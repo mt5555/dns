@@ -15,9 +15,9 @@ F77FIXED=
 
 
 ifeq ($(UNAME),Linux)
-   #VENDOR=LAHEY
+   VENDOR=LAHEY
    #VENDOR=PGI
-   VENDOR=INTEL
+   #VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),sulaco)
@@ -62,8 +62,8 @@ ifeq ($(UNAME),Linux)
 
 
    ifeq ($(VENDOR),LAHEY)
-   #F90 = /usr/local/lf9560/bin/lf95
-   F90 = lf95
+   F90 = /usr/local/lf9562/bin/lf95
+   #F90 = lf95
    FFLAGS = -g  -DLINUX $(MPI) -DUSE_FFT99
    #FFLAGS =  -tpp -O -DLINUX $(MPI) -DUSE_FFT99
    LDFLAGS = --staticlink  #-Lstk -lstk
@@ -267,8 +267,8 @@ conv:  conv.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 convert:  convert.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 	$(LINK) -o convert convert.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG) $(LDFLAGS) $(MPILIB)
 
-analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
-	$(LINK) -o analysis analysis.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+analysis:  analysis.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o analysis analysis.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_rms analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
