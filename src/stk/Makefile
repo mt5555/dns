@@ -1,5 +1,5 @@
 ####
-#### $Id: Makefile,v 1.2 2001-08-07 17:01:24 mt Exp $
+#### $Id: Makefile,v 1.3 2001-08-08 23:18:41 mt Exp $
 ####
 
 default:
@@ -36,7 +36,7 @@ sun:
 	@$(MAKE) CC=cc CFLAGS="-xO5 -fsimple=2 -native -dalign -xarch=v9 -xrestrict" AR=/usr/ccs/bin/ar RANLIB=true LIBS="-L. -lstk -lm" $(TARGET)
 
 sgi:
-	@$(MAKE) CC=cc CFLAGS="-O2 -OPT:alias=RESTRICT" AR=ar RANLIB=true LIBS="-L. -lstk -lm" $(TARGET)
+	@$(MAKE) CC=cc CFLAGS="-O2 -64 -OPT:alias=RESTRICT" AR=ar RANLIB=true LIBS="-L. -lstk -lm" $(TARGET)
 
 hp:
 	@$(MAKE) CC=c89 CFLAGS="-D_HPUX_SOURCE +e +DA2.0W +O3" AR=ar RANLIB=true LIBS="-L. -lstk -lm -lpthread" $(TARGET)
