@@ -17,9 +17,23 @@ Local grid (with padding):     34 x    34 x    34
 Initial data                                                                    
 Initializing FFT99 of size n=    32                                             
 Isotropic initial condition in wave numbers:
-0.5 <= wn < 1.5   E=  1.0000  E target=  1.0000                                 
-1.5 <= wn < 2.5   E=  0.3150  E target=  0.3150                                 
-Total E=  1.3150                                                                
+wn=   1+/-.5   E=  0.1000E+01  E target=  0.1000E+01                            
+wn=   2+/-.5   E=  0.3150E+00  E target=  0.3150E+00                            
+wn=   3+/-.5   E=  0.7704E-01  E target=  0.7704E-01                            
+wn=   4+/-.5   E=  0.3937E-01  E target=  0.3937E-01                            
+wn=   5+/-.5   E=  0.2339E-01  E target=  0.2339E-01                            
+wn=   6+/-.5   E=  0.1529E-01  E target=  0.1529E-01                            
+wn=   7+/-.5   E=  0.1067E-01  E target=  0.1067E-01                            
+wn=   8+/-.5   E=  0.7813E-02  E target=  0.7813E-02                            
+wn=   9+/-.5   E=  0.5935E-02  E target=  0.5935E-02                            
+wn=  10+/-.5   E=  0.4642E-02  E target=  0.4642E-02                            
+wn=  11+/-.5   E=  0.3716E-02  E target=  0.3716E-02                            
+wn=  12+/-.5   E=  0.3033E-02  E target=  0.3033E-02                            
+wn=  13+/-.5   E=  0.2517E-02  E target=  0.2517E-02                            
+wn=  14+/-.5   E=  0.2117E-02  E target=  0.2117E-02                            
+wn=  15+/-.5   E=  0.1802E-02  E target=  0.1802E-02                            
+wn=  16+/-.5   E=  0.1550E-02  E target=  0.1550E-02                            
+Total E=  1.5231                                                                
 Projecting initial data...
 Time stepping...                                                                
 initial time:    0.0000                                                         
@@ -27,94 +41,25 @@ final time:   *********
 max number timesteps:         10                                                
 
 time=  0.00000(     0)  next output=990.00000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.0079400 cfl_adv= 1.500 cfl_vis= 0.091                 
-max: (u,v,w)      2.64326630760328     2.53250954498017     2.81377091624493    
-<z-vor>=-0.46241E-16   <hel>=-0.26866E+01   max(vor) 0.00000E+00                
-R_lambda=   103.59415  R=   269.50599                                           
-mesh spacing(eta):        2.0069       2.0069       2.0069                      
-eddy turnover time:        3.0266                                               
-ke:  1.3149802711  enstropy:      234.0641         total d/dt(ke):   0.0000000  
-d/dt(ke) vis=  -0.8689528 f=   0.0000000 alpha=   0.0000000 total=  -0.8689528  
+for next timestep: delt=0.0070497 cfl_adv= 1.500 cfl_vis= 0.080                 
+max: (u,v,w)      3.10803271936694     3.60965774185389     3.44655318495328    
+<z-vor>= 0.79147E-17   <hel>=-0.29227E+01   max(vor) 0.00000E+00                
+R_lambda=    71.67891  R=   269.50599                                           
+mesh spacing(eta):        2.7965       2.7965       2.7965                      
+eddy turnover time:        0.9278                                               
+ke:  1.5197516401  enstropy:      653.0243         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -3.2761767 f=   0.0000000 alpha=   0.0000000 total=  -3.2761767  
 writing output files at t=    0.0000                                            
  
  1E0   | *******              KE spectrum    0.0000   
-       |        *            
+       |        ****         
+       |            *****    
+       |                 *** 
        |                     
        |                     
        |                     
        |                     
        |                     
-       |                     
-       |                     
-       |                     
-       |                     
-       |                     
-       |                     
- 1E-10 |*        ************
-       +---------------------+
-      k=0                 k=  17
-max(div)= 0.12434E-13                                                           
-
-time=  0.00794(     1)  next output=990.00000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.0080583 cfl_adv= 1.500 cfl_vis= 0.092                 
-max: (u,v,w)      2.62247386057018     2.51772666006594     2.81901545527443    
-<z-vor>=-0.66624E-16   <hel>=-0.26866E+01   max(vor) 0.00000E+00                
-R_lambda=   103.59415  R=   269.50599                                           
-mesh spacing(eta):        2.0069       2.0069       2.0069                      
-eddy turnover time:        3.0266                                               
-ke:  1.3149802711  enstropy:      234.0641         total d/dt(ke):   0.0000000  
-d/dt(ke) vis=  -0.8689528 f=   0.0000000 alpha=   0.0000000 total=  -0.8689528  
-
-time=  0.01600(     2)  next output=990.00000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.0082258 cfl_adv= 1.500 cfl_vis= 0.094                 
-max: (u,v,w)      2.58963879583872     2.52003204792936     2.81340299669988    
-<z-vor>=-0.18632E-15   <hel>=-0.26849E+01   max(vor) 0.00000E+00                
-R_lambda=   103.37258  R=   269.50599                                           
-mesh spacing(eta):        2.0038       2.0038       2.0038                      
-eddy turnover time:        3.0295                                               
-ke:  1.3081048725  enstropy:      232.6169         total d/dt(ke):  -0.8659214  
-d/dt(ke) vis=  -0.8635895 f=   0.0000000 alpha=   0.0000000 total=  -0.8635895  
-
-time=  0.02422(     3)  next output=990.00000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.0084316 cfl_adv= 1.500 cfl_vis= 0.096                 
-max: (u,v,w)      2.57615382547981     2.52751032374889     2.79707470341606    
-<z-vor>= 0.11343E-16   <hel>=-0.26833E+01   max(vor) 0.00000E+00                
-R_lambda=   102.85948  R=   269.50599                                           
-mesh spacing(eta):        2.0035       2.0035       2.0035                      
-eddy turnover time:        3.0154                                               
-ke:  1.3011524736  enstropy:      232.4527         total d/dt(ke):  -0.8627631  
-d/dt(ke) vis=  -0.8630109 f=   0.0000000 alpha=   0.0000000 total=  -0.8630109  
-
-time=  0.03266(     4)  next output=990.00000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.0085830 cfl_adv= 1.500 cfl_vis= 0.098                 
-max: (u,v,w)      2.59015711985308     2.53371887982575     2.77981449089875    
-<z-vor>= 0.28493E-15   <hel>=-0.26820E+01   max(vor) 0.00000E+00                
-R_lambda=   102.05928  R=   269.50599                                           
-mesh spacing(eta):        2.0058       2.0058       2.0058                      
-eddy turnover time:        2.9848                                               
-ke:  1.2940427491  enstropy:      233.5388         total d/dt(ke):  -0.8643192  
-d/dt(ke) vis=  -0.8670984 f=   0.0000000 alpha=   0.0000000 total=  -0.8670984  
-
-time=  0.08662(    10)  next output=  0.08662  LSF minutes left:    -1. 0       
-for next timestep: delt=0.0097224 cfl_adv= 1.500 cfl_vis= 0.111                 
-max: (u,v,w)      2.62826189958294     2.54123946159648     2.65413993096293    
-<z-vor>=-0.42872E-16   <hel>=-0.26817E+01   max(vor) 0.00000E+00                
-R_lambda=    92.42691  R=   269.50599                                           
-mesh spacing(eta):        2.0689       2.0689       2.0689                      
-eddy turnover time:        2.5390                                               
-ke:  1.2458156642  enstropy:      263.9232         total d/dt(ke):  -0.9649674  
-d/dt(ke) vis=  -0.9813350 f=   0.0000000 alpha=   0.0000000 total=  -0.9813350  
-writing output files at t=    0.0866                                            
- 
- 1E0   | *******              KE spectrum    0.0866   
-       |        **           
-       |          **         
-       |            *        
-       |             **      
-       |               **    
-       |                 *   
-       |                  *  
-       |                   * 
        |                     
        |                     
        |                     
@@ -122,9 +67,79 @@ writing output files at t=    0.0866
  1E-10 |*                   *
        +---------------------+
       k=0                 k=  17
-max(div)= 0.12434E-13                                                           
+max(div)= 0.94924E-14                                                           
+diag_output():  Creating NEW .scalars file
+
+time=  0.00705(     1)  next output=990.00000  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0071660 cfl_adv= 1.500 cfl_vis= 0.082                 
+max: (u,v,w)      2.98423284093566     3.60413310046340     3.51784934126721    
+<z-vor>= 0.61800E-17   <hel>=-0.29227E+01   max(vor) 0.00000E+00                
+R_lambda=    71.67891  R=   269.50599                                           
+mesh spacing(eta):        2.7965       2.7965       2.7965                      
+eddy turnover time:        0.9278                                               
+ke:  1.5197516401  enstropy:      653.0243         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -3.2761767 f=   0.0000000 alpha=   0.0000000 total=  -3.2761767  
+
+time=  0.01422(     2)  next output=990.00000  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0073392 cfl_adv= 1.500 cfl_vis= 0.084                 
+max: (u,v,w)      2.96211640688158     3.61325320476572     3.38198807559716    
+<z-vor>= 0.14967E-15   <hel>=-0.29161E+01   max(vor) 0.00000E+00                
+R_lambda=    73.72242  R=   269.50599                                           
+mesh spacing(eta):        2.6865       2.6865       2.6865                      
+eddy turnover time:        1.0742                                               
+ke:  1.4986359145  enstropy:      600.2883         total d/dt(ke):  -2.9952493  
+d/dt(ke) vis=  -2.7901684 f=   0.0000000 alpha=   0.0000000 total=  -2.7901684  
+
+time=  0.02155(     3)  next output=990.00000  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0074276 cfl_adv= 1.500 cfl_vis= 0.085                 
+max: (u,v,w)      3.03967540450630     3.42363273858199     3.34287697256622    
+<z-vor>=-0.57246E-16   <hel>=-0.29090E+01   max(vor) 0.00000E+00                
+R_lambda=    75.24156  R=   269.50599                                           
+mesh spacing(eta):        2.6083       2.6083       2.6083                      
+eddy turnover time:        1.1941                                               
+ke:  1.4801313948  enstropy:      562.1494         total d/dt(ke):  -2.5822540  
+d/dt(ke) vis=  -2.4791223 f=   0.0000000 alpha=   0.0000000 total=  -2.4791223  
+
+time=  0.02898(     4)  next output=990.00000  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0075624 cfl_adv= 1.500 cfl_vis= 0.086                 
+max: (u,v,w)      3.08481981681998     3.46056388464248     3.22867662395193    
+<z-vor>= 0.19193E-15   <hel>=-0.29011E+01   max(vor) 0.00000E+00                
+R_lambda=    76.31910  R=   269.50599                                           
+mesh spacing(eta):        2.5514       2.5514       2.5514                      
+eddy turnover time:        1.2891                                               
+ke:  1.4630971804  enstropy:      533.8838         total d/dt(ke):  -2.3209971  
+d/dt(ke) vis=  -2.2698816 f=   0.0000000 alpha=   0.0000000 total=  -2.2698816  
+
+time=  0.07575(    10)  next output=  0.07575  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0078312 cfl_adv= 1.500 cfl_vis= 0.089                 
+max: (u,v,w)      3.02350554619511     2.91408216499911     3.09103824540118    
+<z-vor>= 0.25785E-15   <hel>=-0.28470E+01   max(vor) 0.00000E+00                
+R_lambda=    76.45974  R=   269.50599                                           
+mesh spacing(eta):        2.4199       2.4199       2.4199                      
+eddy turnover time:        1.4950                                               
+ke:  1.3730757656  enstropy:      468.4791         total d/dt(ke):  -1.8179940  
+d/dt(ke) vis=  -1.8369017 f=   0.0000000 alpha=   0.0000000 total=  -1.8369017  
+writing output files at t=    0.0757                                            
+ 
+ 1E0   | *******              KE spectrum    0.0757   
+       |        ****         
+       |            ***      
+       |               ***   
+       |                  ** 
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+ 1E-10 |*                   *
+       +---------------------+
+      k=0                 k=  17
+max(div)= 0.13933E-13                                                           
 CPU times (min):   (avg/max)
-initialization:      0.00     0.00                                              
+initialization:      0.01     0.01                                              
 dns_solve:           0.05     0.05                                              
    time_control            0.00     0.00                                        
    RHS                     0.03     0.03                                        

@@ -156,6 +156,11 @@ do i=nx1,nx2
    enddo
    vel = abs(Q_grid(i,j,1))/delx + abs(Q_grid(i,j,2))/dely 
    maxs(4)=max(maxs(4),vel)
+
+   if (Q_grid(i,j,3)<.1) then
+      Q_grid(i,j,3)=.1
+      print *,'warning: using h limiter at .1'
+   endif
 enddo
 enddo
 
@@ -361,6 +366,8 @@ if (alpha_value>0) then
       work=work*Q(:,:,3)
       call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
         helmholtz_hform_periodic,.true.)
+!      call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
+!        helmholtz_hform_periodic,.false.)
       !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
       !  helmholtz_hform_periodic,.true.)
    enddo
