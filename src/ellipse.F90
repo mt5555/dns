@@ -13,7 +13,7 @@ module which will compute ellipse centerered around the peak vorticity
 
 integer,private   :: init = 0
 
-integer,parameter :: nelld = 4  !  number of ellipses
+integer,parameter :: nelld = 7  !  number of ellipses
 integer,parameter :: npd   = 65  !  number of points along each ellipse
 
 
@@ -24,7 +24,7 @@ real*8 :: Rad(npd,nelld)       ! radius
 real*8 :: center(2)            ! location of center
 real*8 :: Rad2(npd,nelld)       ! shifted radius
 real*8 :: ccord(2,nelld)        ! shifted centers
-real*8 :: mxw                 ! max vorticity 
+real*8 :: mxw                 ! max vorticity on grid
 real*8 :: mxw_init=-1         ! max vorticity at time=0
 real*8 :: dft(0:4,nelld)              ! modes of Rad
 
@@ -42,10 +42,13 @@ integer :: nell,np
 init=1
 
 
-wval(1)=3/4d0   
-wval(2)=1/2d0   
-wval(3)=1/4d0   
-wval(4)=1/8d0   
+wval(1)=7/8.
+wval(2)=6/8.
+wval(3)=5/8.
+wval(4)=4/8.
+wval(5)=3/8.
+wval(6)=2/8.
+wval(7)=1/8.
 
 if (nelld /= 4) then
    call abort("ellipse init error")

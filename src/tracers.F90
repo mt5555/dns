@@ -416,7 +416,7 @@ if (rk4stage==4) then
    endif
 
    ! check for crossings before insertting points
-   if (numt>numt_insert) call check_crossing(tracer,tracer_old,time+delt/2)
+   if (numt>numt_insert) call check_crossing(tracer,tracer_old,time,time+delt)
 
 
    ! insert points into tracer() if necessary:
@@ -440,23 +440,29 @@ end subroutine
 
 
 
-subroutine check_crossing(tnew,told,time)
+subroutine check_crossing(tnew,told,time_old,time_new)
+use ellipse  ! needed for 'center' variable, just to save 1 mpi_allreduce
 implicit none
 real*8 :: tnew(numt_max,ndim+1)
 real*8 :: told(numt_max,ndim)
-real*8 :: time
+real*8 :: time_old,time_new
 
 integer :: k
 do k=numt_insert+1,numt
 
-   if (.false.) then
+   if (told(k,1)<=center(1) .and. tnew(k,1)>center(1)) then
       ! if angle crosses -pi/2, add to crossing:
       if (1+ncross>ncross_max) then
          call abort("tracers(): ncross_max too small")
       endif
       ncross=ncross+1
       cross(ncross,1)=tnew(k,ndim+1)  ! particle label
-      cross(ncross,2)=time            ! crossing time
+      ! linear interpolate for crossing time
+      cross(ncross,2)=&
+time_new*(center(1)-told(k,1))/(tnew(k,1)-told(k,1))  +  &
+time_old*(tnew(k,1)-center(1))/(tnew(k,1)-told(k,1))
+
+
    endif
 enddo
 
