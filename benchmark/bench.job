@@ -3,7 +3,7 @@
 #BSUB -q small-d
 #BSUB -J dns
 #BSUB -W 0:15
-#BSUB -n 16 -R "span[ptile=16]"
+#BSUB -n 32 -R "span[ptile=32]"
 
 set NCPU=1 
 
@@ -11,7 +11,7 @@ set refin=benchmark1.inp
 
 cd ../src
 ./gridsetup.py 1 1 1 64 64 64
-make -j $NCPU dns
+make -j 4 dns
 
 cd ../benchmark
 mpirun -np $NCPU ../src/dns < $refin 

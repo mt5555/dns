@@ -1,6 +1,6 @@
 #ifdef USE_STKFFT
 #include "fftstk_interface.F90"
-#elif (defined USE_SGIFFT
+#elif (defined USE_SGIFFT)
 #include "fftsgi_interface.F90"
 #elif (defined USE_CPQFFT)
 #include "fftcpq_interface.F90"

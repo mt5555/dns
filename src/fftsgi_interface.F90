@@ -2,8 +2,7 @@
 #if 0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! our wrapper for ECMWF FFT99 and SGI FFT
-! (they both have the same output format)
+! our wrapper for SGI FFT
 ! 
 !
 ! provides public interfaces:
@@ -169,7 +168,6 @@ call getindex(n1,index)
 
 
 
-j=0  ! j=number of fft's computed for each k
 do k=1,n3
    do j=1,n2
 
@@ -181,6 +179,8 @@ do k=1,n3
 
    CALL ZDFFTM (1, n1, n2, scale, p(1,1,k), n1d/2, p(1,1,k), n1d,fftdata(index)%trigs, w,0)
 enddo
+
+!CALL ZDFFTM (1, n1, n3*n2, scale, p(1,1,1), n1d/2, p(1,1,1), n1d,fftdata(index)%trigs, w,0)
 
 end subroutine
 
@@ -207,6 +207,8 @@ call getindex(n1,index)
 scale=n1
 scale=1/scale
 
+!CALL DZFFTM (-1, n1, n2*n3, scale, p(1,1,1), n1d, p(1,1,1), n1d/2,&
+!       fftdata(index)%trigs, w,0)
 
 do k=1,n3
    !   do j=1,n2
