@@ -45,6 +45,7 @@ ifeq ($(UNAME),Linux)
       #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi 
    endif
    ifeq ($(HOST),brain)
+      VENDOR=INTEL
       MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
