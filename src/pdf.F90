@@ -145,7 +145,7 @@ do i=1,NUM_SF
 enddo
 
 if (my_pe==io_pe) then
-   cwrite8(fid,time,1)
+   call cwrite8(fid,time,1)
    do i=1,NUM_SF
       call normalize_and_write_pdf(fid,SF(i,1),SF(i,1)%nbin)   
       call normalize_and_write_pdf(fid,SF(i,2),SF(i,2)%nbin)   
