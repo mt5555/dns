@@ -22,6 +22,7 @@ program anal
 use params
 use mpi
 use fft_interface
+use sforcing
 implicit none
 real*8,save  :: Q(nx,ny,nz,n_var)
 real*8,save  :: f(nx,ny,nz,n_var)
