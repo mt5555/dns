@@ -145,7 +145,7 @@ icount=icount+1
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2e"
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
    endif
-   if (convert_opt==4) then  ! -cout norm2
+   if (convert_opt==4) then  ! -cout 4uvw
       ! 2048^3 needs 192GB storage.  can run on 128 cpus?
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
