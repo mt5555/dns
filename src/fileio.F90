@@ -295,7 +295,7 @@ if (doit_output) then
       call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
       q1=0
-      call compute_psi(Q(1,1,1,3),q1,work1,work2,q1(1,1,1,2))
+      call compute_psi(Q(1,1,1,3),q1,work1,work2,q1(1,1,1,2),1)
       call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
    endif
 endif

@@ -233,7 +233,7 @@ end subroutine
 
 
 
-subroutine compute_psi(w,psi,b,work,psi0)
+subroutine compute_psi(w,psi,b,work,psi0,runbs)
 !
 !  btype=0   all periodic  use periodic FFT solver 
 !  btype=1   all periodic,reflect, reflect-odd
@@ -248,6 +248,7 @@ real*8 psi(nx,ny,nz)
 real*8 work(nx,ny,nz)
 real*8 b(nx,ny,nz)
 real*8 psi0(nx,ny,nz)   ! initial guess, if needed
+integer :: runbs 
 
 !local
 real*8 :: one=1,zero=0,tol=1e-6
@@ -299,7 +300,7 @@ else if (btype==1) then
 
 else if (btype==2) then
    psi=0  ! initial guess
-   call bc_biotsavart(w,psi)    !update PSI on boundary using biot-savart law
+   call bc_biotsavart(w,psi,runbs)    !update PSI on boundary using biot-savart law
 
    b=-w  ! be sure to copy ghost cell data also!
 

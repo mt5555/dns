@@ -72,7 +72,7 @@ end subroutine
 
 
 
-subroutine bc_biotsavart(w,psi)
+subroutine bc_biotsavart(w,psi,runbs)
 !
 ! on non-periodic or non-reflective boundarys:
 ! use biot-savar law to compute boundary data for PSI.
@@ -91,26 +91,29 @@ use mpi
 implicit none
 real*8 w(nx,ny)
 real*8 psi(nx,ny)
+integer :: runbs
 
 ! local
 integer i,j,k,l,ierr
 real*8 :: dela
 real*8,external :: logterm
 real*8 :: eps=1e-3
-real*8 :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
+real*8,save :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
                                       ! psi_b(k,1,2) = x2 boundary
                                       ! psi_b(k,2,1) = y1 boundary
                                       ! psi_b(k,2,2) = y2 boundary
 real*8 :: temp(max(g_ny,g_nx),2,2)
 real*8 tmx1,tmx2
 
+
 call wallclock(tmx1)
 
+if (runbs==1) then
 ! init to zero on boundary
 psi_b=0
 
-do j=ny1,ny2
-do i=nx1,nx2
+do j=inty1,inty2
+do i=intx1,intx2
    if (abs(w(i,j)).ge.eps) then
       do k=1,g_nx  !,10
          psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
@@ -150,6 +153,7 @@ do k=2,g_ny
    psi_b(k,1,1) = psi_b(k,1,1)*dela  - ubar*g_ycord(k)
    psi_b(k,1,2) = psi_b(k,1,2)*dela  - ubar*g_ycord(k)
 enddo
+endif
 
 
 ! set PSI boundary data:

@@ -15,6 +15,7 @@ name='../src/impulse/kh24';
 %name='../src/kh/khQ';  %nopq
 name='../src/temp';
 
+figure(1)
 mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
@@ -91,7 +92,6 @@ for i=range
     %  2D field.  options set above:
     %  mkcontour=0,1    use pcolor, or contour plot
     %
-    figure(1)
     clf
     subplot(2,1,1)
 
@@ -140,38 +140,5 @@ for i=range
   end
 end
 return
-
-
-
-
-%
-%########################################################################
-%#  restart file
-%########################################################################
-time=fread(fidu,1,'float64');
-
-
-data=fread(fidu,4,'float64');
-nx=data(1);
-ny=data(2);
-nz=data(3);
-n_var=data(4);
-
-q = fread(fidu,nx*ny*nz*n_var,'float64');
-fclose(fidu);
-
-disp(sprintf('restart dump:\ntime=%f  dims=%i %i %i %i',time,nx,ny,nz,n_var))
-q = reshape(q,nx,ny,nz,n_var);
-
-u = squeeze(q(:,:,1,1));
-figure(1)
-subplot(2,2,1)
-pcolor(u')
-shading interp
-
-v = squeeze(q(:,:,1,2));
-subplot(2,2,2)
-pcolor(v')
-shading interp
 
 
