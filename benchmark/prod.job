@@ -25,7 +25,6 @@ set mesh = "1 1 $NCPU 256 256 256"
 
 
 
-
 # CPQ or BlueMountain?
 set OSTYPE = `uname`
 if ($OSTYPE == IRIX64) then

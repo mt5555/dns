@@ -28,6 +28,7 @@ integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
 integer,save :: itime=0
 
+
 if (firstcall) then
    firstcall=.false.
    Q=Q_grid
@@ -46,6 +47,7 @@ if (firstcall) then
       call abort("Error: shallow water model cannot run in 3D")
    endif
 endif
+
 
 
 #ifndef USE_LEAPFROG
@@ -272,6 +274,8 @@ enddo
 
 if (alpha_value>0) then
    call alpha_model_forcing(Q,divtau,gradu,gradv,work,work2)
+
+
    ! Apply Helmholtz inverse to:   div(tau) - grav grad(h)
 
    ! a_diss should be the KE dissapation from the div(tau) term,

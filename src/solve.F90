@@ -119,7 +119,6 @@ if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
 if (itqmr>25 .and. (my_pe==io_pe)) then
    write(*,'(a,i4,a,e11.6,a,e11.6)')  'Final CG iter=',itqmr,' || RHS ||=',res_init,' residual: ',err
 endif
-
    
 if (itqmr>=itermax) then
    stop 'CG iteration failure'   
