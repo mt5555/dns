@@ -17,7 +17,8 @@ integer :: itime
 integer i,j,k,n
 character(len=80) message
 character(len=80) fname
-real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
+real*8 remainder, time_target,psmax,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
+real*8 :: cfl_used_psvis
 real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss,xtmp
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen,doit_model
@@ -55,6 +56,11 @@ else
    mumax = mu/(delx**2) + &
            mu/(dely**2) 
 endif
+psmax=0
+if (npassive>0) then
+   psmax=mumax/minval(schmidt(np1:np2))
+endif
+
 
 if (equations==SHALLOW .and. grav>0) then
    umax=umax+fcor + sqrt(grav*H0)/min(delx,dely)   
@@ -65,12 +71,14 @@ xtmp=1e-8
 umax=max(umax,xtmp)
 delt = cfl_adv/umax                         ! advective CFL
 if (mu>0) delt = min(delt,cfl_vis/mumax)    ! viscous CFL
+if (psmax>0) delt = min(delt,cfl_vis/psmax)    ! viscous CFL for passive scalars
 delt = max(delt,delt_min)
 delt = min(delt,delt_max)
 
 ! compute CFL used for next time step.
 cfl_used_adv=umax*delt
 cfl_used_vis=mumax*delt
+cfl_used_psvis=psmax*delt
 
 
 
@@ -180,7 +188,9 @@ if (doit_screen) then
       '  LSF minutes left: ',maxs(8),enable_lsf_timelimit
    call print_message(message)	
 
-   write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'for next timestep: delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
+   write(message,'(a,f9.7,a,f6.3,a,f6.3,a,f6.3)') &
+           'next timestep: delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis,&
+            'cfl_passive_vis=',cfl_used_psvis
    call print_message(message)	
 
    write(message,'(a,3f21.14)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)

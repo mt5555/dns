@@ -27,6 +27,11 @@ clear all;
 name = '/scratch2/taylorm/tmix256C/tmix256C'
 times=[1.0001];
 
+% load in the u,v,w scalars:
+use_pscalars_name=1;
+disp('running scalars_turb...')
+scalarsturb
+disp('reading passive scalar data...')
 
 nt=0;
 for t=times
@@ -39,13 +44,14 @@ for t=times
     [ns_e,count] = fread(fid,1,'float64');
     [npassive,count] = fread(fid,1,'float64');
     time = fread(fid,1,'float64');
+    mu = fread(fid,1,'float64');
 
     nt=nt+1;
     if(nt==1) pints_e=zeros([1+ns_e,npassive,1]); end;
 
     for np=1:npassive
        data1 = fread(fid,[ns_e,1],'float64');
-       data1=[time;data1];
+       data1=[time;mu;data1];
        pints_e(:,np,nt)= data1;
     end
     fclose(fid);
@@ -85,13 +91,18 @@ su(3)=pints_e(25,np,:);
 %       u2, ux2, ux3, uxx2
 %
 %
-return
+
 
 ke=.5*sum(u2,1);
 epsilon=15*mu*mean(ux2,1);                   % only uses ux^2, vy^2, wz^2
 lambda=sqrt( mu*(2*ke/3) / (epsilon/15)  );
 R_l = lambda.*sqrt(2*ke/3)/mu;
 
+disp(sprintf('mu = %f',mu ))
+disp(sprintf('ke = %f',ke ))
+disp(sprintf('R_l = %f',R_l ))
+disp(sprintf('lambda = %f',lambda ))
+disp(sprintf('epsilon = %f',epsilon ))
 
 ke_s=.5*sum(s2,1);
 epsilon_s=15*(mu/schmidt)*sum(s2,1)/3;  

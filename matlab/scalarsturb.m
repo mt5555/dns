@@ -16,24 +16,28 @@
 %   w_i^4      i=1,3
 %
 
-clear all;
 
-name = '/ccs/scratch/taylorm/decay/decay2048'
-times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357]
-times=[times,.24:.01:4.0];
+if (exist('use_pscalars_name') & use_pscalars_name)
+   % name set in pscalars.m
+else
+   return
+   name = '/ccs/scratch/taylorm/decay/decay2048'
+   times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357]
+   times=[times,.24:.01:4.0];
 
-%name = '/ccs/scratch/taylorm/dns/iso12_512'
-%times=7;
+   %name = '/ccs/scratch/taylorm/dns/iso12_512'
+   %times=7;
 
-%name = '/ccs/scratch/taylorm/dns/sc512A'
-%times=3;
+   %name = '/ccs/scratch/taylorm/dns/sc512A'
+   %times=3;
 
-%name = '/home/skurien/dns/src/sk128_alpha0';
-%times=0.5
+   %name = '/home/skurien/dns/src/sk128_alpha0';
+   %times=0.5
 
-name = '/scratch2/taylorm/tmix256B/tmix256B'
-times=[0:.5:3]
+   name = '/scratch2/taylorm/tmix256B/tmix256B'
+   times=[0:.5:3]
 
+end
 
 nt=0;
 for t=times

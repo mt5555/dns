@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model
 
 ! local variables
-integer,parameter :: nints_e=28,npints_e=24	
+integer,parameter :: nints_e=28,npints_e=23	
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x
@@ -115,6 +115,7 @@ if (.not.doit_model) return
       x=nints_e; call cwrite8(fid,x,1)
       x=npassive; call cwrite8(fid,x,1)
       call cwrite8(fid,time,1)
+      x=mu; call cwrite8(fid,x,1)
       do n=np1,np2	
          call cwrite8(fid,pints_e(1,n),nints_e)
       enddo	 
@@ -706,12 +707,11 @@ su=su/g_nx/g_ny/g_nz
 
 
 
-ASSERT("compute_expensive_pscalars: ns too small ",ns>=24)
+ASSERT("compute_expensive_pscalars: ns too small ",ns>=23)
 
-scalars(1)=mu
-scalars(2)=schmidt(np)
-scalars(3)=u2
-i=3
+scalars(1)=schmidt(np)
+scalars(2)=u2
+i=2
 
 do n=1,3
 scalars(n+i)=ux2(n)
