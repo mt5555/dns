@@ -17,12 +17,9 @@ save $name*.isostr
 save $name*.sf
 save $name*.s2v2
 save $name*.jpdf
-
 store $name*.scalars
-
-save $name*.h5
-save $name*.u
-save $name*.v
-save $name*.w
+save $name*.h5 $name*.u $name*.v $name*.w
 EOF
+
+
 
