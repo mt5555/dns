@@ -5,14 +5,14 @@
 %
 
 
-name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000'
+name='/scratch2/taylorm/sc1024A/sc1024A0001.9000'
 ext='.isostrf';
 nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 
 
-!  index=1 .. 9   corresponds to u_l^(.1*p)
-p=1; frac_power = .1*p;
+%  index=1 .. 9   corresponds to u_l^(.1*p)
+p=5; frac_power = .1*p;
 plot_points=1;
 ndir_use=0;
 
@@ -41,8 +41,7 @@ cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,3) 
 
 
 msize=4;   % marker size
-xmax=1000;  % maximum x axis
-xmax2=1000;  % x axis for iso check plots
+xmax=3000;  % maximum x axis
 iso_check_dir=2;  % direction to use for single direction iso_check
 
 
@@ -55,7 +54,6 @@ iso_check_dir=2;  % direction to use for single direction iso_check
 
 eta = (mu^3 / epsilon)^.25;
 delx_over_eta=(1/nx)/eta;
-
 
 %
 % use only 49 directions:
@@ -110,20 +108,11 @@ disp(' ')
 
 
 figure(1); subplot(1,1,1);
-yyave=0*xx;
-yyave_sq=0*xx;
-yyave1=yyave;
+yyave_t=0*xx;
+yyave_l=0*xx;
 
-y45=yyave;
-y415=yyave;
-y43=yyave;
-
-pave=yyave;
-nave=yyave;
 
 ndir_vec=1:ndir;
-%ndir_vec=[1,2,3, 4:3:ndir];
-skip=(length(ndir_vec)~=ndir);
 
 
 
@@ -132,13 +121,10 @@ for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  yl=Dl(:,i.p);
+  yl=Dl(:,i,p);
 
   if (plot_points==1) 
-     if (skip==0) 
-        semilogx(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
-     if (skip==1) 
-        semilogx(x_plot,yl,['.-',cdir(i)],'MarkerSize',2*msize);   hold on; end;
+      semilogx(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
   end     
   yyl = spline(x,yl,xx);
   
@@ -147,7 +133,7 @@ for i=ndir_vec
 end
 
 
-title(sprintf('D_l ** %.1f',frac_power);
+title(sprintf('D_l^{%.1f}',frac_power));
 ylabel(pname);
 xlabel('r/\eta');
 plot(xx_plot,yyave_l,'k','LineWidth',1.0); hold on;
@@ -163,22 +149,19 @@ for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  yt=Dt(:,i.p);
+  yt=Dt(:,i,p);
 
   if (plot_points==1) 
-     if (skip==0) 
-        semilogx(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
-     if (skip==1) 
-        semilogx(x_plot,yt,['.-',cdir(i)],'MarkerSize',2*msize);   hold on; end;
+     semilogx(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
   end     
   yyt = spline(x,yt,xx);
   
-  yyave_t=yyave_t+w(i)*yyl;
+  yyave_t=yyave_t+w(i)*yyt;
   
 end
 
 
-title(sprintf('D_t ** %.1f',frac_power);
+title(sprintf('D_t^{%.1f}',frac_power));
 ylabel(pname);
 xlabel('r/\eta');
 plot(xx_plot,yyave_t,'k','LineWidth',1.0); hold on;
