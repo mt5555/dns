@@ -16,7 +16,9 @@ logical ::  compute_passive_pdfs=.true.
 
 real*8 :: uscale=.01             ! bin size for vel increment
 real*8 :: epsscale=.01           ! bin size for epsilon increment
-real*8 :: pscale=.01             ! bin size for scalar increment
+real*8 :: pscale=.0025           ! bin size for scalar increment
+                                 ! for t-mix problem, scalar will 
+                                 ! range from 0..1
 
 
 

@@ -31,6 +31,7 @@ for np=1:npassive
    subplot(npassive/2,2,np)
    splot=squeeze(s(:,:,slice1));
    pcolor(x,y,splot')
+   caxis([0 1]); 
    
    stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
    if (np==1) title(stitle); end;

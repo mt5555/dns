@@ -28,7 +28,7 @@ for p=1:npmax
    subplot(5,2,p) 
    plot(bins,pdf)
    ax=axis;
-   axis([-.5,1.5,ax(3),.2]);
+   axis([-.1, 1.1, 0, .2]);
    xlabel(sprintf('[%.3f,%.3f] <s^2>=%.5f',mn,mx,s2));
    set(gca,'YTickLabel','')    
    if (p==1) 
