@@ -22,56 +22,7 @@ integer input_file_type
 
 call params_init()
 call fft_interface_init()
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! global grid data
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-delx = one/g_nx
-dely = one/g_ny
-delz = one/g_nz
-
-do i=1,g_nx
-   g_xcord(i)=(i-1)*delx	
-enddo
-do j=1,g_ny
-   g_ycord(j)=(j-1)*dely	
-enddo
-do k=1,g_nz
-   g_zcord(k)=(k-1)*delz	
-enddo
-
-call fft_get_mcord(g_imcord,g_nx)
-call fft_get_mcord(g_jmcord,g_ny)
-call fft_get_mcord(g_kmcord,g_nz)
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! local grid data
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call init_mpi_comm3d()
-
-do i=nx1,nx2
-   l = i-nx1+1 + nslabx*my_x
-   xcord(i)=g_xcord(l)
-   imcord(i)=g_imcord(l)
-enddo
-do j=ny1,ny2
-   l = j-ny1+1 + nslaby*my_y
-   ycord(j)=g_ycord(l)
-   jmcord(j)=g_jmcord(l)
-enddo
-do k=nz1,nz2
-   l = k-nz1+1 + nslabz*my_z
-   zcord(k)=g_zcord(l)
-   kmcord(k)=g_kmcord(l)
-enddo
-
-write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
-call print_message(message)
-write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
-call print_message(message)
-
 
 if (my_pe==io_pe) then
    read(*,*) input_file_type
@@ -108,6 +59,62 @@ if (.not. allocated(custom)) allocate(custom(ncustom))
 call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
 
 #endif
+
+
+
+! periodic FFT case:  for output, we include the point at x=1 (same as x=0)
+o_nx=g_nx+1
+o_ny=g_ny+1
+o_nz=g_nz+1
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! global grid data
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+delx = one/g_nx
+dely = one/g_ny
+delz = one/g_nz
+
+do i=1,o_nx
+   g_xcord(i)=(i-1)*delx	
+enddo
+do j=1,o_ny
+   g_ycord(j)=(j-1)*dely	
+enddo
+do k=1,o_nz
+   g_zcord(k)=(k-1)*delz	
+enddo
+
+call fft_get_mcord(g_imcord,g_nx)
+call fft_get_mcord(g_jmcord,g_ny)
+call fft_get_mcord(g_kmcord,g_nz)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid data
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+do i=nx1,nx2
+   l = i-nx1+1 + nslabx*my_x
+   xcord(i)=g_xcord(l)
+   imcord(i)=g_imcord(l)
+enddo
+do j=ny1,ny2
+   l = j-ny1+1 + nslaby*my_y
+   ycord(j)=g_ycord(l)
+   jmcord(j)=g_jmcord(l)
+enddo
+do k=nz1,nz2
+   l = k-nz1+1 + nslabz*my_z
+   zcord(k)=g_zcord(l)
+   kmcord(k)=g_kmcord(l)
+enddo
+
+write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
+call print_message(message)
+write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
+call print_message(message)
+
 
 
 end subroutine

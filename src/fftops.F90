@@ -128,6 +128,8 @@ real*8 work(nx,ny,nz)
 ! local variables
 integer i
 real*8 dummy(1)
+
+vor=0
 do i=1,3
 
    ! compute u_x, u_xx

@@ -1,4 +1,5 @@
 #include "macros.h"
+#include "transpose.h"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -47,6 +48,11 @@ character*80 :: runname
 !
 !
 integer :: g_nx,g_ny,g_nz    ! dimension of global grid (unique data)
+integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
+                             ! For periodic FFT case, o_nx=g_nx+1 because we do not
+                             ! store the point at x=1.  for 4th order case, we 
+                             ! may store this point.  
+                             
 integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
                              ! (because FFT99 requires 2 extra points)
  
@@ -103,6 +109,27 @@ real*8 :: restart_dt = 0    ! restart
 ! error_code = 3   
 !
 integer :: error_code =0
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! scalar quantities of current state
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+integer,parameter :: nints=5
+!
+!
+! storage allocated locally, but:
+! ints(1) = ke
+! ints(2) = ke dissapation
+! ints(3) = ke dissapation from diffusion
+! ints(4) = vor 
+! ints(5) = helicity
+! maxs(1,2,3) = max U,V,W
+! maxs(4) = vor
+! maxs(5) =  helicty
+!
+!
+
 
 
 
@@ -175,13 +202,20 @@ ny_2dx=nslaby/ncpu_x     ! TRANSPOSE_X_SPLIT_Y  (usefull if nslabz=1)
 nx_2dy=nslabx/ncpu_y     ! TRANSPOSE_Y_SPLIT_X  (always used)
 ny_2dz=nslaby/ncpu_z     ! TRANSPOSE_Z_SPLIT_Y  (always used)
 
+#if (!defined TRANSPOSE_X_SPLIT_Z && !defined TRANSPOSE_X_SPLIT_Y)
+   call abort("define TRANSPOSE_X_SPLIT_Y or TRANSPOSE_X_SPLIT_Z in transpose.h") 
+#endif
 
 #ifdef TRANSPOSE_X_SPLIT_Z
+ny_2dx=-1  ! set to an invalid value
 if (0/=mod(nslabz,ncpu_x)) then
    fail=1
    call print_message("ncpu_x does not divide nz");
 endif
-#else
+#endif
+
+#ifdef TRANSPOSE_X_SPLIT_Y
+nz_2dx=-1  ! set to an invalid value
 if (0/=mod(nslaby,ncpu_x)) then
    fail=1
    call print_message("ncpu_x does not divide ny");
@@ -202,6 +236,7 @@ endif
 ! memory contraint: 2D decomposition should fit in a 3D decomposition array
 ! check if: (g_nz2)*nslabx*ny_2d <= nx*ny*nz)
 !
+#ifdef TRANSPOSE_X_SPLIT_Z
 if ((g_nx2)*nz_2dx*real(nslaby,r8kind) > nx*nz*real(ny,r8kind) )  then
    fail=1
    call print_message("insufficient storage.");
@@ -212,6 +247,24 @@ if ((g_nx2)*nz_2dx*real(nslaby,r8kind) > nx*nz*real(ny,r8kind) )  then
    call print_message(message)	
 
 endif
+#endif
+
+
+#ifdef TRANSPOSE_X_SPLIT_Y
+if ((g_nx2)*ny_2dx*real(nslabz,r8kind) > nx*nz*real(ny,r8kind) )  then
+   fail=1
+   call print_message("insufficient storage.");
+   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
+   call print_message(message)	
+   write(message,'(a,f10.0)') "storage needed for 2D x-decomposition: ", &
+     (g_nx2)*ny_2dx*real(nslabz,r8kind)
+   call print_message(message)	
+
+endif
+#endif
+
+
+
 if ( (g_ny2)*nx_2dy*real(nslabz,r8kind) > nx*ny*real(nz,r8kind)) then
    fail=1
    call print_message("insufficient storage.");
@@ -253,9 +306,9 @@ endif
 
 if (fail/=0) call abort("params.F90 dimension settings failure")
 
-allocate(g_xcord(g_nx))
-allocate(g_ycord(g_ny))
-allocate(g_zcord(g_nz))
+allocate(g_xcord(g_nx+1))
+allocate(g_ycord(g_ny+1))
+allocate(g_zcord(g_nz+1))
 allocate(g_imcord(g_nx))
 allocate(g_jmcord(g_ny))
 allocate(g_kmcord(g_nz))

@@ -24,7 +24,7 @@ time_target = time_final
 ! viscous CFL =  delt*mu/delx^2  delt <= CFL*delx^2/mu
 !  
 !
-umax=pi*max(maxs(1)/delx,maxs(2)/dely,maxs(3)/delz)
+umax=max(maxs(1)/delx,maxs(2)/dely,maxs(3)/delz)
 if (umax> pi*1000/min(delx,dely,delz)) error_code=1
 
 ! advective CFL
@@ -32,7 +32,7 @@ delt = cfl_adv/umax
 
 ! viscous CFL
 mumax=min(delx,dely,delz)
-mumax = pi*pi*mu/(mumax*mumax)
+mumax = mu/(mumax*mumax)
 delt = min(delt,cfl_vis/mumax)
 
 
@@ -86,20 +86,24 @@ cfl_used_vis=mumax*delt
 !
 if (doit) then
 
-   write(message,'(a,f8.5,a,i5,a,f8.5)') 'time=',time,'(',itime,')  next output=',time_target
+   write(message,'(a,f9.5,a,i5,a,f8.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
    call print_message(message)	
+
+   write(message,'(a,3f22.15)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
+   call print_message(message)	
+
    call compute_div(Q,divx,divi)
-   write(message,'(a,3f12.5,a,e12.5)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3),' max div',divx
+   write(message,'(3(a,e12.5))') 'max(div)=',divx,'   <z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
    mx = ints(3)/(1d-100+ints(2))
    if (mx>1) mx=1    ! round-off error if ke_viscous > ke_tot
    if (mx<-1) mx=-1  ! total ke is growing, but viscous term is negative
    
-   write(message,'(a,f10.2,a,f6.2,a,f6.2,a)') 'ke: ',ints(1),&
+   write(message,'(a,f10.2,a,f9.5,a,f9.5,a)') 'ke: ',ints(1),&
      ' d/dt log(ke) total:',ints(2)/ints(1),&
      ' d/dt log(ke) diffusion:',ints(3)/ints(1)
    call print_message(message)	
@@ -145,8 +149,9 @@ write(tmp,'(i5)') 10000+my_y
 message=message(1:len_trim(message)) // "-" // tmp(n:5)
 write(tmp,'(i5)') 10000+my_z
 message=message(1:len_trim(message)) // "-" // tmp(n:5) // "-"
-write(tmp,'(f9.4)') 1000.0000 + time
-message=message(1:len_trim(message)) // tmp(2:9)
+
+write(tmp,'(f10.4)') 10000.0000 + time
+message=message(1:len_trim(message)) // tmp(2:10)
 
 message = runname(1:len_trim(runname)) // message(1:len_trim(message)) // ".data"
 open(unit=10,file=message,form='binary')
@@ -218,112 +223,40 @@ end subroutine
 
 
 
-
-
-subroutine output1(p,pt,unit)
-use params
-use mpi
-use transpose
-implicit none
-real*8 :: p(nx,ny,nz)
-real*8 :: pt(g_nx2,nslaby,nz_2dx)
-
-! local vars
-real*8 buf(g_nx,nslaby)
-integer sending_pe,ierr,tag,unit,z_pe,y_pe,x_pe
-integer request,statuses(MPI_STATUS_SIZE),dest_pe3(3)
-integer i,j,k,l
-integer n1,n1d,n2,n2d,n3,n3d
-
-call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
-do z_pe=0,ncpu_z-1
-do x_pe=0,ncpu_x-1
-do k=1,nz_2dx
-do y_pe=0,ncpu_y-1
-
-   ! output pt(1:g_nx,1:nslaby,k) from cpus: x_pe,y_pe,z_pe
-   l=g_nx*nslaby
-
-   dest_pe3(1)=my_x
-   dest_pe3(2)=my_y
-   dest_pe3(3)=my_z
-   tag=1
-   call mpi_cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
-
-   if (sending_pe==my_pe) then
-
-      buf(:,:)=pt(1:g_nx,1:nslaby,k)
-      if (my_pe == io_pe) then
-         ! dont send message to self
-      else
-         tag=1
-         call MPI_ISend(buf,l,MPI_REAL8,io_pe,tag,comm_3d,request,ierr)
-         ASSERT("output1: MPI_ISend failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
-         ASSERT("output1: MPI_waitalll failure",ierr==0)
-      endif
-   endif
-
-   if (my_pe==io_pe) then
-      if (sending_pe==my_pe) then
-         ! dont recieve message from self
-      else
-         call MPI_IRecv(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
-         ASSERT("output1: MPI_IRecv failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
-         ASSERT("output1: MPI_waitalll failure",ierr==0)
-      endif
-
-      write(unit) buf
-   endif
-
-enddo
-enddo
-enddo
-enddo
-
-
-end subroutine
-
-
-
 subroutine output_write(time,Q)
 use params
+use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: time
 
 ! local variables
 integer i,j,k,n
-real*8 xnx,xny,xnz,xnv
+real*8 xnx,xny,xnz
 real*8 :: vor(nx,ny,nz,n_var)
 real*8 :: d1(nx,ny,nz),work(nx,ny,nz)
-real*8 :: d2(1)
 character*80 message
 integer n_var_start
 
-call vorticity(vor,Q,d1,d2)
+call vorticity(vor,Q,d1,work)
+
 
 if (my_pe==io_pe) then
-   write(message,'(f9.4)') 1000.0000 + time
-   message = runname(1:len_trim(runname)) // message(2:9) // ".vor"
+   write(message,'(f10.4)') 10000.0000 + time
+   message = runname(1:len_trim(runname)) // message(2:10) // ".vor"
    open(unit=11,file=message,form='binary')
 
    write(11) time
-   xnv=n_var
-   n_var_start=1
-   if (nz2==nz1) then
-      xnv=1
-      n_var_start=3
-  endif
-
-   xnx=nslabx
-   xny=nslaby
-   xnz=nslabz
-   write(11) xnx,xny,xnz,xnv
+   xnx=o_nx
+   xny=o_ny
+   xnz=o_nz
+   write(11) xnx,xny,xnz
+   write(11) g_xcord(1:o_nx)
+   write(11) g_ycord(1:o_ny)
+   write(11) g_zcord(1:o_nz)
 endif
 
-call output1(vor,work,11)
+call output1(vor(1,1,1,3),work,11)
 if (my_pe==io_pe) close(11)
 
 end subroutine

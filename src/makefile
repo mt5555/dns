@@ -8,8 +8,8 @@ ARCH = $(shell uname -m)
 ifeq ($(UNAME),Linux)
    F90 = lf95
    LDFLAGS = --staticlink
-   MPI = -DUSE_MPI -I/contrib/lam/include
-   MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+#   MPI = -DUSE_MPI -I/contrib/lam/include
+#   MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    FFLAGS = -O -DLINUX $(MPI)
 endif
 ifeq ($(UNAME),SunOS)
@@ -73,6 +73,10 @@ fft_interface.o:  fft99_interface.o
 
 user_params.h:  
 	echo "Run gridsetup.py to generage a user_params.h file!"
+	exit 1
+
+transpose.h:
+	echo "Run gridsetup.py to generage a transpose.h file!"
 	exit 1
 
 

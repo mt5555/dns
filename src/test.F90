@@ -2,7 +2,7 @@
 subroutine test
 use params
 
-call test_parallel
+call test_transform
 call test_fft
 call test_poisson
 call test_divfree
@@ -11,32 +11,60 @@ end subroutine
 
 
 
-subroutine test_parallel
+
+
+
+
+
+
+
+
+subroutine test_transform
 use params
 use transpose
 implicit none
 
 real*8 input(nx,ny,nz)
 real*8 output(nx,ny,nz)
-real*8 work(g_nz2,nx*ny)
+real*8 work(g_nz2,nx,ny)
+real*8 mx
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
+character*80 message
 
 input=0
 output=0
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
-   input(i,j,k)=zcord(k)
+   input(i,j,k)=zcord(k)+xcord(i)+ycord(j)
 enddo
 enddo
 enddo
 
-
+output=0
 call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
+mx=maxval(abs(input-output))
+write(message,*) 'transpose z round trip error:',mx
+call print_message(message)
+
+output=0
+call transpose_to_y(input,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,output,n1,n1d,n2,n2d,n3,n3d)
+mx=maxval(abs(input-output))
+write(message,*) 'transpose y round trip error:',mx
+call print_message(message)
+
+output=0
+call transpose_to_x(input,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,output,n1,n1d,n2,n2d,n3,n3d)
+mx=maxval(abs(input-output))
+write(message,*) 'transpose x round trip error:',mx
+call print_message(message)
 
 
+#if 0
 if (my_z==1) then
    print *,'rank=',my_pe,'my coords  = ',my_x,my_y,my_z
    print *,'maxval round trip=',maxval(abs(input-output))
@@ -48,12 +76,7 @@ if (my_z==1) then
       write(*,'(a,i5,3f10.4)') 'k,work ',k,work(k,1),work(k,1)-work(k-1,1)
    enddo
 endif
-
-
-
-
-
-
+#endif
 end subroutine
 
 
@@ -227,6 +250,7 @@ end subroutine
 
 subroutine test_fft
 use params
+use transpose
 implicit none
 
 real*8 work(nx,ny,nz)
@@ -240,6 +264,7 @@ real*8 inputy(nx,ny,nz)
 real*8 inputyy(nx,ny,nz)
 real*8 inputz(nx,ny,nz)
 real*8 inputzz(nx,ny,nz)
+integer n1,n1d,n2,n2d,n3,n3d
 real*8 cf1,error
 integer i,j,k
 character*80 message
@@ -313,19 +338,6 @@ enddo
 
 
 
-
-output=input
-call fft3d(output,work)
-call print_modes(output)
-call ifft3d(output,work)
-
-error=maxval(abs(input(nx1:nx2,ny1:ny2,nz1:nz2)-output(nx1:nx2,ny1:ny2,nz1:nz2)))
-write(message,'(a,e15.10)') "x-direction Forward-Backward 3D FFT: error=",error
-call print_message(message)
-
-
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! d/dx
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -339,6 +351,7 @@ error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputxx(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "x-direction d2/dxx error=",error
 call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -374,6 +387,17 @@ call print_message(message)
 
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 3d fft
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+output=input
+call fft3d(output,work)
+call print_modes(output)
+call ifft3d(output,work)
+
+error=maxval(abs(input(nx1:nx2,ny1:ny2,nz1:nz2)-output(nx1:nx2,ny1:ny2,nz1:nz2)))
+write(message,'(a,e15.10)') "x-direction Forward-Backward 3D FFT: error=",error
+call print_message(message)
 
 
 

@@ -4,17 +4,22 @@ CFL:
 
 dealiased, vis=0
 cfl_adv
-10.0 unstable
-5.0  stable, results bad at t=.5
-4.5  ok,
+4.0 unstable
+2.0 unstable - at t=2 KE diss osscillating
+1.0 at t=36 KE still looks good,plot is ok
 
 
 aliased:  mu=0
-10.0 unstable
-5.0  unstable
-2.5  unstable, t=.64
-1.5  unstable t=.63
-0.5  unstable t=.63
+2.0 unstable
+1.0 unstable KE diss osscillating
+.25  IN
+
+
+plots at t=.5:
+mu=.0001:  more viscous than dealiased.
+mu=.00001: about the same
+mu=.000001: about the same
+
 
 
 aliased:  mu=.001    (damping time .0031s)
@@ -23,7 +28,7 @@ cfl=2.0:  t=6.9 unstable (ke going up)
 cfl=1.5:  goes bad around t=8.4
 cfl=1.4:  d/dt ke going bad, t=15
 cfl=1.3:  d/dt ke going bad, t=15
-cfl=1.25: IN dosadi
+cfl=1.25: look good, ran to t=100, ke down from 5000 to 11.15
 cfl=1.2:  looks good.  rant to t=50, ke down from 5000 to 76
 cfl=1.0:  t=10.0  looks good, ran to t=60, ke down from 5000 to 36.
 
@@ -34,6 +39,7 @@ cfl=1.0: blows up at t=5.3
 
 
 aliased:  mu=.00001   (damping time: .31s)
+cfl=4.0  IN
 cfl=2.0:  unstable at t=?
 cfl=1.0:  looks bad at t=.5, unstable t=.75
 cfl=.5:   noisy at t=.5, but 8 nice rollups, unstable at t=.75

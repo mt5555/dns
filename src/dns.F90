@@ -27,11 +27,9 @@ call test           ! optional testing  routines go here
 write(message,'(a)') 'Initial data'
 call print_message(message)
 call init_data(Q)             ! set up initial data 
-call MPI_Barrier(comm_3d,ierr)
 
 write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data
-call MPI_Barrier(comm_3d,ierr)
 
 
 write(message,'(a)') 'Time stepping...'
@@ -66,12 +64,8 @@ real*8 :: Q(nx,ny,nz,n_var)
 !local variables
 real*8  :: time=0
 integer :: itime=0,ierr
-real*8  :: ints(3)       ! ints(1) = ke
-                         ! ints(2) = ke dissapation
-                         ! ints(3) = ke dissapation from diffusion
-real*8 :: maxs(3)        ! maxs(1,2,3) = max U,V,W
 real*8 :: ke_old
-
+real*8 ints(nints),maxs(nints)
 
 ints=0
 maxs=0
@@ -119,39 +113,39 @@ subroutine rk4(time,Q,ints,maxs)
 use params
 use mpi
 implicit none
-real*8 :: time,Q(nx,ny,nz,n_var),ints(3),maxs(3)
+real*8 :: time,Q(nx,ny,nz,n_var),ints(nints),maxs(nints)
 
 ! local variables
 real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 real*8 :: ke_diff
-real*8 :: ints_buf(3)
+real*8 :: ints_buf(nints)
 integer i,j,k,n,ierr
 
 
 Q_old=Q
 
 ! stage 1
-call ns3D(rhs,Q_old,time,ints(3))
+call ns3D(rhs,Q_old,time,1,ints)
 call divfree(rhs,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,ke_diff)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0,ints)
 call divfree(rhs,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,ke_diff)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0,ints)
 call divfree(rhs,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
-call ns3D(rhs,Q_tmp,time+delt,ke_diff)
+call ns3D(rhs,Q_tmp,time+delt,0,ints)
 Q=Q+delt*rhs/6.0
 call divfree(Q,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
 
@@ -172,9 +166,9 @@ time = time + delt
 
 #ifdef USE_MPI
    ints_buf=ints
-   call MPI_allreduce(ints_buf,ints,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_allreduce(ints_buf,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    ints_buf=maxs
-   call MPI_allreduce(ints_buf,maxs,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 
