@@ -358,13 +358,7 @@ do i=1,nump
          
          ! interpolate zcord(kgrid-1:kgrid+2) to zcord=particle(k,2)
          ! data:  Q1d(1:4,j)
-!
-! BUG???
-! JAMAL: should this be particle_tmp(i,3) (the z-coordinate) 
-!        in the next line?  
-!
-!
-         zc = 1 + (particle_tmp(i,2)-zcord(kgrid))/delz
+         zc = 1 + (particle_tmp(i,3)-zcord(kgrid))/delz
          !loop over velocity components
          do j=1,ndim
             call interp4(Q1d(1,j),Q1d(2,j),Q1d(3,j),Q1d(4,j),zc,Ulocal(j))

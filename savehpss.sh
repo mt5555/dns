@@ -33,9 +33,9 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
       psi save -d dns/$name $name*.h5 $name*.u  $name*.v   $name*.w
    endif
 else
-   echo 'saving .' $ext ' fie
-   #psi save -d dns/$name {$name}0003.3563.$ext $name*.$ext
-   psi save -d dns/$name name*.$ext
+   echo 'saving .' $ext ' files'
+   #psi save -d dns/$name {$name}0003.6781.$ext $name*.$ext
+   psi save -d dns/$name $name*.$ext
 endif
 
 
