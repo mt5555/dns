@@ -105,7 +105,7 @@ LINK=$(F90) $(FFLAGS)
 #independent modules/routines (dont use any other modules):
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 #modules/routines which use OBJS1
-OBJS2 = transpose.o  solve.o ghost.o bc.o  tracers.o
+OBJS2 = transpose.o  solve.o ghost.o bc.o  tracers.o sforcing.o
 
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
@@ -126,10 +126,10 @@ SHALLOW_DIAG =  shallow_diag.o
 # n_var>=3 models:  (u,v,w) or (u,v,h)
 # but they can still be run on 2D problems with nz=1
 MODEL_GRID       = ns_grid.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_GHOST      = ns_ghost.o  sforcing.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_GHOST      = ns_ghost.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SPEC       = ns.o sforcing.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SHALLOW    = shallow.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)
 
@@ -177,7 +177,7 @@ splitspec:  splitspec.o fileioc.o
 
 analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis analysis.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
-analysis_rms:  analysis_rms.o sforcing.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
+analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_rms analysis_rms.o sforcing.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 

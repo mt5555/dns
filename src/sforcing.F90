@@ -41,11 +41,11 @@ use params
 use fft_interface
 implicit none
 real*8 :: work(nx,ny,nz)
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: q4(nx,ny,nz,n_var)
-real*8 :: rhs(nx,ny,nz,n_var)
-real*8 :: q4z(g_nz2,nslabx,ny_2dz,n_var) 
-real*8 :: rhsz(g_nz2,nslabx,ny_2dz,n_var) 
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: q4(nx,ny,nz,3)
+real*8 :: rhs(nx,ny,nz,3)
+real*8 :: q4z(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: rhsz(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: f_diss
 integer :: n
 
@@ -74,8 +74,8 @@ subroutine sforcing12(rhs,Qhat,f_diss)
 use params
 use mpi
 implicit none
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var) 
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var) 
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,xfac,f_diss,tauf
 real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)

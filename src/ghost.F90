@@ -7,6 +7,15 @@ implicit none
 real*8,private :: tmx1,tmx2
 integer,private :: nghost=2
 
+real*8,private,allocatable :: recbuf0(:)
+real*8,private,allocatable :: recbuf1(:)
+#ifdef USE_MPI
+real*8,private,allocatable :: sendbuf0(:)
+real*8,private,allocatable :: sendbuf1(:)
+#endif
+
+
+
 logical,private,save :: firstcall=.true.
 
 contains
@@ -19,6 +28,7 @@ subroutine ghost_init()
 use params
 implicit none
 
+integer :: n
 !
 ! dont use bx1,bx2 in these checks, because they will fail
 ! at a real boundary if offset_bdy is true.  But this is not
@@ -47,6 +57,27 @@ endif
 
 firstcall=.false.
 
+
+n = max(ny*nz,nx*ny,nx*nz)*ndim*nghost
+allocate (recbuf0(n))
+allocate (recbuf1(n))
+#ifdef USE_MPI
+n=1
+if (ncpu_z>1) then
+   n=max(n,nx*ny*nghost*ndim)
+endif
+if (ncpu_x>1) then
+   n=max(n,ny*nz*nghost*ndim)
+endif
+if (ncpu_y>1) then
+   n=max(n,nz*nx*nghost*ndim)
+endif
+
+allocate (sendbuf0(n))
+allocate (sendbuf1(n))
+#endif
+
+
 end subroutine
 
 
@@ -73,13 +104,10 @@ real*8 :: p(nx,ny,nz,nvar)
 
 !local variables
 integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
-real*8 :: recbufx0(ny*nz*nvar*nghost)
-real*8 :: recbufx1(ny*nz*nvar*nghost)
 logical :: ghost0=.true.,ghost1=.true.
 
+
 #ifdef USE_MPI
-real*8 :: sendbufx0(ny*nz*nvar*nghost)
-real*8 :: sendbufx1(ny*nz*nvar*nghost)
 integer :: ierr,dest_pe0,dest_pe1,request(12),statuses(MPI_STATUS_SIZE,12)
 integer :: dest_pe3(3),tag
 #endif
@@ -135,13 +163,13 @@ if (x0==my_x) then
       l=l+1
       if (bdy_x1==PERIODIC) then
          !periodic:  nx2-1,nx2-0  -->   nx1-2,nx1-1
-         recbufx0(l)=p(nx2-i,j,k,n)
+         recbuf0(l)=p(nx2-i,j,k,n)
       else if (bdy_x1==REFLECT) then
          !reflection:  nx1+2,nx1+1  -->   nx1-2,nx1-1
-         recbufx0(l)=p(nx1+i+1,j,k,n)
+         recbuf0(l)=p(nx1+i+1,j,k,n)
       else if (bdy_x1==REFLECT_ODD) then
          !reflection:  nx1+2,nx1+1  -->   nx1-2,nx1-1
-         recbufx0(l)=-p(nx1+i+1,j,k,n)
+         recbuf0(l)=-p(nx1+i+1,j,k,n)
       else
          ! b.c., so dont touch ghost cells
          ghost0=.false.
@@ -161,18 +189,18 @@ else
       ! regular ghost cell update
       ! nx1,nx1+1 on this processor goes to nx2+1,nx2+2 on dest_pe0
       l=l+1
-      sendbufx0(l)=p(nx1+i,j,k,n)
+      sendbuf0(l)=p(nx1+i,j,k,n)
    enddo
    enddo
    enddo
    enddo
    tag=2
    nmesg=nmesg+1
-   call MPI_IRecv(recbufx0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 
    tag=1
    nmesg=nmesg+1
-   call MPI_ISend(sendbufx0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 90 continue
@@ -189,13 +217,13 @@ if (x1==my_x) then
       l=l+1
       if (bdy_x2==PERIODIC) then
          !periodic:  nx1,nx1+1  -->   nx2+1,nx2+2
-         recbufx1(l)=p(nx1+i-1,j,k,n)
+         recbuf1(l)=p(nx1+i-1,j,k,n)
       else if (bdy_x2==REFLECT) then
          !reflection:  nx2-1,nx2-2  -->   nx2+1,nx2+2
-         recbufx1(l)=p(nx2-i,j,k,n)
+         recbuf1(l)=p(nx2-i,j,k,n)
       else if (bdy_x2==REFLECT_ODD) then
          !reflection:  nx2-1,nx2-2  -->   nx2+1,nx2+2
-         recbufx1(l)=-p(nx2-i,j,k,n)
+         recbuf1(l)=-p(nx2-i,j,k,n)
       else
          ! b.c., so dont touch ghost cells
          ghost1=.false.
@@ -215,7 +243,7 @@ else
       ! regular ghost cell update
       ! nx2-1,nx2 on this processor goes to nx1-2,nx1-1 on dest_pe1
       l=l+1
-      sendbufx1(l)=p(nx2-i,j,k,n)
+      sendbuf1(l)=p(nx2-i,j,k,n)
    enddo
    enddo
    enddo
@@ -223,11 +251,11 @@ else
 
    tag=1
    nmesg=nmesg+1
-   call MPI_IRecv(recbufx1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 
    tag=2
    nmesg=nmesg+1
-   call MPI_ISend(sendbufx1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 100 continue
@@ -248,9 +276,9 @@ do j=by1,by2
 do i=1,nghost
    l=l+1
    ! left edge:  p(nx1-2,,) then p(nx1-1,,)
-   if (ghost0) p(nx1-(nghost-i+1),j,k,n)=recbufx0(l)
+   if (ghost0) p(nx1-(nghost-i+1),j,k,n)=recbuf0(l)
    ! right edge:  p(nx2+1,,) then p(nx2+2,,)
-   if (ghost1) p(nx2+i,j,k,n)=recbufx1(l)
+   if (ghost1) p(nx2+i,j,k,n)=recbuf1(l)
 enddo
 enddo
 enddo
@@ -283,13 +311,9 @@ real*8 :: p(nx,ny,nz,nvar)
 
 !local variables
 integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
-real*8 :: recbufy0(nx*nz*nvar*nghost)
-real*8 :: recbufy1(nx*nz*nvar*nghost)
 logical :: ghost0=.true.,ghost1=.true.
 
 #ifdef USE_MPI
-real*8 :: sendbufy0(nx*nz*nvar*nghost)
-real*8 :: sendbufy1(nx*nz*nvar*nghost)
 integer :: ierr,dest_pe0,dest_pe1,request(12),statuses(MPI_STATUS_SIZE,12)
 integer :: dest_pe3(3),tag
 #endif
@@ -346,11 +370,11 @@ if (y0==my_y) then
    do i=bx1,bx2
       l=l+1
       if (bdy_y1==PERIODIC) then
-         recbufy0(l)=p(i,ny2-j,k,n)
+         recbuf0(l)=p(i,ny2-j,k,n)
       else if (bdy_y1==REFLECT) then
-         recbufy0(l)=p(i,ny1+j+1,k,n)
+         recbuf0(l)=p(i,ny1+j+1,k,n)
       else if (bdy_y1==REFLECT_ODD) then
-         recbufy0(l)=-p(i,ny1+j+1,k,n)
+         recbuf0(l)=-p(i,ny1+j+1,k,n)
       else
          ghost0=.false.
          goto 90
@@ -368,18 +392,18 @@ else
    do i=bx1,bx2
       ! regular ghost cell update
       l=l+1
-      sendbufy0(l)=p(i,ny1+j,k,n)
+      sendbuf0(l)=p(i,ny1+j,k,n)
    enddo
    enddo
    enddo
    enddo
    tag=20
    nmesg=nmesg+1
-   call MPI_IRecv(recbufy0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 
    tag=10
    nmesg=nmesg+1
-   call MPI_ISend(sendbufy0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 90 continue
@@ -393,11 +417,11 @@ if (y1==my_y) then
    do i=bx1,bx2
       l=l+1
       if (bdy_y2==PERIODIC) then
-         recbufy1(l)=p(i,ny1+j-1,k,n)
+         recbuf1(l)=p(i,ny1+j-1,k,n)
       else if (bdy_y2==REFLECT) then
-         recbufy1(l)=p(i,ny2-j,k,n)
+         recbuf1(l)=p(i,ny2-j,k,n)
       else if (bdy_y2==REFLECT_ODD) then
-         recbufy1(l)=-p(i,ny2-j,k,n)
+         recbuf1(l)=-p(i,ny2-j,k,n)
       else
          ghost1=.false.
          goto 100
@@ -415,7 +439,7 @@ else
    do i=bx1,bx2
       ! regular ghost cell update
       l=l+1
-      sendbufy1(l)=p(i,ny2-j,k,n)
+      sendbuf1(l)=p(i,ny2-j,k,n)
    enddo
    enddo
    enddo
@@ -423,11 +447,11 @@ else
 
    tag=10
    nmesg=nmesg+1
-   call MPI_IRecv(recbufy1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 
    tag=20
    nmesg=nmesg+1
-   call MPI_ISend(sendbufy1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 100 continue
@@ -449,9 +473,9 @@ do j=1,nghost
 do i=bx1,bx2
    l=l+1
    ! left edge: 
-   if (ghost0) p(i,ny1-(nghost-j+1),k,n)=recbufy0(l)
+   if (ghost0) p(i,ny1-(nghost-j+1),k,n)=recbuf0(l)
    ! right edge: 
-   if (ghost1) p(i,ny2+j,k,n)=recbufy1(l)
+   if (ghost1) p(i,ny2+j,k,n)=recbuf1(l)
 enddo
 enddo
 enddo
@@ -482,13 +506,9 @@ real*8 :: p(nx,ny,nz,nvar)
 
 !local variables
 integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
-real*8 :: recbufz0(nx*ny*nvar*nghost)
-real*8 :: recbufz1(nx*ny*nvar*nghost)
 logical :: ghost0=.true.,ghost1=.true.
 
 #ifdef USE_MPI
-real*8 :: sendbufz0(nx*ny*nvar*nghost)
-real*8 :: sendbufz1(nx*ny*nvar*nghost)
 integer :: ierr,dest_pe0,dest_pe1,request(12),statuses(MPI_STATUS_SIZE,12)
 integer :: dest_pe3(3),tag
 #endif
@@ -547,11 +567,11 @@ if (z0==my_z) then
    do i=bx1,bx2
       l=l+1
       if (bdy_z1==PERIODIC) then
-         recbufz0(l)=p(i,j,nz2-k,n)
+         recbuf0(l)=p(i,j,nz2-k,n)
       else if (bdy_z1==REFLECT) then
-         recbufz0(l)=p(i,j,nz1+k+1,n)
+         recbuf0(l)=p(i,j,nz1+k+1,n)
       else if (bdy_z1==REFLECT_ODD) then
-         recbufz0(l)=-p(i,j,nz1+k+1,n)
+         recbuf0(l)=-p(i,j,nz1+k+1,n)
       else
          ghost0=.false.
          goto 90
@@ -569,18 +589,18 @@ else
    do i=bx1,bx2
       ! regular ghost cell update
       l=l+1
-      sendbufz0(l)=p(i,j,nz1+k,n)
+      sendbuf0(l)=p(i,j,nz1+k,n)
    enddo
    enddo
    enddo
    enddo
    tag=200
    nmesg=nmesg+1
-   call MPI_IRecv(recbufz0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 
    tag=100
    nmesg=nmesg+1
-   call MPI_ISend(sendbufz0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 90 continue
@@ -594,11 +614,11 @@ if (z1==my_z) then
    do i=bx1,bx2
       l=l+1
       if (bdy_z2==PERIODIC) then
-         recbufz1(l)=p(i,j,nz1+k-1,n)
+         recbuf1(l)=p(i,j,nz1+k-1,n)
       else if (bdy_z2==REFLECT) then
-         recbufz1(l)=p(i,j,nz2-k,n)
+         recbuf1(l)=p(i,j,nz2-k,n)
       else if (bdy_z2==REFLECT_ODD) then
-         recbufz1(l)=-p(i,j,nz2-k,n)
+         recbuf1(l)=-p(i,j,nz2-k,n)
       else
          ghost1=.false.
          goto 100
@@ -616,7 +636,7 @@ else
    do i=bx1,bx2
       ! regular ghost cell update
       l=l+1
-      sendbufz1(l)=p(i,j,nz2-k,n)
+      sendbuf1(l)=p(i,j,nz2-k,n)
    enddo
    enddo
    enddo
@@ -624,11 +644,11 @@ else
 
    tag=100
    nmesg=nmesg+1
-   call MPI_IRecv(recbufz1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 
    tag=200
    nmesg=nmesg+1
-   call MPI_ISend(sendbufz1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 endif
@@ -650,9 +670,9 @@ do j=by1,by2
 do i=bx1,bx2
    l=l+1
    ! left edge: 
-   if (ghost0) p(i,j,nz1-(nghost-k+1),n)=recbufz0(l)
+   if (ghost0) p(i,j,nz1-(nghost-k+1),n)=recbuf0(l)
    ! right edge: 
-   if (ghost1) p(i,j,nz2+k,n)=recbufz1(l)
+   if (ghost1) p(i,j,nz2+k,n)=recbuf1(l)
 enddo
 enddo
 enddo
