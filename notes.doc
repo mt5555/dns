@@ -16,23 +16,12 @@ E&Liu KH problem.
         khO  dnsgrid using new dxx on autry (done)
         compare agains khN
         run khP, with dnsghost, compare with khO    only to .75
-        run khQ, with dnsvor, compare with khO      done
+        run khQ, with dnsvor, compare with khO      RESUB-IN
 
         benchmark parallel decompostions
 
 2. psi-vor code:
-        update b.c. code.  periodic
-                           reflect-even
-                           reflect-odd    (code this up)
-                           inflow0/onesided
-
-        boundary starts at nx1.
-        b.c.:  1 reflective, 3 inflow=0/outflow=onesided_differences
-        reflective handled in ghost update
-    
         boundary condition routines (inflow, onesided, biot-savar)
-        test 2nd order dirichlet  (CG & jacobi)
-        test 4th order dirichlet  (CG & jacobi)
 
 
 
