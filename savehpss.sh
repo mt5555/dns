@@ -36,6 +36,7 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
    psi store -d dns/$name  $name*.spec
    psi store -d dns/$name  $name*.hspec
    psi store -d dns/$name  $name*.cospec
+   psi store -d dns/$name  $name*.kspec
    psi store -d dns/$name  $name*.pspec
    psi store -d dns/$name $name*.spect
    psi store -d dns/$name $name*.cross
@@ -45,6 +46,7 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
       psi save -d dns/$name $name*00.h5 $name*00.u  $name*00.v   $name*00.w
       psi save -d dns/$name $name*00.vor $name*00.psi
       psi save -d dns/$name $name*00.t??.s???.???
+      psi save -d dns/$name $name*00.t??.s???.???.gradxy2
    endif
 else
    echo 'saving .' $ext ' files'

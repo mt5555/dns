@@ -871,12 +871,10 @@ scalars(n+i)=su(n)         ! 21,22,23
 enddo
 i=i+3
 
-i=i+1
-scalars(i)=u3              ! 24
-i=i+1
-scalars(i)=u4              ! 25
-
-scalars(26)=0               ! opps, forgot this one
+scalars(24)=u1              ! 24
+scalars(25)=u3              ! 25
+scalars(26)=u4              ! 26
+i=26
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
