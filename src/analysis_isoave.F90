@@ -38,10 +38,10 @@ real*8 :: kr,ke,ck,xfac
 CPOINTER :: fid
 
 ! input file
-basename="temp5"
+basename="/ccs/taylorm/shankara/dns/src/iso12_256_"
 print *,basename
-tstart=1.75
-tstop=1.75
+tstart=.75
+tstop=.75
 tinc=1.0
 icount=0
 

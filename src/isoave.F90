@@ -209,7 +209,7 @@ print *,'R_l      ',R_lambda
 
 
 
-!$XXX parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
+!$omp parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
 do idir=1,ndir
 
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',&
@@ -232,7 +232,7 @@ do idir=1,ndir
       
 #endif
 
-!$omp parallel do private(rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
+!$XXX parallel do private(rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
    do idel=1,ndelta
 
       rvec = dir(:,idir)*delta_val(idel)
@@ -297,8 +297,8 @@ do idir=1,ndir
       enddo
       endif
 enddo
-!$omp end parallel do
 enddo
+!$omp end parallel do
 
 
 D_ll=D_ll/g_nx/g_ny/g_nz

@@ -1,3 +1,9 @@
+mu=0;
+ke=0;
+nx=1;
+delx_over_eta=1;
+eta = 1/(nx*delx_over_eta);
+
 %name='/scratch1/taylorm/iso12w512A0001.3847'
 %nx=512; delx_over_eta=5.8615; epsilon=.2849;
 
@@ -7,12 +13,21 @@
 %name='/scratch1/taylorm/iso12_250A0022.000'
 %nx=250; delx_over_eta=.80; epsilon=3.9;
 
-name='../src/iso12_256_0001.0000'
+
+
+name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.7500'
+%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.5000'
+%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.0000'
+%name='/ccs/taylorm/shankara/dns/src/iso12_256_0000.7500'
 
 
 
 fid=fopen([name,'.isostr'],'r','l');
- 
+
+l=findstr('/',name);
+l=l(length(l));
+bname=name(l+1:length(name));
+
 cdir=[ 'k','k','k' ];  % x,y,zz
 cdir=[cdir, 'g','g','g','g','g','g'];  % face diagonals
 cdir=[cdir, 'r','r','r','r'];      % body diagonals
@@ -63,9 +78,7 @@ if (ntran>=4)
    SN2_ltt=fread(fid,[ndelta,ndir],'float64');
 end
 
-mu=0;
-ke=0;
-eta = 1/(nx*delx_over_eta);
+
 if (nscalars==7) 
   time=fread(fid,1,'float64');
   nx=fread(fid,1,'float64');
@@ -79,7 +92,7 @@ if (nscalars==7)
 end
 
 r_val=r_val*delx_over_eta;            % convert to units of r/eta:
-xx=(1:1.0:(nx./2.5))*delx_over_eta;   % units of r/eta
+xx=(1:.5:(nx./2.5))*delx_over_eta;   % units of r/eta
 xx_box = xx/delx_over_eta/nx;         % in code units (box length)
 
 lambda=sqrt(10*ke*mu/epsilon);       % single direction lambda
@@ -128,6 +141,7 @@ else
    check_isotropy=0;
    if (in==2) 
      plot_posneg=1;
+     bname=[bname,'s'];
    end
 end
 
@@ -145,6 +159,7 @@ if (klaws)
 figure(1)
 yyave=0*xx;
 yyave_sq=0*xx;
+yyave1=yyave;
 
 pave=yyave;
 nave=yyave;
@@ -155,6 +170,7 @@ for i=1:ndir
   y=-D_lll(:,i)./(x_box*epsilon);
 
   semilogx(x,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
+  %loglog(x,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
   yy = spline(x,y,xx);
   %plot(xx,yy,[cdir(i)],'LineWidth',.2);
   
@@ -166,25 +182,50 @@ for i=1:ndir
   pave=pave+w(i)*spline(x,y,xx);
   y=-SN_lll(:,i)./(x_box*epsilon);
   nave=nave+w(i)*spline(x,y,xx);
+
+  y  = D_ll(:,i); 
+  yyave1=yyave1 + w(i)*spline(x,y,xx)/epsilon;
   
 end
 yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
-
-semilogx(xx,yyave,'k','LineWidth',1.0);
+max(yyave)
+plot(xx,yyave,'k','LineWidth',1.0);
 %errorbar(xx,yyave,yyave_sq);
 title('D_{lll} / r\epsilon   (4/5 law)       blue: D-/D+');
 xlabel('r/\eta');
-x=1:xmax; semilogx(x,.8*x./x,'k');
+x=1:xmax; plot(x,.8*x./x,'k');
 if (plot_posneg)
   grid
-  semilogx(xx,pave)
-  semilogx(xx,nave)
+  plot(xx,pave)
+  plot(xx,nave)
 end
+
+
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
-print -dpsc 45.ps
+print('-dpsc',[bname,'_45.ps']);
 print -djpeg 45.jpg
 
+figure(4)
+%curve fit (xx,pave)  and (xx,nave)
+%  
+%  pave, nave have been divied by x
+%  compute: 6 mu (1/r) d/dr yyave1
+l=length(yyave1);
+df = ( yyave1(3:l)-yyave1(1:l-2)) ./ (xx_box(3:l)-xx_box(1:l-2));
+df = 6*mu*df./xx_box(3:l);
+
+xx=xx(3:l);
+pave=pave(3:l);
+nave=nave(3:l);
+semilogx(xx,pave+.5*df,'k',xx,nave+.5*df,'k',xx,pave,xx,nave);
+grid;
+
+%Bm = lsqcurvefit('fun3',[0],xx,nave)
+%Bp = lsqcurvefit('fun3',[0],xx,pave)
+%bm = fun3([Bm(1)],xx);
+%bp = fun3([Bp(1)],xx);
+%plot(xx,bm,xx,bp)
 
 
 
@@ -230,7 +271,7 @@ end
 x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
-print -dpsc 415.ps
+print('-dpsc',[bname,'_415.ps']);
 print -djpeg 415.jpg
 
 
@@ -268,7 +309,7 @@ x=1:xmax; semilogx(x,(4/3)*x./x,'k');
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
-print -dpsc 43.ps
+print('-dpsc',[bname,'_43.ps']);
 print -djpeg 43.jpg
 
 end
@@ -321,8 +362,8 @@ ylabel('scaled by r^{-2/3}')
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
-print -dpsc isocheck.ps
-print -djpeg isocheck.jpg
+print('-dpsc',[bname,'_isocheck2.ps']);
+print -djpeg isocheck2.jpg
 
 
 
@@ -366,6 +407,6 @@ ylabel('scaled by 1/r')
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
-print -dpsc isocheck3.ps
+print('-dpsc',[bname,'_isocheck3.ps']);
 print -djpeg isocheck3.jpg
 end
