@@ -17,6 +17,7 @@ Angle averging:  153 calls to transpose_z()
 
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  
+      (needs 3GB to run)
 
 2. ns_ghost: 
         benchmark parallel decompostions

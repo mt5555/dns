@@ -22,6 +22,8 @@ if ($#argv == 0 ) then
    exit
 endif
 
+set MPIRUN = "mpirun -x LD_LIBRARY_PATH "
+
 if ($1 == makeref) then
 
    ./gridsetup.py 1 1 1 128 128 1 
@@ -36,15 +38,15 @@ endif
 if ($1 == 3p) then
 
   ./gridsetup.py 2 2 1 128 128 8  
-  make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns < $refin > $tmp 
+  make >& /dev/null ;  rm -f $tmp ; $MPIRUN -np 4 ./dns < $refin > $tmp 
   ../testing/check.sh $tmp $refout
 
   ./gridsetup.py 1 1 2 128 128 8  
-  make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
+  make >& /dev/null ;  rm -f $tmp ; $MPIRUN -np 2 ./dns < $refin > $tmp 
   ../testing/check.sh $tmp $refout
 
   ./gridsetup.py 1 1 4 128 128 8  3 2 1  5 4 3
-  make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns < $refin > $tmp 
+  make >& /dev/null ;  rm -f $tmp ; $MPIRUN -np 4 ./dns < $refin > $tmp 
   ../testing/check.sh $tmp $refout
 
 
@@ -82,31 +84,31 @@ if ($1 == 1p) then
 ./gridsetup.py 1 1 1 128 128 1  
 make >& /dev/null ;  rm -f $tmp ; 
 echo "running restart dns 1x1x1"
-mpirun -x LD_LIBRARY_PATH -np 1 ./dns -r -d $rundir -i  $refin > $tmp 
+$MPIRUN -np 1 ./dns -r -d $rundir -i  $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 2 1 1 128 128 1  
 make >& /dev/null ;  rm -f $tmp ; 
 echo "running restart dns 2x1x1"
-mpirun -x LD_LIBRARY_PATH -np 2 ./dns -r -d $rundir -i  $refin > $tmp 
+$MPIRUN -np 2 ./dns -r -d $rundir -i  $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 2 1 128 128 1  
 make >& /dev/null ;  rm -f $tmp ; 
 echo "running restart dns 1x2x1"
-mpirun -x LD_LIBRARY_PATH -np 2 ./dns -r -d $rundir -i  $refin > $tmp 
+$MPIRUN -np 2 ./dns -r -d $rundir -i  $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 8 1 1 128 128 1  
 make >& /dev/null ;  rm -f $tmp ; 
 echo "running restart dns 8x1x1"
-mpirun -x LD_LIBRARY_PATH -np 8 ./dns -r -d $rundir -i  $refin > $tmp 
+$MPIRUN -np 8 ./dns -r -d $rundir -i  $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 8 1 128 128 1  
 make >& /dev/null ;  rm -f $tmp ; 
 echo "running restart dns 1x8x1"
-mpirun -x LD_LIBRARY_PATH -np 8 ./dns -r -d $rundir -i  $refin > $tmp 
+$MPIRUN -np 8 ./dns -r -d $rundir -i  $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
