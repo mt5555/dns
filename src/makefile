@@ -28,7 +28,7 @@ ifeq ($(UNAME),Linux)
 	VENDOR=LAHEY
    endif
    ifeq ($(HOST),brain)
-      MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
+      MPI =  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
    ifeq ($(HOST),shankara1)

@@ -357,48 +357,71 @@ if (numt_insert>0) tracer_tmp(numt_insert,2)=0
 
 ! interpolate psi to position in tracer_tmp
 do i=1,numt
-   ! find cpu which owns the grid point tracer(i,:)
-   if (xcord(intx1)<=tracer_tmp(i,1) .and. tracer_tmp(i,1)<xcord(intx2)+delx .and. &
-       ycord(inty1)<=tracer_tmp(i,2) .and. tracer_tmp(i,2)<ycord(inty2)+dely ) then
 
-      ! find igrid,jgrid so that point is in box:
-      ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
-      igrid = intx1 + floor( (tracer_tmp(i,1)-xcord(intx1))/delx )
-      jgrid = inty1 + floor( (tracer_tmp(i,2)-ycord(inty1))/dely )
-      ASSERT("advance_tracers(): igrid interp error",igrid<=intx2)
-      ASSERT("advance_tracers(): jgrid interp error",jgrid<=inty2)
+   ! find position in global grid:
+   igrid = 1 + floor( (tracer_tmp(i,1)-g_xcord(1))/delx )
+   jgrid = 1 + floor( (tracer_tmp(i,2)-g_ycord(1))/dely )
 
+   if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
+      ! compute a new point in the center of the above cell:
+      ! (do this to avoid problems with 2 cpus both claiming a point
+      ! on the boundary of a cell)
+      xc=.5*(g_xcord(igrid)+g_xcord(igrid+1))
+      yc=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
 
-      ! interpolate trhs
-      do jj=1,4
-         ! interpolate xcord(igrid-1:igrid+2) to xcord=tracer(i,1)
-         ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
-         xc = 1 + (tracer_tmp(i,1)-xcord(igrid))/delx
-         jc = jgrid-2+jj
-         do j=1,ndim
-            call interp4(ugrid(igrid-1,jc,j),ugrid(igrid,jc,j),&
-                ugrid(igrid+1,jc,j),ugrid(igrid+2,jc,j),&
-                xc,Qint(jj,j))
+      ! find cpu which owns the grid point (xc,yc)
+      if (xcord(intx1)<xc .and. xc<xcord(intx2)+delx .and. &
+           ycord(inty1)<yc .and. yc<ycord(inty2)+dely ) then
+
+         ! find igrid,jgrid so that point is in box:
+         ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
+         igrid = intx1 + floor( (xc-xcord(intx1))/delx )
+         jgrid = inty1 + floor( (yc-ycord(inty1))/dely )
+
+         ASSERT("advance_tracers(): igrid interp error",igrid<=intx2)
+         ASSERT("advance_tracers(): jgrid interp error",jgrid<=inty2)
+
+         ! interpolate trhs
+         do jj=1,4
+            ! interpolate xcord(igrid-1:igrid+2) to xcord=tracer(i,1)
+            ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
+            xc = 1 + (tracer_tmp(i,1)-xcord(igrid))/delx
+            ASSERT("advance_tracers(): xc interp error 1",xc>.99)
+            ASSERT("advance_tracers(): xc interp error 2",xc<4.01)
+            jc = jgrid-2+jj
+            do j=1,ndim
+               call interp4(ugrid(igrid-1,jc,j),ugrid(igrid,jc,j),&
+                    ugrid(igrid+1,jc,j),ugrid(igrid+2,jc,j),&
+                    xc,Qint(jj,j))
+            enddo
          enddo
-      enddo
-      ! interpolate ycord(jgrid-1:jgrid+2) to ycord=tracer(i,2)
-      ! data:  Qint(1:4,j)
-      yc = 1 + (tracer_tmp(i,2)-ycord(jgrid))/dely
-      do j=1,ndim
-         call interp4(Qint(1,j),Qint(2,j),Qint(3,j),Qint(4,j),yc,trhs(j))
-      enddo
-
-      ! advance
-      do j=1,ndim
-         tracer(i,j)=tracer(i,j)+c1*trhs(j)
-         tracer_tmp(i,j)=tracer_old(i,j)+c2*trhs(j)
-      enddo
+         ! interpolate ycord(jgrid-1:jgrid+2) to ycord=tracer(i,2)
+         ! data:  Qint(1:4,j)
+         yc = 1 + (tracer_tmp(i,2)-ycord(jgrid))/dely
+         ASSERT("advance_tracers(): yc interp error 1",yc>.99)
+         ASSERT("advance_tracers(): yc interp error 2",yc<4.01)
+         do j=1,ndim
+            call interp4(Qint(1,j),Qint(2,j),Qint(3,j),Qint(4,j),yc,trhs(j))
+         enddo
+         
+         ! advance
+         do j=1,ndim
+            tracer(i,j)=tracer(i,j)+c1*trhs(j)
+            tracer_tmp(i,j)=tracer_old(i,j)+c2*trhs(j)
+         enddo
+         if (maxval(abs(Qint(:,1)))>10) call abort("qint to big")
+         
+      else
+         ! point does not belong to my_pe, set position to -inf
+         do j=1,ndim
+            tracer(i,j)=-1d100
+            tracer_tmp(i,j)=-1d100
+         enddo
+      endif
    else
-      ! point does not belong to my_pe, set position to -inf
-      do j=1,ndim
-         tracer(i,j)=-1d100
-         tracer_tmp(i,j)=-1d100
-      enddo
+      print *,'tracer has left the domain: '
+      write(*,'(2i5,2e14.5,f5.0)') my_pe,i,tracer(i,1),tracer(i,2),tracer(i,3)
+      call abort("tracer_advance(): point has left domain") 
    endif
 enddo
 
@@ -421,10 +444,15 @@ if (rk4stage==4) then
    ! xcord set to -1d100 to denote off processor.  
    ! if any tracer has left *all* processors, abort:
    if (minval(tracer(1:numt,1))<g_xcord(1)) then
+       ierr=0
       do i=1,numt
-         write(*,'(i5,3f12.5)') i,tracer(i,1),tracer(i,2),tracer(i,3)
+        if ((tracer(i,1))<g_xcord(1)) then
+           ierr=ierr+1
+           write(*,'(2i5,2e14.5,f5.0)') my_pe,i,tracer(i,1),tracer(i,2),tracer(i,3)
+        endif
+        if (ierr>10) exit ! this do loop
       enddo
-      call abort("tracer_advance(): point has left domain") 
+      call abort("Error: tracers above were not claimed by any CPU")
    endif
 
    ! check for crossings before insertting points
