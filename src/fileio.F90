@@ -144,6 +144,11 @@ if (doit) then
    write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
+   ! 
+   ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
+   ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
+   !       < u    u  > = (1/3)  || u ||^2
+   !
    lambda=sqrt(  5*(2*ints(1))/ints(2)  )
    write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(1))/mu, &
         '  R=',1/mu
@@ -446,8 +451,10 @@ if (my_pe==fpe) then
    if (read==1) then
       call copen(fname,"r",fid,ierr)
       if (ierr/=0) then
-         write(message,'(3a,i5)') "singlefile_io(): Read Error file=",fname," error no=",ierr
-         call abort(message)
+         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
+         call print_message(message)
+         call print_message(fname)
+         call abort("")
       endif
       call cread8(fid,time,1)
       xnx=o_nx
@@ -465,8 +472,10 @@ if (my_pe==fpe) then
    else
       call copen(fname,"w",fid,ierr)
       if (ierr/=0) then
-         write(message,'(3a,i5)') "singlefile_io(): Write Error file=",fname," error no=",ierr
-         call abort(message)
+         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
+         call print_message(message)
+         call print_message(fname)
+         call abort("")
       endif
       call cwrite8(fid,time,1)
       xnx=o_nx

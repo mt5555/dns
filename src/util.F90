@@ -6,7 +6,7 @@ use params
 implicit none
 integer ierr
 character(len=*) message
-character(len=15) :: pre="ASSERT FAILURE "
+character(len=15) :: pre="ABORT"
 write(*,'(a)') pre // message
 
 #ifdef IBM

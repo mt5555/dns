@@ -24,23 +24,22 @@ ifeq ($(UNAME),Linux)
 
    # Lahey
    #F90 = lf95
-   #FFLAGS = -O -DLINUX $(MPI) -DUSE_STKFFT
-   ##FFLAGS = -O -DLINUX $(MPI) -DUSE_FFT99
-   #LDFLAGS = --staticlink  -Lstk -lstk
+   ##FFLAGS = -g -O -DLINUX $(MPI) -DUSE_STKFFT
+   #FFLAGS = -g -O -DLINUX $(MPI) -DUSE_FFT99
+   #LDFLAGS = --staticlink  #-Lstk -lstk
    #CC = gcc
 
-   # PGI
+   ## PGI
    #F90 = pgf90
    #CC=pgcc
-   #FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   ##FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_STKFFT
+   #FFLAGS = -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
    ##LDFLAGS = -Lstk -lstk
 
 
    #INTEL	
    F90 = ifc 
    CC=gcc
-   FFLAGS = -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
 
 endif

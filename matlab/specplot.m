@@ -8,8 +8,9 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-fid=fopen('test32.spec','r','l');
+%fid=fopen('test32.spec','r','l');
 %fid=fopen('n128.spec','r','b');
+fid=fopen('../src/output/n32_50.spec','r','l');
 
 
 time=fread(fid,1,'float64');
