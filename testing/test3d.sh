@@ -11,8 +11,7 @@ if ($#argv == 0 ) then
    echo " 1 = run 2 (with and without restart) simple 3D test case"
    echo " g = run 1 simple 3D test case using dnsgrid"
    echo " 2 = run lots of 3D test cases (different dimensions)"
-   echo " 3 = run several 3D test cases (different dimensions)"
-   echo " 3p = run several 3D test cases in parallel (2 and 4 cpus)"
+   echo " p = run several 3D test cases in parallel (2 and 4 cpus)"
    echo " makeref  = generate new reference output, 3D"
    exit
 endif
@@ -33,11 +32,15 @@ endif
 
 if ($1 == 1) then
 ./gridsetup.py 1 1 1 32 32 32
+
+echo "without restart:"
+make >& /dev/null ;  rm -f $tmp ; ./dns < $makerefin > $tmp 
+../testing/check.sh $tmp $refout
+
+echo "with restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
-make >& /dev/null ;  rm -f $tmp ; ./dns < $makerefin > $tmp 
-../testing/check.sh $tmp $refout
 
 endif
 
@@ -56,7 +59,29 @@ if ($1 == 2) then
 make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
+endif
 
+if ($1 == p) then
+
+./gridsetup.py 1 1 2 32 32 32 2 2 0
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+./gridsetup.py 1 2 1 32 32 32 2 2 0
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+./gridsetup.py 2 1 1 32 32 32 2 2 0
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+./gridsetup.py 2 1 2 32 32 32 2 2 0
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns < $refin > $tmp 
+../testing/check.sh $tmp $refout
 
 
 endif
+
+
+
+

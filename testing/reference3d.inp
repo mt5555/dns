@@ -1,7 +1,7 @@
 1            ! input file type
 reference3d     ! runname
 ../testing/3d   ! run directory
-restart      ! initial condition:  KH-blob, KH-anal, iso12
+iso12        ! initial condition:  KH-blob, KH-anal, iso12
 none         ! forcing:  none, iso12
 0            ! str_nx  compute structure functions every str_nx timesteps
 0            ! str_ny  0=disabled.  str_nx & str_y >= 2 
