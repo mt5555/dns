@@ -1,6 +1,7 @@
 #include "macros.h"
 subroutine test
 
+call test_parallel
 call test_fft
 call test_poisson
 call test_divfree
@@ -9,6 +10,39 @@ end subroutine
 
 
 
+subroutine test_parallel
+use params
+use transform
+implicit none
+
+real*8 input(nx,ny,nz)
+real*8 work(g_nz2,nx*ny)
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+   input(i,j,k)=zcord(k)
+enddo
+enddo
+enddo
+
+
+call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
+
+if (my_z==1) then
+   print *,'rank=',my_pe,'my coords  = ',my_x,my_y,my_z
+   do k=1,g_nz2
+      print *,work(k,1),work(k,1)-work(k-1,1)
+   enddo
+endif
+
+stop
+
+
+
+end subroutine
 
 
 
