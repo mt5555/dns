@@ -189,9 +189,9 @@ do idir=1,ndir
          D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
          D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
          
-         D_lll(idel,idir)=D_ll(idel,idir) + u_l**3
-         D_ltt(idel,idir,1)=D_tt(idel,idir,1) + u_l*u_t1**2
-         D_ltt(idel,idir,2)=D_tt(idel,idir,2) + u_l*u_t2**2
+         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
+         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
+         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
          
       enddo
       enddo
