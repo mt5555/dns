@@ -12,19 +12,39 @@ real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr
+integer,allocatable :: seed(:)
 real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
 character(len=80) message
 
+!
+! 
+!   g_xcord(i)=(i-1)*delx	
+
 !random vorticity
+
+! set the seed - otherwise it will be the same for all CPUs,
+! producing a bad initial condition
+call random_seed(size=k)
+allocate(seed(k))
+call random_seed(get=seed)
+seed=seed+my_pe
+call random_seed(put=seed)
+deallocate(seed)
+
+
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
    do n=1,3
-      call random_number(PSI(i,j,k,n))
+      call random_number(xw)
+      xw=2*xw-1
+      PSI(i,j,k,n)=xw
    enddo
 enddo
 enddo
 enddo
+
+
 alpha=0
 beta=1
 do n=1,3
@@ -69,6 +89,13 @@ enddo
    ener=ener2
    call MPI_allreduce(ener,ener2,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
+
+if (ener1<=0) then
+   call abort("ener1 must be positive")
+endif
+if (ener2<=0) then
+   call abort("ener2 must be positive")
+endif
 
 
 do n=1,3

@@ -10,7 +10,7 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-fid=fopen('../src/test.scalars','r');
+fid=fopen('test64.scalars','r');
 
 nscalars=0;
 while (1) 

@@ -10,7 +10,7 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-fid=fopen('../src/test.sf','r');
+fid=fopen('test64.sf','r');
 
 
 times=[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0];

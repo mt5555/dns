@@ -309,13 +309,15 @@ type(pdf_structure_function) :: str
 
 ! local variables
 real*8,allocatable :: pdfdata(:,:)
-integer :: bin,ierr,n,ndelta
+integer :: bin,ierr,n,ndelta,ncalls
 
 
 
 #ifdef USE_MPI
 ! find maximum value of bin  MPI max
 call MPI_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+call MPI_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+str%ncalls=ncalls  ! in case io_pe has ncalls=0
 
 ! resize all str's to size bin
 call resize_pdf(str,bin)
@@ -581,7 +583,7 @@ if (compz) then
          work=work+w1(:,:,:,1)**2
 
          ! compute y derivative
-         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),1,2)
+         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),DX_ONLY,2)
          work=work+w1(:,:,:,1)**2
 
       else
@@ -591,7 +593,7 @@ if (compz) then
          work=work+w1(:,:,:,1)**2
 
          ! compute x derivative
-         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),1,1)
+         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),DX_ONLY,1)
          work=work+w1(:,:,:,1)**2
       endif
    enddo

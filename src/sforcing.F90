@@ -182,7 +182,7 @@ if (ntot>0) color=1
 key=0
 
 ! everyone with ntot>0 joins a new group, comm_sforcing
-#ifdef MPI
+#ifdef USE_MPI
 call MPI_Comm_split(comm_3d,color,key,comm_sforcing,ierr);
 if (ntot==0) call MPI_Comm_free(comm_sforcing,ierr)
 #endif

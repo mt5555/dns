@@ -213,7 +213,6 @@ call getindex(n1,index)
 scale=n1
 scale=1/scale
 
-
 do k=1,n3
    !   do j=1,n2
    !         p(n1+1,jj,k)=0
@@ -224,7 +223,7 @@ do k=1,n3
    
    !     move the last cosine mode into slot of first sine mode:
    do j=1,n2
-      p(2,j,k)=p(n1+1,j,k)
+!      p(2,j,k)=p(n1+1,j,k)
    enddo
    
 enddo

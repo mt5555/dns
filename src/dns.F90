@@ -23,7 +23,7 @@ call init_grid
 
 
 write(message,'(a)') 'Running some tests'
-call print_message(message)
+!call print_message(message)
 !call test           ! optional testing  routines go here
 
 

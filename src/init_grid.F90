@@ -33,6 +33,8 @@ if (my_pe==io_pe) then
       print *,'Calling read_type1()'
       call read_type1()
    else
+      ! if you add a new variable and new input type, be sure to add
+      ! it to the MPI broadcast!
       call abort("bad input file")
    endif
 endif
@@ -81,6 +83,9 @@ call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 
 
 if (.not. allocated(custom)) allocate(custom(ncustom))

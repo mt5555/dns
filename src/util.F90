@@ -37,7 +37,7 @@ use params
 implicit none
 integer count,count_rate,count_max
 real*8 tmx
-#ifdef MPI
+#ifdef USE_MPI
 real*8 MPI_Wtime
 tmx = MPI_Wtime()
 #else

@@ -43,7 +43,6 @@ integer n1,n1d,n2,n2d,n3,n3d
 logical,save :: firstcall=.true.
 integer,save :: countx=-1,county=-1,countz=-1
 
-
 if (struct_nx>0) countx=mod(countx+1,struct_nx)  
 if (struct_ny>0) county=mod(county+1,struct_ny)  
 if (struct_nz>0) countz=mod(countz+1,struct_nz)  
