@@ -1,11 +1,7 @@
 TODO:
 
-remove all benchmark files except 96 and 512
-
 
 1. PDF for e
-2. memory estimate.  why off by a factor of 2?
-
 2. use a mpi defined type for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
 6. divergence: go to Shashkov formula?  
@@ -64,17 +60,21 @@ Spectral Model 1 CPU timings.
 run 5 timesteps.  CFL=1.5/.25, no structure functions
 
 darkstar (linux 1Ghz)
-PGF90, STK2+PGCC, auto       2.91  2.90       ( 2.88  
-PGF90, STK2+PGCC, params     2.86  2.87
+PGF90, FFT99, auto       2.90  2.90    
+PGF90, FFT99, params     2.86  2.87
+
+
+PGF90,FFT99, auto            1.16  1.15
+IFC,FFT99, auto              1.07  1.07
+IFC,FFT99, params            1.05  1.07
+LF90,FFT99, auto             1.28  1.27
 
 autrey (linux 1.? Ghz ) 
-PGF90,STK2+PGCC, auto
-PGF90,FFT99, auto
+PGF90,STK2+PGCC, auto        1.41  1.40
 
-IFC,
-LF90,
-
-
+PGF90,STK2+GCC, auto         1.53  1.53
+IFC,STK2+GCC, auto           1.45  1.45
+LF90,STK2+GCC, auto          2.01  2.01
 
 
 Nirvana SGIFFT             
@@ -89,13 +89,10 @@ CPQ
 
 
 *****************************************************************
-1 CPU  512x512x2
+1 CPU  512x512x1
 
 
 *****************************************************************
-
-
-
 
 
 
