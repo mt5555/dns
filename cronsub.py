@@ -149,7 +149,7 @@ for jobscript in vjobscript:
 
 
         if len(jobname)==0:
-            raise ContinueEx,"job does not have a BSUB -J option: "+jobname
+            raise ContinueEx,"no BSUB -J option: "+jobname
 
         # for idbsub, #BSUB -n 64 line is ignored, we have to add this
         # to the idbsub line
@@ -184,8 +184,8 @@ for jobscript in vjobscript:
     except ValueError,e:
         print 'VALUE_ERROR: '
 
-    except NameError,e:
-        print 'NAME_ERROR: ',e
+    except ContinueEx,e:
+        print 'skipping script: ',e
 
     else:
         # submit job
