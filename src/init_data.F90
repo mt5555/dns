@@ -20,7 +20,8 @@ call fft3d(Q(1,1,1,n),work)
             if (xw > .5 .and. xw <= 1.5) then
                Q(i,j,k,n) = 1e-3
             else if (xw <= 2.5) then
-               Q(i,j,k,n) = 1e-3
+               ! random number between 0 and 1
+               call random_number(Q(i,j,k,n)
             endif
          enddo
       enddo
