@@ -170,15 +170,18 @@ offset_bdy=1
 if (init_cond_subtype ==0) then
 !  my standard test case:
    biotsavart_cutoff=.001  
-   delta=.2
-   ubar=.089
+   biotsavart_ubar=.089
+   biotsavart_apply=5  ! disabled
    yscale=3
+   delta=.2
 
    if (g_nx==65) then
       print *,'disabling offset'
       offset_bdy=0
    endif
 endif
+
+
 
 if (init_cond_subtype ==1) then
 ! Monika's case
@@ -191,16 +194,32 @@ if (init_cond_subtype ==1) then
 !                         xscale=3.6   
 !
    biotsavart_cutoff=5e-4
-   if (g_bdy_x1==INFLOW0_ONESIDED) biotsavart_cutoff=5e-3
+   biotsavart_apply=-1  ! disabled
    delta=.2
-   ubar=.089
+   biotsavart_ubar=.089
    yscale=2.0
 endif
+
+
+
+if (init_cond_subtype ==2) then
+   biotsavart_cutoff=5e-3
+   biotsavart_apply=5
+   delta=.2
+   biotsavart_ubar=.089
+   yscale=2.0
+endif
+
+
+
+
+
 
 ! choose xscale so that delx*xscale = dely*yscale
 xscale = yscale*(o_nx-1)/(o_ny-1)
 
 call init_grid()   ! redo grid points since we changed scalings
+
 
 
 xlocation=xscale/2
@@ -243,7 +262,7 @@ do i=bx1,bx2
       psisum = psisum - wd(k)*log(denom1/denom2)
    enddo
    w(i,j,1) = delsq*wsum/pi
-   Qhat(i,j,1,2)= psisum*delx*dely/(4*pi)  - ubar*ycord(j)
+   Qhat(i,j,1,2)= psisum*delx*dely/(4*pi)  - biotsavart_ubar*ycord(j)
 enddo
 enddo
 
@@ -258,13 +277,13 @@ call bcw_impose(Qhat(1,1,1,1))
 
 ! Set the values of PSI on the boundary coming from the initial condition,
 ! if needed.  
-if (g_bdy_x1==INFLOW0_ONESIDED) then
-   ! psi on the boundary always computed from w in time stepping loop.
-else
+if (biotsavart_apply==-1) then
    ! psi on the boundary fixed for all time from the initial conditon:
    call print_message("Setting PSI boundary values (fixed for all time)")
    call bc_biotsavart(w,Qhat(1,1,1,2),1)  ! recompute PSI on boundary from w
    !call set_biotsavart(Qhat)    ! set based on PSI computed above 
+else
+   ! psi on the boundary always computed from w in time stepping loop.
 endif
 
 

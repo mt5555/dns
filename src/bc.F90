@@ -21,6 +21,9 @@ real*8,private :: psi_b(bsize,2,2)   ! psi_b(k,1,1) = x1 boundary
                                               ! psi_b(k,2,2) = y2 boundary
                                               ! psi_b(k,2,2) = y2 boundary
 real*8 :: psi_b_temp(bsize,2,2)
+real*8 :: biotsavart_cutoff
+real*8 :: biotsavart_ubar=0
+integer :: biotsavart_apply=5   !apply biotsavart every 5th timestep
 
 contains
 
@@ -123,12 +126,12 @@ if REALBOUNDARY(bdy_x1) then
    !         -(nx1) + (nx1+2)  = -3(nx1+1) + 4(nx1+2) + (nx1+3)
    !          nx1 = 3(nx1+1) - 3(nx1+2) - (nx1+3)
    do j=by1,by2
-
-     ! if (bdy_x1==INFLOW0_ONESIDED) then
+      
+      if (bdy_x1==INFLOW0_ONESIDED) then
          w(bx1,j)= 3*w(bx1+1,j)-3*w(bx1+2,j)+w(bx1+3,j)
-     ! else
-     !    w(bx1,j)=0
-     ! endif
+      else
+         w(bx1,j)=0
+      endif
    enddo
 endif
 if REALBOUNDARY(bdy_x2) then
@@ -156,15 +159,15 @@ endif
 
 if REALBOUNDARY(bdy_y2) then
    do i=bx1,bx2
-!      if (bdy_y2==INFLOW0_ONESIDED) then
+      if (bdy_y2==INFLOW0_ONESIDED) then
          if (xcord(i)<=xscale/2) then
             w(i,by2)=0
          else
             w(i,by2)=  3*w(i,by2-1) - 3*w(i,by2-2) + w(i,by2-3)
          endif
-!      else
-!         w(i,by2)=0
-!      endif
+      else
+         w(i,by2)=0
+      endif
    enddo
 endif
 
@@ -346,13 +349,13 @@ if (interp) call intpsi(psi_b,bsize)
 dela = delx*dely/(4*pi)
 do k=1,o_nx
    ! y2 boundary
-   !psi_b(k,2,1) = psi_b(k,2,1)*dela - ubar*g_ycord(1)
-   psi_b(k,2,2) = psi_b(k,2,2)*dela - ubar*g_ycord(o_ny)
+   !psi_b(k,2,1) = psi_b(k,2,1)*dela - biotsavart_ubar*g_ycord(1)
+   psi_b(k,2,2) = psi_b(k,2,2)*dela - biotsavart_ubar*g_ycord(o_ny)
 enddo
 do k=2,o_ny
    ! x1,x2 boundary
-   psi_b(k,1,1) = psi_b(k,1,1)*dela  - ubar*g_ycord(k)
-   psi_b(k,1,2) = psi_b(k,1,2)*dela  - ubar*g_ycord(k)
+   psi_b(k,1,1) = psi_b(k,1,1)*dela  - biotsavart_ubar*g_ycord(k)
+   psi_b(k,1,2) = psi_b(k,1,2)*dela  - biotsavart_ubar*g_ycord(k)
 enddo
 endif
 

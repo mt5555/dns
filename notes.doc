@@ -1,19 +1,11 @@
 1. put in CJ functions
 3. check Energy for 250^3 runs
-3. 2D problems use n_var==2
-
-   run 3d tests again (I muckedaround with dns.F90)
-
-
 
 2. ns_ghost:  4th order code using ghost cells:
         benchmark parallel decompostions
 
 3. psi-vor code:
         test restart capability (mucked around with Qhat in dns.F90)
-
-        bcw_impose(): modified on milkyway so that it does onesided even for 
-             PSI fixed on the boundary, submitted.  
         add tracers.F90 module
         fix output1/input1 for non-perfect decompositions? not really needed.  
 

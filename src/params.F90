@@ -49,8 +49,6 @@ logical :: dealias=.false.
 real*8 :: xscale=1
 real*8 :: yscale=1
 real*8 :: zscale=1
-real*8 :: biotsavart_cutoff
-real*8 :: ubar=0
 
 
 ! local boundary conditions

@@ -37,19 +37,7 @@ call init_model()
 write(message,'(a)') 'Initial data'
 call print_message(message)
 Q=0
-if (restart==1) then
-   !call set_byteswap_input(1);
-   ! initialize some constants, if needed:
-   if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)      ! set grav, fcor
-   if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0) ! set xscale, yscale... 
-   call init_data_restart(Q,Qhat,work1,work2)
-else
-   if (init_cond==0) call init_data_khblob(Q,Qhat,work1,work2)
-   if (init_cond==1) call init_data_kh(Q,Qhat,work1,work2)
-   if (init_cond==2) call init_data_lwisotropic(Q,Qhat,work1,work2)
-   if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,1)
-   if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,1)
-endif
+call init_data(Q,Qhat,work1,work2)
 
 if (equations==NS_UVW) then
    call print_message('Projecting initial data...')

@@ -29,9 +29,12 @@ real*8 :: beta
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,ix1,ix2,iy1,iy2
 real*8 xm,ym,zm,xfac,im,jm
-real*8 :: axy,x_axy,y_axy
-real*8 :: xb(ny,2),yb(nx,2)
+real*8 :: axy,x_axy,y_axy,diag
+real*8 :: xb(ny,2),yb(nx,2),y_cosy,y_cosx
 
+real*8,save :: y_cosy(g_ny)
+real*8,save :: y_cosx(g_nx) ! only needs to be of size nx_2dy, but that is not a parameter
+logical,save :: firstcall=.true.
 
 #if 0
 ! for checking b.c. tweak:
@@ -48,6 +51,19 @@ call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
 f2=f2-lphi
 call zero_boundary(f2)
 #endif
+
+if (firstcall) then
+   firstcall=.false.
+   do j=2,g_ny
+   do i=1,nx_2dy
+      im=y_imsine(i)
+      jm=j-1
+      y_cosy(j)=cos(pi*dely*jm/yscale)
+      y_cosx(i)=cos(pi*delx*im/xscale)
+   enddo
+   enddo
+endif
+
 
 
 
@@ -93,6 +109,7 @@ axy=0
 
 x_axy=1/(delx*delx) - 2*axy
 y_axy=1/(dely*dely) - 2*axy
+diag=-2/(delx*delx)-2/(dely*dely)+4*axy   
 
 
 
@@ -231,15 +248,16 @@ do i=1,nx_2dy
 
    im=y_imsine(i)
    jm=j-1
-
-!   if (abs(work(j,k,i))>1e-8) print *,im,jm,work(j,k,i)
+   ! y_cosy(j)=cos(pi*dely*jm/yscale)
+   ! y_cosx(i)=cos(pi*delx*im/xscale)
    
-   xfac = x_axy*2*cos(pi*delx*im/xscale)         ! x term
-   xfac = xfac + y_axy*2*cos(pi*dely*jm/yscale)  ! y term
+   xfac = x_axy*2*y_cosx(i)                         ! x term
+   xfac = xfac + y_axy*2*y_cosy(j)                  ! y term
    ! diagonal terms:
-   xfac = xfac + axy*4*cos(pi*delx*im/xscale)*cos(pi*dely*jm/yscale)
+   xfac = xfac + axy*4*y_cosx(i)*y_cosy(j)
    ! center term:
-   xfac = xfac -2/(delx*delx)-2/(dely*dely)+4*axy   
+   xfac = xfac + diag
+
 
    xfac = alpha + beta*xfac
    if (im+jm==0 ) then
@@ -252,7 +270,6 @@ do i=1,nx_2dy
 enddo
 enddo
 enddo
-
 
 
 call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)

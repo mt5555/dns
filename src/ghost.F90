@@ -7,7 +7,7 @@ implicit none
 real*8,private :: tmx1,tmx2
 integer,private :: nghost=2
 
-logical,save :: firstcall=.true.
+logical,private,save :: firstcall=.true.
 
 contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

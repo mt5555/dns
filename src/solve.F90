@@ -83,7 +83,6 @@ endif
 err=1d99
 
 itqmr=0
-
 call matvec(sol,R,a1,a2,h)
 if (precond) call helmholtz_periodic_inv(R,work,a1,a2)
 R=b-R
@@ -304,33 +303,15 @@ else if (btype==1) then
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
 
 else if (btype==2) then
+
    psi=0  ! initial guess
-
-#if 0
-   print *,'sumvalw ',sum(w(intx1:intx2,inty1:inty2,1))
-   print *,'sumvalw2 ',sum(w(bx1:bx2,by1:by2,1))
-#endif
-
    call bc_biotsavart(w,psi,runbs)    !update PSI on boundary using biot-savart law
-
-
    b=-w  ! be sure to copy ghost cell data also!
+
    ! apply compact correction to 'b', then set b.c. of b:
    call helmholtz_dirichlet_setup(b,psi,work,1)
-
-#if 0
-   print *,'sumvalb ',sum(b(intx1:intx2,inty1:inty2,1))
-   print *,'sumvalb2 ',sum(b(bx1:bx2,by1:by2,1))
-#endif
-
    psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
    !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
-
-#if 0
-   print *,'sumvalq ',sum(psi(intx1:intx2,inty1:inty2,1))
-   stop
-#endif
-
 
    !update PSI 1st row of ghost cells so that our 4th order differences
    !near the boundary look like 2nd order centered

@@ -1272,17 +1272,57 @@ end
 
 
 
+#if 0
+sin fft from NUMERICAL REC.  doesn't work, maybe becasue
+my fft is not the same as their rfft?
+subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
+!
+!  p(1:n1)  p(1)=0  p(n1+1)=0  (but data at p(n1+1),p(n1+2) does not have to be set)
+!
+use params
+use fft_interface
+implicit none
+integer n1,n1d,n2,n2d,n3,n3d
+real*8 :: p(n1d,n2d,n3d)
+real*8 :: Y(n1+2)
 
+real*8 :: theta,wr,wi,wpr,wpi,y1,y2,wtemp,sum
 
+integer i,j,k
+if (n1==1) return
 
-
-
-
-
-
-
-
-
+do k=1,n3
+   do j=1,n2
+      y(1:n1)=p(1:n1,j,k)
+      theta=pi/n1
+      wr=1
+      wi=0
+      wpr=-2*sin(theta/2)**2
+      wpi=sin(theta)
+      Y(1)=0
+      do i=1,n1/2
+         WTEMP=WR
+         WR=WR*WPR-WI*WPI+WR
+         WI=WI*WPR+WTEMP*WPI+WI
+         Y1=WI*(Y(i+1)+Y(N1-i+1))
+         Y2=0.5*(Y(i+1)-Y(N1-i+1))
+         Y(i+1)=Y1+Y2
+         Y(N1-i+1)=Y1-Y2
+      enddo
+      call fft1(Y,n1,n1+2,1,1,1,1)
+      SUM=0.0
+      Y(1)=0.5*Y(1)
+      Y(2)=0.0
+      DO i=1,N1-1,2
+         SUM=SUM+Y(i)
+         Y(i)=Y(i+1)
+         Y(i+1)=SUM
+      enddo
+      p(1:n1,j,k)=y(1:n1)
+   enddo
+enddo
+end subroutine
+#endif
 
 
 
@@ -1314,7 +1354,7 @@ end
 ! if offset_bdy, then the trailing 0 is missing:
 !  g_nx=5  o_nx=6    fft: 2*g_nx
 !
-!  input:            1 2 3 4 5 
+!  input:            1 2 3 4 5     x(1)=x(6)=0  (x(6) not included)
 !  odd extension:    1 2 3 4 5 0 -5 -4 -3 -2  0 0 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
@@ -1366,7 +1406,6 @@ do k=1,n3
 enddo
 endif
 end subroutine
-
 
 
 
