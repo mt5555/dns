@@ -220,8 +220,9 @@ if (doit_screen) then
    endif
    call print_message(message)	
 
-   if (equations==NS_UVW) then
-      ! ke dissapation not computed for SHALLOW and NS_PSIVOR
+   if (equations==NS_PSIVOR .or. (equations==SHALLOW .and. alpha_value>=0)) then
+      ! ke dissapation not computed correctly in the above cases.
+   else
       write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
            'd/dt(ke) vis=',ke_diss,' f=',ints(3),' alpha=',ints(8),&
            ' total=',(ke_diss+ints(3)+ints(8))
