@@ -66,7 +66,9 @@ call init_model
 
 print *,runname
 
-!call writepoints()
+!call writepoints(); stop
+
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -118,7 +120,7 @@ do
       write(sdata,'(f10.4)') 10000.0000 + time
       fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
       if (nxdecomp*nydecomp*nzdecomp>1) then
-         write(sdata,'(3i1)') nxdecomp,nydecomp,nzdecomp
+         write(sdata,'(3i1)') i,j,k
          fname=fname(1:len_trim(fname)) // sdata(1:3)
       endif
       print *,fname

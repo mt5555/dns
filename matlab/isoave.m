@@ -15,14 +15,18 @@ eta = 1/(nx*delx_over_eta);
 
 
 
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.7500'
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.5000'
-name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.0000'
+
 %name='/ccs/taylorm/shankara/dns/src/iso12_256_0000.7500'
+%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.0000'
+%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.5000'
 
+name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.7500'
+ext='.isostr';
 
+ndir_use=0;
+%ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
-fid=fopen([name,'.isostr'],'r','l');
+fid=fopen([name,ext],'r','l');
 
 l=findstr('/',name);
 l=l(length(l));
@@ -35,17 +39,13 @@ cdir=[ 'k','k','k' ];  % x,y,zz
 cdir=[cdir, 'g','g','g','g','g','g'];  % face diagonals
 cdir=[cdir, 'r','r','r','r'];      % body diagonals
 cdir=[cdir, 'b','b','b','b','b','b','b','b','b','b','b','b'];      % 12 (1,2,0) directions
-cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,2) directions
-cdir=[cdir, 'c','c','c','c','c','c','c','c','c','c','c','c'];      % 12 (1,2,2) directions
+cdir=[cdir, 'b','b','b','b','b','b','b','b','b','b','b','b'];      % 12 (1,1,2) directions
+cdir=[cdir, 'b','b','b','b','b','b','b','b','b','b','b','b'];      % 12 (1,2,2) directions
+cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,3,0) directions
+cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,3) directions
 
 
 
-% get the weights:
-w=textread('../src/voronoi/isoave.weights','%f');
-% take every other weight
-w=2*w(1:2:length(w));
-
-%w=w./w/length(w);  % equally weighted
 
 
 msize=4;   % marker size
@@ -57,6 +57,7 @@ nlon  =fread(fid,1,'float64');
 ntran =fread(fid,1,'float64');
 nscalars =fread(fid,1,'float64');
 nnew2 =fread(fid,1,'float64');
+
 
 r_val=fread(fid,[ndelta,ndir],'float64');
 if (nlon>=2) 
@@ -93,6 +94,23 @@ if (nscalars==7)
   eta = (mu^3 / epsilon)^.25;
   delx_over_eta=(1/nx)/eta;
 end
+
+
+%
+% use only 49 directions:
+if (ndir_use>0) ndir=49; end;
+
+
+% get the weights:
+wname=sprintf('../src/voronoi/isoave.weights%i',ndir);
+w=textread(wname,'%f');
+% take every other weight
+w=2*w(1:2:length(w));
+
+%w=w./w/length(w);  % equally weighted
+
+
+
 
 r_val=r_val*delx_over_eta;            % convert to units of r/eta:
 xx=(1:.5:(nx./2.5))*delx_over_eta;   % units of r/eta

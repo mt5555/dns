@@ -20,8 +20,8 @@ extern int errno;
 
 static int byteswap_input=0;
 
-void FORTRAN(set_byteswap_input)(int val) {
-   byteswap_input=val;
+void FORTRAN(set_byteswap_input)(int *val) {
+   byteswap_input=*val;
 }
 
 
