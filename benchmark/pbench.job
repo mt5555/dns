@@ -1,0 +1,31 @@
+#! /bin/csh 
+#BSUB -o bench.o -e bench.e
+#BSUB -q small-d
+#BSUB -J dns
+#BSUB -W 0:15
+#BSUB -n 128 -R "span[ptile=128]"
+
+set NCPU=128 
+
+set refin=benchmark1024.inp
+
+cd ../src
+./gridsetup.py 1 1 128 384 384 384
+make -j 4 dns
+cd ../benchmark
+mpirun -np $NCPU ../src/dns < $refin 
+
+cd ../src
+./gridsetup.py 1 8 16 384 384 384
+make -j 4 dns
+cd ../benchmark
+mpirun -np $NCPU ../src/dns < $refin 
+
+cd ../src
+./gridsetup.py 4 4 8 384 384 384
+make -j 4 dns
+cd ../benchmark
+mpirun -np $NCPU ../src/dns < $refin 
+
+
+
