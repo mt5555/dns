@@ -85,10 +85,19 @@ integer :: user_specified_isodel=-1   ! number of seperations in isoave
 real*8  :: g_u2xave=0               ! <ux,ux> updated after each time step  
 
 ! xscale and yscale are used by psi-vor model
-! zscale is used by the rotating DNS model
+! they are used to modify the computational domain from the standard
+! [0..1] x [0..1] to [0..xscale] x [0..yscale]
 real*8 :: xscale=1
 real*8 :: yscale=1
-real*8 :: zscale=1
+
+
+! scale_z is used by the DNS model.  The code is solving
+! the equations in the physical domain [0..1]x[0..1]x[0..scale_z], but
+! the computational domain remains [0..1]x[0..1]x[0..1]
+! The equations are mapped to the computational domain
+! Input data is assumed to be in the physical domain.  
+! Output of data: data is converted to physical domain and then output.
+real*8 :: scale_z=1
 
 
 ! local boundary conditions

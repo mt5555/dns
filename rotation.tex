@@ -194,7 +194,8 @@ Thus the only changes needed for our parallel DNS code are:
 needs to be scaled to the non-primed coordinate system $\uv$.
 \item Our output files will contain velocity will be in the non-primed 
 $\uv$ coordinate system.  Need to scaled appropriately  to be analysed
-by other codes.
+by other codes.  Need to add a new output file header type that
+contains L.  
 \item modify computation of vorticity to match Eq.~\ref{E:vor}.
 \item modify Laplacian (scale $z$ derivative terms by $1/L^2$).
 \item modify vorticity term $\w \times \uv$ as shown above.

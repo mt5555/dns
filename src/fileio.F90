@@ -975,6 +975,7 @@ logical :: output_spec
 ! local
 integer :: ierr,	i
 character(len=80) message
+real*8 :: temp(g_nz+1)
 
 
 if (io_read==1) then
@@ -1008,6 +1009,7 @@ if (io_read==1) then
       call mread8(fid,g_xcord(1),o_nx)
       call mread8(fid,g_ycord(1),o_ny)
       call mread8(fid,g_zcord(1),o_nz)
+      g_zcord=g_zcord/scale_z
    endif
 else
    call mwrite8(fid,time,1)
@@ -1027,7 +1029,8 @@ else
    else
       call mwrite8(fid,g_xcord(1),o_nx)
       call mwrite8(fid,g_ycord(1),o_ny)
-      call mwrite8(fid,g_zcord(1),o_nz)
+      temp=g_zcord*scale_z
+      call mwrite8(fid,temp(1),o_nz)
    endif
    
 endif
