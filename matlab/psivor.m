@@ -39,6 +39,8 @@ for i=range
   x=fread(fidvor,nx,'float64');
   y=fread(fidvor,ny,'float64');
   z=fread(fidvor,nz,'float64');
+  x = x*(nx/ny);
+  
   
   q = fread(fidvor,nx*ny*nz,'float64');
   tmp = fread(fidvor,1,'float64');
@@ -65,6 +67,7 @@ for i=range
   x=fread(fidvor,nx,'float64');
   y=fread(fidvor,ny,'float64');
   z=fread(fidvor,nz,'float64');
+  x=x*(nx/ny);
   
   q = fread(fidvor,nx*ny*nz,'float64');
   tmp = fread(fidvor,1,'float64');
@@ -105,7 +108,7 @@ for i=range
     end
     
     title(stitle);
-    axis square
+    axis equal
 
     
     subplot(2,1,2)
@@ -117,7 +120,7 @@ for i=range
       v=20;                             % use 20 contours
       contour(x,y,psi',v)
     end
-    axis square
+    axis equal
     
     
 
