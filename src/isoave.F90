@@ -61,7 +61,7 @@ real*8,allocatable  :: SP_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable  :: SN_lll(:,:)        ! D_lll(ndelta,ndir)
 real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
-! cj's structure functions:
+! scalar structure functions:
 !
 !  w2s2(:,:,1)   <w2(x)*w2(x+r)>
 !  w2s2(:,:,2)   <s2(x)*s2(x+r)>
@@ -188,21 +188,25 @@ end subroutine
 !       subcube code will still work)
 !
 !
-!  nd=3   assume Q is (u,v,w) data
-!  nd=2   assume Q = two scalars, p1,p2, compute structure functions
-!                    of the form <p1(x)p2(x+r)>
+!  stype=3   assume Q is (u,v,w) data.  compute standard velocity
+!                                    structure functions
+!
+!  stype=2   assume Q = (w,s), the vorticity and strain.  compute CJ's 
+!            correlations, of the form <w(x)s(x+r>
+!
+!  stype=1   assume Q = scalar.  compute <(h(x+r)-h(x))^p>  p=2..6
 !                   
 !
-subroutine isoavep(Q,Qs,Qt,Qst,nd,csig)
+subroutine isoavep(Q,Qs,Qt,Qst,stype,csig)
 use params
 use transpose
 
 !input
-integer :: nd
-real*8 :: Q(nx,ny,nz,nd)               ! original data
-real*8 :: Qt(g_nz2,nslabx,ny_2dz,nd)   ! transpose
-real*8 :: Qs(nx,ny,nz,nd)              ! shifted original data
-real*8 :: Qst(g_nz2,nslabx,ny_2dz,nd)  ! transpose
+integer :: stype
+real*8 :: Q(nx,ny,nz,n_var)               ! original data
+real*8 :: Qt(g_nz2,nslabx,ny_2dz,n_var)   ! transpose
+real*8 :: Qs(nx,ny,nz,n_var)              ! shifted original data
+real*8 :: Qst(g_nz2,nslabx,ny_2dz,n_var)  ! transpose
 
 
 !local
@@ -211,7 +215,7 @@ real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
 character(len=80) :: message
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,nd
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,csig
 
 if (firstcall) then
@@ -222,12 +226,16 @@ if (firstcall) then
    call init
 endif
 
+nd=3  ! number of variables stored in Q.
+if (stype==3) nd=3
+if (stype==2) nd=2
+if (stype==1) nd=1
 
 ntranspose=0
 
 call zero_str
 
-if (nd==3) then
+if (stype==3) then
 ke_diss=0
 ke=0
 ntot=real(g_nx)*g_ny*g_nz
@@ -332,10 +340,10 @@ do idir=1,ndir
 !     if (dir_shift(3)==0 .or. ncpu_z==1) then
       if (dir_shift(3)==0) then  
          ! no shifts - compute directly 
-         call comp_str_xy(Q,nd,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Q,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else if (dir_shift(2)==0) then
          ! no need to shift, y-direction already 0
-         call comp_str_xz(Qt,nd,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qt,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(2),dir_shift(3))==0) then
          ! 
          ! shift in y by (y/z)*z-index:
@@ -361,7 +369,7 @@ do idir=1,ndir
             ntranspose=ntranspose+1
             call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xz(Qst,nd,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qst,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(3),dir_shift(2))==0) then
          ! 
          ! shift in z by (z/y)*y-index
@@ -390,7 +398,7 @@ do idir=1,ndir
             ntranspose=ntranspose+1
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xy(Qs,nd,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Qs,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else
          call abort("parallel computation of direction not supported")
       endif
@@ -779,12 +787,12 @@ end subroutine
 
 
 
-subroutine comp_str_xy(Q,nd,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xy(Q,stype,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
-integer :: nd
-real*8 :: Q(nx,ny,nz,nd)       
+integer :: stype
+real*8 :: Q(nx,ny,nz,*)       
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
@@ -820,11 +828,13 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             j2=j2-nslaby
          enddo
 
-         if (nd==2) then
-            call accumulate_scalar_str(idir,idel, &
+         if (stype==2) then
+            call accumulate_cj_str(idir,idel, &
               Q(i,j,k,1),Q(i,j,k,2),&
-              Q(i2,j2,k,1),Q(i2,j2,k,2), &
-              rhat,rperp1,rperp2)
+              Q(i2,j2,k,1),Q(i2,j2,k,2))
+         else if (stype==1) then
+            call accumulate_scalar_str(idir,idel, &
+              Q(i,j,k,1),Q(i2,j2,k,1))
          else
             call accumulate_str(idir,idel, &
               Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),&
@@ -849,12 +859,12 @@ end subroutine
 
 
 
-subroutine comp_str_xz(Q,nd,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xz(Q,stype,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
-integer :: nd
-real*8 :: Q(g_nz2,nslabx,ny_2dz,nd)  
+integer :: stype
+real*8 :: Q(g_nz2,nslabx,ny_2dz,*)  
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
@@ -891,11 +901,13 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             k2=k2-g_nz
          enddo
 
-         if (nd==2) then
-            call accumulate_scalar_str(idir,idel, &
+         if (stype==2) then
+            call accumulate_cj_str(idir,idel, &
               Q(k,i,j,1),Q(k,i,j,2),&
-              Q(k2,i2,j,1),Q(k2,i2,j,2), &
-              rhat,rperp1,rperp2)
+              Q(k2,i2,j,1),Q(k2,i2,j,2))
+         else if (stype==2) then
+            call accumulate_scalar_str(idir,idel, &
+              Q(k,i,j,1),Q(k2,i2,j,1))
          else
             call accumulate_str(idir,idel, &
               Q(k,i,j,1),Q(k,i,j,2),Q(k,i,j,3),&
@@ -1099,7 +1111,7 @@ end subroutine
 
 
 
-subroutine accumulate_scalar_str(idir,idel,u1,u2,ur1,ur2,rhat,rperp1,rperp2)
+subroutine accumulate_cj_str(idir,idel,u1,u2,ur1,ur2)
 !
 !  (u1,u2)         w(x), s(x)
 !  (ur1,ur2)       w(x+r), s(x+r)
@@ -1117,6 +1129,32 @@ integer :: p
 w2s2(idel,idir,1)=w2s2(idel,idir,1)+u1*ur1
 w2s2(idel,idir,2)=w2s2(idel,idir,2)+u2*ur2
 w2s2(idel,idir,3)=w2s2(idel,idir,3)+u1*ur2
+
+
+end subroutine 
+
+
+
+
+
+
+subroutine accumulate_scalar_str(idir,idel,u1,ur1)
+!
+!  (u1,u2)         w(x), s(x)
+!  (ur1,ur2)       w(x+r), s(x+r)
+!
+!
+real*8 :: u1,ur1,u2,ur2
+real*8 :: rhat(3),rperp1(3),rperp2(3)
+integer :: idir,idel
+
+! local
+integer :: p
+
+do p=2,pmax
+   Dl(idel,idir,p)=(ur1-u1)**p
+enddo
+
 
 
 

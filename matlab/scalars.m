@@ -63,6 +63,8 @@ fclose(fid);
 
 
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  the scalars computed every time step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,6 +112,7 @@ title('KE: red,    d(KE)/dt: blue,    hel: green');
 hold off
 xlabel('time')
 print -dpsc ke.ps
+print -djpeg -r72 ke.jpg
 
 
 lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
@@ -119,7 +122,7 @@ figure(2); subplot(1,1,1)
 plot(time,R_l)
 title('R_\lambda')
 xlabel('time')
-print -dpsc rl.ps
+print -djpeg -r72 rl.jpg
 
 
 % Kolm. micro scale

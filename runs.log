@@ -130,6 +130,17 @@ jnunjez
 128 stripe:         288
 
 
+MPI_IO tests:
+!
+! set up all the I/O processors
+! and create communicator, comm_io
+!  256  128  64   32         stripe=64
+!  200  300  338  308
+!
+!  256  128  64         stripe=128
+!       227
+
+
 
 
 2. UDM: test on qidse:
@@ -701,7 +712,7 @@ cpus
 4x1
 8x1
 16x1
-32x1      20.02
+32x1      20.02     6.66                 42 d
 
 64x1       9.84     3.28h                20.5d  
 32x2      10.77

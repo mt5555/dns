@@ -274,6 +274,7 @@ print -djpeg 43.jpg
 %
 %  the 2/15 law
 %
+if (0)
 yyave=0*xx;
 figure(4)
 yyave=0*xx;
@@ -301,6 +302,7 @@ ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print('-dpsc',[bname,'_215.ps']);
 print -djpeg 215.jpg
+end
 
 
 

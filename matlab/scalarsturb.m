@@ -22,28 +22,31 @@ clear all;
 name = '/ccs/scratch/taylorm/decay/decay2048'
 
 nt=0;
-times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357 .24 .25 .26 .27];
-times=[times,(.29:.01:.35) ,.37,.38,.39,.40];
+times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357]
+times=[times,.24:.01:63];
 for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10),'.scalars-turb'];
   disp(fname)
   fid=fopen(fname,'r','l');
+  if (fid>=0) 
 
-  [ns_e,count] = fread(fid,1,'float64');
-
-  time = fread(fid,1,'float64');
-  data1 = fread(fid,[ns_e,1],'float64');
-  data1=[time;data1];
-  if (nt==0) 
-    ints_e= data1;
-  else
-    ints_e= [ints_e,data1];
+    [ns_e,count] = fread(fid,1,'float64');
+    
+    time = fread(fid,1,'float64');
+    data1 = fread(fid,[ns_e,1],'float64');
+    data1=[time;data1];
+    if (nt==0) 
+      ints_e= data1;
+    else
+      ints_e= [ints_e,data1];
+    end
+    nt=nt+1;
+    [nt,ns_e]
+    fclose(fid);
   end
-  nt=nt+1;
-  [nt,ns_e]
 end
-fclose(fid);
+
 
 
 
@@ -77,7 +80,7 @@ figure(6)
 clf
 %plot(time_e,Sww)
 
-plot(time_e,ux3(1,:)./ux2(1,:).^(3/2),'o-k')
+plot(time_e,ux3(1,:)./ux2(1,:).^(3/2),'k')
 hold on
 plot(time_e,ux3(2,:)./ux2(2,:).^(3/2),'b')
 plot(time_e,ux3(3,:)./ux2(3,:).^(3/2),'g')
@@ -96,6 +99,9 @@ plot(time_e,ux3(3,:)./ux2(3,:).^(3/2),'g')
 %plot(time_e,vor4(2,:)./vor2(2,:).^2,'b')
 %plot(time_e,vor4(3,:)./vor2(3,:).^2,'g')
 
+ax=axis;
+axis([ax(1),ax(2),-.6,-.4]);
+print -djpeg -r72 skew.jpg
 
 hold off
 

@@ -70,48 +70,54 @@ else:
 # get a list of all jobnames queued in LSF
 cmd = "bjobs -u all"
 (status,out) = commands.getstatusoutput(cmd)
-if (status!=0):
+if (status!=0) & (status!=255):
     print 'Error getting list of LSF jobs'
     sys.exit(1)
 
+# sometimes there are NO jobs in the system:
+if (status==255) & (find(out,"No unfinished job found")>=0):
+    # in this case, there were no jobs in the system,
+    # so dont parse to find our running jobs
+    print "bjobs: que is empty?"
+    print "bjobs: ",out
+else    
+    #parse out to get jobname_running
+    jobname_running=[]
+    jobc=-1;
+    vout=split(out,"\n")
 
-#parse out to get jobname_running
-jobname_running=[]
-jobc=-1;
-vout=split(out,"\n")
+    if (len(vout)<2):
+        print 'Error parsing bjobs output: need at least 2 lines'
+        sys.exit(1)
 
-if (len(vout)<2):
-    print 'Error parsing bjobs output: need at least 2 lines'
-    sys.exit(1)
+    for line in vout:
+        sline=split(line)
+        if (jobc==-1) & (len(sline)>=7):
+            if (sline[6]=="JOB_NAME"):
+                #find column where job starts
+                jobc=find(line,"JOB_NAME")
 
-for line in vout:
-    sline=split(line)
-    if (jobc==-1) & (len(sline)>=7):
-        if (sline[6]=="JOB_NAME"):
-            #find column where job starts
-            jobc=find(line,"JOB_NAME")
+        if (jobc<0):
+            print 'Error parsing bjobs output for JOB_NAME'
+            sys.exit(1)
 
-    if (jobc<0):
-       print 'Error parsing bjobs output for JOB_NAME'
-       sys.exit(1)
-    
-        
-    if (len(sline)>=7) & (jobc>=0):
-        if (sline[1]==user):
-            # get everything in JOB_NAME column and beyond:
-            out=line[jobc:-1]
-            out=split(out," ")
-            if (len(out)==0):
-                print 'Error parsing bjobs output for jobname'
-                sys.exit(1)
-            jobname_running.append(out[0]);
-        
 
-print "current LSF jobs for user ",user
-if (len(jobname_running)==0):
-    print "<none>"		
-for out in jobname_running:
-    print out
+        if (len(sline)>=7) & (jobc>=0):
+            if (sline[1]==user):
+                # get everything in JOB_NAME column and beyond:
+                out=line[jobc:-1]
+                out=split(out," ")
+                if (len(out)==0):
+                    print 'Error parsing bjobs output for jobname'
+                    sys.exit(1)
+                jobname_running.append(out[0]);
+
+
+    print "current LSF jobs for user ",user
+    if (len(jobname_running)==0):
+        print "<none>"		
+    for out in jobname_running:
+        print out
 
 
 print ' '

@@ -16,7 +16,7 @@ name='decay2048';
 namedir='/ccs/scratch/taylorm/decay/';
 
 % save spectrum at these times:
-tsave=[0 .40 .43];
+tsave=[0 .40 .62];
 spec_r_save=[];
 
 fid=endianopen([namedir,name,'.spec'],'r');
@@ -201,7 +201,7 @@ if (fidt>0) fclose(fidt); end;
 if (length(spec_r_save>1) )
 figure(1); clf;
 loglog53(n_r,spec_r_save,.43,...
-'KE: Blue: t=0.0 and .4027    Green: t=0.4    Red: t=.43');
-print -djpeg spec.jpg
+'KE: Blue: t=0.0 and .4027    Green: t=0.4    Red: t=.62');
+print -djpeg -r72 spec.jpg
 end
 

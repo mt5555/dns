@@ -14,7 +14,7 @@ if (floor(test)==test & test>-32000 & test < 32000)
 end
 
 % try big endian
-fclose(fid)
+fclose(fid);
 fid=fopen(fname,access,'b');
 test=fread(fid,1,'float64');
 if (floor(test)==test & test>-32000 & test < 32000) 
