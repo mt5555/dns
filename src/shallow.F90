@@ -219,8 +219,8 @@ real*8 dummy,tmx1,tmx2,f_diss,fxx_diss
 real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss,normdx,smag_diss
 real*8,save :: f_diss_ave
 integer n,i,j,k
-integer im,jm
-real*8 XFAC,hx,hy,normS
+integer im,jm,numk
+real*8 XFAC,hx,hy,normS,hyper_scale,ke1
 
 call wallclock(tmx1)
 
@@ -378,6 +378,21 @@ endif
 !  and no longer have gradient information below this point
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! add in diffusion term
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (mu_hyper>0) then
+   call ke_shell(Qhat,ke1,numk,dealias_23_kmax2_1,dealias_23_kmax2)
+   ! units of E = m**2/s**2
+   ! units of E(k) = m**3/s**2
+   ! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
+   ! scaling:  E(kmax)/(kmax**2)(4-.75)
+   hyper_scale = sqrt(ke1) * (pi2_squared*2*dealias_23_kmax2)**(-(mu_hyper-.75))
+
+   ! du/dt = (sqrt(E(kmax))  [1/ (kmax**8 kmax**alpha) ] k**8  u  
+   ! m/s**2  =  m**1.5/s  kmax**-alpha  m/s
+   !  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
+endif
 
 
 
@@ -406,15 +421,12 @@ enddo
 call ifft3d(gradu(1,1,1),work)
 call ifft3d(gradu(1,1,2),work)
 
-#define POSDEF_HYPERVIS
-#ifdef POSDEF_HYPERVIS
-   do j=ny1,ny2
+do j=ny1,ny2
    do i=nx1,nx2
-      rhs(i,j,1)=rhs(i,j,1)+mu_hyper_value*gradu(i,j,1)/Q(i,j,3)
-      rhs(i,j,2)=rhs(i,j,2)+mu_hyper_value*gradu(i,j,2)/Q(i,j,3)
+      rhs(i,j,1)=rhs(i,j,1)+mu_hyper_value*hyper_scale*gradu(i,j,1)/Q(i,j,3)
+      rhs(i,j,2)=rhs(i,j,2)+mu_hyper_value*hyper_scale*gradu(i,j,2)/Q(i,j,3)
    enddo
-   enddo
-#endif
+enddo
 
 
 ! compute ke_diss = energy disspation from hyperviscosity:
@@ -423,17 +435,10 @@ if (compute_ints==1) then
    call ifft3d(gradv(1,1,2),work)
    do j=ny1,ny2
    do i=nx1,nx2
-#ifdef POSDEF_HYPERVIS
       ke_diss = ke_diss + (Q(i,j,1)*gradu(i,j,1) &
                         + Q(i,j,2)*gradu(i,j,2)) 
       gradu_diss = gradu_diss + (gradu(i,j,1)*gradv(i,j,1) &
                         + gradu(i,j,2)*gradv(i,j,2)) 
-#else
-      ke_diss = ke_diss + (Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &
-                        + Q(i,j,3)*Q(i,j,2)*gradu(i,j,2)) 
-      gradu_diss = gradu_diss + (Q(i,j,3)*gradu(i,j,1)*gradv(i,j,1) &
-                        + Q(i,j,3)*gradu(i,j,2)*gradv(i,j,2)) 
-#endif
    enddo
    enddo
 
@@ -441,22 +446,16 @@ if (compute_ints==1) then
    ints(2)=normdx/g_nx/g_ny
    !ints(3) = 
    ints(4)=vor/g_nx/g_ny
-   ints(6)=(ke+pe)/g_nx/g_ny
    ints(5)=ke/g_nx/g_ny
+   ints(6)=(ke+pe)/g_nx/g_ny
    !ints(7)
    ints(8)=a_diss/g_nx/g_ny         ! < Hu,div(tau)' >  
    ! ints(9)  = 
-   ints(10)=(smag_diss+mu_hyper_value*ke_diss)/g_nx/g_ny     ! u dot laplacian u
-
+   ints(10)=(smag_diss+mu_hyper_value*hyper_scale*ke_diss)/g_nx/g_ny     ! u dot laplacian u
 
 
 
    if (compute_transfer) then
-#ifndef POSDEF_HYPERVIS
-      call abort("shallow.F90: computation of transfer function requires POSDEF")
-#endif
-
-
       transfer_comp_time=time
       spec_diff=0
       do n=1,2
@@ -471,7 +470,7 @@ if (compute_ints==1) then
             enddo
          enddo
          call compute_spectrum_fft(work,work,io_pe,spec_tmp)
-         spec_diff=spec_diff - mu_hyper_value*spec_tmp
+         spec_diff=spec_diff - mu_hyper_value*hyper_scale*spec_tmp
       enddo
 
       
@@ -498,7 +497,7 @@ enddo
 
 
 
-! hyper viscosity and dealias:
+! dealias
 do j=ny1,ny2
    jm=abs(jmcord(j))
    do i=nx1,nx2
@@ -508,15 +507,6 @@ do j=ny1,ny2
          rhs(i,j,1)=0
          rhs(i,j,2)=0
          rhs(i,j,3)=0
-#ifndef POSDEF_HYPERVIS
-      else
-         ! - mu laplacian**4
-         xfac=-((im*im + jm*jm )*pi2_squared)
-         xfac=-(xfac**mu_hyper)
-         xfac=mu_hyper_value*xfac
-         rhs(i,j,1)=rhs(i,j,1) + xfac*Qhat(i,j,1)
-         rhs(i,j,2)=rhs(i,j,2) + xfac*Qhat(i,j,2)
-#endif
       endif
    enddo
 enddo

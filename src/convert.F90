@@ -14,6 +14,7 @@
 !  -cout norm2
 !  -cout passive    convert passive scalar file
 !                   need to specify shmidt_in and type_in below
+!  -cout gradu      output u_i,j
 !
 !
 ! To run, set the base name of the file and the times of interest
@@ -46,8 +47,9 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-real*8 :: schmidt_in,type_in
+real*8 :: schmidt_in,type_in,mn,mx
 character(len=4) :: extension="uvwX"
+character(len=8) :: ext2,ext
 
 ! input file
 tstart=.4026
@@ -75,8 +77,11 @@ call init_model
 if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
    allocate(Q(nx,ny,nz,n_var))
-else if (convert_opt == 4) then
+else if (convert_opt == 4 .or. convert_opt==6) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
+   allocate(Q(nx,ny,nz,1))
+else if (convert_opt == 7) then
+   allocate(vor(nx,ny,nz,1)) ! only first component used
    allocate(Q(nx,ny,nz,1))
 else
    allocate(vor(nx,ny,nz,n_var))
@@ -141,7 +146,6 @@ icount=icount+1
 
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorm"
       call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,2)
-
 !      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorme"
 !      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,3)
 
@@ -236,6 +240,32 @@ icount=icount+1
           // '-raw'
       call print_message(fname)
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+   endif
+   if (convert_opt==7) then  ! -cout gradu
+      call input_uvw(time,Q,vor,work1,work2,1)
+      call print_message("computing vorticity magnitude...")
+      do i=1,3
+      do j=1,3    
+         ! u_i,j
+         write(message,'(a,i1,a,i1)') 'computing u_',i,',',j,' ...'
+         call print_message(message)
+         call der(Q(1,1,1,i),vor,work1,work2,DX_ONLY,j)
+
+         write(sdata,'(f10.4)') 10000.0000 + time
+         write(ext,'(2i1)') i,j
+         basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+         fname = basename(1:len_trim(basename)) // sdata(2:10) // ext(1:2)
+         call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+
+         if (j==1) then
+            basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+                  // "-raw"
+            fname = basename(1:len_trim(basename)) // sdata(2:10) // "." &
+            // extension(i:i)
+            call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+         endif
+      enddo
+      enddo
    endif
 
 

@@ -1,12 +1,12 @@
 6            ! input file type
 shallow      ! equations (shallow, ns_psivor, ns_uvw)
 sht           ! initial condition:  shallow water turbulence
-2           ! init condition subtype
-none         !  none or sto_high_10  
+100           ! init condition subtype
+none          ! sto_high_10   !  none or sto_high_10  
 value        ! viscosity type
 0.0          ! viscosity value
 hyper8       ! hyper viscosity type
-1e-19        ! value
+1.        ! value
 none        ! hypo vis
 0.0         ! hypo vis value
 0.0          !alpha (for NS-alpha model).  alpha>1 is in units of delx
@@ -19,12 +19,12 @@ periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
 1.0          ! time to run
-1.45         ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
+1.15         ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
 0.0          ! restart_dt  (0 = restart output disabled)
-.0025        ! diag_dt   
+.1          ! diag_dt   
 -10           ! model dt
 -10           ! screen_dt
 .1          ! output_dt  (0 = output disabled, except for custom output times)

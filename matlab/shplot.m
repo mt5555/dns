@@ -1,6 +1,7 @@
 
-range=.0:.25:75;
-name='../src/sht/runa_5000_'
+range=.0:.2:75;
+range=.0:.2:75;
+name='../src/temp'
 
 
 mkpr=0;            % make ps and jpeg files
@@ -17,43 +18,19 @@ for i=range
   ts=ts(2:10);
 
   tsf=[name,ts,'.vor']
-  fidvor=fopen(tsf,'r');
-  time=fread(fidvor,1,'float64')
-  data=fread(fidvor,3,'float64');
-  nx=data(1);
-  ny=data(2);
-  nz=data(3);
-  
-  x=fread(fidvor,nx,'float64');
-  y=fread(fidvor,ny,'float64');
-  z=fread(fidvor,nz,'float64');
-  
-  q = fread(fidvor,nx*ny*nz,'float64');
-  tmp = fread(fidvor,1,'float64');
-  tmp=size(tmp);
-  if (tmp(1)~=0) 
-    disp('Error reading input file...')
-  end
-  fclose(fidvor);
-  
+  [x,y,z,q,time]=getfield(tsf);
+  nx=length(x);
+  ny=length(y);
+  nz=length(z);
   q = reshape(q,nx,ny,nz);
   qmax=max(max(max(abs(q))));
   disp(sprintf('max vor=                %f ',qmax));
   vor = squeeze(q(:,:,1))';
 
   
-  tsf=[name,ts,'.w']
-  fid=fopen(tsf,'r');
-  time=fread(fid,1,'float64')
-  data=fread(fid,3,'float64');
-  nx=data(1);
-  ny=data(2);
-  nz=data(3);
+  tsf=[name,ts,'.h']
+  [x,y,z,h,time]=getfield(tsf);
   
-  x=fread(fid,nx,'float64');
-  y=fread(fid,ny,'float64');
-  z=fread(fid,nz,'float64');
-  h = fread(fid,nx*ny*nz,'float64');
   h = reshape(h,nx,ny,nz);
   h = squeeze(h(:,:,1))';
   

@@ -292,6 +292,10 @@ integer           :: dealias_sphere_kmax2
 integer           :: dealias_sphere_kmax2_1 
 real*8            :: dealias_sphere_kmax 
 
+integer           :: dealias_23_kmax2 
+integer           :: dealias_23_kmax2_1 
+real*8            :: dealias_23_kmax 
+
 integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
                              ! For periodic FFT case, o_nx=g_nx+1 because we do not
                              ! store the point at x=1.  for 4th order case, we 
@@ -511,6 +515,10 @@ endif
 dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
 dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
 dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
+
+dealias_23_kmax2 = (g_nmin*g_nmin)/9
+dealias_23_kmax = sqrt(real(dealias_23_kmax2))
+dealias_23_kmax2_1 = floor( (dealias_23_kmax-1)**2 )
 
 
 

@@ -1,5 +1,6 @@
 function [x,y,z,q,time]=getfield(fname);
-  fidvor=fopen(fname,'r');
+
+fidvor=fopen(fname,'r');
 
   if (fidvor<0) 
     x=0;

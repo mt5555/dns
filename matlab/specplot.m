@@ -38,10 +38,15 @@ tsave=[];
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';
 
-name='alpha1'; namedir='/home/taylorm/';
+name='temp0000.0000'; namedir='../src/';
 CK_orig=1.613; decay_scale=0; endian='l';
 % save spectrum at these times:
 movie_plot=0; movie=1; tsave=[2.5 5.0];
+
+%name='alpha1'; namedir='/home/taylorm/';
+%CK_orig=1.613; decay_scale=0; endian='l';
+%% save spectrum at these times:
+%movie_plot=0; movie=1; tsave=[2.5 5.0];
 
 
 
@@ -132,7 +137,7 @@ while (time>=.0 & time<=9999.3)
     %subplot(2,1,1);
     subplot(1,1,1);
     stitle=sprintf('Spectrum t=%8.4f',time);
-    loglog53(n_r,spec_r,stitle,1);
+    loglog53(n_r,spec_r,stitle,1,4);
 %    subplot(2,1,2);
 %    loglog53(n_x,spec_ux,' ',1);
 %    hold on;

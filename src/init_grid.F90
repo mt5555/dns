@@ -411,7 +411,7 @@ if (my_pe==io_pe) then
    !
    !
    !   -cout <text>   type of data to output for the convert.F90 program
-   !                   "uvw", "vor", "vorm", "norm2", "passive"
+   !                   "uvw", "vor", "vorm", "norm2", "passive", "gradu"
    !
    !   -isodir <n>    use at most n directions in isoave calculation
    !   -isodel <n>    use seperation distances at most n grid points.
@@ -444,6 +444,8 @@ if (my_pe==io_pe) then
             convert_opt=5 
          else if (carg(1:7)=="passive") then
             convert_opt=6 
+         else if (carg(1:5)=="gradu") then
+            convert_opt=7 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abort("-cout unrecognized option")
