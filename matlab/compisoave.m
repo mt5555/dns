@@ -127,7 +127,7 @@ for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  y=-D_lll(:,i)./(x*epsilon);
+  y=-D_lll(:,i);
 
   if (plot_points==1) 
      if (skip==0) 
@@ -159,7 +159,8 @@ if (skip==0)
    title('D_{lll} / r\epsilon   (4/5 law) ');
    ylabel(pname);
    xlabel('r/\eta');
-   semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+%   semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+localslp(xx_plot, yyave,2);
    x=1:xmax; plot(x,(4/5)*x./x,'k');
 end
 if (plot_posneg)

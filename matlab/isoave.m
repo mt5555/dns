@@ -36,6 +36,8 @@ name='/ccs/scratch/taylorm/dns/iso12/iso12_5120002.7000'
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
+name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
+nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 
 disp('1 = Scaling laws for total structure function');

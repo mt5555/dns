@@ -5,14 +5,17 @@
 %
 
 
-name='/scratch2/taylorm/sc1024A/sc1024A0001.9000'
+%name='/scratch2/taylorm/sc1024A/sc1024A0001.9000'
 ext='.isostrf';
+%nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
+
+name = '/home2/skurien/fractional_stats/sc1024A0001.9000'
 nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-
-
 %  index=1 .. 9   corresponds to u_l^(.1*p)
-p=5; 
+ps=[1:1:9]; 
+%p=1
+for p = ps
 frac_power = .1*p;
 plot_points=1;
 ndir_use=0;
@@ -117,7 +120,7 @@ ndir_vec=1:ndir;
 
 
 
-figure(1); clf; subplot(1,1,1)
+figure(1); %clf; subplot(1,1,1)
 for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -125,8 +128,9 @@ for i=ndir_vec
   yl=Dl(:,i,p);
   
   if (plot_points==1) 
-    semilogx(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on; 
-  end     
+%    loglog(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on; 
+
+end     
   yyl = spline(x,yl,xx);
   
   yyave_l=yyave_l+w(i)*yyl;
@@ -137,15 +141,15 @@ end
 title(sprintf('D_l^{%.1f}',frac_power));
 ylabel(pname);
 xlabel('r/\eta');
-plot(xx_plot,yyave_l,'k','LineWidth',1.0); hold on;
+%plot(xx_plot,yyave_l,'k','LineWidth',1.0); hold on;
+%loglog(y45,yyave_l,'k','LineWidth',1.0); hold on;
+localslp(xx_plot,yyave_l,1);hold on;
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 
-hold off;
+%hold off;
 
 
-
-
-figure(2); clf; subplot(1,1,1)
+figure(2); %clf; subplot(1,1,1)
 for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -153,7 +157,7 @@ for i=ndir_vec
   yt=Dt(:,i,p);
 
   if (plot_points==1) 
-     semilogx(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on;
+     loglog(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on;
   end     
   yyt = spline(x,yt,xx);
   
@@ -168,8 +172,8 @@ xlabel('r/\eta');
 plot(xx_plot,yyave_t,'k','LineWidth',1.0); hold on;
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 
-hold off;
+%hold off;
 
 
-
+end
 
