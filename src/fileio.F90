@@ -16,11 +16,12 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon
+real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
-real*8,save :: delea_tot=0,delke_tot=0
+real*8,save :: ens0,ens1=0
+real*8,save :: delea_tot=0,delke_tot=0,delens_tot=0
 
 
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
@@ -103,6 +104,8 @@ maxs_save(1:nints,nscalars)=maxs(1:nints)
 ! KE total dissapation 
 ! t0,t1  three time levels
 !
+ens0=ens1
+ens1=ints(7)   
 ke0=ke1
 ke1=ints(6)
 ea0=ea1
@@ -115,9 +118,11 @@ t1=maxs(7)                  ! previous time level  (most quantities known at thi
 if (t1-t0>0) then
    delke_tot=(ke1-ke0)/(t1-t0)
    delea_tot=(ea1-ea0)/(t1-t0)
+   delens_tot=(ens1-ens0)/(t1-t0)
 else
    delke_tot=0
    delea_tot=0
+   delens_tot=0
 endif
 
 
@@ -214,10 +219,21 @@ if (doit_screen) then
         ints(7),'         total d/dt(ke):',delke_tot
    endif
    call print_message(message)	
-   write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
-     'd/dt(ke) vis=',ke_diss,' f=',ints(3),' alpha=',ints(8),&
-     ' total=',(ke_diss+ints(3)+ints(8))
-   call print_message(message)	
+
+   if (equations==NS_UVW) then
+      ! ke dissapation not computed for SHALLOW and NS_PSIVOR
+      write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
+           'd/dt(ke) vis=',ke_diss,' f=',ints(3),' alpha=',ints(8),&
+           ' total=',(ke_diss+ints(3)+ints(8))
+      call print_message(message)	
+   endif
+   if (equations==NS_PSIVOR) then
+      !multiply by 2 because enstrophy is vor**2, not .5*vor**2
+      ens_diss = 2*mu*ints(5)  
+      write(message,'(a,f15.7,a,f15.7)') &
+           'total d/dt(w) vis=',delens_tot,'   mu <w,w_xx>= ',ens_diss
+      call print_message(message)	
+   endif
 endif
 
 !

@@ -230,27 +230,78 @@ real*8 psi(nx,ny)
 
 !local
 integer i,j
+real*8 :: u,v
 
 if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
+   !             nx1   nx1+1   nx1+2    nx1+3
+   ! stencil (   -1             1              ) /2h
+   !                    -3      4        1     ) /2h
+   !      
+   !
+   !         -(nx1) + (nx1+2)  = -3(nx1+1) + 4(nx1+2) + (nx1+3)
+   !          nx1 = 3(nx1+1) - 3(nx1+2) - (nx1+3)
    do j=ny1,ny2
-      w(nx1,j)=0
+
+      i=nx1+1
+      u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
+           (psi(i,j+2)-psi(i,j-2))/12          )
+
+      if (u>=0) then !inflow
+         w(nx1,j)=0
+      else
+         w(nx1,j)= 3*w(nx1+1,j)-3*w(nx1+2,j)-w(nx1+3,j)
+      endif
    enddo
 endif
 if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
    do j=ny1,ny2
-      w(nx2,j)=0
+
+      i=nx2-1
+      u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
+           (psi(i,j+2)-psi(i,j-2))/12          )
+
+
+      if (u<=0) then
+         w(nx2,j)=0
+      else
+         w(nx2,j)= 3*w(nx2-1,j)-3*w(nx2-2,j)-w(nx2-3,j)
+      endif
    enddo
 endif
+
+
 if (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED) then
    do i=nx1,nx2
-      w(i,ny1)=0
+
+      j=ny1+1
+      v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
+           (psi(i+2,j)-psi(i-2,j))/12          )
+
+      if (v>=0) then
+         w(i,ny1)=0
+      else
+         w(i,ny1)= 3*w(i,ny1+1)  - 3*w(i,ny1+2) - w(i,ny1+3)
+      endif
    enddo
 endif
+
 if (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED) then
    do i=nx1,nx2
-      w(i,ny2)=0
+
+      j=ny2-1
+      v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
+           (psi(i+2,j)-psi(i-2,j))/12          )
+
+      if (v<=0) then
+         w(i,ny2)=0
+      else
+         w(i,ny2)=  3*w(i,ny2-1) - 3*w(i,ny2-2) - w(i,ny2-3)
+      endif
    enddo
 endif
+
+
+
 
 call ghost_update_x_reshape(w,1)
 call ghost_update_y_reshape(w,1)
@@ -360,16 +411,15 @@ real*8 rhs(nx,ny)
 
 !local
 real*8 dummy,tmx1,tmx2
-real*8 :: ke,ke_diss,ke_diss2,vor,dx,dxx,dy,dyy,ensave,u,v
+real*8 :: ke,ens_diss,vor,dx,dxx,dy,dyy,ensave,u,v
 integer n,i,j,k
 
 call wallclock(tmx1)
 
 ke=0
-ke_diss=0
-ke_diss2=0
 vor=0
 ensave=0
+ens_diss=0
 
 
 
@@ -410,12 +460,14 @@ do i=nx1,nx2
    endif
 
 
+
    rhs(i,j) = rhs(i,j) +  mu*(dxx+dyy) - u*dx - v*dy
    
    ke = ke + .5*(u**2 + v**2)
 
    vor=vor + w(i,j)
    ensave = ensave + w(i,j)**2
+   ens_diss=ens_diss + w(i,j)*(dxx+dyy)
 enddo
 enddo
 
@@ -425,15 +477,13 @@ enddo
 
 
 if (compute_ints==1) then
-   ints(2)=ke_diss2/g_nx/g_ny     ! gradu dot gradu
    !ints(3) = forcing terms
    ints(4)=vor/g_nx/g_ny
+   ints(5)=ens_diss/g_nx/g_ny
    ints(6)=ke/g_nx/g_ny
    ints(7)=ensave /g_nx/g_ny
    ! ints(8) = < u,div(tau)' >   (alpha model only)
    ! ints(9)  = < u,f >  (alpha model only)
-   ints(10)=ke_diss/g_nx/g_ny     ! u dot laplacian u
-
 endif
 
 call wallclock(tmx2)

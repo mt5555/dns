@@ -242,7 +242,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
 !                    non-alpha-mode: F=f.  Alpha model F=f'
 ! ints(4) = integral of z-component of vorticity
-! ints(5) = helicity
+! ints(5) = helicity  (or: <w,w_xx> enstrophy diffusion)
 ! ints(6) = .5 < u,u >
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)

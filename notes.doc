@@ -5,29 +5,9 @@
         benchmark parallel decompostions
 
 3. psi-vor code:
-        boundary condition routines (inflow, onesided, biot-savart)
-             x-1 x0 x1 x2 
-        vorticity:  inflow:  
-                  x0 chosen so dx at x2 uses 2nd order centered
-                 x-1 chosen so dx at x1 uses 2nd order centered with x-1=0
-                    outflow:       
-                  x0 chosen so dx at x2 uses 2nd order centered
-                 x-1 chosen so dx at x1 uses 2nd order one sided
-
-         d/dx at x2:   
-(-1/12 2/3 0 -2/3  1/12)(x0,x1,x2,x3,x4) = (-x1 +x3)/2
--1/12 x0 = (-2/3 -1/2)x1 + (2/3+1/2)x3  + (-1/12)x4
-
-x0 = -12* [ (-2/3 -1/2)x1 + (2/3+1/2)x3  + (-1/12)x4  ]
-x0 =  [ 14 x1 -14 x3 + x4  ]
-
-         d/dx at x1:   (with bogus data assumed at x0)
-(-1/12   2/3   0   -2/3     1/12)(x-1,x0,x1,x2,x3) = x2/2
-            -1/12 x-1 = -2/3 x0  + 2/3 x2  -1/12 x3  +  x2/2
-                  x-1 =   8 x0     -2 x2    x3  
-
-                
-
+        debug psi b.c. code
+        debug w b.c. code
+        put in B-S
 
 1. change NS-alpha so forcing always appears as just 'f'
    see nots about ints(3) and ints(9) in params.F90
