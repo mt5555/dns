@@ -31,7 +31,7 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %nx=2048; delx_over_eta=-1; epsilon=-1;
 
 name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
-nx=2048; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
+nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 
 ndir_use=0;

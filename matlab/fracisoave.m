@@ -126,12 +126,13 @@ ndir_vec=1:ndir;
 skip=(length(ndir_vec)~=ndir);
 
 
+
+figure(1); clf; subplot(1,1,1)
 for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
 
   yl=Dl(:,i.p);
-  yt=Dt(:,i.p);
 
   if (plot_points==1) 
      if (skip==0) 
@@ -140,10 +141,8 @@ for i=ndir_vec
         semilogx(x_plot,yl,['.-',cdir(i)],'MarkerSize',2*msize);   hold on; end;
   end     
   yyl = spline(x,yl,xx);
-  yyt = spline(x,yt,xx);
   
   yyave_l=yyave_l+w(i)*yyl;
-  yyave_t=yyave_t+w(i)*yyl;
   
 end
 
@@ -152,6 +151,36 @@ title(sprintf('D_l ** %.1f',frac_power);
 ylabel(pname);
 xlabel('r/\eta');
 plot(xx_plot,yyave_l,'k','LineWidth',1.0); hold on;
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+
+hold off;
+
+
+
+
+figure(2); clf; subplot(1,1,1)
+for i=ndir_vec
+  x = r_val(:,i);                   % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
+
+  yt=Dt(:,i.p);
+
+  if (plot_points==1) 
+     if (skip==0) 
+        semilogx(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
+     if (skip==1) 
+        semilogx(x_plot,yt,['.-',cdir(i)],'MarkerSize',2*msize);   hold on; end;
+  end     
+  yyt = spline(x,yt,xx);
+  
+  yyave_t=yyave_t+w(i)*yyl;
+  
+end
+
+
+title(sprintf('D_t ** %.1f',frac_power);
+ylabel(pname);
+xlabel('r/\eta');
 plot(xx_plot,yyave_t,'k','LineWidth',1.0); hold on;
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 
