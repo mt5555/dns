@@ -371,7 +371,7 @@ do k=nz1,nz2
       
          ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
 
-         ! compute 2*k^2 u^2 vor^2:
+         ! compute 2*k^2 u vor:
          h_diss = h_diss + 2*xfac*(Qs(i,j,k,1)*(wy-vz) + &
                                    Qs(i,j,k,2)*(uz-wx) + &
                                    Qs(i,j,k,3)*(vx-uy)) 
@@ -400,7 +400,7 @@ enddo
 
 epsilon=mu*ke_diss/ntot
 if (epsilon==0) epsilon=1e-20
-h_epsilon=mu*h_diss/ntot
+h_epsilon=mu*h_diss
 if (h_epsilon==0) h_epsilon=1e-20
 ke=ke/ntot
 
