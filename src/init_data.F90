@@ -363,6 +363,7 @@ integer :: n,im,jm,km,ixw
 real*8 :: k_0,xw,xfac ,alpha,beta,dummy
 real*8 :: E_target,ke,pe
 real*8 :: E_k(0:max(nx,ny,nz))
+real*8 :: E_k2(0:max(nx,ny,nz))
 real*8 :: Len,U,R,F
 character(len=80) :: message
 
@@ -470,6 +471,11 @@ do k=nz1,nz2
       enddo
    enddo
 enddo
+
+#ifdef USE_MPI
+   E_k2=E_k
+   call MPI_allreduce(E_k2,E_k,max(nx,ny,nz),MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
 
 
 do k=nz1,nz2
