@@ -179,11 +179,18 @@ disp(sprintf('energy dissipation rate = %d',epsilon));
 end
 fclose(fid);  
 
-end
+%end
 
-% compensated mean spectrum
+% mean energy spectrum
 spec_ave = spec_ave/j;
+
 figure(5)
+loglog(k,spec_ave,'k'); hold on;
+title('Mean energy spectrum');
+xlabel('k')
+% compensated mean spectrum
+
+figure(6)
 loglog(k,spec_ave.*k'.^(4/3),'b'); hold on;
 
      title('5/3 Compensated MEAN energy spectrum');

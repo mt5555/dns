@@ -41,32 +41,17 @@ nx=2048;
 %fid=endianopen('/scratch2/taylorm/tmix256B/tmix256B.scalars','r');
 %nx=256;
 
-%fid=endianopen('../../helicity_data/helical_forced/sk128_hq_0000.0000.scalars','r');
-%nx = 128;
-
-%fid=endianopen('../src/hel128_hpi4/hel128_hpi4_0000.0000.scalars','r');
-%nx = 128;
-
-%fid=endianopen('/home2/skurien/rotation/Test0000.0000.scalars','r');
-%nx = 128;
-
 %fid=endianopen('/home2/skurien/dns/src/sk128_alpha00/v5e-4/sk128_alpha000000.0000.scalars','r');
-%nx = 128;
-
-%fid=endianopen('/home2/skurien/rotation/Test/Test0000.0000.scalars','r');
-%nx = 128;
-
-%fid=endianopen('/home2/skurien/rotation/Test2/Test0002.scalars','r');
 %nx = 128;
 
 %fid=endianopen('/home2/skurien/dns/src/sk128_alpha40/sk128_v5e-4_alpha400000.0000.scalars','r');
 %nx = 128;
 
-%fid=endianopen('/home2/skurien/rotation/Rot1/Rot10000.0000.scalars','r');
-%nx = 128;
-
 %fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
 %nx=128;
+
+fid=endianopen('/home2/skurien/helicity_data/helical_forced/hel480_hpi2/hel480_hpi2_0000.1000.scalars','r');
+nx=480;
 
 nscalars=0;
 nscalars_e=0;

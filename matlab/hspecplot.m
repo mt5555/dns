@@ -29,7 +29,7 @@ mu = 2e-4;
 
 
 % plot all the spectrum:
-movie=1;
+movie=0;
 
 
 spec_r_save=[];
@@ -62,6 +62,7 @@ end
 
 k = [0:n_r-1];
 
+if (movie)
 figure(20); % +, - and total helicity spectra
 loglog(k,abs(hspec_n),'r'); hold on;
 loglog(k,hspec_p,'b'); hold on;
@@ -94,7 +95,7 @@ title('5/3 compensated helicity spectra');
 legend('|H_-(k)| k^{5/3}','H_+(k) k^{5/3}','H(k) k^{5/3}')
 %hold off
 
-
+end % end movie loop
 
 % compute total helicity for snapshot -- in Mark's units
 % multiply by 2*pi^2 to get Takeshi's units
@@ -105,7 +106,7 @@ disp(sprintf('Total helicity = %d',H))
 % multiply dissipation rate by 2*pi to get Takeshi's units
 
 h = -2*mu*sum((hspec_p+hspec_n).*(k'*2*pi).^2);
-disp(sprintf('Mean helicity dissipation rate = %d',h));
+disp(sprintf('Helicity dissipation rate = %d',h));
 
 figure(23)
 plot(time,H,'o',time,h,'x');hold on;
@@ -127,5 +128,17 @@ title('Average 4/3 compensated helicity spectrum');
 figure(26)
 loglog(k,abs(hspec_ave).*k'.^(5/3),'b');hold on;
 title('Average 5/3 compensated helicity spectrum');
+
+% compute MEAN helicity in time -- in Mark's units
+% multiply by 2*pi^2 to get Takeshi's units
+H = sum(hspec_ave);
+disp(sprintf('Total helicity = %d',H))
+
+% compute dissipation rate of helicity -- in Mark's units 
+% multiply dissipation rate by 2*pi to get Takeshi's units
+
+h = -2*mu*sum((hspec_ave).*(k'*2*pi).^2);
+disp(sprintf('Helicity dissipation rate = %d',h));
+
 
 %end
