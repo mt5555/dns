@@ -58,12 +58,13 @@ use params
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,n_var)
+real*8 :: psi0(nx,ny)
 real*8 :: w_tmp(nx,ny)
 real*8 :: w_old(nx,ny)
 real*8 :: psi(nx,ny)
 real*8 :: rhs(nx,ny)
 real*8 :: work(nx,ny)
-real*8 :: psi0(nx,ny)
+
 
 ! local variables
 real*8 :: vel,u,v
