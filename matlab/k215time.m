@@ -131,12 +131,12 @@ print -dpsc k215time.ps
 
 figure(6); clf
 
-for i=[1:1:31]
+for i=[1:1:73]
   %semilogx(xx_plot,y215_ave(:,i),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,-(y215_ave(:,i)),'r-','LineWidth',2.0); hold on
+  semilogx(xx_plot,-(y215_ave(:,i))/(2/15),'r-','LineWidth',2.0); hold on
 end
 %semilogx(xx_plot,y215_iso_ave,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y215_iso_ave,'b','LineWidth',2.0); hold on
+semilogx(xx_plot,y215_iso_ave/(2/15),'b','LineWidth',2.0); hold on
 axis([1 1000 0 1.0])
 x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
@@ -152,14 +152,14 @@ figure(7); clf
 offset=y215_iso_ave;
 stdr=0*offset;
 
-for i=[1:1:31]
-  %semilogx(xx_plot,y215_ave(:,i)-offset,'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,-y215_ave(:,i)-offset,'k-','LineWidth',2.0); hold on
+for i=[1:1:73]
+  %semilogx(xx_plot,(y215_ave(:,i)-offset),'k:','LineWidth',2.0); hold on
+  semilogx(xx_plot,(-y215_ave(:,i)-offset)/(2/15),'k-','LineWidth',2.0); hold on
   stdr=stdr+(y215_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
 %semilogx(xx_plot,y215_iso_ave-offset,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y215_iso_ave-offset,'b','LineWidth',2.0); hold on
+semilogx(xx_plot,(y215_iso_ave-offset)/(2/15),'b','LineWidth',2.0); hold on
 axis([1 1000 -.2 .2])
 x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;

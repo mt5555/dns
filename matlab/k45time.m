@@ -29,11 +29,19 @@ ext='.isostr';
 %ext='.isostr001';
 %times=[1:.1:7.0];
 
-name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
-nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
-ext='.new.isostr';
-times=[1:.1:2.0];
+%name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
+%nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
+%ext='.new.isostr';
+%times=[1:.1:2.0];
 
+name = '/home/skurien/helicity_data/check256_hq_';
+
+[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params
+
+nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
+teddy=1;
+ext='.new.isostr';
+times=[0:1:30];
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
@@ -44,12 +52,10 @@ time_and_angle_ave=1;
 k=0;
 
 
-
-
 xx=(1:.5:(nx./2.5)) / nx;
 xx_plot=(1:.5:(nx./2.5)) *delx_over_eta;   % units of r/eta
 
-y45_ave=zeros([length(xx),15]);
+y45_ave=zeros([length(xx),73]);
 if (time_and_angle_ave==1) 
    y45_iso_ave=zeros([length(xx),1]);
 end
@@ -89,7 +95,7 @@ for t=times
     eta_l = (mu^3 / eps_l)^.25;
     delx_over_eta_l=(1/nx)/eta_l;
     
-    for dir=1:15;
+    for dir=1:73;
       x=r_val(:,dir)/nx;                % box length
       y=-D_lll(:,dir)./(x*eps_l);
       
@@ -126,7 +132,7 @@ load k45data_t1
 end
 
 
-figure(4); clf; hold on; 
+figure(8); clf; hold on; 
 for i=2:2
 %   plot(times/teddy,mx45_localeps(1:length(times),i),'k:','LineWidth',2.0);
    plot(times/teddy,mx45_localeps(1:length(times),i),'g-','LineWidth',2.0);
@@ -142,14 +148,14 @@ xlabel('time','FontSize',16)
 print -dpsc k45time.ps
 
 
-figure(5); clf
+figure(9); clf
 
-for i=[1,5,13]
+for i=[1:1:73]
   %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,y45_ave(:,i),'g-','LineWidth',2.0); hold on
+  semilogx(xx_plot,y45_ave(:,i)/0.8,'g-','LineWidth',2.0); hold on
 end
-%semilogx(xx_plot,y45_iso_ave,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y45_iso_ave,'b','LineWidth',2.0); hold on
+%semilogx(xx_plot,y45_iso_ave/0.8,'k','LineWidth',2.0); hold on
+semilogx(xx_plot,y45_iso_ave/0.8,'b','LineWidth',2.0); hold on
 axis([1 1000 0 1.0])
 x=1:1000; plot(x,(4/5)*x./x,'k');
 hold off;
@@ -161,18 +167,18 @@ print -dpsc k45mean.ps
 
 
 
-figure(5); clf
+figure(10); clf
 offset=y45_iso_ave;
 stdr=0*offset;
 
-for i=1:15
-  %semilogx(xx_plot,y45_ave(:,i)-offset,'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,y45_ave(:,i)-offset,'g-','LineWidth',2.0); hold on
+for i=[1:1:73]
+  %semilogx(xx_plot,(y45_ave(:,i)-offset),'k:','LineWidth',2.0); hold on
+  semilogx(xx_plot,(y45_ave(:,i)-offset)/0.8,'m-','LineWidth',2.0); hold on
   stdr=stdr+(y45_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
 %semilogx(xx_plot,y45_iso_ave-offset,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y45_iso_ave-offset,'b','LineWidth',2.0); hold on
+semilogx(xx_plot,(y45_iso_ave-offset)/0.8,'b','LineWidth',2.0); hold on
 axis([1 1000 -.2 .2])
 x=1:1000; plot(x,(4/5)*x./x,'k');
 hold off;
@@ -193,10 +199,4 @@ lnmax=length(times);
 dir_use=2;
 [mean(mx45(ln:lnmax,dir_use)),mean(mx45_iso(ln:lnmax))]
 [std(mx45(ln:lnmax,dir_use)),std(mx45_iso(ln:lnmax)) ]
-
-
-
-
-
-
 
