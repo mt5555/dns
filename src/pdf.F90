@@ -30,7 +30,7 @@ end type
 !  SF(NUM_SF,3) :  structure functions, in the x,y and z directions
 !  
 !
-integer,parameter :: NUM_SF=3
+integer,parameter :: NUM_SF=6
 type(pdf_structure_function) ::  SF(NUM_SF,3)
 
 
@@ -86,8 +86,17 @@ end subroutine
 
 subroutine resize_pdf(str,bin)
 !
-! resize a pdf_structure_function
+! resize a pdf_structure_function so it can hold value = bin
+! bin should be out of the range:   -str%nbin : str%nbin
+! 
+! if bin is inside that range, we abort.  (cant shrink str)
+! if bin is one of the end points of that range, we do nothing
+! if bin is outside the range:
+!      if abs(bin) > pdf_max_bin:  print warning, set bin to end point
+!      else: resize str to contain bin.  
+!      
 !
+use params
 implicit none
 type(pdf_structure_function) :: str
 integer :: bin
@@ -99,6 +108,13 @@ integer n
 n=str%nbin
 if (bin<n) call abort("resize_pdf: attempting to shrink pdf");
 if (bin==n) return;
+
+
+if (bin>pdf_max_bin) then
+   print *,"Warning pdf bin overflow on pe=",my_pe
+endif
+
+
 
 ! make a copy of data
 allocate(str2%pdf(-n:n,delta_num))
@@ -239,11 +255,11 @@ call resize_pdf(str,bin)
 n=(2*bin+1)*delta_num
 if (my_pe == io_pe) then
    allocate(pdfdata(-bin:bin,delta_num))
-   call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
+   call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    str%pdf=pdfdata
    deallocate(pdfdata)
 else
-   call MPI_reduce(str%pdf,0,n,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
+   call MPI_reduce(str%pdf,0,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 endif
 
 #endif
@@ -262,58 +278,69 @@ subroutine compute_pdf(Q,n1,n1d,n2,n2d,n3,n3d,str)
 ! for all the values of delta given by delta_val(:)
 !
 implicit none
-integer :: n1,n1d,n2,n2d,n3,n3d
-real*8 :: Q(n1d,n2d,n3d)
-type(pdf_structure_function) :: str
+integer :: n1,n1d,n2,n2d,n3,n3d,n
+real*8 :: Q(n1d,n2d,n3d,3)
+type(pdf_structure_function) :: str(NUM_SF)
 
 ! local variables
-real*8  :: del
-integer :: bin,idel,i,j,k,i2
+real*8  :: del,delv(3),delq
+real*8  :: one_third = (1d0/3d0)
+integer :: bin,idel,i,j,k,i2,nsf
 
 do k=1,n3
    do j=1,n2
       do idel=1,delta_num
          if (delta_val(idel) < n1/2) then
             do i=1,n1
-               i2 = i + delta_val(idel)
-               if (i2>n1) i2=i2-n1
+               ! compute structure functions for U,V,W 
+               do n=1,3
+                  i2 = i + delta_val(idel)
+                  if (i2>n1) i2=i2-n1
+                  
+                  del = Q(i2,j,k,n)-Q(i,j,k,n)
+                  delv(n)=del
+                  del = del/pdf_bin_size
+                  bin = nint(del)
+                  
+                  ! increase the size of our PDF function
+                  if (abs(bin)>str(n)%nbin) call resize_pdf(str(n),abs(bin)+10) 
+                  if (bin>pdf_max_bin) bin=pdf_max_bin
+                  if (bin<-pdf_max_bin) bin=-pdf_max_bin
+                  str(n)%pdf(bin,idel)=str(n)%pdf(bin,idel)+1
+               enddo
+               ! compute structure functions for U(U**2+V**2+W**2)
+               delq = delv(1)**2 + delv(2)**2 + delv(3)**2
+               do n=1,3
+                  nsf=n+3
+                  del = (delv(n)*delq)**(one_third)
+                  del = del/pdf_bin_size
+                  bin=nint(del)
+                  if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
+                  if (bin>pdf_max_bin) bin=pdf_max_bin
+                  if (bin<-pdf_max_bin) bin=-pdf_max_bin
+                  str(nsf)%pdf(bin,idel)=str(nsf)%pdf(bin,idel)+1
+               enddo
                
-               del = Q(i,j,k)-Q(i2,j,k)
-               del = del/pdf_bin_size
-               bin = nint(del)
-
-               if (abs(bin)>pdf_max_bin) then
-                  print *,"Warning pdf bin overflow"
-                  if (bin<0) then
-                     bin=-pdf_max_bin
-                  else
-                     bin=pdf_max_bin
-                  endif
-               endif
-
-               ! increase the size of our PDF function
-               if (abs(bin)>str%nbin) call resize_pdf(str,abs(bin)) 
-               str%pdf(bin,idel)=str%pdf(bin,idel)+1
             enddo
          endif
       enddo
    enddo
 enddo
-str%ncalls=str%ncalls+1
+
+do n=1,NUM_SF
+str(n)%ncalls=str(n)%ncalls+1
+enddo
 end subroutine
 
 
 
 
 
-subroutine z_ifft3d_str(fin,f,strid,compy_instead_of_x,compz)
+subroutine z_ifft3d_str(fin,f,w1,w2,compy_instead_of_x,compz)
 !
 !  compute inverse fft 3d of fin, return in f
 !  fin and f can overlap in memory
 !  Also compute structure functions.
-!  strid=1    U
-!        2    V
-!        3    W
 !
 !  This routine can compute PDF's of structure functions in the x direction
 !  or y direction (but not both) and in the z direction.
@@ -326,57 +353,69 @@ use params
 use fft_interface
 use transpose
 implicit none
-real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
-real*8 f(nx,ny,nz)    ! output
-real*8 work(nx,ny,nz) ! work array
-real*8 work2(g_nz2,nslabx,ny_2dz) ! work array
-logical :: compy_instead_of_x,compz
-integer strid
+real*8 fin(g_nz2,nslabx,ny_2dz,n_var)  ! input
+real*8 f(nx,ny,nz,n_var)               ! output
 
+! overlaped in memory:
+real*8 w1(g_nz2,nslabx,ny_2dz,n_var)
+real*8 w2(nx,ny,nz,n_var)    
+logical :: compy_instead_of_x,compz
 
 
 !local
 integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k
+integer i,j,k,n
 
-n1=g_nz
-n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
-n3=ny_2dz
-n3d=ny_2dz
 
-work2=fin
-call ifft1(work2,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work2,f,n1,n1d,n2,n2d,n3,n3d)
+do n=1,3
+   n1=g_nz
+   n1d=g_nz2   	
+   n2=nslabx
+   n2d=nslabx
+   n3=ny_2dz
+   n3d=ny_2dz
+   w1(:,:,:,1)=fin(:,:,:,n)
+   call ifft1(w1,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_z(w1,f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+
 
 if (compy_instead_of_x) then
+do n=1,3
+   call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 
-   call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo   
+call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,1))
 
-   call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-   call compute_pdf(work,n1,n1d,n2,n2d,n3,n3d,SF(strid,2))
-   call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-   
+
 else
+do n=1,3
+   call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   
+   call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,2))
 
-   call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-   
-   
-   call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-   call compute_pdf(work,n1,n1d,n2,n2d,n3,n3d,SF(strid,1))
-   call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 endif
 
+
+
+
+
 if (compz) then
-   call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
-   call compute_pdf(work,n1,n1d,n2,n2d,n3,n3d,SF(strid,3))
+   do n=1,3
+      call transpose_to_z(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,3))
 endif
 
 

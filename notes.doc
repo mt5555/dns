@@ -20,8 +20,10 @@ structure function:
 sizes
 Nirvana:  32Gb per box.  optimal is 225M per CPU.  = 29Gb.
                                         max size: 425. fft: 400?
+          2 Boxes, 64Gb.  optimal size: 550.  
 
-          64Gb.  optimal size: 550.  
+QidSE:  16x4 cpus.  64Gb memory
+Qid:   128x4        512Gb memory
                          
 
 64^3 is 100M on linux box.
@@ -34,17 +36,23 @@ Nirvana:  32Gb per box.  optimal is 225M per CPU.  = 29Gb.
 
 size = .1*n^3/64^3 
 
-                                   Nirv    BlueMtn
+grid:  (n/256)**3 (n/256)
+
+t=.05                              Nirv    BlueMtn      
 one box timings:  256 on 32 cpus            > 15min
                   256 on 64 cpus   9.11m    8.32
-                  256 on 128 cpus  7.65m    4.11m
+                  256 on 128 cpus  7.65m    4.11m        
                   250 on 125 cpus  7.65m    3.98m
 
-                  384 on 128 cpus.
-                  375 on 125 cpus.           IN
+                  384 on 128 cpus.           no
+                  375 on 125 cpus.           no
+                  360 on 120 cpus.           no
+                  400 on 5x1x25              27.03m
+                  400 on 1x100               32.09m
 
-two box timings:  512 on 256 cpus
-                  500 on 250 cpus.  
+t=.01
+two box timings:  512 on 256 cpus   pend
+                  500 on 250 cpus.           in
 
 
 

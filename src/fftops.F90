@@ -337,7 +337,7 @@ end
 
 
 
-subroutine z_fft3d(f,fout)
+subroutine z_fft3d_trashinput(f,fout,work)
 !
 !  compute fft of f, return in fout.
 !  f,fout can overlap in memory
@@ -347,21 +347,20 @@ use fft_interface
 use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input
-real*8 fout(*)        ! output
+real*8 fout(g_nz2,nslabx,ny_2dz)  ! output
 real*8 work(nx,ny,nz) ! work array1
-real*8 work2(nx,ny,nz) ! work array2
 integer n1,n1d,n2,n2d,n3,n3d
 
 
 call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
-call transpose_from_x(work,work2,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_y(work2,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,work2,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_z(work2,fout,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_z(f,fout,n1,n1d,n2,n2d,n3,n3d)
 call fft1(fout,n1,n1d,n2,n2d,n3,n3d)
 
 end
@@ -369,7 +368,7 @@ end
 
 
 
-subroutine z_ifft3d(fin,f)
+subroutine z_ifft3d(fin,f,work)
 !
 !  compute inverse fft 3d of fin, return in f
 !  fin and f can overlap in memory
@@ -380,8 +379,8 @@ use transpose
 implicit none
 real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
 real*8 f(nx,ny,nz)    ! output
-real*8 work(nx,ny,nz) ! work array
-real*8 work2(g_nz2,nslabx,ny_2dz) ! work array
+! true size must be nx,ny,nz:
+real*8 work(g_nz2,nslabx,ny_2dz) ! work array
 
 
 !local
@@ -395,9 +394,9 @@ n2d=nslabx
 n3=ny_2dz
 n3d=ny_2dz
 
-work2=fin
-call ifft1(work2,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work2,f,n1,n1d,n2,n2d,n3,n3d)
+work=fin
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)

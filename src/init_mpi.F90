@@ -61,7 +61,7 @@ character*80 message
 isperiodic(1)=.false.
 isperiodic(2)=.false.
 isperiodic(3)=.false.
-reorder=.false.
+reorder=.true.
 
 call mpi_cart_create(MPI_COMM_WORLD,3,mpidims,isperiodic,reorder,comm_3d,ierr1)
 if (ierr1/=0) call abort("mpi_cart_create failure")

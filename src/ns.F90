@@ -12,25 +12,27 @@ real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 real*8,save :: Q(nx,ny,nz,n_var)
 
-call rk4reshape(time,Q_grid,Q,rhs)
+call rk4reshape(time,Q_grid,Q,rhs,rhs)
 end
 
 
 
-subroutine rk4reshape(time,Q_grid,Q,rhs)
+subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg)
 use params
 use structf
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
+! overlapped in memory:
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: rhsg(nx,ny,nz,n_var)
 
 
 ! local variables
 real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
-
+real*8 :: work(nx,ny,nz)
 
 real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
@@ -45,7 +47,8 @@ count10=mod(count10+1,10)   ! toggles between 0...9
 if (firstcall) then
    firstcall=.false.
    do n=1,3
-      call z_fft3d(Q_grid(1,1,1,n),Q(1,1,1,n)) ! use rhs as work array
+      rhsg(:,:,:,1)=Q_grid(:,:,:,n)
+      call z_fft3d_trashinput(rhsg,Q(1,1,1,n),rhsg(1,1,1,2)) ! use rhs as work array
    enddo
 
    if (.not. dealias) then
@@ -57,7 +60,7 @@ endif
 
 
 ! stage 1
-call ns3D(rhs,rhs,Q,Q_grid,time,1)
+call ns3D(rhs,rhs,Q,Q_grid,time,1,work)
 
 do n=1,3
    do j=1,ny_2dz
@@ -70,13 +73,13 @@ do n=1,3
    enddo
    enddo
 
-   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
 
 ! stage 2
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work)
 
 do n=1,3
    do j=1,ny_2dz
@@ -89,11 +92,11 @@ do n=1,3
    enddo
 
 
-   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 ! stage 3
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work)
 
 
 do n=1,3
@@ -106,11 +109,11 @@ do n=1,3
    enddo
    enddo
 
-   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 ! stage 4
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work)
 
 
 do n=1,3
@@ -121,9 +124,8 @@ do n=1,3
    enddo
    enddo
    enddo
-
-   call z_ifft3d_str(Q(1,1,1,n),Q_grid(1,1,1,n),n,(count2==0),(count10==0))
 enddo
+call z_ifft3d_str(Q,Q_grid,rhs,rhs,(count2==0),(count10==0))
 
 
 time = time + delt
@@ -155,7 +157,7 @@ end subroutine
 
 
 
-subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints)
+subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -186,6 +188,9 @@ real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 ! output  (rhsg and rhs are overlapped in memory)
 real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)
 real*8 rhsg(nx,ny,nz,n_var)    
+
+! work/storage
+real*8 work(nx,ny,nz)
                                  
 
 !local
@@ -250,7 +255,7 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
-call z_ifft3d(p,rhsg(1,1,1,n))
+call z_ifft3d(p,rhsg(1,1,1,n),work)
 enddo
 ! alternative:
 ! compute from Q_grid: vx,wx  uy,wy      8 ffts, 0 z-transforms 
@@ -300,7 +305,7 @@ enddo
 ! back to spectral space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
-   call z_fft3d(Q(1,1,1,n),rhs(1,1,1,n))
+   call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),p)
 enddo
 
 
