@@ -87,13 +87,15 @@ endif
 
 
    ! output (mu/schmidt) * c_x**2 + c_y**2
-   do n=np1,np2
-      call der(Q(1,1,1,n),work1,q2,q3,DX_ONLY,1)  ! c_x
-      call der(Q(1,1,1,n),work2,q2,q3,DX_ONLY,2)  ! c_y
-      q1(:,:,:,n)=mu*(work1**2 + work2**2)/schmidt(n)
-   enddo
-   message=runname(1:len_trim(runname)) // "-gradxy2"
-   call output_passive(message,time,q1,work1,work2)
+   if (npassive>0) then
+      do n=np1,np2
+         call der(Q(1,1,1,n),work1,q2,q3,DX_ONLY,1)  ! c_x
+         call der(Q(1,1,1,n),work2,q2,q3,DX_ONLY,2)  ! c_y
+         q1(:,:,:,n)=mu*(work1**2 + work2**2)/schmidt(n)
+      enddo
+      message=runname(1:len_trim(runname)) // "-gradxy2"
+      call output_passive(message,time,q1,work1,work2)
+   endif
 
 
 
