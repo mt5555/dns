@@ -1,11 +1,11 @@
 function ...
     [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
-    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_ll] ...
+    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt] ...
      = readisostr(fname)
 
 
-fid=fopen(fname,'r','b');
+fid=endianopen(fname,'r');
 
 ndelta=fread(fid,1,'float64');
 ndir  =fread(fid,1,'float64');
@@ -13,6 +13,13 @@ nlon  =fread(fid,1,'float64');
 ntran =fread(fid,1,'float64');
 nscalars =fread(fid,1,'float64');
 nnew2 =fread(fid,1,'float64');
+
+SP_lll=0;
+SN_lll=0;
+SP1_ltt=0;
+SN1_ltt=0;
+SP2_ltt=0;
+SN2_ltt=0;
 
 
 r_val=fread(fid,[ndelta,ndir],'float64');

@@ -17,11 +17,17 @@
 # status=0  success
 # status=1  failed
 #
+#set PSIGET "psi get"
+#set PSIVM "psi mv"
+
+set PSIGET = "echo psi get disabled: "
+set PSIMV  = "echo psi mv disabled: "
+
 set name = $1
 set fpath = $2
 set ext = w
 
-if ($#argv >=3) then
+if ($#argv >= 3 ) then
    if ($3 == uvw ) then
       set ext = w
    else
@@ -29,29 +35,33 @@ if ($#argv >=3) then
    endif
 endif
 
-set both = no
-if ($#argv >=4) then
-   set both = $4
+set searchall = no
+if ($#argv >= 4 ) then
+   set searchall = $4
 endif
 
 
-if ($both == "all") 
+if ($searchall == all) then
    #search $fpath for newest restart file
+   echo searching both HPSS and $fpath     
    set resnamels = `\ls {$fpath}/{$name}*.{$ext} | sort | tail -1`
    if ($resnamels =="") then
       echo {$fpath}/{$name}
-      echo "no restart files in directory"
-      set resnamels=aaaaaaaaaaa
+      echo "no restart files in $fpath"
+      set resnamels = aaaaaaaaaaa
    endif
    #search PSI
    set resnamepsi = `psi ls dns/{$name}/{$name}\*.{$ext} | sort | tail -1`
    if ($resnamepsi =="") then
       echo "no restart files on HPSS"
-      set resnamepsi=aaaaaaaaaaa
-   else
-   resnamew=`echo "$resanmels\n$resnamepsi" | sort | tail -1`
+      set resnamepsi = aaaaaaaaaaa
+   endif
+   set resnamels = `basename $resnamels`
+   set resnamepsi = `basename $resnamepsi`
+   set resnamew=`echo "$resnamels\n$resnamepsi" | sort | tail -1`
    if ($resnamew == $resnamels ) then
       echo "using restart files in directory"
+      #fpath already set
    else if ($resnamew == $resnamepsi ) then
       echo "using restart files from HPSS"
       set fpath = HPSS
@@ -91,32 +101,32 @@ endif
 
    if ( $ext == "w" ) then
       if !(-e $resnameu2) then
-         psi get $resnameu
+         $PSIGET $resnameu
       endif
       if !(-e $resnamev2) then
-         psi get $resnamev
+         $PSIGET $resnamev
       endif
       if !(-e $resnamew2) then
-         psi get $resnamew
+         $PSIGET $resnamew
       endif
       \ln -s $resnameu2  restart.u
       \ln -s $resnamev2  restart.v
       \ln -s $resnamew2  restart.{$ext}
       if !(-e restart.u) then
          echo "No restart.u file"
-         psi mv $resnameu2 $resnameu2.bak
-         psi mv $resnamev2 $resnamev2.bak
-         psi mv $resnamew2 $resnamew2.bak
+         $PSIMV $resnameu $resnameu.bak
+         $PSIMV $resnamev $resnamev.bak
+         $PSIMV $resnamew $resnamew.bak
          exit 1
       endif
    else
       if !(-e $resnamew2) then
-         psi get $resnamew
+         $PSIGET $resnamew
       endif
       \ln -s $resnamew2  restart.{$ext}
       if !(-e restart.{$ext}) then
          echo "No restart.{$ext} file"
-         psi mv $resnamew2 $resnamew2.bak
+         $PSIMV $resnamew $resnamew.bak
          exit 1
       endif
    endif

@@ -21,6 +21,8 @@ name='/ccs/scratch/taylorm/dns/iso12_5120003.0000'
 nx=512; delx_over_eta=2.74; epsilon=3.89;
 %ext='.isostr001';
 
+name='/ccs/scratch/taylorm/sk/check256_0000.8000'
+nx=256; delx_over_eta=1.0; epsilon=1.0;
 
 
 ndir_use=0;

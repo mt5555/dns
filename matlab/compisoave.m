@@ -27,7 +27,7 @@ xmax=1000;  % maximum x axis
 
 [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
-    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt] ...
+    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt] ...
      = readisostr( [name,ext] );
  
 eta = (mu^3 / epsilon)^.25;
@@ -73,12 +73,12 @@ lambda=sqrt(10*ke*mu/epsilon);       % single direction lambda
 R_lambda = lambda*sqrt(2*ke/3)/mu;
 
 
-disp(sprintf('KE:      %f',ke));
-disp(sprintf('epsilon: %f',epsilon));
-disp(sprintf('mu:      %f',mu));
-disp(sprintf('eta:     %f',eta));
+disp(sprintf('KE:      %f  2pi units: %f',ke,ke*4*pi*pi));
+disp(sprintf('epsilon: %f  2pi units: %f',epsilon,epsilon*4*pi*pi));
+disp(sprintf('mu:      %f  2pi units: %f',mu,mu*4*pi*pi));
+disp(sprintf('eta:     %f  2pi units: %f',eta,eta*2*pi));
+disp(sprintf('lambda:  %f  2pi units: %f',lambda,lambda*2*pi));
 disp(sprintf('delx/eta %f',delx_over_eta));
-disp(sprintf('lambda:  %f',lambda));
 disp(sprintf('R_l:     %f',R_lambda));
 disp(sprintf('ndir:     %f',ndir));
 disp(' ')
@@ -268,6 +268,42 @@ ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print('-dpsc',[bname,'_43.ps']);
 print -djpeg 43.jpg
+
+
+
+%
+%  the 2/15 law
+%
+yyave=0*xx;
+figure(4)
+yyave=0*xx;
+pave=yyave;
+nave=yyave;
+for i=1:ndir
+  x = r_val(:,i);                       % units of box length
+  x_plot=x*nx*delx_over_eta;            % units of r/eta
+
+  y=H_ltt(:,i)./(epsilon*(x.^2));
+
+  semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
+  yyave=yyave+w(i)*spline(x,y,xx);
+
+end
+
+semilogx(xx_plot,yyave,'k','LineWidth',2.5);
+y215=yyave;
+title('2/15 law');
+ylabel(pname);
+xlabel('r/\eta');
+x=1:xmax; semilogx(x,(2/15)*x./x,'k');
+xlabel('r/\eta');
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+hold off;
+print('-dpsc',[bname,'_215.ps']);
+print -djpeg 215.jpg
+
+
+
 
 end
 
