@@ -8,7 +8,7 @@
 %
 
 dir='/ccs/scratch/taylorm/dns/decay/';
-dir='/home/mt/';
+%dir='/home/mt/';
 filename='decay2048-new.0000.7019';
 %filename='decay2048-new.0000.7536';
 
@@ -38,10 +38,6 @@ while 1
 end
 fclose(fid);
 
-% normalize:
-tscale=(epsilon^(1/3));
-gradu=gradu/tscale;
-%gradu2=gradu2/tscale/tscale;
 
 
 len=size(gradu2);
@@ -52,13 +48,18 @@ epsilon=mu*epsilon;
 % .7018 time: 2048^3 epsilon=.035
 epsilon_l=mu*squeeze(sum(sum(gradu2,1),2));
 
-
+% normalize:
+tscale=(epsilon^(1/3));
+gradu=gradu/tscale;
+%gradu2=gradu2/tscale/tscale;
 
 
 mn = min(min(min(min(min(gradu)))));
 mx = max(max(max(max(max(gradu)))));
 mx=max(abs(mx),abs(mn));
 mn=-mx;
+mn=.9*mn;
+mx=.9*mx;
 
 diag1=reshape(gradu(1,1,:,:,:),[8*8*8,1]);
 diag2=reshape(gradu(2,2,:,:,:),[8*8*8,1]);
@@ -75,6 +76,7 @@ large=1.90.*small;
 %diag_std=1;
 figure(2); subplot(2,2,1)
 h=hist((diag1/diag_std),25);
+hist((diag1/diag_std),25)
 title('PDF of <u_{1,1}>')
 xlabel('standard deviations u_{1,1}');
 hold on;
@@ -95,6 +97,7 @@ diag6=reshape(gradu(3,2,:,:,:),[8*8*8,1]);
 offdiag1=[diag1;diag2;diag3;diag4;diag5;diag6];
 figure(2); subplot(2,2,3)
 h=hist((diag1/diag_std),25);
+hist((diag1/diag_std),25);
 title('PDF of <u_{1,2}>')
 xlabel('standard deviations u_{1,1}');
 hold on;
@@ -108,6 +111,7 @@ hold off;
 figure(2); subplot(2,2,4)
 diag1=reshape(epsilon_l,[8*8*8,1]);
 h=hist(diag1,25);
+hist(diag1,25);
 title('PDF local \epsilon')
 hold on;
 x=[epsilon,epsilon];
