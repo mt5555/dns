@@ -77,8 +77,13 @@ else
    \ln -s $resnameu  restart.u
    \ln -s $resnamev  restart.v
    \ln -s $resnamew  restart.w
-   if !(-e restart.u) then
+   if !(-e restart.w) then
       echo "No restart.w file"
+      # move them out of the way in case this time is corrupt:
+      # then next run will pick up earlier backup:
+      mv $resnameu $resnameu.bak
+      mv $resnamev $resnamev.bak
+      mv $resnamew $resnamew.bak
       exit 1
    endif
 
