@@ -287,7 +287,6 @@ real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3)
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,xfac,f_diss,tauf
-real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)
 
 real*8,save :: rmodes(-2:2,-2:2,-2:2,3)       ! value at time tmod
 real*8,save :: rmodes_old(-2:2,-2:2,-2:2,3)   ! value at time tmod_old
@@ -333,11 +332,9 @@ if (new_f==1) then
 endif
 
 
-
 f_diss=0
 do wn=1,NUMBANDS
 
-   ener(wn)=0
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
@@ -355,10 +352,9 @@ do wn=1,NUMBANDS
          Qhat(k,i,j,2)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2) +&
          Qhat(k,i,j,3)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3) )
 
-
    enddo
-enddo
 
+enddo
 
 end subroutine 
    
@@ -373,9 +369,9 @@ use params
 implicit none
 real*8 :: rmodes(-2:2,-2:2,-2:2,3)       
 
-integer km,jm,im,i,j,k,n,wn,ierr
+integer km,jm,im,i,j,k,n,wn,ierr,k2
 real*8 xw,xfac,f_diss,tauf
-real*8 :: R(-2:2,-2:2,-2:2,3,2),Rr,Ri
+real*8 :: R(-2:2,-2:2,-2:2,3,2),Rr,Ri,F1,F2
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
@@ -391,12 +387,28 @@ do im=-2,2
    ! Choose R gaussian, theta uniform from [0..1]
    ! vorticty = (R1 + i R2)  exp(im*2pi*x) * exp(jm*2pi*y) * exp(km*2pi*z) 
    !
-   ! convert from vorticity to stream function, then take curl:
-   ! remove 1 factor of 2*pi from laplacian and derivative, since they candel
-   xfac = (im**2 + jm**2 + km**2)
-   if (xfac>0) xfac=1/(-2*pi*xfac)
+   ! R = vorticity
+   ! PSI = laplacian^-1 R
+   ! f = curl R 
+   !
+   ! 
+   ! 
+   k2 = (im**2 + jm**2 + km**2)
+   if (k2>0) then
+      xfac=1/(-2*pi*k2)
+   else
+      xfac=0
+   endif
    if (delt>0) xfac=xfac/sqrt(delt)
-   xfac=xfac/10
+   ! normalize so that < R**2 >   = F1  in wave number 1
+   ! normalize so that < R**2 >   = F2  in wave number 2
+   F1 = 1 
+   F2 = 1
+   if (k2 <= 1.5**2) then
+      xfac=xfac*sqrt(F1/60)
+   else if (k2 <= 2.5**2)  then
+      xfac=xfac*sqrt(F2/365)
+   endif
    
    do n=1,3
       psix_r(n) = -im*R(im,jm,km,n,2)*xfac
@@ -457,6 +469,9 @@ enddo
 enddo
 enddo
 end subroutine
+
+
+
 
 
 integer function zerosign(i)
