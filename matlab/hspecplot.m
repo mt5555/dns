@@ -42,10 +42,14 @@ namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/
 name = 'skhel512_hpi2';
 mu = 1e-4;
 
+
 namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
 name = 'sc1024A';
 mu = 3.5e-5;
 
+namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
+name = 'skhel512a0000.2000';
+mu = 1e-4;
 
 
 % plot all the spectrum:
