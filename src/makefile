@@ -7,28 +7,29 @@ ARCH = $(shell uname -m)
 
 
 ifeq ($(UNAME),Linux)
-   F90 = lf95
-   #LDFLAGS = --staticlink -L stk -lstk
-   LDFLAGS = --staticlink 
+   #F90 = lf95
+   #FFLAGS = -O -DLINUX $(MPI)
+   #LDFLAGS = --staticlink 
+
+   F90 = pgf90
+   FFLAGS = -fast -DLINUX $(MPI)
+
    HOST = $(shell hostname)
    ifeq ($(HOST),darkstar)
       MPI = -DUSE_MPI -I/contrib/lam/include
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
-   FFLAGS = -O -DLINUX $(MPI)
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
    #MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
    #MPI = -DUSE_MPI -I/usr/local/src/mpich/include
-   LDFLAGS = -Lstk -lstk 
    # default -fast is -xvector=yes, but this introduces bugs in test.F90!
    FFLAGS = -fast -xvector=no -xarch=v9  -DSUNOS $(MPI)
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
-   #LDFLAGS =  -Lstk -lstk
    LDFLAGS =  -l scs 
    FFLAGS = -64 -O3 -macro_expand -DUSE_MPI  -DIRIX64  -DSGIFFT
 endif

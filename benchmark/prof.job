@@ -1,0 +1,21 @@
+#! /bin/csh 
+#BSUB -o bench.o -e bench.e
+#BSUB -q small-d
+#BSUB -J dns
+#BSUB -W 0:15
+#BSUB -n 64 -R "span[ptile=64]"
+
+set NCPU=64 
+rm -f bench.o bench.e
+
+set refin=benchmark1.inp
+
+#cd ../src
+#./gridsetup.py 1 1 1 64 64 64
+#make -j $NCPU dns
+
+#cd ../benchmark
+mpirun -np $NCPU ssrun -usertime ./dns < $refin 
+#
+# to look at the results, run:  prof dns.usertime.f???????? > prof.out
+#
