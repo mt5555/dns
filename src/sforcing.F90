@@ -210,7 +210,8 @@ do wn=numb1,numb
    ! Qf = Q*sqrt(ener_target/ener)
    ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
    tauf=tau_inv*(sqrt(ener_target(wn)/ener(wn))-1)
-   write(*,'(a,3i4,3f17.10)') 'FORCING:',my_pe,wn,wnforcing(wn)%n,ener(wn),ener_target(wn),tauf
+   ! if (io_pe==my_pe) &
+   !write(*,'(a,3i4,3f17.10)') 'FORCING:',my_pe,wn,wnforcing(wn)%n,ener(wn),ener_target(wn),tauf
 
    if (tauf>0) then ! only apply forcing if net input is positive
    do n=1,wnforcing(wn)%n

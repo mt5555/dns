@@ -105,7 +105,8 @@ for i=1:ndir
 end
 yyave=yyave/ndir;
 semilogx(xx,yyave,'r');
-title('D_{lll} / r\epsilon');
+title('D_{lll} / r\epsilon   (4/5 law)');
+semilogx(xx,.8*xx./xx,':');
 hold off;
 
 
@@ -132,7 +133,8 @@ yyave1=yyave1/ndir;
 yyave2=yyave2/ndir;
 semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
-title('D_{ltt} / r\epsilon');
+title('D_{ltt} / r\epsilon  (4/15 law)');
+semilogx(xx,(4/15)*xx./xx,':');
 hold off;
 
 
@@ -154,6 +156,7 @@ end
 yyave=yyave/ndir;
 semilogx(xx,yyave,'r');
 title('4/3 law');
+semilogx(xx,(4/3)*xx./xx,':');
 hold off;
 
 

@@ -1,4 +1,5 @@
 #include "macros.h"
+#undef COMP_JPDF
 
 module structf
 implicit none
@@ -175,11 +176,13 @@ do i=1,NUM_SF
 enddo
 call init_pdf(epsilon,100,.01d0,1)
 
+#ifdef COMP_JPDF
 do i=1,NUM_JPDF
    call init_jpdf(jpdf_v(i,1),100,.1d0, min(numx,numy))
    call init_jpdf(jpdf_v(i,2),100,.1d0, min(numx,numz))
    call init_jpdf(jpdf_v(i,3),100,.1d0, min(numy,numz))
 enddo
+#endif
 end subroutine
 
 
@@ -387,11 +390,13 @@ enddo
 enddo
 call mpisum_pdf(epsilon)
 
+#ifdef COMP_JPDF
 do j=1,3
 do i=1,NUM_JPDF
    call mpisum_jpdf(jpdf_v(i,j))
 enddo
 enddo
+#endif
 
 
 
@@ -408,6 +413,7 @@ if (my_pe==io_pe) then
    x=1 ; call cwrite8(fid,x,1)
    call normalize_and_write_pdf(fid,epsilon,epsilon%nbin)   
 
+#ifdef COMP_JPDF
    call cwrite8(fidj,time,1)
    ! number of structure functions
    x=NUM_SF ; call cwrite8(fidj,x,1)
@@ -416,7 +422,7 @@ if (my_pe==io_pe) then
       call normalize_and_write_jpdf(fidj,jpdf_v(i,j),jpdf_v(i,j)%nbin)
    enddo
    enddo
-
+#endif
 
    ! some strain/vorticity structure functions (not stored as pdf's)
    numm=max(numx,numy,numz) 
@@ -448,6 +454,7 @@ enddo
 epsilon%ncalls=0
 epsilon%pdf=0
 
+#ifdef COMP_JPDF
 do i=1,NUM_JPDF
 do j=1,3
    ! reset JPDF's
@@ -455,6 +462,7 @@ do j=1,3
    jpdf_v(i,j)%pdf=0
 enddo
 enddo
+#endif
 
 end subroutine
 
@@ -1149,20 +1157,25 @@ do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
+#ifdef COMP_JPDF
 call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
+#endif
 
 do n=1,3
    call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
+#ifdef COMP_JPDF
 call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
+#endif
 
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
+#ifdef COMP_JPDF
 call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
-
+#endif
 
 do n=1,3
    call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,work,DX_ONLY,n)

@@ -71,6 +71,12 @@ shankara              1.76                      .62               .29
    running 4 cpus, 1 cpu per node:              .51  
 
 
+./bench.sh 240 4  20  
+1.9G
+./bench.sh 192 2  20
+980M
+
+
 ./bench.sh 256 8  20
 2.3G                                                                 
 
