@@ -73,9 +73,19 @@ endif
 !
 ! the "expensive" scalars
 !
-
+   call print_message("Computing velocity stats...")
    call compute_expensive_scalars(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
+   if (minval(ints_e(1:3))>0) then
+      write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
+           (ints_e(n+3)/ints_e(n)**1.5,n=1,3)
+      call print_message(message)
+      
+      write(message,'(a,f14.8)') 'wSw: ',&
+           ints_e(10)/ ( (ints_e(1)**2 + ints_e(2)**2 + ints_e(3)**2)/3 )
+      call print_message(message)
+   endif
    if (npassive>0) then
+      call print_message("Computing passive scalar stats...")
       ! copy data computed above so that q3 = (ux,vy,wz)
       q3(:,:,:,1)=q1(:,:,:,1)
       q3(:,:,:,2)=q2(:,:,:,2)
@@ -91,15 +101,6 @@ endif
 
 
 
-   if (minval(ints_e(1:3))>0) then
-      write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
-           (ints_e(n+3)/ints_e(n)**1.5,n=1,3)
-      call print_message(message)
-      
-      write(message,'(a,f14.8)') 'wSw: ',&
-           ints_e(10)/ ( (ints_e(1)**2 + ints_e(2)**2 + ints_e(3)**2)/3 )
-      call print_message(message)
-   endif
 
 
    ! output turb scalars
@@ -842,7 +843,6 @@ do i=istart,n
       ! find the location of the zero between [ data(i),data(i+1) )
       count=count+1
       zero_location(count)=i +y1/(y1-y2)
-      print *,y1,y2,y1/(y1-y2)
    endif
 enddo
 

@@ -104,6 +104,11 @@ c1=pints_e(26,np,:);
 c1=squeeze(c1)';
 c2=c2-c1.^2;
 
+n0(1,:)=pints_e(27,np,:);
+n0(2,:)=pints_e(28,np,:);
+n0(3,:)=pints_e(29,np,:);
+
+
 %
 % isotropic relations (may not exactly agree with data from scalars.m)
 %
