@@ -258,7 +258,7 @@ icount=icount+1
          write(sdata,'(f10.4)') 10000.0000 + time
          write(ext,'(2i1)') i,j
          basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-         fname = basename(1:len_trim(basename)) // sdata(2:10) // ext(1:2)
+         fname = basename(1:len_trim(basename)) // sdata(2:10) // '.' // ext(1:2)
          call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
 
          if (j==1) then
