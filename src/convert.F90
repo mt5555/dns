@@ -33,7 +33,7 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-character(len=3) :: extension="uvw"
+character(len=3) :: extension="uvwX"
 
 ! input file
 tstart=.32
@@ -158,7 +158,8 @@ icount=icount+1
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
 
-      do i=1,3
+      do i=4,4  ! use this to process a single .X file
+!      do i=1,3  ! use this to loop over .u,.v,.w
          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i)
          call print_message("input file:")	
@@ -171,6 +172,7 @@ icount=icount+1
          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i) // "4"
 	 call print_message(fname(1:len_trim(fname)))
+
          call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
  	 if (ncpu_x==ncpu_y .and. ncpu_x==ncpu_z .and. ncpu_x>1) then
             call print_message("outputing multfile as REAL*4...")  

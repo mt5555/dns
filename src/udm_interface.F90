@@ -357,9 +357,10 @@ Q=0
    enddo
    enddo
 
-   call print_message("done.  calling UDM_FILE_CLOSE")
+   call print_message("calling UDM_FILE_CLOSE")
    call UDM_INFO_FREE(1,infoid,ierr)
    call UDM_FILE_CLOSE(fidudm, ierr)
+   call print_message("done with UDM")
 
 
 #else
