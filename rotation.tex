@@ -227,14 +227,15 @@ is given by
 In our DNS code, we index our arrays of Fourier coefficients
 with integers $(l,m,n)$, with $l=0 \dots N_x/2$, 
 $m=0 \dots N_y/2$ and 
-$n=0 \dots N_z/2$.
-The relation between wave number and
-these integers is 
+$n=0 \dots N_z/2$.  The wave number spacing is given by
 given by
 \[
 k_x = l \Delta k_x,, \qquad  k_y = m \Delta k_y, \qquad  k_z = n  \Delta k_z
 \]
-
+We index the arrays containing power spectra
+such as $E(k)$ with integer wave number $k$, represents a shell or anulus
+of some chosen thickness centered around the wave number associated
+with $k$.
 
 The total energy is
 \[
@@ -271,23 +272,32 @@ E(k_h) &=& \sum_{k_z=0}^{\pi N_z/L} E(k_h,k_z)
 \label{E:SPECb}
 \end{eqnarray}
 where $k_h = \sqrt{(k_x^2 + k_y^2)} = \sqrt{(2\pi l)^2 + (2\pi m)^2}$. 
-Eq.~\ref{E:SPECa} represents the power spectrum of the 2D field
-obtained by vertically averaging the original 3D field.
+Eq.~\ref{E:SPECa} represents the energy spectrum of the 2D field
+obtained by averaging the original 3D field  in the direction of rotation,
+and then summing the energy within spherical shells (an annulus for 2D fields).  
 Eq.~\ref{E:SPECb} represents
-the power spectrum of the full 3D field, but instead of 
-summing the energy within spherical shells, the sum is
+the energy spectrum of the full 3D field, but instead of 
+summing the energy within spherical shells in wave number space, the sum is
 taken over the annular region between concentric cylinders
-(whose axis are in the $z$ direction).
+(whose axis are in the $z$ direction).  As with the spherical
+shell spectrum, Eq.~\ref{E:SPECb} has the property that
+it partitions the energy into a set of discrete wave numbers, so
+that the total energy 
+\[
+E = \sum_{k_h} E(k_h)
+\]
 
 
 The 2D shell (annulus) thickness is now
-determined by the horizontal wavenumber spacings. Therefore 
+determined by the horizontal wavenumber spacings. In our code,
+we use an integer index given by $k_h = k \Delta k_x$ and
+define
 \begin{eqnarray*}
-E_0(k) = \sum_{l,m,n=0}  |  {\hat u_1}(l,m,n=0) |^2 +
+E_0(k) = \sum_{l,m}  |  {\hat u_1}(l,m,n=0) |^2 +
  |  {\hat u_2}(l,m,n=0) |^2 + 
  |  L {\hat u_3}(l,m,n=0) |^2
 \end{eqnarray*}
-where the sum is taken over all integers $(l,m,n=0)$ such that
+where the sum is taken over all integers $(l,m)$ such that $n=0$ and
 \[
 (\Delta k_x)^2 (k-1/2)^2 < (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_x)^2 (k+1/2)^2 
 \]
@@ -299,9 +309,9 @@ k_y = 2\pi$. Scaling out the $2\pi$, we get
 \]  
 
 The second spectrum is computed the same way as above except that now
-we $average$ over all $n$ for a given 2D shell:
+we sum over all wave numbers $n$ for a given 2D shell:
 \begin{eqnarray}
-E(k) = \sum_{n=0}^{N_z/2}  |  {\hat u_1}(l,m,n) |^2 +
+E(k) = \sum_{n=0}^{N_z/2} \sum_{l,m} |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
  |  L {\hat u_3}(l,m,n) |^2
 \end{eqnarray}
