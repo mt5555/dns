@@ -30,7 +30,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,ix1,ix2,iy1,iy2
 real*8 xm,ym,zm,xfac,im,jm
 real*8 :: axy,x_axy,y_axy,diag
-real*8 :: xb(ny,2),yb(nx,2),y_cosy,y_cosx
+real*8 :: xb(ny,2),yb(nx,2)
 
 real*8,save :: y_cosy(g_ny)
 real*8,save :: y_cosx(g_nx) ! only needs to be of size nx_2dy, but that is not a parameter
