@@ -1,6 +1,4 @@
-
-
-der(p,px,pxx,n,index)
+der(p,px,pxx,pt,n,index)
 !
 !  compute derivative along index index=1,2 or 3
 !  n = number of derivatives to compute
@@ -11,14 +9,12 @@ use params
 
 !input:
 integer n,index
-real*8 p(nxd,nyd,nzd)
-!output:
-real*8 px(nxd,nyd,nzd)
-real*8 pxx(nxd,nyd,nzd)
+real*8 p(nxd,nyd,nzd)    ! original data
+real*8 pt(nxd,nyd,nzd)   ! work array
 
-!local
-real*8 pt(nxd*nyd*nzd)
-real*8 tmp(nxd*nyd*nzd)
+!output:
+real*8 pxx(nxd,nyd,nzd)
+real*8 px(nxd,nyd,nzd)
 
 integer n1,n1d,n2,n2d,n3,n3d
 
@@ -31,18 +27,19 @@ n3d=nzd
 
 
 if (index==1) then
-   fft_derivatives(p,px,pxx,n1,n1d,n2,n2d,n3,n3d)
+   px=p
+   fft_derivatives(px,pxx,n1,n1d,n2,n2d,n3,n3d)
 else if (index==2) then
-   transpose12(p,ptmp,n1,n1d,n2,n2d,n3,n3d)
-   ! tmp 1st derivative, px=2nd derivative
-   fft_derivatives(pt,tmp,px,n,n1,n1d,n2,n2d,n3,n3d)
+   transpose12(p,pt,n1,n1d,n2,n2d,n3,n3d)
+   ! 1st derivative returned in pt, 2nd derivative returned in px
+   fft_derivatives(pt,px,n,n1,n1d,n2,n2d,n3,n3d)
    if (n==2) transpose12(px,pxx,n1,n1d,n2,n2d,n3,n3d)
-   transpose12(pxt,px,n1,n1d,n2,n2d,n3,n3d)
+   transpose12(pt,px,n1,n1d,n2,n2d,n3,n3d)
 else if (index==3) then
    transpose13(p,pt,n1,n1d,n2,n2d,n3,n3d0
-   fft_derivatives(pt,tmp,px,1,n1,n1d,n2,n2d,n3,n3d)
+   fft_derivatives(pt,px,1,n1,n1d,n2,n2d,n3,n3d)
    if (n==2) transpose13(px,pxx,n1,n1d,n2,n2d,n3,n3d)
-   transpose13(tmp,px,n1,n1d,n2,n2d,n3,n3d)
+   transpose13(pt,px,n1,n1d,n2,n2d,n3,n3d)
 endif
 
 ASSERT(n1==nx)

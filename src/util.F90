@@ -1,24 +1,4 @@
 
-fft_derivatives(Q,Qx,Qxx,numder,n1,n1d,n2,n2d,n3,n3d)
-!
-!  if numder=1   compute Qx
-!  if numder=2   compute Qx and Qxx
-!
-implicit none
-
-call fft(Q,Qhat,n1,n1d,n2,n2d,n3,n3d)
-
-if (numder>=1) then
-   Qhat *= m
-   call ifft(Qhat,Qx,n1,n1d,n2,n2d,n3,n3d)
-endif
-if (numder>=2) then
-   Qxx *= m
-   call ifft(Qhat,Qxx,n1,n1d,n2,n2d,n3,n3d)
-endif
-end
-
-
 
 
 subroutine transpose12(p,pt,nx,nxd,ny,nyd,nz,nzd)
