@@ -147,7 +147,7 @@ while (time>=0 & time<=9999.3)
   grid;
   title(sprintf('E Flux'));
 
-  print('-dpsc',sprintf('name%.2f.ps',time)) 
+  print('-dpsc',sprintf('transfer%.2f.ps',time)) 
   pause
   
   
