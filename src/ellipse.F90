@@ -103,7 +103,6 @@ if (io_pe==my_pe) then
    tmp=npd
    call cwrite8(fid,tmp,1)
    call cwrite8(fid,time,1)
-   call cwrite8(fid,center,2)
 
    do nell=1,nelld
 !      do np=1,npd
@@ -112,7 +111,8 @@ if (io_pe==my_pe) then
 !      enddo
 !      call cwrite8(fid,xell,npd)
 !      call cwrite8(fid,yell,npd)
-      call cwrite8(fid,Rad(1,nell),npd)
+      call cwrite8(fid,ccord(1,nell),2)
+      call cwrite8(fid,Rad2(1,nell),npd)
    enddo
    call cclose(fid,ierr)
 endif
