@@ -379,8 +379,6 @@ if (ntot==0) return
 ! rmodes is at time  tmod
 !
 
-
-
 !
 ! Compute a new forcing function?  
 !
@@ -415,9 +413,12 @@ do wn=numb1,numb
       xw=(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
       fxx_diss = fxx_diss + xfac*xw*fsum
 
+
    enddo
 
 enddo
+
+
 
 end subroutine 
    
@@ -432,15 +433,56 @@ use params
 implicit none
 real*8 :: rmodes(-numbs:numbs,-numbs:numbs,-numbs:numbs,3)       
 
-integer km,jm,im,i,j,k,n,wn,ierr,k2
+integer km,jm,im,i,j,k,n,wn,ierr,k2,count,countmax
 real*8 xw,xfac,f_diss
-real*8 :: R(-numbs:numbs,-numbs:numbs,-numbs:numbs,3,2),Rr,Ri,F1,F2
+real*8 :: R(-numbs:numbs,-numbs:numbs,-numbs:numbs,3,2),Rr,Ri,FM(numbs)
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
+real*8 :: ff(numbs)
+
+#undef GATHER_STATS
+#ifdef GATHER_STATS
+countmax=5000
+do count=1,countmax
+
+call gaussian(rmodes,((2*numbs+1)**3) *3)
+do wn=1,numb
+
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+
+
+      ff(wn)= ff(wn) + xfac*( &
+         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)**2 +&
+         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)**2 +&
+         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)**2 )
+
+   enddo
+
+enddo
+enddo
+ff=ff/countmax
+print *,'count=',countmax
+print *,'<R,R> =',ff
+call abort("end stats")
+#endif
+
+
+
 
 rmodes=0
 call gaussian(R,((2*numbs+1)**3) *3*2)
+
+
+
 
 
 do km=-numb,numb 
@@ -454,8 +496,11 @@ do im=-numb,numb
    ! PSI = laplacian^-1 R
    ! f = curl R 
    !
-   ! 
-   ! 
+   ! code above (#define COMPUTE_STATS) shows that
+   !  k=1  <R,R> = 180
+   !  k=2  <R,R> = 1090
+   !  k=3  <R,R> = 1809
+   !
    k2 = (im**2 + jm**2 + km**2)
    if ((numb1-.5)**2 <=k2 .and.   k2 <= (numb+.5)**2) then
    ! ignore wave numbers outside of our forcing band 
@@ -467,14 +512,19 @@ do im=-numb,numb
       if (delt>0) xfac=xfac/sqrt(delt)
       ! normalize so that < R**2 >   = F1  in wave number 1
       ! normalize so that < R**2 >   = F2  in wave number 2
-      F1 = 5 
-      F2 = 5
+      FM(1) = 15
+      FM(2) = 15
+      FM(3) = 15
       if (k2 <= 1.5**2) then
-         xfac=xfac*sqrt(F1/60)
+         xfac=xfac*sqrt(FM(1)/180)
       else if (k2 <= 2.5**2)  then
-         xfac=xfac*sqrt(F2/365)
+         xfac=xfac*sqrt(FM(2)/1090)
+      else if (k2 <= 3.5**2)  then
+         xfac=xfac*sqrt(FM(3)/1809)
       endif
       
+
+
       do n=1,3
          psix_r(n) = -im*R(im,jm,km,n,2)*xfac
          psix_i(n) =  im*R(im,jm,km,n,1)*xfac
