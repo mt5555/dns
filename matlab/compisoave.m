@@ -121,7 +121,7 @@ pave=yyave;
 nave=yyave;
 
 ndir_vec=1:ndir;
-ndir_vec=[1,2,3, 4:3:ndir];
+%ndir_vec=[1,2,3, 4:3:ndir];
 skip=(length(ndir_vec)~=ndir);
 
 
@@ -129,7 +129,8 @@ for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  y=-D_lll(:,i);
+  %  y=-D_lll(:,i);                     %un-normalized sfn
+  y=-D_lll(:,i)./(x*epsilon);
 
   if (plot_points==1) 
      if (skip==0) 
@@ -161,9 +162,9 @@ if (skip==0)
    title('D_{lll} / r\epsilon   (4/5 law) ');
    ylabel(pname);
    xlabel('r/\eta');
-%   semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
-localslp(xx_plot, yyave,2);
-   x=1:xmax; plot(x,(4/5)*x./x,'k');
+   semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+%localslp(xx_plot, yyave,2);
+%   x=1:xmax; plot(x,(4/5)*x./x,'k');
 end
 if (plot_posneg)
   grid
@@ -309,6 +310,12 @@ end
 
 
 
+
+%calculate angle-averaged scaling exponents for longitudinal and 
+%transverse str.fns
+
+ndir
+long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
 
 end
@@ -504,6 +511,8 @@ xlabel('r/\eta','FontSize',16);
 ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
 hold off;
 print -deps isocheck3.ps;
+
+
 
 end
 

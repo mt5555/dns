@@ -1,7 +1,5 @@
-function [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext)
-%name = '/home/skurien/helicity_data/check256_hq_';
-%ext='.new.isostr';
-times=[0:1:30];
+function [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
+
 
 avg_eps = 0;
 avg_heps = 0;

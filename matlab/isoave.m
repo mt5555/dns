@@ -34,8 +34,8 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 
-%name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
-%nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
+name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
+nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 
 
