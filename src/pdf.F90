@@ -36,7 +36,7 @@ integer :: numx=0,numy=0,numz=0          ! actual number of delta's in each dire
 
 
 ! max range:  10 ... 10
-integer,parameter :: pdf_max_bin=2000
+integer,parameter :: pdf_max_bin=4000
 integer,parameter :: jpdf_max_bin=200
 
 

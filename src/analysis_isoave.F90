@@ -51,6 +51,7 @@ real*8 :: kr,ke,ck,xfac,range(3,2),dummy
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs
+logical :: read_uvw
 CPOINTER :: fid,fid1,fid2
 
 
@@ -58,6 +59,7 @@ compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.true.
+read_uvw=.false.
 
 tstart=3.0
 tstop=3.0
@@ -79,6 +81,8 @@ nzdecomp=1
 !SEDdecomp
 !SEDcompcj
 !SEDcompscalar
+
+
 
 
 call init_mpi
@@ -149,6 +153,7 @@ do
       else
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
       endif
+      read_uvw=.true.	
       
       do i=0,nxdecomp-1
       do j=0,nydecomp-1
@@ -214,6 +219,34 @@ do
    endif
 
 
+   if (compute_pdfs) then
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.sf"
+         print *,fname
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
+            call abort(message)
+         endif
+      endif
+      
+      if (.not. read_uvw) then
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+	 read_uvw=.true.
+      endif
+      
+      uscale=.005 / pi2               ! (del_u)              units:  m/s
+      epsscale=.005 / pi2**(2./3.)    ! (mu*gradu**2)**1/3   units: 
+      if (my_pe==io_pe) then
+         print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
+      endif
+      call compute_all_pdfs(Q,q1,q2,q3)
+
+      call output_pdf(time,fid,fid1,fid2)
+      if (my_pe==io_pe) call cclose(fid,ierr)
+   endif
+
 
    if (compute_cj) then
       if (my_pe==io_pe) then
@@ -222,10 +255,14 @@ do
          print *,fname
       endif
       
-      if (.not. compute_uvw) then
+      if (.not. read_uvw) then
+         call print_message("calling input_uvw")
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+	 ! read_uvw=.true. ! dont set to .true.: we trash Q below:
       endif
+      call print_message("calling compute_w2s2")
       call compute_w2s2(Q,q1,q2,q3)
+      call print_message("calling isoavep")
       call isoavep(Q,q1,q2,q3,2,csig)
       
       if (my_pe==io_pe) then
@@ -262,38 +299,11 @@ do
    endif
    
 
-   if (compute_pdfs) then
-      if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.sf"
-         print *,fname
-         call copen(fname,"w",fid,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
-            call abort(message)
-         endif
-      endif
-      
-      if (.not. compute_uvw) then
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
-      endif
-      
-      uscale=.01 / pi2
-      epsscale=.01 / pi2_squared  
-      if (my_pe==io_pe) then
-         print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
-      endif
-      call compute_all_pdfs(Q,q1,q2,q3)
-
-      call output_pdf(time,fid,fid1,fid2)
-      if (my_pe==io_pe) call cclose(fid,ierr)
-   endif
-
    if (tstart>0) then   
       time=time+tinc
       if (io_pe==my_pe) print *,'time, tstart, tstop: ',time,tstart,tstop 
-      if (time > max(tstop,tstart)+1e-5) exit
-      if (time < min(tstop,tstart)-1e-5) exit
+      if (time > max(tstop,tstart)+.005) exit
+      if (time < min(tstop,tstart)-.005) exit
    endif
 enddo
 100 continue
