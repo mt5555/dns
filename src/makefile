@@ -49,6 +49,11 @@ ifeq ($(UNAME),Linux)
       MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
+   ifeq ($(HOST),shankara12)
+      VENDOR=INTEL
+      MPI = -DUSE_MPI -I/users/contrib/lam/include
+      MPILIB =   -L/users/contrib/lam/lib -llamf77mpi -lmpi -llam -lpthread
+   endif
    ifeq ($(HOST),pinkish.lanl.gov)
       #MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
       #MPILIB =-L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm -lpthread
