@@ -84,9 +84,9 @@ do idel=1,ndelta
    rvec = dir(:,idir)*delta_val(idel)
    rhat = rvec/sqrt(rvec(1)**2+rvec(2)**2+rvec(3)**2)
    call compute_perp(rhat,rperp1,rperp2)
-
 #if 1
 ! check orthoginality
+   print *,'idel,idir',idel,idir
    print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
      sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
      sqrt(rperp2(1)**2+rperp2(2)**2+rperp2(3)**2)
@@ -97,6 +97,7 @@ do idel=1,ndelta
         rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
 
 #endif
+
 
 
 do k=nz1,nz2
@@ -293,9 +294,10 @@ allocate(D_ltt(ndelta,ndir,2))
 do idel=1,ndelta
 do idir=1,ndir
    rvec = dir(:,idir)*delta_val(idel)
-   r_val(idel,idir) =sqrt(rvec(1)**2+rvec(2)**2+rvec(3)**2)
+   r_val(idel,idir) =(rvec(1)**2+rvec(2)**2+rvec(3)**2)
 enddo
 enddo
+r_val=sqrt(r_val)
 
 
 end subroutine
