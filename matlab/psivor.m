@@ -8,15 +8,15 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 %range=0:.05:1.00;
-range=1:1.0:1000.0;
+range=15:1.0:1000.0;
 %range=[.00];
 %name='../src/kh/khK';
-%name='../src/vxpair/vx3072b_';
-name='../src/temp';
+name='../src/vxpair/vx3072b_';
+%name='../src/temp';
 
 
 usefig=1;
-mkpr=0;            % make ps and jpeg files
+mkpr=1;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
 
