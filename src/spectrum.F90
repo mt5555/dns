@@ -36,6 +36,7 @@ integer,private :: iwave=-1
 
 
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
+real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -66,15 +67,18 @@ real*8 :: time
 integer :: iwave_max,i,n
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_k2(0:max(g_nx,g_ny,g_nz))
 
 iwave_max=max(g_nx,g_ny,g_nz)
 spec_r=0
 spec_diff=0
 spec_r2=0
 spec_d2=0
+spec_k2=0
 spec_x=0
 spec_y=0
 spec_z=0
+spec_kEk=0
 
 q1=Q
 
@@ -94,9 +98,10 @@ enddo
 
 do i=1,ndim
    call fft3d(q1(1,1,1,i),work1)
-   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
+   call compute_spectrum2(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,spec_k2,&
        spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,1)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
+   spec_kEk(:)=spec_kEk(:)+spec_k2
    ! for now, use the value computed in RHS
    ! spec_diff=spec_diff + spec_d2
 enddo
@@ -490,6 +495,20 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_helicity_rp,1+iwave)
    call cclose(fid,ierr)
 
+
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".kspec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "output_helicity_spec(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_kEk,1+iwave)
+   call cclose(fid,ierr)
+
+
    write(message,'(f10.4)') 10000.0000 + time_file
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".cospec"
    call copen(message,access,fid,ierr)
@@ -678,11 +697,6 @@ end subroutine
 
 
 
-
-
-
-
-
 subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,&
    spectrum_z,iwave_max,pe,skip_fft)
 !
@@ -707,7 +721,47 @@ real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)
 real*8 :: spec_d(0:iwave_max)
-real*8 :: spec_kEk(0:iwave_max)
+real*8 :: spectrum_x(0:g_nx/2)
+real*8 :: spectrum_y(0:g_ny/2)
+real*8 :: spectrum_z(0:g_nz/2)
+
+! local
+real*8 :: spec_k(0:iwave_max)
+
+call compute_spectrum2(pin,p,work,spectrum,spec_d,spec_k,spectrum_x,&
+spectrum_y,spectrum_z,iwave_max,pe,skip_fft)
+
+end subroutine
+
+
+
+
+
+subroutine compute_spectrum2(pin,p,work,spectrum,spec_d,spec_k,spectrum_x,spectrum_y,&
+   spectrum_z,iwave_max,pe,skip_fft)
+!
+!  INPUT:  iwave_max:  size of spectrum()
+!  OUTPUT: iwave:      number of coefficients returned in spectrum()
+!          spectrum()  spherical wave number spectrum
+!          spec_d()    spherical wave number spectrum of diffusion term
+!          spectrum_x  spectrum in x
+!          spectrum_y  spectrum in y
+!          spectrum_z  spectrum in z
+!
+!  skip_fft=0    pin = grid point data - take FFT
+!  skip_fft=1    pin = FFT data, skip the FFT
+!
+use params
+use mpi
+implicit none
+integer :: iwave_max,ierr,skip_fft
+integer :: pe             ! compute spectrum on this processor
+real*8 :: pin(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
+real*8 :: p(nx,ny,nz)
+real*8 :: spectrum(0:iwave_max)
+real*8 :: spec_d(0:iwave_max)
+real*8 :: spec_k(0:iwave_max)
 real*8 :: spectrum_x(0:g_nx/2)
 real*8 :: spectrum_y(0:g_ny/2)
 real*8 :: spectrum_z(0:g_nz/2)
@@ -733,6 +787,7 @@ spec_d=0
 spectrum_x=0
 spectrum_y=0
 spectrum_z=0
+spec_k=0
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -762,7 +817,7 @@ do i=nx1,nx2
     ! compute k E(k)
     xw=sqrt(rwave*pi2_squared)
     denergy=-xfac*xw*p(i,j,k)*p(i,j,k)
-    ! spec_kEk(iwave)=spec_kEk(iwave)+denergy
+    spec_k(iwave)=spec_k(iwave)+denergy
 
 
 enddo
@@ -779,6 +834,12 @@ spectrum_in(0:g_ny/2)=spectrum_y
 call MPI_reduce(spectrum_in,spectrum_y,1+(g_ny/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 spectrum_in(0:g_nz/2)=spectrum_z
 call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+
+spectrum_in=spec_d
+call MPI_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spectrum_in=spec_k
+call MPI_reduce(spectrum_in,spec_k,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+
 #endif
 
 if (g_nz == 1)  then
@@ -791,6 +852,8 @@ iwave = (iwave/2)           ! max wave number in sphere.
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
    spectrum(iwave+1)=spectrum(iwave+1)+spectrum(i)
+   spec_d(iwave+1)=spec_d(iwave+1)+spec_d(i)
+   spec_k(iwave+1)=spec_k(iwave+1)+spec_k(i)
 enddo
 iwave=iwave+1
 
