@@ -138,7 +138,7 @@ dep:
 
 -include .depends
 
-ns_alpha.o: ns.F90
+ns_alpha.o: ns.F90 ns.o
 	$(COMPILE) -DALPHA_MODEL -o ns_alpha.o ns.F90
 
 params.h:  

@@ -49,10 +49,14 @@ real*8  :: pi,pi2,pi2_squared
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! initial condition and forcing
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+integer :: restart=0
 integer :: init_cond      ! 0 = KH vortex blob
                           ! 1 = KH analytic
                           ! 2 = random, isotropic, .5 < wave no. < 2.5
                           !     E(1)=1, E(2)=2**(-5/3)
+integer :: init_cond_subtype   !  0 = default
+                               !  other vaules: set other parameters
+                               !  in the initial condition
 integer :: forcing_type   ! 0 = none
                           ! 1 = relax back to E(1)=1, E(2)=2**(-5/3)
                           !     can only be used by the z-decomp model!

@@ -211,19 +211,28 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 
 ! local variables
-integer i,j,k,l
+integer :: i,j,k,l,use3d=0
 real*8 :: eps
 real*8 :: amp
 
 Q=0
 
-k=nz1
-eps=200
-amp=.05
+if (init_cond_subtype==0) then
+   call print_message("Using thin shear layer initial condition")
+   eps=200
+   amp=.05
+else if (init_cond_subtype==1) then
+   ! E & Liu case:
+   call print_message("Using thick shear layer initial condition")
+   eps=10*pi
+   amp=.25
+else if (init_cond_subtype==3) then
+   use3d=1
+   call print_message("Using 3d shear layer initial condition")
+   eps=200
+   amp=.05
+endif
 
-! E & Liu case:
-eps=10*pi
-amp=.25
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -233,7 +242,7 @@ do i=nx1,nx2
    else
       Q(i,j,k,1)=tanh(eps*(.75-ycord(j)))
    endif
-   if (nslabz>16) then
+   if (use3d==1) then
       Q(i,j,k,2)=amp*sin(2*pi*xcord(i))*cos(2*pi*zcord(k))
    else
       Q(i,j,k,2)=amp*sin(2*pi*xcord(i))
@@ -241,19 +250,6 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-
-#if 0
-
-do k=nz1+1,nz2
-do i=nx1,nx2
-do j=ny1,ny2
-   Q(i,j,k,1)=Q(i,j,nz1,1)	
-   Q(i,j,k,2)=Q(i,j,nz1,2)	
-enddo
-enddo
-enddo
-#endif
-
 
    
 

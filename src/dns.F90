@@ -36,10 +36,14 @@ call init_grid
 write(message,'(a)') 'Initial data'
 call print_message(message)
 Q=0
-if (init_cond==0) call init_data_khblob(Q)
-if (init_cond==1) call init_data_kh(Q)
-if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
-if (init_cond==3) call init_data_restart(Q,work1,work2)
+if (restart==1) then
+   !if (init_cond==?) call initialize forcing if needed...
+   call init_data_restart(Q,work1,work2)
+else
+   if (init_cond==0) call init_data_khblob(Q)
+   if (init_cond==1) call init_data_kh(Q)
+   if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
+endif
 
 write(message,'(a)') 'Initial data projection'
 call print_message(message)

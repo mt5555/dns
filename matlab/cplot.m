@@ -10,15 +10,15 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %range=0:50;
 %range = 1
 %range=0:.50:2;
-range=.318310;
-
+range=[.39 ];
+name='../src/impulse/kh2';
+mkpr=1;
 
 for i=range
   ts=i;
   ts = sprintf('%9.5f',10000+ts);
   ts=ts(2:10);
-  %ts=['../src/kh/test',ts,'.vor']
-  ts=['../src/impulse/kh3',ts,'.vor']
+  ts=[name,ts,'.vor']
   fidvor=fopen(ts,'r');
   time=fread(fidvor,1,'float64')
   data=fread(fidvor,3,'float64');
@@ -72,10 +72,18 @@ for i=range
     figure(2)
     %pcolor(x,y,vor')
     %shading interp
-    contour(x,y,vor')
+    v=-35:5:35;
+    contour(x,y,vor',v)
     title(ts);
     axis square
-    %print -dpsc vor.ps 
+    if (mkpr) 
+      pname=[name,'.vor.ps'];
+      disp('creating ps...')
+      print('-depsc',pname);
+      pname=[name,'.vor.jpg'];
+      disp('creating jpg...')
+      print('-djpeg','-r 96',pname);
+    end
   end
   
   

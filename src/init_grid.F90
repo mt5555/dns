@@ -20,27 +20,74 @@ real*8 :: one=1,xfac,diff_2h,kmode
 integer i,j,k,l,ierr
 character(len=80) message
 integer input_file_type
+integer,external :: iargc
+
+
 
 call params_init()
 call transpose_init()
 call fft_interface_init()
 
 
+
 if (my_pe==io_pe) then
+   !
+   ! command line parameters
+   ! ./dns -r -d rundir  runname  
+   !
+   rundir="/tmp/"
+   runname="test"
+   i=0
+   do 
+      i=i+1
+      if (i>iargc()) exit
+      call getarg(i,message)
+
+      if (message(1:2)=="-r") then
+         restart=1
+      else if (message(1:2)=="-d") then
+         i=i+1
+         if (i>iargc()) exit
+         call getarg(i,rundir)
+         j=len_trim(rundir)
+         if (j>0) then
+            if (rundir(j:j)/="/") then
+               rundir(j+1:j+1)="/"
+            endif
+         endif
+      else if (message(1:1)/="-") then
+         ! this must be the runname
+         runname=message(1:len_trim(message))
+      else
+         print *,'Invalid options.'  
+         print *,'./dns  [-r] [-d rundir] [runname] < params.inp'
+      endif
+   enddo
+   print *,'Run name:         ',runname(1:len_trim(runname))
+   print *,'output directory: ',rundir(1:len_trim(rundir))
+
    print *,'Enter input file type: '
    read(*,*) input_file_type
    if (input_file_type==0) then
       print *,'Calling read_type0()'
       call read_type0()
-   else if (input_file_type==1) then
+   else if (input_file_type==2) then
       print *,'Calling read_type1()'
-      call read_type1()
+      call read_type2()
    else
       ! if you add a new variable and new input type, be sure to add
       ! it to the MPI broadcast!
       call abort("bad input file")
    endif
+
 endif
+
+
+
+
+
+
+
 
 ! Diffusion of mode k:
 ! d/dt (.5 u**2)  = - mu 2pi 2pi k k u**2
@@ -53,8 +100,6 @@ endif
 !    mu = diff_2h / (2 2pi 2pi k**2)
 ! 
 
-write(message,'(a,e10.4)') 'NS-alpha value=',alpha_value
-call print_message(message)
 
 write(message,'(a,e10.4)') 'Diffusion coefficient mu=',mu
 call print_message(message)
@@ -89,10 +134,12 @@ call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 
 
@@ -189,6 +236,15 @@ enddo
 
 
 
+!
+! scale alpha now that we know delx
+!
+if (alpha_value>=1.0) then
+   alpha_value=alpha_value*min(delx,dely,delz)
+endif
+write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
+     alpha_value,alpha_value/min(delx,dely,delz)
+call print_message(message)
 
 write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
 call print_message(message)
@@ -273,13 +329,15 @@ do i=1,ncustom
    read(*,*) custom(i)
 enddo
 
-init_cond=1      ! KH analytic - default initial condition
+init_cond=1           ! KH analytic - default initial condition
+init_cond_subtype=0   ! default parameters
 forcing_type=0   ! no forcing
+compute_struct=0
 struct_nx=0
 struct_ny=0
 struct_nz=0
 alpha_value=0
-rundir=""
+
 
 end subroutine
 
@@ -290,7 +348,7 @@ end subroutine
 
 
 
-subroutine read_type1
+subroutine read_type2
 use params
 use structf
 implicit none
@@ -301,31 +359,6 @@ character(len=20) sdata
 real*8 rvalue,xfac,kmode
 integer i
 
-
-read(*,'(a)') message
-do i=1,80
-   if (message(i:i)==' ') then
-      runname=message(1:i-1)
-      exit
-   endif
-enddo
-print *,'name: ',runname(1:i-1)
-read(*,'(a)') message
-do i=1,80
-   if (message(i:i)==' ') then
-      rundir=message(1:i-1)
-      exit
-   endif
-enddo
-if (i>1) then
-   if (rundir(i-1:i-1)/='/') then
-      rundir(i:i)='/'
-      i=i+1
-   endif
-   print *,'directory: ',rundir(1:i-1)
-else
-   print *,'directory: current working directory'
-endif
 
 read(*,'(a12)') sdata
 print *,'initial condition: ',sdata
@@ -342,6 +375,8 @@ else
    call abort("invalid initial condtion specified on line 3 on input file")
 endif
 
+read(*,*) init_cond_subtype
+
 
 read(*,'(a12)') sdata
 print *,'forcing: ',sdata
@@ -352,13 +387,6 @@ else if (sdata=='iso12') then
 else 
    call abort("invalid forcing type specified on line 4 on input file")
 endif
-
-
-read(*,*) struct_nx
-if (struct_nx==1) call abort("struct_nx = 1 in input file not allowed")
-read(*,*) struct_ny
-if (struct_ny==1) call abort("struct_ny = 1 in input file not allowed")
-read(*,*) struct_nz
 
 
 read(*,'(a12)') sdata
@@ -375,6 +403,7 @@ else
 endif
 
 read(*,*) alpha_value
+read(*,*) compute_struct
 
 
 read(*,'(a12)') sdata

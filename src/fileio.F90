@@ -98,6 +98,7 @@ time_target=min(time_target,time_next)
 ! dont write a restart file if we just restarted:
 if (time==time_initial .and. (init_cond==3)) doit_restart=.false.
 
+
 doit_output=check_time(itime,time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
 ! dont write output file if we just restarted:
@@ -435,27 +436,29 @@ deallocate(spectrum1)
 !
 ! output structure functions
 !
-call compute_all_pdfs(Q,q1,q2,q3,work1,ints_e,nints_e)
-
-
-write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
-(ints_e(n+3)/ints_e(n)**1.5,n=1,3)
-call print_message(message)
-
-
-if (structf_init==1) then
-if (my_pe==io_pe) then
-!   write(message,'(f10.4)') 10000.0000 + time
-!   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".sf"
-   call copen(message,access,fid,ierr)
-   if (ierr/=0) then
-      write(message,'(a,i5)') "outputSF(): Error opening file errno=",ierr
-      call abort(message)
+if (compute_struct==1) then
+   call compute_all_pdfs(Q,q1,q2,q3,work1,ints_e,nints_e)
+   
+   
+   write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
+        (ints_e(n+3)/ints_e(n)**1.5,n=1,3)
+   call print_message(message)
+   
+   
+   if (structf_init==1) then
+   if (my_pe==io_pe) then
+      !   write(message,'(f10.4)') 10000.0000 + time
+      !   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".sf"
+      call copen(message,access,fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "outputSF(): Error opening file errno=",ierr
+         call abort(message)
+      endif
    endif
-endif
-call outputSF(time,fid)
-if (my_pe==io_pe) call cclose(fid,ierr)
+   call outputSF(time,fid)
+   if (my_pe==io_pe) call cclose(fid,ierr)
+   endif
 endif
 
 
@@ -637,7 +640,7 @@ if (dt>0) then
    if (remainder < small) then
       check_time=.true.
    endif
-   time_next = time-remainder+dt
+   time_next = min(time_next,time-remainder+dt)
 
 endif
 
