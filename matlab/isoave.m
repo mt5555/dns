@@ -32,6 +32,8 @@ ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
 
+
+
 disp('1 = Scaling laws for total structure function');
 disp('2 = Scaling laws and also plot D+/-');
 disp('4 = 2nd and 3rd order isotropy check');
