@@ -23,7 +23,10 @@ spec_r_save_fac3=[];
 
 fid=fopen([namedir,name,'.hspec'],'r','l');
 
-time=fread(fid,1,'float64')
+[time,count]=fread(fid,1,'float64')
+if (count==0) 
+   disp('error reading hspec file')
+end
 
 
   n_r=fread(fid,1,'float64');

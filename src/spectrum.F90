@@ -70,6 +70,7 @@ spec_z=0
 
 q1=Q
 
+
 !
 !   pe=pe+.5*grav*Q(i,j,3)**2 - .5*grav*H0**2
 !   ke = ke + .5*Q(i,j,3)*Q(i,j,n)**2   n=1,2
@@ -79,13 +80,14 @@ q1=Q
 ! passive scalars:
 do n=np1,np2
    call compute_spectrum(q1(1,1,1,n),work1,work2,spec_r(0,n),spec_r2,&
-       spec_x(0,n),spec_y(0,n),spec_z(0,n),iwave_max,io_pe)
+       spec_x(0,n),spec_y(0,n),spec_z(0,n),iwave_max,io_pe,0)
 enddo
 
 
 do i=1,ndim
+   call fft3d(q1(1,1,1,i),work)
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,1)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
    ! for now, use the value computed in RHS
    ! spec_diff=spec_diff + spec_d2
@@ -102,7 +104,7 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 #endif
 
 ! q1 already contains the FFT of Q, so set skip_fft (last arg) to 1:
-call compute_helicity_spectrum(Q,q1,work1,io_pe,0)
+call compute_helicity_spectrum(Q,q1,work1,io_pe,1)
 
 end subroutine
 
@@ -150,7 +152,7 @@ q1(:,:,:,3)=(Q(:,:,:,3))
 !  PE part
 !
 call compute_spectrum(q1(1,1,1,3),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,io_pe)
+       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,io_pe,0)
 spec_r(:,1)=spec_r(:,1)+.5*grav*spec_r2
 spec_r(0,1)=spec_r(0,1) - .5*grav*H0**2
 
@@ -160,7 +162,7 @@ spec_r(0,1)=spec_r(0,1) - .5*grav*H0**2
 !
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,0)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
 enddo
 spec_x=.5*spec_x
@@ -221,7 +223,7 @@ q1(:,:,:,3)=(Q(:,:,:,3))
 !  PE part
 !
 call compute_spectrum(q1(1,1,1,3),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,io_pe)
+       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,io_pe,0)
 spec_r_new=spec_r_new+.5*grav*spec_r2
 spec_r_new(0)=spec_r_new(0) - .5*grav*H0**2
 
@@ -231,7 +233,7 @@ spec_r_new(0)=spec_r_new(0) - .5*grav*H0**2
 !
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,0)
    spec_r_new=spec_r_new+.5*spec_r2
 enddo
 
@@ -312,7 +314,7 @@ q1=Q
 ! compute spectrum in spec_r
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,0)
    spec_r_new=spec_r_new+.5*spec_r2
    ! for now, use the value computed in RHS
    ! spec_diff_new=spec_diff_new + spec_d2  
@@ -654,7 +656,8 @@ end subroutine
 
 
 
-subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,spectrum_z,iwave_max,pe)
+subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,&
+   spectrum_z,iwave_max,pe,skip_fft)
 !
 !  INPUT:  iwave_max:  size of spectrum()
 !  OUTPUT: iwave:      number of coefficients returned in spectrum()
@@ -664,6 +667,8 @@ subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,spe
 !          spectrum_y  spectrum in y
 !          spectrum_z  spectrum in z
 !
+!  skip_fft=0    pin = grid point data - take FFT
+!  skip_fft=1    pin = FFT data, skip the FFT
 !
 use params
 use mpi
@@ -694,7 +699,7 @@ iwave_max=nint(rwave)
 
 
 p=pin
-call fft3d(p,work)
+if (skip_fft==0) call fft3d(p,work)
 spectrum=0
 spec_d=0
 spectrum_x=0
