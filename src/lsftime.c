@@ -174,6 +174,10 @@ extern  void    ExceptionHandler( int nSignal )
 /* Written by Jerry Melendez, CIC-7                                     */
 /************************************************************************/
 
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <lsf/lsbatch.h>
 
 extern  int     FORTRAN(lsf_time_remaining)(int *TTRL) {
 typedef enum    { FALSE = 0, TRUE = 1 } Bool_t;
@@ -187,7 +191,6 @@ auto    char    *lsf_jobid_str;
 auto    int     lsf_jobid, more, numJobs;
 auto    struct  jobInfoEnt      *job;
 auto    time_t  Ctime;
-
 
         if (! lsf_data.initialized ) {
                 lsf_jobid_str = getenv("LSB_JOBID");

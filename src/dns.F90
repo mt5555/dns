@@ -179,6 +179,8 @@ real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
 real*8 :: tmx1,tmx2
+integer,external :: lsf_time_remaining
+integer :: lsftime
 
 
 
@@ -203,6 +205,13 @@ do
 
    call rk4(time,Q,Qhat,q1,q2,q3,work1,work2)
 
+   maxs(8)=-1  
+   if (my_pe==io_pe) then
+      if (lsf_time_remaining(lsftime)==0) then
+         maxs(8)=lsftime/100.0
+      endif
+   endif
+
 #ifdef USE_MPI
    ints_buf=ints
    call MPI_allreduce(ints_buf,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
@@ -213,10 +222,15 @@ do
    maxs(6)=time
    maxs(7)=time_old
 
-
+   if (maxs(8)>=0 .and. maxs(8)<30 .and. enable_lsf_timelimit) then
+      write(message,'(a,f20.10)') "LSF timelimit approaching. Stoping at time=",time
+      call print_message(message)
+      itime_final=itime
+   endif
    
    if (maxval(maxs(1:3))> 1000) then
-      print *,"max U > 1000. Stoping at time=",time
+      write(message,'(a,f20.10)') "max U > 1000. Stoping at time=",time
+      call print_message(message)
       itime_final=itime
    endif
 

@@ -1,8 +1,8 @@
 bc.o: params.o makefile 
 dns.o: macros.h params.o mpi.o structf.o makefile 
 fft99_interface.o: macros.h makefile 
-fftcpq_interface.o: macros.h <cxmldef.for> makefile 
 fft_interface.o: fftstk_interface.F90 fftsgi_interface.F90 fftcpq_interface.F90 fft99_interface.F90 makefile 
+fftcpq_interface.o: macros.h <cxmldef.for> makefile 
 fftops.o: macros.h params.o fft_interface.o transpose.o ghost.o makefile 
 fftsgi_interface.o: macros.h makefile 
 fftstk_interface.o: macros.h makefile 
@@ -13,13 +13,13 @@ init_grid.o: macros.h params.o structf.o transpose.o fft_interface.o mpi.o makef
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
 mpi.o: makefile 
-ns_decomp3.o: macros.h params.o transpose.o makefile 
 ns.o: macros.h params.o structf.o transpose.o sforcing.o makefile 
+ns_decomp3.o: macros.h params.o transpose.o makefile 
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
 params.o: macros.h transpose.h params.h makefile 
 sforcing.o: macros.h params.o mpi.o makefile 
-shallow.o: macros.h params.o fft_interface.o makefile 
+shallow.o: macros.h params.o fft_interface.o sforcing.o transpose.o makefile 
 solve.o: macros.h params.o mpi.o makefile 
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 test.o: macros.h params.o transpose.o mpi.o fft_interface.o makefile 

@@ -33,9 +33,14 @@ call fft_interface_init()
 if (my_pe==io_pe) then
    !
    ! command line parameters
-   ! ./dns -r -d rundir  runname  
+   ! ./dns -i -r -d rundir  runname  
    !
-   rundir="/tmp/"
+   !   -i   disable LSF timelimit feature.  Only needed if you are 
+   !        running under LSF and dont want the code to stop with 30min left
+   !
+   !   -r   use a restart file for the initial conditions
+   !
+   rundir="./"
    runname="test"
    i=0
    do 
@@ -45,6 +50,8 @@ if (my_pe==io_pe) then
 
       if (message(1:2)=="-r") then
          restart=1
+      else if (message(1:2)=="-i") then
+         enable_lsf_timelimit=.false.
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit
@@ -60,7 +67,7 @@ if (my_pe==io_pe) then
          runname=message(1:len_trim(message))
       else
          print *,'Invalid options.'  
-         print *,'./dns  [-r] [-d rundir] [runname] < params.inp'
+         print *,'./dns  [-i] [-r] [-d rundir] [runname] < params.inp'
       endif
    enddo
    print *,'Run name:         ',runname(1:len_trim(runname))

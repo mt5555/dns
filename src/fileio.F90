@@ -26,16 +26,8 @@ real*8,save :: delea_tot=0,delke_tot=0
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
 
-integer,external :: lsf_time_remaining
-integer :: lsftime
 
 call wallclock(tmx1)
-
-if (lsf_time_remaining(lsftime)==0) then
-   if (lsftime <30) then
-      time_final=time
-   endif
-endif
 
 
 time_target=time_final
@@ -156,7 +148,8 @@ if (itime<5 .and. screen_dt/=0) doit_screen=.true.
 !
 if (doit_screen) then
    call print_message("")
-   write(message,'(a,f9.5,a,i5,a,f9.5)') 'time=',time,'(',itime,')  next output=',time_target
+   write(message,'(a,f9.5,a,i5,a,f9.5,a,f6.0,l)') 'time=',time,'(',itime,')  next output=',time_target, &
+      '  LSF minutes left: ',maxs(8),enable_lsf_timelimit
    call print_message(message)	
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'for next timestep: delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis

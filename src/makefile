@@ -56,15 +56,21 @@ ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPI = -DUSE_MPI
    MPILIB = -lmpi 
-   LDFLAGS =  -l scs #-Lstk -lstk
-   FFLAGS = -64 -Ofast -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT -DUSE_LSFTIME $(MPI)
-   CC = cc -64
+   LSFLIB = -L /lsf/lib64 -lbat -llsf 
+   LSFFLAGS = -I /lsf/share/include -DUSE_LSFTIME
+
+   LDFLAGS =  -l scs $(LSFLIB)  #-Lstk -lstk
+   FFLAGS = -64 -Ofast -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
+   CPPFLAGS = 
+   CC = cc -64 $(LSFFLAGS)
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
    ifeq ($(HOST),mahi)
       MPI = 
       MPILIB =  
+      LSFLIB = 
+      LSFFLAGS = 
    else
    ifeq ($(HOST),truchas)
       MPI = -DUSE_MPI -I/usr/opt/MPI190/include
@@ -72,14 +78,18 @@ ifeq ($(UNAME),OSF1)
    else	
       MPI = -DUSE_MPI -I/usr/opt/MPI/include
       MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+      LSFLIB = -L /lsf/lib64 -lbat -llsf 
+      LSFFLAGS = -I /lsf/include -DUSE_LSFTIME
    endif
    endif
 
-   LDFLAGS =  $(MPILIB) -lcxml #-Lstk -lstk 
+
+   LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  #-Lstk -lstk 
 
    #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -recursive -fast -DOSF1  $(MPI) -DUSE_STKFFT  
    FFLAGS = -fast  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
+   CC = cc $(LSFFLAGS)
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)

@@ -41,6 +41,7 @@ real*8  :: mu_hyper=0     !set to 1 to enable hyper viscosity
 real*8  :: alpha_value=0      !for the alpha model  
 real*8  :: H0=0               ! for shallow water model
 integer,parameter :: r8kind=kind(mu)
+logical :: enable_lsf_timelimit = .true.
 logical :: dealias       
 integer :: numerical_method=0      ! 0 = FFT
                                    ! 1 = 4th order F.D.
@@ -170,6 +171,7 @@ real*8 :: diag_dt = 0       ! diagnostics
 real*8 :: screen_dt = 0     ! screen output
 real*8 :: restart_dt = 0    ! restart 
 
+#if 0
 ! set to > 0 to cause time stepping loop to exit.  if more than one cpu sets
 ! error_code > 0, the largest value will be reported.  
 !
@@ -178,7 +180,7 @@ real*8 :: restart_dt = 0    ! restart
 ! error_code = 3   
 !
 integer :: error_code =0
-
+#endif
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -232,7 +234,7 @@ real*8 :: ints(nints),maxs(nints)
 ! for convience, we store the time data in maxs(6:7)
 ! maxs(6) = time (at end of time step)  T
 ! maxs(7) = time at begining of time step T-1
-! maxs(8) = 
+! maxs(8) = time (in min) remaining from LSF job (or -1).
 ! maxs(9) = 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
