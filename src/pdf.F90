@@ -672,7 +672,7 @@ end subroutine
 
 
 
-subroutine compute_all_pdfs(Q,gradu,gradv,gradw,work,scalars,ns)
+subroutine compute_all_pdfs(Q,gradu,gradv,gradw,work,work2,scalars,ns)
 !
 !
 use params
@@ -683,6 +683,7 @@ integer :: ns
 real*8 :: scalars(ns)
 real*8 Q(nx,ny,nz,n_var)    
 real*8 work(nx,ny,nz)
+real*8 work2(nx,ny,nz)
 real*8 gradu(nx,ny,nz,n_var)    
 real*8 gradv(nx,ny,nz,n_var)    
 real*8 gradw(nx,ny,nz,n_var)    
@@ -692,7 +693,6 @@ real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3),S2sum
-real*8 :: S(3,3)
 real*8 dummy(1)
 real*8 :: tmx1,tmx2
 
@@ -730,29 +730,6 @@ work=mu*work
 call compute_pdf_epsilon(work)
 
 
-#if 0
-! cj structure functions
-! 
-! note: fix S2 below.  it is wrong
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
-   vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
-   vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
-   v2(i,j,k)=vor(1)**2+vor(2)**2+vor(3)**2
-   S(m1,m2)=      
-enddo
-enddo
-enddo
-
-! compute integrals of:
-! <v2(x),v2(x+r)>
-! <S2(x),S2(x+r)>
-! <S2(x),v2(x+r)>
-!
-#endif
-
 
 
 ! scalars
@@ -789,6 +766,7 @@ do i=nx1,nx2
          ! S(m1,m2) = .5*(uij_uji)
          Sw(m1)=Sw(m1)+.5*(uij+uji)*vor(m2)
          !wS(m2)=wS(m2)+.5*(uij+uji)*vor(m1)
+         S2sum=S2sum + (.5*(uij+uji))**2
       enddo
    enddo
    ! compute Sww = wi*(Sij*wj)
@@ -821,6 +799,63 @@ ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux3/g_nx/g_ny/g_nz
 ux4=ux4/g_nx/g_ny/g_nz
 u2=u2/g_nx/g_ny/g_nz
+
+
+
+
+#if 0
+
+! cj structure functions
+! 
+! work = vor**2
+! work2 = S**2
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
+   vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
+   vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
+   work(i,j,k)=vor(1)**2+vor(2)**2+vor(3)**2
+
+   do m1=1,3
+   do m2=1,3
+      if (m1==1) uij=gradu(i,j,k,m2)
+      if (m1==2) uij=gradv(i,j,k,m2)
+      if (m1==3) uij=gradw(i,j,k,m2)
+      if (m2==1) uji=gradu(i,j,k,m1)
+      if (m2==2) uji=gradv(i,j,k,m1)
+      if (m2==3) uji=gradw(i,j,k,m1)
+      !S(m1,m2)= .5*(uij+uji)
+      work2(i,j,k) =   work2(i,j,k) + ( .5*(uij+uji) ) **2     
+   enddo
+   enddo
+enddo
+enddo
+enddo
+
+! compute integrals of:
+! <v2(x),v2(x+r)>
+! <S2(x),S2(x+r)>
+! <S2(x),v2(x+r)>
+!
+! overwrite gradu in the process
+! v2 v2 structure functions:
+call transpose_to_x(work,gradu,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_x(work,gradv,n1,n1d,n2,n2d,n3,n3d)
+call compute_structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,v2S2_str,1)
+call transpose_to_y(work,gradu,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_y(work,gradv,n1,n1d,n2,n2d,n3,n3d)
+call compute_structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,v2S2_str,2)
+call transpose_to_z(work,gradu,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_z(work,gradv,n1,n1d,n2,n2d,n3,n3d)
+call compute_structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,v2S2_str,3)
+
+
+
+
+#endif
+
+
 
 ASSERT("compute_all_pdfs: ns too small ",ns>=14)
 do n=1,3

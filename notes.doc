@@ -7,6 +7,8 @@ E&Liu KH problem.
 
 
 
+1. verify <s**2> = .5*vor**2    for iso/homogeneity
+
 1. change NS-alpha so forcing always appears as just 'f'
    see nots about ints(3) and ints(9) in params.F90
 

@@ -457,7 +457,7 @@ deallocate(spectrum1)
 ! output structure functions
 !
 if (compute_struct==1) then
-   call compute_all_pdfs(Q,q1,q2,q3,work1,ints_e,nints_e)
+   call compute_all_pdfs(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
    
    
    write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
