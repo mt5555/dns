@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2001 University Corporation for Atmospheric Research 
  *       
- * $Id: fortran.c,v 1.3 2001-08-20 18:33:27 mt Exp $
+ * $Id: fortran.c,v 1.4 2001-08-20 22:38:54 mt Exp $
  */
 
 
@@ -87,10 +87,19 @@ void _Fortran(cfft_synthesis) (complex *c,cfft **X)
 
 void _Fortran(rfft_analysis) (real *c,rfft **X) 
 { 
-  rfftAnalysis2(c,*X); 
+  rfftAnalysis(c,*X); 
 }
 
 void _Fortran(rfft_synthesis) (real *c,rfft **X) 
+{ 
+  rfftSynthesis(c,*X); 
+}
+void _Fortran(rfft_analysis2) (real *c,rfft **X) 
+{ 
+  rfftAnalysis2(c,*X); 
+}
+
+void _Fortran(rfft_synthesis2) (real *c,rfft **X) 
 { 
   rfftSynthesis2(c,*X); 
 }
@@ -126,5 +135,20 @@ void _Fortran(rfft_synthesis_m) (real *c,rfft **X,int *m,int *n)
   if((*m<=0)||(*n<(*X)->n))
     fortranError("rfft_synthesis_m:: argument out of range");
   rfftSynthesisM(c,*X,*n,0,*m);
+}
+void _Fortran(rfft_analysis_m2) (real *c,rfft **X,int *m,int *n) 
+{ 
+  int i;
+  if((*m<=0)||(*n<(*X)->n))
+    fortranError("rfft_analysis_m:: argument out of range");
+  rfftAnalysisM2(c,*X,*n,0,*m);
+}
+
+void _Fortran(rfft_synthesis_m2) (real *c,rfft **X,int *m,int *n) 
+{ 
+  int i;
+  if((*m<=0)||(*n<(*X)->n))
+    fortranError("rfft_synthesis_m:: argument out of range");
+  rfftSynthesisM2(c,*X,*n,0,*m);
 }
 

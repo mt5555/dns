@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2001 University Corporation for Atmospheric Research 
  *       
- * $Id: rfftSynthesis.c,v 1.2 2001-08-20 18:33:27 mt Exp $
+ * $Id: rfftSynthesis.c,v 1.3 2001-08-20 22:38:54 mt Exp $
  */
 
 #include "rfft.h"
@@ -144,6 +144,18 @@ void rfftSynthesisM(real *c,rfft *X,int n,int p,int m)
   for(i=p;i<p+m;i++)
     {
       rfftSynthesis(c,X);
+      c=c+n;
+    }
+}
+
+
+void rfftSynthesisM2(real *c,rfft *X,int n,int p,int m)
+{
+  int i;
+  c=c+p*n;
+  for(i=p;i<p+m;i++)
+    {
+      rfftSynthesis2(c,X);
       c=c+n;
     }
 }

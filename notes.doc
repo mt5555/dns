@@ -52,13 +52,13 @@ STK2+gcc                   1.72  1.71
 
 
 
-Autrey FFT99  (Sun Ultra 60):    1.92  1.98 1.97
-Autrey STK    (Sun Ultra 60):    1.63  1.57 1.55 1.59
+Autrey FFT99  (Sun Ultra 60):    2.17  2.00 2.01
+Autrey STK2   (Sun Ultra 60):    1.53  1.57 
 
 
 
 truchas FFT99 (Compaq ES40):   .34  .34  .34
-truchas STK   (Compaq ES40):   .45  .45 
+truchas STK2  (Compaq ES40):   .39  .39  .39
 
 
 1024x1024x1 timings (1cpu)  runsize: 380M
@@ -66,15 +66,15 @@ truchas STK   (Compaq ES40):   .45  .45
 CFL=1.5/.25
 
 Linux laptop PGI F90
-FFT99          3.85  3.87
+FFT99        
 STK+gcc       
-STK+PGCC       3.27  3.27
+STK+PGCC     
 
 Autrey FFT99  (Sun Ultra 60):
 Autrey STK    (Sun Ultra 60):
 
-truchas FFT99 (Compaq ES40): 
-truchas STK   (Compaq ES40): 
+truchas FFT99 (Compaq ES40):    1.70  1.74  
+truchas STK   (Compaq ES40):    1.60
 
 
 
