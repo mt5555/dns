@@ -291,12 +291,14 @@ implicit none
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
 integer :: model_spec
-integer km,jm,im,i,j,k,n,wn,ierr,kfmax
+integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
 real*8 ener(numb_max),temp(numb_max),Qdel(3)
 real*8,allocatable :: rmodes(:,:,:,:)
 real*8,allocatable :: rmodes2(:,:,:,:)
 real*8,allocatable :: cmodes(:,:,:,:,:)
+real*8 RR(3),II(3)
+
 character(len=80) :: message
 
 
@@ -418,7 +420,22 @@ enddo
 ! convert to complex FFT coefficients
 call sincos_to_complex(rmodes,cmodes,numb)
 
+
+
 ! apply helicity fix:
+do i=-numb,numb
+do j=-numb,numb
+do k=-numb,numb
+   k2=i**2 + j**2 + k**2
+   if (k2 < (.5+numb)**2 ) then
+      RR = cmodes(1,:,i,j,k)
+      II = cmodes(2,:,i,j,k)
+   endif
+enddo
+enddo
+enddo
+
+
 
 ! convert back:
 call complex_to_sincos(rmodes,cmodes,numb)
