@@ -285,7 +285,7 @@ endif
 
 
 if (init==1) then
-   i=100
+   i=500
    call allocate_tracers(i+1)
    delalf = pi/(2*i)
    do k=0,i
