@@ -20,7 +20,7 @@ ifeq ($(UNAME),Linux)
 
    #F90 = lf95
    #FFLAGS = -O -DLINUX $(MPI)
-   #LDFLAGS = --staticlink 
+   #LDFLAGS = --staticlink  -Lstk -lstk
 
    F90 = pgf90
    FFLAGS = -fast -DLINUX $(MPI) #-DUSE_STKFFT
