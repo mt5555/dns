@@ -61,8 +61,15 @@ endif
 end subroutine
 
 
-
-subroutine divfree(u,p,work,work2)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! three methods for divergence free projection.  All require 18 total FFTs
+! (1) grid space method using derivative operators.  Cant dealias without extra FFTs
+! (2) spectral space method, can dealias for free
+! (3) same as (2) but with loops are fused.
+! does either (2) or (3) have better performance? 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine divfree_gridspace(u,p,work,work2)
 !
 ! make u divergence free
 !    solve:  div(u) = laplacian(p)
@@ -74,21 +81,19 @@ use params
 use fft_interface
 implicit none
 real*8 u(nx,ny,nz,3)
-real*8 work(nx,ny,nz)
-real*8 work2(nx,ny,nz)
-real*8 p(nx,ny,nz)
+real*8          :: p(nx,ny,nz)
 
-!local variables
+! not needed for non GRIDMETHOD
+real*8,optional :: work(nx,ny,nz)
+real*8,optional :: work2(nx,ny,nz)
 real*8 :: dummy(1)
 real*8 :: alpha=0
 real*8 :: beta=1
+
+
+!local variables
 integer i,j,k
 
-!
-! two methods.  both require 18 total FFT's but second method has
-! the advantage that we can also dealias at no additional cost
-!
-#if 0
 call divergence(p,u,work,work2)
 
 ! solve laplacian(p)=div(u)
@@ -108,8 +113,28 @@ if (dealias) then
    enddo
 endif
 
+end subroutine
 
-#else
+
+
+
+
+subroutine divfree(u,p)
+!
+! make u divergence free
+!    solve:  div(u) = laplacian(p)
+!    then:   unew = u - grad(p)
+!    
+! 
+!
+use params
+use fft_interface
+implicit none
+real*8 u(nx,ny,nz,3)
+real*8 p(nx,ny,nz)
+
+!local variables
+integer i,j,k
 integer im,jm,km,i2,j2,k2
 real*8 :: uu,vv,ww,xfac
 
@@ -119,7 +144,7 @@ ASSERT("divfree(): nslaby must be even ",mod(nslaby,2)==0)
 ASSERT("divfree(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
 
 do i=1,3
-   call fft3d(u(1,1,1,i),work)
+   call fft3d(u(1,1,1,i),p)
 enddo
 
    do k=nz1,nz2
@@ -203,15 +228,202 @@ enddo
 
 do i=1,3
    if (dealias) call fft_filter_dealias(u(1,1,1,i))
-   call ifft3d(u(1,1,1,i),work)
+   call ifft3d(u(1,1,1,i),p)
 enddo
-#endif
-
-
-
-
-
 end subroutine
+
+
+
+
+
+
+subroutine divfree_loopfused(u,p)
+!
+! make u divergence free
+!    solve:  div(u) = laplacian(p)
+!    then:   unew = u - grad(p)
+!
+!  u  input/output 
+!  p is used as a work array    
+! 
+!
+use params
+use fft_interface
+implicit none
+real*8 u(nx,ny,nz,3)
+real*8 p(nx,ny,nz)
+
+!local variables
+integer i,j,k
+integer im,jm,km,i0,i1,j0,j1,k0,k1,n
+real*8 :: xfac
+integer ii,jj,kk
+
+real*8 pi0j0k0
+real*8 pi1j0k0
+real*8 pi0j1k0
+real*8 pi1j1k0
+real*8 pi0j0k1
+real*8 pi1j0k1
+real*8 pi0j1k1
+real*8 pi1j1k1 
+
+ASSERT("divfree(): nslabx must be even ",mod(nslabx,2)==0)
+ASSERT("divfree(): nslaby must be even ",mod(nslaby,2)==0)
+ASSERT("divfree(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
+
+do i=1,3
+   call fft3d(u(1,1,1,i),p)
+enddo
+
+p=0
+   do k=nz1,nz2,2
+      km=kmcord(k)
+      if (km==g_nz/2) km=0
+      do j=ny1,ny2,2
+         jm=jmcord(j)
+         if (jm==g_ny/2) jm=0
+         do i=nx1,nx2,2
+            im=imcord(i)
+            if (im==g_nx/2) im=0
+
+            ! compute the divergence
+            ! compute laplacian inverse
+            xfac= (im*im +km*km + jm*jm)
+            if (xfac/=0) xfac = -1/xfac
+
+            i0=i
+            i1=i+1
+            j0=j
+            j1=j+1
+            k0=k
+            k1=k+1
+            if (g_nz==1) k1=k ! ignore k, we are doing a 2d problem.  km=0
+
+            !                  u_x                  v_y               w_z
+            pi0j0k0 = (-im*u(i1,j0,k0,1)  -  jm*u(i0,j1,k0,2) - km*u(i0,j0,k1,3))*xfac
+            pi1j0k0 = ( im*u(i0,j0,k0,1)  -  jm*u(i1,j1,k0,2) - km*u(i1,j0,k1,3))*xfac
+            pi0j1k0 = (-im*u(i1,j1,k0,1)  +  jm*u(i0,j0,k0,2) - km*u(i0,j1,k1,3))*xfac
+            pi1j1k0 = ( im*u(i0,j1,k0,1)  +  jm*u(i1,j0,k0,2) - km*u(i1,j1,k1,3))*xfac
+
+            if (g_nz>1) then
+            pi0j0k1 = (-im*u(i1,j0,k1,1)  -  jm*u(i0,j1,k1,2) + km*u(i0,j0,k0,3))*xfac
+            pi1j0k1 = ( im*u(i0,j0,k1,1)  -  jm*u(i1,j1,k1,2) + km*u(i1,j0,k0,3))*xfac
+            pi0j1k1 = (-im*u(i1,j1,k1,1)  +  jm*u(i0,j0,k1,2) + km*u(i0,j1,k0,3))*xfac
+            pi1j1k1 = ( im*u(i0,j1,k1,1)  +  jm*u(i1,j0,k1,2) + km*u(i1,j1,k0,3))*xfac
+            endif
+
+            ! u = u - px
+            u(i0,j0,k0,1) = u(i0,j0,k0,1) + im*pi1j0k0
+            u(i1,j0,k0,1) = u(i1,j0,k0,1) - im*pi0j0k0
+            u(i0,j1,k0,1) = u(i0,j1,k0,1) + im*pi1j1k0
+            u(i1,j1,k0,1) = u(i1,j1,k0,1) - im*pi0j1k0
+            if (g_nz>1) then
+            u(i0,j0,k1,1) = u(i0,j0,k1,1) + im*pi1j0k1
+            u(i1,j0,k1,1) = u(i1,j0,k1,1) - im*pi0j0k1
+            u(i0,j1,k1,1) = u(i0,j1,k1,1) + im*pi1j1k1
+            u(i1,j1,k1,1) = u(i1,j1,k1,1) - im*pi0j1k1
+            endif
+
+            ! v = v - py
+            u(i0,j0,k0,2) = u(i0,j0,k0,2) + jm*pi0j1k0
+            u(i1,j0,k0,2) = u(i1,j0,k0,2) + jm*pi1j1k0
+            u(i0,j1,k0,2) = u(i0,j1,k0,2) - jm*pi0j0k0
+            u(i1,j1,k0,2) = u(i1,j1,k0,2) - jm*pi1j0k0
+            if (g_nz>1) then
+            u(i0,j0,k1,2) = u(i0,j0,k1,2) + jm*pi0j1k1
+            u(i1,j0,k1,2) = u(i1,j0,k1,2) + jm*pi1j1k1
+            u(i0,j1,k1,2) = u(i0,j1,k1,2) - jm*pi0j0k1
+            u(i1,j1,k1,2) = u(i1,j1,k1,2) - jm*pi1j0k1
+            endif
+
+
+            ! v = v - pz
+            if (g_nz>1) then
+            u(i0,j0,k0,3) = u(i0,j0,k0,3) + km*pi0j0k1
+            u(i1,j0,k0,3) = u(i1,j0,k0,3) + km*pi1j0k1
+            u(i0,j1,k0,3) = u(i0,j1,k0,3) + km*pi0j1k1
+            u(i1,j1,k0,3) = u(i1,j1,k0,3) + km*pi1j1k1
+            u(i0,j0,k1,3) = u(i0,j0,k1,3) - km*pi0j0k0
+            u(i1,j0,k1,3) = u(i1,j0,k1,3) - km*pi1j0k0
+            u(i0,j1,k1,3) = u(i0,j1,k1,3) - km*pi0j1k0
+            u(i1,j1,k1,3) = u(i1,j1,k1,3) - km*pi1j1k0
+            endif
+
+            if (dealias) then
+            if ( ((km>=g_nz/3) .and. (km>0)) .or. &
+                 ((jm>=g_ny/3) .and. (jm>0)) .or. &
+                 ((im>=g_nx/3) .and. (im>0)) )  then
+               do n=1,3
+                  u(i0,j0,k0,n) = 0
+                  u(i1,j0,k0,n) = 0
+                  u(i0,j1,k0,n) = 0
+                  u(i1,j1,k0,n) = 0
+                  u(i0,j0,k1,n) = 0
+                  u(i1,j0,k1,n) = 0
+                  u(i0,j1,k1,n) = 0
+                  u(i1,j1,k1,n) = 0     
+               enddo
+            endif            
+            ! dont forget the last cosine mode, stored in 2nd array position.
+            ! it has its mode number set to zero for the above computations
+            if (im==0) then
+               do n=1,3
+                  u(i1,j0,k0,n) = 0
+                  u(i1,j1,k0,n) = 0
+                  u(i1,j0,k1,n) = 0
+                  u(i1,j1,k1,n) = 0
+               enddo
+            endif
+            if (jm==0) then
+               do n=1,3
+                  u(i0,j1,k0,n) = 0
+                  u(i1,j1,k0,n) = 0
+                  u(i0,j1,k1,n) = 0
+                  u(i1,j1,k1,n) = 0
+               enddo	
+            endif
+            if (km==0 .and. g_nz>1) then
+               do n=1,3
+                  u(i0,j0,k1,n) = 0
+                  u(i1,j0,k1,n) = 0
+                  u(i0,j1,k1,n) = 0
+                  u(i1,j1,k1,n) = 0
+               enddo
+            endif
+            endif
+
+         enddo
+      enddo
+   enddo
+
+
+do n=1,3
+   call ifft3d(u(1,1,1,n),p)
+enddo
+end subroutine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 subroutine vorticity(vor,u,d1,work)

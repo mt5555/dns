@@ -128,26 +128,26 @@ Q_old=Q
 
 ! stage 1
 call ns3D(rhs,Q_old,time,1,ints)
-call divfree(rhs,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
+call divfree(rhs,Q_tmp)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,ints)
-call divfree(rhs,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
+call divfree(rhs,Q_tmp)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,ints)
-call divfree(rhs,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
+call divfree(rhs,Q_tmp)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0,ints)
 Q=Q+delt*rhs/6.0
-call divfree(Q,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
+call divfree(Q,Q_tmp)
 
 ints(1)=0
 maxs=0

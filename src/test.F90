@@ -118,15 +118,15 @@ enddo
 ! remove that pesky highest cosine mode
 ! no longer needed, we tweaked laplacian so that it = div grad
 do i=1,3
-call fft3d(input(1,1,1,i),work)
-!call fft_filter_last(input(1,1,1,i))
-call ifft3d(input(1,1,1,i),work)
+   call fft3d(input(1,1,1,i),work)
+   call fft_filter_last(input(1,1,1,i))
+   call ifft3d(input(1,1,1,i),work)
 enddo
 #endif
 
 
 
-call divfree(input,p,work,d1)
+call divfree(input,p)
 
 ! compute p = div(u)
 i=1
