@@ -159,6 +159,7 @@ subroutine passive_KE_init(Q,work1,work2)
 ! low wave number, quasi isotropic initial condition
 !
 use params
+use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
@@ -268,9 +269,9 @@ do n=np1,np2
    call rescale_e(Q(1,1,1,n),work1,ener,enerb,enerb_target,NUMBANDS,1)
    ! convert to 0,1:
    ! filter
-   call fft3d(u(1,1,1,i),work)
-   call fft_filter_dealias(u(1,1,1,i))
-   call ifft3d(u(1,1,1,i),work)
+   call fft3d(Q(1,1,1,n),work1)
+   call fft_filter_dealias(Q(1,1,1,n))
+   call ifft3d(Q(1,1,1,n),work1)
 
    ! laplacian smoothing
 enddo
@@ -370,6 +371,7 @@ subroutine rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,nvec)
 !
 use params
 use transpose
+use mpi
 implicit none
 integer :: NUMBANDS,nvec
 real*8 :: Q(nx,ny,nz,nvec)
@@ -379,7 +381,7 @@ real*8 :: enerb(NUMBANDS)
 real*8 :: enerb_work(NUMBANDS)
 real*8 :: ener
 
-integer :: n,im,jm,km,i,j,k,nb
+integer :: n,im,jm,km,i,j,k,nb,ierr
 real*8 :: xfac,xw
 character(len=80) :: message
 

@@ -44,12 +44,10 @@ if ($1 == makeref) then
   mv reference3ds0000.0000.vs restart.vs
   mv reference3ds0000.0000.ws restart.ws
 
-
-
-
-  
-
 endif
+
+rm -f dns dnsgrid
+
 
 if ($1 == 1) then
 ./gridsetup.py 1 1 1 32 32 32
