@@ -604,8 +604,9 @@ endif
 
 if (compz) then
 
-   !
-   ! epsilon PDF calculations
+   ! compute:
+   ! 1. epsilon PDF calculations
+   ! 2. z-direction Q PDF
    !
    !   Qt = x or y transpose of (u,v,w)
    !
@@ -613,6 +614,7 @@ if (compz) then
    do n=1,3
       if (compx) then
          ! Qt = x transpoe of (u,v,w), computed above
+         ! compute x derivative
          call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
          call transpose_from_x(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
          work=work+w1(:,:,:,1)**2
@@ -656,6 +658,134 @@ end subroutine
 
 
 
+
+
+
+
+
+
+subroutine compute_all_pdfs(Q,scalars)
+!
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 :: scalars(13)
+real*8 Q(nx,ny,nz,n_var)    
+real*8 Qt(nx,ny,nz,n_var)    
+real*8 gradu(nx,ny,nz,n_var)    
+real*8 gradv(nx,ny,nz,n_var)    
+real*8 gradw(nx,ny,nz,n_var)    
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k,n,m1,m2
+real*8 :: vor(3),sum(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
+real*8 dummy(1)
+
+do n=1,3
+   call transpose_to_x(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1))
+
+do n=1,3
+   call transpose_to_y(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2))
+
+do n=1,3
+   call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3))
+
+
+do n=1,3
+   call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,Qt,DX_ONLY,n)
+   call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,Qt,DX_ONLY,n)
+   call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,Qt,DX_ONLY,n)
+enddo
+Qt(:,:,:,1)=0
+do n=1,3
+   Qt(:,:,:,1)=Qt(:,:,:,1)+gradu(:,:,:,n)**2
+   Qt(:,:,:,1)=Qt(:,:,:,1)+gradv(:,:,:,n)**2
+   Qt(:,:,:,1)=Qt(:,:,:,1)+gradw(:,:,:,n)**2
+enddo
+Qt(:,:,:,1)=mu*Qt(:,:,:,1)
+call compute_pdf_epsilon(Qt)
+
+
+
+Sww=0
+ux2=0
+ux3=0
+ux4=0
+u2=0
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   do n=1,3
+      u2(n)=u2(n)+Q(i,j,k,n)**2
+   enddo
+
+   vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
+   vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
+   vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
+
+   ! compute Sij*wj
+   do m1=1,3
+      sum(m1)=0
+      do m2=1,3
+         if (m1==1) uij=gradu(i,j,k,m2)
+         if (m1==2) uij=gradv(i,j,k,m2)
+         if (m1==3) uij=gradw(i,j,k,m2)
+         if (m2==1) uji=gradu(i,j,k,m1)
+         if (m2==2) uji=gradv(i,j,k,m1)
+         if (m2==3) uji=gradw(i,j,k,m1)
+         sum(m1)=sum(m1)+.5*(uij+uji)*vor(m2)
+      enddo
+   enddo
+   ! compute Sww = wi*(Sij*wj)
+   Sww=Sww+sum(1)*vor(1)+sum(2)*vor(2)+sum(3)*vor(3)
+
+   ! if we use gradu(i,j,k,1)**3, do we preserve the sign?  
+   ! lets not put f90 to that test!
+   uij=gradu(i,j,k,1)**2
+   ux2(1)=ux2(1)+uij
+   ux3(1)=ux3(1)+uij*gradu(i,j,k,1)
+   ux4(1)=ux4(1)+uij*uij
+
+   uij=gradv(i,j,k,2)**2
+   ux2(2)=ux2(2)+uij
+   ux3(2)=ux3(2)+uij*gradv(i,j,k,2)
+   ux4(2)=ux4(2)+uij*uij
+
+   uij=gradw(i,j,k,3)**2
+   ux2(3)=ux2(3)+uij
+   ux3(3)=ux3(3)+uij*gradw(i,j,k,3)
+   ux4(3)=ux4(3)+uij*uij
+
+enddo
+enddo
+enddo
+Sww=Sww/g_nx/g_ny/g_nz
+ux2=ux2/g_nx/g_ny/g_nz
+ux3=ux2/g_nx/g_ny/g_nz
+ux4=ux2/g_nx/g_ny/g_nz
+u2=u2/g_nx/g_ny/g_nz
+
+do n=1,3
+scalars(n)=ux2(n)
+scalars(n+3)=ux3(n)
+scalars(n+6)=ux4(n)
+enddo
+scalars(10)=Sww
+do n=1,3
+scalars(10+n)=u2(n)
+enddo
+
+end subroutine
 
 
 end module

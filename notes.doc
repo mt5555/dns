@@ -1,11 +1,6 @@
 TODO:
 
-bmtn: job running: 1 stage RK, with MPI buffers increased
-and b47&b48
-1 stage RK, pblock=NULL   11.60
-1 stage RK, pblock=4      IN
-
-
+0. Bullets for Darryl
 1. 3D forced test case
 2.  4th order differences
 4. 2D shallow water case
@@ -14,6 +9,15 @@ and b47&b48
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  
 101. divergence: go to Shashkov formula?  
+
+**********************************************************************************
+
+Q: 512x512x256: formula                 288Mb per cpu
+                observed:               334M
+
+1 cpu:       formula    observed
+514x514x10    362         385
+130x130x130   301         326   
 
 **********************************************************************************
 sizes

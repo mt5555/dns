@@ -9,12 +9,11 @@ use params
 use mpi
 use structf
 implicit none
-real*8,allocatable :: Q(:,:,:,:)
+real*8 :: Q(nx,ny,nz,n_var)
 character(len=80) message
 integer ierr
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
-allocate(Q(nx,ny,nz,n_var))
 
 
 call init_mpi       
@@ -39,7 +38,9 @@ if (init_cond==1) call init_data_kh(Q)
 if (init_cond==2) call init_data_lwisotropic(Q) 
 
 write(message,'(a)') 'Initial data projection'
+call print_message(message)
 call init_data_projection(Q)  ! impose constrains on initial data
+call MPI_Barrier(comm_3d,ierr)
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

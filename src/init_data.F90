@@ -31,7 +31,6 @@ seed=seed+my_pe
 call random_seed(put=seed)
 deallocate(seed)
 
-
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2

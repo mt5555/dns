@@ -12,11 +12,12 @@ range=0:50;
 
 %fid=fopen('test32.sf','r','l');
 fid=fopen('n128.sf','r','b');
+%fid=fopen('../src/test32.sf','r','l');
 
 
 times=[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0];
 mkps=1;
-dp=7;
+dp=5;
 
 time=fread(fid,1,'float64');
 while (time>=0 & time<=5000)
@@ -38,8 +39,9 @@ while (time>=0 & time<=5000)
     figure(1)
     plot_u(fid,time,dp);
     if (mkps) 
-      orient landscape
-      print -dpsc sf1.ps
+      %orient landscape
+      orient portrait
+      print -depsc sf1.ps
     end
   else
     % skip data
@@ -50,8 +52,9 @@ while (time>=0 & time<=5000)
     figure(2)
     plot_tran(fid,time,dp);
     if (mkps) 
-      orient landscape
-      print -dpsc sf2.ps
+      %orient landscape
+      orient portrait
+      print -depsc sf2.ps
     end
   else
     % skip data

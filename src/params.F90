@@ -57,23 +57,10 @@ integer :: forcing_type   ! 0 = none
                           !     can only be used by the z-decomp model!
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! global dimensions
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!
-integer :: g_nx,g_ny,g_nz    ! dimension of global grid (unique data)
-integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
-                             ! For periodic FFT case, o_nx=g_nx+1 because we do not
-                             ! store the point at x=1.  for 4th order case, we 
-                             ! may store this point.  
-                             
-integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
-                             ! (because FFT99 requires 2 extra points)
- 
 
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! mesh dimensions on a single processor
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #include "params.h"
 !integer,parameter :: n_var=3                  ! number of prognostic variables
 !integer,parameter :: nxd=18,nyd=18,nzd=18         ! dimension of grid & data
@@ -84,13 +71,13 @@ integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
 ! NOTE: if these are parameters, then all automatic arrays
 ! in subroutines will be allocated at run time.  This doubles
 ! the amount of memory needed:
-!integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
+integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 ! NOTE: if these are NOT parameters, then all automatic arrays
 ! are placed on the stack, and thus dont take up memory between calls.
 ! this halves the amount of memory needed.  
 ! any performance penaulty?
-integer           :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
+!integer           :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 
 ! number of actual data points
@@ -119,6 +106,26 @@ integer :: imsign(nxd),jmsign(nyd),kmsign(nzd)  ! fft modes local
 integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
 integer,allocatable :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! global dimensions
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!
+integer,parameter :: g_nx=nslabx*ncpu_x
+integer,parameter :: g_ny=nslaby*ncpu_y
+integer,parameter :: g_nz=nslabz*ncpu_z
+
+
+integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
+                             ! For periodic FFT case, o_nx=g_nx+1 because we do not
+                             ! store the point at x=1.  for 4th order case, we 
+                             ! may store this point.  
+                             
+integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
+                             ! (because FFT99 requires 2 extra points)
+ 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! time stepping
@@ -231,7 +238,11 @@ real*8 :: tims(ntimers)=0
 ! parallel decompositions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !integer :: ncpu_x=1,ncpu_y=1,ncpu_z=1
-integer :: nx_2dy,ny_2dz,nz_2dx,ny_2dx
+integer,parameter :: nz_2dx=nslabz/ncpu_x     ! TRANSPOSE_X_SPLIT_Z 
+integer,parameter :: ny_2dx=nslaby/ncpu_x     ! TRANSPOSE_X_SPLIT_Y  (usefull if nslabz=1)
+integer,parameter :: nx_2dy=nslabx/ncpu_y     ! TRANSPOSE_Y_SPLIT_X  (always used)
+integer,parameter :: ny_2dz=nslaby/ncpu_z     ! TRANSPOSE_Z_SPLIT_Y  (always used)
+
 integer :: io_pe
 integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
 integer :: initial_live_procs
@@ -275,9 +286,6 @@ subroutine params_init
 character(len=80) message
 integer :: fail=0
 
-g_nx=nslabx*ncpu_x
-g_ny=nslaby*ncpu_y
-g_nz=nslabz*ncpu_z
 g_nx2=g_nx+2
 g_ny2=g_ny+2
 g_nz2=g_nz+2
@@ -285,17 +293,16 @@ if (g_nz==1) g_nz2=1
 
 
 ! these values must divide with no remainder:
-nz_2dx=nslabz/ncpu_x     ! TRANSPOSE_X_SPLIT_Z 
-ny_2dx=nslaby/ncpu_x     ! TRANSPOSE_X_SPLIT_Y  (usefull if nslabz=1)
-nx_2dy=nslabx/ncpu_y     ! TRANSPOSE_Y_SPLIT_X  (always used)
-ny_2dz=nslaby/ncpu_z     ! TRANSPOSE_Z_SPLIT_Y  (always used)
+!nz_2dx=nslabz/ncpu_x     ! TRANSPOSE_X_SPLIT_Z 
+!ny_2dx=nslaby/ncpu_x     ! TRANSPOSE_X_SPLIT_Y  (usefull if nslabz=1)
+!nx_2dy=nslabx/ncpu_y     ! TRANSPOSE_Y_SPLIT_X  (always used)
+!ny_2dz=nslaby/ncpu_z     ! TRANSPOSE_Z_SPLIT_Y  (always used)
 
 #if (!defined TRANSPOSE_X_SPLIT_Z && !defined TRANSPOSE_X_SPLIT_Y)
    call abort("define TRANSPOSE_X_SPLIT_Y or TRANSPOSE_X_SPLIT_Z in transpose.h") 
 #endif
 
 #ifdef TRANSPOSE_X_SPLIT_Z
-ny_2dx=-1  ! set to an invalid value
 if (0/=mod(nslabz,ncpu_x)) then
    fail=1
    call print_message("ncpu_x does not divide nz");
@@ -303,7 +310,6 @@ endif
 #endif
 
 #ifdef TRANSPOSE_X_SPLIT_Y
-nz_2dx=-1  ! set to an invalid value
 if (0/=mod(nslaby,ncpu_x)) then
    fail=1
    call print_message("ncpu_x does not divide ny");

@@ -111,11 +111,11 @@ enddo
 #ifdef USE_MPI
 spectrum_in=spectrum
 call MPI_reduce(spectrum_in,spectrum,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
-spectrum_in=spectrum_x
+spectrum_in(0:g_nx/2)=spectrum_x
 call MPI_reduce(spectrum_in,spectrum_x,1+(g_nx/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
-spectrum_in=spectrum_y
+spectrum_in(0:g_ny/2)=spectrum_y
 call MPI_reduce(spectrum_in,spectrum_y,1+(g_ny/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
-spectrum_in=spectrum_z
+spectrum_in(0:g_nz/2)=spectrum_z
 call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
 

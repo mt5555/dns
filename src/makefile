@@ -40,8 +40,7 @@ ifeq ($(UNAME),Linux)
    #INTEL	
    F90 = ifc 
    CC=gcc
-   #FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_STKFFT
-   FFLAGS = -w95 -static -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS = -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
 endif
 ifeq ($(UNAME),SunOS)
@@ -69,9 +68,9 @@ ifeq ($(UNAME),OSF1)
    MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
    LDFLAGS =  $(MPILIB) -Lstk -lstk -lcxml
 
-   #FFLAGS = -O3  -DOSF1 $(MPI) -DUSE_FFT99
-   #FFLAGS = -O3  -DOSF1 $(MPI) -DUSE_STKFFT  
-   FFLAGS = -fast  -DOSF1 $(MPI) -DUSE_CPQFFT  
+   #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
+   #FFLAGS = -recursive -fast -DOSF1  $(MPI) -DUSE_STKFFT  
+   FFLAGS = -recursive -fast  -DOSF1 $(MPI) -DUSE_CPQFFT  
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)

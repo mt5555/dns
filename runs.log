@@ -1,4 +1,40 @@
 **********************************************************************************
+10/24/01
+
+Memory leak on Q?
+
+
+Q: 512x512x256: formula                 288Mb per cpu
+                observed:               334M
+                using gridsetup.py 1 1 32 512 512 256 2 2 0
+
+1 cpu:       formula    observed
+514x514x10    362         385
+130x130x130   301         326   
+
+
+
+512^3  on Q.
+32 cpus:  512x512x16
+                               formula   obs
+1 cpu running 514x514x18:        653      700
+
+
+forcing: none
+initial cond: Q=0, projection disabled
+
+
+4 cpu running 256x256x256        603      crashes
+              2    2   2
+
+1 cpu running 256x256x64         603       650
+                2   2  2
+
+
+
+
+
+**********************************************************************************
 10/8/01 
 64^3 decaying turbulense
 tag: temp1  output: temp1.out in temp1 directory

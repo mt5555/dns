@@ -43,7 +43,7 @@ void FORTRAN(cclose) (FILE **fid) {
   Write 8 byte numbers 
 */
 void FORTRAN(cwrite8) (FILE **fid,char *buf,int *len) {
-    fwrite(buf,8,*len,*fid);
+    if (*len>0) fwrite(buf,8,*len,*fid);
 }
 
 /*

@@ -10,7 +10,7 @@ integer :: itime
 integer i,j,k,n
 character(len=80) message
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 divx,divi,tmx1,tmx2,del,delke_tot
+real*8 divx,divi,tmx1,tmx2,del,delke_tot,lambda
 logical,external :: check_time
 logical :: doit
 
@@ -131,7 +131,8 @@ if (doit) then
    write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
-   write(message,'(3(a,f12.5))') 'R_lambda=',2*ints(1)/(mu*sqrt(ints(2))),&
+   lambda=sqrt(  5*(2*ints(1))/ints(2)  )
+   write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(1))/mu, &
         '  R=',1/mu
    call print_message(message)	
 
@@ -268,7 +269,8 @@ real*8 :: time
 integer nv,nscalars
 real*8 :: ints_save(nv,nscalars)
 real*8 :: maxs_save(nv,nscalars)
-
+integer,parameter :: nints_e=13
+real*8 :: ints_e(nints_e)
 
 ! local variables
 integer i,j,k,n
@@ -338,6 +340,7 @@ deallocate(spectrum1)
 !
 ! output structure functions
 !
+call compute_all_pdfs(Q,ints_e)
 if (structf_init==1) then
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time
@@ -354,7 +357,6 @@ if (my_pe==io_pe) call cclose(fid)
 endif
 
 
-
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time
    message = runname(1:len_trim(runname)) // ".scalars"
@@ -363,16 +365,21 @@ if (my_pe==io_pe) then
       write(message,'(a,i5)') "diag_output(): Error opening .scalars file errno=",ierr
       call abort(message)
    endif
-   if (nscalars>0) then
-      x=nv; call cwrite8(fid,x,1)
-      x=nscalars; call cwrite8(fid,x,1)
-      call cwrite8(fid,mu,1)
-      call cwrite8(fid,alpha_value,1)
-      call cwrite8(fid,ints_save,nv*nscalars);
-      call cwrite8(fid,maxs_save,nv*nscalars);
-   endif
+   x=nv; call cwrite8(fid,x,1)
+   x=nscalars; call cwrite8(fid,x,1)
+   call cwrite8(fid,mu,1)
+   call cwrite8(fid,alpha_value,1)
+   call cwrite8(fid,ints_save,nv*nscalars);
+   call cwrite8(fid,maxs_save,nv*nscalars);
+
+   x=nints_e; call cwrite8(fid,x,1)
+   call cwrite8(fid,time,1)
+   call cwrite8(fid,ints_e,nints_e)
+
+
    call cclose(fid)
 endif
+
 
 
 end subroutine

@@ -126,9 +126,9 @@ do n=1,3
    enddo
    enddo
    enddo
-   !call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-call z_ifft3d_str(Q,Q_grid,rhs,Q_tmp,work,work)
+!call z_ifft3d_str(Q,Q_grid,rhs,Q_tmp,work,work)
 
 time = time + delt
 
