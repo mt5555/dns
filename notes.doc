@@ -3,6 +3,8 @@
 
 2. ns_ghost: 
         benchmark parallel decompostions
+        1000^3  4th and spectral
+        2000^3 on 512?
        
 0. homog. tests:
 
@@ -21,6 +23,15 @@
 3. psi-vor code:
         fix output1/input1 for non-perfect decompositions? not really needed.  
         add ellipse fft finder
+
+        1. find max.  
+        2. communicat location to all cpus.
+        3. compute list of points in circle from max
+        4. interpolate to those points
+        5. FFT.  one contour per cpu?
+        6. adjust location of center.  goto 2.
+        
+
 
 
 1. change NS-alpha so forcing always appears as just 'f'
