@@ -25,6 +25,7 @@ program anal
 use params
 use mpi
 use isoave
+use structf
 implicit none
 
 ! 1 cpu version uses less memory then parallel version
@@ -49,10 +50,11 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig
-logical :: compute_cj,compute_scalar, compute_uvw=.true. 
-CPOINTER :: fid
+logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs
+CPOINTER :: fid,fid1,fid2
 
 
+compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.true.
@@ -112,6 +114,16 @@ else
       allocate(work2(nx,ny,nz))
       allocate(work3(nx,ny,nz))
       allocate(work4(nx,ny,nz))
+   endif
+endif
+
+if (compute_pdfs) then
+   ! needs work1, work2
+   if (.not. allocated(work1)) then
+      allocate(work1(nx,ny,nz))
+   endif
+   if (.not. allocated(work2)) then
+      allocate(work2(nx,ny,nz))
    endif
 endif
 
@@ -248,6 +260,34 @@ do
          call writeisoave_scalar(fid,time)
          call cclose(fid,ierr)
       endif
+   endif
+   
+
+   if (compute_pdfs) then
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.sf"
+         print *,fname
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
+            call abort(message)
+         endif
+      endif
+      
+      if (.not. compute_uvw) then
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+      endif
+      
+      uscale=.01 / pi2
+      epsscale=.01 / pi2_squared  
+      if (my_pe==io_pe) then
+         print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
+      endif
+      call compute_all_pdfs(Q,q1,q2,q3,work1,work2)
+
+      call output_pdf(time,fid,fid1,fid2)
+      if (my_pe==io_pe) call cclose(fid,ierr)
    endif
    
    

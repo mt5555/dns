@@ -1,5 +1,5 @@
 analysis.o: macros.h params.o mpi.o fft_interface.o makefile 
-analysis_isoave.o: macros.h params.o mpi.o isoave.o makefile 
+analysis_isoave.o: macros.h params.o mpi.o isoave.o structf.o makefile 
 analysis_rms.o: macros.h params.o mpi.o fft_interface.o sforcing.o makefile 
 bc.o: macros.h params.o mpi.o ghost.o makefile 
 cases2v.o: macros.h params.o tracers.o bc.o ellipse.o makefile 
@@ -20,6 +20,7 @@ ghostops.o: macros.h params.o fft_interface.o ghost.o transpose.o makefile
 ibm.o: macros.h params.o fft_interface.o makefile 
 init_data.o: macros.h params.o mpi.o fft_interface.o makefile 
 init_grid.o: macros.h params.o fft_interface.o transpose.o mpi.o makefile 
+init_model.o: params.o fft_interface.o makefile 
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
 isoave.o: macros.h params.o transpose.o mpi.o makefile 
@@ -41,6 +42,7 @@ solve.o: macros.h params.o ghost.o bc.o mpi.o makefile
 spectrum.o: macros.h params.o mpi.o makefile 
 splitspec.o: macros.h makefile 
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
+temp.o: macros.h params.o transpose.o mpi.o makefile 
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 
 timecontrol.o: macros.h params.o tracers.o transpose.o makefile 
 tracers.o: macros.h params.o mpi.o ghost.o ellipse.o makefile 

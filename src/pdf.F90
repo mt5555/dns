@@ -18,6 +18,10 @@ implicit none
 ! 
 ! 
 !
+real*8 :: uscale=.01             ! bin size for vel increment
+real*8 :: epsscale=.01           ! bin size for epsilon increment
+
+
 integer :: struct_nx=0 
 integer :: struct_ny=0          ! every "struct_n*" time steps
 integer :: struct_nz=0          !
@@ -125,7 +129,6 @@ contains
 
 
 
-
 subroutine init_pdf_module()
 !
 ! Initialize this module.  Set the values of delta to use
@@ -136,8 +139,8 @@ subroutine init_pdf_module()
 use params
 implicit none
 
-integer idel,i
-integer :: nmax,max_delta,j
+integer idel,i,j
+integer :: nmax,max_delta
 ! we can compute them up to g_nx/2, but no reason to go that far.
 nmax=max(g_nx/3,g_ny/3,g_nz/3)
 
@@ -216,13 +219,12 @@ do idel=1,delta_num_max
 enddo
 
 
-
 do i=1,NUM_SF
-   call init_pdf(SF(i,1),100,.01d0,numx)
-   call init_pdf(SF(i,2),100,.01d0,numy)
-   call init_pdf(SF(i,3),100,.01d0,numz)
+   call init_pdf(SF(i,1),100,uscale,numx)
+   call init_pdf(SF(i,2),100,uscale,numy)
+   call init_pdf(SF(i,3),100,uscale,numz)
 enddo
-call init_pdf(epsilon,100,.01d0,1)
+call init_pdf(epsilon,100,epsscale,1)
 
 #ifdef COMP_JPDF
 do i=1,NUM_JPDF
@@ -987,10 +989,10 @@ use params
 use fft_interface
 use transpose
 implicit none
-real*8 fin(g_nz2,nslabx,ny_2dz,n_var)  ! input
-real*8 f(nx,ny,nz,n_var)               ! output
-real*8 w1(nx,ny,nz,n_var)
-real*8 Qt(nx,ny,nz,n_var)    
+real*8 fin(g_nz2,nslabx,ny_2dz,3)  ! input
+real*8 f(nx,ny,nz,3)               ! output
+real*8 w1(nx,ny,nz,3)
+real*8 Qt(nx,ny,nz,3)    
 
 ! overlapped in memory:
 real*8 work(nx,ny,nz)
@@ -1129,12 +1131,12 @@ use fft_interface
 use transpose
 implicit none
 integer :: ns
-real*8 Q(nx,ny,nz,n_var)    
+real*8 Q(nx,ny,nz,3)    
 real*8 work(nx,ny,nz)
 real*8 work2(nx,ny,nz)
-real*8 gradu(nx,ny,nz,n_var)    
-real*8 gradv(nx,ny,nz,n_var)    
-real*8 gradw(nx,ny,nz,n_var)    
+real*8 gradu(nx,ny,nz,3)    
+real*8 gradv(nx,ny,nz,3)    
+real*8 gradw(nx,ny,nz,3)    
 
 !local
 integer n1,n1d,n2,n2d,n3,n3d,ierr
