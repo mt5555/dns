@@ -561,6 +561,7 @@ x=1
 if (str%ncalls==0) x=0
 do j=1,ndelta
    if (1e-9<abs(x - sum(pdfdata(:,j)))) then 
+      print *,'ERROR in PDF normalization: '
       print *,'ndelta = ',j
       print *,'sum:     ',sum(pdfdata(:,j))
       print *,'un-norm: ',sum(str%pdf),g_nx*g_ny*g_nz
@@ -1063,8 +1064,8 @@ gradu=mu*gradu; gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
 call compute_pdf_scalar(gradu,epsilon)
 
 if (compute_passive_pdfs) then
-   do i=1,npassive
-      call compute_pdf_scalar(Q(1,1,1,i),SCALARS(i)) 
+   do i=np1,np2
+      call compute_pdf_scalar(Q(1,1,1,i),SCALARS(i-np1+1)) 
    enddo
 endif
 call print_message("done with pdfs.")

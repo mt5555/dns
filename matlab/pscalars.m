@@ -27,6 +27,9 @@ clear all;
 name = '/scratch2/taylorm/tmix256C/tmix256C'
 times=[1.0001];
 
+name = '../src/temp'
+times=[0.0000];
+
 % load in the u,v,w scalars:
 use_pscalars_name=1;
 disp('running scalars_turb...')
