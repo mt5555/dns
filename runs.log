@@ -1,4 +1,70 @@
 **********************************************************************************
+7/7/02
+
+ISOW tuning runs.
+
+mu=1.35e-3
+forcing in wave numbers 1&2, or 2&3,
+tuned so that epsilon=.5
+R_l and E are too low when compared to Gotoh's results.
+
+Try:  mu=.75e-3  IN milkyway
+      R_l=113  epsilon=.5  ke=.5  
+
+check definition of R_l vs. Gotoh paper?
+        
+
+
+ke  .215
+R_lambda = 50.0    lambda = 50*mu/sqrt(2 KE) = .103 
+mu = 1.35e-3
+delx/eta = .803   eta=1/(.803*128) = .00973
+
+
+lambda/eta = 10.5
+
+lambda/eta =   sqrt(10 KE mu /epsilon)   (mu^3/epsilon)^-.25
+           =   sqrt(10) KE^.5  mu epsilon^-1  mu^-3/4 epsilon^.25
+           =   sqrt(10) KE^.5  mu^1/4 epsilon^-3/4 
+
+
+
+
+
+
+
+
+
+**********************************************************************************
+7/1/02
+new isotropic runs
+
+dealiasing:  fft-sphere 
+
+
+iso12_250A  (bluemountain)
+iso12_256A  (Qsc)
+
+
+iso12 forcing:  k1=.5   (forcing disabled if it removes energy)
+                k2=.5
+
+mu=1.35e-3 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**********************************************************************************
 6/28/02
 KH with thin sheet for Chris Brislawn
 

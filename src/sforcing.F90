@@ -356,8 +356,9 @@ if (0==init_sforcing) then
       numb1=2
       numb=3
       FM(1) = 0    ! choose these so that mu <ux,ux> = .5
-      FM(2) = 5
-      FM(3) = 5
+      FM(2) = 30    ! 0,5,5: epsilon: .09     R_l=35  E=.08
+      FM(3) = 30    ! 0,15,15:        .27     R_l=45  E=.19
+                    ! 0,30,30:        .56     R_l=49  E=.30
    endif
 
    call sforcing_init()
