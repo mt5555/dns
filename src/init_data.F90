@@ -207,7 +207,7 @@ do n=np1,np2
                   
                   xfac=(im*im+jm*jm+km*km)
                   xfac=xfac/(.25*g_nx*g_nx + .25*g_ny*g_ny + .25*g_nz*g_nz)
-                  xfac=(1-.50*xfac)
+                  xfac=(1-.40*xfac)
                   
                   Q(i,j,k,n)=Q(i,j,k,n)*xfac
                enddo
