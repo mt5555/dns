@@ -292,79 +292,106 @@ else if (rk4stage==4) then
 endif
 
 
-
 ! interpolate u to position in particle_tmp
 do i=1,nump
-   ! find cpu which owns the grid point particle(i,:)
-   if (xcord(intx1)<=particle_tmp(i,1) .and. particle_tmp(i,1)<xcord(intx2)+delx .and. &
-       ycord(inty1)<=particle_tmp(i,2) .and. particle_tmp(i,2)<ycord(inty2)+dely .and. &
-       zcord(intz1)<=particle_tmp(i,3) .and. particle_tmp(i,3)<zcord(intz2)+delz ) then
+   
+   ! find position in global grid:
+   igrid = 1 + floor( (particle_tmp(i,1)-g_xcord(1))/delx )
+   jgrid = 1 + floor( (particle_tmp(i,2)-g_ycord(1))/dely )
+   kgrid = 1 + floor( (particle_tmp(i,3)-g_zcord(1))/delz )
+   
+   if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny &
+        .and. 1<=kgrid .and. kgrid+1 < o_nz ) then
+      
+      ! compute a new point in the center of the above cell:
+      ! (do this to avoid problems with 2 cpus both claiming a point
+      ! on the boundary of a cell)
+      xc=.5*(g_xcord(igrid)+g_xcord(igrid+1))
+      yc=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
+      zc=.5*(g_zcord(kgrid)+g_zcord(kgrid+1))
+      
+      ! find cpu which owns the grid point (xc,yc)
+      if (xcord(intx1)<xc .and. xc<xcord(intx2)+delx .and. &
+          ycord(inty1)<yc .and. yc<ycord(inty2)+dely .and. &
+          zcord(intz1)<zc .and. zc<zcord(intz2)+delz ) then
+         
 
-      ! find igrid,jgrid,kgrid so that point is in box:
-      ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
-      ! and kgrid-1,kgrid,kgrid+1,kgrid+2   
-      igrid = intx1 + floor( (particle_tmp(i,1)-xcord(intx1))/delx )
-      jgrid = inty1 + floor( (particle_tmp(i,2)-ycord(inty1))/dely )
-      kgrid = intz1 + floor( (particle_tmp(i,3)-zcord(intz1))/delz )
-      ASSERT("advance_particles(): igrid interp error",igrid<=intx2)
-      ASSERT("advance_particles(): jgrid interp error",jgrid<=inty2)
-      ASSERT("advance_particles(): kgrid interp error",kgrid<=intz2)
-
-      ! interpolate Ulocal
-      ! 3d --> 2d y-z planes --> 1d z-lines --> point
-      do kk=1,4
-      do jj=1,4
-         ! interpolate xcord(igrid-1:igrid+2) to xcord=particle(i,1)
-	 ! onto 2-d planes in y-z
-         ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
-         xc = 1 + (particle_tmp(i,1)-xcord(igrid))/delx
-         jc = jgrid-2+jj
-         kc = kgrid-2+kk
-         !loop over velocity components
-         do j=1,ndim
-            call interp4(ugrid(igrid-1,jc,kc,j),ugrid(igrid,jc,kc,j),&
-                ugrid(igrid+1,jc,kc,j),ugrid(igrid+2,jc,kc,j),&
-                xc,Q2d(jj,kk,j))
+         ! find igrid,jgrid,kgrid so that point (xc,yc,zc) is in box:
+         ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
+         ! and kgrid-1,kgrid,kgrid+1,kgrid+2   
+         igrid = intx1 + floor( (xc-xcord(intx1))/delx )
+         jgrid = inty1 + floor( (yc-ycord(inty1))/dely )
+         kgrid = intz1 + floor( (zc-zcord(intz1))/delz )
+         ASSERT("advance_particles(): igrid interp error",igrid<=intx2)
+         ASSERT("advance_particles(): jgrid interp error",jgrid<=inty2)
+         ASSERT("advance_particles(): kgrid interp error",kgrid<=intz2)
+         
+         ! interpolate Ulocal 
+         ! 3d --> 2d y-z planes --> 1d z-lines --> point
+         do kk=1,4
+            do jj=1,4
+               ! interpolate xcord(igrid-1:igrid+2) to xcord=particle(i,1)
+               ! onto 2-d planes in y-z
+               ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
+               xc = 1 + (particle_tmp(i,1)-xcord(igrid))/delx
+               jc = jgrid-2+jj
+               kc = kgrid-2+kk
+               !loop over velocity components
+               do j=1,ndim
+                  call interp4(ugrid(igrid-1,jc,kc,j),ugrid(igrid,jc,kc,j),&
+                       ugrid(igrid+1,jc,kc,j),ugrid(igrid+2,jc,kc,j),&
+                       xc,Q2d(jj,kk,j))
+               enddo
+            enddo
          enddo
-      enddo
-      enddo
-
-      do kk=1,4
-         ! interpolate ycord(jgrid-1:jgrid+2) to ycord=particle(j,1)
-	 ! onto lines in z
-         ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
-         yc = 1 + (particle_tmp(i,2)-ycord(jgrid))/dely
-         !loop over velocity components
-         do j=1,ndim
-         call interp4(Q2d(1,kk,j),Q2d(2,kk,j),Q2d(3,kk,j),Q2d(4,kk,j),yc,Q1d(kk,j))
+         
+         do kk=1,4
+            ! interpolate ycord(jgrid-1:jgrid+2) to ycord=particle(j,1)
+            ! onto lines in z
+            ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
+            yc = 1 + (particle_tmp(i,2)-ycord(jgrid))/dely
+            !loop over velocity components
+            do j=1,ndim
+               call interp4(Q2d(1,kk,j),Q2d(2,kk,j),Q2d(3,kk,j),Q2d(4,kk,j),yc,Q1d(kk,j))
+            enddo
          enddo
-      enddo
-
-      ! interpolate zcord(kgrid-1:kgrid+2) to zcord=particle(k,2)
-      ! data:  Q1d(1:4,j)
+         
+         ! interpolate zcord(kgrid-1:kgrid+2) to zcord=particle(k,2)
+         ! data:  Q1d(1:4,j)
+!
+! BUG???
+! JAMAL: should this be particle_tmp(i,3) (the z-coordinate) 
+!        in the next line?  
+!
+!
          zc = 1 + (particle_tmp(i,2)-zcord(kgrid))/delz
          !loop over velocity components
-      do j=1,ndim
-         call interp4(Q1d(1,j),Q1d(2,j),Q1d(3,j),Q1d(4,j),zc,Ulocal(j))
-      enddo
+         do j=1,ndim
+            call interp4(Q1d(1,j),Q1d(2,j),Q1d(3,j),Q1d(4,j),zc,Ulocal(j))
+         enddo
 
-      !for inertial particles, change this step to use appropriate drag law
-      ! first ndim data are positions
-      ! next ndim data are velocities
-      !update velocity first
-      ! advance
-      do j=1,ndim
-         particle(i,j+ndim)=Ulocal(j)
-         particle_tmp(i,j+ndim)=Ulocal(j)
-         particle(i,j)=particle(i,j)+c1*particle(i,j+ndim)
-         particle_tmp(i,j)=particle_old(i,j)+c2*particle(i,j+ndim)
-      enddo
+         !for inertial particles, change this step to use appropriate drag law
+         ! first ndim data are positions
+         ! next ndim data are velocities
+         !update velocity first
+         ! advance
+         do j=1,ndim
+            particle(i,j+ndim)=Ulocal(j)
+            particle_tmp(i,j+ndim)=Ulocal(j)
+            particle(i,j)=particle(i,j)+c1*particle(i,j+ndim)
+            particle_tmp(i,j)=particle_old(i,j)+c2*particle(i,j+ndim)
+         enddo
+      else
+         ! this cpu does not own the particle
+         ! point does not belong to my_pe, set position to -inf
+         do j=1,2*ndim
+            particle(i,j)=-1d100
+            particle_tmp(i,j)=-1d100
+         enddo
+      endif
    else
-      ! point does not belong to my_pe, set position to -inf
-      do j=1,2*ndim
-         particle(i,j)=-1d100
-         particle_tmp(i,j)=-1d100
-      enddo
+      ! partical has left the domain
+      call abort("paritcal has left computational domain")
    endif
 enddo
 
