@@ -1,9 +1,9 @@
 %
 %   matlab script to read DNS output files *.scalars-turb
 %
-% each file contains, in this order:
+% each file contains only IEEE 8 byte floats, in this order:
 %
-%   number of scalars in file
+%   number of scalars in file (not including time). should be 23.0
 %   time
 %   u_i,i^2    i=1,3
 %   u_i,i^3    i=1,3
@@ -18,10 +18,12 @@
 
 clear all;
 
-name = '/ccs/scratch/taylorm/cj/cj19'
+%name = '/ccs/scratch/taylorm/cj/cj19'
+name = '/ccs/scratch/taylorm/decay/decay2048'
 
 nt=0;
 times=[0:.25:2.5];
+times=[0,.0167,.0283,.0524,.0650,.0776]
 for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10),'.scalars-turb'];
@@ -75,10 +77,10 @@ figure(6)
 clf
 %plot(time_e,Sww)
 
-%plot(time_e,ux3(1,:)./ux2(1,:).^(3/2),'k')
-%hold on
-%plot(time_e,ux3(2,:)./ux2(2,:).^(3/2),'b')
-%plot(time_e,ux3(3,:)./ux2(3,:).^(3/2),'g')
+plot(time_e,ux3(1,:)./ux2(1,:).^(3/2),'k')
+hold on
+plot(time_e,ux3(2,:)./ux2(2,:).^(3/2),'b')
+plot(time_e,ux3(3,:)./ux2(3,:).^(3/2),'g')
 
 %plot(time_e,ux2(1,:),'k')
 %plot(time_e,ux2(2,:),'b')
@@ -89,10 +91,10 @@ clf
 %plot(time_e,ux4(2,:)./ux2(2,:).^2,'b')
 %plot(time_e,ux4(3,:)./ux2(3,:).^2,'g')
 
-plot(time_e,vor4(1,:)./vor2(1,:).^2,'r')
-hold on
-plot(time_e,vor4(2,:)./vor2(2,:).^2,'b')
-plot(time_e,vor4(3,:)./vor2(3,:).^2,'g')
+%plot(time_e,vor4(1,:)./vor2(1,:).^2,'r')
+%hold on
+%plot(time_e,vor4(2,:)./vor2(2,:).^2,'b')
+%plot(time_e,vor4(3,:)./vor2(3,:).^2,'g')
 
 
 hold off

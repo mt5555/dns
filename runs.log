@@ -106,6 +106,20 @@ d/dt(ke) vis=  -0.0298152 f=   0.0000000 alpha=   0.0000000 total=  -0.0298152
 
 
 
+Random numbers on a 2x1x256:, run for 10 timesteps:
+time=  0.01675(    10)  next output=  0.01675  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0017638 cfl_adv= 1.500 cfl_vis= 0.005                 
+max: (u,v,w)      0.85318461175931     0.89334461353931     0.87389815907870    
+<z-vor>=-0.10408E-16   <hel>=-0.48312E-01   max(vor) 0.42825E+03                
+R_lambda=   316.42675  R=290495.00349 lambda=     0.00697                       
+mesh spacing/eta:        9.8042       9.8042       9.8042                       
+spherical dealiasing kmax*eta:        0.0481                                    
+eddy turnover time:        2.8257                                               
+ke:  0.0365933275  enstropy:     7523.9083         total d/dt(ke):  -0.0258968  
+d/dt(ke) vis=  -0.0259003 f=   0.0000000 alpha=   0.0000000 total=  -0.0259003  
+writing output files at t=    0.0168                                            
+
+
 restart.* files generated with 1 1 256
 restart.h5 with 1 1 256: pass
 restart.h5 with 2 1 128: pass

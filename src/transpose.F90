@@ -1017,7 +1017,7 @@ integer :: sending_pe,ierr,tag,z_pe,y_pe,x_pe
 integer i,j,k,l,extra_k,kuse,dest_pe3(3),fpe
 integer n1,n1d,n2,n2d,n3,n3d
 integer :: ny_2dx_actual ,offset
-integer :: first_seek
+logical :: first_seek
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
@@ -1473,7 +1473,8 @@ CPOINTER fid
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
 real*8 :: buf(o_nx,ny_2dx)
-integer :: offset,first_seek,fpe
+integer :: offset,fpe
+logical :: first_seek
 
 ! local vars
 real*8 saved_edge(o_nx)

@@ -28,10 +28,17 @@ ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
 % this type of averging is expensive:
-time_and_angle_ave=0;
+time_and_angle_ave=1;
 
 k=0
 times=[0:.1:3.7];
+
+
+xx1=(1:.5:(nx./2.5))*delx_over_eta;     % units of r/eta
+y45_ave=zeros([length(xx1),15]);
+y45_iso_ave=zeros([length(xx1),1]);
+
+
 for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10)];
@@ -47,6 +54,8 @@ for t=times
     mx45_iso_localeps(k)=max(y45);
     mx45_iso(k)=max(y45)*eps/epsilon;
 
+    y45_iso_ave=y45_iso_ave+y45';
+
   end    
   
   [nx,ndelta,ndir,r_val,ke,eps,mu,D_ll,D_lll] ...
@@ -61,28 +70,20 @@ for t=times
       x_box = x/delx_over_eta_l/nx;     % in code units (box length)
       y=-D_lll(:,dir)./(x_box*eps);
       
-      xx=(1:.5:(nx./2.5))*delx_over_eta; % units of r/eta
-      y45 = spline(x,y,xx);
+      y45 = spline(x,y,xx1);
       
       mx45_localeps(k,dir)=max(y45);
       mx45(k,dir)=max(y45)*eps/epsilon;
       
-      if (dir==dir_use)
-        if (t ==times(1))
-          y45ave=y45/length(times);
-        else
-          y45ave=y45ave+y45/length(times);
-        end
-        xx_ave=xx;
-      end
-      
+      y45_ave(:,dir)=y45_ave(:,dir)+y45';
+      xx_ave=xx1;
     end
+end
+end
+end
+y45_ave=y45_ave/length(times);
+y45_iso_ave=y45_iso_ave/length(times);
 
-  
-  
-end
-end
-end
 
 
 figure(4); clf; hold on; 
@@ -94,9 +95,11 @@ ax=axis
 axis( [ax(1),ax(2),.5,1.5] );
 hold off;
 
-figure(5)
-semilogx(xx_ave,y45ave)
-axis([1 1000 0 1])
+figure(5); clf
+for i=1:3
+  semilogx(xx_ave,y45_ave(:,i)); hold on
+end
+axis([1 1000 0 1.5])
 
 starttime=1;
 ln=find(times>=starttime);
