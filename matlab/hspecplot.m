@@ -20,21 +20,28 @@
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
-name = 'hel256_hpi2_all';
-mu = 2e-4;
+%namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
+%name = 'hel256_hpi2_all';
+%mu = 2e-4;
 
-%name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
+%namedir = '/home2/skurien/helicity_data/helical_forced/hel128_h3pi8/';
+%name = 'hel128_h3pi8_0000.0000';
 %mu = 5e-4;
 
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel480_hpi2/';
 %name = 'hel480_hpi2_0000.1000';
 %mu = 2e-4;
 
+namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
+name = 'hel256_h0_0000.8000';
+mu = 2e-4;
 
+namedir = '/home2/skurien/dns/src/';
+name = '2Dhypo1e4_1024_0000.0000';
+mu = 2e-4;
 
 % plot all the spectrum:
-movie=0;
+movie=1;
 
 
 spec_r_save=[];
@@ -59,10 +66,12 @@ time
   hspec_n=fread(fid,n_r,'float64');
 hspec_p = fread(fid,n_r,'float64');
 
-if (j == 0) 
+%if (j == 0) 
+if (time < 1.5)
      hspec_ave = 0*(hspec_n + hspec_p); % initialize hspec_ave
 end
-if (time>=1)
+%if (time>=1)
+if (time >= 1.5)
 j=j+1
 hspec_ave = hspec_ave + hspec_n + hspec_p;
 end
@@ -126,7 +135,7 @@ end
 hspec_ave = hspec_ave/(j);
 
 figure(24)
-loglog(k,abs(hspec_ave),'x'); hold on;
+loglog(k,abs(hspec_ave),'b'); hold on;
 title('Average helicity spectrum')
 xlabel('k')
 ylabel(pname);

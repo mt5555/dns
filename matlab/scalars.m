@@ -57,6 +57,9 @@ nx=256;
 %fid=endianopen('/home2/skurien/helicity_data/helical_forced/hel480_hpi2/hel480_hpi2_0000.1000.scalars','r');
 %nx=480;
 
+fid=endianopen('/home2/skurien/dns/src/2Dhypo1e4_1024_0000.0000.scalars','r');
+nx=1024;
+
 nscalars=0;
 nscalars_e=0;
 while (1) 

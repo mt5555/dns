@@ -41,9 +41,16 @@ mu = 2e-4;
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel480_hpi2/';
 %mu = 2e-4;
 
+name = 'hel256_h0_0000.8000';
+namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
+mu = 2e-4;
+
+namedir = '/home2/skurien/dns/src/';
+name = '2Dhypo1e4_1024_0000.0000';
+mu = 2e-4;
 
 % plot all the spectrum:
-movie=0; % 1 to plot all the spectra
+movie=1; % 1 to plot all the spectra
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -69,10 +76,11 @@ j=0;
 while (time>=.0 & time<=9999.3)
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
-if (j==0)
+%if (j==0)
+if (time < 1.5)
      spec_ave =  0*spec_r;  %initialize spec_ave
 end
-if (time>=1)        %only average times greater than 1 eddy turnover
+if (time >= 1.5)        %only average times greater than 1 eddy turnover
      j=j+1;                 %count j's for averaging only after t==1.
      spec_ave = spec_ave + spec_r;
 end
@@ -191,20 +199,22 @@ fclose(fid);
 spec_ave = spec_ave/j;
 
 figure(5)
-loglog(k,spec_ave,'k'); hold on;
+loglog(k,spec_ave,'k--'); hold on;
 title('Mean energy spectrum');
 ylabel(pname);
 xlabel('k')
+
 % compensated mean spectrum
 
 figure(6)
-loglog(k,spec_ave.*k'.^(4/3),'b'); hold on;
+loglog(k,spec_ave.*k'.^(5/3),'b'); hold on;
 
      title('5/3 Compensated MEAN energy spectrum');
 ylabel(pname);
 xlabel('k');
+
 %compute mean energy
-E - sum(spec_ave);
+E = sum(spec_ave);
 disp(sprintf('Mean energy = %d',E));
 
 %compute mean dissipation rate
