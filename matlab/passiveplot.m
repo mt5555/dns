@@ -57,22 +57,22 @@ for type=type_list
     cx2(3,:)=pints_e(7,np);
     lambda_c=sqrt(c2./mean(cx2))
 
-    % try to read the scalars-turb file 
-    fname=[name,times,'.scalars-turb'];
-    disp(fname)
-    fid=endianopen(fname,'r');
-    [ns_e,count] = fread(fid,1,'float64');
-    time_2 = fread(fid,1,'float64');
-    data1 = fread(fid,[ns_e,1],'float64');
-    data1=[time;data1];
-    ints_e= data1;
-    fclose(fid);
-    for i=1:3
-      ux2(i)=ints_e(i+1);    % < u1,1 ^ 2 >
-    end
-    epsilon=15*mu.*mean(ux2);
-    eta = (mu.^3./epsilon).^(.25);
-    eta_c= eta/sqrt(sch)
+% $$$     % try to read the scalars-turb file 
+% $$$     fname=[name,times,'.scalars-turb'];
+% $$$     disp(fname)
+% $$$     fid=endianopen(fname,'r');
+% $$$     [ns_e,count] = fread(fid,1,'float64');
+% $$$     time_2 = fread(fid,1,'float64');
+% $$$     data1 = fread(fid,[ns_e,1],'float64');
+% $$$     data1=[time;data1];
+% $$$     ints_e= data1;
+% $$$     fclose(fid);
+% $$$     for i=1:3
+% $$$       ux2(i)=ints_e(i+1);    % < u1,1 ^ 2 >
+% $$$     end
+% $$$     epsilon=15*mu.*mean(ux2);
+% $$$     eta = (mu.^3./epsilon).^(.25);
+% $$$     eta_c= eta/sqrt(sch)
   end
 
   
@@ -103,7 +103,6 @@ for type=type_list
    line(xt,yt);
    text(1.05,yt(3)-.05,'5 \lambda_{\theta}');
    
-
 
    if (lambda_c>0) 
      figure(2); 
