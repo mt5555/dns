@@ -1336,8 +1336,8 @@ enddo
 enddo
 enddo
 
-! index = a + b*cos_tta; calculate a and b
-minct = -1
+! bin index = a + b*cos_tta; calculate a and b
+minct = 0
 maxct = 1
 a = (nbin*minct - maxct)/(minct - maxct)
 b = (1 - nbin)/(minct - maxct)
@@ -1362,21 +1362,21 @@ do j=ny1,ny2
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
 	
-	if (im>0) then
-	if (jm>0) then	
-	if (km>0) then	
-! 	histogram of angles
-	ind = nint(a + b*cos_tta)	
+!	if (im>0) then
+!	if (jm>0) then	
+!	if (km>0) then	
+! 	histogram of cosine of angle (between 0 and 1)
+	ind = nint(a + b*abs(cos_tta))	
 	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
 
 !     spectrum of angles         
-        cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
+        cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
 
 	count(iwave) = count(iwave)+1
 	
-	endif
-	endif
-	endif		         
+!	endif
+!	endif
+!	endif		         
 
          !     cutoff for recalculating the spectra
 !         delta = 0.1      !this value can be changed by hand
