@@ -98,14 +98,15 @@ for type=type_list
    figure(1);
    subplot(npassive/2,2,k)
    splot=squeeze(s(:,:,slice1));
-   pcolor(x,y,splot')
+   plot(splot(:,1))
    
-   stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
-   if (k==1) title(stitle); end;
-   axis equal
-   axis([0,max(x),0,max(y)]);
-   shading interp
-   caxis([0 1]) 
+% $$$    pcolor(x,y,splot')
+% $$$    stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
+% $$$    if (k==1) title(stitle); end;
+% $$$    axis equal
+% $$$    axis([0,max(x),0,max(y)]);
+% $$$    shading interp
+% $$$    caxis([0 1]) 
 
    
 

@@ -7,7 +7,7 @@
 clear all;
 
 
-fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.0200.spdf','r','l');
+fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0002.0000.spdf','r','l');
 %fid=fopen('../src/temp0000.0000.spdf','r','l');
 
 time=fread(fid,1,'float64');

@@ -321,7 +321,6 @@ character(len=80) :: message
 !h_angle = 0.0d0
 h_angle = pi/2.0d0
 
-fix = 1
 
 if (0==init_sforcing) then
    numb1=1
@@ -454,18 +453,17 @@ enddo
 do i=-numb,numb
 do j=-numb,numb
 do k=-numb,numb
-    k2=i**2 + j**2 + k**2
-      if (k2>0 .and. k2 < (.5+numb)**2 ) then
+   k2=i**2 + j**2 + k**2
+   if (k2>0 .and. k2 < (.5+numb)**2 ) then
       RR = cmodes(1,i,j,k,:)
       II = cmodes(2,i,j,k,:)
       mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
       mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
+      fix = 1
       if (mod_rr == 0) then
          fix = 0
       elseif (mod_ii == 0) then
-         fix = 0
-      elseif (k2 == 0) then
          fix = 0
       elseif (h_angle == 0.0d0) then
          fix = 0
@@ -475,18 +473,18 @@ do k=-numb,numb
 
       if (fix == 1) then         
 
-      RRhat = RR/mod_rr
-      khat(1) = i/sqrt(k2*1.0d0)
-      khat(2) = j/sqrt(k2*1.0d0)
-      khat(3) = k/sqrt(k2*1.0d0)
+         RRhat = RR/mod_rr
+         khat(1) = i/sqrt(k2*1.0d0)
+         khat(2) = j/sqrt(k2*1.0d0)
+         khat(3) = k/sqrt(k2*1.0d0)
+         
+!        yhat = khat X RRhat (coordinate system with zhat=khat and xhat = RRhat
 
-!     yhat = khat X RRhat (coordinate system with zhat=khat and xhat = RRhat
-
-      yhat(1) = khat(2)*RRhat(3) - khat(3)*RRhat(2)
-      yhat(2) = - (khat(1)*RRhat(3) - khat(3)*RRhat(1))
-      yhat(3) = khat(1)*RRhat(2) - khat(2)*RRhat(1)
-
-!     	first check that RR and II are orthogonal to k (incompressibility).
+         yhat(1) = khat(2)*RRhat(3) - khat(3)*RRhat(2)
+         yhat(2) = - (khat(1)*RRhat(3) - khat(3)*RRhat(1))
+         yhat(3) = khat(1)*RRhat(2) - khat(2)*RRhat(1)
+         
+!      	first check that RR and II are orthogonal to k (incompressibility).
 !       This is confirmed. Comment out.
 
 !	RRdotk = (RR(1)*i + RR(2)*j + RR(3)*k)
@@ -510,47 +508,48 @@ do k=-numb,numb
 !      RR = mod_rr * IIxk_hat
 	
 
-      IIp = II	
+         IIp = II	
 
-!     write II in terms of new coordinate system (z=khat,x=RRhat,y=yhat)
+!        write II in terms of new coordinate system (z=khat,x=RRhat,y=yhat)
          
          II(1) = IIp(1)*RRhat(1) + IIp(2)*RRhat(2) + IIp(3)*RRhat(3)
          II(2) = IIp(1)*yhat(1) + IIp(2)*yhat(2) + IIp(3)*yhat(3)
          II(3) = IIp(1)*khat(1) + IIp(2)*khat(2) + IIp(3)*khat(3) !should be zero
                   
-!     set II to have angle h_angle wrt RR
+!        set II to have angle h_angle wrt RR
          IIp(1) = cos(h_angle)*mod_ii
          IIp(2) = sin(h_angle)*mod_ii
          IIp(3) = II(3)
          
          
-!     check angle between RR and IIp again
+!         check angle between RR and IIp again
 	 
-         tta = acos(IIp(1)/mod_ii)
-         write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
+!         tta = acos(IIp(1)/mod_ii)
+!         write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
          
-!     now write II in old (i,j,k) coordinate system
+!         now write II in old (i,j,k) coordinate system
          
          II(1) = IIp(1)*RRhat(1) + IIp(2)*yhat(1) + IIp(3)*khat(1)
          II(2) = IIp(1)*RRhat(2) + IIp(2)*yhat(2) + IIp(3)*khat(2)
          II(3) = IIp(1)*RRhat(3) + IIp(2)*yhat(3) + IIp(3)*khat(3)
          
-      endif   
 
-!     check angle between final RR and II again
-      RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
-      costta = (RRdotII/(mod_rr * mod_ii))
-      tta = acos(costta)
-!      if (k2 == 12) then
-         write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
-!      endif
+
+!        check angle between final RR and II again
+!         RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
+!         costta = (RRdotII/(mod_rr * mod_ii))
+!         tta = acos(costta)
+!        if (k2 == 12) then
+!            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
+!        endif
       
-      cmodes(1,i,j,k,:) = RR	
-      cmodes(2,i,j,k,:) = II	
-      endif	
-      enddo	
-      enddo	
-      enddo	
+         cmodes(1,i,j,k,:) = RR	
+         cmodes(2,i,j,k,:) = II	
+      endif
+   endif
+enddo
+enddo
+enddo
       
 !     convert back:
 

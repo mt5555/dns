@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0100:.01:1.80];
+times=[1.0000:.01:2.55];
 
 
 if (readdata)
@@ -60,7 +60,7 @@ for t=times
     for p=1:npmax
       [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
       vtot = sum(pdf);
-      Vpdata(p,nt) = sum(pdf.*(bins>=.12 & bins <=.88));
+      Vpdata(p,nt) = sum(pdf.*(bins>=.20 & bins <=.80));
       Vpdata(p,nt)=Vpdata(p,nt)/vtot;
     end
   else
@@ -189,54 +189,51 @@ ff = ff + G*7/15;
 
 %r=3* ((lambda./lambda_c).^2) /5 ./ schmidt; 
 r = 2*ke.*epsilon_c./(c2.*epsilon);
-gg = sqrt(5/3)*Suc.*sqrt(Rt) + r.*Gc;
+gg = sqrt(5/3)*Suc.*sqrt(Rt) + (5/9)*r.*Gc;
 
 
 figure(1); clf;
 
 
 subplot(4,2,1)
-plot(time_e,Su)
-title('S_u')
+plot(time_e,Su,time_e,Suc)
+title('S_u,  S_{uc}')
 
 subplot(4,2,2)
-plot(time_e,Suc)
-title('S_{uc}')
+plot(time_e,ff,time_e,gg)
+title('f,  g')
+%ax=axis;
+%axis([ax(1),ax(2),0,2]);
+
 
 subplot(4,2,3)
 plot(time_e,G)
 title('G')
 
 subplot(4,2,4)
-plot(time_e,Gc)
-title('G_c')
-
+plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
+title('G_c,    \lambda_c^2 / (4 \eta_c^2)')
 
 
 subplot(4,2,5)
-plot(time_e,ff)
-title('f')
-ax=axis;
-axis([ax(1),ax(2),0,2]);
-
-
-subplot(4,2,6)
-plot(time_e,gg)
-title('g')
-ax=axis;
-axis([ax(1),ax(2),0,10]);
-
-
-subplot(4,2,7)
 plot(time_e,r)
 title('r')
 ax=axis;
 axis([ax(1),ax(2),0,4]);
 
-subplot(4,2,8)
+subplot(4,2,6)
 plot(time_e,R_l)
 title('R_\lambda')
 
+
+
+subplot(4,2,7)
+plot(time_e,lambda,time_e,lambda_c)
+title('\lambda,  \lambda_c')
+
+subplot(4,2,8)
+plot(time_e,eta,time_e,eta_c)
+title('\eta,   \eta_c')
 
 
 figure(1)
@@ -262,43 +259,48 @@ print('-djpeg','-r90',pname);
 % some more scalars
 %
 figure(2); clf;
+
+
 subplot(4,2,1)
-plot(time_e,1./(2*pi*n0))
-title('1 / 2 \pi N0')
+plot(time_e,0*Suc)
+title(' ')
+
+
 
 subplot(4,2,2)
-plot(time_e,lambda_c)
-title('\lambda_c')
-
-
+plot(time_e,0*gg)
+title(' ')
 subplot(4,2,3)
-plot(time_e,eta)
-title('\eta')
+plot(time_e,0*eta)
+title(' ')
 
 subplot(4,2,4)
-plot(time_e,eta_c)
-title('\eta_c')
+plot(time_e,0*lambda_c)
+title(' ')
 
-%subplot(4,2,5)
-%plot(time_e,lambda)
-%title('\lambda')
+
 subplot(4,2,5)
-plot(time_e,1./(2*pi*n0x_l),time_e,1./(2*pi*n0x_t))
-title('1/2 \pi N0_{\nabla}_c  long & trans')
+plot(time_e,2*pi*n0.*lambda_c)
+title('2 \pi N0 \lambda,    2 \pi N0_c \lambda_c')
 
 
 subplot(4,2,6)
-plot(time_e,lambda_x_c)
-title('\lambda_{\nabla}_c')
+plot(time_e,2*pi*n0x_l.*eta_c',time_e,eta_c./lambda_x_c,time_e,...
+     2*pi*n0x_l.*lambda_x_c')
+title('2 \pi N_{\nabla}_c \eta_c, \eta_c / \lambda_{\nabla}_c,   2\pi N_{\nabla}_c \lambda_{\nabla}_c  ')
 
 
 subplot(4,2,7)
-plot(time_e,Vp)
-title('%mix')
+plot(time_e,1-Vp)
+title('% pure fluid')
+
+
+ym = (1 - eta_c./lambda_c).^3;
+yp = (1 + eta_c./lambda_c).^3; 
 
 subplot(4,2,8)
-plot(time_e,Vp2)
-title('%mix \lambda_c / \eta_c')
+plot(time_e,ym./yp)
+title('% pure fluid model 0')
 
 
 orient tall

@@ -123,15 +123,22 @@ ifeq ($(UNAME),OSF1)
    LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
 
    # check for MPI module loaded:
-   MPIMODULE = $(shell echo $$MPI_LD_FLAGS | grep MPI)
-   ifneq ($(MPIMODULE),)
+   MOD_MPIR12 = $(shell echo $$MPI_LD_FLAGS | grep MPI)
+   MOD_lampi = $(shell echo $$MPI_LD_FLAGS | grep lampi)
+   ifneq ($(MOD_MPIR12),)
       # R12
       MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS)
       MPILIB =  $(MPI_LD_FLAGS) -lfmpi -lmpio -lmpi  -lelan
    else
-      # lampi
-      MPI =  -DUSE_MPI -DUSE_MPI_IO -I/users/taylorm/liblampi/include
-      MPILIB =  -L/users/taylorm/liblampi/lib -lmpi  -lelan
+      ifneq ($(MOD_lampi),)
+         # lampi module
+         MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS)
+         MPILIB =  $(MPI_LD_FLAGS) -lmpi -lelan
+      else
+         # lampi
+         MPI =  -DUSE_MPI -DUSE_MPI_IO -I/users/taylorm/liblampi/include
+         MPILIB =  -L/users/taylorm/liblampi/lib -lmpi  -lelan
+      endif	
    endif
 
 
