@@ -25,14 +25,13 @@ my_z=0
 
 
 #ifdef USE_MPI
+
 call mpi_init(ierr1)
 if (ierr1/=0) call abort("mpi_init failure")
 call mpi_comm_rank(MPI_COMM_WORLD,my_world_pe,ierr2)
 if (ierr2/=0) call abort("mpi_comm_rank failure")
 call mpi_comm_size(MPI_COMM_WORLD,initial_live_procs,ierr3)
 if (ierr3/=0) call abort("mpi_comm_size failure")
-
-
 
 
 #endif

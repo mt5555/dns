@@ -45,8 +45,21 @@ if ($ncpus > 0) then
         set command = "/home/gmpi.pgi/bin/mpirun -np $ncpus  $exe"
    endif
    if (`hostname` == pinkish.lanl.gov) then
-        set pinkopts = "-o 16 --gm --nper 2"
-        set command = "mpirun $pinkopts -np $ncpus   $exe"
+        setenv MPI_VERSION lampi
+        if ($MPI_VERSION == lampi) then
+            set pinknum = 0
+            set ncpus2 = 0
+            @ ncpus2 = ($ncpus + 1) / 2
+            set echo
+	    set nodes = `pushlib -t $pinknum+$ncpus2`
+	    pushlib $nodes
+            set command = "lampirun -np $ncpus -H $nodes   $exe"
+        else
+            set pinkopts = "-o 16 --gm --nper 2"
+            set command = "mpirun $pinkopts -np $ncpus   $exe"
+            set pinkhost = `mpirun $pinkopts -np $ncpus hostname`
+            set pinknum = `echo $pinkhost | sed 's/n//' `
+        endif
    endif
    echo $command
 else
@@ -59,13 +72,13 @@ make dns
 cd $benchdir
 sed s/NDELT/$3/ step.inp.sed > benchmark.inp
 
+echo $command
 if (`hostname` == pinkish.lanl.gov) then
-   set pinkhost = `mpirun $pinkopts -np $ncpus hostname`
-   set pinknum = `echo $pinkhost | sed 's/n//' `
-   echo $pinkhost $pinknum
-   bpsh $pinknum mkdir /tmp/taylorm
-   bpcp benchmark.inp {$pinkhost}:/tmp/taylorm
-   $command -i /tmp/taylorm/benchmark.inp -d /tmp/taylorm
+   set nodesc = `echo $nodes | tr "," " " `
+   foreach nl ($nodesc)
+      bpcp benchmark.inp {$nl}:/tmp/taylorm
+   end
+   $command -d /tmp/taylorm -i /tmp/taylorm/benchmark.inp 
 else
    $command -i benchmark.inp
 endif

@@ -45,8 +45,15 @@ ifeq ($(UNAME),Linux)
    endif
    ifeq ($(HOST),pinkish.lanl.gov)
       MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
-      MPILIB =   -L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm 
+      MPILIB =-L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm -lpthread
    endif
+   ifeq ($(MPI_VERSION),lampi)
+      # LAMPI
+      MPI =  -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_LAMPI \
+           -I/home/taylorm/liblampi/include
+      MPILIB = -L /home/taylorm/liblampi/lib -lmpi
+   endif
+
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9560/bin/lf95
