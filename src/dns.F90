@@ -38,8 +38,6 @@ if (init_cond==2) call init_data_lwisotropic(Q)
 
 write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data
-call init_pdf_module()        ! initialize structure functions  
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

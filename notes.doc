@@ -19,15 +19,22 @@ structure function:
 **********************************************************************************
 sizes
 Nirvana:  32Gb per box.  optimal is 225M per CPU.  = 29Gb.
-                                        max size: 425. fft: 400?
+                                        max size: 502?. fft: 400?
           2 Boxes, 64Gb.  optimal size: 550.  
 
 QidSE:  16x4 cpus.  64Gb memory
 Qid:   128x4        512Gb memory
                          
 
-64^3 is 100M on linux box.
-256^3   6.4Gb                   (run on 32 cpus ?)
+Linux box sizes:
+ 64^3     60M            5 arrays,3 coordinates=5*3*8*64^3 
+ 96^3    197M
+128^3    462M
+192^3     ?              5 arrays: 810M
+
+
+256^3   3.8Gb                  
+
 400^3   25Gb.                    128 cpus.  
 512^3:  51Gb                     226 cpus. 
 1024^3  410Gb                   1822 cpus.

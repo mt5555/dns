@@ -58,7 +58,6 @@ endif
 
 
 
-
 ! stage 1
 call ns3D(rhs,rhs,Q,Q_grid,time,1,work)
 
@@ -124,8 +123,9 @@ do n=1,3
    enddo
    enddo
    enddo
+   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-call z_ifft3d_str(Q,Q_grid,rhs,rhs,(count2==0),(count10==0))
+!call z_ifft3d_str(Q,Q_grid,rhs,rhs,(count2==0),(count10==0))
 
 
 time = time + delt

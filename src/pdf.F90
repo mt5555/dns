@@ -3,6 +3,7 @@
 module structf
 implicit none
 
+integer           :: structf_init=0
 integer,parameter :: delta_num=10
 integer           :: delta_val(delta_num)
 
@@ -153,6 +154,9 @@ integer i,ierr
 character*80 message
 real*8 x
 
+if (structf_init==0) then
+   call abort("Error: outputSF() called, but structf module not initialized")
+endif
 
 do i=1,NUM_SF
    call mpisum_pdf(SF(i,1))  
@@ -286,6 +290,12 @@ type(pdf_structure_function) :: str(NUM_SF)
 real*8  :: del,delv(3),delq
 real*8  :: one_third = (1d0/3d0)
 integer :: bin,idel,i,j,k,i2,nsf
+
+if (structf_init==0) then
+   structf_init=1
+   call init_pdf_module()
+endif
+
 
 do k=1,n3
    do j=1,n2

@@ -1,5 +1,4 @@
 #include "macros.h"
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  compute derivative along index index=1,2 or 3

@@ -313,6 +313,10 @@ deallocate(spectrum)
 deallocate(spectrum1)
 
 
+!
+! output structure functions
+!
+if (structf_init==1) then
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time
 !   message = runname(1:len_trim(runname)) // message(2:10) // ".sf"
@@ -325,7 +329,7 @@ if (my_pe==io_pe) then
 endif
 call outputSF(time,fid)
 if (my_pe==io_pe) call cclose(fid)
-
+endif
 
 
 
