@@ -29,6 +29,10 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
+   ifeq ($(HOST),shankara1)
+      MPI = -DUSE_MPI -I/users/contrib/lam/include
+      MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+   endif
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9560/bin/lf95

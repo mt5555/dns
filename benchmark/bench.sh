@@ -14,11 +14,13 @@ endif
 set ncpus = $2
 set command = ../src/dns
 if ($ncpus > 0) then
+#   set command = "mpirun.lam -np $ncpus ../src/dns"
    set command = "mpirun -np $ncpus ../src/dns"
-   if (`hostname` == shankara1) then
-#      set command = "mpirun -np $ncpus -npn 2 ../src/dns"
-      set command = "mpirun -np $ncpus -npn 1 ../src/dns"
+   if (`hostname` == brain) then
+        set command = "mpirun -np $ncpus -npn 2 ../src/dns"
+#       set command = "mpirun -np $ncpus -npn 1 ../src/dns"
    endif
+   echo $command
 else
    set ncpus = 1
 endif
