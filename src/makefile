@@ -29,9 +29,17 @@ ifeq ($(UNAME),SunOS)
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
+   MPI = -DUSE_MPI
    MPILIB = -lmpi 
    LDFLAGS =  -l scs 
-   FFLAGS = -64 -O3 -macro_expand -DUSE_MPI  -DIRIX64  -DSGIFFT
+   FFLAGS = -64 -O3 -macro_expand  -DIRIX64  -DSGIFFT
+endif
+ifeq ($(UNAME),OSF1)
+   F90 = f90
+   MPI = -DUSE_MPI -I /usr/opt/MPI190/include
+   MPILIB = -L/usr/opt/MPI190/lib -lmpi 
+   LDFLAGS =  
+   FFLAGS = -O3  -DOSF1
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
@@ -77,13 +85,11 @@ dep:
 
 -include .depends
 
-ifeq ($(UNAME),IRIX64)
 fft_interface.o:  fft99_interface.o
 	cp -f fft99_interface.o fft_interface.o
-else
-fft_interface.o:  fft_james_interface.o
-	cp -f fft_james_interface.o fft_interface.o
-endif
+#fft_interface.o:  fft_james_interface.o
+#	cp -f fft_james_interface.o fft_interface.o
+
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"

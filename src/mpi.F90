@@ -33,6 +33,15 @@ end module
 #endif
 
 
+!
+! OSF1
+!
+#ifdef OSF1
+module mpi
+#include "mpif.h"
+end module
+#endif
+
 
 
 
