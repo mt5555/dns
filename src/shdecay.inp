@@ -1,0 +1,51 @@
+6            ! input file type
+shallow      ! equations (shallow, ns_psivor, ns_uvw)
+sht           ! initial condition:  shallow water turbulence
+1            ! init condition subtype
+none          ! sto_high_10   !  none or sto_high_10  
+value        ! viscosity type
+0.0          ! viscosity value
+hyper8       ! hyper viscosity type
+1.        ! value
+none        ! hypo vis
+0.0         ! hypo vis value
+0.0          !alpha (for NS-alpha model).  alpha>1 is in units of delx
+.0            ! smagorinsky coefficient (0=disabled)
+0             ! passive scalars
+0            ! compute_structure functions
+0            ! compute pdf
+fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+1.0          ! time to run
+1.15         ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
+.25           ! vis cfl  (0 = disabled, use min_dt)
+0             ! min_dt  
+1             ! max_dt 
+0.0          ! restart_dt  (0 = restart output disabled)
+.1          ! diag_dt   
+.1           ! model dt
+-20           ! screen_dt
+.1          ! output_dt  (0 = output disabled, except for custom output times)
+1            !  also output vorticity
+0            ! n_output_custom  number of custom output times  
+.009         ! custom output times, one per line
+
+
+
+subtype=5 good CFL test.
+g=400
+U=3
+
+100x100
+cfl 1.25 goes unstable at by t=.2
+cfl 1.15 stable.
+
+alpha=2 delx
+cfl 4.5:  stable to .43
+cfl 5.0:  CG iteration failure
+
+alpha=4 delx
+cfl 4.5   out of balance by t=.4
+cfl 6.0:  CG iteration failure

@@ -23,8 +23,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(HOST),sulaco)
       #MPI = -DUSE_MPI -I/contrib/lam/include
       #MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
-      MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I/contrib/liblampi/include
-      MPILIB =  -Xlinker -rpath /contrib/liblampi/lib -L/contrib/liblampi/lib -lmpi
+      #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I/contrib/liblampi/include
+      #MPILIB =  -Xlinker -rpath /contrib/liblampi/lib -L/contrib/liblampi/lib -lmpi
    endif
    ifeq ($(HOST),jmac.lanl.gov)
 	VENDOR=LAHEY

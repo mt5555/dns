@@ -433,11 +433,11 @@ else if (init_cond_subtype==12) then   ! run M
 else if (init_cond_subtype==13) then   ! run N
    R=.4
    F=.1
-else if (init_cond_subtype==100) then   ! run N
+else if (init_cond_subtype==101) then   ! run N
    R=.05
    F=.05
    init_zero=.true.
-else if (init_cond_subtype==101) then   ! run N
+else if (init_cond_subtype==105) then   ! run N
    R=1.0
    F=.05
    init_zero=.true.

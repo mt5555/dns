@@ -48,9 +48,8 @@ if (compute_transfer) then
    compute_transfer=.false.
 endif
 
-if (.not.doit_model) return
 
-
+if (doit_model .or. time==time_initial) then
 if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
@@ -61,7 +60,7 @@ if ( g_bdy_x1==PERIODIC .and. &
    !spectral transfer functions:
    compute_transfer=.true.
 endif
-
+endif
 
 
 end subroutine
