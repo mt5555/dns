@@ -1,4 +1,15 @@
 **********************************************************************************
+12/04/01
+iso12_250C_
+
+iso12 initial condition
+iso12 forcing  (subtype=0:  tau=5)
+CFL=1.5/.25
+mu=.4e-3  
+
+
+
+**********************************************************************************
 11/30/01
 iso12_250B_
 
@@ -7,9 +18,13 @@ iso12 forcing  (subtype=0:  tau=5)
 CFL=1.5/.25
 mu=.2e-3  
 
-same as iso12_250B_, but with mu 2x larger
+same as iso12_250_, but with mu 2x larger
 
-IN
+R_l = 241
+h/eta= 2.41
+eddy turnover time: around 1.4
+epsilon: about -1.0
+
 
 
 
@@ -38,9 +53,8 @@ mu=.1e-3
 
 a little under-resolved:
 data average from t=5..11:    
-R_l = 350 
-eta=.000996
-h/eta = 4.02 
+R_l = 347 
+h/eta = 4.03 
 
 eddy turnover time: about 1.6
 epsilon:  about  -1.0
