@@ -54,7 +54,8 @@ real*8 :: diff,ax,ay,az
 
 subcube_size=ssize/g_nx
 wsubcube_size=2*ssize/g_nx   ! 2x larger
-diff = ssize/g_nx
+diff = ssize
+diff = diff/g_nx
 
 
 if (allocated(subcube_cords)) deallocate(subcube_cords)

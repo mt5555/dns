@@ -299,7 +299,9 @@ real*8,allocatable :: gradu(:,:,:)
 real*8,allocatable :: gradu2(:,:,:)
 integer :: i2,j2,k2,k
 
+call print_message("setting up subcubes")
 call setup_subcubes(ssize)
+call print_message("done setting up subcubes")
 allocate(gradu(3,3,nsubcube))
 allocate(gradu2(3,3,nsubcube))
 gradu=0
