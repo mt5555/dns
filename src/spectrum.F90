@@ -1358,7 +1358,7 @@ do j=ny1,ny2
             spec_E(iwave)=spec_E(iwave) + energy*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*energy*(sum(RR*RR)+ sum(II*II))
 
-!	helicity(k) = k\cdot RR(k) cross II(k)            
+            !	helicity(k) = k\cdot RR(k) cross II(k)            
             energy = energy * pi2 * (im*(RR(2) - II(3)) + &
                  jm*(II(3) - RR(1)) + km*(RR(1) - II(2))) 
             if (energy>0) spec_helicity_rp(iwave)= & 
