@@ -16,8 +16,8 @@ F77FIXED=
 
 ifeq ($(UNAME),Linux)
    #VENDOR=LAHEY
-   VENDOR=PGI
-   #VENDOR=INTEL
+   #VENDOR=PGI
+   VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),s854018)

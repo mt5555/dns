@@ -1183,7 +1183,7 @@ use params
 use mpi
 implicit none
 integer :: ierr,skip_fft
-real*8 :: p1(nx,ny,nz,2)
+real*8 :: p1(nx,ny,nz,3)
 real*8 :: cmodes(nx,ny,nz,2,3)
 
 
