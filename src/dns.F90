@@ -186,7 +186,7 @@ if (time_final<0) then
    ! flag denoting run abs(time_final) time steps, instead of specifing 
    ! a final time
    itime_final=-time_final
-   time_final=1e99
+   time_final=1e20
 else
    time_final=time_final+time_initial
 endif
