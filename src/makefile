@@ -22,10 +22,8 @@ ifeq ($(UNAME),Linux)
    MPILIB = 
    ifeq ($(HOST),s854018)
       VENDOR=INTEL8
-      MPI = -DUSE_MPI 
-      MPILIB =   -llamf77mpi -lmpi -llam 
-      #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
-      #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
+      MPI = -DUSE_MPI -DMPI_UNDERSCORE
+      MPILIB =   -llamf77mpi -lmpi -llam -lpthread
    endif
    ifeq ($(HOST),kiwi1)
       VENDOR=INTEL8

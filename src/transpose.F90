@@ -1711,7 +1711,12 @@ implicit none
 CPOINTER fid
 integer :: len,ierr
 real*8 :: buf(len)
+character(len=80) :: message
 call mread8e(fid,buf,len,ierr)
+if (ierr /= len) then
+   write(message,*) "ERROR: mread8() elements requested: ",len," elements read: ",ierr
+   call abort(message)
+endif
 end subroutine
 
 

@@ -45,7 +45,10 @@ subroutine wallclock(tmx)
 use params
 use mpi
 implicit none
-real*8 tmx,mpi_wtime
+real*8 tmx
+#ifdef MPI_UNDERSCORE
+real*8 mpi_wtime
+#endif
 tmx = mpi_wtime()
 
 #else
