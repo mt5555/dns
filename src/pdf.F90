@@ -1123,7 +1123,7 @@ end subroutine
 
 
 
-subroutine compute_all_pdfs(Q,gradu,gradv,gradw)
+subroutine compute_all_pdfs(Q,gradu)
 !
 !
 use params
@@ -1133,8 +1133,6 @@ implicit none
 integer :: ns
 real*8 Q(nx,ny,nz,3)    
 real*8 gradu(nx,ny,nz,3)    
-real*8 gradv(nx,ny,nz,3)    
-real*8 gradw(nx,ny,nz,3)    
 
 !local
 integer n1,n1d,n2,n2d,n3,n3d,ierr
@@ -1146,7 +1144,7 @@ real*8 :: tmx1,tmx2
 
 
 call wallclock(tmx1)
-
+call print_message("computing u pdfs...")
 do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
@@ -1155,6 +1153,7 @@ call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n
 call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
 #endif
 
+call print_message("computing v pdfs...")
 do n=1,3
    call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
@@ -1163,6 +1162,7 @@ call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n
 call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
 #endif
 
+call print_message("computing w pdfs...")
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
@@ -1171,25 +1171,24 @@ call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n
 call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
 #endif
 
-gradw=0
+call print_message("computing eps pdfs...")
+gradu=0
 do n=1,3
    ! u_x, u_y, u_z
-   call der(Q(1,1,1,1),gradu(1,1,1,1),dummy,gradv,DX_ONLY,n)
-   gradw(:,:,:,1)=gradw(:,:,:,1)+gradu(:,:,:,1)**2	
+   call der(Q(1,1,1,1),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+   gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
 
    ! v_x, v_y, v_z
-   call der(Q(1,1,1,2),gradu(1,1,1,1),dummy,gradv,DX_ONLY,n)
-   gradw(:,:,:,1)=gradw(:,:,:,1)+gradu(:,:,:,1)**2	
+   call der(Q(1,1,1,2),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+   gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
 
    ! w_x, w_y, w_z
-   call der(Q(1,1,1,3),gradu(1,1,1,1),dummy,gradv,DX_ONLY,n)
-   gradw(:,:,:,1)=gradw(:,:,:,1)+gradu(:,:,:,1)**2	
+   call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+   gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
 enddo
-gradw=mu*gradw
-call compute_pdf_epsilon(gradw)
-
-
-
+gradu=mu*gradu
+call compute_pdf_epsilon(gradu)
+call print_message("done with pdfs.")
 
 
 
@@ -1198,10 +1197,6 @@ call wallclock(tmx2)
 tims(12)=tims(12)+(tmx2-tmx1)
 
 end subroutine
-
-
-
-
 
 
 

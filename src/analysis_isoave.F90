@@ -114,13 +114,17 @@ else
    allocate(Q(nx,ny,nz,ndim))
    allocate(q1(nx,ny,nz,ndim))
    allocate(q2(nx,ny,nz,ndim))
-   allocate(q3(nx,ny,nz,ndim))
    if (nxdecomp*nydecomp*nzdecomp>1) then
+      allocate(q3(nx,ny,nz,ndim))
       allocate(work1(nx,ny,nz))
       allocate(work2(nx,ny,nz))
       allocate(work3(nx,ny,nz))
       allocate(work4(nx,ny,nz))
    endif
+endif
+
+if (compute_cj) then
+   if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
 endif
 
 
@@ -146,7 +150,41 @@ do
    endif	
 
 
+
+
+   if (compute_pdfs) then
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.sf"
+         print *,fname
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
+            call abort(message)
+         endif
+      endif
+      
+      if (.not. read_uvw) then
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+	 read_uvw=.true.
+      endif
+      
+      uscale=.01 / pi2               ! (del_u)              units:  m/s
+      epsscale=.01 / pi2**(2./3.)    ! (mu*gradu**2)**1/3   units: 
+      if (my_pe==io_pe) then
+         print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
+      endif
+      call compute_all_pdfs(Q,q1)
+
+      call output_pdf(time,fid,fid1,fid2)
+      if (my_pe==io_pe) call cclose(fid,ierr)
+   endif
+
+
+
+
    if (compute_uvw) then
+      if (.not. read_uvw) then	
       if (use_serial==1) then
          !      call dataio(time,Q,work1,work2,1)
          call input_uvw(time,Q,dummy,work1,work2)
@@ -154,6 +192,7 @@ do
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
       endif
       read_uvw=.true.	
+      endif
       
       do i=0,nxdecomp-1
       do j=0,nydecomp-1
@@ -188,7 +227,7 @@ do
          else
             if (nxdecomp*nydecomp*nzdecomp==1) then
                ! no subcubes:
-               call isoavep(Q,q1,q2,q3,3,csig)
+               call isoavep(Q,q1,q1,q2,3,csig)
             else
                range(1,1)=dble(i)/nxdecomp
                range(1,2)=dble(i+1)/nxdecomp
@@ -219,33 +258,6 @@ do
    endif
 
 
-   if (compute_pdfs) then
-      if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.sf"
-         print *,fname
-         call copen(fname,"w",fid,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
-            call abort(message)
-         endif
-      endif
-      
-      if (.not. read_uvw) then
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
-	 read_uvw=.true.
-      endif
-      
-      uscale=.005 / pi2               ! (del_u)              units:  m/s
-      epsscale=.005 / pi2**(2./3.)    ! (mu*gradu**2)**1/3   units: 
-      if (my_pe==io_pe) then
-         print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
-      endif
-      call compute_all_pdfs(Q,q1,q2,q3)
-
-      call output_pdf(time,fid,fid1,fid2)
-      if (my_pe==io_pe) call cclose(fid,ierr)
-   endif
 
 
    if (compute_cj) then
@@ -263,7 +275,7 @@ do
       call print_message("calling compute_w2s2")
       call compute_w2s2(Q,q1,q2,q3)
       call print_message("calling isoavep")
-      call isoavep(Q,q1,q2,q3,2,csig)
+      call isoavep(Q,q1,q1,q2,2,csig)
       
       if (my_pe==io_pe) then
          call copen(fname,"w",fid,ierr)
@@ -286,7 +298,7 @@ do
       
       call singlefile_io(time,Q(1,1,1,1),fname,q1(1,1,1,1),q1(1,1,1,2),1,io_pe)
       
-      call isoavep(Q,q1,q2,q3,1,csig)
+      call isoavep(Q,q1,q1,q2,1,csig)
       if (my_pe==io_pe) then
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then

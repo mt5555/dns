@@ -280,7 +280,6 @@ real*8 :: Q(nx,ny,nz,n_var)               ! original data
 real*8 :: Qst(g_nz2,nslabx,ny_2dz,n_var)  ! transpose
 
 ! these two arrays can be overlapped in memory:
-! if some of the qt_uptodate lines below are uncommented
 real*8 :: Qt(g_nz2,nslabx,ny_2dz,n_var)   ! transpose
 real*8 :: Qs(nx,ny,nz,n_var)              ! shifted original data
 
@@ -490,9 +489,8 @@ do idir=1,ndir
          enddo
          enddo
 
-!        not yet coded:
-!         ! Qs is same array as Qt, so we just trashed Qt:
-!         qt_uptodate=.false.	
+         ! Qs is same array as Qt, so we just trashed Qt:
+         qt_uptodate=.false.	
 
          do n=1,nd
             ntranspose=ntranspose+1
@@ -536,9 +534,8 @@ do idir=1,ndir
             ntranspose=ntranspose+1
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-!        not yet coded:
-!         ! Qs is the same array as Qt, so we just trashed Qt
-!         qt_uptodate=.false.
+         ! Qs is the same array as Qt, so we just trashed Qt
+         qt_uptodate=.false.
          call comp_str_xy(Qs,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else
          call abort("parallel computation of direction not supported")

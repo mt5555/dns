@@ -121,7 +121,7 @@ if (compute_struct==1) then
 #if 0
    ! uscale=.01 / pi2
    ! epsscale=.01 / pi2_squared  
-   call compute_all_pdfs(Q,q1,q2,q3)
+   call compute_all_pdfs(Q,q1)
    
    
    
