@@ -32,12 +32,14 @@ sgi:     87s
 
 
 quick & dirty 64x64x64 timings (1cpu)  
+./bench.sh 64  
 run to .1 
 CFL=1.5/.25
 
-darkstar:  
-nirvana:  
-Autrey:  .93  .92
+darkstar (PGI):  1.06  1.06
+darkstar (LF):   1.25  1.25 
+nirvana:  .94  .95  .94
+Autrey:  .93  .92  .92
 
 
 

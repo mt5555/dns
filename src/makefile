@@ -77,10 +77,13 @@ dep:
 
 -include .depends
 
+ifeq ($(UNAME),IRIX64)
 fft_interface.o:  fft99_interface.o
 	cp -f fft99_interface.o fft_interface.o
-#fft_interface.o:  fft_james_interface.o
-#	cp -f fft_james_interface.o fft_interface.o
+else
+fft_interface.o:  fft_james_interface.o
+	cp -f fft_james_interface.o fft_interface.o
+endif
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"
