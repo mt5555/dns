@@ -5,7 +5,7 @@
 %
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-time=1.10;
+time=1.00;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
 

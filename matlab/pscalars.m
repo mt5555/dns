@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:1.65];
+times=[1.0000:.01:1.19];
 
 
 if (readdata)
@@ -70,7 +70,7 @@ end
 end
 
 % look at passive scalar number np
-for np=1:10
+for np=1:1;
 
 Vp=Vpdata(np,:);
 time_e=squeeze(pints_e(1,np,:))';
@@ -107,7 +107,7 @@ c2=c2-c1.^2;
 n0(1,:)=pints_e(27,np,:);
 n0(2,:)=pints_e(28,np,:);
 n0(3,:)=pints_e(29,np,:);
-
+n0=mean(n0,1);
 
 %
 % isotropic relations (may not exactly agree with data from scalars.m)
@@ -138,8 +138,8 @@ lambda_c=sqrt(c2./mean(cx2,1));
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
 % eta_c = Bachelor scale
 % lambda_c = taylor microscale
-eta_c=(mu./schmidt).^3 ./ epsilon_c;            %eta/sqrt(schmidt);
-%eta_c=(mu./schmidt).^3 ./ epsilon_c            
+eta_c= ( (mu./schmidt).^3 ./ epsilon_c).^(.25);        %eta/sqrt(schmidt);
+%eta_c=( (mu./schmidt).^3 ./ epsilon_c).^(.25);            
 %eta_c=eta./sqrt(schmidt);
 
 
@@ -148,8 +148,10 @@ disp(' ')
 disp(sprintf('passive scalar n=%i',np))
 disp(sprintf('schmidt = %f',schmidt(1) ))
 disp(sprintf('s2 = %f',c2(1) ))
-disp(sprintf('lambda_c = %f',lambda_c(1) ))
 disp(sprintf('epsilon_c = %f',epsilon_c(1) ))
+disp(sprintf('lambda_c = %f',lambda_c(1) ))
+disp(sprintf('1/N0 = %f %f %f',1./n0(:,1) ))
+
 
 
 %
@@ -274,10 +276,14 @@ plot(time_e,eta_c)
 title('\eta_c')
 
 subplot(4,2,5)
+plot(time_e,1./n0)
+title('1/N0')
+
+subplot(4,2,7)
 plot(time_e,Vp)
 title('%mix')
 
-subplot(4,2,6)
+subplot(4,2,8)
 plot(time_e,Vp2)
 title('%mix \lambda_c / \eta_c')
 
