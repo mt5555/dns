@@ -69,9 +69,11 @@ int main(int argc, char **argv) {
 	fid2=fopen(subname,"w");
 	fwrite(buf,4,ncube*ncube*ncube,fid2);
 	fclose(fid2);
+	goto done;
       }
     }
   }
+done:
   fclose(fid);
   return 0;
 }
