@@ -84,7 +84,11 @@ real*8 :: alpha=0
 real*8 :: beta=1
 integer i,j,k
 
-
+!
+! two methods.  both require 18 total FFT's but second method has
+! the advantage that we can also dealias at no additional cost
+!
+#if 0
 call divergence(p,u,work,work2)
 
 ! solve laplacian(p)=div(u)
@@ -102,15 +106,109 @@ if (dealias) then
       call fft_filter_dealias(u(1,1,1,i))
       call ifft3d(u(1,1,1,i),work)
    enddo
-else
-#if 0
-   do i=1,3
-      call fft3d(u(1,1,1,i),work)
-      call fft_filter_last(u(1,1,1,i))
-      call ifft3d(u(1,1,1,i),work)
-   enddo
-#endif
 endif
+
+
+#else
+integer im,jm,km,i2,j2,k2
+real*8 :: uu,vv,ww,xfac
+
+
+ASSERT("divfree(): nslabx must be even ",mod(nslabx,2)==0)
+ASSERT("divfree(): nslaby must be even ",mod(nslaby,2)==0)
+ASSERT("divfree(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
+
+do i=1,3
+   call fft3d(u(1,1,1,i),work)
+enddo
+
+   do k=nz1,nz2
+      km=kmcord(k)
+      if (km==g_nz/2) km=0
+      do j=ny1,ny2
+         jm=jmcord(j)
+         if (jm==g_ny/2) jm=0
+         do i=nx1,nx2
+            im=imcord(i)
+            if (im==g_nx/2) im=0
+
+            ! compute the divergence
+            p(i,j,k)=0
+            if (mod(i-nx1+1,2)==1) then
+               p(i,j,k)=p(i,j,k) - pi2*im*u(i+1,j,k,1)
+            else
+               p(i,j,k)=p(i,j,k) + pi2*im*u(i-1,j,k,1)
+            endif
+
+            if (mod(j-ny1+1,2)==1) then
+               p(i,j,k)=p(i,j,k) - pi2*jm*u(i,j+1,k,2)
+            else
+               p(i,j,k)=p(i,j,k) + pi2*jm*u(i,j-1,k,2)
+            endif
+
+            if (g_nz>1) then
+            if (mod(k-nz1+1,2)==1) then
+               p(i,j,k)=p(i,j,k) - pi2*km*u(i,j,k+1,3)
+            else
+               p(i,j,k)=p(i,j,k) + pi2*km*u(i,j,k-1,3)
+            endif
+            endif
+
+
+            ! compute laplacian inverse
+            xfac= pi2*pi2*(im*im +km*km + jm*jm)
+            if (xfac/=0) xfac = 1/xfac
+            p(i,j,k)=-xfac*p(i,j,k)
+
+         enddo
+      enddo
+   enddo
+
+   do k=nz1,nz2
+      km=kmcord(k)
+      if (km==g_nz/2) km=0
+      do j=ny1,ny2
+         jm=jmcord(j)
+         if (jm==g_ny/2) jm=0
+         do i=nx1,nx2
+            im=imcord(i)
+            if (im==g_nx/2) im=0
+
+            ! compute gradient  dp/dx
+            if (mod(i-nx1+1,2)==1) then
+               uu= - pi2*im*p(i+1,j,k)
+            else
+               uu= + pi2*im*p(i-1,j,k)
+            endif
+            if (mod(j-ny1+1,2)==1) then
+               vv= - pi2*jm*p(i,j+1,k)
+            else
+               vv= + pi2*jm*p(i,j-1,k)
+            endif
+            if (mod(k-nz1+1,2)==1) then
+               ww= - pi2*km*p(i,j,k+1)
+            else
+               ww= + pi2*km*p(i,j,k-1)
+            endif
+
+            u(i,j,k,1)=u(i,j,k,1) - uu
+            u(i,j,k,2)=u(i,j,k,2) - vv
+            u(i,j,k,3)=u(i,j,k,3) - ww
+
+         enddo
+      enddo
+   enddo
+
+
+do i=1,3
+   if (dealias) call fft_filter_dealias(u(1,1,1,i))
+   call ifft3d(u(1,1,1,i),work)
+enddo
+#endif
+
+
+
+
 
 end subroutine
 
