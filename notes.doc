@@ -4,16 +4,9 @@
         benchmark parallel decompostions
 
 3. psi-vor code:
-        put in interpolation for PSI boundary values
         fix output1/input1 for non-perfect decompositions
-
-        code up offset_nx1 code:  all code that worries about
-        boundaries needs to use bx1,bx2 or intx1,intx2
-        and NOT nx1,nx2.
-
-        OR: nx1,nx2 made to be variable?  NO. nx1,nx2 control
-        parallel decomposition.  
-        
+        benchmark parallel run (see runs.log)
+        set PSI interp ON if wcutoff>0
 
 
 1. hyper viscosity in NS code

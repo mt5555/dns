@@ -13,7 +13,6 @@ call fft_interface_init()
 call init_input_file()
 call init_grid()          
 
-
 !
 ! scale alpha now that we know delx
 !
@@ -55,7 +54,7 @@ real*8 :: one=1
 integer i,j,k,l,ierr
 character(len=80) message
 
-
+print *,'hi'
 
 
 
@@ -89,8 +88,6 @@ if (g_bdy_z1==PERIODIC) o_nz=g_nz+1
 if (g_nz==1) o_nz=1
 
 
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! local grid, bounds over interior (non-boundary) points
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -111,6 +108,7 @@ bz2=nz2
 if (offset_bdy==1) then
    if (my_x==ncpu_x-1) bx2=nx2+1; o_nx=g_nx+1
    if (my_y==ncpu_y-1) by2=ny2+1; o_ny=g_ny+1
+   if (my_z==ncpu_z-1 .and. g_nz>1) bz2=nz2+1; o_nz=g_nz+1
 endif
 
 
@@ -268,8 +266,6 @@ do j=1,ny_2dz
    if (z_jmcord(j)==0) z_jmsign(j)=0
    if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
 enddo
-
-
 
 
 

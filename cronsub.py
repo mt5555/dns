@@ -57,7 +57,7 @@ if (status==0):
         bsub="bsub"
         path="cronlsf/"
     else:
-        bsub="bsub -L /bin/csh"
+        bsub="bsub"
         path="cronQ/"
 else:
     print 'Error getting OS type'

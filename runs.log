@@ -11,8 +11,12 @@ t=1.5  NIRVANA timings              t=15
 2305x1025 on 5x5      9 min          90min
 2305x1025 on 1x25     in                         1e-7
 
+8192x4096  5 timesteps initialized, but didn't finish 1 time step in 15min
+           resubmitted with interpolation enabled
+
 2049x1025 autrey                     508min
 
+4096x2048 autrey      IN?  segfault
 
 
 
