@@ -54,14 +54,14 @@ CPOINTER :: fid
 
 
 
-tstart=3.0
-tstop=3.0
+tstart=0.0
+tstop=0.0
 tinc=.25
 icount=0
 
-nxdecomp=2
-nydecomp=2
-nzdecomp=2
+nxdecomp=1
+nydecomp=1
+nzdecomp=1
 
 call set_byteswap_input(1);
 
@@ -98,8 +98,7 @@ allocate(Q(nx,ny,nz,ndim))
 allocate(work1(nx,ny,nz))
 allocate(work2(nx,ny,nz))
 
-! call convert_sk(Q,work1,work2); stop
-
+print *,'allocated memory.'
 if (use_serial==0) then
    ! parallel version requires extra data:
    allocate(q1(nx,ny,nz,ndim))
@@ -120,7 +119,12 @@ time=tstart
 do
    icount=icount+1
 
-   call dataio(time,Q,work1,work2,1)
+!   call dataio(time,Q,work1,work2,1)
+
+!  read in SK's data, and compute helical structure function
+   comp_sk_helical=.true.;
+   call convert_sk(Q,work1,work2);  
+   print *,'Also computing H_ltt...'
 
    do i=0,nxdecomp-1
    do j=0,nydecomp-1
@@ -236,11 +240,18 @@ real*8  :: time
 
 character(len=80) message,sdata
 character(len=280) basename,fname
+integer :: N,ix,iy,iz
 
 ! read in data from alien file format, store in Q
+open(unit = 10, form = 'unformatted', status = 'old', &
+     file = 'check256_hapiq_t0.8_velfield.out')
+N=256
+Q=0
+read(10)(((Q(nx1+ix, ny1+iy, nz1+iz,1), &
+           Q(nx1+ix, ny1+iy, nz1+iz,2), &
+           Q(nx1+ix, ny1+iy, nz1+iz,3), &
+           ix = 0, N-1), iy=0,N-1),iz=0,N-1)
 
-! output into our file format
-time = 0
-call dataio(time,Q,work1,work2,0)
+
 
 end subroutine

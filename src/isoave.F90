@@ -10,6 +10,8 @@
 !
 !
 
+! compute SK's helical structure function
+
 module isoave
 implicit none
 
@@ -21,6 +23,8 @@ integer :: dir(3,ndir)
 integer :: ndelta
 integer :: delta_val(ndelta_max)   ! delta values (in terms of grid points)
 real*8  :: r_val(ndelta_max,ndir)      ! actual distance for each delta value
+
+logical :: comp_sk_helical=.false.  ! compute SK's helical str function
 
 
 logical :: firstcall=.true.
@@ -44,6 +48,8 @@ logical :: firstcall=.true.
 real*8,allocatable  :: Dl(:,:,:)         ! longitudinal, p=2..10
 real*8,allocatable  :: Dt(:,:,:,:)       ! transverse, p=2..10
 real*8,allocatable  :: D_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
+
+real*8,allocatable  :: H_ltt(:,:)      ! H_ltt(ndelta,ndir)    
 
 ! signed (positive part) of above
 real*8,allocatable  :: SP_lll(:,:)        ! D_lll(ndelta,ndir)
@@ -80,8 +86,12 @@ if (my_pe/=io_pe) return
 
 x=ndelta; call cwrite8(fid,x,1)   
 x=ndir;   call cwrite8(fid,x,1)   
-x=pmax-1+2;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
-x=pmax-1+3;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
+if (comp_sk_helical) then
+   x=pmax-1+2+1;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
+else
+   x=pmax-1+2;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
+endif
+x=pmax-1+3;    call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
 x=7;      call cwrite8(fid,x,1)   ! number of scalars
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
@@ -104,6 +114,12 @@ enddo
 do idir=1,ndir
    call cwrite8(fid,SN_lll(1,idir),ndelta)
 enddo
+if (comp_sk_helical) then
+do idir=1,ndir
+   call cwrite8(fid,H_ltt(1,idir),ndelta)
+enddo
+endif
+
 
 ! transverse
 do p=2,pmax
@@ -129,6 +145,7 @@ do idir=1,ndir
    call cwrite8(fid,SN_ltt(1,idir,i),ndelta)
 enddo
 enddo
+
 
 call cwrite8(fid,time,1)
 x=g_nx; call cwrite8(fid,x,1)
@@ -190,6 +207,7 @@ endif
 Dl=0
 Dt=0
 D_ltt=0
+H_ltt=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -353,40 +371,8 @@ do idir=1,ndir
    enddo
 
 
-Dl=Dl/ntot
-Dt=Dt/ntot
-D_ltt=D_ltt/ntot
+   call normalize_and_reduce(ntot)
 
-SP_ltt=SP_ltt/ntot
-SP_lll=SP_lll/ntot
-SN_ltt=SN_ltt/ntot
-SN_lll=SN_lll/ntot
-
-#ifdef USE_MPI
-   do p=2,pmax
-   dwork2=Dl(:,:,p)
-   call MPI_allreduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork3=Dt(:,:,:,p)
-   call MPI_allreduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   enddo
-
-   dwork3=D_ltt
-   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-
-
-
-   dwork3=SP_ltt
-   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork2=SP_lll
-   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork3=SN_ltt
-   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork2=SN_lll
-   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-
-
-
-#endif
 
 end subroutine
 
@@ -421,7 +407,6 @@ real*8 :: subcube_st(g_nz2,nslabx,ny_2dz)
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
-real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
@@ -441,6 +426,7 @@ endif
 Dl=0
 Dt=0
 D_ltt=0
+H_ltt=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -621,39 +607,7 @@ do idir=1,ndir
    enddo
 
 
-Dl=Dl/ntot
-Dt=Dt/ntot
-D_ltt=D_ltt/ntot
-
-SP_ltt=SP_ltt/ntot
-SP_lll=SP_lll/ntot
-SN_ltt=SN_ltt/ntot
-SN_lll=SN_lll/ntot
-
-#ifdef USE_MPI
-   do p=2,pmax
-   dwork2=Dl(:,:,p)
-   call MPI_allreduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork3=Dt(:,:,:,p)
-   call MPI_allreduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   enddo
-
-   dwork3=D_ltt
-   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-
-
-   dwork3=SP_ltt
-   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork2=SP_lll
-   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork3=SN_ltt
-   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork2=SN_lll
-   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-
-
-
-#endif
+call normalize_and_reduce(ntot)
 
 end subroutine
 
@@ -675,7 +629,6 @@ integer :: lx1,lx2,lz1,lz2,ly1,ly2
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
-real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,ntot
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
@@ -692,6 +645,7 @@ endif
 Dl=0
 Dt=0
 D_ltt=0
+H_ltt=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -737,7 +691,6 @@ print *,'R_l      ',R_lambda
 
 
 
-!$omp parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
 do idir=1,ndir
 
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
@@ -759,7 +712,6 @@ do idir=1,ndir
       
 #endif
 
-!$XXX parallel do private(rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
    do idel=1,ndelta
 
       rvec = dir(:,idir)*delta_val(idel)
@@ -793,31 +745,13 @@ do idir=1,ndir
             if (k2<=nz2) exit
             k2=k2-nslabz
          enddo
-         do n=1,3
-            delu(n)=Q(i2,j2,k2,n)-Q(i,j,k,n)
-         enddo
-         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
-         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
-         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
-         
-         do p=2,pmax
-            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
-            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
-            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
-         enddo
-         
-         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
-         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
 
-         if (u_l>=0) then
-            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
-            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
-            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
-         else
-            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
-            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
-            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
-         endif
+         call accumulate_str(idir,idel, &
+              Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),&
+              Q(i2,j2,k2,1),Q(i2,j2,k2,2),Q(i2,j2,k2,3), &
+              rhat,rperp1,rperp2)
+
+
          
       enddo
       enddo
@@ -827,15 +761,7 @@ enddo
 enddo
 !$omp end parallel do
 
-
-Dl=Dl/ntot
-Dt=Dt/ntot
-D_ltt=D_ltt/ntot
-
-SP_ltt=SP_ltt/ntot
-SP_lll=SP_lll/ntot
-SN_ltt=SN_ltt/ntot
-SN_lll=SN_lll/ntot
+call normalize_and_reduce(ntot)
 
 
 end subroutine
@@ -852,7 +778,6 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
 real*8 :: rvec(3),delu(3)
-real*8 :: u_l,u_t1,u_t2
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 
@@ -884,31 +809,11 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             j2=j2-nslaby
          enddo
 
-         do n=1,3
-            delu(n)=Q(i2,j2,k,n)-Q(i,j,k,n)
-         enddo
-         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
-         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
-         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
-         
-         do p=2,pmax
-            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
-            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
-            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
-         enddo
-         
-         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
-         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+         call accumulate_str(idir,idel, &
+              Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),&
+              Q(i2,j2,k2,1),Q(i2,j2,k2,2),Q(i2,j2,k2,3), &
+              rhat,rperp1,rperp2)
 
-         if (u_l>=0) then
-            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
-            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
-            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
-         else
-            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
-            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
-            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
-         endif
          
       enddo
       enddo
@@ -935,7 +840,6 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
 real*8 :: rvec(3),delu(3)
-real*8 :: u_l,u_t1,u_t2
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 
@@ -967,33 +871,12 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             if (k2<=g_nz) exit
             k2=k2-g_nz
          enddo
-         do n=1,3
-            delu(n)=Q(k2,i2,j,n)-Q(k,i,j,n)
-         enddo
 
-         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
-         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
-         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
-         
-         do p=2,pmax
-            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
-            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
-            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
-         enddo
-         
-         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
-         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+         call accumulate_str(idir,idel, &
+              Q(k,i,j,1),Q(k,i,j,2),Q(k,i,j,3),&
+              Q(k2,i2,j,1),Q(k2,i2,j,2),Q(k2,i2,j,3), &
+              rhat,rperp1,rperp2)
 
-         if (u_l>=0) then
-            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
-            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
-            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
-         else
-            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
-            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
-            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
-         endif
-         
       enddo
       enddo
       enddo
@@ -1016,7 +899,6 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
 real*8 :: rvec(3),delu(3)
-real*8 :: u_l,u_t1,u_t2
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 
@@ -1050,33 +932,12 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             j2=j2-nslaby
          enddo
 
-         do n=1,3
-            delu(n)=Q(i2,j2,k,n)-Q(i,j,k,n)
-         enddo
-         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
-         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
-         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
-         
-         
-         do p=2,pmax
-            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
-            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
-            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
-         enddo
-         
-         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
-         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+         call accumulate_str(idir,idel, &
+              Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),&
+              Q(i2,j2,k,1),Q(i2,j2,k,2),Q(i2,j2,k,3), &
+              rhat,rperp1,rperp2)
+      endif
 
-         if (u_l>=0) then
-            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
-            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
-            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
-         else
-            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
-            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
-            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
-         endif
-         endif
       enddo
       enddo
       enddo
@@ -1104,9 +965,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
 real*8 :: rvec(3),delu(3)
-real*8 :: u_l,u_t1,u_t2
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
-
 
   do idel=1,ndelta
 
@@ -1128,45 +987,26 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
          if (subcube(k,i,j)/=0) then   ! using an exit here exits *all* loops!
 
          
-         i2 = i + rvec(1)
-         do
-            if (i2<1) call abort("isoave: i2<nx1")
-            if (i2<=nslabx) exit
-            i2=i2-nslabx
-         enddo
+            i2 = i + rvec(1)
+            do
+               if (i2<1) call abort("isoave: i2<nx1")
+               if (i2<=nslabx) exit
+               i2=i2-nslabx
+            enddo
+            
+            k2 = k + rvec(3)
+            do
+               if (k2<1) call abort("isoave: k2<nz1")
+               if (k2<=g_nz) exit
+               k2=k2-g_nz
+            enddo
+            
 
-         k2 = k + rvec(3)
-         do
-            if (k2<1) call abort("isoave: k2<nz1")
-            if (k2<=g_nz) exit
-            k2=k2-g_nz
-         enddo
-         do n=1,3
-            delu(n)=Q(k2,i2,j,n)-Q(k,i,j,n)
-         enddo
+            call accumulate_str(idir,idel, &
+                 Q(k,i,j,1),Q(k,i,j,2),Q(k,i,j,3),&
+                 Q(k2,i2,j,1),Q(k2,i2,j,2),Q(k2,i2,j,3), &
+                 rhat,rperp1,rperp2)
 
-         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
-         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
-         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
-         
-         do p=2,pmax
-            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
-            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
-            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
-         enddo
-         
-         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
-         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
-
-         if (u_l>=0) then
-            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
-            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
-            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
-         else
-            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
-            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
-            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
-         endif
          endif
          
       enddo
@@ -1179,6 +1019,49 @@ end subroutine
 
 
 
+subroutine accumulate_str(idir,idel,u1,u2,u3,ur1,ur2,ur3,rhat,rperp1,rperp2)
+real*8 :: u1,u2,u3,ur1,ur2,ur3   
+real*8 :: rhat(3),rperp1(3),rperp2(3)
+
+real*8 :: delu1,delu2,delu3
+real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
+integer :: p,idel,idir
+
+delu1=ur1-u1
+delu2=ur2-u2
+delu3=ur3-u3
+
+u_l  = delu1*rhat(1)+delu2*rhat(2)+delu3*rhat(3)
+u_t1 = delu1*rperp1(1)+delu2*rperp1(2)+delu3*rperp1(3)
+u_t2 = delu1*rperp2(1)+delu2*rperp2(2)+delu3*rperp2(3)
+if (comp_sk_helical) then
+   ! HELICAL structure function
+   ux_t1 = u1*rperp1(1)+u2*rperp1(2)+u3*rperp1(3)
+   ux_t2 = u1*rperp2(1)+u2*rperp2(2)+u3*rperp2(3)
+   ur_t1 = ur1*rperp1(1)+ur2*rperp1(2)+ur3*rperp1(3)
+   ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
+   H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
+endif
+
+do p=2,pmax
+   Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
+   Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
+   Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
+enddo
+
+D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
+D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+
+if (u_l>=0) then
+   SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
+   SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
+   SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
+else
+   SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
+   SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
+   SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
+endif
+end subroutine 
 
 
 
@@ -1442,6 +1325,7 @@ allocate(Dl(ndelta,ndir,2:pmax))
 allocate(Dt(ndelta,ndir,2,2:pmax))
 allocate(D_ltt(ndelta,ndir,2))
 
+allocate(H_ltt(ndelta,ndir))
 allocate(SP_lll(ndelta,ndir))
 allocate(SP_ltt(ndelta,ndir,2))
 
@@ -1487,5 +1371,57 @@ rp2(3) =  r(1)*rp1(2) - r(2)*rp1(1)
 
 end subroutine
 
+
+
+
+
+
+subroutine normalize_and_reduce(ntot)
+!
+! noramlize all structure functions by ntot, then
+! to a global sum over all cpus.  
+!
+use params
+use mpi
+implicit none
+real*8 :: ntot
+
+integer :: ierr,p
+Dl=Dl/ntot
+Dt=Dt/ntot
+D_ltt=D_ltt/ntot
+H_ltt=H_ltt/ntot
+
+SP_ltt=SP_ltt/ntot
+SP_lll=SP_lll/ntot
+SN_ltt=SN_ltt/ntot
+SN_lll=SN_lll/ntot
+
+#ifdef USE_MPI
+   do p=2,pmax
+   dwork2=Dl(:,:,p)
+   call MPI_allreduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork3=Dt(:,:,:,p)
+   call MPI_allreduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enddo
+
+   dwork3=D_ltt
+   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
+
+
+   dwork3=SP_ltt
+   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork2=SP_lll
+   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork3=SN_ltt
+   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork2=SN_lll
+   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
+
+
+#endif
+end subroutine
 
 end module 
