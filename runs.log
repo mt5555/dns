@@ -14,13 +14,13 @@ vxpair runs on autry
 make dnsvor
 
 
-vx2048a   mu=6e-8  (formula above gives: mu=6.87e-8)
+vx2048a   vx2048a.inp   mu=6e-8  (formula above gives: mu=6.87e-8)
 
 vx2048a   restarting at t=50 with different
           ellipse search routine.
           check out: vx2048a0050.0000.[ellipse,tracer]
 
-vx2048b   mu=10e-8   IN
+vx2048b   vx2048b.inp  mu=10e-8   IN
 
 
 
