@@ -8,14 +8,18 @@ forcing in wave numbers 1&2, or 2&3,
 tuned so that epsilon=.5
 R_l and E are too low when compared to Gotoh's results.
 
-
-  mu      epsilon   ke     R_l      kmax*eta
+                                     
+  mu      epsilon   ke     R_l      241*eta         G  (L^3/T^.5 = 1e-6)
 1.35e-3     .09    .08      20
 1.35e-3     .27    .22      29
-1.35e-3     .55    .30      29
+1.35e-3     .55    .30      29        2.0            .4M
 
-.75e-3      .5      .5      65         .33
-.25e-3      .5      .6     132         .14
+.75e-3      .5      .5      65         
+.25e-3      .5      .6     132                       11M
+
+1.35e-3/36  .55/36   ?     130         .32           96M  (Gotoh)
+
+
 
 
 
