@@ -271,12 +271,10 @@ do idir=1,ndir
 !     if (dir_shift(3)==0 .or. ncpu_z==1) then
       if (dir_shift(3)==0) then  
          ! no shifts - compute directly 
-         Qs=Q
-         call comp_str_xy(Q,Qs,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_shift)
       else if (dir_shift(2)==0) then
          ! no need to shift, y-direction alread 0
-         Qst=Qt
-         call comp_str_xz(Qt,Qst,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(2),dir_shift(3))==0) then
          ! 
          ! shift in y by (y/z)*z-index:
@@ -301,8 +299,7 @@ do idir=1,ndir
          do n=1,3
             call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         dir_shift(2)=0
-         call comp_str_xz(Qt,Qst,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(3),dir_shift(2))==0) then
          ! 
          ! shift in z by (z/y)*y-index
@@ -317,12 +314,12 @@ do idir=1,ndir
             ishift=(dir_shift(3)/dir_shift(2))*(j_g-1)
             k2=k+ishift
             do
-               if (1<=k2 .or. k2<=g_nz) exit
+               if (1<=k2 .and. k2<=g_nz) exit
                if (k2<1) k2=k2+g_nz
                if (k2>g_nz) k2=k2-g_nz
             enddo
             do n=1,3
-               Qst(j,k,i,n)=Qt(j,k2,i,n)
+               Qst(k,i,j,n)=Qt(k2,i,j,n)
             enddo
          enddo
          enddo
@@ -330,8 +327,7 @@ do idir=1,ndir
          do n=1,3
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         dir_shift(3)=0
-         call comp_str_xy(Q,Qs,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift)
       else
          call abort("parallel computation of direction not supported")
       endif
@@ -542,12 +538,11 @@ end subroutine
 
 
 
-subroutine comp_str_xy(Q,Qs,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
-real*8 :: Q(nx,ny,nz,ndim)          ! original data
-real*8 :: Qs(nx,ny,nz,ndim)          ! shifted data
+real*8 :: Q(nx,ny,nz,ndim)       
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
@@ -564,7 +559,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       
       if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
       if (rvec(2)<0) rvec(2)=rvec(2)+nslaby
-      if (rvec(3)/=0) call abort("comp_str_xy: z-direction must be 0")
+      rvec(3)=0  ! data required to be in xy slab
       
       
       do k=nz1,nz2
@@ -585,7 +580,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
          enddo
 
          do n=1,3
-            delu(n)=Qs(i2,j2,k,n)-Q(i,j,k,n)
+            delu(n)=Q(i2,j2,k,n)-Q(i,j,k,n)
          enddo
          u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
          u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
@@ -626,12 +621,11 @@ end subroutine
 
 
 
-subroutine comp_str_xz(Q,Qs,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xz(Q,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
 real*8 :: Q(g_nz2,nslabx,ny_2dz,ndim)  
-real*8 :: Qs(g_nz2,nslabx,ny_2dz,ndim) 
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
@@ -647,7 +641,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       if ( (rvec(1)**2+rvec(2)**2+rvec(3)**2) < g_nmin**2/4) then
       
       if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
-      if (rvec(2)/=0) call abort("comp_str_xz requires rvec(2)==0")
+      rvec(2)=0  ! data required to be in xz slab
       if (rvec(3)<0) rvec(3)=rvec(3)+g_nz
       
       do j=1,ny_2dz
@@ -669,12 +663,12 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
             k2=k2-g_nz
          enddo
          do n=1,3
-            delu(n)=Qs(k2,i2,j,n)-Q(k,i,j,n)
+            delu(n)=Q(k2,i2,j,n)-Q(k,i,j,n)
          enddo
+
          u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
          u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
          u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
-         
          
          D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
          D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2

@@ -107,6 +107,16 @@ do
    call singlefile_io(time2,Q(1,1,1,3),fname,q1,q2,1,io_pe)
    time=time2
 
+   do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         Q(i,j,k,1)=i
+         Q(i,j,k,2)=j
+         Q(i,j,k,3)=k
+      enddo
+      enddo
+      enddo
+
 
 
    do i=0,nxdecomp-1
