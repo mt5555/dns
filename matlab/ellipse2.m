@@ -2,6 +2,7 @@
 %########################################################################
 %#  plotting ellipses
 %########################################################################
+clear;
 
 %ts=input('time=? ');
 
@@ -107,7 +108,7 @@ for t=times
      fclose(fid);
 
      % try and get some vorticity contours:
-     fname=[name,tstr,'.vor'];
+     fname=[name,tstr(2:10),'.vor'];
      [x,y,z,vor,time2]=getfield(fname);
      if (time2>0) 
        disp('plotting vorticity contours');
@@ -128,7 +129,7 @@ for t=times
      title(sprintf('time=%f',time))
      hold off;
 
-     figure(2)
+     figure(2); clf;
      for i=1:nell
        subplot(2,1,1)
        semilogy(timev,squeeze(emode(i,1,:)),[ccol(i),'-']); hold on;

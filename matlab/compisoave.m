@@ -1,5 +1,12 @@
 function [y45,y415,y43,epsilon]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
-
+%
+% compute angle average and plot a single snapshot
+% klaws==1   4/5ths and other laws
+% klaws==2   4th order structure functions
+% 
+% check_isotropy==1    2nd and 3rd order isotropy checks
+%
+%
 
 l=findstr('/',name);
 l=l(length(l));
@@ -27,8 +34,8 @@ xmax=1000;  % maximum x axis
 
 [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
-    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt] ...
-     = readisostr( [name,ext] );
+    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt,D_lltt,Dl,Dt] ...
+= readisostr( [name,ext] );
 
 
 eta = (mu^3 / epsilon)^.25;
@@ -89,7 +96,7 @@ disp(' ')
 
 
 
-if (klaws) 
+if (klaws==1) 
 
 %
 %  the 4/5 law
@@ -427,3 +434,96 @@ hold off;
 print -djpeg isocheck.jpg
 
 end
+
+
+
+
+
+
+
+if (klaws==2) 
+
+%
+%  4th order structure funtions
+%
+
+msize=3.2;   % marker size
+ulave=0*xx;
+utave=0*xx;
+ultave=0*xx;
+
+figure(1); clf
+for i=1:ndir
+  x = r_val(:,i);                   % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
+
+  % u_l**4
+  y=squeeze(Dl(:,i,3));
+  if (plot_points==1) 
+     loglog(x_plot,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
+  end     
+  yy = spline(x,y,xx);
+  ulave=ulave+w(i)*yy;
+
+end
+plot(xx_plot,ulave,'k','LineWidth',1.0); hold on;
+title('D_{llll}');
+ylabel(pname);
+xlabel('r/\eta');
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+%hold off;
+
+
+figure(1); 
+for i=1:ndir
+  x = r_val(:,i);                   % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
+
+  % u_t**4
+  y=Dt(:,i,3);
+  if (plot_points==1) 
+     loglog(x_plot,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
+  end     
+  yy = spline(x,y,xx);
+  utave=utave+w(i)*yy;
+
+end
+plot(xx_plot,utave,'k','LineWidth',1.0); hold on;
+title('D_{tttt}');
+ylabel(pname);
+xlabel('r/\eta');
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+%hold off;
+
+
+
+figure(1)
+for i=1:ndir
+  x = r_val(:,i);                   % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
+
+  % u_lltt
+  y=D_lltt(:,i);
+  if (plot_points==1) 
+     loglog(x_plot,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
+  end     
+  yy = spline(x,y,xx);
+  ultave=ultave+w(i)*yy;
+
+end
+plot(xx_plot,ultave,'k','LineWidth',1.0); hold on;
+title('D_{llll}   D_{tttt}  D_{lltt}');
+ylabel(pname);
+xlabel('r/\eta');
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+hold off;
+
+if (plot_points==1) 
+  %print -dpsc dlltt.ps
+  print -djpeg -r125 d4.jpg
+end
+
+end
+
+
+

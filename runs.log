@@ -63,10 +63,16 @@ delx/eta = .5
 **********************************************************************************
 10/31/02
 QB pre-science run.
- 
+
+times0.dat
+1024^3 conversion: everything
+
+times5.dat 
 convert to h5:     5 per eddy turnover time
 2048^3 analysis:   run 5 per eddy turnover time?
-1024^3 conversion: everything
+
+
+
 
 
 

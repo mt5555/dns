@@ -114,7 +114,7 @@ save k45data_t1 teddy times mx45_localeps mx45_iso_localeps ...
       y45_ave y45_iso_ave xx_plot
 
 % load data from t=0 (averaged wrong!) for isoave paper:
-load k45data_t1 
+load k45data_t0 
 
 % load data from t=1 (for time averaged) for isoave paper:
 load k45data_t1 

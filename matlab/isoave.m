@@ -42,6 +42,7 @@ disp('2 = Scaling laws and also plot D+/-');
 disp('4 = 2nd and 3rd order isotropy check');
 disp('5 = 2nd and 3rd order isotropy check, x,y,z directions only');
 disp('6 = Scaling laws for total structure function (for paper)');
+disp('7 = plot 4th order functions');
 in=input('Enter choice: ');
 
 
@@ -53,6 +54,9 @@ elseif (in==5)
    ndir_use=3;
    klaws=0;
    check_isotropy=1;
+elseif (in==7)
+   klaws=2;
+   check_isotropy=0;
 else
    klaws=1;
    check_isotropy=0;
