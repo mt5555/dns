@@ -18,11 +18,11 @@ ifeq ($(UNAME),Linux)
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
-   MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
-   MPI = -DUSE_MPI -I/usr/local/src/mpich/include
-   LDFLAGS = 
+   #MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
+   #MPI = -DUSE_MPI -I/usr/local/src/mpich/include
+   LDFLAGS = -Lstk -lstk 
    # default -fast is -xvector=yes, but this introduces bugs in test.F90!
-   FFLAGS = -fast -xvector=no  -DSUNOS $(MPI)
+   FFLAGS = -fast -xvector=no -xarch=v9  -DSUNOS $(MPI)
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90

@@ -1,5 +1,5 @@
 ####
-#### $Id: Makefile,v 1.1 2001-08-06 20:33:30 mt Exp $
+#### $Id: Makefile,v 1.2 2001-08-07 17:01:24 mt Exp $
 ####
 
 default:
@@ -32,7 +32,8 @@ OBJ=$(OBJ_COMPLEX) $(OBJ_REAL) $(OBJ_FORTRAN)
 TARGET=libstk.a t_fft test
 
 sun:
-	@$(MAKE) CC=cc CFLAGS="-mt -xO5 -fsimple=2 -native -dalign -xarch=v9 -xrestrict" AR=ar RANLIB=true LIBS="-L. -lstk -lm" $(TARGET)
+#	@$(MAKE) CC=cc CFLAGS="-mt -xO5 -fsimple=2 -native -dalign -xarch=v9 -xrestrict" AR=/usr/ccs/bin/ar RANLIB=true LIBS="-L. -lstk -lm" $(TARGET)
+	@$(MAKE) CC=cc CFLAGS="-xO5 -fsimple=2 -native -dalign -xarch=v9 -xrestrict" AR=/usr/ccs/bin/ar RANLIB=true LIBS="-L. -lstk -lm" $(TARGET)
 
 sgi:
 	@$(MAKE) CC=cc CFLAGS="-O2 -OPT:alias=RESTRICT" AR=ar RANLIB=true LIBS="-L. -lstk -lm" $(TARGET)
