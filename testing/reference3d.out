@@ -1,0 +1,129 @@
+Running parallel.  NCPUS=    1 =   1 x  1 x  1                                  
+ Enter input file type: 
+ Calling read_type1()
+ name: reference3d
+ directory: ../testing/3d/
+ initial condition: restart             
+ forcing: none                
+ method: fft-dealias         
+ b.c. x-direction: periodic            
+ b.c. y-direction: periodic            
+ b.c. z-direction: periodic            
+NS-alpha value=0.0000E+00                                                       
+Diffusion coefficient mu=0.1113E-01                                             
+Diffusion d/dt(KE)/KE on mode k =    1.:     0.88                               
+Diffusion d/dt(KE)/KE on mode k =   18.:   300.00                               
+Global grid:     32 x    32 x    32                                             
+Local grid (with padding):     34 x    34 x    34                               
+Initial data                                                                    
+Restarting from file restart.[uvw]
+restart time=    0.0000                                                         
+Initial data projection                                                         
+Initializing FFT99 of size n=    32                                             
+Time stepping...                                                                
+ 
+ 1E0   | *******              KE spectrum    0.0000   
+       |        *            
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+ 1E-10 |*        ************
+       +---------------------+
+      k=0                 k=  17
+time=  0.00000(    0)  next output= 10.00000                                    
+for next timestep: delt=0.0073108 cfl_adv= 1.447 cfl_vis= 0.250                 
+max: (u,v,w)      1.851392523325220     2.675949062914596     3.078137957207650 
+max(div)= 0.67391E-13   max(vor) 0.29989E+02                                    
+<z-vor>=-0.49787E-15   <hel>= 0.31237E+01                                       
+R_lambda=    35.49826  R=    89.83533                                           
+Ea:  1.3149802711   |gradU|:      221.4873         total d/dt(Ea):   0.0000000  
+ke:  1.3149802711  enstropy:      221.4873        total d/dt(ke):    0.0000000  
+d/dt(ke) vis=  -2.4654805 f=   0.0000000 alpha=   0.0000000 total=  -2.4654805  
+
+time=  0.00731(    1)  next output= 10.00000                                    
+for next timestep: delt=0.0073108 cfl_adv= 1.437 cfl_vis= 0.250                 
+max: (u,v,w)      1.818373490257207     2.637005902179198     3.055083850490312 
+max(div)= 0.74163E-13   max(vor) 0.29989E+02                                    
+<z-vor>=-0.49787E-15   <hel>= 0.31237E+01                                       
+R_lambda=    35.01583  R=    89.83533                                           
+Ea:  1.2971096282   |gradU|:      221.4873         total d/dt(Ea):   0.0000000  
+ke:  1.2971096282  enstropy:      221.4873        total d/dt(ke):   -2.4444109  
+d/dt(ke) vis=  -2.4654805 f=   0.0000000 alpha=   0.0000000 total=  -2.4654805  
+
+time=  0.01462(    2)  next output= 10.00000                                    
+for next timestep: delt=0.0073108 cfl_adv= 1.430 cfl_vis= 0.250                 
+max: (u,v,w)      1.795252781405236     2.591080975151794     3.025643451818852 
+max(div)= 0.74163E-13   max(vor) 0.28210E+02                                    
+<z-vor>= 0.19993E-15   <hel>= 0.31392E+01                                       
+R_lambda=    34.82740  R=    89.83533                                           
+Ea:  1.2795005946   |gradU|:      217.8528         total d/dt(Ea):  -2.4444109  
+ke:  1.2795005946  enstropy:      217.8528        total d/dt(ke):   -2.4086271  
+d/dt(ke) vis=  -2.4250240 f=   0.0000000 alpha=   0.0000000 total=  -2.4250240  
+
+time=  0.02193(    3)  next output= 10.00000                                    
+for next timestep: delt=0.0073108 cfl_adv= 1.421 cfl_vis= 0.250                 
+max: (u,v,w)      1.778612126099966     2.558180417240691     2.993413642154516 
+max(div)= 0.89706E-13   max(vor) 0.27000E+02                                    
+<z-vor>= 0.17423E-15   <hel>= 0.31533E+01                                       
+R_lambda=    34.57810  R=    89.83533                                           
+Ea:  1.2620927745   |gradU|:      215.0328         total d/dt(Ea):  -2.4086271  
+ke:  1.2620927745  enstropy:      215.0328        total d/dt(ke):   -2.3811044  
+d/dt(ke) vis=  -2.3936326 f=   0.0000000 alpha=   0.0000000 total=  -2.3936326  
+
+time=  0.02924(    4)  next output= 10.00000                                    
+for next timestep: delt=0.0073108 cfl_adv= 1.408 cfl_vis= 0.250                 
+max: (u,v,w)      1.786088747015796     2.518735589033093     2.962080982643130 
+max(div)= 0.73275E-13   max(vor) 0.26919E+02                                    
+<z-vor>=-0.31225E-16   <hel>= 0.31660E+01                                       
+R_lambda=    34.27690  R=    89.83533                                           
+Ea:  1.2448366619   |gradU|:      212.8855         total d/dt(Ea):  -2.3811044  
+ke:  1.2448366619  enstropy:      212.8855        total d/dt(ke):   -2.3603532  
+d/dt(ke) vis=  -2.3697302 f=   0.0000000 alpha=   0.0000000 total=  -2.3697302  
+
+ 
+ 1E0   | ******               KE spectrum    0.0731   
+       |       **            
+       |         **          
+       |           **        
+       |             *       
+       |              *      
+       |               *     
+       |                *    
+       |                 *   
+       |                  *  
+       |                     
+       |                   * 
+       |                     
+ 1E-10 |*                   *
+       +---------------------+
+      k=0                 k=  17
+time=  0.07311(   10)  next output=  0.07311                                    
+for next timestep: delt=0.0073108 cfl_adv= 1.314 cfl_vis= 0.250                 
+max: (u,v,w)      1.839123585629692     2.221582059302237     2.723218095246316 
+max(div)= 0.70166E-13   max(vor) 0.31110E+02                                    
+<z-vor>= 0.27972E-16   <hel>= 0.32208E+01                                       
+R_lambda=    31.84952  R=    89.83533                                           
+Ea:  1.1428384141   |gradU|:      207.8204         total d/dt(Ea):  -2.3154399  
+ke:  1.1428384141  enstropy:      207.8204        total d/dt(ke):   -2.3112613  
+d/dt(ke) vis=  -2.3133478 f=   0.0000000 alpha=   0.0000000 total=  -2.3133478  
+
+CPU times (min):   (avg/max)
+initialization:      0.00     0.00                                              
+dns_solve:           0.27     0.27                                              
+   time_control            0.04     0.04                                        
+   RHS                     0.12     0.12                                        
+   compute_pdf             0.07     0.07                                        
+   transpose_to_z          0.01     0.01                                        
+   transpose_from_z        0.01     0.01                                        
+   transpose_to_x          0.01     0.01                                        
+   transpose_from_x        0.02     0.02                                        
+   transpose_to_y          0.01     0.01                                        
+   transpose_from_y        0.02     0.02                                        
