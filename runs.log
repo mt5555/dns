@@ -1,5 +1,39 @@
 **********************************************************************************
+10/31/02
+QB pre-science run.
+
+
+1. initial value: restart + rescale.  call daniel to talk about this
+       decay2048_e   initial condition
+       decay2048_s   rescale the initial condition
+
+2. UDM: test on qidse:
+     run test suite with my code w/restart:
+             ../testing/test3d.sh pr   (parallel, restart)  WORKS
+     run test suite, orig restart, UDM output
+     run test suite with UDM restart 
+
+     test using 512^3 restart data on QB
+     1x1x256 decomposisiton
+     run code, restarting from iso12_5120003.0000.[uvw]
+          outputting UDM
+
+     1x1x256 decomposisiton
+     run code, restarting from UDM
+     2x1x256 decomposisiton
+     run code, restarting from UDM
+     1x1x128 decomposisiton
+     run code, restarting from UDM
+     
+
+
+1. downsampling/upsampling: test 
+
+
+
+**********************************************************************************
 10/21/02
+runs stored on /ccs/scratch/taylorm/cj
 
 128^3
 
@@ -18,9 +52,6 @@ cj4  mu=25e-4  alpha=6h
 cj5  mu=6.25e-4  alpha=6h    epsilon=1.1
 cj6  mu=1.5e-4  alpha=6h  
 cj7  mu=.4e-4  alpha=6h  
-
-above runs are done, and stored on /ccs/taylorm/dns/src
-
 
 cj8  mu=25e-4   alpha=1h  
 cj9  mu=6.25e-4  alpha=1h  

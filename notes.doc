@@ -1,3 +1,4 @@
+
 Angle averging:  153 calls to transpose_z()
      1 stage RK:   9 transpose_z().  = 36 transposes per timestep
      angle averaging:  4.25 timesteps.

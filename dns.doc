@@ -86,9 +86,12 @@ Running the code
                         and may not be as isotropic)
              sht        shallow water testcases from McWilliams and Polvani
              zero       flow at rest
-             decay      Meneveau's spectrum (slow init, but reproducable)
-             decay_e    same as decay, not reproducible with different parallel
-                        decomposition
+             decay2048   Meneveau's spectrum (slow init, but reproducable)
+             decay2048_e same as decay, not reproducible with different parallel
+                         decomposition
+             decay2048_s for restart only.  re-scale amplitude of restart
+                                           data to fit prescribed spectrum
+                                              
 
 
    line 4   initial condition subtype

@@ -220,7 +220,7 @@ milkyway              .16     .080    .054
 autrey                .21     .17
 shankara.old  (2x2)   .28     .19               .093    .064     .050
 shankara 4ring        .27     .14               .059    .062     .047
-shankara-LAM (ethernet)                                          .200
+shankara-LAM(ethernet).27                                        .200
 
 ./bench.sh 160 0 20
 544M

@@ -12,7 +12,11 @@ if (restart==1) then
    ! initialize some constants, if needed on restart runs:
    if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)      ! set grav, fcor
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0) ! set xscale, yscale... 
+
    call init_data_restart(Q,Qhat,work1,work2)
+
+   if (init_cond==9) call init_data_decay(Q,Qhat,work1,work2,2,0,0)
+
 else
    if (init_cond==0) call init_data_khblob(Q,Qhat,work1,work2)
    if (init_cond==1) call init_data_kh(Q,Qhat,work1,work2)
@@ -86,6 +90,7 @@ else if (equations==SHALLOW) then
    endif
 else if (equations==NS_PSIVOR) then
    call print_message("Restarting from file restart.vor")
+   call abort("restart error: check it is ok that we setup I.C. before reading data")
    fname = rundir(1:len_trim(rundir)) // "restart.vor"
    call singlefile_io(time_initial,Qhat(1,1,1,1),fname,work1,work2,1,io_pe)
    !fname = rundir(1:len_trim(rundir)) // "restart.psi"

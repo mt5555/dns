@@ -6,7 +6,11 @@
 subroutine init_data_lwisotropic(Q,PSI,work,work2,init,rantype)
 !
 ! low wave number, quasi isotropic initial condition
-! init=     (ignored for now)
+! init=0         set parameters (but there are none to set)
+!                but do not compute initial condition
+!
+! init= 1        compute initial condition
+!
 ! rantype=  0    intialize using a gaussian, in grid space
 ! rantype=  1    initalize using E=constant and random phase
 !
@@ -29,13 +33,11 @@ real*8 enerb_work(NUMBANDS)
 character(len=80) message
 CPOINTER :: null
 
-!
-! 
-!   g_xcord(i)=(i-1)*delx	
+
+if (init==0) return
+
 
 !random vorticity
-
-
 if (rantype==0) then
 do n=1,3
    ! input from random number generator
@@ -77,6 +79,9 @@ enddo
 call vorticity(Q,PSI,work,work2)
 
 
+!
+!  rescale data to fit energy profile
+!
 enerb=0
 do nb=1,NUMBANDS
    enerb_target(nb)=real(nb)**(-5.0/3.0)
@@ -194,7 +199,15 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 !
 ! low wave number, quasi isotropic initial condition
 ! based on spectrum provided by Menevea
-! init=     (ignored for now)
+!
+! init=0         set parameters (but there are none to set)
+!                but do not compute initial condition
+!
+! init= 1        compute initial condition
+!
+! init=2         rescale energy of initial data in Q
+!
+!
 ! rantype=  0    intialize using a gaussian, in grid space
 ! rantype=  1    initalize using E=constant and random phase
 !
@@ -212,18 +225,19 @@ real*8 :: work2(nx,ny,nz)
 
 ! local variables
 real*8 :: alpha,beta
-integer km,jm,im,i,j,k,n,wn,ierr,nb
-integer,parameter :: NUMBANDS=1024
+integer km,jm,im,i,j,k,n,wn,ierr,nb,NUMBANDS
+integer,parameter :: NUMBANDS_MAX=1024
 real*8 xw,ener,xfac,theta
-real*8 ::  enerb_target(NUMBANDS),enerb_work(NUMBANDS),enerb(NUMBANDS)
+real*8 ::  enerb_target(NUMBANDS_MAX),enerb_work(NUMBANDS_MAX),enerb(NUMBANDS_MAX)
 real*8 :: xnb,ep23,lenscale,eta,fac1,fac2,fac3,ens,epsilon,mu_m
 
 character(len=80) message
 CPOINTER :: null
 
 
+if (init==0) return
 
-
+NUMBANDS=NUMBANDS_MAX
 
 !
 ! cj2.out run: 128^3
@@ -283,14 +297,16 @@ endif
 enerb_target=enerb_target / (2*pi*2*pi)
 
 
-
-
-
-
+! number of bands to use in initial condtion. doesn't really matter
+! since it will be truncated by sqrt(2)*g_nmin/3 during initial
+! projection & dealias step
 !
-! 
-!   g_xcord(i)=(i-1)*delx	
+NUMBANDS=g_nmin/2 -1 
 
+
+
+if (init==1) then
+call print_message("computing random initial vorticity")
 !random vorticity
 if (rantype==0) then
 do n=1,3
@@ -333,12 +349,17 @@ enddo
 
 call print_message("computing curl PSI")
 call vorticity(Q,PSI,work,work2)
+call print_message("random initial condition complete")
+endif
 
 
 
 
+!
+! rescale initial data
+!
+call print_message("Rescaling initial condition")
 enerb=0
-
 do n=1,3
    write(message,*) 'FFT to spectral space n=',n   
    call print_message(message)
