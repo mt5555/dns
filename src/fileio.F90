@@ -644,8 +644,11 @@ else if (equations==NS_PSIVOR) then
    !call singlefile_io(time_in,Qhat,fname,work1,work2,1,io_pe)
 endif
 
-
-time=time_in
+!this is the only header that can read the time from the input file:
+! for other headers, dont change 'time'
+if (header_type==1) then
+   time=time_in
+endif
 end subroutine
 
 

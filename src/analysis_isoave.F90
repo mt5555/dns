@@ -75,7 +75,7 @@ compute_scalar=.false.
 compute_uvw=.true.
 read_uvw=.false.
 
-tstart=1
+tstart=0
 tstop=30
 tinc=1.
 icount=0
