@@ -140,7 +140,7 @@ init_sforcing=1
    ! allocate storage
    do n=1,NUMBANDS
       i=wnforcing(n)%n
-      allocate(wnforcing(n)%index(i,3))
+      if (i>0) allocate(wnforcing(n)%index(i,3))
       wnforcing(n)%n=0  ! reset counter to use again below
    enddo
    
