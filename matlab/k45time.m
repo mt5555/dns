@@ -34,7 +34,7 @@ ext='.isostr';
 name = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a';
 ext='.new.isostr';
 pname = 'skhel512a'
-times = [2.0:0.2:3.8];
+times = [2.0:0.2:7.8];
 nx=512
 
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)

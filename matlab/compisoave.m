@@ -335,7 +335,8 @@ for i=1:ndir
 
   y=-H_ltt(:,i)./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition
   
-  semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
+%  semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
+semilogx(x_plot,y,'k:','MarkerSize',1); hold on;         %for paper
   yyave=yyave+w(i)*spline(x,y,xx);
 
 

@@ -35,12 +35,18 @@ mu = 2e-4;
 %mu = 2e-4;
 
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
-%name = 'hel256_h0_0000.8000';
+%name = 'hel256_h0';
 %mu = 2e-4;
 
 namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
 name = 'skhel512_hpi2';
 mu = 1e-4;
+
+namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
+name = 'sc1024A';
+mu = 3.5e-5;
+
+
 
 % plot all the spectrum:
 movie=0;
@@ -69,11 +75,11 @@ time
 hspec_p = fread(fid,n_r,'float64');
 
 %if (j == 0) 
-if (time < 1.5)
+if (time < 1)
      hspec_ave = 0*(hspec_n + hspec_p); % initialize hspec_ave
 end
 %if (time>=1)
-if (time >= 1.5)
+if (time >= 1)
 j=j+1
 if (length(hspec_ave)==0) 
   hspec_ave = hspec_n + hspec_p;
@@ -147,11 +153,12 @@ xlabel('k')
 ylabel(pname);
 
 figure(25)
-loglog(k,abs(hspec_ave).*k'.^(5/3),'k');hold on;
-loglog(k,abs(hspec_ave).*k'.^(4/3),'b--');hold on;
-set(gca,'fontsize',14);
+semilogx(k,abs(hspec_ave).*k'.^(5/3),'k');hold on;
+semilogx(k,abs(hspec_ave).*k'.^(4/3),'b--');hold on;
+set(gca,'fontsize',16);
 %title('Average compensated helicity spectrum');
-legend('H(k) k^{5/3}','H(k) k^{4/3}');	      
+legend('H(k) k^{5/3}','H(k) k^{4/3}');
+set(gca,'fontsize',18);	      
 xlabel('k')
 %ylabel(pname);
 

@@ -27,12 +27,16 @@ tsave=[2.5];
 %name = 'hel128_hpi2_0000.0000';
 %namedir = '/home2/skurien/dns/src/';
 
-%name = 'hel256_hpi2_all';
-%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
-%name = 'skhel512a0000.0000';
-%namedir = '/home/mt/data/skhel/';
+name = 'hel256_hpi2_all';
+namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
+mu=2e-4;
 
-%mu = 2e-4;
+name = 'hel256_h0_0000.0000';
+namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
+mu=2e-4;
+
+%name = 'iso12_512';
+%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
 
 %name = 'Rot10000.0000';
 %namedir = '/home2/skurien/rotation/Rot1/';
@@ -45,7 +49,7 @@ tsave=[2.5];
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel480_hpi2/';
 %mu = 2e-4;
 
-%name = 'hel256_h0_0000.8000';
+%name = 'hel256_h0';
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
 %mu = 2e-4;
 
@@ -82,17 +86,22 @@ if (fidt>=0)
 end
   spec_r = [];
   spec_ave = spec_r;
+spec_l = spec_r;
+spec_t1 = spec_r;
+spec_t2 = spec_r;
+spec_t3 = spec_r;
+spec_t = spec_r;
 
 CK=CK_orig;
-j=0;
+j=0;l=0;
 while (time>=.0 & time<=9999.3)
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
 %if (j==0)
-if (time < 1.5)
+if (time < 1)
      spec_ave =  0*spec_r;  %initialize spec_ave
 end
-if (time >= 1.5)        %only average times greater than 1 eddy turnover
+if (time >= 1)        %only average times greater than 1 eddy turnover
      j=j+1;                 %count j's for averaging only after t==1.
      spec_ave = spec_ave + spec_r;
 end
@@ -140,6 +149,23 @@ j
   spec_uz=spec_scale*fread(fid,n_z,'float64');
   spec_vz=spec_scale*fread(fid,n_z,'float64');
   spec_wz=spec_scale*fread(fid,n_z,'float64');  
+
+if (time < 1)
+     spec_l =  0*spec_ux ;  %initialize longit.spec
+     spec_t1 = 0*spec_vx;
+     spec_t2 = 0*spec_wy;
+spec_t3 = 0*spec_uz;
+     spec_t = 0*spec_t1;	
+end
+if (time >= 1)        %only average times greater than 1 eddy turnover
+     l=l+1;                 %count j's for averaging only after t==1.
+     spec_l = spec_l + (spec_ux + spec_vy + spec_wz)/3;
+spec_t1 = (spec_vx + spec_wx)/2;
+spec_t2 = (spec_uy + spec_wy)/2;
+spec_t3 = (spec_uz + spec_vz)/2;
+     spec_t = spec_t+(spec_t1+spec_t2+spec_t3)/3;
+end
+
 
   i=find( abs(time-tsave)<.0001);
   if (length(i)>=1) 
@@ -209,6 +235,11 @@ fclose(fid);
 
 % mean energy spectrum
 spec_ave = spec_ave/j;
+spec_l = spec_l/l;
+spec_t1 = spec_t1/l;
+spec_t2 = spec_t2/l;
+spec_t3 = spec_t3/l;
+spec_t = spec_t/l;
 
 figure(5)
 loglog(k,spec_ave,'k--'); hold on;
@@ -216,17 +247,54 @@ title('Mean energy spectrum');
 ylabel(pname);
 xlabel('k')
 
-% compensated mean spectra
-
+% mean longitudinal and transverse spectra
 figure(6)
-loglog(k,spec_ave.*k'.^(5/3),'k'); hold on;
-loglog(k,spec_ave.*k'.^(4/3),'b--');hold on;
-set(gca,'fontsize',14);
+loglog(k(1:n_x),spec_l,k(1:n_x),spec_t1,k(1:n_x),spec_t2,k(1:n_x), spec_t3,k(1:n_z),spec_t); hold on;
+%title('mean long and trans spectra);
+legend('E_{11}(k_1)','E_T(k_1)','E_T(k_2)','E_T(k_3)', 'E_T(k)');
+%ylabel(pname);
+xlabel('k')
+
+% compensated mean spectra
+figure(7)
+semilogx(k,spec_ave.*k'.^(5/3),'k'); hold on;
+semilogx(k,spec_ave.*k'.^(4/3),'b--');hold on;
+set(gca,'fontsize',16);
 legend('E(k) k^{5/3}','E(k) k^{4/3}');
     % title('Compensated MEAN energy spectrum');
 %ylabel(pname);
+set(gca,'fontsize',18);
 xlabel('k');
 
+% compensated mean long and trans spectra
+figure(8)
+semilogx(k(1:n_x),spec_l.*k(1:n_x)'.^(5/3),'k'); hold on;
+semilogx(k(1:n_x),spec_l.*k(1:n_x)'.^(4/3),'b--');hold on;
+set(gca,'fontsize',16);
+legend('E_{L}(k) k^{5/3}','E_{L}(k) k^{4/3}');
+    % title('Compensated MEAN energy spectrum');
+%ylabel(pname);
+set(gca,'fontsize',18);
+xlabel('k');
+
+figure(9)
+semilogx(k(1:n_z),spec_t.*k(1:n_z)'.^(5/3),'k'); hold on;
+semilogx(k(1:n_x),spec_t.*k(1:n_z)'.^(4/3),'b--');hold on;
+%semilogx(k(1:n_z),spec_t1.*k(1:n_z)'.^(5/3),k(1:n_z),spec_t2.*k(1:n_z)'.^(5/3),k(1:n_z),spec_t3.*k(1:n_z)'.^(5/3),k(1:n_z),spec_t.*k(1:n_z)'.^(5/3)); hold on;
+%semilogx(k(1:n_z),spec_t1.*k(1:n_z)'.^(4/3),k(1:n_z),spec_t2.*k(1:n_z)'.^(4/3),k(1:n_z),spec_t3.*k(1:n_z)'.^(4/3),k(1:n_z),spec_t.*k(1:n_z)'.^(4/3));hold on;
+set(gca,'fontsize',16);
+legend('E_{T}(k) k^{5/3}','E_{T}(k) k^{4/3}');
+    % title('Compensated MEAN energy spectrum');
+%ylabel(pname);
+set(gca,'fontsize',18);
+xlabel('k');
+
+figure(10)
+semilogx(k(1:n_z), (spec_l + spec_t).*k(1:n_z)'.^(5/3),'k', k(1:n_z), (spec_l + spec_t).*k(1:n_z)'.^(4/3),'b--');hold on;
+set(gca,'fontsize',16);
+legend('E_{1D}k^{5/3}','E_{1D}k^{4/3}');
+set(gca,'fontsize',18);
+xlabel('k');
 
 %compute mean energy
 E = sum(spec_ave);
