@@ -305,10 +305,10 @@ do i=1,80
       exit
    endif
 enddo
-print *,runname
+print *,'name: ',runname(1:i-1)
 
 read(*,'(a12)') sdata
-print *,sdata
+print *,'initial condition: ',sdata
 if (sdata=='KH-blob') then
    init_cond=0
 else if (sdata=='KH-anal') then
@@ -322,7 +322,7 @@ endif
 
 
 read(*,'(a12)') sdata
-print *,sdata
+print *,'forcing: ',sdata
 if (sdata=='none') then
    forcing_type=0
 else if (sdata=='iso12') then
@@ -356,6 +356,7 @@ read(*,*) alpha_value
 
 
 read(*,'(a12)') sdata
+print *,'method: ',sdata
 if (sdata=='fft') then
    dealias=.false.
 else if (sdata=='fft-dealias') then
@@ -367,18 +368,21 @@ endif
 
 
 read(*,'(a12)') sdata
+print *,'b.c. x-direction: ',sdata
 if (sdata=='periodic') then
 else
    call abort("only 'perodic' b.c. supported")
 endif
 
 read(*,'(a12)') sdata
+print *,'b.c. y-direction: ',sdata
 if (sdata=='periodic') then
 else
    call abort("only 'perodic' b.c. supported")
 endif
 
 read(*,'(a12)') sdata
+print *,'b.c. z-direction: ',sdata
 if (sdata=='periodic') then
 else
    call abort("only 'perodic' b.c. supported")
