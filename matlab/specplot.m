@@ -36,8 +36,9 @@ tsave=[];
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
-name = 'temp0000.0000';
-namedir = '../src/';
+name = 'eve10000.0000';
+name = 'eve20000.0100';
+namedir = '../../evelyn/';
 mu=1e-9;
 
 %name = 'Rot10000.0000';
