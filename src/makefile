@@ -150,7 +150,7 @@ dnsslow:  $(MODEL_SPEC_SLOW)
 
 
 clean: 
-	rm -f *.d *.o *.mod dns  
+	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi 
 
 dep:
 	./mkdep.py *.F90 *.f  > .depends
