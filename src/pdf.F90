@@ -94,7 +94,7 @@ do i=1,NUM_SF
    call init_pdf(SF(i,2),100,.01d0,numy)
    call init_pdf(SF(i,3),100,.01d0,numz)
 enddo
-call init_pdf(epsilon,100,.001d0,1)
+call init_pdf(epsilon,100,.01d0,1)
 end subroutine
 
 
@@ -141,7 +141,7 @@ type(pdf_structure_function) :: str
 integer :: bin
 
 !local vars
-type(pdf_structure_function) :: str2
+real*8, allocatable :: pdfdata(:,:)
 integer n,ndelta
 
 ndelta=str%delta_num
@@ -160,9 +160,8 @@ endif
 
 
 ! make a copy of data
-allocate(str2%pdf(-n:n,ndelta))
-str2%pdf=str%pdf
-str2%ncalls=str%ncalls
+allocate(pdfdata(-n:n,ndelta))
+pdfdata=str%pdf
 
 ! create a larger structure function
 deallocate(str%pdf)
@@ -170,12 +169,11 @@ allocate(str%pdf(-bin:bin,ndelta))
 
 ! copy data into new, larger structure function
 str%pdf=0
-str%pdf(-n:n,:)=str2%pdf(-n:n,:)
-str%ncalls=str2%ncalls
+str%pdf(-n:n,:)=pdfdata(-n:n,:)
 str%nbin=bin
 
 ! delete the copy of original data
-deallocate(str2%pdf)
+deallocate(pdfdata)
 
 end subroutine
 
@@ -192,7 +190,7 @@ implicit none
 real*8 time
 CPOINTER fid
 
-integer i,j,ierr
+integer i,j,ierr,ndelta
 character(len=80) message
 real*8 x
 
@@ -200,20 +198,25 @@ if (structf_init==0) then
    call abort("Error: outputSF() called, but structf module not initialized")
 endif
 
+
+
+do j=1,3
 do i=1,NUM_SF
-   call mpisum_pdf(SF(i,1))  
-   call mpisum_pdf(SF(i,2))
-   call mpisum_pdf(SF(i,3))
+   call mpisum_pdf(SF(i,j))  
 enddo
+enddo
+call mpisum_pdf(epsilon)
+
+
 
 if (my_pe==io_pe) then
    call cwrite8(fid,time,1)
    ! number of structure functions
    x=NUM_SF ; call cwrite8(fid,x,1)
    do i=1,NUM_SF
-      call normalize_and_write_pdf(fid,SF(i,1),SF(i,1)%nbin)   
-      call normalize_and_write_pdf(fid,SF(i,2),SF(i,2)%nbin)   
-      call normalize_and_write_pdf(fid,SF(i,3),SF(i,3)%nbin)   
+   do j=1,3
+      call normalize_and_write_pdf(fid,SF(i,j),SF(i,j)%nbin)   
+   enddo
    enddo
    ! number of plain pdf's
    x=1 ; call cwrite8(fid,x,1)
@@ -224,8 +227,8 @@ endif
 do i=1,NUM_SF
 do j=1,3
    ! reset PDF's
-   SF(i,1)%ncalls=0
-   SF(i,1)%pdf=0
+   SF(i,j)%ncalls=0
+   SF(i,j)%pdf=0
 enddo
 enddo
 epsilon%ncalls=0
@@ -241,7 +244,7 @@ end subroutine
 subroutine normalize_and_write_pdf(fid,str,nbin)
 use params
 implicit none
-integer i,ierr,nbin
+integer j,i,ierr,nbin
 CPOINTER :: fid
 type(pdf_structure_function) :: str
 real*8 x
@@ -270,6 +273,15 @@ x=max(str%ncalls,1)
 pdfdata=pdfdata / x;
 pdfdata=pdfdata/g_nx/g_ny/g_nz
 
+
+! consistency check:
+x=1
+if (str%ncalls==0) x=0
+do j=1,ndelta
+   ASSERT("n_and_w(): bad normalization",1e-9>abs(x - sum(pdfdata(:,j)))  )
+enddo
+
+
 call cwrite8(fid,pdfdata,(2*nbin+1)*ndelta)
 deallocate(pdfdata)
 end subroutine
@@ -294,7 +306,6 @@ type(pdf_structure_function) :: str
 
 
 ! local variables
-type(pdf_structure_function) :: totstr
 real*8,allocatable :: pdfdata(:,:)
 integer :: bin,ierr,n,ndelta
 
@@ -307,11 +318,11 @@ call MPI_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
 ! resize all str's to size bin
 call resize_pdf(str,bin)
 
-! MPI sum into totstr.
-! str%pdf(-bin:bin) = 2*bin+1 data points
-
+!
+! MPI sum into pdfdata
+!
 ndelta=str%delta_num
-n=(2*bin+1)*n
+n=(2*bin+1)*ndelta
 if (my_pe == io_pe) then
    allocate(pdfdata(-bin:bin,ndelta))
    call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
@@ -390,7 +401,7 @@ do k=1,n3
                   else
                      del=-(-del)**one_third
                   endif
-                  del = del/str(n)%pdf_bin_size
+                  del = del/str(nsf)%pdf_bin_size
                   bin=nint(del)
                   if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
                   if (bin>pdf_max_bin) bin=pdf_max_bin
@@ -407,23 +418,23 @@ enddo
 do n=1,NUM_SF
 str(n)%ncalls=str(n)%ncalls+1
 enddo
+
 call wallclock(tmx2)
 tims(12)=tims(12)+(tmx2-tmx1)
 end subroutine
 
 
 
-subroutine compute_pdf_epsilon(ux,n1,n1d,n2,n2d,n3,n3d,idone)
+
+
+subroutine compute_pdf_epsilon(ux)
 !
-! compute a pdf of diffusion. 
-! ux = one of ux,uy,uz,wx,wy,wz,vx,vy,vz
-! accumulate pdf of ux**2 into epsilon (and do not increment ncalls)
-! unless idone=1, in which case just increment ncalls.  
+! compute a pdf of epsilon.  < epsilon > = KE diffusion. 
+! ux = norm(grad(u))**2
 !
 use params
 implicit none
-integer :: n1,n1d,n2,n2d,n3,n3d,idone
-real*8 :: ux(n1d,n2d,n3d)
+real*8 :: ux(nx,ny,nz)
 
 ! local variables
 real*8  :: del
@@ -436,18 +447,15 @@ if (structf_init==0) then
    structf_init=1
    call init_pdf_module()
 endif
-if (idone==1) then
-   epsilon%ncalls=epsilon%ncalls+1
-   return
-endif
+
 
 call wallclock(tmx1)
 
-do k=1,n3
-   do j=1,n2
-      do i=1,n1
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
          ! compute structure functions for U,V,W 
-         del=mu*ux(i,j,k)**2
+         del=ux(i,j,k)
          del = del/epsilon%pdf_bin_size
          bin = nint(del)
 
@@ -460,6 +468,7 @@ do k=1,n3
    enddo
 enddo
 
+epsilon%ncalls=epsilon%ncalls+1
 call wallclock(tmx2)
 tims(12)=tims(12)+(tmx2-tmx1)
 end subroutine
@@ -468,7 +477,7 @@ end subroutine
 
 
 
-subroutine z_ifft3d_str(fin,f,w1,w2,work,compx,compy,compz)
+subroutine z_ifft3d_str(fin,f,w1,Qt,works,work,compx,compy,compz)
 !
 !  compute inverse fft 3d of fin, return in f
 !  fin and f can overlap in memory
@@ -491,11 +500,10 @@ use transpose
 implicit none
 real*8 fin(g_nz2,nslabx,ny_2dz,n_var)  ! input
 real*8 f(nx,ny,nz,n_var)               ! output
-real*8 work(nx,ny,nz)    
-
-! overlaped in memory:
-real*8 w1(g_nz2,nslabx,ny_2dz,n_var)
-real*8 w2(nx,ny,nz,n_var)    
+real*8 w1(nx,ny,nz,n_var)
+real*8 Qt(nx,ny,nz,n_var)    
+real*8 work(nx,ny,nz)
+real*8 works(g_nz2,nslabx,ny_2dz)
 
 
 logical :: compx,compy,compz
@@ -514,69 +522,86 @@ do n=1,3
    n2d=nslabx
    n3=ny_2dz
    n3d=ny_2dz
-   w1(:,:,:,1)=fin(:,:,:,n)
-   call ifft1(w1,n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_z(w1,f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   works=fin(:,:,:,n)
+   call ifft1(works,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_z(works,f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 
 if (compx) then
    do n=1,3
-      call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_to_y(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_y(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
       
-      call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_to_x(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_x(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    enddo
-   call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,1))
+   call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,1))
    
 else ! compy, or default (compute no structure functions)
    do n=1,3
-      call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_to_x(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_x(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
       
-      call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_to_y(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_y(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    enddo
-   if (compy) call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,2))
+   if (compy) call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,2))
 endif
 
 
 
 if (compz) then
+
+   !
+   ! epsilon PDF calculations
+   !
+   !   Qt = x or y transpose of (u,v,w)
+   !
+   work=0
    do n=1,3
-      ! compute either x or y term:
-      work=w2(:,:,:,n)
-      call fft_derivatives(work,dummy,1,n1,n1d,n2,n2d,n3,n3d)
-      call compute_pdf_epsilon(work,n1,n1d,n2,n2d,n3,n3d,0)
-      
       if (compx) then
-         ! x term computed above, compute y term
-         call transpose_to_y(f(1,1,1,n),work,n1,n1d,n2,n2d,n3,n3d)
+         ! Qt = x transpoe of (u,v,w), computed above
+         call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
+         call transpose_from_x(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
+         work=work+w1(:,:,:,1)**2
+
+         ! compute y derivative
+         call der(f(1,1,1,n),w1,dummy,1,2)
+         work=work+w1(:,:,:,1)**2
+
       else
-         ! y term computed above, compute x term
-         call transpose_to_x(f(1,1,1,n),work,n1,n1d,n2,n2d,n3,n3d)
+         ! Qt = y transpoe of (u,v,w), computed above
+         call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
+         call transpose_from_x(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
+         work=work+w1(:,:,:,1)**2
+
+         ! compute x derivative
+         call der(f(1,1,1,n),w1,dummy,1,1)
+         work=work+w1(:,:,:,1)**2
       endif
-      call fft_derivatives(work,dummy,1,n1,n1d,n2,n2d,n3,n3d)
-      call compute_pdf_epsilon(work,n1,n1d,n2,n2d,n3,n3d,0)
+
    enddo
 
+   ! do the Z component
    do n=1,3
-      call transpose_to_z(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-
-      ! compute z term
-      work=w2(:,:,:,n)
-      call fft_derivatives(work,dummy,1,n1,n1d,n2,n2d,n3,n3d)
-      call compute_pdf_epsilon(work,n1,n1d,n2,n2d,n3,n3d,0)
+      call transpose_to_z(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    enddo
+   ! Qt = z transpose of (u,v,w)
+   ! compute regular structure functions:
+   call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,3))
 
-   call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,3))
-
-   ! let routine know we have accumulated all terms
-   call compute_pdf_epsilon(dummy,n1,n1d,n2,n2d,n3,n3d,1)
+   ! add in epsilon component
+   do n=1,3
+      call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_x(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
+      work=work+w1(:,:,:,1)**2
+   enddo
+   work=mu*work
+   call compute_pdf_epsilon(work)
 
 endif
 
