@@ -138,7 +138,7 @@ while (time1>=0 & time1<=5000)
  
   npdf=fread(fid,1,'float64');
   if (plotu)
-    plot_epsilon(fid,time1);
+    plot_epsilon(fid,time1);  % read and plot epsilon pdf
   else
     [n_del1,delta1,bin_size1,n_bin1,n_call1,bins1,pdf1]=read1pdf(fid);
     epsilon=sum(pdf1(:,1).*bins1.^3);
