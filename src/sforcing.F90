@@ -680,6 +680,87 @@ end function
 
 
 
+
+
+
+subroutine complex_to_sincos(p,cmodes,nmax)
+use params
+implicit none
+real*8 :: p(nx,ny,nz),Rr,Ri
+real*8 :: cmodes(2,-nmax:nmax,-nmax:nmax,-nmax:nmax)
+real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
+integer :: i,j,k,im,jm,km,nmax,imax,ip,jp,kp
+!
+!   
+! convert to sine & cosine modes:
+!
+! (R1 + i R2) (cosx + i sinx)  (cosy + i siny)  (cosz + i sinz)  
+! = (real parts only:)
+!   R1  cosx cosy cosz                      R1 (1,1,1)
+! i R2  cosx cosy sinz  i                  -R2 (1,1,-1) zerosign(km) 
+! i R2  cosx siny cosz  i                  -R2 (1,-1,1) zerosign(jm)
+!   R1  cosx siny sinz  i**2               -R1 (1,-1,-1) zerosign(km*jm)
+! i R2  sinx cosy cosz  i                  -R2 (-1,1,1) zerosign(im) 
+!   R1  sinx cosy sinz  i**2               -R1 (-1,1,-1) zerosign(im*km)
+!   R1  sinx siny cosz  i**2               -R1 (-1,-1,1) zerosign(im*jm)
+! i R2  sinx siny sinz  i**3                R2 (-1,-1,-1) zerosign(im*jm*km)
+!  
+! 
+
+rmodes=0
+
+do im=-nmax,nmax
+do jm=-nmax,nmax
+do km=-nmax,nmax
+   Rr = cmodes(1,im,jm,km)
+   Ri = cmodes(2,im,jm,km)
+
+   i=abs(im)
+   j=abs(jm)
+   k=abs(km)
+   
+   rmodes( i, j, k) = rmodes( i, j, k) + Rr 
+   rmodes( i, j,-k) = rmodes( i, j,-k) - Ri*zerosign(km) 
+   rmodes( i,-j, k) = rmodes( i,-j, k) - Ri*zerosign(jm) 
+   rmodes( i,-j,-k) = rmodes( i,-j,-k) - Rr*zerosign(jm*km) 
+   rmodes(-i, j, k) = rmodes(-i, j, k) - Ri*zerosign(im)
+   rmodes(-i, j,-k) = rmodes(-i, j,-k) - Rr*zerosign(im*km) 
+   rmodes(-i,-j, k) = rmodes(-i,-j, k) - Rr*zerosign(im*jm) 
+   rmodes(-i,-j,-k) = rmodes(-i,-j,-k) + Ri*zerosign(im*jm*km) 
+
+enddo
+enddo
+enddo
+
+imax=2*nmax+2
+p=0
+do i=1,imax
+do j=1,imax
+do k=1,imax
+   im=z_imcord(i)
+   jm=z_jmcord(j)
+   km=z_kmcord(k)
+
+   ip=abs(im)
+   jp=abs(jm)
+   kp=abs(km)
+   if (ip<=nmax .and. jp<=nmax .and. kp<=nmax) then
+      p(k,i,j) = rmodes(im,jm,km)
+   endif
+enddo
+enddo
+enddo
+
+
+end subroutine
+
+
+
+
+
+
+
+
 subroutine sincos_to_complex(p,cmodes,nmax)
 #if 0
    conversion to complex coefficients:
@@ -712,7 +793,7 @@ subroutine sincos_to_complex(p,cmodes,nmax)
 use params
 implicit none
 real*8 :: p(nx,ny,nz),a,b
-real*8 :: cmodes(-nmax:nmax,-nmax:nmax,-nmax,nmax)
+real*8 :: cmodes(2,-nmax:nmax,-nmax:nmax,-nmax:nmax)
 integer :: i,j,k,im,jm,km,imax,nmax,sm,ip,jp,kp
 
 imax=2*nmax+2
@@ -733,18 +814,17 @@ do k=1,imax
 
    a=0; b=0
 
-   sm=0
-   if (im<0) sm=sm+1
-   if (jm<0) sm=sm+1
-   if (km<0) sm=sm+1
+   ! count the number if sin() terms:
+   sm=0; if (im<0) sm=sm+1;  if (jm<0) sm=sm+1;  if (km<0) sm=sm+1
+
    if (sm==0) then
-      a=p(i,j,k)/8
+      a=p(k,i,j)/8
    else if (sm==1) then
-      b=-p(i,j,k)/8
+      b=-p(k,i,j)/8
    else if (sm==2) then
-      a=-p(i,j,k)/8
+      a=-p(k,i,j)/8
    else if (sm==3) then
-      b=p(i,j,k)/8
+      b=p(k,i,j)/8
    else
       call abort("this cant happen")
    endif
