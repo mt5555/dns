@@ -35,9 +35,9 @@ implicit none
 real*8 input(nx,ny,nz)
 real*8 output(nx,ny,nz)
 real*8 work(g_nz2,nx,ny)
-real*8 mx
+real*8 mx,tx1,tx2
 integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k
+integer i,j,k,n
 character*80 message
 
 input=0
@@ -88,6 +88,34 @@ if (my_z==1) then
    enddo
 endif
 #endif
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  benchmark the transforms
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+n=10
+call wallclock(tx1)
+do i=1,n
+call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
+enddo
+call wallclock(tx2)
+write(message,'(a,i3,a,f10.5)') 'wall clock transpose_to_z n=',n,' time=',tx2-tx1
+call print_message(message)
+
+call wallclock(tx1)
+do i=1,n
+call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
+enddo
+call wallclock(tx2)
+write(message,'(a,i3,a,f10.5)') 'wall clock transpose_to_z n=',n,' time=',tx2-tx1
+call print_message(message)
+
+
+
+
+
 end subroutine
 
 
