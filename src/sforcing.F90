@@ -423,7 +423,7 @@ if (ntot==0) return
 !
 ! Compute a new forcing function?  
 !
-#if 0
+#if 1
 if (new_f==1) then
    call random12(rmodes)
    return
@@ -444,7 +444,7 @@ endif
 f_diss=0
 fxx_diss=0
 do wn=numb1,numb
-
+   print *,'my_pe wave number  n',my_pe,wn,wnforcing(wn)%n
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
