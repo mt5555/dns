@@ -166,7 +166,8 @@ extern  void    ExceptionHandler( int nSignal )
 
 
         /*      Indicate that the signal has been caught        */
-        if (nSignal==SIGUSR1) sig_received=1;
+        /*if (nSignal==SIGUSR1) sig_received=1;*/
+        if (nSignal==SIGURG) sig_received=1;
 
 
 }
