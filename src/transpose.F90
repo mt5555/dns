@@ -51,6 +51,8 @@ subroutine mpi_io_init(init)
 ! init=1   first time, create comm_io
 ! init=0   not first time - free comm_io, create a new comm_io
 !
+integer init
+
 integer i,dest_pe3(3),key,color,ierr
 
 if (init==0) then
