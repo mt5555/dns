@@ -461,42 +461,25 @@ integer i,j,k
 integer im,jm,km,i2,j2,k2
 real*8 :: uu,vv,ww,xfac
 
-
 do i=1,3
    call fft3d(u(1,1,1,i),p)
 enddo
 
    do k=nz1,nz2
-      km=kmcord(k)
+      km=(kmcord(k))
       if (km==g_nz/2) km=0
       do j=ny1,ny2
-         jm=jmcord(j)
+         jm=(jmcord(j))
          if (jm==g_ny/2) jm=0
          do i=nx1,nx2
-            im=imcord(i)
+            im=(imcord(i))
             if (im==g_nx/2) im=0
 
             ! compute the divergence
-            p(i,j,k)=0
-            if (mod(i-nx1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - im*u(i+1,j,k,1)
-            else
-               p(i,j,k)=p(i,j,k) + im*u(i-1,j,k,1)
-            endif
+            p(i,j,k)= - im*u(i+imsign(i),j,k,1) &
+                      - jm*u(i,j+jmsign(j),k,2) &
+                      - km*u(i,j,k+kmsign(k),3)
 
-            if (mod(j-ny1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - jm*u(i,j+1,k,2)
-            else
-               p(i,j,k)=p(i,j,k) + jm*u(i,j-1,k,2)
-            endif
-
-            if (g_nz>1) then
-            if (mod(k-nz1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - km*u(i,j,k+1,3)
-            else
-               p(i,j,k)=p(i,j,k) + km*u(i,j,k-1,3)
-            endif
-            endif
 
             ! compute laplacian inverse
             xfac= (im*im +km*km + jm*jm)
@@ -519,21 +502,9 @@ enddo
             if (im==g_nx/2) im=0
 
             ! compute gradient  dp/dx
-            if (mod(i-nx1+1,2)==1) then
-               uu= - im*p(i+1,j,k)
-            else
-               uu= + im*p(i-1,j,k)
-            endif
-            if (mod(j-ny1+1,2)==1) then
-               vv= - jm*p(i,j+1,k)
-            else
-               vv= + jm*p(i,j-1,k)
-            endif
-            if (mod(k-nz1+1,2)==1) then
-               ww= - km*p(i,j,k+1)
-            else
-               ww= + km*p(i,j,k-1)
-            endif
+            uu= - im*p(i+imsign(i),j,k)  ! cosine mode
+            vv= - jm*p(i,j+jmsign(j),k)
+            ww= - km*p(i,j,k+kmsign(k))
 
             u(i,j,k,1)=u(i,j,k,1) - uu
             u(i,j,k,2)=u(i,j,k,2) - vv
@@ -584,10 +555,6 @@ real*8 pi0j0k1
 real*8 pi1j0k1
 real*8 pi0j1k1
 real*8 pi1j1k1 
-
-ASSERT("divfree(): nslabx must be even ",mod(nslabx,2)==0)
-ASSERT("divfree(): nslaby must be even ",mod(nslaby,2)==0)
-ASSERT("divfree(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
 
 do i=1,3
    call fft3d(u(1,1,1,i),p)
@@ -745,11 +712,11 @@ integer i,j,k,im,jm,km
 real*8 xfac
 
    do k=nz1,nz2
-      km=kmcord(k)
+      km=abs(kmcord(k))
       do j=ny1,ny2
-         jm=jmcord(j)
+         jm=abs(jmcord(j))
          do i=nx1,nx2
-            im=imcord(i)
+            im=abs(imcord(i))
 
             if ( ((km==g_nz/2) .and. (km>0)) .or. &
                  ((jm==g_ny/2) .and. (jm>0)) .or. &
@@ -778,11 +745,11 @@ integer i,j,k,im,jm,km
 real*8 xfac
 
    do k=nz1,nz2
-      km=kmcord(k)
+      km=abs(kmcord(k))
       do j=ny1,ny2
-         jm=jmcord(j)
+         jm=abs(jmcord(j))
          do i=nx1,nx2
-            im=imcord(i)
+            im=abs(imcord(i))
 
             if ( ((km>=g_nz/3) .and. (km>0)) .or. &
                  ((jm>=g_ny/3) .and. (jm>0)) .or. &

@@ -98,16 +98,22 @@ do i=nx1,nx2
    l = i-nx1+1 + nslabx*my_x
    xcord(i)=g_xcord(l)
    imcord(i)=g_imcord(l)
+   imsign(i)=sign(1,imcord(i))
+   if (imcord(i)==0) imsign(i)=0
 enddo
 do j=ny1,ny2
    l = j-ny1+1 + nslaby*my_y
    ycord(j)=g_ycord(l)
    jmcord(j)=g_jmcord(l)
+   jmsign(j)=sign(1,jmcord(j))
+   if (jmcord(j)==0) jmsign(j)=0
 enddo
 do k=nz1,nz2
    l = k-nz1+1 + nslabz*my_z
    zcord(k)=g_zcord(l)
    kmcord(k)=g_kmcord(l)
+   kmsign(k)=sign(1,kmcord(k))
+   if (kmcord(k)==0) kmsign(k)=0
 enddo
 
 write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz

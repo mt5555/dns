@@ -194,38 +194,19 @@ wz=0
             if (im==g_nx/2) im=0
 
             ! u_x term
-            if (mod(i-nx1+1,2)==1) then
-               ux = - im*uhat(i+1,j,k,1)
-               vx = - im*uhat(i+1,j,k,2)
-               wx = - im*uhat(i+1,j,k,3)
-            else
-               ux = im*uhat(i-1,j,k,1)
-               vx = im*uhat(i-1,j,k,2)
-               wx = im*uhat(i-1,j,k,3)
-            endif
-
-            if (mod(j-ny1+1,2)==1) then
-               uy = - jm*uhat(i,j+1,k,1)
-               vy = - jm*uhat(i,j+1,k,2)
-               wy = - jm*uhat(i,j+1,k,3)
-            else
-               uy=    jm*uhat(i,j-1,k,1)
-               vy=    jm*uhat(i,j-1,k,2)
-               wy=    jm*uhat(i,j-1,k,3)
-            endif
+            ux = - im*uhat(i+imsign(i),j,k,1)
+            vx = - im*uhat(i+imsign(i),j,k,2)
+            wx = - im*uhat(i+imsign(i),j,k,3)
 
 
-            if (g_nz>1) then
-            if (mod(k-nz1+1,2)==1) then
-               uz =  - km*uhat(i,j,k+1,1)
-               vz =  - km*uhat(i,j,k+1,2)
-               wz =  - km*uhat(i,j,k+1,3)
-            else
-               uz =    km*uhat(i,j,k-1,1)
-               vz =    km*uhat(i,j,k-1,2)
-               wz =    km*uhat(i,j,k-1,3)
-            endif
-            endif
+            uy = - jm*uhat(i,j+jmsign(j),k,1)
+            vy = - jm*uhat(i,j+jmsign(j),k,2)
+            wy = - jm*uhat(i,j+jmsign(j),k,3)
+
+
+            uz =  - km*uhat(i,j,k+kmsign(k),1)
+            vz =  - km*uhat(i,j,k+kmsign(k),2)
+            wz =  - km*uhat(i,j,k+kmsign(k),3)
 
             rhs(i,j,k,1) = pi2*(wy - vz)
             rhs(i,j,k,2) = pi2*(uz - wx)
@@ -332,26 +313,10 @@ ke_diss = 0
             if (im==g_nx/2) im=0
 
             ! compute the divergence
-            p(i,j,k)=0
-            if (mod(i-nx1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - im*rhs(i+1,j,k,1)
-            else
-               p(i,j,k)=p(i,j,k) + im*rhs(i-1,j,k,1)
-            endif
+            p(i,j,k)= - im*rhs(i+imsign(i),j,k,1) &
+                      - jm*rhs(i,j+jmsign(j),k,2) &
+                      - km*rhs(i,j,k+kmsign(k),3)
 
-            if (mod(j-ny1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - jm*rhs(i,j+1,k,2)
-            else
-               p(i,j,k)=p(i,j,k) + jm*rhs(i,j-1,k,2)
-            endif
-
-            if (g_nz>1) then
-            if (mod(k-nz1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - km*rhs(i,j,k+1,3)
-            else
-               p(i,j,k)=p(i,j,k) + km*rhs(i,j,k-1,3)
-            endif
-            endif
 
             ! compute laplacian inverse
             xfac= (im*im +km*km + jm*jm)
@@ -374,21 +339,9 @@ ke_diss = 0
             if (im==g_nx/2) im=0
 
             ! compute gradient  dp/dx
-            if (mod(i-nx1+1,2)==1) then
-               uu= - im*p(i+1,j,k)
-            else
-               uu= + im*p(i-1,j,k)
-            endif
-            if (mod(j-ny1+1,2)==1) then
-               vv= - jm*p(i,j+1,k)
-            else
-               vv= + jm*p(i,j-1,k)
-            endif
-            if (mod(k-nz1+1,2)==1) then
-               ww= - km*p(i,j,k+1)
-            else
-               ww= + km*p(i,j,k-1)
-            endif
+            uu= - im*p(i+imsign(i),j,k) 
+            vv= - jm*p(i,j+jmsign(j),k)
+            ww= - km*p(i,j,k+kmsign(k))
 
             rhs(i,j,k,1)=rhs(i,j,k,1) - uu 
             rhs(i,j,k,2)=rhs(i,j,k,2) - vv 

@@ -35,6 +35,14 @@ if ($1 == threed) then
 
 endif
 
+if ($1 == 2) then
+
+./gridsetup.py 1 1 1 128 128 1  
+make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+endif
+
 if ($1 == twod) then
 
 ./gridsetup.py 1 1 1 128 128 1  

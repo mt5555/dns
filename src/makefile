@@ -20,8 +20,8 @@ ifeq ($(UNAME),Linux)
    endif
 
    F90 = lf95
-   #FFLAGS = -O -DLINUX $(MPI) -DUSE_STKFFT
-   FFLAGS = -O -DLINUX $(MPI) -DUSE_FFT99
+   FFLAGS = -O -DLINUX $(MPI) -DUSE_STKFFT
+   #FFLAGS = -O -DLINUX $(MPI) -DUSE_FFT99
    LDFLAGS = --staticlink  -Lstk -lstk
    CC = gcc
 

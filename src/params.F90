@@ -79,6 +79,7 @@ real*8,allocatable :: g_xcord(:)
 real*8,allocatable :: g_ycord(:)  
 real*8,allocatable :: g_zcord(:)  
 integer :: imcord(nx),jmcord(ny),kmcord(nz)  ! fft modes local
+integer :: imsign(nx),jmsign(ny),kmsign(nz)  ! fft modes local
 integer,allocatable :: g_imcord(:)           ! fft modes global
 integer,allocatable :: g_jmcord(:)  
 integer,allocatable :: g_kmcord(:)  

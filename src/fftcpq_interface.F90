@@ -88,12 +88,13 @@ end subroutine
 
 subroutine fft_get_mcord(mcord,n)
 integer n,mcord(:)
-integer i,m
+integer i
 do i=1,n
-   m=(i-1)/2
-   if (i==2) m=n/2   ! last cosine mode is stored at i=2
-   mcord(i)=m	
+   mcord(i)=(i-1)/2	
+   if (mod(i,2)==0) mcord(i)=-mcord(i)
+   if (i==2) mcord(i)=n/2
 enddo
+
 end subroutine
 
 
