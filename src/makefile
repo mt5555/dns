@@ -78,8 +78,8 @@ ifeq ($(UNAME),OSF1)
    else	
       MPI = -DUSE_MPI -I/usr/opt/MPI/include
       MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
-      #LSFLIB = -L /lsf/lib64 -lbat -llsf 
-      #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
+      LSFLIB = -L/lsf/lib -lbat -llsf 
+      LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
    endif
    endif
 

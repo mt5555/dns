@@ -48,7 +48,7 @@ integer :: equations=NS_UVW        ! NS_UVW    = NS / NS-alpha
 integer :: numerical_method=FOURIER ! FOURIER
                                     ! FORTH_ORDER
                                     ! others?
-logical :: dealias=0       
+logical :: dealias=.false.       
 
 ! boundary conditions
 integer :: bdy_x1=PERIODIC

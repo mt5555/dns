@@ -15,6 +15,7 @@ end subroutine
 
 subroutine test_dirichlet
 use params
+use ghost
 implicit none
 external helmholtz_dirichlet
 
@@ -67,6 +68,8 @@ enddo
 
 
 ! copy b.c. from psi into 'b', and apply compact correction to b:
+call ghost_update_x(b,1)
+call ghost_update_y(b,1)
 call helmholtz_dirichlet_setup(b,psi,work)
 
 

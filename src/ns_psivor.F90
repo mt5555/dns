@@ -12,25 +12,31 @@ w = vorticity
 PSI = stream function
 
 1. w initialized on interior and boundary
-2. solve for PSI on boundary with B-S
-3  solve for PSI on interior
-4. set ghost cells for PSI based on one-sided differencing at boundary
-5. compute (u,v)
-6. set 1st row of ghost points of w (based on u,v)
-
-7. advance w in time:   w_t + u dot grad(w) = viscosity
-8. update w on boundary and first row of ghost points
-      (inflow=0, outflow=set so we are using one sided using old (u,v))
-9  solve for PSI on boundary with B-S
-10.solve for PSI on interior
-11 set ghost cells for PSI based on one-sided differencing at boundary
-12. goto 7
+2. call gost_update on w
+3. compute_psi 
+4. compute (u,v) from grad PSI
+5. compute grad(w) and w_xx, boundary terms hand coded in loop:
+      go to 2nd order centered near boundary
 
 
+6. advance w in time:   w_t + u dot grad(w) = viscosity
+7. set w on boundary (needed for compute_PSI) and call ghost_update(w)
+      inflow: 0
+      outflow: chose so 2nd order will give one sided difference?
+goto #3
 
 
+compute_PSI:
+  1. solve for PSI on boundary with B-S
+  2  solve for PSI on interior
+  3. set ghost cells for PSI so that 4th order formula because
+     2nd order near boundary
+  4. call ghost update on PSI
 
 #endif
+
+
+
 subroutine rk4(time,Q,Q2,Q3,Q4,rhs,work1,work2)
 use params
 implicit none
@@ -85,7 +91,6 @@ if (firstcall) then
    ! initial vorticity should have been set on the boundary, so
    ! we can compute PSI right now:
    call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work)
-   ! now use PSI to get u,v to impose inflow b.c. on vorticity:
    call bc_impose(Q(1,1,1),Q(1,1,2))
 endif
 
@@ -108,7 +113,7 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
-call bc_impose(w_tmp,Q(1,1,2))  ! use PSI at starting time for (u,v) b.c.
+call bc_impose(w_tmp,Q(1,1,2))
 call compute_psi(w_tmp,psi,rhs,work)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
@@ -128,18 +133,14 @@ call bc_impose(w_tmp,Q(1,1,2))
 call compute_psi(w_tmp,psi,rhs,work)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
-
-
 call bc_impose(Q(1,1,1),Q(1,1,2))
+
 call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work)
 time = time + delt
 
 
 
 
-
-call ghost_update_x_reshape(Q(1,1,2),1)
-call ghost_update_y_reshape(Q(1,1,2),1)
 
 ! compute KE, max U  
 maxs(1:4)=0
@@ -188,21 +189,27 @@ if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
    !psi=0  ! initial guess
    !b=-w
    !call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic,.true.)
+
 else
    psi=0  ! initial guess
    call bc_biotsavart(w,psi)    !update PSI on boundary using biot-savart law
 
-   b=-w
+   b=-w  ! be sure to copy ghost cell data also!
+
    ! copy b.c. from psi into 'b', and apply compact correction to b:
    call helmholtz_dirichlet_setup(b,psi,work)
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
 
    !update PSI 1st row of ghost cells so that we are 2nd order differences
    call bc_onesided(psi)
 endif
 
+call ghost_update_x_reshape(psi,1)
+call ghost_update_y_reshape(psi,1)
 
 end subroutine
+
 
 
 
@@ -210,30 +217,53 @@ end subroutine
 
 
 subroutine bc_impose(w,psi)
-! apply non-periodic or non-reflective b.c.
-!(preiodic and reflective are automatically hanlded with ghost_update)
+! on non-periodic or non-reflective boundarys:
+!
+! set w=0 on boundary for inflow
+! interpolate for outflow
+!  
 use params
 implicit none
 real*8 w(nx,ny)
 real*8 psi(nx,ny)
 
-#if 0
-   u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
-        (psi(i,j+2)-psi(i,j-2))/12          )/dely
 
-   v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
-        (psi(i+2,j)-psi(i-2,j))/12          )/delx
+!local
+integer i,j
 
-#endif
+if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
+   do j=ny1,ny2
+      w(nx1,j)=0
+   enddo
+endif
+if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
+   do j=ny1,ny2
+      w(nx2,j)=0
+   enddo
+endif
+if (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED) then
+   do i=nx1,nx2
+      w(i,ny1)=0
+   enddo
+endif
+if (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED) then
+   do i=nx1,nx2
+      w(i,ny2)=0
+   enddo
+endif
 
-
+call ghost_update_x_reshape(w,1)
+call ghost_update_y_reshape(w,1)
 
 end subroutine
 
 
 
+
+
+
 subroutine bc_onesided(w)
-! on non-preiodic or non-reflective boundarys:
+! on non-periodic or non-reflective boundarys:
 !
 ! fiddle first ghost cell so that 4th order derivative at 1st interior point
 ! will be the same as a 2nd order centered scheme.  
@@ -242,6 +272,46 @@ subroutine bc_onesided(w)
 use params
 implicit none
 real*8 w(nx,ny)
+
+
+!local
+integer i,j
+
+if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
+   !           nx1-1     nx1   nx1+1   nx1+2    nx1+3
+   ! stencil ( 1/12     -2/3      0     2/3     -1/12)     /h
+   !                    -1/2            1/2                /h
+   ! multiply both sided by 12h:
+   !           nx1-1     nx1   nx1+1   nx1+2    nx1+3
+   ! stencil    1       -8      0       8       -1
+   !                    -6              6         
+
+   do j=ny1,ny2
+      w(nx1-1,j)= 2*w(nx1,j)  - 2*w(nx1+2,j) +  w(nx1+3,j)
+   enddo
+endif
+if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
+   !           nx2-3   nx2-2   nx2-1   nx2     nx2+1
+   ! stencil    1       -8      0       8       -1
+   !                    -6              6         
+   do j=ny1,ny2
+      w(nx2+1,j)= 2*w(nx2,j)  -2*w(nx2-2,j)  +  w(nx2-3,j)
+   enddo
+endif
+
+
+if (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED) then
+   do i=nx1,nx2
+      w(i,ny1-1)= 2*w(i,ny1)  - 2*w(i,ny1+2) +  w(i,ny1+3)
+   enddo
+endif
+
+if (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED) then
+   do i=nx1,nx2
+      w(i,ny2+1)=  2*w(i,ny2)  -2*w(i,ny2-2)  +  w(i,ny2-3)
+   enddo
+endif
+
 
 
 end subroutine
@@ -305,10 +375,6 @@ ensave=0
 
 rhs=0
 
-call ghost_update_x_reshape(psi,1)
-call ghost_update_y_reshape(psi,1)
-call ghost_update_x_reshape(w,1)
-call ghost_update_y_reshape(w,1)
 
 do j=ny1,ny2
 do i=nx1,nx2
@@ -318,16 +384,32 @@ do i=nx1,nx2
    v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
         (psi(i+2,j)-psi(i-2,j))/12          )/delx
 
-   dx=( 2*(w(i+1,j)-w(i-1,j))/3 -  &
-        (w(i+2,j)-w(i-2,j))/12          )/delx
-   dxx=(-w(i+2,j) + 16*w(i+1,j) - 30*w(i,j) + &
-        16*w(i-1,j) - w(i-2,j)) / (12*delx*delx)
-   
-   dy=( 2*(w(i,j+1)-w(i,j-1))/3 -  &
-        (w(i,j+2)-w(i,j-2))/12          )/dely
-   dyy=(-w(i,j+2) + 16*w(i,j+1) - 30*w(i,j) + &
-        16*w(i,j-1) - w(i,j-2)) / (12*dely*dely)
-   
+
+   if ((my_x==0 .and. bdy_x1==INFLOW0_ONESIDED .and. i<=nx1+2) .or. &
+       (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED .and. i>=nx2-2)) then
+      ! centered, 2nd order
+      dx=( w(i+1,j)-w(i-1,j) ) / (2*delx)
+      dxx=(w(i+1,j)-2*w(i,j)+w(i-1,j) ) / (delx*delx)
+   else
+      dx=( 2*(w(i+1,j)-w(i-1,j))/3 -  &
+           (w(i+2,j)-w(i-2,j))/12          )/delx
+      dxx=(-w(i+2,j) + 16*w(i+1,j) - 30*w(i,j) + &
+           16*w(i-1,j) - w(i-2,j)) / (12*delx*delx)
+   endif
+
+   if ((my_y==0 .and. bdy_y1==INFLOW0_ONESIDED .and. j<=ny1+2) .or. &
+       (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED .and. j>=ny2-2)) then
+      ! centered, 2nd order
+      dy=( w(i,j+1)-w(i,j-1) ) / (2*dely)
+      dyy=(w(i,j+1)-2*w(i,j)+w(i,j-1) ) / (dely*dely)
+    else
+       dy=( 2*(w(i,j+1)-w(i,j-1))/3 -  &
+            (w(i,j+2)-w(i,j-2))/12          )/dely
+       dyy=(-w(i,j+2) + 16*w(i,j+1) - 30*w(i,j) + &
+            16*w(i,j-1) - w(i,j-2)) / (12*dely*dely)
+   endif
+
+
    rhs(i,j) = rhs(i,j) +  mu*(dxx+dyy) - u*dx - v*dy
    
    ke = ke + .5*(u**2 + v**2)

@@ -1192,12 +1192,12 @@ end subroutine
 #define COMPACT
 subroutine helmholtz_dirichlet_setup(f,p,work)
 !
-! compact laplace solver really solves:
-! Helmholtz(p) = f + h**2/12 (fxx + fyy)
+! for compact: replace f with:   f + h**2/12 (fxx + fyy)
+! in the interior!
 !
-! also, boundary values of f need to be set to those 
-! alread set for p.  
+! THEN, set boundary values in f to those given in p.
 !
+! be sure to have called ghost_update(f) before!
 !
 use params
 use ghost
@@ -1212,8 +1212,6 @@ if (ndim==2) then
    k=1
 
 #ifdef COMPACT
-   call ghost_update_x(f,1)
-   call ghost_update_y(f,1)
    do j=ny1,ny2
    do i=nx1,nx2
 

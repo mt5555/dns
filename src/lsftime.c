@@ -180,13 +180,13 @@ extern  void    ExceptionHandler( int nSignal )
 #include <lsf/lsbatch.h>
 
 extern  int     FORTRAN(lsf_time_remaining)(int *TTRL) {
-typedef enum    { FALSE = 0, TRUE = 1 } Bool_t;
+    /* typedef enum    { FALSE = 0, TRUE = 1 } Bool_t;*/
 typedef struct {
-                Bool_t  initialized;
+                int  initialized;
                 time_t  start_time;
                 time_t  end_time;
         } lsf_data_t;
-static  lsf_data_t lsf_data = {FALSE, NULL, NULL};
+static  lsf_data_t lsf_data = {0, NULL, NULL};
 auto    char    *lsf_jobid_str;
 auto    int     lsf_jobid, more, numJobs;
 auto    struct  jobInfoEnt      *job;
@@ -212,7 +212,7 @@ auto    time_t  Ctime;
                 lsf_data.start_time = job->startTime;
                 lsf_data.end_time = lsf_data.start_time +
                                 (time_t) job->submit.rLimits[LSF_RLIMIT_RUN];
-                lsf_data.initialized=TRUE;
+                lsf_data.initialized=1;
                 lsb_closejobinfo();
         }
 
