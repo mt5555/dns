@@ -34,7 +34,7 @@ if (firstcall) then
    Q=Q_grid
    do n=1,3
       call fft3d(Q(1,1,n),work1)
-      if (dealias) call fft_filter_dealias(Q(1,1,n))
+      if (dealias>0) call fft_filter_dealias(Q(1,1,n))
    enddo
    if (equations/=SHALLOW) then
       call print_message("Error: shallow water model can only run equations=SHALLOW")

@@ -246,7 +246,7 @@ do n=1,3
    enddo
 enddo
 
-if (dealias) then
+if (dealias>0) then
    call dealias_gridspace(u,work)
 endif
 
@@ -1058,10 +1058,7 @@ p=0
             u(i1,j1,k1,3) = u(i1,j1,k1,3) - km*pi1j1k0
             endif
 
-            if (dealias) then
-            if ( ((km>=g_nz/3) .and. (km>0)) .or. &
-                 ((jm>=g_ny/3) .and. (jm>0)) .or. &
-                 ((im>=g_nx/3) .and. (im>0)) )  then
+            if (dealias_remove(abs(im),abs(jm),abs(km)) then
                do n=1,3
                   u(i0,j0,k0,n) = 0
                   u(i1,j0,k0,n) = 0
@@ -1073,6 +1070,7 @@ p=0
                   u(i1,j1,k1,n) = 0     
                enddo
             endif            
+
             ! dont forget the last cosine mode, stored in 2nd array position.
             ! it has its mode number set to zero for the above computations
             if (im==0) then
@@ -1273,9 +1271,9 @@ end
 
 
 #if 0
-sin fft from NUMERICAL REC.  doesn't work, maybe becasue
-my fft is not the same as their rfft?
-subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
+! sin fft from NUMERICAL REC.  does not work, maybe becasue
+! my fft is not the same as their rfft?
+! subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
 !
 !  p(1:n1)  p(1)=0  p(n1+1)=0  (but data at p(n1+1),p(n1+2) does not have to be set)
 !
@@ -1322,6 +1320,7 @@ do k=1,n3
    enddo
 enddo
 end subroutine
+
 #endif
 
 
@@ -1509,6 +1508,9 @@ end subroutine
 
 
 
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Filter out last 1/3 of spectrum (de-alias quadratic terms)
@@ -1529,9 +1531,7 @@ real*8 xfac
          do i=nx1,nx2
             im=abs(imcord(i))
 
-            if ( (km>g_nz/3)  .or. &
-                 (jm>g_ny/3)  .or. &
-                 (im>g_nx/3) )  then
+            if (dealias_remove(im,jm,km)) then 
                p(i,j,k)=0
             endif
          enddo

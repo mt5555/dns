@@ -178,7 +178,7 @@ subroutine singlefile_io2(time,p,fname,work,work2,io_read,fpe,output_spec)
 !
 ! fpe       processor to do the file I/O
 !
-! output_spec=.true.     i/o on dealiased spectral coefficients
+! output_spec=.true.     i/o on 2/3 dealiased spectral coefficients
 ! output_spec=.false.    i/o on full 3d array p 
 !                     (grid point data or non-dealiased spec coeff.)
 !

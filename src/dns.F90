@@ -49,7 +49,7 @@ if (equations==NS_UVW) then
    call print_message('Projecting initial data...')
    call divfree_gridspace(Q,work1,work2,q1) 
 else if (equations==SHALLOW .or. equations==NS_PSIVOR) then
-   if (dealias)  then
+   if (dealias>0)  then
       call print_message('Dealiasing initial data...')
       call dealias_gridspace(Q,work1)
    endif

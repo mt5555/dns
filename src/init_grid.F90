@@ -382,6 +382,10 @@ if (my_pe==io_pe) then
       call abort("bad input file")
    endif
 
+   if (rw_spec .and. dealias/=1) then
+      call abort("Error: -s option only works with fft-dealias method")
+   endif
+
 endif
 
 
@@ -528,13 +532,16 @@ endif
 read(*,'(a12)') sdata
 if (sdata=='fft') then
    numerical_method=FOURIER
-   dealias=.false.
+   dealias=0
 else if (sdata=='fft-dealias') then
    numerical_method=FOURIER
-   dealias=.true.
+   dealias=1
+else if (sdata=='fft-sphere') then
+   numerical_method=FOURIER
+   dealias=2
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
-   dealias=.false.
+   dealias=0
 else
    call abort("only 'fft' derivative method supported")
 endif
@@ -669,13 +676,16 @@ read(*,'(a12)') sdata
 print *,'method: ',sdata
 if (sdata=='fft') then
    numerical_method=FOURIER
-   dealias=.false.
+   dealias=0
 else if (sdata=='fft-dealias') then
    numerical_method=FOURIER
-   dealias=.true.
+   dealias=1
+else if (sdata=='fft-sphere') then
+   numerical_method=FOURIER
+   dealias=2
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
-   dealias=.false.
+   dealias=0
 else
    print *,'value=',sdata
    call abort("only 'fft' derivative method supported")
@@ -854,13 +864,16 @@ read(*,'(a12)') sdata
 print *,'method: ',sdata
 if (sdata=='fft') then
    numerical_method=FOURIER
-   dealias=.false.
+   dealias=0
 else if (sdata=='fft-dealias') then
    numerical_method=FOURIER
-   dealias=.true.
+   dealias=1
+else if (sdata=='fft-sphere') then
+   numerical_method=FOURIER
+   dealias=2
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
-   dealias=.false.
+   dealias=0
 else
    print *,'value=',sdata
    call abort("only 'fft' derivative method supported")

@@ -42,7 +42,11 @@ integer :: equations=NS_UVW        ! NS_UVW    = NS / NS-alpha
 integer :: numerical_method=FOURIER ! FOURIER
                                     ! FOURTH_ORDER
                                     ! others?
-logical :: dealias=.false.       
+
+integer :: dealias=0                ! 0 = none
+                                    ! 1 = 2/3 rule (exact)
+                                    ! 2 = sqrt(2)*N/3 rule (approximate)
+
 logical :: rw_spec=.false.          ! set to .true. to read/write dealiased spectral coefficieints 
                                     ! instead of grid point values 
 real*8  :: g_u2xave                 ! <ux,ux> updated after each time step  
@@ -234,11 +238,15 @@ integer :: kmsine(nzd)
 integer,parameter :: g_nx=nslabx*ncpu_x
 integer,parameter :: g_ny=nslaby*ncpu_y
 integer,parameter :: g_nz=nslabz*ncpu_z
-! size of the dealiased grid:
+integer,parameter :: g_nmax=max(g_nx,g_ny,g_nz)
+integer,parameter :: g_nmin=min(g_nx,g_ny,g_nz)
+! 2/3 rule dealias kmax
 integer,parameter :: dealias_nx = 2+2*(g_nx/3)
 integer,parameter :: dealias_ny = 2+2*(g_ny/3)
 integer,parameter :: dealias_nz = 2+2*(g_nz/3)
 
+! spherical dealias kmax
+integer           :: dealias_sphere_kmax2 
 
 integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
                              ! For periodic FFT case, o_nx=g_nx+1 because we do not
@@ -435,6 +443,7 @@ if (g_nz==1) then
    ndim=2
 endif
 
+dealias_sphere_kmax2 = 2*(g_nmin/3)**2
 
 
 ! these values must divide with no remainder:
@@ -562,6 +571,26 @@ pi2_squared=4*pi*pi
 
 
 end subroutine
+
+
+
+
+
+
+logical function dealias_remove(im,jm,km)
+implicit none
+integer :: im,jm,km
+
+if (dealias==1) then
+   dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
+else if (dealias==2) then
+   dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
+else
+   dealias_remove = .false.
+endif
+   
+end function
+
                       
 
 end ! module mod_params

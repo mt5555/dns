@@ -56,7 +56,7 @@ if (firstcall) then
       call abort("Error: ns3dspectral model does not yet support Smagorinsky")
    endif
 
-   if (.not. dealias) then
+   if (dealias==0) then
       call abort("Error: using ns3dspectral model, which must be run dealiased")
    endif
    if (numerical_method/=FOURIER) then
@@ -486,9 +486,7 @@ do j=1,ny_2dz
          rhs(k,i,j,3)=rhs(k,i,j,3) - ww 
 
          ! dealias           
-         if ( ((abs(km)> g_nz/3) ) .or. &
-              ((abs(jm)> g_ny/3) ) .or. &
-              ((abs(im)> g_nx/3) ) )  then
+         if ( dealias_remove(abs(im),abs(jm),abs(km))) then
             rhs(k,i,j,1)=0
             rhs(k,i,j,2)=0
             rhs(k,i,j,3)=0
