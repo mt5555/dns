@@ -349,11 +349,11 @@ end subroutine
 
 
 
-subroutine output_pdf(time,fid)
+subroutine output_pdf(time,fid,fidj)
 use params
 implicit none
 real*8 time
-CPOINTER fid
+CPOINTER fid,fidj
 
 integer i,j,ierr,ndelta
 character(len=80) message
@@ -394,7 +394,15 @@ if (my_pe==io_pe) then
    ! number of plain pdf's
    x=1 ; call cwrite8(fid,x,1)
    call normalize_and_write_pdf(fid,epsilon,epsilon%nbin)   
+
+   ! call cwrite8(fidj,time,1)
+   ! number of structure functions
+   !x=NUM_SF ; call cwrite8(fidj,x,1)
+   !do j=1,3
+   !   call normalize_and_write_pdf(fidj,jpdf_v_lonlon(j),jpdf_v_lonlon(j)%nbin)
+   !enddo
 endif
+
 
 
 do i=1,NUM_SF
@@ -406,6 +414,13 @@ enddo
 enddo
 epsilon%ncalls=0
 epsilon%pdf=0
+
+
+do j=1,3
+   ! reset JPDF's
+   jpdf_v_lonlon(j)%ncalls=0
+   jpdf_v_lonlon(j)%pdf=0
+enddo
 
 end subroutine
 
@@ -456,6 +471,58 @@ enddo
 
 
 call cwrite8(fid,pdfdata,(2*nbin+1)*ndelta)
+deallocate(pdfdata)
+end subroutine
+
+
+
+
+
+
+
+
+subroutine normalize_and_write_jpdf(fid,str,nbin)
+use params
+implicit none
+integer j,i,ierr,nbin
+CPOINTER :: fid
+type(jpdf_structure_function) :: str
+real*8 x
+real*8,allocatable :: pdfdata(:,:,:)
+integer ndelta
+
+
+ndelta=str%delta_num
+allocate(pdfdata(-nbin:nbin,-nbin:nbin,ndelta))
+
+
+! the delta values
+x=ndelta; call cwrite8(fid,x,1)
+do i=1,ndelta
+   x=delta_val(i); call cwrite8(fid,x,1)
+enddo
+
+! PDF data
+call cwrite8(fid,str%pdf_bin_size,1)
+x=str%nbin; call cwrite8(fid,x,1)
+x=str%ncalls; call cwrite8(fid,x,1)
+
+! normalize
+pdfdata=str%pdf
+x=max(str%ncalls,1)
+pdfdata=pdfdata / x;
+pdfdata=pdfdata/g_nx/g_ny/g_nz
+
+
+! consistency check:
+x=1
+if (str%ncalls==0) x=0
+do j=1,ndelta
+   ASSERT("n_and_w(): bad normalization",1e-9>abs(x - sum(pdfdata(:,:,j)))  )
+enddo
+
+
+call cwrite8(fid,pdfdata,(2*nbin+1)*(2*nbin+1)*ndelta)
 deallocate(pdfdata)
 end subroutine
 

@@ -19,7 +19,7 @@ real*8 :: x
 integer i,j,k,n,ierr
 character(len=80) :: message
 character,save :: access="0"
-CPOINTER fid
+CPOINTER fid,fidj
 
 ! append to output files, unless this is first call.
 if (access=="0") then
@@ -53,12 +53,22 @@ if (compute_struct==1) then
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
       call copen(message,access,fid,ierr)
       if (ierr/=0) then
-         write(message,'(a,i5)') "output_pdf(): Error opening file errno=",ierr
+         write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
          call abort(message)
       endif
+
+      write(message,'(f10.4)') 10000.0000 + time_initial
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".jpdf"
+      call copen(message,access,fidj,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .jpdf file errno=",ierr
+         call abort(message)
+      endif
+
    endif
-   call output_pdf(time,fid)
+   call output_pdf(time,fid,fidj)
    if (my_pe==io_pe) call cclose(fid,ierr)
+   if (my_pe==io_pe) call cclose(fidj,ierr)
    endif
 
 
