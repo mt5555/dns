@@ -54,16 +54,16 @@ CPOINTER :: fid
 
 
 
-tstart=0.8
-tstop=0.8
-tinc=.25
+tstart=3.5
+tstop=1.0
+tinc=-.50
 icount=0
 
 nxdecomp=1
 nydecomp=1
 nzdecomp=1
 
-!call set_byteswap_input(1);
+call set_byteswap_input(1);
 comp_sk_helical=.true.;  print *,'Also computing H_ltt...'
 
 
@@ -187,7 +187,8 @@ do
 
 
    time=time+tinc
-   if (time>tstop) exit
+   if (time > max(tstop,tstart)) exit
+   if (time < min(tstop,tstart)) exit
 enddo
 
 call close_mpi
@@ -210,15 +211,15 @@ character(len=280) basename,fname
 
    time2=time
    write(sdata,'(f10.4)') 10000.0000 + time
-   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".u"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".u"
    call print_message(fname(1:len_trim(fname)))
    call singlefile_io(time2,Q(1,1,1,1),fname,work1,work2,readflag,io_pe)
 
-   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".v"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".v"
    call print_message(fname(1:len_trim(fname)))
    call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,readflag,io_pe)
 
-   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".w"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".w"
    call print_message(fname(1:len_trim(fname)))
    call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,readflag,io_pe)
 
@@ -254,6 +255,11 @@ read(10)(((Q(nx1+ix, ny1+iy, nz1+iz,1), &
            Q(nx1+ix, ny1+iy, nz1+iz,3), &
            ix = 0, N-1), iy=0,N-1),iz=0,N-1)
 
+Q=Q/(2*pi)
+!
+! and be sure to scale viscosity by 1/(2pi)**2
+! Takashi's data: mu=.006 which scales to .00015198 
+!
 print *,'writing out DNS format data'
 call dataio(time,Q,work1,work2,0)
 

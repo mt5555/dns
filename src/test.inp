@@ -4,7 +4,7 @@ zero        ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
 iso12w        ! forcing:  none, iso, iso12, iso12w, iso23w
 value        ! viscosity type  (value, smallest, kediff, Re)
-3e-4         ! viscosity coefficient.  (300)
+0.00015198    ! viscosity coefficient.  (300)
 0e10          ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
 0            ! compute_structure functions
