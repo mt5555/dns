@@ -82,7 +82,7 @@ r_val=r_val*delx_over_eta;            % convert to units of r/eta:
 xx=(1:1.0:(nx./2.5))*delx_over_eta;   % units of r/eta
 xx_box = xx/delx_over_eta/nx;         % in code units (box length)
 
-lambda=10*ke*mu/epsilon;       % single direction lambda
+lambda=sqrt(10*ke*mu/epsilon);       % single direction lambda
 R_lambda = lambda*sqrt(2*ke/3)/mu;
 
 

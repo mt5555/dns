@@ -190,7 +190,7 @@ epsilon=mu*ke_diss/g_nx/g_ny/g_nz
 ke=ke/g_nx/g_ny/g_nz
 
 eta = (mu**3 / epsilon)**.25
-lambda=10*ke*mu/epsilon       ! single direction lambda
+lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
 R_lambda = lambda*sqrt(2*ke/3)/mu 
 
 
