@@ -1207,15 +1207,15 @@ if (ndim<3) then
    call abort("compute_helicity_specturm: can only be used in 3D")
 endif
 
-#define TESTEXP
+#undef TESTEXP
 #ifdef TESTEXP
 ! 5,-3,1   xfac=8   efac=64    N=64
 ! 0,-3,1   xfac=4   efac=32
 ! 0,0,1   xfac=2   efac=16
 ! 0,0,0   xfac=1   efac=8
-im=1
-jm=0
-km=0
+im=5
+jm=-3
+km=1
 print *,'initial mode: im,jm,km: ',im,jm,km
 
 pgrid=0
@@ -1304,12 +1304,29 @@ stop
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
 iwave_max=nint(rwave)
+e1=0
+e2=0
 hetot=0
 diss1=0
 diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
 cos_tta_spec = 0
+
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   xfac=8
+   if (km==0) xfac=xfac/2
+   if (jm==0) xfac=xfac/2
+   if (im==0) xfac=xfac/2
+   e1=e1+xfac*(p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
+enddo
+enddo
+enddo
+
+
 
 do j=ny1,ny2
    jm=jmcord_exp(j)
@@ -1350,18 +1367,19 @@ do j=ny1,ny2
 	    WI(2) = pi2*(im*II(3) - km*RR(1))
 	    WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
             	
-            energy = 64
-            if (km==0) energy=energy/2
-            if (jm==0) energy=energy/2
-            if (im==0) energy=energy/2
+            xfac = 64
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
             
             !     compute E(k) and kE(k)
             xw=sqrt(rwave*pi2_squared)
-            spec_E(iwave)=spec_E(iwave) + energy*(sum(RR*RR)+ sum(II*II))
-            spec_kEk(iwave)=spec_kEk(iwave) + xw*energy*(sum(RR*RR)+ sum(II*II))
+            e2 = e2 + xfac*(sum(RR*RR)+ sum(II*II))
+            spec_E(iwave)=spec_E(iwave) + xfac*(sum(RR*RR)+ sum(II*II))
+            spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
 
             !	helicity(k) = k\cdot RR(k) cross II(k)            
-            energy = energy * pi2 * (im*(RR(2) - II(3)) + &
+            energy = xfac * pi2 * (im*(RR(2) - II(3)) + &
                  jm*(II(3) - RR(1)) + km*(RR(1) - II(2))) 
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
@@ -1408,10 +1426,16 @@ rwave=diss2
 call mpi_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 rwave=hetot
 call mpi_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+rwave=e1
+call mpi_reduce(rwave,e1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+rwave=e2
+call mpi_reduce(rwave,e2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
 
 if (my_pe==io_pe) then
+   print *,'KE: (from sin/cos modes)',e1
+   print *,'KE: (from complex modes)',e2
    print *,'helicity: ',hetot
    print *,'helicity dissipation (spectrum): ',diss1*mu
    print *,'helicity dissipation (exact):    ',diss2*mu
