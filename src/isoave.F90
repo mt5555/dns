@@ -1300,13 +1300,47 @@ H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 
 
 if (compute_fractional_power) then
-do p=2,pmax
-   xp=fractional_power(p)
-   Dl(idel,idir,p)=Dl(idel,idir,p) + abs(u_l)**xp
-   Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + abs(u_t1)**xp
-   Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + abs(u_t2)**xp
+xp=fractional_power(2)
+u_l=abs(u_l)**xp            ! ** .1
+u_t1=abs(u_t1)**xp
+u_t2=abs(u_t2)**xp
+
+u_l_sq=u_l*u_l              ! **.2
+u_t1_sq=u_t1*u_t1
+u_t2_sq=u_t2*u_t2
+
+Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l       ! ** .1
+Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1
+Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2
+
+Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l_sq    ! ** .2
+Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1_sq
+Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2_sq
+
+Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l*u_l_sq   ! ** .3
+Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1*u_t1_sq
+Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2*u_t2_sq
+
+Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l_sq*u_l_sq   ! ** .4
+Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1_sq*u_t1_sq
+Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2_sq*u_t2_sq
+
+Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l*u_l_sq*u_l_sq    ! ** .5
+Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1*u_t1_sq*u_t1_sq
+Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2*u_t2_sq*u_t2_sq
+
+Dl(idel,idir,7)  =  Dl(idel,idir,7) + u_l_sq*u_l_sq*u_l_sq   ! ** .6
+Dt(idel,idir,1,7)=Dt(idel,idir,1,7) + u_t1_sq*u_t1_sq*u_t1_sq
+Dt(idel,idir,2,7)=Dt(idel,idir,2,7) + u_t2_sq*u_t2_sq*u_t2_sq
+
+! .1**7, .1**8, .1**9
+do p=8,min(10,pmax)   
+   Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**(p-1)             
+   Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**(p-1)
+   Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**(p-1)
 enddo
 
+                          
 else
 
 Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq
