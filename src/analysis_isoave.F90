@@ -74,13 +74,13 @@ header_type=1; scale=1;
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
-compute_uvw=.true.
+compute_uvw=.false.
 compute_fractional_power=.false.   
-compute_hspec=.false.
+compute_hspec=.true.
 read_uvw=.false.
 
-tstart=8.0
-tstop=9.8
+tstart=4.0
+tstop=5.8
 tinc=0.2
 icount=0
 
