@@ -9,7 +9,7 @@ range=20.00:5.0:1000.0 ;
 name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
-name='/ccs/taylorm/dns/src/vxpair/vx6144e';
+name='/home/mt/lanl/vxpair/vx6144e';
 
 usefig=1;
 mkpr=1;            % make ps and jpeg files
