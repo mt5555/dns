@@ -156,8 +156,6 @@ if (init_cond_subtype==0) then
    enddo
 else if (init_cond_subtype==1) then
    call livescu_spectrum(enerb_target,NUMBANDS)
-   call print_message("TURNNING ON PDF CALCULATIONS")
-   diag_pdfs=1
 else
    call abort("init_data_decay: bad init_cond_subtype")
 endif

@@ -1,4 +1,4 @@
-4            ! input file type
+5            ! input file type
 ns_uvw       ! equations
 iso12         ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
@@ -12,6 +12,7 @@ none        ! hypo vis
 0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
 0            ! compute_structure functions
+0            ! compute pdf functions
 fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc

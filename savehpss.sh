@@ -21,10 +21,11 @@ EOF
 if ( ( $ext == all ) || ( $ext == diag ) ) then
    echo 'saving diagnostics'
    psi save -d dns/$name $name*.scalars-turb
+   psi save -d dns/$name $name*.pscalars-turb
    psi save -d dns/$name $name*.isostr 
    psi save -d dns/$name $name*.isow2s2
    psi save -d dns/$name $name*.iso1
-   psi save -d dns/$name  $name*.sf
+   psi save -d dns/$name $name*.sf
    psi save -d dns/$name $name*.jpdf
    psi save -d dns/$name $name*.spdf
    psi save -d dns/$name $name*.vxline
@@ -32,6 +33,7 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
 
    psi store -d dns/$name  $name*.scalars
    psi store -d dns/$name  $name*.spec
+   psi store -d dns/$name  $name*.pspec
    psi store -d dns/$name $name*.spect
    psi store -d dns/$name $name*.cross
 
@@ -39,6 +41,7 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
       echo 'saving uvw'
       psi save -d dns/$name $name*00.h5 $name*00.u  $name*00.v   $name*00.w
       psi save -d dns/$name $name*00.vor $name*00.psi
+      psi save -d dns/$name $name*00.s[0-9][0-9]
    endif
 else
    echo 'saving .' $ext ' files'

@@ -366,7 +366,7 @@ endif
 !
 ! model specific output
 !
-call output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
+call output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
 
 
 

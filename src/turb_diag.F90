@@ -1,5 +1,5 @@
 #include "macros.h"
-subroutine output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
+subroutine output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use pdf
 use spectrum
@@ -13,7 +13,7 @@ real*8 :: q3(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
-logical :: doit_model
+logical :: doit_model,doit_diag
 
 ! local variables
 integer,parameter :: nints_e=28,npints_e=23	
@@ -55,7 +55,6 @@ if ( g_bdy_x1==PERIODIC .and. &
    compute_transfer=.true.
 endif
 endif
-
 
 ! do PDF's and scalars if doit_model=.true., OR if this is a restart
 ! but we have computed new passive scalars.
@@ -158,13 +157,8 @@ endif
 
 
 if (diag_pdfs==1) then
-   ! uscale=.01 / pi2
-   ! epsscale=.01 / pi2_squared  
    call compute_all_pdfs(Q,q1)
-   
-   
-   
-   if (structf_init==1) then
+
    if (my_pe==io_pe) then
       write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
@@ -199,7 +193,6 @@ if (diag_pdfs==1) then
    if (my_pe==io_pe) call cclose(fid,ierr)
    if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
    if (compute_passive_pdfs .and. my_pe==io_pe) call cclose(fidS,ierr)
-   endif
 endif
 
 ! time averaged dissapation and forcing:

@@ -1,31 +1,13 @@
 %
 %   matlab script to read DNS output files *.scalars-turb
 %
-% each file contains only IEEE 8 byte floats, in this order:
-%
-%   number of data for each passive scalar
-%   number of passive scalars
-%   time
-%
-% then, repeated for each passive scalar:
-%
-%   mu                          2  (matlab array starts at 2 since we add time)
-%   schmidt                     3 
-%   s^2                         4
-%   s,i ^2     i=1,3            5
-%   s,i ^3     i=1,3            8
-%   s,i ^4     i=1,3            11
-%   s,ii ^2     i=1,3           14
-%   s,ii ^3     i=1,3           17
-%   s,ii ^4     i=1,3           20
-%   ui,i*s,i    i=1,3           23
 %    
 %
 
 clear all;
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000];
+times=[1.0000:.05:1.2];
 
 
 % load in the u,v,w scalars:
@@ -64,25 +46,25 @@ end
 % look at passive scalar number np
 np=1;
 
-time_e=pints_e(1,np,:);
-mu=pints_e(2,np,:);
-schmidt=pints_e(3,np,:)/128;
-s2=pints_e(4,np,:);
+time_e=squeeze(pints_e(1,np,:))';
+mu=squeeze(pints_e(2,np,:))';
+schmidt=squeeze(pints_e(3,np,:)/128)';
+s2=squeeze(pints_e(4,np,:))';
 
-sx2(1)=pints_e(5,np,:);
-sx2(2)=pints_e(6,np,:);
-sx2(3)=pints_e(7,np,:);
-sx3(1)=pints_e(8,np,:);
-sx3(2)=pints_e(9,np,:);
-sx3(3)=pints_e(10,np,:);
+sx2(1,:)=pints_e(5,np,:);
+sx2(2,:)=pints_e(6,np,:);
+sx2(3,:)=pints_e(7,np,:);
+sx3(1,:)=pints_e(8,np,:);
+sx3(2,:)=pints_e(9,np,:);
+sx3(3,:)=pints_e(10,np,:);
 
-sxx2(1)=pints_e(14,np,:);
-sxx2(2)=pints_e(15,np,:);
-sxx2(3)=pints_e(16,np,:);
+sxx2(1,:)=pints_e(14,np,:);
+sxx2(2,:)=pints_e(15,np,:);
+sxx2(3,:)=pints_e(16,np,:);
 
-su(1)=pints_e(23,np,:);
-su(2)=pints_e(24,np,:);
-su(3)=pints_e(25,np,:);
+su(1,:)=pints_e(23,np,:);
+su(2,:)=pints_e(24,np,:);
+su(3,:)=pints_e(25,np,:);
 
 
 %
@@ -95,9 +77,9 @@ su(3)=pints_e(25,np,:);
 
 
 ke=.5*sum(u2,1);
-epsilon=15*mu*mean(ux2,1);                   % only uses ux^2, vy^2, wz^2
-lambda=sqrt( mu*(2*ke/3) / (epsilon/15)  );
-R_l = lambda.*sqrt(2*ke/3)/mu;
+epsilon=15*mu.*mean(ux2,1);                   % only uses ux^2, vy^2, wz^2
+lambda=sqrt( mu.*(2*ke/3) ./ (epsilon/15)  );
+R_l = lambda.*sqrt(2*ke/3)./mu;
 
 disp(sprintf('mu = %f',mu ))
 disp(sprintf('ke = %f',ke ))
@@ -105,8 +87,8 @@ disp(sprintf('R_l = %f',R_l ))
 disp(sprintf('lambda = %f',lambda ))
 disp(sprintf('epsilon = %f',epsilon ))
 
-epsilon_s=15*(mu/schmidt)*s2/3;  
-lambda_s=sqrt(s2/mean(sx2));
+epsilon_s=15*(mu./schmidt).*s2/3;  
+lambda_s=sqrt(s2./mean(sx2));
 
 disp(' ')
 disp(sprintf('passive scalar n=%i',np))

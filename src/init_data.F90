@@ -247,7 +247,8 @@ ke=ke/g_nx/g_ny/g_nz
 
 
 
-ke_thresh=.75*ke  ! .82 has too much 0, not enough 1 at 256^3
+ke_thresh=.77*ke  ! .82 has too much 0, not enough 1 at 256^3
+                  ! .77 has a touch too much at 1, not enought at 0
 
 Q(:,:,:,np)=0
 check=0

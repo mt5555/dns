@@ -2,7 +2,7 @@
 !
 !  diagnostics for psi-vor model
 !
-subroutine output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
+subroutine output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use ellipse
 use tracers
@@ -15,7 +15,7 @@ real*8 :: q3(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
-logical :: doit_model
+logical :: doit_model,doit_diag
 
 if (.not.doit_model) return
 

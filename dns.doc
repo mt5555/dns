@@ -66,9 +66,9 @@ Running the code
 
 3. the input file
 
-   line 1.  input file type.  0-4
+   line 1.  input file type.  0-5
    Each input file type has its own routine to read in the parameters
-   in init_grid.F90.  4 is the newest input file format and the others
+   in init_grid.F90.  number 5 is the newest input file format and the others
    should be considered obsolete.
 
    line 2   equations. valid values:    ns_uvw
@@ -126,17 +126,46 @@ Running the code
 
    line 7    viscosity data, see line 6.
 
-   line 8    alpha    alpha=0:      dont use alpha model
+   line 8    hyper viscosity:   none, 
+   line 9    hyper viscosity value
+   line 10   hypo viscosity:  none,   
+   line 11   hypo viscosity value
+
+   line 12    alpha    alpha=0:      dont use alpha model
                       0<alpha<=1    value of alpha
                       alpha>1       value of alpha in units of delx
                       allpha=9999   run with alpha=infinity (not coded?)
 
-   line 9     smagorinsky   0:      dont use
+   line 13    smagorinsky   0:      dont use
 
+   line 14    compute angle averaged structure functions?   value: 0 or 1
+   line 15    compute velocity and passive scalar PDFs?     value: 0 or 1
 
- 
-               
+   line 16    numerical method:  fft, fft-dealias, fft-sphere, 4th
+   line 17    x boundary condition:   (model dependent)  
+   line 18    y boundary condition:   
+   line 19    z boundary condition:   
 
+   line 20    amount of time to run
+   line 21    advective CFL number  suggested value:  1.5
+   line 21    viscous CFL number.   suggested value:  .25
+   line 22    min dt
+   line 23    max dt
+          
+   line 24    restart_dt   (ignored)
+
+   line 25    diag_dt      save scalar data (collected every timestep) to .scalar file
+                           when mod(time,diag_dt)==0.  Can also be used in 
+                           output_model() in addition to model_dt.
+                            
+   line 26    model_dt     compute and output model specific data (output_model()):
+                                spectrum, scalars_turb, PDFs, structure functions... 
+
+   line 27    screen_dt    output diagnostic info to stdou
+   line 28    output_dt    output data files (can be used for restart)
+   line 29    n_output_custom   Number of custom output times to follow (0 is okay)
+                                1 per line
+   line 30+                 custom output times.  
 
 
 

@@ -1064,6 +1064,7 @@ gradu=mu*gradu; gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
 call compute_pdf_scalar(gradu,epsilon)
 
 if (compute_passive_pdfs) then
+   call print_message("computing passive scalar pdfs...")
    do i=np1,np2
       call compute_pdf_scalar(Q(1,1,1,i),SCALARS(i-np1+1)) 
    enddo
