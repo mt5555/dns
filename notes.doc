@@ -1,17 +1,19 @@
+1. 200x200 sh.inp does not converge with 1e-10 tolerence
+
 1. put in CJ functions
 
-2. 4th order code using ghost cells:
+2. ns_ghost:  4th order code using ghost cells:
         add 3d test case (nsgrid vs nsghost)
         benchmark parallel decompostions
 
 3. psi-vor code:
-        debug psi b.c. code
-        debug w b.c. code
-        put in B-S
+        debug psi b.c. code, w b.c. code, B-S code
+        put in interpolation B-S
+        put in fast direct solve  (reflect odd, FFT)
 
+1. hyper viscosity in NS code
 1. change NS-alpha so forcing always appears as just 'f'
    see nots about ints(3) and ints(9) in params.F90
-1. LSF time remaining - not working for CPQ because no time limits?
 2. construct convergence test for KH problem
        use E&Liu KH problem?  what value of mu?
        mu=0:  at t=1, E is down .25e-6.  dk/dt = -1.25e-6

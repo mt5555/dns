@@ -88,17 +88,15 @@ if (firstcall) then
       call abort("Error: dnsgrid cannot handle alpha>0.")
    endif
 
-
-   ! initial vorticity should have been set on the boundary, so
-   ! we can compute PSI right now:
    call ghost_update_x_reshape(Q(1,1,3),1)
    call ghost_update_y_reshape(Q(1,1,3),1)   
-   psi0=0
-   call compute_psi(Q(1,1,3),psi0,rhs,work)
+   ! initial vorticity should have been set on the boundary, so
+   ! we can compute PSI right now:
+   w_tmp=0
+   call compute_psi(Q(1,1,3),psi0,rhs,work,w_tmp)
    call bc_impose(Q(1,1,3),psi0)
   
 endif
-
 
 
 !
@@ -118,9 +116,7 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-
-psi=psi0   ! initial guess. REMOVE when we put in fast direct solver
-call compute_psi(w_tmp,psi,rhs,work)
+call compute_psi(w_tmp,psi,rhs,work,psi0)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
@@ -129,21 +125,19 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-psi=psi0
-call compute_psi(w_tmp,psi,rhs,work)
+call compute_psi(w_tmp,psi,rhs,work,psi0)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
 call bc_impose(w_tmp,psi0)
-psi=psi0
-call compute_psi(w_tmp,psi,rhs,work)
+call compute_psi(w_tmp,psi,rhs,work,psi0)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 call bc_impose(Q(1,1,3),psi0)
 
-call compute_psi(Q(1,1,3),psi0,rhs,work)
+call compute_psi(Q(1,1,3),psi0,rhs,work,psi)
 time = time + delt
 
 
@@ -176,7 +170,7 @@ end subroutine
 
 
 
-subroutine compute_psi(w,psi,b,work)
+subroutine compute_psi(w,psi,b,work,psi0)
 !
 !  btype=0   all periodic  use periodic FFT solver 
 !  btype=1   all periodic,reflect, reflect-odd
@@ -189,6 +183,7 @@ real*8 w(nx,ny)
 real*8 psi(nx,ny)
 real*8 work(nx,ny)
 real*8 b(nx,ny)
+real*8 psi0(nx,ny)   ! initial guess, if needed
 
 !local
 real*8 :: one=1,zero=0,tol=1e-6
@@ -228,8 +223,7 @@ if (btype==0) then
 else if (btype==1) then
    ! this code can handle any compination of PERIODIC, REFLECT, REFLECT-ODD:
 
-
-   !psi=0  ! initial guess
+   psi=psi0  ! initial guess
    b=-w  ! be sure to copy ghost cell data also!
    ! apply compact correction to b:
 
@@ -469,6 +463,7 @@ do i=nx1,nx2
    endif
 enddo
 enddo
+
 
 #if 0
 C     INTERPOLATE TO INTERMEDIATE POINTS

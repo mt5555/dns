@@ -434,6 +434,20 @@ enddo
 enddo
 enddo
 
+if (bdy_y2==INFLOW0_ONESIDED) then
+! test case...
+Q=0
+eps=.25
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   amp=sqrt( ( xcord(i)-.5)**2 + (ycord(j)-.5)**2 )
+   if (amp<eps) Q(i,j,k,3)=10*cos(.5*pi*amp/eps)**2
+enddo
+enddo
+enddo
+endif
+
 
 end subroutine
 

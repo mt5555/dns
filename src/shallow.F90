@@ -288,7 +288,7 @@ if (alpha_value>0) then
       divtau(:,:,n)=work  ! use RHS as our initial guess also
 
       work=work*Q(:,:,3)
-      call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-8,Q(1,1,3),&
+      call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
         helmholtz_hform_periodic,.true.)
       !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-6,Q(1,1,3),&
       !  helmholtz_hform_periodic,.true.)
