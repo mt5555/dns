@@ -58,7 +58,7 @@ call init_model
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-if (convert_opt == 3 .or. convert_opt==5) then
+if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
    allocate(Q(nx,ny,nz,n_var))
 else if (convert_opt == 4) then

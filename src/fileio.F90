@@ -785,8 +785,7 @@ else
       print *,'Spectrum output data'
       write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
       if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
-         ! we can only upsample low-res data.
-         ! to run with high-res data, output a trucated form.  
+         ! we can only downsample to lower res data on output.
          call print_message("Error: spectral output requires zero padding") 
          call print_message("Output routines can only downsample.") 
          call print_message("Input routines can input this data directly")
