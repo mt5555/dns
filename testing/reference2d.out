@@ -6,7 +6,6 @@ Diffusion d/dt(KE)/KE on mode k =    1.:     0.08
 Diffusion d/dt(KE)/KE on mode k =   60.:   287.48                               
 Global grid:    128 x   128 x     1                                             
 Local grid (with padding):    130 x   130 x     1                               
-Running some tests                                                              
 Initial data                                                                    
 Initializing FFT99 of size n=   128                                             
 Time stepping...                                                                
@@ -29,37 +28,47 @@ Time stepping...
       k=0                 k=  65
 time=  0.00000(    0)  next output=  0.10000                                    
 for next timestep: delt=0.0105711 cfl_adv= 1.500 cfl_vis= 0.346                 
-max: (u,v,w)      1.058561716503954     0.050000000745058     0.000000000000000 
-max(div)= 0.00000E+00   <z-vor>= 0.59976E-14   <hel>= 0.00000E+00               
-ke:  0.4900072007                                 total d/dt(ke):    0.0000000  
+max: (u,v,w)      1.058561716503953     0.050000000745058     0.000000000000000 
+max(div)= 0.00000E+00   max(vor) 0.13476E+03                                    
+<z-vor>= 0.76447E-14   <hel>= 0.00000E+00                                       
+ke + .5*alpha*<vor**2> 0.49001E+00                                              
+ke:  0.4900072007  enstropy:      448.3907        total d/dt(ke):    0.0000000  
 d/dt(ke) from:  diffusion=  -0.4483907 forcing=   0.0000000 total=  -0.4483907  
 
 time=  0.01057(    1)  next output=  0.10000                                    
 for next timestep: delt=0.0109783 cfl_adv= 1.500 cfl_vis= 0.360                 
 max: (u,v,w)      1.017379610056682     0.050144361723534     0.000000000000000 
-max(div)= 0.11736E-12   <z-vor>= 0.59976E-14   <hel>= 0.00000E+00               
-ke:  0.4858922699                                 total d/dt(ke):   -0.3892612  
+max(div)= 0.11567E-12   max(vor) 0.13476E+03                                    
+<z-vor>= 0.76447E-14   <hel>= 0.00000E+00                                       
+ke + .5*alpha*<vor**2> 0.48589E+00                                              
+ke:  0.4858922699  enstropy:      448.3907        total d/dt(ke):   -0.3892612  
 d/dt(ke) from:  diffusion=  -0.4483907 forcing=   0.0000000 total=  -0.4483907  
 
 time=  0.02155(    2)  next output=  0.10000                                    
 for next timestep: delt=0.0109955 cfl_adv= 1.500 cfl_vis= 0.360                 
 max: (u,v,w)      1.015472354871907     0.050600211173455     0.000000000000000 
-max(div)= 0.56185E-13   <z-vor>= 0.83117E-14   <hel>= 0.00000E+00               
-ke:  0.4825050414                                 total d/dt(ke):   -0.3085389  
+max(div)= 0.12113E-12   max(vor) 0.11244E+03                                    
+<z-vor>= 0.16103E-14   <hel>= 0.00000E+00                                       
+ke + .5*alpha*<vor**2> 0.48251E+00                                              
+ke:  0.4825050414  enstropy:      341.7516        total d/dt(ke):   -0.3085389  
 d/dt(ke) from:  diffusion=  -0.3417516 forcing=   0.0000000 total=  -0.3417516  
 
 time=  0.03254(    3)  next output=  0.10000                                    
 for next timestep: delt=0.0109775 cfl_adv= 1.500 cfl_vis= 0.360                 
-max: (u,v,w)      1.016871237406071     0.051307017981092     0.000000000000000 
-max(div)= 0.11369E-12   <z-vor>= 0.22450E-14   <hel>= 0.00000E+00               
-ke:  0.4796408799                                 total d/dt(ke):   -0.2604858  
+max: (u,v,w)      1.016871237406072     0.051307017981092     0.000000000000000 
+max(div)= 0.13481E-12   max(vor) 0.96457E+02                                    
+<z-vor>= 0.21105E-15   <hel>= 0.00000E+00                                       
+ke + .5*alpha*<vor**2> 0.47964E+00                                              
+ke:  0.4796408799  enstropy:      280.7610        total d/dt(ke):   -0.2604858  
 d/dt(ke) from:  diffusion=  -0.2807610 forcing=   0.0000000 total=  -0.2807610  
 
 time=  0.04352(    4)  next output=  0.10000                                    
 for next timestep: delt=0.0109414 cfl_adv= 1.500 cfl_vis= 0.359                 
 max: (u,v,w)      1.019948386793338     0.052270710527400     0.000000000000000 
-max(div)= 0.55372E-13   <z-vor>=-0.48040E-14   <hel>= 0.00000E+00               
-ke:  0.4771252831                                 total d/dt(ke):   -0.2291586  
+max(div)= 0.13941E-12   max(vor) 0.85050E+02                                    
+<z-vor>=-0.28842E-14   <hel>= 0.00000E+00                                       
+ke + .5*alpha*<vor**2> 0.47713E+00                                              
+ke:  0.4771252831  enstropy:      242.8612        total d/dt(ke):   -0.2291586  
 d/dt(ke) from:  diffusion=  -0.2428612 forcing=   0.0000000 total=  -0.2428612  
 
  
@@ -81,20 +90,22 @@ d/dt(ke) from:  diffusion=  -0.2428612 forcing=   0.0000000 total=  -0.2428612
       k=0                 k=  65
 time=  0.10000(   10)  next output=  0.10000                                    
 for next timestep: delt=0.0107184 cfl_adv= 1.500 cfl_vis= 0.351                 
-max: (u,v,w)      1.040505254060680     0.060370237600165     0.000000000000000 
-max(div)= 0.60640E-13   <z-vor>= 0.14658E-13   <hel>= 0.00000E+00               
-ke:  0.4670405504                                 total d/dt(ke):   -0.1524963  
+max: (u,v,w)      1.040505254060681     0.060370237600165     0.000000000000000 
+max(div)= 0.12332E-12   max(vor) 0.54737E+02                                    
+<z-vor>= 0.17777E-13   <hel>= 0.00000E+00                                       
+ke + .5*alpha*<vor**2> 0.46704E+00                                              
+ke:  0.4670405504  enstropy:      153.2651        total d/dt(ke):   -0.1524963  
 d/dt(ke) from:  diffusion=  -0.1532651 forcing=   0.0000000 total=  -0.1532651  
 
 CPU times (min):   (avg/max)
 initialization:      0.00     0.00                                              
-dns_solve:           0.07     0.07                                              
+dns_solve:           0.09     0.09                                              
    time_control            0.00     0.00                                        
-   RHS                     0.03     0.03                                        
-   compute_pdf             0.03     0.03                                        
+   RHS                     0.06     0.06                                        
+   compute_pdf             0.00     0.00                                        
    transpose_to_z          0.00     0.00                                        
    transpose_from_z        0.00     0.00                                        
-   transpose_to_x          0.00     0.00                                        
+   transpose_to_x          0.01     0.01                                        
    transpose_from_x        0.00     0.00                                        
-   transpose_to_y          0.00     0.00                                        
-   transpose_from_y        0.00     0.00                                        
+   transpose_to_y          0.01     0.01                                        
+   transpose_from_y        0.01     0.01                                        

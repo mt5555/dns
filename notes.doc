@@ -9,6 +9,7 @@ and b47&b48
 2.  4th order differences
 3.  3D forced test case
 4. 2D shallow water case
+5. remove all automatic arrays?
 
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  

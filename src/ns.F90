@@ -36,6 +36,7 @@ real*8 :: rhsg(nx,ny,nz,n_var)
 
 ! local variables
 real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 
 real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
@@ -62,7 +63,7 @@ endif
 
 
 ! stage 1
-call ns3D(rhs,rhs,Q,Q_grid,time,1,work)
+call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2)
 
 do n=1,3
    do j=1,ny_2dz
@@ -81,7 +82,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2)
 
 do n=1,3
    do j=1,ny_2dz
@@ -98,7 +99,7 @@ do n=1,3
 enddo
 
 ! stage 3
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2)
 
 
 do n=1,3
@@ -115,7 +116,7 @@ do n=1,3
 enddo
 
 ! stage 4
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2)
 
 
 do n=1,3
@@ -159,7 +160,7 @@ end subroutine
 
 
 
-subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work)
+subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -194,15 +195,17 @@ real*8 rhsg(nx,ny,nz,n_var)
 
 ! work/storage
 real*8 work(nx,ny,nz)
+! actual dimension: nx,ny,nz, since sometimes used as work array
+real*8 p(g_nz2,nslabx,ny_2dz)    
                                  
 
 !local
-real*8 p(g_nz2,nslabx,ny_2dz)    
+
 real*8 xfac,tmx1,tmx2
 real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke_diss,vorave,helave,maxvor,f_diss
+real*8 :: ke_diss,ensave,vorave,helave,maxvor,f_diss
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
 real*8 gradu(nx,ny,nz,n_var)
@@ -262,6 +265,7 @@ call wallclock(tmx1)
 ! form u x vor, overwrite into Q, ifft into rhs 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 vorave=0
+ensave=0
 helave=0
 maxvor=0
 
@@ -281,6 +285,7 @@ do i=nx1,nx2
 #endif
 
    vorave = vorave + vor(3)
+   ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
    
    helave = helave + Q(i,j,k,1)*vor(1) + & 
         Q(i,j,k,2)*vor(2) + & 
@@ -317,9 +322,9 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in alpha model forcing term to the rhs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#ifdef ALPHA_MODEL
 ! overwrite Q with div(tau)
 ! rhs = rhs + helmholtz inverse ( div tau)
+#ifdef ALPHA_MODEL
 call alpha_model_rhs(rhs,Q,gradu,gradv,gradw,work,p)
 #endif
 
@@ -423,6 +428,7 @@ if (compute_ints==1) then
    ints(3)=ke_diss   ! computed in spectral space - dont have to normalize
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
+   ints(7)=ensave/g_nx/g_ny/g_nz
    maxs(5)=maxvor
 endif
 
@@ -513,7 +519,7 @@ real*8 dummy(1)
 
 
 do nd=1,3
-call der(Q(1,1,1,1),gradu(1,1,1,nd),dummy,work,DX_ONLYnd)
+call der(Q(1,1,1,1),gradu(1,1,1,nd),dummy,work,DX_ONLY,nd)
 call der(Q(1,1,1,2),gradv(1,1,1,nd),dummy,work,DX_ONLY,nd)
 call der(Q(1,1,1,3),gradw(1,1,1,nd),dummy,work,DX_ONLY,nd)
 enddo
@@ -523,7 +529,7 @@ end subroutine
 
 
 
-#ifdef ALPHA_MODEL
+
 !
 ! 3 ways to do this:
 ! div on grid, inverse in spectral
@@ -552,9 +558,9 @@ real*8 gradw(nx,ny,nz,n_var)
 
 
 !local
-integer i,j,k
+integer i,j,k,m1,m2,im,jm,km,l,n
 integer nd
-real*8 :: D(3,3)
+real*8 :: D(3,3),dummy,xfac
 
 div=0
 do m2=1,3
@@ -577,7 +583,7 @@ do m1=1,3
    enddo
 
    ! compute div(Tau)  
-   call der(work,work,dummy,work2,DX_ONLY,m1)
+   call der(work,work,dummy,p,DX_ONLY,m1)
    div(:,:,:,m2) = div(:,:,:,m2) + work
 
 enddo
@@ -586,9 +592,24 @@ enddo
 ! apply inverse operatore to div, accumulate into RHS
 do n=1,3
    call z_fft3d_trashinput(div(1,1,1,n),p,work) 
-   rhs(:,:,:,n)=laplace inverse (work)
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            
+            ! compute laplacian inverse
+            xfac= -(im*im +km*km + jm*jm)*pi2_squared      
+            xfac=1 + alpha_model*xfac
+            if (xfac/=0) xfac = 1/xfac
+            rhs(k,i,j,n) = rhs(k,i,j,n) + xfac*p(k,i,j)
+            
+         enddo
+      enddo
+   enddo
 enddo
 
 
 end subroutine
-#endif
+

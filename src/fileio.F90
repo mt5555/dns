@@ -126,11 +126,18 @@ if (doit) then
    call print_message(message)	
 
    call compute_div(Q,divx,divi)
-   write(message,'(3(a,e12.5))') 'max(div)=',divx,'   <z-vor>=',ints(4),'   <hel>=',ints(5)
+   write(message,'(3(a,e12.5))') 'max(div)=',divx,'   max(vor)',maxs(5)
    call print_message(message)	
 
-   write(message,'(a,f13.10,a,f12.7)') 'ke: ',ints(1),&
-     '                                 total d/dt(ke): ',delke_tot
+   write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5)
+   call print_message(message)	
+
+   write(message,'(3(a,e12.5))') 'ke + .5*alpha*<vor**2>',&
+      ints(1)+.5*alpha_model*ints(7)
+   call print_message(message)	
+
+   write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'ke: ',ints(1),'  enstropy: ',&
+        ints(7),'        total d/dt(ke): ',delke_tot
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7)') &
      'd/dt(ke) from:  diffusion=',ints(3),' forcing=',ints(2),&

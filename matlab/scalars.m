@@ -60,8 +60,8 @@ hold on
 plot(timeU,ke)
 plot(timeDU(2:nscalars),ke_diss_tot(2:nscalars),'r')
 plot(timeDU,ke_diss_f+ke_diss_d,'k')
-%plot(timeDU,ke_diss_f,'k')
-%plot(timeDU,ke_diss_d,'k')
+plot(timeDU,ke_diss_f,'k')
+plot(timeDU,ke_diss_d,'k')
 plot(timeDU,hel,'g')
 title('KE: blue,    d(KE)/dt: black & red,    hel: green');
 hold off

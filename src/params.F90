@@ -37,10 +37,12 @@ implicit none
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0           !viscosity
+real*8  :: alpha_model=0        !for the alpha model  
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
 character(len=80) :: runname
 real*8  :: pi,pi2,pi2_squared
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -170,9 +172,10 @@ real*8 :: ints_timeU,ints_timeDU
 ! 
 ! ints(2) = ke dissapation from forcing
 ! ints(3) = ke dissapation from diffusion
-! ints(4) = vor 
+! ints(4) = z-component of vorticity
 ! ints(5) = helicity
 ! ints(6) = delke_tot = Actual d(KE)/dt computed from KE(t) and KE(t+1)
+! ints(7) = enstrophy (vorticity**2)
 !
 ! maxs(5) = max vorticity
 !
