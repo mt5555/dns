@@ -15,6 +15,8 @@ set ncpus = $2
 set command = ../src/dns
 if ($ncpus > 0) then
    set command = "mpirun -np $ncpus ../src/dns"
+else
+   set ncpus = 1
 endif
 
 

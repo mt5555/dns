@@ -98,10 +98,11 @@ tims_ave=tims_ave/60
 call print_message('CPU times (min):   (avg/max)')
 write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
 call print_message(message)
-write(message,'(a,2f9.2,a)') 'dns_solve:      ',tims_ave(2),tims_max(2)
+write(message,'(a,2f9.2,a,2f10.5)') 'dns_solve:      ',tims_ave(2),tims_max(2),&
+'  per timestep: ',tims_ave(2)/itime,tims_max(2)/itime
 call print_message(message)
-write(message,'(a,2f9.2,a)') 'dns_solve per step:          ',tims_ave(2)/itime,tims_max(2)/itime
-call print_message(message)
+
+
 write(message,'(a,2f9.2,a,f4.3,a)') '   time_control       ',tims_ave(3),tims_max(3)
 call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   RHS                ',tims_ave(5),tims_max(5)
@@ -278,7 +279,9 @@ do
    if (time >= time_final) exit
 
 enddo
-
+itime=itime -1  ! total number of time steps taken
+                ! not couting the first time step with delt=0
+                ! (that timestep is not included in cpu totals either)
 
 call wallclock(tmx2)
 tims(2)=tmx2-tmx1

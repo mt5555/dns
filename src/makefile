@@ -14,12 +14,15 @@ ARCH = $(shell uname -m)
 
 ifeq ($(UNAME),Linux)
    HOST = $(shell hostname)
-   ifeq ($(HOST),darkstar)
-      MPI = 
-      MPILIB = 
-   else
+   MPI = 
+   MPILIB = 
+   ifeq ($(HOST),autrey)
       MPI = -DUSE_MPI -I/contrib/lam/include
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+   endif
+   ifeq ($(HOST),shankara1)
+      MPI = 
+      MPILIB = 
    endif
 
    ## Lahey
