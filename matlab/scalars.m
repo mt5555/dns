@@ -156,11 +156,11 @@ title('maximum vorticity component')
 xlabel('time')
 print -djpeg -r72 vor.jpg
 
+epsilon=-(  ke_diss_d-mu*alpha^2*ints(1,:) )
+lambda=sqrt( mu*(2*Ea/3) / (epsilon/15)  )
+R_l = lambda.*sqrt(2*Ea/3)/mu;
 
-lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
-R_l = lambda.*sqrt(2*ints(6,:)/3)/mu;
-
-R_large = 1 * sqrt(2*ke) / mu;
+R_large = 1 * sqrt(2*Ea) / mu;
 
 figure(2); subplot(1,1,1)
 plot(time,R_l)
@@ -200,7 +200,7 @@ tturn = tturn(length(tturn)/2:length(tturn));
 tturn = sum(tturn)/length(tturn);
 disp(sprintf('eddy turnover time (averaged over last haf of data) = %f ',tturn));
 
-epsilon=-ke_diss_d;
+
 epsilon = epsilon(length(epsilon)/2:length(epsilon));
 epsilon = sum(epsilon)/length(epsilon);
 disp(sprintf('epsilon (averaged over last haf of data) = %f ',epsilon));
