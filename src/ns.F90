@@ -51,10 +51,6 @@ logical,save :: firstcall=.true.
 
 if (firstcall) then
    firstcall=.false.
-   do n=1,3
-      rhsg(:,:,:,1)=Q_grid(:,:,:,n)
-      call z_fft3d_trashinput(rhsg,Q(1,1,1,n),rhsg(1,1,1,2)) ! use rhs as work array
-   enddo
    if (smagorinsky>0) then
       call abort("Error: ns3dspectral model does not yet support Smagorinsky")
    endif
@@ -73,14 +69,19 @@ if (firstcall) then
    if (alpha_value/=0) then
       call abort("Error: alpha>0 but this is not the alpha model!")
    endif
-#endif   
+#endif  
+
+   do n=1,n_var
+      rhsg(:,:,:,1)=Q_grid(:,:,:,n)
+      call z_fft3d_trashinput(rhsg,Q(1,1,1,n),rhsg(1,1,1,2)) ! use rhs as work array
+   enddo
 endif
 
 
 ! stage 1
 call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2,1)
 
-do n=1,3
+do n=1,n_var
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
@@ -102,7 +103,7 @@ enddo
 ! stage 2
 call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
 
-do n=1,3
+do n=1,n_var
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
@@ -120,7 +121,7 @@ enddo
 call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
 
 
-do n=1,3
+do n=1,n_var
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
@@ -138,7 +139,7 @@ call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2,4)
 
 
 
-do n=1,3
+do n=1,n_var
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
@@ -155,12 +156,17 @@ time = time + delt
 
 ! compute max U  
 maxs(1:4)=0
+maxs(10:11)=-9e20
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   do n=1,3
+   do n=1,ndim
       maxs(n)=max(maxs(n),abs(Q_grid(i,j,k,n)))   ! max u,v,w
    enddo
+   if (npassive>0) then
+      maxs(10)=max(maxs(10),Q_grid(i,j,k,ndim+1))
+      maxs(11)=max(maxs(11),-Q_grid(i,j,k,ndim+1))
+   endif
    vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz
    maxs(4)=max(maxs(4),vel)
 enddo
@@ -256,7 +262,6 @@ call wallclock(tmx1)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do ns=ndim+1,n_var
-
    ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,1)
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,1)  ! s_x
    do k=nz1,nz2
@@ -587,7 +592,7 @@ do j=1,ny_2dz
 enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! dealias the RHS scalars:
+! dealias the RHS scalars, and add diffusion:
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do ns=ndim+1,n_var
    ! FFT into p
@@ -603,7 +608,9 @@ do ns=ndim+1,n_var
             if ( dealias_remove(abs(im),abs(jm),abs(km))) then
                rhs(k,i,j,ns)=0
             else
-               rhs(k,i,j,ns)=p(k,i,j)
+               xw=(im*im + jm*jm + km*km)*pi2_squared
+               xw_viss=mu*xw
+               rhs(k,i,j,ns)=p(k,i,j) - xw_viss*Qhat(k,i,j,ns)
             endif
          enddo
       enddo

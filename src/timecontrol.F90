@@ -185,6 +185,11 @@ if (doit_screen) then
    write(message,'(a,3f21.14)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
    call print_message(message)	
 
+   if (npassive>0) then
+   write(message,'(a,2f21.14)') 'min/max first passive scalar: ',-maxs(11),maxs(10)
+   call print_message(message)	
+   endif
+
    write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5),&
            '   max(vor)',maxs(5)
    call print_message(message)	

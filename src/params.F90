@@ -321,7 +321,7 @@ integer :: error_code =0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer,parameter :: nints=10
+integer,parameter :: nints=11
 real*8 :: ints(nints),maxs(nints)
 
 !
@@ -368,6 +368,8 @@ real*8 :: ints(nints),maxs(nints)
 ! maxs(8) = time (in min) remaining from LSF job (or -1).
 ! maxs(9) = error conditions.  0 = no error
 !                              1 = kill signal detected by handler
+! maxs(10) = max of 1st passive scalar (if npassive>0)
+! maxs(11) = max of negative of 1st passive scalar (used to copute min)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! for the shallow water model, we modify the above slightly:
@@ -387,8 +389,7 @@ real*8 :: ints(nints),maxs(nints)
 !
 !
 !
-! passive scalar statistics
-real*8,allocatable :: intp(:),maxp(:)
+!
 !
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

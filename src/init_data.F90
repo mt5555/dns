@@ -41,7 +41,7 @@ else
    if (init_cond==8) call init_data_decay(Q,Qhat,work1,work2,1,1,0)
 
    if (npassive>0) then
-      call init_scalars(Q(1,1,1,ndim+1),Qhat(1,1,1,ndim+1),work1,work2)
+      call init_passive_scalars(Q,Qhat,work1,work2)
    endif
 
    if (equations==NS_UVW) then
@@ -61,7 +61,7 @@ end subroutine
 
 
 
-subroutine init_scalars(Q,Qhat,work1,work2)
+subroutine init_passive_scalars(Q,Qhat,work1,work2)
 !
 ! low wave number, quasi isotropic initial condition
 !
@@ -69,13 +69,17 @@ use params
 use mpi
 use fft_interface
 implicit none
-real*8 :: Q(nx,ny,nz,npassive)
-real*8 :: Qhat(nx,ny,npassive)
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Qhat(nx,ny,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
-print *,'init_scalars:  ',npassive 
-Q=0
+integer :: n
+
+do n=ndim+1,n_var
+   Q(:,:,:,n)=100 !+ Q(:,:,:,1)**2 
+enddo
+
 
 end subroutine
 
