@@ -1,4 +1,46 @@
 **********************************************************************************
+11/28/01
+iso12_500_
+
+iso12 initial condition
+iso12 forcing  (subtype=0:  tau=5)
+CFL=1.5/.25
+mu=.1e-3  
+
+.1 done
+looks like we can do t=.4 in one 720min run ????
+IN now. but check if .4 will really run
+
+
+**********************************************************************************
+11/28/01
+iso12_250_
+
+iso12 initial condition
+iso12 forcing  (subtype=0:  tau=5)
+CFL=1.5/.25
+mu=.1e-3  
+
+a little under-resolved:
+data average from t=5..11:    
+R_l = 350 
+eta=.000996
+h/eta = 4.02 
+
+eddy turnover time: about 1.6
+epsilon:  about  -1.0
+
+Times:
+we can do t=6 in one 720min run.  
+0..11   done
+
+
+
+
+
+
+
+**********************************************************************************
 11/17/01
 
 IMPULSE runs

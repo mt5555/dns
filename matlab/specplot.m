@@ -4,15 +4,13 @@
 %########################################################################
 %
 
-range=0:50;
-%range = 1
-%range=0:.5:2;
+
 
 %fid=fopen('test32.spec','r','l');
 %fid=fopen('iso12_256_200.spec','r','b');
 
-fid=fopen('../src/impulse/kh4.spec','r','l');
-
+%fid=fopen('../src/impulse/kh4.spec','r','l');
+fid=fopen('../src/kh/khK.spec','r','l');
 
 
 

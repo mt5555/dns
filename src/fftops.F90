@@ -1,7 +1,7 @@
 #include "macros.h"
 
 ! used to try out 2nd order schemes:
-#undef CENTER2H
+#define CENTER2H
 #undef CENTER4H        
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -10,14 +10,14 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %range=0:50;
 %range = 1
 %range=0:.25:.75;
-range=[.50 .75];
-name='../src/impulse/kh21';
-%name='../src/kh/khN';
-%name='/tmp/test';
+range=[.75];
+%name='../src/impulse/kh21';
+%name='../src/kh/khK';
+name='../src/kh/khN';
 
 mkpr=1;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
-mplot=2;           % set to nonzero to put mplot plots per figure
+mplot=0;           % set to nonzero to put mplot plots per figure
 
 
 s=findstr(name,'/');

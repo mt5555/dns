@@ -392,9 +392,6 @@ real*8  :: del,delv(3)
 integer :: bin,idel,i,j,k,i2,nsf,ndelta
 
 
-integer pos,neg
-pos=0
-neg=0
 if (structf_init==0) then
    structf_init=1
    call init_pdf_module()
@@ -423,11 +420,6 @@ do k=1,n3
                      del = v(i2,j,k)-v(i,j,k)
                   else
                      del = w(i2,j,k)-w(i,j,k)
-                  endif
-
-                  if (n==ncomp .and. idel==1) then
-                     if (del>0) pos=pos+1
-                     if (del<0) neg=neg+1
                   endif
 
                   delv(n)=del
@@ -470,9 +462,6 @@ do k=1,n3
       enddo
    enddo
 enddo
-print *,'ncomp=',ncomp
-print *,'pos',pos
-print *,'neg',neg
 
 do n=1,NUM_SF
 str(n)%ncalls=str(n)%ncalls+1
@@ -793,7 +782,6 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-
 
 Sww=Sww/g_nx/g_ny/g_nz
 ux2=ux2/g_nx/g_ny/g_nz
