@@ -1,12 +1,23 @@
 
 
-iso12w_256B IN QA
-
+iso12w256A IN QA
+   oops: this run is really running at 512^3.  
+ 
    zero initial condition
+   FM=5/(2pi)**2, mu=6e-4/(2pi)**2
+   mu=1.5e-3/(2pi)**2 = 3.7995e-5 
+
+   At around t=13, changed mu to:
+   mu=mu=6e-4/(2pi)**2 = 1.52e-5
+
+iso12w250B     
+ 
+   iso12 initial condition
    FM=5/(2pi)**2, mu=6e-4/(2pi)**2
    nu=1.5e-3/(2pi)**2 = 3.7995e-5 
 
    check to see if this run is isotropic?
+
 
 
 
@@ -83,6 +94,19 @@ iso12_256G        ran to t=5
 iso12_256H      
     alpha=.25
     mu=.25e-4  
+iso12_256I      
+    alpha=1/16 = .0625   ran to t=3.    Looks like iso12_256B
+    mu=1.00e-4                          too viscous???
+
+iso12_256J      
+    alpha=1/16 = .0625   ran to t=3.  
+    mu=2.75e-4  
+
+    compare to iso12_256 from shankara.  
+
+
+
+
 
 
 **********************************************************************************
