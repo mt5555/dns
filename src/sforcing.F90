@@ -931,7 +931,7 @@ endif
 
 
 
-ntest=1  ! set > 1 to run some stats tests
+ntest=100; delt=1.0  ! set > 1 to run some stats tests
 if (new_f==1) then
    ener2=0
    ener_test=0
@@ -970,7 +970,7 @@ if (new_f==1) then
                   vor(3) = vx - uy
                   ! scale out various shell factors:
                   vor=vor/sqrt(xfac*numk(wn)*3.0)
-                  ! undo curl scaling:
+                  ! undo curl scaling:  (2/3) wn**2
                   vor = vor * sqrt(1.5)/ wn
                   ! vorticity now scaled so that E(wn)=1
                else
@@ -979,8 +979,9 @@ if (new_f==1) then
                   vor(3) = 0
                   ! scale out various shell factors:
                   vor=vor/sqrt(xfac*numk(wn)*2.0)
-                  ! undo curl scaling:
-                  vor = vor * sqrt(3.0)/ wn
+                  ! undo gradient scaling: should be .5 wn**2
+                  ! but numerically 4 wn**2 works better.  why???
+                  vor = vor * 2 /  wn
                   ! vorticity now scaled so that E(wn)=1
                endif
 
@@ -1001,12 +1002,12 @@ if (new_f==1) then
    enddo
 
    if (ntest>1) then
-   if (io_pe==my_pe) print *,"iter=",ntest
+      if (io_pe==my_pe) print *,"iter=",ii,numb1,numb,sum(ener(numb1:numb))
 #ifdef USE_MPI
-   ener2=ener
-   call MPI_allreduce(ener2,ener,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      ener2=ener
+      call MPI_allreduce(ener2,ener,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif      
-   ener_test=ener_test+ener/ntest
+      ener_test=ener_test+ener/ntest
    endif
    enddo
 
