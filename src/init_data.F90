@@ -33,7 +33,7 @@ if (restart==1) then
    if (init_cond==9) then
       call init_data_decay(Q,Qhat,work1,work2,2,0,0)
       ! output rescaled data, but with different name:
-      fname=basename(1:len_trim(basename)) // '-rescale'
+      fname=runname(1:len_trim(runname)) // '-rescale'
       call output_uvw(fname,time_initial,Q,Qhat,work1,work2)		  
    endif
 
