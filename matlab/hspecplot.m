@@ -20,9 +20,7 @@
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-%name = 'skhel512a0009.2781';
-%namedir = '/home/mt/data/skhel/';
-namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
+namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
 name = 'hel256_hpi2_all';
 mu = 2e-4;
 
@@ -34,12 +32,12 @@ mu = 2e-4;
 %name = 'hel256_h0';
 %mu = 2e-4;
 
-namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
-name = 'skhel512_hpi2';
-mu = 1e-4;
+%namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
+%name = 'skhel512_hpi2';
+%mu = 1e-4;
 
 
-%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
+%namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
 %name = 'sc1024A';
 %mu = 3.5e-5;
 
@@ -54,7 +52,7 @@ spec_r_save_fac3=[];
 
 % note: endianopen() will notwork with .spec and  .hspec files
 %because first number is not necessaryly an integer 
-pname = [strrep(name,'_','-'),'.hspec'];
+%pname = [strrep(name,'_','-'),'.hspec'];
 fid=fopen([namedir,name,'.hspec'],'r','l');
 
 
@@ -152,8 +150,8 @@ xlabel('k')
 ylabel(pname);
 
 figure(25)
-semilogx(k,abs(hspec_ave).*k'.^(5/3),'k');hold on;
-semilogx(k,abs(hspec_ave).*k'.^(4/3),'b--');hold on;
+semilogx(k,abs(hspec_ave).*k'.^(5/3),'k','linewidth',[2]);hold on;
+semilogx(k,abs(hspec_ave).*k'.^(4/3),'b-.','linewidth',[2]);hold on;
 set(gca,'fontsize',16);
 %title('Average compensated helicity spectrum');
 legend('H(k) k^{5/3}','H(k) k^{4/3}');

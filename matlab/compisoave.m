@@ -134,7 +134,9 @@ for i=ndir_vec
 
   if (plot_points==1) 
      if (skip==0) 
-        semilogx(x_plot,y,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
+        semilogx(x_plot,y,[':',cdir(i)],'MarkerSize',msize*2);
+%semilogx(x_plot,y,'k:','MarkerSize',1); hold on;         %for paper
+  hold on; end;
      if (skip==1) 
         semilogx(x_plot,y,['.-',cdir(i)],'MarkerSize',2*msize);   hold on; end;
   end     
@@ -162,9 +164,10 @@ if (skip==0)
    title('D_{lll} / r\epsilon   (4/5 law) ');
    ylabel(pname);
    xlabel('r/\eta');
-   semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+%   semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+semilogx(xx_plot,yyave,'k','LineWidth',2.5); hold on; % for paper
 %localslp(xx_plot, yyave,2);
-%   x=1:xmax; plot(x,(4/5)*x./x,'k');
+   x=1:xmax*5; plot(x,(4/5)*x./x,'k');
 end
 if (plot_posneg)
   grid
@@ -312,8 +315,8 @@ end
 %calculate angle-averaged scaling exponents for longitudinal and 
 %transverse str.fns
 
-%ndir
-%long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
+ndir
+long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
 
 end
@@ -333,10 +336,12 @@ for i=1:ndir
   x = r_val(:,i);                       % units of box length
   x_plot=x*nx*delx_over_eta;            % units of r/eta
 
-  y=-H_ltt(:,i)./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition
-  
-%  semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
-semilogx(x_plot,y,'k:','MarkerSize',1); hold on;         %for paper
+    y=-H_ltt(:,i)./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition , forced case
+ 
+%    y=(H_ltt(:,i))./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition, decaying case (TM data)
+ 
+  semilogx(x_plot,y,[':',cdir(i)],'MarkerSize',5); hold on;
+%semilogx(x_plot,y,'k:','MarkerSize',1); hold on;         %for paper
   yyave=yyave+w(i)*spline(x,y,xx);
 
 

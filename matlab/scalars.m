@@ -50,8 +50,8 @@ nx=2048;
 %fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
 %nx=128;
 
-%fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_all.scalars','r');
-%nx=256;
+fid=endianopen('/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_all.scalars','r');
+nx=256;
 
 
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');

@@ -40,7 +40,7 @@ nx=512
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 nx=512; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
 
-teddy=1;
+teddy=1.05;
 %times=[0:1:30];
 
 ndir_use=0;
@@ -84,7 +84,8 @@ for t=times
       
       mx45_iso_localeps(k)=max(y45);
       mx45_iso(k)=max(y45)*eps/epsilon;
-      
+mn45_iso_localeps(k) = y45(1);
+mn45_iso(k) = y45(1)*eps/epsilon;
       y45_iso_ave=y45_iso_ave+y45';
       
     end    
@@ -104,7 +105,9 @@ for t=times
       
       mx45_localeps(k,dir)=max(y45);
       mx45(k,dir)=max(y45)*eps/epsilon;
-      
+      mn45_localeps(k,dir)=y45(1);
+      mn45(k,dir)=y45(1)*eps/epsilon;
+
       y45_ave(:,dir)=y45_ave(:,dir)+y45';
     end
   end
@@ -147,24 +150,24 @@ hold off;
 xlabel('t/T','FontSize',18)
      set(gca,'fontsize',18);
 %title(ppname);
-print('-dpsc', 'k45time.ps')
-print('-dtiff', 'k45time.jpg')
+%print('-dpsc', 'k45time.ps')
+%print('-dtiff', 'k45time.jpg')
 
 
 figure(9); clf
 scale = 1; %scale = 4/5 if need to normalize out the 4/5th
-for i=[1:1:73]
-  %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',1.0); hold on
-  semilogx(xx_plot,y45_ave(:,i)/scale,'g-','LineWidth',1.0); hold on
+for i=[1:20:73]
+  semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',1.0); hold on %for paper
+%  semilogx(xx_plot,y45_ave(:,i)/scale,'g-','LineWidth',1.0); hold on
 end
 %semilogx(xx_plot,y45_iso_ave/scale,'k','LineWidth',1.0); hold on
-semilogx(xx_plot,y45_iso_ave/scale,'b','LineWidth',1.0); hold on
+semilogx(xx_plot,y45_iso_ave/scale,'k','LineWidth',2.5); hold on %for paper
 axis([1 1000 0 1.0])
 x=1:1000; plot(x,(4/5)*x./x/scale,'k');
 hold off;
 title(ppname);
-ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
-xlabel('r/\eta','FontSize',16);
+ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',18);
+xlabel('r/\eta','FontSize',18);
 
 print -dpsc k45mean.ps
 

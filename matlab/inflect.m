@@ -7,12 +7,12 @@ function[indy] = inflect(x,y,color)
 %     max(d2(indx));
 %     d2(indx);
 % index find for integer str fns 1024^3
-%     indy = find(d2(indx) <= max(d2(indx)) & d2(indx) >= max(d2(indx))-0.4);
+     indy = find(d2(indx) <= max(d2(indx)) & d2(indx) >= max(d2(indx))-0.4);
 
 % index find for for fractional str fns 1024^3
 
-     indy  = find(d2(indx) <= max(d2(indx)) & d2(indx) >= max(d2(indx))-0.05);
+%     indy  = find(d2(indx) <= max(d2(indx)) & d2(indx) >= max(d2(indx))-0.05);
 
 %shift back to proper x-axis index;
-     indy = indy + indx(1); 
+%     indy = indy + indx(1); 
 

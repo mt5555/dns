@@ -28,12 +28,12 @@ tsave=[2.5];
 %namedir = '/home2/skurien/dns/src/';
 
 name = 'hel256_hpi2_all';
-namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
+namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
 mu=2e-4;
 
-name = 'hel256_h0_0000.0000';
-namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
-mu=2e-4;
+%name = 'hel256_h0_0000.0000';
+%namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
+%mu=2e-4;
 
 %name = 'iso12_512';
 %namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
@@ -61,9 +61,9 @@ mu=2e-4;
 %name = 'skhel512_hpi2';
 %mu = 1e-4;
 
-namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
-name = 'sc1024A';
-mu = 3.5e-5;
+%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
+%name = 'sc1024A';
+%mu = 3.5e-5;
 
 % plot all the spectrum:
 movie=0; % 1 to plot all the spectra
@@ -257,8 +257,8 @@ xlabel('k')
 
 % compensated mean spectra
 figure(7)
-semilogx(k,spec_ave.*k'.^(5/3),'k'); hold on;
-semilogx(k,spec_ave.*k'.^(4/3),'b--');hold on;
+semilogx(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
+semilogx(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
 set(gca,'fontsize',16);
 legend('E(k) k^{5/3}','E(k) k^{4/3}');
     % title('Compensated MEAN energy spectrum');
@@ -268,8 +268,8 @@ xlabel('k');
 
 % compensated mean long and trans spectra
 figure(8)
-semilogx(k(1:n_x),spec_l.*k(1:n_x)'.^(5/3),'k'); hold on;
-semilogx(k(1:n_x),spec_l.*k(1:n_x)'.^(4/3),'b--');hold on;
+semilogx(k(1:n_x),spec_l.*k(1:n_x)'.^(5/3),'k','linewidth',[2]); hold on;
+semilogx(k(1:n_x),spec_l.*k(1:n_x)'.^(4/3),'b-.','linewidth',[2]);hold on;
 set(gca,'fontsize',16);
 legend('E_{L}(k) k^{5/3}','E_{L}(k) k^{4/3}');
     % title('Compensated MEAN energy spectrum');
@@ -278,8 +278,8 @@ set(gca,'fontsize',18);
 xlabel('k');
 
 figure(9)
-semilogx(k(1:n_z),spec_t.*k(1:n_z)'.^(5/3),'k'); hold on;
-semilogx(k(1:n_x),spec_t.*k(1:n_z)'.^(4/3),'b--');hold on;
+semilogx(k(1:n_z),spec_t.*k(1:n_z)'.^(5/3),'k','linewidth',[2]); hold on;
+semilogx(k(1:n_x),spec_t.*k(1:n_z)'.^(4/3),'b-.','linewidth',[2]);hold on;
 %semilogx(k(1:n_z),spec_t1.*k(1:n_z)'.^(5/3),k(1:n_z),spec_t2.*k(1:n_z)'.^(5/3),k(1:n_z),spec_t3.*k(1:n_z)'.^(5/3),k(1:n_z),spec_t.*k(1:n_z)'.^(5/3)); hold on;
 %semilogx(k(1:n_z),spec_t1.*k(1:n_z)'.^(4/3),k(1:n_z),spec_t2.*k(1:n_z)'.^(4/3),k(1:n_z),spec_t3.*k(1:n_z)'.^(4/3),k(1:n_z),spec_t.*k(1:n_z)'.^(4/3));hold on;
 set(gca,'fontsize',16);

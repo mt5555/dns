@@ -5,27 +5,6 @@ delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
 ext='.isostr';
 
-%name='/scratch1/taylorm/iso12w512A0001.3847'
-%nx=512; delx_over_eta=5.8615; epsilon=.2849;
-
-%name='/scratch1/taylorm/iso12_500A0001.7723'
-%nx=500; delx_over_eta=2.740; epsilon=3.5208;
-
-%name='/scratch1/taylorm/iso12_250A0022.000'
-%nx=250; delx_over_eta=.80; epsilon=3.9;
-
-
-%name='/ccs/scratch/taylorm/check256_0000.8000'
-name='/ccs/scratch/taylorm/dns/iso12/iso12_5120002.7000'
-%name='/ccs/scratch/taylorm/dns/iso12/iso12_5120007.0000'
-nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
-%ext='.isostr001';
-
-%name='/ccs/scratch/taylorm/sk/check256_0000.8000'
-%nx=256; delx_over_eta=1.0; epsilon=1.0;
-
-%name='/ccs/scratch/taylorm/decay/decay2048-1024.0000.6491'
-%nx=1024; delx_over_eta=2.73*2; epsilon=.04;
 
 %name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
 %nx=2048; delx_over_eta=-1; epsilon=-1;
@@ -33,13 +12,13 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
-nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
+%name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
+%nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 %name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0005.8000.new'
 %nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
 
-name='/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/skhel512a0007.0000.new'
+name='/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a0009.0000.new'
 nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=186
 
 

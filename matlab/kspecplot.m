@@ -8,8 +8,16 @@ namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/
 name = 'skhel512_hpi2';
 mu = 1e-4;
 
-% plot all the spectrum:
+%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
+%name = 'sc1024A';
+%mu = 3.5e-5;
+
+% plot all the spectrum: 
 movie=0;
+
+% plot the relative helicity 
+relh = 1;
+
 
 pname = [strrep(name,'_','-'),'.kspec'];
 fid=fopen([namedir,name,'.kspec'],'r','l');
@@ -34,7 +42,7 @@ end
 
 if (time >= 1)
 j=j+1
-if (length(kspec)==0) 
+if (length(kspec_ave)==0) 
   kspec_ave = kspec;
 else
   kspec_ave = kspec_ave + kspec;
@@ -45,3 +53,10 @@ end
 end
 
 kspec_ave = kspec_ave/(j);
+
+%plot relative helicity hspec_ave/2/kspec_ave
+if (relh ==1)
+     figure(13);clf
+semilogx(k,abs(hspec_ave)./(kspec_ave),'k'); % kspec_ave already has factor 2
+
+end

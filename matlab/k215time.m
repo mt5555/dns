@@ -1,8 +1,8 @@
-%
-%
+%   
+%   
 % 2/15ths law: time and angle averaged 
-%
-%
+%   
+%   
 mu=0;
 ke=0;
 nx=1;
@@ -73,7 +73,14 @@ ppname = [pname,tstr(2:10),ext];
       [y45,y415,y43,eps,h_eps,y215]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
       
       
-      mx215_iso_localeps(k)=max(y215);
+      mx215_iso_localeps(k)=max(y215); %peak of angle-average
+% a few other distances for the paper
+
+      r30_iso(k) = y215(23);
+r45_iso(k) = y215(35);
+r90_iso(k) = y215(70);
+r120_iso(k)= y215(93);
+
       mx215_iso(k)=max(y215)*h_eps/h_epsilon;
       mn215_iso_localeps(k)=y215(1);
       mn215_iso(k) = y215(1)*h_eps/h_epsilon;
@@ -83,6 +90,7 @@ ppname = [pname,tstr(2:10),ext];
       
     end    
 
+      max_index = find(y215_iso_ave==max(y215_iso_ave)); % index of the peak of angle-avg
 
     [nx,ndelta,ndir,r_val,ke,eps_l,mu,tmp,tmp,tmp,tmp,tmp,tmp,tmp,...
     tmp,tmp,tmp,tmp,tmp,H_ltt,H_tt,tmp,tmp,tmp,h_eps_l] ...
@@ -94,17 +102,29 @@ ppname = [pname,tstr(2:10),ext];
     
     for dir=1:73;
       x=r_val(:,dir)/nx;                % box length
-      y=-H_ltt(:,dir)./(x.^2*abs(h_eps_l)/2);
+      y=-H_ltt(:,dir)./(abs(h_eps_l)*(x.^2)/2);  %for forced data
+%    y = H_ltt(:,dir)./(abs(h_eps_l)*(x.^2)/2);  %for takeshi's decaying data
       
       y215 = spline(x,y,xx);
       
-      mx215_localeps(k,dir)=max(y215);
-      mx215(k,dir)=max(y215)*h_eps_l/h_epsilon;
-      
+%      mx215_localeps(k,dir)=max(y215);  
+      mx215_localeps(k,dir)= y215(max_index);  % value at peak of angle-avg.
+
+%for 512^3 data set ; extra displacements for paper
+r30_dir(k,dir) = y215(23); %value at r/eta = 30
+      r45_dir(k,dir) = y215(35); %value at r/eta = 45
+r90_dir(k,dir) = y215(70); %value at r/eta = 90
+      r120_dir(k,dir) = y215(93); %value at r/eta = 120
+
+
+%      mx215(k,dir)=max(y215)*h_eps_l/h_epsilon;
+      mx215(k,dir) = y215(max_index)*h_eps_l/h_epsilon;
+
       mn215_localeps(k,dir)=y215(1);
       mn215(k,dir) = y215(1)*h_eps_l/h_epsilon;
 
       y215_ave(:,dir)=y215_ave(:,dir)+y215';
+
     end
   end
 
@@ -133,30 +153,30 @@ end
 
 scale = 1;  % scale = 2/15 if normalizing by prefactor as well
 
-figure(5); clf;subplot(2,1,1);hold on; 
+figure(5); clf;subplot(4,1,1);hold on; 
 plot(times/teddy,mx215_iso_localeps/scale,'b-','LineWidth',1.0);hold on;
-i=1; %a particular directions
-%plot(times/teddy,mx215_localeps(1:length(times),i)/scale,'g-','LineWidth',1.0);hold on;
+plot(times/teddy,r30_iso/scale,'b--','LineWidth',1.0);hold on;
+plot(times/teddy,r120_iso/scale,'b:','LineWidth',2.5);hold on;
 plot([1:10],(2/15)*[1:10]./[1:10],'m');
 grid on;
 
-%subplot(2,1,2);hold on;
-%plot(times/teddy,mn215_iso_localeps/scale,'k-','LineWidth',1.0);hold on;
-%i=1; %a particular directions
-%plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
 
-subplot(2,1,2);hold on;
-i=1; %a particular directions
-plot(times/teddy,mx215_localeps(1:length(times),i)/scale, 'k-','LineWidth',1.0);hold on;
+j=1;
+for i = [1,2,3]
+subplot(4,1,j+1);hold on;
+plot(times/teddy,mx215_localeps(1:length(times),i)/scale, 'k-','LineWidth',1.0);plot(times/teddy,r30_dir(1:length(times),i)/scale,'k--','LineWidth',1.0);
+plot(times/teddy,r120_dir(1:length(times),i)/scale,'k:','LineWidth',2.5);
+hold on;
 plot([1:10],(2/15)*[1:10]./[1:10],'m');
 grid on;
-
+j=j+1;
+end
 ax=axis;
 %axis( [ax(1),ax(2),0,1] );
 %title('Green - dir max; Red - dir first pt; Blue - avg max; Black - avg first pt; Magenta - 2/15')   
 hold off;
 
-xlabel('t/T','FontSize',18)
+xlabel('t / T','FontSize',16)
 %     ylabel(ppname)
      grid on;
 %print -dpsc k215time.ps
@@ -164,7 +184,7 @@ xlabel('t/T','FontSize',18)
 
 figure(6); clf
 scale = 1; % scale = 2/15 to scale out
-for i=[1:30:73]
+for i=[1:73]
   %semilogx(xx_plot,y215_ave(:,i),'k:','LineWidth',0.2); hold on
   semilogx(xx_plot,(y215_ave(:,i))/scale,'k:','LineWidth',1.0); hold on
 end
@@ -198,9 +218,66 @@ xlabel('r/\eta','FontSize',16);
 %ylabel(ppname);
 %xlabel('r/\eta','FontSize',16);
 
+figure(8); clf;subplot(4,1,1);hold on; 
+plot(times/teddy,mn215_iso_localeps/scale,'b-','LineWidth',1.0);hold on;
+plot([1:10],(0)*[1:10]./[1:10],'m');
+grid on;
+
+%subplot(2,1,2);hold on;
+%plot(times/teddy,mn215_iso_localeps/scale,'k-','LineWidth',1.0);hold on;
+%i=1; %a particular directions
+%plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
+
+j=1;
+for i = [1,2,3]
+subplot(4,1,j+1);hold on;
+plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'k-','LineWidth',1.0);hold on;
+plot([1:10],(0)*[1:10]./[1:10],'m');
+grid on;
+j=j+1;
+end
 
 
-starttime=1;
+figure(9); clf;subplot(4,1,1);hold on; 
+plot(times/teddy,r30_iso/scale,'b-','LineWidth',1.0);hold on;
+plot([1:10],(2/15)*[1:10]./[1:10],'m');
+grid on;
+
+%subplot(2,1,2);hold on;
+%plot(times/teddy,mn215_iso_localeps/scale,'k-','LineWidth',1.0);hold on;
+%i=1; %a particular directions
+%plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
+
+subplot(4,1,2);hold on;
+plot(times/teddy,r45_iso/scale, 'k-','LineWidth',1.0);hold on;
+plot([1:10],(2/15)*[1:10]./[1:10],'m');
+grid on;
+
+subplot(4,1,3);hold on;
+plot(times/teddy,r90_iso/scale, 'k-','LineWidth',1.0);hold on;
+plot([1:10],(2/15)*[1:10]./[1:10],'m');
+grid on;
+
+subplot(4,1,4);hold on;
+plot(times/teddy,r120_iso/scale, 'k-','LineWidth',1.0);hold on;
+plot([1:10],(2/15)*[1:10]./[1:10],'m');
+grid on;
+
+
+end
+ax=axis;
+%axis( [ax(1),ax(2),0,1] );
+%title('Green - dir max; Red - dir first pt; Blue - avg max; Black - avg first pt; Magenta - 2/15')   
+hold off;
+
+xlabel('t/T','FontSize',18)
+%     ylabel(ppname)
+     grid on;
+%print -dpsc k215time.ps
+
+
+
+starttime=2;
 ln=find(times>=starttime);
 ln=ln(1);
 lnmax=length(times);
@@ -209,9 +286,9 @@ dir_use=1;
 [mean(mx215(ln:lnmax,dir_use)),mean(mx215_iso(ln:lnmax))]
 [std(mx215(ln:lnmax,dir_use)),std(mx215_iso(ln:lnmax)) ]
 
+[mean(r30_iso(ln:lnmax)),mean(r45_iso(ln:lnmax)),mean(r90_iso(ln:lnmax)), mean(r120_iso(ln:lnmax))]
 
 
-
-
+[std(r30_iso(ln:lnmax)),std(r45_iso(ln:lnmax)),std(r90_iso(ln:lnmax)), std(r120_iso(ln:lnmax))]
 
 
