@@ -10,8 +10,10 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 range=50:5:150.00;
 %range=29:1.0:1000.0;
 %range=[.00];
-name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
+name='../src/vxpair/vx6144b_';
+%name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
 %name='../src/temp';
+%name='/data/vxpair/vx2048a';
 %name='/data/vxpair/vx2048b';
 
 usefig=1;
