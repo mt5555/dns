@@ -191,8 +191,8 @@ if (doit_screen) then
    call print_message(message)	
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3,a,f6.3)') &
-           'next delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis,&
-            'cfl_passive_vis=',cfl_used_psvis
+           'next delt=',delt,' cfl_adv=',cfl_used_adv,&
+           ' cfl_vis=',cfl_used_vis,' cfl_passive_vis=',cfl_used_psvis
    call print_message(message)	
 
    write(message,'(a,3f21.14)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
