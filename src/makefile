@@ -106,15 +106,15 @@ ifeq ($(UNAME),OSF1)
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
-   UDM = -I$(HOME)/udm/udm/include -DHAVE_UDM 
-   UDMLIB = -L$(HOME)/udm/udm/lib \
+   UDM = -I$(HOME)/udm/udm_Nov_19/include -DHAVE_UDM 
+   UDMLIB = -L$(HOME)/udm/udm_Nov_19/lib \
       -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
       -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
      -lrt -free -lcxxstd -lcxx -lexc -lc
    #UDM=
    #UDMLIB= 
 
-   LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+   LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) 
 
 
    ifeq ($(HOST),milkyway.lanl.gov)

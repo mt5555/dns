@@ -235,6 +235,7 @@ character(len=80) fnameudm
 character(len=80) dsnameudm 
 character(len=80) attrname 
 character*(2) dotudm 
+character(len=20) kw1, kw2, val1, val2
 
 ! character*(6) dbgname
 
@@ -251,6 +252,7 @@ integer*8 fidmpi,infoin
 
    fnameudm = fname(1:len_trim(fname)) // char(0) 
 
+#if 0
    if (io_pe==my_pe) then
    call print_message("attempting to set stripe")
    call MPI_Info_create(infoin,ierr)
@@ -261,6 +263,21 @@ integer*8 fidmpi,infoin
            infoin, fidmpi,ierr)
    call MPI_File_close(fidmpi,ierr)
    endif
+#endif
+
+   call print_message("UDM Set_MPI_INFO")
+   kw1(1:16)  = '-striping_factor'
+   kw1(17:17) = CHAR(0)
+   val1(1:3) = ' 32 '
+   val1(4:4) = CHAR(0)
+   kw2(1:14) = '-striping_unit'
+   kw2(15:15) = CHAR(0)
+   val2(1:9) = ' 8388608 '
+   val2(10:10) = CHAR(0)
+
+   call UDM_SET_MPI_INFO(kw1,val1,ierr)
+   call UDM_SET_MPI_INFO(kw2,val2,ierr)
+
 
    call print_message("UDM open")
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_CREATE, fidudm, ierr)

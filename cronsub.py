@@ -80,7 +80,7 @@ if (status==255) & (find(out,"No unfinished job found")>=0):
     # so dont parse to find our running jobs
     print "bjobs: que is empty?"
     print "bjobs: ",out
-else    
+else:    
     #parse out to get jobname_running
     jobname_running=[]
     jobc=-1;
