@@ -14,7 +14,7 @@ periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
 11.5         ! time to run
-1.35          ! adv cfl  1.35 ok for RK4.   .30 ok for LEAPFROG?
+1.00          ! adv cfl  1.35 ok for RK4.   .30 ok for LEAPFROG?
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 

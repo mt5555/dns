@@ -1,10 +1,12 @@
-2            ! input file type
+3            ! input file type
+ns_psivor    ! equation
 vxpair       ! initial condition:  KH-blob, KH-anal, iso12, restart
 0            ! initial condition subtype
 none         ! forcing:  none, iso12
 value        ! viscosity type  (value, smallest, kediff, Re)
 1e-3         ! viscosity coefficient.  (300)
 0.0           ! alpha (for NS-alpha model)
+0.0          ! smag
 0            ! compute struct
 4th           ! derivative method  (fft, fft-dealias, 4th)
 in0/onesided  ! x bc  (periodic, no-slip)
