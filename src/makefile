@@ -25,7 +25,7 @@ ifeq ($(UNAME),Linux)
    # Lahey
    #F90 = lf95
    #FFLAGS = -O -DLINUX $(MPI) -DUSE_STKFFT
-   #FFLAGS = -O -DLINUX $(MPI) -DUSE_FFT99
+   ##FFLAGS = -O -DLINUX $(MPI) -DUSE_FFT99
    #LDFLAGS = --staticlink  -Lstk -lstk
    #CC = gcc
 
@@ -33,14 +33,16 @@ ifeq ($(UNAME),Linux)
    #F90 = pgf90
    #CC=pgcc
    #FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_STKFFT
    #LDFLAGS = -Lstk -lstk
 
 
    #INTEL	
    F90 = ifc 
    CC=gcc
+   #FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_STKFFT
    FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_FFT99 
-   LDFLAGS = -Lstk -lstk
+   #LDFLAGS = -Lstk -lstk
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95

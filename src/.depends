@@ -13,7 +13,7 @@ init_grid.o: macros.h params.o mpi.o fft_interface.o makefile
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
 mpi.o: makefile 
-ns.o: macros.h params.o structf.o transpose.o makefile 
+ns.o: macros.h params.o structf.o transpose.o sforcing.o makefile 
 ns_decomp3.o: macros.h params.o transpose.o makefile 
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 params.o: macros.h transpose.h params.h makefile 
