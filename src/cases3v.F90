@@ -300,7 +300,7 @@ else if (init_cond_subtype==1) then
       fac1=p2**p1 * xnb**p
       fac2=ku**(p+1)
       fac3=exp(-p2* (xnb/ku)**2)
-      enerb_target(nb)=fac1*fac2*fac3
+      enerb_target(nb)=fac1*fac3/fac2
    enddo
    
 else
