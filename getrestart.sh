@@ -1,4 +1,4 @@
-#! /bin/csh 
+#! /bin/csh -f
 #
 # get some restart files from HPSS or specified directory
 # using the specified basename, find the file of the form basename????.????.u
@@ -46,9 +46,9 @@ if ($fpath == HPSS) then
    endif
 
    \rm -f restart.*
-   \cp -f $resnameu2  restart.u
-   \cp -f $resnamev2  restart.v
-   \cp -f $resnamew2  restart.w
+   \ln -s $resnameu2  restart.u
+   \ln -s $resnamev2  restart.v
+   \ln -s $resnamew2  restart.w
    if !(-e restart.w) then
       echo "No restart.w file"
       exit 1
@@ -85,9 +85,9 @@ else
    endif
 
    \rm -f restart.*
-   \cp -f $resnameu2  restart.u
-   \cp -f $resnamev2  restart.v
-   \cp -f $resnamew2  restart.w
+   \ln -s $resnameu2  restart.u
+   \ln -s $resnamev2  restart.v
+   \ln -s $resnamew2  restart.w
    if !(-e restart.w) then
       echo "No restart.w file"
       exit 1

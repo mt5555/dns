@@ -15,7 +15,7 @@ range=50:5:150.00;
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='../src/temp';
 %name='/data/vxpair/vx2048a';
-name='/data/vxpair/vx2048c';
+name='/data/vxpair/vx2048d';
 
 usefig=1;
 mkpr=1;            % make ps and jpeg files

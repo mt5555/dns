@@ -195,9 +195,9 @@ integer :: lsftime,i,time_needed
 
 delt=0
 ! quit if we are within 'time_needed' min of being killed:
-time_needed = 5  
+time_needed = 15  
 ! for 2000^3 on 512 cpus, we need 10min per timestep:
-if (g_nx>1500 .and. g_ny>1500 .and. g_nz>1500) time_needed=15
+! if (g_nx>=2048 .and. g_ny>=2048 .and. g_nz>=2048) time_needed=15
 
 time=time_initial
 if (time_final<0) then

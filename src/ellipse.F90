@@ -78,8 +78,6 @@ integer :: nell,np,ierr
 CPOINTER fid
 character(len=280) :: fname
 character(len=80) :: message
-character :: access="0"
-
 
 
 if (io_pe==my_pe) then
@@ -91,17 +89,9 @@ if (io_pe==my_pe) then
           sqrt(dft(3,nell)**2+dft(4,nell)**2)/dft(0,nell)
    enddo
 
-   ! append to output files, unless this is first call.
-   if (access=="0") then
-      access="w"
-   else
-      access="a"
-   endif
-
-
-   write(message,'(f10.4)') 10000.0000 + time_initial
+   write(message,'(f10.4)') 10000.0000 + time
    fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ellipse"
-   call copen(fname,access,fid,ierr)
+   call copen(fname,"w",fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
       call abort(message)

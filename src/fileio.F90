@@ -290,52 +290,5 @@ end subroutine
 
 
 
-logical function check_time(itime,time,dt,ncust,cust,time_next)
-use params
-implicit none
-integer ncust,itime
-real*8 :: time,dt,cust(ncust)
-real*8 :: time_next  ! output
-
-!local variables
-real*8 remainder
-integer i
-real*8 :: small=1e-7
-
-check_time = .false.
-time_next=time_final
-
-! custom times always take precedence:
-do i=1,ncust
-   if (abs(time-cust(i))<small) then
-      check_time=.true.
-   else if (time<cust(i)) then
-      time_next=min(time_next,cust(i))
-      exit 
-   endif
-enddo
-
-if (dt==0) return
-
-
-if (time>=time_final-small) check_time=.true.
-if (time==0) check_time=.true.
-
-
-if (dt<0) then
-   if (mod(itime,nint(abs(dt)))==0) check_time=.true.
-endif
-
-if (dt>0) then
-   remainder=time - int((small+time)/dt)*dt
-   
-   if (remainder < small) then
-      check_time=.true.
-   endif
-   time_next = min(time_next,time-remainder+dt)
-
-endif
-
-end function
 
 

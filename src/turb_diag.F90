@@ -18,15 +18,8 @@ real*8 :: ints_e(nints_e)
 real*8 :: x
 integer i,j,k,n,ierr
 character(len=80) :: message
-character,save :: access="0"
 CPOINTER fid,fidj,fidS
 
-! append to output files, unless this is first call.
-if (access=="0") then
-   access="w"
-else
-   access="a"
-endif
 
 
 
@@ -49,25 +42,25 @@ if (compute_struct==1) then
    
    if (structf_init==1) then
    if (my_pe==io_pe) then
-      write(message,'(f10.4)') 10000.0000 + time_initial
+      write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
-      call copen(message,access,fid,ierr)
+      call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
          call abort(message)
       endif
 
-      write(message,'(f10.4)') 10000.0000 + time_initial
+      write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".jpdf"
-      call copen(message,access,fidj,ierr)
+      call copen(message,"w",fidj,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .jpdf file errno=",ierr
          call abort(message)
       endif
 
-      write(message,'(f10.4)') 10000.0000 + time_initial
+      write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".s2v2"
-      call copen(message,access,fidS,ierr)
+      call copen(message,"w",fidS,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .s2v2 file errno=",ierr
          call abort(message)
@@ -83,9 +76,9 @@ if (compute_struct==1) then
 
    ! output turb scalars
    if (my_pe==io_pe) then
-      write(message,'(f10.4)') 10000.0000 + time_initial
+      write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".scalars-turb"
-      call copen(message,access,fid,ierr)
+      call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "diag_output(): Error opening .scalars-turb file errno=",ierr
          call abort(message)
@@ -104,7 +97,7 @@ if (compute_struct==1) then
 endif
 
 ! time averaged dissapation and forcing:
-call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
+!call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
 
 end subroutine
 

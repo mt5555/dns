@@ -11,13 +11,13 @@ vxpair runs on autry
 
             mu = 1e-8:  N = 17400.  
 
-Formula:
-16384x8192   mu = 1.1e-8
-12288x6144   mu = 1.6e-8
-6144x3072    mu = 4.0e-8    Reference value 
-4096x2048    mu = 6.9e-8
-3072x1536    mu = 1.0e-7
-2048x1024    mu = 1.7e-7
+Formula:     mu ~ N^{-4/3}        mu ~ N^-2            good values
+16384x8192   mu = 1.1e-8         5.6e-9
+12288x6144   mu = 1.6e-8         1e-8
+6144x3072(ref)mu = 4.0e-8        4e-8                       4e-8?
+4096x2048    mu = 6.9e-8         9e-8                       1e-7
+3072x1536    mu = 1.0e-7         1.6e-7 
+2048x1024    mu = 1.7e-7         3.6e-7                     4e-7
 
 Results:
 6144x3072    mu=1e-7 ok.    2e-8: a touch noisy, goes away
@@ -33,11 +33,12 @@ vx2048a   vx2048a.inp   mu=6e-8  very noisy at t=50
 vx2048b   vx2048b.inp  mu=1e-7   noisy at t=49
 vx2048c   vx2048c.inp  mu=2e-7   small amount of noise on leading edge at t=50
                                  reduced by t=55
-vx2048d                mu=4e-7   NEXT?
+vx2048d   vx2048d.inp  mu=4e-7   looks good
 
-vx4096a                mu=1e-7            
-vx4096b                mu=7e-8   IN milkyway        
-vx4096c                mu=4e-8            
+
+vx4096a                mu=1e-7   IN milkyway         
+vx4096b                mu=7e-8   extremly small amount of noise at t=50
+
 
 
 
@@ -240,9 +241,16 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 
 500    .1e-3    5     455   2.38      1.44        2.00     hook 1e-2     kink
 500B   .1e-3  25 (stopped)
+500C  1.35e-3 500     IN.  run 10 eddy turnover times to check isotropy
+                           with more data then 512 run below.  
+
 
 512    1.35e-3  500   131    .37      1.22        3.14
-512b   1.35e-3  (same as above, but different initial condition)
+512c   1.35e-3  isow  IN  run 10 eddy turnover times to check isotropy
+                          with isow forcing
+
+
+
    
 
 Energy:
