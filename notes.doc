@@ -1,26 +1,12 @@
+
 TODO:
-      update decay website, email charles
+      CCS-2 slides/talk for monday 
       balu work
-
-      paper
-        plots:  iso12w snapshot, iso12w timeseries, time+angle ave. mean.
-        make changes outlined in email
-        put all figures at end - hard copy only 
-
-      MIMIC test case: benchmark on PC and cray
-
-      Monika: put in w thru cut output dataset
-              fix ellipse iteration 
-      
       iso12_512 data:  look at intermittency? 
+      check scratch2 xpsi  get  "xpsi get -pfComp 32" running.
 
-      check HPSS code.  recharge system 
 
-       
-
-email: Bonnie answer
-       PINK-team: science run
-       UDM team: qb1533  
+email: Bonnie answer about cyber security
        Goeff: jobs?
 
 Angle averging:  153 calls to transpose_z()
