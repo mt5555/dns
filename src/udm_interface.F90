@@ -46,7 +46,7 @@ integer*8 fidmpi,infoin
 
    len1 = len_trim(rundir)
    len2 = len_trim(runname)
-   fnameudm = rundir(1:len1) // runname(1:len2) // message(2:10) //'.h5'// char(0) 
+   fnameudm = fname // char(0) 
 
    if (io_pe==my_pe) then
    call print_message("attempting to set stripe")
@@ -260,7 +260,7 @@ Q=0
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)
    nochar(1:1) = char(0)
-   fnameudm = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // 'h5'//char(0)
+   fnameudm = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // '.h5'//char(0)
    call print_message("Restarting from UDM file:")
    call print_message(fnameudm)
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_READ, fidudm, ierr)
@@ -324,20 +324,20 @@ Q=0
    if (dimsudm .ne. 3) call abort("ERROR: datafile is wrong")
    CALL UDM_INFO_ITEM_GET(infoid, UDM_INFO_DIMS_TOTAL, gsizesudm, ierr)
 
+   if (base(1:len_trim(base)=="restart") then
    if (gsizesudm(1) .ne. (ncpu_z *(nz2 - nz1 + 1)))    &
        call abort("ERROR: nz, ncpu_z in param.h not consistent the datafile")
    if (gsizesudm(2) .ne. (ncpu_y *(ny2 - ny1 + 1)))    &
        call abort("ERROR: ny, ncpu_y in param.h not consistent the datafile")
    if (gsizesudm(3) .ne. (ncpu_x *(nx2 - nx1 + 1)))    &
        call abort("ERROR: nx, ncpu_x in param.h not consistent the datafile")
-
-   sizesudm(1) = gsizesudm(1) / ncpu_z  
-   sizesudm(2) = gsizesudm(2) / ncpu_y
-   sizesudm(3) = gsizesudm(3) / ncpu_x
-   if ( (gsizesudm(1) - sizesudm(1) * ncpu_z .ne. 0) .or.   &
-        (gsizesudm(2) - sizesudm(2) * ncpu_y .ne. 0) .or.   &
-        (gsizesudm(3) - sizesudm(3) * ncpu_x .ne. 0) )      &
-        call abort("ERROR: mod(nx, ncpu_x) != 0")
+   else
+      if (io_pe==my_pe) &
+      print *,'input file grid: ',gsizesudm(1:3)
+   endif
+   sizesudm(1) = nslabz
+   sizesudm(2) = nslaby
+   sizesudm(3) = nslabx
    offsetsudm(1) = my_z * sizesudm(1)
    offsetsudm(2) = my_y * sizesudm(2)
    offsetsudm(3) = my_x * sizesudm(3)
