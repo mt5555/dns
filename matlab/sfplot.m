@@ -34,15 +34,19 @@ while (time>=0 & time<=5000)
     
     pdf=fread(fid,[(2*n_bin+1),n_del],'float64');
 
-    dp=1;
+    dp=4;
+    p=2;
+    % structure function to the p'th power
+    str=sum(pdf(:,dp).*bins.^p);
+    
     mx=max(bins - bins.*(pdf(:,dp)==0));
     mn=min(bins - bins.*(pdf(:,dp)==0));  % min over non zero values
     bar(bins,pdf(:,dp))
     ax=axis;
     %axis([-1,1,ax(3),ax(4)]);
     axis([-2,2,0,.02]);
-    ylabel(sprintf('%s(%s)-%s(%s+%i)',components(j),var(i),components(j),var(i),dp));
-    xlabel(sprintf('min=%.4f  max=%.4f  ncalls=%i',mn,mx,n_call));
+    ylabel(sprintf('%s(%s)-%s(%s+%i)',components(j),var(i),components(j),var(i),delta(dp)));
+    xlabel(sprintf('min=%.4f  max=%.4f  ncalls=%i str(%i)=%.5f',mn,mx,n_call,p,str));
     if (i==1) title(sprintf('Time=%.4f',time)); end;
     
   end
