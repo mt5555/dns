@@ -13,10 +13,10 @@ ifeq ($(UNAME),Linux)
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
-   MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4 -lfmpi -lmpi
+   MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
    MPIINC = -DMPI 
    MPIF90 = /usr/local/src/mpich/include/mpif.f90
-   LDFLAGS = $(MPILIB) 
+   LDFLAGS = 
    FFLAGS = -O -DMPI
 endif
 
@@ -46,7 +46,7 @@ OBJS3 = $(MODEL) $(INITS) $(OPS) $(FILEIO)
 
 dnslink = $(OBJS1) $(OBJS2) $(OBJS3)
 dns:  $(dnslink) dns.o
-	$(LINK) -o dns dns.o $(dnslink)
+	$(LINK) -o dns dns.o $(dnslink) $(MPILIB)
 
 
 clean: 
