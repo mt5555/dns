@@ -130,7 +130,7 @@ enddo
 
 z_kmcord=g_kmcord
 do k=1,g_nz
-   z_kmsign=sign(1,z_kmcord(k))
+   z_kmsign(k)=sign(1,z_kmcord(k))
    if (z_kmcord(k)==0) z_kmsign(k)=0
    if (z_kmcord(k)==g_nz/2) z_kmsign(k)=0
 enddo

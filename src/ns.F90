@@ -6,27 +6,31 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine rk4(time,Q_grid)
 use params
-use transpose
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
+real*8,save :: Q(nx,ny,nz,n_var)
+
+call rk4reshape(time,Q_grid,Q)
+end
+
+
+
+subroutine rk4reshape(time,Q_grid,Q)
+use params
+implicit none
+real*8 :: time
+real*8 :: Q_grid(nx,ny,nz,n_var)
+real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
+
 
 ! local variables
-real*8 :: Q_old(nx,ny,nz,n_var)
-real*8 :: Q_tmp(nx,ny,nz,n_var)
-real*8 :: rhs(nx,ny,nz,n_var)
-
-real*8 :: z_rhs(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: z_Q(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
 
 
 real*8 :: ke_old,time_old,vel
-real*8,save :: Q(nx,ny,nz,n_var)
-
-real*8,save,allocatable :: Q2(:,:,:,:)
-
-
-
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d
 logical,save :: firstcall=.true.
@@ -35,12 +39,8 @@ logical,save :: firstcall=.true.
 
 if (firstcall) then
    firstcall=.false.
-   allocate(Q2(g_nz2,nslabx,ny_2dz,n_var))
-
-   Q_tmp=Q_grid
    do n=1,3
-      call z_fft3d(Q_tmp(1,1,1,n),Q2(1,1,1,n),rhs)  ! use rhs as a work array
-      call transpose_from_z(Q2(1,1,1,n),Q(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call z_fft3d(Q_grid(1,1,1,n),Q(1,1,1,n)) ! use rhs as work array
    enddo
 
    if (.not. dealias) then
@@ -51,137 +51,74 @@ endif
 
 
 
-
-
-
 ! stage 1
-
-call ns3D(z_rhs,Q2,Q_grid,time,1)
-do n=1,3
-   call transpose_from_z(z_rhs(1,1,1,n),rhs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-
+call ns3D(rhs,Q,Q_grid,time,1)
 
 do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
-      Q2(k,i,j,n)=Q2(k,i,j,n)+delt*z_rhs(k,i,j,n)/6.0
+      Q_old(k,i,j,n)=Q(k,i,j,n)
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2.0
    enddo
    enddo
    enddo
 
-
-
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      Q_old(i,j,k,n)=Q(i,j,k,n)
-      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6.0
-      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2.0
-      Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
-   enddo
-   enddo
-   enddo
-   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
+
 
 
 ! stage 2
-do n=1,3
-   call transpose_to_z(Q_tmp(1,1,1,n),z_Q(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-call ns3D(z_rhs,z_Q,Q_grid,time+delt/2.0,0)
-do n=1,3
-   call transpose_from_z(z_rhs(1,1,1,n),rhs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-
-
+call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
 
 do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
-      Q2(k,i,j,n)=Q2(k,i,j,n)+delt*z_rhs(k,i,j,n)/3.0
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3.0
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2.0
    enddo
    enddo
    enddo
 
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3.0
-      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2.0
-      Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
-   enddo
-   enddo
-   enddo
-   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
+
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
 
 ! stage 3
-do n=1,3
-   call transpose_to_z(Q_tmp(1,1,1,n),z_Q(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-call ns3D(z_rhs,z_Q,Q_grid,time+delt/2.0,0)
-do n=1,3
-   call transpose_from_z(z_rhs(1,1,1,n),rhs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
+call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
 
 
 do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
-      Q2(k,i,j,n)=Q2(k,i,j,n)+delt*z_rhs(k,i,j,n)/3.0
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3.0
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)
    enddo
    enddo
    enddo
 
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3.0
-      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs(i,j,k,n)
-      Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
-   enddo
-   enddo
-   enddo
-   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
-
 
 ! stage 4
-do n=1,3
-   call transpose_to_z(Q_tmp(1,1,1,n),z_Q(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-call ns3D(z_rhs,z_Q,Q_grid,time+delt,0)
-do n=1,3
-   call transpose_from_z(z_rhs(1,1,1,n),rhs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
+call ns3D(rhs,Q_tmp,Q_grid,time+delt,0)
 
 
 do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
-      Q2(k,i,j,n)=Q2(k,i,j,n)+delt*z_rhs(k,i,j,n)/6.0
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0
    enddo
    enddo
    enddo
 
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6.0
-      Q_grid(i,j,k,n)=Q(i,j,k,n)
-   enddo
-   enddo
-   enddo
-   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
+   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n))
 enddo
-
-
 
 
 time = time + delt
@@ -207,7 +144,7 @@ enddo
 
 
 
-end subroutine rk4  
+end subroutine 
 
 
 
@@ -215,7 +152,7 @@ end subroutine rk4
 
 
 
-subroutine ns3d(rhs,z_Qhat,Q,time,compute_ints)
+subroutine ns3d(rhs,Qhat,Q,time,compute_ints)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -236,28 +173,27 @@ use transpose
 implicit none
 
 ! input
-real*8 z_Qhat(g_nz2,nslabx,ny_2dz,n_var)
-real*8 Q(nx,ny,nz,n_var)
 real*8 time
 integer compute_ints
+
+! input, but data can be trashed if needed
+real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 
 ! output
 real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)
 
+                                 
 
 !local
-real*8 grid(nx,ny,nz,n_var)
-
-
+real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 grid(nx,ny,nz,n_var)   
 real*8 xfac,tmx1,tmx2
 real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke_diss,vor,hel,maxvor
 
-
-
-real*8 p(g_nz2,nslabx,ny_2dz,n_var)
 
 
 
@@ -278,9 +214,6 @@ call wallclock(tmx1)
 
 
 ! compute vorticity-hat, store in RHS
-
-
-
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nslabx
@@ -288,37 +221,30 @@ do j=1,ny_2dz
       do k=1,g_nz
          km=z_kmcord(k)
          
-         ! u_x term
-         vx = - im*z_Qhat(k,i+z_imsign(i),j,2)
-         wx = - im*z_Qhat(k,i+z_imsign(i),j,3)
-         
-         uy = - jm*z_Qhat(k,i,j+z_jmsign(j),1)
-         wy = - jm*z_Qhat(k,i,j+z_jmsign(j),3)
-         
-         uz =  - km*z_Qhat(k+z_kmsign(k),i,j,1)
-         vz =  - km*z_Qhat(k+z_kmsign(k),i,j,2)
-         
+         wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
+         vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
          rhs(k,i,j,1) = pi2*(wy - vz)
+         
+         wx = - im*Qhat(k,i+z_imsign(i),j,3)
+         uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
          rhs(k,i,j,2) = pi2*(uz - wx)
+         
+         uy = - jm*Qhat(k,i,j+z_jmsign(j),1)
+         vx = - im*Qhat(k,i+z_imsign(i),j,2)
          rhs(k,i,j,3) = pi2*(vx - uy)
 
-         
       enddo
    enddo
 enddo
-! 3 forward&back z-transforms, 9 ffts.  
+
+! 3 z-transforms, 9 ffts.  
 do n=1,3
-   call z_ifft3d(rhs(1,1,1,n),grid(1,1,1,n),p)
+   call z_ifft3d(rhs(1,1,1,n),grid(1,1,1,n))
 enddo
-
-
 ! alternative:
-! compute all terms above: vx,wx  uy,wy, uz,vz
-! 12 ffts, but only 2 f&b z transforms.  
-
-
-
-
+! compute from Q_grid: vx,wx  uy,wy      8 ffts, 0 z-transforms 
+!              Qhat:   vz,uz             6 ffts, 2 z-transforms
+!
 
 
 
@@ -326,44 +252,44 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Grid space computations
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 vor=0
 hel=0
 maxvor=0
 
-   ! rhs = u x vor
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      vor = vor + grid(i,j,k,3)
-
-      hel = hel + Q(i,j,k,1)*grid(i,j,k,1) + & 
-                  Q(i,j,k,2)*grid(i,j,k,2) + & 
-                  Q(i,j,k,3)*grid(i,j,k,3)  
-
-      maxvor = max(maxvor,abs(grid(i,j,k,1)))
-      maxvor = max(maxvor,abs(grid(i,j,k,2)))
-      maxvor = max(maxvor,abs(grid(i,j,k,3)))
-
-      uu = ( Q(i,j,k,2)*grid(i,j,k,3) - Q(i,j,k,3)*grid(i,j,k,2) )
-      vv = ( Q(i,j,k,3)*grid(i,j,k,1) - Q(i,j,k,1)*grid(i,j,k,3) )
-      ww = ( Q(i,j,k,1)*grid(i,j,k,2) - Q(i,j,k,2)*grid(i,j,k,1) )
-
-      grid(i,j,k,1) = uu
-      grid(i,j,k,2) = vv
-      grid(i,j,k,3) = ww
-   enddo
-   enddo
-   enddo
-
-
+! rhs = u x vor
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   vor = vor + grid(i,j,k,3)
+   
+   hel = hel + Q(i,j,k,1)*grid(i,j,k,1) + & 
+        Q(i,j,k,2)*grid(i,j,k,2) + & 
+        Q(i,j,k,3)*grid(i,j,k,3)  
+   
+   maxvor = max(maxvor,abs(grid(i,j,k,1)))
+   maxvor = max(maxvor,abs(grid(i,j,k,2)))
+   maxvor = max(maxvor,abs(grid(i,j,k,3)))
+   
+   !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
+   !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
+   !  w*(wy-vz) - u*(vx-uy)
+   !  u*(uz-wx) - v*(wy-vz)
+   uu = ( Q(i,j,k,2)*grid(i,j,k,3) - Q(i,j,k,3)*grid(i,j,k,2) )
+   vv = ( Q(i,j,k,3)*grid(i,j,k,1) - Q(i,j,k,1)*grid(i,j,k,3) )
+   ww = ( Q(i,j,k,1)*grid(i,j,k,2) - Q(i,j,k,2)*grid(i,j,k,1) )
+   
+   grid(i,j,k,1) = uu
+   grid(i,j,k,2) = vv
+   grid(i,j,k,3) = ww
+enddo
+enddo
+enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! back to spectral space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
-   call z_fft3d(grid(1,1,1,n),rhs(1,1,1,n),p)
+   call z_fft3d(grid(1,1,1,n),rhs(1,1,1,n))
 enddo
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -378,9 +304,9 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
             xfac=-mu*(im*im + jm*jm + km*km)*pi2_squared
-            rhs(k,i,j,1)=rhs(k,i,j,1) + xfac*z_Qhat(k,i,j,1)
-            rhs(k,i,j,2)=rhs(k,i,j,2) + xfac*z_Qhat(k,i,j,2)
-            rhs(k,i,j,3)=rhs(k,i,j,3) + xfac*z_Qhat(k,i,j,3)
+            rhs(k,i,j,1)=rhs(k,i,j,1) + xfac*Qhat(k,i,j,1)
+            rhs(k,i,j,2)=rhs(k,i,j,2) + xfac*Qhat(k,i,j,2)
+            rhs(k,i,j,3)=rhs(k,i,j,3) + xfac*Qhat(k,i,j,3)
 
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
@@ -390,15 +316,16 @@ do j=1,ny_2dz
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
 
-            ke_diss = ke_diss + xfac*z_Qhat(k,i,j,1)**2 + &
-                                xfac*z_Qhat(k,i,j,2)**2 + &
-                                xfac*z_Qhat(k,i,j,3)**2 
+            ke_diss = ke_diss + xfac*Qhat(k,i,j,1)**2 + &
+                                xfac*Qhat(k,i,j,2)**2 + &
+                                xfac*Qhat(k,i,j,3)**2 
 
          
 
       enddo
    enddo
 enddo
+
 
 
 !  make rhs div-free
@@ -413,8 +340,7 @@ do j=1,ny_2dz
          p(k,i,j)= - im*rhs(k,i+z_imsign(i),j,1) &
               - jm*rhs(k,i,j+z_jmsign(j),2) &
               - km*rhs(k+z_kmsign(k),i,j,3)
-         
-         
+
          ! compute laplacian inverse
          xfac= (im*im +km*km + jm*jm)
          if (xfac/=0) xfac = -1/xfac
@@ -432,15 +358,14 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
          ! compute gradient  dp/dx
-         uu= - im*p(k,i+imsign(i),j) 
-         vv= - jm*p(k,i,j+jmsign(j))
-         ww= - km*p(k+kmsign(k),i,j)
+         uu= - im*p(k,i+z_imsign(i),j) 
+         vv= - jm*p(k,i,j+z_jmsign(j))
+         ww= - km*p(k+z_kmsign(k),i,j)
          
          rhs(k,i,j,1)=rhs(k,i,j,1) - uu 
          rhs(k,i,j,2)=rhs(k,i,j,2) - vv 
          rhs(k,i,j,3)=rhs(k,i,j,3) - ww 
-         
-         
+
          ! dealias           
          if ( ((abs(km)> g_nz/3) .and. (km/=0)) .or. &
               ((abs(jm)> g_ny/3) .and. (jm/=0)) .or. &
