@@ -7,18 +7,18 @@ ARCH = $(shell uname -m)
 
 
 ifeq ($(UNAME),Linux)
+   HOST = $(shell hostname)
+   ifeq ($(HOST),darkstar)
+      MPI = -DUSE_MPI -I/contrib/lam/include
+      MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+   endif
+
    #F90 = lf95
    #FFLAGS = -O -DLINUX $(MPI)
    #LDFLAGS = --staticlink 
 
    F90 = pgf90
    FFLAGS = -fast -DLINUX $(MPI)
-
-   HOST = $(shell hostname)
-   ifeq ($(HOST),darkstar)
-      MPI = -DUSE_MPI -I/contrib/lam/include
-      MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
-   endif
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
@@ -36,10 +36,10 @@ ifeq ($(UNAME),IRIX64)
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
-   MPI = -DUSE_MPI -I /usr/opt/MPI190/include
-   MPILIB = -L/usr/opt/MPI190/lib -lmpi 
-   LDFLAGS =  
-   FFLAGS = -O3  -DOSF1
+   MPI = -DUSE_MPI -I/usr/opt/MPI190/include
+   MPILIB = -L/usr/opt/MPI190/lib -lfmpi -lmpi 
+   LDFLAGS =  $(MPILIB)
+   FFLAGS = -O3  -DOSF1 $(MPI)
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)

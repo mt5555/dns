@@ -34,7 +34,6 @@ if (ierr3/=0) call abort("mpi_comm_size failure")
 
 if (ncpu_x * ncpu_y * ncpu_z /= initial_live_procs) then
    call print_message("Error: incorrect number of cpus");
-
    write(message,'(a,i5,a,i3,a,i3,a,i3)') "Parallel decomposition requested: ncpus= ", &
       ncpu_x*ncpu_y*ncpu_z," = ",ncpu_x," x",ncpu_y," x",ncpu_z
    call print_message(message)
