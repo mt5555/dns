@@ -75,7 +75,7 @@ real*8 u(nx,ny,nz,3)
 real*8 d1(nx,ny,nz)
 real*8 work(nx,ny,nz)
 real*8 p(nx,ny,nz)
-real*8 :: dummy
+real*8 :: dummy(1)
 real*8 :: alpha=0
 real*8 :: beta=1
 

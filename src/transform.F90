@@ -2,6 +2,7 @@
 
 module transform
 use params
+use mpi
 implicit none
 
 
@@ -26,10 +27,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,jj,l
+real*8 sendbuf(nslabx*nslabz*ny_2d)
+real*8 recbuf(nslabx*nslabz*ny_2d)
 
 !
-! each cube is broken, along the y axis, into ncpu_z slabs of
-! size ny_2d = (ny2-ny1+1)/ncpu_z
+! each cube is broken, along the y axis, into mpidims(3) slabs of
+! size ny_2d = (ny2-ny1+1)/mpidims(3)
 !
 ! in the z direction, the dimension is nslabz = (nz2-nz1+1)
 !
@@ -43,9 +46,8 @@ n3d=ny_2d
 
 
 
-do iproc=0,ncpu_z-1  ! loop over each slab
-!   if (iproc==myproc_z) then
-    if (.true.) then
+do iproc=0,mpidims(3)-1  ! loop over each slab
+   if (iproc==mpicoords(3)) then
       do j=1,ny_2d  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2d +j -1
          ASSERT("transpose_to_z jj failure 1",jj<=ny2)
@@ -71,8 +73,8 @@ do iproc=0,ncpu_z-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (myproc_x,iproc,mproc_z)
-!     rec  buffer from (myproc_x,iproc,mproc_z)
+!     send buffer to (mpicoords(1),iproc,mproc_z)
+!     rec  buffer from (mpicoords(1),iproc,mproc_z)
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
@@ -112,10 +114,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,jj,l
+real*8 sendbuf(nslabx*nslabz*ny_2d)
+real*8 recbuf(nslabx*nslabz*ny_2d)
 
 !
-! each cube is broken, along the y axis, into ncpu_z slabs of
-! size ny_2d = (ny2-ny1+1)/ncpu_z
+! each cube is broken, along the y axis, into mpidims(3) slabs of
+! size ny_2d = (ny2-ny1+1)/mpidims(3)
 !
 ! in the z direction, the dimension is nslabz = (nz2-nz1+1)
 
@@ -132,9 +136,8 @@ ASSERT("transpose_from_x dimension failure 7",n3d==ny_2d)
 
 
 
-do iproc=0,ncpu_z-1  ! loop over each slab
-!   if (iproc==myproc_z) then
-    if (.true.) then
+do iproc=0,mpidims(3)-1  ! loop over each slab
+   if (iproc==mpicoords(3)) then
       do j=1,ny_2d  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2d +j -1
          ASSERT("transpose_from_z jj failure 1",jj<=ny2)
@@ -160,8 +163,8 @@ do iproc=0,ncpu_z-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (myproc_x,iproc,mproc_z)
-!     rec  buffer from (myproc_x,iproc,mproc_z)
+!     send buffer to (mpicoords(1),iproc,mproc_z)
+!     rec  buffer from (mpicoords(1),iproc,mproc_z)
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
@@ -226,11 +229,13 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,kk,l
+real*8 sendbuf(nslabx*nslabz*ny_2d)
+real*8 recbuf(nslabx*nslabz*ny_2d)
 
 
 
 !
-! each cube is broken, along the z axis, into ncpu_x slabs of
+! each cube is broken, along the z axis, into mpidims(1) slabs of
 ! size nz_2d
 !
 ! in the x direction, the dimension is nslabx = (nx2-nx1+1)
@@ -245,9 +250,8 @@ n3d=nz_2d
 
 
 
-do iproc=0,ncpu_x-1  ! loop over each slab
-!   if (iproc==myproc_x) then
-    if (.true.) then
+do iproc=0,mpidims(1)-1  ! loop over each slab
+   if (iproc==mpicoords(1)) then
       do k=1,nz_2d  ! loop over points in a single slab
          kk=nz1 + iproc*nz_2d +k -1
          ASSERT("transpose_to_x kk failure 1",kk<=nz2)
@@ -273,8 +277,8 @@ do iproc=0,ncpu_x-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (iproc,myproc_y,mproc_z)
-!     rec  buffer from (iproc,myproc_y,mproc_z)
+!     send buffer to (iproc,mpicoords(2),mproc_z)
+!     rec  buffer from (iproc,mpicoords(2),mproc_z)
 
       l=0
       do k=1,nz_2d  ! loop over points in a single slab
@@ -315,9 +319,11 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,kk,l
+real*8 sendbuf(nslabx*nslabz*ny_2d)
+real*8 recbuf(nslabx*nslabz*ny_2d)
 
 !
-! each cube is broken, along the z axis, into ncpu_x slabs of
+! each cube is broken, along the z axis, into mpidims(1) slabs of
 ! size nz_2d
 !
 ! in the x direction, the dimension is nslabx = (nx2-nx1+1)
@@ -333,9 +339,8 @@ ASSERT("transpose_from_x dimension failure 6",n3==nz_2d)
 ASSERT("transpose_from_x dimension failure 7",n3d==nz_2d)
 
 
-do iproc=0,ncpu_x-1  ! loop over each slab
-!   if (iproc==myproc_x) then
-    if (.true.) then
+do iproc=0,mpidims(1)-1  ! loop over each slab
+   if (iproc==mpicoords(1)) then
       do k=1,nz_2d  ! loop over points in a single slab
          kk=nz1 + iproc*nz_2d +k -1
          ASSERT("transpose_to_x kk failure 1",kk<=nz2)
@@ -361,8 +366,8 @@ do iproc=0,ncpu_x-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (iproc,myproc_y,mproc_z)
-!     rec  buffer from (iproc,myproc_y,mproc_z)
+!     send buffer to (iproc,mpicoords(2),mproc_z)
+!     rec  buffer from (iproc,mpicoords(2),mproc_z)
 
       l=0
       do k=1,nz_2d  ! loop over points in a single slab
@@ -427,9 +432,11 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,ii,l
+real*8 sendbuf(nslabx*nslabz*ny_2d)
+real*8 recbuf(nslabx*nslabz*ny_2d)
 
 !
-! each cube is broken, along the x axis, into ncpu_y slabs of
+! each cube is broken, along the x axis, into mpidims(2) slabs of
 ! size nx_2d
 !
 ! in the y direction, the dimension is nslaby = (ny2-ny1+1)
@@ -444,9 +451,8 @@ n3d=nx_2d
 
 
 
-do iproc=0,ncpu_y-1  ! loop over each slab
-!   if (iproc==myproc_y) then
-    if (.true.) then
+do iproc=0,mpidims(2)-1  ! loop over each slab
+   if (iproc==mpicoords(2)) then
       do i=1,nx_2d  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2d +i -1
          ASSERT("transpose_to_y ii failure 1",ii<=nx2)
@@ -472,8 +478,8 @@ do iproc=0,ncpu_y-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (myproc_x,iproc,mproc_z)
-!     rec  buffer from (myproc_x,iproc,mproc_z)
+!     send buffer to (mpicoords(1),iproc,mproc_z)
+!     rec  buffer from (mpicoords(1),iproc,mproc_z)
 
       l=0
       do i=1,nx_2d  ! loop over points in a single slab
@@ -512,9 +518,11 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,ii,l
+real*8 sendbuf(nslabx*nslabz*ny_2d)
+real*8 recbuf(nslabx*nslabz*ny_2d)
 
 !
-! each cube is broken, along the x axis, into ncpu_y slabs of
+! each cube is broken, along the x axis, into mpidims(2) slabs of
 ! size nx_2d
 !
 ! in the y direction, the dimension is nslaby = (ny2-ny1+1)
@@ -533,9 +541,8 @@ ASSERT("transpose_from_y dimension failure 7",n3d==nx_2d)
 
 
 
-do iproc=0,ncpu_y-1  ! loop over each slab
-!   if (iproc==myproc_y) then
-    if (.true.) then
+do iproc=0,mpidims(2)-1  ! loop over each slab
+   if (iproc==mpicoords(2)) then
       do i=1,nx_2d  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2d +i-1
          ASSERT("transpose_from_y ii failure 1",ii<=nx2)
@@ -561,8 +568,8 @@ do iproc=0,ncpu_y-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (myproc_x,iproc,mproc_z)
-!     rec  buffer from (myproc_x,iproc,mproc_z)
+!     send buffer to (mpicoords(1),iproc,mproc_z)
+!     rec  buffer from (mpicoords(1),iproc,mproc_z)
 
       l=0
       do i=1,nx_2d  ! loop over points in a single slab

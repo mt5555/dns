@@ -1,37 +1,50 @@
+#include "macros.h"
+
+
 subroutine init_mpi
 use params
 use fft_interface
+use mpi
+
 implicit none
-#ifdef MPI
-integer ierr1,ierr2,ierr3
-#include "mpif.h"
-#endif
+logical isperiodic(3),reorder
+integer ierr1,ierr2,ierr3,rank
 character*80 message
 
-ncpu_x=1
-ncpu_y=1
-ncpu_z=1
-
 myproc=0
-myproc_x=0
-myproc_y=0
-myproc_z=0
-
+mpicoords=0
+mpidims=1
 ioproc=0
+initial_live_procs=1
 
 
 #ifdef MPI
+
 call mpi_init(ierr1)
+if (ierr1<>0) call abort("mpi_init failure")
 call mpi_comm_rank(MPI_COMM_WORLD,myproc,ierr2)
+if (ierr2<>0) call abort("mpi_comm_rank failure")
 call mpi_comm_size(MPI_COMM_WORLD,initial_live_procs,ierr3)
+if (ierr3<>0) call abort("mpi_comm_size failure")
 
-if(debug_mpi.ne.0) then 
 
-write(message,*) "me= ",me_global,"total procs= ",initial_live_procs,"Error codes= ",ierr1,ierr2,ierr3
-call print_message(message)
+isperiodic(1)=.false.
+isperiodic(2)=.false.
+isperiodic(3)=.false.
+reorder=.true.
 
-end if 
+call mpi_cart_create(MPI_COMM_WORLD,3,mpidims,isperiodic,reorder,comm_3d,ierr1)
+if (ierr1<>0) call abort("mpi_cart_create failure")
+
+call mpi_cart_get(comm_3d,3,mpidims,isperiodic,mpicoords,ierr1)
+if (ierr1<>0) call abort("mpi_cart_get failure")
+print *,'me=',myproc," mpi coords: ",mpicoords(1),mpicoords(2),mpicoords(3)
+
+! get processor number with coords = mpicoords
+call mpi_cart_coords(comm_3d,rank,3,mpicoords,ierr2)
+ASSERT("MPI init failure: rank<>myproc",rank==myproc)
 #endif
 
+print *, "me= ",myproc," total procs= ",initial_live_procs
 
 end subroutine

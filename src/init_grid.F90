@@ -35,17 +35,17 @@ call fft_get_mcord(g_jmcord,g_ny)
 call fft_get_mcord(g_kmcord,g_nz)
 
 do i=nx1,nx2
-   l = i-nx1+1 + nslabx*myproc_x
+   l = i-nx1+1 + nslabx*mpicoords(1)
    xcord(i)=g_xcord(l)
    imcord(i)=g_imcord(l)
 enddo
 do j=ny1,ny2
-   l = j-ny1+1 + nslaby*myproc_y
+   l = j-ny1+1 + nslaby*mpicoords(2)
    ycord(j)=g_ycord(l)
    jmcord(j)=g_jmcord(l)
 enddo
 do k=nz1,nz2
-   l = j-ny1+1 + nslaby*myproc_y
+   l = j-ny1+1 + nslaby*mpicoords(3)
    zcord(k)=g_zcord(l)
    kmcord(k)=g_kmcord(l)
 enddo

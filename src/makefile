@@ -8,12 +8,16 @@ ARCH = $(shell uname -m)
 ifeq ($(UNAME),Linux)
    F90 = lf95
    LDFLAGS = --staticlink
-   FDFLAGS = -O
+   FFLAGS = -O
+   MPIF90 = mpi.F90
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
-   LDFLAGS = 
-   FDFLAGS = -O
+   MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4 -lfmpi -lmpi
+   MPIINC = -DMPI 
+   MPIF90 = /usr/local/src/mpich/include/mpif.f90
+   LDFLAGS = $(MPILIB) 
+   FFLAGS = -O -DMPI
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
@@ -22,11 +26,11 @@ LINK=$(F90) $(FFLAGS) $(LDFLAGS)
 
 
 #independent modules/routines (dont use any other modules):
-OBJS1 = params.o util.o  fft99.o fft_interface.o
+OBJS1 = params.o util.o  fft99.o fft_interface.o mpi.o
 #modules/routines which use OBJS1
 OBJS2 = transform.o
 #modules/routines which use OBJS1,2
-INITS  = init_model.o init_mpi.o init_data.o init_grid.o
+INITS  = init_model.o init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o
 MODEL  = ns3d.o bc.o
 FILEIO = fileio.o
@@ -50,7 +54,8 @@ clean:
 
 
 
-
+mpi.o: $(MPIF90)
+	$(COMPILE) -o mpi.o $(MPIF90)
 fft_interface.o:  fft99_interface.F90 params.o
 	$(COMPILE) -o fft_interface.o fft99_interface.F90
 #fft_interface.o:  compaq_fft_interface.F90 params.o
