@@ -21,10 +21,8 @@ if ($ncpus > 0) then
    set command = "mpirun -np $ncpus $exe"
    if (`uname` == OSF1) then
       #set command = "prun -n $ncpus $exe"
-
       set command = "/users/taylorm/liblampi/bin/mpirun -np $ncpus $exe"
       setenv MPI_VERSION lampi
-
    endif
    if (`hostname` == brain) then
         set command = "mpirun -np $ncpus -npn 2 $exe"
@@ -44,4 +42,12 @@ make dns
 cd $benchdir
 sed s/NDELT/$3/ step.inp.sed > benchmark.inp
 $command -i benchmark.inp
+
+
+
+
+
+
+
+
 

@@ -15,6 +15,7 @@ range=[125:10:200];
 %name='/ccs/taylorm/dns/src/vxpair/vx4096d';
 %name='/ccs/scratch/taylorm/vxpair/vx6144e';
 name='/scratch2/taylorm/vx12288b/vx12288b';
+name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/scratch/taylorm/vxpair/vx6144e';
 
@@ -45,7 +46,15 @@ for i=range
   [x,y,z,psi,time]=getfield(fname);
   psi = squeeze(psi(:,:,1));
 
+<<<<<<< psivor.m
+<<<<<<< psivor.m
+  subsample=8;
+=======
+  subsample=4;
+>>>>>>> 1.38
+=======
   subsample=16;
+>>>>>>> 1.39
   if (subsample>1) 
     nx=length(x);
     ny=length(y);

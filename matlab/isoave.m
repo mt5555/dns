@@ -30,10 +30,8 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
 %nx=2048; delx_over_eta=-1; epsilon=-1;
 
-%name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
-%nx=2048; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
-
-name = '/home/skurien/helicity_data/check256_hq_0001.0000.new'
+name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
+nx=2048; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 
 ndir_use=0;
