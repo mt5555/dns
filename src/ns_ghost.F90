@@ -269,9 +269,6 @@ enddo
 endif
 
 
-! apply b.c. to rhs:
-!call bc_rhs(rhs)
-
 
 if (compute_ints==1) then
    ints(1)=gradu_diss/g_nx/g_ny/g_nz

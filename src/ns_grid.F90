@@ -260,10 +260,6 @@ enddo
 
 
 
-! apply b.c. to rhs:
-call bc_rhs(rhs)
-!call divfree_gridspace(rhs,work,d1,d2)
-
 if (compute_ints==1) then
    ints(1)=gradu_diss/g_nx/g_ny/g_nz
 

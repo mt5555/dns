@@ -34,7 +34,6 @@ real*8 :: rhs(nx,ny)
 
 ! local variables
 real*8 :: vel,u,v
-real*8 :: mone=-1,zero=0
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
 
@@ -54,9 +53,9 @@ if (firstcall) then
    if (alpha_value/=0) then
       call abort("Error: dnsgrid cannot handle alpha>0.")
    endif
-   Q(:,:,2)=Q(:,:,1)
-   call helmholtz_inv(Q(1,1,2),rhs,zero,mone)
 
+   call bc_impose(Q(1,1,1))
+   call compute_psi(Q(1,1,2),Q(1,1,1),rhs)
 endif
 
 
@@ -78,30 +77,34 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
-psi=w_tmp
-call helmholtz_inv(psi,rhs,zero,mone)
+call bc_impose(w_tmp)
+call compute_psi(psi,w_tmp,rhs)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
+
+
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
-psi=w_tmp
-call helmholtz_inv(psi,rhs,zero,mone)
+call bc_impose(w_tmp)
+call compute_psi(psi,w_tmp,rhs)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
-psi=w_tmp
-call helmholtz_inv(psi,rhs,zero,mone)
+call bc_impose(w_tmp)
+call compute_psi(psi,w_tmp,rhs)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 
-Q(:,:,2)=Q(:,:,1)
-call helmholtz_inv(Q(1,1,2),rhs,zero,mone)
 
-
+call bc_impose(Q(1,1,1))
+call compute_psi(Q(1,1,2),Q(1,1,1),rhs)
 time = time + delt
+
+
+
 
 
 call ghost_update_x_reshape(Q(1,1,2),1)
@@ -127,6 +130,85 @@ enddo
 
 
 end subroutine
+
+
+
+
+subroutine compute_psi(psi,w,work)
+use params
+implicit none
+real*8 w(nx,ny)
+real*8 psi(nx,ny)
+real*8 work(nx,ny)
+
+!local
+real*8 :: mone=-1,zero=0
+
+psi=w
+!update PSI on boundary using bio-savar law
+call bc_biosavar(psi,w)
+
+
+! if all b.c. periodic:
+call helmholtz_periodic_inv(psi,work,zero,mone)
+
+! CG solver.  if all b.c. periodic, turn on preconditioner and it
+! should just take one iteration!
+!work = -w
+!psi=0
+!call cgsolver(psi,work,zero,mone,1d-8,zero,helmholtz_periodic,.true.)
+!
+
+!update PSI 1st row of ghost cells so that we are 2nd order differences
+call bc_onesided(psi)
+end subroutine
+
+
+
+
+
+
+subroutine bc_impose(w)
+! apply non-periodic or non-reflective b.c.
+!(preiodic and reflective are automatically hanlded with ghost_update)
+use params
+implicit none
+real*8 w(nx,ny)
+
+
+end subroutine
+
+
+
+subroutine bc_onesided(w)
+! on non-preiodic or non-reflective boundarys:
+!
+! fiddle first ghost cell so that 4th order derivative at 1st interior point
+! will be the same as a 2nd order centered scheme.  
+! (assuming boundary values already set)
+
+use params
+implicit none
+real*8 w(nx,ny)
+
+
+end subroutine
+
+
+
+subroutine bc_biosavar(psi,w)
+! on non-preiodic or non-reflective boundarys:
+!
+! use biot-savar law to compute boundary data for PSI.
+
+use params
+implicit none
+real*8 w(nx,ny)
+real*8 psi(nx,ny)
+
+
+end subroutine
+
 
 
 
@@ -206,8 +288,6 @@ enddo
 
 
 
-! apply b.c. to rhs:
-!call bc_rhs(rhs)
 
 
 if (compute_ints==1) then

@@ -93,7 +93,7 @@ enddo
 alpha=0
 beta=1
 do n=1,3
-   call helmholtz_inv(PSI(1,1,1,n),work,alpha,beta)
+   call helmholtz_periodic_inv(PSI(1,1,1,n),work,alpha,beta)
 enddo
 call vorticity(Q,PSI,work,work2)
 
@@ -520,7 +520,7 @@ call input1(PSI,work1,work2,null,io_pe,.true.)
 ! invert to get PSI
 alpha=0
 beta=1
-call helmholtz_inv(PSI,work1,alpha,beta)
+call helmholtz_periodic_inv(PSI,work1,alpha,beta)
 
 ! initialize amplitude to satisfy:  E(k)/.5k^2
 ! E(k) = k^(m/2) / (k + k_0)^m

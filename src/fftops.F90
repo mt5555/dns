@@ -139,12 +139,12 @@ integer i,j,k,n
 
 ! solve laplacian(p)=div(u)
 call divergence(p,u,work,work2)
-call helmholtz_inv(p,work,alpha,beta)
+call helmholtz_periodic_inv(p,work,alpha,beta)
 
 !call divergence(work,u,p,work2)
 !p=0  ! initial guess
 !tol=1e-10
-!call cg(p,work,alpha,beta,tol,dummy)
+!call cgsolver(p,work,alpha,beta,tol,...)
 
 
 
@@ -310,7 +310,7 @@ end subroutine
 
 
 
-subroutine helmholtz_inv(f,work,alpha,beta)
+subroutine helmholtz_periodic_inv(f,work,alpha,beta)
 !
 !  solve [alpha + beta*laplacian](p) = f
 !  input:  f 
@@ -1015,6 +1015,260 @@ end subroutine
 
 
 
+
+
+
+subroutine helmholtz_periodic(f,lf,alpha,beta,work)
+!
+!  input: f
+!  output: lf
+!
+!     lf = [alpha + beta*laplacian](f)
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input
+real*8 lf(nx,ny,nz)    ! output
+real*8 work(nx,ny,nz)    ! work array
+real*8 :: alpha
+real*8 :: beta
+
+!local
+real*8 gradf(nx,ny,nz,2) ! work array
+real*8 fxx(nx,ny,nz)     ! work array
+real*8 dummy
+integer n
+
+! linear helmholtz operator
+lf=alpha*f
+if (beta==0) return
+do n=1,3
+   call der(f,gradf,fxx,work,DX_AND_DXX,n)
+   lf=lf+beta*fxx
+enddo
+
+end subroutine
+
+
+
+
+
+
+subroutine helmholtz_dirichlet_setup(f,p)
+!
+! compact laplace solver really solves:
+! Helmholtz(p) = f + h**2/12 (fxx + fyy)
+!
+! also, boundary values of f need to be set to those 
+! alread set for p.  
+!
+!
+use params
+use ghost
+implicit none
+real*8 f(nx,ny,nz)    ! input
+real*8 p(nx,ny,nz)    ! output
+integer i,j,k
+
+
+if (ndim==2) then
+   call ghost_update_x(f,1)
+   call ghost_update_y(f,1)
+   k=1
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (my_x==0 .and. i==nx1) continue
+      if (my_x==ncpu_x-1 .and. i==nx2) continue
+
+      if (my_y==0 .and. j==ny1) continue
+      if (my_y==ncpu_y-1 .and. j==ny2) continue
+
+#ifdef COMPACT
+      f(i,j,k)=f(i,j,k) + &
+            (                                       &
+               (f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k)) + &
+               (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))   &
+             ) / 12
+#endif
+
+      
+   enddo
+   enddo
+
+   ! now overwrite boundary with same data as in p
+   if (my_x==0) then
+      do j=ny1,ny2
+         f(nx1,j,k)=p(nx1,j,k)
+      enddo
+   endif
+   if (my_x==ncpu_x-1) then
+      do j=ny1,ny2
+         f(nx2,j,k)=p(nx2,j,k)
+      enddo
+   endif
+   if (my_y==0) then
+      do i=nx1,nx2
+         f(i,ny1,k)=p(i,ny1,k)
+      enddo
+   endif
+   if (my_y==ncpu_y-1) then
+      do i=nx1,nx2
+         f(i,ny2,k)=p(i,ny2,k)
+      enddo
+   endif
+
+
+else
+   stop 'helm_rhs_correction: 3D not yet coded'
+endif
+
+
+end subroutine
+
+
+
+
+subroutine helmholtz_dirichlet(f,lf,alpha,beta,work)
+!
+!  input: f
+!  output: lf
+!
+!     lf = [alpha + beta*laplacian](f)
+!
+!     lf on the boundary unchanged.
+!
+use params
+use ghost
+implicit none
+real*8 f(nx,ny,nz)    ! input
+real*8 lf(nx,ny,nz)    ! output
+real*8 work(nx,ny,nz)
+real*8 :: alpha
+real*8 :: beta
+
+!local
+integer n,i,j,k
+
+
+if (ndim==2) then
+   call ghost_update_x(f,1)
+
+   k=1
+
+#ifdef COMPACT
+   ! work = Dx(f)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      work(i,j,k)=f(i+1,j,k)-2*f(i,j,k)+f(i,j,k)
+   enddo
+   enddo
+   call ghost_update_y(work,1)
+#endif
+
+   call ghost_update_y(f,1)
+
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (my_x==0 .and. i==nx1) continue
+      if (my_x==ncpu_x-1 .and. i==nx2) continue
+
+      if (my_y==0 .and. j==ny1) continue
+      if (my_y==ncpu_y-1 .and. j==ny2) continue
+
+      lf(i,j,k)=(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx) + &
+                (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))/(dely*dely)
+
+      ! add the DyDx(f) term:
+#ifdef COMPACT
+      lf(i,j,k)=lf(i,j,k) + &
+             (work(i,j+1,k)-2*work(i,j,k)+work(i,j-1,k))/(6*delx*dely)
+#endif
+
+      if (alpha==0) then
+         lf(i,j,k)=beta*lf(i,j,k)
+      else
+         lf(i,j,k)=alpha*f(i,j,k)+beta*lf(i,j,k) 
+#ifdef COMPACT
+         lf(i,j,k)=lf(i,j,k) + &
+            alpha*(                                       &
+                     (f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k)) + &
+                     (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))   &
+                   ) / 12
+#endif
+
+      endif
+      
+   enddo
+   enddo
+else if (ndim==3) then
+   call ghost_update_x(f,1)
+   call ghost_update_y(f,1)
+   call ghost_update_z(f,1)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (my_x==0 .and. i==nx1) continue
+      if (my_x==ncpu_x-1 .and. i==nx2) continue
+
+      if (my_y==0 .and. j==ny1) continue
+      if (my_y==ncpu_y-1 .and. j==ny2) continue
+
+      if (my_z==0 .and. k==nz1) continue
+      if (my_z==ncpu_z-1 .and. k==nz2) continue
+
+      
+      lf(i,j,k)=alpha*f(i,j,k)+ &
+            beta*(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx) +&
+            beta*(f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))/(dely*dely) +&
+            beta*(f(i,j,k+1)-2*f(i,j,k)+f(i,j,k-1))/(delz*delz) 
+   enddo
+   enddo
+   enddo
+
+endif
+
+
+end subroutine
+
+
+
+
+
+
+subroutine helmholtz_hform_periodic(f,lf,alpha,beta,h)
+!
+!  input: f
+!  output: lf
+!
+!      lf = [h*alpha + beta*div h grad](f)
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input
+real*8 lf(nx,ny,nz)    ! output
+real*8 h(nx,ny,nz)    ! height field (used only for shallow water equations)
+real*8 :: alpha
+real*8 :: beta
+
+!local
+real*8 work(nx,ny,nz)    ! work array
+real*8 gradf(nx,ny,nz,2) ! work array
+real*8 fxx(nx,ny,nz)     ! work array
+real*8 dummy
+integer n
+
+do n=1,2
+   call der(f,gradf(1,1,1,n),dummy,work,DX_ONLY,n)
+   gradf(:,:,:,n)=h*gradf(:,:,:,n)
+enddo
+call divergence(lf,gradf,fxx,work)
+lf=alpha*f*h + beta*lf
+
+end subroutine
 
 
 

@@ -377,7 +377,7 @@ enddo
 
 
 rhs = alpha*input + beta*rhs
-call helmholtz_inv(rhs,work,alpha,beta)
+call helmholtz_periodic_inv(rhs,work,alpha,beta)
 
 work=rhs-input
 error=maxval(abs(work(nx1:nx2,ny1:ny2,nz1:nz2)));
@@ -400,7 +400,7 @@ call der(input,d1,d2,work,DX_AND_DXX,3)
 rhs=rhs+d2
 
 rhs=alpha*input + beta*rhs
-call helmholtz_inv(rhs,work,alpha,beta)
+call helmholtz_periodic_inv(rhs,work,alpha,beta)
 work=rhs-input
 #if 0
 do i=nx1,nx2

@@ -35,7 +35,7 @@ if (firstcall) then
       call fft3d(Q(1,1,n),work1)
       if (dealias) call fft_filter_dealias(Q(1,1,n))
    enddo
-   if (equations/=2) then
+   if (equations/=1) then
       call print_message("Error: shallow water model can only run equations=1")
       call abort("initial conditions are probably incorrect.")
    endif
@@ -207,6 +207,8 @@ real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss,normdx
 integer n,i,j,k
 integer im,jm
 real*8 XFAC,hx,hy
+external :: helmholtz_hform_periodic
+
 
 call wallclock(tmx1)
 
@@ -285,9 +287,11 @@ if (alpha_value>0) then
       !call ifft3d(work,work2)
       divtau(:,:,n)=work  ! use RHS as our initial guess also
 
-      call cg(divtau(1,1,n),work,1d0,-alpha_value**2,1d-8,Q(1,1,3),.true.,.true.)
-      !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-6,Q(1,1,3),.true.,.true.)
-      !call helmholtz_inv(divtau(1,1,n),work,1d0,-alpha_value**2)
+      work=work*Q(:,:,3)
+      call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-8,Q(1,1,3),&
+        helmholtz_hform_periodic,.true.)
+      !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-6,Q(1,1,3),&
+      !  helmholtz_hform_periodic,.true.)
    enddo
 
    do j=ny1,ny2
@@ -364,9 +368,6 @@ if (compute_ints==1) then
    enddo
 endif
 
-
-! apply b.c. to rhs:
-call bc_rhs(rhs)
 
 
 

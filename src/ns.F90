@@ -604,6 +604,8 @@ integer :: i2,j2,k2,i1,j1,k1,ii,jj,kk
 real*8  :: wtot,w,r
 real*8  :: gfilt(0:1000)
 real*8 p2(g_nz2,nslabx,ny_2dz)    
+external helmholtz_periodic
+
 
 
 div=0
@@ -728,15 +730,17 @@ rhs=rhs+divs
 
 #elif (defined ITER)
 
+! trash gradu and gradv (using them as work arrays below)
 #define JACOBI
-
 gradu=div
 do n=1,3
    work=gradu(:,:,:,n)
 #ifdef JACOBI
-   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0,dummy,.false.,.false.)
+   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0,gradv,&
+     helmholtz_periodic,.false.)
 #else
-   call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,.03d0,dummy,.false.,.false.)
+   call cgsolver(work,gradu(1,1,1,n),1d0,-alpha_value**2,.03d0,gradv,&
+     helmholtz_periodic,.false.)
 #endif
    call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
 enddo
