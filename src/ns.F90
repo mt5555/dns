@@ -327,7 +327,7 @@ enddo
 #else
    if (ncpu_z==1) then
       call ns_vorticity(rhsg,Qhat,work,p)
-      ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)
+      ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
    else
       call ns_vorticity(rhsg,Qhat,work,p)
    endif

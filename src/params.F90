@@ -84,9 +84,8 @@ integer :: user_specified_isodel=-1   ! number of seperations in isoave
 
 real*8  :: g_u2xave=0               ! <ux,ux> updated after each time step  
 
-! parameter used by psi-vor model:
-! before using xscale,yscale,zscale, we need to update all FFT
-! derivatives and replace pi by pi/scale
+! xscale and yscale are used by psi-vor model
+! zscale is used by the rotating DNS model
 real*8 :: xscale=1
 real*8 :: yscale=1
 real*8 :: zscale=1
