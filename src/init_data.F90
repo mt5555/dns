@@ -8,6 +8,8 @@ real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+character(len=280) :: fname
+
 if (restart==1) then
 
    ! initialize some constants, if needed on restart runs:
@@ -19,7 +21,8 @@ if (restart==1) then
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0)   
 
    !
-   ! read input data from restart files
+   ! read input uvw data from restart files.  sets 'time_initial'
+   ! from restart data
    !
    call init_data_restart(Q,Qhat,work1,work2)
 
@@ -27,11 +30,18 @@ if (restart==1) then
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,2)  
 
    ! rescale Energy spectrum
-   if (init_cond==9) call init_data_decay(Q,Qhat,work1,work2,2,0,0)
+   if (init_cond==9) then
+      call init_data_decay(Q,Qhat,work1,work2,2,0,0)
+      ! output rescaled data, but with different name:
+      fname=basename(1:len_trim(basename)) // '-rescale'
+      call output_uvw(fname,time_initial,Q,Qhat,work1,work2)		  
+   endif
 
    if (npassive>0) then
    if (compute_passive_on_restart) then
       call init_passive_scalars(1,Q,Qhat,work1,work2)
+      ! restart runs wont output data at t=0, for scalar output:
+      call output_passive(runname,time_initial,Q,work1,work2)	
    else
       call init_passive_scalars(0,Q,Qhat,work1,work2)
       call input_passive(runname,time_initial,Q,work1,work2)
@@ -237,7 +247,7 @@ ke=ke/g_nx/g_ny/g_nz
 
 
 
-ke_thresh=.82*ke
+ke_thresh=.75*ke  ! .82 has too much 0, not enough 1 at 256^3
 
 Q(:,:,:,np)=0
 check=0

@@ -25,10 +25,8 @@
 clear all;
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0001];
+times=[1.0000];
 
-name = '../src/temp'
-times=[0.0000];
 
 % load in the u,v,w scalars:
 use_pscalars_name=1;
@@ -68,7 +66,7 @@ np=1;
 
 time_e=pints_e(1,np,:);
 mu=pints_e(2,np,:);
-schmidt=pints_e(3,np,:);
+schmidt=pints_e(3,np,:)/128;
 s2=pints_e(4,np,:);
 
 sx2(1)=pints_e(5,np,:);

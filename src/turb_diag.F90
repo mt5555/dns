@@ -719,8 +719,10 @@ su=su/g_nx/g_ny/g_nz
 
 ASSERT("compute_expensive_pscalars: ns too small ",ns>=23)
 
-scalars(1)=schmidt(np)
-if (my_pe==io_pe) print *,'np,schmidt=',np,schmidt(np)
+! we will sum over all pe's below, so do this for non-sums:
+scalars(1)=0
+if (my_pe==io_pe) scalars(1)=schmidt(np)
+
 scalars(2)=u2
 i=2
 
