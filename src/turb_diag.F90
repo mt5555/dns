@@ -635,7 +635,8 @@ u3=u3/g_nx/g_ny/g_nz
 u4=u4/g_nx/g_ny/g_nz
 
 
-ASSERT("compute_expensive_scalars: ns too small ",ns>=43)
+ASSERT("compute_expensive_scalars: ns too small ",ns>=49)
+scalars=0
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)

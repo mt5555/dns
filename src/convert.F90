@@ -253,7 +253,7 @@ icount=icount+1
    endif
    if (convert_opt==8) then  ! -cout extract_subcube
       call input_uvw(time,Q,vor,work1,work2,1)
-      call print_message("computing gradu ")
+      call print_message("extracting subcubes ")
       call gradu_rotate_subcubes(time,Q,vor,work1,work2)
    endif
    if (convert_opt==9) then  ! -cout spec_window  
@@ -299,6 +299,7 @@ real*8 :: gradp(3),meanp,gradp2(3),px,py,pz
 real*8 :: xwindow(nx)
 real*8 :: ywindow(ny)
 real*8 :: zwindow(nz)
+integer :: xinside(nx),yinside(ny),zinside(nz),grad_count
 
 if (nx1<3 .or. nx2+2>nx)&
      call abort('Error: insufficient ghost cells in x direction')
@@ -312,8 +313,65 @@ call ghost_update_x(p,1)
 call ghost_update_y(p,1)
 call ghost_update_z(p,1)
 
+
+! compute window function
+if (wtype==0) then
+   ! domain: 0..1   
+   ! 0-0.25    .5-.5*cos(x*pi/.25)
+   ! .25-.75   1
+   ! .75-1.0   .5+.5*cos((x-.75)*pi/.25)
+   !
+   xinside=1
+   yinside=1
+   zinside=1
+   xwindow=1
+   ywindow=1
+   zwindow=1
+   do i=nx1,nx2
+      if (xcord(i)<=.25) then
+         xwindow(i)=.5-.5*cos(xcord(i)*pi*4)
+         xinside(i)=0
+      endif
+      if (xcord(i)>=.75) then
+         xwindow(i)=.5+.5*cos((xcord(i)-.75)*pi*4)
+         xinside(i)=0
+      endif
+   enddo
+   do j=ny1,ny2
+      if (ycord(j)<=.25) then
+         ywindow(j)=.5-.5*cos(ycord(j)*pi*4)
+         yinside(j)=0
+      endif
+      if (ycord(j)>=.75) then
+         ywindow(j)=.5+.5*cos((ycord(j)-.75)*pi*4)
+         yinside(j)=0
+      endif
+   enddo
+   do k=nz1,nz2
+      if (zcord(k)<=.25) then
+         zwindow(k)=.5-.5*cos(zcord(k)*pi*4)
+         zinside(k)=0
+      endif
+      if (zcord(k)>=.75) then
+         zwindow(k)=.5+.5*cos((zcord(k)-.75)*pi*4)
+         zinside(k)=0
+      endif
+   enddo
+
+endif
+
+#ifdef DETREND_DEBUG
+if (io_pe==my_pe) then
+!print *,'xwindow: ',xwindow
+!print *,'ywindow: ',ywindow
+!print *,'zwindow: ',zwindow
+endif
+#endif
+
+
 meanp=0
 gradp=0
+grad_count=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
@@ -321,9 +379,12 @@ do i=nx1,nx2
    px=(2*(p(i+1,j,k)-p(i-1,j,k))/3 - (p(i+2,j,k)-p(i-2,j,k))/12)/delx
    py=(2*(p(i,j+1,k)-p(i,j-1,k))/3 - (p(i,j+2,k)-p(i,j-2,k))/12)/dely
    pz=(2*(p(i,j,k+1)-p(i,j,k-1))/3 - (p(i,j,k+2)-p(i,j,k-2))/12)/delz
-   gradp(1)=gradp(1)+px
-   gradp(2)=gradp(2)+py
-   gradp(3)=gradp(3)+pz
+   if (xinside(i)==1 .and. yinside(j)==1 .and. zinsize(k)==1) then 
+      grad_count=grad_count+1
+      gradp(1)=gradp(1)+px
+      gradp(2)=gradp(2)+py
+      gradp(3)=gradp(3)+pz
+   endif
 enddo
 enddo
 enddo
@@ -336,7 +397,7 @@ call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 meanp=meanp/g_nx/g_ny/g_nz
-gradp=gradp/g_nx/g_ny/g_nz
+gradp=gradp/grad_count
 if (io_pe==my_pe) then
    print *,'mean, gradp:   ',meanp,gradp(1:3)
 endif
@@ -387,50 +448,7 @@ endif
 #endif
 
 
-if (wtype==0) then
-   ! domain: 0..1   
-   ! 0-0.25    .5-.5*cos(x*pi/.25)
-   ! .25-.75   1
-   ! .75-1.0   .5+.5*cos((x-.75)*pi/.25)
-   !
-   xwindow=1
-   ywindow=1
-   zwindow=1
-   do i=nx1,nx2
-      if (xcord(i)<=.25) then
-         xwindow(i)=.5-.5*cos(xcord(i)*pi*4)
-      endif
-      if (xcord(i)>=.75) then
-         xwindow(i)=.5+.5*cos((xcord(i)-.75)*pi*4)
-      endif
-   enddo
-   do j=ny1,ny2
-      if (ycord(j)<=.25) then
-         ywindow(j)=.5-.5*cos(ycord(j)*pi*4)
-      endif
-      if (ycord(j)>=.75) then
-         ywindow(j)=.5+.5*cos((ycord(j)-.75)*pi*4)
-      endif
-   enddo
-   do k=nz1,nz2
-      if (zcord(k)<=.25) then
-         zwindow(k)=.5-.5*cos(zcord(k)*pi*4)
-      endif
-      if (zcord(k)>=.75) then
-         zwindow(i)=.5+.5*cos((zcord(k)-.75)*pi*4)
-      endif
-   enddo
-
-endif
-
-#ifdef DETREND_DEBUG
-if (io_pe==my_pe) then
-!print *,'xwindow: ',xwindow
-!print *,'ywindow: ',ywindow
-!print *,'zwindow: ',zwindow
-endif
-#endif
-
+!apply window
 do k=nz1,nz2
 do j=ny2,ny2
 do i=nx1,nz2
