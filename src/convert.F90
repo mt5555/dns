@@ -260,7 +260,9 @@ icount=icount+1
       !call input_uvw(time,Q,vor,work1,work2,1) ! DNS default headers
       call input_uvw(time,Q,vor,work1,work2,2) ! no headers
       call print_message("computing spectrum ")
-
+      do n=1,3
+         call window_data(Q(1,1,1,n),0)
+      enddo
       call compute_spec(time,Q,vor,work1,work2)
       call output_spec(time,time)
       call output_helicity_spec(time,time) 
@@ -285,7 +287,32 @@ end program
 
 
 
+subroutine window_data(p,wtype)
+use params
+implicit none
+real*8 :: p(nx,ny,nz)
+integer :: wtype
+integer :: i,j,k
+real*8 :: xwindow(nx)
+real*8 :: ywindow(ny)
+real*8 :: zwindow(nz)
 
+
+if (wtype==0) then
+   ! flat for middle 50%
+   xwindow=1
+   ywindow=1
+   zwindow=1
+endif
+
+do k=1,nx
+do j=1,nx
+do i=1,nx
+   p(i,j,k)=p(i,j,k)*xwindow(i)*ywindow(j)*zwindow(k)
+enddo
+enddo
+enddo
+end subroutine
 
 
 subroutine gradu_stats(time,Q,vor,work1,work2)
