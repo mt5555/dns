@@ -17,6 +17,10 @@ based.  All work done in the 3d parallel decoposition.
 All operaters are computed via the der() subroutine.  It
 handles spectral and 4th order via transpose operators.
 
+1.1 ns_ibm.F90.  
+
+A version of ns_grid.F90 which contains the Immersed Boundary Method
+
 
 2. ns.F90
 
