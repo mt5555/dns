@@ -368,6 +368,59 @@ end subroutine
 
 
 
+subroutine helmholtz_dirichlet_inv(f,work,alpha,beta)
+!
+!  solve [alpha + beta*laplacian](p) = f
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
+!  b.c. for f specified in f. 
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+real*8 work(nx,ny,nz) ! work array
+real*8 :: alpha
+real*8 :: beta
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+real*8 phi(nx,ny,nz)    
+real*8 lphi(nx,ny,nz)    
+
+
+!NOTE: we dont need phi, lphi.  when this code is debugged, replace by:
+! save boundary data in single 1D array
+! set f = 0 on boundary
+! using boundary data alone: compute f = f - lphi 
+!      along points just inside boundary
+!
+! solve as before
+! restor boundary conditions in f from 1D array.
+
+
+
+
+! phi = f on boundary, zero inside
+phi=f
+call zero_boundary(phi)
+phi=f-phi
+call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
+
+
+! convert problem to zero b.c. problem
+f=f-lphi
+call zero_boundary(f)
+! solve Helm(f) = b with 0 b.c.
+f=f+phi
+
+
+end subroutine
+
+
 
 
 subroutine helmholtz_periodic_inv(f,work,alpha,beta)
@@ -1136,8 +1189,8 @@ end subroutine
 
 
 
-#undef COMPACT
-subroutine helmholtz_dirichlet_setup(f,p)
+#define COMPACT
+subroutine helmholtz_dirichlet_setup(f,p,work)
 !
 ! compact laplace solver really solves:
 ! Helmholtz(p) = f + h**2/12 (fxx + fyy)
@@ -1151,32 +1204,35 @@ use ghost
 implicit none
 real*8 f(nx,ny,nz)    ! input
 real*8 p(nx,ny,nz)    ! output
+real*8 work(nx,ny,nz)   
 integer i,j,k
 
 
 if (ndim==2) then
-   call ghost_update_x(f,1)
-   call ghost_update_y(f,1)
    k=1
-   do j=ny1,ny2
-   do i=nx1,nx2
-      if (my_x==0 .and. i==nx1) cycle
-      if (my_x==ncpu_x-1 .and. i==nx2) cycle
-
-      if (my_y==0 .and. j==ny1) cycle
-      if (my_y==ncpu_y-1 .and. j==ny2) cycle
 
 #ifdef COMPACT
-      f(i,j,k)=f(i,j,k) + &
+   call ghost_update_x(f,1)
+   call ghost_update_y(f,1)
+   do j=ny1,ny2
+   do i=nx1,nx2
+
+      work(i,j,k)= &
             (                                       &
                (f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k)) + &
                (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))   &
              ) / 12
+
+   enddo
+   enddo
+   do j=ny1,ny2
+   do i=nx1,nx2
+      f(i,j,k)=f(i,j,k)+work(i,j,k)
+   enddo
+   enddo
 #endif
 
       
-   enddo
-   enddo
 
    ! now overwrite boundary with same data as in p
    if (my_x==0) then
@@ -1211,6 +1267,36 @@ end subroutine
 
 
 
+subroutine zero_boundary(f)
+!
+!  input/output: f
+!  f set to zero on the boundary
+!
+use params
+implicit none
+real*8 f(nx,ny,nz)    ! input
+!local
+integer n,i,j,k
+
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if ( (my_x==0 .and. i==nx1)  .or. &
+           (my_x==ncpu_x-1 .and. i==nx2)  .or. &
+           (my_y==0 .and. j==ny1) .or. &
+           (my_y==ncpu_y-1 .and. j==ny2) .or.&
+           (my_z==0 .and. k==nz1 .and. ndim==3) .or. &
+           (my_z==ncpu_z-1 .and. k==nz2 .and. ndim==3) ) then
+         f(i,j,k)=0
+      endif
+   enddo
+   enddo
+   enddo
+
+end subroutine
+
+
+
 subroutine helmholtz_dirichlet(f,lf,alpha,beta,work)
 !
 !  input: f
@@ -1219,6 +1305,27 @@ subroutine helmholtz_dirichlet(f,lf,alpha,beta,work)
 !     lf = [alpha + beta*laplacian](f)
 !
 !     lf on the boundary copied from f.
+!
+!  2nd order uses the regular stencil:     
+!  x=1/delx**2
+!  y=1/dely**2
+!                 y
+!           x  -2x-2y   x
+!                 y
+!
+!  4th order compact uses above + a  * D2Y D2
+!  where a= (1/x+1/y)/12
+!
+!
+!                 y                   xy  -2xy    xy
+!           x  -2x-2y   x   +   a   -2xy   4xy  -2xy 
+!                 y                   xy  -2xy    xy
+!
+! which is:
+!
+!              axy       y  -2axy         axy
+!           x-2axy    -2x-2y+4axy      x-2axy
+!              axy       y  -2axy         axy
 !
 use params
 use ghost
@@ -1242,7 +1349,7 @@ if (ndim==2) then
    ! work = Dx(f)
    do j=ny1,ny2
    do i=nx1,nx2
-      work(i,j,k)=f(i+1,j,k)-2*f(i,j,k)+f(i,j,k)
+      work(i,j,k)=(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx)
    enddo
    enddo
    call ghost_update_y(work,1)
@@ -1266,8 +1373,8 @@ if (ndim==2) then
 
       ! add the DyDx(f) term:
 #ifdef COMPACT
-      lf(i,j,k)=lf(i,j,k) + &
-             (work(i,j+1,k)-2*work(i,j,k)+work(i,j-1,k))/(6*delx*dely)
+      lf(i,j,k)=lf(i,j,k) + ((delx*delx+dely*dely)/12)* &
+             (work(i,j+1,k)-2*work(i,j,k)+work(i,j-1,k))/(dely*dely)
 #endif
 
       if (alpha==0) then

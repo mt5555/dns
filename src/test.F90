@@ -22,9 +22,11 @@ real*8 b(nx,ny)
 real*8 psi(nx,ny)
 real*8 psi_exact(nx,ny)
 real*8 lpsi(nx,ny)
+real*8 phi(nx,ny)
+real*8 lphi(nx,ny)
 real*8 work(nx,ny)
 real*8 :: zero=0,one=1
-real*8 :: tol=1e-6
+real*8 :: tol=1e-8
 integer i,j,k,n
 b=0
 psi=0
@@ -35,10 +37,25 @@ lpsi=0
 ! laplacian = 4
 do j=ny1,ny2
 do i=nx1,nx2
-   psi_exact(i,j)=xcord(i)**2 + ycord(i)**2
-   b(i,j)=4
+   !psi_exact(i,j)=xcord(i)**2 + ycord(j)**2
+   !b(i,j)=4
+
+   !psi_exact(i,j)=xcord(i)**3 + ycord(j)**3
+   !b(i,j)=3*2*xcord(i) + 3*2*ycord(j)
+
+   psi_exact(i,j)=cos(2*pi*xcord(i))*sin(2*pi*ycord(j))
+   b(i,j)=-8*pi*pi*cos(2*pi*xcord(i))*sin(2*pi*ycord(j))
 enddo
 enddo
+
+! create PHI = 0 interior, but with correct b.c.
+phi=psi_exact
+work=phi
+call zero_boundary(work)
+phi=phi-work
+call helmholtz_dirichlet(phi,lphi,zero,one,work)
+
+
 
 psi=psi_exact
 ! muck around with psi on the interior, to give CG something to iterate on:
@@ -50,13 +67,44 @@ enddo
 
 
 ! copy b.c. from psi into 'b', and apply compact correction to b:
-call helmholtz_dirichlet_setup(b,psi)
+call helmholtz_dirichlet_setup(b,psi,work)
+
+
+#undef CONVERT_TO_ZERO_ON_BDY
+#ifdef CONVERT_TO_ZERO_ON_BDY
+
+b=b-lphi
+call zero_boundary(b)
+call zero_boundary(psi)
+call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+psi=psi+phi
+
+#else
+
 !call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
+#endif
+
+
 
 print *,'helmholtz_dirichlet solver error: ',&
 maxval(abs(psi(  nx1:nx2,ny1:ny2)-psi_exact(nx1:nx2,ny1:ny2)     ))
 
+#if 0
+ jacobi results  COMPACT WORKING!
+ compact:      ITER         ERROR
+      16x16     513         6.18e-5
+      32x32     830         4.12e-6       15x    
+      64x64    1795         2.47e-7       17x
+ 
+ 2nd:
+      16x16   1171           1.31e-2 
+      32x32   3447           3.23e-3      4x
+      64x64   8059           8.05e-4      4x
+
+
+#endif
 stop
 
 end subroutine

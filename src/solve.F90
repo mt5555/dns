@@ -160,7 +160,7 @@ real*8 res_init,tol1,w
 integer itqmr
 integer itermax
 
-itermax=2000
+itermax=50000
 w = a1 - a2*(pi2/(3*min(delx,dely,delz)))**2
 w=2.5*w  ! safety factor
 w = 1/w
@@ -206,14 +206,17 @@ do
    sol = sol + w*R
    
    err=sqrt(ddot(R,R))
-   write(*,444) itqmr,res_init,err
+   if (mod(itqmr,25)==0) &
+      write(*,444) itqmr,res_init,err
    if (err <= tol1 .or. itqmr>=itermax) exit
 enddo
 
       write(*,444) itqmr,res_init,err
-444   format('Jacobi iter=',i4,' ||rhs||, residual=',e11.6,'  ',e11.6)
+444   format('Jacobi iter=',i8,' ||rhs||, residual=',e11.6,'  ',e11.6)
 
-if (itqmr>=itermax) stop 'Jacobi iteration failure'   
+if (itqmr>=itermax) then
+   print *,'Jacobi iteration failure...'   
+endif
 
 end subroutine
 

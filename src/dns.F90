@@ -24,9 +24,9 @@ call wallclock(tmx1)  ! wallclock may use MPI timers, call after init_mpi
 call init_mpi_comm3d()
 call init_grid      
 
-write(message,'(a)') 'Running some tests'
-call print_message(message)
-call test           ! optional testing  routines go here
+!write(message,'(a)') 'Running some tests'
+!call print_message(message)
+!call test           ! optional testing  routines go here
 
 
 

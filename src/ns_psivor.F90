@@ -4,6 +4,33 @@
 !  subroutine to take one Runge-Kutta 4th order time step
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#if 0
+
+outline of algorithm for infinite domain computation.
+
+w = vorticity
+PSI = stream function
+
+1. w initialized on interior and boundary
+2. solve for PSI on boundary with B-S
+3  solve for PSI on interior
+4. set ghost cells for PSI based on one-sided differencing at boundary
+5. compute (u,v)
+6. set 1st row of ghost points of w (based on u,v)
+
+7. advance w in time:   w_t + u dot grad(w) = viscosity
+8. update w on boundary and first row of ghost points
+      (inflow=0, outflow=set so we are using one sided using old (u,v))
+9  solve for PSI on boundary with B-S
+10.solve for PSI on interior
+11 set ghost cells for PSI based on one-sided differencing at boundary
+12. goto 7
+
+
+
+
+
+#endif
 subroutine rk4(time,Q,Q2,Q3,Q4,rhs,work1,work2)
 use params
 implicit none
@@ -167,7 +194,7 @@ else
 
    b=-w
    ! copy b.c. from psi into 'b', and apply compact correction to b:
-   call helmholtz_dirichlet_setup(b,psi)
+   call helmholtz_dirichlet_setup(b,psi,work)
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
    !update PSI 1st row of ghost cells so that we are 2nd order differences
