@@ -1434,6 +1434,12 @@ SN_lll=SN_lll/ntot
    call MPI_allreduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    enddo
 
+   dwork2=H_ltt
+   call MPI_allreduce(dwork2,H_ltt,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork2=H_tt
+   call MPI_allreduce(dwork2,H_tt,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
+
    dwork3=D_ltt
    call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 
