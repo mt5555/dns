@@ -247,11 +247,11 @@ icount=icount+1
    endif
    if (convert_opt==7) then  ! -cout gradu
       call input_uvw(time,Q,vor,work1,work2,1)
-      call print_message("computing vorticity magnitude...")
+      call print_message("computing gradu ")
       do i=1,3
       do j=1,3    
          ! u_i,j
-         write(message,'(a,i1,a,i1)') 'computing u_',i,',',j,' ...'
+         write(message,'(a,i1,a,i1,a)') 'computing u_',i,',',j,' ...'
          call print_message(message)
          call der(Q(1,1,1,i),vor,work1,work2,DX_ONLY,j)
 

@@ -3,21 +3,34 @@
 extern int errno;
 
 int main(int argc, char **argv) {
-  char *fname;
+  char fname[240];
   FILE *fid[3,3], *fid2, *fid3;
   double *buf,mn,mx;
   double sum[3,3],sum2[3,3]; 
   char subname[240];
   char c='A';
-  int i,j,k,ioff,joff,koff;
+  int i,j,k,ioff,joff,koff,len;
   long nbig,ncube,size;
 
   if (argc != 4) {
-    printf("USAGE:  ./extract filename  orig_size  subcube_size \n");
+    printf("USAGE:  ./extract_gradu filename  orig_size  subcube_size \n");
     exit(1);
   }
-  fname=argv[1];
-  fid=fopen(fname,"r");
+  /* open files of the form:  filename.ij */
+  strncpy(fname,argv[1],240);
+  len=strlen(fname);
+  fname[len]='.';
+  fname[len+3]=0;
+  for (gradi=1; gradi<=3; ++gradi) {
+      for (gradj=1; gradj<=3; ++gradj) {
+          sprintf(&fname[len+1],"%c",gradi)
+          sprintf(&fname[len+2],"%c",gradj)
+          fid[gradi][gradj]=fopen(fname,"r");
+          printf("filename = %i %i %s\n",gradi,gradj,fname);
+      }
+  }
+  fname[len]=0;
+  exit(1);
 
 
   /* 256^3 blocks: */
@@ -49,7 +62,7 @@ int main(int argc, char **argv) {
                     for (j=0; j<ncube; ++j) {
                         long pos_big=nbig*(nbig*(i+ioff) + j +joff) + k+koff;
                         long pos_small=ncube*(ncube*i + j) + k;
-                        fseek(fid[gradi,gradj],4*pos_big,SEEK_SET);
+                        fseek(fid[gradi][gradj],4*pos_big,SEEK_SET);
                         if (ncube!=fread(&buf[pos_small],4,ncube,fid)) {
                             printf("Error on read \n"); exit(1);
                         }
@@ -58,16 +71,16 @@ int main(int argc, char **argv) {
                 
                 mn=buf[0];
                 mx=buf[0];
-                sum[gradi,gradj]=0;
-                sum2[gradi,gradj]=0;
+                sum[gradi][gradj]=0;
+                sum2[gradi][gradj]=0;
                 for (i=0; i<size; ++i) {
-                    sum[gradi,gradj] += buf[i];  
-                    sum2[gradi,gradj] += buf[i]*buf[i];  
+                    sum[gradi][gradj] += buf[i];  
+                    sum2[gradi][gradj] += buf[i]*buf[i];  
                     if (buf[i]<mn) mn=buf[i];
                     if (buf[i]>mx) mx=buf[i];
                 }
-                sum[gradi,gradj]/=size;
-                sum2[gradi,gradj]/=size;
+                sum[gradi][gradj]/=size;
+                sum2[gradi][gradj]/=size;
                 
 
             }
