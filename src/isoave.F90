@@ -63,7 +63,7 @@ real*8 :: x
 x=ndelta; call cwrite8(fid,x,1)   
 x=ndir;   call cwrite8(fid,x,1)   
 x=2;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
-x=3;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
+x=2;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
 x=0;      call cwrite8(fid,x,1)   ! number of future type1
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
@@ -126,66 +126,76 @@ D_lll=0
 
 
 do idir=1,ndir
-do idel=1,ndelta
 
-   rvec = dir(:,idir)*delta_val(idel)
-   rhat = rvec/sqrt(rvec(1)**2+rvec(2)**2+rvec(3)**2)
-   call compute_perp(rhat,rperp1,rperp2)
-#if 1
-! check orthoginality
-   print *,'idel,idir',idel,idir
-   print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
-     sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
-     sqrt(rperp2(1)**2+rperp2(2)**2+rperp2(3)**2)
+   write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',&
+           dir(:,idir),')'
 
-   print *,'ortho: ',&
-        rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3), &
-        rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3), &
-        rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
-
+   do idel=1,ndelta
+      
+      rvec = dir(:,idir)*delta_val(idel)
+      rhat = rvec/sqrt(rvec(1)**2+rvec(2)**2+rvec(3)**2)
+      call compute_perp(rhat,rperp1,rperp2)
+#if 0
+      ! check orthoginality
+      print *,'idel,idir',idel,idir
+      print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
+           sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
+           sqrt(rperp2(1)**2+rperp2(2)**2+rperp2(3)**2)
+      
+      print *,'ortho: ',&
+           rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3), &
+           rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3), &
+           rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
+      
 #endif
+      
+      if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
+      if (rvec(2)<0) rvec(2)=rvec(2)+nslaby
+      if (rvec(3)<0) rvec(3)=rvec(3)+nslabz
+      
+      
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
 
-
-
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-
-   i2 = i + rvec(1)
-   do
-      if (i2<=nx2) exit
-      i2=i2-nslabx
-   enddo
-   j2 = j + rvec(2)
-   do
-      if (j2<=ny2) exit
-      j2=j2-nslaby
-   enddo
-   k2 = k + rvec(3)
-   do
-      if (k2<=nz2) exit
-      k2=k2-nslabz
-   enddo
-   
-   do n=1,3
-      delu(n)=Q(i2,j2,k2,n)-Q(i,j,k,n)
-   enddo
-   u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
-   u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
-   u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
-
- 
-   D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
-   D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
-   D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
-
-   D_lll(idel,idir)=D_ll(idel,idir) + u_l**3
-   D_ltt(idel,idir,1)=D_tt(idel,idir,1) + u_l*u_t1**2
-   D_ltt(idel,idir,2)=D_tt(idel,idir,2) + u_l*u_t2**2
-
-enddo
-enddo
-enddo
+         i2 = i + rvec(1)
+         do
+            if (i2<nx1) call abort("isoave: i2<nx1")
+            if (i2<=nx2) exit
+            i2=i2-nslabx
+         enddo
+         j2 = j + rvec(2)
+         do
+            if (j2<ny1) call abort("isoave: j2<ny1")
+            if (j2<=ny2) exit
+            j2=j2-nslaby
+         enddo
+         k2 = k + rvec(3)
+         do
+            if (k2<nz1) call abort("isoave: k2<nz1")
+            if (k2<=nz2) exit
+            k2=k2-nslabz
+         enddo
+         
+         do n=1,3
+            delu(n)=Q(i2,j2,k2,n)-Q(i,j,k,n)
+         enddo
+         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
+         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
+         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
+         
+         
+         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
+         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
+         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
+         
+         D_lll(idel,idir)=D_ll(idel,idir) + u_l**3
+         D_ltt(idel,idir,1)=D_tt(idel,idir,1) + u_l*u_t1**2
+         D_ltt(idel,idir,2)=D_tt(idel,idir,2) + u_l*u_t2**2
+         
+      enddo
+      enddo
+      enddo
 enddo
 enddo
 
@@ -213,12 +223,6 @@ use params
 integer :: i,j,idel,idir
 real*8 :: rvec(3)
 
-
-! determine maximum value of delta to use for this grid
-do idel=1,ndelta_max
-   if (delta_val(idel) >= g_nmin/2) exit
-   ndelta=idel
-enddo
 
 
 
@@ -271,6 +275,12 @@ do i=9,16
    j=j+1
    delta_val(j)=128*i
 enddo
+! determine maximum value of delta to use for this grid
+do idel=1,ndelta_max
+   if (delta_val(idel) >= g_nmin/2) exit
+   ndelta=idel
+enddo
+
 
 
 
