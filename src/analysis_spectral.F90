@@ -227,122 +227,122 @@ do
       if (my_pe==io_pe) call cclose(fid2,ierr)
       if (my_pe==io_pe) call cclose(fidcore,ierr)
    endif
-
-
-      
+   
+   
+   
    if (compute_hspec) then
       if (.not. read_uvw) then	
-      if (use_serial==1) then
-         stop 'compute_hspec needs q1,q2 allocated'
-         call input_uvw(time,Q,dummy,work1,work2,header_type)
-         Q=Q*scale;
-      else
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
-         Q=Q*scale;
-      endif
-      read_uvw=.true.	
+         if (use_serial==1) then
+            stop 'compute_hspec needs q1,q2 allocated'
+            call input_uvw(time,Q,dummy,work1,work2,header_type)
+            Q=Q*scale;
+         else
+            call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
+            Q=Q*scale;
+         endif
+         read_uvw=.true.	
       endif
       call compute_helicity_spectrum(Q,q2,q1,0)
       call output_helicity_spec(time,time)
-    endif
-      
-    if (compute_hfree) then
-       if (.not. read_uvw) then	
-          if (use_serial==1) then
-             stop 'compute_hfree needs q1,q2 allocated'
-          else
-             call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-             Q=Q*scale;
-          endif
-          read_uvw=.true.	
-       endif
-       call compute_hfree_spec(Q,q1,q2,q3)
-       call output_hfree_spec(time,time)
-    endif
-      
-
-      if (compute_uvw) then
-         if (.not. read_uvw) then	
-            if (use_serial==1) then
-               call input_uvw(time,Q,dummy,work1,work2,header_type)
-               Q=Q*scale;
-            else
-               call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-               Q=Q*scale;
-            endif
-            read_uvw=.true.	
-         endif	
-               
-      do i=0,nxdecomp-1
-      do j=0,nydecomp-1
-      do k=0,nzdecomp-1  
-
-         if (my_pe==io_pe) then
-            write(sdata,'(f10.4)') 10000.0000 + time
-            if (compute_fractional_power) then
-               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf2"
-            else
-               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
-            endif
-            if (nxdecomp*nydecomp*nzdecomp>1) then
-               write(sdata,'(3i1)') i,j,k
-               fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
-            endif
-            
-            print *,fname
-         endif
-         
-         if (use_serial==1) then
-            nxlen=nslabx/nxdecomp
-            nylen=nslaby/nydecomp
-            nzlen=nslabz/nzdecomp
-            
-            lx1=nx1 + i*nxlen     
-            ly1=ny1 + j*nylen     
-            lz1=nz1 + k*nzlen     
-            
-            lx2=lx1 + nxlen-1
-            ly2=ly1 + nylen-1
-            lz2=lz1 + nzlen-1
-            
-            ! subcube version cannot run in parallel - it will abort
-            call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
-         else
-            if (nxdecomp*nydecomp*nzdecomp==1) then
-               ! no subcubes:
-               call isoavep(Q,q1,q1,q2,3,csig)
-            else
-               range(1,1)=dble(i)/nxdecomp
-               range(1,2)=dble(i+1)/nxdecomp
-               range(2,1)=dble(j)/nxdecomp
-               range(2,2)=dble(j+1)/nxdecomp
-               range(3,1)=dble(k)/nxdecomp
-               range(3,2)=dble(k+1)/nxdecomp
-               call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
-            endif
-         endif
-      
-         
-         
-         if (my_pe==io_pe) then
-            call copen(fname,"w",fid,ierr)
-            if (ierr/=0) then
-               write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
-               call abort(message)
-            endif
-            call writeisoave(fid,time)
-            call cclose(fid,ierr)
-         endif
-         
-      enddo
-      enddo
-      enddo
-
    endif
+   
+   if (compute_hfree) then
+      if (.not. read_uvw) then	
+         if (use_serial==1) then
+            stop 'compute_hfree needs q1,q2 allocated'
+         else
+            call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+            Q=Q*scale;
+         endif
+         read_uvw=.true.	
+      endif
+      call compute_hfree_spec(Q,q1,q2,q3)
+      call output_hfree_spec(time,time)
+   endif
+   
+   
+   if (compute_uvw) then
+      if (.not. read_uvw) then	
+         if (use_serial==1) then
+            call input_uvw(time,Q,dummy,work1,work2,header_type)
+            Q=Q*scale;
+         else
+            call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+            Q=Q*scale;
+         endif
+         read_uvw=.true.	
+      endif
+      
+      do i=0,nxdecomp-1
+         do j=0,nydecomp-1
+            do k=0,nzdecomp-1  
+               
+               if (my_pe==io_pe) then
+                  write(sdata,'(f10.4)') 10000.0000 + time
+                  if (compute_fractional_power) then
+                     fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf2"
+                  else
+                     fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
+                  endif
+                  if (nxdecomp*nydecomp*nzdecomp>1) then
+                     write(sdata,'(3i1)') i,j,k
+                     fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
+                  endif
+                  
+                  print *,fname
+               endif
+               
+               if (use_serial==1) then
+                  nxlen=nslabx/nxdecomp
+                  nylen=nslaby/nydecomp
+                  nzlen=nslabz/nzdecomp
+                  
+                  lx1=nx1 + i*nxlen     
+                  ly1=ny1 + j*nylen     
+                  lz1=nz1 + k*nzlen     
+                  
+                  lx2=lx1 + nxlen-1
+                  ly2=ly1 + nylen-1
+                  lz2=lz1 + nzlen-1
+
+! subcube version cannot run in parallel - it will abort
+                  call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
+               else
+                  if (nxdecomp*nydecomp*nzdecomp==1) then
+                     ! no subcubes:
+                     call isoavep(Q,q1,q1,q2,3,csig)
+                  else
+                     range(1,1)=dble(i)/nxdecomp
+                     range(1,2)=dble(i+1)/nxdecomp
+                     range(2,1)=dble(j)/nxdecomp
+                     range(2,2)=dble(j+1)/nxdecomp
+                     range(3,1)=dble(k)/nxdecomp
+                     range(3,2)=dble(k+1)/nxdecomp
+                     call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
+                  endif
+               endif
+               
+         
+         
+               if (my_pe==io_pe) then
+                  call copen(fname,"w",fid,ierr)
+                  if (ierr/=0) then
+                     write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
+                     call abort(message)
+                  endif
+                  call writeisoave(fid,time)
+                  call cclose(fid,ierr)
+               endif
+               
+            enddo
+         enddo
+      enddo
+      
+   endif
+   
 
 
-
-
+   
    if (compute_cj) then
       if (my_pe==io_pe) then
          write(sdata,'(f10.4)') 10000.0000 + time
@@ -372,7 +372,7 @@ do
          call cclose(fid,ierr)
       endif
    endif
-
+   
    
    if (compute_scalar) then
       if (my_pe==io_pe) then
