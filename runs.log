@@ -48,11 +48,11 @@ estimage: 6 arrays * 3 dim * N^2 * 8 bytes = 144 N^2
 **********************************************************************************
 3/4/02
 
-Schmidt number runs.
+Schmidt number runs. 256^3
 
 S = .01, .05, .1, .5, 1.0  
 
-
+spectrum peaked at k=10, with k**4
 
 mu=3.00e-4          R_l=70   kmax_eta=1.5     teddy=.7
 mu=2.75e-4     run to t=.1, check Re, kmax*eta 
@@ -60,11 +60,16 @@ mu=2.75e-4     run to t=.1, check Re, kmax*eta
 mu=2.00e-4          R_l=106  kmax*eta=1.2
 
 
+tmix256A  k**4, kmax=10  mu=3e-4   ran to t=3.00.  
 
-tmix256A  
-mu=3e-4   IN t=3.00
+REDO with k**2, kmax=10:
+mu=3e-4:   R_l=52.6    kmax*eta=1.54      teddy=.56
 
-run this to t=3.00, look at stats, compute when to re-init. 
+
+tmix256B  k**2, kmax=10  mu=3e-4   IN t=3.00.  
+   Check this run, figure out when to re-iniitalize. 
+   Then put in Schmidt numbers:  .01, .05, .1, .5, 1.0
+
 
 
 

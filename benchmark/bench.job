@@ -25,7 +25,7 @@ setenv MPI_VERSION lampi
 
 
 if ($MPI_VERSION == lampi)  then
-   set MPIRUN = "/users/taylorm/lampi/build-alphaev6-dec-osf5.1/mpirun -dev quadrics -np"
+   set MPIRUN = "/users/taylorm/lampi/build-alphaev6-dec-osf5.1/mpirun -s g1 -dev quadrics -np"
 else
    set MPIRUN = "prun -n"
 endif
@@ -49,22 +49,29 @@ sed s/NDELT/$ntime/ ~/dns/benchmark/step.inp.sed > benchmark.inp
 
 
 
-set mesh = "1 1 64 512 512 512"
-./gridsetup.py $mesh
-make -j 4 dns
-$MPIRUN 16 ./dns   $name -i benchmark.inp
+#set mesh = "1 1 64 512 512 512"
+#./gridsetup.py $mesh
+#make -j 4 dns
+#$MPIRUN 64 ./dns   $name -i benchmark.inp
 
 
-set mesh = "1 1 128 512 512 512"
-./gridsetup.py $mesh
-make -j 4 dns
-$MPIRUN 32 ./dns   $name -i benchmark.inp
+#set mesh = "1 1 128 512 512 512"
+#./gridsetup.py $mesh
+#make -j 4 dns
+#$MPIRUN 128 ./dns   $name -i benchmark.inp
 
 
 set mesh = "1 1 256 512 512 512"
 ./gridsetup.py $mesh
 make -j 4 dns
-$MPIRUN 64 ./dns   $name -i benchmark.inp
+
+sh -c 'echo "run 1" 1>&2'
+$MPIRUN 256 ./dns   $name -i benchmark.inp
+
+sh -c 'echo "run 2" 1>&2'
+$MPIRUN 256 ./dns   $name -i benchmark.inp
+
+#sh -c 'date 1>&2'
 
 date
 

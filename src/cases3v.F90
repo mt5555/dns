@@ -290,7 +290,7 @@ if (init_cond_subtype==0) then
       enerb_target(nb)=fac1*fac2*fac3
    enddo
 else if (init_cond_subtype==1) then
-   p=4;
+   p=2;
    p1=(1+p)/2
    p2=p/2
    ku=10
