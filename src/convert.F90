@@ -361,7 +361,7 @@ if (io_pe==my_pe) then
       write(sdata,'(f10.4)') 10000.0000 + time
       write(ext,'(i1)') ip
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu' // ext(1)
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu' //  ext(1:1)
       open(15,file=fname,form='formatted')
       do sc=1,nsubcube
          write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
