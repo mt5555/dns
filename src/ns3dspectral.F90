@@ -34,7 +34,6 @@ endif
 
 
 
-Q_old=Q
 
 
 ! stage 1
@@ -45,6 +44,7 @@ do n=1,3
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
+      Q_old(i,j,k,n)=Q(i,j,k,n)
       Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6.0
       Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2.0
       Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
@@ -62,8 +62,8 @@ do n=1,3
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs/3.0
-      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs/2.0
+      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3.0
+      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2.0
       Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
    enddo
    enddo
@@ -78,8 +78,8 @@ do n=1,3
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs/3.0
-      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs
+      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3.0
+      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs(i,j,k,n)
       Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
    enddo
    enddo
@@ -96,7 +96,7 @@ do n=1,3
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs/6.0
+      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6.0
       Q_grid(i,j,k,n)=Q(i,j,k,n)
    enddo
    enddo
