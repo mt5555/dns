@@ -261,6 +261,9 @@ call wallclock(tmx1)
 !                                     3 y-transforms 
 !                                     3 z-transforms
 !
+!  For passive scalars of type "2", we also add (pi-u**2) to the RHS
+!  pi will be added later, but u**2 has to be added here
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do ns=np1,np2
    ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,1)
@@ -269,6 +272,7 @@ do ns=np1,np2
    do j=ny1,ny2
    do i=nx1,nx2
       rhsg(i,j,k,ns)=-Q(i,j,k,1)*work(i,j,k)
+      if (passive_type(ns)==2) rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,1)**2
    enddo
    enddo
    enddo
@@ -278,10 +282,12 @@ do ns=np1,np2
    do j=ny1,ny2
    do i=nx1,nx2
       rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,n)*work(i,j,k)
+      if (passive_type(ns)==2) rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,n)**2
    enddo
    enddo
    enddo
    enddo
+
    ! we cannot dealias here, because below we use rhsg(:,:,:,3),
    ! which coult potentially trash some of rhs(:,:,:,4)
 enddo
@@ -637,12 +643,15 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! passive scalars:
 ! dealias the RHS scalars, and add diffusion:
+! for passiv_type=2, also add p computed above p = (pressure + .5*u**2 )
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 pke=0
 p_diss=0               
 do ns=np1,np2
-   ! FFT into p
-   call z_fft3d_trashinput(rhsg(1,1,1,ns),p,work)
+   ! FFT from rhsg -> rhs  
+   Q(:,:,:,1)=rhsg(:,:,:,ns)
+   call z_fft3d_trashinput(Q(1,1,1,ns),rhs(1,1,1,ns),work)
 
    ! de-alias, and store in RHS(:,:,:,ns)
    do j=1,ny_2dz
@@ -656,9 +665,8 @@ do ns=np1,np2
             else
                xw=(im*im + jm*jm + km*km)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
-               rhs(k,i,j,ns)=p(k,i,j) - xw_viss*Qhat(k,i,j,ns)
-! dissipation only
-!               rhs(k,i,j,ns)=- xw_viss*Qhat(k,i,j,ns)
+               rhs(k,i,j,ns)=rhs(k,i,j,ns) - xw_viss*Qhat(k,i,j,ns)
+               if (passive_type(ns)==2) rhs(k,i,j,ns)=rhs(k,i,j,ns)+p(k,i,j)
             endif
 #if 0
             if (compute_ints==1) then

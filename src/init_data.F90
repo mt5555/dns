@@ -129,57 +129,44 @@ subroutine init_passive_scalars(init,Q,Qhat,work1,work2)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(nx,ny,n_var)
+real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: schmidt_table(5),xfac,mn,mx
-integer :: n,k,i,j,im,jm,km,init,count,iter
+real*8 :: xfac,mn,mx
+integer :: n,k,i,j,im,jm,km,init,count,iter,n1
 character(len=80) :: message
 
 schmidt=0
 passive_type=0
 
-schmidt_table(1)=.01
-schmidt_table(2)=.05
-schmidt_table(3)=.10
-schmidt_table(4)=.5
-schmidt_table(5)=1.0
-
-k=0
-call print_message("passive scalars:")
-call print_message("    n   Schmidt   Type (0=Gaussian, 1=KE based)")
-do n=np1,np2
-   if (mod(n-np1,2)==0) then
-      passive_type(n)=0   ! gaussian
-      k=k+1
-   else
-      passive_type(n)=1   ! KE based
-   endif
-   if (k>5) then
-      call abort("Error: passive_scalar_init(): schmidt_table too small.")
-   endif
-   schmidt(n)=schmidt_table(k)
-   if (npassive==10) schmidt(n)=schmidt_table(k)
-   if (npassive==8) schmidt(n)=schmidt_table(k+1)
-   if (npassive==6) schmidt(n)=schmidt_table(k+2)
-   if (npassive==4) schmidt(n)=schmidt_table(k+3)
-   if (npassive==2) schmidt(n)=schmidt_table(k+4)
-
-
-   if (my_pe==io_pe) then
+if (my_pe==io_pe) then
+   print *,"passive scalars:"
+   print *,"    n   Schmidt   Type (0=Gaussian, 1=KE based)"
+   do n=np1,np2
       write(*,'(i4,f11.3,i7)') n-np1+1,schmidt(n),passive_type(n)
-   endif
-enddo
+   enddo
+endif
 
 
 if (init==0) return
 
 count=0
 do n=np1,np2
+
+   if (mod(count,2)==1) then
+      n1=np1
+   else
+      n1=np1+1
+   endif
+
    count=count+1
-   if (count<=2) then
+   if (count>2 .and. passive_type(n)==passive_type(n1)) then
+      call print_message('Re-using i.c. from passive scalar 1')
+      Q(:,:,:,n)=Q(:,:,:,n1) 
+   else
       if (passive_type(n)==0) call passive_gaussian_init(Q,work1,work2,n)
       if (passive_type(n)==1) call passive_KE_init(Q,work1,work2,n)
+      if (passive_type(n)==2) Q(:,:,:,n)=0
 
 
       call global_min(Q(1,1,1,n),mn)
@@ -187,6 +174,9 @@ do n=np1,np2
       
       write(message,'(a,2f17.5)') 'initial passive scalar min/max: ',mn,mx
       call print_message(message)	
+
+
+      if (passive_type(n)==2) exit  ! skip smoothing step
       call print_message("smothing passive scalar...")
       
       ! filter
@@ -230,14 +220,6 @@ do n=np1,np2
       call ifft3d(Q(1,1,1,n),work1)
       write(message,'(a,2f17.5,a,i3)') 'after smoothing: min/max: ',mn,mx,'  iter=',iter
       call print_message(message)	
-   else
-      if (mod(count,2)==1) then
-         Q(:,:,:,n)=Q(:,:,:,np1) 
-         call print_message('Re-using i.c. from passive scalar 1')
-      else
-         Q(:,:,:,n)=Q(:,:,:,np1+1)          
-         call print_message('Re-using i.c. from passive scalar 2')
-      endif
    endif
 enddo
 

@@ -231,8 +231,14 @@ integer :: ndim       ! 2 or 3 dimensions.  ndim = (g_nz==1 ? 2 : 3)
 integer :: npassive = 0   ! number of passive scalars
 integer :: np1=1,np2=0    ! passive scalars Q(:,:,:,np1:np2)
 real*8  :: schmidt(n_var)       ! schmidt number for passive scalars
-integer :: passive_type(n_var)  ! type of passive scalar 0 = Gaussian -> 0,1
-                                ! type of passive scalar 1 = KE ->       0,1
+integer :: passive_type(n_var)  ! type of passive scalar:
+                                !     0 = Gaussian i.c., regular equation
+                                !     1 = KE-correlated i.c., regular equation
+                                !     2 = 0 i.c., Kurien's gage equation
+
+integer :: input_npassive                       ! npassive in input file
+real*8,allocatable :: input_schmidt(:)          ! data from input file
+integer,allocatable :: input_passive_type(:)    ! data from input file
 
 ! number of actual data points
 integer,parameter :: nslabx=nx2-nx1+1

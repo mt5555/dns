@@ -1,4 +1,4 @@
-5            ! input file type
+6            ! input file type
 ns_uvw       ! equations
 iso12         ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
@@ -11,6 +11,8 @@ none        ! hypo vis
 0.0         ! hypo vis value
 0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
+1             ! max number of schmidt numbers for passive scalars
+1.0, 2        ! passive scalar 1:  schmidt number, type
 0            ! compute_structure functions
 0            ! compute pdf functions
 fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
