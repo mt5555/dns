@@ -14,7 +14,7 @@ ARCH = $(shell uname -m)
 
 ifeq ($(UNAME),Linux)
    HOST = $(shell hostname)
-   ifeq ($(HOST),darkstar)
+   ifeq ($(HOST),darkstarXX)
       MPI = 
       MPILIB = 
    else

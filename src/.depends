@@ -1,6 +1,6 @@
 analysis.o: macros.h params.o mpi.o fft_interface.o makefile 
 bc.o: macros.h params.o mpi.o ghost.o makefile 
-cases2v.o: macros.h params.o ghost.o bc.o makefile 
+cases2v.o: macros.h params.o tracers.o bc.o makefile 
 cases3v.o: macros.h params.o mpi.o transpose.o makefile 
 dns.o: macros.h params.o mpi.o makefile 
 fft99_interface.o: macros.h makefile 
@@ -24,7 +24,7 @@ ns.o: macros.h params.o structf.o transpose.o sforcing.o makefile
 ns_ghost.o: macros.h params.o fft_interface.o ghost.o makefile 
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
-ns_psivor.o: macros.h params.o bc.o fft_interface.o makefile 
+ns_psivor.o: macros.h params.o bc.o tracers.o fft_interface.o makefile 
 params.o: macros.h params.h makefile 
 psivor_diag.o: macros.h params.o makefile 
 sforcing.o: macros.h params.o mpi.o makefile 
@@ -34,7 +34,8 @@ solve.o: macros.h params.o ghost.o bc.o mpi.o makefile
 splitspec.o: macros.h makefile 
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 
-timecontrol.o: macros.h params.o makefile 
+timecontrol.o: macros.h params.o tracers.o makefile 
+tracers.o: macros.h params.o mpi.o ghost.o makefile 
 transpose.o: macros.h params.o mpi.o makefile 
 turb_diag.o: macros.h params.o structf.o makefile 
 util.o: macros.h mpi.o params.o makefile 

@@ -32,11 +32,11 @@ integer :: in_numt
 
 numt=in_numt
 
-allocate(tracer(numt,n_var))  
-allocate(tracer_work(numt,n_var))  
-allocate(tracer_old(numt,n_var))  
-allocate(tracer_tmp(numt,n_var))  
-allocate(tracer_rhs(numt,n_var))  
+allocate(tracer(numt,ndim))  
+allocate(tracer_work(numt,ndim))  
+allocate(tracer_old(numt,ndim))  
+allocate(tracer_tmp(numt,ndim))  
+allocate(tracer_rhs(numt,ndim))  
 
 end subroutine
 
@@ -115,11 +115,11 @@ if (my_pe==fpe) then
       numt=x
       
       call cread8(fid,x,1)
-      if (n_var /= nint(x)) then
-         call abort("Error: n_var in code not the same as n_var in tracers restart file")
+      if (ndim /= nint(x)) then
+         call abort("Error: ndim in code not the same as ndim in tracers restart file")
       endif
       call allocate_tracers(numt)
-      call cread8(fid,tracer,numt*n_var)
+      call cread8(fid,tracer,numt*ndim)
       call cclose(fid,ierr)
    else
       call copen(fname,"w",fid,ierr)
@@ -131,9 +131,9 @@ if (my_pe==fpe) then
       endif
       x=numt
       call cwrite8(fid,x,1)
-      x=n_var
+      x=ndim
       call cwrite8(fid,x,1)
-      call cwrite8(fid,tracer,numt*n_var)
+      call cwrite8(fid,tracer,numt*ndim)
       call cclose(fid,ierr)
    endif
 endif
@@ -190,8 +190,8 @@ integer :: rk4stage
 
 !local
 integer :: i,j,ii,jj,igrid,jgrid
-real*8 :: trhs(n_var),c1,c2
-real*8 :: Qint(4,n_var)
+real*8 :: trhs(ndim),c1,c2
+real*8 :: Qint(4,ndim)
 real*8 :: xc,yc
 integer :: jc
 integer :: ierr
@@ -265,13 +265,16 @@ do i=1,numt
          call interp4(Qint(1,j),Qint(2,j),Qint(3,j),Qint(4,j),yc,trhs(j))
       enddo
 
-
       ! advance
       do j=1,ndim
          tracer(i,j)=tracer(i,j)+c1*trhs(j)
          tracer_tmp(i,j)=tracer_old(i,j)+c2*trhs(j)
       enddo
    else
+      if (i<3) then
+         print *,'skipping my_cpu, point',my_pe,i
+         print *,tracer_tmp(i,1),tracer_tmp(i,2)
+      endif
       ! point does not belong to my_pe, set position to 0
       do j=1,ndim
          tracer(i,j)=0
@@ -284,11 +287,11 @@ enddo
 
 #ifdef USE_MPI
    tracer_work=tracer
-   call MPI_allreduce(tracer_work,tracer,n_var*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   if (rk4sgate/=4) then
+   call MPI_allreduce(tracer_work,tracer,ndim*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   if (rk4stage/=4) then
       ! not necessary on last stage - we no longer need tracer_tmp
       tracer_work=tracer_tmp
-      call MPI_allreduce(tracer_work,tracer_tmp,n_var*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      call MPI_allreduce(tracer_work,tracer_tmp,ndim*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    endif
 #endif
 
@@ -296,6 +299,7 @@ enddo
 
 if (rk4stage==4) then
    ! insert points into tracer() if necessary:
+
 
 endif
 
