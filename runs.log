@@ -69,13 +69,15 @@ iso12_256A  ran to t=11.
 
 iso12_256 (shankara) forcing, k1=.5, k2=.5 
 
-mu=1.25e-3    [0.0,0.75]     delx/eta=.77  next?
+mu=1.25e-3    [0.0,0.75]     delx/eta=.77  next?                 epsilon
 mu=4e-4       (0.75,1.25]    delx/eta=2.0     4/5 law:  .743
 mu=2e-4       (1.25,1.50]    delx/eta=3.46    4/5 law:  .6875
 mu=3e-4       (1.50,1.75]    delx/eta=2.48    4/5 law:  .675
-mu=2.75e-4    (1.75,IN]    
-
-
+mu=2.75e-4    (1.75,3.5]  t=2.25      2.64              .69      4.32
+                            2.5       2.56              .68      3.84
+                            2.75      2.58              .79      3.97
+                            3.00      2.70              .64      4.74
+                            3.25      2.52              .70      3.60  
 
 
 iso_256A  (Qsc)
@@ -95,6 +97,12 @@ iso12_500A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
         t=[1.13,4+]:  mu=1e-4  R_l=252  delx/eta=2.8  epsilon=3.80 
          still running bluemountain
 
+                t=5.56   4/5 law max:   .7551
+                t=5.0                   .7338
+                  4.57                  .717
+                  4.00                  .807
+                  3.00                  .768
+
 
 
 iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2  
@@ -107,6 +115,15 @@ iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2
 
                FM=5/(2pi)**2 for runs starting at 2.92:  
                IN    R_l=250  delx/eta=2.37  epsilon=.00763 = .3012
+
+               t=40.  4/5 law max:  .744
+                 35                 .7511
+                 30                 .779 
+                 25                 .7612
+                 20                 .7484
+                 15                 .7695
+
+
 
 
 

@@ -24,9 +24,9 @@ ext='.isostr';
 %name='/ccs/taylorm/shankara/dns/src/iso12_256_0000.7500'
 %name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.0000'
 %name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.5000'
-
 name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.7500'
-ext='.isostr';
+%name='/ccs/taylorm/shankara/dns/src/iso12_256_0003.2500'
+%ext='.isostr001';
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
@@ -54,7 +54,6 @@ else
    check_isotropy=0;
    if (in==2) 
      plot_posneg=1;
-     bname=[bname,'s'];
    end
 end
 
@@ -65,6 +64,10 @@ end
 figure(10); hold off;
 semilogx(xx,y45,'k'); hold on;
 axis([1,1000,0,1.5]);
+
+return
+
+
 
 yysum=0*y45;
 
