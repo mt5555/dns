@@ -13,14 +13,24 @@ implicit none
 !  3. call advance_tracers(rhs) to advance them one time step
 !  
 !
+!  tracer(:,1)  = xcord
+!  tracer(:,2)  = ycord
+!  tracer(:,3)  = zcord   (if ndim==3)
+!  tracer(:,ndim+1) = 'alf', a particle marker used for insertion
+!
+!  tracer_old(:,1:ndim)   used for rk4 time stepping
+!  tracer_tmp(:,1:ndim)   used for rk4 time stepping
+!
+!  tracer_work(:,1:ndim+1)  used for MPI buffer, other copy operations
 !
 integer :: numt=0
+integer :: numt_max=0
 real*8,allocatable :: tracer(:,:)
 real*8,private,allocatable :: tracer_old(:,:)
 real*8,private,allocatable :: tracer_tmp(:,:)
 real*8,private,allocatable :: tracer_work(:,:)
-real*8,private,allocatable :: tracer_rhs(:,:)
 
+character(len=80),private :: message
 
 
 contains
@@ -29,14 +39,49 @@ subroutine allocate_tracers(in_numt)
 implicit none
 integer :: in_numt
 
-
 numt=in_numt
+numt_max=2*in_numt
 
-allocate(tracer(numt,ndim))  
-allocate(tracer_work(numt,ndim))  
-allocate(tracer_old(numt,ndim))  
-allocate(tracer_tmp(numt,ndim))  
-allocate(tracer_rhs(numt,ndim))  
+if (allocated(tracer)) then
+   call abort("allocate_tracers(): error: tracers allready allocated")
+endif
+
+allocate(tracer(numt_max,ndim+1))  
+allocate(tracer_work(numt_max,ndim+1))  
+allocate(tracer_old(numt_max,ndim))  
+allocate(tracer_tmp(numt_max,ndim))  
+
+end subroutine
+
+
+
+
+subroutine enlarge_tracers()
+!
+! double the size of all tracer_* arrays.
+! preserve data in tracer() array ONLY
+!
+implicit none
+integer :: in_numt
+
+
+numt_max=2*numt_max
+call print_message("Increasig size of tracer array")
+write(message,'(a,i5)') "new size=",numt_max
+call print_message(message)
+
+
+tracer_work=tracer
+deallocate(tracer)
+allocate(tracer(numt_max,ndim+1))  
+tracer(1:numt,:)=tracer_work(1:numt,:)
+
+deallocate(tracer_work)
+allocate(tracer_work(numt_max,ndim+1))  
+deallocate(tracer_old)
+allocate(tracer_old(numt_max,ndim))  
+deallocate(tracer_tmp)
+allocate(tracer_tmp(numt_max,ndim))  
 
 end subroutine
 
@@ -49,6 +94,8 @@ subroutine tracers_restart(fpe)
 implicit none
 integer :: fpe
 real*8 :: time=0
+
+call print_message("Restart tracer data from file restart.tracer")
 call tracers_io(1,fpe,'restart.tracer')
 end subroutine
 
@@ -62,7 +109,7 @@ use params
 implicit none
 integer :: fpe
 real*8 :: time
-character(len=280) :: fname,message
+character(len=280) :: fname
 
 if (numt==0) return
 
@@ -90,9 +137,8 @@ integer :: read,fpe
 character(len=*) :: fname
 
 ! local
-character(len=280) :: message
 CPOINTER :: fid
-integer :: ierr
+integer :: ierr,j,numt_in
 real*8 :: x
 
 if (my_pe==fpe) then
@@ -112,15 +158,19 @@ if (my_pe==fpe) then
          call print_message(fname)
          call abort("")
       endif
-      numt=x
+      numt_in=x
       
       call cread8(fid,x,1)
-      if (ndim /= nint(x)) then
+      if (ndim+1 /= nint(x)) then
          call abort("Error: ndim in code not the same as ndim in tracers restart file")
       endif
-      call allocate_tracers(numt)
-      call cread8(fid,tracer,numt*ndim)
+      call allocate_tracers(numt_in)
+      do j=1,ndim+1
+         call cread8(fid,tracer(1,j),numt)
+      enddo
       call cclose(fid,ierr)
+
+
    else
       call copen(fname,"w",fid,ierr)
       if (ierr/=0) then
@@ -131,12 +181,27 @@ if (my_pe==fpe) then
       endif
       x=numt
       call cwrite8(fid,x,1)
-      x=ndim
+      x=ndim+1
       call cwrite8(fid,x,1)
-      call cwrite8(fid,tracer,numt*ndim)
+      do j=1,ndim+1
+         call cwrite8(fid,tracer(1,j),numt)
+      enddo
       call cclose(fid,ierr)
    endif
 endif
+
+#ifdef USE_MPI
+if (read==1) then
+   call MPI_bcast(numt,1,MPI_INTEGER,fpe,comm_3d ,ierr)
+   if (my_pe/=fpe) then
+      numt_in=numt
+      call allocate_tracers(numt_in)      
+   endif
+   call MPI_bcast(tracer,(ndim+1)*numt_max,MPI_REAL8,fpe,comm_3d ,ierr)
+endif
+#endif
+
+
 
 end subroutine
 
@@ -192,15 +257,16 @@ integer :: rk4stage
 integer :: i,j,ii,jj,igrid,jgrid
 real*8 :: trhs(ndim),c1,c2
 real*8 :: Qint(4,ndim)
-real*8 :: xc,yc
+real*8 :: xc,yc,tmx1,tmx2
 integer :: jc
 integer :: ierr
 
 if (numt==0) return
+call wallclock(tmx1)
 
 if (rk4stage==1) then
-   tracer_tmp=tracer
-   tracer_old=tracer
+   tracer_tmp(:,1:ndim)=tracer(:,1:ndim)
+   tracer_old(:,1:ndim)=tracer(:,1:ndim)
    c1=delt/6
    c2=delt/2
 else if (rk4stage==2) then
@@ -235,15 +301,15 @@ call ghost_update_y(ugrid,2)
 ! interpolate psi to position in tracer_tmp
 do i=1,numt
    ! find cpu which owns the grid point tracer(i,:)
-   if (xcord(intx1)<=tracer_tmp(i,1) .and. tracer_tmp(i,1)<xcord(intx2) .and. &
-       ycord(inty1)<=tracer_tmp(i,2) .and. tracer_tmp(i,2)<ycord(inty2) ) then
+   if (xcord(intx1)<=tracer_tmp(i,1) .and. tracer_tmp(i,1)<xcord(intx2)+delx .and. &
+       ycord(inty1)<=tracer_tmp(i,2) .and. tracer_tmp(i,2)<ycord(inty2)+dely ) then
 
       ! find igrid,jgrid so that point is in box:
       ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
       igrid = intx1 + floor( (tracer_tmp(i,1)-xcord(intx1))/delx )
       jgrid = inty1 + floor( (tracer_tmp(i,2)-ycord(inty1))/dely )
-      ASSERT("advance_tracers(): igrid interp error",igrid<intx2)
-      ASSERT("advance_tracers(): jgrid interp error",jgrid<inty2)
+      ASSERT("advance_tracers(): igrid interp error",igrid<=intx2)
+      ASSERT("advance_tracers(): jgrid interp error",jgrid<=inty2)
 
 
       ! interpolate trhs
@@ -271,14 +337,10 @@ do i=1,numt
          tracer_tmp(i,j)=tracer_old(i,j)+c2*trhs(j)
       enddo
    else
-      if (i<3) then
-         print *,'skipping my_cpu, point',my_pe,i
-         print *,tracer_tmp(i,1),tracer_tmp(i,2)
-      endif
-      ! point does not belong to my_pe, set position to 0
+      ! point does not belong to my_pe, set position to -inf
       do j=1,ndim
-         tracer(i,j)=0
-         tracer_tmp(i,j)=0
+         tracer(i,j)=-1d100
+         tracer_tmp(i,j)=-1d100
       enddo
    endif
 enddo
@@ -287,26 +349,37 @@ enddo
 
 #ifdef USE_MPI
    tracer_work=tracer
-   call MPI_allreduce(tracer_work,tracer,ndim*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_allreduce(tracer_work,tracer,(ndim+1)*numt_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    if (rk4stage/=4) then
       ! not necessary on last stage - we no longer need tracer_tmp
-      tracer_work=tracer_tmp
-      call MPI_allreduce(tracer_work,tracer_tmp,ndim*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      tracer_work(:,1:ndim)=tracer_tmp(:,1:ndim)
+      call MPI_allreduce(tracer_work,tracer_tmp,ndim*numt_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    endif
 #endif
 
 
 
 if (rk4stage==4) then
+   ! xcord set to 1d-100 to denote off processor.  
+   ! if any tracer has left *all* processors, abort:
+   if (minval(tracer(1:numt,1))<g_xcord(1)) then
+      call abort("tracer_advance(): point has left domain") 
+   endif
+
    ! insert points into tracer() if necessary:
-
-
+   if (numt>(3*numt_max/4)) call enlarge_tracers()
+   j=numt
+   call insert(tracer(1,1),tracer(1,2),tracer(1,ndim+1))
+   if (j/=numt) then
+      write(message,'(a,i5)') "tracers(): inserting points. numt=",numt
+      call print_message(message)
+   endif
 endif
 
 
 
-
-
+call wallclock(tmx2)
+tims(16)=tims(16)+(tmx2-tmx1)
 end subroutine
 
 
@@ -346,6 +419,156 @@ end subroutine
 
       return
       end subroutine
+
+
+
+
+
+      subroutine insert(x,y,alf)
+!
+!     inserts a points if the angle that two consecutive points make
+!     with the center of the spiral is bigger than a specified value
+!     (dble prec)
+!
+      use params
+      integer j,k,n,j1,j2,jm1,k1,nt
+      real*8 x(0:numt_max-1),y(0:numt_max-1),alf(0:numt_max-1),&
+            newalf,newx,newy,asq,bsq,csq,cosalf,x0,y0,&
+            denom0,denom1,denom2,denom3,fact0,fact1,fact2,fact3
+      real*8 :: cutoff
+
+      integer,save :: jctr=10
+      real*8 :: epsd=.1
+      cutoff=cos(pi)/30   
+
+      n=numt-1
+
+
+      call fdjctr(x,y,n,jctr)
+!      jctr = 0
+      j = jctr+3
+      x0 = x(jctr)
+      y0 = y(jctr)
+      x(n+1)   =  x(n-1)
+      y(n+1)   = -y(n-1)
+      alf(n+1) = 2*alf(n)-alf(n-1)
+
+      do 30 while (j.le.n-1)
+         j1 = j+1
+         j2 = j+2
+         jm1 = j-1
+
+         asq = (x(j1) - x(j))**2 + (y(j1) - y(j))**2
+         bsq = (x(j1) - x0)**2 + (y(j1) - y0)**2
+         csq = (x(j)  - x0)**2 + (y(j)  - y0)**2
+         cosalf = (bsq + csq - asq) / (2*sqrt(bsq*csq))
+
+!     insert points if alfa is too small
+
+      if (( cosalf.lt.cutoff ).or.( asq.gt.epsd ) ) then
+          if (numt+1>numt_max) then
+             call abort("error: tracer insertion: array too small")
+          endif
+#if 0
+         print*,' jinsert = ',j,x(j),y(j)
+         if ( asq.gt.epsd ) write(*,'(a,2f10.6)')&
+            'asq,eps  ',sqrt(asq),sqrt(epsd)
+         write(*,'(6e15.3)')cosalf,cutoff,x(0),y(0),x(n),y(n)
+         write(*,'(6e15.3)') bsq,csq
+#endif
+
+
+         newalf = (alf(j1)+alf(j))/2
+
+         denom0 = (alf(jm1)-alf(j))*(alf(jm1)-alf(j1))*&
+                 (alf(jm1)-alf(j2))
+         denom1 = (alf(j)-alf(jm1))*(alf(j)-alf(j1))*&
+                 (alf(j)-alf(j2))
+         denom2 = (alf(j1)-alf(j))*(alf(j1)-alf(jm1))*&
+                 (alf(j1)-alf(j2))
+         denom3 = (alf(j2)-alf(j))*(alf(j2)-alf(j1))*&
+                 (alf(j2)-alf(jm1))
+
+         fact0 = (newalf - alf(j))*(newalf-alf(j1))*&
+                 (newalf-alf(j2))/denom0
+         fact1 = (newalf-alf(jm1))*(newalf-alf(j1))*&
+                 (newalf-alf(j2))/denom1
+         fact2 = (newalf-alf(j))*(newalf-alf(jm1))*&
+                 (newalf-alf(j2))/denom2
+         fact3 = (newalf-alf(j))*(newalf-alf(j1))*&
+                 (newalf-alf(jm1))/denom3
+
+         newx = x(jm1)*fact0 + x(j)*fact1 + x(j1)*fact2 &
+                                            + x(j2)*fact3
+         newy = y(jm1)*fact0 + y(j)*fact1 + y(j1)*fact2 &
+                                            + y(j2)*fact3
+
+
+         do 20 k = n+1,j1,-1
+            k1 = k + 1
+            alf(k1) = alf(k)
+            x(k1)     = x(k)
+            y(k1)     = y(k)
+20       continue
+
+         alf(j1) = newalf
+         x(j1)     = newx
+         y(j1)     = newy
+
+         n = n+1
+         j = j1
+      endif
+
+      j = j+1
+30    continue
+
+      numt=n+1
+      return
+      end subroutine
+
+
+      subroutine fdjctr(x,y,n,jctr)
+!
+!     Finds jctr, where  (x(jctr),y(jctr)) is the inflection
+!     point of the curve
+!
+      implicit none
+      integer n,jctr
+      real*8 x(0:*),y(0:*)
+      real*8 x0,x1,y0,y1,cross
+
+!     Find curvature at j = jctr (>=1)
+
+      x0 = x(jctr-1) - x(jctr)
+      y0 = y(jctr-1) - y(jctr)
+      x1 = x(jctr+1) - x(jctr)
+      y1 = y(jctr+1) - y(jctr)
+
+      cross = x0*y1 - y0*x1
+      if (cross.lt.0) then
+         do 10 while ( (cross.lt.0.).and.(jctr.le.(n-2)) )
+            x0 = -x1
+            y0 = -y1
+            jctr = jctr + 1
+            x1 = x(jctr+1) - x(jctr)
+            y1 = y(jctr+1) - y(jctr)
+            cross = x0*y1 - y0*x1
+10       continue
+      else
+         do 15 while ( (cross.gt.0.).and.(jctr.ge.2) )
+            x1 = -x0
+            y1 = -y0
+            jctr = jctr - 1
+            x0 = x(jctr-1) - x(jctr)
+            y0 = y(jctr-1) - y(jctr)
+            cross = x0*y1 - y0*x1
+15       continue
+      endif
+!      print*,'jctr = ',jctr
+
+      return
+      end subroutine
+
 
 
 
