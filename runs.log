@@ -60,6 +60,35 @@ KH runs.
 autrey
 src/kh
 
+These runs were made to study a problem in the 1024x1024 KH
+results.  Initial results looked great but were not symmetrical.
+Noise at around t=.20 (which was then dissapated) triggered the
+asymmetry.  The noise turned out to be caused by CFL.
+
+Two fixes:
+
+1. lower CFL:
+with mu=2.5e-5   CFL = 1.5:   noise triggers asymetric rollup
+                 CFL = 1.45:  symmetric rollup
+
+
+2. Increase viscosity?
+mu=5e-5
+
+
+
+
+
+khL  1024x1024  mu = 5.0e-5    CFL: 1.5/.25   Noise at t=.25
+                                              KE dissapation does not match
+                                              at t=.15 
+                                              cfl_vis has no effect above .15
+                                             
+kkM  1024x1024  mu = 5.0e-5    CFL: 1.45/.25  IN
+
+
+
+
 
 
 
@@ -72,7 +101,7 @@ khI 1024x1024  mu = 2.5e-5    CFL: 1.50/.25  repeat kh run
                                              check scalars as progressing
                                              yes - can see unstable at .25
 
-khK 1024x1024  mu = 2.5e-5    CFL: 1.45/.25  NEXT???
+khK 1024x1024  mu = 2.5e-5    CFL: 1.45/.25  looks great at t=1.0
 khJ 1024x1024  mu = 2.5e-5    CFL: 1.40/.25  looks great at t=1.0
 khH 1024x1024  mu = 2.5e-5    CFL: 1.25/.25  looks great at t=1.0
 khG 1024x1024  mu = 2.5e-5    CFL: .75/.25   looks great at t=1

@@ -11,19 +11,20 @@ module list
 
 set refin=$HOME/dns/benchmark/benchmark128.inp
 set SRC=$HOME/dns/src
+set WORK=/scratch/taylorm/benchmark
+
+if (!(-d $WORK )) then
+   mkdir /scratch/taylorm
+   mkdir $WORK
+endif
+
 
 cd $SRC
-
 ./gridsetup.py 1 1 32 128 128 128
 make -j 4 dns
-    
-if (!(-d /scratch/mat)) then
-   mkdir /scratch/mat
-endif
-cp dns  /scratch/mat/dns
-
-cd /scratch/mat
-mpirun -np 32 ./dns -d /scratch/taylorm  < $refin 
+cp dns  {$WORK}/dns
+cd $WORK
+mpirun -np 32 ./dns -d .  < $refin 
 
 
 

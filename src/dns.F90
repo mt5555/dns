@@ -87,11 +87,8 @@ call print_message(message)
 tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
-call wallclock(tmx1)
-call dns_solve(Q,q1,work1,work2)
-call wallclock(tmx2)
-tims(2)=tmx2-tmx1
 
+call dns_solve(Q,q1,work1,work2)
 
 
 
@@ -179,6 +176,9 @@ real*8 :: time_old=0
 real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
+real*8 :: tmx1,tmx2
+
+
 
 ints=0
 maxs=0
@@ -220,10 +220,21 @@ do
 
    if (itime>=itime_final) time_final=time
    call time_control(itime,time,Q,q1,q2,q3,work1,work2)
+
+   ! start the main timer *AFTER* 1 complete time step:
+   if (itime==0) call wallclock(tmx1)
+
    itime=itime+1
    if (time >= time_final) exit
 
 enddo
+
+
+call wallclock(tmx2)
+tims(2)=tmx2-tmx1
+
+
+
 end subroutine
 
 
