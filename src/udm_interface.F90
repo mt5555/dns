@@ -5,9 +5,9 @@ subroutine udm_dummy()
 end subroutine
 
 #else
+#include "macros.h"
 
-
-subroutine udm_write_uvw(fname,Q,Qhat,work1,work2)
+subroutine udm_write_uvw(fname,time,Q,Qhat,work1,work2)
 !
 ! 
 !
@@ -19,12 +19,13 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+real*8 :: time
 character(len=80) fname
 
 
 !local
 character(len=80) message
-integer :: n
+integer :: n,i,j,k
 
 
 integer len1, len2, fidudm, gidudm, sgidudm, dsidudm, infoid, ierr

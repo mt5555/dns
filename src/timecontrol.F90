@@ -322,7 +322,7 @@ if (doit_output) then
    else if (equations==NS_UVW) then
 #ifdef UDM_OUTPUT
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
-      call udm_write_uvw(fname,Q,Qhat,work1,work2)
+      call udm_write_uvw(fname,time,Q,Qhat,work1,work2)
 #else
       ! NS, primitive variables
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"

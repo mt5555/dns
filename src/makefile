@@ -100,8 +100,8 @@ ifeq ($(UNAME),OSF1)
 
    #UDM = -DHAVE_UDM -DUDM_OUTPUT -DUDM_RESTART
    #UDM = -DHAVE_UDM -DUDM_OUTPUT
-   UDM = -DHAVE_UDM 
-   UDMLIB = 
+   UDM = -I../../udm/udm/include -DHAVE_UDM 
+   UDMLIB = -L../../udm/udm/lib -ludm 
 
    ifeq ($(HOST),milkyway.lanl.gov)
       MPI = -DUSE_MPI -I/usr/opt/MPI196/include
@@ -112,7 +112,7 @@ ifeq ($(UNAME),OSF1)
       LSFFLAGS = 
    endif
 
-   LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  #-Lstk -lstk 
+   LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  $(UDMLIB) #-Lstk -lstk 
 
    #flag for OPENMP:  -omp
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
