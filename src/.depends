@@ -1,0 +1,14 @@
+bc.o: params.o 
+dns.o: params.o 
+fft99_interface.o: macros.h 
+fftops.o: macros.h params.o fft_interface.o transform.o 
+fileio.o: params.o 
+init_data.o: params.o fft_interface.o 
+init_grid.o: params.o fft_interface.o 
+init_model.o: params.o fft_interface.o 
+init_mpi.o: macros.h params.o fft_interface.o mpi.o 
+ns3d.o: macros.h params.o 
+params.o: macros.h 
+test.o: macros.h params.o fft_interface.o 
+transform.o: macros.h params.o mpi.o 
+util.o: macros.h 
