@@ -1180,7 +1180,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3)
 
 real*8 :: delu1,delu2,delu3
 real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
-real*8 :: u_t1_sq,u_t2_sq
+real*8 :: u_t1_sq,u_t2_sq,u_l_sq
 integer :: p,idel,idir
 
 delu1=ur1-u1
