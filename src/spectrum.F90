@@ -1207,7 +1207,7 @@ if (ndim<3) then
    call abort("compute_helicity_specturm: can only be used in 3D")
 endif
 
-#undef TESTEXP
+#define TESTEXP
 #ifdef TESTEXP
 ! 5,-3,1   xfac=8   efac=64    N=64
 ! 0,-3,1   xfac=4   efac=32
@@ -1297,7 +1297,8 @@ enddo
 enddo
 print *,'energy (sin/cos) = ',e1
 print *,'energy (complex) = ',e2
-return
+!return
+stop
 #endif
 
 
