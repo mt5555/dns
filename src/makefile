@@ -100,11 +100,16 @@ ifeq ($(UNAME),AIX)
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
-   # defaults for asci Q: MPI paths loaded via modules
-   MPI =  -DUSE_MPI -DUSE_MPI_IO 
-   MPILIB =  -lfmpi -lmpio -lmpi  -lelan
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
+
+   #defaults for QA
+   MPI =  -DUSE_MPI -DUSE_MPI_IO 
+   MPILIB =  -lfmpi -lmpio -lmpi  -lelan
+   UDM = 
+   UDMLIB = 
+   LDFLAGS =  -lcxml 
+
 
    # QSC
    HNAME = $(shell hostname | grep qsc)
@@ -128,13 +133,6 @@ ifeq ($(UNAME),OSF1)
       LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) 
    endif
 
-   # QA
-   HNAME = $(shell hostname | grep qa)
-   ifneq ($(HNAME),)
-      UDM = 
-      UDMLIB = 
-      LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
-   endif
 
 
    ifeq ($(HOST),milkyway.lanl.gov)
