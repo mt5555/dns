@@ -13,13 +13,13 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 ! local variables
-integer,parameter :: nints_e=23
+integer,parameter :: nints_e=14
 real*8 :: ints_e(nints_e)
 real*8 :: x
 integer i,j,k,n,ierr
 character(len=80) :: message
 character,save :: access="0"
-CPOINTER fid,fidj
+CPOINTER fid,fidj,fidS
 
 ! append to output files, unless this is first call.
 if (access=="0") then
@@ -65,10 +65,19 @@ if (compute_struct==1) then
          call abort(message)
       endif
 
+      write(message,'(f10.4)') 10000.0000 + time_initial
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".s2v2"
+      call copen(message,access,fidS,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .s2v2 file errno=",ierr
+         call abort(message)
+      endif
+
    endif
-   call output_pdf(time,fid,fidj)
+   call output_pdf(time,fid,fidj,fidS)
    if (my_pe==io_pe) call cclose(fid,ierr)
    if (my_pe==io_pe) call cclose(fidj,ierr)
+   if (my_pe==io_pe) call cclose(fidS,ierr)
    endif
 
 

@@ -26,6 +26,9 @@ integer :: countx=-1,county=-1,countz=-1
 integer           :: structf_init=0
 integer,parameter :: delta_num_max=32
 integer           :: delta_val(delta_num_max)
+integer :: numx=0,numy=0,numz=0          ! actual number of delta's in each direction
+                                         ! allowed by the grid
+
 
 ! max range:  10 ... 10
 integer,parameter :: pdf_max_bin=2000
@@ -77,12 +80,12 @@ end type
 !
 ! 4th order
 !  SF(i+6)    (i,j)
-!             (1,1)     delta_j(u_j**2) delta_j(u_2**2)                 
-!             (2,1)     delta_j(u_j**2) delta_j(u_3**2)                 
-!             (1,2)     delta_j(u_j**2) delta_j(u_1**2)           
-!             (2,2)     delta_j(u_j**2) delta_j(u_3**2)
-!             (1,3)     delta_j(u_j**2) delta_j(u_1**2)
-!             (2,3)     delta_j(u_j**2) delta_j(u_2**2)
+!             (1,1)     delta_j(u_1**2) delta_j(u_2**2)                 
+!             (2,1)     delta_j(u_1**2) delta_j(u_3**2)                 
+!             (1,2)     delta_j(u_2**2) delta_j(u_1**2)           
+!             (2,2)     delta_j(u_2**2) delta_j(u_3**2)
+!             (1,3)     delta_j(u_3**2) delta_j(u_1**2)
+!             (2,3)     delta_j(u_3**2) delta_j(u_2**2)
 !              
 ! Note: the PDF's are further normalized so that they all have the same
 ! units.  3rd order SF are raised to the 1/3 power, 4th order SF
@@ -114,6 +117,16 @@ real*8  :: one_third = (1d0/3d0)
 integer,parameter :: NUM_JPDF=3
 type(jpdf_structure_function) ::  jpdf_v(NUM_JPDF,3)
 
+
+!
+! some strain/vorticity structure functions
+! saved as structure functions, not PDF's
+!
+real*8 :: v2v2_str(delta_num_max,3)
+real*8 :: S2S2_str(delta_num_max,3)
+real*8 :: S2v2_str(delta_num_max,3)
+
+
 contains
 
 
@@ -131,7 +144,6 @@ use params
 implicit none
 
 integer idel,i
-integer :: numx=0,numy=0,numz=0
 integer :: nmax
 ! we can compute them up to g_nx/2, but no reason to go that far.
 nmax=max(g_nx/3,g_ny/3,g_nz/3)
@@ -348,13 +360,13 @@ end subroutine
 
 
 
-subroutine output_pdf(time,fid,fidj)
+subroutine output_pdf(time,fid,fidj,fidS)
 use params
 implicit none
 real*8 time
-CPOINTER fid,fidj
+CPOINTER fid,fidj,fidS
 
-integer i,j,ierr,ndelta
+integer i,j,ierr,ndelta,numm
 character(len=80) message
 real*8 x
 
@@ -396,12 +408,32 @@ if (my_pe==io_pe) then
    x=1 ; call cwrite8(fid,x,1)
    call normalize_and_write_pdf(fid,epsilon,epsilon%nbin)   
 
-   ! call cwrite8(fidj,time,1)
+   call cwrite8(fidj,time,1)
    ! number of structure functions
-   !x=NUM_SF ; call cwrite8(fidj,x,1)
-   !do j=1,3
-   !   call normalize_and_write_pdf(fidj,jpdf_v(j),jpdf_v(j)%nbin)
-   !enddo
+   x=NUM_SF ; call cwrite8(fidj,x,1)
+   do i=1,NUM_JPDF
+   do j=1,3
+      call normalize_and_write_jpdf(fidj,jpdf_v(i,j),jpdf_v(i,j)%nbin)
+   enddo
+   enddo
+
+
+   ! some strain/vorticity structure functions (not stored as pdf's)
+   numm=max(numx,numy,numz) 
+   call cwrite8(fidS,time,1)       ! time
+   x=3; call cwrite8(fidS,x,1)     ! number of structure functions
+   x=numm; call cwrite8(fidS,x,1)  ! number of delta's
+
+   ! number of structure functions
+   do i=1,3
+      call cwrite8(fidS,v2v2_str(1,i),numm)
+   enddo
+   do i=1,3
+      call cwrite8(fidS,S2S2_str(1,i),numm)
+   enddo
+   do i=1,3
+      call cwrite8(fidS,S2v2_str(1,i),numm)
+   enddo
 endif
 
 
@@ -643,7 +675,7 @@ end subroutine
 subroutine compute_S2v2structs(v2,S2,n1,n1d,n2,n2d,n3,n3d,v2v2,S2S2,S2v2)
 integer :: n1,n1d,n2,n2d,n3,n3d
 real*8 :: v2(n1d,n2d,n3d),S2(n1d,n2d,n3d)
-real*8 :: v2v2,S2S2,S2v2
+real*8 :: v2v2(delta_num_max),S2S2(delta_num_max),S2v2(delta_num_max)
 
 ! local
 integer :: i,j,k,idel,ndelta,i2
@@ -661,9 +693,9 @@ do k=1,n3
                ! compute structure functions for U,V,W 
                i2 = i + delta_val(idel)
                if (i2>n1) i2=i2-n1
-               v2v2=v2v2 + v2(i,j,k)*v2(i2,j,k)
-               S2S2=S2S2 + S2(i,j,k)*S2(i2,j,k)
-               S2v2=S2v2 + S2(i,j,k)*v2(i2,j,k)
+               v2v2(idel)=v2v2(idel) + v2(i,j,k)*v2(i2,j,k)
+               S2S2(idel)=S2S2(idel) + S2(i,j,k)*S2(i2,j,k)
+               S2v2(idel)=S2v2(idel) + S2(i,j,k)*v2(i2,j,k)
             enddo
          endif
       enddo
@@ -1108,7 +1140,6 @@ integer i,j,k,n,m1,m2
 real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
 real*8 :: dummy(1),S2sum,ensave
 real*8 :: tmx1,tmx2
-real*8 :: v2v2_str(3), S2S2_str(3), S2v2_str(3)
 
 
 
@@ -1263,23 +1294,23 @@ enddo
 call transpose_to_x(work,gradu,n1,n1d,n2,n2d,n3,n3d)
 call transpose_to_x(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
 call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
-     v2v2_str(1),S2S2_str(1),S2v2_str(1))
+     v2v2_str(1,1),S2S2_str(1,1),S2v2_str(1,1))
 
 call transpose_to_y(work,gradu,n1,n1d,n2,n2d,n3,n3d)
 call transpose_to_y(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
 call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
-     v2v2_str(2),S2S2_str(2),S2v2_str(2))
+     v2v2_str(1,2),S2S2_str(1,2),S2v2_str(1,2))
 
 call transpose_to_z(work,gradu,n1,n1d,n2,n2d,n3,n3d)
 call transpose_to_z(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
 call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
-     v2v2_str(3),S2S2_str(3),S2v2_str(3))
+     v2v2_str(1,3),S2S2_str(1,3),S2v2_str(1,3))
 
 
 
 
 
-ASSERT("compute_all_pdfs: ns too small ",ns>=23)
+ASSERT("compute_all_pdfs: ns too small ",ns>=14)
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)
@@ -1290,16 +1321,6 @@ do n=1,3
 scalars(10+n)=u2(n)
 enddo
 scalars(14)=S2sum
-do n=1,3
-scalars(14+n)=v2v2_str(n)
-enddo
-do n=1,3
-scalars(17+n)=S2S2_str(n)
-enddo
-do n=1,3
-scalars(20+n)=S2v2_str(n)
-enddo
-
 
 
 

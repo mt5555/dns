@@ -274,6 +274,7 @@ if (my_pe==io_pe) then
    sum_tot2=0
    sum_diss=0
    sum_f=0
+   write(*,'()') '    i      d(E_k)/dt      d(E_k)/dt      T      D      F'
    do i=0,iwave
       write(*,'(i4,5f12.4)') i,transfer_r(i),&
            spec_r(i)+spec_diff(i)+spec_f(i), &
@@ -526,7 +527,7 @@ do j=1,ny_2dz
          if (km==0) energy=energy/2
          if (jm==0) energy=energy/2
          if (im==0) energy=energy/2
-         energy=energy*p1(i,j,k)*p2(i,j,k)
+         energy=energy*p1(k,i,j)*p2(k,i,j)
          
          spec_r(iwave)=spec_r(iwave)+energy
          
