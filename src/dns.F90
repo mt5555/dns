@@ -33,10 +33,14 @@ write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data
 
 call wallclock(tmx2)
-tims(1)=tmx2-tmx1
 
 write(message,'(a)') 'Time stepping...'
 call print_message(message)
+
+! set all counters to zero (so they dont include initialization)
+tims=0
+! tims(1) times the total initialization
+tims(1)=tmx2-tmx1
 
 call wallclock(tmx1)
 call dns_solve(Q)
@@ -54,7 +58,13 @@ write(message,'(a,f12.5,a)') 'initialization: ',tims(1),' s'
 call print_message(message)
 write(message,'(a,f12.5,a)') 'dns_solve:      ',tims(2),' s'
 call print_message(message)
-write(message,'(a,f12.5,a,f4.3,a)') '   time_control:   ',tims(3),' s (',tims(3)/tims(2),')'
+write(message,'(a,f12.5,a,f4.3,a)') '   RK4: (estimated)',tims(2)-tims(3)-tims(5),' s'
+call print_message(message)
+write(message,'(a,f12.5,a,f4.3,a)') '   time_control:   ',tims(3),' s'
+call print_message(message)
+write(message,'(a,f12.5,a,f4.3,a)') '   RHS:            ',tims(5),' s'
+call print_message(message)
+write(message,'(a,f12.5,a,f4.3,a)') '       transpose:      ',tims(4),' s'
 call print_message(message)
 
 call close_mpi

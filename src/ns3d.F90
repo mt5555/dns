@@ -31,10 +31,11 @@ real*8 rhs(nx,ny,nz,n_var)
 real*8 d1(nx,ny,nz)
 real*8 d2(nx,ny,nz)
 real*8 work(nx,ny,nz)
-real*8 dummy
+real*8 dummy,tmx1,tmx2
 real*8 :: ke_diss,ke_diss2,vor,hel
 integer n,i,j,k,numder
 
+call wallclock(tmx1)
 
 ke_diss=0
 ke_diss2=0
@@ -137,6 +138,8 @@ if (compute_ints==1) then
    ints(5)=hel
 endif
 
+call wallclock(tmx2)
+tims(5)=tims(5)+(tmx2-tmx1)
 end
 
 

@@ -144,6 +144,7 @@ real*8 :: tims(ntimers)=0
 !  tims(2)    total runtime after initialization
 !  tims(3)    time spent in time_control()
 !  tims(4)    time spent in transpose
+!  tims(5)    time spent in RHS
 !
 
 

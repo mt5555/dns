@@ -6,6 +6,9 @@ use params
 use mpi
 implicit none
 
+real*8 tmx1,tmx2
+
+
 
 contains
 
@@ -34,7 +37,8 @@ real*8 recbuf(nslabx*nslabz*ny_2dz)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
-      
+
+call wallclock(tmx1)
 
 !
 ! each cube is broken, along the y axis, into mpidims(3) slabs of
@@ -111,6 +115,9 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 #endif
    endif
 enddo
+
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
 end subroutine
 
 
@@ -147,7 +154,7 @@ integer dest_pe3(3),tag
 !
 ! in the z direction, the dimension is nslabz = (nz2-nz1+1)
 
-
+call wallclock(tmx1)
 
 ! If any of these fail, then pt was probably not computed
 ! via a call to transpose_to_z().
@@ -224,6 +231,9 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 #endif
    endif
 enddo
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
+
 end subroutine
 
 
@@ -278,7 +288,7 @@ integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
 
-
+call wallclock(tmx1)
 
 !
 ! each cube is broken, along the z axis, into mpidims(1) slabs of
@@ -357,6 +367,8 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
    endif
 enddo
 
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
 end subroutine
 
 
@@ -386,6 +398,8 @@ real*8 recbuf(nslabx*nslaby*nz_2dx)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
+
+call wallclock(tmx1)
 
 !
 ! each cube is broken, along the z axis, into mpidims(1) slabs of
@@ -466,6 +480,8 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
    endif
 enddo
 
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
 end subroutine
 
 
@@ -507,6 +523,7 @@ integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
 
+call wallclock(tmx1)
 
 !
 ! each cube is broken, along the z axis, into mpidims(1) slabs of
@@ -587,6 +604,8 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
    endif
 enddo
 
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
 end subroutine
 
 
@@ -618,7 +637,7 @@ integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
 
-
+call wallclock(tmx1)
 
 !
 ! each cube is broken, along the z axis, into mpidims(1) slabs of
@@ -698,6 +717,8 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
    endif
 enddo
 
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
 end subroutine
 
 
@@ -751,6 +772,9 @@ real*8 recbuf(nslaby*nslabz*nx_2dy)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
+
+call wallclock(tmx1)
+
 
 !
 ! each cube is broken, along the x axis, into mpidims(2) slabs of
@@ -830,6 +854,8 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
    endif
 enddo
 
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
 end subroutine
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -857,6 +883,8 @@ real*8 recbuf(nslaby*nslabz*nx_2dy)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
+
+call wallclock(tmx1)
 
 !
 ! each cube is broken, along the x axis, into mpidims(2) slabs of
@@ -939,6 +967,8 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
    endif
 enddo
 
+call wallclock(tmx2) 
+tims(4)=tims(4)+(tmx2-tmx1)          
 end subroutine
 
 
