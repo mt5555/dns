@@ -89,7 +89,8 @@ end type
 ! units.  3rd order SF are raised to the 1/3 power, 4th order SF
 ! are raised to the 1/4 power before binning up the PDF.  
 !
-integer,parameter :: NUM_SF=8
+!integer,parameter :: NUM_SF=8
+integer,parameter :: NUM_SF=3   ! just compute first 3 pdfs
 type(pdf_structure_function) ::  SF(NUM_SF,3)
 type(pdf_structure_function) ::  epsilon
 ! number of scalar structure functions:  params.F90::npassive 
@@ -814,6 +815,7 @@ do k=1,n3
       do idel=1,ndelta
          if (delta_val(idel) < n1/2) then
             do i=1,n1
+
                ! compute structure functions for U,V,W 
                do n=1,3
                   i2 = i + delta_val(idel)
@@ -837,6 +839,7 @@ do k=1,n3
                   str(n)%pdf(bin,idel)=str(n)%pdf(bin,idel)+1
                enddo
 
+               if (NUM_SF>=6) then
                ! compute structure functions for U U**2, U V**2 and U W**2
                ! but U * U**2 was already computed above, so replace
                ! this one with U (U**2 + V**2 + W**2)
@@ -861,9 +864,11 @@ do k=1,n3
                   if (bin<-pdf_max_bin) bin=-pdf_max_bin
                   str(nsf)%pdf(bin,idel)=str(nsf)%pdf(bin,idel)+1
                enddo
+               endif
 
 
                ! compute structure functions for U**2 V**2 and U**2  W**2
+               if (NUM_SF>=8) then
                nsf=6
                do n=1,3
                   if (n==ncomp) then
@@ -881,6 +886,7 @@ do k=1,n3
                      str(nsf)%pdf(bin,idel)=str(nsf)%pdf(bin,idel)+1
                   endif
                enddo
+               endif
 
 
 

@@ -20,7 +20,8 @@ ifeq ($(UNAME),Linux)
    #VENDOR=INTEL
    MPI = 
    MPILIB = 
-   ifeq ($(HOST),sulaco)
+   ifeq ($(HOST),s854018)
+      VENDOR=INTEL
       #MPI = -DUSE_MPI -I/contrib/lam/include
       #MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
       #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include

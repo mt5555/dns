@@ -1343,6 +1343,7 @@ do p=8,min(10,pmax)
 enddo
 #endif
 
+#if 0
 u_l=abs(u_l)
 u_t1=abs(u_t1)
 u_t2=abs(u_t2)
@@ -1400,11 +1401,31 @@ Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq
 Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l       ! ** -.2
 Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1
 Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2
+#endif
+
+
+! 2.45 2.55 2.65 2.75 2.85 2.95 3.05 3.15 3.25 
+u_l=abs(u_l)
+
+u_l_sq=u_l**.1
+u_l_3=u_l**.2
+
+u_l=u_l**2.85
+
+Dl(idel,idir,2)  =  Dl(idel,idir,2)  + u_l_sq                    ! 2.45
+Dl(idel,idir,3)  =  Dl(idel,idir,3)  + u_l_sq*u_l_3              ! 2.55
+Dl(idel,idir,4)  =  Dl(idel,idir,4)  + u_l_sq*u_l_3*u_l_3        ! 2.65
+Dl(idel,idir,5)  =  Dl(idel,idir,5)  + u_l_sq*u_l_3*u_l_3*u_l_3  ! 2.75
+
+Dl(idel,idir,6)  =  Dl(idel,idir,6)  + u_l                       ! 2.85
+
+Dl(idel,idir,7)  =  Dl(idel,idir,7)  + u_l*u_l_sq                ! 2.95
+Dl(idel,idir, 8) =  Dl(idel,idir, 8) + u_l*u_l_3                ! 3.05
+Dl(idel,idir, 8) =  Dl(idel,idir, 9) + u_l*u_l_sq*u_l_3         ! 3.15
+Dl(idel,idir,10) =  Dl(idel,idir,10) + u_l*u_l_3*u_l_3          ! 3.25
 
 
 
-
-                          
 else
 
 Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq
