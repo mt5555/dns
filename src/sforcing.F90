@@ -305,8 +305,8 @@ real*8 costta, tta, tta_sgn, theta, h_angle, phi
 character(len=80) :: message
 
 !should have h_angle inputted by user eventually
-h_angle = 0.0d0
-! h_angle = pi/2.0d0
+!h_angle = 0.0d0
+h_angle = pi/2.0d0
 
 fix = 1
 
