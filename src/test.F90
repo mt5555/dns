@@ -365,7 +365,7 @@ tx2=tmax
 call MPI_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 tx2=tave
 call MPI_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-tave=tave/initial_live_procs
+tave=tave/ncpus
 #endif
 
 write(message,'(a,i3,a,2f10.5)') 'wall clock transpose_to_z n=',n,' time=',&
@@ -389,7 +389,7 @@ tx2=tmax
 call MPI_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 tx2=tave
 call MPI_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-tave=tave/initial_live_procs
+tave=tave/ncpus
 #endif
 
 write(message,'(a,i3,a,2f10.5)') 'wall clock transpose_from_z n=',n,' time=',&

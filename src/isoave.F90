@@ -107,7 +107,7 @@ real*8 :: Q(nx,ny,nz,ndim)
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
-real*8 :: u_l,u_t1,u_t2
+real*8 :: u_l,u_t1,u_t2,rnorm
 integer :: idir,idel,i2,j2,k2,i,j,k,n
 
 if (firstcall) then
@@ -130,14 +130,12 @@ do idir=1,ndir
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',&
            dir(:,idir),')'
 
-   do idel=1,ndelta
-      
-      rvec = dir(:,idir)*delta_val(idel)
-      rhat = rvec/sqrt(rvec(1)**2+rvec(2)**2+rvec(3)**2)
+      rhat = dir(:,idir)*delta_val(idel)
+      rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
       call compute_perp(rhat,rperp1,rperp2)
+
 #if 0
       ! check orthoginality
-      print *,'idel,idir',idel,idir
       print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
            sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
            sqrt(rperp2(1)**2+rperp2(2)**2+rperp2(3)**2)
@@ -148,6 +146,13 @@ do idir=1,ndir
            rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
       
 #endif
+
+
+   do idel=1,ndelta
+
+      rvec = dir(:,idir)*delta_val(idel)
+      ! dont bother computing deltas above 50% domain size
+      if ( (rvec(1)**2+rvec(2)**2+rvec(3)**2) >= g_nmin**2/4) exit
       
       if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
       if (rvec(2)<0) rvec(2)=rvec(2)+nslaby
@@ -379,9 +384,9 @@ endif
 
 ! take cross product for remaining vector:
 ! rp2 = r cross rp1
-rp2(1) =  r(2)*rp1(3) - r(3)*rp2(2)
-rp2(2) =-(r(1)*rp1(3) - r(3)*rp2(1))
-rp2(3) =  r(1)*rp1(2) - r(2)*rp2(1)
+rp2(1) =  r(2)*rp1(3) - r(3)*rp1(2)
+rp2(2) =-(r(1)*rp1(3) - r(3)*rp1(1))
+rp2(3) =  r(1)*rp1(2) - r(2)*rp1(1)
 
 
 end subroutine

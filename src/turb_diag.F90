@@ -248,8 +248,8 @@ seed=seed+my_pe
 call random_seed(put=seed)
 deallocate(seed)
 
-if (initial_live_procs>1) then
-   call abort("iso stats requires only 1 cpu")
+if (ncpus>1) then
+   call abort("iso stats requires only 1 cpu in cartesian communicator")
 endif
 
 do trys=1,num_trys

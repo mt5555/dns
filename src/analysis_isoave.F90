@@ -45,7 +45,7 @@ tstop=11.0
 tinc=1.0
 icount=0
 
-call init_mpi       
+call init_mpi
 call init_mpi_comm3d()
 call init_model
 

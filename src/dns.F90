@@ -90,7 +90,7 @@ tims_ave=tims
 #ifdef USE_MPI
    call MPI_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    call MPI_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   tims_ave=tims_ave/initial_live_procs
+   tims_ave=tims_ave/ncpus
 #endif
 tims_max=tims_max/60
 tims_ave=tims_ave/60

@@ -17,6 +17,7 @@ mpidims(3)=ncpu_z
 io_pe=0
 initial_live_procs=1
 
+
 my_x=0
 my_y=0
 my_z=0
@@ -32,15 +33,9 @@ call mpi_comm_size(MPI_COMM_WORLD,initial_live_procs,ierr3)
 if (ierr3/=0) call abort("mpi_comm_size failure")
 #endif
 
-if (ncpu_x * ncpu_y * ncpu_z /= initial_live_procs) then
-   call print_message("Error: incorrect number of cpus");
-   write(message,'(a,i5,a,i3,a,i3,a,i3)') "Parallel decomposition requested: ncpus= ", &
-      ncpu_x*ncpu_y*ncpu_z," = ",ncpu_x," x",ncpu_y," x",ncpu_z
-   call print_message(message)
-   write(message,'(a,i5)') "Actual ncpus = ",initial_live_procs
-   call print_message(message)
-   call abort("Terminating.")
-endif
+
+ncpus=initial_live_procs
+
 end subroutine
 
 
@@ -56,12 +51,24 @@ logical isperiodic(3),reorder
 integer ierr1,ierr2,ierr3,rank
 character(len=80) message
 
+if (ncpu_x * ncpu_y * ncpu_z /= ncpus) then
+   call print_message("Error: incorrect number of cpus");
+   write(message,'(a,i5,a,i3,a,i3,a,i3)') "Parallel decomposition requested: ncpus= ", &
+      ncpu_x*ncpu_y*ncpu_z," = ",ncpu_x," x",ncpu_y," x",ncpu_z
+   call print_message(message)
+   write(message,'(a,i5)') "Total cpus = ",initial_live_procs
+   write(message,'(a,i5)') "cpus for cartesian communicator = ",ncpus
+   call print_message(message)
+   call abort("Terminating.")
+endif
+
 
 #ifdef USE_MPI
 isperiodic(1)=.false.
 isperiodic(2)=.false.
 isperiodic(3)=.false.
 reorder=.true.
+
 
 call mpi_cart_create(MPI_COMM_WORLD,3,mpidims,isperiodic,reorder,comm_3d,ierr1)
 if (ierr1/=0) call abort("mpi_cart_create failure")
@@ -74,7 +81,7 @@ if (ierr1/=0) call abort("mpi_cart_get failure")
 call mpi_cart_rank(comm_3d,mpicoords,my_pe,ierr2)
 
 write(message,'(a,i5,a,i3,a,i3,a,i3)') "Running parallel.  NCPUS=", &
-   initial_live_procs," = ",ncpu_x," x",ncpu_y," x",ncpu_z
+   ncpus," = ",ncpu_x," x",ncpu_y," x",ncpu_z
 call print_message(message)
 #else
 call print_message("Running single threaded")

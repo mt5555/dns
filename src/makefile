@@ -97,9 +97,9 @@ ifeq ($(UNAME),OSF1)
 
    LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  #-Lstk -lstk 
 
-   #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
-   #FFLAGS = -recursive -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   FFLAGS = -fast -recursive -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
+   #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
+   #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
+   FFLAGS = -fast -automatic -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
    CC = cc $(LSFFLAGS)
 endif
 
@@ -188,9 +188,9 @@ splitspec:  splitspec.o fileioc.o
 analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis analysis.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
-	$(LINK) -o analysis_rms analysis_rms.o sforcing.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+	$(LINK) -o analysis_rms analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
-	$(LINK) -o analysis_isoave analysis_isoave.o sforcing.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+	$(LINK) -o analysis_isoave analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 
 
