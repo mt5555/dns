@@ -921,6 +921,8 @@ scalars(48)=lnux1
 scalars(49)=lnux2
 scalars(50)=lnux3
 scalars(51)=lnux4
+i=51
+
 
 
 if (i/=ns) then

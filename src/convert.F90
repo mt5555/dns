@@ -114,10 +114,16 @@ icount=icount+1
             call fft3d(Q(1,1,1,n),work1)
          enddo
       endif
-      basename=runname(1:len_trim(runname)) // "-new."
-!      call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
-      basename=runname(1:len_trim(runname)) // "-raw."
-      call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
+      if (w_spec /= r_spec) then
+         ! converting from spec to grid (or vice versa) 
+         basename=runname(1:len_trim(runname))
+      else
+         ! dont clobber input file!
+         basename=runname(1:len_trim(runname)) // "-new."
+      endif
+      call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
+!      basename=runname(1:len_trim(runname)) // "-raw."
+!      call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
    endif
 
    if (convert_opt==1) then  ! -cout vor

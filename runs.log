@@ -23,6 +23,8 @@ rescale:  restart run with tmix256D-rescale.inp
 
 init_cond_subtype==3
 spectrum peaked at k=6 (instead of 10)
+lowered mu from 3e-4 to 1.75e-4 because of change in k_peak.
+(kmax*eta at t=0 is 1.5)
 Change KE corr. scalar from type 1 to 3:   ke_thresh = .5?   debug.
 
 add to matlab:  Sk_{ln eps_c} = <psi^3>/<psi^2>^{3/2}

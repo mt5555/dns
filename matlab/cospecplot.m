@@ -12,18 +12,25 @@ tsave=[];
 mu=1;
 
 sc_count=0;
-for sc=1:18
+%for sc=1:18
 %for sc=1111:1111   
-%for sc=-1:-1        % regular file, dont use a _sc postfix
+for sc=-1:-1        % regular file, dont use a _sc postfix
 sc_count=sc_count+1;
 
-timename='0000.7019';
+%timename='0000.7019';
 %timename='0000.7536';
-basename='/scratch1/taylorm/decay2048/specold/decay2048-new.';
+%basename='/scratch1/taylorm/decay2048/specold/decay2048-new.';
 %basename='/scratch1/taylorm/decay2048/decay2048-new.';
 
 %timename='0002.0000';
 %basename='/scratch2/taylorm/sc1024A/sc1024A';
+
+%timename='0000.7019';
+%basename='/scratch1/taylorm/decay2048/decay2048-new.';
+
+timename='0000.0000';
+basename='/scratch1/taylorm/shear/shear';
+
 
 
 namesc=sprintf('%i5',sc+10000); namesc=namesc(2:5);
@@ -185,14 +192,20 @@ while (time>=.0 & time<=9999.3)
       cospec_2=uw_r/cospec_scale;
       cospec_3=vw_r/cospec_scale;
     elseif (il==1 & jl==3)         % S13 dominant
+      ! u2 -> -u3   u3 -> u2   u1,3 -> u1,2
+      ! E12 -> -E13    E13 -> E12,  E23 -> -E23
       cospec_1=uw_r/cospec_scale;
       cospec_2=-uv_r/cospec_scale;  
       cospec_3=-vw_r/cospec_scale;
     elseif (il==2 & jl==3)
+      ! u1 -> u2   u2 -> u3   u3 -> u1  
       cospec_1=vw_r/cospec_scale;
       cospec_2=uv_r/cospec_scale;  
       cospec_3=uw_r/cospec_scale;
     elseif (il==2 & jl==1) 
+      ! u2 -> -u1   u1 -> u2   u2,1 -> -u1,2
+      ! E12 -> -E12    E13 -> E23,  E23 -> -E13   
+      ! add extra sign change because sign of shear changed:
       cospec_1=uv_r/cospec_scale;  
       cospec_2=-uw_r/cospec_scale;
       cospec_3=vw_r/cospec_scale;

@@ -623,19 +623,29 @@ else
 endif
 
 else if (equations==SHALLOW) then
-   if (header_type /= 1) call abort("Error: SHALLOW I/O requires header_type==1");
    fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
+   if (r_spec) fname=fname(1:len_trim(fname)) // "s"
    call print_message("Input: ")
    call print_message(fname)
-   call singlefile_io(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+   call singlefile_io3(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec,header_type)
+
    fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
+   if (r_spec) fname=fname(1:len_trim(fname)) // "s"
    call print_message(fname)
-   call singlefile_io(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe)
-   if (n_var==3) then
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".h"
-      call print_message(fname)
-      call singlefile_io(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe)
+   call singlefile_io3(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec,header_type)
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".h"
+   if (r_spec) fname=fname(1:len_trim(fname)) // "s"
+   call print_message(fname)
+   call singlefile_io3(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec,header_type)
+
+   if (r_spec) then
+      ! transform to grid space
+      do n=1,n_var
+         call ifft3d(Q(1,1,1,n),work1)
+      enddo
    endif
+
+
 else if (equations==NS_PSIVOR) then
    if (header_type /= 1) call abort("Error: NS_PSIVOR I/O requires header_type==1");
    call tracers_restart(io_pe)
@@ -740,18 +750,23 @@ else if (equations==NS_UVW) then
 else if (equations==SHALLOW) then
    ! shallow water 2D
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".u"
-   call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+   if (w_spec) fname=fname(1:len_trim(fname)) // "s"
+   call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,0,io_pe,w_spec,header_type)
+
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".v"
-   call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
-   if (n_var==3) then
-      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".h"
-      call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
-   endif	
-   if (ndim==2) then
+   if (w_spec) fname=fname(1:len_trim(fname)) // "s"
+   call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,w_spec,header_type)
+
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".h"
+   if (w_spec) fname=fname(1:len_trim(fname)) // "s"
+   call singlefile_io3(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe,w_spec,header_type)
+
+   if (ndim==2 .and. .not. w_spec) then
       call vorticity2d(q1,Q,work1,work2)
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
       call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
    endif
+
 else if (equations==NS_PSIVOR) then
    call tracers_save(io_pe,time)
    ! 2D NS psi-vor formulation
