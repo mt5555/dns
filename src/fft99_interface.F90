@@ -106,7 +106,7 @@ subroutine fftinit(n,index)
 integer n,index
 character*80 message
 
-if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initialize first!");
+if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initialize first!")
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
 
 fftdata(index)%size=n
@@ -128,7 +128,7 @@ CALL DZFFTM (0, n, 1, 0, 0, 0, 0, 0, fftdata(index)%trigs, 0,0)
 #else
 call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
 #endif
-if (n<0) call abort("Error; invalid value of n for fft");
+if (n<0) call abort("Error: invalid value of n for fft")
 
 end subroutine
 
@@ -182,7 +182,7 @@ character*80 message_str
 
 integer index,jj,j,k,numffts
 if (n1==1) return
-ASSERT("ifft1: dimension too small ",n1+2<=n1d;)
+ASSERT("ifft1: dimension too small ",n1+2<=n1d)
 call getindex(n1,index)
 
 
@@ -232,7 +232,7 @@ real*8 :: w(min(fftblocks,n2)*(n1+1))
 
 integer index,jj,j,k,numffts
 if (n1==1) return
-ASSERT("fft1: dimension too small ",n1+2<=n1d);
+ASSERT("fft1: dimension too small ",n1+2<=n1d)
 call getindex(n1,index)
 
 scale=n1
