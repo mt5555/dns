@@ -15,13 +15,14 @@ fid2=-1;
 %fid=fopen('iso12_256_200.scalars','r','b'); 
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
-%fid=endianopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r'); 
+fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
+nx=256;
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
-nx=2048;
+%fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+%nx=2048;
 
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
@@ -158,6 +159,8 @@ print -djpeg -r72 vor.jpg
 
 lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
 R_l = lambda.*sqrt(2*ints(6,:)/3)/mu;
+
+R_large = 1 * sqrt(2*ke) / mu;
 
 figure(2); subplot(1,1,1)
 plot(time,R_l)
