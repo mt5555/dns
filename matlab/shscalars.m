@@ -13,7 +13,7 @@ range=0:50;
 
 
 %fid=fopen('../src/sht/rung_500_0000.0000.scalars','r','l'); 
-fid=fopen('../src/sht/rune_5000_0000.0000.scalars','r','l'); 
+fid=fopen('../src/rune_0000.0000.scalars','r','l'); 
 
 
 
