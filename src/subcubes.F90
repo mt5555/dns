@@ -56,7 +56,7 @@ subcube_size=ssize*delx
 wsubcube_size=2*subcube_size   ! 2x larger
 !diff = ssize*delx     ! no overlap
 !diff = ssize*delx/2  ! overlap 50%
-diff = ssize*delx*.75  ! 25% overlap
+diff = nint(g_nx/12)*delx    ! 12x12x12 subcubes
 
 
 if (allocated(subcube_cords)) deallocate(subcube_cords)
