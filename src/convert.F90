@@ -408,7 +408,7 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 integer :: sc
-integer :: ssize
+integer :: ssize,irot
 real*8,allocatable  :: dx(:),dy(:),dz(:)
 real*8,allocatable :: dslice(:,:,:)
 real*8 :: mat(3,3,3),gradu(3,3)
@@ -429,28 +429,37 @@ call ghost_update_y(Q,3)
 call ghost_update_z(Q,3)
 
 
-fname= rundir(1:len_trim(rundir)) // "subcubes.lst"
-open(84,err=100,file=fname)
+write(sdata,'(f10.4)') 10000.0000 + time
+basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+fname = basename(1:len_trim(basename)) // sdata(2:10) // '.select'
+call print_message(fname)
+open(84,err=100,file=fname(1:len_trim(fname)),form='formatted')
 
 sc=0  ! subcube counter
 do
    sc=sc+1
    ! read coordinates of subcube corner and size (gridpoints)
    ! corner(1:3), ssize, gradu
-   read(83,*,err=100,end=100) corner(1),corner(2),corner(3),ssize
+   read(84,*,err=100,end=100) corner(1),corner(2),corner(3),ssize
    do i=1,3
-      read(83,*,err=100,end=100) (gradu(i,j),j=1,3)
+      read(84,*,err=100,end=100) (gradu(i,j),j=1,3)
    enddo
 
+   if (io_pe==my_pe) then
+      write(*,'(a,3f12.5)') 'corner: ',corner(1:3)
+   endif
+
    ! compute rotation matrix from gradu(3,3):
-   ASSERT("compute rotation matrix",.false.)   
+   irot=0
+   !ASSERT("compute rotation matrix",.false.)   
 
    ! allocate memory:
-   allocate(dx(2*ssize))
-   allocate(dy(2*ssize))
-   allocate(dz(2*ssize))
-   allocate(dslice(2*ssize,2*ssize,1) )
-
+   if (sc==1) then
+      allocate(dx(2*ssize))
+      allocate(dy(2*ssize))
+      allocate(dz(2*ssize))
+      allocate(dslice(2*ssize,2*ssize,1) )
+   endif
 
    ! select a subcube 2x larger containg the sc'th subcube:
    do i=1,2*ssize
@@ -470,7 +479,7 @@ do
       
       do k=1,2*ssize ! loop over all z-slices
          ! interpolate 1 slice of data
-         call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,Q(1,1,1,j),0,mat)
+         call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,Q(1,1,1,j),irot,mat)
          ! output this slab:
          call cwrite8(fid,dslice,2*ssize*2*ssize)
       enddo
@@ -478,7 +487,7 @@ do
       call cclose(fid,ierr)
    enddo
 
-
+    
 
 enddo
 return

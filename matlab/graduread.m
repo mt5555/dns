@@ -9,9 +9,9 @@
 
 %dir='/ccs/scratch/taylorm/dns/decay/';
 %dir='/home/taylorm/furens/';
-dir='/home/taylorm/';
-filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
-%filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
+dir='/scratch1/taylorm/decay2048/';
+%filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
+filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
 
 
 
