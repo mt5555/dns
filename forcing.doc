@@ -56,7 +56,7 @@ realizations.
 A better approach is to use a more realistic spectrum peaked at wave
 number between 4 and 10 (Daniel recommends 10), with a steep increase
 (for exampe: k^4) from wave number 1 up to the peak.  This is what is
-used in Overhold and Pope, and they show very good isotropy results.
+used in Overholt and Pope, and they show very good isotropy results.
 With this type of model spectrum, there is very little energy in the
 large scales which minimizes their influence on the statistics.
 
