@@ -1,5 +1,5 @@
 ####
-#### $Id: Makefile,v 1.4 2001-08-17 17:27:55 mt Exp $
+#### $Id: Makefile,v 1.5 2001-08-20 18:33:27 mt Exp $
 ####
 
 default:
@@ -51,7 +51,7 @@ linux:
 	@$(MAKE) CC=cc CFLAGS="-O3" AR=ar RANLIB=true LIBS="-L. -lstk -lm -lpthread" $(TARGET)
 
 linuxpgc:
-	@$(MAKE) CC=pgcc CFLAGS="-fast" AR=ar RANLIB=true LIBS="-L. -lstk -lm -lpthread" $(TARGET)
+	@$(MAKE) CC=pgcc CFLAGS="-fast -Msafeptr" AR=ar RANLIB=true LIBS="-L. -lstk -lm -lpthread" $(TARGET)
 
 macosx:
 	@$(MAKE) CC=cc CFLAGS="-O4" AR=ar RANLIB=ranlib LIBS="-L. -lstk -lm" $(TARGET)

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2001 University Corporation for Atmospheric Research 
  *       
- * $Id: fortran.c,v 1.2 2001-08-17 22:25:44 mt Exp $
+ * $Id: fortran.c,v 1.3 2001-08-20 18:33:27 mt Exp $
  */
 
 
@@ -87,12 +87,12 @@ void _Fortran(cfft_synthesis) (complex *c,cfft **X)
 
 void _Fortran(rfft_analysis) (real *c,rfft **X) 
 { 
-  rfftAnalysis(c,*X); 
+  rfftAnalysis2(c,*X); 
 }
 
 void _Fortran(rfft_synthesis) (real *c,rfft **X) 
 { 
-  rfftSynthesis(c,*X); 
+  rfftSynthesis2(c,*X); 
 }
 
 void _Fortran(cfft_analysis_m) (complex *c,cfft **X,int *m,int *n) 

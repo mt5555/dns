@@ -4,7 +4,7 @@ cd ../src
 set refin=benchmark1.inp
 
 if ($#argv == 0 ) then
-   echo "./bencht.sh [64,96]"
+   echo "./bencht.sh [64,96,256]"
    exit
 endif
 
@@ -20,5 +20,13 @@ if ($1 == 96) then
    make dns
    cd ../benchmark
    ../src/dns < $refin 
+endif
+
+if ($1 == 1024) then
+   ./gridsetup.py 1 1 1 1024 1024 1
+   make dns
+   cd ../benchmark
+   ../src/dns < benchmark1024.inp
+
 endif
 

@@ -158,11 +158,13 @@ call getindex(n1,index)
 
 do k=1,n3
    do j=1,n2
+#if 0
       tmp=p(2,j,k)
       do i=2,n1-1
          p(i,j,k)=p(i+1,j,k) 
       enddo
       p(n1,j,k)=tmp
+#endif
       call rfft_synthesis(p(1,j,k),fftdata(index)%ptrigs)
    enddo
 enddo
@@ -192,13 +194,18 @@ call getindex(n1,index)
 do k=1,n3
    do j=1,n2   
       call rfft_analysis(p(1,j,k),fftdata(index)%ptrigs)
-
+#if 0
       tmp=p(n1,j,k)
       do i=n1-1,2,-1
          p(i+1,j,k)=p(i,j,k)/n1
       enddo
       p(2,j,k)=tmp/n1
       p(1,j,k)=p(1,j,k)/n1
+#endif
+      do i=1,n1
+         p(i,j,k)=p(i,j,k)/n1
+      enddo
+
    enddo
 enddo
 end subroutine
