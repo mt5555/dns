@@ -14,7 +14,7 @@ real*8,save :: q1(nx,ny,nz,n_var)
 real*8,save :: work1(nx,ny,nz)
 real*8,save :: work2(nx,ny,nz)
 character(len=80) message
-integer ierr
+integer ierr,i,j,k,n
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
 
@@ -47,6 +47,27 @@ call init_data_projection(Q,work1)  ! impose constrains on initial data
 #ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
 #endif
+
+
+
+
+
+#if 0
+! transpose data, for testing
+print *,'Transposing input data'
+q1=Q
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   Q(j,k,i,1)=q1(i,j,k,2)
+   Q(j,k,i,2)=q1(i,j,k,3)
+   Q(j,k,i,3)=q1(i,j,k,1)
+enddo
+enddo
+enddo
+#endif
+
+
 
 
 

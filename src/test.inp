@@ -1,5 +1,5 @@
 1            ! input file type
-n32_25      ! runname
+n32_25b      ! runname
 output       ! rundir
 iso12        ! initial condition:  KH-blob, KH-anal, iso12, restart
 iso12        ! forcing:  none, iso12
@@ -13,7 +13,7 @@ fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-8.0         ! time to run
+8.0           ! time to run
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  

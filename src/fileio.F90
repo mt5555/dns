@@ -302,6 +302,9 @@ integer :: iwave,iwave_max,ierr
 real*8 spec_x(0:g_nx/2)
 real*8 spec_y(0:g_ny/2)
 real*8 spec_z(0:g_nz/2)
+real*8 spec_x2(0:g_nx/2)
+real*8 spec_y2(0:g_ny/2)
+real*8 spec_z2(0:g_nz/2)
 real*8 x
 real*8,allocatable  ::  spectrum(:),spectrum1(:)
 character(len=80) :: message
@@ -318,11 +321,17 @@ allocate(spectrum(0:iwave_max))
 allocate(spectrum1(0:iwave_max))
 spectrum=0
 spectrum1=0
+spec_x=0
+spec_y=0
+spec_z=0
 
 do i=1,3
    iwave=iwave_max
-   call compute_spectrum(Q(:,:,:,i),work1,work2,spectrum1,spec_x,spec_y,spec_z,iwave,io_pe)
+   call compute_spectrum(Q(:,:,:,i),work1,work2,spectrum1,spec_x2,spec_y2,spec_z2,iwave,io_pe)
    spectrum=spectrum+.5*spectrum1
+   spec_x=spec_x + .5*spec_x2
+   spec_y=spec_y + .5*spec_y2
+   spec_z=spec_z + .5*spec_z2
 enddo
 
 write(message,'(a,f10.4)') " KE spectrum",time
