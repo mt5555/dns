@@ -151,7 +151,7 @@ real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ntot
 
 if (firstcall) then
    firstcall=.false.
@@ -184,9 +184,9 @@ do n=1,ndim
       enddo
    enddo
 enddo
-n=(lz2-lz1+1)*(ly2-ly1+1)*(lx2-lx1+1)
-epsilon=mu*ke_diss/n
-ke=ke/n
+ntot=(lz2-lz1+1)*(ly2-ly1+1)*(lx2-lx1+1)
+epsilon=mu*ke_diss/ntot
+ke=ke/ntot
 
 eta = (mu**3 / epsilon)**.25
 lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
@@ -299,15 +299,15 @@ enddo
 !$omp end parallel do
 
 
-D_ll=D_ll/g_nx/g_ny/g_nz
-D_tt=D_tt/g_nx/g_ny/g_nz
-D_ltt=D_ltt/g_nx/g_ny/g_nz
-D_lll=D_lll/g_nx/g_ny/g_nz
+D_ll=D_ll/ntot
+D_tt=D_tt/ntot
+D_ltt=D_ltt/ntot
+D_lll=D_lll/ntot
 
-SP_ltt=SP_ltt/g_nx/g_ny/g_nz
-SP_lll=SP_lll/g_nx/g_ny/g_nz
-SN_ltt=SN_ltt/g_nx/g_ny/g_nz
-SN_lll=SN_lll/g_nx/g_ny/g_nz
+SP_ltt=SP_ltt/ntot
+SP_lll=SP_lll/ntot
+SN_ltt=SN_ltt/ntot
+SN_lll=SN_lll/ntot
 
 
 end subroutine
