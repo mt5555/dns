@@ -7,7 +7,7 @@
 
 %ts=input('time=? ');
 
-range=1:.5:4;
+range=0:.5:4;
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
 %range=[125:10:200];
@@ -45,14 +45,19 @@ for i=range
   nx=length(x);
   ny=length(y);
 
+
+  % default exenstion for plots
+  pext='.vor';  % .ps or .jpg will also be added
+
+
   % whole plot, but subsample data:
-  % subsample=1;
-  % skip=4;   x1=1; x2=nx; y1=1; y2=ny;
+   subsample=1;
+   skip=4;   x1=1; x2=nx; y1=1; y2=ny;
 
   % zoom in:  
-  subsample=1;   skip = 1;
-  x1=floor(nx/4); x2=floor(3*nx/4);
-  y1=floor(ny/4); y2=floor(3*ny/4);
+  %subsample=1;   skip = 1;  pext='.vor.zoom';
+  %x1=floor(nx/4); x2=floor(3*nx/4);
+  %y1=floor(ny/4); y2=floor(3*ny/4);
 
   rangex=x1:skip:x2;
   rangey=y1:skip:y2; 
@@ -93,14 +98,14 @@ for i=range
       shading interp
     else
       v = -12:1:3;
-      v = -7:2:5;
+      v = -7:2:7;
       v=2.^v;
       %v = 4.5*[3/4, 1/2, .4 , 1/4, 1/8]
       %v=  [3.3938    2.2626    1.1313    0.5656];
       contour(x,y,vor',v,'b')
       hold on
       contour(x,y,vor',-v,'g')
-      contour(x,y,vor',[.005 .005],'r')
+      %contour(x,y,vor',[-.005 .005],'r')
       hold off
     end
     
@@ -127,10 +132,10 @@ for i=range
   
     if (mkpr) 
       orient tall
-      pname=[name,'.vor.ps'];
+      pname=[name,ts,pext,'.ps'];
       disp('creating ps...')
       print('-depsc','-r 300',pname);
-      pname=[name,'.vor.jpg'];
+      pname=[name,ts,pext,'.jpg'];
       disp('creating jpg...')
       print('-djpeg','-r 200',pname);
     end

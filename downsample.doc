@@ -1,0 +1,61 @@
+Instructions for downsampling highres data.
+
+Example Input file:  Ia00000.0000.[uvh]   512^2 data file.
+
+First compile the "convert" code:
+
+% ./gridsetup.py 1 1 1 512 512 1 
+
+edit dns/src/convert.F90 and set the variables "tstart" and "tstop" to 0.0000
+which tells the code we to convert the data files from time 0000.0000
+
+Then look for this block of code, around line 108:
+  if (convert_opt==0) then  ! -cout uvw     
+     call input_uvw(time,Q,vor,work1,work2,1)  ! default headers
+  endif
+And make sure we are using the "default headers" input_uvw() subroutine call.
+Sometimes I change this to read headerless input files, and you will
+have to change it back if you do a "cvs update"
+
+
+% make convert
+% ./convert -b -cout uvw -so -smax 128 -d /ccs/wingate/period/Ia0  Ia0  < sh2.inp
+
+-b:  byteswap the input file
+-cout uvw:    reoutput u,v and h
+-so           output spectral coefficients (instead of default grid point data)
+-smax         output spectral coefficients suitable for a 128^2 grid
+-d path       directory for data files
+Ia0           run name
+
+
+This will create  .us, .vs and .hs data files which contain spectral
+coefficients.  Now we want to convert these to grid point values.
+First rename the spectral files (otherwise, when we convert back
+to grid point data, it will overright the original data files)
+
+Rename the files to:  Ia0-128-0000.0000.[uvh]s
+
+Recompile convert with a lower resolution:
+./gridsetup.py 1 1 1 128 128 1 
+make convert
+
+% ./convert -cout uvw -si -d /ccs/wingate/period/Ia0  Ia0-128-  < sh2.inp
+
+-cout uvw:    reoutput u,v and h
+-si           input spectral coefficients (instead of default grid point data)
+-d path       directory for data files
+Ia0           run name
+
+
+
+
+
+
+
+
+
+
+
+ 
+

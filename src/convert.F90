@@ -54,7 +54,7 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=.7019
+tstart=.0000
 tstop=.32
 tinc=1.0
 
@@ -78,7 +78,11 @@ call init_model
 
 if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5 .or. &
     convert_opt==10 ) then
-   allocate(vor(1,1,1,1)) ! dummy variable -wont be used
+   if (equations==SHALLOW) then
+      allocate(vor(nx,ny,nz,n_var)) ! used for shallow water output routiens
+   else
+      allocate(vor(1,1,1,1)) ! dummy variable -wont be used
+   endif
    allocate(Q(nx,ny,nz,n_var))
 else if (convert_opt == 4 .or. convert_opt==6) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
@@ -94,7 +98,7 @@ endif
 
 time=tstart
 do
-icount=icount+1
+   icount=icount+1
    if (tstart<0) then
       ! read times from unit 83
       fname= rundir(1:len_trim(rundir)) // tname(1:len_trim(tname))
@@ -345,7 +349,7 @@ icount=icount+1
 
 
 
-   if (tstart>0) then
+   if (tstart>=0) then
       time=time+tinc
       if (time > max(tstop,tstart)) exit
       if (time < min(tstop,tstart)) exit
@@ -373,6 +377,7 @@ character(len=*) :: fname
 integer :: num_io_cpu,stripe,ierr
 real*8 :: tmx1,tmx2,time=1111.1111    
 
+#ifdef USE_MPI
 mpi_maxio=num_io_cpu
 write(mpi_stripe,'(i3)') stripe
 call mpi_io_init(0)
@@ -389,7 +394,7 @@ if (io_pe==my_pe) then
    write(*,'(a,f12.5,a,f12.5,a)') 'cpu time for output: ',tmx2,'s (',tmx2/60,'m)'
    print *,'data rate MB/s: ',8.*3.*g_nx*g_ny*g_nz/1024./1024./tmx2
 endif
-
+#endif
 end subroutine iotest
 
 

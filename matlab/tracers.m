@@ -81,7 +81,7 @@ for i=range
       axis(axis_size);
       title(sprintf('time = %6.2f ',i)); 
       if (mkpr)
-         pname=[name,'.tracer.ps'];
+         pname=[fname,'.ps'];
          print('-depsc',pname);
       end
       'pause' ;     pause
