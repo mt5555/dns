@@ -353,36 +353,35 @@ xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 if (plot_points==1) 
-print('-dpsc',[bname,'_215.ps']);
-print -djpeg 215.jpg
+  print('-dpsc',[bname,'_215.ps']);
+  print -djpeg 215.jpg
 end
 
 % the second-order helical structure function (H_tt) scaling
 htt = 0; %set to 0 if do not want these plots
 if(htt)
-     figure(5);
-end
-yttave = 0*xx;
-for i=1:ndir
-  x = r_val(:,i);                       % units of box length
-  x_plot=x*nx*delx_over_eta;            % units of r/eta
-
-     ytt = H_tt(:,i);
-if (htt)
-     semilogx(x_plot,abs(ytt),['o-'cdir(i)],'MarkerSize',msize); hold on;
-end
-     yttave = yttave + w(i)*spline(x,ytt,xx);
-
-end
-     ytt = yttave;
-if(htt)
-     semilogx(xx_plot,abs(yttave),'k','LineWidth',2.5);hold on;
-end
-     title('H_{tt}/h r^2')
-     ylabel(pname);
-xlabel('r/\eta');
-ax=axis;  axis([1,xmax,ax(3),ax(4)]);
-hold off;
+  figure(5);
+  yttave = 0*xx;
+  for i=1:ndir
+    x = r_val(:,i);                       % units of box length
+    x_plot=x*nx*delx_over_eta;            % units of r/eta
+    
+    ytt = H_tt(:,i);
+    if (htt)
+      semilogx(x_plot,abs(ytt),['o-',cdir(i)],'MarkerSize',msize); hold on;
+    end
+    yttave = yttave + w(i)*spline(x,ytt,xx);
+    
+    ytt = yttave;
+    if(htt)
+      semilogx(xx_plot,abs(yttave),'k','LineWidth',2.5);hold on;
+    end
+    title('H_{tt}/h r^2')
+    ylabel(pname);
+    xlabel('r/\eta');
+    ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+    hold off;
+  end
 end
 
 

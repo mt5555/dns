@@ -10,40 +10,27 @@ delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
 ext='.isostr';
 
-%name='/scratch1/taylorm/iso12w512A0001.3847'
-%nx=512; delx_over_eta=5.8615; epsilon=.2849;
-
-%name='/scratch1/taylorm/iso12_500A0001.7723'
-%nx=500; delx_over_eta=2.740; epsilon=3.5208;
-
-%name='/scratch1/taylorm/iso12_250A0022.000'
-%nx=250; delx_over_eta=.80; epsilon=3.9;
-
-
-%name='/ccs/scratch/taylorm/check256_0000.8000'
-
-%name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
 
 %name='/ccs/scratch/taylorm/dns/iso12/iso12_512'
 %nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
+%pname='iso12_512';
 
-name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_'
-nx=256; delx_over_eta=3.13; epsilon=2.72; teddy=1.05; % R_l=186
-pname = 'hel256\_hpi2\_'
-
-ext='.new.isostr';
-%times=[1:.1:7.0];
-times = [4.2:0.2:10.2];
-
-%name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
-%nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
+%name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_'
+%nx=256; delx_over_eta=3.13; epsilon=2.72; teddy=1.05; % R_l=186
+%pname = 'hel256\_hpi2\_'
 %ext='.new.isostr';
-%times=[1:.1:2.0];
+%times = [4.2:0.2:10.2];
+
+name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
+nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
+ext='.new.isostr';
+pname='sc1024A';
+times=[1:.1:2.5];
 
 %name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
 %ext='.new.isostr';
-[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
-nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
+%[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
+%nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
 
 %teddy=1;
 %times=[0:1:30];
@@ -70,7 +57,7 @@ for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10)];
   disp([fname,ext]);
-ppname = [pname,tstr(2:10),ext];
+  ppname = [pname,tstr(2:10),ext];
   fid=fopen([fname,ext]);
   if (fid<0) ;
     disp('error openining file, skipping...');
@@ -139,23 +126,24 @@ end
 
 
 figure(8); clf; hold on;
-scale = 4/5; %scale = 2/15 is normalizing by prefactor as well 
+scale = 1;  %scale = 2/15 is normalizing by prefactor as well 
 for i=1:1:1 % directions
  plot(times/teddy,mx45_localeps(1:length(times),i)/scale,'g-','LineWidth',2.0);
 end
 plot(times/teddy,mx45_iso_localeps,'b-','LineWidth',2.0);
 ax=axis;
 axis( [ax(1),ax(2),.5,1.0] );
-plot(times,(4/5)*times./times,'k');
+plot(times,(4/5)*times./times/scale,'k');
 hold off;
 ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
 xlabel('time','FontSize',16)
-     title(ppname);
-     print('-dpsc', 'k215time.ps')
+title(ppname);
+print('-dpsc', 'k45time.ps')
+print('-dtiff', 'k45time.jpg')
 
 
 figure(9); clf
-scale = 4/5; %scale = 4/5 if need to normalize out the 4/5th
+scale = 1; %scale = 4/5 if need to normalize out the 4/5th
 for i=[1:1:73]
   %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',1.0); hold on
   semilogx(xx_plot,y45_ave(:,i)/scale,'g-','LineWidth',1.0); hold on
@@ -171,13 +159,16 @@ xlabel('r/\eta','FontSize',16);
 
 print -dpsc k45mean.ps
 
+return
 
 
+% plot deviation from mean:
 figure(10); clf
 offset=y45_iso_ave;
 stdr=0*offset;
 scale = 4/5; % scale = 4/5 if need to factor out the 4/5 
 for i=[1:1:73]
+  i
   semilogx(xx_plot,abs(y45_ave(:,i)-offset)/offset,'m-','LineWidth',1.0); hold on
   stdr=stdr+(y45_ave(:,i)-offset).^2;
 end
@@ -185,8 +176,6 @@ stdr=sqrt(stdr/15)./offset;
 title('Measure of anisotropy - 4/5 law; |D_{lll}(dir) - D_{lll}(ave)|/D_lll(ave)');
 ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
-
-
 
 
 

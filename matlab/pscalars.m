@@ -155,7 +155,11 @@ lambda_x_c=sqrt(mean(cx2,1)./mean(cxx2,1));
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
 % eta_c = Bachelor scale
 % lambda_c = taylor microscale
-eta_c=eta./sqrt(schmidt);
+if(schmidt(1)<=1) 
+  eta_c=eta./(schmidt.^(.75));
+else
+  eta_c=eta./sqrt(schmidt);
+end
 
 
 
@@ -211,8 +215,13 @@ plot(time_e,G)
 title('G')
 
 subplot(4,2,4)
-plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
-title('G_c,    \lambda_c^2 / (4 \eta_c^2)')
+if (schmidt(1)<=1) 
+  plot(time_e,Gc.*schmidt.^(-.5),time_e,(schmidt.^(-.5)).*lambda_c.^2 ./ (4*eta_c.^2))
+  title('G_c Sc^{-1/2},    \lambda_c^2 / (4 \eta_c^2 Sc^{1/2})')
+else
+  plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
+  title('G_c ,    \lambda_c^2 / (4 \eta_c^2)')
+end
 
 
 subplot(4,2,5)
@@ -262,20 +271,20 @@ figure(2); clf;
 
 
 subplot(4,2,1)
-plot(time_e,0*Suc)
-title(' ')
-
+plot(time_e,c2,time_e,mean(cx2,1))
+title('<c^2>, < {c,1}^2> ')
 
 
 subplot(4,2,2)
-plot(time_e,0*gg)
+%plot(time_e,0*gg)
 title(' ')
+
 subplot(4,2,3)
-plot(time_e,0*eta)
+%plot(time_e,0*eta)
 title(' ')
 
 subplot(4,2,4)
-plot(time_e,0*lambda_c)
+%plot(time_e,0*lambda_c)
 title(' ')
 
 
