@@ -133,7 +133,7 @@ real*8 :: Qhat(nx,ny,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: schmidt_table(5),xfac,mn,mx
-integer :: n,k,i,j,im,jm,km,init,count
+integer :: n,k,i,j,im,jm,km,init,count,iter
 character(len=80) :: message
 
 schmidt=0
@@ -182,35 +182,38 @@ do n=np1,np2
       call print_message(message)	
       call print_message("smothing passive scalar...")
       
-      
-                                ! filter
+      ! filter
       call fft3d(Q(1,1,1,n),work1)
       call fft_filter_dealias(Q(1,1,1,n))
       
       ! laplacian smoothing:
       ! du/dt  =  laplacian(u)
       !  u_k = ((1 - k**2))**p  u_k    p = number of timesteps
-      do k=nz1,nz2
-         km=abs(kmcord(k))
-         do j=ny1,ny2
-            jm=abs(jmcord(j))
-            do i=nx1,nx2
-               im=abs(imcord(i))
-               
-               xfac=(im*im+jm*jm+km*km)
-               xfac=xfac/(.25*g_nx*g_nx + .25*g_ny*g_ny + .25*g_nz*g_nz)
-               xfac=(1-.50*xfac)**15
-               
-               Q(i,j,k,n)=Q(i,j,k,n)*xfac
+      iter=0
+      do 
+         iter=iter+1
+         do k=nz1,nz2
+            km=abs(kmcord(k))
+            do j=ny1,ny2
+               jm=abs(jmcord(j))
+               do i=nx1,nx2
+                  im=abs(imcord(i))
+                  
+                  xfac=(im*im+jm*jm+km*km)
+                  xfac=xfac/(.25*g_nx*g_nx + .25*g_ny*g_ny + .25*g_nz*g_nz)
+                  xfac=(1-.50*xfac)
+                  
+                  Q(i,j,k,n)=Q(i,j,k,n)*xfac
+               enddo
             enddo
          enddo
-      enddo
-      call ifft3d(Q(1,1,1,n),work1)
-      
-      call global_min(Q(1,1,1,n),mn)
-      call global_max(Q(1,1,1,n),mx)
-      
-      write(message,'(a,2f17.5)') 'after smoothing: min/max: ',mn,mx
+         if (iter>10) then  ! start checking 'mx'
+            call ifft3d(Q(1,1,1,n),work1)
+            call global_min(Q(1,1,1,n),mn)
+            call global_max(Q(1,1,1,n),mx)
+         endif
+      while (mx>1.05)
+      write(message,'(a,2f17.5a,i3)') 'after smoothing: min/max: ',mn,mx,'  iter=',iter
       call print_message(message)	
    else
       if (mod(count,2)==1) then

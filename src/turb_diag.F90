@@ -49,7 +49,8 @@ if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
    call compute_spec(time,Q,q1,work1,work2)
    call output_spec(time,Q,q1,q2,q3,work1,work2)
-   
+   call output_helicity_spec(time)
+
    !set this flag so that for next timestep, we will compute and save
    !spectral transfer functions:
    compute_transfer=.true.
