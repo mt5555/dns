@@ -92,7 +92,7 @@ for i=range
       pcolor(x,y,vor')
       shading interp
     else
-      v = -12:1:3;
+      v = -12:4:3;
       v=2.^v;
       contour(x,y,vor',v)
       hold on

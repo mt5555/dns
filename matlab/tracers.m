@@ -6,7 +6,8 @@
 %ts=input('time=? ');
 
 range=0.00:1.0:1000.0 ;
-name='../src/temp';
+%name='../src/temp';
+name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 
 
 usefig=1;
@@ -35,8 +36,8 @@ for i=range
 
   figure(1)
   plot(tracer(:,1),tracer(:,2))
-  hold on;   plot(tracer(:,1),tracer(:,2),'o')
-  hold off;
+  %hold on;   plot(tracer(:,1),tracer(:,2),'r.') ;   hold off;
+  axis equal
   axis([0,4,0,2]);
   title(sprintf('time = %6.2f ',i)); 
 

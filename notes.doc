@@ -2,6 +2,11 @@
     <u> and <u**2>  on subcubes too
     joint pdf of <u,v> (and others)
 
+    sqrt(u**2) in time
+    <u,F> in time
+    <u,lap u> in time
+
+
 1. Test CJ functions
 
 2. ns_ghost:  4th order code using ghost cells:

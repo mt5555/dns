@@ -1,4 +1,21 @@
 **********************************************************************************
+2/12/02
+
+milkyway runs
+VXPAIR case
+init_cond_subtype==1  
+(onesided/inflow for w, PSI fixed for all t )
+3072x1536  
+mu=1e-7
+
+new code with tracers!
+RUNNING 
+vx3072
+
+
+
+
+**********************************************************************************
 1/18/02
 VXPAIR case timings
 init_cond_subtype==1
@@ -109,7 +126,7 @@ Energy:
 250D  1.31 down to .71
 250G  1.31 up to 2.22
 
-
+500   1.31 to 1.44
 
 
 
