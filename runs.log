@@ -2,25 +2,34 @@
 4/24/02
 vxpair runs on autry
 
-3072x1536:  mu=1e-7 ok.  mu=2e-8 a touch noisy, goes away.
+6144x3072:  mu=1e-7 ok.  
+            mu=2e-8 a touch noisy, goes away.
             mu=4e-8 ok?
             using delx goes like eta goes like mu^3/4 rule:  
-              (4e-8)^(3/4)*3072 = mu^(3/4) * N
-              .00869/N = mu^3/4 
+              (4e-8)^(3/4)*6144 = mu^(3/4) * N
+              .0174/N = mu^3/4 
 
+            mu = 1e-8:  N = 17400.  
+
+Formula:
+16384x8192   mu = 1.1e-8
+12288x6144   mu = 1.6e-8
+6144x3072    mu = 4.0e-8    Reference value 
+3072x1536    mu = 1.0e-7
+2048x1024    mu = 1.7e-7
+
+Results:
+6144x3072    mu=1e-7 ok.    2e-8: a touch noisy, goes away
+3072x1536    mu = 1e-7 ok.  tiny noise on leading edge.  goes away t=55
 
 2048x1024
 ./gridsetup.py 1 1 1 2048 1024 1 2 2 0 2 2 0
+mu formula above suggests:  mu=1.7e-7
 make dnsvor
 
-
-vx2048a   vx2048a.inp   mu=6e-8  (formula above gives: mu=6.87e-8)
-
-vx2048a   restarting at t=50 with different
-          ellipse search routine.
-          check out: vx2048a0050.0000.[ellipse,tracer]
-
-vx2048b   vx2048b.inp  mu=10e-8   IN
+vx2048a   vx2048a.inp   mu=6e-8  very noisy at t=50
+vx2048b   vx2048b.inp  mu=1e-7   noisy at t=49
+vx2048b   vx2048c.inp  mu=2e-7   IN
 
 
 
