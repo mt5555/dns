@@ -1,3 +1,90 @@
+
+
+iso12w_256B IN QA
+
+   zero initial condition
+   FM=5/(2pi)**2, mu=6e-4/(2pi)**2
+   nu=1.5e-3/(2pi)**2 = 3.7995e-5 
+
+   check to see if this run is isotropic?
+
+
+
+**********************************************************************************
+9/19/02
+large alpha runs
+
+Run:  spectrum peaked at k=8
+
+      decay with alpha=inf, 0
+      (need initial condition also peaked at 8, or start from
+      on of our forced runs?)
+
+Run:  forced, alpha=inf,1/8,1/16,1/32
+
+
+
+
+FORCING: iso
+iso_256B (QA)
+   alpha=inf.
+   mu=.25e-4      viscosity appears to be much to high
+                  spectrum drops to 1e-2 after forcing (at k=9)
+                  and remains flat for all k>9
+
+iso_256C (QA)     didn't run.  
+   alpha=.125
+   mu=.25e-4
+
+iso_256D (QA)     looks good: some -3 slope, too viscous?
+   alpha=inf.
+   mu=4e-4 
+
+iso_256E (QA)       died -QA down.
+   alpha=inf.
+   mu=1e-4 
+
+
+
+
+
+
+FORCING: iso12
+iso12_250I    Bluemtn done
+   alpha=inf
+   mu=4e-4
+iso12_250J    Bluemtn done
+   alpha=inf
+   mu=8e-4
+
+
+iso12_256B (QA)  done
+    alpha=infinity
+    mu=1e-4
+
+iso12_256C (QA)  
+    alpha=infinity
+    mu=.25e-4  
+iso12_256D
+    F = 1, .128
+    alpha=infinity
+    mu=.25e-4  
+iso12_256E        ran to t=7
+    F = 1, 4.5
+    alpha=infinity
+    mu=.25e-4  
+iso12_256F        ran to t=50  
+    decay case
+    alpha=infinity
+    mu=.25e-4  
+iso12_256G        ran to t=5  
+    alpha=1.0
+    mu=.25e-4  
+iso12_256H      
+    alpha=.25
+    mu=.25e-4  
+
+
 **********************************************************************************
 7/7/02
 
@@ -110,31 +197,6 @@ iso12_512 (ON O3K)   done
    t>.5     mu=1e-4
 
 
-iso12_256B (QA)  done
-    alpha=infinity
-    mu=1e-4
-
-iso12_256C (QA)  
-    alpha=infinity
-    mu=.25e-4  
-iso12_256D
-    F = 1, .128
-    alpha=infinity
-    mu=.25e-4  
-iso12_256E        ran to t=7
-    F = 1, 4.5
-    alpha=infinity
-    mu=.25e-4  
-iso12_256F        ran to t=50  
-    decay case
-    alpha=infinity
-    mu=.25e-4  
-iso12_256G        ran to t=5  
-    alpha=1.0
-    mu=.25e-4  
-iso12_256H      
-    alpha=.25
-    mu=.25e-4  
 
 
 

@@ -15,8 +15,9 @@ ext='.isostr';
 %nx=250; delx_over_eta=.80; epsilon=3.9;
 
 
-%name='/ccs/taylorm/dns/src/check256_0000.8000'
-name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
+%name='/ccs/scratch/taylorm/check256_0000.8000'
+%name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
+name='/home/taylorm/iso12_5120003.0000'
 %ext='.isostr001';
 
 
