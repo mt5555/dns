@@ -22,7 +22,7 @@ if ($#argv == 0 ) then
    exit
 endif
 
-set MPIRUN = "mpirun -x LD_LIBRARY_PATH "
+set MPIRUN = "mpirun -x LD_LIBRARY_PATH -wd $PWD "
 
 if ($1 == makeref) then
 

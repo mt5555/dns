@@ -27,6 +27,13 @@ ifeq ($(UNAME),Linux)
       #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
       #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
    endif
+   ifeq ($(HOST),kiwi1)
+      VENDOR=INTEL8
+      MPI = -DUSE_MPI  -I/usr/include/lam  -DMPI_UNDERSCORE
+      MPILIB =   -L/usr/lib/lam/lib -llamf77mpi -lmpi -llam 
+      #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
+      #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
+   endif
    ifeq ($(HOST),dosadi)
       VENDOR=INTEL8
       MPI = -DUSE_MPI -DMPI_UNDERSCORE
