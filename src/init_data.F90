@@ -5,7 +5,8 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work(nx,ny,nz)
 integer km,jm,im,i,j,k,n
 
-do n=1,3
+Q=0
+do n=1,2
 call fft3d(Q(1,1,1,n),work)
 
    do k=nz1,nz2
@@ -15,7 +16,7 @@ call fft3d(Q(1,1,1,n),work)
          do i=nx1,nx2
             im=imcord(i)
 
-            Q(i,j,k,n) = 1
+            Q(i,j,k,n) = 1e-3
 
          enddo
       enddo
