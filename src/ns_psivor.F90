@@ -77,7 +77,7 @@ integer i,j,k,n,ierr
 integer,save :: ncall=0
 integer,save :: btype
 
-integer :: comp_psi0 = 0       ! compute psi on boundary initially
+integer :: comp_psi0 = 0       ! compute psi on boundary at time=0 
 integer :: comp_psi_rk13=0     ! compute psi on boundary after RK stages 1..3?
 integer :: comp_psi_rk4=0      ! compute psi on boundary after RK stage 4?
 

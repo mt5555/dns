@@ -264,7 +264,7 @@ endif
 if (init_cond_subtype ==3) then
 ! special quick init case for performance
    biotsavart_cutoff=5e-2
-   biotsavart_apply=-2  ! disabled
+   biotsavart_apply=-2  ! disabled, quick initialization
    delta=.2
    biotsavart_ubar=.089
    yscale=2

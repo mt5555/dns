@@ -22,7 +22,7 @@ real*4 :: buf(nx)
 character(len=80) message,ftime
 character(len=240) fname
 character(len=20) tmp
-character(len=3) :: extension="uvwX"
+character(len=4) :: extension="uvwX"
 CPOINTER :: fid
 integer ierr
 

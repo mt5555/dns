@@ -343,6 +343,9 @@ else if (rk4stage==4) then
    c2=0
 endif
 
+if (g_bdy_y1 /= REFLECT_ODD) then
+   call abort("tracers module requires y1 boundary REFLECT_ODD")
+endif
 
 do j=inty1,inty2
 do i=intx1,intx2
@@ -373,12 +376,11 @@ do i=1,numt
    igrid = 1 + floor( (tracer_tmp(i,1)-g_xcord(1))/delx )
    jgrid = 1 + floor( (tracer_tmp(i,2)-g_ycord(1))/dely )
 
-   ! dont let point get into a cell along the boundary:
-   ! normally this would be okay, except sometimes in PSIVOR model
-   ! we put the boundary in the first row of ghost cells, and in
-   ! that case we dont know (u,v) at that boundary
+   ! dont let point get into a cell along real boundary.
+   ! for real boundaries, we dont compute (u,v) at boundary
+   ! (reflect boundary at y=0 is not a "real" boundary
 !   if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
-   if (2<=igrid .and. igrid+1<o_nx-1 .and. 2<=jgrid .and. jgrid+1<o_ny-2) then
+   if (2<=igrid .and. igrid+1<o_nx-1 .and. 1<=jgrid .and. jgrid+1<o_ny-2) then
       ! compute a new point in the center of the above cell:
       ! (do this to avoid problems with 2 cpus both claiming a point
       ! on the boundary of a cell)
@@ -477,7 +479,7 @@ if (rk4stage==4) then
 
 
    ! insert points into tracer() if necessary:
-   if (numt> (3*numt_max)/4 ) call enlarge_tracers()
+   if (numt>(3*numt_max)/4 ) call enlarge_tracers()
    j=numt
    call insert(tracer(1,1),tracer(1,2),tracer(1,ndim+1))
    if (j/=numt .and. mod(numt,50)==0) then
@@ -507,7 +509,7 @@ real*8 :: time_old,time_new
 integer :: k
 do k=numt_insert+1,numt
 
-   if (told(k,1)<=center(1) .and. tnew(k,1)>center(1)) then
+   if (told(k,1)<center(1) .and. tnew(k,1)>=center(1)) then
       ! if angle crosses -pi/2, add to crossing:
       if (1+ncross>ncross_max) then
          call abort("tracers(): ncross_max too small")
