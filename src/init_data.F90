@@ -151,13 +151,13 @@ if (init==0) return
 count=0
 do n=np1,np2
 
+   count=count+1
    if (mod(count,2)==1) then
       n1=np1
    else
       n1=np1+1
    endif
 
-   count=count+1
    if (count>2 .and. passive_type(n)==passive_type(n1)) then
       call print_message('Re-using i.c. from passive scalar 1')
       Q(:,:,:,n)=Q(:,:,:,n1) 
