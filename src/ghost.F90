@@ -64,7 +64,7 @@ endif
 #ifdef USE_MPI
 ndata=nvar*nslaby*nslabz*nghost
 tag=1
-dest_pe3(1)=x
+dest_pe3(1)=x1
 dest_pe3(2)=my_y
 dest_pe3(3)=my_z
 call mpi_cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
