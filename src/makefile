@@ -108,7 +108,8 @@ ifeq ($(UNAME),OSF1)
    #flag for OPENMP:  -omp
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   FFLAGS =  -fast -automatic -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
+   # shallow water model cannot use -automatic
+   FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
    CC = cc $(LSFFLAGS)
 endif
 
