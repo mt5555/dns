@@ -7,6 +7,9 @@
         benchmark parallel decompostions
 
 3. psi-vor code:
+        bcw_impose(): modified on milkyway so that it does onesided even for 
+        PSI fixed on the boundary, submitted.  
+
         fix output1/input1 for non-perfect decompositions? not really needed.  
 
 

@@ -1,6 +1,6 @@
 **********************************************************************************
 1/18/02
-VXPAIR case
+VXPAIR case timings
 init_cond_subtype==1
 mu=1e-4
 w=0, cutoff=0, bito_savart init only
@@ -42,47 +42,33 @@ BlueMtn
 
 **********************************************************************************
 1/17/02
+
+milkyway runs
 VXPAIR case
 init_cond_subtype==1
-mu=1e-4
+3072x1536  
+mu=1e-7
 
 
-compare all 5 runs at t=15?
-
-vxpair0_
-vxpair0_nointerp
-  720x400  yscale=2.0
-  w=0/outflow
-  biot_savart: init and every 5 time steps
-  cutoff=.005
-  ran over night to time 16
-
-vxpair0b_
-  1024x400  yscale=2.0
-  w=0/outflow
-  biot_savart: init and every 5 time steps
-  cutoff=.005
+vx3072_*
+   b.c.:  w=0, PSI fixed 
+   2 cpus  t=15 in 661m
 
 
-vxpair1_
-  720x400   yscale=2.0
-  w=0
-  cutoff=0  
-  biot_savart: init only
+vx3072_onesided_*
+   b.c.:  w=0/onesided,  PSI recomputed every 5 timesteps
+   2 cpus  t=15:  IN
 
 
-vxpair1b_ 
-   1024x400   yscale=2.0
-   w=0 
-   cutoff=0
-   biot_savart: init only
+vx3072b_
+   b.c.:  w=0/onesided, PSI fixed 
+   2 cpus t=15  NEXT
+
+   IN (autrey)
+   code is setup. 
+   make dnsvor ; mpirun -np 2 dnsvor vx3072b_ < vxpair.inp > vxpairb.out
 
 
-vxpair2
-  2048x1024   yscale=2.0
-  w=0
-  cutoff=0  
-  biot_savart: init only
 
 
 

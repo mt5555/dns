@@ -203,11 +203,11 @@ real*8 p(g_nz2,nslabx,ny_2dz)
 
 !local
 
-real*8 xw,xfac,tmx1,tmx2
+real*8 xw,xfac,tmx1,tmx2,xw_viss
 real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke,gradu_diss,ke_diss,ensave,vorave,helave,maxvor
+real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss
 real*8 :: f_diss=0,a_diss=0,normuf=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
@@ -329,8 +329,9 @@ enddo
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ke=0
+ux2ave=0
 ke_diss=0
-gradu_diss=0
+uxx2ave=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nslabx
@@ -339,9 +340,15 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
             xw=(im*im + jm*jm + km*km)*pi2_squared
-            rhs(k,i,j,1)=rhs(k,i,j,1) - mu*xw*Qhat(k,i,j,1)
-            rhs(k,i,j,2)=rhs(k,i,j,2) - mu*xw*Qhat(k,i,j,2)
-            rhs(k,i,j,3)=rhs(k,i,j,3) - mu*xw*Qhat(k,i,j,3)
+            if (mu_hyper==4) then
+               xw_viss=xw**4
+            else
+               xw_viss=xw
+            endif
+
+            rhs(k,i,j,1)=rhs(k,i,j,1) - mu*xw_viss*Qhat(k,i,j,1)
+            rhs(k,i,j,2)=rhs(k,i,j,2) - mu*xw_viss*Qhat(k,i,j,2)
+            rhs(k,i,j,3)=rhs(k,i,j,3) - mu*xw_viss*Qhat(k,i,j,3)
 
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
@@ -355,11 +362,15 @@ do j=1,ny_2dz
                                 Qhat(k,i,j,2)**2 + &
                                 Qhat(k,i,j,3)**2) 
 
-            ke_diss = ke_diss + xfac*xw*(Qhat(k,i,j,1)**2 + &
+            ux2ave = ux2ave + xfac*xw*(Qhat(k,i,j,1)**2 + &
                                 Qhat(k,i,j,2)**2 + &
                                 Qhat(k,i,j,3)**2) 
 
-            gradu_diss = gradu_diss + xfac*xw*xw*(Qhat(k,i,j,1)**2 + &
+            ke_diss = ke_diss + xfac*xw_viss*(Qhat(k,i,j,1)**2 + &
+                                Qhat(k,i,j,2)**2 + &
+                                Qhat(k,i,j,3)**2) 
+
+            uxx2ave = uxx2ave + xfac*xw*xw*(Qhat(k,i,j,1)**2 + &
                                 Qhat(k,i,j,2)**2 + &
                                 Qhat(k,i,j,3)**2) 
 
@@ -442,8 +453,8 @@ enddo
 if (compute_ints==1) then
    ! note: dont noramlize quantities computed in spectral space,
    ! but normalize quantities computed in grid space by /g_nx/g_ny/g_nz
-   ints(1)=gradu_diss
-   ints(2)=ke_diss                     ! <u_x,u_x>
+   ints(1)=uxx2ave
+   ints(2)=ux2ave                     ! <u_x,u_x>
    ints(3)=f_diss    
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
@@ -451,7 +462,7 @@ if (compute_ints==1) then
    ints(7)=ensave/g_nx/g_ny/g_nz
    ints(8)=a_diss    
    ints(9)=normuf
-   ints(10)=-mu*ke_diss                   ! <u,u_xx>
+   ints(10)=-mu*ke_diss                 ! <u,u_xx>
 
    maxs(5)=maxvor
 endif

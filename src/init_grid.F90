@@ -353,7 +353,7 @@ endif
 call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(mu_hyper,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(mu_hyper,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
@@ -409,7 +409,7 @@ write(message,'(a,e10.4)') 'Diffusion coefficient mu=',mu
 call print_message(message)
 
 
-if (mu_hyper==1) then
+if (mu_hyper>1) then
 write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu
 call print_message(message)
 kmode=1
@@ -619,7 +619,7 @@ else if (sdata=='hyper') then
    endif
    xfac = 2* (2*pi*kmode)**8
    mu = rvalue/xfac
-   mu_hyper = 1
+   mu_hyper = 4
 else 
    call abort("non supported viscosity type")
 endif
