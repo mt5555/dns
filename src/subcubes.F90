@@ -52,16 +52,17 @@ subroutine setup_subcubes(ssize)
 integer :: ssize,i
 real*8 :: diff,ax,ay,az
 
-subcube_size=ssize/g_nx
-wsubcube_size=2*ssize/g_nx   ! 2x larger
-diff = ssize
-diff = diff/g_nx
+subcube_size=ssize*delx
+wsubcube_size=2*subcube_size   ! 2x larger
+diff = ssize*delx  ! non-overlapping
 
 
 if (allocated(subcube_cords)) deallocate(subcube_cords)
 if (allocated(wsubcube_cords)) deallocate(wsubcube_cords)
 allocate(subcube_cords(ssize))
 allocate(wsubcube_cords(ssize*2))
+
+
 do i=1,ssize
    subcube_cords(i)=(i-1)*delx
 enddo
@@ -72,18 +73,19 @@ enddo
 
 nsubcube=0
 ax=0
-ay=0
-az=0
 do while (ax<1)
-do while (ay<1)
-do while (az<1)
-   nsubcube=nsubcube+1
+   ay=0
+   do while (ay<1)
+      az=0
+      do while (az<1)
+         nsubcube=nsubcube+1
+         az=az+diff
+      enddo
+      ay=ay+diff
+   enddo
    ax=ax+diff
-   ay=ay+diff
-   az=az+diff
 enddo
-enddo
-enddo
+
 
 if (allocated(subcube_corner)) deallocate(subcube_corner)
 if (allocated(wsubcube_corner)) deallocate(wsubcube_corner)
@@ -92,21 +94,24 @@ allocate(subcube_corner(3,nsubcube))
 allocate(wsubcube_corner(3,nsubcube))
 
 i=0
+ax=0
 do while (ax<1)
-do while (ay<1)
-do while (az<1)
-   i=i+1
-   subcube_corner(1,i)=ax*diff
-   subcube_corner(2,i)=ay*diff
-   subcube_corner(3,i)=az*diff
-   wsubcube_corner(1,i)=ax*diff - subcube_size/2
-   wsubcube_corner(2,i)=ay*diff - subcube_size/2
-   wsubcube_corner(3,i)=az*diff - subcube_size/2
+   ay=0
+   do while (ay<1)
+      az=0
+      do while (az<1)
+         i=i+1
+         subcube_corner(1,i)=ax
+         subcube_corner(2,i)=ay
+         subcube_corner(3,i)=az
+         wsubcube_corner(1,i)=ax - subcube_size/2
+         wsubcube_corner(2,i)=ay - subcube_size/2
+         wsubcube_corner(3,i)=az - subcube_size/2
+         az=az+diff
+      enddo
+      ay=ay+diff
+   enddo
    ax=ax+diff
-   ay=ay+diff
-   az=az+diff
-enddo
-enddo
 enddo
 
 end subroutine
@@ -135,11 +140,11 @@ real*8,allocatable :: data2(:,:,:)
 integer :: ierr
 #endif
 
-if (io_pe==my_pe) then
-   print *,'interpolating to subcube: '
-   print *,dx(1),dy(1),dz(1)
-   print *,dx(nsx),dy(nsy),dz(nsz)
-endif
+!if (io_pe==my_pe) then
+!   print *,'interpolating to subcube: '
+!   print *,dx(1),dy(1),dz(1)
+!   print *,dx(nsx),dy(nsy),dz(nsz)
+!endif
 do k=1,nsz
    do j=1,nsy
       do i=1,nsx

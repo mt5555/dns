@@ -285,7 +285,8 @@ real*8 :: vor(nx,ny,nz)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer i,j
-character(len=280) basename,fname,sdata,message
+character(len=280) basename,fname,sdata
+character(len=80) :: message
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
@@ -311,8 +312,8 @@ do j=1,3
    write(message,'(a,i1,a,i1,a)') 'computing u_',i,',',j,' ...'
    call print_message(message)
    call der(Q(1,1,1,i),vor,work1,work2,DX_ONLY,j)
-
    do sc=1,nsubcube
+
       dx(1:ssize)=subcube_corner(1,sc)+subcube_cords(:)
       dy(1:ssize)=subcube_corner(2,sc)+subcube_cords(:)
       dz(1:ssize)=subcube_corner(3,sc)+subcube_cords(:)
