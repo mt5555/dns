@@ -1,3 +1,10 @@
+1. update_ghost() routine, then start upgrading FD code
+2. streamfunction-vorticity 2d code  
+3. benchmark FD + transform with different decomposisitons
+4. compare some scalars for FD vs spectral in KH 1024 problem
+5. start 512^3 run for weekend on Blue
+6. replace div() with cell centered version
+
 1. if run stops because u>1000, timings are incorrect
 1. specplot: multiply by f^5/3
 1. check restart testcase on mahi (also little endian)

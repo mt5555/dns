@@ -127,7 +127,7 @@ if (time==time_initial .and. restart==1) doit_restart=.false.
 doit_output=check_time(itime,time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
 ! dont write output file if we just restarted:
-if (time==time_initial .and. restart==1) doit_restart=.false.
+if (time==time_initial .and. restart==1) doit_output=.false.
 
 doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
@@ -418,9 +418,8 @@ call print_message(message)
 
 
 if (my_pe==io_pe) then
-!   write(message,'(f10.4)') 10000.0000 + time
-!   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec"
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".spec"
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
@@ -457,9 +456,8 @@ if (compute_struct==1) then
    
    if (structf_init==1) then
    if (my_pe==io_pe) then
-      !   write(message,'(f10.4)') 10000.0000 + time
-      !   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
-      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".sf"
+      write(message,'(f10.4)') 10000.0000 + time_initial
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
       call copen(message,access,fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "outputSF(): Error opening file errno=",ierr
@@ -475,8 +473,8 @@ endif
 
 
 if (my_pe==io_pe) then
-!   write(message,'(f10.4)') 10000.0000 + time
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".scalars"
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".scalars"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "diag_output(): Error opening .scalars file errno=",ierr

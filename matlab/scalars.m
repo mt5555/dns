@@ -12,8 +12,8 @@ range=0:50;
 %range=0:.5:2;
 
 
-%fid=fopen('../src/impulse/kh5.scalars','r','l'); 
-fid=fopen('../src/kh/khN.scalars','r','l'); 
+fid=fopen('../src/impulse/kh10.scalars','r','l'); 
+%fid=fopen('../src/kh/khN.scalars','r','l'); 
 
 
 
@@ -132,6 +132,25 @@ hold off
 lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
 R_l = lambda.*sqrt(2*ints(6,:))/mu;
 
+% Kolm. micro scale
+eta = (mu^3 ./ abs(ke_diss_d)).^(.25);
+
+
+
+% averge eta to a number
+eta = eta(length(eta)/2:length(eta));
+eta = sum(eta)/length(eta);
+disp(sprintf('eta (average over last half of data) = %f ',eta));
+
+% averge R_l to a number
+R_l = R_l(length(R_l)/2:length(R_l));
+R_l = sum(R_l)/length(R_l);
+disp(sprintf('R_l (average over last half of data) = %f ',R_l));
+
+disp(sprintf('1/250 in units of eta:  %f',(1/250)/eta));
+
+
+
 print -depsc scalars.ps
 
 
@@ -176,8 +195,6 @@ plot(time_e,ux4(3,:)./ux2(3,:).^2,'g')
 
 
 hold off
-
-
 
 
 

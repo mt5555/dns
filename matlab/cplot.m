@@ -11,7 +11,7 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %range = 1
 %range=0:.25:.75;
 range=[.50 .75];
-name='../src/impulse/kh20';
+name='../src/impulse/kh21';
 %name='../src/kh/khN';
 %name='/tmp/test';
 
@@ -49,12 +49,13 @@ for i=range
     disp('Error reading input file...')
   end
   fclose(fidvor);
-  %ts=sprintf('%s    time=%.2f  %ix%ix%i',shortname,time,nx,ny,nz);
-  ts=sprintf('%s    time=%.2f  max=%f',shortname,time,max(max(abs(vor))))
   
   q = reshape(q,nx,ny,nz);
   qmax=max(max(max(q)));
   disp(sprintf('max vor=                %f ',qmax));
+
+  %ts=sprintf('%s    time=%.2f  %ix%ix%i',shortname,time,nx,ny,nz);
+  ts=sprintf('%s    time=%.2f  max=%f',shortname,time,qmax)
 
   
   if (nz>=4) 
