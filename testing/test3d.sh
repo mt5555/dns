@@ -18,6 +18,7 @@ if ($#argv == 0 ) then
    echo " 2 = run lots of 3D test cases (different dimensions)"
    echo " p  = run several 3D test cases in parallel (2 and 4 cpus)"
    echo " pr = run several 3D test cases in parallel, with restart"
+   echo " pudm = run several 3D test cases in parallel, with udm restart"
    echo " ps = run several 3D test cases in parallel, with spec  restart"
    echo " makeref  = generate new reference output, 3D"
    exit
@@ -92,7 +93,7 @@ endif
 
 
 
-if ($1 == p || $1 == pr || $1 == ps) then
+if ($1 == p || $1 == pr || $1 == pudm || $1 == ps) then
 
 if ($1 == pr) then
    set opt = "-r"
@@ -100,6 +101,9 @@ if ($1 == pr) then
 else if ($1 == ps) then
    set opt = "-s -r" 
    echo USING SPEC RESTART   
+else if ($1 == pudm) then
+   set opt = "-r -ui" 
+   echo USING UDM RESTART   
 else
    set opt = ""
    echo NOT USING RESTART

@@ -298,6 +298,7 @@ endif
 !
 !  output dumps
 !
+
 if (doit_output) then
    write(message,'(a,f10.4)') "writing output files at t=",time
    call print_message(message)

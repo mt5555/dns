@@ -18,7 +18,6 @@ ghost.o: macros.h params.o mpi.o makefile
 ghostops.o: macros.h params.o fft_interface.o ghost.o transpose.o makefile 
 init_data.o: macros.h params.o mpi.o fft_interface.o makefile 
 init_grid.o: macros.h params.o fft_interface.o transpose.o mpi.o makefile 
-init_model.o: params.o fft_interface.o makefile 
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
 isoave.o: macros.h params.o transpose.o mpi.o makefile 
@@ -45,6 +44,7 @@ timecontrol.o: macros.h params.o tracers.o transpose.o makefile
 tracers.o: macros.h params.o mpi.o ghost.o ellipse.o makefile 
 transpose.o: macros.h params.o mpi.o makefile 
 turb_diag.o: macros.h params.o structf.o spectrum.o isoave.o sforcing.o fft_interface.o mpi.o transpose.o makefile 
+udm_interface.o: macros.h params.o mpi.o fft_interface.o makefile 
 util.o: macros.h mpi.o params.o makefile 
 fbelimb.o: makefile 
 fft99.o: makefile 

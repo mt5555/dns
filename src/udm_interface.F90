@@ -42,13 +42,12 @@ character*(2) dotudm
 #include "UDMFCInterfaceF.h"
 
 !  open udm file
+   write(message,'(f10.4)') 10000.0000 + time
 
    len1 = len_trim(rundir)
    len2 = len_trim(runname)
    fnameudm = rundir(1:len1) // runname(1:len2) // message(2:10) //'.h5'// char(0) 
-	print *,'calling 1',fnameudm
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_CREATE, fidudm, ierr)
-	print *,'calling 2'
 
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)
@@ -240,12 +239,12 @@ character*2 nochar
 
 Q=0
 
-!  -----------------------------  added for restart through udm -------------------- 
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)
    nochar(1:1) = char(0)
-   call print_message("Restarting from file restart.h5")
-   fnameudm = 'restart.h5'//char(0)
+   fnameudm = rundir(1:len_trim(rundir)) // 'restart.h5'//char(0)
+   call print_message("Restarting from UDM file:")
+   call print_message(fnameudm)
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_READ, fidudm, ierr)
 
    dotudm = '.'//char(0)
