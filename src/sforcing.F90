@@ -136,12 +136,13 @@ if (0==init_sforcing) then
       if (wn>=kfmax) then
          ener_target(wn)=0
       else
-         ener_target(wn)=wn**(-5/3)*tanh( (kfmax-wn) / (.3*kfmax) )
+         ener_target(wn)=real(wn)**(-5./3.)*tanh( (kfmax-wn) / (.3*kfmax) )
       endif
    enddo
-
 endif
+
 if (ntot==0) return
+! only CPUS which belong to "comm_sforcing" beyond this point!
 
 
 ! relaxation coefficient (below) and kfmax (above) 
@@ -152,7 +153,6 @@ if (ntot==0) return
 tau_inv=sqrt(ux2ave)/.5
 
 
-! only CPUS which belong to "comm_sforcing" beyond this point!
 
 f_diss=0
 fxx_diss=0
@@ -181,7 +181,7 @@ do wn=1,numb
    ! Qf = Q*sqrt(ener_target/ener)
    ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
    tauf=tau_inv*(sqrt(ener_target(wn)/ener(wn))-1)
-!   print *,'FORCING:',wn,ener(wn),ener_target(wn)
+   write(*,'(a,3i4,3f17.10)') 'FORCING:',my_pe,wn,wnforcing(wn)%n,ener(wn),ener_target(wn),tauf
 
    if (tauf>0) then ! only apply forcing if net input is positive
    do n=1,wnforcing(wn)%n
