@@ -23,7 +23,6 @@ if ($fpath == HPSS) then
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      set nametime = `basename $resnamew .w`
       echo "Using restart file: " 
       echo $resnamew
    endif
@@ -49,7 +48,6 @@ else
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      set nametime = `basename $resnamew .w`
       echo "Using restart file: " 
       echo $resnamew
    endif

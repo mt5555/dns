@@ -71,25 +71,11 @@ else
       echo $resnamev
       echo $resnamew
    endif
-   set resnameu2 = `basename $resnameu`
-   set resnamev2 = `basename $resnamev`
-   set resnamew2 = `basename $resnamew`
-
-   # check to see if files are left over from last run: 
-   if !(-e $resnameu2) then
-      \cp $resnameu .
-   endif
-   if !(-e $resnamev2) then
-      \cp $resnamev .
-   endif
-   if !(-e $resnamew2) then
-      \cp $resnamew .
-   endif
 
    \rm -f restart.*
-   \ln -s $resnameu2  restart.u
-   \ln -s $resnamev2  restart.v
-   \ln -s $resnamew2  restart.w
+   \ln -s $resnameu  restart.u
+   \ln -s $resnamev  restart.v
+   \ln -s $resnamew  restart.w
    if !(-e restart.u) then
       echo "No restart.w file"
       exit 1
