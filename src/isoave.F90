@@ -61,8 +61,14 @@ real*8,allocatable  :: SP_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable  :: SN_lll(:,:)        ! D_lll(ndelta,ndir)
 real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
+! cj's structure functions:
+real*8,allocatable :: w2s2(:,:)
+real*8,allocatable :: w2w2(:,:)
+real*8,allocatable :: s2s2(:,:)
+
 real*8,allocatable  :: dwork2(:,:)     
 real*8,allocatable  :: dwork3(:,:,:)   
+
 
 
 ! also added to the file for completeness:
@@ -167,7 +173,6 @@ end subroutine
 
 
 
-
 !
 ! compute structure functions for many different directions
 ! 
@@ -178,15 +183,21 @@ end subroutine
 !       subcube code will still work)
 !
 !
-subroutine isoavep(Q,Qs,Qt,Qst,csig)
+!  nd=3   assume Q is (u,v,w) data
+!  nd=2   assume Q = two scalars, p1,p2, compute structure functions
+!                    of the form <p1(x)p2(x+r)>
+!                   
+!
+subroutine isoavep(Q,Qs,Qt,Qst,nd,csig)
 use params
 use transpose
 
 !input
-real*8 :: Q(nx,ny,nz,ndim)               ! original data
-real*8 :: Qt(g_nz2,nslabx,ny_2dz,ndim)   ! transpose
-real*8 :: Qs(nx,ny,nz,ndim)              ! shifted original data
-real*8 :: Qst(g_nz2,nslabx,ny_2dz,ndim)  ! transpose
+integer :: nd
+real*8 :: Q(nx,ny,nz,nd)               ! original data
+real*8 :: Qt(g_nz2,nslabx,ny_2dz,nd)   ! transpose
+real*8 :: Qs(nx,ny,nz,nd)              ! shifted original data
+real*8 :: Qst(g_nz2,nslabx,ny_2dz,nd)  ! transpose
 
 
 !local
@@ -209,18 +220,9 @@ endif
 
 ntranspose=0
 
+call zero_str
 
-Dl=0
-Dt=0
-D_ltt=0
-H_ltt=0
-H_tt=0
-SP_ltt=0
-SP_lll=0
-SN_ltt=0
-SN_lll=0
-
-
+if (nd==3) then
 ke_diss=0
 ke=0
 ntot=real(g_nx)*g_ny*g_nz
@@ -270,9 +272,10 @@ if (my_pe==io_pe) then
    print *,'lambda   ',lambda
    print *,'R_l      ',R_lambda
 endif
+endif
 
 
-do n=1,3
+do n=1,nd
    ntranspose=ntranspose+1
    call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo   
@@ -324,10 +327,10 @@ do idir=1,ndir
 !     if (dir_shift(3)==0 .or. ncpu_z==1) then
       if (dir_shift(3)==0) then  
          ! no shifts - compute directly 
-         call comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Q,nd,idir,rhat,rperp1,rperp2,dir_shift)
       else if (dir_shift(2)==0) then
          ! no need to shift, y-direction already 0
-         call comp_str_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qt,nd,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(2),dir_shift(3))==0) then
          ! 
          ! shift in y by (y/z)*z-index:
@@ -343,17 +346,17 @@ do idir=1,ndir
                if (j2<ny1) j2=j2+nslaby
                if (j2>ny2) j2=j2-nslaby
             enddo
-            do n=1,3
+            do n=1,nd
                Qs(i,j,k,n)=Q(i,j2,k,n)
             enddo
          enddo
          enddo
          enddo
-         do n=1,3
+         do n=1,nd
             ntranspose=ntranspose+1
             call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qst,nd,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(3),dir_shift(2))==0) then
          ! 
          ! shift in z by (z/y)*y-index
@@ -372,17 +375,17 @@ do idir=1,ndir
                if (k2<1) k2=k2+g_nz
                if (k2>g_nz) k2=k2-g_nz
             enddo
-            do n=1,3
+            do n=1,nd
                Qst(k,i,j,n)=Qt(k2,i,j,n)
             enddo
          enddo
          enddo
          enddo
-         do n=1,3
+         do n=1,nd
             ntranspose=ntranspose+1
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Qs,nd,idir,rhat,rperp1,rperp2,dir_shift)
       else
          call abort("parallel computation of direction not supported")
       endif
@@ -441,16 +444,7 @@ endif
 
 
 
-
-Dl=0
-Dt=0
-D_ltt=0
-H_ltt=0
-H_tt=0
-SP_ltt=0
-SP_lll=0
-SN_ltt=0
-SN_lll=0
+call zero_str
 
 subcube=0
 
@@ -661,17 +655,7 @@ if (firstcall) then
    call init
 endif
 
-
-Dl=0
-Dt=0
-D_ltt=0
-H_ltt=0
-H_tt=0
-SP_ltt=0
-SP_lll=0
-SN_ltt=0
-SN_lll=0
-
+call zero_str
 
 ke_diss=0
 ke=0
@@ -790,11 +774,12 @@ end subroutine
 
 
 
-subroutine comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xy(Q,nd,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
-real*8 :: Q(nx,ny,nz,ndim)       
+integer :: nd
+real*8 :: Q(nx,ny,nz,nd)       
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
@@ -830,10 +815,17 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             j2=j2-nslaby
          enddo
 
-         call accumulate_str(idir,idel, &
+         if (nd==2) then
+            call accumulate_scalar_str(idir,idel, &
+              Q(i,j,k,1),Q(i,j,k,2),&
+              Q(i2,j2,k,1),Q(i2,j2,k,2), &
+              rhat,rperp1,rperp2)
+         else
+            call accumulate_str(idir,idel, &
               Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),&
               Q(i2,j2,k,1),Q(i2,j2,k,2),Q(i2,j2,k,3), &
               rhat,rperp1,rperp2)
+         endif
 
          
       enddo
@@ -852,11 +844,12 @@ end subroutine
 
 
 
-subroutine comp_str_xz(Q,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xz(Q,nd,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
-real*8 :: Q(g_nz2,nslabx,ny_2dz,ndim)  
+integer :: nd
+real*8 :: Q(g_nz2,nslabx,ny_2dz,nd)  
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 
 !local
@@ -893,10 +886,17 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             k2=k2-g_nz
          enddo
 
-         call accumulate_str(idir,idel, &
+         if (nd==2) then
+            call accumulate_scalar_str(idir,idel, &
+              Q(k,i,j,1),Q(k,i,j,2),&
+              Q(k2,i2,j,1),Q(k2,i2,j,2), &
+              rhat,rperp1,rperp2)
+         else
+            call accumulate_str(idir,idel, &
               Q(k,i,j,1),Q(k,i,j,2),Q(k,i,j,3),&
               Q(k2,i2,j,1),Q(k2,i2,j,2),Q(k2,i2,j,3), &
               rhat,rperp1,rperp2)
+         endif
 
       enddo
       enddo
@@ -1094,6 +1094,37 @@ end subroutine
 
 
 
+subroutine accumulate_scalar_str(idir,idel,u1,u2,ur1,ur2,rhat,rperp1,rperp2)
+!
+!  (u1,u2)         w(x), s(x)
+!  (ur1,ur2)       w(x+r), s(x+r)
+!
+!
+real*8 :: u1,ur1,u2,ur2
+real*8 :: rhat(3),rperp1(3),rperp2(3)
+integer :: idir,idel
+
+! local
+integer :: p
+
+
+! compute:  <w^2s^2(r)>, <w^2w^2(r)>, <s^2s^2(r)>
+w2s2(idel,idir)=w2s2(idel,idir)+u1*ur2
+w2w2(idel,idir)=w2w2(idel,idir)+u1*ur1
+s2s2(idel,idir)=s2s2(idel,idir)+u2*ur2
+
+
+
+
+
+end subroutine 
+
+
+
+
+
+
+
 !
 ! For each direction, find its intersection with the unit sphere
 ! (2 points) and output in lat-lon coordinates
@@ -1102,8 +1133,6 @@ end subroutine
 subroutine writepoints()
 use params
 
-!input
-real*8 :: Q(nx,ny,nz,ndim)
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
@@ -1135,6 +1164,8 @@ enddo
 
 close(97)
 end subroutine
+
+
 
 
 
@@ -1457,6 +1488,19 @@ SN_lll=SN_lll/ntot
 
 
 #endif
+end subroutine
+
+
+subroutine zero_str
+Dl=0
+Dt=0
+D_ltt=0
+H_ltt=0
+H_tt=0
+SP_ltt=0
+SP_lll=0
+SN_ltt=0
+SN_lll=0
 end subroutine
 
 end module 

@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model
 
 ! local variables
-integer,parameter :: nints_e=23
+integer,parameter :: nints_e=25
 real*8 :: ints_e(nints_e)
 real*8 :: x
 integer i,j,k,n,ierr,csig
@@ -102,7 +102,7 @@ call compute_expensive_scalars(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
 if (compute_struct==1) then
 
    ! angle averaged functions:
-   call isoavep(Q,q1,q2,q3,csig)
+   call isoavep(Q,q1,q2,q3,3,csig)
    ! if csig>0, isoavep did not complete - interrupted by SIGURG
    if (my_pe==io_pe .and. csig==0) then
       write(message,'(f10.4)') 10000.0000 + time
@@ -418,8 +418,8 @@ integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
 real*8 :: vor2(3),vor3(3),vor4(3)
-real*8 :: dummy(1),S2sum,ensave
-real*8 :: tmx1,tmx2
+real*8 :: dummy(1),S2sum,ensave,S4sum,S2,S4,S2w2
+real*8 :: tmx1,tmx2,xtmp
 
 
 
@@ -434,6 +434,8 @@ enddo
 
 ! scalars
 S2sum=0
+S4sum=0
+S2w2=0
 ensave=0
 Sww=0
 ux2=0
@@ -458,6 +460,8 @@ do i=nx1,nx2
    ! compute Sw = Sij*wj
    Sw=0
    !wS=0
+   S2=0
+   S4=0
    do m1=1,3
       do m2=1,3
          if (m1==1) uij=gradu(i,j,k,m2)
@@ -469,13 +473,19 @@ do i=nx1,nx2
          ! S(m1,m2) = .5*(uij_uji)
          Sw(m1)=Sw(m1)+.5*(uij+uji)*vor(m2)
          !wS(m2)=wS(m2)+.5*(uij+uji)*vor(m1)
-         S2sum=S2sum + (.5*(uij+uji))**2
+         xtmp=(.5*(uij+uji))**2
+         S2=S2 + xtmp
+         S4=S4 + xtmp**2
       enddo
    enddo
+   S2sum=S2sum+S2
+   S4sum=S4sum+S4
    ! compute Sww = wi*(Sij*wj)
    Sww=Sww+Sw(1)*vor(1)+Sw(2)*vor(2)+Sw(3)*vor(3)
 
-   ensave=ensave+vor(1)**2+vor(2)**2+vor(3)**2
+   xtmp=vor(1)**2+vor(2)**2+vor(3)**2
+   ensave=ensave+xtmp
+   S2w2 = S2*xtmp
 
    ! if we use gradu(i,j,k,1)**3, do we preserve the sign?  
    ! lets not put f90 to that test!
@@ -502,6 +512,8 @@ enddo
 enddo
 
 S2sum=S2sum/g_nx/g_ny/g_nz
+S2w2=S2w2/g_nx/g_ny/g_nz
+S4sum=S4sum/g_nx/g_ny/g_nz
 Sww=Sww/g_nx/g_ny/g_nz
 ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux3/g_nx/g_ny/g_nz
@@ -516,7 +528,7 @@ ensave=ensave/g_nx/g_ny/g_nz
 
 
 
-ASSERT("compute_expensive_scalars: ns too small ",ns>=23)
+ASSERT("compute_expensive_scalars: ns too small ",ns>=25)
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)
@@ -532,6 +544,8 @@ scalars(15:17)=vor2
 scalars(18:20)=vor3
 scalars(21:23)=vor4
 
+scalars(24)=S4sum
+scalars(25)=S2w2
 
 #ifdef USE_MPI
    scalars2=scalars

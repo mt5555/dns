@@ -10,6 +10,8 @@
 UNAME = $(shell uname)
 ARCH = $(shell uname -m)
 HOST = $(shell hostname)
+# use this if compiler needs options to compile fixed format code:
+F77FIXED=
 
 
 ifeq ($(UNAME),Linux)
@@ -89,6 +91,13 @@ ifeq ($(UNAME),IRIX64)
    CPPFLAGS = 
    CC = cc -64 $(LSFFLAGS)
 endif
+ifeq ($(UNAME),AIX)
+   F90 = mpxlf95
+   F77FIXED = -qfixed
+   MPI = -DUSE_MPI
+   FFLAGS = -WF,"-DAIX,-Dabort=punt,$(MPI),-DUSE_FFT99"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
+   CC = cc -DAIX
+endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
    # defaults for asci Q: MPI paths loaded via modules
@@ -131,6 +140,7 @@ ifeq ($(UNAME),OSF1)
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
+COMPILE77=$(F90) $(F77FIXED) -c $(FFLAGS)
 LINK=$(F90) $(FFLAGS) 
 
 
@@ -179,7 +189,7 @@ MODEL_PSIVOR     = ns_psivor.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(PSIVOR_DIAG)
 %.o: %.F90
 	$(COMPILE)  $< 
 %.o: %.f
-	$(COMPILE) -o $@ $< 
+	$(COMPILE77) -o $@ $< 
 %.o: %.c
 	$(CC) -c -o $@ $< 
 

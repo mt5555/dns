@@ -168,7 +168,7 @@ do
       else
          if (nxdecomp*nydecomp*nzdecomp==1) then
             ! no subcubes:
-            call isoavep(Q,q1,q2,q3,csig)
+            call isoavep(Q,q1,q2,q3,3,csig)
          else
             range(1,1)=dble(i)/nxdecomp
             range(1,2)=dble(i+1)/nxdecomp

@@ -19,7 +19,7 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss
+real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss,xtmp
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen,doit_model
 integer :: n1,n1d,n2,n2d,n3,n3d
@@ -62,7 +62,8 @@ if (equations==SHALLOW .and. grav>0) then
 endif
 
 !if u=0, take very small timesteps 
-umax=max(umax,1e-8)
+xtmp=1e-8
+umax=max(umax,xtmp)
 delt = cfl_adv/umax                         ! advective CFL
 delt = min(delt,cfl_vis/mumax)              ! viscous CFL
 delt = max(delt,delt_min)
