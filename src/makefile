@@ -23,6 +23,10 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
+   ifeq ($(HOST),brain)
+      MPI = -DNDEBUG -DUSE_MPI -I/usr/include
+      MPILIB =  -L/usr/lib/lib -lpmpi -llamf77mpi -lmpi -llam 
+   endif
    #VENDOR=LAHEY
    #VENDOR=PGI
    VENDOR=INTEL
