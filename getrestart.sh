@@ -4,89 +4,167 @@
 # using the specified basename, find the file of the form basename????.????.u
 # with the newest time stamp (????.????)
 #
+#  getrestart.sh basname HPSS [uvw,h5]        search HPSS
+#  getrestart.sh basname path [uvw,h5]        search path 
+#  getrestart.sh basname path  uvw,h5  all    search both
+#
 #  $1 = basename of restart file. 
 #  $2 = HPSS   get file off of HPSS
 #     = path   get file from specified path
+#  $3   uvw or h5.  default = uvw
+#  $4   "all"
 #
 # status=0  success
 # status=1  failed
 #
 set name = $1
 set fpath = $2
+set ext = w
+
+if ($#argv >=3) then
+   if ($3 == uvw ) then
+      set ext = w
+   else
+      set ext = h5
+   endif
+endif
+
+set both = no
+if ($#argv >=4) then
+   set both = $4
+endif
 
 
-if ($fpath == HPSS) then
+if ($both == "all") 
+   #search $fpath for newest restart file
+   set resnamels = `\ls {$fpath}/{$name}*.{$ext} | sort | tail -1`
+   if ($resnamels =="") then
+      echo {$fpath}/{$name}
+      echo "no restart files in directory"
+      set resnamels=aaaaaaaaaaa
+   endif
+   #search PSI
+   set resnamepsi = `psi ls dns/{$name}/{$name}\*.{$ext} | sort | tail -1`
+   if ($resnamepsi =="") then
+      echo "no restart files on HPSS"
+      set resnamepsi=aaaaaaaaaaa
+   else
+   resnamew=`echo "$resanmels\n$resnamepsi" | sort | tail -1`
+   if ($resnamew == $resnamels ) then
+      echo "using restart files in directory"
+   else if ($resnamew == $resnamepsi ) then
+      echo "using restart files from HPSS"
+      set fpath = HPSS
+   else
+      echo "no restart files found"
+      exit 1
+   endif
+endif
+
+
+ if ($fpath == HPSS) then
 
    #search HPSS for newest restart file
-   set resnamew = `psi ls dns/{$name}/{$name}\*.w | sort | tail -1`
+   set resnamew = `psi ls dns/{$name}/{$name}\*.{$ext} | sort | tail -1`
    if ($resnamew =="") then
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      set nametime = `basename $resnamew .w`
-      set resnameu = `psi ls  dns/{$name}/{$nametime}\*.u | sort | tail -1`
-      set resnamev = `psi ls  dns/{$name}/{$nametime}\*.v | sort | tail -1`
       echo "Using restart files: " 
-      echo $resnameu
-      echo $resnamev
+      set nametime = `basename $resnamew .{$ext}`
+      if ( $ext == "w" ) then
+         set resnameu = `psi ls  dns/{$name}/{$nametime}\*.u | sort | tail -1`
+         set resnamev = `psi ls  dns/{$name}/{$nametime}\*.v | sort | tail -1`
+         echo $resnameu
+         echo $resnamev
+      endif
       echo $resnamew
    endif
-   set resnameu2 = `basename $resnameu`
-   set resnamev2 = `basename $resnamev`
+   if ( $ext == "w" ) then
+      set resnameu2 = `basename $resnameu`
+      set resnamev2 = `basename $resnamev`
+   endif
    set resnamew2 = `basename $resnamew`
 
    # check to see if files are left over from last run: 
-   if !(-e $resnameu2) then
-      psi get $resnameu
-   endif
-   if !(-e $resnamev2) then
-      psi get $resnamev
-   endif
-   if !(-e $resnamew2) then
-      psi get $resnamew
-   endif
-
    \rm -f restart.*
-   \ln -s $resnameu2  restart.u
-   \ln -s $resnamev2  restart.v
-   \ln -s $resnamew2  restart.w
-   if !(-e restart.u) then
-      echo "No restart.w file"
-      exit 1
+
+   if ( $ext == "w" ) then
+      if !(-e $resnameu2) then
+         psi get $resnameu
+      endif
+      if !(-e $resnamev2) then
+         psi get $resnamev
+      endif
+      if !(-e $resnamew2) then
+         psi get $resnamew
+      endif
+      \ln -s $resnameu2  restart.u
+      \ln -s $resnamev2  restart.v
+      \ln -s $resnamew2  restart.{$ext}
+      if !(-e restart.u) then
+         echo "No restart.u file"
+         psi mv $resnameu2 $resnameu2.bak
+         psi mv $resnamev2 $resnamev2.bak
+         psi mv $resnamew2 $resnamew2.bak
+         exit 1
+      endif
+   else
+      if !(-e $resnamew2) then
+         psi get $resnamew
+      endif
+      \ln -s $resnamew2  restart.{$ext}
+      if !(-e restart.{$ext}) then
+         echo "No restart.{$ext} file"
+         psi mv $resnamew2 $resnamew2.bak
+         exit 1
+      endif
    endif
 
 else
 
    #search $fpath for newest restart file
-   set resnamew = `\ls {$fpath}/{$name}*.w | sort | tail -1`
+   set resnamew = `\ls {$fpath}/{$name}*.{$ext} | sort | tail -1`
    if ($resnamew =="") then
       echo {$fpath}/{$name}
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      set nametime = `basename $resnamew .w`
-      set resnameu = `ls  {$fpath}/{$nametime}*.u | sort | tail -1`
-      set resnamev = `ls  {$fpath}/{$nametime}*.v | sort | tail -1`
       echo "Using restart files: " 
-      echo $resnameu
-      echo $resnamev
+      set nametime = `basename $resnamew .{$ext}`
+      if ( $ext == "w" ) then
+         set resnameu = `ls  {$fpath}/{$nametime}*.u | sort | tail -1`
+         set resnamev = `ls  {$fpath}/{$nametime}*.v | sort | tail -1`
+         echo $resnameu
+         echo $resnamev
+      endif
       echo $resnamew
    endif
 
    \rm -f restart.*
-   \ln -s $resnameu  restart.u
-   \ln -s $resnamev  restart.v
-   \ln -s $resnamew  restart.w
-   if !(-e restart.w) then
-      echo "No restart.w file"
-      # move them out of the way in case this time is corrupt:
-      # then next run will pick up earlier backup:
-      mv $resnameu $resnameu.bak
-      mv $resnamev $resnamev.bak
-      mv $resnamew $resnamew.bak
-      exit 1
+   if ( $ext == "w" ) then
+      \ln -s $resnameu  restart.u
+      \ln -s $resnamev  restart.v
+      \ln -s $resnamew  restart.{$ext}
+      if !(-e restart.{$ext}) then
+         echo "No restart.{$ext} file"
+         # move them out of the way in case this time is corrupt:
+         # then next run will pick up earlier backup:
+         mv $resnameu $resnameu.bak
+         mv $resnamev $resnamev.bak
+         mv $resnamew $resnamew.bak
+         exit 1
+      endif
+   else
+      \ln -s $resnamew  restart.{$ext}
+      if !(-e restart.{$ext}) then
+         echo "No restart.{$ext} file"
+         # move them out of the way in case this time is corrupt:
+         # then next run will pick up earlier backup:
+         mv $resnamew $resnamew.bak
+         exit 1
+       endif
    endif
-
 endif
 
 exit 0
