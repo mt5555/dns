@@ -37,7 +37,7 @@ for i=range
   title(ts);
   shading interp
   axis square
-  
+  pause  
 end
 return
 

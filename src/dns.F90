@@ -26,8 +26,8 @@ call test           ! optional testing  routines go here
 
 write(message,'(a)') 'Initial data'
 call print_message(message)
-call init_data_test(Q)             ! set up initial data 
-!call init_data_kh(Q)             ! set up initial data 
+!call init_data_test(Q)             ! set up initial data 
+call init_data_kh(Q)             ! set up initial data 
 
 write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data
@@ -50,11 +50,11 @@ tims(2)=tmx2-tmx1
 
 
 call print_message('CPU times:')
-write(message,'(a,f10.5,a)') 'initialization: ',tims(1),' s'
+write(message,'(a,f12.5,a)') 'initialization: ',tims(1),' s'
 call print_message(message)
-write(message,'(a,f10.5,a)') 'dns_solve:      ',tims(2),' s'
+write(message,'(a,f12.5,a)') 'dns_solve:      ',tims(2),' s'
 call print_message(message)
-write(message,'(a,f10.5,a,f4.3,a)') '   time_control:   ',tims(3),' s (',tims(3)/tims(2),')'
+write(message,'(a,f12.5,a,f4.3,a)') '   time_control:   ',tims(3),' s (',tims(3)/tims(2),')'
 call print_message(message)
 
 call close_mpi
