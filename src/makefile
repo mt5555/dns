@@ -105,9 +105,10 @@ ifeq ($(UNAME),OSF1)
 
    LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  #-Lstk -lstk 
 
+   #flag for OPENMP:  -omp
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   FFLAGS = -omp -fast -automatic -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
+   FFLAGS =  -fast -automatic -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
    CC = cc $(LSFFLAGS)
 endif
 

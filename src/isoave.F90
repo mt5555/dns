@@ -52,6 +52,9 @@ real*8,allocatable  :: SP_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable  :: SN_lll(:,:)        ! D_lll(ndelta,ndir)
 real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
+real*8,allocatable  :: dwork2(:,:)     
+real*8,allocatable  :: dwork3(:,:,:)   
+
 ! also added to the file for completeness:
 real*8,private :: epsilon,mu,ke
 
@@ -162,9 +165,9 @@ real*8 :: Qst(g_nz2,nslabx,ny_2dz,ndim)  ! transpose
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
-real*8 :: dummy
+real*8 :: dummy,xtmp
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ntot,ishift,k_g,j_g
-integer :: n1,n1d,n2,n2d,n3,n3d
+integer :: n1,n1d,n2,n2d,n3,n3d,ierr
 
 if (firstcall) then
    firstcall=.false.
@@ -209,7 +212,10 @@ ke=ke/ntot
 
 
 #ifdef USE_MPI
-   global sum KE, EPSILON
+   xtmp=epsilon
+   call MPI_allreduce(xtmp,epsilon,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   xtmp=ke
+   call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -345,7 +351,29 @@ SN_ltt=SN_ltt/ntot
 SN_lll=SN_lll/ntot
 
 #ifdef USE_MPI
-   global sum all the above
+allocate(dwork2(ndelta,ndir))
+allocate(dwork3(ndelta,ndir,2))
+   dwork2=D_ll
+   call MPI_allreduce(dwork2,D_ll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   dwork3=D_tt
+   call MPI_allreduce(dwork3,D_tt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   dwork3=D_ltt
+   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   dwork2=D_lll
+   call MPI_allreduce(dwork2,D_lll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+
+
+   dwork3=SP_ltt
+   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   dwork2=SP_lll
+   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   dwork3=SN_ltt
+   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   dwork2=SN_lll
+   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+
+
+
 #endif
 
 end subroutine
