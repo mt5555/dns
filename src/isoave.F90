@@ -62,12 +62,17 @@ real*8,allocatable  :: SN_lll(:,:)        ! D_lll(ndelta,ndir)
 real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
 ! cj's structure functions:
-real*8,allocatable :: w2s2(:,:)
-real*8,allocatable :: w2w2(:,:)
-real*8,allocatable :: s2s2(:,:)
+!
+!  w2s2(:,:,1)   <w2(x)*w2(x+r)>
+!  w2s2(:,:,2)   <s2(x)*s2(x+r)>
+!  w2s2(:,:,3)   <w2(x)*s2(x+r)>
+!
+real*8,allocatable :: w2s2(:,:,:)
 
-real*8,allocatable  :: dwork2(:,:)     
-real*8,allocatable  :: dwork3(:,:,:)   
+
+real*8,allocatable  :: dwork2(:,:)
+real*8,allocatable  :: dwork3(:,:,:)
+
 
 
 
@@ -1108,10 +1113,11 @@ integer :: idir,idel
 integer :: p
 
 
-! compute:  <w^2s^2(r)>, <w^2w^2(r)>, <s^2s^2(r)>
-w2s2(idel,idir)=w2s2(idel,idir)+u1*ur2
-w2w2(idel,idir)=w2w2(idel,idir)+u1*ur1
-s2s2(idel,idir)=s2s2(idel,idir)+u2*ur2
+! compute:  <w^2w^2(r)>,  <s^2s^2(r)>, <w^2s^2(r)>  
+w2s2(idel,idir,1)=w2s2(idel,idir,1)+u1*ur1
+w2s2(idel,idir,2)=w2s2(idel,idir,2)+u2*ur2
+w2s2(idel,idir,3)=w2s2(idel,idir,3)+u1*ur2
+
 
 
 
@@ -1391,6 +1397,8 @@ allocate(SP_ltt(ndelta,ndir,2))
 allocate(SN_lll(ndelta,ndir))
 allocate(SN_ltt(ndelta,ndir,2))
 
+allocate(w2s2(ndelta,ndir,3))
+
 
 do idel=1,ndelta
 do idir=1,ndir
@@ -1457,6 +1465,8 @@ SP_lll=SP_lll/ntot
 SN_ltt=SN_ltt/ntot
 SN_lll=SN_lll/ntot
 
+w2s2=w2s2/ntot
+
 #ifdef USE_MPI
    do p=2,pmax
    dwork2=Dl(:,:,p)
@@ -1475,7 +1485,6 @@ SN_lll=SN_lll/ntot
    call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 
 
-
    dwork3=SP_ltt
    call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork2=SP_lll
@@ -1484,6 +1493,11 @@ SN_lll=SN_lll/ntot
    call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork2=SN_lll
    call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
+   do p=1,3
+      dwork2=w2s2(:,:,p)
+      call MPI_allreduce(dwork2,w2s2(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enddo
 
 
 
@@ -1501,6 +1515,7 @@ SP_ltt=0
 SP_lll=0
 SN_ltt=0
 SN_lll=0
+w2s2=0
 end subroutine
 
 end module 
