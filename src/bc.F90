@@ -265,7 +265,7 @@ real*8 psi(nx,ny)
 integer :: runbs
 
 ! local
-integer i,j,k,l,ierr,last
+integer i,j,k,l,ierr,last,nskip
 real*8 :: dela
 real*8 tmx1,tmx2
 logical interp
@@ -283,38 +283,39 @@ interp=(biotsavart_cutoff>0)
 
 
 if (interp) then
-! interpolate every 10'th point
-do j=by1,by2
+   nskip=10
+   ! interpolate every nskip point
+   do j=by1,by2
    if (mod(j,100)==0 .and. my_pe==io_pe) then
       print *,'interp: ',by2,j
    endif
-do i=bx1,bx2
+   do i=bx1,bx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
-      do k=1,o_nx,10 
+      do k=1,o_nx,nskip
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
          psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,o_ny)
       enddo
-      last=k-10
+      last=k-nskip
       do k=last+1,o_nx
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
          psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,o_ny)
       enddo
-      do k=11,o_ny,10 
+      do k=11,o_ny,nskip
             psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
             psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,o_nx,k)
       enddo
-      last=k-10
+      last=k-nskip
       do k=last+1,o_ny
             psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
             psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,o_nx,k)
       enddo
    endif
-enddo
-enddo
+   enddo
+   enddo
 
 else
-do j=by1,by2
-do i=bx1,bx2
+   do j=by1,by2
+   do i=bx1,bx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
       do k=1,o_nx
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
@@ -326,7 +327,7 @@ do i=bx1,bx2
       enddo
 !      print *,i,j,w(i,j)
    endif
-enddo
+   enddo
 enddo
 endif
 
@@ -340,7 +341,7 @@ call MPI_allreduce(psi_b_temp,psi_b,4*bsize,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 !print *,'psib',psi_b(o_ny,1,1)
 
 
-if (interp) call intpsi(psi_b,bsize)
+if (interp) call intpsi(psi_b,nskip,bsize)
 
 
 ! add ubar correction
@@ -424,30 +425,30 @@ end function
 
 
 
-subroutine intpsi(psi,n)
+subroutine intpsi(psi,nskip,n)
 use params
 implicit none
-integer :: n
+integer :: n,nskip
 real*8 psi(n,2,2)
 
 integer i,k
 
 ! x1 and x2 boundary
-! psi(i,1,*) was set for i=1,o_nx,10
+! psi(i,1,*) was set for i=1,o_nx,nskip
 
 do k=1,2
-do i=1,o_ny,10
-   if (i+30>o_ny) exit
+do i=1,o_ny,nskip
+   if (i+3*nskip>o_ny) exit
    if (i==1) then  
       ! do the [y0,y1] piece
-      call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+1,1,k),10,0)
+      call interpn(psi(i,1,k),psi(i+nskip,1,k),psi(i+2*nskip,1,k),psi(i+3*nskip,1,k),psi(i+1,1,k),nskip,0)
    endif
-   if (i+40>o_ny) then  
+   if (i+4*nskip>o_ny) then  
       ! do the [y2,y3] piece, this is the final iteration
-      call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+21,1,k),10,2)
+      call interpn(psi(i,1,k),psi(i+nskip,1,k),psi(i+2*nskip,1,k),psi(i+3*nskip,1,k),psi(i+1+2*nskip,1,k),nskip,2)
    endif
    ! using [y0,y1,y2,y3], interpolate the [y1,y2] piece
-   call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+11,1,k),10,1)
+   call interpn(psi(i,1,k),psi(i+nskip,1,k),psi(i+2*nskip,1,k),psi(i+3*nskip,1,k),psi(i+1+nskip,1,k),nskip,1)
 enddo
 enddo
 
@@ -455,18 +456,18 @@ enddo
 ! y2 boundary
 ! psi(i,2,2) was set for i=1,o_ny,10
 k=2
-do i=1,o_nx,10
-   if (i+30>o_nx) exit
+do i=1,o_nx,nskip
+   if (i+3*nskip>o_nx) exit
    if (i==1) then  
       ! do the [y0,y1] piece
-      call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+1,2,k),10,0)
+      call interpn(psi(i,2,k),psi(i+nskip,2,k),psi(i+2*nskip,2,k),psi(i+3*nskip,2,k),psi(i+1,2,k),nskip,0)
    endif
-   if (i+40>o_nx) then  
+   if (i+4*nskip>o_nx) then  
       ! do the [y2,y3] piece, this is the final iteration
-      call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+21,2,k),10,2)
+      call interpn(psi(i,2,k),psi(i+nskip,2,k),psi(i+2*nskip,2,k),psi(i+3*nskip,2,k),psi(i+1+2*nskip,2,k),nskip,2)
    endif
    ! using [y0,y1,y2,y3], interpolate the [y1,y2] piece
-   call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+11,2,k),10,1)
+   call interpn(psi(i,2,k),psi(i+nskip,2,k),psi(i+2*nskip,2,k),psi(i+3*nskip,2,k),psi(i+1+nskip,2,k),nskip,1)
 enddo
 end subroutine
 
