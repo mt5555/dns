@@ -122,7 +122,9 @@ subroutine interp_subcube(nsx,nsy,nsz,dx,dy,dz,data,field,irot,rmatrix)
 !
 ! interpolate to the points dx(1:ns),dy(1:ns),dz(1:ns)
 !
-! apply rotation matrix if irot==1
+! if irot=0, then interpolate by finding closest grid point.
+!
+! if irot=1, apply rotation matrix and then do true interpolation
 !
 ! NOTE: only io_pe will have the correct, interpolated data
 !
@@ -134,7 +136,7 @@ integer :: irot
 real*8 :: rmatrix(3,3,3)
 
 real*8 :: xi,yi,zi
-integer :: n1,n2,n3,i,j,k
+integer :: n1(nsx),n2(nsy),n3(nsz),i,j,k,igrid,jgrid,kgrid
 #ifdef USE_MPI
 real*8,allocatable :: data2(:,:,:)
 integer :: ierr
@@ -145,28 +147,72 @@ integer :: ierr
 !   print *,dx(1),dy(1),dz(1)
 !   print *,dx(nsx),dy(nsy),dz(nsz)
 !endif
+
+do i=1,nsx
+   xi=dx(i)
+   if (xi<0) xi=xi+1;
+   if (xi>1) xi=xi-1;
+   n1(i)=(xi-xcord(nx1))/delx
+   n1(i)=n1(i)+nx1
+   if (n1(i)<nx1 .or. n1(i)>nx2) n1(i)=0 !flag indicating not on this cpu
+enddo
+do j=1,nsy
+   yi=dy(j)
+   if (yi<0) yi=yi+1;
+   if (yi>1) yi=yi-1;
+   n2(j)=(yi-ycord(ny1))/dely
+   n2(j)=n2(j)+ny1
+   if (n2(j)<ny1 .or. n2(j)>ny2) n2(j)=0 !flag indicating not on this cpu
+enddo
+do k=1,nsz
+   zi=dz(k)
+   if (zi<0) zi=zi+1;
+   if (zi>1) zi=zi-1;
+   n3(k)=(zi-zcord(nz1))/delz
+   n3(k)=n3(k)+nz1
+   if (n3(k)<nz1 .or. n3(k)>nz2) n3(k)=0 !flag indicating not on this cpu
+enddo
+
+
 do k=1,nsz
    do j=1,nsy
       do i=1,nsx
 
-         xi=dx(i)
-         yi=dy(j)
-         zi=dz(k)
-         !if (irot==1) call rotate(xi,yi,zi,rmatrix)
+         if (irot==1) then
+            xi=dx(i)
+            yi=dy(j)
+            zi=dz(k)
+            !rotate to (xi,yi,zi), and map back into [0,1]
+            !call rotate(xi,yi,zi,rmatrix)
+            ! find cell containing (xi,yi,zi):
 
-         n3=(zi-zcord(nz1))/delz
-         n3=n3+nz1
-         n2=(yi-ycord(ny1))/dely
-         n2=n2+ny1
-         n1=(xi-xcord(nx1))/delx
-         n1=n1+nx1
+            ! find position in global grid:
+            igrid = 1 + floor( (xi-g_xcord(1))/delx )
+            jgrid = 1 + floor( (yi-g_ycord(1))/dely )
+            kgrid = 1 + floor( (zi-g_zcord(1))/delz )
 
-         if (n1>=nx1 .and. n1<=nx2 .and. n2>=ny1 .and. n2<=ny2 .and. &
-             n3>=nz1 .and. n3<=nz2) then
-            ! interpolate
-            data(i,j,k)=field(n1,n2,n3)
+            ! compute a new point in the center of the above cell:
+            ! (do this to avoid problems with 2 cpus both claiming a point
+            ! on the boundary of a cell)
+            xi=.5*(g_xcord(igrid)+g_xcord(igrid+1))
+            yi=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
+            zi=.5*(g_zcord(kgrid)+g_zcord(kgrid+1))
+
+            ! find cpu which owns this cell (xi,yi,zi):
+            igrid=(xi-xcord(nx1))/delx
+            jgrid=(yi-ycord(ny1))/dely
+            kgrid=(zi-zcord(nz1))/delz
+
+            ! interpolate:
+            
          else
-            data(i,j,k)=-9d200
+            ! 
+            if (n1==0 .or. n2==0 .or. n3==0) then
+               data(i,j,k)=-9d200
+            else
+               ! we have this data, copy;
+               data(i,j,k)=field(n1,n2,n3)
+            endif
          endif
          
       enddo

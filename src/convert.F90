@@ -375,7 +375,7 @@ basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
 fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu2'
 open(15,file=fname,form='formatted')
 do sc=1,nsubcube
-   write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
+   write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize,sc
    do i=1,3
       write(15,'(3e18.10)') (gradu2(i,j,sc),j=1,3)
    enddo
@@ -395,10 +395,10 @@ do sc=1,nsubcube
    fname = basename(1:len_trim(basename)) // sdata(2:10) // '.sc' // ext(2:5)
 
 
-   ! select on gradu(:,:,sc)
-   dx(:)=subcube_corner(1,sc)+wsubcube_cords(:)
-   dy(:)=subcube_corner(2,sc)+wsubcube_cords(:)
-   dz(:)=subcube_corner(3,sc)+wsubcube_cords(:)
+   ! select a subcube 2x larger containg the sc'th subcube:
+   dx(:)=wsubcube_corner(1,sc)+wsubcube_cords(:)
+   dy(:)=wsubcube_corner(2,sc)+wsubcube_cords(:)
+   dz(:)=wsubcube_corner(3,sc)+wsubcube_cords(:)
    do k=1,2*ssize
       call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,vor,0,mat)
       ! output this slab:
