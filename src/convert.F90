@@ -361,7 +361,7 @@ do j=1,3
       dx(1:ssize)=subcube_corner(1,sc)+subcube_cords(:)
       dy(1:ssize)=subcube_corner(2,sc)+subcube_cords(:)
       dz(1:ssize)=subcube_corner(3,sc)+subcube_cords(:)
-      call interp_subcube(ssize,ssize,ssize,dx,dy,dz,data,vor,0,mat)
+!      call extract_subcube(ssize,ssize,ssize,dx,dy,dz,data,vor,0,mat)
 
       if (io_pe==my_pe) then
          ! data() only computed on io_pe
@@ -446,10 +446,9 @@ character(len=8) :: ext2,ext
 
 integer :: sc
 integer :: ssize,irot
-real*8,allocatable  :: dx(:),dy(:),dz(:)
 real*8,allocatable :: dslice(:,:,:)
 real*8 :: mat(3,3,3),gradu(3,3)
-real*8 :: corner(3),wcorner(3)
+real*8 :: corner(3),x0(3),x1(3),x2(3),x3(3),e01(3),e02(3),e03(3)
 CPOINTER :: fid
 
 ! check to make sure we have 2 ghost cells in all directions:
@@ -486,24 +485,30 @@ do
       write(*,'(a,3f12.5)') 'corner: ',corner(1:3)
    endif
 
+
+   x0(1) = corner(1) - ssize*delx/2
+   x0(2) = corner(2) - ssize*dely/2
+   x0(3) = corner(3) - ssize*delz/2
+
+   x1 = x0; x1(1)=x0(1) + 2*ssize*delx
+   x2 = x0; x2(2)=x0(2) + 2*ssize*dely
+   x3 = x0; x3(3)=x0(3) + 2*ssize*delz
+
    ! compute rotation matrix from gradu(3,3):
+   ! apply rotation to x0,x1,x2,x3
    irot=0
-   !ASSERT("compute rotation matrix",.false.)   
+
+
+   e01=(x1-x0)/(2*ssize*delx)
+   e02=(x2-x0)/(2*ssize*dely)
+   e03=(x3-x0)/(2*ssize*delz)
+
 
    ! allocate memory:
    if (sc==1) then
-      allocate(dx(2*ssize))
-      allocate(dy(2*ssize))
-      allocate(dz(2*ssize))
       allocate(dslice(2*ssize,2*ssize,1) )
    endif
 
-   ! select a subcube 2x larger containg the sc'th subcube:
-   do i=1,2*ssize
-      dx(i)=-ssize*delx/2  + corner(1) + (i-1)*delx
-      dy(i)=-ssize*dely/2  + corner(2) + (i-1)*dely
-      dz(i)=-ssize*delz/2  + corner(3) + (i-1)*delz
-   enddo
 
    do j=1,3
       ! compute filename.  use runname+"-sc#_"+time+".uvw"
@@ -512,16 +517,19 @@ do
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // "-sc" // ext(2:5) // &
               "_" // sdata(2:10) // '.' // extension(j:j)
-      call copen(fname,"w",fid,ierr)
+      if (io_pe==my_pe) &
+          call copen(fname,"w",fid,ierr)
       
       do k=1,2*ssize ! loop over all z-slices
          ! interpolate 1 slice of data
-         call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,Q(1,1,1,j),irot,mat)
+         call interp_subcube(2*ssize,k,k,x0,e01,e02,e03,dslice,Q(1,1,1,j),irot)
          ! output this slab:
-         call cwrite8(fid,dslice,2*ssize*2*ssize)
+         if (io_pe==my_pe) &
+             call cwrite8(fid,dslice,2*ssize*2*ssize)
       enddo
       
-      call cclose(fid,ierr)
+      if (io_pe==my_pe) &
+          call cclose(fid,ierr)
    enddo
 
     

@@ -124,25 +124,20 @@ end subroutine
 
 
 
-subroutine interp_subcube(nsx,nsy,nsz,dx,dy,dz,data,field,irot,rmatrix)
+subroutine interp_subcube(ssize,k1,k2,x0,e01,e02,e03,data,field,irot)
 !
 ! interpolate to the points dx(1:ns),dy(1:ns),dz(1:ns)
 !
-! if irot=0, then interpolate by finding closest grid point.
-!
-! if irot=1, apply rotation matrix and then do true interpolation
-!
 ! NOTE: only io_pe will have the correct, interpolated data
 !
-integer :: nsx,nsy,nsz
-real*8 :: dx(nsx),dy(nsy),dz(nsz)
-real*8 :: data(nsx,nsy,nsz)
+integer :: ssize,k1,k2,irot
+real*8 :: data(ssize,ssize,k2-k1+1)
 real*8 :: field(nx,ny,nz)
-integer :: irot
-real*8 :: rmatrix(3,3,3)
+real*8 :: x0(3),e01(3),e02(3),e03(3)
 
-real*8 :: xi,yi,zi,pos(3)
-integer :: n1(nsx),n2(nsy),n3(nsz),i,j,k,igrid,jgrid,kgrid
+
+real*8 :: xi(3)
+integer :: i,j,k,ii,jj,kk
 #ifdef USE_MPI
 real*8,allocatable :: data2(:,:,:)
 integer :: ierr
@@ -154,53 +149,33 @@ integer :: ierr
 !   print *,dx(nsx),dy(nsy),dz(nsz)
 !endif
 
-do i=1,nsx
-   xi=dx(i)
-   if (xi<g_xcord(1)) xi=xi+1;
-   if (xi>g_xcord(g_nx)) xi=xi-1;
-   n1(i)=(xi-xcord(nx1))/delx
-   n1(i)=n1(i)+nx1
-   if (n1(i)<nx1 .or. n1(i)>nx2) n1(i)=0 !flag indicating not on this cpu
-enddo
-do j=1,nsy
-   yi=dy(j)
-   if (yi<g_ycord(1)) yi=yi+1;
-   if (yi>g_ycord(g_ny)) yi=yi-1;
-   n2(j)=(yi-ycord(ny1))/dely
-   n2(j)=n2(j)+ny1
-   if (n2(j)<ny1 .or. n2(j)>ny2) n2(j)=0 !flag indicating not on this cpu
-enddo
-do k=1,nsz
-   zi=dz(k)
-   if (zi<g_zcord(1)) zi=zi+1;
-   if (zi>g_zcord(g_nz)) zi=zi-1;
-   n3(k)=(zi-zcord(nz1))/delz
-   n3(k)=n3(k)+nz1
-   if (n3(k)<nz1 .or. n3(k)>nz2) n3(k)=0 !flag indicating not on this cpu
-enddo
 
+do k=k1,k2
+   do j=1,ssize
+      do i=1,ssize
 
-do k=1,nsz
-   do j=1,nsy
-      do i=1,nsx
-
+         xi = x0 + (i-1)*delx*e01 + (j-1)*dely*e02 + (k-1)*delz*e03
+         if (xi(1)>g_xcord(g_nx)) xi(1)=xi(1)-1
+	 if (xi(1)<g_xcord(1))    xi(1)=xi(1)+1
+	 if (xi(2)>g_ycord(g_ny)) xi(2)=xi(2)-1
+	 if (xi(2)<g_ycord(1))    xi(2)=xi(2)+1
+	 if (xi(3)>g_zcord(g_nz)) xi(3)=xi(3)-1
+	 if (xi(3)<g_zcord(1))    xi(3)=xi(3)+1
          if (irot==1) then
-            pos(1)=dx(i)
-            pos(2)=dy(j)
-            pos(3)=dz(k)
-
-            !rotate to (xi,yi,zi), and map back into [0,1]
-            !call rotate(xi,yi,zi,rmatrix)
-            ASSERT("rotate!",.false.)
-
-            ! interpolate:
-            call interp3d(data(i,j,k),field,pos)            
+             call interp3d(data(i,j,k-k1+1),field,xi)
          else
-            if (n1(i)==0 .or. n2(j)==0 .or. n3(k)==0) then
-               data(i,j,k)=-9d200
-            else
-               ! we have this data, copy;
-               data(i,j,k)=field(n1(i),n2(j),n3(k))
+            ! no interpolation - just use closes gridpoint to xi
+            ii=(xi(1)-xcord(nx1))/delx;  ii=ii+nx1
+	    jj=(xi(2)-ycord(ny1))/dely;  jj=jj+ny1
+	    kk=(xi(3)-zcord(nz1))/delz;  kk=kk+nz1
+
+	    if (kk>=nz1 .and. kk<=nz2 .and. &
+                ii>=nx1 .and. ii<=nx2 .and. &
+                jj>=ny1 .and. jj<=ny2) then
+	        ! interpolate 
+	        data(i,j,k-k1+1)=field(ii,jj,kk)
+            else	
+	        data(i,j,k-k1+1)=-9d99
             endif
          endif
          
@@ -208,9 +183,9 @@ do k=1,nsz
    enddo
 enddo
 #ifdef USE_MPI
-allocate(data2(nsx,nsy,nsz))
+allocate(data2(ssize,ssize,k2-k1+1))
 data2=data
-call mpi_reduce(data2,data,nsx*nsy*nsz,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
+call mpi_reduce(data2,data,ssize*ssize*(k2-k1+1),MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
 deallocate(data2)
 #endif
 
