@@ -102,8 +102,8 @@ time to 0.1.  4.99min = 5.2days
           90 timesteps          90 timesteps             no PSI-recompute
           1 PSI-recompute        no PSI-recompute        no ellipse
 64x4:       5.58m                   5.86                   4.99
-32x4:
-16x4:
+32x4:                                                      8.77
+16x4:                                                      IN
 
 
 **********************************************************************************
