@@ -227,7 +227,7 @@ real*8 :: ints(nints),maxs(nints)
 ! maxs(8) = 
 ! maxs(9) = 
 !
-integer,parameter :: ntimers=12
+integer,parameter :: ntimers=13
 real*8 :: tims(ntimers)=0
 !  tims(1)    time for initialization
 !  tims(2)    total runtime after initialization
@@ -241,6 +241,7 @@ real*8 :: tims(ntimers)=0
 !  tims(10)    transpose_to_y
 !  tims(11)    transpose_from_y
 !  tims(12)    compute_pdf
+!  tims(13)    ghost_update
 !
 !
 

@@ -122,6 +122,8 @@ write(message,'(a,2f9.2,a,f4.3,a)') '   RHS                ',tims_ave(5),tims_ma
 call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   compute_pdf        ',tims_ave(12),tims_max(12)
 call print_message(message)
+write(message,'(a,2f9.2,a,f4.3,a)') '   ghost_update       ',tims_ave(13),tims_max(13)
+call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_z     ',tims_ave(6),tims_max(6)
 call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_z   ',tims_ave(7),tims_max(7)
