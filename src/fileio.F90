@@ -249,11 +249,12 @@ output_spec,header_type)
 !                     (grid point data or non-dealiased spec coeff.)
 !
 !
-! header_type:    1   my default header
-!                 2   no headers      
-!                 3   ensight headers
+! header_type:    1   my default header, periodic extension
+!                 2   no headers, no periodic extension      
+!                 3   ensight headers, no periodic extension
+!                 4   4 byte header  (fortran record?), no periodic extension
 !   
-! for header_type 2 & 3:  also disable output of the periodic extension data
+! for header_type 2-4:  also disable output of the periodic extension data
 !
 use params
 use mpi
@@ -281,7 +282,7 @@ CPOINTER fid
 ! disable periodic extension for header_type<>1 (turn it back on
 ! when we are done)
 o_nx_save=o_nx; o_ny_save=o_ny; o_nz_save=o_nz;
-if (header_type==2 .or. header_type==3) then
+if (header_type==2 .or. header_type==3 .or. header_type==4) then
    o_nx=g_nx; 
    o_ny=g_ny;
    o_nz=g_nz;
@@ -340,6 +341,7 @@ if (my_pe==fpe) then
    if (header_type==1) call header1_io(io_read,output_spec,fid,time,xnx,xny,xnz)
    if (header_type==2) call header2_io(io_read,fid,time,xnx,xny,xnz)
    if (header_type==3) call header3_io(io_read,fid,time,xnx,xny,xnz)
+   if (header_type==4) call header4_io(io_read,fid,time,xnx,xny,xnz)
 endif
 
 #ifdef USE_MPI
@@ -488,7 +490,23 @@ if (header_type==2) then
    offset=0
 endif
 if (header_type==3) then
-   offset=240/output_size  ! offset multiplied by output_size later 
+   if (io_read==1) then
+      offset=240/output_size  ! offset multiplied by output_size later 
+   else
+      offset=240/input_size  ! offset multiplied by output_size later 
+   endif
+endif
+if (header_type==4) then
+   if (io_read==1) then
+      offset=4/output_size  ! offset multiplied by output_size later 
+   else
+      offset=4/input_size  ! offset multiplied by output_size later 
+   endif
+   if (offset==0) then
+      ! we should convert offset to total number of bytes!
+      ! need to change this code and input1(), output1()
+      call abort("Error: MPI-IO can not handle header_type==4 with real*8 data") 
+   endif
 endif
 
 #ifdef USE_MPI
@@ -821,7 +839,6 @@ logical :: output_spec
 integer :: ierr,i
 character(len=80) :: message
 
-time=-1
 xnx=-1
 xny=-1
 xnz=-1
@@ -844,6 +861,43 @@ else
    call mwrite1(fid,message,80)
 endif
 end subroutine header3_io
+
+
+
+subroutine header4_io(io_read,fid,time,xnx,xny,xnz)
+!
+! header is 4 bytes, fortran record counter
+!
+use params
+use mpi
+use transpose
+implicit none
+CPOINTER fid
+integer :: io_read  ! =1 for read, 0 for write
+real*8 :: time,xnx,xny,xnz
+logical :: output_spec
+
+! local
+integer :: ierr,i
+character(len=80) :: message
+
+xnx=-1
+xny=-1
+xnz=-1
+
+if (io_read==1) then
+   ! read 4 bytes
+   call mread1e(fid,message,4,ierr)
+   if (ierr/=1) then
+      write(message,'(a,i5)') "singlefile_io(): Error reading file"
+      call print_message(message)
+      call abort("")
+   endif
+else
+   ! dont know how to write a fortran header
+   call abort("ERROR: header_type==4 output not supported")
+endif
+end subroutine header4_io
 
 
 

@@ -59,7 +59,9 @@ CPOINTER :: fid,fid1,fid2
 !    1              DNS code standard format
 !    2              no headers             
 !    3              Ensight headers
+!    4              4 byte (fortran) header 
 !
+
 header_type=1               
 compute_pdfs=.false.
 compute_cj=.false.
@@ -67,8 +69,8 @@ compute_scalar=.false.
 compute_uvw=.true.
 read_uvw=.false.
 
-tstart=3.0
-tstop=3.0
+tstart=.8
+tstop=.8
 tinc=-.50
 icount=0
 
