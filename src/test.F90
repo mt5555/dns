@@ -13,7 +13,7 @@ end subroutine
 
 subroutine test_parallel
 use params
-use transform
+use transpose
 implicit none
 
 real*8 input(nx,ny,nz)

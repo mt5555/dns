@@ -1,6 +1,6 @@
 #include "macros.h"
 
-module transform
+module transpose
 use params
 use mpi
 implicit none

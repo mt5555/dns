@@ -127,7 +127,7 @@ real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 real*8 :: ke_diff
 real*8 :: ints_buf(3)
-integer i,j,k,n
+integer i,j,k,n,ierr
 
 
 Q_old=Q

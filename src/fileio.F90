@@ -220,6 +220,73 @@ end subroutine
 
 
 
+subroutine output1(p,pt,unit)
+use params
+use mpi
+use transpose
+implicit none
+real*8 :: p(nx,ny,nz)
+real*8 :: pt(g_nx2,nslaby,nz_2dx)
+
+! local vars
+real*8 buf(g_nx,nslaby)
+integer sending_pe,ierr,tag,unit,z_pe,y_pe,x_pe
+integer request,statuses(MPI_STATUS_SIZE),dest_pe3(3)
+integer i,j,k,l
+integer n1,n1d,n2,n2d,n3,n3d
+
+call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
+do z_pe=0,ncpu_z-1
+do x_pe=0,ncpu_x-1
+do k=1,nz_2dx
+do y_pe=0,ncpu_y-1
+
+   ! output pt(1:g_nx,1:nslaby,k) from cpus: x_pe,y_pe,z_pe
+   l=g_nx*nslaby
+
+   dest_pe3(1)=my_x
+   dest_pe3(2)=my_y
+   dest_pe3(3)=my_z
+   tag=1
+   call mpi_cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
+
+   if (sending_pe==my_pe) then
+
+      buf(:,:)=pt(1:g_nx,1:nslaby,k)
+      if (my_pe == io_pe) then
+         ! dont send message to self
+      else
+         tag=1
+         call MPI_ISend(buf,l,MPI_REAL8,io_pe,tag,comm_3d,request,ierr)
+         ASSERT("output1: MPI_ISend failure",ierr==0)
+         call MPI_waitall(1,request,statuses,ierr) 	
+         ASSERT("output1: MPI_waitalll failure",ierr==0)
+      endif
+   endif
+
+   if (my_pe==io_pe) then
+      if (sending_pe==my_pe) then
+         ! dont recieve message from self
+      else
+         call MPI_IRecv(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
+         ASSERT("output1: MPI_IRecv failure",ierr==0)
+         call MPI_waitall(1,request,statuses,ierr) 	
+         ASSERT("output1: MPI_waitalll failure",ierr==0)
+      endif
+
+      write(unit) buf
+   endif
+
+enddo
+enddo
+enddo
+enddo
+
+
+end subroutine
+
+
+
 subroutine output_write(time,Q)
 use params
 implicit none
@@ -235,54 +302,29 @@ real*8 :: d2(1)
 character*80 message
 integer n_var_start
 
-vor=0
-! compute viscous terms (in rhs) and vorticity
-do i=1,3
-   ! compute u_x, u_xx
-   call der(Q(1,1,1,i),d1,d2,work,DX_ONLY,1)
-   if (i==3) vor(:,:,:,2) = vor(:,:,:,2) - d1
-   if (i==2) vor(:,:,:,3) = vor(:,:,:,3) + d1
-
-   ! compute u_y, u_yy
-   call der(Q(1,1,1,i),d1,d2,work,DX_ONLY,2)
-   if (i==3) vor(:,:,:,1) = vor(:,:,:,1) + d1
-   if (i==1) vor(:,:,:,3) = vor(:,:,:,3) -d1
-
-   ! compute u_z, u_zz
-   call der(Q(1,1,1,i),d1,d2,work,DX_ONLY,3)
-   if (i==2) vor(:,:,:,1) = vor(:,:,:,1) -d1
-   if (i==1) vor(:,:,:,2) = vor(:,:,:,2) +d1
-enddo
-
+call vorticity(vor,Q,d1,d2)
 
 if (my_pe==io_pe) then
-write(message,'(f9.4)') 1000.0000 + time
-message = runname(1:len_trim(runname)) // message(2:9) // ".vor"
-open(unit=11,file=message,form='binary')
+   write(message,'(f9.4)') 1000.0000 + time
+   message = runname(1:len_trim(runname)) // message(2:9) // ".vor"
+   open(unit=11,file=message,form='binary')
 
-write(11) time
-xnv=n_var
-n_var_start=1
-if (nz2==nz1) then
-   xnv=1
-   n_var_start=3
+   write(11) time
+   xnv=n_var
+   n_var_start=1
+   if (nz2==nz1) then
+      xnv=1
+      n_var_start=3
+  endif
+
+   xnx=nslabx
+   xny=nslaby
+   xnz=nslabz
+   write(11) xnx,xny,xnz,xnv
 endif
 
-xnx=nslabx
-xny=nslaby
-xnz=nslabz
-write(11) xnx,xny,xnz,xnv
-do n=n_var_start,n_var
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   write(11) vor(i,j,k,n)	
-enddo
-enddo
-enddo
-enddo
-close(11)
-endif
+call output1(vor,work,11)
+if (my_pe==io_pe) close(11)
 
 end subroutine
 

@@ -12,7 +12,7 @@
 subroutine der(p,px,pxx,pt,numder,index)
 use params
 use fft_interface
-use transform
+use transpose
 implicit none
 
 !input:
@@ -118,7 +118,7 @@ end subroutine
 subroutine vorticity(vor,u,d1,work)
 use params
 use fft_interface
-use transform
+use transpose
 implicit none
 real*8 u(nx,ny,nz,3)    ! input
 real*8 vor(nx,ny,nz,3)    ! output
@@ -156,7 +156,7 @@ end subroutine
 subroutine divergence(div,u,work1,work2)
 use params
 use fft_interface
-use transform
+use transpose
 implicit none
 real*8 u(nx,ny,nz,3)    ! input
 real*8 div(nx,ny,nz)    ! output
@@ -197,7 +197,7 @@ subroutine poisson(f,work,alpha,beta)
 !
 use params
 use fft_interface
-use transform
+use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
@@ -251,7 +251,7 @@ subroutine fft3d(f,work)
 !
 use params
 use fft_interface
-use transform
+use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
@@ -283,7 +283,7 @@ subroutine ifft3d(f,work)
 !
 use params
 use fft_interface
-use transform
+use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
