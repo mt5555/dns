@@ -27,8 +27,8 @@ if (time==time_initial) access="w"
 
 
 !
-! output structure functions
-!
+! output structure functions and time averaged forcing
+! 
 if (compute_struct==1) then
    call compute_all_pdfs(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
    
@@ -54,9 +54,11 @@ if (compute_struct==1) then
    endif
    call outputSF(time,fid)
    if (my_pe==io_pe) call cclose(fid,ierr)
-   endif
 
+   call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
+endif
 
+! output turb scalars
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time_initial
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".scalars-turb"
@@ -77,7 +79,107 @@ if (my_pe==io_pe) then
    endif
 endif
 
+
+
+
+
 endif
 
 end subroutine
+
+
+
+
+
+subroutine compute_time_averages(Q,Qhat,f,wsum,work1,dxx,time)
+use params
+use sforcing
+use fft_interface
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: wsum(nx,ny,nz)
+real*8 :: work1(nx,ny,nz)
+real*8 :: dxx(nx,ny,nz)
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: f(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: time
+
+! local
+integer :: i,j,k,n,n1,n2,ierr
+real*8,save :: diss(nx,ny,nz)
+real*8,save :: diss2(nx,ny,nz)
+real*8,save :: uf(nx,ny,nz)
+real*8,save :: uf2(nx,ny,nz)
+integer,save :: ntave=0
+real*8 :: f_diss,x
+character(len=80) message
+character(len=80) fname
+
+
+
+if (ntave==0) then
+   diss=0
+   diss2=0
+   uf=0
+   uf2=0
+endif
+ntave=ntave+1
+
+wsum=0
+do n1=1,3
+do n2=1,3
+   ! Q(:,:,:,n1)* d(Q)/dn2(:,:,:,n1)
+   call der(Q(1,1,1,n1),f,dxx,work1,DX_AND_DXX,n2)
+   wsum=wsum+mu*Q(:,:,:,n1)*dxx(:,:,:)
+enddo
+enddo
+diss=(diss*(ntave-1) + wsum) / ntave
+diss2=(diss2*(ntave-1) + wsum**2) / ntave
+
+
+do n=1,3
+   wsum=Q(:,:,:,n)
+   call z_fft3d_trashinput(wsum,Qhat(1,1,1,n),work1)
+enddo
+f=0
+call sforce(f,Qhat,f_diss)
+wsum=0
+do n=1,3
+   call z_ifft3d(f(1,1,1,n),dxx,work1)
+   wsum=wsum+dxx(:,:,:)*Q(:,:,:,n)
+enddo
+uf=(uf*(ntave-1) + wsum) / ntave
+uf2=(uf2*(ntave-1) + wsum**2) / ntave
+
+
+
+if (time>=time_final) then
+   ! time to save the output
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".diss"
+   x=ntave
+   call singlefile_io(x,diss,fname,work1,dxx,0,io_pe)
+
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".diss2"
+   x=ntave
+   call singlefile_io(x,diss2,fname,work1,dxx,0,io_pe)
+
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".uf"
+   x=ntave
+   call singlefile_io(x,uf,fname,work1,dxx,0,io_pe)
+
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".uf2"
+   x=ntave
+   call singlefile_io(x,uf2,fname,work1,dxx,0,io_pe)
+
+
+endif
+
+
+end subroutine
+
+
 
