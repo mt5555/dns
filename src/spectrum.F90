@@ -936,6 +936,7 @@ real*8 :: work(nx,ny,nz)
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
+real*8 :: diss1,diss2,hetot
 integer i,j,k,jm,km,im,iwave_max,n
 
 if (skip_fft==0) then
@@ -948,6 +949,9 @@ endif
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
 iwave_max=nint(rwave)
 
+hetot=0
+diss1=0
+diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
 
@@ -985,6 +989,10 @@ do j=ny1,ny2
                           p1(i,j,k,3)*(vx-uy)) 
          if (energy>0) spec_helicity_rp(iwave)=spec_helicity_rp(iwave)+energy
          if (energy<0) spec_helicity_rn(iwave)=spec_helicity_rn(iwave)+energy
+
+         hetot=hetot+energy
+         diss1=diss1 -2*energy*iwave**2*pi2_squared
+         diss2=diss2 -2*energy*rwave*pi2_squared
 enddo
 enddo
 enddo
@@ -995,8 +1003,16 @@ spec_r_in=spec_helicity_rp
 call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
 call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+rwave=diss1
+call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+rwave=diss2
+call MPI_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
-
+if (my_pe==io_pe) then
+   print *,'helicity: ',hetot
+   print *,'helicity dissipation (spectrum): ',diss1
+   print *,'helicity dissipation (exact):    ',diss2
+endif
 
 if (g_nz == 1)  then
    iwave = min(g_nx,g_ny)
