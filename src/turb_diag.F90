@@ -665,7 +665,7 @@ real*8 gradu(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: ux2(3),ux3(3),ux4(3),u2,uij,su(3)
+real*8 :: ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3)
 real*8 :: uxx2(3),uxx3(3),uxx4(3)
 
 !
@@ -676,7 +676,6 @@ real*8 :: uxx2(3),uxx3(3),uxx4(3)
 do n=1,3
    call der(Q(1,1,1,np),grads(1,1,1,n),grads2(1,1,1,n),work,DX_AND_DXX,n)
 enddo
-
 
 ! scalars
 ux2=0
@@ -697,15 +696,15 @@ do i=nx1,nx2
    ! if we use grads(i,j,k,1)**3, do we preserve the sign?  
    ! lets not put f90 to that test!
    do n=1,3
-      uij=grads(i,j,k,n)**2
-      ux2(n)=ux2(n)+uij
-      ux3(n)=ux3(n)+uij*grads(i,j,k,n)
-      ux4(n)=ux4(n)+uij*uij
+      x1=grads(i,j,k,n)**2
+      ux2(n)=ux2(n)+x1
+      ux3(n)=ux3(n)+x1*grads(i,j,k,n)
+      ux4(n)=ux4(n)+x1*x1
 
-      uij=grads2(i,j,k,n)**2
-      uxx2(n)=uxx2(n)+uij
-      uxx3(n)=uxx3(n)+uij*grads2(i,j,k,n)
-      uxx4(n)=uxx4(n)+uij*uij
+      x2=grads2(i,j,k,n)**2
+      uxx2(n)=uxx2(n)+x2
+      uxx3(n)=uxx3(n)+x2*grads2(i,j,k,n)
+      uxx4(n)=uxx4(n)+x2*x2
 
       su(n) = su(n) + gradu(i,j,k,n)*grads(i,j,k,n)*grads(i,j,k,n)
    enddo
@@ -757,9 +756,8 @@ i=i+3
    call MPI_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
-
-su=u2*uxx2/(ux2*ux2)
-print *,'G_theta=',su
+!su=u2*uxx2/(ux2*ux2)
+!print *,'G_theta=',su
 
 end subroutine
 
