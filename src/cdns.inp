@@ -1,5 +1,5 @@
 5            ! input file type
-ns_uvw       ! equations
+cns        ! equations
 iso12         ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
 none        ! forcing:  none, iso, iso12, iso12w, iso23w
