@@ -34,7 +34,7 @@ ifeq ($(UNAME),SunOS)
    #MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
    #MPI = -DUSE_MPI -I/usr/local/src/mpich/include
    # default -fast is -xvector=yes, but this introduces bugs in test.F90!
-   FFLAGS = -fast -xvector=no -xarch=v9  -DSUNOS $(MPI) #-DUSE_STKFFT
+   FFLAGS = -fast -xvector=no -xarch=v9  -DSUNOS $(MPI) -DUSE_STKFFT
    LDFLAGS = -Lstk -lstk
    CC = cc -xarch=v9 -c
 endif
