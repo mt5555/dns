@@ -85,7 +85,7 @@ endif
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      echo "Using restart files: " 
+      echo "Using HPSS restart files: " 
       set nametime = `basename $resnamew .{$ext}`
       if ( $ext == "w" ) then
          set resnameu = `psi ls  dns/{$name}/{$nametime}\*.u | sort | tail -1`
@@ -145,7 +145,7 @@ else
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      echo "Using restart files: " 
+      echo "Using directory restart files: " 
       set nametime = `basename $resnamew .{$ext}`
       if ( $ext == "w" ) then
          set resnameu = `ls  {$fpath}/{$nametime}*.u | sort | tail -1`
