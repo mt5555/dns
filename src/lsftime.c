@@ -1,3 +1,12 @@
+#if (defined AIX || defined HPUX || defined OSF1)
+#define FORTRAN(A) A
+#else
+#define FORTRAN(A) A##_
+#endif
+
+
+
+
 #ifdef USE_LSFTIME
 
 #if 0
@@ -166,7 +175,7 @@ extern  void    ExceptionHandler( int nSignal )
 /************************************************************************/
 
 
-extern  int     lsf_time_remaining(int *TTRL) {
+extern  int     FORTRAN(lsf_time_remaining)(int *TTRL) {
 typedef enum    { FALSE = 0, TRUE = 1 } Bool_t;
 typedef struct {
                 Bool_t  initialized;
@@ -213,7 +222,7 @@ auto    time_t  Ctime;
 
 #else
 
-extern  int     lsf_time_remaining(int *TTRL){
+extern  int     FORTRAN(lsf_time_remaining)(int *TTRL){
 return 1;
 
 }
