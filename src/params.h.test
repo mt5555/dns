@@ -1,0 +1,13 @@
+! number of prognostic variables:
+integer,parameter :: n_var=3
+! parallel decomposition:
+ integer,parameter :: ncpu_x=1
+integer,parameter :: ncpu_y=1
+integer,parameter :: ncpu_z=1
+! dimensions of grid and data:
+integer,private,parameter :: nxd=34
+integer,private,parameter :: nyd=34
+integer,private,parameter :: nzd=34
+integer,parameter :: nx1=1,nx2=32
+integer,parameter :: ny1=1,ny2=32
+integer,parameter :: nz1=1,nz2=32

@@ -32,11 +32,11 @@ nx=256;
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
 
-%fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
-%nx=1024;
+fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
+nx=1024;
 
-fid=fopen('../src/sk128_alpha0/sktest128_alpha00000.0000.scalars','r');
-nx=128;
+%fid=fopen('../src/sk128_alpha0/sktest128_alpha00000.0000.scalars','r');
+%nx=128;
 
 nscalars=0;
 nscalars_e=0;
