@@ -72,25 +72,6 @@ integer :: g_bdy_z1=PERIODIC
 integer :: g_bdy_z2=PERIODIC
 
 
-! flag indicating (if there is a real boundary) if the boundary is at
-! nx2+1 (instead of the usual nx2).  Only used when we need to use the sine transform,
-! sine without this flag, a 400x400 grid would need a len=399 transform.  
-! 
-! setting this flag changes just adds 1 to nx2 along the nx2 boundary. 
-! So make sure that:
-!   1. code is not relying on 2 rows of ghost cells at the nx2 boundary
-!   2. ncpu_y*nx_2dy>=nslabx 
-!
-! parallel: 8x16   grid:  800x1600
-! grid per CPU:  100x100 or 101x101
-!
-! nslabx=100, or 101
-! nx_2dy = 7, ncpu_y*nx_2dy=112 > 101
-!
-integer :: offset_x2=0
-integer :: offset_y2=0
-integer :: offset_z2=0
-
 
 
 character(len=80) :: runname
@@ -141,6 +122,25 @@ integer :: forcing_type   ! 0 = none
 ! dimensions of interior, non-boundary points.  
 ! for problems with b.c. (other than periodic or reflections)
 ! use these bounds if you want to loop over only the non-boundary points.
+!
+! For example, intx2=nx2 for INTERNAL boundary points 
+! but intx2=nx2-1 at a real boundary.
+!
+! For the psi-vor model, non-periodic, uses a sine transform.
+! Normally, on a 400x400 grid would need a len=399 transform.  
+! So for this model we sometimes set intx2=nx2 at a real boundary.
+! 
+! So make sure that:
+!   1. boundary code is using intx2+1  (instead of nx2)
+!   2. boundary code does not rely on two rows of ghost cells outside the boundary
+!
+! parallel: 8x16   grid:  800x1600
+! grid per CPU:  100x100 or 101x101
+!
+! nslabx=100, or 101
+! nx_2dy = 7, ncpu_y*nx_2dy=112 > 101
+!
+
 integer :: intx1,intx2
 integer :: inty1,inty2
 integer :: intz1,intz2

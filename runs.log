@@ -1,4 +1,19 @@
 **********************************************************************************
+1/18/02
+VXPAIR case
+init_cond_subtype==1
+mu=1e-4
+w=0, cutoff=0, bito_savart init only
+
+t=1.5  NIRVANA timings              t=15
+1024x1024  on 5x5:    3.3 min
+1024x1024  on 25x1:   3.21min        32min
+2048x1024 on 5x5      9 min          90min
+
+
+
+
+**********************************************************************************
 1/17/02
 VXPAIR case
 init_cond_subtype==1
@@ -36,6 +51,13 @@ vxpair1b_
    biot_savart: init only
 
 
+vxpair2
+  2048x1024   yscale=2.0
+  w=0
+  cutoff=0  
+  biot_savart: init only
+
+
 
 **********************************************************************************
 1/2/02
@@ -54,7 +76,8 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 
 
 tau=25  (subtype=1)
-250E   .1e-3   IN
+250E   .1e-3   513   5.20      1.36        2.87 
+
 500B   .1e-3   IN
 
 

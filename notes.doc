@@ -2,11 +2,19 @@
 
 2. ns_ghost:  4th order code using ghost cells:
         benchmark parallel decompostions
-        fix output1/input1 for non-perfect decompositions
 
 3. psi-vor code:
         put in interpolation for PSI boundary values
-        cgsolver on 721x401 case: SEGFAULT
+        fix output1/input1 for non-perfect decompositions
+
+        code up offset_nx1 code:  all code that worries about
+        boundaries needs to use bx1,bx2 or intx1,intx2
+        and NOT nx1,nx2.
+
+        OR: nx1,nx2 made to be variable?  NO. nx1,nx2 control
+        parallel decomposition.  
+        
+
 
 1. hyper viscosity in NS code
 1. change NS-alpha so forcing always appears as just 'f'

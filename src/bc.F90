@@ -38,10 +38,10 @@ real*8 :: w(nx,ny)
 !local
 integer i,j
 integer :: bx1,bx2,by1,by2
-bx1=nx1
-bx2=nx2
-by1=ny1
-by2=ny2
+bx1=intx1-1
+bx2=intx2+1
+by1=inty1-1
+by2=inty2+1
 
 if (REALBOUNDARY(bdy_x1)) then
    !           nx1-1     nx1   nx1+1   nx1+2    nx1+3
