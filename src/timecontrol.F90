@@ -299,7 +299,10 @@ endif
 !
 if (doit_restart) then
    call print_message("writing restart file...")
-   call multfile_io(time,Q)
+   call multfile_io(time,Q(1,1,1,1),0)  ! write headers
+   do i=1,3	
+      call multfile_io(time,Q(1,1,1,i),i) ! write u,v,w files
+   enddo
 endif
 
 

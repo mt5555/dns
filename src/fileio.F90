@@ -2,11 +2,18 @@
 
 
 
-subroutine multfile_io(time,Q)
+subroutine multfile_io(time,Q,iflag)
+!
+!  iflag=0     write .header file
+!        1     write .u file  
+!        2     write .v file  
+!        3     write .w file  
+!
 use params
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz)
 real*8 :: time
+integer :: iflag
 
 ! local variables
 integer i,j,k,n
@@ -14,6 +21,7 @@ real*8 xnx,xny,xnz,xnv
 character(len=80) message,ftime
 character(len=240) fname
 character(len=20) tmp
+character(len=3) :: extension="uvw"
 CPOINTER :: fid
 integer ierr
 
@@ -39,6 +47,8 @@ message=message(1:len_trim(message)) // "-" // tmp(n:5) // "-"
 write(tmp,'(f10.4)') 10000.0000 + time
 ftime=message(1:len_trim(message)) // tmp(2:10)
 
+
+if (iflag==0) then
 fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) //  &
         ftime(1:len_trim(ftime)) // ".header"
 call copen(fname,"w",fid,ierr)
@@ -57,10 +67,11 @@ call cwrite8(fid,xny,1)
 call cwrite8(fid,xnz,1)
 call cwrite8(fid,xnv,1)
 call cclose(fid,ierr)
+endif
 
-
+if (iflag>0) then
 fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-   // ftime(1:len_trim(ftime)) // ".u"
+   // ftime(1:len_trim(ftime)) // "." // extension(iflag:iflag)
 call copen(fname,"w",fid,ierr)
 if (ierr/=0) then
    write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
@@ -68,38 +79,12 @@ if (ierr/=0) then
 endif
 do k=nz1,nz2
 do j=ny1,ny2
-   call cwrite8(fid,Q(nx1,j,k,1),nx2-nx1+1)
+   call cwrite8(fid,Q(nx1,j,k),nx2-nx1+1)
 enddo
 enddo
 call cclose(fid,ierr)
-
-fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-   // ftime(1:len_trim(ftime)) // ".v"
-call copen(fname,"w",fid,ierr)
-if (ierr/=0) then
-   write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
-   call abort(message)
 endif
-do k=nz1,nz2
-do j=ny1,ny2
-   call cwrite8(fid,Q(nx1,j,k,2),nx2-nx1+1)
-enddo
-enddo
-call cclose(fid,ierr)
 
-fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-   // ftime(1:len_trim(ftime)) // ".w"
-call copen(fname,"w",fid,ierr)
-if (ierr/=0) then
-   write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
-   call abort(message)
-endif
-do k=nz1,nz2
-do j=ny1,ny2
-   call cwrite8(fid,Q(nx1,j,k,3),nx2-nx1+1)
-enddo
-enddo
-call cclose(fid,ierr)
 
 
 

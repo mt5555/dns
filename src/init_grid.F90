@@ -391,6 +391,8 @@ if (my_pe==io_pe) then
             convert_opt=2 
          else if (carg(1:5)=="norm2") then
             convert_opt=3 
+         else if (carg(1:4)=="4uvw") then
+            convert_opt=4 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abort("-cout unrecognized option")
