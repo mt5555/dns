@@ -120,7 +120,7 @@ FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
 #diagnostics for 3d turbulence runs:
-TURB_DIAG = structf.o turb_diag.o
+TURB_DIAG = structf.o turb_diag.o isoave.o
 
 #diagnostics for VXPAIR runs:
 PSIVOR_DIAG = psivor_diag.o  
