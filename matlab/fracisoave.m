@@ -12,7 +12,8 @@ nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 
 %  index=1 .. 9   corresponds to u_l^(.1*p)
-p=5; frac_power = .1*p;
+p=5; 
+frac_power = .1*p;
 plot_points=1;
 ndir_use=0;
 
@@ -120,11 +121,11 @@ figure(1); clf; subplot(1,1,1)
 for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
-
+  
   yl=Dl(:,i,p);
-
+  
   if (plot_points==1) 
-      semilogx(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
+    semilogx(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on; 
   end     
   yyl = spline(x,yl,xx);
   
@@ -152,7 +153,7 @@ for i=ndir_vec
   yt=Dt(:,i,p);
 
   if (plot_points==1) 
-     semilogx(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
+     semilogx(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on;
   end     
   yyt = spline(x,yt,xx);
   
