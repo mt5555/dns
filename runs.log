@@ -17,7 +17,16 @@ t=1.5  NIRVANA timings              t=15
            on 64x2    5.63m to go to t=.01
 
 2049x1025 autrey                     t=15: 508min     3.5d for t=150
-3072x1536 autrey 2 cpu:  
+
+3072x1536 milkyway 2x1    t=.1  4.29      t=15  (607m)
+3072x1536 autrey   2x1    t=.1  6.67
+
+BlueMtn  
+6400x3200 25x5      t=.01 .67m    t=.1:  3.13m  t=.2: 6.08min
+8000x4000 125x1     t=.05  3.25                                  6.7d for t=150
+8000x4000 25x5      t=.05  3.36             
+8000x4000 5x25      t=.05  3.56
+
 
 4096x2048 milkyway    t=.1: 19.68m
                              8.19m (4 cpus 4x1)
@@ -106,7 +115,7 @@ tau=25  (subtype=1)
 500B   .1e-3   IN  (stopped)
 
 tau=500 (subtype=3)
-250F   .1e-3
+250F   .1e-3   529   5.34      1.33        3.18
 250G   .8e-3  IN
 
 

@@ -351,7 +351,7 @@ real*8 :: ints(nints),maxs(nints)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-integer,parameter :: ntimers=14
+integer,parameter :: ntimers=15
 real*8 :: tims(ntimers)=0
 !  tims(1)    time for initialization
 !  tims(2)    total runtime after initialization
@@ -367,6 +367,7 @@ real*8 :: tims(ntimers)=0
 !  tims(12)    compute_pdf
 !  tims(13)    ghost_update
 !  tims(14)    biot savart
+!  tims(15)    compute_psi
 !
 !
 

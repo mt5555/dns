@@ -135,6 +135,10 @@ if (tims_max(14)>0) then
    write(message,'(a,2f9.2,a,f4.3,a)') '   Biot-Savart        ',tims_ave(14),tims_max(14)
    call print_message(message)
 endif
+if (tims_max(15)>0) then
+   write(message,'(a,2f9.2,a,f4.3,a)') '   compute_psi        ',tims_ave(15),tims_max(15)
+   call print_message(message)
+endif
 
 
 call close_mpi

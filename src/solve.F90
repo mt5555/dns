@@ -252,9 +252,14 @@ integer :: runbs
 !local
 real*8 :: one=1,zero=0,tol=1e-10
 integer,save :: btype=-1
+real*8 :: tmx1,tmx2
+
+
 
 external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
 integer i,j
+
+call wallclock(tmx1)
 
 ! check global boundary conditions and see what kind of solver we need
 if (btype==-1) then
@@ -336,6 +341,11 @@ endif
 
 call ghost_update_x(psi,1)
 call ghost_update_y(psi,1)
+
+      
+call wallclock(tmx2)
+tims(15)=tims(15)+(tmx2-tmx1)
+
 
 end subroutine
 
