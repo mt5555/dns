@@ -350,7 +350,7 @@ do k=nz1,nz2
       do i=nx1,nx2
          im=imcord(i)
          
-         xfac=-mu*(im*im + jm*jm + km*km)*pi2_squared
+         xfac=-(im*im + jm*jm + km*km)*pi2_squared
          xfac = 2*2*2*xfac
          if (kmcord(k)==0) xfac=xfac/2
          if (jmcord(j)==0) xfac=xfac/2
