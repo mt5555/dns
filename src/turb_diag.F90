@@ -784,7 +784,7 @@ end subroutine
 
 
 
-subroutine compute_zero_crossing(s,n1,n1d,n2,n2d,n3,n3d,avedata,len)
+subroutine compute_zero_crossing(s,n1,n1d,n2,n2d,n3,n3d,avedata,N0)
 use mpi
 use params
 implicit none
@@ -792,32 +792,45 @@ implicit none
 integer :: n1,n1d,n2,n2d,n3,n3d
 real*8 :: s(n1d,n2d,n3d)
 ! output
-real*8 :: len
+real*8 :: len,N0,xtmp
 !local
-integer i,j,k,n,count,count1,ierr
+integer i,j,k,n,count,raycount,ierr,count1
 real*8 :: avedata,ave2,avelen
 
 ! compute zero crossing length in first direction 
 ! (all on processor:)
-count=0
+raycount=0
+N0=0
 avelen=0
 do k=1,n3
 do j=1,n2
+   raycount=raycount+1  ! number of rays on this cpu
    call zero_crossing(s(1,j,k),n1,avedata,len,count1)
-   if (count1>0) then
-      count=count+1
-      avelen=avelen+len
-   endif
-enddo
-enddo
-#ifdef USE_MPI
-count1=count
-call MPI_allreduce(count1,count,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
-ave2=avelen
-call MPI_allreduce(ave2,avelen,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
-avelen=avelen/count
+   N0=N0+count1   ! number of zero crossings along j,k ray
 
+   ! len not computed anymore.  just average 'count1'
+!   if (count1>0) then
+!      count=count+1
+!      avelen=avelen+len
+!   endif
+enddo
+enddo
+
+! number of rays: raycount
+! number of zero crossings sumed over all rays:  N0
+!    (use floating point, at 2048^3 could overflow interger*4)
+
+#ifdef USE_MPI
+xtmp=N0
+call MPI_allreduce(xtmp,N0,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+!ave2=avelen
+!call MPI_allreduce(ave2,avelen,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+count1=raycount
+call MPI_allreduce(count1,raycount,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+#endif
+
+N0 = N0/raycount
+!avelen=avelen/count
 
 end subroutine
 
@@ -826,15 +839,14 @@ end subroutine
 
 
 subroutine zero_crossing(data,n,ave,len,count)
-integer :: n,count,istart
+integer :: n,count
 real*8 :: data(n),len,ave
-
-real*8 :: zero_location(n) ,y1,y2
+real*8 :: y1,y2
+real*8 :: zero_location(n)
 
 count=0
 ! find first crossing:
-istart=1
-do i=istart,n
+do i=1,n
    i1=i+1
    if (i1>n) i1=1
    y1=data(i)-ave
@@ -842,9 +854,11 @@ do i=istart,n
    if ( (y1*y2<=0) .and. y2/=0 ) then
       ! find the location of the zero between [ data(i),data(i+1) )
       count=count+1
-      zero_location(count)=i +y1/(y1-y2)
+!      zero_location(count)=i +y1/(y1-y2)
    endif
 enddo
+
+return
 
 
 if (count>0) then
