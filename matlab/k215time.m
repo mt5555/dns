@@ -136,14 +136,20 @@ scale = 1;  % scale = 2/15 if normalizing by prefactor as well
 figure(5); clf;subplot(2,1,1);hold on; 
 plot(times/teddy,mx215_iso_localeps/scale,'b-','LineWidth',1.0);hold on;
 i=1; %a particular directions
-plot(times/teddy,mx215_localeps(1:length(times),i)/scale,'g-','LineWidth',1.0);hold on;
-plot(times,(2/15)*times./times,'m');
+%plot(times/teddy,mx215_localeps(1:length(times),i)/scale,'g-','LineWidth',1.0);hold on;
+plot([1:10],(2/15)*[1:10]./[1:10],'m');
 grid on;
 
+%subplot(2,1,2);hold on;
+%plot(times/teddy,mn215_iso_localeps/scale,'k-','LineWidth',1.0);hold on;
+%i=1; %a particular directions
+%plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
+
 subplot(2,1,2);hold on;
-plot(times/teddy,mn215_iso_localeps/scale,'k-','LineWidth',1.0);hold on;
 i=1; %a particular directions
-plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
+plot(times/teddy,mx215_localeps(1:length(times),i)/scale, 'k-','LineWidth',1.0);hold on;
+plot([1:10],(2/15)*[1:10]./[1:10],'m');
+grid on;
 
 ax=axis;
 %axis( [ax(1),ax(2),0,1] );
@@ -199,7 +205,7 @@ ln=find(times>=starttime);
 ln=ln(1);
 lnmax=length(times);
 
-dir_use=3;
+dir_use=1;
 [mean(mx215(ln:lnmax,dir_use)),mean(mx215_iso(ln:lnmax))]
 [std(mx215(ln:lnmax,dir_use)),std(mx215_iso(ln:lnmax)) ]
 

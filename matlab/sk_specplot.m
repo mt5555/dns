@@ -289,8 +289,9 @@ legend('E_{T}(k) k^{5/3}','E_{T}(k) k^{4/3}');
 set(gca,'fontsize',18);
 xlabel('k');
 
+%total 1D spectrum
 figure(10)
-semilogx(k(1:n_z), (spec_l + spec_t).*k(1:n_z)'.^(5/3),'k', k(1:n_z), (spec_l + spec_t).*k(1:n_z)'.^(4/3),'b--');hold on;
+semilogx(k(1:n_z), (spec_l + 2*spec_t).*k(1:n_z)'.^(5/3),'k', k(1:n_z), (spec_l + spec_t).*k(1:n_z)'.^(4/3),'b--');hold on;
 set(gca,'fontsize',16);
 legend('E_{1D}k^{5/3}','E_{1D}k^{4/3}');
 set(gca,'fontsize',18);

@@ -34,7 +34,7 @@ ext='.isostr';
 name = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a';
 ext='.new.isostr';
 pname = 'skhel512a'
-times = [2.0:0.2:7.8];
+times = [2.0:0.2:9.8];
 nx=512
 
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
@@ -134,7 +134,7 @@ end
 
 
 figure(8); clf; hold on;
-scale = 1;  %scale = 2/15 is normalizing by prefactor as well 
+scale = 1;  %scale = 4/5 is normalizing by prefactor as well 
 for i=1:1:1 % directions
  plot(times/teddy,mx45_localeps(1:length(times),i)/scale,'g-','LineWidth',2.0);
 end
@@ -143,15 +143,16 @@ ax=axis;
 axis( [ax(1),ax(2),.5,1.0] );
 plot(times,(4/5)*times./times/scale,'k');
 hold off;
-ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
-xlabel('time','FontSize',16)
-title(ppname);
+%ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+xlabel('t/T','FontSize',18)
+     set(gca,'fontsize',18);
+%title(ppname);
 print('-dpsc', 'k45time.ps')
 print('-dtiff', 'k45time.jpg')
 
 
 figure(9); clf
-scale = 4/5; %scale = 4/5 if need to normalize out the 4/5th
+scale = 1; %scale = 4/5 if need to normalize out the 4/5th
 for i=[1:1:73]
   %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',1.0); hold on
   semilogx(xx_plot,y45_ave(:,i)/scale,'g-','LineWidth',1.0); hold on
@@ -171,19 +172,19 @@ return
 
 
 % plot deviation from mean:
-figure(10); clf
-offset=y45_iso_ave;
-stdr=0*offset;
-scale = 4/5; % scale = 4/5 if need to factor out the 4/5 
-for i=[1:1:73]
-  i
-  semilogx(xx_plot,abs(y45_ave(:,i)-offset)/offset,'m-','LineWidth',1.0); hold on
-  stdr=stdr+(y45_ave(:,i)-offset).^2;
-end
-stdr=sqrt(stdr/15)./offset;
-title('Measure of anisotropy - 4/5 law; |D_{lll}(dir) - D_{lll}(ave)|/D_lll(ave)');
-ylabel(ppname);
-xlabel('r/\eta','FontSize',16);
+%figure(10); clf
+%offset=y45_iso_ave;
+%stdr=0*offset;
+%scale = 4/5; % scale = 4/5 if need to factor out the 4/5 
+%for i=[1:1:73]
+%  i
+%  semilogx(xx_plot,abs(y45_ave(:,i)-offset)/offset,'m-','LineWidth',1.0); hold on
+%  stdr=stdr+(y45_ave(:,i)-offset).^2;
+%end
+%stdr=sqrt(stdr/15)./offset;
+%title('Measure of anisotropy - 4/5 law; |D_{lll}(dir) - D_{lll}(ave)|/D_lll(ave)');
+%ylabel(ppname);
+%xlabel('r/\eta','FontSize',16);
 
 
 
@@ -193,7 +194,7 @@ ln=find(times>=starttime);
 ln=ln(1);
 lnmax=length(times);
 
-dir_use=2;
+dir_use=1;
 [mean(mx45(ln:lnmax,dir_use)),mean(mx45_iso(ln:lnmax))]
 [std(mx45(ln:lnmax,dir_use)),std(mx45_iso(ln:lnmax)) ]
 
