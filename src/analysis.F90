@@ -42,6 +42,10 @@ integer icentroid
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac
+CPOINTER :: fscalar
+real*8, allocatable :: ints(:,:),maxs(:,:)
+integer ni,ns,nb
+
 
 ! input file
 basename="Ia0"
@@ -72,6 +76,38 @@ Q=0
    open(55,file='KeCentroid.gp')
 !
 if (init_cond==3) call init_data_sht(Q,vor,work1,work2)
+
+!
+! example code to read .scalar files:
+!
+
+call copen("filename.scalar","r",fscalar,ierr) 
+nb=0
+do
+   cread8e(fscalar,ni,1,ierr)
+   if (ierr/=1) break  ! error reading file
+   if (.not. allocated(ints)) then
+      allocate(ints(ni,10000))
+      allocate(maxs(ni,10000))
+   endif
+   cread8e(fscalar,ns,1,ierr)
+   cread8e(fscalar,mu,1,ierr)
+   cread8e(fscalar,alpha,1,ierr)
+   do n=1,ns
+      nb=nb+1
+      if (nb>10000) call abort("analysis: error: nb too small")
+      cread8e(fscalar,ints(1,nb),ni,ierr)
+      cread8e(fscalar,maxs(1,nb),ni,ierr)
+   enddo
+enddo
+call cclose(fscalar,ierr)
+
+! time:   maxs(7,:)
+! ke:     ints(5,:)
+! tot_e:  ints(6,:)
+!
+
+
 
 time=tstart
 do
