@@ -64,6 +64,7 @@ real*8 :: p(nx,ny,nz,nvar)
 integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
 real*8 :: recbufx0(nslaby*nslabz*nvar*nghost)
 real*8 :: recbufx1(nslaby*nslabz*nvar*nghost)
+logical :: ghost0=.true.,ghost1=.true.
 
 #ifdef USE_MPI
 real*8 :: sendbufx0(nslaby*nslabz*nvar*nghost)
@@ -132,6 +133,10 @@ if (x0==my_x) then
       else if (bdy_x1==REFLECT_ODD) then
          !reflection:  nx1+2,nx1+1  -->   nx1-2,nx1-1
          recbufx0(l)=-p(nx1+i+1,j,k,n)
+      else
+         ! b.c., so dont touch ghost cells
+         ghost0=.false.
+         goto 90
       endif
    enddo
    enddo
@@ -161,6 +166,8 @@ else
    call MPI_ISend(sendbufx0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
+90 continue
+
 
 
 ! get information for right edge ghost cells of X direction:
@@ -180,6 +187,10 @@ if (x1==my_x) then
       else if (bdy_x2==REFLECT_ODD) then
          !reflection:  nx2-1,nx2-2  -->   nx2+1,nx2+2
          recbufx1(l)=-p(nx2-i,j,k,n)
+      else
+         ! b.c., so dont touch ghost cells
+         ghost1=.false.
+         goto 100
       endif
    enddo
    enddo
@@ -210,7 +221,7 @@ else
    call MPI_ISend(sendbufx1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
-
+100 continue
 
 
 
@@ -220,6 +231,7 @@ call MPI_waitall(nmesg,request,statuses,ierr)
 ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
 #endif
 
+
 l=0
 do n=1,nvar
 do k=nz1,nz2
@@ -227,9 +239,9 @@ do j=ny1,ny2
 do i=1,nghost
    l=l+1
    ! left edge:  p(nx1-2,,) then p(nx1-1,,)
-   p(nx1-(nghost-i+1),j,k,n)=recbufx0(l)
+   if (ghost0) p(nx1-(nghost-i+1),j,k,n)=recbufx0(l)
    ! right edge:  p(nx2+1,,) then p(nx2+2,,)
-   p(nx2+i,j,k,n)=recbufx1(l)
+   if (ghost1) p(nx2+i,j,k,n)=recbufx1(l)
 enddo
 enddo
 enddo
@@ -264,6 +276,7 @@ real*8 :: p(nx,ny,nz,nvar)
 integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
 real*8 :: recbufy0(nslabx*nslabz*nvar*nghost)
 real*8 :: recbufy1(nslabx*nslabz*nvar*nghost)
+logical :: ghost0=.true.,ghost1=.true.
 
 #ifdef USE_MPI
 real*8 :: sendbufy0(nslabx*nslabz*nvar*nghost)
@@ -331,6 +344,9 @@ if (y0==my_y) then
          recbufy0(l)=p(i,ny1+j+1,k,n)
       else if (bdy_y1==REFLECT_ODD) then
          recbufy0(l)=-p(i,ny1+j+1,k,n)
+      else
+         ghost0=.false.
+         goto 90
       endif
    enddo
    enddo
@@ -359,7 +375,7 @@ else
    call MPI_ISend(sendbufy0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
-
+90 continue
 
 ! get information for right edge ghost cells of X direction:
 if (y1==my_y) then
@@ -375,6 +391,9 @@ if (y1==my_y) then
          recbufy1(l)=p(i,ny2-j,k,n)
       else if (bdy_y2==REFLECT_ODD) then
          recbufy1(l)=-p(i,ny2-j,k,n)
+      else
+         ghost1=.false.
+         goto 100
       endif
    enddo
    enddo
@@ -404,7 +423,7 @@ else
    call MPI_ISend(sendbufy1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
-
+100 continue
 
 
 
@@ -417,15 +436,15 @@ ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
 
 
 l=0
-do n=1,nvar
+do n=1,nvar  
 do k=nz1,nz2
 do j=1,nghost
 do i=nx1,nx2
    l=l+1
    ! left edge: 
-   p(i,ny1-(nghost-j+1),k,n)=recbufy0(l)
+   if (ghost0) p(i,ny1-(nghost-j+1),k,n)=recbufy0(l)
    ! right edge: 
-   p(i,ny2+j,k,n)=recbufy1(l)
+   if (ghost1) p(i,ny2+j,k,n)=recbufy1(l)
 enddo
 enddo
 enddo
@@ -458,6 +477,7 @@ real*8 :: p(nx,ny,nz,nvar)
 integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
 real*8 :: recbufz0(nslabx*nslaby*nvar*nghost)
 real*8 :: recbufz1(nslabx*nslaby*nvar*nghost)
+logical :: ghost0=.true.,ghost1=.true.
 
 #ifdef USE_MPI
 real*8 :: sendbufz0(nslabx*nslaby*nvar*nghost)
@@ -527,6 +547,9 @@ if (z0==my_z) then
          recbufz0(l)=p(i,j,nz1+k+1,n)
       else if (bdy_z1==REFLECT_ODD) then
          recbufz0(l)=-p(i,j,nz1+k+1,n)
+      else
+         ghost0=.false.
+         goto 90
       endif
    enddo
    enddo
@@ -555,7 +578,7 @@ else
    call MPI_ISend(sendbufz0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
-
+90 continue
 
 ! get information for right edge ghost cells of X direction:
 if (z1==my_z) then
@@ -571,6 +594,9 @@ if (z1==my_z) then
          recbufz1(l)=p(i,j,nz2-k,n)
       else if (bdy_z2==REFLECT_ODD) then
          recbufz1(l)=-p(i,j,nz2-k,n)
+      else
+         ghost1=.false.
+         goto 100
       endif
    enddo
    enddo
@@ -601,7 +627,7 @@ else
 #endif
 endif
 endif
-
+100 continue
 
 
 
@@ -619,9 +645,9 @@ do j=ny1,ny2
 do i=nx1,nx2
    l=l+1
    ! left edge: 
-   p(i,j,nz1-(nghost-k+1),n)=recbufz0(l)
+   if (ghost0) p(i,j,nz1-(nghost-k+1),n)=recbufz0(l)
    ! right edge: 
-   p(i,j,nz2+k,n)=recbufz1(l)
+   if (ghost1) p(i,j,nz2+k,n)=recbufz1(l)
 enddo
 enddo
 enddo

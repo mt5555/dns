@@ -143,9 +143,9 @@ integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
 integer,allocatable :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
 
 ! sine modes, local 3D decomp:
-real*8 :: imsine(nxd)
-real*8 :: jmsine(nyd)
-real*8 :: kmsine(nzd)
+integer :: imsine(nxd)
+integer :: jmsine(nyd)
+integer :: kmsine(nzd)
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -506,7 +506,7 @@ if ( nz2>nz) then
    call print_message("nz is too small. nz must be >=nz2")	
 endif
 
-if (fail/=0) call abort("params.F90 dimension settings failure")
+!if (fail/=0) call abort("params.F90 dimension settings failure")
 
 allocate(g_xcord(g_nx+1))
 allocate(g_ycord(g_ny+1))

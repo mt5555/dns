@@ -52,8 +52,8 @@ def fullfactor(n):
    [nleft,facs[2]]=nfactor(nleft,5)
 
    if (nleft<>1):
-      print "dimension: ",n[i],"must only have factors of 2,3 and 5"
-      sys.exit(1)
+      print "WARNING: dimension: ",n,"must only have factors of 2,3 and 5"
+#      sys.exit(1)
 
 #   if n<>1 and n<=4:
 #      print "dimension: ",n,"must be > 4"

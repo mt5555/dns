@@ -304,6 +304,9 @@ endif
 if (doit_diag) then
    call output_diags(time,Q,q1,q2,q3,work1,work2,ints_save,maxs_save,nints,nscalars)
    nscalars=0
+else if (diag_dt==0) then
+   ! if diagnostics are turned off, dont save the scalars!
+   nscalars=0  
 endif
 
 
@@ -435,7 +438,6 @@ character(len=80) :: message
 character :: access
 CPOINTER fid
 
-
 ! append to output files, unless time=0 create a new file 
 access="a"
 if (time==0) access="w"
@@ -463,6 +465,7 @@ call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_x,g_nx/2,message)
 !call plotASCII(spec_y,g_ny/2,message)
 !call plotASCII(spec_z,g_nz/2,message)
+
 
 
 ! for incompressible equations, print divergence as diagnostic:

@@ -99,6 +99,8 @@ if (firstcall) then
 endif
 
 
+
+
 !
 !  Q(:,:,:,1) = u
 !  Q(:,:,:,2) = v
@@ -148,19 +150,29 @@ time = time + delt
 maxs(1:4)=0
 do j=ny1,ny2
 do i=nx1,nx2
-   u=( 2*(psi0(i,j+1)-psi0(i,j-1))/3 -  &
-        (psi0(i,j+2)-psi0(i,j-2))/12          )/dely
-
-   v=-( 2*(psi0(i+1,j)-psi0(i-1,j))/3 -  &
-        (psi0(i+2,j)-psi0(i-2,j))/12          )/delx
-
-   maxs(1)=max(maxs(1),abs(u))
-   maxs(2)=max(maxs(2),abs(v))
-   maxs(3)=0
-   vel = abs(u)/delx + abs(v)/dely 
-   maxs(4)=max(maxs(4),vel)
-   Q(i,j,1)=u
-   Q(i,j,2)=v
+   if ((my_x==0 .and. bdy_x1==INFLOW0_ONESIDED .and. i==nx1) .or. &
+        (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED .and. i==nx2) .or. &
+        (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED .and. j==ny1) .or. &
+        (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED .and. j==ny2)) then
+      ! u,v (and RHS) not computed on boundary
+      Q(i,j,1)=0
+      Q(i,j,2)=0
+   else
+      
+      u=( 2*(psi0(i,j+1)-psi0(i,j-1))/3 -  &
+           (psi0(i,j+2)-psi0(i,j-2))/12          )/dely
+      
+      v=-( 2*(psi0(i+1,j)-psi0(i-1,j))/3 -  &
+           (psi0(i+2,j)-psi0(i-2,j))/12          )/delx
+      
+      maxs(1)=max(maxs(1),abs(u))
+      maxs(2)=max(maxs(2),abs(v))
+      maxs(3)=0
+      vel = abs(u)/delx + abs(v)/dely 
+      maxs(4)=max(maxs(4),vel)
+      Q(i,j,1)=u
+      Q(i,j,2)=v
+   endif
 enddo
 enddo
 

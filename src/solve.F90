@@ -46,7 +46,7 @@ real*8 :: sol(nx,ny,nz)
 real*8 :: b(nx,ny,nz)
 real*8 :: tol,a1,a2
 logical :: precond
-external :: matvec
+external matvec
 
 !local 
 real*8 :: P(nx,ny,nz)
@@ -142,7 +142,7 @@ real*8 :: b(nx,ny,nz)
 real*8 :: h(nx,ny,nz)
 real*8 :: tol,a1,a2
 logical :: precond
-external :: matvec
+external matvec
 
 !local 
 real*8 :: R(nx,ny,nz)
@@ -306,8 +306,8 @@ else if (btype==2) then
    ! copy b.c. from psi into 'b', and apply compact correction to b:
    call helmholtz_dirichlet_setup(b,psi,work,1)
 
-   call helmholtz_dirichlet_inv(b,work,zero,one)
-!   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+   psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
+   !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
 
    !update PSI 1st row of ghost cells so that our 4th order differences
@@ -315,193 +315,12 @@ else if (btype==2) then
    call bc_onesided(psi)
 endif
 
+
+
 call ghost_update_x(psi,1)
 call ghost_update_y(psi,1)
 
 end subroutine
-
-
-
-
-subroutine helmholtz_dirichlet_inv(f,work,alpha,beta)
-!
-!  solve [alpha + beta*laplacian](p) = f
-!  input:  f 
-!  ouput:  f   will be overwritten with the solution p
-!  b.c. for f specified in f. 
-!
-use params
-use fft_interface
-use transpose
-implicit none
-real*8 f(nx,ny,nz)    ! input/output
-real*8 work(nx,ny,nz) ! work array
-real*8 :: alpha
-real*8 :: beta
-
-
-!local
-integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k
-real*8 phi(nx,ny,nz)    
-real*8 lphi(nx,ny,nz)    
-real*8 xm,ym,zm,xfac
-
-if (beta==0) then
-   f=f/alpha
-   return
-endif
-
-!NOTE: we dont need phi, lphi.  when this code is debugged, replace by:
-! save boundary data in single 1D array
-! set f = 0 on boundary
-! using boundary data alone: compute f = f - lphi 
-!      along points just inside boundary
-!
-! solve as before
-! restor boundary conditions in f from 1D array.
-
-
-
-
-! phi = f on boundary, zero inside
-phi=f
-call zero_boundary(phi)
-phi=f-phi
-call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
-
-
-! convert problem to zero b.c. problem
-f=f-lphi
-call zero_boundary(f)
-! solve Helm(f) = b with 0 b.c.
-
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
-call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)     
-call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
-call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
-
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   ! mode imsine(i),jmsine(j),kmsine(k)
-   ! alpha*sin(x) + beta*[sin(x+h) - 2 sin(x) + sin(x-h)] / delx*delx + same in y,z
-   !
-   ! beta' = beta/delx**2
-   !
-   ! [ alpha + 2*beta'*cos(2pi k delx) - 2beta'  ]  sin(2pi k x)
-
-   xm = -2 + 2*cos(pi2*delx*imsine(i))
-   xm=xm/(delx*delx)
-   ym = -2 + 2*cos(pi2*dely*jmsine(j))
-   ym=ym/(dely*dely)
-   zm = -2 + 2*cos(pi2*delz*kmsine(k))
-   zm=zm/(delz*delz)
-   
-   xfac = alpha + beta*(xm+ym+zm)
-   f(i,j,k) = f(i,j,k) / xfac
-enddo
-enddo
-enddo
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
-call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
-
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
-call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
-call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
-
-
-!print *,maxval(abs(f(nx1:nx2,ny1:ny2,1)-lphi(nx1:nx2,ny1:ny2,1)))
-
-
-f=f+phi
-end subroutine
-
-
-
-
-
-
-
-
-
-
-
-
-subroutine helmholtz_periodic_inv(f,work,alpha,beta)
-!
-!  solve [alpha + beta*laplacian](p) = f
-!  input:  f 
-!  ouput:  f   will be overwritten with the solution p
-!
-use params
-use fft_interface
-use transpose
-implicit none
-real*8 f(nx,ny,nz)    ! input/output
-real*8 work(nx,ny,nz) ! work array
-real*8 :: alpha
-real*8 :: beta
-
-
-!local
-integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k
-
-if (beta==0) then
-   f=f/alpha
-   return
-endif
-
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
-call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
-call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
-call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
-
-! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
-call fft_laplace_inverse(f,alpha,beta)
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
-
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
-
-
-
-end
-
-
 
 
 

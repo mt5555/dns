@@ -96,11 +96,8 @@ for i=range
       pcolor(x,y,vor')
       shading interp
     else
-      if (qmax>15) 
-        v=-60:5:60;
-      else
-        v=20;  % use 10 contours
-      end  
+      v = -12:1:3;
+      v=2.^v;
       contour(x,y,vor',v)
       hold on
       contour(x,y,vor',[0 0],'k')
@@ -117,7 +114,7 @@ for i=range
       pcolor(x,y,psi')
       shading interp
     else
-      v=20;                             % use 10 contours
+      v=20;                             % use 20 contours
       contour(x,y,psi',v)
     end
     axis square

@@ -27,11 +27,9 @@ real*8 b(nx,ny)
 real*8 psi(nx,ny)
 real*8 psi_exact(nx,ny)
 real*8 lpsi(nx,ny)
-real*8 phi(nx,ny)
-real*8 lphi(nx,ny)
 real*8 work(nx,ny)
 real*8 :: zero=0,one=1
-real*8 :: tol=1e-8
+real*8 :: tol=1e-12
 integer i,j,k,n
 b=0
 psi=0
@@ -55,17 +53,13 @@ do i=nx1,nx2
    !psi_exact(i,j)=xcord(i)**3 + ycord(j)**3
    !b(i,j)=3*2*xcord(i) + 3*2*ycord(j)
 
-   psi_exact(i,j)=cos(2*pi*xcord(i))*sin(2*pi*ycord(j))
-   b(i,j)=-8*pi*pi*cos(2*pi*xcord(i))*sin(2*pi*ycord(j))
-enddo
-enddo
+   !psi_exact(i,j)=sin(pi*xcord(i))*sin(pi*ycord(j))
+   !b(i,j)=-2*pi*pi*sin(pi*xcord(i))*sin(pi*ycord(j))
 
-! create PHI = 0 interior, but with correct b.c.
-phi=psi_exact
-work=phi
-call zero_boundary(work)
-phi=phi-work
-call helmholtz_dirichlet(phi,lphi,zero,one,work)
+   psi_exact(i,j)=cos(pi*xcord(i))*cos(pi*ycord(j))
+   b(i,j)=-2*pi*pi*cos(pi*xcord(i))*cos(pi*ycord(j))
+enddo
+enddo
 
 
 
@@ -84,23 +78,12 @@ call ghost_update_y(b,1)
 call helmholtz_dirichlet_setup(b,psi,work,1)
 
 
-#undef CONVERT_TO_ZERO_ON_BDY
-#ifdef CONVERT_TO_ZERO_ON_BDY
-
-b=b-lphi
-call zero_boundary(b)
-call zero_boundary(psi)
-call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
-psi=psi+phi
-
-#else
-
 !call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
-call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+!call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
+psi=b
+call helmholtz_dirichlet_inv(psi,work,zero,one)
 
-
-#endif
 
 
 
@@ -121,7 +104,7 @@ maxval(abs(psi(  nx1:nx2,ny1:ny2)-psi_exact(nx1:nx2,ny1:ny2)     ))
 
 
 #endif
-
+stop
 end subroutine
 
 

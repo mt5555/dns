@@ -1104,7 +1104,7 @@ end subroutine
 
 
 
-#undef COMPACT
+#define COMPACT
 subroutine helmholtz_dirichlet_setup(f,p,work,setbdy)
 !
 ! for compact: replace f with:   f + h**2/12 (fxx + fyy)
@@ -1499,9 +1499,362 @@ end subroutine
 
 
 
+subroutine helmholtz_dirichlet_inv(f,work,alpha,beta)
+!
+!  solve [alpha + beta*laplacian](p) = f
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
+!  b.c. for f specified in f. 
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+real*8 work(nx,ny,nz) ! work array
+real*8 :: alpha
+real*8 :: beta
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+real*8 phi(nx,ny,nz)    
+real*8 lphi(nx,ny,nz)    
+real*8 xm,ym,zm,xfac
+real*8 :: axy,x_axy,y_axy
+real*8 :: xb(ny,2),yb(nx,2)
+
+#ifdef COMPACT
+if (ndim/=2) then
+   call abort("helmholtz_dirichlet_inv() not coded for 3D compact")
+endif
+#endif
+
+if (beta==0) then
+   f=f/alpha
+   return
+endif
+!
+!  let phi = f on the boundary, 0 inside
+!      lphi = Helmholtz(phi)
+!
+!  solve:  Helmholtz(psi) = b - lphi  with psi=0 on boundary
+!          then set psi=psi+phi
+!
+!
+!NOTE: we dont need phi, lphi.  when this code is debugged, replace by:
+! save boundary data in single 1D array
+! set f = 0 on boundary
+! using boundary data alone: compute f = f - lphi 
+!      along points just inside boundary
+!
+! solve as before
+! restor boundary conditions in f from 1D array.
+
+! copy boundary data into temp array:
+! replace (interior only) f with f - lphi
+if (my_x==0) then
+   i=nx1
+   k=1
+   do j=ny1,ny2
+      xb(j,1)=f(i,j,k)
+   enddo
+endif
+if (my_x==ncpu_x-1) then
+   i=nx2
+   k=1
+   do j=ny1,ny2
+      xb(j,2)=f(i,j,k)
+   enddo
+endif
+if (my_y==0) then
+   j=ny1
+   k=1
+   do i=nx1,nx2
+      yb(i,1)=f(i,j,k)
+   enddo
+endif
+if (my_y==ncpu_y-1) then
+   j=ny2
+   k=1
+   do i=nx1,nx2
+      yb(i,2)=f(i,j,k)
+   enddo
+endif
+
+! correct corner points:
+if (my_x==0 .and. my_y==0) then
+endif
+if (my_x==ncpu_x-1 .and. my_y==0) then
+endif
+if (my_x==0 .and. my_y==ncpu_y-1) then
+endif
+if (my_x==ncpu_x-1 .and. my_y==ncpu_y-1) then
+endif
+
+
+
+
+! phi = f on boundary, zero inside
+phi=f
+call zero_boundary(phi)
+phi=f-phi
+call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
+
+
+! convert problem to zero b.c. problem
+f=f-lphi
+call zero_boundary(f)
+! solve Helm(f) = b with 0 b.c.
+
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
+
+
+!  2nd order uses the regular stencil:     
+!  x=1/delx**2
+!  y=1/dely**2
+!                 y
+!           x  -2x-2y   x
+!                 y
+!                                                      
+!  4th order compact uses above + a  * D2Y D2X         
+!  where a= (1/x+1/y)/12                               
+!
+!
+!                 y                   xy  -2xy    xy
+!           x  -2x-2y   x   +   a   -2xy   4xy  -2xy 
+!                 y                   xy  -2xy    xy
+!
+! which is:
+!
+!              axy       y  -2axy         axy
+!           x-2axy    -2x-2y+4axy      x-2axy
+!              axy       y  -2axy         axy
+!
+axy=(delx**2+dely**2)/(12*delx*delx*dely*dely)
+x_axy=1/(delx*delx) - 2*axy
+y_axy=1/(dely*dely) - 2*axy
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+#ifdef COMPACT
+   ! mode imsine(i),jmsine(j),kmsine(k)
+   ! sin(x+h)sin(y+h) + sin(x-h)sin(y+h) + 
+   ! sin(x+h)sin(y-h) + sin(x-h)sin(y-h) =
+   ! 
+   !   [  2*cos(h)  ]  sin(x) [sin(y+h)+sin(y-h) ]  = 
+   !
+   !   [  4*cos(hx) cos(hy) ]  sin(x) sin(y)
+   
+   xfac = x_axy*2*cos(pi*delx*imsine(i))         ! x term
+   xfac = xfac + y_axy*2*cos(pi*dely*jmsine(j))  ! y term
+   ! diagonal terms:
+   xfac = xfac + axy*4*cos(pi*delx*imsine(i))*cos(pi*dely*jmsine(j))
+   ! center term:
+   xfac = xfac -2/(delx*delx)-2/(dely*dely)+4*axy   
+#else
+   ! [sin(x+h) - 2 sin(x) + sin(x-h)]   = 
+   !
+   ! [ -2 + 2*cos(h)  ]  sin(x)
+   ! 
+   xm = -2 + 2*cos(pi*delx*imsine(i))
+   xm=xm/(delx*delx)
+   ym = -2 + 2*cos(pi*dely*jmsine(j))
+   ym=ym/(dely*dely)
+   zm = -2 + 2*cos(pi*delz*kmsine(k))
+   zm=zm/(delz*delz)
+   xfac=xm+ym+zm
+#endif
+
+
+
+!   if (abs(f(i,j,k))>1e-6) then
+!      print *,imsine(i),jmsine(j),kmsine(k),f(i,j,k)
+!   endif
+   xfac = alpha + beta*xfac
+   if (imsine(i)+jmsine(j)+kmsine(k)==0) then
+      f(i,j,k) = 0
+   else
+      f(i,j,k) = f(i,j,k)/xfac
+   endif
+     
+ 
+enddo
+enddo
+enddo
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
+
+
+!print *,maxval(abs(f(nx1:nx2,ny1:ny2,1)-lphi(nx1:nx2,ny1:ny2,1)))
+
+
+!restor boundary values
+if (my_x==0) then
+   i=nx1
+   k=1
+   do j=ny1,ny2
+      f(i,j,k)=xb(j,1)
+   enddo
+endif
+if (my_x==ncpu_x-1) then
+   i=nx2
+   k=1
+   do j=ny1,ny2
+      f(i,j,k)=xb(j,2)
+   enddo
+endif
+if (my_y==0) then
+   j=ny1
+   k=1
+   do i=nx1,nx2
+      f(i,j,k)=yb(i,1)
+   enddo
+endif
+if (my_y==ncpu_y-1) then
+   j=ny2
+   k=1
+   do i=nx1,nx2
+      f(i,j,k)=yb(i,2)
+   enddo
+endif
+
+!f=f+phi
+end subroutine
+
+
+
+
+
+
+
+
+
+
+
+
+subroutine helmholtz_periodic_inv(f,work,alpha,beta)
+!
+!  solve [alpha + beta*laplacian](p) = f
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+real*8 work(nx,ny,nz) ! work array
+real*8 :: alpha
+real*8 :: beta
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+if (beta==0) then
+   f=f/alpha
+   return
+endif
+
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
+
+! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
+call fft_laplace_inverse(f,alpha,beta)
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
+
+
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Compute 3D sin transform along first dimension
+!
+! input data:   (for example, if n1=5)
+!   1 2 3 4 5      x(1)=x(5)=0
+! odd extension:
+!   1 2 3 4 5 -4 -3 -2  0 0      (fft does not include last periodic point)
+!                                and we add 2 for padding
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
@@ -1509,25 +1862,23 @@ use fft_interface
 implicit none
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: p(n1d,n2d,n3d)
-real*8 :: w(2*n1+2,n2)
+real*8 :: w(2*n1,n2)
 
 integer i,j,k
 if (n1==1) return
 
-
 do k=1,n3
    do j=1,n2
       ! make an odd extension
-      p(n1+1,j,k)=0  ! put in the periodic point by hand to make next loop better:
-      do i=1,n1
-         w(i,j)=p(i,j,k)              !  1 2 3 4 
-         w(i+n1,j)=-p(n1+2-i,j,k)     !          5 4 3 2
+      do i=1,n1-1
+         w(i,j)=p(i,j,k)               !  1 2 3 4 
+         w(i+n1-1,j)=-p(n1-i+1,j,k)    !          -5 -4 -2
       enddo
    enddo
-   call fft1(w,2*n1,2*n1+2,n2,n2,1,1)
+   call fft1(w,2*n1-2,2*n1,n2,n2,1,1)
    do j=1,n2
       ! save only the sine modes:
-      do i=1,n1
+      do i=1,n1-1
          p(i,j,k)=w(2*i,j)
       enddo
    enddo
@@ -1547,7 +1898,7 @@ use fft_interface
 implicit none
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: p(n1d,n2d,n3d)
-real*8 :: w(2*n1+2,n2)
+real*8 :: w(2*n1,n2)
 
 integer i,j,k
 if (n1==1) return
@@ -1557,12 +1908,12 @@ do k=1,n3
    do j=1,n2
       ! unpack the sine modes into a sine/cosine array:
       ! save only the sine modes:
-      do i=1,n1
+      do i=1,n1-1
          w(2*i-1,j)=0
          w(2*i,j)=p(i,j,k)
       enddo
    enddo
-   call ifft1(w,2*n1,2*n1+2,n2,n2,1,1)
+   call ifft1(w,2*n1-2,2*n1,n2,n2,1,1)
    do j=1,n2
       do i=1,n1
          p(i,j,k)=w(i,j)
