@@ -7,6 +7,9 @@ QB pre-science run.
        decay2048_e   initial condition
        decay2048_s   rescale the initial condition
 
+email about rescaling.  
+
+
 2. UDM: test on qidse:
      run test suite with my code w/parallel UDM restart: 
             ../testing/test3d.sh pudm
@@ -19,12 +22,33 @@ QB pre-science run.
 
      run code 10 timesteps,  restart and run another 10 timesteps
 
-     1x1x256 decomposisiton
-     run code, restarting from UDM
-     2x1x256 decomposisiton
-     run code, restarting from UDM
-     1x1x128 decomposisiton
-     run code, restarting from UDM
+./gridsetup.py 1 1 256 512 512 512
+prun -n 256 ./dns  < udm.inp 
+mv temp0000.????.u restart.u
+mv temp0000.????.v restart.v
+mv temp0000.????.w restart.w
+
+prun -n 256 ./dns -uo  < udm.inp 
+mv temp0000.????.h5 restart.h5
+
+
+prun -n 256 ./dns -r  < udm.inp   > orig.out
+prun -n 256 ./dns -r -ui -uo  < udm.inp   > udm.out
+
+./gridsetup.py 2 1 128 512 512 512
+prun -n 256 ./dns -r -ui -uo  < udm.inp   > udm2.out
+
+./gridsetup.py 2 1 256 512 512 512
+prun -n 512 ./dns -r -ui -uo  < udm.inp   > udm3.out
+
+
+
+
+
+
+
+
+
      
 
 

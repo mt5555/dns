@@ -245,9 +245,10 @@ NUMBANDS=NUMBANDS_MAX
 ! Teddy/delt = Teddy*Umax
 !
 if (restype==0) then
-   ep23=2.76029**(2d0/3d0)
+   ep23=(2.76029)  **(2d0/3d0) 
    lenscale = .3155
    eta = 9.765e-4
+   mu_m=1.359e-4
 else
    call abort("init_data_decay: bad restype")
 endif
@@ -277,10 +278,7 @@ do nb=1,NUMBANDS
    ener=ener+enerb_target(nb)
    ens=ens+2 * nb**2 * enerb_target(nb)
 enddo
-mu_m=1.359e-4
 epsilon=mu_m*ens
-!epsilon=2.76029
-
 
 print *,'stats computed from target spectrum and target viscosity:'
 print *,'epsilon: ',epsilon
@@ -289,7 +287,7 @@ print *,'u1       ',sqrt(2*ener/3)
 print *,'u1,1     ',epsilon/mu_m/15
 print *,'lambda   ',sqrt(10*ener*mu_m/epsilon)
 print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
-print *,'eta      ',(mu_m**3 / epsilon ) **.25
+print *,'eta      ',(mu_m**3 / epsilon ) **.25 
 print *,'eddy time',2*ener/epsilon
 endif
 
@@ -493,7 +491,8 @@ print *,'u1,1     ',epsilon/mu_m/15
 print *,'lambda   ',sqrt(10*ener*mu_m/epsilon),sqrt(10*ener*mu_m/epsilon)*pi2
 print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
 print *,'eta      ',    (mu_m**3 / epsilon ) **.25, &
-                    pi2*(mu_m**3 / epsilon ) **.25, 
+                    pi2*(mu_m**3 / epsilon ) **.25 
+print *,'delx/eta ',  (1./g_nmin)/((mu_m**3 / epsilon ) **.25)
 print *,'eddy time',2*ener/epsilon
 endif
 
