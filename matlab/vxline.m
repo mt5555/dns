@@ -9,20 +9,16 @@ clear;
 
 
 name='/home/taylorm/ccs/dns/src/vxpair/vx4096c';
-times=[0:.1:10];
+times=[0:.1:100];
 
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
-emode=[];
+
 timev=[];
+wlinev=zeros([10,1]);
 k=0;
 
-figure(1); clf;
-subplot(2,1,1)
-hold on;
-subplot(2,1,2)
-hold on;
 
 for t=times
   tstr=sprintf('%10.4f',t+10000);
@@ -41,28 +37,37 @@ for t=times
      wline=fread(fid,nline,'float64');
      k=k+1;
      timev(k)=time;
-     subplot(2,1,1)
-     for i=2:9
-        if (wline(i)>=0) 
-           plot(time,wline(i),['.',ccol(i)]);
-        end
-     end
-     ylabel('vorticity')
-
-     subplot(2,1,2)
-     plot(time,xc,'.')
-     plot(time,yc,'.')
-     xlabel('time')
-     ylabel('x, y coordinates')
+     wlinev(1:10,k)=wline(1:10) ;
+     xcv(k)=xc;
+     ycv(k)=yc; 
   else
      disp(sprintf('error openting file %s',fname))
   end
 
 end
 
+figure(1); clf;
+subplot(2,1,1)
+hold on;
+subplot(2,1,1)
+for i=2:9
+  plot(timev,wlinev(i,:),[ccol(i)]);
+end
+ylabel('vorticity')
+ax=axis;
+axis([ax(1),ax(2),-1,ax(4)]);
 hold off;
-      
 
+subplot(2,1,2)
+hold on;
+plot(timev,xcv-xcv(1),'b')
+plot(timev,ycv-ycv(1),'r')
+xlabel('time')
+ylabel('x (blue), y (red)')
+hold off;
+orient tall
+print -dpsc vxline.ps
+print -djpeg vxline.jpg
 return
 
 

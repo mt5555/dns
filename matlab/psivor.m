@@ -12,7 +12,7 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %range=29:1.0:1000.0;
 range=[30:10:30];
 %name='../src/vxpair/vx6144b_';
-name='/ccs/taylorm/dns/src/vxpair/vx6144d';
+name='/ccs/taylorm/dns/src/vxpair/vx4096c';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='../src/vxpair/vx4096a';
 %name='../src/vxpair/vx6144a';
@@ -75,7 +75,7 @@ for i=range
       v = -12:1:3;
       v=2.^v;
       %v = 4.5*[3/4, 1/2, .4 , 1/4, 1/8]
-      v=  [3.3938    2.2626    1.1313    0.5656];
+      %v=  [3.3938    2.2626    1.1313    0.5656];
       contour(x,y,vor',v)
       hold on
       contour(x,y,vor',[.005 .005],'r')
