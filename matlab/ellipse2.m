@@ -12,15 +12,20 @@ clear;
 %name='/home/taylorm/vxpair/vx2048a0050.0000.ellipse';
 %name='/data/vxpair/vx2048c0000.0000.ellipse';
 
-name='/ccs/taylorm/dns/src/vxpair/vx6144e';
+%name='/ccs/taylorm/dns/src/vxpair/vx6144e';
 %times=[17.28:.02:115.0];
-times=[105.0:.02:105.0];
+%times=[105.0:.02:105.0];
 
 %name='/ccs/taylorm/dns/src/vxpair/vx6144c';
 %times=[10.00:.1:30.0];
 
 %name='/ccs/taylorm/dns/src/vxpair/vx6144d';
 %times=[0.00:.02:50.0];
+
+name='/home/taylorm/ccs/dns/src/vxpair/vx4096c';
+times=[0:.1:150];
+
+plot_vor_contour=0;
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
@@ -106,6 +111,7 @@ for t=times
      fclose(fid);
 
      % try and get some vorticity contours:
+     if (plot_vor_contour)
      fname=[name,tstr(2:10),'.vor'];
      [x,y,z,vor,time2]=getfield(fname);
      if (time2>0) 
@@ -126,6 +132,7 @@ for t=times
      axis([1 3 0 1.5]);
      title(sprintf('time=%f',time))
      hold off;
+     end
 
      figure(2); clf;
      for i=1:nell

@@ -9,7 +9,7 @@ clear;
 
 
 name='/home/taylorm/ccs/dns/src/vxpair/vx4096c';
-times=[0:.1:100];
+times=[0:.1:150];
 
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
@@ -46,7 +46,7 @@ for t=times
 
 end
 
-figure(1); clf;
+figure(3); clf;
 subplot(2,1,1)
 hold on;
 subplot(2,1,1)
