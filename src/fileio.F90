@@ -26,7 +26,7 @@ time_target = time_final
 !  
 !
 umax=max(maxs(1)/delx,maxs(2)/dely,maxs(3)/delz)
-if (umax> pi*1000/min(delx,dely,delz)) error_code=1
+if (umax> 1000/min(delx,dely,delz)) error_code=1
 
 ! advective CFL
 delt = cfl_adv/umax

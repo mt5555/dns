@@ -1,4 +1,3 @@
-Initializing grid and b.c. and reading input file                               
 Parallel decomposition: ncpus=     1 =   1 x  1 x  1                            
  Reading input file from stdin...
  Diffusion d/dt(log u_2delx) =  323.4170666192972  s^-1                         
@@ -88,3 +87,7 @@ max: (u,v,w)      1.180825097487208     0.134696464721052     0.000000000000000
 max(div)= 0.15010E-12   <z-vor>= 0.43406E-10   <hel>= 0.00000E+00               
 ke:   0.3396159444 d/dt log(ke) tot: -0.41690 d/dt log(ke) diffusion: -0.41828  
 
+CPU times:
+initialization:    2.74600 s                                                    
+dns_solve:         9.50400 s                                                    
+time_control:      0.06500 s (.007)                                             

@@ -14,6 +14,14 @@ TODO:
 6. divergence: go to Shashkov formula?  
 
 
+**********************************************************************************
+analytic CFL:  norm(G)<2.4
+advection:  G = i U 2pi k delt  = i U (2pi/3) delt/delx
+take k=KMAX*(2/3) = N/3 = 1/(3delx)
+                            courant number < 1.245   (.76 w/o de-aliasing)
+
+diffusion: G = mu 4*pi*pi *k*k delt
+      mu delt/delx^2 < 2.4 * 9/(4*pi*pi) = .55   (.24 w/o de-aliasing)
 
 
 

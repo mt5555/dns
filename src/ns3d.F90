@@ -48,6 +48,7 @@ do i=1,3
 
    ! compute u_x, u_xx
    call der(Q(1,1,1,i),d1,d2,work,numder,1)
+!   d1=0
    rhs(:,:,:,i) = rhs(:,:,:,i) + mu*d2 - Q(:,:,:,1)*d1
 
    ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,i)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
@@ -62,6 +63,7 @@ do i=1,3
 
    ! compute u_y, u_yy
    call der(Q(1,1,1,i),d1,d2,work,numder,2)
+!   d1=0
    rhs(:,:,:,i) = rhs(:,:,:,i) + mu*d2 - Q(:,:,:,2)*d1
 
 
@@ -78,6 +80,7 @@ do i=1,3
 
    ! compute u_z, u_zz
    call der(Q(1,1,1,i),d1,d2,work,numder,3)
+!   d1=0
    rhs(:,:,:,i) = rhs(:,:,:,i) + mu*d2 - Q(:,:,:,3)*d1
 
    ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,i)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
