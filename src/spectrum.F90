@@ -112,7 +112,10 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 #endif
 
 ! q1 already contains the FFT of Q, so set skip_fft (last arg) to 1:
-call compute_helicity_spectrum(Q,q1,work1,io_pe,1)
+if (ndim>=3) then
+   call compute_helicity_spectrum(Q,q1,work1,io_pe,1)
+endif
+
 
 end subroutine
 
@@ -952,8 +955,8 @@ use mpi
 implicit none
 integer :: ierr,skip_fft
 integer :: pe             ! compute spectrum on this processor
-real*8 :: Q(nx,ny,nz,3)
-real*8 :: p1(nx,ny,nz,3)
+real*8 :: Q(nx,ny,nz,*)
+real*8 :: p1(nx,ny,nz,*)
 real*8 :: work(nx,ny,nz)
 
 ! local variables
@@ -963,8 +966,12 @@ real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3)
 integer i,j,k,jm,km,im,iwave_max,n
 
+if (ndim<3) then
+   call abort("compute_helicity_specturm: can only be used in 3D")
+endif
+
 if (skip_fft==0) then
-p1=Q
+p1(:,:,:,1:3)=Q(:,:,:,1:3)
 do n=1,3
    call fft3d(p1(1,1,1,n),work)
 enddo

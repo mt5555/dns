@@ -386,7 +386,7 @@ else if (initial_vor==1) then
 !      enddo
 !      close(11)
 !      stop
-   endif
+!   endif
    wd(nd) = wd(nd)/2
    wd(0) = wd(0)/2
    yd(nd) = 0
