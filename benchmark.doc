@@ -1,0 +1,119 @@
+
+
+t=-1 (one timestep)
+2048^3        11.05m      32K timesteps: 245 days.    
+t=-5 (5 timesteps)
+2048^3        46.83m  = 9.37m per timestep.  
+
+
+t=-43  (.05)                         Nirv    BlueMtn       10eddy
+one box timings:  256 on 32 cpus             > 15min       
+                  256 on 64 cpus     9.11m    8.32        
+                  256 on 128 cpus    7.65m    4.11m       
+                  250 on 125 cpus    7.65m    3.98m       
+
+                  400 on 5x1x25              27.03m
+                  400 on 1x100               32.09m
+
+
+
+t=-5  (5 time step)                     Nirv Bmtn   Q       8K timesteps
+                  512^3 on 32 cpus:                 12.43    13.8d
+                  512^3 on 64 cpus:                  5.07    5.6
+                  512^3 on 128:                      2.54    2.8
+                  512^3 on 256:                      1.22    1.4
+                  500^3 on 500:                      0.94    1.0
+                                                    
+                  500^3 on 125 cpus:         4.30             4.7d
+                  512^3 on  64 cpus:         9.66             10.7
+                  512^3 on  32 cpus:        25.0              27
+
+                                                            16K timesteps
+                 1000^3 on 500 cpus:                 5.64    13d
+                 1024^3 on 256 cpus:                  ?
+
+
+ 
+t=-20 (20 time steps)                   Nirv Bmtn  Q        4K timesteps
+                  256^3 on 32 cpus:                5.72m    19h
+                  256^3 on 16 cpus:               10.52m    
+                  256^3 on  8 cpus:               18.97m  
+
+
+                  256^3 on 128 cpus:     6.89  3.97(how many timesteps???)
+                                            check bluemountain output files
+
+
+**********************************************************************************
+LOW RES benchmarks, 6/2002
+cvs tag:  'bench602'
+
+./bench.sh 96 0 5
+5 timesteps
+using benchmark/step.inp.sed
+
+                      1cpu    2cpu    4cpu
+milkyway             
+autrey
+
+
+
+
+
+
+
+
+
+**********************************************************************************
+
+
+
+
+
+
+
+
+**********************************************************************************
+LOW RES benchmarks.  around 11/2001?
+Spectral Model 1 CPU timings.
+1 CPU  96^3  120M  
+*****************************************************************
+./bench.sh 96 0 5
+run 5 timesteps.  CFL=1.5/.25, no structure functions
+
+darkstar (linux 1Ghz)
+PGF90, FFT99, auto       2.90  2.90    
+PGF90, FFT99, params     2.86  2.87
+
+
+PGF90,FFT99, auto            1.16  1.15
+IFC,FFT99, auto              1.07  1.07
+IFC,FFT99, params            1.05  1.07
+LF90,FFT99, auto             1.28  1.27
+
+autrey (linux 1.? Ghz ) 
+PGF90,STK2+PGCC, auto        1.41  1.40
+
+PGF90,STK2+GCC, auto         1.53  1.53
+IFC,STK2+GCC, auto           1.45  1.45
+LF90,STK2+GCC, auto          2.01  2.01
+
+
+Nirvana SGIFFT                2.92  2.92  2.93  2.94
+Nirvana FFT99                 2.97  2.97  2.97
+Nirvana STK                
+
+Truchas (Compaq ES40)
+FFT99,params                 1.03   1.03
+CPQ,params                   1.00   1.00
+
+STK2,auto                    1.07   1.07
+FFT99,auto                   1.03   1.03
+CPQ,auto                     0.99   0.99
+
+
+
+
+*****************************************************************
+
+

@@ -3,23 +3,24 @@
 cd ../src
 set refin=benchmark1.inp
 
-if ($#argv == 0 ) then
-   echo "./bench.sh [96,512]"
+if ($#argv != 3) then
+   echo " run a NxNxN simulation on 'ncpus' for ndelt timesteps "
+   echo "./bench.sh N ncpus  ndelt"
+   echo "(to run without mpi, use N=0)"
    exit
 endif
 
-if ($1 == 96) then
-   ./gridsetup.py 1 1 1 96 96 96
-   make dns
-   cd ../benchmark
-   ../src/dns < benchmark96.inp
+
+set ncpus = $2
+set command = ../src/dns
+if ($ncpus > 0) then
+   set command = "mpirun -np $ncpus ../src/dns"
 endif
 
-if ($1 == 512) then
-   ./gridsetup.py 1 1 1 512 512 2
-   make dns
-   cd ../benchmark
-   ../src/dns < benchmark512.inp
-endif
 
+./gridsetup.py 1 1 $ncpus $1 $1 $1  2 2 0
+make dns
+cd ../benchmark
+sed s/NDELT/$3/ step.inp.sed > benchmark.inp
+$command < benchmark.inp
 
