@@ -62,10 +62,10 @@ make >& /dev/null ;  rm -f $tmp ; ./dns < $refrestart > $tmp
 endif
 
 if ($1 == p) then
-#set in = $refrestart
-#echo USING RESTART
-set in = $refin
-echo NOT USING RESTART
+set in = $refrestart
+echo USING RESTART
+#set in = $refin
+#echo NOT USING RESTART
 
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
 make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $in > $tmp 

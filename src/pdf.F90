@@ -437,7 +437,7 @@ do k=1,n3
                do n=1,3
                   nsf=n+3
                   if (n==ncomp) then
-                     del=delv(n)*(delv(1)**2+delv(2)**2+delv(3)**2)
+                     del=delv(ncomp)*(delv(1)**2+delv(2)**2+delv(3)**2)
                   else
                      del=delv(ncomp)*delv(n)**2
                   endif

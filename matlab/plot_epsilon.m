@@ -4,7 +4,7 @@ function  plot_epsilon(fid,time)
   %
   % read in number of plain pdf's
   [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
-  figure(3)
+  figure(4)
   p=3;
   str=sum(pdf.*bins.^p);
   mx=max(bins - bins.*(pdf==0));

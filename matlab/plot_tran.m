@@ -14,7 +14,7 @@ for j=1:3
     p=1;
     % structure function to the p'th power
     str=sum(pdf(:,dp).*bins.^p);
-    
+
     mx=max(bins - bins.*(pdf(:,dp)==0));
     mn=min(bins - bins.*(pdf(:,dp)==0)); % min over non zero values
     bar(bins,pdf(:,dp))
@@ -23,7 +23,6 @@ for j=1:3
     
 
     text=['\Delta',sprintf('_{%i%s}',delta(dp),var(i))]; 
-    %text=[text,sprintf('%s (',components(j)),text,'U^2 + ',text,'V^2 + ',text,'W^2)'];
     text=[text,sprintf('%s   ||',components(j)),text,'U||^2'];
     text=['[   ',text,'   ]^{.33}'];
     ylabel(text);
