@@ -10,8 +10,7 @@ int main(int argc, char **argv) {
   char subname[240];
   char c='A';
   int i,j,k,ioff,joff,koff;
-  long nbig,ncube,size,size_avg;
-
+  long ncube,nbig,navg,size,size_avg;
   int ws=sizeof(buf[0]);
 
   if (argc != 4) {
@@ -21,22 +20,24 @@ int main(int argc, char **argv) {
   fname=argv[1];
   fid=fopen(fname,"r");
 
-
+  printf("using real*%i\n",ws);
+ 
   /* 256^3 blocks: */
   nbig=atoi(argv[2]);
-  ncube=atoi(argv[3]);
+  navg=atoi(argv[3]);
   printf("input file: %s\n ",fname);
-  printf("original size: %i  subcube size: %i \n",nbig,ncube); 
+  printf("original size: %i  subcube size: %i \n",nbig,navg); 
 
-  size=ncube;
+  size=navg;
   size=size*size*size;    
   buf=(double *)malloc(size*ws);
   if (buf==NULL) {
     printf("Error: couldn't malloc subcube \n");
     exit(1);
   }
-
-  size_avg=nbig/ncube;
+ 
+  ncube=nbig/navg;
+  size_avg=nbig/navg;
   size_avg=size_avg*size_avg*size_avg;
   buf_avg=(double *)malloc(size_avg*ws);
   if (buf_avg==NULL) {
@@ -45,16 +46,16 @@ int main(int argc, char **argv) {
   }
 
 
-  for (ioff=0; ioff <= nbig-ncube;  ioff+=ncube ) {
-    for (joff=0; joff <= nbig-ncube;  joff+=ncube ) {
-      for (koff=0; koff <= nbig-ncube;  koff+=ncube ) {
+  for (ioff=0; ioff <= nbig-navg;  ioff+=navg ) {
+    for (joff=0; joff <= nbig-navg;  joff+=navg ) {
+      for (koff=0; koff <= nbig-navg;  koff+=navg ) {
 	k=0;
-	for (i=0; i<ncube; ++i) {
-	  for (j=0; j<ncube; ++j) {
+	for (i=0; i<navg; ++i) {
+	  for (j=0; j<navg; ++j) {
 	    long pos_big=nbig*(nbig*(i+ioff) + j +joff) + k+koff;
-	    long pos_small=ncube*(ncube*i + j) + k;
+	    long pos_small=navg*(navg*i + j) + k;
 	    fseek(fid,ws*pos_big,SEEK_SET);
-	    if (ncube!=fread(&buf[pos_small],ws,ncube,fid)) {
+	    if (navg!=fread(&buf[pos_small],ws,navg,fid)) {
 	      printf("Error on read \n"); exit(1);
 	    }
 	  }
@@ -69,10 +70,11 @@ int main(int argc, char **argv) {
 	}
 
         sum=sum/size;
-        { long pos_small=ncube*ioff + joff + koff/ncube;
-        buf_avg[pos_small]=sum;
+        {  /* index:  ioff/navg, joff/navg, koff/navg.  size: ncube  */
+            long pos_small=ncube*(ncube*ioff/navg + joff/navg) + koff/navg;
+            buf_avg[pos_small]=sum;
         }
-        printf("averaged subcube: %i %i %i  mn=%f  mx=%f\n",ioff/ncube,joff/ncube,koff/ncube,mn,mx);
+        printf("averaged subcube: %i %i %i  mn=%f  mx=%f\n",ioff/navg,joff/navg,koff/navg,mn,mx);
       }
     }
   }

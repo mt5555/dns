@@ -757,7 +757,7 @@ character(len=*) :: basename
 !local
 character(len=80) message
 character(len=80) fname
-character(len=80) base,ext
+character(len=80) base,ext,ext2
 integer :: n
 real*8 :: time
 
@@ -767,8 +767,9 @@ write(message,'(f10.4)') 10000.0000 + time
 
 do n=np1,np2
    write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
+   write(ext2,'(i3)') 100+passive_type(n)
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
-        // message(2:10) // '.s' // ext(2:len_trim(ext))
+        // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:len_trim(ext))
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,0,io_pe)
 enddo
 
@@ -795,18 +796,21 @@ character(len=*) :: basename
 !local
 character(len=80) message
 character(len=80) fname
-character(len=80) base,ext
+character(len=80) base,ext,ext2
 integer :: n
 real*8 :: time,mn,mx
 
 if (npassive==0) return
 
-
+!     <-time--> <t>  <-sch->
+! name0000.0000.t00.s000.000
+!
 do n=np1,np2
    write(message,'(f10.4)') 10000.0000 + time
    write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
+   write(ext2,'(i3)') 100+passive_type(n)
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
-        // message(2:10) // '.s' // ext(2:len_trim(ext))
+        // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
    call print_message(fname)	
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
 
