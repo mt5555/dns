@@ -276,7 +276,7 @@ do i=1,3
    spectrum=spectrum+.5*spectrum1
 enddo
 write(message,'(a,f10.4)') " KE spectrum",time
-call plotASCII(spectrum,iwave,message)
+call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_x,g_nx/2,message)
 !call plotASCII(spec_y,g_ny/2,message)
 !call plotASCII(spec_z,g_nz/2,message)
@@ -337,10 +337,12 @@ if (my_pe==io_pe) then
       write(message,'(a,i5)') "diag_output(): Error opening .scalars file errno=",ierr
       call abort(message)
    endif
-   x=nv; call cwrite8(fid,x,1)
-   x=nscalars; call cwrite8(fid,x,1)
-   call cwrite8(fid,ints_save,nv*nscalars);
-   call cwrite8(fid,maxs_save,nv*nscalars);
+   if (nscalars>0) then
+      x=nv; call cwrite8(fid,x,1)
+      x=nscalars; call cwrite8(fid,x,1)
+      call cwrite8(fid,ints_save,nv*nscalars);
+      call cwrite8(fid,maxs_save,nv*nscalars);
+   endif
    call cclose(fid)
 endif
 
