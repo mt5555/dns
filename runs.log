@@ -16,10 +16,11 @@ make dnsvor
 
 vx2048a   mu=6e-8  (formula above gives: mu=6.87e-8)
 
-vx2048b   same as vx2048a, restarting from time 50 with different
+vx2048a   restarting at t=50 with different
           ellipse search routine.
           check out: vx2048a0050.0000.[ellipse,tracer]
 
+vx2048b   mu=10e-8   IN
 
 
 

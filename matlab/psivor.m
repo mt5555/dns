@@ -7,15 +7,15 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
-range=0:.25:15.00;
+range=50:10:150.00;
 %range=29:1.0:1000.0;
 %range=[.00];
 %name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
-name='../src/temp';
-
+%name='../src/temp';
+name='/data/vxpair/vx2048a';
 
 usefig=1;
-mkpr=0;            % make ps and jpeg files
+mkpr=1;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
 

@@ -8,12 +8,12 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 %range=0:.05:1.00;
-range=0:.25:10.0;
+range=50:5.0:100.0;
 %range=[.00];
 name='../src/impulse/kh24';
 %name='../src/kh/khK';
-%name='../src/kh/khQ';  %nopq
-name='../src/temp';
+name='/data/vxpair/vx2048a';
+%name='../src/temp';
 
 mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
@@ -31,7 +31,7 @@ for i=range
   ts = sprintf('%9.5f',10000+ts);
   ts=ts(2:10);
 
-  ts=[name,ts,'.u']
+  ts=[name,ts,'.vor']
   fidvor=fopen(ts,'r');
   time=fread(fidvor,1,'float64')
   data=fread(fidvor,3,'float64');
@@ -59,7 +59,7 @@ for i=range
   ts=sprintf('%s    time=%.2f  max=%f',shortname,time,qmax)
 
   
-  if (nz>=4 & 0) 
+  if (nz>=4 ) 
     %
     %  3D field, plot 4 sections in a 2x2 subplot window
     %
@@ -105,16 +105,16 @@ for i=range
       if (qmax>15) 
         v=-60:5:60;
       else
-        v=20;  % use 10 contours
+        v=10;  % use 10 contours
       end  
       contour(x,y,vor',v)
       hold on
-      contour(x,y,vor',[0 0],'k')
+      %contour(x,y,vor',[0 0],'k')
       hold off
     end
     
     title(ts);
-    axis square
+    axis equal
   end
   
   if (kplot==1)
