@@ -484,7 +484,7 @@ do n=1,3
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      uxx2(n)=uxx2(n)+work2(i,j,k)*2
+      uxx2(n)=uxx2(n)+work2(i,j,k)**2
    enddo
    enddo
    enddo   
@@ -611,8 +611,6 @@ scalars(21:23)=vor4
 scalars(24)=S4sum
 scalars(25)=S2w2
 scalars(26:28)=uxx2
-
-print *,'uxx2: ',uxx2
 
 #ifdef USE_MPI
    scalars2=scalars
