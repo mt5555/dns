@@ -8,6 +8,7 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 range=0:50;
+%range = 1
 
 for i=range
   ts=i;
@@ -37,7 +38,6 @@ for i=range
   title(ts);
   shading interp
   axis square
-  pause  
 end
 return
 

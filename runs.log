@@ -3,7 +3,8 @@
 
 mu = .0002/8 = 2.5e-5
 CFL = 1.5
-time=5
+run to time=3.  Looks good.  
+
 
 
 
@@ -15,6 +16,8 @@ time=5
 
 128x128 can handle mu=.0002 to t=1.  What happens if we run longer?
 
+4th order:
+
 CFL=2.0   t=4 noisy, but just two large blobs
 CFL=1.9   t=4 looks good, t=10 is noisy
 CFL=1.8   t=10 ok, t=20 noisy
@@ -24,6 +27,19 @@ CFL=1.6   t=4 ok, t=10 ok, t=30 ok, t=50 ok
 CFL=1.5   t=4 ok, t=10 ok, t=30 ok, t=50 ok
 CFL=1.0   t=4 looks good, t=10 looks good.  two large blobs
 
+
+3rd order:
+
+CFL=1.5   t=1 looks bad.
+CFL=1.25  goes bad around t=22
+CFL=1.20  t=50 looks good.  
+CFL=1.125 t=50 looks good.n
+CFL=1.0   t=50 looks good.
+
+4th order cost: 4/1.6 = 2.5            
+3rd order cost: 3/1.20 = 2.5
+
+So for this problem, might as well use rk4.
 
 
 
