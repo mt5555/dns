@@ -425,7 +425,11 @@ if (mu_hyper>=4) then
    ! units of E(k) = m**3/s**2
    ! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
    ! scaling:  E(kmax)/(kmax**2)(4-.75)
-   hyper_scale = ke * (pi2_squared*dealias_sphere_kmax2)**(-(mu_hyper-.75))
+   hyper_scale = sqrt(ke) * (pi2_squared*dealias_sphere_kmax2)**(-(mu_hyper-.75))
+
+   ! du/dt = (sqrt(E(kmax))  [1/ (kmax**8 kmax**alpha) ] k**8  u  
+   ! m/s**2  =  m**1.5/s  kmax**-alpha  m/s
+   !  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
 endif
 
 
