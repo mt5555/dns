@@ -6,16 +6,18 @@
 %ts=input('time=? ');
 
 range=0:5:200.0 ;
+range=60;
 %name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
-%name='/ccs/taylorm/dns/src/vxpair/vx4096d';
+name='/ccs/taylorm/dns/src/vxpair/vx4096d';
 %name='/scratch2/taylorm/vx12288b/vx12288b';
-name='/home/scratch/vxpair/vx12288/vx12288b';
+%name='/home/scratch/vxpair/vx12288/vx12288b';
 
 usefig=1;
 mkpr=1;            % make ps and jpeg files
+mkascii=0;         % output ascii point data
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
@@ -63,6 +65,15 @@ for i=range
       axis([0,4,0,2]);
       title(sprintf('time = %6.2f ',i)); 
           'pause' ;     pause
+    end
+    
+    % output to ASCI file
+    if (mkascii) 
+      fidout=fopen('ascii.out','w'); 
+      for i=1:nt_ins
+        fprintf(fidout,'%20.12f %20.12f\n',tracer(i,1),tracer(i,2));
+      end
+      fclose(fidout);
     end
   end
 end
