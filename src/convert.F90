@@ -280,27 +280,47 @@ icount=icount+1
       enddo
       call print_message('performing io test')
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-          // message(2:10) // ".iotest"
+           // ".u"
 
       ! stripe, num_cpus, 
+
+      if (ncpu_z<16) then  ! only run these tests when debugging:
       if (ncpu_z>=4) then
+         call iotest(1,2,fname,Q,work1,work2)
+         call iotest(2,2,fname,Q,work1,work2)
          call iotest(4,2,fname,Q,work1,work2)
       endif
       if (ncpu_z>=8) then
+         call iotest(1,4,fname,Q,work1,work2)
+         call iotest(2,4,fname,Q,work1,work2)
          call iotest(4,4,fname,Q,work1,work2)
-         call iotest(8,4,fname,Q,work1,work2)
       endif
+      endif
+
       if (ncpu_z>=16) then
-         call iotest(8,8,fname,Q,work1,work2)
+         call iotest(2,8,fname,Q,work1,work2)
          call iotest(4,8,fname,Q,work1,work2)
-         call iotest(16,8,fname,Q,work1,work2)
+         call iotest(8,8,fname,Q,work1,work2)
       endif
       if (ncpu_z>=32) then
+         call iotest(4,16,fname,Q,work1,work2)
          call iotest(8,16,fname,Q,work1,work2)
          call iotest(16,16,fname,Q,work1,work2)
       endif
       if (ncpu_z>=64) then
+         call iotest(8,32,fname,Q,work1,work2)
          call iotest(16,32,fname,Q,work1,work2)
+         call iotest(32,32,fname,Q,work1,work2)
+      endif
+      if (ncpu_z>=128) then
+         call iotest(16,64,fname,Q,work1,work2)
+         call iotest(32,64,fname,Q,work1,work2)
+         call iotest(64,64,fname,Q,work1,work2)
+      endif
+      if (ncpu_z>=256) then
+         call iotest(16,128,fname,Q,work1,work2)
+         call iotest(32,128,fname,Q,work1,work2)
+         call iotest(64,128,fname,Q,work1,work2)
       endif
 
 
@@ -335,15 +355,17 @@ real*8 :: p(nx,ny,nz)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 character(len=*) :: fname
-integer :: num_io_cpu,stripe
-real*8 :: tmx1,tmx2    
+integer :: num_io_cpu,stripe,ierr
+real*8 :: tmx1,tmx2,time=1111.1111    
 
 mpi_maxio=num_io_cpu
 write(mpi_stripe,'(i3)') stripe
 call mpi_io_init(0)
 
+call mpi_barrier(comm_3d,ierr)
 call wallclock(tmx1)
-call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+call singlefile_io3(time,p,fname,work1,work2,0,io_pe,.false.,2)
+call mpi_barrier(comm_3d,ierr)
 call wallclock(tmx2)
 tmx2=tmx2-tmx1
 

@@ -43,7 +43,7 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
       echo 'saving uvw'
       psi save -d dns/$name $name*00.h5 $name*00.u  $name*00.v   $name*00.w
       psi save -d dns/$name $name*00.vor $name*00.psi
-      psi save -d dns/$name $name*00.s[0-9][0-9]
+      psi save -d dns/$name $name*00.t??.s???.???
    endif
 else
    echo 'saving .' $ext ' files'
