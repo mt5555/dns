@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:1.19];
+times=[1.0100:.01:1.19];
 
 
 if (readdata)
@@ -119,6 +119,11 @@ i=i+3;
 end
 end
 
+n0x_t=(n0x(1,1,:)+n0x(2,2,:)+n0x(3,3,:))/3;
+n0x_l=(n0x(1,2,:)+n0x(1,3,:)+n0x(2,1,:)+n0x(2,3,:)+n0x(3,1,:)+n0x(3,2,:))/6;
+n0x_t=squeeze(n0x_t);
+n0x_l=squeeze(n0x_l);
+
 %
 % isotropic relations (may not exactly agree with data from scalars.m)
 %
@@ -161,7 +166,7 @@ disp(sprintf('schmidt = %f',schmidt(1) ))
 disp(sprintf('s2 = %f',c2(1) ))
 disp(sprintf('epsilon_c = %f',epsilon_c(1) ))
 disp(sprintf('lambda_c = %f',lambda_c(1) ))
-disp(sprintf('1/N0 = %f %f %f',1./n0(:,1) ))
+disp(sprintf('1/2*pi*N0 = %f %f %f',1./(2*pi*n0(:,1)) ))
 
 
 
@@ -258,8 +263,8 @@ print('-djpeg','-r90',pname);
 %
 figure(2); clf;
 subplot(4,2,1)
-plot(time_e,2*pi./n0)
-title('2 \pi / N0')
+plot(time_e,1./(2*pi*n0))
+title('1 / 2 \pi N0')
 
 subplot(4,2,2)
 plot(time_e,lambda_c)
@@ -274,14 +279,17 @@ subplot(4,2,4)
 plot(time_e,eta_c)
 title('\eta_c')
 
+%subplot(4,2,5)
+%plot(time_e,lambda)
+%title('\lambda')
 subplot(4,2,5)
-plot(time_e,lambda)
-title('\lambda')
+plot(time_e,1./(2*pi*n0x_l),time_e,1./(2*pi*n0x_t))
+title('1/2 \pi N0_{\nabla}_c  long & trans')
 
 
 subplot(4,2,6)
 plot(time_e,lambda_x_c)
-title('\lambda_{\nabla c}')
+title('\lambda_{\nabla}_c')
 
 
 subplot(4,2,7)
