@@ -4,7 +4,7 @@ iso12        ! init cond
 iso12        ! forcing
 2            ! struct_x
 2            ! struct_y
-10           ! struct_z
+0            ! struct_z
 kediff       ! viscosity type  (ke diffusion on smallest scale )
 200.0        ! viscosity coefficient.  
 0.0            ! alpha (for NS-alpha model)
@@ -12,7 +12,7 @@ fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-.05          ! final time
+-43          ! final time
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
