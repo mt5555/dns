@@ -102,12 +102,6 @@ if (io_pe==my_pe) then
    call cwrite8(fid,time,1)
 
    do nell=1,nelld
-!      do np=1,npd
-!         xell(np)=center(1)+Rad(np,nell)*cosc(np)
-!         yell(np)=center(2)+Rad(np,nell)*sinc(np)
-!      enddo
-!      call cwrite8(fid,xell,npd)
-!      call cwrite8(fid,yell,npd)
       call cwrite8(fid,ccord(1,nell),2)
       call cwrite8(fid,Rad2(1,nell),npd)
    enddo
@@ -463,33 +457,47 @@ y = yell + r*snc
 
 ! interpolate to w(x,y):
 
-! find cpu which owns the grid point x,y
-if (xcord(intx1)<=x .and. x<xcord(intx2)+delx .and. &
-     ycord(inty1)<=y .and. y<ycord(inty2)+dely ) then
+! find position in global grid:
+igrid = 1 + floor( (x-g_xcord(1))/delx )
+jgrid = 1 + floor( (y-g_ycord(1))/dely )
 
-      ! find igrid,jgrid so that point is in box:
-      ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
-      igrid = intx1 + floor( (x-xcord(intx1))/delx )
-      jgrid = inty1 + floor( (y-ycord(inty1))/dely )
-      ASSERT("ellipse(): igrid interp error",igrid<=intx2)
-      ASSERT("ellipse(): jgrid interp error",jgrid<=inty2)
+if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
+      ! compute a new point in the center of the above cell:
+      ! (do this to avoid problems with 2 cpus both claiming a point
+      ! on the boundary of a cell)
+      xc=.5*(g_xcord(igrid)+g_xcord(igrid+1))
+      yc=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
 
-      ! interpolate trhs
-      do jj=1,4
-         ! interpolate xcord(igrid-1:igrid+2) to xcord=tracer(i,1)
-         ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
-         xc = 1 + (x-xcord(igrid))/delx
-         jc = jgrid-2+jj
-         call interp4(w(igrid-1,jc),w(igrid,jc),&
-              w(igrid+1,jc),w(igrid+2,jc),&
-              xc,Qint(jj))
-      enddo
-      ! interpolate ycord(jgrid-1:jgrid+2) to ycord=tracer(i,2)
-      ! data:  Qint(1:4,j)
-      yc = 1 + (y-ycord(jgrid))/dely
-      call interp4(Qint(1),Qint(2),Qint(3),Qint(4),yc,winterp)
+      ! find cpu which owns the cell centered at xc,yc
+      if (xcord(intx1)<=xc .and. xc<xcord(intx2)+delx .and. &
+           ycord(inty1)<=yc .and. yc<ycord(inty2)+dely ) then
+
+         ! find igrid,jgrid so that point is in box:
+         ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
+         igrid = intx1 + floor( (xc-xcord(intx1))/delx )
+         jgrid = inty1 + floor( (yc-ycord(inty1))/dely )
+         ASSERT("ellipse(): igrid interp error",igrid<=intx2)
+         ASSERT("ellipse(): jgrid interp error",jgrid<=inty2)
+         
+         ! interpolate trhs
+         do jj=1,4
+            ! interpolate xcord(igrid-1:igrid+2) to xcord=tracer(i,1)
+            ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
+            xc = 1 + (x-xcord(igrid))/delx
+            jc = jgrid-2+jj
+            call interp4(w(igrid-1,jc),w(igrid,jc),&
+                 w(igrid+1,jc),w(igrid+2,jc),&
+                 xc,Qint(jj))
+         enddo
+         ! interpolate ycord(jgrid-1:jgrid+2) to ycord=tracer(i,2)
+         ! data:  Qint(1:4,j)
+         yc = 1 + (y-ycord(jgrid))/dely
+         call interp4(Qint(1),Qint(2),Qint(3),Qint(4),yc,winterp)
+      else
+         winterp=-9d20
+      endif
 else
-   winterp=-9d20
+   call abort("interp4w: ellipse iteration point outside of domain")
 endif
 
 
