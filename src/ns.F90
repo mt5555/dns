@@ -93,8 +93,8 @@ do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3.0
-      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2.0
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2
    enddo
    enddo
    enddo
@@ -104,14 +104,14 @@ do n=1,3
 enddo
 
 ! stage 3
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2)
 
 
 do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3.0
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
       Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)
    enddo
    enddo
@@ -127,7 +127,7 @@ do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6
    enddo
    enddo
    enddo
@@ -596,7 +596,7 @@ real*8 :: D(3,3),dummy,xfac
 
 ! tophat filter code:
 integer :: i2,j2,k2,i1,j1,k1,ii,jj,kk
-real*8  :: wtot,w
+real*8  :: wtot,w,r
 
 
 div=0
@@ -631,7 +631,9 @@ enddo
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! apply Helmolz to div(tau), accumulate into RHS
+! Apply Helmholtz inverse to div(tau), accumulate into RHS.
+!
+! RHS  = RHS + Helmholtz_Inverse(DIV)   (variable DIV contains: -div(tau)  )
 ! also return a_diss, the KE dissapation from div(tau) term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #define TOPHAT
@@ -639,44 +641,49 @@ enddo
 #ifdef TOPHAT
 
 ! tophat filter:
-ifilt = nint(.5*alpha_value/min(delx,dely,delz))
+ifilt = nint(.5*(sqrt(24.0)*alpha_value)/min(delx,dely,delz))
+!           ^^^^ take an extra factor of 2?
+!
+ifilt=2*ifilt
 
+print *,'tophat ifilt=',ifilt
+
+
+gradu=0
 do n=1,3
-work=0
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
 
-         w=1
-         wtot=w
-         work(i,j,k)=w*div(i,j,k,n)
 
-
+         wtot=0
          do jj=j-ifilt,j+ifilt
+         do ii=i-ifilt,i+ifilt
             j1=jj
             if (j1<ny1) j1=j1+nslaby
             if (j1>ny2) j1=j1-nslaby
-            if (j1/=j) then
-               work(i,j,k)=work(i,j,k)+w*div(i,j1,k,n)
-               wtot=wtot+w
-            endif
-         enddo
 
-         do ii=i-ifilt,i+ifilt
             i1=ii
             if (i1<nx1) i1=i1+nslabx
             if (i1>nx2) i1=i1-nslabx
-            if (i1/=i) then
-               work(i,j,k)=work(i,j,k)+w*div(i1,j,k,n)
-               wtot=wtot+w
-            endif
+
+            !r = sqrt(real( (jj-j)**2 +  (ii-i)**2 ))/ifilt
+            !w = exp(-2 * r**2)
+            w=1
+
+            wtot=wtot+w
+            gradu(i,j,k,n)=gradu(i,j,k,n)+w*div(i1,j1,k,n)
+
          enddo
-         work(i,j,k)=work(i,j,k)/wtot
+         enddo
+         gradu(i,j,k,n)=gradu(i,j,k,n)/wtot
 
       enddo
    enddo
 enddo
-call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
+enddo
+do n=1,3
+   call z_fft3d_trashinput(gradu(1,1,1,n),divs(1,1,1,n),p) 
 enddo
 
 
@@ -706,9 +713,9 @@ rhs=rhs+divs
 
 #else
 
-
+gradu=div
 do n=1,3
-   call z_fft3d_trashinput(div(1,1,1,n),divs(1,1,1,n),work) 
+   call z_fft3d_trashinput(gradu(1,1,1,n),divs(1,1,1,n),work) 
 enddo
 call helminv(rhs,divs,Qhat,a_diss)
 
@@ -735,45 +742,6 @@ end subroutine
 
 
 
-
-subroutine tophat(ifilt,pin,pout,n1,n1d,n2,n2d,n3,n3d)
-implicit none
-integer :: ifilt,n1,n1d,n2,n2d,n3,n3d
-real*8 :: pin(n1d,n2d,n3d)
-real*8 :: pout(n1d,n2d,n3d)
-
-!local
-integer i,i2,iuse,j,k
-real*8 :: sm,w,wtot
-do k=1,n3
-do j=1,n2
-do i=1,n1
-   sm=0
-   wtot=0
-   do i2=i-ifilt,i+ifilt
-      iuse=i2
-      if (i2<1) iuse=iuse+n1
-      if (i2>n1) iuse=iuse-n1
-      w=1                             ! tophat filter
-      w=1.0-abs(i2-i)/real(ifilt+1)     ! spike filter  
-
-#if 1
-      if (i==i2) then
-         w=1
-      else
-         ! w=.50 looks bad
-         ! w=.75 looks bad
-      endif
-#endif
-      
-      wtot=wtot+w
-      sm=sm+w*pin(iuse,j,k)
-   enddo
-   pout(i,j,k)=sm/wtot
-enddo
-enddo
-enddo
-end subroutine
 
 
 

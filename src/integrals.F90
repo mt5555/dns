@@ -103,7 +103,7 @@ do i=nx1,nx2
     rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
     iwave = nint(sqrt(rwave))
 
-    energy = 8.0
+    energy = 8
     if (kmcord(k)==0) energy=energy/2
     if (jmcord(j)==0) energy=energy/2
     if (imcord(i)==0) energy=energy/2

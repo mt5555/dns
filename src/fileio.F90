@@ -19,11 +19,13 @@ real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,lambda
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
-real*8 :: t0,t1,t2,ke0,ke1,ea0,ea1,eta,ett
+real*8 :: t0,t1=0,t2=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8 :: delea_tot=0,delke_tot=0
 
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
+
+
 
 call wallclock(tmx1)
 time_target=time_final
@@ -132,52 +134,55 @@ if (doit_screen) then
            '   max(vor)',maxs(5)
    call print_message(message)	
 
-   ! 
-   ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
-   ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
-   !       < u    u  > = (1/3)  || u ||^2
-   !
-   lambda=sqrt(  5*(2*ints(6))/ints(2)  )
-   write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6))/mu, &
-        '  R=',1/mu
-   call print_message(message)	
-
 
    !
    ! KE total dissapation 
    ! t0,t1,t2  three time levels
    !
-   ke1=ints_save(6,nscalars)
-   ea1 = ints_save(6,nscalars) + .5*alpha_value**2 * ints_save(2,nscalars)
-   t2=maxs_save(6,nscalars)         ! current time level
+   ke0=ke1
+   ke1=ints(6)
+   ea0=ea1
+   ea1 = ints(6) + .5*alpha_value**2 * ints(2)
 
-   if (nscalars>2) then
-      t0=maxs_save(6,nscalars-2)       ! previous previous time level 
-      t1=maxs_save(6,nscalars-1)       ! previous time level (most quantities known at this time
-      ke0=ints_save(6,nscalars-1)
-      ea0 = ints_save(6,nscalars-1) + .5*alpha_value**2 * ints_save(2,nscalars-1)
-   else
-      t0=0
-      t1=0
-   endif
+   t0=t1                       ! previous previous time level 
+   t1=t2                       ! previous time level  (most quantities known at this time
+   t2=maxs(6)                  ! current time level
+
    if (t1-t0>0) then
       delke_tot=(ke1-ke0)/(t1-t0)
       delea_tot=(ea1-ea0)/(t1-t0)
    endif
 
-   ! K. microscale
-   ! eta = (mu^3/epsilon)^.25
-   ! epsilon = delke_tot
-   eta = (mu**3 / (mu*ints(2)))**.25
-   write(message,'(a,3f13.4)') 'mesh spacing(eta): ',&
-        delx/eta,dely/eta,delz/eta
-   call print_message(message)	
-   
-   !eddy turn over time
+
+
    ! 
-   ett=2*ke1/(mu*ints(2))
-   write(message,'(a,3f13.4)') 'eddy turnover time: ',ett
-   call print_message(message)	
+   ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
+   ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
+   !       < u    u  > = (1/3)  || u ||^2
+   !
+   if (mu>0) then
+      lambda=sqrt(  5*(2*ints(6))/ints(2)  )
+      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6))/mu, &
+           '  R=',1/mu
+      call print_message(message)	
+      
+      
+      ! K. microscale
+      ! eta = (mu^3/epsilon)^.25
+      ! epsilon = delke_tot
+      eta = (mu**3 / (mu*ints(2)))**.25
+      write(message,'(a,3f13.4)') 'mesh spacing(eta): ',&
+           delx/eta,dely/eta,delz/eta
+      call print_message(message)	
+      
+      !eddy turn over time
+      ! 
+      ett=2*ke1/(mu*ints(2))
+      write(message,'(a,3f13.4)') 'eddy turnover time: ',ett
+      call print_message(message)	
+   endif
+   
+
 
    write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'Ea: ',&
         ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
