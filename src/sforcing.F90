@@ -299,8 +299,9 @@ real*8 ener(numb_max),temp(numb_max),Qdel(3)
 real*8,allocatable,save :: rmodes(:,:,:,:)
 real*8,allocatable,save :: rmodes2(:,:,:,:)
 real*8,allocatable,save :: cmodes(:,:,:,:,:)
-real*8 RR(3),II(3)
-
+real*8 RR(3),II(3), IIp(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
+real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotIIp, mod_IIxk
+real*8 tta, tta_sgn, theta, h_angle, phi 
 character(len=80) :: message
 
 
@@ -430,23 +431,61 @@ do n=1,3
       cmodes(1,-numb,-numb,-numb,n),numb)
 enddo
 
-
-! apply helicity fix:
+      
+!     apply helicity fix:
 do i=-numb,numb
 do j=-numb,numb
 do k=-numb,numb
    k2=i**2 + j**2 + k**2
-   if (k2 < (.5+numb)**2 ) then
+      if (k2 < (.5+numb)**2 ) then
       RR = cmodes(1,i,j,k,:)
       II = cmodes(2,i,j,k,:)
-   endif
-enddo
-enddo
-enddo
+      mod_rr = sqrt(RR(1)**2 + RR(2)**2 + RR(3)**2)
+      mod_ii = sqrt(II(1)**2 + II(2)**2 + RR(3)**2)
 
-! convert back:
+!     first rotate II and RR into plane orthogonal to k
+      mod_RRxk = sqrt((RR(2)*k - RR(3)*j)**2 + (RR(1)*k - RR(3)*i)**2 + (RR(1)*j - RR(2)*i)**2)
+      RRxk_hat(1) = (RR(2)*k - RR(3)*j)/mod_RRxk
+      RRxk_hat(2) = -(RR(1)*k - RR(3)*i)/mod_RRxk
+      RRxk_hat(3) = (RR(1)*j - RR(2)*i)/mod_RRxk
+      IIp = mod_ii * RRxk_hat
+
+      mod_IIxk = sqrt((II(2)*k - II(3)*j)**2 + (II(1)*k - II(3)*i)**2 + (II(1)*j - II(2)*i)**2)
+      IIxk_hat(1) = (II(2)*k - II(3)*j)/mod_IIxk
+      IIxk_hat(2) = -(II(1)*k - II(3)*i)/mod_IIxk
+      IIxk_hat(3) = (II(1)*j - II(2)*i)/mod_IIxk
+      RR = mod_rr * IIxk_hat
+
+      RRdotIIp = RR(1)*IIp(1) + RR(2)*IIp(2) + RR(3)*IIp(3)
+      tta = acos(RRdotIIp/(mod_rr * mod_ii))
+
+      RRxIIp(1) = (RR(2)*IIp(3) - RR(3)*IIp(2))
+      RRxIIp(2) = -(RR(1)*IIp(3) - RR(3)*IIp(1))
+      RRxIIp(3) = (RR(1)*IIp(2) - RR(2)*IIp(1))
+      tta_sgn = RRxIIp(1)*i + RRxIIp(2)*j + RRxIIp(3)*k
+
+      if (tta_sgn > 0) then
+         theta = tta
+      elseif (tta_sgn < 0) then
+         theta = 2*pi - tta
+      endif
+      if (h_angle < theta) then 
+         phi = theta - h_angle
+         II = (cos(phi) + sin(phi)) * IIp
+      elseif (h_angle > theta) then
+         phi = h_angle - theta
+         II = (cos(phi) - sin(phi)) * IIp
+      endif
+      cmodes(1,i,j,k,:) = RR	
+      cmodes(2,i,j,k,:) = II	
+      endif	
+      enddo	
+      enddo	
+      enddo	
+      
+!  convert back:
 do n=1,3
-   call complex_to_sincos(rmodes(-numb,-numb,-numb,n),&
+      call complex_to_sincos(rmodes(-numb,-numb,-numb,n),&
       cmodes(1,-numb,-numb,-numb,n),numb)
 enddo
 
@@ -508,17 +547,6 @@ do wn=numb1,numb
 enddo
 end subroutine 
    
-   
-
-
-
-
-
-
-
-
-
-
 
 
 
