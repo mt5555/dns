@@ -111,9 +111,9 @@ allocate(fftdata(index)%trigs(3*n/2+1))
 #endif
 
 #ifdef SGIFFT
-write(message,'(a,i6)') 'Initializing FFT99 of size n=',n
-#else
 write(message,'(a,i6)') 'Initializing SGI FFT of size n=',n
+#else
+write(message,'(a,i6)') 'Initializing FFT99 of size n=',n
 #endif
 call print_message(message)
 

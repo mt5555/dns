@@ -27,7 +27,8 @@ endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
-   LDFLAGS =  -l scs -Lstk -lstk
+   #LDFLAGS =  -Lstk -lstk
+   LDFLAGS =  -l scs 
    FFLAGS = -64 -O3 -macro_expand -DUSE_MPI  -DIRIX64  -DSGIFFT
 endif
 
@@ -70,10 +71,10 @@ dep:
 
 -include .depends
 
-#fft_interface.o:  fft99_interface.o
-#	cp -f fft99_interface.o fft_interface.o
-fft_interface.o:  fft_james_interface.o
-	cp -f fft_james_interface.o fft_interface.o
+fft_interface.o:  fft99_interface.o
+	cp -f fft99_interface.o fft_interface.o
+#fft_interface.o:  fft_james_interface.o
+#	cp -f fft_james_interface.o fft_interface.o
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"
