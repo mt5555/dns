@@ -39,6 +39,7 @@ extrapolated:
 480^3:  15Gb
 512^3:  18Gb             3Gb per vairalbe
 1024^3  144Gb            24Gb per variable
+
 2048^3  1152Gb           192Gb per variable      
 4096^3  9216Gb           1536Gb per variable      
 
