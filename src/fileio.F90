@@ -223,13 +223,14 @@ real*8 :: time
 
 ! local variables
 integer i,j,k,n
-integer :: iwave,iwave_max
+integer :: iwave,iwave_max,ierr
+real*8 spec_x(0:g_nx/2)
+real*8 spec_y(0:g_ny/2)
+real*8 spec_z(0:g_nz/2)
 real*8,allocatable  ::  spectrum(:),spectrum1(:)
+character*80 :: message
+CPOINTER fid
 
-integer,parameter :: numx=20,numy=13
-character :: plot(0:numx,0:numy)
-real*8 cspec(0:numx)
-integer ix,iy
 
 iwave_max=max(g_nx,g_ny,g_nz)
 allocate(spectrum(0:iwave_max))
@@ -239,59 +240,47 @@ spectrum1=0
 
 do i=1,3
    iwave=iwave_max
-   call compute_spectrum(Q(:,:,:,i),spectrum1,iwave,io_pe)
+   call compute_spectrum(Q(:,:,:,i),spectrum1,spec_x,spec_y,spec_z,iwave,io_pe)
    spectrum=spectrum+.5*spectrum1
 enddo
+call plotASCII(spectrum,iwave," KE spectrum")
+!call plotASCII(spec_x,g_nx/2," KE x-spectrum")
+!call plotASCII(spec_y,g_ny/2," KE y-spectrum")
+!call plotASCII(spec_z,g_nz/2," KE z-spectrum")
+
+
 
 
 
 if (my_pe==io_pe) then
-! ASCII plot of KE spectrum
-! number of waves:  1..iwave+1
-! energy range:     1 .. 10e-10  log:  0 .. -10
-!
-cspec=0
-plot=" "
-
-do i=0,iwave
-   if (i==0) then
-      ix=0
-   else
-      ix=1 + ( (numx-1)*log10(real(i))/log10(real(iwave)) )     ! ranges from 1..numx
+   write(message,'(f10.4)') 10000.0000 + time
+!   message = runname(1:len_trim(runname)) // message(2:10) // ".spec"
+   message = runname(1:len_trim(runname)) // ".spec"
+   call copen(message,"a",fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
+      call abort(message)
    endif
-   if (ix<0) ix=0
-   if (ix>numx) ix=numx
-   cspec(ix)=cspec(ix)+spectrum(i)
-enddo
 
-do i=0,numx
-   iy = -(numy/10.0) * log10(1d-200+cspec(i))  ! ranges from 0..numy
-   if (iy<0) iy=0
-   if (iy>numy) iy=numy
-   cspec(i)=iy
-enddo
-
-do i=0,numx
-    j=cspec(i)
-    plot(i,j)="*"
-enddo
-
-print *
-print *,"1E0   |",plot(:,0)," KE spectrum"
-do i=1,numy-1
-   print *,"      |",plot(:,i)
-enddo
-print *,"1E-10 |",plot(:,numy)
-print *,"      +---------------------+"
-print *,"      k=0                 k=",iwave
-
+   call cwrite8(fid,1+iwave,1)
+   call cwrite8(fid,spectrum,1+iwave)
+   call cwrite8(fid,1+g_nx/2,1)
+   call cwrite8(fid,spec_x,1+g_nx/2)
+   call cwrite8(fid,1+g_ny/2,1)
+   call cwrite8(fid,spec_y,1+g_ny/2)
+   call cwrite8(fid,1+g_nz/2,1)
+   call cwrite8(fid,spec_z,1+g_nz/2)
 endif
+
 
 
 deallocate(spectrum)
 deallocate(spectrum1)
 
 end subroutine
+
+
+
 
 
 

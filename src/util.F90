@@ -47,3 +47,73 @@ tmx=real(count,r8kind)/real(count_rate,r8kind)
 
 end subroutine
 
+
+
+
+
+subroutine plotASCII(spectrum,n,title)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! ASCII plot of spectrum(0:n) on a log-log scale
+!
+! Y-axis scale is  10^-10 ... 10^0
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+use params
+implicit none
+integer :: n
+real*8  ::  spectrum(0:n)
+character*(*) :: title
+
+
+! local variables
+integer,parameter :: numx=20,numy=13
+integer i,j
+character :: plot(0:numx,0:numy)
+real*8 cspec(0:numx)
+integer ix,iy
+
+
+if (my_pe==io_pe) then
+cspec=0
+plot=" "
+
+do i=0,n
+   if (i==0) then
+      ix=0
+   else
+      ix=1 + ( (numx-1)*log10(real(i))/log10(real(n)) )     ! ranges from 1..numx
+   endif
+   if (ix<0) ix=0
+   if (ix>numx) ix=numx
+   cspec(ix)=cspec(ix)+spectrum(i)
+enddo
+
+do i=0,numx
+   iy = -(numy/10.0) * log10(1d-200+cspec(i))  ! ranges from 0..numy
+   if (iy<0) iy=0
+   if (iy>numy) iy=numy
+   cspec(i)=iy
+enddo
+
+do i=0,numx
+    j=cspec(i)
+    plot(i,j)="*"
+enddo
+
+print *
+print *,"1E0   |",plot(:,0),title
+do i=1,numy-1
+   print *,"      |",plot(:,i)
+enddo
+print *,"1E-10 |",plot(:,numy)
+print *,"      +---------------------+"
+write (*,'(a,i4)') "      k=0                 k=",n
+
+endif
+end subroutine
+
+
+
+
+
+

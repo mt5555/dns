@@ -51,7 +51,7 @@ end subroutine
 
 
 
-subroutine compute_spectrum(pin,spectrum,iwave_max,pe)
+subroutine compute_spectrum(pin,spectrum,spectrum_x,spectrum_y,spectrum_z,iwave_max,pe)
 use params
 use mpi
 implicit none
@@ -59,6 +59,9 @@ integer :: iwave_max,ierr
 integer :: pe             ! compute spectrum on this processor
 real*8 :: pin(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)
+real*8 :: spectrum_x(0:g_nx/2)
+real*8 :: spectrum_y(0:g_ny/2)
+real*8 :: spectrum_z(0:g_nz/2)
 
 ! local variables
 real*8 :: p(nx,ny,nz)
@@ -66,6 +69,7 @@ real*8 rwave
 integer :: iwave
 real*8 :: spectrum_in(0:iwave_max)
 real*8 :: work(nx,ny,nz)
+real*8 :: energy
 integer i,j,k
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
@@ -84,14 +88,31 @@ do k=nz1,nz2
     rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
     iwave = nint(sqrt(rwave))
     ASSERT("compute spectrum: iwave>iwave_max",iwave<=iwave_max)
-    spectrum(iwave)=spectrum(iwave)+p(i,j,k)**2    
+
+    energy = 8.0 ! *(g_nx*g_ny*g_nz)
+    if (kmcord(k)==0) energy=energy/2
+    if (jmcord(j)==0) energy=energy/2
+    if (imcord(i)==0) energy=energy/2
+  
+    energy=energy*p(i,j,k)**2
+
+    spectrum(iwave)=spectrum(iwave)+energy
+    spectrum_x(abs(imcord(i)))=spectrum_x(abs(imcord(i))) + energy
+    spectrum_y(abs(jmcord(j)))=spectrum_y(abs(jmcord(j))) + energy
+    spectrum_z(abs(kmcord(k)))=spectrum_z(abs(kmcord(k))) + energy
 enddo
 enddo
 enddo
 
 #ifdef USE_MPI
 spectrum_in=spectrum
-call MPI_reduce(spectrum_in,spectrum,iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spectrum_in,spectrum,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spectrum_in=spectrum_x
+call MPI_reduce(spectrum_in,spectrum_x,1+(g_nx/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spectrum_in=spectrum_y
+call MPI_reduce(spectrum_in,spectrum_y,1+(g_ny/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spectrum_in=spectrum_z
+call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
 
 iwave = max(g_nx,g_ny,g_nz)
