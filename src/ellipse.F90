@@ -37,6 +37,7 @@ real*8 :: dft(0:4,nelld)              ! modes of Rad
 integer :: vxline_count        ! number of points on line thru vx center
 real*8  :: vxline_y(g_ny+20)      ! y-cord of 
 real*8  :: vxline_w(g_ny+20)      ! interpolated vorticity
+real*8  :: vxline_w2(g_ny+20)     ! work array for above
 
 real*8 :: contour_eps = 5e-7    ! find contours to within this accuracy
 real*8 :: center_eps  = 1e-5    ! find center to within this accuracy
@@ -162,7 +163,7 @@ real*8 :: w(nx,ny)
 integer :: setmax
 
 !local
-integer :: nell,np
+integer :: nell,np,ierr
 real*8 :: tmx1,tmx2
 real*8  :: yi,xi
 
@@ -213,11 +214,18 @@ print *,'cord diff/h: ',(center_finegrid(1)-center(1))/delx&
 ! y=g_ycord(1):.1:g_ycord(o_ny) 
 xi=center_finegrid(1)
 vxline_count=0
-do yi=g_ycord(1),g_ycord(o_ny),.1
+yi=g_ycord(1)
+do 
+   if (yi>g_ycord(o_ny)) exit
    vxline_count=vxline_count+1
    vxline_y(vxline_count)=yi
    call interp_to_point(vxline_w(vxline_count),w,xi,yi)
+   yi=yi+.1
 enddo
+#ifdef USE_MPI
+   vxline_w2(1:vxline_count)=vxline_w(1:vxline_count)
+   call MPI_allreduce(vxline_w2,vxline_w,vxline_count,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
 
 
 call wallclock(tmx2)
