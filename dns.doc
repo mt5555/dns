@@ -58,6 +58,13 @@ Running the code
 3. the input file
 4. running the code and command line options
 
+5. restart files.
+   To read a restart file on a machine
+   with the opposit endian-ness of the machine which created the file,
+   uncomment the 'call set_byteswap_input(1)' in dns.F90.
+
+
+
 
 
 ****************************************************************************
