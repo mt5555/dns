@@ -31,10 +31,11 @@ sforcing.o: macros.h params.o fft_interface.o mpi.o makefile
 shallow.o: macros.h params.o fft_interface.o sforcing.o transpose.o makefile 
 shallow_diag.o: macros.h params.o makefile 
 solve.o: macros.h params.o ghost.o bc.o mpi.o makefile 
+spectrum.o: macros.h params.o mpi.o makefile 
 splitspec.o: macros.h makefile 
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 
-timecontrol.o: macros.h params.o tracers.o transpose.o makefile 
+timecontrol.o: macros.h params.o tracers.o transpose.o spectrum.o makefile 
 tracers.o: macros.h params.o mpi.o ghost.o makefile 
 transpose.o: macros.h params.o mpi.o makefile 
 turb_diag.o: macros.h params.o structf.o sforcing.o fft_interface.o makefile 

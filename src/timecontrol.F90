@@ -335,7 +335,6 @@ endif
 
 
 if (doit_diag) then
-
    if ( g_bdy_x1==PERIODIC .and. &
         g_bdy_y1==PERIODIC .and. &
         g_bdy_z1==PERIODIC) then
@@ -352,7 +351,6 @@ if (doit_diag) then
 
    ! model specific output:
    call output_model(time,Q,Qhat,q1,q2,q3,work1,work2)
-
 else if (diag_dt==0) then
    ! if diagnostics are turned off, dont save the scalars!
    nscalars=0  

@@ -76,6 +76,7 @@ integer :: operation,accum,decomp
 real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_u(0:max(g_nx,g_ny,g_nz),3)
 real*8 ::  spec_t(0:max(g_nx,g_ny,g_nz),3)
+real*8 :: time
 
 ! local
 real*8 ::  spec_new(0:max(g_nx,g_ny,g_nz))
