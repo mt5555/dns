@@ -41,6 +41,7 @@ real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes
 real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
+real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
 real*8 ::  binvals(1:100)                           !bin values 
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
@@ -574,7 +575,10 @@ if (my_pe==io_pe) then
    call cwrite8(fid,cos_tta_spec,1+iwave)
    call cwrite8(fid,nbin,1)
    write(6,*)costta_pdf(1,:)
-   call cwrite8(fid,costta_pdf(1,:),nbin)
+   do i=1,1_iwave
+      tmp_pdf=costta_pdf(1,:)
+      call cwrite8(fid,tmp_pdf,nbin)
+   enddo
    call cclose(fid,ierr)
    
 endif
