@@ -1,7 +1,7 @@
 function ...
     [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
-    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt] ...
+    SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_ll] ...
      = readisostr(fname)
 
 
@@ -48,6 +48,19 @@ if (nlon==12)
    SP_lll=fread(fid,[ndelta,ndir],'float64');
    SN_lll=fread(fid,[ndelta,ndir],'float64');
    H_ltt=fread(fid,[ndelta,ndir],'float64');
+end
+if (nlon==13) 
+   Dl=zeros([ndelta,ndir,9]);
+   for p=2:10 
+     temp=fread(fid,[ndelta,ndir],'float64');
+     Dl(:,:,p-1)=temp;
+     if (p==2) D_ll=temp; end;
+     if (p==3) D_lll=temp; end;
+   end
+   SP_lll=fread(fid,[ndelta,ndir],'float64');
+   SN_lll=fread(fid,[ndelta,ndir],'float64');
+   H_ltt=fread(fid,[ndelta,ndir],'float64');
+   H_tt=fread(fid,[ndelta,ndir],'float64');
 end
 
 if (ntran==2) 
