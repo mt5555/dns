@@ -28,13 +28,13 @@ void FORTRAN(set_byteswap_input)(int *val) {
 
 void FORTRAN(copen) (char fname[80],char mode[1],FILE **fid,int *err ) {
     int i;
-    char cname[80];     
+    char cname[280];     
     char cmode[2];
     cmode[0]=mode[0];
     cmode[1]=0;
 
-    strncpy(cname,fname,80);
-    for (i=0; i<80; ++i) {
+    strncpy(cname,fname,280);
+    for (i=0; i<280; ++i) {
         if (cname[i]==' ') cname[i]=0;
     }
     
