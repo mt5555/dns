@@ -653,6 +653,9 @@ BlueMtn:
 30x4:      10.31
 
 Benchmarks for 12288x6144:   RES size: 5.7GB
+./gridsetup.py 24 1 1 12288 6144 1 2 2 0 2 2 0
+Shakara  t=.05
+24x1      
 
 ASCI Q    t=.05    t=1 (extrapolated)   t=150
 cpus      

@@ -158,7 +158,7 @@ character(len=*) :: fname
 CPOINTER :: fid
 integer :: ierr,j,numt_in
 real*8 :: x
-character,save :: access="0"
+character,save :: cross_access="0"
 
 if (my_pe==fpe) then
 
@@ -213,27 +213,29 @@ if (my_pe==fpe) then
       call cclose(fid,ierr)
 
       ! now output the crossing times:
-      if (access=="0") then
-         access="w"
-      else
-         access="a"
+      if (ncross>0) then
+         if (cross_access=="0") then
+            access="w"
+         else
+            access="a"
+         endif
+         write(message,'(f10.4)') 10000.0000 + time_initial
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // &
+              message(2:10) // ".cross"
+         call copen(fname,cross_access,fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "tracer_io(): Error cross opening file. Error no=",ierr
+            call print_message(message)
+            call print_message(fname)
+            call abort("")
+         endif
+         x=ncross
+         call cwrite8(fid,x,1)
+         call cwrite8(fid,cross(1,1),ncross)
+         call cwrite8(fid,cross(1,2),ncross)
+         call cclose(fid,ierr)
+         ncross=0
       endif
-      write(message,'(f10.4)') 10000.0000 + time_initial
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // &
-           message(2:10) // ".cross"
-      call copen(fname,access,fid,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "tracer_io(): Error cross opening file. Error no=",ierr
-         call print_message(message)
-         call print_message(fname)
-         call abort("")
-      endif
-      x=ncross
-      call cwrite8(fid,x,1)
-      call cwrite8(fid,cross(1,1),ncross)
-      call cwrite8(fid,cross(1,2),ncross)
-      call cclose(fid,ierr)
-      ncross=0
    endif
 endif
 
