@@ -2,34 +2,51 @@
 #BSUB -o prod.o -e prod.e
 #BSUB -q small
 #XXXX -q large-dq
-#BSUB -J dns
+#BSUB -J iso12
 #BSUB -W 0:720
 #BSUB -n 128 -R "span[ptile=128]"
 
 module list
 
-# number of cpus to use for mpirun:
-set NCPU = 128
-# name of job file to resubmit
-set JOB=prod.job
-
-set name = iso12_256_
+set name = iso12_250_
 #set refin=$HOME/dns/prod/benchmark128.inp
 set refin=$HOME/dns/prod/prod256.inp
 
-# number of times to resubmit:
+# use restart file from PSI?
 set restart = 1
+
+# number of cpus to use for mpirun:
+set NCPU = 128
+# mesh
+set mesh = "1 1 $NCPU 256 256 256"
+
+
+# name of job file to resubmit  (if resubmit = 1)
+set resubmit = 0
+set JOB = prod.job
+# number of times to resubmit:
 set resub = 20
 set resub_file = $SRC/{$name}resub
 
+
+
+
 set HDIR=`pwd`
 set SRC=$HOME/dns/src
+
+# CPQ or BlueMountain?
+set OSTYPE = `uname`
+if ($OSTYPE == IRIX64) then
+   set MPIRUN = mpirun -np $NCPU
+else
+   set MPIRUN = prun -n $NCPU
+endif
 
 
 
 
 cd $SRC
-./gridsetup.py 1 1 $NCPU 256 256 256
+./gridsetup.py $mesh
 make -j 4 dns
     
 if (!(-d /scratch/taylorm)) then
@@ -87,8 +104,7 @@ if ($restart == 1) then
       echo "No restart.w file"
       exit 1
    endif
-   #mpirun -np $NCPU ./dns -r -d . $name < $refin 
-   prun -n $NCPU ./dns -r -d . $name < $refin 
+   $MPIRUN ./dns -r -d . $name < $refin 
 else
    echo 'Initial run.  writing a 0 to ' $resub_file 
    echo '0' > $resub_file
@@ -101,8 +117,7 @@ else
    \rm -f {$name}\*.v
    \rm -f {$name}\*.w
 
-   mpirun -np $NCPU ./dns  -d . $name < $refin
-   prun -n $NCPU ./dns  -d . $name < $refin  
+   $MPIRUN  ./dns  -d . $name < $refin
 endif
 
 
@@ -123,7 +138,7 @@ save {$name}\*.v
 save {$name}\*.w
 EOF
 
-if ($restart == 1) then
+if ($resubmit == 1) then
     cd $HDIR
     idbsub -n $NCPU < $JOB
 endif

@@ -72,8 +72,8 @@ khI 1024x1024  mu = 2.5e-5    CFL: 1.50/.25  repeat kh run
                                              check scalars as progressing
                                              yes - can see unstable at .25
 
-khJ 1024x1024  mu = 2.5e-5    CFL: 1.40/.25  IN
-
+khK 1024x1024  mu = 2.5e-5    CFL: 1.45/.25  NEXT???
+khJ 1024x1024  mu = 2.5e-5    CFL: 1.40/.25  looks great at t=1.0
 khH 1024x1024  mu = 2.5e-5    CFL: 1.25/.25  looks great at t=1.0
 khG 1024x1024  mu = 2.5e-5    CFL: .75/.25   looks great at t=1
 
