@@ -605,7 +605,8 @@ do im=-numb,numb
          psiz_r(n) = -km*R(im,jm,km,n,2)*xfac
          psiz_i(n) =  km*R(im,jm,km,n,1)*xfac
       enddo
-      
+
+
       !
       !   
       ! convert to sine & cosine modes:
@@ -637,6 +638,9 @@ do im=-numb,numb
             Rr = psix_r(2) - psiy_r(1)
             Ri = psix_i(2) - psiy_i(1)
          endif
+
+         
+       
          
          i=abs(im)
          j=abs(jm)
@@ -673,5 +677,114 @@ endif
 
 
 end function
+
+
+
+subroutine sincos_to_complex(p,cmodes,nmax)
+#if 0
+   conversion to complex coefficients:
+        a cos(lx) cos(my) cos(nz)
+      
+        sign(>=0)=1
+        sign(<0)=-1
+
+        p = number of negative values in sign(l), sign(m), sign(n):   
+        1/i**0    1
+        1/i**1   -i
+        1/i**2   -1
+        1/i**3    i
+
+
+        a/(8 i**p) (exp(ilx)+sign(l)exp(-ilx))
+                   (exp(imy)+sign(m)exp(-imy))
+                   (exp(inz)+sign(n)exp(-inz))
+
+        ( l, m, n)
+        ( l, m,-n) sign(n)
+        ( l,-m, n) sign(m)
+        ( l,-m,-n) sign(n)*sign(m)
+        (-l, m, n) sign(l)
+        (-l, m,-n) sign(l)*sign(n)
+        (-l,-m, n) sign(l)*sign(m)
+        (-l,-m,-n) sign(l)*sign(m)*sign(n)
+
+#endif      
+use params
+implicit none
+real*8 :: p(nx,ny,nz),a,b
+real*8 :: cmodes(-nmax:nmax,-nmax:nmax,-nmax,nmax)
+integer :: i,j,k,im,jm,km,imax,nmax,sm,ip,jp,kp
+
+imax=2*nmax+2
+cmodes=0
+
+do i=1,imax
+do j=1,imax
+do k=1,imax
+   im=z_imcord(i)
+   jm=z_jmcord(j)
+   km=z_kmcord(k)
+   ip=abs(im)
+   jp=abs(jm)
+   kp=abs(km)
+
+   if (ip<=nmax .and. jp<=nmax .and. kp<=nmax) then
+
+
+   a=0; b=0
+
+   sm=0
+   if (im<0) sm=sm+1
+   if (jm<0) sm=sm+1
+   if (km<0) sm=sm+1
+   if (sm==0) then
+      a=p(i,j,k)/8
+   else if (sm==1) then
+      b=-p(i,j,k)/8
+   else if (sm==2) then
+      a=-p(i,j,k)/8
+   else if (sm==3) then
+      b=p(i,j,k)/8
+   else
+      call abort("this cant happen")
+   endif
+
+   print *,'sign(1,1)=',sign(1,1)
+   print *,'sign(1,0)=',sign(1,0)
+   print *,'sign(1,-1)=',sign(1,-1)
+   stop
+
+   cmodes(1,ip,jp,kp)=cmodes(1,ip,jp,kp) + a;    
+   cmodes(2,ip,jp,kp)=cmodes(2,ip,jp,kp) + b
+
+   cmodes(1,ip,jp,-kp)=cmodes(1,ip,jp,-kp) + a*sign(1,km)   
+   cmodes(2,ip,jp,-kp)=cmodes(2,ip,jp,-kp) + b*sign(1,km)
+
+   cmodes(1,ip,-jp,kp)=cmodes(1,ip,-jp,kp) + a*sign(1,jm)
+   cmodes(2,ip,-jp,kp)=cmodes(2,ip,-jp,kp) + b*sign(1,jm)
+
+   cmodes(1,ip,-jp,-kp)=cmodes(1,ip,-jp,-kp) + a*sign(1,jm*km)  
+   cmodes(2,ip,-jp,-kp)=cmodes(2,ip,-jp,-kp) + b*sign(1,jm*km)  
+
+   cmodes(1,-ip,jp,kp)=cmodes(1,-ip,jp,kp) + a*sign(1,im)
+   cmodes(2,-ip,jp,kp)=cmodes(2,-ip,jp,kp) + b*sign(1,im)
+
+   cmodes(1,-ip,jp,-kp)=cmodes(1,-ip,jp,-kp) + a*sign(1,im*km)
+   cmodes(2,-ip,jp,-kp)=cmodes(2,-ip,jp,-kp) + b*sign(1,im*km)
+
+   cmodes(1,-ip,-jp,kp)=cmodes(1,-ip,-jp,kp) + a*sign(1,im*jm)
+   cmodes(2,-ip,-jp,kp)=cmodes(2,-ip,-jp,kp) + b*sign(1,im*jm)
+
+   cmodes(1,-ip,-jp,-kp)=cmodes(1,-ip,-jp,-kp) + a*sign(1,im*jm*km)
+   cmodes(2,-ip,-jp,-kp)=cmodes(2,-ip,-jp,-kp) + b*sign(1,im*jm*km)
+   endif
+enddo
+enddo
+enddo
+end subroutine
+
+
+
+
 
 end module
