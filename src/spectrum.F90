@@ -12,15 +12,15 @@ transfer function spectrums
 Example on how to compute spectrum of u dot forcing term:
 
 if (compute_integrals .and. compute_transfer) then
-   call compute_spectrum_z_fft(Qhat,io_pe,spec_velocity,iwave_max)
-   call compute_spectrum_z_fft(rhs,io_pe,spec_term,iwave_max)
+   call compute_spectrum_z_fft(Qhat,io_pe,spec_velocity)
+   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
    call transfer_spec_components(time,spec_f,spec_velocity,spec_term,0)
 endif
 
 < accumulate forcing into rhs... >
 
 if (compute_integrals .and. compute_transfer) then
-   call compute_spectrum_z_fft(rhs,io_pe,spec_term,iwave_max)
+   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
    call transfer_spec_components(time,spec_f,spec_velocity,spec_term,1)
 endif
    
@@ -335,9 +335,27 @@ if (my_pe==io_pe) then
       write(message,'(a,i5)') "transfer spec_write(): Error opening file errno=",ierr
       call abort(message)
    endif
-   call cwrite8(fid,.5*(time+time_old),1)
+   x=4   ! number of spectrums in file for each time.  
+   call cwrite8(fid,x,1)
+   call cwrite8(fid,.5*(time+time_old),1)  ! time of total KE spec
    x=1+iwave; call cwrite8(fid,x,1)
    call cwrite8(fid,transfer_r,1+iwave)
+
+   spec_r = spec_rhs - (spec_diff+spec_f)
+   call cwrite8(fid,transfer_comp_time,1)  ! time of 
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_r,1+iwave)
+
+   call cwrite8(fid,transfer_comp_time,1)  ! time of 
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_diff,1+iwave)
+
+   call cwrite8(fid,transfer_comp_time,1)  ! time of 
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_f,1+iwave)
+
+
+
    call cclose(fid,ierr)
 endif
 end subroutine
@@ -519,26 +537,23 @@ end subroutine
 
 
 
-subroutine compute_spectrum_z_fft(p,pe,spec_r,iwave_max)
+subroutine compute_spectrum_z_fft(p,pe,spec_r)
 use params
 use mpi
 implicit none
-integer :: iwave_max,ierr
+integer :: ierr
 integer :: pe             ! compute spectrum on this processor
 real*8 :: p(g_nz2,nslabx,ny_2dz)
-real*8 :: spec_r(0:iwave_max)
+real*8 :: spec_r(0:max(g_nx,g_ny,g_nz))
 
 ! local variables
 real*8 rwave
-real*8 :: spec_r_in(0:iwave_max)
+real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy
-integer i,j,k,jm,km,im
+integer i,j,k,jm,km,im,iwave_max
 
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
-if (nint(rwave)>iwave_max) then
-   call abort("compute_spectrum: called with insufficient storege for spectrum()")
-endif
 iwave_max=nint(rwave)
 
 spec_r=0

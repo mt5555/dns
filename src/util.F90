@@ -174,8 +174,8 @@ plot=" "
 ! interpolate
 cspec(0)=spectrum(0)
 do ix=1,numx
-!   ireal = 10**( log10(real(n)) * (ix-1)/real(numx-1) )
-   ireal = n * (ix-1)/real(numx-1) 
+   ireal = 10**( log10(real(n)) * (ix-1)/real(numx-1) )
+   !ireal = n * (ix-1)/real(numx-1) 
    i=floor(ireal)
    delta=ireal-i
    if (i>=0 .and. i<=n-1) then

@@ -189,6 +189,7 @@ subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p)
 use params
 use transpose
 use sforcing
+use spectrum
 implicit none
 
 ! input
@@ -234,6 +235,13 @@ real*8,save :: gradw(nx,ny,nz,n_var)
 !
 call wallclock(tmx1)
 
+
+
+if (compute_ints==1 .and. compute_transfer) then
+   do n=1,3
+      call compute_spectrum_z_fft(Qhat(1,1,1,n),io_pe,spec_velocity(0,n))
+   enddo
+endif
 
 
 
@@ -332,6 +340,12 @@ enddo
 
 
 
+if (compute_ints==1 .and. compute_transfer) then
+   do n=1,3
+      call compute_spectrum_z_fft(rhs(1,1,1,n),io_pe,spec_term(0,n))
+   enddo
+   call transfer_spec_components(time,spec_diff,spec_velocity,spec_term,0)
+endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
@@ -387,6 +401,11 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
+if (compute_ints==1 .and. compute_transfer) then
+   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
+   call transfer_spec_components(time,spec_diff,spec_velocity,spec_term,1)
+   call transfer_spec_components(time,spec_f,spec_velocity,spec_term,0)
+endif
 
 
 
@@ -402,6 +421,10 @@ if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
 #endif
 
 
+if (compute_ints==1 .and. compute_transfer) then
+   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
+   call transfer_spec_components(time,spec_f,spec_velocity,spec_term,1)
+endif
 
 
 
@@ -456,6 +479,10 @@ do j=1,ny_2dz
    enddo
 enddo
 
+if (compute_ints==1 .and. compute_transfer) then
+   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
+   call transfer_spec_components(time,spec_rhs,spec_velocity,spec_term,0)
+endif
 
 
 if (compute_ints==1) then
