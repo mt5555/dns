@@ -77,17 +77,7 @@ endif
 endif
 
 
-
-
-
-
-
-
-
-
-
 ! periodic FFT case:  for output, we include the point at x=1 (same as x=0)
-
 o_nx=g_nx
 if (g_bdy_x1==PERIODIC) o_nx=g_nx+1
 
@@ -97,6 +87,77 @@ if (g_bdy_y1==PERIODIC) o_ny=g_ny+1
 o_nz=g_nz
 if (g_bdy_z1==PERIODIC) o_nz=g_nz+1
 if (g_nz==1) o_nz=1
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid, bounds over interior (non-boundary) points
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+intx1=nx1
+intx2=nx2
+inty1=ny1
+inty2=ny2
+intz1=nz1
+intz2=nz2
+
+bx1=nx1
+bx2=nx2
+by1=ny1
+by2=ny2
+bz1=nz1
+bz2=nz2
+
+#if 1
+if (g_nx==64) then
+! move boundary into ghost cell region:
+bx2=nx2+1; o_nx=g_nx+1
+by2=ny2+1; o_ny=g_ny+1
+endif
+#endif
+
+
+bdy_x1=g_bdy_x1
+bdy_x2=g_bdy_x2
+bdy_y1=g_bdy_y1
+bdy_y2=g_bdy_y2
+bdy_z1=g_bdy_z1
+bdy_z2=g_bdy_z2
+
+if (my_x/=0) bdy_x1=INTERNAL
+if (my_x/=ncpu_x-1) bdy_x2=INTERNAL
+if (my_y/=0) bdy_y1=INTERNAL
+if (my_y/=ncpu_y-1) bdy_y2=INTERNAL
+if (my_z/=0) bdy_z1=INTERNAL
+if (my_z/=ncpu_z-1) bdy_z2=INTERNAL
+
+
+if REALBOUNDARY(bdy_x1) then
+   intx1=bx1+1
+endif
+if REALBOUNDARY(bdy_x2) then
+   intx2=bx2-1
+endif
+if REALBOUNDARY(bdy_y1) then
+   inty1=by1+1
+endif
+if REALBOUNDARY(bdy_y2) then
+   inty2=by2-1
+endif
+if REALBOUNDARY(bdy_z1) then
+   intz1=bz1+1
+endif
+if REALBOUNDARY(bdy_z2) then
+   intz2=bz2-1
+endif
+
+
+
+
+
+
+
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -210,50 +271,6 @@ do j=1,ny_2dz
    if (z_jmcord(j)==0) z_jmsign(j)=0
    if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
 enddo
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! local grid, bounds over interior (non-boundary) points
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-intx1=nx1
-intx2=nx2
-inty1=ny1
-inty2=ny2
-intz1=nz1
-intz2=nz2
-
-bdy_x1=g_bdy_x1
-bdy_x2=g_bdy_x2
-bdy_y1=g_bdy_y1
-bdy_y2=g_bdy_y2
-bdy_z1=g_bdy_z1
-bdy_z2=g_bdy_z2
-
-if (my_x/=0) bdy_x1=INTERNAL
-if (my_x/=ncpu_x-1) bdy_x2=INTERNAL
-if (my_y/=0) bdy_y1=INTERNAL
-if (my_y/=ncpu_y-1) bdy_y2=INTERNAL
-if (my_z/=0) bdy_z1=INTERNAL
-if (my_z/=ncpu_z-1) bdy_z2=INTERNAL
-
-
-if REALBOUNDARY(bdy_x1) then
-   intx1=nx1+1
-endif
-if REALBOUNDARY(bdy_x2) then
-   intx2=nx2-1
-endif
-if REALBOUNDARY(bdy_y1) then
-   inty1=ny1+1
-endif
-if REALBOUNDARY(bdy_y2) then
-   inty2=ny2-1
-endif
-if REALBOUNDARY(bdy_z1) then
-   intz1=nz1+1
-endif
-if REALBOUNDARY(bdy_z2) then
-   intz2=nz2-1
-endif
 
 
 

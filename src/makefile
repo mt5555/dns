@@ -17,6 +17,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(HOST),darkstar)
       MPI = 
       MPILIB =  
+      MPI = -DUSE_MPI -I/contrib/lam/include
+      MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    else
       MPI = -DUSE_MPI -I/contrib/lam/include
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
@@ -104,7 +106,7 @@ OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 OBJS2 = transpose.o structf.o sforcing.o solve.o ghost.o bc.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
-OPS    = fftops.o test.o integrals.o
+OPS    = ghostops.o fftops.o test.o integrals.o
 FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 

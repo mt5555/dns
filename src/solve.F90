@@ -306,8 +306,10 @@ else if (btype==2) then
    b=-w  ! be sure to copy ghost cell data also!
    ! apply compact correction to 'b', then set b.c. of b:
    call helmholtz_dirichlet_setup(b,psi,work,1)
-   psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
-   !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
+
+   !psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
+   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
    !update PSI 1st row of ghost cells so that our 4th order differences
    !near the boundary look like 2nd order centered

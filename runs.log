@@ -8,7 +8,9 @@ w=0, cutoff=0, bito_savart init only
 t=1.5  NIRVANA timings              t=15
 1024x1024  on 5x5:    3.3 min
 1024x1024  on 25x1:   3.21min        32min
-2048x1024 on 5x5      9 min          90min
+2305x1025 on 5x5      9 min          90min
+2305x1025 on 1x25     in                         1e-7
+
 
 
 

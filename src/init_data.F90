@@ -431,8 +431,8 @@ yd(nd) = 0
 delsq = delta**2
 !   INITIALIZES VORTICITY ON THE GRID = VORTICITY INDUCED
 !     BY A BLOB AT (0,1)
-do i=nx1,nx2
-do j=ny1,ny2
+do i=intx1,intx2
+do j=inty1,inty2
    wsum = 0
    psisum=0
    do k=0,nd
@@ -450,29 +450,8 @@ do j=ny1,ny2
 enddo
 enddo
 
-! set w=0 on the boundary
-do i=nx1,nx2
-   if REALBOUNDARY(bdy_y1) w(i,ny1,1) = 0
-   if (bdy_y2==INFLOW0_ONESIDED) then
-      if (xcord(i)<=.5) w(i,ny2,1) = 0
-   else if (bdy_y2==INFLOW0) then
-      w(i,ny2,1)=0
-   endif
-enddo
-
-do j=ny1,ny2
-   if (bdy_x1==INFLOW0_ONESIDED) then
-      ! dont change values computed above
-   else if (bdy_x1==INFLOW0) then
-      w(nx1,j,1)=0
-   endif
-   if REALBOUNDARY(bdy_x2) w(nx2,j,1)=0
-enddo
-
-
+call bcw_impose(w)
 Q(:,:,:,3)=w
-
-
 
 
 

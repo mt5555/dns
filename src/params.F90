@@ -119,31 +119,56 @@ integer :: forcing_type   ! 0 = none
 !integer,parameter :: ny1=1,ny2=16             ! upper and lower bounds of non-ghost data
 !integer,parameter :: nz1=1,nz2=16             ! upper and lower bounds of non-ghost data
 
-! dimensions of interior, non-boundary points.  
-! for problems with b.c. (other than periodic or reflections)
-! use these bounds if you want to loop over only the non-boundary points.
+! dimensions of interior, non-boundary points:
+!   do k=intz1,intz2  
+!   do j=inty1,inty2
+!   do i=intx1,intx2
 !
-! For example, intx2=nx2 for INTERNAL boundary points 
-! but intx2=nx2-1 at a real boundary.
+! to loop over all interior points and boundary points:
+!   do k=bz1,bz2  
+!   do j=by1,by2
+!   do i=bx1,bx2
+
+! Code that deals with boundary conditions (other than periodic or reflections)
+! should use these bounds and NOT nx1,nx2...
 !
-! For the psi-vor model, non-periodic, uses a sine transform.
+! In most cases,
+!   INTERIOR boundaries:   intx1=bx1=nx1    intx2=bx2=nx2
+!   PERIODIC boundaries:   intx1=bx1=nx1    intx2=bx2=nx2
+!   REFLECT boundaries:    intx1=bx1=nx1    intx2=bx2=nx2
+!   Real boundaries:       intx1=bx1=nx1    intx2+1=bx2=nx2+1
+!
+! But for the psi-vor model, non-periodic, it needs a sine transform.
 ! Normally, on a 400x400 grid would need a len=399 transform.  
-! So for this model we sometimes set intx2=nx2 at a real boundary.
+! So for this model we sometimes set, along the bdy_x2 boundary:
+!  intx2=nx2   bx2=nx2+1
+! which places the boundary in the ghost cell region.  
 ! 
-! So make sure that:
-!   1. boundary code is using intx2+1  (instead of nx2)
-!   2. boundary code does not rely on two rows of ghost cells outside the boundary
+! This is okay, as long as the boundary code is not relying 
+! on two rows of ghost cells beyond the boundary.  Also, the
+! transpose() routines will not pick up the ghost cell data.
 !
-! parallel: 8x16   grid:  800x1600
-! grid per CPU:  100x100 or 101x101
+! For the sine transform, this is no problem since that end point
+! data is required to be zero.
+! It is a problem for output, since that boundary data in the
+! ghost cell region will not be included.
+! Parallel transpose operations always work just on the nx1,nx2 data.
+! Normally this is not a problem since code with boundary conditions
+! will not be using FFT's, except for the sine transform.  In that case,
+! if bx2<>nx2, the boundary data will not make it into the transposed
+! array.  But this is fine for the sine transform since it requires
+! that data to be zero.  The output routines also rely on the 
+! transpose operatorors, and they will not output the data
 !
-! nslabx=100, or 101
-! nx_2dy = 7, ncpu_y*nx_2dy=112 > 101
+!
 !
 
 integer :: intx1,intx2
 integer :: inty1,inty2
 integer :: intz1,intz2
+integer :: bx1,bx2
+integer :: by1,by2
+integer :: bz1,bz2
 
 
 

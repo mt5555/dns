@@ -662,3 +662,31 @@ tims(13)=tims(13)+(tmx2-tmx1)
 end subroutine
 
 end module
+
+
+
+
+
+
+
+
+
+
+subroutine ghost_update_x_reshape(psi,n)
+use params
+use ghost
+implicit none
+integer :: n
+real*8 :: psi(nx,ny,nz,n)
+call ghost_update_x(psi,n)
+end
+subroutine ghost_update_y_reshape(psi,n)
+use params
+use ghost
+implicit none
+integer :: n
+real*8 :: psi(nx,ny,nz,n)
+call ghost_update_y(psi,n)
+end
+
+

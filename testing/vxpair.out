@@ -1,4 +1,4 @@
-Running parallel.  NCPUS=    1 =   1 x  1 x  1                                  
+Running single threaded
  Run name:         temp
  output directory: /tmp/
  Enter input file type: 
@@ -15,7 +15,6 @@ NS-Alpha:  alpha, alpha/h :    0.00000000    0.0000
 Global grid:     65 x    65 x     1                                             
 Local grid (with padding):     69 x    69 x     1                               
 Initial data                                                                    
- wmax=   4.52077773764242     
 Time stepping...                                                                
 initial time:    0.0000                                                         
 final time:      0.2500                                                         
@@ -23,58 +22,51 @@ max number timesteps: 1073741824
 Initializing FFT99 of size n=   128                                             
 
 time=  0.00000(     0)  next output=  0.05000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1535550 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33801884256873     0.29317470390162     0.00000000000000    
+for next timestep: delt=0.1535459 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33803405081321     0.29318606757922     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.63755E-02   max(vor) 0.45208E+01                
-ke:  0.0118423777  enstropy:        0.1663         total d/dt(ke):   0.0000000  
+ke:  0.0118424320  enstropy:        0.1663         total d/dt(ke):   0.0000000  
 total d/dt(w) vis=      0.0000000   mu <w,w_xx>=      -0.0127510                
 writing output files at t=    0.0000                                            
 
 time=  0.05000(     1)  next output=  0.10000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1535772 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33715396777965     0.29410655283410     0.00000000000000    
+for next timestep: delt=0.1535642 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33716923313162     0.29412886374853     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.63755E-02   max(vor) 0.45208E+01                
-ke:  0.0118423694  enstropy:        0.1663         total d/dt(ke):   0.0000000  
+ke:  0.0118424320  enstropy:        0.1663         total d/dt(ke):   0.0000000  
 total d/dt(w) vis=      0.0000000   mu <w,w_xx>=      -0.0127510                
 
 time=  0.10000(     2)  next output=  0.15000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1537031 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33608814583298     0.29502934800275     0.00000000000000    
+for next timestep: delt=0.1536901 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33610343079478     0.29505169120847     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.62979E-02   max(vor) 0.44842E+01                
-ke:  0.0118340044  enstropy:        0.1657         total d/dt(ke):  -0.0001673  
+ke:  0.0118340640  enstropy:        0.1657         total d/dt(ke):  -0.0001674  
 total d/dt(w) vis=     -0.0126685   mu <w,w_xx>=      -0.0125957                
 
 time=  0.15000(     3)  next output=  0.20000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1539428 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33483791889781     0.29592157625158     0.00000000000000    
+for next timestep: delt=0.1539298 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33485318857693     0.29594394916405     0.00000000000000    
 <z-vor>= 0.10189E+00   <hel>=-0.62234E-02   max(vor) 0.44370E+01                
-ke:  0.0118255929  enstropy:        0.1651         total d/dt(ke):  -0.0001682  
+ke:  0.0118256497  enstropy:        0.1651         total d/dt(ke):  -0.0001683  
 total d/dt(w) vis=     -0.0125087   mu <w,w_xx>=      -0.0124468                
 
 time=  0.20000(     4)  next output=  0.25000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1538888 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33343736005897     0.29672185994659     0.00000000000000    
-<z-vor>= 0.10188E+00   <hel>=-0.61520E-02   max(vor) 0.43808E+01                
-ke:  0.0118171351  enstropy:        0.1645         total d/dt(ke):  -0.0001692  
+for next timestep: delt=0.1538885 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33343749486819     0.29672188446482     0.00000000000000    
+<z-vor>= 0.10188E+00   <hel>=-0.61520E-02   max(vor) 0.43807E+01                
+ke:  0.0118171891  enstropy:        0.1645         total d/dt(ke):  -0.0001692  
 total d/dt(w) vis=     -0.0123560   mu <w,w_xx>=      -0.0123040                
 
 time=  0.25000(     5)  next output=  0.25000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1537263 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33187694564084     0.29751611331269     0.00000000000000    
+for next timestep: delt=0.1537261 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33187700748800     0.29751611675683     0.00000000000000    
 <z-vor>= 0.10188E+00   <hel>=-0.60834E-02   max(vor) 0.43167E+01                
-ke:  0.0118090348  enstropy:        0.1639         total d/dt(ke):  -0.0001620  
-total d/dt(w) vis=     -0.0122103   mu <w,w_xx>=      -0.0121669                
+ke:  0.0118090284  enstropy:        0.1639         total d/dt(ke):  -0.0001632  
+total d/dt(w) vis=     -0.0122102   mu <w,w_xx>=      -0.0121669                
 writing output files at t=    0.2500                                            
 CPU times (min):   (avg/max)
 initialization:      0.00     0.00                                              
 dns_solve:           0.00     0.00                                              
    time_control            0.00     0.00                                        
    RHS                     0.00     0.00                                        
-   ghost_update            0.00     0.00                                        
-   transpose_to_z          0.00     0.00                                        
-   transpose_from_z        0.00     0.00                                        
-   transpose_to_x          0.00     0.00                                        
-   transpose_from_x        0.00     0.00                                        
-   transpose_to_y          0.00     0.00                                        
-   transpose_from_y        0.00     0.00                                        
-   Biot-Savart             0.00     0.00                                        
+   Biot-Savart             0.02     0.02                                        

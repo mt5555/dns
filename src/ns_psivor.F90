@@ -55,6 +55,7 @@ end subroutine
 
 subroutine rk4reshape(time,Q,psi0,rhs,w_old,w_tmp,psi,work)
 use params
+use bc
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,n_var)
@@ -99,13 +100,11 @@ if (ncall==1) then
       call abort("Error: dnsgrid cannot handle alpha>0.")
    endif
 
-   call ghost_update_x_reshape(Q(1,1,3),1)
-   call ghost_update_y_reshape(Q(1,1,3),1)   
-   ! initial vorticity should have been set on the boundary, so
-   ! we can compute PSI right now:
+   ! set w on boundary, and ghost update:
+   call bcw_impose(Q(1,1,3))
    w_tmp=0
    call compute_psi(Q(1,1,3),psi0,rhs,work,w_tmp,comp_psi0)
-   call bc_impose(Q(1,1,3),psi0)
+
   
 endif
 
@@ -128,7 +127,7 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
-call bc_impose(w_tmp,psi0)
+call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
@@ -137,22 +136,21 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
-call bc_impose(w_tmp,psi0)
+call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
-call bc_impose(w_tmp,psi0)
+call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
-call bc_impose(Q(1,1,3),psi0)
+call bcw_impose(Q(1,1,3))
 
 call compute_psi(Q(1,1,3),psi0,rhs,work,psi,comp_psi_rk4)
 time = time + delt
-
 
 
 
@@ -179,89 +177,6 @@ enddo
 enddo
 
 
-
-end subroutine
-
-
-
-
-
-subroutine bc_impose(w,psi)
-!
-! on non-periodic or non-reflective boundarys:
-!
-! set w=0 on boundary for inflow
-! interpolate for outflow
-!  
-use params
-implicit none
-real*8 w(nx,ny)
-real*8 psi(nx,ny)
-
-
-!local
-integer i,j
-real*8 :: u,v
-
-if REALBOUNDARY(bdy_x1) then
-   !             nx1   nx1+1   nx1+2    nx1+3
-   ! stencil (   -1             1              ) /2h
-   !                    -3      4        1     ) /2h
-   !      
-   !
-   !         -(nx1) + (nx1+2)  = -3(nx1+1) + 4(nx1+2) + (nx1+3)
-   !          nx1 = 3(nx1+1) - 3(nx1+2) - (nx1+3)
-   do j=ny1,ny2
-
-      if (bdy_x1==INFLOW0_ONESIDED) then
-         w(nx1,j)= 3*w(nx1+1,j)-3*w(nx1+2,j)-w(nx1+3,j)
-      else
-         w(nx1,j)=0
-      endif
-   enddo
-endif
-if REALBOUNDARY(bdy_x2) then
-   do j=ny1,ny2
-
-      if (bdy_x2==INFLOW0_ONESIDED) then
-         w(nx2,j)=0
-      else
-         w(nx2,j)=0
-      endif
-   enddo
-endif
-
-
-if REALBOUNDARY(bdy_y1) then
-   do i=nx1,nx2
-
-      if (bdy_y1==INFLOW0_ONESIDED) then
-         stop 'should not happen'
-      else
-         w(i,ny1)=0
-      endif
-   enddo
-endif
-
-if REALBOUNDARY(bdy_y2) then
-   do i=nx1,nx2
-      if (bdy_y2==INFLOW0_ONESIDED) then
-         if (xcord(i)<=xscale/2) then
-            w(i,ny2)=0
-         else
-            w(i,ny2)=  3*w(i,ny2-1) - 3*w(i,ny2-2) - w(i,ny2-3)
-         endif
-      else
-         w(i,ny2)=0
-      endif
-   enddo
-endif
-
-
-
-
-call ghost_update_x_reshape(w,1)
-call ghost_update_y_reshape(w,1)
 
 end subroutine
 
@@ -390,19 +305,6 @@ end
 
 
 
-subroutine ghost_update_x_reshape(psi,n)
-use params
-use ghost
-implicit none
-integer :: n
-real*8 :: psi(nx,ny,nz,n)
-call ghost_update_x(psi,n)
-end
-subroutine ghost_update_y_reshape(psi,n)
-use params
-use ghost
-implicit none
-integer :: n
-real*8 :: psi(nx,ny,nz,n)
-call ghost_update_y(psi,n)
-end
+
+
+

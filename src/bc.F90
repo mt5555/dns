@@ -14,10 +14,12 @@ implicit none
 ! you can also use the routine set_biotsavart() to set psi_b
 ! based on the boundary values in an array PSI
 !
-real*8,private :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
+real*8,private :: psi_b(max(1+g_ny,1+g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
                                               ! psi_b(k,1,2) = x2 boundary
                                               ! psi_b(k,2,1) = y1 boundary
                                               ! psi_b(k,2,2) = y2 boundary
+                                              ! psi_b(k,2,2) = y2 boundary
+real*8 :: psi_b_temp(max(1+g_ny,1+g_nx),2,2)
 
 contains
 
@@ -37,11 +39,8 @@ real*8 :: w(nx,ny)
 
 !local
 integer i,j
-integer :: bx1,bx2,by1,by2
-bx1=intx1-1
-bx2=intx2+1
-by1=inty1-1
-by2=inty2+1
+
+
 
 if (REALBOUNDARY(bdy_x1)) then
    !           nx1-1     nx1   nx1+1   nx1+2    nx1+3
@@ -52,28 +51,28 @@ if (REALBOUNDARY(bdy_x1)) then
    ! stencil    1       -8      0       8       -1
    !                    -6              6         
 
-   do j=ny1,ny2
+   do j=by1,by2
       w(bx1-1,j)= 2*w(bx1,j)  - 2*w(bx1+2,j) +  w(bx1+3,j)
    enddo
 endif
 if (REALBOUNDARY(bdy_x2)) then
-   !           nx2-3   nx2-2   nx2-1   nx2     nx2+1
+   !           bx2-3   nx2-2   nx2-1   nx2     nx2+1
    ! stencil    1       -8      0       8       -1
    !                    -6              6         
-   do j=ny1,ny2
+   do j=by1,by2
       w(bx2+1,j)= 2*w(bx2,j)  -2*w(bx2-2,j)  +  w(bx2-3,j)
    enddo
 endif
 
 
 if (REALBOUNDARY(bdy_y1)) then
-   do i=nx1,nx2
+   do i=bx1,bx2
       w(i,by1-1)= 2*w(i,by1)  - 2*w(i,by1+2) +  w(i,by1+3)
    enddo
 endif
 
 if (REALBOUNDARY(bdy_y2)) then
-   do i=nx1,nx2
+   do i=bx1,bx2
       w(i,by2+1)=  2*w(i,by2)  -2*w(i,by2-2)  +  w(i,by2-3)
    enddo
 endif
@@ -81,6 +80,105 @@ endif
 
 
 end subroutine
+
+
+
+
+
+
+
+
+
+
+subroutine bcw_impose(w)
+!
+! on non-periodic or non-reflective boundarys:
+!
+! set w=0 on boundary for inflow
+! interpolate for outflow
+!  
+use params
+implicit none
+real*8 w(nx,ny)
+!real*8 psi(nx,ny)
+
+
+!local
+integer i,j
+real*8 :: u,v
+
+if REALBOUNDARY(bdy_x1) then
+   !             nx1   nx1+1   nx1+2    nx1+3
+   ! stencil (   -1             1              ) /2h
+   !                    -3      4        1     ) /2h
+   !      
+   !
+   !         -(nx1) + (nx1+2)  = -3(nx1+1) + 4(nx1+2) + (nx1+3)
+   !          nx1 = 3(nx1+1) - 3(nx1+2) - (nx1+3)
+   do j=by1,by2
+
+      if (bdy_x1==INFLOW0_ONESIDED) then
+         w(bx1,j)= 3*w(bx1+1,j)-3*w(bx1+2,j)-w(bx1+3,j)
+      else
+         w(bx1,j)=0
+      endif
+   enddo
+endif
+if REALBOUNDARY(bdy_x2) then
+   do j=by1,by2
+
+      if (bdy_x2==INFLOW0_ONESIDED) then
+         w(bx2,j)=0
+      else
+         w(bx2,j)=0
+      endif
+   enddo
+endif
+
+
+if REALBOUNDARY(bdy_y1) then
+   do i=bx1,bx2
+
+      if (bdy_y1==INFLOW0_ONESIDED) then
+         stop 'should not happen'
+      else
+         w(i,by1)=0
+      endif
+   enddo
+endif
+
+if REALBOUNDARY(bdy_y2) then
+   do i=bx1,bx2
+      if (bdy_y2==INFLOW0_ONESIDED) then
+         if (xcord(i)<=xscale/2) then
+            w(i,by2)=0
+         else
+            w(i,by2)=  3*w(i,by2-1) - 3*w(i,by2-2) - w(i,by2-3)
+         endif
+      else
+         w(i,by2)=0
+      endif
+   enddo
+endif
+
+
+call ghost_update_x_reshape(w,1)
+call ghost_update_y_reshape(w,1)
+
+end subroutine
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -97,35 +195,38 @@ integer :: i,j,k,l
 ! set PSI boundary data:
 
 if (REALBOUNDARY(bdy_x1)) then
-   do j=ny1,ny2
-      l = j-ny1+1 + nslaby*my_y
-      psi_b(L,1,1) = psi(nx1,j) 
+   do j=by1,by2
+      l = j-by1+1 + nslaby*my_y
+      psi_b(L,1,1) = psi(bx1,j) 
    enddo
 endif
 
 
 if (REALBOUNDARY(bdy_x2)) then
-   do j=ny1,ny2
-      l = j-ny1+1 + nslaby*my_y
-      psi_b(L,1,2) = psi(nx2,j) 
+   do j=by1,by2
+      l = j-by1+1 + nslaby*my_y
+      psi_b(L,1,2) = psi(bx2,j) 
    enddo
 endif
 
 if (REALBOUNDARY(bdy_y1)) then
-   do i=nx1,nx2
-      l = i-nx1+1 + nslabx*my_x
-      psi_b(L,2,1) = psi(i,ny1) 
+   do i=bx1,bx2
+      l = i-bx1+1 + nslabx*my_x
+      psi_b(L,2,1) = psi(i,by1) 
    enddo
 endif
 
 
 if (REALBOUNDARY(bdy_y2)) then
-   do i=nx1,nx2
-      l = i-nx1+1 + nslabx*my_x
-      psi_b(L,2,2) = psi(i,ny2) 
+   do i=bx1,bx2
+      l = i-bx1+1 + nslabx*my_x
+      psi_b(L,2,2) = psi(i,by2) 
    enddo
 endif
 end subroutine      
+
+
+
 
 
 
@@ -156,7 +257,6 @@ integer :: runbs
 ! local
 integer i,j,k,l,ierr,last
 real*8 :: dela
-real*8 :: temp(max(g_ny,g_nx),2,2)
 real*8 tmx1,tmx2
 logical interp
 
@@ -172,8 +272,8 @@ if (g_bdy_x1==INFLOW0_ONESIDED) interp=.true.
 
 if (interp) then
 ! interpolate every 10'th point
-do j=ny1,ny2
-do i=nx1,nx2
+do j=by1,by2
+do i=bx1,bx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
       do k=1,g_nx,10 
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
@@ -198,8 +298,8 @@ enddo
 enddo
 
 else
-do j=ny1,ny2
-do i=nx1,nx2
+do j=by1,by2
+do i=bx1,bx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
       do k=1,g_nx
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
@@ -217,12 +317,12 @@ endif
 
 
 #ifdef USE_MPI
-temp=psi_b
-k=max(g_ny,g_nx)*4
-call MPI_allreduce(temp,psi_b,k,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+psi_b_temp=psi_b
+k=max(1+g_ny,1+g_nx)*4
+call MPI_allreduce(psi_b_temp,psi_b,k,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
-if (interp) call intpsi(psi_b,max(g_ny,g_nx))
+if (interp) call intpsi(psi_b,max(1+g_ny,1+g_nx))
 
 
 ! add ubar correction
@@ -242,35 +342,42 @@ enddo
 endif
 
 
+print *,'maxval psi_b',maxval(psi_b)
+print *,'sumval psi_b',sum(psi_b)
+psi_b uses g_*coords which have not been set in the
+ghost region
+stop
+
+
 ! set PSI boundary data:
 
 if (REALBOUNDARY(bdy_x1)) then
-   do j=ny1,ny2
-      l = j-ny1+1 + nslaby*my_y
-      psi(nx1,j)= psi_b(L,1,1)
+   do j=by1,by2
+      l = j-by1+1 + nslaby*my_y
+      psi(bx1,j)= psi_b(L,1,1)
    enddo
 endif
 
 
 if (REALBOUNDARY(bdy_x2)) then
-   do j=ny1,ny2
-      l = j-ny1+1 + nslaby*my_y
-      psi(nx2,j)= psi_b(L,1,2)
+   do j=by1,by2
+      l = j-by1+1 + nslaby*my_y
+      psi(bx2,j)= psi_b(L,1,2)
    enddo
 endif
 
 if (REALBOUNDARY(bdy_y1)) then
-   do i=nx1,nx2
-      l = i-nx1+1 + nslabx*my_x
-      psi(i,ny1)= psi_b(L,2,1)
+   do i=bx1,bx2
+      l = i-bx1+1 + nslabx*my_x
+      psi(i,by1)= psi_b(L,2,1)
    enddo
 endif
 
 
 if (REALBOUNDARY(bdy_y2)) then
-   do i=nx1,nx2
-      l = i-nx1+1 + nslabx*my_x
-      psi(i,ny2)= psi_b(L,2,2)
+   do i=bx1,bx2
+      l = i-bx1+1 + nslabx*my_x
+      psi(i,by2)= psi_b(L,2,2)
    enddo
 endif
       
