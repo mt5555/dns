@@ -1,3 +1,7 @@
+0. homog. tests:
+    <u> and <u**2>  on subcubes too
+    joint pdf of <u,v> (and others)
+
 1. Test CJ functions
 
 2. ns_ghost:  4th order code using ghost cells:
