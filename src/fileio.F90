@@ -792,9 +792,10 @@ if (ndim==3 .and. output_vorticity/=0) then
    call singlefile_io3(time,q1(1,1,1,1),fname,work1,work2,0,io_pe,.false.,header_type)
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor2"
    call singlefile_io3(time,q1(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_type)
-   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor3"
-   call singlefile_io3(time,q1(1,1,1,3),fname,work1,work2,0,io_pe,.false.,header_type)
-
+   if (ndim==3) then
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor3"
+      call singlefile_io3(time,q1(1,1,1,ndim),fname,work1,work2,0,io_pe,.false.,header_type)
+   endif
 endif
 
 
@@ -825,7 +826,6 @@ integer :: n
 real*8 :: time
 
 if (npassive==0) return
-
 write(message,'(f10.4)') 10000.0000 + time
 
 do n=np1,np2
@@ -862,9 +862,9 @@ if (passive_type(np1)==2 .and. npassive==1) then
    do n=np1,np2
       call der(Q(1,1,1,n),q1(1,1,1,1),work1,work2,DX_ONLY,1)  ! c_x
       call der(Q(1,1,1,n),q1(1,1,1,2),work1,work2,DX_ONLY,2)  ! c_y
-      call der(Q(1,1,1,n),q1(1,1,1,3),work1,work2,DX_ONLY,3)  ! c_z
+      call der(Q(1,1,1,n),q1(1,1,1,ndim),work1,work2,DX_ONLY,3)  ! c_z
 
-      q1(:,:,:,1:3)=Q(:,:,:,1:3)+ q1(:,:,:,1:3)
+      q1(:,:,:,1:ndim)=Q(:,:,:,1:ndim)+ q1(:,:,:,1:ndim)
 
       write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
       write(ext2,'(i3)') 100+passive_type(n)
@@ -874,9 +874,11 @@ if (passive_type(np1)==2 .and. npassive==1) then
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
            // message(2:10) // '.gamma2'
       call singlefile_io(time,q1(1,1,1,2),fname,work1,work2,0,io_pe)
+      if (ndim>=3) then
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
            // message(2:10) // '.gamma3'
-      call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+      call singlefile_io(time,q1(1,1,1,ndim),fname,work1,work2,0,io_pe)
+      endif
    enddo
 endif
 

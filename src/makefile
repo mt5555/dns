@@ -15,16 +15,16 @@ F77FIXED=
 
 
 ifeq ($(UNAME),Linux)
-   VENDOR=LAHEY
+   #VENDOR=LAHEY
    #VENDOR=PGI
-   #VENDOR=INTEL
+   VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),sulaco)
       #MPI = -DUSE_MPI -I/contrib/lam/include
       #MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
-      MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
-      MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
+      #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
+      #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
    endif
    ifeq ($(HOST),darkstar)
       #MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I$(HOME)/lampi/include

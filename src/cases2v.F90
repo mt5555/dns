@@ -372,7 +372,7 @@ else if (initial_vor==1) then
       else if (yd(k)<.7) then
          gamp  = a1 + 2*a2*yd(k) + 3*a3*yd(k)*yd(k)
       else 
-         gamp  = yalf  ! -y/sqrt(1-y^2)
+         gamp  = -yd(k)/sqrt(1-yd(k)**2) 
       endif
       wd(k)  = gamp*(-sin(hold))*delalf
    enddo
