@@ -8,7 +8,7 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 %range=0:.05:1.00;
-range=31:1.0:1000.0;
+range=41:1.0:1000.0;
 %range=[.00];
 %name='../src/kh/khK';
 name='/ccs/taylorm/dns/src/vxpair/temp'
