@@ -99,7 +99,6 @@ icount=icount+1
    if (convert_opt==2) then  ! -cout vorm
       call print_message("computing vorticity magnitude...")
       call vorticity(vor,Q,work1,work2)
-      vor=Q
       do k=nz1,nz2
       do j=ny1,ny2
       do i=nx1,nx2
@@ -112,6 +111,23 @@ icount=icount+1
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorm"
       call singlefile_io2(time,work1,fname,vor,work2,0,io_pe,.false.)
+   endif
+   if (convert_opt==3) then  ! -cout norm2
+      call print_message("computing norm squared...")
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         work1(i,j,k)=Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2
+      enddo
+      enddo
+      enddo
+      ! output vorticity magnitude
+      write(sdata,'(f10.4)') 10000.0000 + time
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2"
+      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,2)
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2e"
+      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,3)
    endif
 
    if (tstart>0) then

@@ -162,11 +162,9 @@ real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
 character(len=*) :: fname
 
-call singlefile_io2(time,p,fname,work,work2,io_read,fpe,.false.)
+call singlefile_io3(time,p,fname,work,work2,io_read,fpe,.false.,1)
 
 end subroutine
-
-
 
 
 subroutine singlefile_io2(time,p,fname,work,work2,io_read,fpe,output_spec)
@@ -179,9 +177,44 @@ subroutine singlefile_io2(time,p,fname,work,work2,io_read,fpe,output_spec)
 !
 ! fpe       processor to do the file I/O
 !
+use params
+use mpi
+use transpose
+implicit none
+integer :: io_read  ! =1 for read, 0 for write
+integer :: fpe
+real*8 :: time
+real*8 :: p(nx,ny,nz)
+real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
+character(len=*) :: fname
+logical :: output_spec
+
+call singlefile_io3(time,p,fname,work,work2,io_read,fpe,output_spec,1)
+
+end subroutine
+
+
+
+
+subroutine singlefile_io3(time,p,fname,work,work2,io_read,fpe,output_spec,header_type)
+!
+! I/O routines where all data goes through a single PE and is
+! written to a single file
+!
+! io_read=0    write data to file fname
+! io_read=1    read data from file fname
+!
+! fpe       processor to do the file I/O
+!
 ! output_spec=.true.     i/o on 2/3 dealiased spectral coefficients
 ! output_spec=.false.    i/o on full 3d array p 
 !                     (grid point data or non-dealiased spec coeff.)
+!
+!
+! header_type:    1   my default header
+!                 2   no headers
+!                 3   ensight headers
+!
 !
 use params
 use mpi
@@ -199,13 +232,13 @@ integer im_max,km_max,jm_max
 
 
 ! local variables
-integer i,j,k,n
+integer i,j,k,n, header_type
 real*8 xnx,xny,xnz
 character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
-if (do_mpi_io .and. .not. output_spec ) then
+if (do_mpi_io .and. header_type==1 .and. .not. output_spec ) then
    call singlefile_mpi_io(time,p,fname,work,work2,io_read)
    return
 endif
@@ -241,73 +274,18 @@ if (my_pe==fpe) then
 
    if (io_read==1) then
       call copen(fname,"r",fid,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
-         call print_message(message)
-         call print_message(fname)
-         call abort("")
-      endif
-      call cread8e(fid,time,1,ierr)
-      if (ierr/=1) then
-         write(message,'(a,i5)') "singlefile_io(): Error reading file"
-         call print_message(message)
-         call print_message(fname)
-         call abort("")
-      endif
-      call cread8(fid,xnx,1)
-      call cread8(fid,xny,1)
-      call cread8(fid,xnz,1)
-      if (output_spec) then
-         print *,'Spectrum input data'
-         write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
-         if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
-            ! we can only upsample low-res data.
-            ! to run with high-res data, output a trucated form.  
-            call print_message("Error: spectral input requires downsampling to lower resolution")
-            call print_message("Input routines can only upsample.") 
-            call print_message("Output routines can only downsample.") 
-            call print_message("Run code at higher resolution, calling Output to downsample")
-            call abort("error in singlefile_io2")
-         endif
-      else
-         print *,'grid input data'
-         write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
-         if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
-         if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
-         if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
-         call cread8(fid,g_xcord(1),o_nx)
-         call cread8(fid,g_ycord(1),o_ny)
-         call cread8(fid,g_zcord(1),o_nz)
-      endif
    else
       call copen(fname,"w",fid,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
-         call print_message(message)
-         call print_message(fname)
-         call abort("")
-      endif
-      call cwrite8(fid,time,1)
-      call cwrite8(fid,xnx,1)
-      call cwrite8(fid,xny,1)
-      call cwrite8(fid,xnz,1)
-      if ( output_spec) then
-         print *,'Spectrum output data'
-         write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
-         if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
-            ! we can only upsample low-res data.
-            ! to run with high-res data, output a trucated form.  
-            call print_message("Error: spectral output requires zero padding") 
-            call print_message("Output routines can only downsample.") 
-            call print_message("Input routines can input this data directly")
-            call abort("error in singlefile_io2")
-         endif
-      else
-         call cwrite8(fid,g_xcord(1),o_nx)
-         call cwrite8(fid,g_ycord(1),o_ny)
-         call cwrite8(fid,g_zcord(1),o_nz)
-      endif
    endif
+   if (ierr/=0) then
+      write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
+      call print_message(message)
+      call print_message(fname)
+      call abort("")
+   endif
+   if (header_type==1) call header1_io(io_read,output_spec,fid,time,xnx,xny,xnz)
+   if (header_type==2) call header2_io(io_read,fid,time,xnx,xny,xnz)
+   if (header_type==3) call header3_io(io_read,fid,time,xnx,xny,xnz)
 endif
 
 #ifdef USE_MPI
@@ -342,6 +320,8 @@ endif
 if (my_pe==fpe) call cclose(fid,ierr)
 
 end subroutine
+
+
 
 
 
@@ -489,6 +469,15 @@ if (io_nodes(my_z)==my_pe) then
 endif
 #endif
 end subroutine
+
+
+
+
+
+
+
+
+
 
 
 
@@ -687,3 +676,165 @@ else if (equations==NS_PSIVOR) then
 endif
 
 end subroutine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+subroutine header1_io(io_read,output_spec,fid,xnx,xny,xnz)
+use params
+use mpi
+use transpose
+implicit none
+CPOINTER fid
+integer :: io_read  ! =1 for read, 0 for write
+real*8 :: time,xnx,xny,xnz
+logical :: output_spec
+
+! local
+integer :: ierr
+character(len=80) message
+
+
+if (io_read==1) then
+   call cread8e(fid,time,1,ierr)
+   if (ierr/=1) then
+      write(message,'(a,i5)') "singlefile_io(): Error reading file"
+      call print_message(message)
+      call abort("")
+   endif
+   call cread8(fid,xnx,1)
+   call cread8(fid,xny,1)
+   call cread8(fid,xnz,1)
+   if (output_spec) then
+      print *,'Spectrum input data'
+      write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
+      if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
+         ! we can only upsample low-res data.
+         ! to run with high-res data, output a trucated form.  
+         call print_message("Error: spectral input requires downsampling to lower resolution")
+         call print_message("Input routines can only upsample.") 
+         call print_message("Output routines can only downsample.") 
+         call print_message("Run code at higher resolution, calling Output to downsample")
+         call abort("error in singlefile_io2")
+      endif
+   else
+      print *,'grid input data'
+      write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
+      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+      call cread8(fid,g_xcord(1),o_nx)
+      call cread8(fid,g_ycord(1),o_ny)
+      call cread8(fid,g_zcord(1),o_nz)
+   endif
+else
+   call cwrite8(fid,time,1)
+   call cwrite8(fid,xnx,1)
+   call cwrite8(fid,xny,1)
+   call cwrite8(fid,xnz,1)
+   if ( output_spec) then
+      print *,'Spectrum output data'
+      write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
+      if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
+         ! we can only upsample low-res data.
+         ! to run with high-res data, output a trucated form.  
+         call print_message("Error: spectral output requires zero padding") 
+         call print_message("Output routines can only downsample.") 
+         call print_message("Input routines can input this data directly")
+         call abort("error in singlefile_io2")
+      endif
+   else
+      call cwrite8(fid,g_xcord(1),o_nx)
+      call cwrite8(fid,g_ycord(1),o_ny)
+      call cwrite8(fid,g_zcord(1),o_nz)
+   endif
+   
+endif
+end subroutine header1_io
+
+
+
+
+
+subroutine header3_io(io_read,output_spec,fid,xnx,xny,xnz)
+!
+! header is 3 lines of text, with each line exactly 80 characters
+!
+use params
+use mpi
+use transpose
+implicit none
+CPOINTER fid
+integer :: io_read  ! =1 for read, 0 for write
+real*8 :: time,xnx,xny,xnz
+logical :: output_spec
+
+! local
+integer :: ierr
+character(len=80) message
+
+time=-1
+xnx=-1
+xny=-1
+xnz=-1
+
+if (io_read==1) then
+   call cread8e(fid,message,10,ierr)
+   if (ierr/=1) then
+      write(message,'(a,i5)') "singlefile_io(): Error reading file"
+      call print_message(message)
+      call abort("")
+   endif
+   call cread8e(fid,message,10,ierr)
+   call cread8e(fid,message,10,ierr)
+else
+   message="turbulence" // char(0)
+   call cwrite8(fid,message,10)
+   message="part" // char(0)
+   call cwrite8(fid,message,10)
+   message="block" // char(0)
+   call cwrite8(fid,message,10)
+endif
+end subroutine header3_io
+
+
+
+
+
+
+
+subroutine header2_io(io_read,output_spec,fid,xnx,xny,xnz)
+use params
+use mpi
+use transpose
+implicit none
+CPOINTER fid
+integer :: io_read  ! =1 for read, 0 for write
+real*8 :: time,xnx,xny,xnz
+logical :: output_spec
+
+! local
+integer :: ierr
+character(len=80) message
+
+time=-1
+xnx=-1
+xny=-1
+xnz=-1
+
+end subroutine header2_io
+
+
+
+
+

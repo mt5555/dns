@@ -55,6 +55,7 @@ integer init
 
 integer i,dest_pe3(3),key,color,ierr
 
+#ifdef USE_MPI_IO
 if (init==0) then
    ! release the old communicator, construct a new one:
    call MPI_Comm_free(comm_io,ierr)
@@ -107,7 +108,7 @@ key=0
 call MPI_Comm_split(comm_3d,color,key,comm_io,ierr);
 !if (color==0) call MPI_Comm_free(comm_io,ierr)
 
-
+#endif
 end subroutine
 
 
