@@ -6,7 +6,7 @@
 figure(1);clf;
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-time=1.05;
+time=1.10;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
 

@@ -164,6 +164,7 @@ do i=nx1,nx2
       maxs(10)=max(maxs(10),Q_grid(i,j,k,np1))
       maxs(11)=max(maxs(11),-Q_grid(i,j,k,np1))
    endif
+   ! used for CFL
    vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz
    maxs(4)=max(maxs(4),vel)
 enddo

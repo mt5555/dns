@@ -49,7 +49,7 @@ end
 end
 
 % look at passive scalar number np
-for np=10:10
+for np=5:5
 
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
@@ -108,7 +108,8 @@ disp(sprintf('epsilon = %f',epsilon(1) ))
 
 epsilon_c=3*(mu./schmidt).*mean(cx2,1);
 lambda_c=sqrt(c2./mean(cx2,1));
-eta_c=eta/sqrt(schmidt);
+%lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
+eta_c=(mu./schmidt).^3 ./ epsilon_c            %eta/sqrt(schmidt);
 
 
 
@@ -129,13 +130,14 @@ disp(sprintf('epsilon_c = %f',epsilon_c(1) ))
 Su = mean(ux3,1)./mean(ux2,1).^1.5  ;
 Suc = -mean(cu,1)./(sqrt(mean(ux2,1)).*mean(cx2,1));
 G = (mean(u2,1) .* mean(uxx2,1))./mean(ux2).^2;
-Gc = (c2 .* mean(cxx2,1))./(mean(cx2,1).^2);
+Gc = (c2 .* mean(cxx2,1) )./(mean(cx2,1).^2);
 
 
 ff = Su.*sqrt(Rt)*7/3/sqrt(15);
 ff = ff + G*7/15;
 
-r=3* ((lambda./lambda_c).^2) /5 ./ schmidt; 
+%r=3* ((lambda./lambda_c).^2) /5 ./ schmidt; 
+r = 2*ke.*epsilon_c./(c2.*epsilon);
 gg = sqrt(5/3)*Suc.*sqrt(Rt) + r.*Gc;
 
 

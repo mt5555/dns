@@ -251,7 +251,6 @@ while (time>=.0 & time<=9999.3)
      disp('reading passive scalar spectrum')
      npassive=fread(fidp,1,'float64'); 
      time_p=fread(fidp,1,'float64');
-
      figure(5); clf; subplot(1,1,1)
 
      np_r=fread(fidp,1,'float64');
