@@ -18,6 +18,7 @@ ns.o: macros.h params.o structf.o transpose.o sforcing.o makefile
 ns_ghost.o: macros.h params.o fft_interface.o ghost.o makefile 
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
+ns_psivor.o: macros.h params.o fft_interface.o ghost.o makefile 
 params.o: macros.h transpose.h params.h makefile 
 sforcing.o: macros.h params.o mpi.o makefile 
 shallow.o: macros.h params.o fft_interface.o sforcing.o transpose.o makefile 

@@ -18,7 +18,7 @@ real*8 :: work2(nx,ny,nz)
 
 ! local variables
 real*8 :: work3(nx,ny,nz)
-real*8 :: ints_buf(nints),vel
+real*8 :: vel
 real*8 :: beta,alpha
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.

@@ -14,13 +14,30 @@ real*8 :: work2(nx,ny,nz)
 character(len=80) message
 character(len=80) fname
 
-call print_message("Restarting from file restart.[uvw]")
-fname = rundir(1:len_trim(rundir)) // "restart.u"
-call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
-fname = rundir(1:len_trim(rundir)) // "restart.v"
-call singlefile_io(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe)
-fname = rundir(1:len_trim(rundir)) // "restart.w"
-call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+Q=0
+if (equations==0) then
+   call print_message("Restarting from file restart.[uvw]")
+   fname = rundir(1:len_trim(rundir)) // "restart.u"
+   call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+   fname = rundir(1:len_trim(rundir)) // "restart.v"
+   call singlefile_io(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe)
+   fname = rundir(1:len_trim(rundir)) // "restart.w"
+   call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+else if (equations==1) then
+   call print_message("Restarting from file restart.[uvh]")
+   fname = rundir(1:len_trim(rundir)) // "restart.u"
+   call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+   fname = rundir(1:len_trim(rundir)) // "restart.v"
+   call singlefile_io(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe)
+   fname = rundir(1:len_trim(rundir)) // "restart.h"
+   call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+else if (equations==2) then
+   call print_message("Restarting from file restart.vor")
+   fname = rundir(1:len_trim(rundir)) // "restart.vor"
+   call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+endif
+
+
 
 write(message,'(a,f10.4)') "restart time=",time_initial
 call print_message(message)
@@ -339,6 +356,67 @@ end subroutine
 
 
 
+
+
+
+subroutine init_data_kh_psivor(Q,q1,work1,work2)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+! local variables
+integer :: i,j,k,l,use3d=0
+real*8 :: eps
+real*8 :: amp
+
+Q=0
+equations=2
+
+if (init_cond_subtype==0) then
+   call print_message("Using thin shear layer initial condition")
+   eps=200
+   amp=.05
+else if (init_cond_subtype==1) then
+   ! E & Liu case:
+   call print_message("Using E & Liu shear layer initial condition")
+   eps=10*pi
+   amp=.25
+else if (init_cond_subtype==3) then
+   use3d=1
+   call print_message("Using 3d shear layer initial condition")
+   eps=200
+   amp=.05
+endif
+
+! thickness = 1/eps
+! gridpoints per transition layer: nx/eps
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   if (ycord(j)<=.5) then
+      Q(i,j,k,1)=tanh(eps*(ycord(j)-.25))
+   else
+      Q(i,j,k,1)=tanh(eps*(.75-ycord(j)))
+   endif
+   if (use3d==1) then
+      Q(i,j,k,2)=amp*sin(2*pi*xcord(i))*cos(2*pi*zcord(k))
+   else
+      Q(i,j,k,2)=amp*sin(2*pi*xcord(i))
+   endif
+enddo
+enddo
+enddo
+
+q1=Q
+call vorticity(Q,q1,work1,work2)
+Q(:,:,:,1)=Q(:,:,:,3)
+Q(:,:,:,2)=0   
+Q(:,:,:,3)=0   
+
+end subroutine
 
 
 

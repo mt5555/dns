@@ -241,17 +241,40 @@ if (doit_output) then
 
    write(message,'(f10.4)') 10000.0000 + time
 
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
-   call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
-   call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
-   call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
+   if (equations==0) then
+      ! NS, primitive variables
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
+      call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
+      if (ndim==2) then
+         call vorticity(q1,Q,work1,work2)
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+         call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+      endif
 
-   if (ndim==2) then
-      call vorticity(q1,Q,work1,work2)
+   else if (equations==1) then
+      ! shallow water 2D
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h"
+      call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
+      if (ndim==2) then
+         call vorticity(q1,Q,work1,work2)
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+         call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+   endif
+
+   else if (equations==2) then
+      ! 2D NS psi-vor formulation
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-      call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
+      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
    endif
 endif
 
@@ -406,9 +429,17 @@ spec_x=0
 spec_y=0
 spec_z=0
 
+q1=Q
+if (equations==2) then
+   q1=0
+   call der(Q(1,1,1,2),q1(1,1,1,2),work1,work2,DX_ONLY,1) ! psi_x
+   call der(Q(1,1,1,2),q1(1,1,1,1),work1,work2,DX_ONLY,2) ! psi_y
+   q1(:,:,:,1)=-q1(:,:,:,1)
+endif
+
 do i=1,ndim
    iwave=iwave_max
-   call compute_spectrum(Q(:,:,:,i),work1,work2,spectrum1,spec_x2,spec_y2,spec_z2,iwave,io_pe)
+   call compute_spectrum(q1(:,:,:,i),work1,work2,spectrum1,spec_x2,spec_y2,spec_z2,iwave,io_pe)
    spectrum=spectrum+.5*spectrum1
    spec_x=spec_x + .5*spec_x2
    spec_y=spec_y + .5*spec_y2

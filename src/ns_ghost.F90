@@ -17,7 +17,7 @@ real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 ! local variables
-real*8 :: ints_buf(nints),vel
+real*8 :: vel
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
 
@@ -41,25 +41,25 @@ Q_old=Q
 
 
 ! stage 1
-call ns3D(rhs,Q,time,1,work1,work2,q4)
+call ns3D(rhs,Q,time,1)
 call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0)
 call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0)
 call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
-call ns3D(rhs,Q_tmp,time+delt,0,work1,work2,q4)
+call ns3D(rhs,Q_tmp,time+delt,0)
 Q=Q+delt*rhs/6.0
 call divfree_gridspace(Q,q4,work1,work2)
 
@@ -70,13 +70,13 @@ call divfree_gridspace(Q,q4,work1,work2)
 #else
 
 ! stage 1
-call ns3D(rhs,Q,time,1,work1,work2,q4)
+call ns3D(rhs,Q,time,1)
 call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/3
 
 ! stage 2
 Q_tmp = rhs
-call ns3D(rhs,Q,time+delt/3,0,work1,work2,q4)
+call ns3D(rhs,Q,time+delt/3,0)
 call divfree_gridspace(rhs,q4,work1,work2)
 rhs = -5*Q_tmp/9 + rhs
 Q=Q + 15*delt*rhs/16
@@ -84,7 +84,7 @@ Q=Q + 15*delt*rhs/16
 
 ! stage 3
 Q_tmp=rhs
-call ns3D(rhs,Q,time+3*delt/4,0,work1,work2,q4)
+call ns3D(rhs,Q,time+3*delt/4,0)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
 call divfree_gridspace(Q,q4,work1,work2)
@@ -123,7 +123,7 @@ end subroutine rk4
 
 
 
-subroutine ns3d(rhs,Q,time,compute_ints,d1,d2,work)
+subroutine ns3d(rhs,Q,time,compute_ints)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -152,14 +152,10 @@ integer compute_ints
 ! output
 real*8 rhs(nx,ny,nz,n_var)
 
-!work
-real*8 d1(nx,ny,nz)
-real*8 d2(nx,ny,nz)
-real*8 work(nx,ny,nz)
 
 !local
 real*8 dummy,tmx1,tmx2
-real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss
+real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss,d1,d2
 integer n,i,j,k
 
 call wallclock(tmx1)
@@ -182,45 +178,29 @@ rhs=0
 
 call ghost_update_x(Q,ndim)
 do n=1,ndim
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      d1(i,j,k)=( 2*(Q(i+1,j,k,n)-Q(i-1,j,k,n))/3 -  &
-                  (Q(i+2,j,k,n)-Q(i-2,j,k,n))/12          )/delx
-   enddo
-   enddo
-   enddo
-   call ghost_update_x(d1,1)
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      d2(i,j,k)=( 2*(d1(i+1,j,k)-d1(i-1,j,k))/3 -  &
-                  (d1(i+2,j,k)-d1(i-2,j,k))/12          )/delx
-   enddo
-   enddo
-   enddo
-
 
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
       ke = ke + .5*Q(i,j,k,n)**2
 
-      d1(i,j,k)=( 2*(Q(i+1,j,k,n)-Q(i-1,j,k,n))/3 -  &
-                  (Q(i+2,j,k,n)-Q(i-2,j,k,n))/12          )/delx
+      d1=( 2*(Q(i+1,j,k,n)-Q(i-1,j,k,n))/3 -  &
+                 (Q(i+2,j,k,n)-Q(i-2,j,k,n))/12          )/delx
+      d2=(-Q(i+2,j,k,n) + 16*Q(i+1,j,k,n) - 30*Q(i,j,k,n) + &
+                   16*Q(i-1,j,k,n) - Q(i-2,j,k,n)) / (12*delx*delx)
 
-      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,1)*d1(i,j,k) 
+      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2 - Q(i,j,k,1)*d1
 
       ! Q,d1,d2 are in cache, so we can do these sums for free?
-      ke_diss=ke_diss + Q(i,j,k,n)*d2(i,j,k)
-      ke_diss2=ke_diss2 + d1(i,j,k)**2
-      gradu_diss=gradu_diss + d2(i,j,k)**2
+      ke_diss=ke_diss + Q(i,j,k,n)*d2
+      ke_diss2=ke_diss2 + d1**2
+      gradu_diss=gradu_diss + d2**2
       if (n==2) then  ! dv/dx, part of vor(3)
-         vor=vor + d1(i,j,k)
-         hel=hel + Q(i,j,k,3)*d1(i,j,k)
+         vor=vor + d1
+         hel=hel + Q(i,j,k,3)*d1
       endif
       if (n==3) then  ! dw/dx, part of vor(2)
-         hel=hel - Q(i,j,k,2)*d1(i,j,k)
+         hel=hel - Q(i,j,k,2)*d1
       endif
    enddo
    enddo
@@ -229,42 +209,26 @@ enddo
 
 call ghost_update_y(Q,ndim)
 do n=1,ndim
-   ! compute u_y, u_yy
+
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      hel=d1(i,j,k)
-      d1(i,j,k)=( 2*(Q(i,j+1,k,n)-Q(i,j-1,k,n))/3 -  &
+
+      d1=( 2*(Q(i,j+1,k,n)-Q(i,j-1,k,n))/3 -  &
                   (Q(i,j+2,k,n)-Q(i,j-2,k,n))/12          )/dely
-   enddo
-   enddo
-   enddo
-   call ghost_update_y(d1,1)
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      d2(i,j,k)=( 2*(d1(i,j+1,k)-d1(i,j-1,k))/3 -  &
-                  (d1(i,j+2,k)-d1(i,j-2,k))/12          )/dely
-   enddo
-   enddo
-   enddo
+      d2=(-Q(i,j+2,k,n) + 16*Q(i,j+1,k,n) - 30*Q(i,j,k,n) + &
+                   16*Q(i,j-1,k,n) - Q(i,j-2,k,n)) / (12*dely*dely)
+      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2 - Q(i,j,k,2)*d1
 
-
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-
-      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,2)*d1(i,j,k) 
-
-      ke_diss=ke_diss + Q(i,j,k,n)*d2(i,j,k)
-      ke_diss2=ke_diss2  + d1(i,j,k)**2
-      gradu_diss=gradu_diss + d2(i,j,k)**2
+      ke_diss=ke_diss + Q(i,j,k,n)*d2
+      ke_diss2=ke_diss2  + d1**2
+      gradu_diss=gradu_diss + d2**2
       if (n==1) then  ! du/dy part of vor(3)
-         vor=vor - d1(i,j,k)
-         hel=hel - Q(i,j,k,3)*d1(i,j,k)
+         vor=vor - d1
+         hel=hel - Q(i,j,k,3)*d1
       endif
       if (n==3) then  ! dw/dy part of vor(1)
-         hel=hel + Q(i,j,k,1)*d1(i,j,k)
+         hel=hel + Q(i,j,k,1)*d1
       endif
 
    enddo
@@ -273,58 +237,41 @@ do n=1,ndim
 enddo
 
 
+if (ndim==3) then
 call ghost_update_z(Q,ndim)
 do n=1,ndim
-   if (ndim==3) then
-   ! compute u_z, u_zz
+
+
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      hel=d1(i,j,k)
-      d1(i,j,k)=( 2*(Q(i,j,k+1,n)-Q(i,j,k-1,n))/3 -  &
+
+      d1=( 2*(Q(i,j,k+1,n)-Q(i,j,k-1,n))/3 -  &
                   (Q(i,j,k+2,n)-Q(i,j,k-2,n))/12          )/dely
-   enddo
-   enddo
-   enddo
-   call ghost_update_z(d1,1)
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      d2(i,j,k)=( 2*(d1(i,j,k+1)-d1(i,j,k-1))/3 -  &
-                  (d1(i,j,k+2)-d1(i,j,k-2))/12          )/dely
-   enddo
-   enddo
-   enddo
+      d2=(-Q(i,j,k+2,n) + 16*Q(i,j,k+1,n) - 30*Q(i,j,k,n) + &
+                   16*Q(i,j,k-1,n) - Q(i,j,k-2,n)) / (12*delz*delz)
+      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2 - Q(i,j,k,3)*d1
 
-
-
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-
-      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,3)*d1(i,j,k) 
-
-      ke_diss=ke_diss + Q(i,j,k,n)*d2(i,j,k)
-      ke_diss2=ke_diss2 + d1(i,j,k)**2
-      gradu_diss=gradu_diss + d2(i,j,k)**2
+      ke_diss=ke_diss + Q(i,j,k,n)*d2
+      ke_diss2=ke_diss2 + d1**2
+      gradu_diss=gradu_diss + d2**2
       if (n==1) then  ! du/dz part of vor(2)
-         hel=hel + Q(i,j,k,2)*d1(i,j,k)
+         hel=hel + Q(i,j,k,2)*d1
       endif
       if (n==2) then  ! dv/dz part of vor(1)
-         hel=hel - Q(i,j,k,1)*d1(i,j,k)
+         hel=hel - Q(i,j,k,1)*d1
       endif
 
    enddo
    enddo
    enddo
-   endif
 enddo
-
+endif
 
 
 ! apply b.c. to rhs:
-call bc_rhs(rhs)
-!call divfree_gridspace(rhs,work,d1,d2)
+!call bc_rhs(rhs)
+
 
 if (compute_ints==1) then
    ints(1)=gradu_diss/g_nx/g_ny/g_nz

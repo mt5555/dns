@@ -44,6 +44,7 @@ integer,parameter :: r8kind=kind(mu)
 logical :: enable_lsf_timelimit = .false.
 integer :: equations=0             ! 0 = NS / NS-alpha
                                    ! 1 = Shallow water / shallow water-alpha
+                                   ! 2 = NS Streamfunction-Vorticity
 integer :: numerical_method=0      ! 0 = FFT
                                    ! 1 = 4th order F.D.
                                    ! 2 = MPDATA 
@@ -232,7 +233,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(2) = < u_x,u_x >   
 ! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
 !                    non-alpha-mode: F=f.  Alpha model F=f'
-! ints(4) = z-component of vorticity
+! ints(4) = integral of z-component of vorticity
 ! ints(5) = helicity
 ! ints(6) = .5 < u,u >
 ! ints(7) = enstrophy (vorticity**2)

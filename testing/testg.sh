@@ -17,7 +17,7 @@ if ($1 == makeref) then
 
    ./gridsetup.py 1 1 1 128 128 1 
    make dnsgrid; rm -f $refout 
-   ./dnsgrid < $refin > $refout
+   ./dnsgrid -d /tmp < $refin > $refout
   cat $refout
 
 endif

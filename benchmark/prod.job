@@ -29,9 +29,9 @@ set mesh = "1 1 $NCPU 256 256 256"
 # CPQ or BlueMountain?
 set OSTYPE = `uname`
 if ($OSTYPE == IRIX64) then
-   set MPIRUN = mpirun -np $NCPU
+   set MPIRUN = "mpirun -np $NCPU"
 else
-   set MPIRUN = prun -n $NCPU
+   set MPIRUN = "prun -n $NCPU"
 endif
 
 

@@ -408,6 +408,8 @@ else if (sdata=='iso12') then
    init_cond=2
 else if (sdata=='sht') then
    init_cond=3
+else if (sdata=='KH-psivor') then
+   init_cond=4
 else 
    print *,'value = >>',sdata,'<<'
    call abort("invalid initial condtion specified on line 3 on input file")

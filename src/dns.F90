@@ -46,6 +46,7 @@ else
    if (init_cond==1) call init_data_kh(Q,q1,work1,work2)
    if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
    if (init_cond==3) call init_data_sht(Q,q1,work1,work2)
+   if (init_cond==4) call init_data_kh_psivor(Q,q1,work1,work2)
 endif
 
 if (equations==0) then
