@@ -289,8 +289,8 @@ integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,xfac,f_diss,tauf
 real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)
 
-real*8,save :: rmodes(0:2,0:2,0:2,3)       ! value at time tmod
-real*8,save :: rmodes_old(0:2,0:2,0:2,3)   ! value at time tmod_old
+real*8,save :: rmodes(-2:2,-2:2,-2:2,3)       ! value at time tmod
+real*8,save :: rmodes_old(-2:2,-2:2,-2:2,3)   ! value at time tmod_old
 real*8,save :: tmod,tmod_old
 real*8,save :: tscale=.01
 
@@ -342,9 +342,9 @@ do wn=1,NUMBANDS
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
-      rhs(i,j,k,1)=rhs(i,j,k,1) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)
-      rhs(i,j,k,2)=rhs(i,j,k,2) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)
-      rhs(i,j,k,3)=rhs(i,j,k,3) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)
+      rhs(k,i,j,1)=rhs(k,i,j,1) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)
+      rhs(k,i,j,2)=rhs(k,i,j,2) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)
+      rhs(k,i,j,3)=rhs(k,i,j,3) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)
 
       xfac=8
       if (z_kmcord(k)==0) xfac=xfac/2
@@ -371,11 +371,11 @@ end subroutine
 subroutine random12(rmodes)
 use params
 implicit none
-real*8 :: rmodes(0:2,0:2,0:2,3)       
+real*8 :: rmodes(-2:2,-2:2,-2:2,3)       
 
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,xfac,f_diss,tauf
-real*8 :: R(5*5*5,3,2),Rr,Ri
+real*8 :: R(-2:2,-2:2,-2:2,3,2),Rr,Ri
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
@@ -383,11 +383,10 @@ real*8 :: psiz_r(3),psiz_i(3)
 rmodes=0
 call gaussian(R,5*5*5*3*2)
 
-k=0
+
 do km=-2,2 
 do jm=-2,2
 do im=-2,2
-   k=k+1
    !
    ! Choose R gaussian, theta uniform from [0..1]
    ! vorticty = (R1 + i R2)  exp(im*2pi*x) * exp(jm*2pi*y) * exp(km*2pi*z) 
@@ -396,16 +395,16 @@ do im=-2,2
    ! remove 1 factor of 2*pi from laplacian and derivative, since they candel
    xfac = (im**2 + jm**2 + km**2)
    if (xfac>0) xfac=1/(-2*pi*xfac)
-   !if (delt>0) xfac=xfac/sqrt(delt)
-   !xfac=xfac
+   if (delt>0) xfac=xfac/sqrt(delt)
+   xfac=xfac/10
    
    do n=1,3
-      psix_r(n) = -im*R(k,n,2)*xfac
-      psix_i(n) =  im*R(k,n,1)*xfac
-      psiy_r(n) = -jm*R(k,n,2)*xfac
-      psiy_i(n) =  jm*R(k,n,1)*xfac
-      psiz_r(n) = -km*R(k,n,2)*xfac
-      psiz_i(n) =  km*R(k,n,1)*xfac
+      psix_r(n) = -im*R(im,jm,km,n,2)*xfac
+      psix_i(n) =  im*R(im,jm,km,n,1)*xfac
+      psiy_r(n) = -jm*R(im,jm,km,n,2)*xfac
+      psiy_i(n) =  jm*R(im,jm,km,n,1)*xfac
+      psiz_r(n) = -km*R(im,jm,km,n,2)*xfac
+      psiz_i(n) =  km*R(im,jm,km,n,1)*xfac
    enddo
 
    !
@@ -440,14 +439,18 @@ do im=-2,2
          Ri = psix_i(2) - psiy_i(1)
       endif
 
-      rmodes( im, jm, km,n) = rmodes( im, jm, km,n) + Rr 
-      rmodes( im, jm,-km,n) = rmodes( im, jm,-km,n) - Ri*sign(1,km) 
-      rmodes( im,-jm, km,n) = rmodes( im,-jm, km,n) - Ri*sign(1,jm) 
-      rmodes( im,-jm,-km,n) = rmodes( im,-jm,-km,n) - Rr*sign(1,jm*km) 
-      rmodes(-im, jm, km,n) = rmodes(-im, jm, km,n) - Ri*sign(1,im)
-      rmodes(-im, jm,-km,n) = rmodes(-im, jm,-km,n) - Rr*sign(1,im*km) 
-      rmodes(-im,-jm, km,n) = rmodes(-im,-jm, km,n) - Rr*sign(1,im*jm) 
-      rmodes(-im,-jm,-km,n) = rmodes(-im,-jm,-km,n) + Ri*sign(1,im*jm*km) 
+      i=abs(im)
+      j=abs(jm)
+      k=abs(km)
+
+      rmodes( i, j, k,n) = rmodes( i, j, k,n) + Rr 
+      rmodes( i, j,-k,n) = rmodes( i, j,-k,n) - Ri*zerosign(km) 
+      rmodes( i,-j, k,n) = rmodes( i,-j, k,n) - Ri*zerosign(jm) 
+      rmodes( i,-j,-k,n) = rmodes( i,-j,-k,n) - Rr*zerosign(jm*km) 
+      rmodes(-i, j, k,n) = rmodes(-i, j, k,n) - Ri*zerosign(im)
+      rmodes(-i, j,-k,n) = rmodes(-i, j,-k,n) - Rr*zerosign(im*km) 
+      rmodes(-i,-j, k,n) = rmodes(-i,-j, k,n) - Rr*zerosign(im*jm) 
+      rmodes(-i,-j,-k,n) = rmodes(-i,-j,-k,n) + Ri*zerosign(im*jm*km) 
    enddo
 
 enddo
@@ -456,5 +459,17 @@ enddo
 end subroutine
 
 
+integer function zerosign(i)
+integer i
+if (i==0) then
+   zerosign=0
+else if (i<0) then
+   zerosign=-1
+else
+   zerosign=1
+endif
+
+
+end function
 
 end module

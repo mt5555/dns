@@ -39,7 +39,7 @@ test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile
 timecontrol.o: macros.h params.o tracers.o transpose.o spectrum.o makefile 
 tracers.o: macros.h params.o mpi.o ghost.o ellipse.o makefile 
 transpose.o: macros.h params.o mpi.o makefile 
-turb_diag.o: macros.h params.o structf.o sforcing.o fft_interface.o makefile 
+turb_diag.o: macros.h params.o structf.o sforcing.o fft_interface.o mpi.o transpose.o makefile 
 util.o: macros.h mpi.o params.o makefile 
 fbelimb.o: makefile 
 fft99.o: makefile 

@@ -426,10 +426,31 @@ call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,f_diss,a_diss,nor
 ! white in time - so pick a new random force at beginning of
 ! each time step.  
 !
-if (forcing_type==2 .and. rkstage==4) then
-   call sforcing_random12(rhs,Qhat,f_diss,1)  ! compute new forcing function
+
+if (forcing_type==2) then
+   if (rkstage==1) call sforcing_random12(rhs,Qhat,f_diss,1)  ! compute new forcing function
    call sforcing_random12(rhs,Qhat,f_diss,0)  ! apply it
+
+#if 0
+   ! check divfree status of rhs
+   rhs=0
+   call sforcing_random12(rhs,Qhat,f_diss,0)  ! apply it
+   do n=1,3
+      call z_ifft3d(rhs(1,1,1,n),Q(1,1,1,n),work)
+   enddo
+   call divergence(work,Q,rhs,Qhat)
+   print *,maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
+   print *,maxval(work(nx1:nx2,ny1:ny2,nz1:nz2))
+   print *,minval(work(nx1:nx2,ny1:ny2,nz1:nz2))
+   stop
+#endif
+
 endif
+
+!if (forcing_type==2 .and. rkstage==4) then
+!   call sforcing_random12(rhs,Qhat,f_diss,1)  ! compute new forcing function
+!   call sforcing_random12(rhs,Qhat,f_diss,0)  ! apply it
+!endif
 
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
 #endif
