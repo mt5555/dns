@@ -13,7 +13,7 @@ implicit none
 
 !local variables
 real*8 :: one=1
-integer i,j,k,ii
+integer i,j,k,l
 
 
 delx = one/g_nx
@@ -35,19 +35,19 @@ call fft_get_mcord(g_jmcord,g_ny)
 call fft_get_mcord(g_kmcord,g_nz)
 
 do i=nx1,nx2
-   ii = i-nx1+1 + nslabx*myproc_x
-   xcord(i)=g_xcord(ii)
-   imcord(i)=g_imcord(ii)
+   l = i-nx1+1 + nslabx*myproc_x
+   xcord(i)=g_xcord(l)
+   imcord(i)=g_imcord(l)
 enddo
 do j=ny1,ny2
-   ii = i-ny1+1 + nslaby*myproc_y
-   ycord(ii)=g_ycord(ii)
-   jmcord(i)=g_jmcord(ii)
+   l = j-ny1+1 + nslaby*myproc_y
+   ycord(j)=g_ycord(l)
+   jmcord(j)=g_jmcord(l)
 enddo
 do k=nz1,nz2
-   ii = i-ny1+1 + nslaby*myproc_y
-   zcord(ii)=g_zcord(ii)
-   kmcord(i)=g_kmcord(ii)
+   l = j-ny1+1 + nslaby*myproc_y
+   zcord(k)=g_zcord(l)
+   kmcord(k)=g_kmcord(l)
 enddo
 
 
