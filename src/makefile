@@ -117,16 +117,16 @@ ifeq ($(UNAME),OSF1)
       LSFFLAGS = 
    endif
 
-   #LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
-   LDFLAGS =   $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+   LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+   $LDFLAGS =   $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
 
 
    #flag for OPENMP:  -omp
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
    # shallow water model cannot use -automatic
-   FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_FFT99 $(UDM)
-   #FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
+   #FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_FFT99 $(UDM)
+   FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
    CC = cc $(LSFFLAGS)
 endif
 
