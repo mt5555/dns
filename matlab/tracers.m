@@ -6,8 +6,8 @@
 %ts=input('time=? ');
 
 range=0.00:1.0:1000.0 ;
-%name='../src/temp';
-name='/ccs/taylorm/dns/src/vxpair/vx3072_';
+name='../src/temp';
+%name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 
 
 usefig=1;
@@ -25,7 +25,8 @@ for i=range
 
   fname=[name,ts,'.tracer']
   fidvor=fopen(fname,'r');
-  nt=fread(fidvor,1,'float64')
+  nt=fread(fidvor,1,'float64');  % total number of points including insert
+  nt_ins=fread(fidvor,1,'float64');      % total number of non-insert points
   nvar=fread(fidvor,1,'float64')
   data=fread(fidvor,nt*nvar,'float64');
   if (nvar==3) 
@@ -35,14 +36,17 @@ for i=range
   end
 
   figure(1)
-  plot(tracer(:,1),tracer(:,2))
-  %hold on;   plot(tracer(:,1),tracer(:,2),'r.') ;   hold off;
+  plot(tracer(1:nt_ins,1),tracer(1:nt_ins,2))
+  hold on;   
+  %plot(tracer(:,1),tracer(:,2),'r.') ;   
+  plot(tracer(nt_ins+1:nt,1),tracer(nt_ins+1:nt,2),'r.');
+  hold off;
   axis equal
   axis([0,4,0,2]);
   title(sprintf('time = %6.2f ',i)); 
 
     'pause'
-   % pause
+    pause
 end
 return
 

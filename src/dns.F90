@@ -159,6 +159,7 @@ end program DNS
 subroutine dns_solve(Q,Qhat,q1,work1,work2)
 use params
 use mpi
+use tracers
 
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)

@@ -305,21 +305,33 @@ endif
 
 
 if (init==1) then
-   i=500
-   call allocate_tracers(i+1)
-   delalf = pi/(2*i)
-   do k=0,i
-      hold=k*delalf
-      tracer(k+1,1)=xlocation
-      tracer(k+1,2)=cos(hold)
-      tracer(k+1,ndim+1)=k      ! "alf" particle label
+   numt_insert=500             ! 500 particles with insertion
+   n=numt_insert+10            ! 10 extra particles with no insertion between them
+   call allocate_tracers(n)
+   delalf = pi/(2*(numt_insert-1))
+   do k=1,numt_insert
+      hold=(k-1)*delalf
+      tracer(k,1)=xlocation
+      tracer(k,2)=cos(hold)
+      tracer(k,ndim+1)=k      ! "alf" particle label
    enddo
-   tracer(i+1,2)=0    ! put last point on boundary
-else
+   tracer(numt_insert,2)=0    ! put last point on boundary
+
+   ! add some points in the non-insert region:
+   delalf = pi/(2*(n-(numt_insert+1)))
+   do k=numt_insert+1,n
+      hold=(k-(numt_insert+1))*delalf
+      tracer(k,1)=xlocation
+      tracer(k,2)=cos(hold)
+      tracer(k,ndim+1)=k   ! "alf" particle lable 
+   enddo
+else if (init==0) then
    call tracers_restart(io_pe)
 endif
-
 end subroutine
+
+
+
 subroutine comp_ellipse_reshape(w,setmax)
 use params
 use ellipse

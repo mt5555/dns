@@ -23,12 +23,20 @@ implicit none
 !
 !  tracer_work(:,1:ndim+1)  used for MPI buffer, other copy operations
 !
-integer :: numt=0
+integer :: numt=0             ! total number of tracers
+integer :: numt_insert=-1     ! only insert between 1..num_insert.  -1 = use numt instead
+                              ! tracers from num_intsert+1 .. numt 
+                              ! are used for special purposes
 integer :: numt_max=0
 real*8,allocatable :: tracer(:,:)
 real*8,private,allocatable :: tracer_old(:,:)
 real*8,private,allocatable :: tracer_tmp(:,:)
 real*8,private,allocatable :: tracer_work(:,:)
+
+integer,parameter :: ncross_max=5000
+integer :: ncross=0
+real*8  :: cross(ncross_max,2)
+
 
 character(len=80),private :: message
 
@@ -42,6 +50,7 @@ integer :: in_numt
 numt=in_numt
 numt_max=2*in_numt
 
+
 if (allocated(tracer)) then
    call abort("allocate_tracers(): error: tracers allready allocated")
 endif
@@ -52,7 +61,6 @@ allocate(tracer_old(numt_max,ndim))
 allocate(tracer_tmp(numt_max,ndim))  
 
 tracer=-1d100
-
 end subroutine
 
 
@@ -143,6 +151,7 @@ character(len=*) :: fname
 CPOINTER :: fid
 integer :: ierr,j,numt_in
 real*8 :: x
+character,save :: access="0"
 
 if (my_pe==fpe) then
 
@@ -162,6 +171,9 @@ if (my_pe==fpe) then
          call abort("")
       endif
       numt_in=x
+
+      call cread8e(fid,x,1,ierr)
+      numt_insert=x
       
       call cread8(fid,x,1)
       if (ndim+1 /= nint(x)) then
@@ -184,12 +196,35 @@ if (my_pe==fpe) then
       endif
       x=numt
       call cwrite8(fid,x,1)
+      x=numt_insert
+      call cwrite8(fid,x,1)
       x=ndim+1
       call cwrite8(fid,x,1)
       do j=1,ndim+1
          call cwrite8(fid,tracer(1,j),numt)
       enddo
       call cclose(fid,ierr)
+
+      ! now output the crossing times:
+      if (access=="0") then
+         access="w"
+      else
+         access="a"
+      endif
+      write(message,'(f10.4)') 10000.0000 + time_initial
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // &
+           message(2:10) // ".cross"
+      call copen(fname,access,fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "tracer_io(): Error cross opening file. Error no=",ierr
+         call print_message(message)
+         call print_message(fname)
+         call abort("")
+      endif
+      x=ncross
+      call cwrite8(fid,x,1)
+      call cwrite8(fid,cross,ncross*2)
+      ncross=0
    endif
 endif
 
@@ -217,7 +252,7 @@ end subroutine
 
 
 
-subroutine tracer_advance(psi,ugrid,rk4stage)
+subroutine tracer_advance(psi,ugrid,rk4stage,time)
 !
 !  input:  psi  stream function
 !          rk4stage  = 1,2,3,4 to denote which rk4 stage
@@ -255,6 +290,7 @@ implicit none
 real*8 :: psi(nx,ny)
 real*8 :: ugrid(nx,ny,2)
 integer :: rk4stage
+real*8 :: time
 
 !local
 integer :: i,j,ii,jj,igrid,jgrid
@@ -266,6 +302,7 @@ integer :: ierr
 
 if (numt==0) return
 call wallclock(tmx1)
+
 
 if (rk4stage==1) then
    tracer_tmp(:,1:ndim)=tracer(:,1:ndim)
@@ -303,6 +340,7 @@ call ghost_update_y(ugrid,2)
 ! keep the last point, along y=0 boundary, from crossing over.
 ! (velocity = x direction only, so this only happens from roundoff
 tracer_tmp(numt,2)=0
+if (numt_insert>0) tracer_tmp(numt_insert,2)=0
 
 
 ! interpolate psi to position in tracer_tmp
@@ -371,8 +409,15 @@ if (rk4stage==4) then
    ! xcord set to -1d100 to denote off processor.  
    ! if any tracer has left *all* processors, abort:
    if (minval(tracer(1:numt,1))<g_xcord(1)) then
+      do i=1,numt
+         write(*,'(i5,3f12.5)') i,tracer(i,1),tracer(i,2),tracer(i,3)
+      enddo
       call abort("tracer_advance(): point has left domain") 
    endif
+
+   ! check for crossings before insertting points
+   if (numt>numt_insert) call check_crossing(tracer,tracer_old,time+delt/2)
+
 
    ! insert points into tracer() if necessary:
    if (numt>(3*numt_max/4)) call enlarge_tracers()
@@ -382,6 +427,8 @@ if (rk4stage==4) then
       write(message,'(a,i5)') "tracers(): inserted points. numt=",numt
       call print_message(message)
    endif
+
+
 endif
 
 
@@ -389,6 +436,38 @@ endif
 call wallclock(tmx2)
 tims(16)=tims(16)+(tmx2-tmx1)
 end subroutine
+
+
+
+
+subroutine check_crossing(tnew,told,time)
+implicit none
+real*8 :: tnew(numt_max,ndim+1)
+real*8 :: told(numt_max,ndim)
+real*8 :: time
+
+integer :: k
+do k=numt_insert+1,numt
+
+   if (.false.) then
+      ! if angle crosses -pi/2, add to crossing:
+      if (1+ncross>ncross_max) then
+         call abort("tracers(): ncross_max too small")
+      endif
+      ncross=ncross+1
+      cross(ncross,1)=tnew(k,ndim+1)  ! particle label
+      cross(ncross,2)=time            ! crossing time
+   endif
+enddo
+
+end subroutine
+
+
+
+
+
+
+
 
 
 
@@ -443,20 +522,24 @@ end subroutine
       real*8 x(0:numt_max-1),y(0:numt_max-1),alf(0:numt_max-1),&
             newalf,newx,newy,asq,bsq,csq,cosalf,x0,y0,&
             denom0,denom1,denom2,denom3,fact0,fact1,fact2,fact3
-      real*8 :: cutoff
+      real*8 :: cutoff,xsave,ysave
 
       integer,save :: jctr=1
       real*8 :: epsd=.01  ! .1**2
       cutoff=cos(pi/30)
 
-      n=numt-1
-
+      if (numt_insert<0) numt_insert=numt
+      n=numt_insert-1
 
       call fdjctr(x,y,n,jctr)
 !      jctr = 0
       j = jctr+3
       x0 = x(jctr)
       y0 = y(jctr)
+
+      ! make a copy of point x(n+1),y(n+1), since we will temporarily trash it:
+      xsave=x(n+1)
+      ysave=y(n+1)
       x(n+1)   =  x(n-1)
       y(n+1)   = -y(n-1)
       alf(n+1) = 2*alf(n)-alf(n-1)
@@ -477,6 +560,7 @@ end subroutine
           if (numt+1>numt_max) then
              call abort("error: tracer insertion: array too small")
           endif
+
 #if 0
          print*,' jinsert = ',j,x(j),y(j)
          if ( asq.gt.epsd ) write(*,'(a,2f10.6)')&
@@ -512,12 +596,18 @@ end subroutine
                                             + y(j2)*fact3
 
 
-         do 20 k = n+1,j1,-1
+         ! move all points up
+         do 20 k = numt,j1,-1
             k1 = k + 1
             alf(k1) = alf(k)
             x(k1)     = x(k)
             y(k1)     = y(k)
 20       continue
+
+          numt=numt+1
+          numt_insert=numt_insert+1
+          print *,'inserted points',numt,numt_insert
+          stop
 
          alf(j1) = newalf
          x(j1)     = newx
@@ -530,9 +620,15 @@ end subroutine
       j = j+1
 30    continue
 
-      numt=n+1
+      ! restor point n+1:
+      x(n+1)=xsave
+      y(n+1)=ysave
+
       return
       end subroutine
+
+
+
 
 
       subroutine fdjctr(x,y,n,jctr)
