@@ -1,4 +1,25 @@
 **********************************************************************************
+6/14/00
+
+new iso12 forcing:
+force so shells 1 and 2 each  E=.5
+
+iso12w:  white noise, Gotoh stile forcing, with F(1)=F(2)=5
+
+KE at t=0: 1.5
+Gotoh: KE 1.7, epsilon=.5
+
+
+              mu      forcing    KE   epsilon   R_l    h/eta   turnover
+iso12-256a   1.35e-3    iso12    1.7    3.8     100     .8
+iso12-256b   1.35e-3    iso12w   .45     .5      75     .5
+(data at t=10)
+
+
+
+
+
+**********************************************************************************
 4/24/02
 vxpair runs on autry
 
