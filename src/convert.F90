@@ -83,7 +83,7 @@ else if (convert_opt == 4 .or. convert_opt==6) then
    allocate(Q(nx,ny,nz,1))
 else if (convert_opt == 7) then
    allocate(vor(nx,ny,nz,1)) ! only first component used
-   allocate(Q(nx,ny,nz,1))
+   allocate(Q(nx,ny,nz,n_var))
 else
    allocate(vor(nx,ny,nz,n_var))
    allocate(Q(nx,ny,nz,n_var))
