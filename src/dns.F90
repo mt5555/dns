@@ -236,6 +236,8 @@ do
    ints_buf=maxs
    call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
+   g_u2xave=ints(2)
+
 !  storage of some extra quantities:
    maxs(6)=time
    maxs(7)=time_old

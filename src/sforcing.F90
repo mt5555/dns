@@ -24,7 +24,7 @@ contains
 
 
 
-subroutine sforce(rhs,Qhat,f_diss,fxx_diss,param)
+subroutine sforce(rhs,Qhat,f_diss,fxx_diss)
 !
 ! Add a forcing term to rhs, in spectral space.
 !
@@ -34,7 +34,7 @@ real*8 :: Qhat(*)
 real*8 :: rhs(*)
 real*8 :: f_diss,param,fxx_diss
 
-if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss,fxx_diss,param)
+if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss,fxx_diss)
 if (forcing_type==2) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
 end subroutine
@@ -59,7 +59,7 @@ real*8 :: f_diss,fxx_diss
 
 ! local
 integer :: n
-real*8 :: fdiss,fxxdiss,xfac,xw,ux2ave
+real*8 :: fdiss,fxxdiss,xfac,xw
 integer im,jm,km,i,j,k
 
 
@@ -69,32 +69,7 @@ do n=1,3
 enddo
 q4z=0
 
-! compute <ux,ux> from rhsz:
-ux2ave=0
-do j=1,ny_2dz
-   jm=z_jmcord(j)
-   do i=1,nslabx
-      im=z_imcord(i)
-      do k=1,g_nz
-         km=z_kmcord(k)
-
-            xw=(im*im + jm*jm + km*km)*pi2_squared
-            xfac = 2*2*2
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-            ux2ave = ux2ave + xfac*xw*(rhsz(k,i,j,1)**2 + &
-                                rhsz(k,i,j,2)**2 + &
-                                rhsz(k,i,j,3)**2) 
-
-
-      enddo
-   enddo
-enddo
-
-
-
-call sforce(q4z,rhsz,fdiss,fxxdiss,ux2ave)
+call sforce(q4z,rhsz,fdiss,fxxdiss)
 do n=1,3
    call z_ifft3d(q4z(1,1,1,n),rhs(1,1,1,n),work)
 enddo
@@ -110,13 +85,12 @@ end subroutine
 
 
 
-subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss,ux2ave)
+subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss)
 !
 ! Add a forcing term to rhs.
 ! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
 ! Force 3D wave numbers 2 back to the sphere E=2**(-5/3)
 !
-! ux2ave = < ux, ux > 
 !
 use params
 use mpi
@@ -125,11 +99,11 @@ real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3)
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
 integer km,jm,im,i,j,k,n,wn,ierr,kfmax
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
-real*8 ener(numb_max),temp(numb_max),ux2ave
+real*8 ener(numb_max),temp(numb_max)
 character(len=80) :: message
 
 if (0==init_sforcing) then
-   numb=5 ! apply forcing in 5 bands
+   numb=2 ! apply forcing in 5 bands
    call sforcing_init()
    do wn=1,numb
       kfmax=6
@@ -138,6 +112,8 @@ if (0==init_sforcing) then
       else
          ener_target(wn)=real(wn)**(-5./3.)*tanh( (kfmax-wn) / (.3*kfmax) )
       endif
+
+      ener_target(wn)=.5
    enddo
 endif
 
@@ -150,14 +126,13 @@ if (ntot==0) return
 ! tau = .5 tau_kolmogorov = .5 eta^2 / mu = .5 sqrt(mu/epsilon) = 
 !                                           .5/sqrt( <ux,ux> ) 
 !  
-tau_inv=sqrt(ux2ave)/.5
+tau_inv=sqrt(g_u2xave)/.5
 
 
 
 f_diss=0
 fxx_diss=0
 do wn=1,numb
-
 
    ener(wn)=0
    do n=1,wnforcing(wn)%n

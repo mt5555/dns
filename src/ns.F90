@@ -428,7 +428,7 @@ if (forcing_type==2 .and. rkstage==1) then
 endif
 
 ! apply forcing:
-if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss,ux2ave)
+if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
 
 
 
