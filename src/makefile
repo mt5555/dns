@@ -27,12 +27,12 @@ endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
-   LDFLAGS = 
-   FFLAGS = -g -64 -O1 -macro_expand -DUSE_MPI  -DIRIX64  -DSGIFFT
+   LDFLAGS =  -l scs
+   FFLAGS = -64 -O1 -macro_expand -DUSE_MPI  -DIRIX64  -DSGIFFT
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
-LINK=$(F90) $(FFLAGS) $(LDFLAGS)
+LINK=$(F90) $(FFLAGS) 
 
 
 
@@ -58,8 +58,8 @@ OBJS3 = $(MODEL) $(INITS) $(OPS) $(FILEIO)
 	$(COMPILE) -o $@ $< 
 
 dnslink = $(OBJS1) $(OBJS2) $(OBJS3)
-dns:  $(dnslink) dns.o
-	$(LINK) -o dns dns.o $(dnslink) $(MPILIB)
+dns:  $(dnslink) dns.o 
+	$(LINK) -o dns dns.o $(dnslink) $(LDFLAGS) $(MPILIB)
 
 
 clean: 

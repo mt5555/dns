@@ -50,7 +50,6 @@ end subroutine
 
 subroutine init_mpi_comm3d
 use params
-use fft_interface
 use mpi
 
 implicit none

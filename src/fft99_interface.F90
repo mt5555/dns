@@ -111,9 +111,9 @@ write(message,'(a,i6)') 'Initializing FFT of size n=',n
 call print_message(message)
 
 #ifdef SGIFFT
-call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
-#else
 CALL DZFFTM (0, n, 0, 0, 0, 0, 0, 0, fftdata(index)%trigs, 0,0)
+#else
+call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
 #endif
 if (n<0) call abort("Error; invalid value of n for fft");
 
@@ -163,6 +163,7 @@ real*8 w(n1+2)
 #else
 real*8 w(min(fftblocks,n2)*(n1+1))
 #endif
+
 real*8 scale
 character*80 message_str
 
@@ -171,7 +172,7 @@ if (n1==1) return
 ASSERT("ifft1: dimension too small ",n1+2<=n1d);
 call getindex(n1,index)
 
-scale=n
+scale=n1
 scale=1/scale
 
 j=0  ! j=number of fft's computed for each k
@@ -188,7 +189,7 @@ do k=1,n3
       enddo     
 
 #ifdef SGIFFT
-      CALL DZFFTM (1, n1, numffts, scale, p(1,j+1,k), n1d, p(1,j+1,k), n1d,fftdata(index)%trigs, w,0)
+      CALL ZDFFTM (1, n1, numffts, scale, p(1,j+1,k), n1d/2, p(1,j+1,k), n1d,fftdata(index)%trigs, w,0)
 #else
       call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,1)
 #endif
@@ -232,7 +233,8 @@ do k=1,n3
 !      enddo
 
 #ifdef SGIFFT
-      CALL DZFFTM (-1, n1, numffts, scale, p(1,j+1,k), n1d, p(1,j+1,k), n1d,fftdata(index)%trigs, w,0)
+      CALL DZFFTM (0, n1, numffts, scale, 0, 0, 0, 0,fftdata(index)%trigs, 0,0)
+      CALL DZFFTM (-1, n1, numffts, scale, p(1,j+1,k), n1d, p(1,j+1,k), n1d/2,fftdata(index)%trigs, w,0)
 #else
       call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,-1)
 #endif
