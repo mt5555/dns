@@ -5,21 +5,16 @@ CFL:
 dealiased, vis=0
 cfl_adv
 2.0 unstable - at t=2 KE diss osscillating
-1.5 ?
+1.5 IN  t=30 still looks good.  
 1.0 at t=36 KE still looks good,plot is ok
+
 
 How much diffusion do we need so we can run at cfl=1.0?,
 or since that has 2/3 of the full spectrum, cfl=.66?
 
-
-aliased:  mu=0
-.10 unstable  t=1.1
-
-
 aliased:  mu=.00001 
 1.0  unstable
 .10  unstable by t=10, probably earlier
-
 
 aliased:  mu=.0001  
 cfl
@@ -30,11 +25,6 @@ aliased:  mu=.001
 cfl .6: unstable at t=10
 aliased:  mu=.01  
 cfl .6: STABLE - ran KE from 5000 down to 3
-
-
-
-
-
 
 HEAT EQU.  fft, dealiased
 mu=.01
