@@ -1720,16 +1720,34 @@ real*4, allocatable ::  buf4(:)
 integer statuses(MPI_STATUS_SIZE)
 #endif
 
+if (input_size==4) then
+   allocate(buf4(len))
+endif
+
 if (do_mpi_io) then 
 #ifdef USE_MPI_IO
-   call MPI_File_read(fid,buf,len,MPI_REAL8,statuses,ierr)
+   if (input_size==4) then	
+      call MPI_File_read(fid,buf4,len,MPI_REAL4,statuses,ierr)
+   else
+      call MPI_File_read(fid,buf,len,MPI_REAL8,statuses,ierr)
+   endif
    if (ierr==0) ierr=len  ! return length read, if OK
 #else
    call abort("MPI_IO support not compiled in")	
 #endif
 else
-   call cread8e(fid,buf,len,ierr)
+   if (input_size==4) then
+      call cread4e(fid,buf4,len,ierr)
+   else
+      call cread8e(fid,buf,len,ierr)
+   endif
 endif
+
+if (input_size==4) then
+   buf(1:len)=buf4(1:len)
+   deallocate(buf4)
+endif
+
 
 end subroutine
 
