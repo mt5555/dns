@@ -9,8 +9,6 @@ integer           :: delta_val(delta_num_max)
 
 ! max range:  10 ... 10
 integer,parameter :: pdf_max_bin=1000
-real*8            :: pdf_bin_size = .01
-
 
 
 
@@ -24,6 +22,7 @@ type pdf_structure_function
 real*8,pointer      :: pdf(:,:)
 integer             :: delta_num    ! number of different values of delta
 integer             :: nbin         ! number of bins
+real*8              :: pdf_bin_size ! size of bin
 integer             :: ncalls       ! number of instances PDF has been computed
                                ! (i.e. we may compute the PDF for 10 time steps
 end type
@@ -36,6 +35,7 @@ end type
 integer,parameter :: NUM_SF=6
 type(pdf_structure_function) ::  SF(NUM_SF,3),epsilon
 
+integer :: overflow=0    ! count the number of overflow messages
 
 contains
 
@@ -58,26 +58,28 @@ do idel=1,delta_num_max
 enddo
 
 do i=1,NUM_SF
-   call init_pdf(SF(i,1),100,delta_num_max)
-   call init_pdf(SF(i,2),100,delta_num_max)
-   call init_pdf(SF(i,3),100,delta_num_max)
+   call init_pdf(SF(i,1),100,.01d0,delta_num_max)
+   call init_pdf(SF(i,2),100,.01d0,delta_num_max)
+   call init_pdf(SF(i,3),100,.01d0,delta_num_max)
 enddo
-call init_pdf(epsilon,100,1)
+call init_pdf(epsilon,100,.001d0,1)
 end subroutine
 
 
 
 
 
-subroutine init_pdf(str,bin,ndelta)
+subroutine init_pdf(str,bin,binsize,ndelta)
 !
 ! call this to initialize a pdf_structure_function
 !
 implicit none
 type(pdf_structure_function) :: str
 integer :: bin,ndelta
+real*8 binsize
 
 str%nbin=bin
+str%pdf_bin_size=binsize
 allocate(str%pdf(-bin:bin,ndelta))
 str%pdf=0
 str%ncalls=0
@@ -118,7 +120,9 @@ if (bin==n) return;
 
 
 if (bin>pdf_max_bin) then
-   print *,"Warning pdf bin overflow on pe=",my_pe
+   overflow=overflow+1
+   if (overflow<10) print *,"Warning pdf bin overflow on pe=",my_pe
+   if (overflow==10) print *,"disabling bin overflow messages"
 endif
 
 
@@ -220,7 +224,7 @@ do i=1,ndelta
 enddo
 
 ! PDF data
-call cwrite8(fid,pdf_bin_size,1)
+call cwrite8(fid,str%pdf_bin_size,1)
 x=str%nbin; call cwrite8(fid,x,1)
 x=str%ncalls; call cwrite8(fid,x,1)
 
@@ -330,7 +334,7 @@ do k=1,n3
                   
                   del = Q(i2,j,k,n)-Q(i,j,k,n)
                   delv(n)=del
-                  del = del/pdf_bin_size
+                  del = del/str(n)%pdf_bin_size
                   bin = nint(del)
                   
                   ! increase the size of our PDF function
@@ -350,7 +354,7 @@ do k=1,n3
                   else
                      del=-(-del)**one_third
                   endif
-                  del = del/pdf_bin_size
+                  del = del/str(n)%pdf_bin_size
                   bin=nint(del)
                   if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
                   if (bin>pdf_max_bin) bin=pdf_max_bin
@@ -407,14 +411,11 @@ do k=1,n3
    do j=1,n2
       do i=1,n1
          ! compute structure functions for U,V,W 
-         del=ux(i,j,k)
-         if (del<0) then
-            del = -(-del)**two_third
-         else
-            del = del**two_third
-         endif
-         del = del/pdf_bin_size
+         del=mu*ux(i,j,k)**2
+         del = del/epsilon%pdf_bin_size
          bin = nint(del)
+
+         print *,bin,del
          
          ! increase the size of our PDF function
          if (abs(bin)>epsilon%nbin) call resize_pdf(epsilon,abs(bin)+10) 

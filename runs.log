@@ -6,6 +6,9 @@ tag: temp1  output: temp1.out in temp1 directory
 
 tag: temp2  output: temp2.out in src directory
 
+check these two runs: structure functions shoold be the same.
+second run should have epsilon structure function
+
 
 
 
