@@ -320,7 +320,10 @@ if (doit_output) then
       endif
 
    else if (equations==NS_UVW) then
-
+#ifdef UDM_OUTPUT
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
+      call udm_write_uvw(fname,Q,Qhat,work1,work2)
+#else
       ! NS, primitive variables
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
       call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
@@ -335,6 +338,7 @@ if (doit_output) then
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
          call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
       endif
+#endif
 
    else if (equations==SHALLOW) then
       ! shallow water 2D

@@ -98,6 +98,11 @@ ifeq ($(UNAME),OSF1)
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
+   #UDM = -DHAVE_UDM -DUDM_OUTPUT -DUDM_RESTART
+   #UDM = -DHAVE_UDM -DUDM_OUTPUT
+   UDM = -DHAVE_UDM 
+   UDMLIB = 
+
    ifeq ($(HOST),milkyway.lanl.gov)
       MPI = -DUSE_MPI -I/usr/opt/MPI196/include
       MPILIB = -L/usr/opt/MPI196/lib -lfmpi -lmpi 
@@ -114,7 +119,7 @@ ifeq ($(UNAME),OSF1)
    #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
    # shallow water model cannot use -automatic
    #FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
-   FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
+   FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
    CC = cc $(LSFFLAGS)
 endif
 
@@ -131,7 +136,7 @@ OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o spectrum.o ellipse.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
 OPS    = ghostops.o fftops.o test.o integrals.o timecontrol.o tracers.o particles.o 
-FILEIO = fileio.o fileioc.o
+FILEIO = fileio.o fileioc.o udm_interface.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
 #diagnostics for 3d turbulence runs:
