@@ -39,7 +39,8 @@ endif
 
 Q_old=Q
 
-
+! when div_free is called with rhs as the first argument, then q4(:,:,:,1) is 
+! the pressure field.
 ! stage 1
 call ns3D(rhs,Q,time,1,work1,work2,q4)
 call divfree_gridspace(rhs,q4,work1,work2)
@@ -61,6 +62,7 @@ Q=Q+delt*rhs/3.0
 Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0,work1,work2,q4)
 Q=Q+delt*rhs/6.0
+! q4 is not the pressure; it is multiplied by delt/6.0
 call divfree_gridspace(Q,q4,work1,work2)
 
 
