@@ -4,12 +4,33 @@ use params
 use structf
 use fft_interface
 use transpose
+implicit none
+character(len=80) ::  message
 
 call params_init()
 call transpose_init()
 call fft_interface_init()
 call init_input_file()
-call init_grid      
+call init_grid()          
+
+
+!
+! scale alpha now that we know delx
+!
+if (alpha_value>=1.0) then
+   alpha_value=alpha_value*min(delx,dely,delz)
+endif
+write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
+     alpha_value,alpha_value/min(delx,dely,delz)
+call print_message(message)
+
+write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
+call print_message(message)
+write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
+call print_message(message)
+
+
+
 
 end subroutine
 
@@ -35,46 +56,6 @@ integer i,j,k,l,ierr
 character(len=80) message
 
 
-#ifdef USE_MPI
-call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
-call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
-call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(mu_hyper,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(cfl_adv,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(cfl_vis,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(delt_min,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(delt_max,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(restart_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(g_bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(g_bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(g_bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(g_bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(g_bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(g_bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-
-
-call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-if (.not. allocated(custom)) allocate(custom(ncustom))
-call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
-call MPI_Barrier(comm_3d,ierr)
-
-#endif
 
 
 
@@ -121,12 +102,12 @@ if (g_nz==1) o_nz=1
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! global grid data
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-delx = one/(o_nx-1)
-dely = one/(o_ny-1)
+delx = xscale/(o_nx-1)
+dely = yscale/(o_ny-1)
 if (o_nz==1) then
-   delz=1
+   delz=zscale
 else
-   delz = one/(o_nz-1)
+   delz = zscale/(o_nz-1)
 endif
 
 do i=1,o_nx
@@ -248,21 +229,6 @@ endif
 
 
 
-!
-! scale alpha now that we know delx
-!
-if (alpha_value>=1.0) then
-   alpha_value=alpha_value*min(delx,dely,delz)
-endif
-write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
-     alpha_value,alpha_value/min(delx,dely,delz)
-call print_message(message)
-
-write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
-call print_message(message)
-write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
-call print_message(message)
-
 
 
 end subroutine
@@ -345,6 +311,46 @@ endif
 
 
 
+#ifdef USE_MPI
+call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
+call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
+call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(mu_hyper,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(cfl_adv,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(cfl_vis,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(delt_min,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(delt_max,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(restart_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+
+
+call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+if (.not. allocated(custom)) allocate(custom(ncustom))
+call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
+call MPI_Barrier(comm_3d,ierr)
+
+#endif
 
 
 
@@ -609,6 +615,9 @@ if (sdata=='periodic') then
 else if (sdata=='in0/onesided') then
    g_bdy_x1=INFLOW0_ONESIDED
    g_bdy_x2=INFLOW0_ONESIDED
+else if (sdata=='in0') then
+   g_bdy_x1=INFLOW0
+   g_bdy_x2=INFLOW0
 else
    call abort("x boundary condition not supported")
 endif
@@ -624,6 +633,9 @@ else if (sdata=='reflect') then
 else if (sdata=='custom0') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0_ONESIDED
+else if (sdata=='custom1') then
+   g_bdy_y1=REFLECT_ODD
+   g_bdy_y2=INFLOW0
 else
    call abort("y boundary condition not supported")
 endif

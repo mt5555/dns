@@ -1740,10 +1740,10 @@ do i=nx1,nx2
    !
    !   [  4*cos(hx) cos(hy) ]  sin(x) sin(y)
    
-   xfac = x_axy*2*cos(pi*delx*imsine(i))         ! x term
-   xfac = xfac + y_axy*2*cos(pi*dely*jmsine(j))  ! y term
+   xfac = x_axy*2*cos(pi*delx*imsine(i)/xscale)         ! x term
+   xfac = xfac + y_axy*2*cos(pi*dely*jmsine(j)/yscale)  ! y term
    ! diagonal terms:
-   xfac = xfac + axy*4*cos(pi*delx*imsine(i))*cos(pi*dely*jmsine(j))
+   xfac = xfac + axy*4*cos(pi*delx*imsine(i)/xscale)*cos(pi*dely*jmsine(j)/yscale)
    ! center term:
    xfac = xfac -2/(delx*delx)-2/(dely*dely)+4*axy   
 

@@ -150,6 +150,8 @@ for jobscript in vjobscript:
 
         if len(jobname)==0:
             raise ContinueEx,"no BSUB -J option: "+jobname
+        if len(jobname)>10:
+            raise ContinueEx,"BSUB -J <jobname>: jobname too long! "+jobname
 
         # for idbsub, #BSUB -n 64 line is ignored, we have to add this
         # to the idbsub line

@@ -362,6 +362,7 @@ end subroutine
 subroutine init_data_vxpair(Q,q1,work1,w)
 use params
 use ghost
+use bc
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
@@ -372,54 +373,45 @@ real*8 :: w(nx,ny,nz)
 integer :: i,j,k,l,use3d=0,n
 real*8 :: eps
 real*8 :: amp,vx,uy
-real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,sum,delalf,testmax
-real*8 :: delta
+real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,sum,psisum,delalf,testmax
+real*8 :: delta,xlocation
 integer,parameter :: nd=200
 real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
 
 
 if (init_cond_subtype ==0) then
-! 660x380   290min.  t=30  mu=1e-4
-! [-1.7, 1.6]  [0 1.9]   delx=dely=.005
-!OR:
-! [ 0 , 3.3 ]  sheet at .1.7
-!
-! scaled up to 720x400:   yscale=2
-!                         xscale=3.6   
-!
-   biotsavart_cutoff=.001  ! .005
+!  my standard test case:
+   biotsavart_cutoff=.001  
    delta=.2
    ubar=.089
    yscale=3
 endif
 
 if (init_cond_subtype ==1) then
+! Monika's case
 ! 660x380   290min.  t=30  mu=1e-4
 ! [-1.7, 1.6]  [0 1.9]   delx=dely=.005
 !OR:
-! [ 0 , 3.3 ]  sheet at .1.7
+! [ 0 , 3.3 ]  sheet at .1.7         xlocation=1.7/3.3
 !
 ! scaled up to 720x400:   yscale=2
 !                         xscale=3.6   
 !
-   biotsavart_cutoff=.001  ! .005
+   biotsavart_cutoff=0
+   if (g_bdy_x1==INFLOW0_ONESIDED) biotsavart_cutoff=.005
    delta=.2
    ubar=.089
-   yscale=2
+   yscale=2.0
 endif
 
 ! choose xscale so that delx*xscale = dely*yscale
-xscale = yscale*dely/delx
+xscale = yscale*(o_nx-1)/(o_ny-1)
 
-! scale velocity in y direction (units: m/s)
-ubar = ubar/xscale
-
-! scale the viscosity (units: m**2/s)
-mu_x=mu/(xscale**2)
-mu_y=mu/(yscale**2)
+call init_grid()   ! redo grid points since we changed scalings
 
 
-
+xlocation=xscale/2
+ubar = ubar  
 equations=NS_PSIVOR
 Q=0
 
@@ -428,8 +420,8 @@ Q=0
 delalf = pi/(2*nd)
 do k=0,nd
    hold = k*delalf
-   xd(k)  = .5
-   yd(k)  = cos(hold)/yscale
+   xd(k)  = xlocation
+   yd(k)  = cos(hold)
    wd(k)  = cos(hold)*delalf
 enddo
 wd(nd) = wd(nd)/2
@@ -444,39 +436,42 @@ delsq = delta**2
 do i=nx1,nx2
 do j=ny1,ny2
    sum = 0
+   psisum=0
    do k=0,nd
-      difx = (xcord(i) - xd(k))*xscale
-      dify = (ycord(j) - yd(k))*yscale
-      sumy = (ycord(j) + yd(k))*yscale
+      difx = (xcord(i) - xd(k))
+      dify = (ycord(j) - yd(k))
+      sumy = (ycord(j) + yd(k))
 
       denom1 = difx**2 + dify**2 + delsq
       denom2 = difx**2 + sumy**2 + delsq
       sum = sum + wd(k)*(1/denom1**2-1/denom2**2)
+      !psisum = psisum - wd(k)*log(denom1/denom2)
    enddo
    w(i,j,1) = delsq*sum/pi
+   !Q(i,j,1,1)= (psisum  - ubar*ycord(j))/(4*pi)  scaling is wrong
    testmax = max(testmax,w(i,j,1))
-
-
-
 enddo
-!if (mod(i,20).eq.0) print*,'i=',i,w(i,nj/2)
 enddo
 
-
- 
-print*,'wmax=',testmax
-call zero_boundary(w)
-#if 0
 ! set w=0 on the boundary
 do i=nx1,nx2
    w(i,ny1,1) = 0
-   w(i,ny2,1) = 0
+   if (bdy_y2==INFLOW0_ONESIDED) then
+      if (xcord(i)<=.5) w(i,ny2,1) = 0
+   else
+      w(i,ny2,1)=0
+   endif
 enddo
+
 do j=ny1,ny2
-   w(nx1,j,1)=0
+   if (bdy_x1==INFLOW0_ONESIDED) then
+   else
+      w(nx1,j,1)=0
+   endif
    w(nx2,j,1)=0
 enddo
-#endif
+
+
 
 Q(:,:,:,3)=w
 

@@ -69,13 +69,22 @@ real*8 :: work(nx,ny)
 ! local variables
 real*8 :: vel,u,v
 integer i,j,k,n,ierr
-logical,save :: firstcall=.true.
+integer,save :: ncall=0
 integer,save :: btype
 
+integer :: comp_psi0=1         ! initial psi on boundary with biot-savart
+integer :: comp_psi_rk13=0     ! compute psi on boundary after RK stages 1..3?
+integer :: comp_psi_rk4=0      ! compute psi on boundary after RK stage 4?
+
+ncall=ncall+1
 
 
-if (firstcall) then
-   firstcall=.false.
+if (g_bdy_x1==INFLOW0_ONESIDED) then
+   comp_psi_rk4=0; if (mod(ncall,5)==0) comp_psi_rk4=1
+endif
+
+
+if (ncall==1) then
    if (equations/=NS_PSIVOR) then
       call print_message("Error: psi-vor model can only run equations=NS_PSIVOR")
       call abort("initial conditions are probably incorrect.")
@@ -95,7 +104,7 @@ if (firstcall) then
    ! initial vorticity should have been set on the boundary, so
    ! we can compute PSI right now:
    w_tmp=0
-   call compute_psi(Q(1,1,3),psi0,rhs,work,w_tmp,1)
+   call compute_psi(Q(1,1,3),psi0,rhs,work,w_tmp,comp_psi0)
    call bc_impose(Q(1,1,3),psi0)
   
 endif
@@ -120,7 +129,7 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,0)
+call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
@@ -129,19 +138,19 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,0)
+call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,0)
+call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 call bc_impose(Q(1,1,3),psi0)
 
-call compute_psi(Q(1,1,3),psi0,rhs,work,psi,1)
+call compute_psi(Q(1,1,3),psi0,rhs,work,psi,comp_psi_rk4)
 time = time + delt
 
 
@@ -204,29 +213,20 @@ if REALBOUNDARY(bdy_x1) then
    !          nx1 = 3(nx1+1) - 3(nx1+2) - (nx1+3)
    do j=ny1,ny2
 
-      i=nx1+1
-      u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
-           (psi(i,j+2)-psi(i,j-2))/12          )
-
-      if (u>=0) then !inflow
-         w(nx1,j)=0
-      else
+      if (bdy_x1==INFLOW0_ONESIDED) then
          w(nx1,j)= 3*w(nx1+1,j)-3*w(nx1+2,j)-w(nx1+3,j)
+      else
+         w(nx1,j)=0
       endif
    enddo
 endif
 if REALBOUNDARY(bdy_x2) then
    do j=ny1,ny2
 
-      i=nx2-1
-      u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
-           (psi(i,j+2)-psi(i,j-2))/12          )
-
-
-      if (u<=0) then
+      if (bdy_x2==INFLOW0_ONESIDED) then
          w(nx2,j)=0
       else
-         w(nx2,j)= 3*w(nx2-1,j)-3*w(nx2-2,j)-w(nx2-3,j)
+         w(nx2,j)=0
       endif
    enddo
 endif
@@ -235,29 +235,24 @@ endif
 if REALBOUNDARY(bdy_y1) then
    do i=nx1,nx2
 
-      j=ny1+1
-      v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
-           (psi(i+2,j)-psi(i-2,j))/12          )
-
-      if (v>=0) then
-         w(i,ny1)=0
+      if (bdy_y1==INFLOW0_ONESIDED) then
+         stop 'should not happen'
       else
-         w(i,ny1)= 3*w(i,ny1+1)  - 3*w(i,ny1+2) - w(i,ny1+3)
+         w(i,ny1)=0
       endif
    enddo
 endif
 
 if REALBOUNDARY(bdy_y2) then
    do i=nx1,nx2
-
-      j=ny2-1
-      v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
-           (psi(i+2,j)-psi(i-2,j))/12          )
-
-      if (v<=0) then
-         w(i,ny2)=0
+      if (bdy_y2==INFLOW0_ONESIDED) then
+         if (xcord(i)<=xscale/2) then
+            w(i,ny2)=0
+         else
+            w(i,ny2)=  3*w(i,ny2-1) - 3*w(i,ny2-2) - w(i,ny2-3)
+         endif
       else
-         w(i,ny2)=  3*w(i,ny2-1) - 3*w(i,ny2-2) - w(i,ny2-3)
+         w(i,ny2)=0
       endif
    enddo
 endif
@@ -353,14 +348,14 @@ do i=intx1,intx2
             16*w(i,j-1) - w(i,j-2)) / (12*dely*dely)
    endif
 
-   rhs(i,j) = rhs(i,j) - u*dx - v*dy + mu_x*dxx + mu_y*dyy
+   rhs(i,j) = rhs(i,j) - u*dx - v*dy + mu*(dxx + dyy)
 
    if (compute_ints==1) then
          maxvor=max(maxvor,abs(w(i,j)))
          ke = ke + .5*(u**2 + v**2)
          vor=vor + w(i,j)
          ensave = ensave + w(i,j)**2
-         ens_diss=ens_diss + w(i,j)*(mu_x*dxx+mu_y*dyy)
+         ens_diss=ens_diss + w(i,j)*mu*(dxx+dyy)
    endif
 
 enddo

@@ -51,13 +51,13 @@ integer :: numerical_method=FOURIER ! FOURIER
 logical :: dealias=.false.       
 
 ! parameter used by psi-vor model:
+! before using xscale,yscale,zscale, we need to update all FFT
+! derivatives and replace pi by pi/scale
 real*8 :: xscale=1
 real*8 :: yscale=1
 real*8 :: zscale=1
 real*8 :: biotsavart_cutoff
 real*8 :: ubar=0
-real*8 :: mu_x,mu_y,mu_z ! since we allow scaling in both x and y,
-                         ! have to allow two differenent viscosities
 
 
 ! local boundary conditions

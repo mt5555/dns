@@ -8,15 +8,14 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 %range=0:.05:1.00;
-range=0:1.0:100.0;
+range=0:1.0:1000.0;
 %range=[.00];
-name='../src/impulse/kh24';
 %name='../src/kh/khK';
-%name='../src/kh/khQ';  %nopq
-name='../src/temp';
+name='../src/vxpair/vxpair0_';
+
 
 usefig=1;
-mkpr=0;            % make ps and jpeg files
+mkpr=1;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
 
@@ -40,7 +39,6 @@ for i=range
   x=fread(fidvor,nx,'float64');
   y=fread(fidvor,ny,'float64');
   z=fread(fidvor,nz,'float64');
-  x = x*(nx/ny);
   
   q = fread(fidvor,nx*ny*nz,'float64');
   tmp = fread(fidvor,1,'float64');
@@ -67,7 +65,6 @@ for i=range
   x=fread(fidvor,nx,'float64');
   y=fread(fidvor,ny,'float64');
   z=fread(fidvor,nz,'float64');
-  x = x*(nx/ny);
   
   q = fread(fidvor,nx*ny*nz,'float64');
   tmp = fread(fidvor,1,'float64');
@@ -98,14 +95,11 @@ for i=range
       pcolor(x,y,vor')
       shading interp
     else
-      v = -6:1:3;
+      v = -12:1:3;
       v=2.^v;
       contour(x,y,vor',v)
       hold on
-      v = -12:1:-7;
-      v=2.^v;
-      contour(x,y,vor',v,'r')
-      contour(x,y,vor',[0 0],'k')
+      contour(x,y,vor',[.005 .005],'r')
       hold off
     end
     

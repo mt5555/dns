@@ -1,4 +1,43 @@
 **********************************************************************************
+1/17/02
+VXPAIR case
+init_cond_subtype==1
+mu=1e-4
+
+
+compare all 5 runs at t=15?
+
+vxpair0_
+vxpair0_nointerp
+  720x400  yscale=2.0
+  w=0/outflow
+  biot_savart: init and every 5 time steps
+  cutoff=.005
+  ran over night to time 16
+
+vxpair0b_
+  1024x400  yscale=2.0
+  w=0/outflow
+  biot_savart: init and every 5 time steps
+  cutoff=.005
+
+
+vxpair1_
+  720x400   yscale=2.0
+  w=0
+  cutoff=0  
+  biot_savart: init only
+
+
+vxpair1b_ 
+   1024x400   yscale=2.0
+   w=0 
+   cutoff=0
+   biot_savart: init only
+
+
+
+**********************************************************************************
 1/2/02
 
 summary of ISO12 250^3 runs.

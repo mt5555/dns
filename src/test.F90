@@ -36,10 +36,10 @@ psi=0
 work=0
 lpsi=0
 
-bdy_x1=INFLOW0_ONESIDED
-bdy_x2=INFLOW0_ONESIDED
-bdy_y1=INFLOW0_ONESIDED
-bdy_y2=INFLOW0_ONESIDED
+g_bdy_x1=INFLOW0_ONESIDED
+g_bdy_x2=INFLOW0_ONESIDED
+g_bdy_y1=INFLOW0_ONESIDED
+g_bdy_y2=INFLOW0_ONESIDED
 call init_grid()
 
 
@@ -136,10 +136,10 @@ lpsi=0
 ! set b.c. periodoic in X
 ! set b.c. reflect-odd in Y
 
-bdy_x1=REFLECT
-bdy_x2=REFLECT
-bdy_y1=REFLECT_ODD
-bdy_y2=REFLECT_ODD
+g_bdy_x1=REFLECT
+g_bdy_x2=REFLECT
+g_bdy_y1=REFLECT_ODD
+g_bdy_y2=REFLECT_ODD
 call init_grid()
 
 do j=ny1,ny2

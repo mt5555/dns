@@ -101,21 +101,21 @@ LINK=$(F90) $(FFLAGS)
 #independent modules/routines (dont use any other modules):
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 #modules/routines which use OBJS1
-OBJS2 = transpose.o structf.o sforcing.o solve.o ghost.o
+OBJS2 = transpose.o structf.o sforcing.o solve.o ghost.o bc.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o integrals.o
 FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
-MODEL_GRID       = ns_grid.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_GHOST      = ns_ghost.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_PSIVOR     = ns_psivor.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_IMPULSE    = ns_impulse.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC_SLOW  = ns_decomp3.o dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC       = ns.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_ALPHA      = ns_alpha.o dns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SHALLOW    = shallow.o dns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_GRID       = ns_grid.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_GHOST      = ns_ghost.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_PSIVOR     = ns_psivor.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_IMPULSE    = ns_impulse.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SPEC_SLOW  = ns_decomp3.o dns.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SPEC       = ns.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_ALPHA      = ns_alpha.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SHALLOW    = shallow.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 #rules

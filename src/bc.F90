@@ -1,12 +1,25 @@
 #include "macros.h"
-subroutine bc_preloop
+
+
+module bc
 use params
 implicit none
 
 
+! boundary condition on PSI.  
+! used by bc_biotsavart.  
+! if runbs=1,   psi_b is computed using biot savart law
+!    runbs=0,   boundary data psi_b copied into psi
+!
+! you can also use the routine set_biotsavart() to set psi_b
+! based on the boundary values in an array PSI
+!
+real*8,private :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
+                                              ! psi_b(k,1,2) = x2 boundary
+                                              ! psi_b(k,2,1) = y1 boundary
+                                              ! psi_b(k,2,2) = y2 boundary
 
-end subroutine
-
+contains
 
 
 
@@ -71,6 +84,51 @@ end subroutine
 
 
 
+subroutine set_biotsavart(psi)
+!
+! on non-periodic or non-reflective boundarys:
+! set the boundary data psi_b based on boundary data in psi.
+!
+use params
+implicit none
+real*8 psi(nx,ny)
+
+integer :: i,j,k,l
+! set PSI boundary data:
+
+if (REALBOUNDARY(bdy_x1)) then
+   do j=ny1,ny2
+      l = j-ny1+1 + nslaby*my_y
+      psi_b(L,1,1) = psi(nx1,j) 
+   enddo
+endif
+
+
+if (REALBOUNDARY(bdy_x2)) then
+   do j=ny1,ny2
+      l = j-ny1+1 + nslaby*my_y
+      psi_b(L,1,2) = psi(nx2,j) 
+   enddo
+endif
+
+if (REALBOUNDARY(bdy_y1)) then
+   do i=nx1,nx2
+      l = i-nx1+1 + nslabx*my_x
+      psi_b(L,2,1) = psi(i,ny1) 
+   enddo
+endif
+
+
+if (REALBOUNDARY(bdy_y2)) then
+   do i=nx1,nx2
+      l = i-nx1+1 + nslabx*my_x
+      psi_b(L,2,2) = psi(i,ny2) 
+   enddo
+endif
+end subroutine      
+
+
+
 
 subroutine bc_biotsavart(w,psi,runbs)
 !
@@ -96,16 +154,11 @@ real*8 psi(nx,ny)
 integer :: runbs
 
 ! local
-integer i,j,k,l,ierr
+integer i,j,k,l,ierr,last
 real*8 :: dela
-real*8,external :: logterm
-real*8,save :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
-                                      ! psi_b(k,1,2) = x2 boundary
-                                      ! psi_b(k,2,1) = y1 boundary
-                                      ! psi_b(k,2,2) = y2 boundary
 real*8 :: temp(max(g_ny,g_nx),2,2)
 real*8 tmx1,tmx2
-
+logical interp
 
 call wallclock(tmx1)
 
@@ -113,27 +166,54 @@ if (runbs==1) then
 ! init to zero on boundary
 psi_b=0
 
+interp=.false.
+if (g_bdy_x1==INFLOW0_ONESIDED) interp=.true.
+
+
+if (interp) then
+! interpolate every 10'th point
 do j=ny1,ny2
 do i=nx1,nx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
-      do k=1,g_nx  !,10
+      do k=1,g_nx,10 
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
          psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
       enddo
-      do k=2,g_ny  !,10
-         psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
-         psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
+      last=k-10
+      do k=last+1,g_nx
+         !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
+         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
+      enddo
+      do k=11,g_ny,10 
+            psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
+            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
+      enddo
+      last=k-10
+      do k=last+1,g_ny
+            psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
+            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
       enddo
    endif
 enddo
 enddo
 
+else
+do j=ny1,ny2
+do i=nx1,nx2
+   if (abs(w(i,j)).ge.biotsavart_cutoff) then
+      do k=1,g_nx
+         !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
+         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
+      enddo
+      do k=2,g_ny 
+            psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
+            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
+      enddo
+   endif
+enddo
+enddo
+endif
 
-
-#if 0
-C     INTERPOLATE TO INTERMEDIATE POINTS
-      call intpsi(psi)
-#endif
 
 
 #ifdef USE_MPI
@@ -141,6 +221,8 @@ temp=psi_b
 k=max(g_ny,g_nx)*4
 call MPI_allreduce(temp,psi_b,k,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
+
+if (interp) call intpsi(psi_b,max(g_ny,g_nx))
 
 
 ! add ubar correction
@@ -224,5 +306,101 @@ else
    logterm = log(denom1/denom2)
 endif
 end function 
+
+
+
+
+
+subroutine intpsi(psi,n)
+use params
+implicit none
+integer :: n
+real*8 psi(n,2,2)
+
+integer i,k
+
+! x1 and x2 boundary
+! psi(i,1,*) was set for i=1,g_nx,10
+
+do k=1,2
+do i=1,g_ny,10
+   if (i+30>g_ny) exit
+   if (i==1) then  
+      ! do the [y0,y1] piece
+      call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+1,1,k),10,0)
+   endif
+   if (i+40>g_ny) then  
+      ! do the [y2,y3] piece, this is the final iteration
+      call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+21,1,k),10,2)
+   endif
+   ! using [y0,y1,y2,y3], interpolate the [y1,y2] piece
+   call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+11,1,k),10,1)
+enddo
+enddo
+
+
+! y2 boundary
+! psi(i,2,2) was set for i=1,g_ny,10
+k=2
+do i=1,g_nx,10
+   if (i+30>g_nx) exit
+   if (i==1) then  
+      ! do the [y0,y1] piece
+      call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+1,2,k),10,0)
+   endif
+   if (i+40>g_nx) then  
+      ! do the [y2,y3] piece, this is the final iteration
+      call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+21,2,k),10,2)
+   endif
+   ! using [y0,y1,y2,y3], interpolate the [y1,y2] piece
+   call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+11,2,k),10,1)
+enddo
+end subroutine
+
+
+
+
+
+
+
+
+
+end module
+
+      SUBROUTINE interpn(y0,y1,y2,y3,ynew,n,xbeg)
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!c     Interpolates "y" to "n-1" points in the interval 
+!c     [xbeg,xbeg+1] of the 3 intervals [0,1],[1,2],[2,3] 
+!c     --- y0,y1,y2,y3 are assumed to be evenly spaced
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      implicit none
+      integer i,n,xbeg
+      real*8 x0,x1,x2,x3,y0,y1,y2,y3,ynew(*),delx
+      real*8 denom0,denom1,denom2,denom3,fact0,fact1,fact2,fact3,newx
+
+      x0 = 0
+      x1 = 1
+      x2 = 2
+      x3 = 3
+
+      denom0 = -6  !(x0-x1)*(x0-x2)*(x0-x3)   ! (-1)(-2)(-3)=-6
+      denom1 =  2  !(x1-x0)*(x1-x2)*(x1-x3)   ! ( 1)(-1)(-2)= 2
+      denom2 = -2  !(x2-x0)*(x2-x1)*(x2-x3)   ! ( 2)( 1)(-1)=-2
+      denom3 =  6  !(x3-x0)*(x3-x1)*(x3-x2)   ! ( 3)( 2)( 1)= 6
+
+      delx = (x1-x0)/n
+      do i=1,n-1
+        newx = xbeg + i*delx
+        
+        fact0 = (newx-x1)*(newx-x2)*(newx-x3)/denom0
+        fact1 = (newx-x0)*(newx-x2)*(newx-x3)/denom1
+        fact2 = (newx-x0)*(newx-x1)*(newx-x3)/denom2
+        fact3 = (newx-x0)*(newx-x1)*(newx-x2)/denom3
+
+        ynew(i) = y0*fact0 + y1*fact1 + y2*fact2 + y3*fact3
+      enddo
+
+      return
+      end subroutine
 
 

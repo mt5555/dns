@@ -82,7 +82,6 @@ else
 endif
 err=1d99
 
-
 itqmr=0
 
 call matvec(sol,R,a1,a2,h)
@@ -92,7 +91,6 @@ P=R
 alpha=ddot(R,R)
 err=sqrt(alpha)
 if (err<tol1) goto 200
-
 
 100 continue
    itqmr = itqmr+1
@@ -242,6 +240,7 @@ subroutine compute_psi(w,psi,b,work,psi0,runbs)
 !
 use params
 use ghost
+use bc
 implicit none
 real*8 w(nx,ny,nz)
 real*8 psi(nx,ny,nz)
@@ -269,8 +268,8 @@ if (btype==-1) then
         ((g_bdy_y1==PERIODIC) .or. (g_bdy_y1==REFLECT) .or. (g_bdy_y1==REFLECT_ODD)) .and. &
         ((g_bdy_y2==PERIODIC) .or. (g_bdy_y2==REFLECT) .or. (g_bdy_y2==REFLECT_ODD))  ) then
         btype=1
-   else if (g_bdy_x1==INFLOW0_ONESIDED .and. g_bdy_x2==INFLOW0_ONESIDED .and. &
-            g_bdy_y1==REFLECT_ODD .and. g_bdy_y2==INFLOW0_ONESIDED) then
+   else if (REALBOUNDARY(g_bdy_x1)  .and. REALBOUNDARY(g_bdy_x2) .and. &
+            g_bdy_y1==REFLECT_ODD .and. REALBOUNDARY(g_bdy_y2)) then
       btype=2
    else
       ! other types of b.c. not supported, mostly because bc_biotsavart
@@ -305,13 +304,10 @@ else if (btype==2) then
    call bc_biotsavart(w,psi,runbs)    !update PSI on boundary using biot-savart law
 
    b=-w  ! be sure to copy ghost cell data also!
-
    ! apply compact correction to 'b', then set b.c. of b:
    call helmholtz_dirichlet_setup(b,psi,work,1)
-
    psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
    !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
-
 
    !update PSI 1st row of ghost cells so that our 4th order differences
    !near the boundary look like 2nd order centered
