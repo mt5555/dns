@@ -58,7 +58,7 @@ call init_model
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-if (convert_opt == 3) then
+if (convert_opt == 3 .or. convert_opt==5) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
    allocate(Q(nx,ny,nz,n_var))
 else if (convert_opt == 4) then
@@ -117,10 +117,16 @@ icount=icount+1
       enddo
       enddo
       ! output vorticity magnitude
+      output_size=4
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorm"
-      call singlefile_io2(time,work1,fname,vor,work2,0,io_pe,.false.)
+      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,2)
+
+!      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorme"
+!      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,3)
+
    endif
    if (convert_opt==3) then  ! -cout norm2
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
@@ -164,10 +170,31 @@ icount=icount+1
          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i) // "4"
 	 call print_message(fname(1:len_trim(fname)))
-
          call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
       enddo	
-
+   endif
+   if (convert_opt==5) then  ! -cout norm
+      ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
+      call input_uvw(time,Q,vor,work1,work2)
+      print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
+                            maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
+                            maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
+      call print_message("computing norm squared...")
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         work1(i,j,k)=sqrt(Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2)
+      enddo
+      enddo
+      enddo
+      call print_message("outputting norm squared as REAL*4...")
+      output_size=4
+      write(sdata,'(f10.4)') 10000.0000 + time
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norms"
+      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".normse"
+      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
    endif
 
    if (tstart>0) then
