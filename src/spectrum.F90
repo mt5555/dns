@@ -40,7 +40,7 @@ real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes 
 real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
-integer ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
+real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  binvals(1:100)                           !bin values 
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
@@ -573,9 +573,8 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_kEk,1+iwave)
    call cwrite8(fid,cos_tta_spec,1+iwave)
    call cwrite8(fid,nbin,1)
-   do i = 0,iwave
-   call cwrite8(fid,costta_pdf(i,:),1+iwave)
-   enddo
+   write(6,*)costta_pdf(1,:)
+   call cwrite8(fid,costta_pdf(1,:),nbin)
    call cclose(fid,ierr)
    
 endif
@@ -1370,7 +1369,7 @@ do j=ny1,ny2
 ! 	histogram of angles
 	ind = nint(a + b*cos_tta)	
 	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
-        write(6,*)iwave, ind,costta_pdf(iwave,ind)
+!        write(6,*)iwave, ind,costta_pdf(iwave,ind)
 	         
          !     cutoff for recalculating the spectra
 !         delta = 0.1      !this value can be changed by hand
