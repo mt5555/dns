@@ -835,6 +835,7 @@ enddo
 
 ! Ray/tmix passive scalars: output plane dissipation
 ! output plane dissipaiton:  (mu/schmidt) * c_x**2 + c_y**2
+! for passive scalars of type 0 or 1 (Gaussian or KE correlated)
 if (passive_type(np1)<=1) then
    do n=np1,np2
       call print_message("outputting plane dissipation")
@@ -845,8 +846,8 @@ if (passive_type(np1)<=1) then
       write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
       write(ext2,'(i3)') 100+passive_type(n)
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
-           // "-gradxy2" &
-           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:len_trim(ext))
+           // message(2:10) // '.t' // ext2(2:3) // '.s' // &
+          ext(2:len_trim(ext))  // ".gradxy2"
       call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
    enddo
 endif
