@@ -10,7 +10,7 @@ clear all; readdata=1;
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:1.05];
+times=[1.0000:.01:1.11];
 
 
 if (readdata)
@@ -48,7 +48,7 @@ end
 end
 
 % look at passive scalar number np
-for np=10:10
+for np=1:1
 
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
@@ -77,8 +77,7 @@ cxx4(3,:)=pints_e(22,np,:);
 cu(1,:)=pints_e(23,np,:);
 cu(2,:)=pints_e(24,np,:);
 cu(3,:)=pints_e(25,np,:);
-
-
+c1(:)=pints_e(26,np,:);
 
 
 %

@@ -33,8 +33,8 @@ endian='l';
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
-name = 'rot3d_sto0000.0000';
-namedir = '/home/taylorm/ccs/dns/src/rot3d/';
+%name = 'rot3d_sto0000.0000';
+%namedir = '/home/taylorm/ccs/dns/src/rot3d/';
 
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';
@@ -271,7 +271,10 @@ while (time>=.0 & time<=9999.3)
         pspec_z=fread(fidp,np_z,'float64');
      end
 
-     np=10;
+     np=1;
+     % 10  .508
+     % 
+     % 1   .499905
      x=(0:np_r-1)';
      c2=sum(pspec_r(2:np_r,np));     
      cx2=sum((x.^2).*pspec_r(:,np))/3;     % 3<c,1*c,1>
@@ -279,19 +282,8 @@ while (time>=.0 & time<=9999.3)
      %[c2,cx2,cxx2]
      Gc=c2*(cxx2)/(cx2*cx2);
 
-     disp(sprintf('t=%f  <c> Gc  %f  %f  %f  %f ',time,pspec_r(1,np),Gc))
+     disp(sprintf('t=%f  <c> Gc  %f  %f  %f  %f ',time,sqrt(pspec_r(1,np)),Gc))
 
-     hold on;
-     x=1:1000;
-     xt=1e5*((.001+x).^-5);
-     plot(x,xt);
-%     xt=1e5*((.001+x).^-7);
-%     plot(x,xt);
-     hold off; 
-% $$$      c2=sum(xt);
-% $$$      cx2=sum((x.^2).*xt);
-% $$$      cxx2=sum((x.^4).*xt);
-% $$$      c2*(cxx2/3)/(cx2*cx2/9)
 
   end
 
