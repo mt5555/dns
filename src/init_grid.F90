@@ -41,7 +41,7 @@ if (my_pe==io_pe) then
    !   -r   use a restart file for the initial conditions
    !
    rundir="./"
-   runname="test"
+   runname="temp"
    i=0
    do 
       i=i+1

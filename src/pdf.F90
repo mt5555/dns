@@ -692,7 +692,7 @@ real*8 gradw(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3),S2sum
+real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3),S2sum,ensave
 real*8 dummy(1)
 real*8 :: tmx1,tmx2
 
@@ -734,6 +734,7 @@ call compute_pdf_epsilon(work)
 
 ! scalars
 S2sum=0
+ensave=0
 Sww=0
 ux2=0
 ux3=0
@@ -772,6 +773,8 @@ do i=nx1,nx2
    ! compute Sww = wi*(Sij*wj)
    Sww=Sww+Sw(1)*vor(1)+Sw(2)*vor(2)+Sw(3)*vor(3)
 
+   ensave=ensave+vor(1)**2+vor(2)**2+vor(3)**2
+
    ! if we use gradu(i,j,k,1)**3, do we preserve the sign?  
    ! lets not put f90 to that test!
    uij=gradu(i,j,k,1)**2
@@ -800,7 +803,9 @@ ux3=ux3/g_nx/g_ny/g_nz
 ux4=ux4/g_nx/g_ny/g_nz
 u2=u2/g_nx/g_ny/g_nz
 
+ensave=ensave/g_nx/g_ny/g_nz
 
+print *,S2sum,ensave
 
 
 #if 0

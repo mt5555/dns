@@ -57,8 +57,7 @@ if (status==0):
         bsub="bsub"
         path="cronlsf/"
     else:
-        #bsub="idbsub"
-        bsub="bsub"
+        bsub="bsub -L /bin/csh"
         path="cronQ/"
 else:
     print 'Error getting OS type'
@@ -144,8 +143,8 @@ for jobscript in vjobscript:
             if (len(out)>=3) & (out[0]=="#BSUB"):
                 if (out[1]=="-J"):
                     jobname=out[2]
-                if (out[1]=="-n"):
-                    jobcpus=out[2]
+#                if (out[1]=="-n"):
+#                    jobcpus=out[2]
             line=fid.readline()
 
 
@@ -154,8 +153,8 @@ for jobscript in vjobscript:
 
         # for idbsub, #BSUB -n 64 line is ignored, we have to add this
         # to the idbsub line
-        if len(jobcpus)>0:
-            jobcpus=" -n "+jobcpus+" "
+        #if len(jobcpus)>0:
+        #    jobcpus=" -n "+jobcpus+" "
 
         print 'LSF name: ',jobname
 
