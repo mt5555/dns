@@ -27,13 +27,15 @@ ext='.isostr';
 %name='/ccs/scratch/taylorm/decay/decay2048-1024.0000.6491'
 %nx=1024; delx_over_eta=2.73*2; epsilon=.04;
 
-name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
-nx=2048; delx_over_eta=-1; epsilon=-1;
+%name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
+%nx=2048; delx_over_eta=-1; epsilon=-1;
+
+name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0001.4000.new'
+nx=1024; delx_over_eta=-1; epsilon=-1;
 
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
-
 
 
 

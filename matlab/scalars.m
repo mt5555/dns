@@ -23,8 +23,11 @@ fid2=-1;
 %fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
 %nx=2048;
 
-fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
-nx=512;
+%fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
+%nx=512;
+
+fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
+nx=1024;
 
 
 nscalars=0;
@@ -113,9 +116,9 @@ figure(5)
 clf
 hold on
 plot(time,ke,'k')
+plot(time,ke_diss_f+ke_diss_d,'k')
 plot(time_2,ke_diss_tot,'r')
-%plot(time,ke_diss_f+ke_diss_d,'k')
-%plot(time,ke_diss_f,'b')
+plot(time,ke_diss_f,'b')
 plot(time,ke_diss_d,'b')
 plot(time,hel,'g')
 title('KE: black,   \epsilon: blue  d(KE)/dt: red,    hel: green');
