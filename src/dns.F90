@@ -39,6 +39,19 @@ call init_model()
 !stop
 
 
+
+! set the random seed - otherwise it will be the same for all CPUs,
+! producing a bad initial condition.  
+call random_seed(size=k)
+allocate(seed(k))
+call random_seed(get=seed)
+seed=seed+my_pe+1000*time_initial
+call random_seed(put=seed)
+deallocate(seed)
+
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  Set initial data, make it divergence free
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -68,8 +81,7 @@ call MPI_Barrier(comm_3d,ierr)
 
 
 
-! set the random seed - otherwise it will be the same for all CPUs,
-! producing a bad initial condition.  Also make it depend on initial time,
+! rset the random seed based on initial time, 
 ! so we dont have the same seed every time we restart. 
 call random_seed(size=k)
 allocate(seed(k))

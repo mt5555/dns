@@ -113,11 +113,12 @@ extrapolated:
 640^3   29Gb
 768^3   51Gb
 1024^3  144Gb            24Gb per variable                             1b gridpoints
-1536^3  486Gb
+1536^3  486Gb            81Gb per variable
 2048^3  1152Gb           192Gb per variable    
 3072^3  3240Gb           needs at least 1620 cpus.  6x1x512?  
 4096^3  9216Gb           1536Gb per variable      
                          needs 4.6K cpus at 2GB per cpu
+                         NEC ESS 10Tb
 
 **********************************************************************************
 analytic CFL:  for RK4, norm(G)<2.4
