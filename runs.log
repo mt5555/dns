@@ -1,4 +1,22 @@
 **********************************************************************************
+12/6/02
+
+VXPAIR
+new run  testing voriticty interpolation along a line thru vorticity max
+
+4096x2048 
+./gridsetup.py 16 1 1 4096 2048 1 2 2 0 2 2 0   2
+
+Running in /ccs/taylorm/dns/src/vxpair: (MOVE LATER?)
+
+vx4096c   mu=7e-8  IN shankara
+
+
+
+
+
+
+**********************************************************************************
 2/21/02
 NS-alpha runs.
 iso12 forcing
@@ -60,7 +78,6 @@ ran to t=2.0
 
 
 
-
 **********************************************************************************
 12/6/02
 
@@ -85,22 +102,22 @@ deleted all the files.  also, which ellipse contour algorithm
 was beeing used for the older data?)
 
 
-Running in /ccs/taylorm/dns/src/vxpair
+SAVED in:  /ccs/scratch/taylorm/vxpair:
 (move later?)
 
 all using vx6144c.inp:
 
-vx6144c.out  ran to t=17
+vx6144c.out  ran to t=17  (runs deleted)
      65 points per ellipse, 8 contours. 
      R adjustment (after overshoot) in contour search: R=R/2
      contour_eps=1e-7
 
-vx6144d.out   ran to t=17
+vx6144d.out   ran to t=39
      32 points per ellipse, 4 contours.  looks jagged
      R adjustment (after overshoot) in contour search: R=R/10
      contour_eps=5e-7  (should be the same as 1e-7)
      
-vx6144e.out   ran to t=17
+vx6144e.out   ran to t=107
      65 points per ellipse, 4 contours. 
      R adjustment (after overshoot) in contour search: R=R/10
      R init = .1
@@ -738,7 +755,8 @@ vx2048d   vx2048d.inp  mu=4e-7   looks good
 
 vx4096a                mu=1e-7   done, looks good
 vx4096b                mu=7e-8   extremly small amount of noise at t=50
-1
+
+
                        mu=4e-8   save, conservative choice?
 vx6144a                mu=3e-8   looks good - but if you zoom in 
                                  there is a microscopic amount of noise.
