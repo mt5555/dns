@@ -11,6 +11,7 @@ end type
 
 integer           :: numb
 integer,parameter :: numb_max=15
+integer,parameter :: numbs=3         ! max stochastic forcing bands
 type(wnforcing_d) :: wnforcing(numb_max)
 
 integer,private :: ntot=0
@@ -315,8 +316,7 @@ real*8 :: rhs(g_nz2,nslabx,ny_2dz,3)
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,xfac,f_diss,fsum,fxx_diss
 
-real*8,save :: rmodes(-2:2,-2:2,-2:2,3)       ! value at time tmod
-real*8,save :: rmodes_old(-2:2,-2:2,-2:2,3)   ! value at time tmod_old
+real*8,save :: rmodes(-numbs:numbs,-numbs:numbs,-numbs:numbs,3)       ! value at time tmod
 real*8,save :: tmod,tmod_old
 real*8,save :: tscale=.01
 
@@ -327,13 +327,13 @@ if (0==init_sforcing) then
    rmodes=0
    tmod=0
 
-   ! check that we are not including any wave numbers > 2
+   ! check that we are not including any wave numbers > numbs
    do wn=1,numb
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
-      if (abs(z_imcord(i))>2 .or. abs(z_jmcord(j))>2 .or. abs(z_kmcord(k))>2)  then 
+      if (abs(z_imcord(i))>numbs .or. abs(z_jmcord(j))>numbs .or. abs(z_kmcord(k))>numbs)  then 
            call abort("Index error in sforcing_random12")
       endif
    enddo
@@ -401,11 +401,11 @@ end subroutine
 subroutine random12(rmodes)
 use params
 implicit none
-real*8 :: rmodes(-2:2,-2:2,-2:2,3)       
+real*8 :: rmodes(-numbs:numbs,-numbs:numbs,-numbs:numbs,3)       
 
 integer km,jm,im,i,j,k,n,wn,ierr,k2
 real*8 xw,xfac,f_diss
-real*8 :: R(-2:2,-2:2,-2:2,3,2),Rr,Ri,F1,F2
+real*8 :: R(-numbs:numbs,-numbs:numbs,-numbs:numbs,3,2),Rr,Ri,F1,F2
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
@@ -414,9 +414,9 @@ rmodes=0
 call gaussian(R,5*5*5*3*2)
 
 
-do km=-2,2 
-do jm=-2,2
-do im=-2,2
+do km=-numb,numb 
+do jm=-numb,numb
+do im=-numb,numb
    !
    ! Choose R gaussian, theta uniform from [0..1]
    ! vorticty = (R1 + i R2)  exp(im*2pi*x) * exp(jm*2pi*y) * exp(km*2pi*z) 
@@ -428,77 +428,79 @@ do im=-2,2
    ! 
    ! 
    k2 = (im**2 + jm**2 + km**2)
-   if (k2>0) then
-      xfac=1/(-2*pi*k2)
-   else
-      xfac=0
-   endif
-   if (delt>0) xfac=xfac/sqrt(delt)
-   ! normalize so that < R**2 >   = F1  in wave number 1
-   ! normalize so that < R**2 >   = F2  in wave number 2
-   F1 = 5 
-   F2 = 5
-   if (k2 <= 1.5**2) then
-      xfac=xfac*sqrt(F1/60)
-   else if (k2 <= 2.5**2)  then
-      xfac=xfac*sqrt(F2/365)
-   endif
-   
-   do n=1,3
-      psix_r(n) = -im*R(im,jm,km,n,2)*xfac
-      psix_i(n) =  im*R(im,jm,km,n,1)*xfac
-      psiy_r(n) = -jm*R(im,jm,km,n,2)*xfac
-      psiy_i(n) =  jm*R(im,jm,km,n,1)*xfac
-      psiz_r(n) = -km*R(im,jm,km,n,2)*xfac
-      psiz_i(n) =  km*R(im,jm,km,n,1)*xfac
-   enddo
-
-   !
-   !   
-   ! convert to sine & cosine modes:
-   !
-   ! (R1 + i R2) (cosx + i sinx)  (cosy + i siny)  (cosz + i sinz)  
-   ! = (real parts only:)
-   !   R1  cosx cosy cosz                      R1 (1,1,1)
-   ! i R2  cosx cosy sinz  i                  -R2 (1,1,-1) sign(km) 
-   ! i R2  cosx siny cosz  i                  -R2 (1,-1,1) sign(jm)
-   !   R1  cosx siny sinz  i**2               -R1 (1,-1,-1) sign(km*jm)
-   ! i R2  sinx cosy cosz  i                  -R2 (-1,1,1) sign(im) 
-   !   R1  sinx cosy sinz  i**2               -R1 (-1,1,-1) sign(im*km)
-   !   R1  sinx siny cosz  i**2               -R1 (-1,-1,1) sign(im*jm)
-   ! i R2  sinx siny sinz  i**3                R2 (-1,-1,-1) sign(im*jm*km)
-   !  
-   ! 
-   ! vor(1) = w_y - v_z
-   ! vor(2) = u_z - w_x 
-   ! vor(3) = v_x - u_y
-
-   do n=1,3
-      if (n==1) then
-         Rr = psiy_r(3) - psiz_r(2)
-         Ri = psiy_i(3) - psiz_i(2)
-      else if (n==2) then
-         Rr = psiz_r(1) - psix_r(3)
-         Ri = psiz_i(1) - psix_i(3)
-      else if (n==3) then
-         Rr = psix_r(2) - psiy_r(1)
-         Ri = psix_i(2) - psiy_i(1)
+   if (k2 <= (numb+.5)**2) then
+   ! ignore wave numbers outside of our forcing band 
+      if (k2>0) then
+         xfac=1/(-2*pi*k2)
+      else
+         xfac=0
       endif
-
-      i=abs(im)
-      j=abs(jm)
-      k=abs(km)
-
-      rmodes( i, j, k,n) = rmodes( i, j, k,n) + Rr 
-      rmodes( i, j,-k,n) = rmodes( i, j,-k,n) - Ri*zerosign(km) 
-      rmodes( i,-j, k,n) = rmodes( i,-j, k,n) - Ri*zerosign(jm) 
-      rmodes( i,-j,-k,n) = rmodes( i,-j,-k,n) - Rr*zerosign(jm*km) 
-      rmodes(-i, j, k,n) = rmodes(-i, j, k,n) - Ri*zerosign(im)
-      rmodes(-i, j,-k,n) = rmodes(-i, j,-k,n) - Rr*zerosign(im*km) 
-      rmodes(-i,-j, k,n) = rmodes(-i,-j, k,n) - Rr*zerosign(im*jm) 
-      rmodes(-i,-j,-k,n) = rmodes(-i,-j,-k,n) + Ri*zerosign(im*jm*km) 
-   enddo
-
+      if (delt>0) xfac=xfac/sqrt(delt)
+      ! normalize so that < R**2 >   = F1  in wave number 1
+      ! normalize so that < R**2 >   = F2  in wave number 2
+      F1 = 5 
+      F2 = 5
+      if (k2 <= 1.5**2) then
+         xfac=xfac*sqrt(F1/60)
+      else if (k2 <= 2.5**2)  then
+         xfac=xfac*sqrt(F2/365)
+      endif
+      
+      do n=1,3
+         psix_r(n) = -im*R(im,jm,km,n,2)*xfac
+         psix_i(n) =  im*R(im,jm,km,n,1)*xfac
+         psiy_r(n) = -jm*R(im,jm,km,n,2)*xfac
+         psiy_i(n) =  jm*R(im,jm,km,n,1)*xfac
+         psiz_r(n) = -km*R(im,jm,km,n,2)*xfac
+         psiz_i(n) =  km*R(im,jm,km,n,1)*xfac
+      enddo
+      
+      !
+      !   
+      ! convert to sine & cosine modes:
+      !
+      ! (R1 + i R2) (cosx + i sinx)  (cosy + i siny)  (cosz + i sinz)  
+      ! = (real parts only:)
+      !   R1  cosx cosy cosz                      R1 (1,1,1)
+      ! i R2  cosx cosy sinz  i                  -R2 (1,1,-1) sign(km) 
+      ! i R2  cosx siny cosz  i                  -R2 (1,-1,1) sign(jm)
+      !   R1  cosx siny sinz  i**2               -R1 (1,-1,-1) sign(km*jm)
+      ! i R2  sinx cosy cosz  i                  -R2 (-1,1,1) sign(im) 
+      !   R1  sinx cosy sinz  i**2               -R1 (-1,1,-1) sign(im*km)
+      !   R1  sinx siny cosz  i**2               -R1 (-1,-1,1) sign(im*jm)
+      ! i R2  sinx siny sinz  i**3                R2 (-1,-1,-1) sign(im*jm*km)
+      !  
+      ! 
+      ! vor(1) = w_y - v_z
+      ! vor(2) = u_z - w_x 
+      ! vor(3) = v_x - u_y
+      
+      do n=1,3
+         if (n==1) then
+            Rr = psiy_r(3) - psiz_r(2)
+            Ri = psiy_i(3) - psiz_i(2)
+         else if (n==2) then
+            Rr = psiz_r(1) - psix_r(3)
+            Ri = psiz_i(1) - psix_i(3)
+         else if (n==3) then
+            Rr = psix_r(2) - psiy_r(1)
+            Ri = psix_i(2) - psiy_i(1)
+         endif
+         
+         i=abs(im)
+         j=abs(jm)
+         k=abs(km)
+         
+         rmodes( i, j, k,n) = rmodes( i, j, k,n) + Rr 
+         rmodes( i, j,-k,n) = rmodes( i, j,-k,n) - Ri*zerosign(km) 
+         rmodes( i,-j, k,n) = rmodes( i,-j, k,n) - Ri*zerosign(jm) 
+         rmodes( i,-j,-k,n) = rmodes( i,-j,-k,n) - Rr*zerosign(jm*km) 
+         rmodes(-i, j, k,n) = rmodes(-i, j, k,n) - Ri*zerosign(im)
+         rmodes(-i, j,-k,n) = rmodes(-i, j,-k,n) - Rr*zerosign(im*km) 
+         rmodes(-i,-j, k,n) = rmodes(-i,-j, k,n) - Rr*zerosign(im*jm) 
+         rmodes(-i,-j,-k,n) = rmodes(-i,-j,-k,n) + Ri*zerosign(im*jm*km) 
+      enddo
+   endif
 enddo
 enddo
 enddo

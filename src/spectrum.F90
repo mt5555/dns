@@ -12,9 +12,9 @@ transfer function spectrums
 
 logical :: compute_transfer=.false.
 
-real*8,private ::  spec_x(0:g_nx/2)
-real*8,private ::  spec_y(0:g_ny/2)
-real*8,private ::  spec_z(0:g_nz/2)
+real*8,private ::  spec_x(0:g_nx/2,3)
+real*8,private ::  spec_y(0:g_ny/2,3)
+real*8,private ::  spec_z(0:g_nz/2,3)
 real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_r_old(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  transfer_r(0:max(g_nx,g_ny,g_nz))
@@ -50,9 +50,6 @@ real*8 :: time
 
 !local
 integer :: iwave_max,i
-real*8 spec_x2(0:g_nx/2)
-real*8 spec_y2(0:g_ny/2)
-real*8 spec_z2(0:g_nz/2)
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 
 iwave_max=max(g_nx,g_ny,g_nz)
@@ -66,12 +63,13 @@ q1=Q
 
 
 do i=1,ndim
-   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_x2,spec_y2,spec_z2,iwave_max,io_pe)
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_x(0,1),&
+       spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
    spec_r=spec_r+.5*spec_r2
-   spec_x=spec_x + .5*spec_x2
-   spec_y=spec_y + .5*spec_y2
-   spec_z=spec_z + .5*spec_z2
 enddo
+spec_x=.5*spec_x
+spec_y=.5*spec_y
+spec_z=.5*spec_z
 
 spec_r_old=spec_r
 time_old=time
@@ -191,11 +189,17 @@ if (my_pe==io_pe) then
    x=1+iwave; call cwrite8(fid,x,1)
    call cwrite8(fid,spec_r,1+iwave)
    x=1+g_nx/2; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_x,1+g_nx/2)
+   do i=1,3
+      call cwrite8(fid,spec_x(0,i),1+g_nx/2)
+   enddo
    x=1+g_ny/2; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_y,1+g_ny/2)
+   do i=1,3
+      call cwrite8(fid,spec_y(0,i),1+g_ny/2)
+   enddo
    x=1+g_nz/2; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_z,1+g_nz/2)
+   do i=1,3
+      call cwrite8(fid,spec_z(0,i),1+g_nz/2)
+   enddo
    call cclose(fid,ierr)
 endif
 end subroutine

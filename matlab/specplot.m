@@ -29,12 +29,19 @@ while (time>=0 & time<=9999.3)
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
   n_x=fread(fid,1,'float64');
-  spec_x=fread(fid,n_x,'float64');
+  spec_ux=fread(fid,n_x,'float64');  
+  spec_vx=fread(fid,n_x,'float64');  
+  spec_wx=fread(fid,n_x,'float64');  
+  
   n_y=fread(fid,1,'float64');
-  spec_y=fread(fid,n_y,'float64');
+  spec_uy=fread(fid,n_y,'float64');
+  spec_vy=fread(fid,n_y,'float64');
+  spec_wy=fread(fid,n_y,'float64');
+  
   n_z=fread(fid,1,'float64');
-  spec_z=fread(fid,n_z,'float64');
-
+  spec_uz=fread(fid,n_z,'float64');
+  spec_vz=fread(fid,n_z,'float64');
+  spec_wz=fread(fid,n_z,'float64');  
   
   %
   % NOW read the transfer spectrum
@@ -72,9 +79,9 @@ while (time>=0 & time<=9999.3)
     subplot(3,1,1);
     loglog53(n_r,spec_r,time);
     subplot(3,1,2);
-    loglog53(n_x,spec_x,time);
+    loglog53(n_x,spec_ux,time);
     subplot(3,1,3);
-    loglog53(n_y,spec_y,time);
+    loglog53(n_y,spec_vy,time);
     %print -depsc spec.ps    
     %pause
   else
@@ -82,11 +89,11 @@ while (time>=0 & time<=9999.3)
     subplot(2,2,1);
     loglog53(n_r-1,spec_r,time);
     subplot(2,2,2);
-    loglog53(n_x,spec_x,time);
+    loglog53(n_x,spec_ux,time);
     subplot(2,2,3);
-    loglog53(n_y,spec_y,time);
+    loglog53(n_y,spec_vy,time);
     subplot(2,2,4);
-    loglog53(n_z,spec_z,time);
+    loglog53(n_z,spec_wz,time);
     %M(j)=getframe(gcf);
   end
 

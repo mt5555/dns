@@ -47,6 +47,12 @@ echo "without restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns -d $rundir reference3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
+echo "***********************************************************"
+echo "dnsgrid without restart:"
+./gridsetup.py 1 1 1 32 32 32
+make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid  -d $rundir reference3d < $refin > $tmp 
+../testing/check.sh $tmp $refout
+
 
 echo "***********************************************************"
 echo "with restart:"
