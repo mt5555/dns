@@ -1,0 +1,23 @@
+2            ! input file type
+iso12        ! initial condition:  KH-blob, KH-anal, iso12
+0            ! initial condition subtype
+none         ! forcing:  none, iso12
+kediff       ! viscosity type  (value, smallest, kediff, Re)
+100.0        ! viscosity coefficient.  (300)
+0.0           ! alpha (for NS-alpha model)
+0             ! compute structure functions
+4th          ! derivative method  (fft, fft-dealias, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+-10           ! final time
+1.50         ! adv cfl  (0 = disabled, use min_dt)
+.25           ! vis cfl  (0 = disabled, use min_dt)
+0             ! min_dt  
+1             ! max_dt 
+0.0          ! restart_dt  (0 = restart output disabled)
+-10          ! diag_dt   
+-10          ! screen_dt
+-10          ! output_dt  (0 = output disabled, except for custom output times)
+1           ! n_output_custom  number of custom output times  
+990.0
