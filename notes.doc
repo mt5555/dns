@@ -1,19 +1,9 @@
-
 Goeff: jobs?
-Sandia job - email spotz
-Tim Clark: turb mix computer time
-Doug Kothe: amrita job?
 pope's forcing.  phys. fluilds. 1996 Pope and H*
-LDRD-ER proposal - work on that, make paragraph for Beth and Darryl
+LDRD-ER proposal 
 joint pdfs
 
-
-dEk/dt = T(k)  - mu*k**2*E(k)   copute T(k) in ns.F90
-
-March 18: dryrun
-March 24: Sunday, review.
 March 25: call Karl-Heinz about parallel I/O
-
 
 
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid

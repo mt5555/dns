@@ -24,7 +24,7 @@ integer,private :: iwave=-1
 
 
 
-real*8,private :: transfer_comp_time         ! time at which below terms evaluated at:
+real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
 real*8 ::  spec_rhs(0:max(g_nx,g_ny,g_nz))   ! transfer spec of u dot RHS
