@@ -501,6 +501,10 @@ lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
 R_lambda = lambda*sqrt(2*ke/3)/mu 
 
 if (my_pe==io_pe) then
+   print *,range(1,:)
+   print *,range(2,:)
+   print *,range(3,:)
+   print *,'ntot:    ',ntot
    print *,'KE:      ',ke
    print *,'epsilon: ',epsilon
    print *,'mu       ',mu
@@ -530,18 +534,6 @@ do idir=1,ndir
       rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
       call compute_perp(rhat,rperp1,rperp2)
 
-#if 0
-      ! check orthoginality
-      print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
-           sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
-           sqrt(rperp2(1)**2+rperp2(2)**2+rperp2(3)**2)
-      
-      print *,'ortho: ',&
-           rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3), &
-           rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3), &
-           rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
-      
-#endif
 
       ! data is in x-y hyperslabs.  
       ! z-direction=0
@@ -1039,7 +1031,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       do j=ny1,ny2
       do i=nx1,nx2
 
-         if (subcube(i,j,k)==0) exit
+         if (subcube(i,j,k)/=0) then  ! using an exit here exits *all* loops!
 
          i2 = i + rvec(1)
          do
@@ -1079,7 +1071,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
             SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
             SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
          endif
-         
+         endif
       enddo
       enddo
       enddo
@@ -1101,8 +1093,9 @@ use params
 implicit none
 !input
 real*8 :: Q(g_nz2,nslabx,ny_2dz,ndim)  
-real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 real*8 :: subcube(g_nz2,nslabx,ny_2dz)
+real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
+
 
 !local
 real*8 :: rvec(3),delu(3)
@@ -1119,13 +1112,17 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
       rvec(2)=0  ! data required to be in xz slab
       if (rvec(3)<0) rvec(3)=rvec(3)+g_nz
+
+
       
       do j=1,ny_2dz
       do i=1,nslabx
       do k=1,g_nz
 
-         if (subcube(k,i,j)==0) exit
+         
+         if (subcube(k,i,j)/=0) then   ! using an exit here exits *all* loops!
 
+         
          i2 = i + rvec(1)
          do
             if (i2<1) call abort("isoave: i2<nx1")
@@ -1163,6 +1160,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
             SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
             SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
             SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
+         endif
          endif
          
       enddo
