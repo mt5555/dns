@@ -1,5 +1,10 @@
 # Makefile for dns
 #
+# FFT OPTIONS:
+#     USE_STKFFT
+#     USE_FFT99
+#     USE_SGIFFT
+#
 #
 
 UNAME = $(shell uname)
@@ -18,7 +23,8 @@ ifeq ($(UNAME),Linux)
    #LDFLAGS = --staticlink 
 
    F90 = pgf90
-   FFLAGS = -fast -DLINUX $(MPI)
+   FFLAGS = -fast -DLINUX $(MPI) #-DUSE_STKFFT
+   LDFLAGS = -Lstk -lstk
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
@@ -32,7 +38,7 @@ ifeq ($(UNAME),IRIX64)
    MPI = -DUSE_MPI
    MPILIB = -lmpi 
    LDFLAGS =  -l scs 
-   FFLAGS = -64 -O3 -macro_expand  -DIRIX64  -DSGIFFT
+   FFLAGS = -64 -O3 -macro_expand  -DIRIX64  -DUSE_SGIFFT
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
@@ -48,9 +54,9 @@ LINK=$(F90) $(FFLAGS)
 
 
 #independent modules/routines (dont use any other modules):
-OBJS1 = params.o util.o  fft99.o fft_interface.o mpi.o
+OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o
 #modules/routines which use OBJS1
-OBJS2 = transpose.o
+OBJS2 = transpose.o 
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o integrals.o
@@ -88,11 +94,6 @@ dep:
 
 -include .depends
 
-fft_interface.o:  fft99_interface.o
-	cp -f fft99_interface.o fft_interface.o
-#fft_interface.o:  fft_james_interface.o
-#	cp -f fft_james_interface.o fft_interface.o
-
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"
@@ -102,11 +103,3 @@ transpose.h:
 	echo "Run gridsetup.py to generage a transpose.h file!"
 	exit 1
 
-
-
-
-
-
-
-
- 

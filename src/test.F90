@@ -349,6 +349,7 @@ error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputx(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "x-direction d/dx error=",error
 call print_message(message)
 
+
 error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputxx(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "x-direction d2/dxx error=",error
 call print_message(message)
@@ -413,15 +414,19 @@ use params
 implicit none
 real*8 :: output(nx,ny,nz)
 character*80 message
-integer i,j,k
+integer :: i,j,k,count=0
 
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
-    if (abs(output(i,j,k)) > 1e-9) then	
-       write(message,'(a,i4,i4,i4,a,2f15.10)') 'mode=',imcord(i),jmcord(j),kmcord(k),&
+    if (abs(output(i,j,k)) > 1e-9 .and. count<50) then	
+       count=count+1
+       write(message,'(i4,i4,i4,a,i4,i4,i4,a,2f15.10)') i,j,k,'mode=',imcord(i),jmcord(j),kmcord(k),&
             ' val=',output(i,j,k)
        call print_message(message)
+       if (count==50) then
+          call print_message("count>50 will not print any more modes")
+       endif
     endif
 enddo
 enddo

@@ -36,10 +36,10 @@ implicit none
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0           !viscosity
-real*8  :: pi,pi2,pi2_squared
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
 character*80 :: runname
+real*8  :: pi,pi2,pi2_squared
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -203,11 +203,6 @@ subroutine params_init
 character*80 message
 integer :: fail=0
 
-real*8 :: one=1
-pi=4*atan(one)
-pi2=2*pi
-pi2_squared=4*pi*pi
-
 g_nx=nslabx*ncpu_x
 g_ny=nslaby*ncpu_y
 g_nz=nslabz*ncpu_z
@@ -310,7 +305,13 @@ if ( (g_nz2)*ny_2dz*real(nslabx,r8kind) >  ny*nz*real(nx,r8kind)) then
 endif
 
 
-
+!
+! this is needed to gaurentee that the sine and cosine modes
+! are on the same processor.  
+!
+ASSERT("fft_interface_init(): nslabx must be even ",mod(nslabx,2)==0)
+ASSERT("fft_interface_init(): nslaby must be even ",mod(nslaby,2)==0)
+ASSERT("fft_interface_init(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
 
 
 
@@ -335,6 +336,12 @@ allocate(g_zcord(g_nz+1))
 allocate(g_imcord(g_nx))
 allocate(g_jmcord(g_ny))
 allocate(g_kmcord(g_nz))
+
+
+pi=1
+pi=4*atan(pi)
+pi2=2*pi
+pi2_squared=4*pi*pi
 
 
 end subroutine

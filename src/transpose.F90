@@ -276,7 +276,7 @@ use params
 
 real*8 p(nx,ny,nz)
 real*8 pt(g_nx2,nslaby,nz_2dx)
-integer n1,n1d,n2,n2d,n3,n3d
+integer n1,n1d,n2,n2d,n3,n3d,ioff
 
 !local variables
 integer iproc
@@ -511,7 +511,6 @@ use params
 real*8 p(nx,ny,nz)
 real*8 pt(g_nx2,nslabz,ny_2dx)
 integer n1,n1d,n2,n2d,n3,n3d
-
 
 !local variables
 integer iproc
@@ -989,7 +988,7 @@ use params
 use mpi
 implicit none
 real*8 :: p(nx,ny,nz)
-real*8 :: pt(g_nx2,nslaby,nz_2dx)
+real*8 :: pt(T:g_nx2,nslaby,nz_2dx)
 
 ! local vars
 real*8 buf(o_nx,nslaby)
