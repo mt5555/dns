@@ -30,6 +30,14 @@ real*8 :: mxw_finegrid        ! max vorticity on fine grid
 real*8 :: mxw_init=-1         ! max vorticity at time=0
 real*8 :: dft(0:4,nelld)              ! modes of Rad
 
+!
+! interpolating the vorticity on line thru x=center_finegrid(1)
+!                                          y=0:.1:2
+!
+integer :: vxline_count        ! number of points on line thru vx center
+real*8  :: vxline_y(g_ny+20)      ! y-cord of 
+real*8  :: vxline_w(g_ny+20)      ! interpolated vorticity
+
 real*8 :: contour_eps = 5e-7    ! find contours to within this accuracy
 real*8 :: center_eps  = 1e-5    ! find center to within this accuracy
 
@@ -110,7 +118,33 @@ if (io_pe==my_pe) then
       call cwrite8(fid,Rad2(1,nell),npd)
    enddo
    call cclose(fid,ierr)
+
+
+
+
+
+   write(message,'(f10.4)') 10000.0000 + time
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vxline"
+   call copen(fname,"w",fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "output vxline: Error opening file errno=",ierr
+      call abort(message)
+   endif
+   
+   tmp=vxline_count
+   call cwrite8(fid,tmp,1)
+   call cwrite8(fid,time,1)
+   call cwrite8(fid,center_finegrid,2)
+   call cwrite8(fid,vxline_y,vxline_count)
+   call cwrite8(fid,vxline_w,vxline_count)
+   call cclose(fid)
+   
 endif
+
+
+
+
+
 
 end subroutine
 
@@ -130,6 +164,7 @@ integer :: setmax
 !local
 integer :: nell,np
 real*8 :: tmx1,tmx2
+real*8  :: yi,xi
 
 call wallclock(tmx1)
 if (init==0) call ellipse_init()
@@ -157,10 +192,32 @@ enddo
 call findbestcenter(w,center)
 
 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! find "better" center, then interpolate data on a line thru center
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call findcenter_finegrid(w,center,center_finegrid)
 print *,'grid max: ',mxw,center(1),center(2)
+print *,'delx, dely: ',delx,dely
 print *,'findgrid: ',mxw_finegrid,center_finegrid(1),center_finegrid(2)
+print *,'cord diff/h: ',(center_finegrid(1)-center(1))/delx&
+                       ,(center_finegrid(2)-center(2))/dely
 
+
+! now interpolate to the set of points
+! x=center_finegrid(1)
+! y=g_ycord(1):.1:g_ycord(o_ny) 
+xi=center_finegrid(1)
+vxline_count=0
+do yi=g_ycord(1),g_ycord(o_ny),.1
+   vxline_count=vxline_count+1
+   vxline_y(vxline_count)=yi
+   call interp_to_point(vxline_w(vxline_count),w,xi,yi)
+enddo
 
 
 call wallclock(tmx2)
@@ -260,75 +317,22 @@ implicit none
 real*8 :: w(nx,ny),mxcord(2),mxcord_finegrid(2)
 
 !local
-integer :: i,j,ierr,igrid,jgrid,jj,jc
-real*8  :: wfine(-2:2,-2:2),wfine2(-2:2,-2:2)
+integer :: i,j,ierr
+integer,parameter :: sh=2
+real*8  :: wfine(-sh:sh,-sh:sh),wfine2(-sh:sh,-sh:sh)
 real*8  :: mxcord2(2),tmp1,tmp2
-real*8  :: xi,yi,xc,yc
-real*8 :: Qint(4)
+real*8  :: xi,yi
 
-do j=-2,2
-do i=-2,2
+do j=-sh,sh
+do i=-sh,sh
    xi=mxcord(1)+i*delx/4
    yi=mxcord(2)+j*dely/4
-
-   ! interpolate to (xi,yi)
-
-   ! find position in global grid:
-   igrid = 1 + floor( (xi-g_xcord(1))/delx )
-   jgrid = 1 + floor( (yi-g_ycord(1))/dely )
-
-   if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
-      ! compute a new point in the center of the above cell:
-      ! (do this to avoid problems with 2 cpus both claiming a point
-      ! on the boundary of a cell)
-      xc=.5*(g_xcord(igrid)+g_xcord(igrid+1))
-      yc=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
-
-      ! find cpu which owns the grid point (xc,yc)
-      if (xcord(intx1)<xc .and. xc<xcord(intx2)+delx .and. &
-           ycord(inty1)<yc .and. yc<ycord(inty2)+dely ) then
-
-         ! find igrid,jgrid so that point is in box:
-         ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
-         igrid = intx1 + floor( (xc-xcord(intx1))/delx )
-         jgrid = inty1 + floor( (yc-ycord(inty1))/dely )
-
-         ASSERT("findcenter_finegrid(): igrid interp error",igrid<=intx2)
-         ASSERT("findcenter_finegrid(): jgrid interp error",jgrid<=inty2)
-
-         ! interpolate trhs
-         do jj=1,4
-            ! interpolate xcord(igrid-1:igrid+2) to xi
-            ! data  w(igrid-1:igrid+2, jgrid-2+jj,:) 
-            xc = 1 + (xi-xcord(igrid))/delx
-            ASSERT("findcenter_finegrid(): xc interp error 1",xc>.99)
-            ASSERT("findcenter_finegrid(): xc interp error 2",xc<4.01)
-            jc = jgrid-2+jj
-            call interp4(w(igrid-1,jc),w(igrid,jc),&
-                    w(igrid+1,jc),w(igrid+2,jc),&
-                    xc,Qint(jj))
-         enddo
-         ! interpolate ycord(jgrid-1:jgrid+2) to ycord=yi
-         ! data:  Qint(1:4)
-         yc = 1 + (yi-ycord(jgrid))/dely
-         ASSERT("findcenter_finegrid(): yc interp error 1",yc>.99)
-         ASSERT("findcenter_finegrid(): yc interp error 2",yc<4.01)
-         call interp4(Qint(1),Qint(2),Qint(3),Qint(4),yc,wfine(i,j))
-      else
-         ! point does not belong to my_pe, set to -inf
-         wfine(i,j)=-1d100
-      endif
-   else
-      print *,'interpolation point outside of domain: '
-      write(*,'(2i5,2e14.5,f5.0)') my_pe,xi,yi
-      call abort("findcenter_finegrid(): point outside of domain") 
-   endif
+   call interp_to_point(wfine(i,j),w,xi,yi)
 enddo
 enddo
 #ifdef USE_MPI
-   ! assume a 5x5 finegrid:  
    wfine2=wfine
-   call MPI_allreduce(wfine2,wfine,25,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(wfine2,wfine,(2*sh+1)*(2*sh+1),MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 
@@ -336,12 +340,12 @@ enddo
 ! find max vorticity
 !
 mxw_finegrid = -9d20
-do j=-2,2
-do i=-2,2
+do j=-sh,sh
+do i=-sh,sh
    if (wfine(i,j)>mxw_finegrid) then
       mxcord_finegrid(1)=mxcord(1)+i*delx/4
       mxcord_finegrid(2)=mxcord(2)+j*dely/4
-      mxw_finegrid=w(i,j)
+      mxw_finegrid=wfine(i,j)
    endif
 enddo
 enddo
@@ -632,6 +636,77 @@ endif
 
 
 end subroutine
+
+
+
+
+
+subroutine interp_to_point(winterp,w,xi,yi)    
+use params
+use mpi
+implicit none
+real*8 :: w(nx,ny),winterp
+real*8  :: xi,yi,xc,yc
+real*8 :: Qint(4)
+integer :: igrid,jgrid,jj,jc
+
+   ! interpolate to (xi,yi)
+
+   ! find position in global grid:
+   igrid = 1 + floor( (xi-g_xcord(1))/delx )
+   jgrid = 1 + floor( (yi-g_ycord(1))/dely )
+
+   if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
+      ! compute a new point in the center of the above cell:
+      ! (do this to avoid problems with 2 cpus both claiming a point
+      ! on the boundary of a cell)
+      xc=.5*(g_xcord(igrid)+g_xcord(igrid+1))
+      yc=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
+
+      ! find cpu which owns the grid point (xc,yc)
+      if (xcord(intx1)<xc .and. xc<xcord(intx2)+delx .and. &
+           ycord(inty1)<yc .and. yc<ycord(inty2)+dely ) then
+
+         ! find igrid,jgrid so that point is in box:
+         ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
+         igrid = intx1 + floor( (xc-xcord(intx1))/delx )
+         jgrid = inty1 + floor( (yc-ycord(inty1))/dely )
+
+         ASSERT("findcenter_finegrid(): igrid interp error",igrid<=intx2)
+         ASSERT("findcenter_finegrid(): jgrid interp error",jgrid<=inty2)
+
+         ! interpolate trhs
+         do jj=1,4
+            ! interpolate xcord(igrid-1:igrid+2) to xi
+            ! data  w(igrid-1:igrid+2, jgrid-2+jj,:) 
+            xc = 1 + (xi-xcord(igrid))/delx
+            ASSERT("findcenter_finegrid(): xc interp error 1",xc>.99)
+            ASSERT("findcenter_finegrid(): xc interp error 2",xc<4.01)
+            jc = jgrid-2+jj
+            call interp4(w(igrid-1,jc),w(igrid,jc),&
+                    w(igrid+1,jc),w(igrid+2,jc),&
+                    xc,Qint(jj))
+         enddo
+         ! interpolate ycord(jgrid-1:jgrid+2) to ycord=yi
+         ! data:  Qint(1:4)
+         yc = 1 + (yi-ycord(jgrid))/dely
+         ASSERT("findcenter_finegrid(): yc interp error 1",yc>.99)
+         ASSERT("findcenter_finegrid(): yc interp error 2",yc<4.01)
+         call interp4(Qint(1),Qint(2),Qint(3),Qint(4),yc,winterp)
+      else
+         ! point does not belong to my_pe, set to -inf
+         winterp=-1d100
+      endif
+   else
+      print *,'interpolation point outside of domain: '
+      write(*,'(2i5,2e14.5,f5.0)') my_pe,xi,yi
+      call abort("findcenter_finegrid(): point outside of domain") 
+   endif
+end subroutine
+
+
+
+
 
 
 
