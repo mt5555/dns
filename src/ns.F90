@@ -722,62 +722,23 @@ do n=1,3
       enddo
    enddo
 enddo
-
-
 rhs=rhs+divs
 
 #elif (defined ITER)
 
-
-#ifdef JACOBI
+#define JACOBI
 
 gradu=div
-divs=0
-p=0
-p2=0
 do n=1,3
-   call z_fft3d_trashinput(gradu(1,1,1,n),p,work) 
-   ! solve Helm(divs)=p     
-   ! using:  d/dt divs = p - Helm(divs)
-   !     largest eigenvalue:  alpha_value**2 * pi2 **2 * k**2
-   !     kmax = 2/3 1/2delx = 1/(3*delx)
-   !         
-   ! initial guess = p
-   divs(:,:,:,n)=p
-
-
-   i=0
-   do 
-      call helm(p2,divs(1,1,1,n))
-      w = (alpha_value*pi2/(3*min(delx,dely,delz)))**2
-      w = 1/(1.001*w)
-      if (i==0) wtot=maxval(abs(p-p2))
-      !if (i==0) wtot=maxval(abs(p))
-      divs(:,:,:,n) = divs(:,:,:,n) + w*(p -  p2)
-      i=i+1
-      if (mod(i,100)==0) print *,i,maxval(abs(p-p2))/wtot
-      !if (maxval(abs(p -  p2))<=.10*wtot) exit
-      if (i==40) exit
-   enddo
-   print *,i,maxval(abs(p-p2))/wtot
-
-enddo
-
-
+   work=gradu(:,:,:,n)
+#ifdef JACOBI
+   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0)
 #else
-   ! perform iteration in grid space
-   gradu=div
-   do n=1,3
-      work=gradu(:,:,:,n)
-      call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,.05d0)
-      call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
-   enddo
+   call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,.03d0)
 #endif
-
-
+   call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
+enddo
 rhs=rhs+divs
-
-
 
 a_diss=0
 do n=1,3

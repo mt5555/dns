@@ -14,10 +14,12 @@ range=0:50;
 i=1;
 %fidarray(i)=fopen('../src/impulse/kh0.scalars','r','l');  i=i+1;
 fidarray(i)=fopen('../src/impulse/kh10.scalars','r','l'); i=i+1;
-fidarray(i)=fopen('../src/impulse/kh17.scalars','r','l'); i=i+1;
-fidarray(i)=fopen('../src/impulse/kh18.scalars','r','l'); i=i+1;
-fidarray(i)=fopen('../src/impulse/kh19.scalars','r','l'); i=i+1;
-fidarray(i)=fopen('../src/impulse/kh20.scalars','r','l'); 
+%fidarray(i)=fopen('../src/impulse/kh17.scalars','r','l'); i=i+1;
+%fidarray(i)=fopen('../src/impulse/kh18.scalars','r','l'); i=i+1;
+%fidarray(i)=fopen('../src/impulse/kh19.scalars','r','l'); i=i+1;
+%fidarray(i)=fopen('../src/impulse/kh20.scalars','r','l'); 
+
+fidarray(i)=fopen('../src/impulse/kh240000.0000.scalars','r','l'); 
 
 figure(5)
 clf
