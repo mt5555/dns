@@ -13,8 +13,8 @@ module which will compute ellipse centerered around the peak vorticity
 
 integer,private   :: init = 0
 
-integer,parameter :: nelld = 7  !  number of ellipses
-integer,parameter :: npd   = 65  !  number of points along each ellipse
+integer,parameter :: nelld = 4  !  number of ellipses
+integer,parameter :: npd   = 32  !  number of points along each ellipse
 
 
 real*8 :: wval(nelld)         ! vorticity contour values (% of max vorticity)
@@ -28,7 +28,7 @@ real*8 :: mxw                 ! max vorticity on grid
 real*8 :: mxw_init=-1         ! max vorticity at time=0
 real*8 :: dft(0:4,nelld)              ! modes of Rad
 
-real*8 :: contour_eps = 1e-6     ! find contours to within this accuracy
+real*8 :: contour_eps = 5e-8    ! find contours to within this accuracy
 real*8 :: center_eps  = 1e-5    ! find center to within this accuracy
 
 
@@ -42,13 +42,10 @@ integer :: nell,np
 init=1
 
 
-wval(1)=7/8.
-wval(2)=6/8.
-wval(3)=5/8.
-wval(4)=4/8.
-wval(5)=3/8.
-wval(6)=2/8.
-wval(7)=1/8.
+wval(1)=6/8.
+wval(2)=4/8.
+wval(3)=2/8.
+wval(4)=1/8.
 if (nelld /= 7) then
    call abort("ellipse init error")
 endif
@@ -326,8 +323,9 @@ integer :: np,count,ierr
          else if (winterp>wcontour) then
             r(np)=r(np)+Rdelta ! undershoot
          else if (winterp<=wcontour) then ! overshoot
-            Rdelta=Rdelta/2
-            r(np)=r(np)-Rdelta
+            r(np)=r(np)-Rdelta  ! back to original undershoot value
+            Rdelta=Rdelta/10
+            r(np)=r(np)+Rdelta  ! increment by new value
          endif
 #ifdef USE_MPI
          ! r(np):  one cpu has valid (positive) value, the rest
