@@ -20,7 +20,7 @@ character(len=80) message
 integer :: n,i,j,k
 
 
-integer len1, len2, fidudm, gidudm, sgidudm, dsidudm, infoid, ierr
+integer len1, len2, fidudm, dsidudm, infoid, ierr
 integer attrdim, attrcnt
 integer i1, j1, k1
 integer*8 sizesudm(3), gsizesudm(3), offsetsudm(3)
@@ -30,7 +30,6 @@ integer*4 cpulocudm(3)
 
 
 character(len=80) fnameudm
-character(len=80) gnameudm
 character(len=80) dsnameudm 
 character(len=80) attrname 
 character*(2) dotudm 
@@ -55,26 +54,26 @@ character*(2) dotudm
    attrcnt = 1
    call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE, 1, 1, time,ierr)  
 
-   i = ncpu_x *(nx2 - nx1 + 1)  
-   j = ncpu_y *(ny2 - ny1 + 1)  
-   k = ncpu_z *(nz2 - nz1 + 1)  
-   attrname = 'nx'//char(0) 
-   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_INT,attrdim,attrcnt,i,ierr)
-   attrname = 'ny'//char(0)     
-   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_INT,attrdim,attrcnt,j,ierr)
-   attrname = 'nz'//char(0)     
-   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_INT,attrdim,attrcnt,k,ierr)
-
+!   i = ncpu_x *(nx2 - nx1 + 1)  
+!   j = ncpu_y *(ny2 - ny1 + 1)  
+!   k = ncpu_z *(nz2 - nz1 + 1)  
+!   attrname = 'nx'//char(0) 
+!   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_INT,attrdim,attrcnt,i,ierr)
+!   attrname = 'ny'//char(0)     
+!   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_INT,attrdim,attrcnt,j,ierr)
+!   attrname = 'nz'//char(0)     
+!   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_INT,attrdim,attrcnt,k,ierr)
+!
 !  open a group for coordinates
-
-   gnameudm = 'coords'//char(0)
-   call UDM_GROUP_OPEN(gnameudm, fidudm, UDM_HDF_OPEN_CREATE, gidudm, ierr)
-   attrname = 'delx'//char(0)
-   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,attrdim,attrcnt,delx,ierr)
-   attrname = 'dely'//char(0)
-   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,attrdim,attrcnt,dely,ierr)
-   attrname = 'delz'//char(0)
-   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,attrdim,attrcnt,delz,ierr)
+!
+!   gnameudm = 'coords'//char(0)
+!   call UDM_GROUP_OPEN(gnameudm, fidudm, UDM_HDF_OPEN_CREATE, gidudm, ierr)
+!   attrname = 'delx'//char(0)
+!   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,attrdim,attrcnt,delx,ierr)
+!   attrname = 'dely'//char(0)
+!   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,attrdim,attrcnt,dely,ierr)
+!   attrname = 'delz'//char(0)
+!   call UDM_ATTR_WRITE(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,attrdim,attrcnt,delz,ierr)
 
 !  create a empty structure for a dataset
 
@@ -95,7 +94,7 @@ character*(2) dotudm
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_DIMS_TOTAL, gsizesudm, ierr)
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_STARTS, offsetsudm, ierr)  
    dsnameudm = 'xcord'//char(0)
-   call UDM_DATASET_WRITE(dsnameudm,gidudm,UDM_ATOMIC_DOUBLE,infoid,g_xcord(1),ierr)
+   call UDM_DATASET_WRITE(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,g_xcord(1),ierr)
 
    gsizesudm(1) = o_ny
    if (my_pe .eq. 0) then
@@ -104,7 +103,7 @@ character*(2) dotudm
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_DIMS,  sizesudm,  ierr)
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_DIMS_TOTAL, gsizesudm, ierr)
    dsnameudm = 'ycord'//char(0)
-   call UDM_DATASET_WRITE(dsnameudm,gidudm,UDM_ATOMIC_DOUBLE,infoid,g_ycord(1),ierr)
+   call UDM_DATASET_WRITE(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,g_ycord(1),ierr)
 
    gsizesudm(1) = o_nz
    if (my_pe .eq. 0) then
@@ -113,7 +112,7 @@ character*(2) dotudm
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_DIMS,  sizesudm,  ierr)
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_DIMS_TOTAL, gsizesudm, ierr)
    dsnameudm = 'zcord'//char(0) 
-   call UDM_DATASET_WRITE(dsnameudm,gidudm,UDM_ATOMIC_DOUBLE,infoid,g_zcord(1),ierr)
+   call UDM_DATASET_WRITE(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,g_zcord(1),ierr)
 
    call UDM_INFO_FREE(1,infoid,ierr)
 
@@ -126,8 +125,9 @@ character*(2) dotudm
 !     since the current fortran interface treats the rightmost index first, as in C, 
 !     I have to reverse the orders of indices 
 
-      gnameudm = 'ns_uvw'//char(0)
-      call UDM_GROUP_OPEN(gnameudm, fidudm, UDM_HDF_OPEN_CREATE, gidudm, ierr)
+!      gnameudm = 'ns_uvw'//char(0)
+!      call UDM_GROUP_OPEN(gnameudm, fidudm, UDM_HDF_OPEN_CREATE, gidudm, ierr)
+
       dsnameudm(1:1) = char(0)
       call UDM_INFO_CREATE(dsnameudm, dsnameudm, -1, UDM_INFO_DATA_DIST, infoid, ierr)
       call UDM_INFO_ITEM_SET(infoid, UDM_INFO_NDIMS, 3, ierr)
@@ -160,7 +160,7 @@ character*(2) dotudm
       enddo
       enddo
       enddo 
-      call UDM_DATASET_WRITE(dsnameudm,gidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
+      call UDM_DATASET_WRITE(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
 
       dsnameudm = 'v'//char(0)
       do k = nz1, nz2        
@@ -173,7 +173,7 @@ character*(2) dotudm
       enddo
       enddo
       enddo
-      call UDM_DATASET_WRITE(dsnameudm,gidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
+      call UDM_DATASET_WRITE(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
 
       dsnameudm = 'w'//char(0)
       do k = nz1, nz2        
@@ -186,7 +186,7 @@ character*(2) dotudm
       enddo
       enddo
       enddo
-      call UDM_DATASET_WRITE(dsnameudm,gidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
+      call UDM_DATASET_WRITE(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
 
       CALL UDM_INFO_FREE(1, infoid, ierr)
 
@@ -221,7 +221,6 @@ integer :: n
 
 integer fidudm, dsidudm, infoid, ierr
 integer i, j, k, i1, j1, k1
-integer nxstored, nystored, nzstored
 integer dimsudm 
 integer*8 sizesudm(3), gsizesudm(3), offsetsudm(3)
 
@@ -252,19 +251,19 @@ Q=0
    
    call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,time_initial,ierr)
 
-   attrname = 'nx'//char(0)
-   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nxstored, ierr)
-   attrname = 'ny'//char(0)
-   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nystored, ierr)
-   attrname = 'nz'//char(0)
-   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nzstored, ierr)
-
-   if (nxstored .ne. ncpu_x *(nx2 - nx1 + 1))  &   
-       call abort("ERROR: data file nx <> nx set in params.h")
-   if (nystored .ne. ncpu_y *(ny2 - ny1 + 1))  & 
-       call abort("ERROR: data file ny <> ny set in params.h")
-   if (nzstored .ne. ncpu_z *(nz2 - nz1 + 1))  & 
-       call abort("ERROR: data file nz <> nz set in params.h")
+!   attrname = 'nx'//char(0)
+!   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nxstored, ierr)
+!   attrname = 'ny'//char(0)
+!   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nystored, ierr)
+!   attrname = 'nz'//char(0)
+!   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nzstored, ierr)
+!
+!   if (nxstored .ne. ncpu_x *(nx2 - nx1 + 1))  &   
+!       call abort("ERROR: data file nx <> nx set in params.h")
+!   if (nystored .ne. ncpu_y *(ny2 - ny1 + 1))  & 
+!       call abort("ERROR: data file ny <> ny set in params.h")
+!   if (nzstored .ne. ncpu_z *(nz2 - nz1 + 1))  & 
+!       call abort("ERROR: data file nz <> nz set in params.h")
 
 !  read g_xcord, g_ycor and g_zcord
 
@@ -300,7 +299,7 @@ Q=0
 !   call FIO_READ(fidudm, dsnameudm, infoid, UDM_DOUBLE_DATASET, g_zcord(1), ierr)
 !   call FIO_INFO_FREE(1, infoid, ierr)
 
-   dsnameudm = 'ns_uvw/u'//char(0)
+   dsnameudm = 'u'//char(0)
    call UDM_INFO_CREATE(nochar, dsnameudm,fidudm,UDM_INFO_DATA_DIST, infoid, ierr)
    CALL UDM_INFO_ITEM_GET(infoid, UDM_INFO_NDIMS, dimsudm, ierr)
    if (dimsudm .ne. 3) call abort("ERROR: datafile is wrong")
@@ -341,7 +340,7 @@ Q=0
    enddo
    enddo
    
-   dsnameudm = 'ns_uvw/v'//char(0)
+   dsnameudm = 'v'//char(0)
    CALL UDM_DATASET_READ(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
    do k = nz1, nz2       
    k1 = k - nz1 + 1 
@@ -354,7 +353,7 @@ Q=0
    enddo
    enddo
  
-   dsnameudm = 'ns_uvw/w'//char(0)
+   dsnameudm = 'w'//char(0)
    CALL UDM_DATASET_READ(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
    do k = nz1, nz2       
    k1 = k - nz1 + 1 
