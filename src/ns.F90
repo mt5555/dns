@@ -147,6 +147,7 @@ enddo
 
 time = time + delt
 
+
 ! compute max U  
 maxs(1:4)=0
 do k=nz1,nz2

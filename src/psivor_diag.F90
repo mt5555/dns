@@ -23,11 +23,3 @@ end subroutine
 
 
 
-subroutine comp_ellipse_reshape(w,setmax)
-use params
-use ellipse
-implicit none
-real*8 :: w(nx,ny)
-integer :: setmax
-call comp_ellipse(w,setmax)
-end

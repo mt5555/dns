@@ -150,7 +150,6 @@ subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 use params
 use tracers
 use bc
-use ellipse
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -318,6 +317,14 @@ else
 endif
 
 end subroutine
+subroutine comp_ellipse_reshape(w,setmax)
+use params
+use ellipse
+implicit none
+real*8 :: w(nx,ny)
+integer :: setmax
+call comp_ellipse(w,setmax)
+end
 
 
 
