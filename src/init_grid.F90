@@ -166,6 +166,7 @@ endif
 do i=1,o_nx
    g_xcord(i)=(i-1)*delx	
 enddo
+
 do j=1,o_ny
    g_ycord(j)=(j-1)*dely	
 enddo

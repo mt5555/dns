@@ -72,6 +72,7 @@ real*8 :: work2(nx,ny,nz)
 ! local variables
 integer i,j,k,l
 real*8 delta,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
+real*8 xsc,ysc
 real*8 :: eps=.10
 integer :: km=1
 integer,parameter :: n=500
@@ -87,18 +88,18 @@ delalf = 2d0/n
 delgam = delalf/km         !SO ALL PERIODS HAVE TOTAL CIRC=1
 
 
-xscale=2
-yscale=4
+xsc=2
+ysc=4
 
 k=1
 do j=ny1,ny2
 do i=nx1,nx2
   
-   xval=xscale*(xcord(i)-.5)         ! x ranges from -1 .. 1
+   xval=xsc*(xcord(i)-.5)         ! x ranges from -1 .. 1
    if (ycord(j)<=.5) then
-      yval=yscale*(ycord(j)-.25)  ! bottom 50% goes from -.1 .. .1
+      yval=ysc*(ycord(j)-.25)  ! bottom 50% goes from -.1 .. .1
    else
-      yval=-yscale*(ycord(j)-.75) ! top 50% goes from .1 .. -.1
+      yval=-ysc*(ycord(j)-.75) ! top 50% goes from .1 .. -.1
       xval=-xval	
    endif
 
@@ -117,8 +118,8 @@ do i=nx1,nx2
 
    enddo
 
-   Q(i,j,k,1) = 5*uu*delgam/(pi2*xscale)
-   Q(i,j,k,2) = 5*vv*delgam/(pi2*yscale)
+   Q(i,j,k,1) = 5*uu*delgam/(pi2*xsc)
+   Q(i,j,k,2) = 5*vv*delgam/(pi2*ysc)
 enddo
 enddo
 
@@ -197,7 +198,7 @@ if (init_cond_subtype ==1) then
    biotsavart_apply=-1  ! disabled
    delta=.2
    biotsavart_ubar=.089
-   yscale=2.0
+   yscale=2
 endif
 
 
@@ -207,17 +208,12 @@ if (init_cond_subtype ==2) then
    biotsavart_apply=5
    delta=.2
    biotsavart_ubar=.089
-   yscale=2.0
+   yscale=2
+   xscale=4
 endif
 
-
-
-
-
-
-! choose xscale so that delx*xscale = dely*yscale
-xscale = yscale*(o_nx-1)/(o_ny-1)
-
+! set xscale so that delx=dely
+xscale = yscale*(g_nx+offset_bdy-1)/(g_ny+offset_bdy-1)
 call init_grid()   ! redo grid points since we changed scalings
 
 

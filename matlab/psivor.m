@@ -8,11 +8,11 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 %range=0:.05:1.00;
-range=0:1.0:1000.0;
+range=16:1.0:1000.0;
 %range=[.00];
 %name='../src/kh/khK';
-%name='../src/vxpair/vx3072b_';
-name='../src/temp';
+name='../src/vxpair/vx6144b_';
+%name='../src/vx3072_';
 
 
 usefig=1;
@@ -53,7 +53,7 @@ for i=range
   vor = squeeze(q(:,:,1));
   disp(sprintf('max vor=                %f ',qmax));
 
-  
+    
   
   fname=[name,ts,'.psi']
   fidvor=fopen(fname,'r');
@@ -78,10 +78,7 @@ for i=range
   psi = squeeze(q(:,:,1));
 
   
-  
-  
-  
-  
+
   stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,qmax)
   figure(usefig)
   
@@ -105,9 +102,9 @@ for i=range
     end
     
     title(stitle);
-    axis image
+    axis([0,max(x),0,max(y)]);
+    axis equal
 
-    
     subplot(2,1,2)
 
     if (mkcontour==0)
@@ -117,7 +114,8 @@ for i=range
       v=20;                             % use 20 contours
       contour(x,y,psi',v)
     end
-    axis image
+    axis([0,max(x),0,max(y)]);
+    axis equal
     
     
 
@@ -134,7 +132,6 @@ for i=range
 
     'pause'
     pause
-  end
 end
 return
 
