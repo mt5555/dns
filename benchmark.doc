@@ -19,9 +19,24 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
 
 
                   cpu time per timestep
-                   (running 5 timesteps)
+                   (running 5 timesteps) 
+512^3
+    1x1x64              .813
+    1x1x128             .393   
+    1x1x256             .195     
+    2x1x256             .158    
+    4x1x256  IN          
+
+    4x2x128  
+    2x2x256   (doesn't work)
+
+
+
 1024^3 
-     1x1x512
+     1x1x256   ?
+     1x1x512   ?
+     2x1x512   ?  
+     2x2x512
 
 1536
      1x1x768 
@@ -30,9 +45,8 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
 
 2048^3     
       1x1x512     
-      1x1x1024    
+      1x1x1024    in4
       2x1x1024
-      2x2x512
       4x1x1024
 
 
@@ -187,41 +201,39 @@ t=-20 (20 time steps)                   Nirv Bmtn  Q        4K timesteps
 LOW RES benchmarks, 6/2002
 cvs tag:  'bench602'
 
-./bench.sh 96 0 20
+./bench.sh 96 0 20 
 121M
 20 timesteps
-
-
-using benchmark/step.inp.sed
 
                       1cpu    2cpu    3cpu     4cpu       6        8
 milkyway              .16     .080    .054
 autrey                .21     .17
-shankara              .28     .19               .093    .064     .050
-
-
+shankara.old  (2x2)   .28     .19               .093    .064     .050
+shankara 4ring        .27     .14               .059    .062     .047
+shankara-LAM (ethernet)                                          .200
 
 ./bench.sh 160 0 20
 544M
 
 milkyway              1.22    .42
 autrey                1.40
-shankara              1.76                      .62               .29
+shankara.old          1.76                      .62               .29
    running 4 cpus, 1 cpu per node:              .51  
 
 
-./bench.sh 240 4  20  
-1.9G
 ./bench.sh 192 2  20
 980M
-
+./bench.sh 240 4  20  
+1.9G
 
 ./bench.sh 256 8  20
 2.3G                                                                 
 
 milkyway              6.91    3.33
-shankara                                                         1.61
-
+shankara.old                                                     1.61
+shankara 4ring                                                   1.53  
+shankara-LAM                                                     3.90
+ 
 ./bench.sh 288 8  20
 3.2G
 

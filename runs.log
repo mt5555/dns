@@ -1,14 +1,34 @@
+**********************************************************************************
+10/21/02
+
+128^3
+alpha=16 delx
+mu=5e-4  ok for NS?
+
+1e-4 IN
 
 
-iso12w256A IN QA
+
+**********************************************************************************
+10/15/02
+
+
+
+iso12w256A IN QA  up to t=88 so far
    oops: this run is really running at 512^3.  
  
    zero initial condition
    FM=5/(2pi)**2, mu=6e-4/(2pi)**2
    mu=1.5e-3/(2pi)**2 = 3.7995e-5 
 
-   At around t=13, changed mu to:
-   mu=mu=6e-4/(2pi)**2 = 1.52e-5
+   At t=13 changed  mu=6e-4/(2pi)**2 = 1.52e-5
+                    epsilon=.15/(2pi)**2, which is too small. 
+
+IN:
+   at t=90 changed  FM = 18/(2pi)**2 
+                    epsilon=  
+
+
 
 iso12w250B     
  
@@ -17,6 +37,8 @@ iso12w250B
    nu=1.5e-3/(2pi)**2 = 3.7995e-5 
 
    check to see if this run is isotropic?
+   ran to t=200
+
 
 
 
@@ -99,12 +121,22 @@ iso12_256I
     mu=1.00e-4                          too viscous???
 
 iso12_256J      
-    alpha=1/16 = .0625   ran to t=3.  
+    alpha=1/16 = .0625   ran to t=4.2.  
     mu=2.75e-4  
-
     compare to iso12_256 from shankara.  
 
+iso12_256K      
+    alpha=1/64 = 4 delx  ran to t=6
+    mu=2.75e-4  
 
+iso12_256L      
+    alpha=1/256 = 1 delx  IN
+    mu=2.75e-4  
+
+
+TODO:
+print spec?.ps on secure
+print spec3.00.ps on certs.
 
 
 

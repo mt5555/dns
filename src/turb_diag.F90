@@ -49,8 +49,7 @@ if ( g_bdy_x1==PERIODIC .and. &
    
    !set this flag so that for next timestep, we will compute and save
    !spectral transfer functions:
-!   compute_transfer=.true.
-   compute_transfer=.false.
+   compute_transfer=.true.
 endif
 
 

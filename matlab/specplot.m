@@ -10,9 +10,11 @@
 %fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.spec','r','b');
 %fidt=fopen('/ccs/scratch/taylorm/dns/iso12_512.spect','r','b');
 
-fid=fopen('../src/temp0000.0000.spec');
-fidt=fopen('../src/temp0000.0000.spect');
+%fid=fopen('../src/temp0000.0000.spec');
+%fidt=fopen('../src/temp0000.0000.spect');
 
+fid=fopen('/ccs/scratch/taylorm/dns/iso12_256.spec','r','l');
+fidt=fopen('/ccs/scratch/taylorm/dns/iso12_256.spect','r','l');
 
 
 
@@ -47,6 +49,7 @@ while (time>=0 & time<=9999.3)
   if (num_spect==4) % NS transfer spectrum
     n_r=fread(fidt,1,'float64');
     spec_tot=fread(fidt,n_r,'float64');
+    spec_model=0*spec_tot;
     
     time_terms=fread(fidt,1,'float64');  
     n_r=fread(fidt,1,'float64');
@@ -101,20 +104,21 @@ while (time>=0 & time<=9999.3)
     hold on;
     loglog53(n_y,spec_vy,time);
     hold off;
-    %print -depsc spec.ps    
   else
     %spherical wave number
-    subplot(3,1,1);
+    figure(1)
+    subplot(1,1,1);
     loglog53(n_r-1,spec_r,time);
     
     % longitudinal spectraum
-    subplot(3,1,2);
+    figure(2)
+    subplot(2,1,1);
     loglog53(n_x,spec_ux,time);     hold on;
     loglog53(n_y,spec_vy,time);     hold on;
     loglog53(n_z,spec_wz,time,'longitudinal 1D spectrum');     hold off;
     
     % transverse spectraum
-    subplot(3,1,3);
+    subplot(2,1,2);
     loglog53(n_x,spec_uy,time);     hold on;
     loglog53(n_x,spec_uz,time);     hold on;
     loglog53(n_y,spec_vx,time);     hold on;
@@ -122,15 +126,12 @@ while (time>=0 & time<=9999.3)
     loglog53(n_z,spec_wx,time);     hold on;
     loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
     hold off;
-    orient tall
-    %print -depsc spec.ps    
-
   end
 
   %
   % transfer spectrum
   %
-  figure(2);
+  figure(3);
   subplot(2,1,1)
   x=0:n_r-1;
   %semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_f,'b');
@@ -147,8 +148,13 @@ while (time>=0 & time<=9999.3)
   grid;
   title(sprintf('E Flux'));
 
-  print('-dpsc',sprintf('transfer%.2f.ps',time)) 
-  pause
+  if ( ( (time-floor(time))<.01) | (abs(time-.1)<.01) )
+    figure(1)
+    print ('-dpsc',sprintf('spec%.2f.ps',time))
+    figure(2)
+    print ('-dpsc',sprintf('transfer%.2f.ps',time))
+    pause
+  end     
   
   
   time=fread(fid,1,'float64');
