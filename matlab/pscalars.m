@@ -109,6 +109,12 @@ n0(2,:)=pints_e(28,np,:);
 n0(3,:)=pints_e(29,np,:);
 n0=mean(n0,1);
 
+for n=1:3
+n0x(1,n,:)=pints_e(27,np,:);   ! x direction N0 for c,n
+n0x(2,n,:)=pints_e(28,np,:);   ! y direction
+n0x(3,n,:)=pints_e(29,np,:);   ! z direciton
+end
+
 %
 % isotropic relations (may not exactly agree with data from scalars.m)
 %
