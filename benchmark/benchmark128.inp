@@ -1,4 +1,4 @@
-1            ! input file type
+2            ! input file type
 iso12        ! init cond
 0            ! subtype
 iso12        ! forcing
