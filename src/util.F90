@@ -75,6 +75,50 @@ end
 
 
 
+#if 0
+subroutine transpose_to_y(p,pt,n1,n1d,n2,n2d,n3,n3d)
+real*8 p(nx,ny,nz)
+real*8 pt(g_ny,nz_2d,nx)
+
+!nz_2d = (nz2-nz1+1)/ncpu_y
+nslaby = (ny2-ny1+1)
 
 
+do iproc=0,ncpu_y-1
+   if (iproc==myproc_y) then
+      do i=nx1,nx2
+         do j=ny1,ny2
+         do k=1,nslab
+            pt(j+iproc*nslaby,k,i)=p(i,j,k+iproc*nz_2d)
+         enddo
+         enddo
+      enddo
+   else
+      l=0
+      do i=nx1,nx2
+         do j=ny1,ny2
+         do k=1,nslab
+            l=l+1
+            sendbuf(l)=p(i,j,k+iproc*nz_2d)
+         enddo
+         enddo
+      enddo
+
+!     send buffer to (myproc_x,iproc,mproc_z)
+!     rec  buffer from (myproc_x,iproc,mproc_z)
+
+      l=0
+      do i=nx1,nx2
+         do j=ny1,ny2
+         do k=1,nslab
+            l=l+1
+            pt(j+iproc*nslaby,k,i)=recbuf(l)
+         enddo
+         enddo
+      enddo
+   endif
+enddo
+
+end subroutine
+#endif
 

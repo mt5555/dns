@@ -1,7 +1,8 @@
+#include "macros.h"
 subroutine test
 
 call test_fft
-!call test_poisson
+call test_poisson
 call test_divfree
 
 end subroutine
@@ -13,6 +14,7 @@ end subroutine
 
 subroutine test_divfree
 use params
+use fft_interface
 implicit none
 
 real*8 work(nx,ny,nz)
@@ -20,8 +22,9 @@ real*8 input(nx,ny,nz,3)
 real*8 p(nx,ny,nz)
 real*8 d1(nx,ny,nz)
 real*8 dummy
+character*80 message
 
-integer i,j,k,dim
+integer i,j,k,dim,n1,n2,n3
 
 input=0
 do dim=1,3
@@ -36,21 +39,30 @@ enddo
 enddo
 enddo
 
-call filter(input,work)  ! remove that pesky highest cosine mode
+! remove that pesky highest cosine mode
+n1=nx2
+n2=ny2
+n3=nz2
+call fft3d(input,work,n1,n2,n3)
+call fft_filter(input,n1,nx,n2,ny,n3,nz)
+call ifft3d(input,work,n1,n2,n3)
+
+
 call divfree(input)
 
 ! compute p = div(u)
 i=1
-call der(input(1,1,1,i),d1,dummy,work,1,i)
+call der(input(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = d1
 i=2
-call der(input(1,1,1,i),d1,dummy,work,1,i)
+call der(input(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = p + d1
 i=3
-call der(input(1,1,1,i),d1,dummy,work,1,i)
+call der(input(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = p + d1
 
-print *,'maxval of divergence = ',maxval(p(nx1:nx2,ny1:ny2,nz1:nz2))
+write(message,'(a,e10.5)') 'maxval of divergence = ',maxval(p(nx1:nx2,ny1:ny2,nz1:nz2))
+call print_message(message)
 end subroutine
 
 
@@ -66,7 +78,7 @@ implicit none
 real*8 work(nx,ny,nz)
 real*8 input(nx,ny,nz)
 real*8 rhs(nx,ny,nz)
-integer i,j,k
+integer i,j,k,n1,n2,n3
 real*8 cf1,alpha,beta
 real*8 error
 character*80 message
@@ -96,14 +108,17 @@ do k=nz1,nz2
    input(i,j,k)=           4*cos(cf1*ycord(j))    + input(i,j,k)
    rhs(i,j,k)=    -cf1*cf1*4*cos(cf1*ycord(j))    + rhs(i,j,k)
 
+   if (nz2>1) then
 
-   cf1=4*2*pi 
-   input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
-   rhs(i,j,k)=    -cf1*cf1*5*cos(cf1*zcord(k))    + rhs(i,j,k)
+      cf1=4*2*pi 
+      input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
+      rhs(i,j,k)=    -cf1*cf1*5*cos(cf1*zcord(k))    + rhs(i,j,k)
 
-   cf1=3*2*pi 
-   input(i,j,k)=           2*sin(cf1*zcord(k))    + input(i,j,k)
-   rhs(i,j,k)=    -cf1*cf1*2*sin(cf1*zcord(k))    + rhs(i,j,k)
+      cf1=3*2*pi 
+      input(i,j,k)=           2*sin(cf1*zcord(k))    + input(i,j,k)
+      rhs(i,j,k)=    -cf1*cf1*2*sin(cf1*zcord(k))    + rhs(i,j,k)
+
+   endif
 
    cf1=1*2*pi 
    input(i,j,k)= sin(cf1*xcord(i))*cos(cf1*ycord(j))    + input(i,j,k)
@@ -117,11 +132,19 @@ enddo
 enddo
 enddo
 
+n1=nx2
+n2=ny2
+n3=nz2
+call fft3d(input,work,n1,n2,n3)
+!call print_modes(input,n1,nx,n2,ny,n3,nz)
+call ifft3d(input,work,n1,n2,n3)
+
 
 rhs = alpha*input + beta*rhs
 call poisson(rhs,work,alpha,beta)
 
 work=rhs-input
+#if 0
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
@@ -131,8 +154,9 @@ do k=nz1,nz2
 enddo
 enddo
 enddo
-error=maxval(work(nx1:nx2,ny1:ny2,nz1:nz2));
-write(message,'(a,f6.2,a,f6.2,a,e15.10)') 'Laplace solver alpha=',alpha,' beta=',beta,&
+#endif
+error=maxval(abs(work(nx1:nx2,ny1:ny2,nz1:nz2)));
+write(message,'(a,f6.2,a,f6.2,a,e15.8)') 'Laplace solver alpha=',alpha,' beta=',beta,&
    '  error=',error
 call print_message(message)
 
@@ -150,6 +174,9 @@ use params
 implicit none
 
 real*8 work(nx,ny,nz)
+real*8 output(nx,ny,nz)
+real*8 px(nx,ny,nz)
+real*8 pxx(nx,ny,nz)
 real*8 input(nx,ny,nz)
 real*8 inputx(nx,ny,nz)
 real*8 inputxx(nx,ny,nz)
@@ -157,9 +184,10 @@ real*8 inputy(nx,ny,nz)
 real*8 inputyy(nx,ny,nz)
 real*8 inputz(nx,ny,nz)
 real*8 inputzz(nx,ny,nz)
-real*8 cf1
+real*8 cf1,error
 integer i,j,k
 integer n1,n1d,n2,n2d,n3,n3d
+character*80 message
 
 
 input = 0
@@ -203,49 +231,63 @@ enddo
 enddo
 
 
-call print_message("direction1: ")
-call fftest_direction1(input,inputx,inputxx,nx2,nx,ny2,ny,nz2,nz)
-call print_message("")
 
 
 
+output=input
 n1=nx2
-n1d=nx
 n2=ny2
-n2d=ny
 n3=nz2
-n3d=nz
+call fft3d(output,work,n1,n2,n3)
+call print_modes(output,n1,nx,n2,ny,n3,nz)
+call ifft3d(output,work,n1,n2,n3)
+
+error=maxval(abs(input(1:n1,1:n2,1:n3)-output(1:n1,1:n2,1:n3)))
+write(message,'(a,e15.10)') "x-direction Forward-Backward 3D FFT: error=",error
+call print_message(message)
 
 
-call transpose12(input,work,0,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-input=work
-call transpose12(inputy,work,0,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-inputy=work
-call transpose12(inputyy,work,1,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-inputyy=work
-print *,'direction2: ',n1,n1d,n2,n2d,n3,n3d
-call fftest_direction1(input,inputy,inputyy,n1,n1d,n2,n2d,n3,n3d)
-call transpose12(input,work,1,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-input=work
-call print_message("");
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! d/dx
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+call der(input,px,pxx,work,DX_AND_DXX,1)
 
+error=maxval(abs(px(1:n1,1:n2,1:n3)-inputx(1:n1,1:n2,1:n3)))
+write(message,'(a,e15.10)') "x-direction d/dx error=",error
+call print_message(message)
 
+error=maxval(abs(pxx(1:n1,1:n2,1:n3)-inputxx(1:n1,1:n2,1:n3)))
+write(message,'(a,e15.10)') "x-direction d2/dxx error=",error
+call print_message(message)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-call transpose13(input,work,0,n1,n1d,n2,n2d,n3,n3d)  
-input=work
-call transpose13(inputz,work,0,n1,n1d,n2,n2d,n3,n3d)  
-inputz=work
-call transpose13(inputzz,work,1,n1,n1d,n2,n2d,n3,n3d)  
-inputzz=work
-print *,'direction3',n1,n1d,n2,n2d,n3,n3d
-call fftest_direction1(input,inputz,inputzz,n1,n1d,n2,n2d,n3,n3d)
-call transpose13(input,work,1,n1,n1d,n2,n2d,n3,n3d)  
-input=work
-print *,'after direction3',n1,n1d,n2,n2d,n3,n3d
-call print_message("");
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! d/dy
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+call der(input,px,pxx,work,DX_AND_DXX,2)
 
+error=maxval(abs(px(1:n1,1:n2,1:n3)-inputy(1:n1,1:n2,1:n3)))
+write(message,'(a,e15.10)') "y-direction d/dy error=",error
+call print_message(message)
 
+error=maxval(abs(pxx(1:n1,1:n2,1:n3)-inputyy(1:n1,1:n2,1:n3)))
+write(message,'(a,e15.10)') "y-direction d2/dyy error=",error
+call print_message(message)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! d/dz
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+call der(input,px,pxx,work,DX_AND_DXX,3)
+
+error=maxval(abs(px(1:n1,1:n2,1:n3)-inputz(1:n1,1:n2,1:n3)))
+write(message,'(a,e15.10)') "z-direction d/dz error=",error
+call print_message(message)
+
+error=maxval(abs(pxx(1:n1,1:n2,1:n3)-inputzz(1:n1,1:n2,1:n3)))
+write(message,'(a,e15.10)') "z-direction d2/dzz error=",error
+call print_message(message)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -257,34 +299,16 @@ end subroutine
 
 
 
-
-
-
-
-
-
-subroutine fftest_direction1(input,inputx,inputxx,n1,n1d,n2,n2d,n3,n3d)
-use fft_interface
+subroutine print_modes(output,n1,n1d,n2,n2d,n3,n3d)
 implicit none
 integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k
-real*8 input(n1d,n2d,n3d)
-real*8 inputx(n1d,n2d,n3d)
-real*8 inputxx(n1d,n2d,n3d)
-real*8 output(n1d,n2d,n3d)
-real*8 px(n1d,n2d,n3d)
-real*8 pxx(n1d,n2d,n3d)
-real*8 error
+real*8 :: output(n1d,n2d,n3d)
 character*80 message
+integer i,j,k
 
-output=input
-px=input
-
-call fft(output,n1,n1d,n2,n2d,n3,n3d)
-#if 1
-do i=1,n1+2
-do j=1,1  !n2
-do k=1,1  !n3
+do i=1,n1
+do j=1,n2
+do k=1,n3
     if (abs(output(i,j,k)) > 1e-9) then	
        if (mod(i,2)==0) then
           write(message,'(a,i4,i4,i4,a,2f15.10)') '  sine mode=',(i-1)/2,(j-1)/2,(k-1)/2,&
@@ -298,25 +322,8 @@ do k=1,1  !n3
 enddo
 enddo
 enddo
-#endif
-
-
-call ifft(output,n1,n1d,n2,n2d,n3,n3d)
-error=maxval(abs(input(1:n1,1:n2,1:n3)-output(1:n1,1:n2,1:n3)))
-write(message,'(a,e15.10)') "x-direction Forward-Backward FFT: error=",error
-call print_message(message)
-
-
-
-call fft_derivatives(px,pxx,2,n1,n1d,n2,n2d,n3,n3d)
-error=maxval(abs(px(1:n1,1:n2,1:n3)-inputx(1:n1,1:n2,1:n3)))
-write(message,'(a,e15.10)') "x-direction d/dx error=",error
-call print_message(message)
-
-
-error=maxval(abs(pxx(1:n1,1:n2,1:n3)-inputxx(1:n1,1:n2,1:n3)))
-write(message,'(a,e15.10)') "x-direction d2/dxx error=",error
-call print_message(message)
-
-
 end subroutine
+
+
+
+

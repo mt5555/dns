@@ -7,6 +7,7 @@
 program DNS
 use params
 implicit none
+real*8 :: Q(nx,ny,nz,n_var)
 character*80 message
 
 write(message,'(a)') 'Initializing model '
@@ -23,14 +24,13 @@ call init_grid
 
 write(message,'(a)') 'Setting initial data'
 call print_message(message)
-call init_data      ! set up initial data and impose constraints
+call init_data(Q)      ! set up initial data and impose constraints
 
 write(message,'(a)') 'Running some tests'
 call print_message(message)
 call test           ! optional testing  routines go here
 
-stop
-call dns_solve
+call dns_solve(Q)
 
 end program DNS
 
@@ -47,7 +47,7 @@ end program DNS
 !  main time stepping loop
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine dns_solve
+subroutine dns_solve(Q)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
@@ -64,7 +64,8 @@ call out(time,Q)  ! output initial data
 
 do itime=1,itime_max
 
-   call rk4
+   call rk4(time,Q)
+   print *,'after rk4',time,maxval(Q(:,:,:,1))
 
    if (mod(itime,itime_output)==1 .or. itime==itime_max .or. error_code>0) then
       call out(time,Q)

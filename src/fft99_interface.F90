@@ -6,10 +6,10 @@
 !
 ! provides public interfaces:
 !   fft_interface_init               call this before using any other routines
-!   fft
-!   ifft
-!   fft_derivatives
-!   fft_laplace_inverse
+!   fft1                             fft along first dimension of 3D array
+!   ifft1	                     ifft along first dimension of 3D array
+!   fft_derivatives                  compute derivatives in grid space
+!   fft_laplace_inverse              invert laplacian in spectral space
 ! 
 ! Routines work on data of the form:  p(n1d,n2d,n3d)
 ! Size of the grid point data         p(1:n1,1:n2,1:n3)
@@ -133,7 +133,7 @@ end subroutine
 ! FFT taken along first direction
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine ifft(p,n1,n1d,n2,n2d,n3,n3d)
+subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
 real*8 p(n1d,n2d,n3d)
 real*8 w(min(fftblocks,n2)*(n1+1))
 integer n1,n1d,n2,n2d,n3,n3d
@@ -142,6 +142,7 @@ character*80 message_str
 integer index,jj,j,k,numffts
 
 if (n1==1) return
+n1=n1-2
 call getindex(n1,index)
 
 
@@ -169,7 +170,7 @@ end subroutine
 ! FFT taken along first direction
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft(p,n1,n1d,n2,n2d,n3,n3d)
+subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 :: w(min(fftblocks,n2)*(n1+1)) 
@@ -192,7 +193,7 @@ do k=1,n3
    enddo
 enddo
 
-
+n1=n1+2 
 end subroutine
 
 
@@ -219,38 +220,40 @@ integer i,j,k,m
 real*8 temp
 ASSERT("fft99_interface.F90: numder<=2",numder<=2)
 
-call fft(px,n1,n1d,n2,n2d,n3,n3d)
+call fft1(px,n1,n1d,n2,n2d,n3,n3d)
 
 if (numder>=2) then
    do k=1,n3
    do j=1,n2
-      do i=1,n1
+      do i=1,n1-2
          m=(i-1)/2
          pxx(i,j,k) = -m*m * pi2_squared * px(i,j,k)
       enddo
       ! tweak do that dxx = (dx)(dx)
       ! this is because we have a cos((n1/2) 2pi x) mode, but no sine!
-      pxx(n1+1,j,k) = 0
-      pxx(n1+2,j,k) = 0
+      if (n1>1) pxx(n1-1,j,k) = 0
+      pxx(n1,j,k) = 0
    enddo
    enddo
-   call ifft(pxx,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(pxx,n1,n1d,n2,n2d,n3,n3d)
+   if (n1>1) n1=n1+2  ! ifft will set n1 back to n1-2, but we need to undo this
+                      ! for transform below
 endif
 
 if (numder>=1) then
    do k=1,n3
    do j=1,n2
-      do m = 0, n1/2-1
+      do m = 0, n1/2-2
          i = 2*m+1
          temp =  pi2* m * px(i,j,k)
          px(i,j,k) = -pi2 *m * px(i+1,j,k)
          px(i+1,j,k) = temp
       enddo
-      px(n1+1,j,k)=0
-      px(n1+2,j,k)=0
+      if (n1>1) px(n1-1,j,k)=0
+      px(n1,j,k)=0
    enddo
    enddo
-   call ifft(px,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(px,n1,n1d,n2,n2d,n3,n3d)
 endif
 end subroutine
 
@@ -271,11 +274,11 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,im,jm,km
 real*8 xfac
 
-   do k=1,n3+2
+   do k=1,n3
       km=(k-1)/2
-      do j=1,n2+2
+      do j=1,n2
          jm=(j-1)/2
-         do i=1,n1+2
+         do i=1,n1
             im=(i-1)/2
             xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
             if (xfac<>0) xfac = 1/xfac
@@ -304,15 +307,15 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,im,jm,km
 real*8 xfac
 
-   do k=1,n3+2
-      km=(k-1)/2
-      do j=1,n2+2
-         jm=(j-1)/2
-         do i=1,n1+2
-            im=(i-1)/2
-            if (km == n3/2) p(i,j,k)=0
-            if (jm == n2/2) p(i,j,k)=0
-            if (im == n1/2) p(i,j,k)=0
+   do k=1,n3
+!      km=(k-1)/2
+      do j=1,n2
+!         jm=(j-1)/2
+         do i=1,n1
+!            im=(i-1)/2
+            if (k > n3-2) p(i,j,k)=0
+            if (j > n2-2) p(i,j,k)=0
+            if (i > n1-2) p(i,j,k)=0
          enddo
       enddo
    enddo

@@ -18,7 +18,11 @@ integer i,j,k
 ! periodic case
 o_nx=o_nx+1
 o_ny=o_ny+1
-o_nz=o_nz+1
+if (nz>1) then
+   o_nz=o_nz+1
+else
+   o_nz=1
+endif
 
 
 delx = one/g_nx

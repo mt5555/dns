@@ -16,11 +16,11 @@ LINK=$(F90) $(FFLAGS) $(LDFLAGS)
 
 
 
-#independent modules (dont use any other modules):
-OBJS1 = params.o util.o fft99.o
-#modules which use OBJS1
-OBJS2 = fft_interface.o
-#modules which use OBJS1,2
+#independent modules/routines (dont use any other modules):
+OBJS1 = params.o util.o fft99.o fft_interface.o
+#modules/routines which use OBJS1
+OBJS2 = 
+#modules/routines which use OBJS1,2
 INITS  = init_model.o init_mpi.o init_data.o init_grid.o
 OPS    = poisson.o derivatives.o test.o
 MODEL  = ns3d.o bc.o
