@@ -1,6 +1,6 @@
 %
 %
-% 4/5 ths law: time and angle averaged 
+% 2/15ths law: time and angle averaged 
 %
 %
 mu=0;
@@ -11,7 +11,11 @@ eta = 1/(nx*delx_over_eta);
 ext='.isostr';
 
 name = '/home/skurien/helicity_data/check256_hq_';
-nx=256; delx_over_eta=2.98; epsilon=3.74; h_epsilon=1;  teddy=1;
+
+[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params
+
+nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
+teddy=1;
 ext='.new.isostr';
 times=[0:1:30];
 
