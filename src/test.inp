@@ -1,7 +1,7 @@
 2            ! input file type
 iso12e       ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
-iso12w       ! forcing:  none, iso12
+iso12w        ! forcing:  none, iso12
 kediff       ! viscosity type  (value, smallest, kediff, Re)
 2000.0        ! viscosity coefficient.  (300)
 0.0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx

@@ -134,6 +134,7 @@ enddo
 call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2,4)
 
 
+
 do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
@@ -425,10 +426,9 @@ call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,f_diss,a_diss,nor
 ! white in time - so pick a new random force at beginning of
 ! each time step.  
 !
-
 if (forcing_type==2 .and. rkstage==4) then
-   call sforcing_random12(rhs,Q,f_diss,1)  ! compute new forcing function
-   call sforcing_random12(rhs,Q,f_diss,0)  ! apply it
+   call sforcing_random12(rhs,Qhat,f_diss,1)  ! compute new forcing function
+   call sforcing_random12(rhs,Qhat,f_diss,0)  ! apply it
 endif
 
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss)

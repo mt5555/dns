@@ -294,17 +294,13 @@ real*8,save :: rmodes_old(0:2,0:2,0:2,3)   ! value at time tmod_old
 real*8,save :: tmod,tmod_old
 real*8,save :: tscale=.01
 
-real*8 :: R(5*5*5,3,2),Rr,Ri
-real*8 :: psix_r(3),psix_i(3)
-real*8 :: psiy_r(3),psiy_i(3)
-real*8 :: psiz_r(3),psiz_i(3)
 
 if (0==init_sforcing) then
    call sforcing_init()
    rmodes=0
    tmod=0
 
-
+   ! check that we are not including any wave numbers > 2
    do wn=1,NUMBANDS
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
@@ -332,6 +328,58 @@ if (ntot==0) return
 ! Compute a new forcing function?  
 !
 if (new_f==1) then
+   call random12(rmodes)
+   return
+endif
+
+
+
+f_diss=0
+do wn=1,NUMBANDS
+
+   ener(wn)=0
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      rhs(i,j,k,1)=rhs(i,j,k,1) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)
+      rhs(i,j,k,2)=rhs(i,j,k,2) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)
+      rhs(i,j,k,3)=rhs(i,j,k,3) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)
+
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      f_diss = f_diss + xfac*( &
+         Qhat(k,i,j,1)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1) +&
+         Qhat(k,i,j,2)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2) +&
+         Qhat(k,i,j,3)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3) )
+
+
+   enddo
+enddo
+
+
+end subroutine 
+   
+   
+
+
+
+
+
+subroutine random12(rmodes)
+use params
+implicit none
+real*8 :: rmodes(0:2,0:2,0:2,3)       
+
+integer km,jm,im,i,j,k,n,wn,ierr
+real*8 xw,xfac,f_diss,tauf
+real*8 :: R(5*5*5,3,2),Rr,Ri
+real*8 :: psix_r(3),psix_i(3)
+real*8 :: psiy_r(3),psiy_i(3)
+real*8 :: psiz_r(3),psiz_i(3)
+
 rmodes=0
 call gaussian(R,5*5*5*3*2)
 
@@ -348,8 +396,8 @@ do im=-2,2
    ! remove 1 factor of 2*pi from laplacian and derivative, since they candel
    xfac = (im**2 + jm**2 + km**2)
    if (xfac>0) xfac=1/(-2*pi*xfac)
-   if (delt>0) xfac=xfac/sqrt(delt)
-   xfac=xfac/30
+   !if (delt>0) xfac=xfac/sqrt(delt)
+   xfac=xfac/100
    
    do n=1,3
       psix_r(n) = -im*R(k,n,2)*xfac
@@ -405,46 +453,7 @@ do im=-2,2
 enddo
 enddo
 enddo
-return
-endif
-
-
-
-
-f_diss=0
-do wn=1,NUMBANDS
-
-   ener(wn)=0
-   do n=1,wnforcing(wn)%n
-      i=wnforcing(wn)%index(n,1)
-      j=wnforcing(wn)%index(n,2)
-      k=wnforcing(wn)%index(n,3)
-      rhs(i,j,k,1)=rhs(i,j,k,1) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)
-      rhs(i,j,k,2)=rhs(i,j,k,2) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)
-      rhs(i,j,k,3)=rhs(i,j,k,3) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)
-
-      xfac=8
-      if (z_kmcord(k)==0) xfac=xfac/2
-      if (z_jmcord(j)==0) xfac=xfac/2
-      if (z_imcord(i)==0) xfac=xfac/2
-      f_diss = f_diss + xfac*( &
-         Qhat(k,i,j,1)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1) +&
-         Qhat(k,i,j,2)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2) +&
-         Qhat(k,i,j,3)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3) )
-
-
-   enddo
-enddo
-
-
-end subroutine 
-   
-   
-
-
-
-
-
+end subroutine
 
 
 
