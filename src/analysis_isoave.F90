@@ -55,6 +55,11 @@ logical :: read_uvw
 CPOINTER :: fid,fid1,fid2
 
 
+call init_mpi
+call init_mpi_comm3d()
+call init_model
+
+
 ! header_type of input data:
 !    1              DNS code standard format
 !    2              no headers             
@@ -99,10 +104,6 @@ endif
 
 
 
-
-call init_mpi
-call init_mpi_comm3d()
-call init_model
 
 if (ncpus==1) then
    use_serial=1;

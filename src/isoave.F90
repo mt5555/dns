@@ -412,7 +412,8 @@ R_lambda = lambda*sqrt(2*ke/3)/mu
 
 if (my_pe==io_pe) then
    print *,'KE:      ',ke
-   print *,'epsilon: ',epsilon
+   print *,'epsilon:   ',epsilon
+   print *,'h-epsilon: ',h_epsilon
    print *,'mu       ',mu
    print *
    print *,'eta      ',eta
