@@ -4,12 +4,13 @@ module structf
 implicit none
 
 integer           :: structf_init=0
-integer,parameter :: delta_num=10
-integer           :: delta_val(delta_num)
+integer,parameter :: delta_num_max=10
+integer           :: delta_val(delta_num_max)
 
 ! max range:  10 ... 10
 integer,parameter :: pdf_max_bin=1000
 real*8            :: pdf_bin_size = .01
+
 
 
 
@@ -21,6 +22,7 @@ type pdf_structure_function
 !
 !SGI f90 does not allow allocatable arrays in a struct
 real*8,pointer      :: pdf(:,:)
+integer             :: delta_num    ! number of different values of delta
 integer             :: nbin         ! number of bins
 integer             :: ncalls       ! number of instances PDF has been computed
                                ! (i.e. we may compute the PDF for 10 time steps
@@ -32,7 +34,7 @@ end type
 !  
 !
 integer,parameter :: NUM_SF=6
-type(pdf_structure_function) ::  SF(NUM_SF,3)
+type(pdf_structure_function) ::  SF(NUM_SF,3),epsilon
 
 
 contains
@@ -51,33 +53,35 @@ subroutine init_pdf_module()
 implicit none
 
 integer idel,i
-do idel=1,delta_num
+do idel=1,delta_num_max
    delta_val(idel)=2**(idel-1)
 enddo
 
 do i=1,NUM_SF
-   call init_pdf(SF(i,1),100)
-   call init_pdf(SF(i,2),100)
-   call init_pdf(SF(i,3),100)
+   call init_pdf(SF(i,1),100,delta_num_max)
+   call init_pdf(SF(i,2),100,delta_num_max)
+   call init_pdf(SF(i,3),100,delta_num_max)
 enddo
+call init_pdf(epsilon,100,1)
 end subroutine
 
 
 
 
 
-subroutine init_pdf(str,bin)
+subroutine init_pdf(str,bin,ndelta)
 !
 ! call this to initialize a pdf_structure_function
 !
 implicit none
 type(pdf_structure_function) :: str
-integer :: bin
+integer :: bin,ndelta
 
 str%nbin=bin
-allocate(str%pdf(-bin:bin,delta_num))
+allocate(str%pdf(-bin:bin,ndelta))
 str%pdf=0
 str%ncalls=0
+str%delta_num=ndelta
 
 end subroutine
 
@@ -104,7 +108,9 @@ integer :: bin
 
 !local vars
 type(pdf_structure_function) :: str2
-integer n
+integer n,ndelta
+
+ndelta=str%delta_num
 
 n=str%nbin
 if (bin<n) call abort("resize_pdf: attempting to shrink pdf");
@@ -118,13 +124,13 @@ endif
 
 
 ! make a copy of data
-allocate(str2%pdf(-n:n,delta_num))
+allocate(str2%pdf(-n:n,ndelta))
 str2%pdf=str%pdf
 str2%ncalls=str%ncalls
 
 ! create a larger structure function
 deallocate(str%pdf)
-allocate(str%pdf(-bin:bin,delta_num))
+allocate(str%pdf(-bin:bin,ndelta))
 
 ! copy data into new, larger structure function
 str%pdf=0
@@ -198,11 +204,18 @@ implicit none
 integer i,ierr,nbin
 CPOINTER :: fid
 type(pdf_structure_function) :: str
-real*8 x,pdfdata(-nbin:nbin,delta_num)
+real*8 x
+real*8,allocatable :: pdfdata(:,:)
+integer ndelta
+
+
+ndelta=str%delta_num
+allocate(pdfdata(-nbin:nbin,ndelta))
+
 
 ! the delta values
-x=delta_num; call cwrite8(fid,x,1)
-do i=1,delta_num
+x=ndelta; call cwrite8(fid,x,1)
+do i=1,ndelta
    x=delta_val(i); call cwrite8(fid,x,1)
 enddo
 
@@ -217,7 +230,8 @@ x=max(str%ncalls,1)
 pdfdata=pdfdata / x;
 pdfdata=pdfdata/g_nx/g_ny/g_nz
 
-call cwrite8(fid,pdfdata,(2*nbin+1)*delta_num)
+call cwrite8(fid,pdfdata,(2*nbin+1)*ndelta)
+deallocate(pdfdata)
 end subroutine
 
 
@@ -242,7 +256,7 @@ type(pdf_structure_function) :: str
 ! local variables
 type(pdf_structure_function) :: totstr
 real*8,allocatable :: pdfdata(:,:)
-integer :: bin,ierr,n
+integer :: bin,ierr,n,ndelta
 
 
 
@@ -256,9 +270,10 @@ call resize_pdf(str,bin)
 ! MPI sum into totstr.
 ! str%pdf(-bin:bin) = 2*bin+1 data points
 
-n=(2*bin+1)*delta_num
+ndelta=str%delta_num
+n=(2*bin+1)*n
 if (my_pe == io_pe) then
-   allocate(pdfdata(-bin:bin,delta_num))
+   allocate(pdfdata(-bin:bin,ndelta))
    call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    str%pdf=pdfdata
    deallocate(pdfdata)
@@ -291,7 +306,7 @@ type(pdf_structure_function) :: str(NUM_SF)
 real*8  :: del,delv(3),delq
 real*8  :: one_third = (1d0/3d0)
 real*8  :: tmx1,tmx2
-integer :: bin,idel,i,j,k,i2,nsf
+integer :: bin,idel,i,j,k,i2,nsf,ndelta
 
 if (structf_init==0) then
    structf_init=1
@@ -299,9 +314,13 @@ if (structf_init==0) then
 endif
 call wallclock(tmx1)
 
+ndelta=str(1)%delta_num
+ASSERT("ndelta must be the same for all U structure functions",ndelta==str(2)%delta_num)
+ASSERT("ndelta must be the same for all U structure functions",ndelta==str(3)%delta_num)
+
 do k=1,n3
    do j=1,n2
-      do idel=1,delta_num
+      do idel=1,ndelta
          if (delta_val(idel) < n1/2) then
             do i=1,n1
                ! compute structure functions for U,V,W 
@@ -354,9 +373,67 @@ end subroutine
 
 
 
+subroutine compute_pdf_epsilon(ux,n1,n1d,n2,n2d,n3,n3d,idone)
+!
+! compute a pdf of diffusion. 
+! ux = one of ux,uy,uz,wx,wy,wz,vx,vy,vz
+! accumulate pdf of ux**2 into epsilon (and do not increment ncalls)
+! unless idone=1, in which case just increment ncalls.  
+!
+use params
+implicit none
+integer :: n1,n1d,n2,n2d,n3,n3d,idone
+real*8 :: ux(n1d,n2d,n3d)
+
+! local variables
+real*8  :: del
+real*8  :: one_third = (1d0/3d0)
+real*8  :: two_third = (2d0/3d0)
+real*8  :: tmx1,tmx2
+integer :: bin,idel,i,j,k,i2,nsf
+
+if (structf_init==0) then
+   structf_init=1
+   call init_pdf_module()
+endif
+if (idone==1) then
+   epsilon%ncalls=epsilon%ncalls+1
+   return
+endif
+
+call wallclock(tmx1)
+
+do k=1,n3
+   do j=1,n2
+      do i=1,n1
+         ! compute structure functions for U,V,W 
+         del=ux(i,j,k)
+         if (del<0) then
+            del = -(-del)**two_third
+         else
+            del = del**two_third
+         endif
+         del = del/pdf_bin_size
+         bin = nint(del)
+         
+         ! increase the size of our PDF function
+         if (abs(bin)>epsilon%nbin) call resize_pdf(epsilon,abs(bin)+10) 
+         if (bin>pdf_max_bin) bin=pdf_max_bin
+         if (bin<-pdf_max_bin) bin=-pdf_max_bin
+         epsilon%pdf(bin,1)=epsilon%pdf(bin,1)+1
+      enddo
+   enddo
+enddo
+
+call wallclock(tmx2)
+tims(12)=tims(12)+(tmx2-tmx1)
+end subroutine
 
 
-subroutine z_ifft3d_str(fin,f,w1,w2,compx,compy,compz)
+
+
+
+subroutine z_ifft3d_str(fin,f,w1,w2,work,compx,compy,compz)
 !
 !  compute inverse fft 3d of fin, return in f
 !  fin and f can overlap in memory
@@ -365,9 +442,9 @@ subroutine z_ifft3d_str(fin,f,w1,w2,compx,compy,compz)
 !  This routine can compute PDF's of structure functions in the x direction
 !  or y direction (but not both) and in the z direction.
 ! 
-!  compx   compute PDF in x direction
-!  compy   compute PDF in y direction
-!  compz   compute PDF in z direction
+!  compx   compute PDF in x direction of U
+!  compy   compute PDF in y direction of U
+!  compz   compute PDF in z direction of U and epsilon = gradU**2
 !
 ! only one of compx or compy can be computed per call.
 ! compx or compy can be computed w/o any additional transposes.
@@ -379,16 +456,20 @@ use transpose
 implicit none
 real*8 fin(g_nz2,nslabx,ny_2dz,n_var)  ! input
 real*8 f(nx,ny,nz,n_var)               ! output
+real*8 work(nx,ny,nz)    
 
 ! overlaped in memory:
 real*8 w1(g_nz2,nslabx,ny_2dz,n_var)
 real*8 w2(nx,ny,nz,n_var)    
+
+
 logical :: compx,compy,compz
 
 
 !local
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,n
+real*8 dummy(1)
 
 
 do n=1,3
@@ -432,9 +513,36 @@ endif
 
 if (compz) then
    do n=1,3
-      call transpose_to_z(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      ! compute either x or y term:
+      work=w2(:,:,:,n)
+      call fft_derivatives(work,dummy,1,n1,n1d,n2,n2d,n3,n3d)
+      call compute_pdf_epsilon(work,n1,n1d,n2,n2d,n3,n3d,0)
+      
+      if (compx) then
+         ! x term computed above, compute y term
+         call transpose_to_y(f(1,1,1,n),work,n1,n1d,n2,n2d,n3,n3d)
+      else
+         ! y term computed above, compute x term
+         call transpose_to_x(f(1,1,1,n),work,n1,n1d,n2,n2d,n3,n3d)
+      endif
+      call fft_derivatives(work,dummy,1,n1,n1d,n2,n2d,n3,n3d)
+      call compute_pdf_epsilon(work,n1,n1d,n2,n2d,n3,n3d,0)
    enddo
+
+   do n=1,3
+      call transpose_to_z(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+
+      ! compute z term
+      work=w2(:,:,:,n)
+      call fft_derivatives(work,dummy,1,n1,n1d,n2,n2d,n3,n3d)
+      call compute_pdf_epsilon(work,n1,n1d,n2,n2d,n3,n3d,0)
+   enddo
+
    call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,3))
+
+   ! let routine know we have accumulated all terms
+   call compute_pdf_epsilon(dummy,n1,n1d,n2,n2d,n3,n3d,1)
+
 endif
 
 
