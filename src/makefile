@@ -22,8 +22,8 @@ ifeq ($(UNAME),Linux)
    MPILIB = 
    ifeq ($(HOST),s854018)
       VENDOR=INTEL8
-      MPI = -DUSE_MPI -DMPI_UNDERSCORE
-      MPILIB =   -llamf77mpi -lmpi -llam -lpthread
+      #MPI = -DUSE_MPI -DMPI_UNDERSCORE
+      #MPILIB =   -llamf77mpi -lmpi -llam -lpthread
    endif
    ifeq ($(HOST),kiwi1)
       VENDOR=INTEL8

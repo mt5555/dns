@@ -5,7 +5,7 @@ New Monika VXPAIR case:
 
 init_subtype==6 (see cases2v.F90)
 delta=.1
-viscosity = 1e-7
+viscosity = 1e-7 
 
 
 ./gridsetup.py NCPU 1 1 4800 2880 1 2 2 0 2 2 0 2
@@ -14,7 +14,7 @@ KIWI: 4 cpus  time(min) per timestep:  .468   timestep ~ .0011s
       2 cpus                           .644
 
 qsc:  32  .062  
-      64  .0371
+      64  .0371  1.09 days
 shankara:  (some of these timings were not using 2 cpu per node,
             I should redo them)
 2      .666

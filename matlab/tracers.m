@@ -2,7 +2,7 @@
 %#  plotting tacers
 %########################################################################
 usefig=1;
-mkpr=0;            % make ps and jpeg files
+mkpr=1;            % make ps and jpeg files
 mkascii=0;         % output ascii point data
 plot_noni=1;       % plot the non-insert points also
 axis_size=[0,4,0,2];
@@ -10,8 +10,8 @@ ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];
 
 %ts=input('time=? ');
 
-range=0:5:200.0 ;
-range=0:.1:10.0;
+range=0:5:50.0 ;
+%range=0:.1:10.0;
 %name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
@@ -21,7 +21,7 @@ range=0:.1:10.0;
 %name='/home/scratch/vxpair/vx12288/vx12288b';
 
 
-name='/data/vxpair/vx4800a'; axis_size=[0,3,0,1.8];
+name='/data/vxpair/vx4800a/vx4800a'; axis_size=[0,3,0,1.8];
 
 
 %name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a'; 

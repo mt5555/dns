@@ -7,13 +7,16 @@ clear;
 %ts=input('time=? ');
 
 %name='/home/taylorm/ccs/dns/src/vxpair/vx4096d';
-name='/home/taylorm/ccs/dns/src/vxpair/vx4500a';
-times=[0:.1:180];
+%name='/home/taylorm/ccs/dns/src/vxpair/vx4500a';
+%times=[0:.1:180];
 
-name='/scratch2/taylorm/vx12288b/vx12288b';
-times=[0:.1:205];
-name='/home/scratch/vxpair/vx12288/vx12288b';
-times=[0:.1:210];
+name='/data/vxpair/vx4800a/vx4800a'; 
+times=[0:.1:50];
+
+%name='/scratch2/taylorm/vx12288b/vx12288b';
+%times=[0:.1:205];
+%name='/home/scratch/vxpair/vx12288/vx12288b';
+%times=[0:.1:210];
 
 
 

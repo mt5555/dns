@@ -23,7 +23,6 @@ my_y=0
 my_z=0
 
 
-
 #ifdef USE_MPI
 
 call mpi_init(ierr1)
@@ -33,7 +32,11 @@ if (ierr2/=0) call abort("mpi_comm_rank failure")
 call mpi_comm_size(MPI_COMM_WORLD,initial_live_procs,ierr3)
 if (ierr3/=0) call abort("mpi_comm_size failure")
 
-
+#else
+! make sure we are running with MPI!
+if (ncpu_x * ncpu_y * ncpu_z /= 1) then
+   call abort("code was not compiled with MPI support!")
+endif
 #endif
 
 
