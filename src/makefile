@@ -25,7 +25,7 @@ ifeq ($(UNAME),Linux)
    ifeq ($(HOST),jmac.lanl.gov)
 	VENDOR=LAHEY
    endif
-   ifeq ($(HOST),shankara1)
+   ifeq ($(HOST),brain)
       MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
