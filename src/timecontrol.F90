@@ -266,7 +266,7 @@ if (doit_screen) then
    endif
    call print_message(message)	
 
-   if (equations==NS_PSIVOR .or. (equations==SHALLOW .and. alpha_value>0)) then
+   if (equations==NS_PSIVOR ) then
       ! ke dissapation not computed correctly in the above cases.
    else
       write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &

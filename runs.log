@@ -106,21 +106,21 @@ iso12_500A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
                   3.00                  .768
 
 
-iso12_512 (ON O3K)   IN
+
+iso12_512 (ON O3K)   done
    t=0...5  mu=2.75e-4
    t>.5     mu=1e-4
 
 
-iso12_256B (QA)  IN
+iso12_256B (QA)  done
     alpha=infinity
     mu=1e-4
 
+iso12_256C (QA)  
+    alpha=infinity
+    mu=.25e-4  
 
 
-iso12w_512B
-   in QA
-   same as  iso12w_512A, but with zero initial condition
-   FM=5/(2pi)**2, mu=6e-4/(2pi)**2
 
  
 iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2  
@@ -141,18 +141,30 @@ iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2
                  20                 .7484
                  15                 .7695
 
+iso12w_512B
+   in QA
+   same as  iso12w_512A, but with zero initial condition
+   FM=5/(2pi)**2, mu=6e-4/(2pi)**2
 
+
+
+
+i12_1024A run at mu=.35e-4  IN
+
+
+
+
+iso12_640    mu=.6e-4 on guyot?
+    1x1x320  IN this weekend?    (lower iso12_256 to 128 cpus???)
+    stopped because I was kicked off guyot
 
 
 
 FUTURE RUNS:
-iso12_500B   as above, but using dnsgrid?
-             dnsgrid with lower-tol CG?
+    as above, but using dnsgrid?
+     dnsgrid with lower-tol CG?
 
-iso12_640    mu=.6e-4 on guyot?
-    1x1x320  IN this weekend?    (lower iso12_256 to 128 cpus???)
 
-i12_1024A run at mu=.35e-4  ???
 
      256:  2.75e-4
      500:  1.00e-4

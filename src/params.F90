@@ -347,7 +347,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(2) = < h u_x,u_x >   
 ! ints(5) = .5 < h u , u >                 KE
 ! ints(6) = .5 < h u , u >  + g H^2        KE+PE
-! ints(8) = < h u,div(tau)' >              NOT COMPUTED YET
+! ints(8) = < h u,div(tau)' >              NOT debugged yet
 !                              
 ! ints(10) = mu*< u, -del**4 u >   hyper diffusion term + smag. diffusion
 !

@@ -226,7 +226,6 @@ ke=0
 pe=0
 normdx=0
 ke_diss=0
-smag_diss=0
 vor=0
 
 
@@ -280,83 +279,28 @@ enddo
 
 ! smagorinsky terms
 if (smagorinsky>0) then
-   !   S= |       u_x       .5(u_y + v_x)  |
-   !      |   .5(u_y+v_x)      v_y         |
-   !
-   normS=0
-   do j=ny1,ny2
-   do i=nx1,nx2
-      normS=normS+gradu(i,j,1)**2 + gradv(i,j,2)**2 + &
-         .5*(gradu(i,j,2)+gradv(i,j,1))**2
-
-      ! use divtau to store n=1 row of S:
-      divtau(i,j,1)=gradu(i,j,1)
-      divtau(i,j,2)=.5*(gradu(i,j,2)+gradv(i,j,1))
-   enddo
-   enddo
-   normS=sqrt(2*normS)  ! following Marcel Lesieur, Turbulence in Fluids
-
-   divtau=2*(smagorinsky**2)*normS*divtau
-   call der(divtau(1,1,1),work,dummy,work2,DX_ONLY,1)
-   work=work*(delx**2)
-   do j=ny1,ny2
-   do i=nx1,nx2
-      rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
-      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,1)*work(i,j)
-   enddo
-   enddo
-
-   call der(divtau(1,1,2),work,dummy,work2,DX_ONLY,2)
-   work=work*(dely**2)
-   do j=ny1,ny2
-   do i=nx1,nx2
-      rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
-      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,1)*work(i,j)
-   enddo
-   enddo
-
-
-
-   do j=ny1,ny2
-   do i=nx1,nx2
-      ! use divtau to store n=2 row of S:
-      divtau(i,j,1)=.5*(gradu(i,j,2)+gradv(i,j,1))
-      divtau(i,j,2)=gradv(i,j,2)
-   enddo
-   enddo
-   divtau=2*(smagorinsky**2)*normS*divtau
-   call der(divtau(1,1,1),work,dummy,work2,DX_ONLY,1)
-   work=work*(delx**2)
-   do j=ny1,ny2
-   do i=nx1,nx2
-      rhs(i,j,2)=rhs(i,j,2)+work(i,j)      
-      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,2)*work(i,j)
-   enddo
-   enddo
-
-   call der(divtau(1,1,2),work,dummy,work2,DX_ONLY,2)
-   work=work*(dely**2)
-   do j=ny1,ny2
-   do i=nx1,nx2
-      rhs(i,j,2)=rhs(i,j,2)+work(i,j)      
-      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,2)*work(i,j)
-   enddo
-   enddo
-
-
-
+   ! divtau used for work storage
+   call add_smagorinsky(rhs,Q,gradu,gradv,divtau,work,work2,smag_diss)
 endif
 
 
 
 if (alpha_value>0) then
-   call alpha_model_forcing(Q,divtau,gradu,gradv,work,work2)
+   call compute_divtau(Q,divtau,gradu,gradv,work,work2)
    ! Apply Helmholtz inverse to:   div(tau) - grav grad(h)
-
+   ! 
+   ! alpha model:
+   !     u_t + ... = helm^-1[div(tau)-grav grad(h)] 
+   ! OR:
+   !     u_t + ... + grav grad(h) = helm^-1[div(tau)-grav grad(h)] + grav grad(h)
+   ! THUS:
+   ! 
    ! a_diss should be the KE dissapation from the div(tau) term,
-   ! a_diss = <uH, Helmholtz^-1(div(tau)-grav grad(h)>  - <u H , grav grad(h)>
-   !        = <Helm(uH),div(tau)-grav grad(h)>  - < u H, grav grad(h)>
-   !        = ...
+   ! a_diss = <uH, Helmholtz^-1(div(tau)-grav grad(h)>  + <u H , grav grad(h)>
+   !        = <Helm(uH),div(tau)-grav grad(h)>  + < u H, grav grad(h)>
+   !        = <Helm(uH),div(tau)> -<Helm(uh),grav grad(h)>  + < u H, grav grad(h)>
+   !        = <Helm(uH),div(tau)> -<Helm(uh),grav grad(h)>  + < u H, grav grad(h)>
+   !        = <Helm(uH),div(tau)> + alpha_value**2 <Lap(uh),grav grad(h)>  
    ! which is rather complicated and not computed yet.  
 
    do n=1,2
@@ -380,6 +324,8 @@ if (alpha_value>0) then
    do i=nx1,nx2
    do n=1,2
       rhs(i,j,n)=rhs(i,j,n)+divtau(i,j,n)
+      ! a_diss = uH dot (divtau + grav gradh)
+      a_diss=a_diss + Q(i,j,n)*Q(i,j,3)*(divtau(i,j,n) + grav*gradh(i,j,n))
    enddo
    enddo
    enddo
@@ -463,14 +409,41 @@ if (compute_ints==1) then
    ! ints(9)  = 
    ints(10)=(smag_diss+mu*ke_diss)/g_nx/g_ny     ! u dot laplacian u
 
+
+
+
    if (compute_transfer) then
 #ifndef POSDEF_HYPERVIS
       call abort("shallow.F90: computation of transfer function requires POSDEF")
 #endif
+      ! E dissipation from smagorinsky:
+      !       h*U dot smag_term
+      ! which we write as:
+      !       U dot (h*smag_term)
+      ! and fourier transform each of those to compute the 
+      ! spectrum for smagorinsky
+
+      gradh=0
+      ! recompute compute grad(h) for smag. calculation
+      if (smagorinsky>0) then
+         do n=1,2
+            call der(Q(1,1,1),gradu(1,1,n),dummy,work,DX_ONLY,n)
+            call der(Q(1,1,2),gradv(1,1,n),dummy,work,DX_ONLY,n)
+         enddo
+         ! compute smag. term in gradh.  divtau used for work array
+         gradh=0
+         call add_smagorinsky(gradh,Q,gradu,gradv,divtau,work,work2,smag_diss)
+         gradh(:,:,1)=gradh(:,:,1)*Q(:,:,3)
+         gradh(:,:,2)=gradh(:,:,2)*Q(:,:,3)
+         call fft3d(gradh(1,1,1),work)
+         call fft3d(gradh(1,1,2),work)
+      endif
+
+
       transfer_comp_time=time
       spec_diff=0
+      spec_model=0
       do n=1,2
-
          do j=ny1,ny2
             jm=abs(jmcord(j))
             do i=nx1,nx2
@@ -485,8 +458,16 @@ if (compute_ints==1) then
 
          call compute_spectrum_fft(work,work,io_pe,spec_tmp)
          spec_diff=spec_diff - mu*spec_tmp
+         call compute_spectrum_fft(work,gradh(1,1,n),io_pe,spec_tmp)
+         spec_model=spec_model + spec_tmp
       enddo
+
+      
+
    endif
+
+
+
 endif
 
 
@@ -499,10 +480,6 @@ enddo
 
 
 ! hyper viscosity and dealias:
-!
-! use gradu to store -del**4 U to compute viscous KE dissapation
-! use gradv to store del U to compute viscous KE dissapation (for alpha)
-gradu=0
 do j=ny1,ny2
    jm=abs(jmcord(j))
    do i=nx1,nx2
@@ -538,10 +515,99 @@ end
 
 
 
+subroutine add_smagorinsky(rhs,Q,gradu,gradv,s1,work,work2,smag_diss)
+!
+!  add smagorinsky term into rhs
+!
+!   S= |       u_x       .5(u_y + v_x)  |
+!      |   .5(u_y+v_x)      v_y         |
+!
+use params
+use sforcing
+use transpose
+implicit none
+real*8 rhs(nx,ny,2)         
+real*8 Q(nx,ny,n_var)         
+real*8 gradu(nx,ny,2)
+real*8 gradv(nx,ny,2)
+real*8 s1(nx,ny,2)
+real*8 work(nx,ny)
+real*8 work2(nx,ny)
+real*8 smag_diss
+
+real*8 :: normS,dummy
+integer :: i,j
+
+#define SMAGH 1
+!#define SMAGH (1/Q(i,j,3))
+
+
+smag_diss=0
+normS=0
+   do j=ny1,ny2
+   do i=nx1,nx2
+      normS=normS+gradu(i,j,1)**2 + gradv(i,j,2)**2 + &
+         .5*(gradu(i,j,2)+gradv(i,j,1))**2
+
+      s1(i,j,1)=gradu(i,j,1)
+      s1(i,j,2)=.5*(gradu(i,j,2)+gradv(i,j,1))
+   enddo
+   enddo
+   normS=sqrt(2*normS)  ! following Marcel Lesieur, Turbulence in Fluids
+
+   s1=2*(smagorinsky**2)*normS*s1
+   call der(s1(1,1,1),work,dummy,work2,DX_ONLY,1)
+   work=work*(delx**2)*SMAGH
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,1)*work(i,j)
+   enddo
+   enddo
+
+   call der(s1(1,1,2),work,dummy,work2,DX_ONLY,2)
+   work=work*(dely**2)*SMAGH
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,1)*work(i,j)
+   enddo
+   enddo
 
 
 
-subroutine alpha_model_forcing(Q,div,gradu,gradv,work,work2)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      ! use s1 to store n=2 row of S:
+      s1(i,j,1)=.5*(gradu(i,j,2)+gradv(i,j,1))
+      s1(i,j,2)=gradv(i,j,2)
+   enddo
+   enddo
+   s1=2*(smagorinsky**2)*normS*s1
+   call der(s1(1,1,1),work,dummy,work2,DX_ONLY,1)
+   work=work*(delx**2)*SMAGH
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,2)=rhs(i,j,2)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,2)*work(i,j)
+   enddo
+   enddo
+
+   call der(s1(1,1,2),work,dummy,work2,DX_ONLY,2)
+   work=work*(dely**2)*SMAGH
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,2)=rhs(i,j,2)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,2)*work(i,j)
+   enddo
+   enddo
+end subroutine
+
+
+
+
+
+subroutine compute_divtau(Q,div,gradu,gradv,work,work2)
 ! compute one entry of work=DD + DD' - D'D  
 ! transform work -> p
 ! compute d(p), apply helmholtz inverse, accumualte into rhs

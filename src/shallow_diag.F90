@@ -21,23 +21,25 @@ real*8 :: tsave
 
 if (compute_transfer) then
    ! spec_r computed last time step
-   ! spec_diff were computed in RHS computation at the
+   ! spec_diff,spec_model were computed in RHS computation at the
    ! beginning of this flag (becuase compute_transfer flag was set)
    ! So they are all known at time_old. Now compute spec_r_new 
    ! (used to compute edot_r at mid-time level)
    call compute_Edotspec_shallow(time,Q,q1,work1,work2)
 
    ! e_dot_r    known at (time + time_old)/2
-   ! spec_diff  known at time_old
+   ! spec_diff,spec_model  known at time_old
    ! compute spec_diff at 'time' be re-calling getrhs with compute_transfer
    ! flag still set = .true.
 
    spec_diff_new=spec_diff  
+   spec_model_new=spec_model
    tsave=transfer_comp_time
    call getrhs(q1,Qhat,Q,time,1,work1,work2)
    transfer_comp_time=tsave
 
    spec_diff = (spec_diff_new+spec_diff)/2
+   spec_model = (spec_model_new+spec_model)/2
    
    ! output all the spectrum:
    call output_tran(time,Q,q1,q2,q3,work1,work2)

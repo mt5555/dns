@@ -28,6 +28,8 @@ real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
+real*8 ::  spec_model(0:max(g_nx,g_ny,g_nz)) ! spectrum of div(tau) or smagorinsky term
+real*8 ::  spec_model_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_rhs(0:max(g_nx,g_ny,g_nz))   ! transfer spec of u dot RHS
 
 real*8 ::  spec_tmp(0:max(g_nx,g_ny,g_nz))   ! storage, for calling program convienience
@@ -480,7 +482,7 @@ if (my_pe==io_pe) then
       call cwrite8(fid,spec_f,1+iwave)
    endif
    if (equations==SHALLOW) then
-      x=2   ! number of spectrums in file for each time.  
+      x=3   ! number of spectrums in file for each time.  
       call cwrite8(fid,x,1)
       
       ! e-dot
@@ -492,6 +494,11 @@ if (my_pe==io_pe) then
       call cwrite8(fid,.5*(time+time_old),1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_diff,1+iwave)
+
+      ! div(tau) (or smag) spectrum
+      call cwrite8(fid,.5*(time+time_old),1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_model,1+iwave)
    endif
 
 
