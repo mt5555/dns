@@ -30,19 +30,34 @@ import os, commands, getopt, sys
 #
 #
 #############################################################################
-
-
-user="taylorm"
-path="cronlsf/"    #requires that we run from home directory
-                   # which is what cron does. otherwise hard code
-                   # a full path
-
-
-
+#testing mode, unless arg1= "submit"
 submit=0
 if (len(sys.argv)== 2):
     if (sys.argv[1]=="submit"):
         submit=1
+
+
+user="taylorm"
+
+#set below for value of path
+#path="cronlsf/"    #requires that we run from home directory
+                   # which is what cron does. otherwise hard code
+                   # a full path
+
+# are we on IRIX or OSF1?
+(status,out) = commands.getstatusoutput("uname")
+if (status==0):
+    if (out=="IRIX64"):
+        bsub="bsub"
+        path="cronlsf/"
+    else:
+        bsub="idbsub"
+        path="cronQ/"
+else:
+    print 'Error getting OS type'
+    sys.exit(1)
+
+
 
 
 
@@ -65,23 +80,25 @@ if (len(vout)<2):
 
 for line in vout:
     sline=split(line)
-    if (jobc==-1) & (len(sline)>=7) & (sline[6]=="JOB_NAME"):
-        #find column where job starts:
-        jobc=find(line,"JOB_NAME")
+    if (jobc==-1) & (len(sline)>=7):
+        if (sline[6]=="JOB_NAME"):
+            #find column where job starts
+            jobc=find(line,"JOB_NAME")
 
     if (jobc<0):
        print 'Error parsing bjobs output for JOB_NAME'
        sys.exit(1)
     
         
-    if (len(sline)>=7) & (sline[1]==user) & (jobc>=0):
-        # get everything in JOB_NAME column and beyond:
-        out=line[jobc:-1]
-        out=split(out," ")
-        if (len(out)==0):
-            print 'Error parsing bjobs output for jobname'
-            sys.exit(1)
-        jobname_running.append(out[0]);
+    if (len(sline)>=7) & (jobc>=0):
+        if (sline[1]==user):
+            # get everything in JOB_NAME column and beyond:
+            out=line[jobc:-1]
+            out=split(out," ")
+            if (len(out)==0):
+                print 'Error parsing bjobs output for jobname'
+                sys.exit(1)
+            jobname_running.append(out[0]);
         
 
 print "current LSF jobs for user ",user
@@ -91,17 +108,6 @@ for out in jobname_running:
     print out
 
 
-
-# are we on IRIX or OSF1?
-(status,out) = commands.getstatusoutput("uname")
-if (status==0):
-    if (out=="IRIX64"):
-        bsub="bsub"
-    else:
-        bsub="idbsub"
-else:
-    print 'Error getting OS type'
-    sys.exit(1)
 
 
 
@@ -117,7 +123,7 @@ vjobscript=split(out,"\n")
 
 for jobscript in vjobscript:
 
-    print jobscript
+    print 'script: ',jobscript
     try:
 
         # parse file for the job name
@@ -135,12 +141,14 @@ for jobscript in vjobscript:
 
 
         if len(jobname)==0:
-            break
+            raise NameError,"job does not have a BSUB -J option: "+jobname
+
+        print 'LSF name: ',jobname
 
         # check if it is in que
         i=jobname in jobname_running
         if i:
-            raise NameError,"job already running: "+jobname
+            raise NameError,"job already running."
 
         
         # check resub count in file jobname.resub
@@ -158,10 +166,10 @@ for jobscript in vjobscript:
 
             
     except IOError,e:
-        print 'FILE_ACCESS_ERROR: (resub file?)',jobname
+        print 'FILE_ACCESS_ERROR: (resub file?)'
 
     except ValueError,e:
-        print 'VALUE_ERROR: ',jobname
+        print 'VALUE_ERROR: '
 
     except NameError,e:
         print 'NAME_ERROR: ',e
@@ -169,12 +177,11 @@ for jobscript in vjobscript:
     else:
         # submit job
         jobcommand = bsub + " < " + jobscript
-        out= "resub=" + str(fvalue)+" LSF job: "+jobcommand+"\n"
-        sys.stderr.write(out)
+        print "resub=" + str(fvalue)+" LSF job: "+jobcommand
         if (submit):
             os.system(jobcommand)
         else:
-            sys.stderr.write("(testing mode - no jobs submitted)\n")
+            print "(testing mode - no jobs submitted)"
 
 
 

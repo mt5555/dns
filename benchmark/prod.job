@@ -24,15 +24,6 @@ set NCPU = 128
 set mesh = "1 1 $NCPU 256 256 256"
 
 
-# name of job file to resubmit  (if resubmit = 1)
-set resubmit = 0
-set JOB = prod.job
-# number of times to resubmit:
-set resub = 20
-set resub_file = $SRC/{$name}resub
-
-
-
 
 
 # CPQ or BlueMountain?
@@ -58,16 +49,6 @@ endif
 cd /scratch/taylorm
 
 if ($restart == 1) then
-
-   # check for resub limit
-   set out = `$SRC/lsfcheck.py $resub_file $resub`
-   echo 'resublimit = ' $resub 
-   echo 'resub value in file: '
-   cat $resub_file
-   if ($out != SMALLER) then
-      echo 'resubmit limit reached.  Exit.'
-      exit 1
-   endif
 
    #search HPSS for newest restart file
    set resnameu = `psi ls -t dns/{$name}\*.u | sort | tail -1`
@@ -107,9 +88,6 @@ if ($restart == 1) then
    endif
    $MPIRUN ./dns -r -d . $name < $refin 
 else
-   echo 'Initial run.  writing a 0 to ' $resub_file 
-   echo '0' > $resub_file
-
    #cleanup:  
    \rm -f {$name}\*.sf
    \rm -f {$name}\*.scalars
@@ -139,10 +117,6 @@ save {$name}\*.v
 save {$name}\*.w
 EOF
 
-if ($resubmit == 1) then
-    cd $HDIR
-    idbsub -n $NCPU < $JOB
-endif
 
 
 # ssrun -workshop mpirun -np 128 ../src/dns < $refin 
