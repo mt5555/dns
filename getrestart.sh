@@ -18,13 +18,14 @@ set fpath = $2
 if ($fpath == HPSS) then
 
    #search HPSS for newest restart file
-   set resnameu = `psi ls dns/{$name}\*.u | sort | tail -1`
-   if ($resnameu =="") then
+   set resnamew = `psi ls dns/{$name}\*.w | sort | tail -1`
+   if ($resnamew =="") then
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      set resnamev = `psi ls  dns/{$name}\*.v | sort | tail -1`
-      set resnamew = `psi ls  dns/{$name}\*.w | sort | tail -1`
+      set nametime = `basename $resnamew .w`
+      set resnameu = `psi ls  dns/{$nametime}\*.u | sort | tail -1`
+      set resnamev = `psi ls  dns/{$nametime}\*.v | sort | tail -1`
       echo "Using restart files: " 
       echo $resnameu
       echo $resnamev
@@ -49,7 +50,7 @@ if ($fpath == HPSS) then
    \ln -s $resnameu2  restart.u
    \ln -s $resnamev2  restart.v
    \ln -s $resnamew2  restart.w
-   if !(-e restart.w) then
+   if !(-e restart.u) then
       echo "No restart.w file"
       exit 1
    endif
@@ -57,13 +58,14 @@ if ($fpath == HPSS) then
 else
 
    #search $fpath for newest restart file
-   set resnameu = `\ls {$fpath}/{$name}\*.u | sort | tail -1`
-   if ($resnameu =="") then
+   set resnamew = `\ls {$fpath}/{$name}\*.w | sort | tail -1`
+   if ($resnamew =="") then
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      set resnamev = `ls  {$fpath}/{$name}\*.v | sort | tail -1`
-      set resnamew = `ls  {$fpath}/{$name}\*.w | sort | tail -1`
+      set nametime = `basename $resnamew .w`
+      set resnameu = `ls  {$fpath}/{$nametime}\*.u | sort | tail -1`
+      set resnamev = `ls  {$fpath}/{$nametime}\*.v | sort | tail -1`
       echo "Using restart files: " 
       echo $resnameu
       echo $resnamev
@@ -88,7 +90,7 @@ else
    \ln -s $resnameu2  restart.u
    \ln -s $resnamev2  restart.v
    \ln -s $resnamew2  restart.w
-   if !(-e restart.w) then
+   if !(-e restart.u) then
       echo "No restart.w file"
       exit 1
    endif
