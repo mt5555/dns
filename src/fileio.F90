@@ -765,7 +765,7 @@ character(len=80) message
 if (io_read==1) then
    call mread8e(fid,time,1,ierr)
    if (ierr/=1) then
-      write(message,'(a,i5)') "singlefile_io(): Error reading file"
+      write(message,'(a,i5)') "header1_io(): Error reading file"
       call print_message(message)
       call abort("")
    endif
@@ -782,7 +782,7 @@ if (io_read==1) then
          call print_message("Input routines can only upsample.") 
          call print_message("Output routines can only downsample.") 
          call print_message("Run code at higher resolution, calling Output to downsample")
-         call abort("error in singlefile_io2")
+         call abort("error in header1_io")
       endif
    else
       print *,'grid input data'
@@ -807,7 +807,7 @@ else
          call print_message("Error: spectral output requires zero padding") 
          call print_message("Output routines can only downsample.") 
          call print_message("Input routines can input this data directly")
-         call abort("error in singlefile_io2")
+         call abort("error in header1_io")
       endif
    else
       call mwrite8(fid,g_xcord(1),o_nx)
@@ -846,7 +846,7 @@ xnz=-1
 if (io_read==1) then
    call mread1e(fid,message,80,ierr)
    if (ierr/=1) then
-      write(message,'(a,i5)') "singlefile_io(): Error reading file"
+      write(message,'(a,i5)') "header3_io(): Error reading file"
       call print_message(message)
       call abort("")
    endif
@@ -888,8 +888,8 @@ xnz=-1
 if (io_read==1) then
    ! read 4 bytes
    call mread1e(fid,message,4,ierr)
-   if (ierr/=1) then
-      write(message,'(a,i5)') "singlefile_io(): Error reading file"
+   if (ierr/=4) then
+      write(message,'(a,i5)') "header4_io(): Error reading file"
       call print_message(message)
       call abort("")
    endif
