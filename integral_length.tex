@@ -46,7 +46,7 @@
 \author{Mark Taylor}
 
 \begin{document}
-\maketitle
+%\maketitle
 
 The normalization used for the 1D spectrum $E_{ij}$ in our DNS code
 is:
@@ -77,9 +77,14 @@ and thus
 \int_0^1 R(r) \,dr = \sum_k u_k^2   \int_0^1 e^{i k 2 \pi r} \,dr
                    = u_0^2 = 2 E_{11}(0)
 \]
-So 
+So using the definition
 \[
-L = \frac{\int_0^1 R(r) \,dr}{< u^2 > } = \frac{ 2 E_{11}(0) }{ < u^2 > }
+L_{11} = \frac{\int_0^1 R(r) \,dr}{< u^2 > }
+\]
+we have
+\[
+L_{11} =  \frac{ 2 E_{11}(0) }{ 2 \sum_k E_{11}(k) }
+ = \frac{ E_{11}(0) }{ \sum_k E_{11}(k) }
 \]
 
 
