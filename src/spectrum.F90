@@ -577,7 +577,7 @@ if (my_pe==io_pe) then
    call cwrite8(fid,x,1)
    write(6,*)costta_pdf(1,:)
    do i=1,1+iwave
-      tmp_pdf=costta_pdf(1,:)
+      tmp_pdf=costta_pdf(i,:)
       call cwrite8(fid,tmp_pdf,nbin)
    enddo
    call cclose(fid,ierr)
