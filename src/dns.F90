@@ -229,7 +229,7 @@ do
    maxs(6)=time
    maxs(7)=time_old
 
-   if (maxs(8)>=0 .and. maxs(8)<30 .and. enable_lsf_timelimit==1) then
+   if (maxs(8)>=0 .and. maxs(8)<15 .and. enable_lsf_timelimit==1) then
       write(message,'(a,f20.10)') "LSF timelimit approaching. Stoping at time=",time
       call print_message("** ERROR ****************************************")
       call print_message(message)

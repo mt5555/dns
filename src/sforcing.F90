@@ -125,7 +125,7 @@ init_sforcing=1
    else
       tau=5
    endif
-   write(message,'(a,f5.2)') 'Forcing relaxation parameter tau=',tau
+   write(message,'(a,f8.2)') 'Forcing relaxation parameter tau=',tau
    call print_message(message)
 
    do n=1,NUMBANDS

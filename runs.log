@@ -22,7 +22,7 @@ t=1.5  NIRVANA timings              t=15
 4096x2048 milkyway    t=.1: 19.68m
                              8.19m (4 cpus 4x1)
                             11.52m ( 2 cpus 2x1)
-                                   ( 4 cpus 2x2)
+                             8.48  ( 4 cpus 2x2)
 
 
 
@@ -107,7 +107,7 @@ tau=25  (subtype=1)
 
 tau=500 (subtype=3)
 250F   .1e-3
-250D   .8e-3
+250G   .8e-3  IN
 
 
 

@@ -33,7 +33,7 @@ else if (equations==SHALLOW) then
    fname = rundir(1:len_trim(rundir)) // "restart.h"
    call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
 else if (equations==NS_PSIVOR) then
-   call print_message("Restarting from file restart.vor,psi")
+   call print_message("Restarting from file restart.vor")
    fname = rundir(1:len_trim(rundir)) // "restart.vor"
    call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
    !fname = rundir(1:len_trim(rundir)) // "restart.psi"

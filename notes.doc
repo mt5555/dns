@@ -21,7 +21,6 @@
        2e-4: looks good, a little too smoothed 
       compare with spectral, 4th, 4th+1st order grad, or 1st order div
 3. if run stops because u>1000, timings are incorrect
-4. check restart testcase on mahi or CPQ (also little endian)
 5. make suite of runs for diffusion: 32^3, 64^3 128^3 256^3
        plot R_lamba vs mu and h
 6. switch 3d test case to different dimensions

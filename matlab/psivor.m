@@ -133,7 +133,7 @@ for i=range
     end
 
     'pause'
-%    pause
+    pause
   end
 end
 return
