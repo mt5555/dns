@@ -1482,13 +1482,14 @@ if (user_specified_isodir>0) then
    ndir=min(user_specified_isodir,ndir_max)
 endif
 
-
-
 do idel=1,ndelta_max
    if (delta_val(idel) >= max_delta) exit
    ndelta=idel
 enddo
 
+if (io_pe==my_pe) then
+   print *,'isoave: ndir,ndelta: ',ndir,ndelta
+endif
 
 
 
@@ -1692,17 +1693,14 @@ SN_lll=SN_lll/ntot
 w2s2=w2s2/ntot
 
 #ifdef USE_MPI
-   call print_message("reduce 1")
    do p=2,pmax
-   dwork2=Dl(:,:,p)
-   call MPI_reduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+      dwork2=Dl(:,:,p)
+      call MPI_reduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
-   call print_message("reduce 2")
-   dwork3=Dt(:,:,:,p)
-   call MPI_reduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+      dwork3=Dt(:,:,:,p)
+      call MPI_reduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    enddo
 
-   call print_message("reduce 3")
    dwork2=H_ltt
    call MPI_reduce(dwork2,H_ltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=H_tt

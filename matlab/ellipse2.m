@@ -137,7 +137,7 @@ for t=times
        semilogy(timev,squeeze(emode(i,2,:)),[ccol(i),'-']); hold on;
      end
      hold off;
-     'pause' ;     pause
+%     'pause' ;     pause
      
   end
 end

@@ -291,8 +291,8 @@ do
    
    if (tstart>0) then   
       time=time+tinc
-      if (time > max(tstop,tstart)) exit
-      if (time < min(tstop,tstart)) exit
+      if (time > max(tstop,tstart)+1e-5) exit
+      if (time < min(tstop,tstart)-1e-5) exit
    endif
 enddo
 100 continue

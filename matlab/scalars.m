@@ -18,10 +18,11 @@ fid2=-1;
 %fid=endianopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r'); 
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
-fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-
+fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+nx=2048;
+fid2=fopen('/ccs/scratch/taylorm/decay/decay1024.scalars','r','l'); 
 
 
 nscalars=0;
@@ -151,7 +152,7 @@ print -djpeg -r72 rl.jpg
 eta = (mu^3 ./ abs(ke_diss_d)).^(.25);
 
 figure(3); subplot(1,1,1)
-plot(time,eta* 1024*2*pi*2*sqrt(2)/3 )
+plot(time,eta* nx*pi*2*sqrt(2)/3 )
 title('k_{nmax} \eta')
 xlabel('time')
 print -djpeg -r72 kmaxeta.jpg
@@ -171,7 +172,7 @@ disp(sprintf('R_l (average over last half of data) = %f ',R_l));
 disp(sprintf('1/250 in units of eta:  %f',(1/250)/eta));
 disp(sprintf('1/500 in units of eta:  %f',(1/500)/eta));
 disp(sprintf('1/512 in units of eta:            %f   %f', (1/512)/eta,eta*2*pi*512*sqrt(2)/3 )) ;
-disp(sprintf('1/2048 in units of eta:  %f',(1/2048)/eta));
+disp(sprintf('1/nx in units of eta:  %f',(1/nx)/eta));
 
 tturn=-2*ke./ke_diss_d;
 tturn = tturn(length(tturn)/2:length(tturn));
