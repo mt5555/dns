@@ -32,8 +32,8 @@ fid2=-1;
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
 
-fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
-nx=1024;
+%fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
+%nx=1024;
 
 %fid=fopen('../src/sk128_alpha25/sk128_alpha250000.0000.scalars','r');
 %nx=128;
