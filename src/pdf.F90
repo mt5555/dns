@@ -14,13 +14,12 @@ real*8            :: pdf_bin_size = .01
 
 
 
-
-
 type pdf_structure_function
 !
 ! pdf%data(-bin:bin,delta_num,npdfs)
 !
-real*8,allocatable :: pdf(:,:)
+!SGI f90 does not allow allocatable arrays in a struct
+real*8,pointer      :: pdf(:,:)
 integer             :: nbin         ! number of bins
 integer             :: ncalls       ! number of instances PDF has been computed
                                ! (i.e. we may compute the PDF for 10 time steps
@@ -73,8 +72,6 @@ subroutine init_pdf(str,bin)
 implicit none
 type(pdf_structure_function) :: str
 integer :: bin
-
-if (allocated(str%pdf)) deallocate(str%pdf)
 
 str%nbin=bin
 allocate(str%pdf(-bin:bin,delta_num))
@@ -383,11 +380,7 @@ if (compz) then
 endif
 
 
-end
-
-
-
-
+end subroutine
 
 
 

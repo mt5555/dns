@@ -29,7 +29,8 @@ logical,save :: firstcall=.true.
 
 type wnforcing_d
    integer :: n
-   integer, allocatable :: index(:,:)
+   ! note: SGI f90 does not allow allocatable arrays in a struct
+   integer, pointer :: index(:,:)
 end type
 #define NUMBANDS 2
 type(wnforcing_d),save :: wnforcing(NUMBANDS)
