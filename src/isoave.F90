@@ -18,7 +18,7 @@ implicit none
 
 integer,parameter :: ndir_max=73
 integer,parameter :: ndelta_max=73
-integer,parameter :: pmax=10
+integer,parameter :: pmax=10       ! has to be 6 or greater
 integer :: dir(3,ndir_max)
 integer :: ndelta,ndir
 integer :: delta_val(ndelta_max)   ! delta values (in terms of grid points)
