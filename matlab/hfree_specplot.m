@@ -61,7 +61,7 @@ costta_spec = fread(fid,n_r,'float64');
 nbin = fread(fid,1,'int');
 costta_pdf = zeros(n_r,nbin);
 for i = 1:n_r
-costta_pdf(i,:) = fread(fid,nbin,'float64')
+costta_pdf(i,:) = (fread(fid,nbin,'float64'))';
 end
 
 % bin values for pdfs of cos_tta
@@ -173,8 +173,9 @@ grid on;
 title('energy spectrum');
 
 figure(28)
-     for i = 1:1
-plot(binvals, costta_pdf(i,:),'r'); hold on;
+for i = 1:n_r
+plot(binvals, costta_pdf(i,:),'r')
+hold on;
 end
 
 
