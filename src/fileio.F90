@@ -121,13 +121,13 @@ endif
 doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 ! dont write a restart file if we just restarted:
-if (time==time_initial .and. (init_cond==3)) doit_restart=.false.
+if (time==time_initial .and. restart==1) doit_restart=.false.
 
 
 doit_output=check_time(itime,time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
 ! dont write output file if we just restarted:
-if (time==time_initial .and. (init_cond==3)) doit_restart=.false.
+if (time==time_initial .and. restart==1) doit_restart=.false.
 
 doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)

@@ -1,4 +1,9 @@
 #include "macros.h"
+
+! used to try out 2nd order schemes:
+#undef CENTER2H
+#undef CENTER4H        
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  compute derivative along index index=1,2 or 3
@@ -30,7 +35,7 @@ if (numerical_method==1) then
 if (index==1) then
 
    call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
-   call fourth_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,delx)
+   call fd_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,delx)
    if (numder==2) then
       call transpose_from_x(px,pxx,n1,n1d,n2,n2d,n3,n3d)
    endif
@@ -41,7 +46,7 @@ else if (index==2) then
 
    call transpose_to_y(p,pt,n1,n1d,n2,n2d,n3,n3d)
    ! 1st derivative returned in pt, 2nd derivative returned in px
-   call fourth_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,dely)
+   call fd_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,dely)
    if (numder==2) then
       call transpose_from_y(px,pxx,n1,n1d,n2,n2d,n3,n3d)
    endif
@@ -49,7 +54,7 @@ else if (index==2) then
 
 else if (index==3) then
    call transpose_to_z(p,pt,n1,n1d,n2,n2d,n3,n3d)
-   call fourth_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,delz)
+   call fd_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,delz)
    if (numder==2) then
       call transpose_from_z(px,pxx,n1,n1d,n2,n2d,n3,n3d)
    endif
@@ -107,7 +112,7 @@ end subroutine
 ! Note: method (2) and (3) depend on FFT data structure, and are thus 
 !       in the fft_*_interface.F90 files.  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine divfree_gridspace(u,p)
+subroutine divfree_gridspace(u,p,work,work2)
 !
 ! make u divergence free
 !    solve:  div(u) = laplacian(p)
@@ -118,16 +123,15 @@ subroutine divfree_gridspace(u,p)
 use params
 use fft_interface
 implicit none
-real*8 u(nx,ny,nz,3)
+real*8 :: u(nx,ny,nz,3)
 real*8 :: p(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+
+!local
 real*8 :: dummy(1)
 real*8 :: alpha=0
 real*8 :: beta=1
-
-
-!local variables
 integer i,j,k,n
 
 call divergence(p,u,work,work2)
@@ -513,12 +517,32 @@ do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
 
-         ! u(x+h)-u(x-h)  ->   2i sin(k*pi2*h)
+         ! u(x+h)-u(x-h)    ->   2i sin(k*pi2*h)
+         ! u(x+2h)-u(x-2h)  ->   2i sin(k*pi2*2*h)
          ! applied twice: ->   -4 sin(k*pi2*h)^2
+
+#ifdef CENTER2H
          xm=2*sin(imcord(i)*pi2*delx)/(2*delx)
          ym=2*sin(jmcord(j)*pi2*dely)/(2*dely)
          zm=2*sin(kmcord(k)*pi2*delz)/(2*delz)
-         xfac= alpha + beta*(-xm*xm -ym*ym - zm*zm)
+#elif (defined CENTER4H) 
+         xm=2*sin(imcord(i)*pi2*2*delx)/(4*delx)
+         ym=2*sin(jmcord(j)*pi2*2*dely)/(4*dely)
+         zm=2*sin(kmcord(k)*pi2*2*delz)/(4*delz)
+#else
+         xm=4*sin(imcord(i)*pi2*delx)/3
+         ym=4*sin(jmcord(j)*pi2*dely)/3
+         zm=4*sin(kmcord(k)*pi2*delz)/3
+         xm=xm - sin(imcord(i)*pi2*2*delx)/6
+         ym=ym - sin(jmcord(j)*pi2*2*dely)/6
+         zm=zm - sin(kmcord(k)*pi2*2*delz)/6
+         xm=xm/delx
+         ym=ym/dely
+         zm=zm/delz
+#endif
+         xfac=xm*xm + ym*ym  +zm*zm
+         if (xfac<1e-12) xfac=0
+         xfac= alpha - beta*xfac
          if (xfac/=0) xfac = 1/xfac
          p(i,j,k)=p(i,j,k)*xfac
       enddo
@@ -564,7 +588,7 @@ end subroutine
 !
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fourth_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d,h)
+subroutine fd_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d,h)
 
 implicit none
 
@@ -577,19 +601,32 @@ real*8 :: h
 
 integer i,j,k,i0,i1,i2,i3
 
+if (n1==1) then
+   px=0
+   pxx=0
+   return
+endif
+
+
+
 do k=1,n3
 do j=1,n2
+
    do i=1,n1
       work(i)=px(i,j,k)
    enddo
-
    i0=n1-1
    i1=n1
    i2=2
    i3=3
    do i=1,n1
-!      px(i,j,k)= (2*(work(i2)-work(i1))/3 - (work(i3)-work(i0))/12 )/h
+#ifdef CENTER2H
       px(i,j,k)= (work(i2)-work(i1))/(2*h)
+#elif (defined CENTER4H)
+      px(i,j,k)= (work(i3)-work(i0))/(4*h)
+#else
+      px(i,j,k)= (2*(work(i2)-work(i1))/3 - (work(i3)-work(i0))/12 )/h
+#endif
       i0=i1
       i1=i
       i2=i3
@@ -602,8 +639,13 @@ do j=1,n2
       i2=2
       i3=3
       do i=1,n1
-         !pxx(i,j,k)= (2*(px(i2,j,k)-px(i1,j,k))/3 - (px(i3,j,k)-px(i0,j,k))/12 )/h
+#ifdef CENTER2H
          pxx(i,j,k)= (px(i2,j,k)-px(i1,j,k))/(2*h)
+#elif (defined CENTER4H)
+         pxx(i,j,k)= (px(i3,j,k)-px(i0,j,k))/(4*h)
+#else
+         pxx(i,j,k)= (2*(px(i2,j,k)-px(i1,j,k))/3 - (px(i3,j,k)-px(i0,j,k))/12 )/h
+#endif
          i0=i1
          i1=i
          i2=i3
@@ -685,6 +727,8 @@ end subroutine
 
 
 
+#if 0
+example code, cant handle non fft methods 
 
 subroutine divfree(u,p)
 !
@@ -763,13 +807,14 @@ do i=1,3
    call ifft3d(u(1,1,1,i),p)
 enddo
 end subroutine
+#endif
 
 
 
 
 
-
-
+#if 0
+example code, cant handle non fft methods 
 subroutine divfree_loopfused(u,p)
 !
 ! make u divergence free
@@ -930,7 +975,7 @@ do n=1,3
    call ifft3d(u(1,1,1,n),p)
 enddo
 end subroutine
-
+#endif
 
 
 

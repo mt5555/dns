@@ -9,10 +9,11 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:50;
 %range = 1
-range=0:.25:2;
+range=0:.10:2;
 %range=[.750 ];
 %name='../src/impulse/kh18';
-name='../src/kh/khL';
+%name='../src/kh/khL';
+name='/tmp/test';
 mkpr=0;
 
 for i=range

@@ -25,8 +25,6 @@ end subroutine
 
 
 
-
-
 subroutine test_transform
 use params
 use transpose
@@ -140,17 +138,21 @@ end subroutine
 
 subroutine test_divfree
 use params
+use transpose
 use fft_interface
 implicit none
 
 real*8 work(nx,ny,nz)
 real*8 input(nx,ny,nz,3)
+real*8 input2(nx,ny,nz,3)
 real*8 p(nx,ny,nz)
+real*8 div(nx,ny,nz),div2(nx,ny,nz)
 real*8 d1(nx,ny,nz)
+real*8 d2(nx,ny,nz)
 real*8 dummy
 character(len=80) message
 
-integer i,j,k,dim
+integer i,j,k,dim,n1,n2,n3,n1d,n2d,n3d
 
 input=0
 do i=nx1,nx2
@@ -183,21 +185,28 @@ enddo
 
 
 
-call divfree(input,p)
+call divfree_gridspace(input,p,d1,work)
 
 ! compute p = div(u)
-i=1
+i=3
 call der(input(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = d1
 i=2
 call der(input(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = p + d1
-i=3
+i=1
 call der(input(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = p + d1
 
-write(message,'(a,e10.5)') 'maxval of divergence = ',maxval(p(nx1:nx2,ny1:ny2,nz1:nz2))
+write(message,'(a,e10.5)') 'maxval of divergence = ',&
+   maxval(abs(p(nx1:nx2,ny1:ny2,nz1:nz2)))
 call print_message(message)
+#if 0
+print *,'modes of divergence:'
+call fft3d(p,work)
+call print_modes(p)
+call ifft3d(p,work)
+#endif
 end subroutine
 
 
@@ -211,6 +220,8 @@ use params
 implicit none
 
 real*8 work(nx,ny,nz)
+real*8 d1(nx,ny,nz)
+real*8 d2(nx,ny,nz)
 real*8 rhs(nx,ny,nz)
 real*8 input(nx,ny,nz)
 integer i,j,k
@@ -271,7 +282,28 @@ enddo
 rhs = alpha*input + beta*rhs
 call poisson(rhs,work,alpha,beta)
 
+work=rhs-input
+error=maxval(abs(work(nx1:nx2,ny1:ny2,nz1:nz2)));
+call maxvalMPI(error)
+call print_message("analytic Helmholtz problem:")
+write(message,'(a,f6.2,a,f6.2,a,e15.8)') 'Laplace solver alpha=',alpha,' beta=',beta,&
+   '  error=',error
+call print_message(message)
 
+
+! descrete problem
+
+
+! compute descrete laplacian:
+call der(input,d1,d2,work,DX_AND_DXX,1)
+rhs=d2
+call der(input,d1,d2,work,DX_AND_DXX,2)
+rhs=rhs+d2
+call der(input,d1,d2,work,DX_AND_DXX,3)
+rhs=rhs+d2
+
+rhs=alpha*input + beta*rhs
+call poisson(rhs,work,alpha,beta)
 work=rhs-input
 #if 0
 do i=nx1,nx2
@@ -286,9 +318,13 @@ enddo
 #endif
 error=maxval(abs(work(nx1:nx2,ny1:ny2,nz1:nz2)));
 call maxvalMPI(error)
+call print_message("discrete Helmholtz problem:")
 write(message,'(a,f6.2,a,f6.2,a,e15.8)') 'Laplace solver alpha=',alpha,' beta=',beta,&
    '  error=',error
 call print_message(message)
+
+
+
 
 
 #if 0
@@ -329,8 +365,8 @@ real*8 inputyy(nx,ny,nz)
 real*8 inputz(nx,ny,nz)
 real*8 inputzz(nx,ny,nz)
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 cf1,error
-integer i,j,k
+real*8 cf1,error,xm,ym,zm
+integer i,j,k,i0,i1,i2,i3,im
 character(len=80) message
 
 
@@ -400,20 +436,20 @@ enddo
 enddo
 enddo
 
+
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
    cf1=3*2*pi 
-   input(i,j,k)=           6*sin(cf1*zcord(k))*sin(cf1*zcord(i))    + input(i,j,k)
-   inputz(i,j,k)=      cf1*6*cos(cf1*zcord(k))*sin(cf1*zcord(i))    + inputz(i,j,k)
-   inputzz(i,j,k)=-cf1*cf1*6*sin(cf1*zcord(k))*sin(cf1*zcord(i))    + inputzz(i,j,k)
-   inputx(i,j,k)=      cf1*6*sin(cf1*zcord(k))*cos(cf1*zcord(i))    + inputx(i,j,k)
-   inputxx(i,j,k)=-cf1*cf1*6*sin(cf1*zcord(k))*sin(cf1*zcord(i))    + inputxx(i,j,k)
-enddo
-enddo
-enddo
+   input(i,j,k)=           6*sin(cf1*zcord(k))*sin(cf1*xcord(i))    + input(i,j,k)
+   inputz(i,j,k)=      cf1*6*cos(cf1*zcord(k))*sin(cf1*xcord(i))    + inputz(i,j,k)
+   inputzz(i,j,k)=-cf1*cf1*6*sin(cf1*zcord(k))*sin(cf1*xcord(i))    + inputzz(i,j,k)
+   inputx(i,j,k)=      cf1*6*sin(cf1*zcord(k))*cos(cf1*xcord(i))    + inputx(i,j,k)
+   inputxx(i,j,k)=-cf1*cf1*6*sin(cf1*zcord(k))*sin(cf1*xcord(i))    + inputxx(i,j,k)
 
-
+enddo
+enddo
+enddo
 
 
 
@@ -488,6 +524,8 @@ call print_message(message)
 
 
 
+
+
 end subroutine
 
 
@@ -498,8 +536,9 @@ use params
 implicit none
 real*8 :: output(nx,ny,nz),wn
 character(len=80) message
-integer :: i,j,k,count=0
+integer :: i,j,k,count
 
+count=0
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2

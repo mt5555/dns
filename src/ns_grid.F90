@@ -42,22 +42,27 @@ Q_old=Q
 
 ! stage 1
 call ns3D(rhs,Q,time,1,work1,work2,q4)
+call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
+call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
+call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0,work1,work2,q4)
 Q=Q+delt*rhs/6.0
+call divfree_gridspace(Q,q4,work1,work2)
+
 
 
 
@@ -66,11 +71,13 @@ Q=Q+delt*rhs/6.0
 
 ! stage 1
 call ns3D(rhs,Q,time,1,work1,work2,q4)
+call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/3
 
 ! stage 2
 Q_tmp = rhs
 call ns3D(rhs,Q,time+delt/3,0,work1,work2,q4)
+call divfree_gridspace(rhs,q4,work1,work2)
 rhs = -5*Q_tmp/9 + rhs
 Q=Q + 15*delt*rhs/16
 
@@ -80,6 +87,7 @@ Q_tmp=rhs
 call ns3D(rhs,Q,time+3*delt/4,0,work1,work2,q4)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
+call divfree_gridspace(Q,q4,work1,work2)
 
 
 #endif
@@ -250,9 +258,7 @@ enddo
 
 ! apply b.c. to rhs:
 call bc_rhs(rhs)
-
-call divfree_gridspace(rhs,work)
-
+!call divfree_gridspace(rhs,work,d1,d2)
 
 if (compute_ints==1) then
    !ints(2)=ke_diss/g_nx/g_ny/g_nz     ! u dot laplacian u

@@ -47,7 +47,7 @@ endif
 
 write(message,'(a)') 'Initial data projection'
 call print_message(message)
-call init_data_projection(Q,work1)  ! impose constrains on initial data
+call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
 #ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
 #endif

@@ -373,8 +373,6 @@ else if (sdata=='KH-anal') then
    init_cond=1
 else if (sdata=='iso12') then
    init_cond=2
-else if (sdata=='restart') then
-   init_cond=3
 else 
    print *,'value = ',sdata
    call abort("invalid initial condtion specified on line 3 on input file")

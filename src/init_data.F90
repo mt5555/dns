@@ -337,12 +337,14 @@ end subroutine
 
 
 
-subroutine init_data_projection(Q,d1)
+subroutine init_data_projection(Q,d1,d2,d3)
 use params
 use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: d1(nx,ny,nz)
+real*8 :: d2(nx,ny,nz)
+real*8 :: d3(nx,ny,nz)
 
 ! local variables
 integer i
@@ -351,7 +353,7 @@ integer i
 call bc_preloop(Q)
 
 ! will also dealias if dealias=1
-call divfree(Q,d1)
+call divfree_gridspace(Q,d1,d2,d3)
 
 
 end subroutine
