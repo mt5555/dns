@@ -442,7 +442,7 @@ do i=-numb,numb
 do j=-numb,numb
 do k=-numb,numb
     k2=i**2 + j**2 + k**2
-      if (k2 < (.5+numb)**2 ) then
+      if (k2>0 .and. k2 < (.5+numb)**2 ) then
       RR = cmodes(1,i,j,k,:)
       II = cmodes(2,i,j,k,:)
       mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
