@@ -1,30 +1,7 @@
 TODO:
 
-diag output:
-spectrum (snapshot )(wave #,x,y & z)   4N   
-spectrum running average?              4N
-
-scalars.                               25N
-  KE                               
-  structure functions:                
-    delta's:  N/2
-    powers:    15  
-    u,v,w       3
-    directions  3
-    
-max file size: 2000M
-data: 50N (N=4000) = .2 M
-# of snapshots:  10K.  
-10 eddy turn-over times, so number per eddy turnover time: 1K
-diag_dt: 1e-3
-
-
-
-
-
-1. compute structure functions
-2. forcing functions
-2. use a mpi communcator for the buffer->2d array copy in transpose.F90
+1. create new mpi communicator for sforcing routines
+2. use a mpi defined type for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
 6. divergence: go to Shashkov formula?  
 
@@ -38,6 +15,37 @@ the coefficients in the z-decomposition .
 **********************************************************************************
 structure function:
  <  [ u(x+l)-u(x) ]^p  >   
+
+**********************************************************************************
+sizes
+Nirvana:  32Gb per box.  optimal is 225M per CPU.  = 29Gb.
+                                        max size: 425. fft: 400?
+
+          64Gb.  optimal size: 550.  
+                         
+
+64^3 is 100M on linux box.
+256^3   6.4Gb                   (run on 32 cpus ?)
+400^3   25Gb.                    128 cpus.  
+512^3:  51Gb                     226 cpus. 
+1024^3  410Gb                   1822 cpus.
+
+2048^4  3280Gb                 
+
+size = .1*n^3/64^3 
+
+                                   Nirv    BlueMtn
+one box timings:  256 on 32 cpus            > 15min
+                  256 on 64 cpus   9.11m    8.32
+                  256 on 128 cpus  7.65m    4.11m
+                  250 on 125 cpus  7.65m    3.98m
+
+                  384 on 128 cpus.
+                  375 on 125 cpus.           IN
+
+two box timings:  512 on 256 cpus
+                  500 on 250 cpus.  
+
 
 
 **********************************************************************************

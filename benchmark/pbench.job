@@ -11,10 +11,10 @@ newcshrc
 set refin=benchmark256.inp
 
 cd ../src
-./gridsetup.py 1 1 64 256 256 256
+./gridsetup.py 1 1 125 250 250 250
 make -j 4 dns
 cd ../benchmark
-mpirun -np 64 ../src/dns < $refin 
+mpirun -np 125 ../src/dns < $refin 
 
 
 
