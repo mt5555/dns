@@ -7,27 +7,15 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
-<<<<<<< psivor.m
-%range=0:.05:1.00;
-range=29:1.0:1000.0;
+range=0:.25:15.00;
+%range=29:1.0:1000.0;
 %range=[.00];
-=======
-%range=0:1.0:1000.0;
-range=[59];
->>>>>>> 1.20
-%name='../src/kh/khK';
-<<<<<<< psivor.m
 %name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
-name='../src/vxpair/vx6144b_';
-%name='../src/vx3072_';
-=======
-name='/ccs/taylorm/dns/src/vxpair/vx6144b_'
-%name='../src/temp';
->>>>>>> 1.20
+name='../src/temp';
 
 
 usefig=1;
-mkpr=1;            % make ps and jpeg files
+mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
 
@@ -104,8 +92,9 @@ for i=range
       pcolor(x,y,vor')
       shading interp
     else
-      v = -12:4:3;
+      v = -12:1:3;
       v=2.^v;
+      %v = 4.5*[3/4, 1/2, .4 , 1/4, 1/8]
       contour(x,y,vor',v)
       hold on
       contour(x,y,vor',[.005 .005],'r')

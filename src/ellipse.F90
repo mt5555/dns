@@ -14,15 +14,16 @@ module which will compute ellipse centerered around the peak vorticity
 integer,private   :: init = 0
 
 integer,parameter :: nelld = 4  !  number of ellipses
-integer,parameter :: npd   = 32  !  number of points along each ellipse
+integer,parameter :: npd   = 65  !  number of points along each ellipse
 
 
 real*8 :: wval(nelld)         ! vorticity contour values (% of max vorticity)
 real*8 :: cosc(npd),sinc(npd)     ! angles to perform contouring
 real*8 :: cos2c(npd),sin2c(npd)   
-real*8 :: center(2)               ! location of center
 real*8 :: Rad(npd,nelld)       ! radius
+real*8 :: center(2)            ! location of center
 real*8 :: Rad2(npd,nelld)       ! shifted radius
+real*8 :: ccord(2,nelld)        ! shifted centers
 real*8 :: mxw                 ! max vorticity 
 real*8 :: mxw_init=-1         ! max vorticity at time=0
 real*8 :: dft(0:4,nelld)              ! modes of Rad
@@ -41,18 +42,18 @@ integer :: nell,np
 init=1
 
 
-wval(1)=3/4d0
-wval(2)=1/2d0
-wval(3)=1/4d0
-wval(4)=1/8d0
+wval(1)=3/4d0   
+wval(2)=1/2d0   
+wval(3)=1/4d0   
+wval(4)=1/8d0   
 
 if (nelld /= 4) then
    call abort("ellipse init error")
 endif
 
 do np=1,npd
-   cosc(np) = cos(2*pi*(np-1)/npd)
-   sinc(np) = sin(2*pi*(np-1)/npd)
+   cosc(np) = cos(2*pi*(np-1)/(npd))
+   sinc(np) = sin(2*pi*(np-1)/(npd))
    cos2c(np) = cos(2*2*pi*(np-1)/npd)
    sin2c(np) = sin(2*2*pi*(np-1)/npd)
 enddo
@@ -66,12 +67,18 @@ end subroutine
 
 
 
-subroutine ellipse_output()
+subroutine ellipse_output(time)
 use params
-use mpi
 implicit none
+real*8 :: xell(npd),yell(npd)
+real*8 :: tmp,time
+integer :: nell,np,ierr
+CPOINTER fid
+character(len=280) :: fname
+character(len=80) :: message
+character :: access="0"
 
-integer :: nell
+
 
 if (io_pe==my_pe) then
    print *,'center: ',center
@@ -81,6 +88,41 @@ if (io_pe==my_pe) then
           sqrt(dft(1,nell)**2+dft(2,nell)**2)/dft(0,nell),&
           sqrt(dft(3,nell)**2+dft(4,nell)**2)/dft(0,nell)
    enddo
+
+   ! append to output files, unless this is first call.
+   if (access=="0") then
+      access="w"
+   else
+      access="a"
+   endif
+
+
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ellipse"
+   call copen(fname,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+
+   
+   call cwrite8(fid,time,1)
+   tmp=nelld
+   call cwrite8(fid,tmp,1)
+   tmp=npd
+   call cwrite8(fid,tmp,1)
+
+   do nell=1,nelld
+      do np=1,npd
+         !xell(np)=ccord(1,nell)+Rad2(np,nell)*cosc(np)
+         !yell(np)=ccord(2,nell)+Rad2(np,nell)*sinc(np)
+         xell(np)=center(1)+Rad(np,nell)*cosc(np)
+         yell(np)=center(2)+Rad(np,nell)*sinc(np)
+      enddo
+      call cwrite8(fid,xell,npd)
+      call cwrite8(fid,yell,npd)
+   enddo
+   call cclose(fid,ierr)
 endif
 
 end subroutine
@@ -146,17 +188,21 @@ use params
 use mpi
 implicit none
 
-real*8 :: w(nx,ny),mxcord(2),ccord(2,nelld)
+real*8 :: w(nx,ny),mxcord(2)
 real*8 :: xell(npd),yell(npd)
-real*8 :: sq2
+real*8 :: sq2,relax
 integer np,nell,count
 
 sq2=sqrt(2d0)
-Rad2=Rad
+relax=1.50
 
 do nell=1,nelld
    if (wval(nell)*mxw_init<mxw) then
 
+   count=0
+50 continue
+
+   Rad2(:,nell)=Rad(:,nell)
    ccord(:,nell)=mxcord
    do np=1,npd
       xell(np)=mxcord(1)+Rad(np,nell)*cosc(np)
@@ -165,7 +211,6 @@ do nell=1,nelld
 
 
    ! find best mxcord(:) to minimize non-ellipticial modes in Rad
-   count=0
    do
       dft(:,nell)=0
       do np=1,npd
@@ -178,46 +223,28 @@ do nell=1,nelld
       dft(:,nell)=dft(:,nell)/npd
 
       if ( (dft(1,nell)**2 + dft(2,nell)**2) < dft(0,nell)*center_eps**2 ) exit
-      if (count==1) exit
+      if (count>40) then
+         exit
+      else if (count==20) then
+         call print_message("findbestcenter(): restarting iteration")
+         relax=.9
+         count=count+1
+         goto 50
+      endif
 
       ! move the center mxcord(:)
       !print *,nell
       !print *,ccord(1),dft(1,nell)
       !print *,ccord(2),dft(2,nell)
-      ccord(1,nell)=ccord(1,nell)+2.0*dft(1,nell)   ! 3.0 failes, 2.5 works
-      ccord(2,nell)=ccord(2,nell)+2.0*dft(2,nell)
+      ccord(1,nell)=ccord(1,nell)+relax*dft(1,nell)     ! 3.0 failes, 2.5 works
+      ccord(2,nell)=ccord(2,nell)+relax*dft(2,nell)
       count=count+1
-      if (count>5000) call abort("findbestcenter() iteration failure")
 
-      do np=1,npd
-         Rad2(np,nell)=sqrt( (xell(np)-ccord(1,nell))**2 + (yell(np)-ccord(2,nell))**2 )      
-      enddo
+
+      call findellipse(w,nell,ccord(1,nell),Rad2(1,nell))
    enddo
-
    endif
 enddo
-
-
-!ccord(1,1)=sum(ccord(1,:))/nelld
-!ccord(2,1)=sum(ccord(2,:))/nelld
-do nell=1,nelld
-   if (wval(nell)*mxw_init<mxw) then
-
-   ! recompute angles with average center computed above:
-   call findellipse(w,nell,ccord(1,nell),Rad2(1,nell))
-   dft(:,nell)=0
-   do np=1,npd
-      dft(0,nell)=dft(0,nell) + Rad2(np,nell)
-      dft(1,nell)=dft(1,nell) + Rad2(np,nell)*cosc(np)*sq2
-      dft(2,nell)=dft(2,nell) + Rad2(np,nell)*sinc(np)*sq2
-      dft(3,nell)=dft(3,nell) + Rad2(np,nell)*cos2c(np)*sq2
-      dft(4,nell)=dft(4,nell) + Rad2(np,nell)*sin2c(np)*sq2
-   enddo
-   dft(:,nell)=dft(:,nell)/npd
-
-   endif
-enddo
-
 end subroutine
 
 
@@ -268,6 +295,63 @@ end subroutine
 
 
 
+
+
+
+#if 0
+subroutine findellipse(w,nell,mxcord,r)
+use params
+use mpi
+implicit none
+real*8 :: w(nx,ny),mxcord(2),r(npd)
+integer :: nell
+
+!local
+real*8 :: mxcord2(2)
+real*8 :: wcontour,winterp
+real*8 :: Rdelta
+integer :: np,count,ierr
+
+!
+! compute location of ellipse:  mxcord(1) + r(np) * cosc(np) 
+!                               mxcord(2) + r(np) * sinc(np) 
+!
+
+   wcontour = wval(nell)*mxw_init
+   if (wcontour<mxw) then
+   !print *,'looking for ',wcontour,mxw
+   do np=1,npd
+      ! find Rad so that:  w(Rad cosc(np), Rad sinc(np)) = wcontour
+
+      Rdelta=.01
+      r(np)=Rdelta
+
+      count=0
+      do 
+         call interp4w(w,mxcord(1),mxcord(2),r(np),cosc(np),sinc(np),winterp)
+         if (winterp>wcontour) r(np)=r(np)+Rdelta ! undershoot
+         if (winterp<=wcontour) then ! overshoot
+            Rdelta=Rdelta/2
+            r(np)=r(np)-Rdelta
+         endif
+         if (winterp<-9d10) then
+            r(np)=-9d20  ! not on this CPU
+         endif
+#ifdef USE_MPI
+         tmp=r(np)
+         call MPI_allreduce(tmp,r(np),1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+         !print *,'w,w',winterp,wcontour
+         !print *,r(np),Rdelta
+         if (Rdelta < contour_eps) exit
+         count=count+1
+         if (count>1000 .or. r(np)<-9d10) call abort("findellipse() count iteration failure")
+      enddo
+   enddo
+   endif
+
+end subroutine
+#endif
 
 
 
@@ -353,9 +437,7 @@ end subroutine
 
 
 
-
-
-subroutine interp4w(w,xell,yell,r,cosc,sinc,winterp)
+subroutine interp4w(w,xell,yell,r,csc,snc,winterp)
 !
 !  interpolate to 
 !            w(xell + r*cosc,yell + r*sinc) = wc
@@ -363,15 +445,15 @@ subroutine interp4w(w,xell,yell,r,cosc,sinc,winterp)
 implicit none
 real*8 :: r,winterp
 real*8 :: w(nx,ny)
-real*8 :: xell,yell,cosc,sinc
+real*8 :: xell,yell,csc,snc
 
 !local
 real*8 :: x,y,xc,yc
 real*8 :: Qint(4)
 integer :: jj,igrid,jgrid,jc
 
-x = xell + r*cosc
-y = yell + r*sinc
+x = xell + r*csc
+y = yell + r*snc
 
 
 ! interpolate to w(x,y):
