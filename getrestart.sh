@@ -17,10 +17,11 @@
 # status=0  success
 # status=1  failed
 #
-#set PSIGET "psi get"
-#set PSIVM "psi mv"
 
-set PSIGET = "echo psi get disabled: "
+set PSIGET "psi get"
+#set PSIGET = "echo psi get disabled: "
+
+#set PSIVM "psi mv"
 set PSIMV  = "echo psi mv disabled: "
 
 set name = $1
