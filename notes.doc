@@ -165,8 +165,6 @@ advection:  G = i 2pi  (u,v,w)dot(kx,ky,kz) delt
 
     (U/dx+V/dy+W/dz) delt <= 2.4 3 / 2pi = 1.15
 
-1.30: seems stable 500 time steps
-
 
 diffusion: G = mu 4 pi^2 (kx^2 +ky^2 + kz^2)  delt
              = mu (4/9) pi^2 (delx^-2 + dely^-2 + delz^-2)
