@@ -1,23 +1,27 @@
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
+      but 1x1x25 works fine.  
 
+2. ns_ghost:  4th order code using ghost cells:
+        make a 3d test case
+        benchmark parallel decompostions
+       
 0. homog. tests:
-    <u> and <u**2>  on subcubes too
-    joint pdf of <u,v> (and others)
 
     sqrt(u**2) in time
     <u,F> in time
     <u,lap u> in time
+    find furtherst departure from global mean
+    plot line chart (3 axis) through that point
+    plot time mean + varience, or time_mean over varience?
 
 
+1. make 256**3 run on Nirvana  tau=500
+1. save scalars every 10 timesteps?
 1. Test CJ functions
 
-2. ns_ghost:  4th order code using ghost cells:
-        benchmark parallel decompostions
-
 3. psi-vor code:
-        test restart capability (mucked around with Qhat in dns.F90)
-        add tracers.F90 module
         fix output1/input1 for non-perfect decompositions? not really needed.  
+        add ellipse fft finder
 
 
 1. change NS-alpha so forcing always appears as just 'f'
