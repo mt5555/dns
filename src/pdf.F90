@@ -3,6 +3,26 @@
 module structf
 implicit none
 
+! compute structure functions every "struct_n*" time steps
+! x and y structure functions can be computed with no additional
+! transforms at most every other timestep. (struct_nx,y >= 2)
+!
+! struct_nz controls z structure functions, and the epsilon 1 point
+! structure functions.  This requires 2 extra z-tranpose plus
+! an x and y tranpose.   
+!
+! structure functions are output every 'diag_dt' time interval.  
+! Set struct_n* is very large to only compute structure functions
+! once per diag_dt time interval.  
+! 
+! 
+!
+integer :: struct_nx=0 
+integer :: struct_ny=0          ! every "struct_n*" time steps
+integer :: struct_nz=0          !
+integer :: countx=-1,county=-1,countz=-1
+
+
 integer           :: structf_init=0
 integer,parameter :: delta_num_max=16
 integer           :: delta_val(delta_num_max)
@@ -200,6 +220,10 @@ if (structf_init==0) then
    call abort("Error: outputSF() called, but structf module not initialized")
 endif
 
+! reset structure function counters
+countx=-1
+county=-1
+countz=-1
 
 
 do j=1,3
@@ -490,7 +514,7 @@ end subroutine
 
 
 
-subroutine z_ifft3d_str(fin,f,w1,Qt,works,work,compx,compy,compz)
+subroutine z_ifft3d_str(fin,f,w1,Qt,works,work)
 !
 !  compute inverse fft 3d of fin, return in f
 !  fin and f can overlap in memory
@@ -528,6 +552,17 @@ logical :: compx,compy,compz
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,n
 real*8 dummy(1)
+
+
+if (struct_nx>0) countx=mod(countx+1,struct_nx)  
+if (struct_ny>0) county=mod(county+1,struct_ny)  
+if (struct_nz>0) countz=mod(countz+1,struct_nz)  
+compx=(countx==0)
+compy=(county==1)
+compz=(countz==0)
+
+
+
 
 n1=g_nz
 n1d=g_nz2   	

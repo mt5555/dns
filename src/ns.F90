@@ -42,11 +42,7 @@ real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d
 logical,save :: firstcall=.true.
-integer,save :: countx=-1,county=-1,countz=-1
 
-if (struct_nx>0) countx=mod(countx+1,struct_nx)  
-if (struct_ny>0) county=mod(county+1,struct_ny)  
-if (struct_nz>0) countz=mod(countz+1,struct_nz)  
 
 if (firstcall) then
    firstcall=.false.
@@ -132,7 +128,7 @@ do n=1,3
    enddo
    !call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-call z_ifft3d_str(Q,Q_grid,rhs,Q_tmp,work,work,(countx==0),(county==1),(countz==0))
+call z_ifft3d_str(Q,Q_grid,rhs,Q_tmp,work,work)
 
 time = time + delt
 

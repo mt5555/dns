@@ -129,9 +129,6 @@ real*8  :: cfl_vis = 1.2
 real*8  :: delt_min = 0
 real*8  :: delt_max = 1
 real*8  :: time_final = 1 
-integer :: struct_nx=10          ! compute structure functions 
-integer :: struct_ny=10          ! every 10 time steps
-integer :: struct_nz=10          !
 
 
 real*8 :: output_dt = 0    ! netcdf output for plotting

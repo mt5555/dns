@@ -9,6 +9,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine init_grid
 use params
+use structf
 use mpi
 use fft_interface
 implicit none
@@ -199,6 +200,7 @@ end subroutine
 
 subroutine read_type0
 use params
+use structf
 implicit none
 
 !local variables
@@ -286,6 +288,7 @@ end subroutine
 
 subroutine read_type1
 use params
+use structf
 implicit none
 
 !local variables
