@@ -405,9 +405,10 @@ do idir=1,ndir
    enddo
 
 
-   call normalize_and_reduce(ntot)
    write(message,'(a,i5)') 'isoavep: number of calls to transpose_*() ',ntranspose
    call print_message(message)
+   call normalize_and_reduce(ntot)
+   call print_message('done with str normalize_and_reduce')
 
 end subroutine
 
@@ -1508,33 +1509,33 @@ w2s2=w2s2/ntot
 #ifdef USE_MPI
    do p=2,pmax
    dwork2=Dl(:,:,p)
-   call MPI_allreduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork3=Dt(:,:,:,p)
-   call MPI_allreduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    enddo
 
    dwork2=H_ltt
-   call MPI_allreduce(dwork2,H_ltt,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork2,H_ltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=H_tt
-   call MPI_allreduce(dwork2,H_tt,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork2,H_tt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
    dwork3=D_ltt
-   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
    dwork3=SP_ltt
-   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=SP_lll
-   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork3=SN_ltt
-   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=SN_lll
-   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_reduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
    do p=1,3
       dwork2=w2s2(:,:,p)
-      call MPI_allreduce(dwork2,w2s2(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      call MPI_reduce(dwork2,w2s2(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    enddo
 
 
