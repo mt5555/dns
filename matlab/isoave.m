@@ -15,9 +15,9 @@ eta = 1/(nx*delx_over_eta);
 
 
 
-name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.7500'
+%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.7500'
 %name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.5000'
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.0000'
+name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.0000'
 %name='/ccs/taylorm/shankara/dns/src/iso12_256_0000.7500'
 
 

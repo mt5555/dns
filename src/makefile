@@ -73,7 +73,7 @@ ifeq ($(UNAME),IRIX64)
 
    LDFLAGS =  -l scs $(LSFLIB)  #-Lstk -lstk
    # When SGI adds padding to data in params.h, MPI breaks:  
-   FFLAGS = -64 -Ofast -OPT:reorg_common=OFF -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
+   FFLAGS = -64 -mp -Ofast -OPT:reorg_common=OFF -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
    CPPFLAGS = 
    CC = cc -64 $(LSFFLAGS)
 endif

@@ -38,8 +38,6 @@ real*8 :: kr,ke,ck,xfac
 CPOINTER :: fid
 
 ! input file
-basename="/ccs/taylorm/shankara/dns/src/iso12_256_"
-print *,basename
 tstart=.75
 tstop=.75
 tinc=1.0
@@ -47,12 +45,18 @@ icount=0
 
 !call set_byteswap_input(1);
 
+! these lines are modifed by some sed scripts for automatic running
+! of this code:
+!SEDbyteswap
+!SEDtstart
 
 call init_mpi
 call init_mpi_comm3d()
 call init_model
 
-call writepoints()
+print *,runname
+
+!call writepoints()
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -66,15 +70,15 @@ do
    print *,'icount = ',icount
 
    write(sdata,'(f10.4)') 10000.0000 + time
-   fname = basename(1:len_trim(basename)) // sdata(2:10) // ".u"
+   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".u"
    print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,1),fname,work1,work2,1,io_pe)
 
-   fname = basename(1:len_trim(basename)) // sdata(2:10) // ".v"
+   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".v"
    print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,1,io_pe)
 
-   fname = basename(1:len_trim(basename)) // sdata(2:10) // ".w"
+   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".w"
    print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
    time=time2
@@ -84,7 +88,7 @@ do
 
 
    write(sdata,'(f10.4)') 10000.0000 + time
-   fname = basename(1:len_trim(basename)) // sdata(2:10) // ".isostr"
+   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
    call copen(fname,"w",fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
