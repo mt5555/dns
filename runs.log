@@ -18,8 +18,10 @@ kh8     NS-alpha  alpha=32h
 
 
 TOPHAT
-kh13     NS-alpha alpha=2h  3 point
-kh14     NS-alpha alpha=2h  5 point  IN
+kh13     NS-alpha alpha=2h  (width 10 points)   ifilt=5
+kh14     NS-alpha alpha=4h  (width 20 points)   ifilt=10   
+         NS-alpha alpha=4h  (width 20 points)   ifilt=5    bad
+kh15     NS-alpha alpha=4h  (width 20 points)   ifilt=20   IN
 
 
 
