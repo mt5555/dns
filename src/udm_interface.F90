@@ -31,7 +31,7 @@ integer*4 cpulocudm(3)
 character(len=80) fnameudm
 character(len=80) dsnameudm 
 character(len=80) attrname 
-character*(2) dotudm 
+character(len=2) dotudm 
 
 integer  ::  dest_pe3(3),y_pe,x_pe,z_pe,ope,fpe,tag
 

@@ -16,13 +16,13 @@ module isoave
 implicit none
 
 
-integer,parameter :: ndir=73
+integer,parameter :: ndir_max=73
 integer,parameter :: ndelta_max=73
 integer,parameter :: pmax=10
-integer :: dir(3,ndir)
-integer :: ndelta
+integer :: dir(3,ndir_max)
+integer :: ndelta,ndir
 integer :: delta_val(ndelta_max)   ! delta values (in terms of grid points)
-real*8  :: r_val(ndelta_max,ndir)      ! actual distance for each delta value
+real*8  :: r_val(ndelta_max,ndir_max)      ! actual distance for each delta value
 
 logical :: comp_sk_helical=.false.  ! compute SK's helical str function
 
@@ -1350,7 +1350,7 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine init
 use params
-integer :: i,j,idel,idir
+integer :: i,j,idel,idir,max_delta
 real*8 :: rvec(3)
 
 
@@ -1410,11 +1410,22 @@ enddo
 if (j > ndelta_max) then
    stop "isoave init: j > ndelta_max"
 endif
+
+max_delta = g_nmin/2
+
+ndir=ndir_max
+if (init_cond>=7 .and. init_cond <=9) then
+   print *,'SETTING ndir=49 to save computations'
+   print *,'SETTING max_delta = 100 to save computations'
+   ndir=49
+   max_delta = 100
+endif
+
+
 do idel=1,ndelta_max
-   if (delta_val(idel) >= g_nmin/2) exit
+   if (delta_val(idel) >= max_delta) exit
    ndelta=idel
 enddo
-
 
 
 
@@ -1525,10 +1536,11 @@ dir(:,73)=(/3,1,-1/)
 
 
 
-
-if (ndir/=73) then
-   call abort("isoave: ndir /= 49")
+if (ndir_max<73) then
+   call abort("isoave: ndir_max <  73")
 endif
+
+
 
 allocate(dwork2(ndelta,ndir))
 allocate(dwork3(ndelta,ndir,2))

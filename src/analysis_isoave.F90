@@ -53,9 +53,9 @@ logical :: compute_cj,compute_scalar, compute_uvw=.true.
 CPOINTER :: fid
 
 
-compute_cj=.true.
+compute_cj=.false.
 compute_scalar=.false.
-compute_uvw=.false.
+compute_uvw=.true.
 
 tstart=3.0
 tstop=3.0
