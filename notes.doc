@@ -29,11 +29,8 @@ structure function:
 
 
 **********************************************************************************
-FFT timings.  So quick & dirty fft timings (512x512x1) on Nirvana:
+FFT timings. 
 
-fft99:  115s
-stk:     96s
-sgi:     87s
 
 
 64x64x64 timings (1cpu)  
@@ -55,10 +52,15 @@ STK2+gcc                   1.72  1.71
 Autrey FFT99  (Sun Ultra 60):    2.17  2.00 2.01
 Autrey STK2   (Sun Ultra 60):    1.53  1.57 
 
+Nirvana SGIFFT                 1.21 1.20 1.20
+Nirvana FFT99                  1.32 1.54 1.35  1.47 
+Nirvana STK                    1.37 1.37 1.37
 
 
 truchas FFT99 (Compaq ES40):   .34  .34  .34
 truchas STK2  (Compaq ES40):   .39  .39  .39
+
+
 
 
 1024x1024x1 timings (1cpu)  runsize: 380M
@@ -69,9 +71,6 @@ Linux laptop PGI F90
 FFT99        
 STK+gcc       
 STK+PGCC     
-
-Autrey FFT99  (Sun Ultra 60):
-Autrey STK    (Sun Ultra 60):
 
 truchas FFT99 (Compaq ES40):    1.70  1.74  
 truchas STK   (Compaq ES40):    1.60
