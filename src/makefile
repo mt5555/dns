@@ -64,9 +64,9 @@ ifeq ($(UNAME),OSF1)
    F90 = f90
    #MPI = -DUSE_MPI -I/usr/opt/MPI190/include
    #MPILIB = -L/usr/opt/MPI190/lib -lfmpi -lmpi 
-   MPI = -DUSE_MPI -I/usr/opt/MPI/include
-   MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
-   LDFLAGS =  $(MPILIB) -Lstk -lstk -lcxml
+   #MPI = -DUSE_MPI -I/usr/opt/MPI/include
+   #MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+   LDFLAGS =  $(MPILIB) -lcxml #-Lstk -lstk 
 
    #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -recursive -fast -DOSF1  $(MPI) -DUSE_STKFFT  

@@ -16,7 +16,7 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 tmx1,tmx2,del,delke_tot,lambda
+real*8 tmx1,tmx2,del,lambda
 logical,external :: check_time
 logical :: doit
 real*8 :: t0,t1,t2,ke0,ke1,ea0,ea1
