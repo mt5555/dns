@@ -148,6 +148,7 @@ Ea = ints(6,:) + .5*alpha^2 *ints(2,:); % at time
 time_2=[];
 ke_diss_tot=[];
 Ea_diss_tot=[];
+h_diss_tot=[];
 j=0
 for i=2:l
   % skip repeats, and skip data with large KE increase
@@ -157,6 +158,7 @@ for i=2:l
     time_2(j) = .5*(time(i)+time(i-1));
     ke_diss_tot(j)=(ke(i)-ke(i-1))./(time(i)-time(i-1));
     Ea_diss_tot(j)=(Ea(i)-Ea(i-1))./(time(i)-time(i-1));
+    h_diss_tot(j)=(hel(i)-hel(i-1))./(time(i)-time(i-1));
   end
 end
 
