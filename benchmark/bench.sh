@@ -1,8 +1,7 @@
 #/bin/csh -f
 
 cd ../src
-set refin=../benchmark/benchmark1.inp
-set refout=../benchmark/benchmark.out
+set refin=benchmark1.inp
 
 #if ($#argv == 0 ) then
 #   echo "./bencht.sh ?"
@@ -10,7 +9,8 @@ set refout=../benchmark/benchmark.out
 #endif
 
 ./gridsetup.py 1 1 1 64 64 64
-make >& /dev/null ; 
+#make >& /dev/null ; 
+make dns
 cd ../benchmark
 ../src/dns < $refin 
 

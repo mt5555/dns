@@ -52,20 +52,17 @@ tims(2)=tmx2-tmx1
    call MPI_allreduce(temp,tims,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
-
+tims=tims/60
 call print_message('CPU times:')
-write(message,'(a,f12.5,a)') 'initialization: ',tims(1),' s'
+write(message,'(a,f9.2,a)') 'initialization: ',tims(1),' m'
 call print_message(message)
-write(message,'(a,f12.5,a)') 'dns_solve:      ',tims(2),' s'
+write(message,'(a,f9.2,a)') 'dns_solve:      ',tims(2),' m'
 call print_message(message)
-write(message,'(a,f12.5,a,f4.3,a)') '   RK4: no children, estimated:',tims(2)-tims(3)-tims(5),' s'
+write(message,'(a,f9.2,a,f4.3,a)') '   time_control + children:    ',tims(3),' m'
 call print_message(message)
-write(message,'(a,f12.5,a,f4.3,a)') '   time_control + children:    ',tims(3),' s'
+write(message,'(a,f9.2,a,f4.3,a)') '   RHS + children:             ',tims(5),' m'
 call print_message(message)
-write(message,'(a,f12.5,a,f4.3,a)') '   RHS + children:             ',tims(5),' s'
-call print_message(message)
-call print_message("")
-write(message,'(a,f12.5,a,f4.3,a)') '       transpose + children:       ',tims(4),' s'
+write(message,'(a,f9.2,a,f4.3,a)') '   transpose + children:       ',tims(4),' m'
 call print_message(message)
 
 call close_mpi
