@@ -70,7 +70,7 @@ if (precond) then
 endif
 
 
-itermax=1000
+itermax=5000
 res_init=sqrt(ddot(b,b))          
 if (tol>1) then
    itermax=tol

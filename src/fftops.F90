@@ -81,6 +81,16 @@ real*8 px(nx,ny,nz)
 
 integer n1,n1d,n2,n2d,n3,n3d
 
+if (bdy_y1/=PERIODIC) then
+   call abort('der() can only handle periodic boundaries')
+endif
+if (bdy_y1/=PERIODIC) then
+   call abort('der() can only handle periodic boundaries')
+endif
+if (bdy_z1/=PERIODIC) then
+   call abort('der() can only handle periodic boundaries')
+endif
+
 if (numerical_method==FORTH_ORDER) then
 
 if (index==1) then
@@ -1189,7 +1199,7 @@ end subroutine
 
 
 
-#define COMPACT
+#undef COMPACT
 subroutine helmholtz_dirichlet_setup(f,p,work,setbdy)
 !
 ! for compact: replace f with:   f + h**2/12 (fxx + fyy)

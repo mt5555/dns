@@ -37,24 +37,23 @@ compute_PSI:
 
 
 
-subroutine rk4(time,Q,Q2,Q3,Q4,rhs,work1,work2)
+subroutine rk4(time,Q,Qsave,Q2,Q3,rhs,work1,work2)
 use params
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Q2(nx,ny,nz,n_var)
+real*8 :: Qsave(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+real*8 :: Q2(nx,ny,nz,n_var)
 real*8 :: Q3(nx,ny,nz,n_var)
-real*8 :: Q4(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 
-! not used: work1, rhs, Q3,Q4
-call rk4reshape(time,Q,Q(1,1,1,3),Q2(1,1,1,1),Q2(1,1,1,2),Q2(1,1,1,3),work1)
+call rk4reshape(time,Q,Qsave(1,1,1,1),Q2(1,1,1,1),Q2(1,1,1,2),Q2(1,1,1,3),work1,work2)
 end subroutine
 
 
-subroutine rk4reshape(time,Q,rhs,w_old,w_tmp,psi,work)
+subroutine rk4reshape(time,Q,psi0,rhs,w_old,w_tmp,psi,work)
 use params
 implicit none
 real*8 :: time
@@ -64,7 +63,7 @@ real*8 :: w_old(nx,ny)
 real*8 :: psi(nx,ny)
 real*8 :: rhs(nx,ny)
 real*8 :: work(nx,ny)
-
+real*8 :: psi0(nx,ny)
 
 ! local variables
 real*8 :: vel,u,v
@@ -89,6 +88,117 @@ if (firstcall) then
       call abort("Error: dnsgrid cannot handle alpha>0.")
    endif
 
+
+   ! initial vorticity should have been set on the boundary, so
+   ! we can compute PSI right now:
+   call ghost_update_x_reshape(Q(1,1,3),1)
+   call ghost_update_y_reshape(Q(1,1,3),1)   
+   psi0=0
+   call compute_psi(Q(1,1,3),psi0,rhs,work)
+   call bc_impose(Q(1,1,3),psi0)
+  
+endif
+
+
+
+!
+!  Q(:,:,:,1) = u
+!  Q(:,:,:,2) = v
+!  Q(:,:,:,3) = vor
+!
+
+
+w_old=Q(:,:,3)
+
+
+! stage 1
+call ns3D(rhs,Q(1,1,3),psi0,time,1)
+Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
+
+! stage 2
+w_tmp = w_old + delt*rhs/2.0
+call bc_impose(w_tmp,psi0)
+
+psi=psi0   ! initial guess. REMOVE when we put in fast direct solver
+call compute_psi(w_tmp,psi,rhs,work)
+call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
+Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
+
+
+
+! stage 3
+w_tmp = w_old + delt*rhs/2.0
+call bc_impose(w_tmp,psi0)
+psi=psi0
+call compute_psi(w_tmp,psi,rhs,work)
+call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
+Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
+
+! stage 4
+w_tmp = w_old + delt*rhs
+call bc_impose(w_tmp,psi0)
+psi=psi0
+call compute_psi(w_tmp,psi,rhs,work)
+call ns3D(rhs,w_tmp,psi,time+delt,0)
+Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
+call bc_impose(Q(1,1,3),psi0)
+
+call compute_psi(Q(1,1,3),psi0,rhs,work)
+time = time + delt
+
+
+
+
+
+! compute KE, max U  
+maxs(1:4)=0
+do j=ny1,ny2
+do i=nx1,nx2
+   u=( 2*(psi0(i,j+1)-psi0(i,j-1))/3 -  &
+        (psi0(i,j+2)-psi0(i,j-2))/12          )/dely
+
+   v=-( 2*(psi0(i+1,j)-psi0(i-1,j))/3 -  &
+        (psi0(i+2,j)-psi0(i-2,j))/12          )/delx
+
+   maxs(1)=max(maxs(1),abs(u))
+   maxs(2)=max(maxs(1),abs(v))
+   maxs(3)=0
+   vel = abs(u)/delx + abs(v)/dely 
+   maxs(4)=max(maxs(4),vel)
+   Q(i,j,1)=u
+   Q(i,j,2)=v
+enddo
+enddo
+
+
+end subroutine
+
+
+
+
+subroutine compute_psi(w,psi,b,work)
+!
+!  btype=0   all periodic  use periodic FFT solver 
+!  btype=1   all periodic,reflect, reflect-odd
+!                use ghost cell CG solver (no boundaries)
+!  btype=2   use biotsavart for boundary and dirichlet solver
+!
+use params
+implicit none
+real*8 w(nx,ny)
+real*8 psi(nx,ny)
+real*8 work(nx,ny)
+real*8 b(nx,ny)
+
+!local
+real*8 :: one=1,zero=0,tol=1e-6
+integer,save :: btype=-1
+
+external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
+integer i,j
+
+
+if (btype==-1) then
    if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
       ! periodic
       btype=0
@@ -102,104 +212,7 @@ if (firstcall) then
    else
       btype=2
    endif
-
-   ! initial vorticity should have been set on the boundary, so
-   ! we can compute PSI right now:
-   call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work,btype)
-   call bc_impose(Q(1,1,1),Q(1,1,2))
-
 endif
-
-
-
-
-!
-!  Q(:,:,:,1) = vorticity
-!  Q(:,:,:,2) = stream function
-!  Q(:,:,:,3) = ?
-!
-
-
-w_old=Q(:,:,1)
-
-
-! stage 1
-call ns3D(rhs,Q,Q(1,1,2),time,1)
-Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
-
-! stage 2
-w_tmp = w_old + delt*rhs/2.0
-call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs,work,btype)
-call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
-Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
-
-
-
-! stage 3
-w_tmp = w_old + delt*rhs/2.0
-call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs,work,btype)
-call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
-Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
-
-! stage 4
-w_tmp = w_old + delt*rhs
-call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs,work,btype)
-call ns3D(rhs,w_tmp,psi,time+delt,0)
-Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
-call bc_impose(Q(1,1,1),Q(1,1,2))
-
-call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work,btype)
-time = time + delt
-
-
-
-
-
-! compute KE, max U  
-maxs(1:4)=0
-do j=ny1,ny2
-do i=nx1,nx2
-   u=( 2*(Q(i,j+1,2)-Q(i,j-1,2))/3 -  &
-        (Q(i,j+2,2)-Q(i,j-2,2))/12          )/dely
-
-   v=-( 2*(Q(i+1,j,2)-Q(i-1,j,2))/3 -  &
-        (Q(i+2,j,2)-Q(i-2,j,2))/12          )/delx
-
-   maxs(1)=max(maxs(1),abs(u))
-   maxs(2)=max(maxs(1),abs(v))
-   maxs(3)=0
-   vel = abs(u)/delx + abs(v)/dely 
-   maxs(4)=max(maxs(4),vel)
-enddo
-enddo
-
-
-end subroutine
-
-
-
-
-subroutine compute_psi(w,psi,b,work,btype)
-!
-!  btype=0   all periodic  use periodic FFT solver 
-!  btype=1   all periodic,reflect, reflect-odd
-!                use ghost cell CG solver (no boundaries)
-!  btype=2   use biotsavart for boundary and dirichlet solver
-!
-use params
-implicit none
-real*8 w(nx,ny)
-real*8 psi(nx,ny)
-real*8 work(nx,ny)
-real*8 b(nx,ny)
-integer :: btype
-
-!local
-real*8 :: one=1,zero=0,tol=1e-8
-external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
 
 
 
@@ -215,8 +228,11 @@ if (btype==0) then
 else if (btype==1) then
    ! this code can handle any compination of PERIODIC, REFLECT, REFLECT-ODD:
 
+
+   !psi=0  ! initial guess
    b=-w  ! be sure to copy ghost cell data also!
    ! apply compact correction to b:
+
    call helmholtz_dirichlet_setup(b,psi,work,0)
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
 

@@ -289,9 +289,11 @@ if (doit_output) then
    else if (equations==NS_PSIVOR) then
       ! 2D NS psi-vor formulation
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+      call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
-      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+      q1=0
+      call compute_psi(Q(1,1,1,3),q1,work1,work2)
+      call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
    endif
 endif
 
@@ -447,12 +449,6 @@ spec_y=0
 spec_z=0
 
 q1=Q
-if (equations==NS_PSIVOR) then
-   q1=0
-   call der(Q(1,1,1,2),q1(1,1,1,2),work1,work2,DX_ONLY,1) ! psi_x
-   call der(Q(1,1,1,2),q1(1,1,1,1),work1,work2,DX_ONLY,2) ! psi_y
-   q1(:,:,:,2)=-q1(:,:,:,2)
-endif
 
 do i=1,ndim
    iwave=iwave_max

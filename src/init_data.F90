@@ -361,6 +361,7 @@ end subroutine
 
 subroutine init_data_kh_psivor(Q,q1,work1,work2)
 use params
+use ghost
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
@@ -368,9 +369,9 @@ real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 ! local variables
-integer :: i,j,k,l,use3d=0
+integer :: i,j,k,l,use3d=0,n
 real*8 :: eps
-real*8 :: amp
+real*8 :: amp,vx,uy
 
 Q=0
 equations=NS_PSIVOR
@@ -410,13 +411,28 @@ enddo
 enddo
 enddo
 
-q1=Q
-call vorticity(Q,q1,work1,work2)
-Q(:,:,:,1)=Q(:,:,:,3)
-Q(:,:,:,2)=0   
-Q(:,:,:,3)=0   
+call ghost_update_x(Q,ndim)
+call ghost_update_y(Q,ndim)
+call ghost_update_z(Q,ndim)
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   ! vor(1) = w_y - v_z
+   ! vor(2) = u_z - w_x 
+   ! vor(3) = v_x - u_y
 
+   n=2
+   vx=( 2*(Q(i+1,j,k,n)-Q(i-1,j,k,n))/3 -  &
+        (Q(i+2,j,k,n)-Q(i-2,j,k,n))/12          )/delx
 
+   n=1
+   uy=( 2*(Q(i,j+1,k,n)-Q(i,j-1,k,n))/3 -  &
+        (Q(i,j+2,k,n)-Q(i,j-2,k,n))/12          )/dely
+
+   Q(i,j,k,3)=vx-uy
+enddo
+enddo
+enddo
 
 
 end subroutine

@@ -10,15 +10,15 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %range=0:50;
 %range = 1
 %range=0:.25:.75;
-range=[.75];
+range=[.00];
 name='../src/impulse/kh24';
 %name='../src/kh/khK';
-name='../src/kh/khQ';  %nopq
-%name='/tmp/test';
+%name='../src/kh/khQ';  %nopq
+name='../src/temp';
 
-mkpr=1;            % make ps and jpeg files
+mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
-mplot=2;           % set to nonzero to put 'mplot' plots per figure
+mplot=0;           % set to nonzero to put 'mplot' plots per figure
 
 mplot=min(mplot,length(range));
 
@@ -104,6 +104,7 @@ for i=range
       shading interp
     else
       v=-60:5:60;
+      size(vor)
       hold on
       contour(x,y,vor',v)
       contour(x,y,vor',[0 0],'k')
