@@ -222,7 +222,7 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 ! low wave number, quasi isotropic initial condition
 ! based on spectrum provided by Menevea
 !
-! init=0         set parameters (but there are none to set)
+! init=0         set parameters 
 !                but do not compute initial condition
 !
 ! init= 1        compute initial condition
@@ -234,8 +234,11 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 ! rantype=  1    initalize using E=constant and random phase
 !                  (faster, but not independed of parallel decomp)
 !
-! restype = 0    use 2048^3 parameters with kmax eta = 1
-! restype = 1    use Livescu initial spectrum
+! restype =      not used
+!
+! init_cond_subtype: 
+!     0               use 2048^3 parameters with kmax eta = 1
+!     1               use Livescu initial spectrum
 !
 use params
 use mpi
@@ -254,13 +257,12 @@ integer,parameter :: NUMBANDS_MAX=1024
 real*8 xw,ener,xfac,theta
 real*8 ::  enerb_target(NUMBANDS_MAX),enerb_work(NUMBANDS_MAX),enerb(NUMBANDS_MAX)
 real*8 :: xnb,ep23,lenscale,eta,fac1,fac2,fac3,ens,epsilon,mu_m
-real*8 :: tmx1,tmx2
+real*8 :: tmx1,tmx2,p,p1,p2,ku
 
 character(len=80) message,fname
 CPOINTER :: null
 
 
-if (init==0) return
 
 NUMBANDS=NUMBANDS_MAX
 
@@ -269,7 +271,7 @@ NUMBANDS=NUMBANDS_MAX
 !  R_l = 73   Teddy=.95  Umax=4.25  delx/eta = 1.9
 ! Teddy/delt = Teddy*Umax
 !
-if (restype==0) then
+if (init_cond_subtype==0) then
    ep23=(2.76029)  **(2d0/3d0) 
    lenscale = .3155
    eta = 9.765e-4
@@ -287,41 +289,55 @@ if (restype==0) then
       
       enerb_target(nb)=fac1*fac2*fac3
    enddo
-else if (restype==1) then
-   ! schmidt number and tracer initialization:
+else if (init_cond_subtype==1) then
+   p=4;
+   p1=(1+p)/2
+   p2=p/2
+   ku=10
+
+   do nb=1,NUMBANDS
+      xnb = nb
+      fac1=p2**p1 * xnb**p
+      fac2=ku**(p+1)
+      fac3=exp(-p2* (xnb/ku)**2)
+      enerb_target(nb)=fac1*fac2*fac3
+   enddo
+   
 else
-   call abort("init_data_decay: bad restype")
+   call abort("init_data_decay: bad init_cond_subtype")
 endif
 
 
 
+if (init==0) return
 
 
-if (my_pe==io_pe) then 
-! compute some stats:
-ener=0
-ens=0
-do nb=1,NUMBANDS
-   ener=ener+enerb_target(nb)
-   ens=ens+2 * nb**2 * enerb_target(nb)
-enddo
-epsilon=mu_m*ens
 
-print *,'stats computed from target spectrum and target viscosity:'
-print *,'epsilon: ',epsilon
-print *,'energy:  ',ener
-print *,'u1       ',sqrt(2*ener/3)
-print *,'u1,1     ',epsilon/mu_m/15
-print *,'lambda   ',sqrt(10*ener*mu_m/epsilon)
-print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
-print *,'eta      ',(mu_m**3 / epsilon ) **.25 
-print *,'965*eta  ',965*(mu_m**3 / epsilon ) **.25 
-print *,'eddy time',2*ener/epsilon
+
+if (my_pe==io_pe .and. init_cond_subtype==0) then 
+   ! compute some stats:
+   ener=0
+   ens=0
+   do nb=1,NUMBANDS
+      ener=ener+enerb_target(nb)
+      ens=ens+2 * nb**2 * enerb_target(nb)
+   enddo
+   epsilon=mu_m*ens
+   
+   print *,'stats computed from target spectrum and target viscosity:'
+   print *,'epsilon: ',epsilon
+   print *,'energy:  ',ener
+   print *,'u1       ',sqrt(2*ener/3)
+   print *,'u1,1     ',epsilon/mu_m/15
+   print *,'lambda   ',sqrt(10*ener*mu_m/epsilon)
+   print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
+   print *,'eta      ',(mu_m**3 / epsilon ) **.25 
+   print *,'965*eta  ',965*(mu_m**3 / epsilon ) **.25 
+   print *,'eddy time',2*ener/epsilon
+
+   ! convert to our units, with L=1 instead of 2pi
+   enerb_target=enerb_target / (2*pi*2*pi)
 endif
-
-
-! convert to our units, with L=1 instead of 2pi
-enerb_target=enerb_target / (2*pi*2*pi)
 
 
 ! number of bands to use in initial condtion. doesn't really matter

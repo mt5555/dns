@@ -87,6 +87,12 @@ extrapolated:
                          needs 4.6K cpus at 2GB per cpu
                          NEC ESS 10Tb
 
+with tracers:  5 big arrays + 13D:
+               (6*3  + 5*NTRACERS)*8  = 144 + 40*NTRACERS
+                10 Tracers:  3.8x more memory
+                 1000^3 10 tracers: 550GB = 256 cpus NO.   
+                  256^3 10 tracers: 8.6GB
+
 **********************************************************************************
 analytic CFL:  for RK4, norm(G)<2.4
 

@@ -79,19 +79,27 @@ Running the code
              KH-blob    initial velocity computed from a specified
                         vortex sheet
              KH-anal    analytic KH problem from E & Lui
-             iso12      random phases, with spectrum in E(k) given
-                        by init_cond_subtype
+             iso12      random phases, 
+                        spectrum in E(k) given by init_cond_subtype
              vxpair     Monika's vortex instability problem
              iso12e     quick version of iso12 (gives different
                         answers for different parallel decompositions,
                         and may not be as isotropic)
              sht        shallow water testcases from McWilliams and Polvani
              zero       flow at rest
-             decay2048   Meneveau's spectrum (slow init, but reproducable)
+
+
+             decay2048   Decaying spectrum (slow init, but reproducable)
              decay2048_e same as decay, not reproducible with different parallel
                          decomposition
              decay2048_s for restart only.  re-scale amplitude of restart
-                                           data to fit prescribed spectrum
+                                            data to fit prescribed spectrum
+                         init_cond_subtype==0:  Menevaus's spectrum
+                         init_cond_subtype==1:  Livescu's spectrum
+
+
+
+            
                                               
 
 
