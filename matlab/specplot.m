@@ -20,9 +20,17 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
-name='sk2560000.0000';
-namedir='/scratch2/taylorm/sk256/';
+%name='sk2560000.0000';
+%namedir='/scratch2/taylorm/sk256/';
+%CK_orig=1.613;
+
+name='tmix256C0001.0000';
+namedir='/scratch2/taylorm/tmix256C/';
 CK_orig=1.613;
+
+%name='tmix256B0000.0000';
+%namedir='/scratch2/taylorm/tmix256B/';
+%CK_orig=1.613;
 
 
 %name='decay2048';
@@ -32,8 +40,6 @@ CK_orig=1.613;
 %tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 
 
-name = 'sk128_alpha00000.0000';
-namedir = '/home/skurien/dns/src/'
 
 
 % plot all the spectrum:
@@ -245,10 +251,10 @@ while (time>=.0 & time<=9999.3)
       print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
     end
     disp('pause')
-    %pause
+    pause
   else     
     disp('pause')
-    %pause
+    pause
   end
   end
   

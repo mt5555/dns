@@ -27,9 +27,12 @@ if ($ncpus > 0) then
    #set command = "mpirun.lam -np $ncpus $exe"
    set command = "mpirun -np $ncpus $exe"
    if (`uname` == OSF1) then
-      #set command = "prun -n $ncpus $exe"
-      set command = "/users/taylorm/liblampi/bin/mpirun -np $ncpus $exe"
-      setenv MPI_VERSION lampi
+      set command = "prun -n $ncpus $exe"
+      module load MPI_64bit_Thread_Safe_R12
+      #set command = "lampirun -np $ncpus $exe"
+      #setenv MPI_VERSION lampi
+
+      module list
    endif
    if (`hostname` == brain) then
         set command = "mpirun -np $ncpus -npn 2 $exe"

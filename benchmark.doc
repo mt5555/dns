@@ -3,9 +3,9 @@
 3/25/03
 LAMPI (CVS 3-24-03), QSC
 256^3  
-          
-1x1x8       0.625        
-1x1x16:     0.36340        in-repeat for predictability
+                                    w/o Reliability           HP-R12
+1x1x8       0.625                      0.628                 .604
+1x1x16:     0.36340    
 1x1x32:     0.18887 
 1x1x64:     0.08524 
 

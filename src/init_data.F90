@@ -86,6 +86,11 @@ call input_uvw(time_initial,Q,Qhat,work1,work2,1)
 
 write(message,'(a,f10.4)') "restart time=",time_initial
 call print_message(message)
+
+if (npassive>0) then
+   call init_passive_scalars(Q,Qhat,work1,work2)
+endif
+
 end subroutine
 
 
@@ -143,7 +148,7 @@ do n=np1,np2
    if (passive_type(n)==0) call passive_gaussian_init(Q,work1,work2,n)
    if (passive_type(n)==1) call passive_KE_init(Q,work1,work2,n)
 
-
+   call print_message("smothing passive scalar...")
    ! filter
    call fft3d(Q(1,1,1,n),work1)
    call fft_filter_dealias(Q(1,1,1,n))
@@ -180,13 +185,14 @@ end subroutine
 
 
 
-subroutine passive_KE_init(Q,work1,work2)
+subroutine passive_KE_init(Q,work1,work2,np)
 !
 ! low wave number, quasi isotropic initial condition
 !
 use params
 use mpi
 implicit none
+integer :: np
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
@@ -196,9 +202,7 @@ integer :: i,j,k,n,ierr
 
 character(len=80) ::  message
 
-write(message,'(a,i3,a)') "Initializing KE correlated passive scalars n=",n,&
-                        " ..."
-
+write(message,'(a,i3,a)') "Initializing KE correlated passive scalar n=",np
 call print_message(message)
 
 ke=0
@@ -222,14 +226,14 @@ ke=ke/g_nx/g_ny/g_nz
 
 ke_thresh=.82*ke
 
-Q(:,:,:,n)=0
+Q(:,:,:,np)=0
 check=0
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
          ke = .5*(Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2)
          if (ke>ke_thresh) then
-            Q(:,:,:,n)=1
+            Q(i,j,k,np)=1
             check=check+1
          endif
       enddo
@@ -261,13 +265,14 @@ end subroutine
 
 
 
-subroutine passive_gaussian_init(Q,work1,work2)
+subroutine passive_gaussian_init(Q,work1,work2,np)
 !
 ! low wave number, quasi isotropic initial condition
 !
 use params
 use transpose
 implicit none
+integer :: np
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
@@ -280,8 +285,7 @@ real*8 :: ener
 CPOINTER :: null
 character(len=80) ::  message
 
-write(message,'(a,i3,a)') "Initializing KE correlated passive scalars n=",n,&
-                        " ..."
+write(message,'(a,i3,a)') "Initializing KE correlated passive scalars n=",np," ..."
 call print_message(message)
 
 
@@ -290,23 +294,22 @@ allocate(enerb_target(NUMBANDS))
 allocate(enerb(NUMBANDS))
 
 call livescu_spectrum(enerb_target,NUMBANDS)
-do n=np1,np2
-   call input1(Q(1,1,1,n),work1,work2,null,io_pe,.true.,-1)  
-   call rescale_e(Q(1,1,1,n),work1,ener,enerb,enerb_target,NUMBANDS,1)
+
+   call input1(Q(1,1,1,np),work1,work2,null,io_pe,.true.,-1)  
+   call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1)
    ! convert to 0,1:
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      if (Q(i,j,k,n)<0) then
-         Q(i,j,k,n)=0
+      if (Q(i,j,k,np)<0) then
+         Q(i,j,k,np)=0
       else
-         Q(i,j,k,n)=1
+         Q(i,j,k,np)=1
       endif
    enddo
    enddo
    enddo
 
-enddo
 
 deallocate(enerb_target)
 deallocate(enerb)

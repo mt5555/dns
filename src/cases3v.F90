@@ -528,8 +528,8 @@ end subroutine
 
 subroutine livescu_spectrum(enerb_target,numb)
 implicit none
-real*8 :: enerb_target(numb)
 integer :: numb
+real*8 :: enerb_target(numb)
 
 real*8 :: p,p1,p2,ku,xnb,fac1,fac2,fac3
 integer ::  nb

@@ -952,9 +952,10 @@ subroutine rmodes_to_zdecomp(p,rmodes,nmax)
 !
 use params
 implicit none
+integer :: nmax
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: p(g_nz2,nslabx,ny_2dz)
-integer :: nmax,i,j,k
+integer :: i,j,k
 
 do j=1,ny_2dz
 do i=1,nslabx
@@ -982,10 +983,11 @@ subroutine complex_to_sincos(rmodes,cmodes,nmax)
 !
 use params
 implicit none
+integer :: nmax
 real*8 :: Rr,Ri
 real*8 :: cmodes(2,-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
-integer :: i,j,k,im,jm,km,nmax,imax,ip,jp,kp
+integer :: i,j,k,im,jm,km,imax,ip,jp,kp
 !
 ! Note: this code also used in random12() above. 
 ! Any bugfixes here, also apply to random12().
@@ -1075,10 +1077,11 @@ subroutine sincos_to_complex(rmodes,cmodes,nmax)
 #endif      
 use params
 implicit none
+integer :: nmax
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: cmodes(2,-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: a,b
-integer :: i,j,k,im,jm,km,imax,nmax,sm,ip,jp,kp
+integer :: i,j,k,im,jm,km,imax,sm,ip,jp,kp
 
 imax=2*nmax+2
 cmodes=0

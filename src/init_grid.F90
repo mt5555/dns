@@ -48,7 +48,6 @@ call print_message(message)
 !
 if (equations==NS_UVW) then
    ! NS_UVW requires u,v,w (n_var>=3) even for 2d problems
-   print *,'checking passive: ',n_var
    if (n_var>3) then
       ! prognostic variables > 3 are passive scalars:
       npassive=n_var-3

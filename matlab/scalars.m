@@ -16,8 +16,8 @@ fid2=-1;
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
 
-fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
-nx=256;
+%fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
+%nx=256;
 
 %fid=endianopen('/scratch2/taylorm/sk256/sk2560000.0000.scalars','r'); 
 %nx=256;
@@ -32,11 +32,14 @@ nx=256;
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
 
-fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
-nx=1024;
+%fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
+%nx=1024;
 
 %fid=fopen('../src/sk128_alpha0/sktest128_alpha00000.0000.scalars','r');
 %nx=128;
+
+fid=endianopen('/scratch2/taylorm/tmix256B/tmix256B.scalars','r');
+nx=256;
 
 nscalars=0;
 nscalars_e=0;

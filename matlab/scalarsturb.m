@@ -28,8 +28,12 @@ times=[times,.24:.01:4.0];
 %name = '/ccs/scratch/taylorm/dns/sc512A'
 %times=3;
 
-name = '/home/skurien/dns/src/sk128_alpha0';
-times=0.5
+%name = '/home/skurien/dns/src/sk128_alpha0';
+%times=0.5
+
+name = '/scratch2/taylorm/tmix256B/tmix256B'
+times=[0:.5:3]
+
 
 nt=0;
 for t=times
