@@ -5,7 +5,10 @@ Meneauvau: check schedule, register
 
 .isostr and .smal.isostr for iso12_5120000.0000 check that they agree
                      in matlab
-isoave.F90: run cj analyis QSC on forced data.
+
+isoave.F90: plot up all of cj's functions, and see what they
+            look like.
+
 512^3:     can run analysis if we to a two array analysis. isoavep2()?
                                              time isoavep2 vs isoavep
 
@@ -38,31 +41,6 @@ test5 48:  restart from test1   same restart as test3?  yes
 
 reference tests: run makeref and test again.  (that will test 
 new output routines?)
-
-
-big test: take 512^3 data, output 384 spec. 
-          read in 384 spec, output 384 grid vorm.
-          run dx.  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

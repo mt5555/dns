@@ -305,13 +305,14 @@ if (stype==2) nd=2
 if (stype==1) nd=1
 
 ntranspose=0
+ntot=real(g_nx)*g_ny*g_nz
+
 
 call zero_str
 
 if (stype==3) then
 ke_diss=0
 ke=0
-ntot=real(g_nx)*g_ny*g_nz
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
@@ -1174,6 +1175,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3)
 
 real*8 :: delu1,delu2,delu3
 real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
+real*8 :: u_t1_sq,u_t2_sq
 integer :: p,idel,idir
 
 delu1=ur1-u1
@@ -1184,6 +1186,10 @@ u_l  = delu1*rhat(1)+delu2*rhat(2)+delu3*rhat(3)
 u_t1 = delu1*rperp1(1)+delu2*rperp1(2)+delu3*rperp1(3)
 u_t2 = delu1*rperp2(1)+delu2*rperp2(2)+delu3*rperp2(3)
 
+u_t1_sq = u_t1*u_t1
+u_t2_sq = u_t2*u_t2
+u_l_sq  = u_l*u_l
+
 ! HELICAL structure function
 ux_t1 = u1*rperp1(1)+u2*rperp1(2)+u3*rperp1(3)
 ux_t2 = u1*rperp2(1)+u2*rperp2(2)+u3*rperp2(3)
@@ -1192,25 +1198,47 @@ ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
 H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
 H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 
-do p=2,pmax
+
+Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq
+Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq
+Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq
+
+Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq
+Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
+Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
+
+Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq*u_l_sq
+Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq*u_t1_sq
+Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq*u_t2_sq
+
+Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l*u_l_sq*u_l_sq
+Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1*u_t1_sq*u_t1_sq
+Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2*u_t2_sq*u_t2_sq
+
+Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l_sq*u_l_sq*u_l_sq
+Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1_sq*u_t1_sq*u_t1_sq
+Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2_sq*u_t2_sq*u_t2_sq
+
+! this loop is very expensive.  
+do p=7,pmax
    Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
    Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
    Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
 enddo
 
-D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
-D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
-D_lltt(idel,idir)=D_lltt(idel,idir) + u_l**2 * .5*(u_t1**2 + u_t2**2)
+D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1_sq
+D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2_sq
+D_lltt(idel,idir)=D_lltt(idel,idir) + u_l_sq * .5*(u_t1_sq + u_t2_sq)
 
 
 if (u_l>=0) then
-   SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
-   SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
-   SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
+   SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l*u_l_sq
+   SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1_sq
+   SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2_sq
 else
-   SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
-   SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
-   SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
+   SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l*u_l_sq
+   SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1_sq
+   SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2_sq
 endif
 end subroutine 
 
