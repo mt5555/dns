@@ -18,11 +18,13 @@ endif
 if ($#argv == 0 ) then
    echo "./test3d.sh [1,2,p]"
    echo " 1 = run dns and dnsgrid with and without restart, simple 3D test case"
+   echo " s = run dns with passive scalars, with and without restart, simple 3D test case"
    echo " 2 = run lots of 3D test cases (different dimensions)"
    echo " p  = run several 3D test cases in parallel (2 and 4 cpus)"
    echo " pr = run several 3D test cases in parallel, with restart"
    echo " pudm = run several 3D test cases in parallel, with udm restart"
    echo " ps = run several 3D test cases in parallel, with spec  restart"
+
    echo " makeref  = generate new reference output, 3D"
    exit
 endif
@@ -74,11 +76,15 @@ echo "with spectral restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns -s -r -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
+
+
 echo "***********************************************************"
 echo "dnsgrid with restart:"
 ./gridsetup.py 1 1 1 32 32 32
 make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid -r -d $rundir reference3d -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
+
+
 
 
 endif
@@ -98,6 +104,33 @@ make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  -i $refin > $
 
 
 endif
+
+
+
+
+
+
+if ($1 == s) then
+
+echo "***********************************************************"
+echo "with 3 passive scalars"
+./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
+make >& /dev/null ;  rm -f $tmp ; ./dns  -d $rundir reference3d  -i $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+echo "with 3 passive scalars and restart"
+./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
+make >& /dev/null ;  rm -f $tmp ; ./dns -r  -d $rundir reference3d  -i $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+endif
+
+
+
+
+
+
 
 
 
