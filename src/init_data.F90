@@ -178,7 +178,7 @@ do n=np1,np2
       call global_min(Q(1,1,1,n),mn)
       call global_max(Q(1,1,1,n),mx)
       
-      write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
+      write(message,'(a,2f17.5)') 'initial passive scalar min/max: ',mn,mx
       call print_message(message)	
       call print_message("smothing passive scalar...")
       
@@ -195,7 +195,7 @@ do n=np1,np2
       ! du/dt  =  laplacian(u)
       !  u_k = ((1 - k**2))**p  u_k    p = number of timesteps
       iter=0
-      do while (mx>1.05)
+      do while (mx>1.05 .or. mn<.05)
          iter=iter+1
          do k=nz1,nz2
             km=abs(kmcord(k))
