@@ -21,7 +21,22 @@ TOPHAT
 kh13     NS-alpha alpha=2h  (width 10 points)   ifilt=5
 kh14     NS-alpha alpha=4h  (width 20 points)   ifilt=10   
          NS-alpha alpha=4h  (width 20 points)   ifilt=5    bad
-kh15     NS-alpha alpha=4h  (width 20 points)   ifilt=20   IN
+kh15     NS-alpha alpha=4h  (width 20 points)   ifilt=20   
+
+
+GAUSSIAN
+kh16     NS-alpha alpha=2h  ifilt=7       dk/dt seems good, check plot
+kh17     NS-alpha alpha=4h  ifilt=15     dk/dt seem ok, check plot
+
+JACOBI  error: 10%  (about 40 iterations)
+         NS-alpha alpha=4h   fixed 10 iterations   unstable
+kh20     NS-alpha alpha=4h   fixed 20 iterations   residual: .25
+kh19     NS-alpha alpha=4h   fixed 80 iterations   residual: .03
+kh18     NS-alpha alpha=4h   fixed 40 iterations   residual: .13
+
+kh21     NS-alpha alpha=2h   fixed 40 iterations   residual: .13
+
+
 
 
 
