@@ -1,5 +1,6 @@
 1            ! input file type
 benchmark1   ! runname
+             ! run dir
 KH-anal      ! initial condition:  KH-blob, KH-anal, iso12
 none         ! forcing:  none, iso12
 0            ! struct_nx

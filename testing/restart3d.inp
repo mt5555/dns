@@ -1,8 +1,8 @@
 1            ! input file type
-test64       ! runname
-output       ! rundir
-iso12        ! initial condition:  KH-blob, KH-anal, iso12, restart
-iso12        ! forcing:  none, iso12
+reference3d     ! runname
+../testing/3d   ! run directory
+restart      ! initial condition:  KH-blob, KH-anal, iso12
+none         ! forcing:  none, iso12
 0            ! str_nx  compute structure functions every str_nx timesteps
 0            ! str_ny  0=disabled.  str_nx & str_y >= 2 
 0            ! str_nz  Set large.  requires 1 extra z-transpoze to compute.
@@ -13,14 +13,14 @@ fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-10.0         ! time to run
+-10           ! final time
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
 0.0          ! restart_dt  (0 = restart output disabled)
-.1          ! diag_dt   
-.1          ! screen_dt
+-10          ! diag_dt   
+-10          ! screen_dt
 0           ! output_dt  (0 = output disabled, except for custom output times)
 1           ! n_output_custom  number of custom output times  
-0.00         ! custom output times, one per line
+990.0

@@ -41,6 +41,7 @@ real*8  :: alpha_value=0      !for the alpha model
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
 character(len=80) :: runname
+character(len=80) :: rundir
 real*8  :: pi,pi2,pi2_squared
 
 
@@ -136,6 +137,7 @@ real*8  :: cfl_vis = 1.2
 real*8  :: delt_min = 0
 real*8  :: delt_max = 1
 real*8  :: time_final = 1 
+real*8  :: time_initial = 0
 
 
 real*8 :: output_dt = 0    ! netcdf output for plotting

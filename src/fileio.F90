@@ -14,6 +14,7 @@ integer :: itime
 ! local variables
 integer i,j,k,n
 character(len=80) message
+character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 divx,divi,tmx1,tmx2,del,delke_tot,lambda
 logical,external :: check_time
@@ -53,7 +54,7 @@ delt = min(delt,delt_max)
 doit=check_time(itime,time,restart_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
-   call restart_write(time,Q)
+   call multfile_io(time,Q)
 endif
 
 
@@ -65,11 +66,18 @@ endif
 doit=check_time(itime,time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
-   call output_write(time,Q(1,1,1,1),'u',work1,work2)
-   call output_write(time,Q(1,1,1,2),'v',work1,work2)
-   call output_write(time,Q(1,1,1,3),'w',work1,work2)
+   write(message,'(f10.4)') 10000.0000 + time
+
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+   call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+   call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
+   call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
+
    call vorticity(q1,Q,work1,work2)
-   call output_write(time,q1(1,1,1,3),'vor',work1,work2)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+   call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
 endif
 
 
@@ -190,7 +198,7 @@ end subroutine
 
 
 
-subroutine restart_write(time,Q)
+subroutine multfile_io(time,Q)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
@@ -226,7 +234,7 @@ message=message(1:len_trim(message)) // "-" // tmp(n:5) // "-"
 write(tmp,'(f10.4)') 10000.0000 + time
 message=message(1:len_trim(message)) // tmp(2:10)
 
-message = runname(1:len_trim(runname)) // message(1:len_trim(message)) // ".data"
+message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(1:len_trim(message)) // ".data"
 
 !open(unit=10,file=message,form='binary')
 call copen(message,"w",fid,ierr)
@@ -324,8 +332,8 @@ call plotASCII(spectrum,iwave,message(1:25))
 
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time
-!   message = runname(1:len_trim(runname)) // message(2:10) // ".spec"
-   message = runname(1:len_trim(runname)) // ".spec"
+!   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec"
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".spec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
@@ -355,8 +363,8 @@ call compute_all_pdfs(Q,q1,q2,q3,work1,ints_e,nints_e)
 if (structf_init==1) then
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time
-!   message = runname(1:len_trim(runname)) // message(2:10) // ".sf"
-   message = runname(1:len_trim(runname)) // ".sf"
+!   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".sf"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "outputSF(): Error opening file errno=",ierr
@@ -372,7 +380,7 @@ endif
 
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time
-   message = runname(1:len_trim(runname)) // ".scalars"
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // ".scalars"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "diag_output(): Error opening .scalars file errno=",ierr
@@ -405,14 +413,25 @@ end subroutine
 
 
 
-subroutine output_write(time,p,ext,work,work2)
+subroutine singlefile_io(time,p,fname,work,work2,read,fpe)
+!
+! I/O routines where all data goes through a single PE and is
+! written to a single file
+!
+! read=0    write data to file fname
+! read=1    read data from file fname
+!
+! fpe       processor to do the file I/O
+!
 use params
 use transpose
 implicit none
+integer :: read  ! =1 for read, 0 for write
+integer :: fpe
 real*8 :: time
 real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
-character(len=*) :: ext
+character(len=*) :: fname
 
 ! local variables
 integer i,j,k,n
@@ -422,32 +441,52 @@ integer n_var_start,ierr
 CPOINTER fid
 
 
+if (my_pe==fpe) then
 
-if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time
-   message = runname(1:len_trim(runname)) // message(2:10) // "." // ext
-   !open(unit=11,file=message,form='binary')
-   call copen(message,"w",fid,ierr)
-   if (ierr/=0) then
-      write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
-      call abort(message)
+   if (read==1) then
+      call copen(fname,"r",fid,ierr)
+      if (ierr/=0) then
+         write(message,'(3a,i5)') "singlefile_io(): Read Error file=",fname," error no=",ierr
+         call abort(message)
+      endif
+      call cread8(fid,time,1)
+      xnx=o_nx
+      xny=o_ny
+      xnz=o_nz
+      call cread8(fid,xnx,1)
+      call cread8(fid,xny,1)
+      call cread8(fid,xnz,1)
+      if (int(xnx)/=o_nx) call abort("Error: restart file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abort("Error: restart file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abort("Error: restart file nz <> nz set in params.h");
+      call cread8(fid,g_xcord(1),o_nx)
+      call cread8(fid,g_ycord(1),o_ny)
+      call cread8(fid,g_zcord(1),o_nz)
+   else
+      call copen(fname,"w",fid,ierr)
+      if (ierr/=0) then
+         write(message,'(3a,i5)') "singlefile_io(): Write Error file=",fname," error no=",ierr
+         call abort(message)
+      endif
+      call cwrite8(fid,time,1)
+      xnx=o_nx
+      xny=o_ny
+      xnz=o_nz
+      call cwrite8(fid,xnx,1)
+      call cwrite8(fid,xny,1)
+      call cwrite8(fid,xnz,1)
+      call cwrite8(fid,g_xcord(1),o_nx)
+      call cwrite8(fid,g_ycord(1),o_ny)
+      call cwrite8(fid,g_zcord(1),o_nz)
    endif
-
-
-   call cwrite8(fid,time,1)
-   xnx=o_nx
-   xny=o_ny
-   xnz=o_nz
-   call cwrite8(fid,xnx,1)
-   call cwrite8(fid,xny,1)
-   call cwrite8(fid,xnz,1)
-   call cwrite8(fid,g_xcord(1),o_nx)
-   call cwrite8(fid,g_ycord(1),o_ny)
-   call cwrite8(fid,g_zcord(1),o_nz)
 endif
 
-call output1(p,work,work2,fid)
-if (my_pe==io_pe) call cclose(fid)
+if (read==1) then
+   call input1(p,work,work2,fid)
+else
+   call output1(p,work,work2,fid)
+endif
+if (my_pe==fpe) call cclose(fid)
 
 end subroutine
 

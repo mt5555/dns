@@ -1,4 +1,35 @@
 #include "macros.h"
+subroutine init_data_restart(Q,work1,work2)
+!
+! low wave number, quasi isotropic initial condition
+!
+use params
+use mpi
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+!local
+character(len=80) message
+character(len=80) fname
+
+
+call print_message("Restarting from file restart.[uvw]")
+fname = rundir(1:len_trim(rundir)) // "restart.u"
+call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+fname = rundir(1:len_trim(rundir)) // "restart.v"
+call singlefile_io(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe)
+fname = rundir(1:len_trim(rundir)) // "restart.w"
+call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+
+write(message,'(a,f10.4)') "restart time=",time_initial
+call print_message(message)
+end subroutine
+
+
+
+
 subroutine init_data_lwisotropic(Q,PSI,work,work2)
 !
 ! low wave number, quasi isotropic initial condition

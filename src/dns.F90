@@ -18,7 +18,6 @@ integer ierr
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
 
-
 call init_mpi       
 call wallclock(tmx1)  ! wallclock may use MPI timers, call after init_mpi
 call init_mpi_comm3d()
@@ -36,9 +35,11 @@ write(message,'(a)') 'Running some tests'
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 write(message,'(a)') 'Initial data'
 call print_message(message)
+Q=0
 if (init_cond==0) call init_data_khblob(Q)
 if (init_cond==1) call init_data_kh(Q)
 if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
+if (init_cond==3) call init_data_restart(Q,work1,work2)
 
 write(message,'(a)') 'Initial data projection'
 call print_message(message)
@@ -164,6 +165,8 @@ if (time_final<0) then
    ! a final time
    itime_final=-time_final
    time_final=-time_final
+else
+   time_final=time_final+time_initial
 endif
 
 

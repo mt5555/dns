@@ -1024,6 +1024,112 @@ enddo
 enddo
 
 end subroutine
+subroutine input1(p,pt,buf,fid)
+use params
+use mpi
+real*8 :: p(nx,ny,nz)
+real*8 :: pt(g_nx2,nslabz,ny_2dx)
+real*8 :: buf(o_nx,ny_2dx)
+
+! local vars
+real*8 saved_edge(o_nx)
+integer destination_pe,ierr,tag,z_pe,y_pe,x_pe
+CPOINTER fid
+#ifdef USE_MPI
+integer request,statuses(MPI_STATUS_SIZE)
+#endif
+integer i,j,k,l,extra_k,kuse,dest_pe3(3)
+integer n1,n1d,n2,n2d,n3,n3d
+
+
+do z_pe=0,ncpu_z-1
+extra_k=0
+if (z_pe==ncpu_z-1 .and. o_nz==g_nz+1) extra_k=1
+do k=1,nslabz+extra_k
+do y_pe=0,ncpu_y-1
+do x_pe=0,ncpu_x-1
+
+   ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
+   l=o_nx*ny_2dx
+
+   if (k>nslabz) then 
+      ! this is the periodic z-direction case. refetch data at z=0
+      kuse=1
+      dest_pe3(1)=x_pe
+      dest_pe3(2)=y_pe
+      dest_pe3(3)=0
+   else
+      kuse=k
+      dest_pe3(1)=x_pe
+      dest_pe3(2)=y_pe
+      dest_pe3(3)=z_pe
+   endif
+
+#ifdef USE_MPI
+   tag=1
+   call mpi_cart_rank(comm_3d,dest_pe3,destination_pe,ierr)
+#else
+   destination_pe=my_pe
+#endif
+
+
+   if (my_pe==io_pe) then
+      call cread8(fid,buf,o_nx*ny_2dx)
+
+      if (o_ny==g_ny+1) then
+      if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then    
+         call cread8(fid,saved_edge,o_nx)      ! read and discard periodic duplicate points
+      endif
+      endif
+
+   endif
+
+   if (my_pe==io_pe) then
+      if (destination_pe==my_pe) then
+         ! dont send message to self
+      else
+#ifdef USE_MPI
+         call MPI_ISend(buf,l,MPI_REAL8,destination_pe,tag,comm_3d,request,ierr)
+         ASSERT("output1: MPI_IRecv failure",ierr==0)
+         call MPI_waitall(1,request,statuses,ierr) 	
+         ASSERT("output1: MPI_waitalll failure",ierr==0)
+#endif
+      endif
+   endif
+
+
+   if (destination_pe==my_pe) then
+      if (my_pe == io_pe) then
+         ! dont recieve message from self
+      else
+#ifdef USE_MPI
+         tag=1
+         call MPI_IRecv(buf,l,MPI_REAL8,io_pe,tag,comm_3d,request,ierr)
+         ASSERT("output1: MPI_ISend failure",ierr==0)
+         call MPI_waitall(1,request,statuses,ierr) 	
+         ASSERT("output1: MPI_waitalll failure",ierr==0)
+#endif
+      endif
+      pt(1:g_nx,kuse,:)=buf(1:g_nx,:)
+   endif
+
+      
+enddo
+enddo
+enddo
+enddo
+
+
+n1=g_nx
+n1d=g_nx2
+n2=nslabz
+n2d=nslabz
+n3=ny_2dx
+n3d=ny_2dx
+call transpose_from_x(pt,p,n1,n1d,n2,n2d,n3,n3d)
+
+
+end subroutine
 
 #endif
 

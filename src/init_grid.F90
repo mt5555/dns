@@ -75,6 +75,7 @@ call print_message(message)
 
 #ifdef USE_MPI
 call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
+call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
@@ -278,6 +279,7 @@ struct_nx=0
 struct_ny=0
 struct_nz=0
 alpha_value=0
+rundir=""
 
 end subroutine
 
@@ -308,6 +310,22 @@ do i=1,80
    endif
 enddo
 print *,'name: ',runname(1:i-1)
+read(*,'(a)') message
+do i=1,80
+   if (message(i:i)==' ') then
+      rundir=message(1:i-1)
+      exit
+   endif
+enddo
+if (i>1) then
+   if (rundir(i-1:i-1)/='/') then
+      rundir(i:i)='/'
+      i=i+1
+   endif
+   print *,'directory: ',rundir(1:i-1)
+else
+   print *,'directory: current working directory'
+endif
 
 read(*,'(a12)') sdata
 print *,'initial condition: ',sdata
@@ -317,6 +335,8 @@ else if (sdata=='KH-anal') then
    init_cond=1
 else if (sdata=='iso12') then
    init_cond=2
+else if (sdata=='restart') then
+   init_cond=3
 else 
    print *,'value = ',sdata
    call abort("invalid initial condtion specified on line 3 on input file")

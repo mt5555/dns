@@ -1,5 +1,6 @@
 1            ! input file type
 benchmark128 ! runname
+             ! run dir
 iso12        ! init cond
 iso12        ! forcing
 10            ! struct_x
