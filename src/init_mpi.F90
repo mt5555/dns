@@ -73,7 +73,7 @@ if (ierr1/=0) call abort("mpi_cart_get failure")
 ! get processor number with coords = mpicoords
 call mpi_cart_rank(comm_3d,mpicoords,my_pe,ierr2)
 
-write(message,'(a,i5,a,i3,a,i3,a,i3)') "Parallel decomposition: ncpus= ", &
+write(message,'(a,i5,a,i3,a,i3,a,i3)') "Running parallel.  NCPUS=", &
    initial_live_procs," = ",ncpu_x," x",ncpu_y," x",ncpu_z
 call print_message(message)
 #else

@@ -24,11 +24,13 @@ call params_init()
 call fft_interface_init()
 
 if (my_pe==io_pe) then
-   print *,'Reading input file from stdin...'
+   print *,'Enter input file type: '
    read(*,*) input_file_type
    if (input_file_type==0) then
+      print *,'Calling read_type0()'
       call read_type0()
    else if (input_file_type==1) then
+      print *,'Calling read_type1()'
       call read_type1()
    else
       call abort("bad input file")
@@ -309,6 +311,11 @@ else
    call abort("invalid forcing type specified on line 4 on input file")
 endif
 
+read(*,*) struct_nx
+if (struct_nx==1) call abort("struct_nx = 1 in input file not allowed")
+read(*,*) struct_ny
+if (struct_ny==1) call abort("struct_ny = 1 in input file not allowed")
+read(*,*) struct_nz
 
 
 read(*,'(a12)') sdata

@@ -186,9 +186,9 @@ for i in range(3):
 
 
 fout.write("! dimensions of grid and data:\n")
-fout.write("integer,parameter :: nx="+str(tot[0])+"\n")
-fout.write("integer,parameter :: ny="+str(tot[1])+"\n")
-fout.write("integer,parameter :: nz="+str(tot[2])+"\n")
+fout.write("integer,private,parameter :: nxd="+str(tot[0])+"\n")
+fout.write("integer,private,parameter :: nyd="+str(tot[1])+"\n")
+fout.write("integer,private,parameter :: nzd="+str(tot[2])+"\n")
 fout.write("integer,parameter :: nx1="+str(pad1[0])+",nx2="+str(pad2[0])+"\n")
 fout.write("integer,parameter :: ny1="+str(pad1[1])+",ny2="+str(pad2[1])+"\n")
 fout.write("integer,parameter :: nz1="+str(pad1[2])+",nz2="+str(pad2[2])+"\n")

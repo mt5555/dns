@@ -74,10 +74,22 @@ integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
 ! mesh dimensions on a single processor
 #include "params.h"
 !integer,parameter :: n_var=3                  ! number of prognostic variables
-!integer,parameter :: nx=18,ny=18,nz=18         ! dimension of grid & data
+!integer,parameter :: nxd=18,nyd=18,nzd=18         ! dimension of grid & data
 !integer,parameter :: nx1=1,nx2=16              ! upper and lower bounds of non-ghost data
 !integer,parameter :: ny1=1,ny2=16             ! upper and lower bounds of non-ghost data
 !integer,parameter :: nz1=1,nz2=16             ! upper and lower bounds of non-ghost data
+
+! NOTE: if these are parameters, then all automatic arrays
+! in subroutines will be allocated at run time.  This doubles
+! the amount of memory needed:
+!integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
+
+! NOTE: if these are NOT parameters, then all automatic arrays
+! are placed on the stack, and thus dont take up memory between calls.
+! this halves the amount of memory needed.  
+! any performance penaulty?
+integer           :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
+
 
 ! number of actual data points
 integer,parameter :: nslabx=nx2-nx1+1
@@ -85,9 +97,9 @@ integer,parameter :: nslaby=ny2-ny1+1
 integer,parameter :: nslabz=nz2-nz1+1
 
 ! mesh coordinates
-real*8 :: xcord(nx),delx
-real*8 :: ycord(ny),dely
-real*8 :: zcord(nz),delz
+real*8 :: xcord(nxd),delx
+real*8 :: ycord(nyd),dely
+real*8 :: zcord(nzd),delz
 real*8,allocatable :: g_xcord(:)  
 real*8,allocatable :: g_ycord(:)  
 real*8,allocatable :: g_zcord(:)  
@@ -98,8 +110,8 @@ integer,allocatable :: g_jmcord(:)
 integer,allocatable :: g_kmcord(:)  
 
 ! fft modes, local 3D decompostion
-integer :: imcord(nx),jmcord(ny),kmcord(nz)  ! fft modes local
-integer :: imsign(nx),jmsign(ny),kmsign(nz)  ! fft modes local
+integer :: imcord(nxd),jmcord(nyd),kmcord(nzd)  ! fft modes local
+integer :: imsign(nxd),jmsign(nyd),kmsign(nzd)  ! fft modes local
 
 ! fft modes, local z-decompostion
 integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
@@ -115,6 +127,10 @@ real*8  :: cfl_vis = 1.2
 real*8  :: delt_min = 0
 real*8  :: delt_max = 1
 real*8  :: time_final = 1 
+integer :: struct_nx=10          ! compute structure functions 
+integer :: struct_ny=10          ! every 10 time steps
+integer :: struct_nz=10          !
+
 
 real*8 :: output_dt = 0    ! netcdf output for plotting
 integer :: ncustom =0
@@ -165,7 +181,7 @@ real*8 :: ints_timeU,ints_timeDU
 ! maxs(7) = ints_timeDU
 !
 
-integer,parameter :: ntimers=11
+integer,parameter :: ntimers=12
 real*8 :: tims(ntimers)=0
 !  tims(1)    time for initialization
 !  tims(2)    total runtime after initialization
@@ -178,6 +194,7 @@ real*8 :: tims(ntimers)=0
 !  tims(9)    transpose_from_x
 !  tims(10)    transpose_to_y
 !  tims(11)    transpose_from_y
+!  tims(12)    compute_pdf
 !
 !
 

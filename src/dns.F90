@@ -56,7 +56,6 @@ call wallclock(tmx2)
 tims(2)=tmx2-tmx1
 
 
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Print timing information
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -80,6 +79,8 @@ call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   time_control       ',tims_ave(3),tims_max(3)
 call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   RHS                ',tims_ave(5),tims_max(5)
+call print_message(message)
+write(message,'(a,2f9.2,a,f4.3,a)') '   compute_pdf        ',tims_ave(12),tims_max(12)
 call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_z     ',tims_ave(6),tims_max(6)
 call print_message(message)
@@ -120,8 +121,11 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 
 !local variables
+real*8 :: Qhat(nx,ny,nz,n_var)
+real*8 :: Qw2(nx,ny,nz,n_var)
 real*8  :: time=0
 integer :: itime=0,ierr,n
+integer :: itime_final
 character*80 message
 real*8 :: ke_old,time_old,delke_tot
 real*8 :: ints_buf(nints)
@@ -132,12 +136,18 @@ time=0
 itime=0
 delt=0
 
+if (time_final<0) then
+   ! flag denoting run abs(time_final) time steps, instead of specifing 
+   ! a final time
+   itime_final=-time_final
+   time_final=-time_final
+endif
 
 do 
    time_old=ints_timeU
    ke_old=ints(1)
 
-   call rk4(time,Q)
+   call rk4(time,Q,Qhat,Qw2)
 
 #ifdef USE_MPI
    ints_buf=ints
@@ -156,20 +166,16 @@ do
    
    if (maxval(maxs(1:3))> 1000) then
       print *,"max U > 1000. Stoping at time=",time
-      time_final=time
+      itime_final=itime
    endif
 
    call time_control(itime,time,Q)
    itime=itime+1
-   if (time >= time_final) exit
+   if (time_final>0 .and. time >= time_final) exit
+   if (itime_final>0 .and. itime>=itime_final) exit
+
 enddo
-
 end subroutine
-
-
-
-
-
 
 
 

@@ -213,7 +213,7 @@ end subroutine
 
 subroutine poisson(f,work,alpha,beta)
 !
-!  solve laplacian(p) = f
+!  solve [alpha + beta*laplacian](p) = f
 !  input:  f 
 !  ouput:  f   will be overwritten with the solution p
 !
@@ -340,6 +340,7 @@ subroutine z_fft3d_trashinput(f,fout,work)
 !
 !  compute fft of f, return in fout.
 !  f,fout can overlap in memory
+!  data in f is ovewritten
 !
 use params
 use fft_interface

@@ -4,16 +4,16 @@
 !  subroutine to take one Runge-Kutta 4th order time step
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q)
+subroutine rk4(time,Q,rhs,Q_old)
 use params
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: rhs(nx,ny,nz,n_var)
+real*8 :: Q_old(nx,ny,nz,n_var)
 
 ! local variables
-real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
-real*8 :: rhs(nx,ny,nz,n_var)
 real*8 :: ints_buf(nints),vel
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.

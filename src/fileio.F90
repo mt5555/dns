@@ -18,7 +18,7 @@ real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:)
 integer,save :: nscalars=0,nsize=0
 
 call wallclock(tmx1)
-time_target = time_final
+time_target=time_final
 
 !
 ! compute new time step
@@ -434,6 +434,7 @@ real*8 :: small=1e-7
 
 check_time = .false.
 time_next=time_final
+
 if (dt==0) return
 
 

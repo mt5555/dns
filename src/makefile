@@ -32,7 +32,7 @@ ifeq ($(UNAME),Linux)
    # PGI
    F90 = pgf90
    CC=pgcc
-   FFLAGS = -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_FFT99 
    LDFLAGS = -Lstk -lstk
 
 
@@ -78,7 +78,7 @@ LINK=$(F90) $(FFLAGS)
 #independent modules/routines (dont use any other modules):
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o 
 #modules/routines which use OBJS1
-OBJS2 = transpose.o structf.o
+OBJS2 = transpose.o structf.o sforcing.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o integrals.o
@@ -87,7 +87,7 @@ OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
 MODEL_GRID       = ns_grid.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC_SLOW  = ns_decomp3.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC       = ns.o sforcing.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SPEC       = ns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 

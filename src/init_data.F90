@@ -9,6 +9,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: PSI(nx,ny,nz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
 character*80 message
@@ -22,6 +23,11 @@ do i=nx1,nx2
    enddo
 enddo
 enddo
+enddo
+alpha=0
+beta=1
+do n=1,3
+   call poisson(PSI(1,1,1,n),work,alpha,beta)
 enddo
 call vorticity(Q,PSI,work,work2)
 

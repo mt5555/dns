@@ -281,6 +281,7 @@ subroutine compute_pdf(Q,n1,n1d,n2,n2d,n3,n3d,str)
 ! compute a pdf_structure function along the first dimension of Q
 ! for all the values of delta given by delta_val(:)
 !
+use params
 implicit none
 integer :: n1,n1d,n2,n2d,n3,n3d,n
 real*8 :: Q(n1d,n2d,n3d,3)
@@ -289,13 +290,14 @@ type(pdf_structure_function) :: str(NUM_SF)
 ! local variables
 real*8  :: del,delv(3),delq
 real*8  :: one_third = (1d0/3d0)
+real*8  :: tmx1,tmx2
 integer :: bin,idel,i,j,k,i2,nsf
 
 if (structf_init==0) then
    structf_init=1
    call init_pdf_module()
 endif
-
+call wallclock(tmx1)
 
 do k=1,n3
    do j=1,n2
@@ -318,11 +320,17 @@ do k=1,n3
                   if (bin<-pdf_max_bin) bin=-pdf_max_bin
                   str(n)%pdf(bin,idel)=str(n)%pdf(bin,idel)+1
                enddo
+
                ! compute structure functions for U(U**2+V**2+W**2)
                delq = delv(1)**2 + delv(2)**2 + delv(3)**2
                do n=1,3
                   nsf=n+3
-                  del = (delv(n)*delq)**(one_third)
+                  del=delv(n)*delq
+                  if (del>=0) then
+                     del=del**one_third
+                  else
+                     del=-(-del)**one_third
+                  endif
                   del = del/pdf_bin_size
                   bin=nint(del)
                   if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
@@ -330,23 +338,25 @@ do k=1,n3
                   if (bin<-pdf_max_bin) bin=-pdf_max_bin
                   str(nsf)%pdf(bin,idel)=str(nsf)%pdf(bin,idel)+1
                enddo
-               
             enddo
          endif
       enddo
    enddo
 enddo
 
+
 do n=1,NUM_SF
 str(n)%ncalls=str(n)%ncalls+1
 enddo
+call wallclock(tmx2)
+tims(12)=tims(12)+(tmx2-tmx1)
 end subroutine
 
 
 
 
 
-subroutine z_ifft3d_str(fin,f,w1,w2,compy_instead_of_x,compz)
+subroutine z_ifft3d_str(fin,f,w1,w2,compx,compy,compz)
 !
 !  compute inverse fft 3d of fin, return in f
 !  fin and f can overlap in memory
@@ -355,9 +365,13 @@ subroutine z_ifft3d_str(fin,f,w1,w2,compy_instead_of_x,compz)
 !  This routine can compute PDF's of structure functions in the x direction
 !  or y direction (but not both) and in the z direction.
 ! 
-!  compy_instead_of_x    compute PDF in y direction instead of x
-!  compz                 also compute PDF in z direction
+!  compx   compute PDF in x direction
+!  compy   compute PDF in y direction
+!  compz   compute PDF in z direction
 !
+! only one of compx or compy can be computed per call.
+! compx or compy can be computed w/o any additional transposes.
+! compz requires an additional z-transpose.
 !
 use params
 use fft_interface
@@ -369,7 +383,7 @@ real*8 f(nx,ny,nz,n_var)               ! output
 ! overlaped in memory:
 real*8 w1(g_nz2,nslabx,ny_2dz,n_var)
 real*8 w2(nx,ny,nz,n_var)    
-logical :: compy_instead_of_x,compz
+logical :: compx,compy,compz
 
 
 !local
@@ -389,35 +403,30 @@ do n=1,3
    call transpose_from_z(w1,f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 
-
-if (compy_instead_of_x) then
-do n=1,3
-   call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-
-   call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo   
-call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,1))
-
-
-else
-do n=1,3
-   call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+if (compx) then
+   do n=1,3
+      call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      
+      call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,1))
    
-   call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,2))
-
+else ! compy, or default (compute no structure functions)
+   do n=1,3
+      call transpose_to_x(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_x(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      
+      call transpose_to_y(f(1,1,1,n),w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call ifft1(w2(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_y(w2(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   if (compy) call compute_pdf(w2,n1,n1d,n2,n2d,n3,n3d,SF(1,2))
 endif
-
-
 
 
 

@@ -1,37 +1,38 @@
 TODO:
 
-0. segault at 64 128 128
+remove all benchmark files except 96 and 512
+
+
 1. PDF for e
 2. memory estimate.  why off by a factor of 2?
-3. timers in compute_pdf
-4. random vorticity (not stream function)
 
-1. create new mpi communicator for sforcing routines
 2. use a mpi defined type for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
 6. divergence: go to Shashkov formula?  
 
 **********************************************************************************
 sizes
-Nirvana:  32Gb per box.  optimal is 225M per CPU.  = 29Gb.
-                                        max size: 502?. fft: 400?
-          2 Boxes, 64Gb.  optimal size: 550.  
+Nirvana:  32Gb per box.  optimal is 225M per CPU.  
+          1 box: 29Gb,  max size: 600
+          2 box: 58Gb.  max size: 760 
+          4 box: 116Gb  max size: 950
 
 QidSE:  16x4 cpus.  64Gb memory
 Qid:   128x4        512Gb memory
                          
 
-Linux box sizes:
- 64^3     60M            5 arrays,3 coordinates=5*3*8*64^3 
- 96^3    197M
-128^3    462M
+Linux box sizes:          3D array size: 3*8*n**3.  5 big arrays per run.
+                                                    total size about 6 arrays
+ 64^3     38M            6M per array
+ 96^3    120M            20M per array, 100M total.  
+128^3    281M            48M per array
 
-
-256^3   3.8Gb                  
-512^3:  31Gb             array size: 15Gb.  
-1024^3  410Gb               
-
-2048^4  3280Gb                 
+extrapolated:
+256^3   2.25Gb           .375M per variable
+512^3:  18Gb             3Gb per vairalbe
+1024^3  144Gb            24Gb per variable
+2048^3  1152Gb           192Gb per variable      
+4096^3  9216Gb           1536Gb per variable      
 
 size = .1*n^3/64^3 
 
@@ -56,63 +57,30 @@ two box timings:  512 on 256 cpus   pend
 
 
 **********************************************************************************
-parallel timings on blue mountain.  
-Nirvana is too unreliable.  
-
-256x256x256
-
-1x1x128 parallel decompostion
-                          dns_solve      _to_z   _from_z
-original                     1.36         .41     .40
-
-block=1                      1.43         .47     .41
-block=1                      1.36         .44     .38
-
-block=2                      1.33         .41.    .37
-block=2                      1.32         .41     .37
-
-block=4                      1.84         .74     .53
-block=4                      1.32         .44     .33
-block=4                      1.31         .42     .34
-
-
-block=32
-
-block=128                    1.45         .51     .39
-                             1.51         .54     .41
-
-
-
-                          dns_solve      _to_z   _from_z
-original 1x2x64              1.81        .49      .37
-original 1x4x32              1.79        .44      .33
-original 1x8x16      IN
-
-
-
-
-
-**********************************************************************************
-FFT timings. 
-
+Spectral Model 1 CPU timings.
+1 CPU  96^3  120M  
 *****************************************************************
+./bench.sh 96
+run 5 timesteps.  CFL=1.5/.25, no structure functions
 
-64x64x64 timings (1cpu)    110M
-./bench.sh 64  
-run to .1 
-CFL=1.5/.25
+darkstar (linux 1Ghz)
+PGF90, STK2+PGCC, auto       2.91  2.90       ( 2.88  
+PGF90, STK2+PGCC, params     2.86  2.87
 
-autrey (linux) PGI F90 
-STK2+PGCC                   .62  .62
+autrey (linux 1.? Ghz ) 
+PGF90,STK2+PGCC, auto
+PGF90,FFT99, auto
 
-autrey (linux) INTEL
-STK2+PGCC                   .58  .58
+IFC,
+LF90,
+
+
+
 
 Nirvana SGIFFT             
 Nirvana SGIFFT 3d multiple 
 Nirvana FFT99              
 Nirvana STK                
-
 
 Truchas (Compaq ES40)
 FFT99 
@@ -121,50 +89,12 @@ CPQ
 
 
 *****************************************************************
-
-1024x1024x1 timings (1cpu)  run size: 380M
-./bench.sh 1024
-CFL=1.5/.25
-
-Linux laptop PGI F90
-FFT99        
-STK+gcc       
-STK+PGCC     
-
-Truchas Compaq ES40
-FFT99     1.70  1.74  1.74
-STK       1.60  1.59  1.60
-CPQ       1.46  1.46  1.46
+1 CPU  512x512x2
 
 
 *****************************************************************
 
-96x96x96 timings (1cpu)  runsize: 320Mb
-./bench.sh 256
-CFL=1.5/.25
 
-Linux laptop Lahey
-STK    3.08
-FFT99  2.85 2.86
-
-
-
-*****************************************************************
-
-256x8x256 timings (1cpu)  runsize: 241M
-./bench.sh 256
-CFL=1.5/.25
-
-
-Linux laptop Lahey
-FFT99        4.48  4.41
-STK+gcc      3.14  3.13
-
-
-Truchas Compaq ES40
-FFT99      1.68  1.70
-STK        1.51  1.51
-CPQ        1.52  1.52
 
 
 

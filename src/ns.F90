@@ -4,13 +4,13 @@
 !  subroutine to take one Runge-Kutta 4th order time step
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q_grid)
+subroutine rk4(time,Q_grid,Q,rhs)
 use params
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
-real*8,save :: Q(nx,ny,nz,n_var)
 
 call rk4reshape(time,Q_grid,Q,rhs,rhs)
 end
@@ -38,11 +38,12 @@ real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d
 logical,save :: firstcall=.true.
-integer,save :: count2=0,count10=0
+integer,save :: countx=-1,county=-1,countz=-1
 
 
-count2=mod(count2+1,2)     ! toggles between 0 and 1
-count10=mod(count10+1,10)   ! toggles between 0...9
+if (struct_nx>0) countx=mod(countx+1,struct_nx)  
+if (struct_ny>0) county=mod(county+1,struct_ny)  
+if (struct_nz>0) countz=mod(countz+1,struct_nz)  
 
 if (firstcall) then
    firstcall=.false.
@@ -125,7 +126,7 @@ do n=1,3
    enddo
    !call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-call z_ifft3d_str(Q,Q_grid,rhs,rhs,(count2==0),(count10==0))
+call z_ifft3d_str(Q,Q_grid,rhs,rhs,(countx==0),(county==1),(countz==0))
 
 
 time = time + delt
@@ -221,7 +222,6 @@ call wallclock(tmx1)
 
 
 ! compute vorticity-hat, store in RHS
-
 ! 3 z-transforms, 9 ffts.  
 do n=1,3
 do j=1,ny_2dz
@@ -305,9 +305,8 @@ enddo
 ! back to spectral space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
-   call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),p)
+   call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
 enddo
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
