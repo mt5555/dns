@@ -95,7 +95,7 @@ program stripackd_prb
 !  Generate the default set of nodes as latitudinal and longitudinal
 !  coordinates. 
 !
-  open(97,file="isoave.latlon",form='formatted') 
+  open(97,file="isoave.coords",form='formatted') 
   read(97,*) n
   print *,'Number of nodes: ',n
   do i=1,n

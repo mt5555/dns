@@ -284,7 +284,7 @@ if (firstcall) then
    call init
 endif
 
-open(97,file="isoave.latlon",form='formatted')
+open(97,file="isoave.coords",form='formatted')
 write(97,*) 2*ndir
 
 do idir=1,ndir

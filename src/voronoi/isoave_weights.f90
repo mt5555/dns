@@ -47,7 +47,7 @@ program stripack_prb2
   !call random_number ( harvest = x(1:n) )
   !call random_number ( harvest = y(1:n) )
   !call random_number ( harvest = z(1:n) )
-  open(97,file="isoave.latlon",form='formatted') 
+  open(97,file="isoave.coords",form='formatted') 
   read(97,*) n
   print *,'Number of nodes: ',n
   do i=1,n
