@@ -1,0 +1,108 @@
+
+Notes on Isotropic Homogenious Forcing
+Daniel Livescu and Mark Taylor
+last revised on: 6/19/20002
+
+
+There seem to be two types of forcing:
+
+1. Deterministic.  
+
+Examples include:
+
+Chen, Doolen, Kraichnan and She, Phys. Fluids A, 1993   
+Sullivan, Mahalingam, and Kerr, Phys. Fluids 1994
+Overholt and Pope, Computers and Fluids, 1998
+
+All of these forcings are actually quite similar.  The equations are
+forced in the form:
+
+u_t(K) + navier_stokes_terms =  f(k) u(K)
+
+Where k is the spherical shell wave number index, and K is the full
+3-component wave number, K=(k1,k2,k3) and k=|K|.  You specify a model
+spectrum, Em(k).  The forcing f(k) is a function of the energy at the
+current time E(k) and the model spectrum Em(k), and is chosen to relax
+E(k) back to Em(k) for some values of k.  The different forcing
+techniques cited above just differ in the details of how f(k) is
+chosen at each time step.  Once equillibrium is obtained, they all
+give similar resutls.
+
+Isotropy problems: The isotropy problems we have been seeing are
+related not to the forcing methodology, but instead to the choice of
+model spectrum Em(k).  It is appealing to use the following for the
+model spectrum:
+
+              Em(k) = k^{-5/3}  k <= 2.5 
+              Em(k) = 0         k >  2.5
+
+because it will make for the largest possible inertial range.  But in
+practice this produces poor results.
+
+The energy is peaked in wave numbers k=1 and 2.  These scales
+are inherently anisotropic since they feel the effects of the
+anisotropic geometory (a periodic box).   
+ 
+In an unforced flow, these large scales evolve on an extremely slow
+time scale.  This type of deterministic forcing has no effect on the
+phase, it only relaxes the amplitude (with the same coefficient in
+each shell).  Thus the time scale for the evolution of any anistropy
+is not effected by the forcing.  In any single forced simulation,
+anisotropy in the k=1 and k=2 modes will be retained for the entire
+simulation.  The only way to obtain isotropic results is to repeat the
+simulation with many different initial conditions and average over all
+realizations.
+
+A better approach is to use a more realistic spectrum peaked at wave
+number between 4 and 10 (Daniel recommends 10), with a steep increase
+(for exampe: k^4) from wave number 1 up to the peak.  This is what is
+used in Overhold and Pope, and they show very good isotropy results.
+With this type of model spectrum, there is very little energy in the
+large scales which minimizes their influence on the statistics.
+
+advantages:    smooth forcing, less variablity in statistics
+
+disadvantages: some loss of resolution since spectrum cannot be peaked
+               at k=1
+
+
+
+2. Stochastic forcing:
+
+Ref:  Gotoh, Fukayama, Nakano Phys. Fluids 2002
+
+They use a stochastic forcing of the form:
+
+u_t(K) + navier_stokes_terms =  f(K) 
+
+(as before, K=(k1,k2,k3) and k=|K|).  To make f divergence free, 
+we define f= curl(psi), and w = -laplacian(psi) and w(K) is
+chosen randomly and uncorrelated in space 
+and time for k<=2.5.  The forcing is normalized by specifing
+the variance in the first two shells:
+
+      F(1) = sum over k=1 of <w(K),w(K)>
+      F(2) = sum over k=2 of <w(K),w(K)>
+
+The strong, uncorrelated nature of the forcing dramatically lowers the
+time scale on which the k=1 and k=2 modes evolve.  The results are
+very isotropic, but the statistics have a higher variability when
+compared to deterministic forcing, and thus longer time integrations
+are needed to obtain meaningfull averages.
+
+advantages:    largest possible inertial range
+
+disadvantages: non-smooth forcing, longer integrations needed for good
+               statistics
+
+
+
+
+
+
+
+
+
+
+
+
