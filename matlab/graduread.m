@@ -7,14 +7,10 @@
 %
 %
 
-dir='/home/taylorm/furens/';
-filename='new';
-fline=4; mu=3.4424e-6;
-
 %dir='/ccs/scratch/taylorm/dns/decay/';
-%filename='decay2048-new.0000.7019';
-%%filename='decay2048-new.0000.7536';
-%fline=3; mu=3.4424e-6;
+dir='/home/taylorm/furens/';
+%filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
+filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
 
 
 
@@ -35,7 +31,7 @@ while 1
   [data,count]=fscanf(fid,'%f',[fline,1]);
   if (count==0) break; end;
   if (count~=fline) 
-    disp('error reading file')
+    disp('error reading gradu file')
     return;
   end
   nsubcube=nsubcube+1;
@@ -46,19 +42,18 @@ while 1
 end
 fclose(fid);
 
-% convert from x,y,z coords to integer subcubes
-if max(max(coords))<=1
-  coords=round(coords*nsubcube^(1/3));
-end
-
 
 fname=[dir,filename,'.gradu2'];
 fid=fopen(fname);
 i=0;
 if (fid>-1)
   while 1
-    [data,count]=fscanf(fid,'%d',[1,fline]);
-    if (count~=fline) break; end;
+    [data,count]=fscanf(fid,'%f',[1,fline]);
+    if (count==0) break; end;
+    if (count~=fline) 
+      disp('error reading gradu2 file')
+      return;
+    end
     i=i+1;
     gradu2(:,:,i)=fscanf(fid,'%f',[3,3]);
   end
@@ -192,7 +187,7 @@ for i=1:nsubcube
         set(gca,'YTickLabel','')
         set(gca,'XTickLabel','')
         axis image
-        xlabel(sprintf('(%i,%i,%i)',coords(:,i)));
+        xlabel(sprintf('(%.2f,%.2f,%.2f)',coords(:,i)));
 
         if (count==m1*m2)
           count=0;

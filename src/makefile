@@ -274,7 +274,7 @@ analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 
 clean: 
 	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi dnsvor \
-                            analysis_isoave analysis splitspec 
+                            analysis_isoave analysis splitspec convert
 
 dep:
 	./mkdep.py *.F90 *.f  > .depends
