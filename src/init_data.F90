@@ -483,8 +483,8 @@ if (g_bdy_x1==INFLOW0_ONESIDED) then
 else
    ! psi on the boundary fixed for all time from the initial conditon:
    call print_message("Setting PSI boundary values (fixed for all time)")
-   !call bc_biotsavart(w,Qhat,1)
-   call set_biotsavart(Qhat)
+   call bc_biotsavart(w,Qhat,1)  ! recompute from w
+   !call set_biotsavart(Qhat)    ! set based on PSI computed above 
 endif
 
 

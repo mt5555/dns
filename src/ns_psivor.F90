@@ -105,6 +105,7 @@ if (ncall==1) then
    call bcw_impose(Q(1,1,3))
    w_tmp=0
    psi0=0
+   ! initialize PSI on interior.  
    ! recompute PSI on boundary if comp_psi0==1
    call compute_psi(Q(1,1,3),psi0,rhs,work,w_tmp,comp_psi0)
 endif
