@@ -107,12 +107,13 @@ if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initial
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
 
 fftdata(index)%size=n
-allocate(fftdata(index)%trigs(3*n/2+1))
+allocate(fftdata(index)%trigs(n+15))
 
-write(message,'(a,i6)') 'Initializing FFT99 of size n=',n
+
+write(message,'(a,i6)') 'Initializing SGI FFT of size n=',n
 call print_message(message)
 
-call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
+CALL DZFFTM (0, n, 1, 0, 0, 0, 0, 0, fftdata(index)%trigs, 0,0)
 if (n<0) call abort("Error: invalid value of n for fft")
 
 end subroutine
@@ -156,7 +157,7 @@ end subroutine
 subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
-real*8 w(n2*(n1+1))
+real*8 w(n1+2)
 
 real*8 :: scale=1
 character*80 message_str
@@ -178,7 +179,7 @@ do k=1,n3
       !p(n1+2,j,k)=0          ! not needed?
    enddo
 
-   call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,1)
+   CALL ZDFFTM (1, n1, n2, scale, p(1,1,k), n1d/2, p(1,1,k), n1d,fftdata(index)%trigs, w,0)
 enddo
 
 end subroutine
@@ -195,7 +196,8 @@ subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 :: scale
-real*8 :: w(n2*(n1+1)) 
+real*8 w(n1+2)
+
 
 integer index,j,k
 if (n1==1) return
@@ -212,7 +214,8 @@ do k=1,n3
    !         p(n1+2,jj,k)=0
    !   enddo
    
-   call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,-1)
+   CALL DZFFTM (-1, n1, n2, scale, p(1,1,k), n1d, p(1,1,k), n1d/2,&
+       fftdata(index)%trigs, w,0)
    
    !     move the last cosine mode into slot of first sine mode:
    do j=1,n2
@@ -221,6 +224,11 @@ do k=1,n3
    
 enddo
 end subroutine
+
+
+
+
+
 
 
 

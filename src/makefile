@@ -53,9 +53,9 @@ ifeq ($(UNAME),OSF1)
    #MPILIB = -L/usr/opt/MPI190/lib -lfmpi -lmpi 
    LDFLAGS =  $(MPILIB) -Lstk -lstk -lcxml
 
-   FFLAGS = -O3  -DOSF1 $(MPI) -DUSE_FFT99
+   #FFLAGS = -O3  -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -O3  -DOSF1 $(MPI) -DUSE_STKFFT  
-   #FFLAGS = -O3  -DOSF1 $(MPI) -DUSE_CPQFFT  
+   FFLAGS = -O3  -DOSF1 $(MPI) -DUSE_CPQFFT  
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
