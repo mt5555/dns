@@ -27,7 +27,7 @@ real*8,save  :: Q(nx,ny,nz,n_var)
 real*8,save  :: vor(nx,ny,nz,n_var)
 real*8,save  :: work1(nx,ny,nz)
 real*8,save  :: work2(nx,ny,nz)
-character(len=80) message,sdata
+character(len=80) message,sdata,tname
 character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
@@ -39,11 +39,13 @@ tstart=.32
 tstop=.32
 tinc=1.0
 
+! to read times from  file times.dat:
+! tstart=-1; tinc=0; tname="times.dat"
+
 ! these lines are modifed by some sed scripts for automatic running
 ! of this code by putting in new values of tstart, tstop, tinc,
 ! nxdecomp,nydecomp,nzdecom, etc.
 !SEDtstart
-!SEDdecomp
 
 
 icount=0
@@ -60,6 +62,12 @@ Q=0
 time=tstart
 do
 icount=icount+1
+   if (tstart<0) then
+      ! read times from unit 83
+      fname= rundir(1:len_trim(rundir)) // tname(1:len_trim(tname))
+      if (icount==1)  open(83,file=fname)
+      read(83,*,err=100,end=100) time
+   endif	
 
    call input_uvw(time,Q,vor,work1,work2)
 !   print *,'max U: ',&
@@ -115,7 +123,7 @@ if (io_pe==my_pe) then
    print *,tstart,tstop
 endif
 
-
+100 continue
 call close_mpi
 end program
 

@@ -68,6 +68,8 @@ nxdecomp=1
 nydecomp=1
 nzdecomp=1
 
+! to read times from  file times.dat:
+! tstart=-1; tinc=0; tname="times.dat"
 
 
 ! these lines are modifed by some sed scripts for automatic running
@@ -141,6 +143,12 @@ endif
 time=tstart
 do
    icount=icount+1
+   if (tstart<0) then
+      ! read times from unit 83
+      fname= rundir(1:len_trim(rundir)) // tname(1:len_trim(tname))
+      if (icount==1)  open(83,file=fname)
+      read(83,*,err=100,end=100) time
+   endif	
 
 
    if (compute_uvw) then
