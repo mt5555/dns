@@ -8,6 +8,7 @@
 !  -cout uvw      (can be used with -si/-so  spectral input/output)
 !                  and -smax spectral coefficient truncation to 
 !                  perform downsampling or upsampling)
+!  -count 4uvw     as above, but real*4 output
 !  -cout vor
 !  -cout vorm
 !  -cout norm2

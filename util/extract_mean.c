@@ -5,12 +5,12 @@ extern int errno;
 int main(int argc, char **argv) {
   char *fname;
   FILE *fid, *fid2;
-  float *buf,mn,mx;
+  double *buf_avg,*buf;
   double sum; 
   char subname[240];
   char c='A';
   int i,j,k,ioff,joff,koff;
-  long nbig,ncube,size;
+  long nbig,ncube,size,size_avg;
 
   if (argc != 4) {
     printf("USAGE:  ./extract filename  orig_size  subcube_size \n");
@@ -28,12 +28,19 @@ int main(int argc, char **argv) {
 
   size=ncube;
   size=size*size*size;    
-  buf=(float *)malloc(size*4);
+  buf=(double *)malloc(size*4);
   if (buf==NULL) {
     printf("Error: couldn't malloc subcube \n");
     exit(1);
   }
 
+  size_avg=nbig/ncube;
+  size_avg=size_avg*size_avg*size_avg;
+  buf_avg=(double *)malloc(size_avg*4);
+  if (buf_avg==NULL) {
+    printf("Error: couldn't malloc average subcube \n");
+    exit(1);
+  }
 
 
   for (ioff=0; ioff <= nbig-ncube;  ioff+=ncube ) {
@@ -51,38 +58,31 @@ int main(int argc, char **argv) {
 	  }
 	}
 
-	mn=buf[0];
-        mx=buf[0];
         sum=0;
 	for (i=0; i<size; ++i) {
           sum=sum+buf[i];  
-	  if (buf[i]<mn) mn=buf[i];
-	  if (buf[i]>mx) mx=buf[i];
 	}
         sum=sum/size;
-
-
-	/* compute name of subcube: */
-	strcpy(subname,fname);
-	i=strlen(subname);
-	subname[i++]='.';
-	subname[i++]=c+(ioff/ncube);
-	subname[i++]=c+(joff/ncube);
-	subname[i++]=c+(koff/ncube);
-        subname[i]=0;
-	printf("%s min=%f max=%f\n",subname,mn,mx);
-	fid2=fopen(subname,"w");
-	fwrite(buf,4,ncube*ncube*ncube,fid2);
-	fclose(fid2);
-
-
-
-	/* 	goto done; */
+        { long pos_small=ncube*ioff + joff + koff/ncube;
+        buf_avg[pos_small]=sum;
+        }
+        printf("averaged subcube: %i %i %i\n",ioff/ncube,joff/ncube,koff/ncube);
       }
     }
   }
 done:
   fclose(fid);
+
+  strcpy(subname,fname);
+  i=strlen(subname);
+  subname[i++]='.';
+  subname[i++]='a';
+  subname[i++]='v';
+  subname[i++]='e';
+  subname[i++]=0;
+  fid2=fopen(subname,"w");
+  fwrite(buf_avg,8,size_avg,fid2);
+  fclose(fid2);
 
   return 0;
 }
