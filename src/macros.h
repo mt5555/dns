@@ -15,6 +15,9 @@
 #define my_x    mpicoords(1)
 #define my_y    mpicoords(2)
 #define my_z    mpicoords(3)
+<<<<<<< macros.h
+<<<<<<< macros.h
 
 ! variable used to hold C style pointers.  should be at least 64 bits
 #define CPOINTER real*8
+

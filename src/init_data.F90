@@ -1,3 +1,5 @@
+
+
 subroutine init_data_test(Q)
 use params
 implicit none
@@ -67,7 +69,6 @@ do i=nx1,nx2
    Q(i,j,k,2)=.05*sin(2*pi*xcord(i))
 enddo
 enddo
-
 
 
 #else

@@ -1,5 +1,10 @@
 TODO:
 
+move fft_derivatives (from james) into FFTOPTS
+make imcord +/- m for sine or cosine mode!
+
+
+
 1.1  FFT in blocks - faster if they are dimensioned:  x(lot,128)?  
 2. use a mpi communcator for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
@@ -36,20 +41,24 @@ quick & dirty 64x64x64 timings (1cpu)
 run to .1 
 CFL=1.5/.25
 
+
 truchas (Compaq ES40):       .26  .29  .29
 linux desktop:               
 Autrey (Sun Ultra 60):       .93  .92  .92
 Nirvana (SGI O2)             .94  .95  .94
-linux laptop (PGI F90):     1.06  1.06
-linux laptop (Lahey F90):   1.25  1.25 
+
+
+battery:
+linux laptop (PGI F90/FFT99):     1.12  1.11
+linux laptop (PGI F90/STK):       1.27  1.28
+
+AC:
+linux laptop (PGI F90/FFT99):   
+linux laptop (PGI F90/STK):     
 
 
 
-
-
-
-
-
+ 
 
 
 

@@ -10,8 +10,6 @@
 !   fft_interface_init               call this before using any other routines
 !   fft1                             fft along first dimension of 3D array
 !   ifft1	                     ifft along first dimension of 3D array
-!   fft_derivatives                  compute derivative along first dimension 
-!                                    (input/ouput given in grid space)
 ! 
 ! Routines work on data of the form:  p(n1d,n2d,n3d)
 ! Size of the grid point data         p(1:n1,1:n2,1:n3)
@@ -38,6 +36,16 @@ sum over m=1..n/2:
      note: the fact that the gridpoint values x(j) are real
      implies that b(0)=b(n/2)=0.  for a call with isign=+1,
      it is not actually necessary to supply these zeros.
+
+
+In otherwords:
+
+ grid space data:    1 2 3 4 5 6 7 8 * *
+ 
+ fourier space:      0 0 1 1 2 2 3 3 4 4
+ rearranged:         0 4 1 1 2 2 3 3 * *
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #endif
 
@@ -45,7 +53,6 @@ sum over m=1..n/2:
 module fft_interface
 implicit none
 integer, parameter ::  num_fftsizes=3
-real*8 :: pi2,pi2_squared
 
 integer :: init=0
 type fftdata_d
@@ -68,16 +75,15 @@ contains
 subroutine fft_interface_init()
 
 integer i
-real*8  :: pi,one=1
+real*8 :: one=1
 
+init=1
 do i=1,num_fftsizes
    fftdata(i)%size = 0	
 enddo
-pi=4*atan(one)
-pi2=2*pi
-pi2_squared=4*pi*pi
-init=1
 end subroutine
+
+
 
 
 subroutine fft_get_mcord(mcord,n)
@@ -104,20 +110,20 @@ if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initial
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
 
 fftdata(index)%size=n
-#ifdef SGIFFT
+#ifdef USE_SGIFFT
 allocate(fftdata(index)%trigs(n+15))
 #else
 allocate(fftdata(index)%trigs(3*n/2+1))
 #endif
 
-#ifdef SGIFFT
+#ifdef USE_SGIFFT
 write(message,'(a,i6)') 'Initializing SGI FFT of size n=',n
 #else
 write(message,'(a,i6)') 'Initializing FFT99 of size n=',n
 #endif
 call print_message(message)
 
-#ifdef SGIFFT
+#ifdef USE_SGIFFT
 CALL DZFFTM (0, n, 1, 0, 0, 0, 0, 0, fftdata(index)%trigs, 0,0)
 #else
 call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
@@ -165,7 +171,7 @@ end subroutine
 subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
-#ifdef SGIFFT
+#ifdef USE_SGIFFT
 real*8 w(n1+2)
 #else
 real*8 w(min(fftblocks,n2)*(n1+1))
@@ -194,7 +200,7 @@ do k=1,n3
         !p(n1+2,jj,k)=0          ! not needed?
       enddo     
 
-#ifdef SGIFFT
+#ifdef USE_SGIFFT
       CALL ZDFFTM (1, n1, numffts, scale, p(1,j+1,k), n1d/2, p(1,j+1,k), n1d,fftdata(index)%trigs, w,0)
 #else
       call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,1)
@@ -218,7 +224,7 @@ subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 :: scale
-#ifdef SGIFFT
+#ifdef USE_SGIFFT
 real*8 w(n1+2)
 #else
 real*8 :: w(min(fftblocks,n2)*(n1+1)) 
@@ -241,7 +247,7 @@ do k=1,n3
 !         p(n1+2,jj,k)=0
 !      enddo
 
-#ifdef SGIFFT
+#ifdef USE_SGIFFT 
       CALL DZFFTM (-1, n1, numffts, scale, p(1,j+1,k), n1d, p(1,j+1,k), n1d/2,fftdata(index)%trigs, w,0)
 #else
       call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,-1)
@@ -258,354 +264,6 @@ do k=1,n3
 enddo
 end subroutine
 
-
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!  Compute FFT derivates.
-!
-!  input: px 
-!  output:
-!     if numder=1   return d/dx along first direction in px
-!                   (and pxx is not accessed) 
-!     if numder=2   return d2/dx2 along first direction in pxx
-!
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d)
-integer numder,n1,n1d,n2,n2d,n3,n3d
-real*8 px(n1d,n2d,n3d)
-real*8 pxx(n1d,n2d,n3d)
-
-
-integer i,j,k,m
-real*8 temp
-ASSERT("fft99_interface.F90: numder<=2",numder<=2)
-ASSERT("fft99_interface.F90: numder>=1",numder>=1)
-
-call fft1(px,n1,n1d,n2,n2d,n3,n3d)
-
-if (numder>=2) then
-   do k=1,n3
-   do j=1,n2
-      do i=1,n1
-         ! note: for i=2, we are actually working with the cos(n1/2) mode
-         ! but d/dx of this mode goes to sin(n1/2) = 0 on our grid, so we
-         ! just take m=0 to make sure that dxx = dx dx
-         m=(i-1)/2
-         pxx(i,j,k) = -m*m * pi2_squared * px(i,j,k)
-      enddo
-   enddo
-   enddo
-   call ifft1(pxx,n1,n1d,n2,n2d,n3,n3d)
-endif
-
-   do k=1,n3
-   do j=1,n2
-      ! note: for i=2, m=0, we are actually working with the cos(n1/2) mode
-      ! but d/dx of this mode goes to sin(n1/2) = 0, so just take m=0 
-
-      px(1,j,k)=0                !m=0 cosine mode
-      if( n1>1) px(2,j,k)=0      !m=n1/2 cosine mode
-      do m = 1, n1/2-1
-         i=2*m+1
-         temp =  pi2* m * px(i,j,k)
-         px(i,j,k) = -pi2 *m * px(i+1,j,k)
-         px(i+1,j,k) = temp
-      enddo
-   enddo
-   enddo
-   call ifft1(px,n1,n1d,n2,n2d,n3,n3d)
-
-end subroutine
-
-
-
-
-
-
-
-
-subroutine divfree(u,p)
-!
-! make u divergence free
-!    solve:  div(u) = laplacian(p)
-!    then:   unew = u - grad(p)
-!    
-! 
-!
-use params
-implicit none
-real*8 u(nx,ny,nz,3)
-real*8 p(nx,ny,nz)
-
-!local variables
-integer i,j,k
-integer im,jm,km,i2,j2,k2
-real*8 :: uu,vv,ww,xfac
-
-ASSERT("divfree(): nslabx must be even ",mod(nslabx,2)==0)
-ASSERT("divfree(): nslaby must be even ",mod(nslaby,2)==0)
-ASSERT("divfree(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
-
-do i=1,3
-   call fft3d(u(1,1,1,i),p)
-enddo
-
-   do k=nz1,nz2
-      km=kmcord(k)
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2
-         jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2
-            im=imcord(i)
-            if (im==g_nx/2) im=0
-
-            ! compute the divergence
-            p(i,j,k)=0
-            if (mod(i-nx1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - im*u(i+1,j,k,1)
-            else
-               p(i,j,k)=p(i,j,k) + im*u(i-1,j,k,1)
-            endif
-
-            if (mod(j-ny1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - jm*u(i,j+1,k,2)
-            else
-               p(i,j,k)=p(i,j,k) + jm*u(i,j-1,k,2)
-            endif
-
-            if (g_nz>1) then
-            if (mod(k-nz1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - km*u(i,j,k+1,3)
-            else
-               p(i,j,k)=p(i,j,k) + km*u(i,j,k-1,3)
-            endif
-            endif
-
-            ! compute laplacian inverse
-            xfac= (im*im +km*km + jm*jm)
-            if (xfac/=0) xfac = -1/xfac
-            p(i,j,k)=xfac*p(i,j,k)
-
-
-         enddo
-      enddo
-   enddo
-
-   do k=nz1,nz2
-      km=kmcord(k)
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2
-         jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2
-            im=imcord(i)
-            if (im==g_nx/2) im=0
-
-            ! compute gradient  dp/dx
-            if (mod(i-nx1+1,2)==1) then
-               uu= - im*p(i+1,j,k)
-
-            else
-               uu= + im*p(i-1,j,k)
-            endif
-            if (mod(j-ny1+1,2)==1) then
-               vv= - jm*p(i,j+1,k)
-            else
-               vv= + jm*p(i,j-1,k)
-            endif
-            if (mod(k-nz1+1,2)==1) then
-               ww= - km*p(i,j,k+1)
-            else
-               ww= + km*p(i,j,k-1)
-            endif
-
-            u(i,j,k,1)=u(i,j,k,1) - uu
-            u(i,j,k,2)=u(i,j,k,2) - vv
-            u(i,j,k,3)=u(i,j,k,3) - ww
-
-         enddo
-      enddo
-   enddo
-
-do i=1,3
-   if (dealias) call fft_filter_dealias(u(1,1,1,i))
-   call ifft3d(u(1,1,1,i),p)
-enddo
-end subroutine
-
-
-
-
-
-
-subroutine divfree_loopfused(u,p)
-!
-! make u divergence free
-!    solve:  div(u) = laplacian(p)
-!    then:   unew = u - grad(p)
-!
-!  u  input/output 
-!  p is used as a work array    
-! 
-!
-use params
-implicit none
-real*8 u(nx,ny,nz,3)
-real*8 p(nx,ny,nz)
-
-!local variables
-integer i,j,k
-integer im,jm,km,i0,i1,j0,j1,k0,k1,n
-real*8 :: xfac
-integer ii,jj,kk
-
-real*8 pi0j0k0
-real*8 pi1j0k0
-real*8 pi0j1k0
-real*8 pi1j1k0
-real*8 pi0j0k1
-real*8 pi1j0k1
-real*8 pi0j1k1
-real*8 pi1j1k1 
-
-ASSERT("divfree(): nslabx must be even ",mod(nslabx,2)==0)
-ASSERT("divfree(): nslaby must be even ",mod(nslaby,2)==0)
-ASSERT("divfree(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
-
-do i=1,3
-   call fft3d(u(1,1,1,i),p)
-enddo
-
-p=0
-   do k=nz1,nz2,2
-      km=kmcord(k)
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2,2
-         jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2,2
-            im=imcord(i)
-            if (im==g_nx/2) im=0
-
-            ! compute the divergence
-            ! compute laplacian inverse
-            xfac= (im*im +km*km + jm*jm)
-            if (xfac/=0) xfac = -1/xfac
-
-            i0=i
-            i1=i+1
-            j0=j
-            j1=j+1
-            k0=k
-            k1=k+1
-            if (g_nz==1) k1=k ! ignore k, we are doing a 2d problem.  km=0
-
-            !                  u_x                  v_y               w_z
-            pi0j0k0 = (-im*u(i1,j0,k0,1)  -  jm*u(i0,j1,k0,2) - km*u(i0,j0,k1,3))*xfac
-            pi1j0k0 = ( im*u(i0,j0,k0,1)  -  jm*u(i1,j1,k0,2) - km*u(i1,j0,k1,3))*xfac
-            pi0j1k0 = (-im*u(i1,j1,k0,1)  +  jm*u(i0,j0,k0,2) - km*u(i0,j1,k1,3))*xfac
-            pi1j1k0 = ( im*u(i0,j1,k0,1)  +  jm*u(i1,j0,k0,2) - km*u(i1,j1,k1,3))*xfac
-
-            if (g_nz>1) then
-            pi0j0k1 = (-im*u(i1,j0,k1,1)  -  jm*u(i0,j1,k1,2) + km*u(i0,j0,k0,3))*xfac
-            pi1j0k1 = ( im*u(i0,j0,k1,1)  -  jm*u(i1,j1,k1,2) + km*u(i1,j0,k0,3))*xfac
-            pi0j1k1 = (-im*u(i1,j1,k1,1)  +  jm*u(i0,j0,k1,2) + km*u(i0,j1,k0,3))*xfac
-            pi1j1k1 = ( im*u(i0,j1,k1,1)  +  jm*u(i1,j0,k1,2) + km*u(i1,j1,k0,3))*xfac
-            endif
-
-            ! u = u - px
-            u(i0,j0,k0,1) = u(i0,j0,k0,1) + im*pi1j0k0
-            u(i1,j0,k0,1) = u(i1,j0,k0,1) - im*pi0j0k0
-            u(i0,j1,k0,1) = u(i0,j1,k0,1) + im*pi1j1k0
-            u(i1,j1,k0,1) = u(i1,j1,k0,1) - im*pi0j1k0
-            if (g_nz>1) then
-            u(i0,j0,k1,1) = u(i0,j0,k1,1) + im*pi1j0k1
-            u(i1,j0,k1,1) = u(i1,j0,k1,1) - im*pi0j0k1
-            u(i0,j1,k1,1) = u(i0,j1,k1,1) + im*pi1j1k1
-            u(i1,j1,k1,1) = u(i1,j1,k1,1) - im*pi0j1k1
-            endif
-
-            ! v = v - py
-            u(i0,j0,k0,2) = u(i0,j0,k0,2) + jm*pi0j1k0
-            u(i1,j0,k0,2) = u(i1,j0,k0,2) + jm*pi1j1k0
-            u(i0,j1,k0,2) = u(i0,j1,k0,2) - jm*pi0j0k0
-            u(i1,j1,k0,2) = u(i1,j1,k0,2) - jm*pi1j0k0
-            if (g_nz>1) then
-            u(i0,j0,k1,2) = u(i0,j0,k1,2) + jm*pi0j1k1
-            u(i1,j0,k1,2) = u(i1,j0,k1,2) + jm*pi1j1k1
-            u(i0,j1,k1,2) = u(i0,j1,k1,2) - jm*pi0j0k1
-            u(i1,j1,k1,2) = u(i1,j1,k1,2) - jm*pi1j0k1
-            endif
-
-
-            ! v = v - pz
-            if (g_nz>1) then
-            u(i0,j0,k0,3) = u(i0,j0,k0,3) + km*pi0j0k1
-            u(i1,j0,k0,3) = u(i1,j0,k0,3) + km*pi1j0k1
-            u(i0,j1,k0,3) = u(i0,j1,k0,3) + km*pi0j1k1
-            u(i1,j1,k0,3) = u(i1,j1,k0,3) + km*pi1j1k1
-            u(i0,j0,k1,3) = u(i0,j0,k1,3) - km*pi0j0k0
-            u(i1,j0,k1,3) = u(i1,j0,k1,3) - km*pi1j0k0
-            u(i0,j1,k1,3) = u(i0,j1,k1,3) - km*pi0j1k0
-            u(i1,j1,k1,3) = u(i1,j1,k1,3) - km*pi1j1k0
-            endif
-
-            if (dealias) then
-            if ( ((km>=g_nz/3) .and. (km>0)) .or. &
-                 ((jm>=g_ny/3) .and. (jm>0)) .or. &
-                 ((im>=g_nx/3) .and. (im>0)) )  then
-               do n=1,3
-                  u(i0,j0,k0,n) = 0
-                  u(i1,j0,k0,n) = 0
-                  u(i0,j1,k0,n) = 0
-                  u(i1,j1,k0,n) = 0
-                  u(i0,j0,k1,n) = 0
-                  u(i1,j0,k1,n) = 0
-                  u(i0,j1,k1,n) = 0
-                  u(i1,j1,k1,n) = 0     
-               enddo
-            endif            
-            ! dont forget the last cosine mode, stored in 2nd array position.
-            ! it has its mode number set to zero for the above computations
-            if (im==0) then
-               do n=1,3
-                  u(i1,j0,k0,n) = 0
-                  u(i1,j1,k0,n) = 0
-                  u(i1,j0,k1,n) = 0
-                  u(i1,j1,k1,n) = 0
-               enddo
-            endif
-            if (jm==0) then
-               do n=1,3
-                  u(i0,j1,k0,n) = 0
-                  u(i1,j1,k0,n) = 0
-                  u(i0,j1,k1,n) = 0
-                  u(i1,j1,k1,n) = 0
-               enddo	
-            endif
-            if (km==0 .and. g_nz>1) then
-               do n=1,3
-                  u(i0,j0,k1,n) = 0
-                  u(i1,j0,k1,n) = 0
-                  u(i0,j1,k1,n) = 0
-                  u(i1,j1,k1,n) = 0
-               enddo
-            endif
-            endif
-
-         enddo
-      enddo
-   enddo
-
-
-do n=1,3
-   call ifft3d(u(1,1,1,n),p)
-enddo
-end subroutine
 
 
 
