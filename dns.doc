@@ -85,6 +85,7 @@ Running the code
                         answers for different parallel decompositions,
                         and may not be as isotropic)
              sht        shallow water testcases from McWilliams and Polvani
+             zero       flow at rest
 
 
    line 4   initial condition subtype

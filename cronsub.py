@@ -58,7 +58,7 @@ if (status==0):
         path="cronlsf/"
     else:
         bsub="bsub"
-        path="cronQ/"
+        path="cronqa/"
 else:
     print 'Error getting OS type'
     sys.exit(1)

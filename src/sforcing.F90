@@ -482,7 +482,7 @@ real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
 real*8 :: ff(numbs,3)
 
-#define GATHER_STATS
+#undef GATHER_STATS
 #ifdef GATHER_STATS
 ff=0
 Ri=3

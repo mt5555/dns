@@ -1,6 +1,6 @@
 function [xx_out,y45,y415,y43,epsilon]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy)
 
-fid=fopen([name,ext],'r','l');
+fid=fopen([name,ext],'r','b');
 
 l=findstr('/',name);
 l=l(length(l));

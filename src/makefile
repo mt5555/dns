@@ -88,8 +88,8 @@ ifeq ($(UNAME),OSF1)
    # to enable openMP  -omp ?? 
    MPI = -DUSE_MPI 
    MPILIB = -lfmpi -lmpi -lelan
-   LSFLIB = -L/lsf/lib -lbat -llsf 
-   LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
+   #LSFLIB = -L/lsf/lib -lbat -llsf 
+   #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
    ifeq ($(HOST),milkyway.lanl.gov)
       MPI = -DUSE_MPI -I/usr/opt/MPI196/include

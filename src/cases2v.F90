@@ -4,6 +4,21 @@
 !
 
 
+subroutine init_data_zero(Q,q1,work1,work2)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+Q=0
+
+end subroutine
+
+
+
+
 subroutine init_data_kh(Q,q1,work1,work2)
 use params
 implicit none

@@ -9,7 +9,7 @@ real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 if (restart==1) then
    !call set_byteswap_input(1);
-   ! initialize some constants, if needed:
+   ! initialize some constants, if needed on restart runs:
    if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)      ! set grav, fcor
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0) ! set xscale, yscale... 
    call init_data_restart(Q,Qhat,work1,work2)
@@ -20,6 +20,7 @@ else
    if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,1)
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,1)
    if (init_cond==5) call init_data_lwisotropic(Q,Qhat,work1,work2,1,1)
+   if (init_cond==6) call init_data_zero(Q,Qhat,work1,work2)
 endif
 end subroutine
 

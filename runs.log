@@ -103,9 +103,18 @@ iso12_500A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
                   4.00                  .807
                   3.00                  .768
 
-iso12_256A (shankara)
+
+iso12_512 (ON O3K)   IN
+   t=0...5  mu=2.75e-4
+   t>.5     mu=1e-4
+
+
+iso12_256B (QA)  IN
     alpha=infinity
     mu=1e-4
+
+
+
 
 
 

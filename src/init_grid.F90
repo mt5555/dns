@@ -828,6 +828,8 @@ else if (sdata=='vxpair') then
    init_cond=4
 else if (sdata=='iso12e') then
    init_cond=5
+else if (sdata=='zero') then
+   init_cond=6
 else 
    print *,'value = >>',sdata,'<<'
    call abort("invalid initial condtion specified on line 3 on input file")

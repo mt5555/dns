@@ -8,7 +8,7 @@
                                 (averaging over 5 timesteps)
 O3K                       64        1.40
                          128        .697 
-                         256        .332
+                         256        .332     1419steps, diags & output:.5124
         2x1x256          512        .394
 500^3                    125     .55
 500^3   2x1x250          500     .209

@@ -61,7 +61,8 @@ if (equations==SHALLOW .and. grav>0) then
    umax=umax+fcor + sqrt(grav*H0)/min(delx,dely)   
 endif
 
-
+!if u=0, take very small timesteps 
+umax=max(umax,1e-8)
 delt = cfl_adv/umax                         ! advective CFL
 delt = min(delt,cfl_vis/mumax)              ! viscous CFL
 delt = max(delt,delt_min)
@@ -70,7 +71,6 @@ delt = min(delt,delt_max)
 ! compute CFL used for next time step.
 cfl_used_adv=umax*delt
 cfl_used_vis=mumax*delt
-
 
 
 
@@ -139,23 +139,19 @@ endif
 
 
 
-doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next,1)
+doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next,1,0)
 time_target=min(time_target,time_next)
-! dont write a restart file if we just restarted:
-if (time==time_initial .and. restart==1) doit_restart=.false.
 
 ! ouput of various fields.  
 ! right now, this is also our restart, so we also output these fields
 ! if the run is finished.
-doit_output=check_time(itime,time,output_dt,ncustom,custom,time_next,1)
+doit_output=check_time(itime,time,output_dt,ncustom,custom,time_next,1,0)
 time_target=min(time_target,time_next)
-! dont write output file if we just restarted:
-if (time==time_initial .and. restart==1) doit_output=.false.
 
 !
 ! diagnostic output (scalars, spectrum).  
 !
-doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next,1)
+doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next,1,0)
 time_target=min(time_target,time_next)
 
 !
@@ -163,10 +159,10 @@ time_target=min(time_target,time_next)
 ! dns:      structure functions and time averages
 ! disnvor:  elliptical contours
 !
-doit_model=check_time(itime,time,diag_dt,0,0.0,time_next,0)
+doit_model=check_time(itime,time,diag_dt,0,0.0,time_next,0,0)
 time_target=min(time_target,time_next)
 
-doit_screen=check_time(itime,time,screen_dt,0,0.0,time_next,1)
+doit_screen=check_time(itime,time,screen_dt,0,0.0,time_next,1,0)
 time_target=min(time_target,time_next)
 ! also output first 5 timesteps, unless screen_dt==0
 if (itime<5 .and. screen_dt/=0) doit_screen=.true.
@@ -402,7 +398,8 @@ end subroutine
 
 
 
-logical function check_time(itime,time,dt,ncust,cust,time_next,include_final)
+logical function check_time(itime,time,dt,ncust,cust,time_next,include_final,&
+   include_initial)
 !
 !  determine if current time is an "output" time, as set by:
 !     dt:   output every 'dt' time
@@ -411,12 +408,15 @@ logical function check_time(itime,time,dt,ncust,cust,time_next,include_final)
 !  include_final=1   also output if time=time_final, even if time_final
 !                    is not a multiple of dt or listed in 'cust'
 !
+!  include_initial=1   for restart runs, we skip the intial time
+!                      unless this flag is set to 1.  
+!
 use params
 implicit none
 integer ncust,itime
 real*8 :: time,dt,cust(ncust)
 real*8 :: time_next  ! output
-integer :: include_final
+integer :: include_final,include_initial
 
 !local variables
 real*8 remainder
@@ -437,6 +437,11 @@ do i=1,ncust
 enddo
 
 if (dt==0) return
+
+! skip initial time on restart runs:
+if (include_initial==0) then
+   if (time==time_initial .and. restart==1) return
+endif
 
 
 if (include_final==1 .and. time>=time_final-small) check_time=.true.

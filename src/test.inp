@@ -1,11 +1,11 @@
 3            ! input file type
 ns_uvw       ! equations
-iso12        ! initial condition:  KH-blob, KH-anal, iso12
+zero        ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
-iso12        ! forcing:  none, iso, iso12, iso12w, iso23w
+iso12w        ! forcing:  none, iso, iso12, iso12w, iso23w
 value        ! viscosity type  (value, smallest, kediff, Re)
 3e-4         ! viscosity coefficient.  (300)
-1e10          ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+0e10          ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
 0            ! compute_structure functions
 fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
