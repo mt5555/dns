@@ -168,7 +168,7 @@ real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ntot,ishift,k_g,j_g
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,ntot
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr
 
 if (firstcall) then
@@ -181,7 +181,6 @@ endif
 
 
 
-ntot=g_nx*g_ny*g_nz
 
 D_ll=0
 D_tt=0
@@ -200,35 +199,37 @@ do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
       do k=nz1,nz2
-      if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
-      do j=ny1,ny2
-      if (ycord(j)>=range(2,1) .and. ycord(j)<range(2,2)) then
-      do i=nx1,nx2
-      if (xcord(i)>=range(1,1) .and. xcord(i)<range(1,2)) then
-
-         ntot=ntot+1
-         if (m==1) ke = ke + .5*Q(i,j,k,n)**2
-         ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
-
-      endif
-      enddo
-      endif
-      enddo
-      endif
+         if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
+            do j=ny1,ny2
+               if (ycord(j)>=range(2,1) .and. ycord(j)<range(2,2)) then
+                  do i=nx1,nx2
+                     if (xcord(i)>=range(1,1) .and. xcord(i)<range(1,2)) then
+                        
+                        ntot=ntot+1
+                        if (m==1) ke = ke + .5*Q(i,j,k,n)**2
+                        ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
+                        
+                     endif
+                  enddo
+               endif
+            enddo
+         endif
       enddo
    enddo
 enddo
 
-epsilon=mu*ke_diss/ntot
-ke=ke/ntot
-
 
 #ifdef USE_MPI
-   xtmp=epsilon
-   call MPI_allreduce(xtmp,epsilon,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   xtmp=ke_diss
+   call MPI_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ke
    call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   i=ntot
+   call MPI_allreduce(i,ntot,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif
+
+epsilon=mu*ke_diss/ntot
+ke=ke/ntot
 
 
 
@@ -395,7 +396,7 @@ end subroutine
 
 
 !
-! same as above, but serial version
+! same as below, but serial version
 !
 subroutine isoave1(Q,d1,work,lx1,lx2,ly1,ly2,lz1,lz2)
 use params

@@ -40,14 +40,14 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-tstart=2.25
-tstop=3.00
+tstart=1.75
+tstop=1.75
 tinc=.25
 icount=0
 
-nxdecomp=1
-nydecomp=1
-nzdecomp=1
+nxdecomp=2
+nydecomp=2
+nzdecomp=2
 
 !call set_byteswap_input(1);
 
@@ -67,7 +67,7 @@ call init_model
 
 !call writepoints(); stop
 
-
+#if 0
 if (nxdecomp*nydecomp*nzdecomp>1) then
    ! in this case, we only need 2 work areas.  we are running in
    ! serial, so we have to save as much memory as possible
@@ -78,7 +78,11 @@ else
    allocate(q2(nx,ny,nz,ndim))
    allocate(q3(nx,ny,nz,ndim))
 endif
+#endif
 
+allocate(q1(nx,ny,nz,ndim))
+allocate(q2(nx,ny,nz,ndim))
+allocate(q3(nx,ny,nz,ndim))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -120,7 +124,6 @@ do
       ly2=ly1 + nylen-1
       lz2=lz1 + nzlen-1
 
-
       if (nxdecomp*nydecomp*nzdecomp==1) then
          ! no subcubes:
          call isoavep(Q,q1,q2,q3)
@@ -132,6 +135,8 @@ do
          call isoave1(Q,q1,q2,lx1,lx2,ly1,ly2,lz1,lz2)
       endif
 
+
+#if 0
       range(1,1)=dble(i)/nxdecomp
       range(1,2)=dble(i+1)/nxdecomp
       range(2,1)=dble(j)/nxdecomp
@@ -139,14 +144,14 @@ do
       range(3,1)=dble(k)/nxdecomp
       range(3,2)=dble(k+1)/nxdecomp
       call isoavep(Q,q1,q2,q3,range)
-
+#endif
 
       if (my_pe==io_pe) then
          write(sdata,'(f10.4)') 10000.0000 + time
          fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
          if (nxdecomp*nydecomp*nzdecomp>1) then
             write(sdata,'(3i1)') i,j,k
-            fname=fname(1:len_trim(fname)) // sdata(1:3)
+            fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
          endif
 
          print *,fname

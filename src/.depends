@@ -14,14 +14,12 @@ fftsgi_interface.o: macros.h makefile
 fftstk_interface.o: macros.h makefile 
 fileio.o: macros.h params.o mpi.o transpose.o makefile 
 ghost.o: macros.h params.o mpi.o makefile 
-ghost-nonghostcells.o: macros.h params.o mpi.o makefile 
 ghostops.o: macros.h params.o fft_interface.o ghost.o transpose.o makefile 
-ghost-yesghost.o: macros.h params.o mpi.o makefile 
 init_data.o: macros.h params.o mpi.o fft_interface.o makefile 
 init_grid.o: macros.h params.o fft_interface.o transpose.o mpi.o makefile 
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
-isoave.o: macros.h params.o makefile 
+isoave.o: macros.h params.o transpose.o makefile 
 mpi.o: makefile 
 ns_decomp3.o: macros.h params.o transpose.o makefile 
 ns.o: macros.h params.o structf.o transpose.o sforcing.o spectrum.o makefile 
