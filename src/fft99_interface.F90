@@ -102,11 +102,13 @@ if (n>1000000) call abort("fft99_interface.F90: n>1 million")
 
 fftdata(index)%size=n
 allocate(fftdata(index)%trigs(3*n/2+1))
-call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
-
 
 write(message,'(a,i6)') 'Initializing FFT of size n=',n
 call print_message(message)
+
+call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
+if (n<0) call abort("Error; invalid value of n for fft");
+
 end subroutine
 
 

@@ -30,8 +30,7 @@ write(message,'(a)') 'Running some tests'
 call print_message(message)
 call test           ! optional testing  routines go here
 
-stop
-call dns_solve(Q)
+! call dns_solve(Q)
 
 end program DNS
 

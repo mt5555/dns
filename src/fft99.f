@@ -1,5 +1,5 @@
 C
-C $Id: fft99.f,v 1.2 2001-06-28 22:58:57 mt Exp $
+C $Id: fft99.f,v 1.3 2001-07-03 19:09:23 mt Exp $
 C
       subroutine fft99(a,work,trigs,ifax,inc,jump,n,lot,isign)
       implicit real*8 (a-h), real*8 (o-z)
@@ -674,8 +674,10 @@ c
       i = ifax(1)
       if (ifax(i+1) .gt. 5 .or. n .le. 4) ifax(1) = -99
       if (ifax(1) .le. 0 ) then 
-        write(6,*) ' set99 -- invalid n'
-        stop'set99'
+c        write(6,*) ' set99 -- invalid n'
+        n=-1
+        return
+c        stop'set99'
       endif
       call fftrig (trigs, n, mode)
       return

@@ -45,7 +45,7 @@ do j=ny1,ny2
    jmcord(j)=g_jmcord(l)
 enddo
 do k=nz1,nz2
-   l = j-ny1+1 + nslaby*mpicoords(3)
+   l = k-nz1+1 + nslabz*mpicoords(3)
    zcord(k)=g_zcord(l)
    kmcord(k)=g_kmcord(l)
 enddo

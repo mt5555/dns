@@ -52,11 +52,16 @@ dns:  $(dnslink) dns.o
 clean: 
 	rm -f *.o *.mod dns  
 
+dep:
+	./mkdep.py *.F90 *.f  > .depends
+
+
+-include .depends
 
 
 mpi.o: $(MPIF90)
 	$(COMPILE) -o mpi.o $(MPIF90)
-fft_interface.o:  fft99_interface.F90 params.o
+fft_interface.o:  fft99_interface.F90 macros.h
 	$(COMPILE) -o fft_interface.o fft99_interface.F90
 #fft_interface.o:  compaq_fft_interface.F90 params.o
 #	$(COMPILE) compaq_fft_interface.F90

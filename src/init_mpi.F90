@@ -11,7 +11,7 @@ logical isperiodic(3),reorder
 integer ierr1,ierr2,ierr3,rank
 character*80 message
 
-myproc=0
+my_pe=0
 mpicoords=0
 mpidims=1
 ioproc=0
@@ -22,7 +22,7 @@ initial_live_procs=1
 
 call mpi_init(ierr1)
 if (ierr1<>0) call abort("mpi_init failure")
-call mpi_comm_rank(MPI_COMM_WORLD,myproc,ierr2)
+call mpi_comm_rank(MPI_COMM_WORLD,my_pe,ierr2)
 if (ierr2<>0) call abort("mpi_comm_rank failure")
 call mpi_comm_size(MPI_COMM_WORLD,initial_live_procs,ierr3)
 if (ierr3<>0) call abort("mpi_comm_size failure")
@@ -38,13 +38,13 @@ if (ierr1<>0) call abort("mpi_cart_create failure")
 
 call mpi_cart_get(comm_3d,3,mpidims,isperiodic,mpicoords,ierr1)
 if (ierr1<>0) call abort("mpi_cart_get failure")
-print *,'me=',myproc," mpi coords: ",mpicoords(1),mpicoords(2),mpicoords(3)
+print *,'me=',my_pe," mpi coords: ",mpicoords(1),mpicoords(2),mpicoords(3)
 
 ! get processor number with coords = mpicoords
 call mpi_cart_coords(comm_3d,rank,3,mpicoords,ierr2)
-ASSERT("MPI init failure: rank<>myproc",rank==myproc)
+ASSERT("MPI init failure: rank<>my_pe",rank==myproc)
 #endif
 
-print *, "me= ",myproc," total procs= ",initial_live_procs
+print *, "me= ",my_pe," total procs= ",initial_live_procs
 
 end subroutine
