@@ -24,10 +24,15 @@ ext='.isostr';
 
 %name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
 
-name='/ccs/scratch/taylorm/dns/iso12_512'
-nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
+%name='/ccs/scratch/taylorm/dns/iso12_512'
+%nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
 %ext='.isostr001';
+%times=[1:.1:7.0];
 
+name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
+nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
+ext='.new.isostr';
+times=[1:.1:1.7];
 
 
 ndir_use=0;
@@ -37,7 +42,7 @@ ndir_use=0;
 time_and_angle_ave=1;
 
 k=0;
-times=[1:.1:7.0];
+
 
 
 

@@ -22,7 +22,7 @@ cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,3) 
 
 
 
-msize=8;   % marker size
+msize=4;   % marker size
 xmax=1000;  % maximum x axis
 
 [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
@@ -112,8 +112,9 @@ for i=1:ndir
   y=-D_lll(:,i)./(x*epsilon);
 
   if (plot_points==1 & mod(i,3)==1) 
-     semilogx(x_plot,y,['.k-'],'MarkerSize',msize);   hold on;
+%     semilogx(x_plot,y,['.k-'],'MarkerSize',msize);   hold on;
   end     
+  semilogx(x_plot,y,['k.'],'MarkerSize',msize);   hold on;
   yy = spline(x,y,xx);
   
   yyave=yyave+w(i)*yy;
@@ -125,7 +126,7 @@ for i=1:ndir
 end
 yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
 max(yyave)
-%plot(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+plot(xx_plot,yyave,'k','LineWidth',2.0); hold on;
 y45=yyave;
 
 %title('D_{lll} / r\epsilon   (4/5 law) ');

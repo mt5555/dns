@@ -7,17 +7,16 @@ s=size(spec);
 s=s(2);
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
-scalep = 0;
-%scalep = 5/3;
-
+%scalep = 0;
+scalep = 5/3;
 
 x=10:500;
 scale=x.^scalep;
 
 
 
-%y = CK* scale .* x.^(-5/3);
-y = CK* scale .* x.^(-3);
+y = CK* scale .* x.^(-5/3);
+%y = CK* scale .* x.^(-3);
 %semilogx(x,y,'k'); hold on
 loglog(x,y,'k'); hold on
 

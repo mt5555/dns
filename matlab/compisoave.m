@@ -31,6 +31,9 @@ cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,3) 
 
 msize=4;   % marker size
 xmax=1000;  % maximum x axis
+xmax2=2000;  % x axis for iso check plots
+iso_check_dir=2;  % direction to use for single direction iso_check
+
 
 [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
@@ -148,6 +151,9 @@ xlabel('r/\eta');
 x=1:xmax; plot(x,(4/5)*x./x,'k');
 if (plot_posneg)
   grid
+  %plot(xx_plot,nave./pave)
+  %plot(xx_plot,pave./yyave)
+  %plot(xx_plot,nave./yyave)
   plot(xx_plot,pave)
   plot(xx_plot,nave)
 end
@@ -155,6 +161,7 @@ end
 
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 ax=axis;  axis([1,xmax,0,1]);
+ax=axis;  axis([1,xmax,0,2.5]);
 hold off;
 if (plot_points==1) 
 print('-dpsc',[bname,'_45.ps']);
@@ -345,6 +352,12 @@ for i=1:ndir
   y  = D_ll(:,i); 
   y1 = D1_tt(:,i).*x.^(-2/3);
   y2 = D2_tt(:,i).*x.^(-2/3);
+
+  if (i==iso_check_dir)
+    ytt = (y1+y2)/2;  % save the coordinate direction
+    ytt = spline(x,ytt,xx);
+    yll = spline(x,y,xx); 
+  end
   
   semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on
   semilogx(x_plot,y2,['.',cdir(i)],'MarkerSize',msize);
@@ -360,25 +373,42 @@ semilogx(xx_plot,.5*(yyave1+yyave2),'r');
 %
 %  compute and plot: (D_ll  + .5 r d/dr ( D_ll) )^(-2/3)
 %
-f = yyave;
-l=length(f);
+l=length(yyave);
+
+f = yyave;  
 df = ( f(3:l)-f(1:l-2)) ./ (xx(3:l)-xx(1:l-2));
-f2 = f(2:l-1) + .5*xx(2:l-1).*df;
-f2 = f2 .* xx(2:l-1).^(-2/3);
-semilogx(xx_plot(2:l-1),f2,'g');
+f2 = f(2:l-1) + .5*xx(2:l-1).*df; 
+dyyave = f2 .* xx(2:l-1).^(-2/3);
+
+f = yll;
+df = ( f(3:l)-f(1:l-2)) ./ (xx(3:l)-xx(1:l-2));
+f2 = f(2:l-1) + .5*xx(2:l-1).*df; 
+dyll = f2 .* xx(2:l-1).^(-2/3);
+
+
+
+
+
+
+semilogx(xx_plot(2:l-1),dyyave,'g');
 title('D_{tt} (points)       angle ave(red)       D_{ll} + .5 r (D_{ll})'' (green)');
 ylabel(pname);
 xlabel('r/\eta');
-ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
 hold off;
 print('-dpsc',[bname,'_isocheck2.ps']);
 print -djpeg isocheck2.jpg
 
 
 figure(3); subplot(1,1,1);
-semilogx(xx_plot,.5*(yyave1+yyave2),'r'); hold on;
-semilogx(xx_plot(2:l-1),f2,'g'); hold on ;
-
+semilogx(xx_plot,.5*(yyave1+yyave2),'k'); hold on;
+semilogx(xx_plot(2:l-1),dyyave,'k'); hold on ;
+semilogx(xx_plot,ytt,'k:'); hold on ;
+semilogx(xx_plot(2:l-1),dyll,'k:'); hold on ;
+ylabel('Second order relation','FontSize',16);
+xlabel('r/\eta','FontSize',16);
+ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
+hold off;
 
 
 
@@ -398,6 +428,12 @@ for i=1:ndir
   y1 = -D1_ltt(:,i)./x;
   y2 = -D2_ltt(:,i)./x;
   
+  if (i==iso_check_dir)
+    yltt = (y1+y2)/2;  % save the coordinate direction
+    yltt = spline(x,yltt,xx);
+    ylll = spline(x,y,xx); 
+  end
+
   semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on
   semilogx(x_plot,y2,['.',cdir(i)],'MarkerSize',msize);
   
@@ -412,29 +448,40 @@ semilogx(xx_plot,.5*(yyave1+yyave2),'r');
 %
 %  compute and plot: [ 1/6 d/dr r D_+lll ] /r
 %
+l=length(yyave);
+
 f = yyave.*xx/6;
-l=length(f);
 df = ( f(3:l)-f(1:l-2)) ./ (xx(3:l)-xx(1:l-2));
-df = df./xx(2:l-1);
-semilogx(xx_plot(2:l-1),df,'g');
+dyyave = df./xx(2:l-1);
+
+f = ylll.*xx/6;
+df = ( f(3:l)-f(1:l-2)) ./ (xx(3:l)-xx(1:l-2));
+dylll = df./xx(2:l-1);
+
+
+semilogx(xx_plot(2:l-1),dyyave,'g');
 title('D_{ltt} (points)       angle ave(red)         (r D_{lll})''/6 (green)');
 ylabel(pname);
 xlabel('r/\eta');
-ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
 hold off;
 print('-dpsc',[bname,'_isocheck3.ps']);
 print -djpeg isocheck3.jpg
 
 
-figure(3); subplot(1,1,1);
-semilogx(xx_plot,.5*(yyave1+yyave2),'r');
-semilogx(xx_plot(2:l-1),df,'g'); 
-title('D_{tt} vs  D_{ll} + .5 r (D_{ll})   and   D_{ltt} vs. (r D_{lll})''/6 (green)');
-ylabel(pname);
-xlabel('r/\eta');
-ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+figure(4); subplot(1,1,1); clf;
+semilogx(xx_plot,.5*(yyave1+yyave2),'k'); 
+ hold on;
+semilogx(xx_plot(2:l-1),dyyave,'k'); 
+
+semilogx(xx_plot,yltt,'k:');
+semilogx(xx_plot(2:l-1),dylll,'k:'); 
+
+%title('D_{tt} vs  D_{ll} + .5 r (D_{ll})   and   D_{ltt} vs. (r D_{lll})''/6 (green)');
+ylabel('Third order relation','FontSize',16);
+xlabel('r/\eta','FontSize',16);
+ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
 hold off;
-print -djpeg isocheck.jpg
 
 end
 

@@ -10,17 +10,17 @@ decay_scale=0;
 name='cj20000.0000';
 namedir='/ccs/taylorm/dns/src/';
 
-name='temp0000.0000';
-namedir='/ccs/taylorm/dns/src/';
+%name='temp0000.0000';
+%namedir='/ccs/taylorm/dns/src/';
 
 
-%name='decay2048';
-%namedir='/ccs/scratch/taylorm/decay/';
-%CK_orig=1.613; decay_scale=1;
+name='decay2048';
+namedir='/ccs/scratch/taylorm/decay/';
+CK_orig=1.613; decay_scale=1;
 
 
 % plot all the spectrum:
-movie=1;
+movie=0;
 
 
 % save spectrum at these times:
@@ -66,8 +66,8 @@ while (time>=.0 & time<=9999.3)
     
     % dimensional scaling:  (undo the above)
     % and use CK from first spectrum
-    % spec_r=spec_r*eps^(2/3);
-    % CK=CK_orig*eps_orig^(2/3);
+    spec_r=spec_r*eps^(2/3);
+    CK=CK_orig*eps_orig^(2/3);
   end
 
   knum2=knum;
@@ -229,10 +229,10 @@ while (time>=.0 & time<=9999.3)
       print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
     end
     disp('pause')
-    pause
+    %pause
   else     
     disp('pause')
-    pause
+    %pause
   end
   end
   
@@ -246,7 +246,7 @@ end
 fclose(fid);
 if (fidt>0) fclose(fidt); end;
 
-return
+%return
 
 
 if (length(spec_r_save>1) )
@@ -254,7 +254,7 @@ figure(1); clf;
 loglog53(n_r,spec_r_save,'KE spectrum',CK);
 print -djpeg -r72 spec.jpg
 figure(2); clf;
-loglog53(n_r,spec_r_save_fac3,'KE / atan-pileup-factor',CK);
+loglog53(n_r,spec_r_save_fac3,'KE / bottleneck-factor',CK);
 print -djpeg -r72 speck3.jpg
 end
 
