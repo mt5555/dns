@@ -15,11 +15,11 @@ namedir = '/home2/skurien/';
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-%name = 'dns/src/hel256_hpi2_0000.0000';
-%mu = 2e-4;
-
-name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
+name = 'dns/src/hel256_hpi2/hel256_hpi2_0000.0000';
 mu = 5e-4;
+
+%name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
+%mu = 5e-4;
 
 % plot all the spectrum:
 movie=1;
@@ -48,34 +48,36 @@ hspec_p = hspec_p*scaling;
 k = [1:n_r];
 %if (time == 5.0) then
 figure(20);
-%loglog(abs(hspec_n),'r'); hold on;
-%hold on;
-%loglog(hspec_p,'b'); hold on;
+loglog(abs(hspec_n),'r'); hold on;
+loglog(hspec_p,'b'); hold on;
 loglog(abs(hspec_p+hspec_n),'k'); hold on;
-loglog(abs(hspec_p-hspec_n),'k.-'); hold on;
+%loglog(abs(hspec_p-hspec_n),'k.-'); hold on;
 %axis([1 100 1e-2 10]);
 grid
+legend('|H_-(k)|','H_+(k)','H(k)=H_+(k) + H_-(k)')
 %hold off
 
 
 figure(21);
-%loglog(abs(hspec_n).*k'.^(4/3),'r'); hold on; 
-%hold on;
-%loglog(hspec_p.*k'.^(4/3),'b');
-loglog(abs(hspec_p-hspec_n).*k'.^(4/3),'k.-');hold on;
-loglog(abs(hspec_p+hspec_n).*k'.^(4/3),'k');hold on;
+loglog(abs(hspec_n).*k'.^(4/3),'r'); hold on; 
+loglog(hspec_p.*k'.^(4/3),'b');
+loglog(abs(hspec_p-hspec_n).*k'.^(4/3),'k-');hold on;
+%loglog(abs(hspec_p+hspec_n).*k'.^(4/3),'k.-');hold on;
 %axis([1 100 1e-2 10]);hold on;
 grid on;
+
+legend('|H_-(k)| k^{4/3}','H_+(k) k^{4/3}','H(k) k^{4/3}')
 %hold off
 
 figure(22); 
-%loglog(abs(hspec_n).*k'.^(5/3),'r');hold on;
-%hold on;
-%loglog(hspec_p.*k'.^(5/3),'b');hold on;
-loglog(abs(hspec_p-hspec_n).*k'.^(5/3),'k.-');hold on;
-loglog(abs(hspec_p+hspec_n).*k'.^(5/3),'k'); hold on;
+loglog(abs(hspec_n).*k'.^(5/3),'r');hold on;
+loglog(hspec_p.*k'.^(5/3),'b');hold on;
+loglog(abs(hspec_p-hspec_n).*k'.^(5/3),'k-');hold on;
+%loglog(abs(hspec_p+hspec_n).*k'.^(5/3),'k.-'); hold on;
 %axis([1 100 1e-2 10]);
 grid on;
+
+legend('|H_-(k)| k^{5/3}','H_+(k) k^{5/3}','H(k) k^{5/3}')
 %hold off
 
 

@@ -148,10 +148,14 @@ ind = inflect(xx_plot,yyave_l,1);hold on;
 sprintf('p=%d;',p)
 sprintf('Exps = %f; ',mean(der(ind)))
      sprintf('Error on exps = %f',std(der(ind)))
-%     figure(10)
-%     k41 = p/10/3;
-%     plot(p/10,mean(der(ind)),'o',p/10,k41,'x');hold on;
-%plot(k41,mean(der(ind)),'ro'); hold on;
+     figure(10)
+     k41 = p/10/3;
+     plot(p/10,mean(der(ind)),'o',p/10,k41,'x');hold on;
+plot(k41,mean(der(ind)),'ro'); hold on;
+
+figure(12)
+     plot(p/10,(mean(der(ind))-k41)/k41,'ko');hold on;
+
 %ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 
 %hold off;

@@ -43,15 +43,19 @@ movie_plot=1;
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
+name = 'Rot10002.0000';
+namedir = '/home2/skurien/rotation/Rot1/';
+
+
 spec_r_save=[];
 spec_r_save_fac3=[];
 
-fid=fopen([namedir,name,'.spec'],'r','l');
+fid=endianopen([namedir,name,'.spec'],'r');
 fidt=endianopen([namedir,name,'.spect'],'r');
 fidp=endianopen([namedir,name,'.pspec'],'r');  
 
 
-fidt=-1;
+%fidt=-1;
 %fidp=-1;
 
 time=fread(fid,1,'float64');

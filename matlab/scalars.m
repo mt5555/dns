@@ -56,9 +56,11 @@ fid2=-1;
 %fid=endianopen('/home2/skurien/rotation/Test/Test0000.0000.scalars','r');
 %nx = 128;
 
-fid=endianopen('/home2/skurien/rotation/Test2/Test0002.scalars','r');
-nx = 128;
+%fid=endianopen('/home2/skurien/rotation/Test2/Test0002.scalars','r');
+%nx = 128;
 
+fid=endianopen('/home2/skurien/dns/src/sk128_alpha40/sk128_v5e-4_alpha400000.0000.scalars','r');
+nx = 128;
 
 
 nscalars=0;
