@@ -16,11 +16,11 @@ fid2=-1;
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
 
-%fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
-%nx=256;
-
-fid=endianopen('/scratch2/taylorm/sk256/sk2560000.0000.scalars','r'); 
+fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
 nx=256;
+
+%fid=endianopen('/scratch2/taylorm/sk256/sk2560000.0000.scalars','r'); 
+%nx=256;
 
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
@@ -117,14 +117,18 @@ Ea_diss_tot=(Ea(2:l)-Ea(1:l-1))./(time(2:l)-time(1:l-1));
 ke_v=ke + alpha^4*ints(1,:)/2 + 2*alpha^2*ints(2,:)/2;
 
 %Euse=ke; 
-%Euse=Ea;
-Euse=ke_v;
+Euse=Ea;
+%Euse=ke_v;
 
 epsilon=-(  ke_diss_d-mu*alpha^2*ints(1,:) );
 lambda=sqrt( mu*(2*Euse/3) / (epsilon/15)  );
 R_l = lambda.*sqrt(2*Euse/3)/mu;
 R_large = 1 * sqrt(2*Euse) / mu;
 eta = (mu^3 ./ abs(epsilon)).^(.25);
+
+epsilon_ke=-ke_diss_d;
+lambda_ke=sqrt( mu*(2*ke/3) / (epsilon_ke/15)  );
+R_l_ke=lambda_ke.*sqrt(2*ke/3)/mu;
 
 
 disp(sprintf('max vor_z = %e',max(vor_z)));
@@ -200,6 +204,11 @@ R_l = R_l(length(R_l)/2:length(R_l));
 R_l = sum(R_l)/length(R_l);
 disp(sprintf('R_l (average over last half of data) = %f ',R_l));
 
+% averge R_l_ke to a number
+R_l_ke = R_l_ke(length(R_l_ke)/2:length(R_l_ke));
+R_l_ke = sum(R_l_ke)/length(R_l_ke);
+disp(sprintf('R_l_ke (average over last half of data) = %f ',R_l_ke));
+
 disp(sprintf('1/250 in units of eta:  %f',(1/250)/eta));
 disp(sprintf('1/500 in units of eta:  %f',(1/500)/eta));
 disp(sprintf('1/512 in units of eta:            %f   %f', (1/512)/eta,eta*2*pi*512*sqrt(2)/3 )) ;
@@ -213,7 +222,11 @@ disp(sprintf('eddy turnover time (averaged over last haf of data) = %f ',tturn))
 
 epsilon = epsilon(length(epsilon)/2:length(epsilon));
 epsilon = sum(epsilon)/length(epsilon);
-disp(sprintf('epsilon (averaged over last haf of data) = %f ',epsilon));
+disp(sprintf('epsilon_E (averaged over last haf of data) = %f ',epsilon));
+
+epsilon_ke = epsilon_ke(length(epsilon_ke)/2:length(epsilon_ke));
+epsilon_ke = sum(epsilon_ke)/length(epsilon_ke);
+disp(sprintf('epsilon_ke (averaged over last haf of data) = %f ',epsilon_ke));
 
 
 
