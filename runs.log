@@ -1,9 +1,61 @@
 **********************************************************************************
+2/21/02
+NS-alpha runs.
+iso12 forcing
+256^3
+mu=2.75e-4
+
+
+iso12_256  (shankara) data in  /ccs/scratch/taylorm/dns/iso12
+        alpha=0
+        E        1.95
+        delx/eta:  2.6
+        epsilon_ke:  4.11
+        R_l = 147
+        
+
+
+DATA STORED: QSC: /scratch2/taylorm/sk256?
+ not backed up.  runs take 4hours on 128cpus.  
+
+sk256: alpha=2x
+        E        1.69
+        KE       1.91
+        delx/eta:  2.6
+        epsilon_E:  3.89
+        epsilon_ke:  1.90   (non-adiabatic part of d(ke)/dt)
+        R_l_E = 149         (using E and epsilon_E)
+        R_l_ke  = 191       (using ke and epsilon_ke)
+
+sk256A: alpha=5x
+        E        2.37
+        KE       1.59
+        delx/eta:  2.8
+        epsilon_E:  5.4
+        epsilon_ke:  1.18   (non-adiabatic part of d(ke)/dt)
+        R_l_E = 163         (using E and epsilon_E)
+        R_l_ke  = 230       (using ke and epsilon_ke)
+
+
+
+sk256B: alpha=10x
+        E        3.83
+        KE       1.53
+        delx/eta:  3.2
+        epsilon_E:  9.21
+        epsilon_ke:  .88    (non-adiabatic part of d(ke)/dt)
+        R_l_E = 216         (using E and epsilon_E)
+        R_l_ke  = 275       (using ke and epsilon_ke)
+
+
+**********************************************************************************
 12/16/02
 
 sc1024A started on QSC   RUNNING
 1024^3 iso12 forcing
 mu=.35e-4
+ran to t=2.0 
+
 
 
 
