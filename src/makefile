@@ -42,8 +42,9 @@ ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPI = -DUSE_MPI
    MPILIB = -lmpi 
-   LDFLAGS =  -l scs 
-   FFLAGS = -64 -O3 -macro_expand  -DIRIX64  -DUSE_SGIFFT
+   LDFLAGS =  -l scs -Lstk -lstk
+   FFLAGS = -64 -O3 -macro_expand  -DIRIX64  -DUSE_SGIFFT $(MPI)
+   CC = cc -64
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90

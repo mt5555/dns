@@ -3,10 +3,9 @@
 #BSUB -q small-d
 #BSUB -J dns
 #BSUB -W 0:15
-#BSUB -n 32 -R "span[ptile=32]"
+#BSUB -n 16 -R "span[ptile=16]"
 
 set NCPU=1 
-rm -f bench.o bench.e
 
 set refin=benchmark1.inp
 
