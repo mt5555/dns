@@ -421,11 +421,12 @@ call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_y,g_ny/2,message)
 !call plotASCII(spec_z,g_nz/2,message)
 
-
-call compute_div(Q,q1,work1,work2,divx,divi)
-write(message,'(3(a,e12.5))') 'max(div)=',divx
-call print_message(message)	
-
+! for incompressible equations, print divergence as diagnostic:
+if (equations==0) then
+   call compute_div(Q,q1,work1,work2,divx,divi)
+   write(message,'(3(a,e12.5))') 'max(div)=',divx
+   call print_message(message)	
+endif
 
 
 if (my_pe==io_pe) then
