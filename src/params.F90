@@ -385,6 +385,12 @@ real*8 :: ints(nints),maxs(nints)
 ! E_alpha = ints(6) + .5*alpha**2 ints(2)
 ! E_alpha dissapation: ints(10) - mu*alpha**2 * ints(1)
 !
+!
+!
+! passive scalar statistics
+real*8,allocatable :: intp(:),maxp(:)
+!
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 integer,parameter :: ntimers=17
