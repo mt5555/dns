@@ -76,11 +76,11 @@ compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
 compute_fractional_power=.false.   
-compute_hspec=.false.
+compute_hspec=.true.
 read_uvw=.false.
 
 tstart=8.0
-tstop=9.8
+tstop=8.2
 tinc=0.2
 icount=0
 
