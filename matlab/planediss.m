@@ -5,7 +5,7 @@
 %
 figure(1);clf;
 
-name = '/scratch2/taylorm/tmix256C/tmix256C-gradxy2'
+name = '/scratch2/taylorm/tmix256C/tmix256C'
 time=1.05;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
@@ -18,6 +18,7 @@ k=0;
 for sch=schmidt_list
 for type=type_list
 
+  k=k+1;
   ext=sprintf('%3i',type+100);
   ext=ext(2:length(ext));
   ext2=sprintf('%8.3f',sch+1000);
@@ -33,7 +34,7 @@ for type=type_list
   % try to read the pscalars-turb file 
   fname=[name,times,'.pscalars-turb'];
   disp(fname)
-  eta_c=0;
+  lambda_c=0;
   fid=endianopen(fname,'r');
   if (fid>=0) 
     [ns_e,count] = fread(fid,1,'float64');
@@ -78,14 +79,13 @@ for type=type_list
   
   
   
-   fname=[name,times,ext]
+   fname=[name,'-gradxy2',times,ext]
    [x,y,z,s,time]=getfield(fname);
    smax=max(max(s));
    [mx,slice1]=max(smax);
    smax=min(min(s));
    [mn,slice2]=min(smax);
 
-   k=k+1;
    splot=squeeze(s(:,:,slice1));
 
    figure(2)
@@ -94,11 +94,11 @@ for type=type_list
    axis equal
    axis([0,max(x),0,max(y)]);
    shading interp
-   len=5*eta_c;
+   len=min(1,20*eta_c);
    xt=[1-len,1-len,1];
    yt=[0,len,len];
    line(xt,yt);
-   text(1.05,yt(3)-.05,'5 \eta_{\theta}');
+   text(1.05,yt(3)-.05,'20 \eta_c');
 
    
    
@@ -108,11 +108,11 @@ for type=type_list
    axis equal
    axis([0,max(x),0,max(y)]);
    shading interp
-   len=5*eta_c;
+   len=min(1,20*eta_c);
    xt=[1-len,1-len,1];
    yt=[0,len,len];
    line(xt,yt);
-   text(1.05,yt(3)-.05,'5 \eta_{\theta}');
+   text(1.05,yt(3)-.05,'20 \eta_c');
 
    stitle=sprintf('time=%.2f  min=%f  max=%f',time,mn,mx)
    if (k==1) title(stitle); end;
