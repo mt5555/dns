@@ -19,6 +19,25 @@ estimage: 6 arrays * 3 dim * N^2 * 8 bytes = 144 N^2
 60000^2:             482GB
 
 
+8196^2 benchmark QSC:  time per timestep (run 4 timesteps)
+ 8    3.78
+16    2.27
+32    1.17
+64    0.644  
+128   .298
+256   .187
+
+12288^2 
+ 12
+ 16
+ 24
+ 32
+ 64
+128
+256
+
+
+
 **********************************************************************************
 3/4/02
 
@@ -26,6 +45,8 @@ Schmidt number runs.
 
 S = .01, .05, .1, .5, 1.0  
 
+tmix256A  initial condition run
+          run to t=1.5, look for a good time to re-normalize
 
 
 
