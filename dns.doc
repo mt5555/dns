@@ -7,9 +7,9 @@ ns_decomp3.F90          2D/3D NS
 shallow.F90             2D shallow water equations  
 ns_ghost.F90            2D/3D NS 4th order 
 ns_psivor.F90           2D NS streamfunction-vorticity form
+cns.F90                 2D/3D compressible NS  using finite differences
 
-
-1. ns_grid.F90.  
+1. ns_grid.F90.  To build:   'make dnsgrid'
 
 This is the main development platform used for debugging.  It is
 signifcanlty slower then some of the other models.  Fully gridspace
@@ -17,12 +17,12 @@ based.  All work done in the 3d parallel decoposition.
 All operaters are computed via the der() subroutine.  It
 handles spectral and 4th order via transpose operators.
 
-1.1 ns_ibm.F90.  
+1.1 ns_ibm.F90.  To build:   'make dnsibm'
 
 A version of ns_grid.F90 which contains the Immersed Boundary Method
 
 
-2. ns.F90
+2. ns.F90   To build:   'make dns'
 
 This is the optimized spectral code.  Most work is done in
 the transform_to_z space with operations are done directly
@@ -31,18 +31,18 @@ grid space using the regular 3d parallel decomposition.
 
 
 
-3. ns_decomp3.F90
+3. ns_decomp3.F90    To build:   'make dnsslow'
 
 Spectral code were all work is done in the regular 3d parallel
 decomposition space.  Not as fast as ns.F90 and no longer maintained.
 
-4. ns_impulse.F90
+4. ns_impulse.F90   To build:   'make dnsi'
 
 A version of ns_grid.F90 that supports the impulse formulation
 of the equations.  No longer maintined, but may be revived for
 the NS-alpha model in U-V form.  
 
-5. shallow.F90  
+5. shallow.F90  To build:   'make dnss'
 
 A 2D shallow water version of the model.  Supports alpha>=0 with the
 div(tau) form of the equations.  Fourier and doubly periodic only (but
@@ -50,9 +50,13 @@ just because we use hyper viscosity.  Could be easily converted to
 grid point model) See shallow.doc for some more documentation.
 
 
-6. ns_ghost.F90
+6. ns_ghost.F90     To build:   'make dnsghost'
 
-7. ns_psivor.F90
+7. ns_psivor.F90.   To build:   'make dnsvor'
+
+8. cns.F90          To build:   'make cdns'
+   compressible NS.  
+
 
 
 ****************************************************************************

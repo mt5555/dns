@@ -3,9 +3,9 @@
 
 subcube averaging for Bill:
 
-1. pull .4026.u  .v and .w runs off of HPSS
-2. convert to brick of doubles   (add header_type arg to output_uvw)
-3. run extract_average.c on data        
+1. pull .4026.u  .v and .w runs off of HPSS  (done)
+2. convert to brick of doubles   (add header_type arg to output_uvw)  (done)
+3. run extract_mean.c on data          IN
 4. convert back to my format
 5. read in, project out, the output u,v,w and p
 

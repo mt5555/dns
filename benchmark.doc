@@ -57,7 +57,6 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
            Umax = max( |u| + |v| + |w| ) 
            CFL=1.5 = Umax delt/delx 
 
-            
 
 
 
