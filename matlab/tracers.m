@@ -74,7 +74,7 @@ for i=range
       axis equal
       axis(axis_size);
       title(sprintf('time = %6.2f ',i)); 
-%          'pause' ;     pause
+          'pause' ;     pause
       if (mkpr)
          pname=[name,'.tracer.ps'];
          print('-depsc',pname);
@@ -92,18 +92,19 @@ for i=range
   end
 end
 
-figure(2)
-clf;
+if (plot_noni)
+  figure(2);
+  clf;
   hold on;   
   for k=1:8
     plot(vxline_x(k,:),vxline_y(k,:),ccol(k));
     plot(vxline_x(k,1),vxline_y(k,1),'k.');
   end 
-
+  
   hold off;
   axis image
   title(sprintf('time = %6.2f ',time)); 
-
+end
 return
 
 

@@ -317,9 +317,9 @@ if (init_cond_subtype ==100) then
    biotsavart_cutoff=5e-3
    biotsavart_apply=50
    delta=.1
-   biotsavart_ubar=.300
+   biotsavart_ubar=.100
    yscale=2.0
-   xlocation=1.25
+   xlocation=.75
    initial_vor = 1
 endif
 

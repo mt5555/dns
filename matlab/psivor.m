@@ -7,7 +7,7 @@
 
 %ts=input('time=? ');
 
-range=0:1:1;
+range=1:1:5;
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
 %range=[125:10:200];
@@ -17,8 +17,8 @@ range=0:1:1;
 %name='/scratch2/taylorm/vx12288b/vx12288b';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
-name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a';
-%name='/home/scratch/kras/vx1280a/vx1280a';
+%name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a';
+name='/home/scratch/kras/vx1280a/vx1280a';
 
 
 usefig=1;
