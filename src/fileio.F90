@@ -16,7 +16,7 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 divx,divi,tmx1,tmx2,del,delke_tot,lambda
+real*8 tmx1,tmx2,del,delke_tot,lambda
 logical,external :: check_time
 logical :: doit
 
@@ -85,6 +85,7 @@ endif
 ! accumulate scalers into an array, output during 
 ! diagnositc output
 !
+if (diag_dt>0) then
 if (nsize==0) then
    nsize=100
    ! scalar arrays need to be allocated
@@ -113,13 +114,7 @@ if (nscalars > nsize) then
 endif
 ints_save(1:nints,nscalars)=ints(1:nints)
 maxs_save(1:nints,nscalars)=maxs(1:nints)
-
-#if 0
-if (nscalars==nsize) then
-   call output_ints(ints_save,maxs_save,nints,nscalars)
-   nscalars=0
 endif
-#endif
 
 
 
@@ -162,11 +157,8 @@ if (doit) then
    write(message,'(a,3f22.15)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
    call print_message(message)	
 
-   call compute_div(Q,q1,work1,work2,divx,divi)
-   write(message,'(3(a,e12.5))') 'max(div)=',divx,'   max(vor)',maxs(5)
-   call print_message(message)	
-
-   write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5)
+   write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5),&
+           '   max(vor)',maxs(5)
    call print_message(message)	
 
    ! 
@@ -303,6 +295,9 @@ end subroutine
 
 
 
+
+
+
 subroutine output_diags(time,Q,q1,q2,q3,work1,work2,ints_save,maxs_save,nv,nscalars)
 use params
 use structf
@@ -330,7 +325,7 @@ real*8 spec_z(0:g_nz/2)
 real*8 spec_x2(0:g_nx/2)
 real*8 spec_y2(0:g_ny/2)
 real*8 spec_z2(0:g_nz/2)
-real*8 x
+real*8 :: x,divx,divi
 real*8,allocatable  ::  spectrum(:),spectrum1(:)
 character(len=80) :: message
 character :: access
@@ -364,6 +359,10 @@ call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_x,g_nx/2,message)
 !call plotASCII(spec_y,g_ny/2,message)
 !call plotASCII(spec_z,g_nz/2,message)
+
+call compute_div(Q,q1,work1,work2,divx,divi)
+write(message,'(3(a,e12.5))') 'max(div)=',divx
+call print_message(message)	
 
 
 
