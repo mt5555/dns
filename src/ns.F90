@@ -720,7 +720,11 @@ do m1=1,3
       enddo
       work(i,j,k)=0
       do L=1,3
+#ifdef LERAY_MODEL
+         work(i,j,k)=work(i,j,k) + D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L)
+#else
          work(i,j,k)=work(i,j,k) + D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L) - D(L,m1)*D(L,m2)
+#endif
       enddo
    enddo
    enddo

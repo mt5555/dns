@@ -146,6 +146,7 @@ MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_LERAY      = ns_leray.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SHALLOW    = shallow.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)
 
 # n_var>=2 models  (u,v) and (w,psi)
@@ -168,6 +169,8 @@ dns:  $(MODEL_SPEC)
 
 dnsa:  $(MODEL_ALPHA) 
 	$(LINK) -o dnsa $(MODEL_ALPHA) $(LDFLAGS) $(MPILIB)
+dnsl:  $(MODEL_LERAY) 
+	$(LINK) -o dnsl $(MODEL_LERAY) $(LDFLAGS) $(MPILIB)
 
 dnsibm:  $(MODEL_IBMGRID) 
 	$(LINK) -o dnsibm $(MODEL_IBMGRID) $(LDFLAGS) $(MPILIB)
@@ -212,6 +215,8 @@ dep:
 
 ns_alpha.o: ns.F90 ns.o
 	$(COMPILE) -DALPHA_MODEL -o ns_alpha.o ns.F90
+ns_leray.o: ns.F90 ns.o
+	$(COMPILE) -DALPHA_MODEL -DLERAY_MODEL -o ns_leray.o ns.F90
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"

@@ -424,7 +424,12 @@ enddo
 
 if (n_var>=3) then
    call divfree_gridspace(PSI,Q(1,1,1,n_var),work1,work2)
-   Q(:,:,:,n_var)= H0 + Q(:,:,:,n_var)/grav
+   do j=ny1,ny2
+   do i=nx1,nx2
+      Q(i,j,k,n_var)= H0 + Q(i,j,k,n_var)/grav
+      if (Q(i,j,k,n_var)<.05*H0)  Q(i,j,k,n_var)=.05*H0
+   enddo
+   enddo
 else
    call abort("init_data_sht() with shallow water equations requires n_var==3")
 endif
