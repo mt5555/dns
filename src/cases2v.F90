@@ -315,9 +315,9 @@ if (init_cond_subtype ==100) then
    ! y:  0.. 2               4*32
    ! [5N,4N] = [640,512]  
    biotsavart_cutoff=5e-3
-   biotsavart_apply=10
+   biotsavart_apply=50
    delta=.1
-   biotsavart_ubar=.000
+   biotsavart_ubar=.300
    yscale=2.0
    xlocation=1.25
    initial_vor = 1

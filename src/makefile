@@ -26,6 +26,11 @@ ifeq ($(UNAME),Linux)
       #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
       #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
    endif
+   ifeq ($(HOST),l1)
+      VENDOR=PGI
+      MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I$(HOME)/lampi/l1/include
+      MPILIB =  -L$(HOME)/lampi/l1/lib -lmpi
+   endif
    ifeq ($(HOST),darkstar)
       #MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I$(HOME)/lampi/include
       #MPILIB =  -Xlinker -rpath $(HOME)/lampi/lib -L$(HOME)/lampi/lib -lmpi
@@ -62,8 +67,8 @@ ifeq ($(UNAME),Linux)
 
 
    ifeq ($(VENDOR),LAHEY)
-   F90 = /usr/local/lf9562/bin/lf95
-   #F90 = lf95
+   #F90 = /usr/local/lf9562/bin/lf95
+   F90 = lf95
    FFLAGS = -g  -DLINUX $(MPI) -DUSE_FFT99
    #FFLAGS =  -tpp -O -DLINUX $(MPI) -DUSE_FFT99
    LDFLAGS = --staticlink  #-Lstk -lstk
@@ -73,8 +78,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),PGI)
    F90 = pgf90
    CC=pgcc
-   FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   #FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif 
 
