@@ -894,7 +894,7 @@ if (0==init_sforcing) then
             do k=1,g_nz
                km=z_kmcord(k)
                wn=sqrt(real(im*im+jm*jm+km*km))
-               if (wn<=numb) numk(wn)=numk(wn)+1
+               if (wn<=numb .and. wn>=1) numk(wn)=numk(wn)+1
             enddo
          enddo
       enddo
