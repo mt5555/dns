@@ -1,5 +1,3 @@
-1. 200x200 sh.inp does not converge with 1e-10 tolerence
-
 1. put in CJ functions
 
 2. ns_ghost:  4th order code using ghost cells:
@@ -7,9 +5,9 @@
         benchmark parallel decompostions
 
 3. psi-vor code:
-        debug psi b.c. code, w b.c. code, B-S code
-        put in interpolation B-S
-        put in fast direct solve  (reflect odd, FFT)
+        rename monika's initial condition
+        create test case.  (add some parallel versions)
+        put in interpolation for PSI boundary values
 
 1. hyper viscosity in NS code
 1. change NS-alpha so forcing always appears as just 'f'
