@@ -65,8 +65,8 @@ n3d=ny_2dz
 iproc=my_z
 do j=1,ny_2dz  ! loop over points in a single slab
    jj=ny1 + iproc*ny_2dz +j -1
-   ASSERT("transpose_to_z jj failure 1",jj<=ny2)
-   ASSERT("transpose_to_z jj failure 2",jj>=ny1)
+   ASSERT("transpose_to_z jj failure 1s",jj<=ny2)
+   ASSERT("transpose_to_z jj failure 2s",jj>=ny1)
    do k=nz1,nz2
       do i=nx1,nx2
          pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=p(i,jj,k)
@@ -78,7 +78,7 @@ enddo
 iproc2=0
 do  ! loop over blocks of messages of size nbcount
 
-   ncount=min(maxbuf, mpidims(3)+1-iproc2)
+   ncount=min(maxbuf, mpidims(3)-iproc2)
    nb=0
    do n=1,ncount 
       iproc=iproc2+n-1
