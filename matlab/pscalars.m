@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:2.55];
+times=[1.0100:.01:2.55];
 
 
 if (readdata)
@@ -271,8 +271,8 @@ figure(2); clf;
 
 
 subplot(4,2,1)
-plot(time_e,c2,time_e,mean(cx2,1))
-title('<c^2>, < {c,1}^2> ')
+plot(time_e,c2)
+title('<c^2>')
 
 
 subplot(4,2,2)

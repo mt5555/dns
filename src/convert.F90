@@ -12,6 +12,8 @@
 !  -cout vor
 !  -cout vorm
 !  -cout norm2
+!  -cout passive    convert passive scalar file
+!                   need to specify shmidt_in and type_in below
 !
 !
 ! To run, set the base name of the file and the times of interest
@@ -44,6 +46,7 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
+real*8 :: schmidt_in,type_in
 character(len=4) :: extension="uvwX"
 
 ! input file
@@ -94,9 +97,9 @@ icount=icount+1
    Q=0
 
    if (convert_opt==0) then  ! -cout uvw  
-!      call input_uvw(time,Q,vor,work1,work2,1)  ! default headers
-      print *,'attempting to read headerless input data...'
-      call input_uvw(time,Q,vor,work1,work2,0)  ! no headers
+      call input_uvw(time,Q,vor,work1,work2,1)  ! default headers
+!      print *,'attempting to read headerless input data...'
+!      call input_uvw(time,Q,vor,work1,work2,2)  ! no headers
       ! just reoutput the variables:
       if (w_spec) then
          do n=1,3
@@ -104,9 +107,9 @@ icount=icount+1
          enddo
       endif
       basename=runname(1:len_trim(runname)) // "-new."
-      call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
-      !basename=runname(1:len_trim(runname)) // "-raw."
-      !call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
+!      call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
+      basename=runname(1:len_trim(runname)) // "-raw."
+      call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
    endif
 
    if (convert_opt==1) then  ! -cout vor
@@ -211,6 +214,30 @@ icount=icount+1
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".normse"
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
    endif
+
+
+   if (convert_opt==6) then  ! -cout passive
+      schmidt_in=1.0
+      type_in=0.0
+      write(message,'(f10.4)') 10000.0000 + time
+      write(ext,'(f8.3)') 1000 + schmidt_in
+      write(ext2,'(i3)') 100+type_in
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
+      call print_message(fname)	
+      call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
+      call global_min(Q,mn)
+      call global_max(Q,mx)
+      write(message,'(a,i3,a,2f17.5)') 'passive scalar min/max: ',mn,mx
+      call print_message(message)	
+
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
+          // '-raw'
+      call print_message(fname)
+      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+   endif
+
 
    if (tstart>0) then
       time=time+tinc
