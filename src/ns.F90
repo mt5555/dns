@@ -1,5 +1,4 @@
 #include "macros.h"
-#undef ALPHA_MODEL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  subroutine to take one Runge-Kutta 4th order time step
@@ -624,11 +623,11 @@ do m1=1,3
 
    ! compute div(Tau)  
 #if 0
-   ! I think this one is correct 
    call der(work,work,dummy,p,DX_ONLY,m1)
    div(nx1:nx2,ny1:ny2,nz1:nz2,m2) = div(nx1:nx2,ny1:ny2,nz1:nz2,m2) +&
                            alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)
 #else
+   ! I think this one is correct 
    call der(work,work,dummy,p,DX_ONLY,m2)
    div(nx1:nx2,ny1:ny2,nz1:nz2,m1) = div(nx1:nx2,ny1:ny2,nz1:nz2,m1) +&
                            alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)

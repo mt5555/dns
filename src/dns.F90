@@ -129,7 +129,7 @@ real*8  :: time=0
 integer :: itime=0,ierr,n
 integer :: itime_final
 character(len=80) message
-real*8 :: time_old,delke_tot,delea_tot,dt
+real*8 :: time_old_old,time_old=0,delke_tot,delea_tot,dt
 real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
@@ -147,7 +147,8 @@ if (time_final<0) then
 endif
 
 do 
-   time_old=ints_timeU
+   time_old_old=time_old
+   time_old=time
    ea_old=ea_new
 
    call rk4(time,Q,Qhat,Qw2)
@@ -159,12 +160,14 @@ do
    call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
    ! KE total dissapation 
-   dt=ints_timeU-time_old
+   dt=time-time_old
+   if (dt>0) delke_tot=(ints(1)-ints(6))/dt
+
+   
    ea_new = ints(6) + .5*alpha_value**2 * ints(2) ! computed at time before rk4
-   if (dt>0) then
-      delke_tot=(ints(1)-ints(6))/dt
-      delea_tot=(ea_new-ea_old) /dt
-   endif
+   dt=time_old-time_old_old
+   if (dt>0) delea_tot=(ea_new-ea_old) /dt
+
 
 
 !  storage of some extra quantities:

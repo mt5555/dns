@@ -6,13 +6,13 @@ iso12        ! forcing:  none, iso12
 0            ! str_ny  0=disabled.  str_nx & str_y >= 2 
 0            ! str_nz  Set large.  requires 1 extra z-transpoze to compute.
 kediff       ! viscosity type  (value, smallest, kediff, Re)
-100.0        ! viscosity coefficient.  (300)
-0            ! alpha (for NS-alpha model)
+300.0        ! viscosity coefficient.  (300)
+.1            ! alpha (for NS-alpha model)
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-10.0         ! final time
+.10         ! final time
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
