@@ -57,7 +57,7 @@ ifeq ($(UNAME),IRIX64)
    MPI = -DUSE_MPI
    MPILIB = -lmpi 
    LDFLAGS =  -l scs #-Lstk -lstk
-   FFLAGS = -64 -Ofast -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
+   FFLAGS = -64 -Ofast -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT -DUSE_LSFTIME $(MPI)
    CC = cc -64
 endif
 ifeq ($(UNAME),OSF1)
@@ -79,7 +79,7 @@ ifeq ($(UNAME),OSF1)
 
    #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -recursive -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   FFLAGS = -fast  -DOSF1 $(MPI) -DUSE_CPQFFT  
+   FFLAGS = -fast  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)

@@ -376,22 +376,55 @@ character(len=80) :: message
 k_0=14  
 m=25
 U=1.0        ! velocity scale  U normalized below so that KE=.5 U**2 = .5
-Len=1.0/k_0  ! length scale, determined by mode k_0 above
+Len=1.0/(2*pi*k_0)  ! length scale, determined by mode k_0 above
 
 
 
 ! set 
 ! R = Rossby number
 ! F = Froude number
-if (init_cond_subtype==0) then
-   R=.25
-   F=.20
-else if (init_cond_subtype==1) then
+if (init_cond_subtype==0) then        ! run A
+   R=.01
+   F=.04
+else if (init_cond_subtype==1) then   ! run B
+   R=.05
+   F=.05
+else if (init_cond_subtype==2) then   ! run C
+   R=.05
+   F=.075
+else if (init_cond_subtype==3) then   ! run D
    R=.25
    F=.05
-else if (init_cond_subtype==2) then
-   R=1.0
-   F=.3
+else if (init_cond_subtype==4) then   ! run E
+   R=.25
+   F=.20
+else if (init_cond_subtype==5) then   ! run F
+   R=1.00
+   F=0.05
+else if (init_cond_subtype==6) then   ! run G
+   R=1.00
+   F=0.30
+else if (init_cond_subtype==7) then   ! run H
+   R=5.00
+   F=0.05
+else if (init_cond_subtype==8) then   ! run I
+   R=5.00
+   F=0.30
+else if (init_cond_subtype==9) then   ! run J
+   R=20.00
+   F=00.30
+else if (init_cond_subtype==10) then   ! run K
+   R=10.00
+   F=00.10
+else if (init_cond_subtype==11) then   ! run L
+   R=20.00
+   F=00.05
+else if (init_cond_subtype==12) then   ! run M
+   R=2.00
+   F=.1
+else if (init_cond_subtype==13) then   ! run N
+   R=.4
+   F=.1
 else
    call abort("init_data_swt(): init_cond_subtype set to unsupported value")
 endif

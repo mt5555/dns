@@ -26,9 +26,18 @@ real*8,save :: delea_tot=0,delke_tot=0
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
 
-
+integer,external :: lsf_time_remaining
+integer :: lsftime
 
 call wallclock(tmx1)
+
+if (lsf_time_remaining(lsftime)==0) then
+   if (lsftime <30) then
+      time_final=time
+   endif
+endif
+
+
 time_target=time_final
 
 !

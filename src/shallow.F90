@@ -194,51 +194,50 @@ real*8 work2(nx,ny)
 !local
 real*8 :: gradu(nx,ny,2)
 real*8 :: gradv(nx,ny,2)
+real*8 :: gradh(nx,ny,2)
 real*8 :: divtau(nx,ny,2)
 real*8 dummy,tmx1,tmx2
-real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss
+real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss,normdx
 integer n,i,j,k
 integer im,jm
 real*8 XFAC,hx,hy
 
 call wallclock(tmx1)
 
+a_diss=0
 ke=0
 pe=0
+normdx=0
 ke_diss=0
 vor=0
 
 
 
-! compute grad(h), store in RHS 
+! compute grad(h)
 do n=1,2
-   call der(Q(1,1,3),rhs(1,1,n),dummy,work,DX_ONLY,n)
+   call der(Q(1,1,1),gradu(1,1,n),dummy,work,DX_ONLY,n)
+   call der(Q(1,1,2),gradv(1,1,n),dummy,work,DX_ONLY,n)
+   call der(Q(1,1,3),gradh(1,1,n),dummy,work,DX_ONLY,n)
 enddo
 
 
 ! u dot grad(h)
 do j=ny1,ny2
 do i=nx1,nx2
-   rhs(i,j,3)= -(Q(i,j,1)*rhs(i,j,1) + Q(i,j,2)*rhs(i,j,2))
+   rhs(i,j,3)= -(Q(i,j,1)*gradh(i,j,1) + Q(i,j,2)*gradh(i,j,2))
 enddo
 enddo
 
 
-! g grad(h) and coriolis
+! coriolis
 do j=ny1,ny2
 do i=nx1,nx2
-   rhs(i,j,1)=-grav*rhs(i,j,1)  + fcor*Q(i,j,2)
-   rhs(i,j,2)=-grav*rhs(i,j,2)  - fcor*Q(i,j,1)
+   rhs(i,j,1)=   fcor*Q(i,j,2)
+   rhs(i,j,2)= - fcor*Q(i,j,1)
 enddo
 enddo
 
 
-
-! compute gradu, gradv
-do n=1,2
-   call der(Q(1,1,1),gradu(1,1,n),dummy,work,DX_ONLY,n)
-   call der(Q(1,1,2),gradv(1,1,n),dummy,work,DX_ONLY,n)
-enddo
 
 
 ! advection and viscous terms
@@ -247,6 +246,8 @@ do i=nx1,nx2
    pe=pe+.5*grav*Q(i,j,3)**2 - .5*grav*H0**2
    do n=1,2
       ke = ke + .5*Q(i,j,3)*Q(i,j,n)**2
+      
+      normdx=normdx+Q(i,j,3)*(gradu(i,j,n)**2 + gradv(i,j,n)**2)
 
       rhs(i,j,1) = rhs(i,j,1) - Q(i,j,n)*gradu(i,j,n)
       rhs(i,j,2) = rhs(i,j,2) - Q(i,j,n)*gradv(i,j,n)
@@ -262,16 +263,55 @@ enddo
 
 
 if (alpha_value>0) then
-   call alpha_model_forcing(rhs,Q,divtau,gradu,gradv,work,work2,a_diss)
+   call alpha_model_forcing(Q,divtau,gradu,gradv,work,work2)
+   ! Apply Helmholtz inverse to div(tau)
+   ! also return a_diss, the KE dissapation from div(tau) term
+   do n=1,2
+      !call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,1d-8)
+      call helmholtz_inv(div(1,1,n),work,1d0,-alpha_value**2)
+   enddo
+
+   do j=ny1,ny2
+   do i=nx1,nx2
+   do n=1,2
+      a_diss=a_diss+Q(i,j,3)*Q(i,j,n)*div(i,j,n)
+      rhs(i,j,n)=rhs(i,j,n)+div(i,j,n)
+   enddo
+   enddo
+   enddo
+
+   ! g grad(h) 
+   do n=1,2
+      !call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,1d-8)
+      call helmholtz_inv(gradh(1,1,n),work,1d0,-alpha_value**2)
+   enddo
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,1)=rhs(i,j,1)-grav*gradh(i,j,1) 
+      rhs(i,j,2)=rhs(i,j,2)-grav*gradh(i,j,2) 
+   enddo
+   enddo
+
+else
+   ! g grad(h) 
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,1)=rhs(i,j,1)-grav*gradh(i,j,1) 
+      rhs(i,j,2)=rhs(i,j,2)-grav*gradh(i,j,2) 
+   enddo
+   enddo
 endif
 
 
+! back to spectral space:
 do n=1,3
    call fft3d(rhs(1,1,n),work)
 enddo
 
 ! hyper viscosity and dealias:
-! use gradu to store viscous forces
+!
+! use gradu to store del**8 U to compute viscous KE dissapation
+! use gradv to store del**2 U to compute viscous KE dissapation (for alpha)
 gradu=0
 do j=ny1,ny2
    jm=abs(jmcord(j))
@@ -284,7 +324,11 @@ do j=ny1,ny2
          rhs(i,j,3)=0
       else
 !        xfac=-mu* (im*im + jm*jm )
-         xfac=((im*im + jm*jm )*pi2_squared)**4
+         xfac=((im*im + jm*jm )*pi2_squared)
+         gradv(i,j,1)=xfac*Qhat(i,j,1)
+         gradv(i,j,2)=xfac*Qhat(i,j,2)
+
+         xfac=xfac**4
          gradu(i,j,1)=xfac*Qhat(i,j,1)
          gradu(i,j,2)=xfac*Qhat(i,j,2)
 
@@ -303,6 +347,8 @@ if (compute_ints==1) then
    do i=nx1,nx2
       ke_diss = ke_diss + (Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &
                         + Q(i,j,3)*Q(i,j,2)*gradu(i,j,2)) 
+      gradu_diss = gradu_diss + (Q(i,j,3)*Q(i,j,1)*gradv(i,j,1) &
+                        + Q(i,j,3)*Q(i,j,2)*gradv(i,j,2)) 
    enddo
    enddo
 endif
@@ -313,8 +359,8 @@ call bc_rhs(rhs)
 
 
 if (compute_ints==1) then
-   !ints(1)=gradu_diss/g_nx/g_ny
-   ints(10)=ke_diss/g_nx/g_ny     ! u dot laplacian u
+   ints(1)=gradu_diss/g_nx/g_ny
+   ints(2)=normdx/g_nx/g_ny
    !ints(3) = forcing terms
 
    ints(4)=vor/g_nx/g_ny
@@ -322,9 +368,9 @@ if (compute_ints==1) then
    ints(5)=ke/g_nx/g_ny
 
    !ints(7)
-   ints(8)=a_diss         ! < Hu,div(tau)' >  
+   ints(8)=a_diss/g_nx/g_ny         ! < Hu,div(tau)' >  
    ! ints(9)  = < u,f >  (alpha model only)
-
+   ints(10)=ke_diss/g_nx/g_ny     ! u dot laplacian u
 endif
 
 call wallclock(tmx2)
@@ -341,26 +387,22 @@ end
 
 
 
-subroutine alpha_model_forcing(rhs,Q,div,gradu,gradv,work,work2,a_diss)
+subroutine alpha_model_forcing(Q,div,gradu,gradv,work,work2)
 ! compute one entry of work=DD + DD' - D'D  
 ! transform work -> p
 ! compute d(p), apply helmholtz inverse, accumualte into rhs
 !
-! a_diss  E dissapation from alpha term added to RHS 
-!         = integral of:  H * U dot alpha_forcing_term  
 !
 use params
 use sforcing
 use transpose
 implicit none
-real*8 rhs(nx,ny,nz,n_var)       
 real*8 Q(nx,ny,nz,n_var)         
 real*8 div(nx,ny,nz,2)
 real*8 gradu(nx,ny,nz,2)
 real*8 gradv(nx,ny,nz,2)
 real*8 work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: a_diss
 
 !local
 integer i,j,k,m1,m2,im,jm,km,l,n
@@ -386,6 +428,11 @@ do m1=1,2
       enddo
    enddo
    enddo
+   do j=ny1,ny2
+   do i=nx1,nx2
+      work(i,j,k)=work(i,j,k)*Q(i,j,k,3)
+   enddo
+   enddo
 
    ! compute div(Tau)  
    call der(work,work,dummy,work2,DX_ONLY,m2)
@@ -396,30 +443,15 @@ do m1=1,2
 enddo
 enddo
 
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Apply Helmholtz inverse to div(tau), accumulate into RHS.
-!
-! RHS  = RHS + Helmholtz_Inverse(DIV)   (variable DIV contains: -div(tau)  )
-! also return a_diss, the KE dissapation from div(tau) term
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do n=1,2
-   !call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,1d-8)
-   call helmholtz_inv(div(1,1,1,n),work,1d0,-alpha_value**2)
-enddo
-
-
-a_diss=0
-do j=ny1,ny2
-do i=nx1,nx2
-   do n=1,2
-      a_diss=a_diss+Q(i,j,k,3)*Q(i,j,k,n)*div(i,j,k,n)
+do m1=1,2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      div(i,j,k,m1)=div(i,j,k,m1)/Q(i,j,k,3)
+   enddo
    enddo
 enddo
-enddo
-a_diss=a_diss/g_nx/g_ny
 
-rhs(:,:,:,1:2) = rhs(:,:,:,1:2) + div
+
 
 end subroutine
 

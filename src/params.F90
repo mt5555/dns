@@ -189,6 +189,7 @@ real*8 :: ints(nints),maxs(nints)
 
 !
 ! For NON-ALPHA-MODEL
+! KE = ints(6)
 ! KE dissapation:  -mu*ints(2) + ints(3) + ints(8)
 !      ints(2) = < u_x,u_x >
 !      ints(3) = < u,f >     
@@ -234,12 +235,23 @@ real*8 :: ints(nints),maxs(nints)
 ! maxs(8) = 
 ! maxs(9) = 
 !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! for the shallow water model, we modify the above slightly:
+! ints(1) = < h u_xx,del**8 u >   
+! ints(2) = < h u_x,u_x >   
 ! ints(5) = .5 < h u , u >                 KE
 ! ints(6) = .5 < h u , u >  + g H^2        KE+PE
 ! ints(8) = < uH,div(tau)' >   (alpha model only)
 ! ints(10) = < H u, del**8 u >   hyper diffusion term
 !
+! E = ints(6)
+! dE/dt = mu*ints(10)   + ints(8)
+!
+! E_alpha = ints(6) + .5*alpha**2 ints(2)
+! E_alpah dissapation: mu*ints(10) + mu*alpha**2 * ints(1)
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 integer,parameter :: ntimers=13
 real*8 :: tims(ntimers)=0
 !  tims(1)    time for initialization
