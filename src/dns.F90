@@ -45,7 +45,7 @@ call init_model()
 call random_seed(size=k)
 allocate(seed(k))
 call random_seed(get=seed)
-seed=seed+my_pe+1000*time_initial
+seed=seed+my_pe
 call random_seed(put=seed)
 deallocate(seed)
 

@@ -242,10 +242,6 @@ integer,parameter :: g_ny=nslaby*ncpu_y
 integer,parameter :: g_nz=nslabz*ncpu_z
 integer           :: g_nmax
 integer           :: g_nmin
-! 2/3 rule dealias kmax
-integer,parameter :: dealias_nx = 2+2*(g_nx/3)
-integer,parameter :: dealias_ny = 2+2*(g_ny/3)
-integer,parameter :: dealias_nz = 2+2*(g_nz/3)
 
 ! spherical dealias kmax
 integer           :: dealias_sphere_kmax2 

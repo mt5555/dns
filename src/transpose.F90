@@ -1079,20 +1079,42 @@ end subroutine
 
 
 
+!
+!
+! dealias_nx = number of coefficients = 2+2*im_max
+! if im_max = g_nx/2-1               full spectrum
+! for im_max < g_nx/2:               all wave numbers up to
+!                                    and including im_max
+!
+!  for no dealiasing:     im_max = g_nx/2-1
+!  for 2/3 dealias rule,  im_max = g_nx/3
+!
+!integer,parameter :: dealias_nx = 2+2*(g_nx/3) = 2 + 2*im_max
+!integer,parameter :: dealias_ny = 2+2*(g_ny/3) = 2 + 2*jm_max
+!integer,parameter :: dealias_nz = 2+2*(g_nz/3) = 2 + 2*km_max
+!
+!
+!  coefficients are stored:  0 6 1 1 2 2 3 3 4 4 5 5   for g_nx=12
+!  if the spectrum is being truncated, then we need to 
+!  reshuffle the coefficients to look like:  (for g_nx_truncated=8)
+!           0  4 1 1 2 2 3 3     where 4 is the cosine mode.
+!
+!  this is tricky, so for now just set it to zero.  If dealiasing
+!  is being used, it will already be set to 0.  If dealiasing is
+!  disabled (dealias==0) and im_max < g_nx/2, go in and set to 
+!  zero by hand before outputting.  
+!
+!  
 
-
-
-
-
-subroutine output1_spec(p,pt,buf,fid,fpe)
+subroutine output1_spec(p,pt,buf,fid,fpe,im_max,jm_max,km_max)
 use params
 use mpi
 
 CPOINTER fid
-integer :: fpe           ! cpu to do the I/O
+integer :: fpe,im_max,jm_max,km_max       ! cpu to do the I/O
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
-real*8 :: buf(dealias_nx,ny_2dx)
+real*8 :: buf(2+2*im_max,ny_2dx)
 
 ! local vars
 integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
@@ -1101,6 +1123,17 @@ integer request(2),statuses(MPI_STATUS_SIZE,2)
 #endif
 integer i,j,k,l,extra_k,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d,jj
+integer dealias_nx,dealias_ny,dealias_nz
+logical truncation
+
+dealias_nx=min(2+2*im_max,g_nx)
+dealias_ny=min(2+2*jm_max,g_ny)
+dealias_nz=min(2+2*km_max,g_nz)
+
+truncation=(dealias_nx < g_nx .or. dealias_ny < g_ny .or. dealias_nz < g_nz)
+if (dealias==0 .and. truncation) then
+   call abort("output1_spec: spectral truncation only supported if dealias>0")
+endif
 
 
 
@@ -1136,7 +1169,7 @@ do x_pe=0,ncpu_x-1
       ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
       jj=0
       do j=1,ny_2dx
-         if (x_jmcord(j)>(g_ny/3)  .and. x_jmcord(j)/=(g_ny/2)) exit
+         if (x_jmcord(j)>jm_max .and. x_jmcord(j)/=(g_ny/2)) exit
          jj=j
       enddo
       l=dealias_nx*jj
@@ -1196,7 +1229,7 @@ end subroutine
 
 
 
-subroutine input1_spec(p,pt,buf,fid,fpe)
+subroutine input1_spec(p,pt,buf,fid,fpe,im_max,jm_max,km_max)
 use params
 use mpi
 
@@ -1204,15 +1237,26 @@ CPOINTER fid
 integer :: fpe           ! cpu to do the I/O
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
-real*8 :: buf(dealias_nx,ny_2dx)
+real*8 :: buf(2+2*im_max,ny_2dx)
 
 ! local vars
-integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
+integer sending_pe,ierr,tag,z_pe,y_pe,x_pe,im_max,jm_max,km_max
 #ifdef USE_MPI
 integer request(2),statuses(MPI_STATUS_SIZE,2)
 #endif
 integer i,j,k,l,extra_k,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d,jj
+integer dealias_nx,dealias_ny,dealias_nz
+logical truncation
+
+dealias_nx=min(2+2*im_max,g_nx)
+dealias_ny=min(2+2*jm_max,g_ny)
+dealias_nz=min(2+2*km_max,g_nz)
+
+truncation=(dealias_nx < g_nx .or. dealias_ny < g_ny .or. dealias_nz < g_nz)
+if (dealias==0 .and. truncation)  then
+   call abort("output1_spec: spectral truncation only supported if dealias>0")
+endif
 
 
 pt=0
@@ -1239,7 +1283,7 @@ do x_pe=0,ncpu_x-1
       ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
       jj=0
       do j=1,ny_2dx
-         if (x_jmcord(j)>(g_ny/3)  .and. x_jmcord(j)/=(g_ny/2)) exit
+         if (x_jmcord(j)>jm_max  .and. x_jmcord(j)/=(g_ny/2)) exit
          jj=j
       enddo
       l=dealias_nx*jj

@@ -833,6 +833,10 @@ else if (sdata=='iso12e') then
    init_cond=5
 else if (sdata=='zero') then
    init_cond=6
+else if (sdata=='decay2048') then
+   init_cond=7
+else if (sdata=='decay2048_e') then
+   init_cond=8
 else 
    print *,'value = >>',sdata,'<<'
    call abort("invalid initial condtion specified on line 3 on input file")

@@ -193,6 +193,7 @@ real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
 character(len=*) :: fname
 logical :: output_spec
+integer im_max,km_max,jm_max
 
 
 
@@ -203,6 +204,27 @@ character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
+xnx=o_nx
+xny=o_ny
+xnz=o_nz
+
+if (output_spec) then
+
+   ! default is to write everything:
+   xnx=g_nx
+   xny=g_ny
+   xnz=g_nz
+
+   if (dealias==1) then
+      xnx=2+2*(g_nx/3)
+      xny=2+2*(g_ny/3)
+      xnz=2+2*(g_nz/3)
+   endif
+
+   ! if some kind of spectral truncation:
+
+
+endif
 
 if (my_pe==fpe) then
 
@@ -221,18 +243,29 @@ if (my_pe==fpe) then
          call print_message(fname)
          call abort("")
       endif
-      xnx=o_nx
-      xny=o_ny
-      xnz=o_nz
       call cread8(fid,xnx,1)
       call cread8(fid,xny,1)
       call cread8(fid,xnz,1)
-      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
-      call cread8(fid,g_xcord(1),o_nx)
-      call cread8(fid,g_ycord(1),o_ny)
-      call cread8(fid,g_zcord(1),o_nz)
+      if (output_spec) then
+         print *,'Spectrum input data'
+         print *,'number of real coefficients: ',xnx,xny,xnz
+         if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
+            ! we can only upsample low-res data.
+            ! to run with high-res data, output a trucated form.  
+            call print_message("Error: spectral input requires downsampling to lower resolution")
+            call print_message("Input routines can only upsample.") 
+            call print_message("Output routines can only downsample.") 
+            call print_message("Run code at higher resolution, calling Output to downsample")
+            call abort("error in singlefile_io2")
+         endif
+      else
+         if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
+         if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
+         if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+         call cread8(fid,g_xcord(1),o_nx)
+         call cread8(fid,g_ycord(1),o_ny)
+         call cread8(fid,g_zcord(1),o_nz)
+      endif
    else
       call copen(fname,"w",fid,ierr)
       if (ierr/=0) then
@@ -242,15 +275,23 @@ if (my_pe==fpe) then
          call abort("")
       endif
       call cwrite8(fid,time,1)
-      xnx=o_nx
-      xny=o_ny
-      xnz=o_nz
       call cwrite8(fid,xnx,1)
       call cwrite8(fid,xny,1)
       call cwrite8(fid,xnz,1)
-      call cwrite8(fid,g_xcord(1),o_nx)
-      call cwrite8(fid,g_ycord(1),o_ny)
-      call cwrite8(fid,g_zcord(1),o_nz)
+      if ( output_spec) then
+         if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
+            ! we can only upsample low-res data.
+            ! to run with high-res data, output a trucated form.  
+            call print_message("Error: spectral output requires zero padding") 
+            call print_message("Output routines can only downsample.") 
+            call print_message("Input routines can input this data directly")
+            call abort("error in singlefile_io2")
+         endif
+      else
+         call cwrite8(fid,g_xcord(1),o_nx)
+         call cwrite8(fid,g_ycord(1),o_ny)
+         call cwrite8(fid,g_zcord(1),o_nz)
+      endif
    endif
 endif
 
@@ -258,15 +299,21 @@ endif
 call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 #endif
 
+! max wave number to read/write for spectral I/O
+im_max=xnx/2-1
+jm_max=xny/2-1
+km_max=xnz/2-1
+
+
 if (io_read==1) then
    if (output_spec) then
-      call input1_spec(p,work,work2,fid,fpe)
+      call input1_spec(p,work,work2,fid,fpe,im_max,jm_max,km_max)
    else
       call input1(p,work,work2,fid,fpe,.false.)
    endif
 else
    if (output_spec) then
-      call output1_spec(p,work,work2,fid,fpe)
+      call output1_spec(p,work,work2,fid,fpe,im_max,jm_max,km_max)
    else
       call output1(p,work,work2,fid,fpe)
    endif

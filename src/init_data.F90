@@ -21,6 +21,8 @@ else
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,1)
    if (init_cond==5) call init_data_lwisotropic(Q,Qhat,work1,work2,1,1)
    if (init_cond==6) call init_data_zero(Q,Qhat,work1,work2)
+   if (init_cond==7) call init_data_decay(Q,Qhat,work1,work2,1,0,0)
+   if (init_cond==8) call init_data_decay(Q,Qhat,work1,work2,1,1,0)
 endif
 end subroutine
 

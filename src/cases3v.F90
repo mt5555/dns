@@ -190,6 +190,276 @@ end subroutine
 
 
 
+subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
+!
+! low wave number, quasi isotropic initial condition
+! based on spectrum provided by Menevea
+! init=     (ignored for now)
+! rantype=  0    intialize using a gaussian, in grid space
+! rantype=  1    initalize using E=constant and random phase
+!
+! restype = 0    use 2048^3 parameters with kmax eta = 1
+!
+use params
+use mpi
+use transpose
+implicit none
+integer :: init,rantype,restype
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: PSI(nx,ny,nz,n_var)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+! local variables
+real*8 :: alpha,beta
+integer km,jm,im,i,j,k,n,wn,ierr,nb
+integer,parameter :: NUMBANDS=1024
+real*8 xw,ener,xfac,theta
+real*8 ::  enerb_target(NUMBANDS),enerb_work(NUMBANDS),enerb(NUMBANDS)
+real*8 :: xnb,ep23,lenscale,eta,fac1,fac2,fac3,ens,epsilon,mu_m
+
+character(len=80) message
+CPOINTER :: null
+
+
+
+
+
+!
+! cj2.out run: 128^3
+!  R_l = 73   Teddy=.95  Umax=4.25  delx/eta = 1.9
+! Teddy/delt = Teddy*Umax
+!
+if (restype==0) then
+   ep23=2.76029**(2d0/3d0)
+   lenscale = .3155
+   eta = 9.765e-4
+else
+   call abort("init_data_decay: bad restype")
+endif
+
+
+do nb=1,NUMBANDS
+   xnb = nb
+   fac1 = 1.613*ep23*xnb**(-5d0/3d0)
+
+   fac2 = ( (xnb*lenscale)**1.2 + .39 )**0.833 
+   fac2 = (xnb*lenscale/fac2)**(17d0/3d0)
+   fac2 = fac2 * exp(-2.1*xnb*eta)
+
+   fac3=.5 + atan( 10*log10(xnb*eta)+12.58 ) / pi
+   fac3 = 1 + .522*fac3
+
+   enerb_target(nb)=fac1*fac2*fac3
+enddo
+
+
+
+if (my_pe==io_pe) then 
+! compute some stats:
+ener=0
+ens=0
+do nb=1,NUMBANDS
+   ener=ener+enerb_target(nb)
+   ens=ens+2 * nb**2 * enerb_target(nb)
+enddo
+mu_m=1.359e-4
+epsilon=mu_m*ens
+!epsilon=2.76029
+
+
+print *,'epsilon: ',epsilon
+print *,'energy:  ',ener
+print *,'u1       ',sqrt(2*ener/3)
+print *,'u1,1     ',epsilon/mu_m/15
+print *,'lambda   ',sqrt(10*ener*mu_m/epsilon)
+print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
+print *,'eta      ',(mu_m**3 / epsilon ) **.25
+print *,'eddy time',2*ener/epsilon
+endif
+
+
+! convert to our units, with L=1 instead of 2pi
+enerb_target=enerb_target / (2*pi*2*pi)
+
+
+
+
+
+
+!
+! 
+!   g_xcord(i)=(i-1)*delx	
+
+!random vorticity
+if (rantype==0) then
+do n=1,3
+   ! input from random number generator
+   ! this gives same I.C independent of cpus
+   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.)  
+enddo
+else if (rantype==1) then
+   do n=1,3
+   write(message,*) 'random initial vorticity n=',n   
+   call print_message(message)
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         call gaussian( PSI(nx1,j,k,n), nslabx  )
+         do i=nx1,nx2
+            im=imcord(i)
+            xfac = (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            PSI(i,j,k,n)=PSI(i,j,k,n)/xfac
+         enddo
+      enddo
+   enddo
+   enddo
+else
+   call abort("decay():  invalid 'rantype'")
+endif
+
+
+alpha=0
+beta=1
+do n=1,3
+   write(message,*) 'solving for PSI n=',n   
+   call print_message(message)
+   call helmholtz_periodic_inv(PSI(1,1,1,n),work,alpha,beta)
+enddo
+
+call print_message("computing curl PSI")
+call vorticity(Q,PSI,work,work2)
+
+
+
+
+enerb=0
+
+do n=1,3
+   write(message,*) 'FFT to spectral space n=',n   
+   call print_message(message)
+   call fft3d(Q(1,1,1,n),work) 
+   write(message,*) 'computing E(k) n=',n   
+   call print_message(message)
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+
+            xfac = (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+
+            do nb=1,NUMBANDS
+               if (xw>=nb-.5 .and. xw<nb+.5) &
+                    enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
+            enddo
+            !remaining coefficients to 0:
+            nb=NUMBANDS+1
+            if (xw>=nb-.5) Q(i,j,k,n)=0
+
+         enddo
+      enddo
+   enddo
+enddo
+
+#ifdef USE_MPI
+   enerb_work=enerb
+   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+
+do n=1,3
+   write(message,*) 'normalizing to E_target(k) n=',n   
+   call print_message(message)
+
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+            
+            do nb=1,NUMBANDS
+            if (xw>=nb-.5 .and. xw<nb+.5) then
+               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
+            endif
+            enddo
+         enddo
+      enddo
+   enddo
+enddo
+
+ener=0
+enerb=0
+do n=1,3
+   write(message,*) 're-computing E(k) n=',n   
+   call print_message(message)
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+
+            xfac = (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+
+            do nb=1,NUMBANDS
+            if (xw>=nb-.5 .and. xw<nb+.5) then
+               enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
+            endif
+            enddo
+            ener=ener+.5*xfac*Q(i,j,k,n)**2
+
+
+         enddo
+      enddo
+   enddo
+enddo
+
+do n=1,3
+   write(message,*) 'FFT back to grid space, n=',n   
+   call print_message(message)
+   call ifft3d(Q(1,1,1,n),work) 
+enddo
+#ifdef USE_MPI
+   xfac=ener
+   call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enerb_work=enerb
+   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+call print_message("Isotropic initial condition in wave numbers:");
+do nb=1,min(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
+   write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
+        "  E target=",enerb_target(nb)
+   call print_message(message)
+enddo
+write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
+call print_message(message)
+
+
+
+
+end subroutine
+
+
+
+
+
 subroutine init_data_sht(Q,PSI,work1,work2,init)
 !
 !   init=0   setup paraemeters only
