@@ -162,7 +162,7 @@ integer :: error_code =0
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 integer,parameter :: nints=10
-real*8 :: ints(nints)=0,maxs(nints)=0
+real*8 :: ints(nints),maxs(nints)
 real*8 :: ints_timeU,ints_timeDU
 
 !

@@ -9,13 +9,14 @@ range=0:50;
 %range=0:.5:2;
 
 %fid=fopen('test32.spec','r','l');
-%fid=fopen('n128.spec','r','b');
+fid=fopen('iso12_256_200.spec','r','b');
 %fid=fopen('../src/output/n32_100.spec','r','l');
 %fid=fopen('../src/output/n128_400.spec','r','b');
 
 %fid=fopen('../src/output/n64_200.spec','r','l');
 %fid=fopen('../src/output/n64_100.spec','r','l');
-fid=fopen('../src/output/n64_50.spec','r','l');
+%fid=fopen('../src/output/n64_50.spec','r','l');
+
 
 
 time=fread(fid,1,'float64');

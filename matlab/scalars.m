@@ -13,9 +13,7 @@ range=0:50;
 %fid=fopen('test32.scalars','r','l');
 %fid=fopen('n128.scalars','r','b');
 %fid=fopen('../src/test32.scalars','r','l');
-%fid=fopen('../src/output/n32_25.scalars','r','l');
-fid=fopen('../src/output/n128_100.scalars','r','b');
-
+fid=fopen('iso12_256_200.scalars','r','ieee-be.l64');
 
 
 nscalars=0;
@@ -28,8 +26,10 @@ while (1)
   mu=fread(fid,1,'float64');
   alpha=fread(fid,1,'float64');
   
+  [nints,ns]
   data1=fread(fid,[nints,ns],'float64');
   data2=fread(fid,[nints,ns],'float64');
+
   if (nscalars==0) 
     ints=data1;
     maxs=data2;
@@ -38,6 +38,7 @@ while (1)
     maxs=[maxs,data2];
   end
   nscalars=nscalars+ns;
+  pause
 
   % now read the "expensive" integrals, which are not computed every time step
   ns_e = fread(fid,1,'float64');
@@ -61,23 +62,30 @@ fclose(fid);
 %  the scalars computed every time step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ke=ints(1,:);
+ke=ints(1,:);   % ke at time timeU
 ke_diss_d=-mu*ints(2,:);
-ke_diss_f=ints(3,:);
-vor=ints(4,:);
+ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
+vor_z=ints(4,:);
 hel=ints(5,:);
-ke_diss_tot=maxs(9,:);
-Ea_diss_tot=maxs(8,:);
+% ints(6,:)   ke at time timeDU
+% ints(7,:)   enstrophy
+% ints(8,:)   < u,div(tau)' >  (alpha model only)
+% ints(9,:)   < u,f>           (alpha model only)
+% ints(10,:)  < u_xx,u_xx> >   (used for E_alpha dissapation term)
 
 maxU=maxs(1,:);
 maxV=maxs(2,:);
 maxW=maxs(3,:);
+%  maxs(4,:)  % max used for CFL
 maxvor=maxs(5,:);
 timeU=maxs(6,:);
 timeDU=maxs(7,:);
+Ea_diss_tot=maxs(8,:);
+ke_diss_tot=maxs(9,:);
 
 
-disp(sprintf('max vor = %e',max(vor)));
+
+disp(sprintf('max vor_z = %e',max(vor_z)));
 
 figure(5)
 clf
@@ -96,6 +104,7 @@ lambda=sqrt(  5*(2*ints(1,:))./ints(2,:)  );
 R_l = lambda.*sqrt(2*ints(1,:))/mu;
 
 print -depsc scalars.ps
+
 
 
 

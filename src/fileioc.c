@@ -34,8 +34,9 @@ void FORTRAN(copen) (char fname[80],char mode[1],FILE **fid,int *err ) {
     if (*fid==NULL) *err=errno;
 }
 
-void FORTRAN(cclose) (FILE **fid) {
-    fclose(*fid);
+void FORTRAN(cclose) (FILE **fid,int *err) {
+    *err=fclose(*fid);
+    
 }
 
 

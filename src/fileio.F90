@@ -268,7 +268,7 @@ do j=ny1,ny2
 enddo
 enddo
 enddo
-call cclose(fid)
+call cclose(fid,ierr)
 
 
 end subroutine
@@ -363,7 +363,7 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_y,1+g_ny/2)
    x=1+g_nz/2; call cwrite8(fid,x,1)
    call cwrite8(fid,spec_z,1+g_nz/2)
-   call cclose(fid)
+   call cclose(fid,ierr)
 endif
 deallocate(spectrum)
 deallocate(spectrum1)
@@ -386,7 +386,7 @@ if (my_pe==io_pe) then
    endif
 endif
 call outputSF(time,fid)
-if (my_pe==io_pe) call cclose(fid)
+if (my_pe==io_pe) call cclose(fid,ierr)
 endif
 
 
@@ -412,7 +412,11 @@ if (my_pe==io_pe) then
    call cwrite8(fid,ints_e,nints_e)
 
 
-   call cclose(fid)
+   call cclose(fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "diag_output(): Error closing .scalars file errno=",ierr
+      call abort(message)
+   endif
 endif
 
 
@@ -504,7 +508,7 @@ if (read==1) then
 else
    call output1(p,work,work2,fid,fpe)
 endif
-if (my_pe==fpe) call cclose(fid)
+if (my_pe==fpe) call cclose(fid,ierr)
 
 end subroutine
 
