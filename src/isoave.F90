@@ -124,7 +124,7 @@ D_tt=0
 D_ltt=0
 D_lll=0
 
-
+!$omp parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
 do idir=1,ndir
 
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',&
@@ -181,7 +181,6 @@ do idir=1,ndir
             if (k2<=nz2) exit
             k2=k2-nslabz
          enddo
-         
          do n=1,3
             delu(n)=Q(i2,j2,k2,n)-Q(i,j,k,n)
          enddo
@@ -203,6 +202,7 @@ do idir=1,ndir
       enddo
 enddo
 enddo
+!$omp end parallel do
 
 D_ll=D_ll/g_nx/g_ny/g_nz
 D_tt=D_tt/g_nx/g_ny/g_nz
