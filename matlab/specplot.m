@@ -46,9 +46,13 @@ mu=3e-4;
 %movie_plot=0; movie=1; tsave=[2.5 5.0];
 
 
-%name = 'decay2048-new.-sc0001_0000.7019';
+%name = 'decay2048-new.-sc0009_0000.7019';
 %namedir = '/scratch1/taylorm/decay2048/';
 %CK_orig=1.613/(2*pi)^2;
+
+name = 'decay2048-new.-sc0001_0000.7536';
+namedir = '/scratch1/taylorm/decay2048/';
+CK_orig=1.613/(2*pi)^2;
 
 %name = 'skhel512a0000.0000';
 %namedir = '/home/mt/data/skhel/';
@@ -340,13 +344,31 @@ while (time>=.0 & time<=9999.3)
      vw_r=fread(fidco,ncor,'float64'); 
 
      figure(3); clf;
+     subplot(3,1,1);
      loglog(0:ncor-1,uv_r,'r'); hold on;
      loglog(0:ncor-1,uw_r,'g');
      loglog(0:ncor-1,vw_r,'b');
-     loglog(0:ncor-1,-uv_r,'ro'); hold on;
-     loglog(0:ncor-1,-uw_r,'go');
-     loglog(0:ncor-1,-vw_r,'bo');
      loglog(0:ncor-1,(0:ncor-1).^-(7/3));
+%     axis([1 200 1e-8 1e-2]);
+     hold off;
+
+     subplot(3,1,2);
+     loglog(0:ncor-1,-uv_r,'r'); hold on;
+     loglog(0:ncor-1,-uw_r,'g');
+     loglog(0:ncor-1,-vw_r,'b');
+     loglog(0:ncor-1,(0:ncor-1).^-(7/3));
+%     axis([1 200 1e-8 1e-2]);
+     hold off;
+
+     subplot(3,1,3);
+     loglog(0:ncor-1,uv_r,'r'); hold on;
+     loglog(0:ncor-1,uw_r,'g');
+     loglog(0:ncor-1,vw_r,'b');
+     loglog(0:ncor-1,-uv_r,'r'); hold on;
+     loglog(0:ncor-1,-uw_r,'g');
+     loglog(0:ncor-1,-vw_r,'b');
+     loglog(0:ncor-1,(0:ncor-1).^-(7/3));
+%     axis([1 200 1e-8 1e-2]);
      hold off;
   end
 

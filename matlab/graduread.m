@@ -10,8 +10,8 @@
 %dir='/ccs/scratch/taylorm/dns/decay/';
 %dir='/home/taylorm/furens/';
 dir='/scratch1/taylorm/decay2048/';
-filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
-%filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
+%filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
+filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
 
 
 
@@ -173,7 +173,9 @@ for i=1:nsubcube
       [a1,mxi]=max(offdiag); [mxa,mxj]=max(a1); mxi=mxi(mxj);
       [a1,mni]=min(offdiag); [mna,mnj]=min(a1); mni=mni(mnj);
 
+      Shear=2*mxa;
       if (mxa < -mna ) 
+        Shear=2*mna;
         mxa=mna;
         mxi=mni;
         mxj=mnj;
@@ -183,7 +185,8 @@ for i=1:nsubcube
       mxa=abs(mxa);
 
       if (mxa>large & mx_remaining < small) 
-        fprintf(fidout,'%f %f %f  %i \n',coords(1:3,i),ssize );
+        fprintf(fidout,'%f %f %f  %i %f %f %i %i\n',coords(1:3,i),ssize,...
+                epsilon_l(i,1),Shear,mxj,mxi );
         for j=1:3
           fprintf(fidout,'%20.10e %20.10e %20.10e \n',gradu(1:3,j,i));
         end

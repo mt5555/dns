@@ -365,7 +365,7 @@ CPOINTER fid
 
 
 ! append to output files, unless this is first call.
-if (access=="0") then
+if (access=="0" .or. time==time_file) then
    access="w"
 else
    access="a"
@@ -469,7 +469,7 @@ CPOINTER fid
 
 
 ! append to output files, unless this is first call.
-if (access=="0") then
+if (access=="0" .or. time==time_file) then
    access="w"
 else
    access="a"
@@ -762,7 +762,7 @@ do i=nx1,nx2
     ! compute k E(k)
     xw=sqrt(rwave*pi2_squared)
     denergy=-xfac*xw*p(i,j,k)*p(i,j,k)
-    spec_kEk(iwave)=spec_kEk(iwave)+denergy
+    ! spec_kEk(iwave)=spec_kEk(iwave)+denergy
 
 
 enddo
@@ -968,6 +968,10 @@ real*8 :: work(nx,ny,nz)
 ! local variables
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_x_in(0:g_nx/2,n_var)   
+real*8 ::  spec_y_in(0:g_ny/2,n_var)
+real*8 ::  spec_z_in(0:g_nz/2,n_var)
+
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3)
 integer i,j,k,jm,km,im,iwave_max,n
@@ -1029,9 +1033,9 @@ do j=ny1,ny2
          co_energy(2) = energy*p1(i,j,k,1)*p1(i,j,k,3)
          co_energy(3) = energy*p1(i,j,k,2)*p1(i,j,k,3)
 
-         cospec_x(abs(im),1:ndim)=cospec_x(abs(im),1:ndim)+co_energy(1:ndim)
-         cospec_y(abs(jm),1:ndim)=cospec_x(abs(jm),1:ndim)+co_energy(1:ndim)
-         cospec_z(abs(km),1:ndim)=cospec_x(abs(km),1:ndim)+co_energy(1:ndim)
+         cospec_x(abs(im),1:ndim)=cospec_x(abs(im),1:ndim)+co_energy(1:ndim)  ! uv
+         cospec_y(abs(jm),1:ndim)=cospec_y(abs(jm),1:ndim)+co_energy(1:ndim)  ! uw
+         cospec_z(abs(km),1:ndim)=cospec_z(abs(km),1:ndim)+co_energy(1:ndim)  ! vw
          cospec_r(iwave,1:ndim)=cospec_r(iwave,1:ndim)+co_energy(1:ndim)
 
 
@@ -1056,6 +1060,20 @@ spec_r_in=spec_helicity_rp
 call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
 call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+
+do n=1,ndim
+   spec_r_in=cospec_r(:,n)
+   call MPI_reduce(spec_r_in,cospec_r(1,n),(1+iwave_max),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+enddo
+
+spec_x_in=cospec_x
+call MPI_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spec_y_in=cospec_y
+call MPI_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spec_z_in=cospec_z
+call MPI_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+
+
 rwave=diss1
 call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 rwave=diss2
@@ -1080,6 +1098,7 @@ iwave = (iwave/2)           ! max wave number in sphere.
 do i=iwave+2,iwave_max
    spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
+   cospec_r(iwave+1,1:ndim)=cospec_r(iwave+1,1:ndim)+cospec_r(i,1:ndim)
 enddo
 iwave=iwave+1
 

@@ -285,6 +285,7 @@ end
 
 pname=sprintf('pscalars%i',np);
 print('-djpeg','-r90',pname); 
+print('-depsc',pname); 
 
 
 %
@@ -353,6 +354,7 @@ title('% pure fluid model 0')
 orient tall
 pname=sprintf('pscalars%i_b',np);
 print('-djpeg','-r90',pname); 
+print('-depsc',pname); 
 
 end
 
