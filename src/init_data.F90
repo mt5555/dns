@@ -173,7 +173,7 @@ do n=np1,np2
    if (passive_type(n)==1) call passive_KE_init(Q,work1,work2,n)
 
    call global_min(Q(1,1,1,n),mn)
-   call global_min(Q(1,1,1,n),mx)
+   call global_max(Q(1,1,1,n),mx)
 
    write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
    call print_message(message)	
@@ -204,7 +204,7 @@ do n=np1,np2
    call ifft3d(Q(1,1,1,n),work1)
 
    call global_min(Q(1,1,1,n),mn)
-   call global_min(Q(1,1,1,n),mx)
+   call global_max(Q(1,1,1,n),mx)
 
    write(message,'(a,2f17.5)') 'after smoothing: min/max: ',mn,mx
    call print_message(message)	

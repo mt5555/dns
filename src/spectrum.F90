@@ -412,9 +412,14 @@ if (my_pe==io_pe) then
       write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
       call abort(message)
    endif
+   x=npassive; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
+
    x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_r(0,1),1+iwave)
+   do i=np2,np2
+      call cwrite8(fid,spec_r(0,i),1+iwave) 
+   enddo
+
    x=1+g_nx/2; call cwrite8(fid,x,1)
    do i=np1,np2
       call cwrite8(fid,spec_x(0,i),1+g_nx/2)

@@ -811,7 +811,7 @@ do n=np1,np2
 
 
    call global_min(Q(1,1,1,n),mn)
-   call global_min(Q(1,1,1,n),mx)
+   call global_max(Q(1,1,1,n),mx)
 
    write(message,'(a,i3,a,2f17.5)') 'passive scalar n=',n,' min/max: ',mn,mx
    call print_message(message)	
