@@ -160,6 +160,9 @@ do i=nx1,nx2
    if (Q_grid(i,j,3)<.1) then
       print *,'warning: h is within 10% of 0'
    endif
+   if (Q_grid(i,j,3)<0) then
+      print *,'error: h is negative'
+   endif
 enddo
 enddo
 

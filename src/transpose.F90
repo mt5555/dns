@@ -1466,8 +1466,8 @@ end subroutine
 subroutine transpose_from_z_3d(Qhat,q1)
 use params
 implicit none
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3)
-real*8 :: q1(nx,ny,nz,3)
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
 
 ! local
 integer :: n1,n1d,n2,n2d,n3,n3d,n
