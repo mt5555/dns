@@ -31,7 +31,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc,iproc2
 integer i,j,k,jj,l
-integer,parameter :: maxbuf=min(4,ncpu_z)   ! maximum number of MPI buffers
+integer,parameter :: maxbuf=min(1000,ncpu_z)   ! maximum number of MPI buffers
 integer :: n          ! loop over message blocks
 integer :: ncount     ! number of message blocks
 integer :: nb         ! loop over MPI buffers
@@ -152,7 +152,6 @@ do  ! loop over blocks of messages of size nbcount
    if (iproc2==mpidims(3)) exit
 enddo
 
-   call MPI_Barrier(comm_3d,ierr)
 #endif
 
 

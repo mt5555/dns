@@ -1,5 +1,29 @@
 TODO:
 
+diag output:
+spectrum (snapshot )(wave #,x,y & z)   4N   
+spectrum running average?              4N
+
+scalars.                               25N
+  KE                               
+  structure functions:                
+    delta's:  N/2
+    powers:    15  
+    u,v,w       3
+    directions  3
+    
+max file size: 2000M
+data: 50N (N=4000) = .2 M
+# of snapshots:  10K.  
+10 eddy turn-over times, so number per eddy turnover time: 1K
+diag_dt: 1e-3
+
+
+
+
+
+1. compute structure functions
+2. forcing functions
 2. use a mpi communcator for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
 6. divergence: go to Shashkov formula?  

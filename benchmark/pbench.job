@@ -1,5 +1,5 @@
 #! /bin/csh 
-#BSUB -o bench.o -e bench.e
+#BSUB -o nb128.o -e bench.e
 #BSUB -q small-d
 #BSUB -J dns
 #BSUB -W 0:15
@@ -7,14 +7,7 @@
 
 set NCPU=128 
 
-set refin=benchmark256.inp
-
-cd ../src
-./gridsetup.py 1 1 64 256 256 256
-make -j 4 dns
-cd ../benchmark
-mpirun -np 64 ../src/dns < $refin 
-
+set refin=benchmark_sgi.inp
 
 cd ../src
 ./gridsetup.py 1 1 128 256 256 256
@@ -22,23 +15,16 @@ make -j 4 dns
 cd ../benchmark
 mpirun -np 128 ../src/dns < $refin 
 
-cd ../src
-./gridsetup.py 1 8 16 256 256 256
-make -j 4 dns
-cd ../benchmark
-mpirun -np 128 ../src/dns < $refin 
+#cd ../src
+#./gridsetup.py 2 8 8 256 256 256
+#make -j 4 dns
+#cd ../benchmark
+#mpirun -np 128 ../src/dns < $refin 
 
-cd ../src
-./gridsetup.py 4 4 8 256 256 256 
-make -j 4 dns
-cd ../benchmark
-mpirun -np 128 ../src/dns < $refin 
-
-
-
-
-
-
-
+#cd ../src
+#./gridsetup.py 4 4 8 256 256 256
+#make -j 4 dns
+#cd ../benchmark
+#mpirun -np 128 ../src/dns < $refin 
 
 
