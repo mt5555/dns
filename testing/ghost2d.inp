@@ -1,7 +1,11 @@
-0            ! input file type
-reference2d  ! runname
+2            ! input file type
+KH-anal      ! initial condition
+0            ! subtype
+none         ! forcing
 value        ! viscosity type  (value, smallest, damping_time, Re)
 .001          ! viscosity coefficient.  
+0.0          ! alpha
+0            ! comput str
 4th          ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc

@@ -25,11 +25,11 @@ endif
 if ($1 == 1) then
 
 ./gridsetup.py 1 1 1 128 128 1  2 2 0 2 2 0
-make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid < $refin > $tmp 
+make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 1 1 128 128 1  2 2 0 2 2 0
-make dnsghost >& /dev/null ;  rm -f $tmp ; ./dnsghost < $refin > $tmp 
+make dnsghost >& /dev/null ;  rm -f $tmp ; ./dnsghost -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -39,15 +39,15 @@ if ($1 == p) then
 
 
 ./gridsetup.py 2 1 1 128 128 1  2 2 0 2 2 0
-make dnsghost >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsghost < $refin > $tmp 
+make dnsghost >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsghost -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 2 1 128 128 1  2 2 0 2 2 0
-make dnsghost >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsghost < $refin > $tmp 
+make dnsghost >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsghost -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 2 2 1 128 128 1  2 2 0 2 2 0
-make dnsghost >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dnsghost < $refin > $tmp 
+make dnsghost >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dnsghost -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 

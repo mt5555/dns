@@ -677,7 +677,9 @@ do j=1,n2
 #elif (defined CENTER4H)
          pxx(i,j,k)= (px(i3,j,k)-px(i0,j,k))/(4*h)
 #else
-         pxx(i,j,k)= (2*(px(i2,j,k)-px(i1,j,k))/3 - (px(i3,j,k)-px(i0,j,k))/12 )/h
+!         pxx(i,j,k)= (2*(px(i2,j,k)-px(i1,j,k))/3 - (px(i3,j,k)-px(i0,j,k))/12 )/h
+         pxx(i,j,k)= (-work(i0)+16*work(i1)-30*work(i)+16*work(i2)-work(i3) )&
+               /(12*h*h)
 #endif
          i0=i1
          i1=i
