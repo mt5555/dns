@@ -98,8 +98,7 @@ allocate(Q(nx,ny,nz,ndim))
 allocate(work1(nx,ny,nz))
 allocate(work2(nx,ny,nz))
 
-
-
+! call convert_sk(Q,work1,work2); stop
 
 if (use_serial==0) then
    ! parallel version requires extra data:
@@ -121,20 +120,7 @@ time=tstart
 do
    icount=icount+1
 
-   write(sdata,'(f10.4)') 10000.0000 + time
-   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".u"
-   call print_message(fname(1:len_trim(fname)))
-   call singlefile_io(time2,Q(1,1,1,1),fname,work1,work2,1,io_pe)
-
-   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".v"
-   call print_message(fname(1:len_trim(fname)))
-   call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,1,io_pe)
-
-   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".w"
-   call print_message(fname(1:len_trim(fname)))
-   call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
-   time=time2
-
+   call dataio(time,Q,work1,work2,1)
 
    do i=0,nxdecomp-1
    do j=0,nydecomp-1
@@ -206,3 +192,55 @@ call close_mpi
 end program anal
 
 
+
+subroutine dataio(time,Q,work1,work2,readflag)
+use params
+implicit none
+real*8  :: Q(nx,ny,nz,3)
+real*8  :: work1(nx,ny,nz)
+real*8  :: work2(nx,ny,nz)
+real*8  :: time
+integer :: readflag   ! = 1 to read data, 0 to write data
+
+real*8 time2
+character(len=80) message,sdata
+character(len=280) basename,fname
+
+   time2=time
+   write(sdata,'(f10.4)') 10000.0000 + time
+   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".u"
+   call print_message(fname(1:len_trim(fname)))
+   call singlefile_io(time2,Q(1,1,1,1),fname,work1,work2,readflag,io_pe)
+
+   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".v"
+   call print_message(fname(1:len_trim(fname)))
+   call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,readflag,io_pe)
+
+   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".w"
+   call print_message(fname(1:len_trim(fname)))
+   call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,readflag,io_pe)
+   time=time2
+end subroutine
+
+
+
+
+
+subroutine convert_sk(Q,work1,work2)
+use params
+implicit none
+real*8  :: Q(nx,ny,nz,3)
+real*8  :: work1(nx,ny,nz)
+real*8  :: work2(nx,ny,nz)
+real*8  :: time
+
+character(len=80) message,sdata
+character(len=280) basename,fname
+
+! read in data from alien file format, store in Q
+
+! output into our file format
+time = 0
+call dataio(time,Q,work1,work2,0)
+
+end subroutine
