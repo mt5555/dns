@@ -509,6 +509,7 @@ implicit none
 real*8 p(nx,ny,nz)
 real*8 alpha,beta
 
+!local
 integer i,j,k,im,jm,km
 real*8 xfac,xm,ym,zm
 
@@ -598,7 +599,7 @@ real*8 :: pxx(n1d,n2d,n3d)
 real*8 :: work(n1d)
 real*8 :: h
 
-
+!local
 integer i,j,k,i0,i1,i2,i3
 
 if (n1==1) then
