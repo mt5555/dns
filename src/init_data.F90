@@ -190,7 +190,7 @@ do n=np1,np2
       ! du/dt  =  laplacian(u)
       !  u_k = ((1 - k**2))**p  u_k    p = number of timesteps
       iter=0
-      do 
+      do while (mx>1.05)
          iter=iter+1
          do k=nz1,nz2
             km=abs(kmcord(k))
@@ -212,8 +212,8 @@ do n=np1,np2
             call global_min(Q(1,1,1,n),mn)
             call global_max(Q(1,1,1,n),mx)
          endif
-      while (mx>1.05)
-      write(message,'(a,2f17.5a,i3)') 'after smoothing: min/max: ',mn,mx,'  iter=',iter
+      enddo
+      write(message,'(a,2f17.5,a,i3)') 'after smoothing: min/max: ',mn,mx,'  iter=',iter
       call print_message(message)	
    else
       if (mod(count,2)==1) then
