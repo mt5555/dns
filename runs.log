@@ -83,12 +83,34 @@ G = ||f|| L^3 / mu^2  =  epsilon^.5/mu^2
 
 iso12_500A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
                               k2=.5
+
                mu=3e-4
+               t=1.13:  R_l=140  delx/eta=1.2  epsilon=3.70 
+
+               New data using: mu=1e-4
+               IN
+
+
+
 
 iso12w_512A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
                               k2=.5
                mu=6e-4/(2pi)**2
                FM=15/(2pi)**2  CHANGE sforcing.F90!!!
+
+               Run to t=2.9:  
+               R_l = 260
+               epsilon = -.0383  = 1.51   
+               delx/eta = 3.5
+
+               epsilon to large, lowering FM.  FM=5/(2pi)**2 for
+               runs starting at 2.92.  
+
+
+
+
+
+
 
 
 

@@ -381,8 +381,8 @@ if (0==init_sforcing) then
    if (forcing_type==2) then
       numb1=1
       numb=2
-      FM(1) = 15/(2*pi)**2    ! 15,15,0 yields: mu <ux,ux> = .5
-      FM(2) = 15/(2*pi)**2
+      FM(1) = 5/(2*pi)**2    ! 15,15,0 yields: mu <ux,ux> = .5
+      FM(2) = 5/(2*pi)**2
       FM(3) = 0
    endif
    if (forcing_type==4) then
