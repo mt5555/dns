@@ -24,6 +24,7 @@ cdir=[cdir, 'm','m','m','m','m','m','m','m','m','m','m','m'];      % 12 (1,1,2) 
 % get the weights:
 w=textread('../src/voronoi/isoave.weights','%f');
 size(w)
+% take every other weight
 w=2*w(1:2:length(w));
 
 

@@ -1,0 +1,21 @@
+This file describes some of the matlab analysis routines
+included with the DNS project.
+
+
+isoave.m:
+   computes angle averages of structure function data.
+   analysis_isoave.F90 will compute structures functions
+   from a single snapshow at 47 different directions.
+
+   We then used STRIPACK to construct the Voronoi diagram for
+   all these directions (represented as points on the sphere)
+   and then take the weight of each direction to be the
+   spherical area of the voronoi cell containing the point on the 
+   sphere associated with the direction
+ 
+   Ref: Robert Renka,
+        Algorithm 772: STRIPACK,
+        Delaunay Triangulation and Voronoi Diagram on the Surface of a Sphere,
+        ACM Transactions on Mathematical Software,
+        Volume 23, Number 3, 1997. 
+
