@@ -30,17 +30,17 @@ ifeq ($(UNAME),Linux)
    #CC = gcc
 
    # PGI
-   F90 = pgf90
-   CC=pgcc
-   FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   LDFLAGS = -Lstk -lstk
+   #F90 = pgf90
+   #CC=pgcc
+   #FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   #LDFLAGS = -Lstk -lstk
 
 
    #INTEL	
-   #F90 = ifc 
-   #CC=pgcc
-   #FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_FFT99 
-   #LDFLAGS = -Lstk -lstk #-lPEPCF90
+   F90 = ifc 
+   CC=gcc
+   FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_FFT99 
+   LDFLAGS = -Lstk -lstk
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
@@ -112,7 +112,7 @@ dnsslow:  $(MODEL_SPEC_SLOW) dns.o
 
 
 clean: 
-	rm -f *.o *.mod dns  
+	rm -f *.d *.o *.mod dns  
 
 dep:
 	./mkdep.py *.F90 *.f  > .depends

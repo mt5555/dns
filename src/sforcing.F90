@@ -18,7 +18,7 @@ integer :: comm_sforcing  ! MPI communicator for all pe's involved in forcing
 contains
 
 
-subroutine sforcing(rhs,Qhat,f_diss)
+subroutine sforce(rhs,Qhat,f_diss)
 !
 ! Add a forcing term to rhs, in spectral space.
 !
@@ -26,10 +26,10 @@ use params
 implicit none
 real*8 :: Qhat(*)
 real*8 :: rhs(*)
-real*8 :: f_diss(*)
+real*8 :: f_diss
 if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss)
 
-end
+end subroutine
 
 
 subroutine sforcing12(rhs,Qhat,f_diss)
@@ -100,7 +100,7 @@ do wn=1,NUMBANDS
 
    enddo
 enddo
-end 
+end subroutine 
    
    
    

@@ -9,11 +9,12 @@ use params
 use mpi
 use structf
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
+real*8,allocatable :: Q(:,:,:,:)
 character*80 message
 integer ierr
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
+allocate(Q(nx,ny,nz,n_var))
 
 call wallclock(tmx1)
 call init_mpi       

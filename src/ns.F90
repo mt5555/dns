@@ -176,6 +176,7 @@ subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work)
 !
 use params
 use transpose
+use sforcing
 implicit none
 
 ! input
@@ -345,7 +346,7 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in forcing
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (forcing_type>0) call sforcing(rhs,Qhat,f_diss)
+if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
 
 !  make rhs div-free
 do j=1,ny_2dz

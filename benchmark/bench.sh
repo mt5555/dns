@@ -15,7 +15,7 @@ if ($1 == 96) then
    ../src/dns < benchmark96.inp
 endif
 
-if ($1 == 96) then
+if ($1 == 512) then
    ./gridsetup.py 1 1 1 512 512 2
    make dns
    cd ../benchmark
