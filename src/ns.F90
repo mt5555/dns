@@ -591,8 +591,12 @@ real*8 :: a_diss,f_diss,normuf
 
 !local
 integer i,j,k,m1,m2,im,jm,km,l,n
-integer nd
+integer nd,ifilt,n1,n1d,n2,n2d,n3,n3d
 real*8 :: D(3,3),dummy,xfac
+
+! tophat filter code:
+integer :: i2,j2,k2,i1,j1,k1,ii,jj,kk
+real*8  :: wtot,w
 
 
 div=0
@@ -617,16 +621,9 @@ do m1=1,3
    enddo
 
    ! compute div(Tau)  
-#if 0
-   call der(work,work,dummy,p,DX_ONLY,m1)
-   div(nx1:nx2,ny1:ny2,nz1:nz2,m2) = div(nx1:nx2,ny1:ny2,nz1:nz2,m2) +&
-                           alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)
-#else
-   ! I think this one is correct 
    call der(work,work,dummy,p,DX_ONLY,m2)
-   div(nx1:nx2,ny1:ny2,nz1:nz2,m1) = div(nx1:nx2,ny1:ny2,nz1:nz2,m1) +&
+   div(nx1:nx2,ny1:ny2,nz1:nz2,m1) = div(nx1:nx2,ny1:ny2,nz1:nz2,m1) -&
                            alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)
-#endif
 
 
 enddo
@@ -635,10 +632,56 @@ enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! apply Helmolz to div(tau), accumulate into RHS
+! also return a_diss, the KE dissapation from div(tau) term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#define TOPHAT
+
+#ifdef TOPHAT
+
+! tophat filter:
+ifilt = nint(.5*alpha_value/min(delx,dely,delz))
+
+do n=1,3
+work=0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+
+         w=1
+         wtot=w
+         work(i,j,k)=w*div(i,j,k,n)
+
+
+         do jj=j-ifilt,j+ifilt
+            j1=jj
+            if (j1<ny1) j1=j1+nslaby
+            if (j1>ny2) j1=j1-nslaby
+            if (j1/=j) then
+               work(i,j,k)=work(i,j,k)+w*div(i,j1,k,n)
+               wtot=wtot+w
+            endif
+         enddo
+
+         do ii=i-ifilt,i+ifilt
+            i1=ii
+            if (i1<nx1) i1=i1+nslabx
+            if (i1>nx2) i1=i1-nslabx
+            if (i1/=i) then
+               work(i,j,k)=work(i,j,k)+w*div(i1,j,k,n)
+               wtot=wtot+w
+            endif
+         enddo
+         work(i,j,k)=work(i,j,k)/wtot
+
+      enddo
+   enddo
+enddo
+call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
+enddo
+
+
 a_diss=0
 do n=1,3
-   call z_fft3d_trashinput(div(1,1,1,n),p,work) 
    do j=1,ny_2dz
       jm=z_jmcord(j)
       do i=1,nslabx
@@ -646,17 +689,11 @@ do n=1,3
          do k=1,g_nz
             km=z_kmcord(k)
             
-            ! compute laplacian inverse
-            xfac= -(im*im +km*km + jm*jm)*pi2_squared      
-            xfac=1 - alpha_value**2 *xfac
-            if (xfac/=0) xfac = 1/xfac
-            rhs(k,i,j,n) = rhs(k,i,j,n) - xfac*p(k,i,j)
-
-            xfac=8*xfac
+            xfac=8
             if (z_kmcord(k)==0) xfac=xfac/2
             if (z_jmcord(j)==0) xfac=xfac/2
             if (z_imcord(i)==0) xfac=xfac/2
-            a_diss = a_diss - xfac*Qhat(k,i,j,n)*p(k,i,j)
+            a_diss = a_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
 
          enddo
       enddo
@@ -664,16 +701,99 @@ do n=1,3
 enddo
 
 
+rhs=rhs+divs
+
+
+#else
+
+
+do n=1,3
+   call z_fft3d_trashinput(div(1,1,1,n),divs(1,1,1,n),work) 
+enddo
+call helminv(rhs,divs,Qhat,a_diss)
+
+#endif
+
+
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! apply Helmolz to forcing, accumulate into RHS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 f_diss=0
 if (forcing_type>0) then
+   ! compute forcing, store in divs
+   divs=0
+   call sforce(divs,Qhat,normuf)
+   call helminv(rhs,divs,Qhat,f_diss)
+endif
 
-! compute forcing, store in divs
-divs=0
-call sforce(divs,Qhat,normuf)
+end subroutine
 
+
+
+
+
+
+subroutine tophat(ifilt,pin,pout,n1,n1d,n2,n2d,n3,n3d)
+implicit none
+integer :: ifilt,n1,n1d,n2,n2d,n3,n3d
+real*8 :: pin(n1d,n2d,n3d)
+real*8 :: pout(n1d,n2d,n3d)
+
+!local
+integer i,i2,iuse,j,k
+real*8 :: sm,w,wtot
+do k=1,n3
+do j=1,n2
+do i=1,n1
+   sm=0
+   wtot=0
+   do i2=i-ifilt,i+ifilt
+      iuse=i2
+      if (i2<1) iuse=iuse+n1
+      if (i2>n1) iuse=iuse-n1
+      w=1                             ! tophat filter
+      w=1.0-abs(i2-i)/real(ifilt+1)     ! spike filter  
+
+#if 1
+      if (i==i2) then
+         w=1
+      else
+         ! w=.50 looks bad
+         ! w=.75 looks bad
+      endif
+#endif
+      
+      wtot=wtot+w
+      sm=sm+w*pin(iuse,j,k)
+   enddo
+   pout(i,j,k)=sm/wtot
+enddo
+enddo
+enddo
+end subroutine
+
+
+
+
+
+
+subroutine helminv(rhs,divs,Qhat,a_diss)
+use params
+implicit none
+
+real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)    
+real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)    
+real*8 divs(g_nz2,nslabx,ny_2dz,n_var)    
+real*8 a_diss
+
+!local
+integer i,j,k,m1,m2,im,jm,km,l,n
+real*8 :: xfac
+
+a_diss=0
 do n=1,3
    do j=1,ny_2dz
       jm=z_jmcord(j)
@@ -692,14 +812,10 @@ do n=1,3
             if (z_kmcord(k)==0) xfac=xfac/2
             if (z_jmcord(j)==0) xfac=xfac/2
             if (z_imcord(i)==0) xfac=xfac/2
-            f_diss = f_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
+            a_diss = a_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
 
          enddo
       enddo
    enddo
 enddo
-
-endif
-
 end subroutine
-

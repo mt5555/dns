@@ -1,4 +1,42 @@
 **********************************************************************************
+11/17/01
+
+IMPULSE runs
+../src/impulse/*
+KH run with thick shear layer from E and Liu paper
+run to time 1.5
+
+kh0     dns (projection method)
+kh1     dnsgrid
+
+kh12    NS-alpha  alpha=.5h??       .00390625
+kh11    NS-alpha  alpha=1h          .0078125
+kh4     NS-alpha  alpha=2h               
+kh10    NS-alpha  alpha=4h       
+kh9     NS-alpha  alpha=8h    
+kh8     NS-alpha  alpha=32h   
+
+
+TOPHAT
+kh13     NS-alpha alpha=2h  3 point
+kh14     NS-alpha alpha=2h  5 point  IN
+
+
+
+kh2     impulse method.            crashes at t=.41
+kh3     impulse-alpha   alpha=2h   crashes at t=.77
+        impulse-alpha   alpha=2h CFL=.25  crashes at t=.77
+
+kh5     impulse-alpha alpha=3h     crashes at .80
+kh6     impulse-alpha alpha=8h     crashes at .9953
+kh7     impulse-alpha alpha=32h    crashes at .507   time step problem?
+
+
+
+
+
+
+**********************************************************************************
 10/30/01
 
 KH runs.  

@@ -10,9 +10,9 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %range=0:50;
 %range = 1
 range=0:.25:2;
-%range=[.39 ];
-name='../src/impulse/kh5';
-mkpr=0;
+range=[.750 ];
+name='../src/impulse/kh13';
+mkpr=1;
 
 for i=range
   ts=i;
@@ -70,10 +70,14 @@ for i=range
   else
     vor = squeeze(q(:,:,1));
     figure(2)
+    clf
     %pcolor(x,y,vor')
     %shading interp
-    v=-35:5:35;
+    v=-60:5:60;
+    hold on
     contour(x,y,vor',v)
+    contour(x,y,vor',[0 0],'k')
+    hold off
     title(ts);
     axis square
     if (mkpr) 

@@ -80,7 +80,11 @@ enddo
 do wn=1,NUMBANDS
    ! Qf = Q*sqrt(ener_target/ener)
    ! forcing = tau (Qf-Q) = tau * (sqrt(ener_target/ener)-1) Q
-   tau=5.0*(sqrt(ener_target(wn)/ener(wn))-1)
+   if (init_cond_subtype==1) then
+      tau=25*(sqrt(ener_target(wn)/ener(wn))-1)
+   else
+      tau=5*(sqrt(ener_target(wn)/ener(wn))-1)
+   endif
 !   print *,'FORCING:',wn,ener(wn),ener_target(wn)
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)

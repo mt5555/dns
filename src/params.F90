@@ -57,6 +57,16 @@ integer :: init_cond      ! 0 = KH vortex blob
 integer :: init_cond_subtype   !  0 = default
                                !  other vaules: set other parameters
                                !  in the initial condition
+                               !
+                               ! for KH anaylitic: 
+                               !     0 = thin shear layer
+                               !     1 = thick shear layer (E and Liu)
+                               !
+                               ! for iso12 with forcing:
+                               !     0  tau=5
+                               !     1  tau=20
+                               !
+                     
 integer :: forcing_type   ! 0 = none
                           ! 1 = relax back to E(1)=1, E(2)=2**(-5/3)
                           !     can only be used by the z-decomp model!
