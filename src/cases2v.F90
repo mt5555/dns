@@ -219,7 +219,6 @@ call init_grid()   ! redo grid points since we changed scalings
 
 
 xlocation=xscale/2
-equations=NS_PSIVOR
 Q=0
 
 

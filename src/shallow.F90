@@ -205,10 +205,10 @@ real*8 :: gradv(nx,ny,2)
 real*8 :: gradh(nx,ny,2)
 real*8 :: divtau(nx,ny,2)
 real*8 dummy,tmx1,tmx2
-real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss,normdx
+real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss,normdx,smag_diss
 integer n,i,j,k
 integer im,jm
-real*8 XFAC,hx,hy
+real*8 XFAC,hx,hy,normS
 external helmholtz_hform_periodic
 
 
@@ -219,6 +219,7 @@ ke=0
 pe=0
 normdx=0
 ke_diss=0
+smag_diss=0
 vor=0
 
 
@@ -250,7 +251,7 @@ enddo
 
 
 
-! advection and viscous terms
+! advection 
 do j=ny1,ny2
 do i=nx1,nx2
    pe=pe+.5*grav*Q(i,j,3)**2 - .5*grav*H0**2
@@ -266,9 +267,75 @@ do i=nx1,nx2
    rhs(i,j,3) = rhs(i,j,3) - Q(i,j,3)*(gradu(i,j,1)+gradv(i,j,2))
 
    vor=vor + gradu(i,j,2)-gradv(i,j,1)
+
 enddo
 enddo
 
+! smagorinsky terms
+if (smagorinsky>0) then
+   stop 'smagorinsky not yet debugged'
+   !   S= |       u_x       .5(u_y + v_x)  |
+   !      |   .5(u_y+v_x)      v_y         |
+   !
+   normS=0
+   do j=ny1,ny2
+   do i=nx1,nx2
+      normS=normS+gradu(i,j,1)**2 + gradv(i,j,2)**2 + &
+         .5*(gradu(i,j,2)+gradv(i,j,1))**2
+
+      ! use divtau to store n=1 row of S:
+      divtau(i,j,1)=gradu(i,j,1)
+      divtau(i,j,2)=.5*(gradu(i,j,2)+gradv(i,j,1))
+   enddo
+   enddo
+   normS=sqrt(2*normS)  ! following Marcel Lesieur, Turbulence in Fluids
+
+   divtau=smagorinsky*2*normS*divtau
+   call der(divtau(1,1,1),work,dummy,work2,DX_ONLY,1)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,1)*work(i,j)
+   enddo
+   enddo
+
+   call der(divtau(1,1,2),work,dummy,work2,DX_ONLY,2)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,1)*work(i,j)
+   enddo
+   enddo
+
+
+
+   do j=ny1,ny2
+   do i=nx1,nx2
+      ! use divtau to store n=2 row of S:
+      divtau(i,j,1)=.5*(gradu(i,j,2)+gradv(i,j,1))
+      divtau(i,j,2)=gradv(i,j,2)
+   enddo
+   enddo
+   divtau=smagorinsky*2*normS*divtau
+   call der(divtau(1,1,1),work,dummy,work2,DX_ONLY,1)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,2)=rhs(i,j,2)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,2)*work(i,j)
+   enddo
+   enddo
+
+   call der(divtau(1,1,2),work,dummy,work2,DX_ONLY,2)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,2)=rhs(i,j,2)+work(i,j)      
+      smag_diss=smag_diss+Q(i,j,3)*Q(i,j,2)*work(i,j)
+   enddo
+   enddo
+
+
+
+endif
 
 
 
@@ -384,7 +451,7 @@ if (compute_ints==1) then
    !ints(7)
    ints(8)=a_diss/g_nx/g_ny         ! < Hu,div(tau)' >  
    ! ints(9)  = < u,f >  (alpha model only)
-   ints(10)=mu*ke_diss/g_nx/g_ny     ! u dot laplacian u
+   ints(10)=(smag_diss+mu*ke_diss)/g_nx/g_ny     ! u dot laplacian u
 endif
 
 call wallclock(tmx2)

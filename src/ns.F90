@@ -59,6 +59,10 @@ if (firstcall) then
    if (numerical_method/=FOURIER) then
       call abort("Error: ns3dspectral model requires FFT method.")
    endif
+   if (equations/=NS_UVW) then
+      call print_message("Error: ns3dspectral model can only runs equations==NS_UVW")
+      call abort("initial conditions are probably incorrect.")
+   endif
 #ifndef ALPHA_MODEL
    if (alpha_value/=0) then
       call abort("Error: alpha>0 but this is not the alpha model!")

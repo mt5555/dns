@@ -204,8 +204,6 @@ real*8 :: E_k2(0:max(nx,ny,nz))
 real*8 :: Len,U,R,F
 character(len=80) :: message
 
-equations = SHALLOW   ! shallow water equations, not the default NS equations
-
 k_0=14  
 m=25
 U=1.0        ! velocity scale  U normalized below so that KE=.5 U**2 = .5
@@ -355,9 +353,11 @@ call ifft3d(PSI,work1)
 
 ! compute velocity = curl PSI
 Q=0
-call der(PSI,Q,dummy,work1,DX_ONLY,2)
-Q(:,:,:,1)=-Q(:,:,:,1)
+! u = PSI_y
+call der(PSI,Q,dummy,work1,DX_ONLY,2)     
+! v = -PSI_x
 call der(PSI,Q(1,1,1,2),dummy,work1,DX_ONLY,1)
+Q(:,:,:,2)=-Q(:,:,:,2)
 
 if (dealias) call dealias_gridspace(Q,work1)
 
@@ -390,6 +390,8 @@ Q =   sqrt(3.23448943961018D-002)*Q/sqrt(E_0)
 
 if (dealias) call dealias_gridspace(Q,work1)
 
+
+if (equations==SHALLOW) then
 ! compute a balenced hight field:
 ! div( u grad u + f cross u  + g grad h ) = 0
 ! 
@@ -425,7 +427,8 @@ if (n_var==3) then
    call divfree_gridspace(PSI,Q(1,1,1,n_var),work1,work2)
    Q(:,:,:,n_var)= H0 + Q(:,:,:,n_var)/grav
 else
-   call abort("init_data_sht() requires n_var==3")
+   call abort("init_data_sht() with shallow water equations requires n_var==3")
+endif
 endif
 
 
