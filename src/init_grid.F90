@@ -795,7 +795,7 @@ real*8 rvalue,xfac,kmode
 integer i
 
 read(5,'(a12)') sdata
-write(*,'(a,a)') 'equations: ',sdata(1:1)
+write(*,'(a,a)') 'equations: ',sdata
 if (sdata=='ns_uvw') then
    equations=NS_UVW
 else if (sdata=='ns_psivor') then
@@ -803,7 +803,7 @@ else if (sdata=='ns_psivor') then
 else if (sdata=='shallow') then
    equations=SHALLOW
 else 
-   print *,'value = >>',sdata(1:12),'<<'
+   print *,'value = >>',sdata,'<<'
    call abort("invalid equations specified")
 endif
 
