@@ -162,6 +162,8 @@ if (status != 0):
    cmd = "mv -f /tmp/transpose.h transpose.h"
    status = os.system(cmd)
 else:
+   cmd = "rm -f /tmp/transpose.h"
+   status = os.system(cmd)
    print "transpose.h file unchanged.",
 
 
@@ -205,6 +207,8 @@ if (status != 0):
    cmd = "mv -f /tmp/params.h params.h"
    status = os.system(cmd)
 else:
+   cmd = "rm -f /tmp/params.h "
+   status = os.system(cmd)
    print "params.h file unchanged"
 
 
