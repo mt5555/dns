@@ -28,7 +28,7 @@ real*8 :: mxw                 ! max vorticity on grid
 real*8 :: mxw_init=-1         ! max vorticity at time=0
 real*8 :: dft(0:4,nelld)              ! modes of Rad
 
-real*8 :: contour_eps = 5e-8    ! find contours to within this accuracy
+real*8 :: contour_eps = 5e-7    ! find contours to within this accuracy
 real*8 :: center_eps  = 1e-5    ! find center to within this accuracy
 
 
