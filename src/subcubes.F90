@@ -174,7 +174,7 @@ call mpi_reduce(data2,data,nsx*nsy*nsz,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
 deallocate(data2)
 #endif
 
-
+#if 0
 do k=1,nsz
    do j=1,nsy
       do i=1,nsx
@@ -197,6 +197,7 @@ do k=1,nsz
       enddo
    enddo
 enddo
+#endif
 
 end subroutine
 
