@@ -1211,43 +1211,43 @@ do i=1,16
 enddo
 j=16
 
-! 2..32  (start with 2*9)
+! 18..32  (start with 2*9)
 do i=9,16
    j=j+1
    delta_val(j)=2*i
 enddo
 
-! 4..64  (start with 4*9)
+! 36..64  (start with 4*9)
 do i=9,16
    j=j+1
    delta_val(j)=4*i
 enddo
 
-! 8..128 (start with 8*9)
+! 72..128 (start with 8*9)
 do i=9,16
    j=j+1
    delta_val(j)=8*i
 enddo
 
-! 16..256  (start with 16*9)
+! 144..256  (start with 16*9)
 do i=9,16
    j=j+1
    delta_val(j)=16*i
 enddo
 
-! 32..512  (start with 32*9)
+! 288..512  (start with 32*9)
 do i=9,16
    j=j+1
    delta_val(j)=32*i
 enddo
 
-! 64..1024  (start with 64*9)
+! 576..1024  (start with 64*9)
 do i=9,16
    j=j+1
    delta_val(j)=64*i
 enddo
 
-! 128..2048
+! 1152..2048
 do i=9,16
    j=j+1
    delta_val(j)=128*i
