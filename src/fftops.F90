@@ -204,7 +204,7 @@ integer i,j,k,n
 real*8 dummy(1)
 
 vor=0
-do n=1,3
+do n=1,ndim
 
    ! compute u_x, u_xx
    call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,1)
@@ -228,6 +228,7 @@ do n=1,3
    enddo
    enddo
 
+   if (ndim==3) then
    ! compute u_z, u_zz
    call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,3)
    do k=nz1,nz2
@@ -238,6 +239,7 @@ do n=1,3
    enddo
    enddo
    enddo
+   endif
 
 enddo
 
@@ -274,6 +276,7 @@ enddo
 enddo
 enddo
 
+if (ndim==3) then
 n=3
 call der(u(1,1,1,n),work1,dummy,work2,DX_ONLY,n)
 do k=nz1,nz2
@@ -283,6 +286,7 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
+endif
 
 
 end subroutine
@@ -923,7 +927,7 @@ p=0
             pi0j1k0 = (-im*u(i1,j1,k0,1)  +  jm*u(i0,j0,k0,2) - km*u(i0,j1,k1,3))*xfac
             pi1j1k0 = ( im*u(i0,j1,k0,1)  +  jm*u(i1,j0,k0,2) - km*u(i1,j1,k1,3))*xfac
 
-            if (g_nz>1) then
+            if (ndim==3) then
             pi0j0k1 = (-im*u(i1,j0,k1,1)  -  jm*u(i0,j1,k1,2) + km*u(i0,j0,k0,3))*xfac
             pi1j0k1 = ( im*u(i0,j0,k1,1)  -  jm*u(i1,j1,k1,2) + km*u(i1,j0,k0,3))*xfac
             pi0j1k1 = (-im*u(i1,j1,k1,1)  +  jm*u(i0,j0,k1,2) + km*u(i0,j1,k0,3))*xfac
@@ -935,7 +939,7 @@ p=0
             u(i1,j0,k0,1) = u(i1,j0,k0,1) - im*pi0j0k0
             u(i0,j1,k0,1) = u(i0,j1,k0,1) + im*pi1j1k0
             u(i1,j1,k0,1) = u(i1,j1,k0,1) - im*pi0j1k0
-            if (g_nz>1) then
+            if (ndim==3) then
             u(i0,j0,k1,1) = u(i0,j0,k1,1) + im*pi1j0k1
             u(i1,j0,k1,1) = u(i1,j0,k1,1) - im*pi0j0k1
             u(i0,j1,k1,1) = u(i0,j1,k1,1) + im*pi1j1k1
@@ -947,7 +951,7 @@ p=0
             u(i1,j0,k0,2) = u(i1,j0,k0,2) + jm*pi1j1k0
             u(i0,j1,k0,2) = u(i0,j1,k0,2) - jm*pi0j0k0
             u(i1,j1,k0,2) = u(i1,j1,k0,2) - jm*pi1j0k0
-            if (g_nz>1) then
+            if (ndim==3) then
             u(i0,j0,k1,2) = u(i0,j0,k1,2) + jm*pi0j1k1
             u(i1,j0,k1,2) = u(i1,j0,k1,2) + jm*pi1j1k1
             u(i0,j1,k1,2) = u(i0,j1,k1,2) - jm*pi0j0k1
@@ -956,7 +960,7 @@ p=0
 
 
             ! v = v - pz
-            if (g_nz>1) then
+            if (ndim==3) then
             u(i0,j0,k0,3) = u(i0,j0,k0,3) + km*pi0j0k1
             u(i1,j0,k0,3) = u(i1,j0,k0,3) + km*pi1j0k1
             u(i0,j1,k0,3) = u(i0,j1,k0,3) + km*pi0j1k1
@@ -1000,7 +1004,7 @@ p=0
                   u(i1,j1,k1,n) = 0
                enddo	
             endif
-            if (km==0 .and. g_nz>1) then
+            if (km==0 .and. ndim==3) then
                do n=1,3
                   u(i0,j0,k1,n) = 0
                   u(i1,j0,k1,n) = 0

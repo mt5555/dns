@@ -41,7 +41,7 @@ time_target=time_final
 !
 
 umax=maxs(4)
-if (g_nz>1) then
+if (ndim==3) then
    mumax = mu*(1/delx**2 + 1/dely**2 + 1/delz**2)
 else
    mumax = mu*(1/delx**2 + 1/dely**2)
@@ -239,9 +239,11 @@ if (doit_output) then
    fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
    call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
 
-   call vorticity(q1,Q,work1,work2)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-   call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+   if (ndim==2) then
+      call vorticity(q1,Q,work1,work2)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+      call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+   endif
 endif
 
 
@@ -395,7 +397,7 @@ spec_x=0
 spec_y=0
 spec_z=0
 
-do i=1,3
+do i=1,ndim
    iwave=iwave_max
    call compute_spectrum(Q(:,:,:,i),work1,work2,spectrum1,spec_x2,spec_y2,spec_z2,iwave,io_pe)
    spectrum=spectrum+.5*spectrum1

@@ -33,10 +33,10 @@ endif
 if ( (ny-ny2)<nghost) then 
     call abort("ny too small for number of ghost cells requested")
 endif
-if ( (nz1-1)<nghost .and. nslabz>1 ) then 
+if ( (nz1-1)<nghost .and. ndim==3 ) then 
     call abort("nz1 too small for number of ghost cells requested")
 endif
-if ( (nz-nz2)<nghost .and.  nslabz>1 ) then 
+if ( (nz-nz2)<nghost .and.  ndim==3 ) then 
     call abort("nz too small for number of ghost cells requested")
 endif
 
@@ -358,7 +358,7 @@ endif
 ! compute Z direction ghost cells
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (nslabz>1) then
+if (ndim==3) then
 z0=my_z-1
 if (z0<0) then
    if (periodic==1) then
@@ -517,7 +517,7 @@ enddo
 enddo
 enddo
 
-if (nslabz>1) then
+if (ndim==3) then
 l=0
 do k=1,nghost
 do j=ny1,ny2

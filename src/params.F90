@@ -98,6 +98,8 @@ integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 !integer           :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 
+integer :: ndim       ! 2 or 3 dimensions.  ndim = (g_nz==1 ? 2 : 3)
+
 ! number of actual data points
 integer,parameter :: nslabx=nx2-nx1+1
 integer,parameter :: nslaby=ny2-ny1+1
@@ -199,33 +201,39 @@ real*8 :: ints(nints),maxs(nints)
 !      ints(9) = < u,f >
 !      ints(1)= < u_xx,u_xx>
 !  
-! Quantities involving only Q are computed in the timestep
-! routine, at the current time T
+! These quantities are computed in the timestep
+! routine, at the current time T:
 !
 ! maxs(1,2,3) = max U,V,W
 ! maxs(4) = max (U/delx + V/dely + W/delz)  used for CFL
 !
-! Quantities involving derivatives are computed when the RHS is computed
-! and thus the data is at the prevous timestep  T-1
+! These quantities computed as the RHS is computed
+! and thus the data is at the prevous timestep  T-1:
 ! 
 ! ints(1) = < u_xx,u_xx >
-! ints(2) = < u_x,u_x >
+! ints(2) = < u_x,u_x >   
 ! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
 !                    non-alpha-mode: F=f.  Alpha model F=f'
 ! ints(4) = z-component of vorticity
 ! ints(5) = helicity
-! ints(6) = ke
+! ints(6) = .5 < u,u >
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < u,f >  (alpha model only)
-!                           
+! ints(10) = ?
 ! maxs(5) = max vorticity
+!
 !
 ! for convience, we store the time data in maxs(6:7)
 ! maxs(6) = time (at end of time step)  T
 ! maxs(7) = time at begining of time step T-1
 ! maxs(8) = 
 ! maxs(9) = 
+!
+! for the shallow water model, we modify the above slightly:
+! ints(2) = < h u , u_xx > 
+! ints(6) = .5 < h u , u >         
+! ints(10) = g*H^2
 !
 integer,parameter :: ntimers=13
 real*8 :: tims(ntimers)=0
@@ -306,7 +314,13 @@ integer :: fail=0
 g_nx2=g_nx+2
 g_ny2=g_ny+2
 g_nz2=g_nz+2
-if (g_nz==1) g_nz2=1
+ndim=3
+
+if (g_nz==1) then
+   g_nz2=1
+   ndim=2
+endif
+
 
 
 ! these values must divide with no remainder:

@@ -106,7 +106,11 @@ do i=nx1,nx2
    do n=1,3
       maxs(n)=max(maxs(n),abs(Q(i,j,k,n)))   ! max u,v,w
    enddo
-   vel = abs(Q(i,j,k,1))/delx + abs(Q(i,j,k,2))/dely + abs(Q(i,j,k,3))/delz
+   if (ndim==3) then
+      vel = abs(Q(i,j,k,1))/delx + abs(Q(i,j,k,2))/dely + abs(Q(i,j,k,3))/delz
+   else
+      vel = abs(Q(i,j,k,1))/delx + abs(Q(i,j,k,2))/dely 
+   endif
    maxs(4)=max(maxs(4),vel)
 enddo
 enddo
@@ -171,7 +175,7 @@ if (mu>0) numder=DX_AND_DXX   ! only compute 2nd derivatives if mu>0
 
 rhs=0
 ! compute viscous terms (in rhs) and vorticity
-do n=1,3
+do n=1,ndim
 
 
    ! compute u_x, u_xx
@@ -226,7 +230,7 @@ do n=1,3
    enddo
 
 
-
+   if (ndim==3) then
    ! compute u_z, u_zz
    call der(Q(1,1,1,n),d1,d2,work,numder,3)
 
@@ -249,7 +253,7 @@ do n=1,3
    enddo
    enddo
    enddo
-
+   endif
 
 
 enddo
