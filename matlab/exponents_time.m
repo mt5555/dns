@@ -1,6 +1,6 @@
 %
 % Calculation of scaling exponents from time-averaged and angle-averaged data
-%
+%S.Kurien
 %
 
 mu=0;
@@ -19,6 +19,22 @@ times=[1.2:0.1:2.4];
 ndir_use = 0;
 
 teddy=1;
+
+
+xx=(1:.5:(nx./2.5)) / nx;        %interpolation points
+xx_plot = xx*nx*delx_over_eta;    %units of r/neta  
+lex = round(length(xx_plot)/4);
+lenx = length(xx_plot);
+
+yyl_tangave = zeros([length(xx),9]);
+yyt_tangave = zeros([length(xx),9]);
+
+ndir_use=49;
+%
+% use only 49 directions:
+if (ndir_use>0) 
+ndir=ndir_use; 
+end
 
 
 
@@ -44,13 +60,7 @@ if (abs(1-sum(w))>1e-7)
   return;
 end
 
-xx=(1:.5:(nx./2.5)) / nx;        %interpolation points
-xx_plot = xx*nx*delx_over_eta;    %units of r/neta  
-lex = round(length(xx_plot)/4);
-lenx = length(xx_plot);
-
-yyl_tangave = zeros([length(xx),9]);
-yyt_tangave = zeros([length(xx),9]);
+  close all;
 
 times_plot=[];
 for t=times
@@ -68,14 +78,7 @@ delx_over_eta_l=(1/nx)/eta_l;
 
 r_val(:,:) = r_val(:,:)/nx;
 
-
-ndir_use=49;
-%
-% use only 49 directions:
-if (ndir_use>0) 
-ndir=ndir_use; 
-end
-
+ndir = ndir_use;
 
 for ord = 1:9
 
@@ -141,6 +144,7 @@ p=i+1;
 sprintf('p=%d;',p)
      exp = mean(der(ind));
 sprintf('Exps = %f; ',exp)
+     experr = std(der(ind));
 sprintf('Error on exps = %f',std(der(ind)))
 
      figure(17)
@@ -154,10 +158,10 @@ figure(19)
      title('Relative scaling exponents - longitudinal');
      grid on;
      figure(21)
-     plot(p,mean(der(ind)),'o');hold on;
-     title('comparison of long and trans exps');
+     errorbar(p,mean(der(ind)),experr,'o');hold on;
+     title('Comparison of long and trans exps');
      grid on;
-
+     
 
 % PLOT THE STRUCTURE FUNCTIONS AND SCALING LINE
 
@@ -186,7 +190,8 @@ grid on;
 sprintf('p=%d;',p)
      exp = mean(der(ind));
      sprintf('Exps = %f; ',exp)
-     sprintf('Error on exps = %f',std(der(ind)))
+     experr = std(der(ind));
+     sprintf('Error on exps = %f',experr)
 
      
 
@@ -201,7 +206,7 @@ figure(20)
      title('Relative scaling exponents -  transverse');
      grid on;
      figure(21)
-     plot(p,mean(der(ind)),'x');hold on;
+     errorbar(p,mean(der(ind)),experr,'x');hold on;
      title('comparison of long and trans exps');
      grid on;
 
@@ -214,7 +219,12 @@ y_const= 1.2*(yyt_tangave(lex,i))/(xx_plot(lex)).^exp;
      loglog(xx_plot, y_const*xx_plot.^exp,'k');hold on;
      set(gca,'fontsize',14)
      text(xx_plot(1)-1,1.2*(yyt_tangave(4,i)),['r^{',sprintf('%3.2f',exp),'}']);
-
-     sname = sprintf('scalings_%i',p)
+     sname = sprintf('scalings_%i_dir%d',p,ndir);
      print('-depsc', sname);
+
+     figure(21)
+     axis([1 7 0.5 2]) 
+     cname = sprintf('exponents_dir%d',ndir);
+     print('-depsc', cname);
+
 end
