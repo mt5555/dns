@@ -49,16 +49,17 @@ real*8 :: Q2(nx,ny,nz,n_var)
 real*8 :: Q3(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 
-call rk4reshape(time,Q,Qsave(1,1,1,1),Q2(1,1,1,1),Q2(1,1,1,2),Q2(1,1,1,3),work1,work2)
+call rk4reshape(time,Q,Qsave(1,1,1,1),Qsave(1,1,1,2),Q2(1,1,1,1),Q2(1,1,1,2),Q2(1,1,1,3),work1,work2)
 end subroutine
 
 
-subroutine rk4reshape(time,Q,psi0,rhs,w_old,w_tmp,psi,work)
+subroutine rk4reshape(time,Q,w0,psi0,rhs,w_old,w_tmp,psi,work)
 use params
 use bc
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,n_var)
+real*8 :: w0(nx,ny)
 real*8 :: psi0(nx,ny)
 real*8 :: w_tmp(nx,ny)
 real*8 :: w_old(nx,ny)
@@ -102,12 +103,12 @@ if (ncall==1) then
    endif
 
    ! set boundary data
-   call bcw_impose(Q(1,1,3))
+   call bcw_impose(w0)
    w_tmp=0
    psi0=0
    ! initialize PSI on interior.  
    ! recompute PSI on boundary if comp_psi0==1
-   call compute_psi(Q(1,1,3),psi0,rhs,work,w_tmp,comp_psi0)
+   call compute_psi(w0,psi0,rhs,work,w_tmp,comp_psi0)
 endif
 
 
@@ -120,12 +121,12 @@ endif
 !
 
 
-w_old=Q(:,:,3)
+w_old=w0
 
 
 ! stage 1
-call ns3D(rhs,Q(1,1,3),psi0,time,1)
-Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
+call ns3D(rhs,w0,psi0,time,1)
+w0=w0+delt*rhs/6.0
 
 
 
@@ -134,7 +135,7 @@ w_tmp = w_old + delt*rhs/2.0
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
-Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
+w0=w0+delt*rhs/3.0
 
 
 
@@ -143,7 +144,7 @@ w_tmp = w_old + delt*rhs/2.0
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
-Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
+w0=w0+delt*rhs/3.0
 
 
 
@@ -153,12 +154,12 @@ w_tmp = w_old + delt*rhs
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
-Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
-call bcw_impose(Q(1,1,3))
+w0=w0+delt*rhs/6.0
+call bcw_impose(w0)
 
 
 
-call compute_psi(Q(1,1,3),psi0,rhs,work,psi,comp_psi_rk4)
+call compute_psi(w0,psi0,rhs,work,psi,comp_psi_rk4)
 time = time + delt
 
 

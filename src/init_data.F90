@@ -35,7 +35,7 @@ else if (equations==SHALLOW) then
 else if (equations==NS_PSIVOR) then
    call print_message("Restarting from file restart.vor")
    fname = rundir(1:len_trim(rundir)) // "restart.vor"
-   call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+   call singlefile_io(time_initial,Qhat(1,1,1,1),fname,work1,work2,1,io_pe)
    !fname = rundir(1:len_trim(rundir)) // "restart.psi"
    !call singlefile_io(time_initial,Qhat,fname,work1,work2,1,io_pe)
 endif
@@ -463,18 +463,18 @@ do i=bx1,bx2
       psisum = psisum - wd(k)*log(denom1/denom2)
    enddo
    w(i,j,1) = delsq*wsum/pi
-   Qhat(i,j,1,1)= psisum*delx*dely/(4*pi)  - ubar*ycord(j)
+   Qhat(i,j,1,2)= psisum*delx*dely/(4*pi)  - ubar*ycord(j)
 enddo
 enddo
 
 
 ! We are generating an initial condition, so store w in Q(:,:,:,3)
 ! otherwise, initial condition was read in, and is already in Q(:,:,:,3)
-if (init==1) Q(:,:,:,3)=w
+if (init==1) Qhat(:,:,:,1)=w
 
 ! do this even for restart case, because boundary conditions were not
 ! saved in restart file if offset_bdy==1
-call bcw_impose(Q(1,1,1,3))
+call bcw_impose(Qhat(1,1,1,1))
 
 ! Set the values of PSI on the boundary coming from the initial condition,
 ! if needed.  
@@ -483,7 +483,7 @@ if (g_bdy_x1==INFLOW0_ONESIDED) then
 else
    ! psi on the boundary fixed for all time from the initial conditon:
    call print_message("Setting PSI boundary values (fixed for all time)")
-   call bc_biotsavart(w,Qhat,1)  ! recompute from w
+   call bc_biotsavart(w,Qhat(1,1,1,2),1)  ! recompute PSI on boundary from w
    !call set_biotsavart(Qhat)    ! set based on PSI computed above 
 endif
 

@@ -10,6 +10,7 @@ use params
 use mpi
 implicit none
 real*8,save :: Q(nx,ny,nz,n_var)
+real*8,save :: Qhat(nx,ny,nz,n_var)
 real*8,save :: q1(nx,ny,nz,n_var)
 real*8,save :: work1(nx,ny,nz)
 real*8,save :: work2(nx,ny,nz)
@@ -39,15 +40,15 @@ Q=0
 if (restart==1) then
    !call set_byteswap_input(1);
    ! initialize some constants, if needed:
-   if (init_cond==3) call init_data_sht(Q,q1,work1,work2,0)      ! set grav, fcor
-   if (init_cond==4) call init_data_vxpair(Q,q1,work1,work2,0) ! set xscale, yscale... 
-   call init_data_restart(Q,q1,work1,work2)
+   if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)      ! set grav, fcor
+   if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0) ! set xscale, yscale... 
+   call init_data_restart(Q,Qhat,work1,work2)
 else
-   if (init_cond==0) call init_data_khblob(Q,q1,work1,work2)
-   if (init_cond==1) call init_data_kh(Q,q1,work1,work2)
-   if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
-   if (init_cond==3) call init_data_sht(Q,q1,work1,work2,1)
-   if (init_cond==4) call init_data_vxpair(Q,q1,work1,work2,1)
+   if (init_cond==0) call init_data_khblob(Q,Qhat,work1,work2)
+   if (init_cond==1) call init_data_kh(Q,Qhat,work1,work2)
+   if (init_cond==2) call init_data_lwisotropic(Q,Qhat,work1,work2)
+   if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,1)
+   if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,1)
 endif
 
 if (equations==NS_UVW) then
@@ -78,7 +79,7 @@ tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
 
-call dns_solve(Q,q1,work1,work2)
+call dns_solve(Q,Qhat,q1,work1,work2)
 
 
 
@@ -159,18 +160,18 @@ end program DNS
 !  main time stepping loop
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine dns_solve(Q,Qhat,work1,work2)
+subroutine dns_solve(Q,Qhat,q1,work1,work2)
 use params
 use mpi
 
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 !local variables
-real*8,save :: q1(nx,ny,nz,n_var)
 real*8,save :: q2(nx,ny,nz,n_var)
 real*8,save :: q3(nx,ny,nz,n_var)
 

@@ -293,9 +293,9 @@ if (doit_output) then
    else if (equations==NS_PSIVOR) then
       ! 2D NS psi-vor formulation
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-      call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
+      call singlefile_io(time,Qhat(1,1,1,1),fname,work1,work2,0,io_pe)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
-      call singlefile_io(time,Qhat,fname,work1,work2,0,io_pe)
+      call singlefile_io(time,Qhat(1,1,1,2),fname,work1,work2,0,io_pe)
    endif
 endif
 
