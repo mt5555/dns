@@ -82,26 +82,23 @@ FFT timings.
 
 *****************************************************************
 
-64x64x64 timings (1cpu)  
+64x64x64 timings (1cpu)    110M
 ./bench.sh 64  
 run to .1 
 CFL=1.5/.25
 
 Linux laptop PGI F90
-FFT99                      1.41  1.41
-STK+gcc                    1.65  1.64
-STK+PGCC                   1.58  1.58
+STK2+gcc                   1.47  1.48
+STK2+PGC                   1.45
 
 Linux laptop Lahey
 FFT99                      1.59  1.58
 STK2+gcc                   1.72  1.71
 
-dunnaway PGI F90            .75
+autrey (linux) PGI F90 
+STK2+PGCC                  .75  .78  .76
+STK2+GCC                   .83  .83  .84
 
-
-Autrey Sun Ultra 60
-FFT99   2.17  2.00 2.01
-STK2    1.53  1.57 
 
                                  (Timings too unreliable - have to be
                                    done on 128cpus?)
