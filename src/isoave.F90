@@ -16,6 +16,7 @@ implicit none
 
 integer,parameter :: ndir=73
 integer,parameter :: ndelta_max=73
+integer,parameter :: pmax=10
 integer :: dir(3,ndir)
 integer :: ndelta
 integer :: delta_val(ndelta_max)   ! delta values (in terms of grid points)
@@ -32,24 +33,16 @@ logical :: firstcall=.true.
 !   u_t1 = (u(x+r)-u(x))  dot rperp1
 !   u_t2 = (u(x+r)-u(x))  dot rperp2
 !
-!   D_ll  = u_l**2
-!   D_lll = u_l**3
+!   Dl  = u_l**p   p=2..10
+!   Dt  = u_t**p   p=2..10
 !
-!   D_tt  = u_t1**2
 !   D_ltt = u_l * u_t1**2
 !
 !
-!   u_l**p   p=2:1:10                       9    9
-!   u_t**p   p=2:1:10                      9*2 = 18
-!   u_l**p u_t**q    p=2,4,6  q=2,4,6      9*2 = 18
-!   Dl(:,:,9)
-!   Dt(:,:,2,9)
-!   Dlt(:,:,2,3,3)
 !   
 !
-real*8,allocatable  :: D_ll(:,:)         ! D_ll(ndelta,ndir)
-real*8,allocatable  :: D_lll(:,:)        ! D_lll(ndelta,ndir)
-real*8,allocatable  :: D_tt(:,:,:)       ! D_tt(ndelta,ndir,2)    
+real*8,allocatable  :: Dl(:,:,:)         ! longitudinal, p=2..10
+real*8,allocatable  :: Dt(:,:,:,:)       ! transverse, p=2..10
 real*8,allocatable  :: D_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
 ! signed (positive part) of above
@@ -79,7 +72,7 @@ implicit none
 CPOINTER fid
 real*8 :: time
 !local
-integer :: i,idir
+integer :: i,idir,p
 real*8 :: x
 
 if (my_pe/=io_pe) return
@@ -87,8 +80,8 @@ if (my_pe/=io_pe) return
 
 x=ndelta; call cwrite8(fid,x,1)   
 x=ndir;   call cwrite8(fid,x,1)   
-x=4;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
-x=4;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
+x=pmax-1+2;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
+x=pmax-1+3;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
 x=7;      call cwrite8(fid,x,1)   ! number of scalars
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
@@ -99,12 +92,12 @@ do idir=1,ndir
 enddo
 
 ! longitudinal
+do p=2,pmax
 do idir=1,ndir
-   call cwrite8(fid,D_ll(1,idir),ndelta)
+   call cwrite8(fid,Dl(1,idir,p),ndelta)
 enddo
-do idir=1,ndir
-   call cwrite8(fid,D_lll(1,idir),ndelta)
 enddo
+
 do idir=1,ndir
    call cwrite8(fid,SP_lll(1,idir),ndelta)
 enddo
@@ -113,11 +106,14 @@ do idir=1,ndir
 enddo
 
 ! transverse
+do p=2,pmax
 do i=1,2
 do idir=1,ndir
-   call cwrite8(fid,D_tt(1,idir,i),ndelta)
+   call cwrite8(fid,Dt(1,idir,i,p),ndelta)
 enddo
 enddo
+enddo
+
 do i=1,2
 do idir=1,ndir
    call cwrite8(fid,D_ltt(1,idir,i),ndelta)
@@ -178,7 +174,7 @@ real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
-integer :: n1,n1d,n2,n2d,n3,n3d,ierr
+integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p
 
 if (firstcall) then
    firstcall=.false.
@@ -191,10 +187,9 @@ endif
 
 
 
-D_ll=0
-D_tt=0
+Dl=0
+Dt=0
 D_ltt=0
-D_lll=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -356,10 +351,9 @@ do idir=1,ndir
    enddo
 
 
-D_ll=D_ll/ntot
-D_tt=D_tt/ntot
+Dl=Dl/ntot
+Dt=Dt/ntot
 D_ltt=D_ltt/ntot
-D_lll=D_lll/ntot
 
 SP_ltt=SP_ltt/ntot
 SP_lll=SP_lll/ntot
@@ -367,14 +361,16 @@ SN_ltt=SN_ltt/ntot
 SN_lll=SN_lll/ntot
 
 #ifdef USE_MPI
-   dwork2=D_ll
-   call MPI_allreduce(dwork2,D_ll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork3=D_tt
-   call MPI_allreduce(dwork3,D_tt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   do p=2,pmax
+   dwork2=Dl(:,:,p)
+   call MPI_allreduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork3=Dt(:,:,:,p)
+   call MPI_allreduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enddo
+
    dwork3=D_ltt
    call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork2=D_lll
-   call MPI_allreduce(dwork2,D_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
 
 
    dwork3=SP_ltt
@@ -440,10 +436,9 @@ endif
 
 
 
-D_ll=0
-D_tt=0
+Dl=0
+Dt=0
 D_ltt=0
-D_lll=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -624,10 +619,9 @@ do idir=1,ndir
    enddo
 
 
-D_ll=D_ll/ntot
-D_tt=D_tt/ntot
+Dl=Dl/ntot
+Dt=Dt/ntot
 D_ltt=D_ltt/ntot
-D_lll=D_lll/ntot
 
 SP_ltt=SP_ltt/ntot
 SP_lll=SP_lll/ntot
@@ -635,14 +629,15 @@ SN_ltt=SN_ltt/ntot
 SN_lll=SN_lll/ntot
 
 #ifdef USE_MPI
-   dwork2=D_ll
-   call MPI_allreduce(dwork2,D_ll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork3=D_tt
-   call MPI_allreduce(dwork3,D_tt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   do p=2,pmax
+   dwork2=Dl(:,:,p)
+   call MPI_allreduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork3=Dt(:,:,:,p)
+   call MPI_allreduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enddo
+
    dwork3=D_ltt
    call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   dwork2=D_lll
-   call MPI_allreduce(dwork2,D_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 
 
    dwork3=SP_ltt
@@ -681,7 +676,7 @@ real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,ntot
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 if (firstcall) then
    if (ncpu_x*ncpu_y*ncpu_z>1) then
@@ -692,10 +687,9 @@ if (firstcall) then
 endif
 
 
-D_ll=0
-D_tt=0
+Dl=0
+Dt=0
 D_ltt=0
-D_lll=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -804,12 +798,12 @@ do idir=1,ndir
          u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
          u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
          
+         do p=2,pmax
+            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
+            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
+            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
+         enddo
          
-         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
-         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
-         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
-         
-         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
          D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
          D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
 
@@ -832,10 +826,9 @@ enddo
 !$omp end parallel do
 
 
-D_ll=D_ll/ntot
-D_tt=D_tt/ntot
+Dl=Dl/ntot
+Dt=Dt/ntot
 D_ltt=D_ltt/ntot
-D_lll=D_lll/ntot
 
 SP_ltt=SP_ltt/ntot
 SP_lll=SP_lll/ntot
@@ -858,7 +851,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 !local
 real*8 :: rvec(3),delu(3)
 real*8 :: u_l,u_t1,u_t2
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 
   do idel=1,ndelta
@@ -896,12 +889,12 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
          u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
          u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
          
+         do p=2,pmax
+            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
+            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
+            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
+         enddo
          
-         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
-         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
-         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
-         
-         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
          D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
          D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
 
@@ -941,7 +934,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 !local
 real*8 :: rvec(3),delu(3)
 real*8 :: u_l,u_t1,u_t2
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 
   do idel=1,ndelta
@@ -980,11 +973,12 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
          u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
          u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
          
-         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
-         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
-         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
+         do p=2,pmax
+            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
+            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
+            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
+         enddo
          
-         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
          D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
          D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
 
@@ -1021,7 +1015,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 !local
 real*8 :: rvec(3),delu(3)
 real*8 :: u_l,u_t1,u_t2
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 
   do idel=1,ndelta
@@ -1062,11 +1056,12 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
          u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
          
          
-         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
-         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
-         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
+         do p=2,pmax
+            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
+            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
+            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
+         enddo
          
-         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
          D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
          D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
 
@@ -1108,7 +1103,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
 !local
 real*8 :: rvec(3),delu(3)
 real*8 :: u_l,u_t1,u_t2
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 
   do idel=1,ndelta
@@ -1152,11 +1147,12 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
          u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
          u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
          
-         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
-         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
-         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
+         do p=2,pmax
+            Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
+            Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
+            Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
+         enddo
          
-         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
          D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
          D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
 
@@ -1440,9 +1436,8 @@ endif
 allocate(dwork2(ndelta,ndir))
 allocate(dwork3(ndelta,ndir,2))
 
-allocate(D_ll(ndelta,ndir))
-allocate(D_lll(ndelta,ndir))
-allocate(D_tt(ndelta,ndir,2))
+allocate(Dl(ndelta,ndir,2:pmax))
+allocate(Dt(ndelta,ndir,2,2:pmax))
 allocate(D_ltt(ndelta,ndir,2))
 
 allocate(SP_lll(ndelta,ndir))

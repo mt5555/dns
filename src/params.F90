@@ -301,7 +301,7 @@ real*8 :: ints(nints),maxs(nints)
 !
 ! KE = ints(6)
 ! KE dissapation:  ints(10) + ints(3) + ints(8)
-!      ints(10) = mu*< u_x,u_x >
+!      ints(10) = -mu*< u_x,u_x >
 !      ints(3) = < u,f  >           
 !      ints(8) = < u,div(tau)' >
 !

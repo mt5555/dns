@@ -230,7 +230,7 @@ do wn=numb1,numb
            Qhat(k,i,j,2)**2 + &
            Qhat(k,i,j,3)**2) 
 
-      xw=(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
+      xw=-(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
       fxx_diss = fxx_diss + xfac*tauf*xw*(Qhat(k,i,j,1)**2 + &
                                 Qhat(k,i,j,2)**2 + &
                                 Qhat(k,i,j,3)**2) 
@@ -451,7 +451,7 @@ do wn=numb1,numb
          Qhat(k,i,j,3)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3) )
       
       f_diss = f_diss + xfac*fsum
-      xw=(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
+      xw=-(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
       fxx_diss = fxx_diss + xfac*xw*fsum
 
 

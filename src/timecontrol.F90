@@ -243,7 +243,7 @@ if (doit_screen) then
    ! alpha model information
    !
    if (alpha_value>0) then
-      write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'Ea: ',&
+      write(message,'(a,f13.8,a,f13.4,a,f12.7)') 'Ea: ',&
            ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
       call print_message(message)	
       
@@ -255,7 +255,7 @@ if (doit_screen) then
               ke_diss-mu*alpha_value**2*ints(1) + ints(3) - alpha_value**2*ints(9)
       else
          write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
-              mu*ints(1),' f=',ints(9),&
+              -mu*ints(1),' f=',-ints(9),&
               '                      tot=', -mu*ints(1) - ints(9)
       endif
       call print_message(message)	

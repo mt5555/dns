@@ -21,8 +21,12 @@ if (alpha_value>=1e10) then
 else if (alpha_value>=1.0) then
    alpha_value=alpha_value*min(delx,dely,delz)
 endif
-write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
-     alpha_value,alpha_value/min(delx,dely,delz)
+if (infinite_alpha==0) then
+   write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
+        alpha_value,alpha_value/min(delx,dely,delz)
+else
+   write(message,'(a,f14.8,f10.4)') "NS-Alpha:  infinite"
+endif
 call print_message(message)
 
 write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
