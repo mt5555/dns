@@ -1,12 +1,18 @@
 
-name='/scratch1/taylorm/iso_256A0040.000'
-nx=256; delx_over_eta=1.73; epsilon=95.0;
+%name='/scratch1/taylorm/iso_256A0040.000'
+%nx=256; delx_over_eta=1.73; epsilon=95.0;
 
-name='/scratch1/taylorm/iso12_250A0022.000'
-nx=250; delx_over_eta=.80; epsilon=3.9;
+%name='/scratch1/taylorm/iso12_250A0022.000'
+%nx=250; delx_over_eta=.80; epsilon=3.9;
 
-name='../src/test0000.5000'
-nx=256; delx_over_eta=.7; epsilon=3.0;
+%name='../src/test0000.5000'
+%nx=256; delx_over_eta=.7; epsilon=3.0;
+
+name='../src/test0001.0000'
+nx=256; delx_over_eta=2.00; epsilon=4.31;
+
+%name='../src/test0001.5000'
+%nx=256; delx_over_eta=3.46; epsilon=4.93;
 
 
 fid=fopen([name,'.isostr'],'r','l');
@@ -25,6 +31,7 @@ cdir=[cdir, 'c','c','c','c','c','c','c','c','c','c','c','c'];      % 12 (1,2,2) 
 w=textread('../src/voronoi/isoave.weights','%f');
 % take every other weight
 w=2*w(1:2:length(w));
+
 %w=w./w/length(w);  % equally weighted
 
 
@@ -142,6 +149,7 @@ yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
 semilogx(xx,yyave,'k','LineWidth',1.0);
 %errorbar(xx,yyave,yyave_sq);
 title('D_{lll} / r\epsilon   (4/5 law)       blue: D-/D+');
+xlabel('r/\eta');
 x=1:xmax; semilogx(x,.8*x./x,'k');
 if (plot_posneg)
   semilogx(xx,yyave1)
@@ -150,6 +158,7 @@ end
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc 45.ps
+print -djpeg 45.jpg
 
 
 
@@ -177,10 +186,12 @@ semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
 semilogx(xx,.5*(yyave1+yyave2),'k','LineWidth',1.0);
 title('D_{ltt} / r\epsilon  (4/15 law)');
+xlabel('r/\eta');
 x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc 415.ps
+print -djpeg 415.jpg
 
 
 %
@@ -199,11 +210,13 @@ for i=1:ndir
 end
 semilogx(xx,yyave,'k','LineWidth',1.0);
 title('4/3 law');
+xlabel('r/\eta');
 x=1:xmax; semilogx(x,(4/3)*x./x,'k');
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc 43.ps
+print -djpeg 43.jpg
 
 end
 
@@ -250,11 +263,13 @@ f2 = f(2:l-1) + .5*xx_box(2:l-1).*df;
 f2 = f2 .* xx_box(2:l-1).^(-2/3);
 semilogx(xx(2:l-1),f2,'g');
 title('D_{tt} (points)       angle ave(red)       D_{ll} + .5 r (D_{ll})'' (green)');
+xlabel('r/\eta');
 ylabel('scaled by r^{-2/3}')
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc isocheck.ps
+print -djpeg isocheck.jpg
 
 
 
@@ -299,4 +314,5 @@ xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc isocheck3.ps
+print -djpeg isocheck3.jpg
 end
