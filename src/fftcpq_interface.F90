@@ -2,8 +2,7 @@
 #if 0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! our wrapper for ECMWF FFT99 and SGI FFT
-! (they both have the same output format)
+! our wrapper for CXML FFT
 ! 
 !
 ! provides public interfaces:
@@ -54,9 +53,14 @@ module fft_interface
 implicit none
 integer, parameter ::  num_fftsizes=3
 
+
+
 integer :: init=0
 type fftdata_d
-   real*8 :: ptrigs(500)
+   ! Real cpq data structure is about 160 words, but lets go 10x to be safe!
+   ! we are supposed to pass in a named common block from a cmxl include
+   ! file - but that does not allow multiple fft's!
+   real*8 :: trigs(1600)
    integer :: size
 end type
 type(fftdata_d) :: fftdata(num_fftsizes)
@@ -99,16 +103,20 @@ end subroutine
 
 
 subroutine fftinit(n,index)
-integer n,index
+integer n,index,stat
 character*80 message
+#include <cxmldef.for>
 
 if (init==0) call abort("fftcpq_interface.F90: call fft_interface_init to initialize first!");
 
-write(message,'(a,i6)') 'Initializing SGI FFT of size n=',n
+write(message,'(a,i6)') 'Initializing CXML FFT of size n=',n
 call print_message(message)
 
 fftdata(index)%size=n
-call dfft_init(n,fftdata%ptrigs,.true.)
+!stat=dfft_init_grp(n,fftdata(index)%trigs,.false.,n)
+stat=dfft_init(n,fftdata(index)%trigs,.true.)
+
+
 
 
 end subroutine
@@ -150,28 +158,37 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
+#include <cxmldef.for>
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
-real*8 :: scale=1
 
-integer index,jj,j,k,numffts
+integer index,i,j,k,numffts
+real*8 :: scale
 if (n1==1) return
-ASSERT("ifft1: dimension too small ",n1+2<=n1d;)
+ASSERT("ifft1: dimension too small ",n1+2<=n1d)
 call getindex(n1,index)
-
+scale=n1
 
 
 do k=1,n3
    do j=1,n2
+
+      do i=1,n1
+         p(i,j,k)=p(i,j,k)*scale
+      enddo
 
 !     move the last cosine mode back into correct location:
       p(n1+1,j,k)=p(2,j,k)
       p(2,j,k)=0             ! not needed?
       p(n1+2,j,k)=0          ! not needed?
 
-      call dfft_apply('C','R','B',p(q,j,k),p(1,j,k),fftdata(index)%trigs,1)
-
+      call dfft_apply('C','R','B',p(1,j,k),p(1,j,k),fftdata(index)%trigs,1)
    enddo
+
+!   j=dfft_apply_grp('C','R','B',p(1,1,k),p(1,1,k),n2,1,&
+!           fftdata(index)%trigs,1,n1d)
+!   ASSERT("Error: ifft1() status <> 0",j==0)
+
 enddo
 
 end subroutine
@@ -185,11 +202,12 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
+#include <cxmldef.for>
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 :: scale
 
-integer index,jj,j,k,numffts
+integer index,i,j,k,numffts
 if (n1==1) return
 ASSERT("fft1: dimension too small ",n1+2<=n1d);
 call getindex(n1,index)
@@ -198,11 +216,22 @@ scale=n1
 scale=1/scale
 
 do k=1,n3
+
+!   j=dfft_apply_grp('R','C','F',p(1,1,k),p(1,1,k),n2,1,&
+!           fftdata(index)%trigs,1,n1d)
+!   ASSERT("Error: fft1() status <> 0",j==0)
+
+
    do j=1,n2
       call dfft_apply('R','C','F',p(1,j,k),p(1,j,k),fftdata(index)%trigs,1)
 !     move the last cosine mode into slot of first sine mode:
       p(2,j,k)=p(n1+1,j,k)
+      do i=1,n1
+         p(i,j,k)=p(i,j,k)*scale
+      enddo
    enddo
+
+
 enddo
 end subroutine
 
