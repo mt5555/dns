@@ -158,8 +158,7 @@ do i=nx1,nx2
    maxs(4)=max(maxs(4),vel)
 
    if (Q_grid(i,j,3)<.1) then
-      Q_grid(i,j,3)=.1
-      print *,'warning: using h limiter at .1'
+      print *,'warning: h is within 10% of 0'
    endif
 enddo
 enddo
