@@ -417,6 +417,12 @@ else if (init_cond_subtype==12) then   ! run M
 else if (init_cond_subtype==13) then   ! run N
    R=.4
    F=.1
+else if (init_cond_subtype==14) then   ! run O
+   R=.01
+   F=.01
+else if (init_cond_subtype==15) then   ! run P
+   R=.001
+   F=.001
 else if (init_cond_subtype==101) then   ! run N
    R=.05
    F=.05
