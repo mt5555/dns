@@ -1,5 +1,5 @@
 #include "macros.h"
-subroutine udm_write_uvw(fname,time,Q,Qhat,work1,work2)
+subroutine udm_write_uvw(fname,time,Q,Qhat,work1,bufudm)
 !
 ! 
 !
@@ -10,7 +10,7 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
+real*8 bufudm(nx2-nx1+1, ny2-ny1+1, nz2-nz1+1)    
 real*8 :: time
 character(len=80) fname
 
@@ -28,7 +28,7 @@ integer*8 cpusizesudm(3)
 integer*8 cpulistudm(ncpu_x * ncpu_y * ncpu_z)  
 integer*4 cpulocudm(3) 
 
-real*8 bufudm(nx2-nx1+1, ny2-ny1+1, nz2-nz1+1)    
+
 character(len=80) fnameudm
 character(len=80) gnameudm
 character(len=80) dsnameudm 
@@ -200,7 +200,7 @@ end subroutine
 
 
 
-subroutine udm_read_uvw(Q,Qhat,work1,work2)
+subroutine udm_read_uvw(Q,Qhat,work1,bufudm)
 !
 ! 
 !
@@ -211,7 +211,8 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
+real*8 bufudm(nx2-nx1+1, ny2-ny1+1, nz2-nz1+1)
+
 
 !local
 character(len=80) message
@@ -224,7 +225,6 @@ integer nxstored, nystored, nzstored
 integer dimsudm 
 integer*8 sizesudm(3), gsizesudm(3), offsetsudm(3)
 
-real*8 bufudm(nx2-nx1+1, ny2-ny1+1, nz2-nz1+1)
 character(len=80) fnameudm
 character(len=80) attrname 
 character(len=80) dsnameudm

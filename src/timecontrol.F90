@@ -371,6 +371,9 @@ if (doit_output) then
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
       call singlefile_io(time,Qhat(1,1,1,2),fname,work1,work2,0,io_pe)
    endif
+
+   call print_message("done with output")
+
 endif
 
 
