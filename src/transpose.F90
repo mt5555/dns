@@ -51,11 +51,12 @@ subroutine mpi_io_init
 integer i,dest_pe3(3),key,color,ierr
 
 nio=1
-if (do_mpi_io .or. udm_output ) then
-   nio=min(mpi_maxio,ncpu_z)
-endif
+nio=min(mpi_maxio,ncpu_z)
 
-if (udm_output) nio=2
+if (udm_output) then
+   print *,'UDM temp. setting nio=2' 
+   nio=2
+endif	
 
 inc=ncpu_z/nio
 
@@ -1045,7 +1046,8 @@ endif
 
 do z_pe=0,ncpu_z-1
 extra_k=0
-fpe=io_nodes(z_pe)
+fpe=fpe_main
+if (do_mpi_io) fpe=io_nodes(z_pe)
 if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
@@ -1499,7 +1501,8 @@ endif
 
 do z_pe=0,ncpu_z-1
 extra_k=0
-fpe=io_nodes(z_pe)
+fpe=fpe_main
+if (do_mpi_io) fpe=io_nodes(z_pe)
 if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1

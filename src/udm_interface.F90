@@ -19,23 +19,21 @@ character(len=80) message
 integer :: n,i,j,k
 logical :: sendpe,recpe
 
-integer len1, len2, fidudm, dsidudm, infoid, ierr
+integer fidudm, dsidudm, infoid, ierr
 integer attrdim, attrcnt
 integer i1, j1, k1
 integer*8 sizesudm(3), gsizesudm(3), offsetsudm(3)
 integer*8 cpusizesudm(3)
 integer*8 cpulistudm(ncpu_x * ncpu_y * ncpu_z)  
+integer*8 fidmpi,infoin
 integer*4 cpulocudm(3) 
-
 
 character(len=80) fnameudm
 character(len=80) dsnameudm 
 character(len=80) attrname 
 character*(2) dotudm 
 
-! character*(6) dbgname
-
-integer*8 fidmpi,infoin,dest_pe3(3),y_pe,x_pe,z_pe,ope,fpe,tag
+integer  ::  dest_pe3(3),y_pe,x_pe,z_pe,ope,fpe,tag
 
 #ifdef HAVE_UDM
 
@@ -44,9 +42,7 @@ integer*8 fidmpi,infoin,dest_pe3(3),y_pe,x_pe,z_pe,ope,fpe,tag
 !  open udm file
    write(message,'(f10.4)') 10000.0000 + time
 
-   len1 = len_trim(rundir)
-   len2 = len_trim(runname)
-   fnameudm = fname // char(0) 
+   fnameudm = fname(1:len_trim(fname)) // char(0) 
 
    if (io_pe==my_pe) then
    call print_message("attempting to set stripe")
@@ -226,7 +222,7 @@ character(len=80) message
 integer :: n,i,j,k
 
 
-integer len1, len2, fidudm, dsidudm, infoid, ierr
+integer fidudm, dsidudm, infoid, ierr
 integer attrdim, attrcnt
 integer i1, j1, k1
 integer*8 sizesudm(3), gsizesudm(3), offsetsudm(3)
@@ -248,12 +244,12 @@ integer*8 fidmpi,infoin
 
 #include "UDMFCInterfaceF.h"
 
+   if (nio>1) call udm_subsetwrite_uvw(fname,time,Q,bufudm)
+
 !  open udm file
    write(message,'(f10.4)') 10000.0000 + time
 
-   len1 = len_trim(rundir)
-   len2 = len_trim(runname)
-   fnameudm = fname // char(0) 
+   fnameudm = fname(1:len_trim(fname)) // char(0) 
 
    if (io_pe==my_pe) then
    call print_message("attempting to set stripe")
