@@ -188,7 +188,7 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 
 250I  .8e-3   500    180   1.13      1.27        3.23      same as G, with new diags
       continuing...  with time averages.. done up to t=40
-      continuing...  with transfer function
+      continuing...  with transfer function t=40 up to 50.  
 
 250J  .8e-3   500   (same as G, but with 4th order) done up to t=14
     
