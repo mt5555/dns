@@ -21,9 +21,9 @@ ifeq ($(UNAME),Linux)
    MPI = 
    MPILIB = 
    ifeq ($(HOST),s854018)
-      VENDOR=INTEL
-      #MPI = -DUSE_MPI -I/contrib/lam/include
-      #MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+      VENDOR=INTEL8
+      MPI = -DUSE_MPI 
+      MPILIB =   -llamf77mpi -lmpi -llam 
       #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
       #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
    endif
@@ -87,6 +87,12 @@ ifeq ($(UNAME),Linux)
 
    ifeq ($(VENDOR),INTEL)
    F90 = ifc
+   CC=gcc
+   FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   endif
+
+   ifeq ($(VENDOR),INTEL8)
+   F90 = ifort
    CC=gcc
    FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #FFLAGS =  -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 

@@ -1,3 +1,7 @@
+#define MPI_reduce mpi_reduce_
+
+
+
 #ifdef NDEBUG
 #define ASSERT(str,cond) 
 #else

@@ -1,7 +1,6 @@
 #ifdef USE_MPI
 
 
-
 !
 ! SUN
 !
