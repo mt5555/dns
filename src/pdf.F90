@@ -1123,7 +1123,7 @@ end subroutine
 
 
 
-subroutine compute_all_pdfs(Q,gradu,gradv,gradw,work,work2)
+subroutine compute_all_pdfs(Q,gradu,gradv,gradw)
 !
 !
 use params
@@ -1132,8 +1132,6 @@ use transpose
 implicit none
 integer :: ns
 real*8 Q(nx,ny,nz,3)    
-real*8 work(nx,ny,nz)
-real*8 work2(nx,ny,nz)
 real*8 gradu(nx,ny,nz,3)    
 real*8 gradv(nx,ny,nz,3)    
 real*8 gradw(nx,ny,nz,3)    
@@ -1173,19 +1171,22 @@ call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n
 call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
 #endif
 
+gradw=0
 do n=1,3
-   call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,work,DX_ONLY,n)
-   call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,work,DX_ONLY,n)
-   call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,work,DX_ONLY,n)
+   ! u_x, u_y, u_z
+   call der(Q(1,1,1,1),gradu(1,1,1,1),dummy,gradv,DX_ONLY,n)
+   gradw(:,:,:,1)=gradw(:,:,:,1)+gradu(:,:,:,1)**2	
+
+   ! v_x, v_y, v_z
+   call der(Q(1,1,1,2),gradu(1,1,1,1),dummy,gradv,DX_ONLY,n)
+   gradw(:,:,:,1)=gradw(:,:,:,1)+gradu(:,:,:,1)**2	
+
+   ! w_x, w_y, w_z
+   call der(Q(1,1,1,3),gradu(1,1,1,1),dummy,gradv,DX_ONLY,n)
+   gradw(:,:,:,1)=gradw(:,:,:,1)+gradu(:,:,:,1)**2	
 enddo
-work=0
-do n=1,3
-   work=work+gradu(:,:,:,n)**2
-   work=work+gradv(:,:,:,n)**2
-   work=work+gradw(:,:,:,n)**2
-enddo
-work=mu*work
-call compute_pdf_epsilon(work)
+gradw=mu*gradw
+call compute_pdf_epsilon(gradw)
 
 
 

@@ -277,9 +277,15 @@ use transpose
 !input
 integer :: stype
 real*8 :: Q(nx,ny,nz,n_var)               ! original data
+real*8 :: Qst(g_nz2,nslabx,ny_2dz,n_var)  ! transpose
+
+! these two arrays can be overlapped in memory:
+! if some of the qt_uptodate lines below are uncommented
 real*8 :: Qt(g_nz2,nslabx,ny_2dz,n_var)   ! transpose
 real*8 :: Qs(nx,ny,nz,n_var)              ! shifted original data
-real*8 :: Qst(g_nz2,nslabx,ny_2dz,n_var)  ! transpose
+
+
+
 
 
 !local
@@ -290,6 +296,7 @@ real*8 :: dummy(pmax),xtmp,ntot
 character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,nd
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,csig
+logical :: qt_uptodate
 
 if (firstcall) then
    firstcall=.false.
@@ -402,13 +409,8 @@ if (stype==1) then
 #endif
 endif
 
-
-do n=1,nd
-   ntranspose=ntranspose+1
-   call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo   
    
-
+qt_uptodate=.false.
 do idir=1,ndir
 
 
@@ -457,6 +459,13 @@ do idir=1,ndir
          ! no shifts - compute directly 
          call comp_str_xy(Q,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else if (dir_shift(2)==0) then
+         if (.not. qt_uptodate) then
+            do n=1,nd
+               ntranspose=ntranspose+1
+               call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+            enddo   
+            qt_uptodate=.true.
+         endif
          ! no need to shift, y-direction already 0
          call comp_str_xz(Qt,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(2),dir_shift(3))==0) then
@@ -480,16 +489,30 @@ do idir=1,ndir
          enddo
          enddo
          enddo
+
+!        not yet coded:
+!         ! Qs is same array as Qt, so we just trashed Qt:
+!         qt_uptodate=.false.	
+
          do n=1,nd
             ntranspose=ntranspose+1
             call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
          call comp_str_xz(Qst,stype,idir,rhat,rperp1,rperp2,dir_shift)
+  
       else if (mod(dir_shift(3),dir_shift(2))==0) then
          ! 
          ! shift in z by (z/y)*y-index
          !
          ! shift  Qst = Qt-shifted
+         if (.not. qt_uptodate) then
+            do n=1,nd
+               ntranspose=ntranspose+1
+               call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+            enddo   
+            qt_uptodate=.true.
+         endif
+
          do j=1,ny_2dz
          do i=1,nslabx
          do k=1,g_nz
@@ -513,6 +536,9 @@ do idir=1,ndir
             ntranspose=ntranspose+1
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
+!        not yet coded:
+!         ! Qs is the same array as Qt, so we just trashed Qt
+!         qt_uptodate=.false.
          call comp_str_xy(Qs,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else
          call abort("parallel computation of direction not supported")
@@ -1666,13 +1692,17 @@ SN_lll=SN_lll/ntot
 w2s2=w2s2/ntot
 
 #ifdef USE_MPI
+   call print_message("reduce 1")
    do p=2,pmax
    dwork2=Dl(:,:,p)
    call MPI_reduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+   call print_message("reduce 2")
    dwork3=Dt(:,:,:,p)
    call MPI_reduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    enddo
 
+   call print_message("reduce 3")
    dwork2=H_ltt
    call MPI_reduce(dwork2,H_ltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=H_tt

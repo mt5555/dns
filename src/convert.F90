@@ -114,9 +114,11 @@ icount=icount+1
       call singlefile_io2(time,work1,fname,vor,work2,0,io_pe,.false.)
    endif
 
-   time=time+tinc
-   if (time > max(tstop,tstart)) exit
-   if (time < min(tstop,tstart)) exit
+   if (tstart>0) then
+      time=time+tinc
+      if (time > max(tstop,tstart)) exit
+      if (time < min(tstop,tstart)) exit
+   endif
 enddo
 if (io_pe==my_pe) then
    print *,'convert.F90 finished t=',time

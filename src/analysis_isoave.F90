@@ -43,7 +43,7 @@ real*8,allocatable  :: work3(:,:,:)
 real*8,allocatable  :: work4(:,:,:)
 
 character(len=80) message,sdata
-character(len=280) basename,fname
+character(len=280) basename,fname,tname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
@@ -119,15 +119,6 @@ else
    endif
 endif
 
-if (compute_pdfs) then
-   ! needs work1, work2
-   if (.not. allocated(work1)) then
-      allocate(work1(nx,ny,nz))
-   endif
-   if (.not. allocated(work2)) then
-      allocate(work2(nx,ny,nz))
-   endif
-endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -292,18 +283,19 @@ do
       if (my_pe==io_pe) then
          print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
       endif
-      call compute_all_pdfs(Q,q1,q2,q3,work1,work2)
+      call compute_all_pdfs(Q,q1,q2,q3)
 
       call output_pdf(time,fid,fid1,fid2)
       if (my_pe==io_pe) call cclose(fid,ierr)
    endif
    
-   
-   time=time+tinc
-   if (time > max(tstop,tstart)) exit
-   if (time < min(tstop,tstart)) exit
+   if (tstart>0) then   
+      time=time+tinc
+      if (time > max(tstop,tstart)) exit
+      if (time < min(tstop,tstart)) exit
+   endif
 enddo
-
+100 continue
 call close_mpi
 end program anal
 
