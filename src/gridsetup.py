@@ -131,7 +131,12 @@ facs=[range(3),range(3),range(3)]
 for i in range(3):
    facs[i]=fullfactor(n[i])
 
-fout=open("transpose.h",'w')
+
+print sys.argv[1:-1]
+print "Grid per cpu: ",nslab[0],nslab[1],nslab[2]
+
+
+fout=open("/tmp/transpose.h",'w')
 fout.write("! Specify the 2D x-coordinate parallel decomposition\n")
 fout.write("! (y and z 2D decompositions are fixed\n")
 fout.write("\n")
@@ -139,6 +144,18 @@ fout.write("! default is TRANSPOSE_X_SPLIT_Y, which can be used with nslabz>=1 \
 fout.write("! TRANSPOSE_X_SPLIT_Z gives the original parallel decomposition\n")
 fout.write("! which cant be used with nslabz=1\n")
 fout.write("\n")
+
+cmd = "diff /tmp/transpose.h transpose.h"
+(status,out) = commands.getstatusoutput(cmd) 
+
+if (status != 0):
+   print "Creating new transpose.h file"
+   cmd = "mv -f /tmp/transpose.h transpose.h"
+   status = os.system(cmd)
+else:
+   print "transpose.h file unchanged"
+
+
 
 
 if (use_x_z):
@@ -149,11 +166,8 @@ else:
    fout.write("#define TRANSPOSE_X_SPLIT_Y\n")
 fout.close()
 
-print sys.argv[1:-1]
-print "Grid per cpu: ",nslab[0],nslab[1],nslab[2]," Updating params.h"
 
-
-fout=open("params.h",'w')
+fout=open("/tmp/params.h",'w')
 fout.write("! number of prognostic variables:\n" )
 fout.write("integer,parameter :: n_var=3\n")
 
@@ -177,6 +191,19 @@ fout.write("integer,parameter :: nx1="+str(pad1[0])+",nx2="+str(pad2[0])+"\n")
 fout.write("integer,parameter :: ny1="+str(pad1[1])+",ny2="+str(pad2[1])+"\n")
 fout.write("integer,parameter :: nz1="+str(pad1[2])+",nz2="+str(pad2[2])+"\n")
 fout.close()
+
+
+cmd = "diff /tmp/params.h params.h"
+#status = os.system(cmd)  #display output on screen
+(status,out) = commands.getstatusoutput(cmd) 
+
+
+if (status != 0):
+   print "Creating new params.h file"
+   cmd = "mv -f /tmp/params.h params.h"
+   status = os.system(cmd)
+else:
+   print "params.h file unchanged"
 
 
     

@@ -10,6 +10,8 @@ set refout=../benchmark/benchmark.out
 #endif
 
 ./gridsetup.py 1 1 1 64 64 64
-make >& /dev/null ;   ./dns < $refin 
+make >& /dev/null ; 
+cd ../benchmark
+../src/dns < $refin 
 
 
