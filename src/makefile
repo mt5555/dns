@@ -39,7 +39,7 @@ ifeq ($(UNAME),Linux)
       VENDOR=PGI
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
       MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
-#-lpthread
+                 #-lpthread
    endif
 
    ifeq ($(VENDOR),LAHEY)
