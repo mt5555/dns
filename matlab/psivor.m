@@ -17,8 +17,8 @@ range=0:1:1;
 %name='/scratch2/taylorm/vx12288b/vx12288b';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
-%name='/ccs/scratch/taylorm/vxpair/vx6144e';
-name='/home/scratch/kras/vx1280a/vx1280a';
+name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a';
+%name='/home/scratch/kras/vx1280a/vx1280a';
 
 
 usefig=1;

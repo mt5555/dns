@@ -24,7 +24,7 @@ real*8 :: divx,divi
 integer i,j,k,n,ierr,csig
 integer :: n1,n1d,n2,n2d,n3,n3d
 character(len=80) :: message
-CPOINTER fid,fidj,fidS
+CPOINTER fid,fidj,fidS,fidcore
 
 
 
@@ -185,6 +185,14 @@ if (diag_pdfs==1) then
          call abort(message)
       endif
 
+      write(message,'(f10.4)') 10000.0000 + time
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".cores"
+      call copen(message,"w",fidcore,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .cores file errno=",ierr
+         call abort(message)
+      endif
+
       if (compute_uvw_jpdfs) then
       write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".jpdf"
@@ -206,8 +214,9 @@ if (diag_pdfs==1) then
       endif
 
    endif
-   call output_pdf(time,fid,fidj,fidS)
+   call output_pdf(time,fid,fidj,fidS,fidcore)
    if (my_pe==io_pe) call cclose(fid,ierr)
+   if (my_pe==io_pe) call cclose(fidcore,ierr)
    if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
    if (compute_passive_pdfs .and. my_pe==io_pe) call cclose(fidS,ierr)
 endif

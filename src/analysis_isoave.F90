@@ -53,7 +53,7 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec
 logical :: read_uvw
-CPOINTER :: fid,fid1,fid2
+CPOINTER :: fid,fid1,fid2,fidcore
 
 
 call init_mpi
@@ -182,11 +182,20 @@ do
             write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
             call abort(message)
          endif
+
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.spdf"
          print *,fname
          call copen(fname,"w",fid2,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+            call abort(message)
+         endif
+
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.cores"
+         print *,fname
+         call copen(fname,"w",fidcore,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .cores file errno=",ierr
             call abort(message)
          endif
       endif
@@ -204,9 +213,10 @@ do
       endif
       call compute_all_pdfs(Q,q1)
 
-      call output_pdf(time,fid,fid1,fid2)
+      call output_pdf(time,fid,fid1,fid2,fidcore)
       if (my_pe==io_pe) call cclose(fid,ierr)
       if (my_pe==io_pe) call cclose(fid2,ierr)
+      if (my_pe==io_pe) call cclose(fidcore,ierr)
    endif
 
 

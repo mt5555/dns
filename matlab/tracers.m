@@ -21,10 +21,14 @@ range=0:.1:5.0;
 %name='/home/scratch/vxpair/vx12288/vx12288b';
 
 
-name='/home/scratch/kras/vx1280a/vx1280a'; 
+name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a'; 
+%name='/home/scratch/kras/vx1280a/vx1280a'; 
    plot_noni=0;
    axis_size=[0,2.5,0,2];
    mkpr=1;
+
+
+
 
 s=findstr(name,'/');
 s=s(length(s));

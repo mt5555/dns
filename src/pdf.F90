@@ -21,6 +21,8 @@ real*8 :: pscale=.0025           ! bin size for scalar increment
                                  ! range from 0..1
 
 
+real*8 :: core_data(g_nx,n_var)      ! used to take x direction cores thru data
+integer :: core_num                  ! number of cores taken
 
 integer           :: structf_init=0
 integer,parameter :: delta_num_max=100
@@ -235,6 +237,8 @@ do i=1,NUM_JPDF
    call init_jpdf(jpdf_v(i,3),100,.1d0, min(numy,numz))
 enddo
 endif
+
+core_num=0
 end subroutine
 
 
@@ -415,20 +419,34 @@ end subroutine
 
 
 
-subroutine output_pdf(time,fid,fidj,fidS)
+subroutine output_pdf(time,fid,fidj,fidS,fidcore)
 use params
 implicit none
 real*8 time
 CPOINTER fid   ! velcoity PDFs
 CPOINTER fidj  ! joint velocity PDFs
 CPOINTER fidS  ! passive scalar PDFs
+CPOINTER fidcore  ! x-direction core data
 
-integer i,j,ierr,ndelta,numm
+integer i,j,ierr,ndelta,numm,n
 character(len=80) message
 real*8 x
 
 if (structf_init==0) then
    call abort("Error: output_pdf() called, but structf module not initialized")
+endif
+
+if (core_num>0) then
+   ! output cores:
+   if (my_pe==io_pe) then
+      x=g_nx;  call cwrite8(fidcore,x,1)
+      x=core_num;  call cwrite8(fidcore,x,1)
+      call cwrite8(fidcore,time,1)
+      do n=1,core_num
+         call cwrite8(fidcore,core_data(1,n),g_nx)
+      enddo
+   endif
+   core_num=0
 endif
 
 
@@ -517,6 +535,7 @@ do j=1,3
 enddo
 enddo
 endif
+
 
 end subroutine
 
@@ -734,7 +753,18 @@ end subroutine
 
 
 
-
+subroutine compute_cores(pt,n1,n1d,n2,n2d,n3,n3d,core,n)
+use params
+implicit none
+integer :: n1,n1d,n2,n2d,n3,n3d,n
+real*8 :: pt(n1d,n2d,n3d)
+real*8 :: core(n1)
+if (n1>g_nx) then
+   call abort("Error: compute_core() called on non traspose-x data?")
+endif
+core(1:n1)=pt(1:n1,1,1)
+core_num=max(core_num,n)
+end subroutine
 
 
 
@@ -1020,16 +1050,18 @@ real*8 :: tmx1,tmx2
 
 
 call wallclock(tmx1)
-call print_message("computing u pdfs...")
+call print_message("computing x direction pdfs...")
 do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call compute_cores(gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d,core_data(1,n),n)
 enddo
+
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
 if (compute_uvw_jpdfs) then
    call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
 endif
 
-call print_message("computing v pdfs...")
+call print_message("computing y direction pdfs...")
 do n=1,3
    call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
@@ -1038,7 +1070,7 @@ if (compute_uvw_jpdfs) then
    call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
 endif
 
-call print_message("computing w pdfs...")
+call print_message("computing z direction pdfs...")
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
@@ -1069,6 +1101,9 @@ if (compute_passive_pdfs) then
    call print_message("computing passive scalar pdfs...")
    do i=np1,np2
       call compute_pdf_scalar(Q(1,1,1,i),SCALARS(i-np1+1)) 
+
+      call transpose_to_x(Q(1,1,1,i),gradu,n1,n1d,n2,n2d,n3,n3d)
+      call compute_cores(gradu,n1,n1d,n2,n2d,n3,n3d,core_data(1,i),i)
    enddo
 endif
 call print_message("done with pdfs.")
