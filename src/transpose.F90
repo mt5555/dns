@@ -1077,6 +1077,237 @@ enddo
 
 end subroutine
 
+
+
+
+
+
+
+
+subroutine output1_spec(p,pt,buf,fid,fpe)
+use params
+use mpi
+
+CPOINTER fid
+integer :: fpe           ! cpu to do the I/O
+real*8 :: p(nx,ny,nz)
+real*8 :: pt(g_nx2,nslabz,ny_2dx)
+real*8 :: buf(dealias_nx,ny_2dx)
+
+! local vars
+integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
+#ifdef USE_MPI
+integer request(2),statuses(MPI_STATUS_SIZE,2)
+#endif
+integer i,j,k,l,extra_k,dest_pe3(3)
+integer n1,n1d,n2,n2d,n3,n3d,jj
+
+
+
+call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
+ASSERT("output1 dimension failure 2",n1==g_nx)
+ASSERT("output1 dimension failure 3",n1d==g_nx2)
+ASSERT("output1 dimension failure 4",n2==nslabz)
+ASSERT("output1 dimension failure 5",n2d==nslabz)
+ASSERT("output1 dimension failure 6",n3==ny_2dx)
+ASSERT("output1 dimension failure 7",n3d==ny_2dx)
+
+
+do z_pe=0,ncpu_z-1
+do k=1,nslabz
+if (z_pe*nslabz+k <= dealias_nz)  then
+do y_pe=0,ncpu_y-1
+do x_pe=0,ncpu_x-1
+
+
+   dest_pe3(1)=x_pe
+   dest_pe3(2)=y_pe
+   dest_pe3(3)=z_pe
+
+#ifdef USE_MPI
+   tag=1
+   call mpi_cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
+#else
+   sending_pe=my_pe
+#endif
+
+   if (sending_pe==my_pe) then
+
+      ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
+      jj=0
+      do j=1,ny_2dx
+         jj=j
+         if (x_jmcord(j)>(g_ny/3)  .and. x_jmcord(j)/=(g_ny/2)) exit
+      enddo
+      l=dealias_nx*jj
+      if (l>0) buf(1:dealias_nx,1:jj)=pt(1:dealias_nx,k,1:jj)
+
+      if (my_pe == fpe) then
+         ! dont send message to self
+      else
+#ifdef USE_MPI
+         tag=1
+         call MPI_ISend(l,1,MPI_INTEGER,fpe,tag,comm_3d,request(2),ierr)
+         ASSERT("output1: MPI_ISend failure",ierr==0)
+
+         if (l==0) then
+            call MPI_waitall(1,request,statuses,ierr) 	
+            ASSERT("output1: MPI_waitalll failure",ierr==0)
+         else
+            call MPI_ISend(buf,l,MPI_REAL8,fpe,tag,comm_3d,request(1),ierr)
+            ASSERT("output1: MPI_ISend failure",ierr==0)
+            call MPI_waitall(2,request,statuses,ierr) 	
+            ASSERT("output1: MPI_waitalll failure",ierr==0)
+         endif
+#endif
+      endif
+   endif
+
+   if (my_pe==fpe) then
+      if (sending_pe==my_pe) then
+         ! dont recieve message from self
+      else
+#ifdef USE_MPI
+         call MPI_IRecv(l,1,MPI_INTEGER,sending_pe,tag,comm_3d,request,ierr)
+         ASSERT("output1: MPI_IRecv failure",ierr==0)
+         call MPI_waitall(1,request,statuses,ierr) 	
+         ASSERT("output1: MPI_waitalll failure",ierr==0)
+         if (l>0) then
+            call MPI_IRecv(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
+            ASSERT("output1: MPI_IRecv failure",ierr==0)
+            call MPI_waitall(1,request,statuses,ierr) 	
+            ASSERT("output1: MPI_waitalll failure",ierr==0)
+         endif
+#endif
+      endif
+      
+      if (l>0) call cwrite8(fid,buf,l)
+   endif
+enddo
+enddo
+endif
+enddo
+enddo
+
+end subroutine
+
+
+
+
+
+
+subroutine input1_spec(p,pt,buf,fid,fpe)
+use params
+use mpi
+
+CPOINTER fid
+integer :: fpe           ! cpu to do the I/O
+real*8 :: p(nx,ny,nz)
+real*8 :: pt(g_nx2,nslabz,ny_2dx)
+real*8 :: buf(dealias_nx,ny_2dx)
+
+! local vars
+integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
+#ifdef USE_MPI
+integer request(2),statuses(MPI_STATUS_SIZE,2)
+#endif
+integer i,j,k,l,extra_k,dest_pe3(3)
+integer n1,n1d,n2,n2d,n3,n3d,jj
+
+
+pt=0
+do z_pe=0,ncpu_z-1
+do k=1,nslabz
+if (z_pe*nslabz+k <= dealias_nz)  then
+do y_pe=0,ncpu_y-1
+do x_pe=0,ncpu_x-1
+
+
+   dest_pe3(1)=x_pe
+   dest_pe3(2)=y_pe
+   dest_pe3(3)=z_pe
+
+#ifdef USE_MPI
+   tag=1
+   call mpi_cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
+#else
+   sending_pe=my_pe
+#endif
+
+   if (sending_pe==my_pe) then
+
+      ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
+      jj=0
+      do j=1,ny_2dx
+         jj=j
+         if (x_jmcord(j)>(g_ny/3)  .and. x_jmcord(j)/=(g_ny/2)) exit
+      enddo
+      l=dealias_nx*jj
+
+      if (my_pe == fpe) then
+         ! dont send message to self
+      else
+#ifdef USE_MPI
+         tag=1
+         call MPI_ISend(l,1,MPI_INTEGER,fpe,tag,comm_3d,request,ierr)
+         ASSERT("output1: MPI_ISend failure",ierr==0)
+         call MPI_waitall(1,request,statuses,ierr) 	
+         ASSERT("output1: MPI_waitalll failure",ierr==0)
+
+         if (l>0) then
+            call MPI_IRecv(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
+            ASSERT("output1: MPI_ISend failure",ierr==0)
+            call MPI_waitall(1,request,statuses,ierr) 	
+            ASSERT("output1: MPI_waitalll failure",ierr==0)
+         endif
+#endif
+      endif
+   endif
+
+   if (my_pe==fpe) then
+      if (sending_pe==my_pe) then
+         ! dont recieve message from self
+         if (l>0) call cread8(fid,buf,l)
+      else
+#ifdef USE_MPI
+         call MPI_IRecv(l,1,MPI_INTEGER,sending_pe,tag,comm_3d,request,ierr)
+         ASSERT("output1: MPI_IRecv failure",ierr==0)
+         call MPI_waitall(1,request,statuses,ierr) 	
+         ASSERT("output1: MPI_waitalll failure",ierr==0)
+
+         if (l>0) then
+            call cread8(fid,buf,l)
+            call MPI_ISend(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
+            ASSERT("output1: MPI_IRecv failure",ierr==0)
+            call MPI_waitall(1,request,statuses,ierr) 	
+            ASSERT("output1: MPI_waitalll failure",ierr==0)
+         endif
+#endif
+      endif
+   endif
+
+   if (l>0) then 
+      pt(1:dealias_nx,k,1:jj)=buf(1:dealias_nx,1:jj)
+   endif
+
+enddo
+enddo
+endif
+enddo
+enddo
+
+
+call transpose_from_x(pt,p,n1,n1d,n2,n2d,n3,n3d)
+
+
+end subroutine
+
+
+
+
+
+
+
 !
 !  parallel input from a single file
 !  if random==.true., then fill p with random numbers between -1.. 1

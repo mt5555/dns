@@ -212,6 +212,9 @@ integer :: imsign(nxd),jmsign(nyd),kmsign(nzd)  ! fft modes local
 ! fft modes, local z-decompostion
 integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
 integer,allocatable :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
+! fft modes, local x-decompostion
+integer,allocatable :: x_imcord(:),X_jmcord(:),x_kmcord(:)  ! fft modes local
+integer,allocatable :: x_imsign(:),x_jmsign(:),x_kmsign(:)  ! fft modes local
 
 ! sine modes, local 3D decomp:
 integer,allocatable :: y_imsine(:)  ! ny_2dz
@@ -228,6 +231,10 @@ integer :: kmsine(nzd)
 integer,parameter :: g_nx=nslabx*ncpu_x
 integer,parameter :: g_ny=nslaby*ncpu_y
 integer,parameter :: g_nz=nslabz*ncpu_z
+! size of the dealiased grid:
+integer,parameter :: dealias_nx = 2+2*(g_nx/3)
+integer,parameter :: dealias_ny = 2+2*(g_ny/3)
+integer,parameter :: dealias_nz = 2+2*(g_nz/3)
 
 
 integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
@@ -542,6 +549,15 @@ allocate(z_kmcord(g_nz))
 allocate(z_imsign(nx))
 allocate(z_jmsign(ny_2dz))
 allocate(z_kmsign(g_nz))
+
+!  X-decomposition modes:   p(g_nz2,nslabx,ny_2dz)
+allocate(x_imcord(g_nx))
+allocate(x_jmcord(ny_2dx))
+allocate(x_kmcord(nz))
+allocate(x_imsign(g_nx))
+allocate(x_jmsign(ny_2dx))
+allocate(x_kmsign(nz))
+
 allocate(y_imsine(nx_2dy))
 
 pi=1

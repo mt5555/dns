@@ -13,6 +13,24 @@ RUNNING
 vx3072
 
 
+mu=2e-8.  a touch noisy in one snapshot that I saw, went away.  
+6144x3072    2 cpu milkyway:  338m per t=1.  
+
+if we use mu^3/4 rule, new grid:  10332x500.  So lets go with 12288x6144.
+
+
+Benchmarks for 12288x6144:   RES size: 5.7GB
+ASCI Q    t=.05    t=1 (extrapolated)   t=150
+cpus      
+4x1
+64x1      11.22m    3.74h               23.4d          time_control=2.33
+32x2      10.76                         22.42d                      2.29
+16x4      11.02                                                     2.26
+8x8       12.27
+16x2      
+
+redo with output turned off?
+
 
 
 **********************************************************************************

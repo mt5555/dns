@@ -267,6 +267,39 @@ enddo
 
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid data, x-decomposition
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+do k=nz1,nz2
+   x_kmcord(k-nz1+1)=kmcord(k)
+   x_kmsign(k-nz1+1)=kmsign(k)
+enddo
+
+x_imcord=g_imcord
+do i=1,g_nx
+   x_imsign(i)=sign(1,x_imcord(i))
+   if (x_imcord(i)==0) x_imsign(i)=0
+   if (x_imcord(i)==g_nx/2) x_imsign(i)=0
+enddo
+
+
+do j=1,ny_2dx
+   L = -1 + ny1 + j + my_x*ny_2dx      ! ncpy_z*ny_2dz = nslaby
+   if (L>ny2) then
+      x_jmcord(j)=0  ! possible, for not-perfect load balance cases
+   else
+      x_jmcord(j)=jmcord(L)
+   endif
+   x_jmsign(j)=sign(1,x_jmcord(j))
+   if (x_jmcord(j)==0) x_jmsign(j)=0
+   if (x_jmcord(j)==g_ny/2) x_jmsign(j)=0
+enddo
+
+
+
+
+
+
 
 end subroutine
 
