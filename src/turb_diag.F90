@@ -112,12 +112,12 @@ if (.not.doit_model) return
          write(message,'(a,i5)') "diag_output(): Error opening .pscalars-turb file errno=",ierr
          call abort(message)
       endif
-      x=nints_e; call cwrite8(fid,x,1)
+      x=npints_e; call cwrite8(fid,x,1)
       x=npassive; call cwrite8(fid,x,1)
       call cwrite8(fid,time,1)
       x=mu; call cwrite8(fid,x,1)
       do n=np1,np2	
-         call cwrite8(fid,pints_e(1,n),nints_e)
+         call cwrite8(fid,pints_e(1,n),npints_e)
       enddo	 
       
       call cclose(fid,ierr)
@@ -710,6 +710,7 @@ su=su/g_nx/g_ny/g_nz
 ASSERT("compute_expensive_pscalars: ns too small ",ns>=23)
 
 scalars(1)=schmidt(np)
+if (my_pe==io_pe) print *,'np,schmidt=',np,schmidt(np)
 scalars(2)=u2
 i=2
 

@@ -47,7 +47,7 @@ for t=times
     mu = fread(fid,1,'float64');
 
     nt=nt+1;
-    if(nt==1) pints_e=zeros([1+ns_e,npassive,1]); end;
+    if(nt==1) pints_e=zeros([2+ns_e,npassive,1]); end;
 
     for np=1:npassive
        data1 = fread(fid,[ns_e,1],'float64');
@@ -104,11 +104,15 @@ disp(sprintf('R_l = %f',R_l ))
 disp(sprintf('lambda = %f',lambda ))
 disp(sprintf('epsilon = %f',epsilon ))
 
-ke_s=.5*sum(s2,1);
-epsilon_s=15*(mu/schmidt)*sum(s2,1)/3;  
-lambda_s=sqrt(mean(s2)/mean(sx2));
+epsilon_s=15*(mu/schmidt)*s2/3;  
+lambda_s=sqrt(s2/mean(sx2));
 
-
+disp(' ')
+disp(sprintf('passive scalar n=%i',np))
+disp(sprintf('schmidt = %f',schmidt ))
+disp(sprintf('s2 = %f',s2 ))
+disp(sprintf('lambda_s = %f',lambda_s ))
+disp(sprintf('epsilon_s = %f',epsilon_s ))
 
 
 
