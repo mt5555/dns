@@ -49,7 +49,7 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-real*8 :: schmidt_in,mn,mx
+real*8 :: schmidt_in,mn,mx,tmx1,tmx2
 integer :: type_in
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -272,12 +272,19 @@ icount=icount+1
 
    if (convert_opt==10) then ! -cout iotest
       ! i/o performance
-      call ranvor(Q,PSI,work,work2,1)
+      write(message,*) 'computing random data'
+      call print_message(message)
+      do k=nz1,nz2
+         do j=ny1,ny2
+            call gaussian( Q(nx1,j,k,1), nslabx  )
+         enddo
+      enddo
+      call print_message('performing io test')
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
 
       mpi_maxio=32
       mpi_stripe="4"
-      call mpi_io_init()
+      call mpi_io_init(0)
 
       call wallclock(tmx1)
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
