@@ -332,7 +332,7 @@ do
    endif
    
 
-   if (tstart>0) then   
+   if (tstart>=0) then   
       time=time+tinc
       if (io_pe==my_pe) print *,'time, tstart, tstop: ',time,tstart,tstop 
       if (time > max(tstop,tstart)+.005) exit
