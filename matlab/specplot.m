@@ -1,6 +1,6 @@
 %
 %########################################################################
-%#  plotting output file
+%#  plot of DNS spectrum output file
 %########################################################################
 %
 %   call cwrite8(fid,time,1)
@@ -22,9 +22,9 @@ fid=fopen('test.spec','r');
 
 
 time=fread(fid,1,'float64');
-
+j=0;
 while (time>=0 & time<=5000)
-
+  j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
   n_x=fread(fid,1,'float64');
@@ -47,11 +47,10 @@ while (time>=0 & time<=5000)
   loglog53(n_y,spec_y,time);
   subplot(2,2,4);
   loglog53(n_z,spec_z,time);
-  
-  pause
+  figure(2)
+  %M(j)=getframe(gcf);
   
   time=fread(fid,1,'float64');
 end
-
 
 fclose(fid);

@@ -135,6 +135,7 @@ real*8 time
 
 integer i,ierr
 character*80 message
+real*8 x
 CPOINTER fid
 
 
@@ -146,6 +147,8 @@ enddo
 
 if (my_pe==io_pe) then
    call cwrite8(fid,time,1)
+   ! number of structure functions
+   x=3 ; call cwrite8(fid,x,1)
    do i=1,NUM_SF
       call normalize_and_write_pdf(fid,SF(i,1),SF(i,1)%nbin)   
       call normalize_and_write_pdf(fid,SF(i,2),SF(i,2)%nbin)   
@@ -189,7 +192,7 @@ call cwrite8(fid,pdf_bin_size,1)
 x=str%nbin; call cwrite8(fid,x,1)
 x=str%ncalls; call cwrite8(fid,x,1)
 pdfdata=str%pdf / (2*nbin+1)
-call cwrite8(fid,pdfdata,2*nbin+1)
+call cwrite8(fid,pdfdata,2*nbin+1*delta_num)
 
 
 end subroutine
