@@ -81,8 +81,7 @@ call helmholtz_dirichlet_setup(b,psi,work,1)
 !call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
-psi=b
-call helmholtz_dirichlet_inv(psi,work,zero,one)
+psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one)
 
 
 

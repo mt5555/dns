@@ -44,9 +44,12 @@ time_target=time_final
 
 umax=maxs(4)
 if (ndim==3) then
-   mumax = mu*(1/delx**2 + 1/dely**2 + 1/delz**2)
+   mumax = mu/(xscale**2 * delx**2) + &
+           mu/(yscale**2 * dely**2) + &
+           mu/(zscale**2 * delz**2) 
 else
-   mumax = mu*(1/delx**2 + 1/dely**2)
+   mumax = mu/(xscale**2 * delx**2) + &
+           mu/(yscale**2 * dely**2) 
 endif
 
 if (grav>0) then

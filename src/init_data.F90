@@ -359,94 +359,94 @@ end subroutine
 
 
 
-subroutine init_data_kh_psivor(Q,q1,work1,work2)
+subroutine init_data_kh_psivor(Q,q1,work1,w)
 use params
 use ghost
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
+real*8 :: w(nx,ny,nz)
 
 ! local variables
 integer :: i,j,k,l,use3d=0,n
 real*8 :: eps
 real*8 :: amp,vx,uy
+real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,sum,delalf,testmax
+real*8 :: delta
+integer,parameter :: nd=200
+real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
 
-Q=0
+
+if (init_cond_subtype ==0) then
+   delta=.2
+   ubar=.089
+   yscale=3
+endif
+
+! choose xscale so that delx*xscale = dely*yscale
+xscale = yscale*delx/dely
+
+! scale velocity in y direction (units: m/s)
+ubar = ubar/yscale
+
+! scale the viscosity (units: m**2/s)
+mu_x=mu/(xscale**2)
+mu_y=mu/(yscale**2)
+
+
+
 equations=NS_PSIVOR
-
-if (init_cond_subtype==0) then
-   call print_message("Using thin shear layer initial condition")
-   eps=200
-   amp=.05
-else if (init_cond_subtype==1) then
-   ! E & Liu case:
-   call print_message("Using E & Liu shear layer initial condition")
-   eps=10*pi
-   amp=.25
-else if (init_cond_subtype==3) then
-   use3d=1
-   call print_message("Using 3d shear layer initial condition")
-   eps=200
-   amp=.05
-endif
-
-! thickness = 1/eps
-! gridpoints per transition layer: nx/eps
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   if (ycord(j)<=.5) then
-      Q(i,j,k,1)=tanh(eps*(ycord(j)-.25))
-   else
-      Q(i,j,k,1)=tanh(eps*(.75-ycord(j)))
-   endif
-   if (use3d==1) then
-      Q(i,j,k,2)=amp*sin(2*pi*xcord(i))*cos(2*pi*zcord(k))
-   else
-      Q(i,j,k,2)=amp*sin(2*pi*xcord(i))
-   endif
-enddo
-enddo
-enddo
-
-call ghost_update_x(Q,ndim)
-call ghost_update_y(Q,ndim)
-call ghost_update_z(Q,ndim)
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   ! vor(1) = w_y - v_z
-   ! vor(2) = u_z - w_x 
-   ! vor(3) = v_x - u_y
-
-   n=2
-   vx=( 2*(Q(i+1,j,k,n)-Q(i-1,j,k,n))/3 -  &
-        (Q(i+2,j,k,n)-Q(i-2,j,k,n))/12          )/delx
-
-   n=1
-   uy=( 2*(Q(i,j+1,k,n)-Q(i,j-1,k,n))/3 -  &
-        (Q(i,j+2,k,n)-Q(i,j-2,k,n))/12          )/dely
-
-   Q(i,j,k,3)=vx-uy
-enddo
-enddo
-enddo
-
-if (bdy_y2==INFLOW0_ONESIDED) then
-! test case...
 Q=0
-eps=.25
-do k=nz1,nz2
-do j=ny1,ny2
+
+
+! INITIALIZES VORTEX SHEET (XS,YS,WS,NS)
+delalf = pi/(2*nd)
+do k=0,nd
+   hold = k*delalf
+   xd(k)  = .5
+   yd(k)  = cos(hold)/yscale
+   wd(k)  = cos(hold)*delalf
+enddo
+wd(nd) = wd(nd)/2
+wd(0) = wd(0)/2
+yd(nd) = 0
+
+
+testmax=0
+delsq = delta**2
+!   INITIALIZES VORTICITY ON THE GRID = VORTICITY INDUCED
+!     BY A BLOB AT (0,1)
 do i=nx1,nx2
-   amp=sqrt( ( xcord(i)-.5)**2 + (ycord(j)-.5)**2 )
-   if (amp<eps) Q(i,j,k,3)=10*cos(.5*pi*amp/eps)**2
+do j=ny1,ny2
+   sum = 0
+   do k=0,nd
+      difx = (xcord(i) - xd(k))*xscale
+      dify = (ycord(j) - yd(k))*yscale
+      sumy = (ycord(j) + yd(k))*yscale
+
+      denom1 = difx**2 + dify**2 + delsq
+      denom2 = difx**2 + sumy**2 + delsq
+      sum = sum + wd(k)*(1/denom1**2-1/denom2**2)
+   enddo
+   w(i,j,1) = delsq*sum/pi
+   testmax = max(testmax,w(i,j,1))
 enddo
+!if (mod(i,20).eq.0) print*,'i=',i,w(i,nj/2)
 enddo
+ 
+print*,'wmax=',testmax
+! set w=0 on the boundary
+do i=nx1,nx2
+   w(i,ny1,1) = 0
+   w(i,ny2,1) = 0
 enddo
-endif
+do j=ny1,ny2
+   w(nx1,j,1)=0
+   w(nx2,j,1)=0
+enddo
+
+Q(:,:,:,3)=w
 
 
 end subroutine

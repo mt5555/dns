@@ -294,7 +294,7 @@ else if (btype==1) then
    b=-w  ! be sure to copy ghost cell data also!
    ! apply compact correction to b:
 
-   call helmholtz_dirichlet_setup(b,psi,work,0)
+   call helmholtz_dirichlet_setup(b,psi,work,1)
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
 
 else if (btype==2) then
@@ -303,9 +303,9 @@ else if (btype==2) then
 
    b=-w  ! be sure to copy ghost cell data also!
 
-   ! copy b.c. from psi into 'b', and apply compact correction to b:
-   call helmholtz_dirichlet_setup(b,psi,work,1)
 
+   ! apply compact correction to 'b', then set b.c. of b:
+   call helmholtz_dirichlet_setup(b,psi,work,1)
    psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
    !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
@@ -345,9 +345,9 @@ integer :: i,j,k ,ierr
 real*8 :: sm
 
 ddot=0
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
+do k=intz1,intz2
+do j=inty1,inty2
+do i=intx1,intx2
    ddot=ddot+a(i,j,k)*b(i,j,k)
 enddo
 enddo

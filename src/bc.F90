@@ -73,6 +73,7 @@ end subroutine
 
 
 subroutine bc_biotsavart(w,psi)
+!
 ! on non-periodic or non-reflective boundarys:
 ! use biot-savar law to compute boundary data for PSI.
 !
@@ -84,8 +85,7 @@ subroutine bc_biotsavart(w,psi)
 !
 !     is the streamfunction in a reference frame moving with the 
 !     predetermined velocity ubar
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
+!
 use params
 use mpi
 implicit none
@@ -96,8 +96,7 @@ real*8 psi(nx,ny)
 integer i,j,k,l,ierr
 real*8 :: dela
 real*8,external :: logterm
-real*8 :: ubar=.1
-real*8 :: eps=1e-8
+real*8 :: eps=1e-3
 real*8 :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
                                       ! psi_b(k,1,2) = x2 boundary
                                       ! psi_b(k,2,1) = y1 boundary

@@ -148,16 +148,8 @@ time = time + delt
 
 ! compute KE, max U  
 maxs(1:4)=0
-do j=ny1,ny2
-do i=nx1,nx2
-   if ((my_x==0 .and. bdy_x1==INFLOW0_ONESIDED .and. i==nx1) .or. &
-        (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED .and. i==nx2) .or. &
-        (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED .and. j==ny1) .or. &
-        (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED .and. j==ny2)) then
-      ! u,v (and RHS) not computed on boundary
-      Q(i,j,1)=0
-      Q(i,j,2)=0
-   else
+do j=inty1,inty2
+do i=intx1,intx2
       
       u=( 2*(psi0(i,j+1)-psi0(i,j-1))/3 -  &
            (psi0(i,j+2)-psi0(i,j-2))/12          )/dely
@@ -172,7 +164,6 @@ do i=nx1,nx2
       maxs(4)=max(maxs(4),vel)
       Q(i,j,1)=u
       Q(i,j,2)=v
-   endif
 enddo
 enddo
 
@@ -326,8 +317,8 @@ maxvor=0
 rhs=0
 
 
-do j=ny1,ny2
-do i=nx1,nx2
+do j=inty1,inty2
+do i=intx1,intx2
    u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
         (psi(i,j+2)-psi(i,j-2))/12          )/dely
 
@@ -360,21 +351,14 @@ do i=nx1,nx2
             16*w(i,j-1) - w(i,j-2)) / (12*dely*dely)
    endif
 
-
-   rhs(i,j) = rhs(i,j) +  mu*(dxx+dyy) - u*dx - v*dy
+   rhs(i,j) = rhs(i,j) - u*dx - v*dy + mu_x*dxx + mu_y*dyy
 
    if (compute_ints==1) then
-      if ((my_x==0 .and. bdy_x1==INFLOW0_ONESIDED .and. i==nx1) .or. &
-          (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED .and. i==nx2) .or. &
-          (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED .and. j==ny1) .or. &
-          (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED .and. j==ny2)) then
-      else
          maxvor=max(maxvor,abs(w(i,j)))
          ke = ke + .5*(u**2 + v**2)
          vor=vor + w(i,j)
          ensave = ensave + w(i,j)**2
          ens_diss=ens_diss + w(i,j)*(dxx+dyy)
-      endif
    endif
 
 enddo

@@ -50,6 +50,15 @@ integer :: numerical_method=FOURIER ! FOURIER
                                     ! others?
 logical :: dealias=.false.       
 
+! parameter used by psi-vor model:
+real*8 :: xscale=1
+real*8 :: yscale=1
+real*8 :: zscale=1
+real*8 :: ubar=0
+real*8 :: mu_x,mu_y,mu_z ! since we allow scaling in both x and y,
+                         ! have to allow two differenent viscosities
+
+
 ! boundary conditions
 integer :: bdy_x1=PERIODIC
 integer :: bdy_x2=PERIODIC
@@ -103,6 +112,15 @@ integer :: forcing_type   ! 0 = none
 !integer,parameter :: nx1=1,nx2=16              ! upper and lower bounds of non-ghost data
 !integer,parameter :: ny1=1,ny2=16             ! upper and lower bounds of non-ghost data
 !integer,parameter :: nz1=1,nz2=16             ! upper and lower bounds of non-ghost data
+
+! dimensions of interior, non-boundary points.  
+! for problems with b.c. (other than periodic or reflections)
+! use these bounds if you want to loop over only the non-boundary points.
+integer :: intx1,intx2
+integer :: inty1,inty2
+integer :: intz1,intz2
+
+
 
 ! compiler has three choices, somewhat controllabe with options:
 !  static  (if all arrays are static, memory use is doubled)
@@ -458,36 +476,6 @@ if ( (g_nz2)*ny_2dz*real(nslabx,r8kind) >  ny*nz*real(nx,r8kind)) then
 endif
 
 
-!
-! this is needed to gaurentee that the sine and cosine modes
-! are on the same processor.  
-!
-if (mod(nslabx,2)/=0) then
-   fail=1
-   call print_message("nslabx must be even")
-endif
-if (mod(nslaby,2)/=0) then
-   fail=1
-   call print_message("nslaby must be even")
-endif
-if (mod(nslabz,2)/=0 .and. g_nz>1) then
-   fail=1
-   call print_message("nslabz must be even if g_nz>1")
-endif
-
-
-!
-!  for the full spectral method, we will be working mostly in
-!  the z-transform fourier space, 
-!     pt(g_nz2,nslabx,ny_2dz)
-!  so we also need that ny_2dz is even
-if (mod(ny_2dz,2)/=0) then
-   fail=1
-   call print_message("ny_2dz is not even.  cant run the ns3dspectral model")
-   call print_message("but other models should work fine")
-endif
-
-
 
 
 
@@ -506,7 +494,7 @@ if ( nz2>nz) then
    call print_message("nz is too small. nz must be >=nz2")	
 endif
 
-!if (fail/=0) call abort("params.F90 dimension settings failure")
+if (fail/=0) call abort("params.F90 dimension settings failure")
 
 allocate(g_xcord(g_nx+1))
 allocate(g_ycord(g_ny+1))

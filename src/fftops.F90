@@ -476,13 +476,22 @@ use params
 use fft_interface
 use transpose
 
-use ghost
-
 implicit none
 real*8 f(nx,ny,nz)    ! input
 real*8 fout(g_nz2,nslabx,ny_2dz)  ! output
 real*8 work(nx,ny,nz) ! work array1
 integer n1,n1d,n2,n2d,n3,n3d
+
+
+!
+!  for the full spectral method, we will be working mostly in
+!  the z-transform fourier space, 
+!     pt(g_nz2,nslabx,ny_2dz)
+!  so we also need that ny_2dz is even
+if (mod(ny_2dz,2)/=0) then
+   call abort("ny_2dz is not even.  cant use z-decomp FFTs")
+endif
+
 
 
 
@@ -1127,8 +1136,8 @@ if (ndim==2) then
    k=1
 
 #ifdef COMPACT
-   do j=ny1,ny2
-   do i=nx1,nx2
+   do j=inty1,inty2
+   do i=intx1,intx2
 
       work(i,j,k)= &
             (                                       &
@@ -1138,8 +1147,8 @@ if (ndim==2) then
 
    enddo
    enddo
-   do j=ny1,ny2
-   do i=nx1,nx2
+   do j=inty1,inty2
+   do i=intx1,intx2
       f(i,j,k)=f(i,j,k)+work(i,j,k)
    enddo
    enddo
@@ -1272,10 +1281,7 @@ if (ndim==2) then
 
    do j=ny1,ny2
    do i=nx1,nx2
-      if ( (my_x==0 .and. i==nx1)  .or. &
-           (my_x==ncpu_x-1 .and. i==nx2)  .or. &
-           (my_y==0 .and. j==ny1) .or. &
-           (my_y==ncpu_y-1 .and. j==ny2) ) then
+      if ( i<intx1 .or. i>intx2 .or. j<inty1 .or. j>inty2) then
          lf(i,j,k)=f(i,j,k)
          cycle
       endif
@@ -1313,12 +1319,8 @@ else if (ndim==3) then
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      if ( (my_x==0 .and. i==nx1)  .or. &
-           (my_x==ncpu_x-1 .and. i==nx2)  .or. &
-           (my_y==0 .and. j==ny1) .or. &
-           (my_y==ncpu_y-1 .and. j==ny2) .or.&
-           (my_z==0 .and. k==nz1) .or. &
-           (my_z==ncpu_z-1 .and. k==nz2) ) then
+      if ( i<intx1 .or. i>intx2 .or. j<inty1 .or. j>inty2 .or. &
+             k<intz1 .or. k>intz2) then
          lf(i,j,k)=f(i,j,k)
          cycle
       endif
@@ -1336,6 +1338,17 @@ endif
 
 
 end subroutine
+
+
+
+
+
+
+
+
+
+
+
 
 
 subroutine helmholtz_periodic_ghost(f,lf,alpha,beta,work)
@@ -1519,108 +1532,29 @@ real*8 :: beta
 !local
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
-real*8 phi(nx,ny,nz)    
-real*8 lphi(nx,ny,nz)    
 real*8 xm,ym,zm,xfac
 real*8 :: axy,x_axy,y_axy
 real*8 :: xb(ny,2),yb(nx,2)
+integer :: bx1,bx2,by1,by2,bz1,bz2
 
-#ifdef COMPACT
-if (ndim/=2) then
-   call abort("helmholtz_dirichlet_inv() not coded for 3D compact")
-endif
+
+#if 0
+! for checking b.c. tweak:
+real*8 f2(nx,ny,nz)    
+real*8 phi(nx,ny,nz)    
+real*8 lphi(nx,ny,nz)    
+
+f2=f
+! phi = f on boundary, zero inside
+phi=f2
+call zero_boundary(phi)
+phi=f2-phi
+call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
+f2=f2-lphi
+call zero_boundary(f2)
 #endif
 
-if (beta==0) then
-   f=f/alpha
-   return
-endif
-!
-!  let phi = f on the boundary, 0 inside
-!      lphi = Helmholtz(phi)
-!
-!  solve:  Helmholtz(psi) = b - lphi  with psi=0 on boundary
-!          then set psi=psi+phi
-!
-!
-!NOTE: we dont need phi, lphi.  when this code is debugged, replace by:
-! save boundary data in single 1D array
-! set f = 0 on boundary
-! using boundary data alone: compute f = f - lphi 
-!      along points just inside boundary
-!
-! solve as before
-! restor boundary conditions in f from 1D array.
 
-! copy boundary data into temp array:
-! replace (interior only) f with f - lphi
-if (my_x==0) then
-   i=nx1
-   k=1
-   do j=ny1,ny2
-      xb(j,1)=f(i,j,k)
-   enddo
-endif
-if (my_x==ncpu_x-1) then
-   i=nx2
-   k=1
-   do j=ny1,ny2
-      xb(j,2)=f(i,j,k)
-   enddo
-endif
-if (my_y==0) then
-   j=ny1
-   k=1
-   do i=nx1,nx2
-      yb(i,1)=f(i,j,k)
-   enddo
-endif
-if (my_y==ncpu_y-1) then
-   j=ny2
-   k=1
-   do i=nx1,nx2
-      yb(i,2)=f(i,j,k)
-   enddo
-endif
-
-! correct corner points:
-if (my_x==0 .and. my_y==0) then
-endif
-if (my_x==ncpu_x-1 .and. my_y==0) then
-endif
-if (my_x==0 .and. my_y==ncpu_y-1) then
-endif
-if (my_x==ncpu_x-1 .and. my_y==ncpu_y-1) then
-endif
-
-
-
-
-! phi = f on boundary, zero inside
-phi=f
-call zero_boundary(phi)
-phi=f-phi
-call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
-
-
-! convert problem to zero b.c. problem
-f=f-lphi
-call zero_boundary(f)
-! solve Helm(f) = b with 0 b.c.
-
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
-call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)     
-call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
-call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
 
 
 !  2nd order uses the regular stencil:     
@@ -1644,14 +1578,153 @@ call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
 !           x-2axy    -2x-2y+4axy      x-2axy
 !              axy       y  -2axy         axy
 !
+#ifdef COMPACT
+if (ndim/=2) then
+   call abort("helmholtz_dirichlet_inv() not coded for 3D compact")
+endif
 axy=(delx**2+dely**2)/(12*delx*delx*dely*dely)
+#else
+axy=0
+#endif
 x_axy=1/(delx*delx) - 2*axy
 y_axy=1/(dely*dely) - 2*axy
+
+
+
+
+if (beta==0) then
+   f=f/alpha
+   return
+endif
+!
+!  let phi = f on the boundary, 0 inside
+!      lphi = Helmholtz(phi)
+!
+!  solve:  Helmholtz(psi) = b - lphi  with psi=0 on boundary
+!          then set psi=psi+phi
+!
+!
+!NOTE: we dont arrays for phi, lphi:  
+! save boundary data in single 1D array
+! set f = 0 on boundary
+! using boundary data alone: compute f = f - lphi 
+!      along points just inside boundary
+!
+! solve as before
+! restor boundary conditions in f from 1D array.
+
+
+! set loop indexes to loop over all points just inside boundary:
+if (my_x==0) then
+   bx1=nx1+1
+endif
+if (my_x==ncpu_x-1) then
+   bx2=nx2-1
+endif
+if (my_y==0) then
+   by1=ny1+1
+endif
+if (my_y==ncpu_y-1) then
+   by2=ny2-1
+endif
+if (my_z==0) then
+   bz1=nz1+1
+endif
+if (my_z==ncpu_z-1) then
+   bz2=nz2-1
+endif
+
+
+
+
+
+!
+! compute f-lphi just above x1 boundary (uses values of f along x1 boundary).
+! then zero out f along x1 boundary. 
+! We need to set f=0 on the boundary, and doing this now will
+! avoid double counting the contribution of the corner points when we do
+! the y1 and y2 boundaries.
+!
+k=1
+if (my_x==0) then
+   i=nx1
+   do j=by1,by2
+      f(i+1,j,k)=f(i+1,j,k) - ( axy*(f(i,j+1,k) + f(i,j-1,k)) + x_axy*f(i,j,k) )
+   enddo
+   do j=ny1,ny2
+      xb(j,1)=f(i,j,k)
+      f(i,j,k)=0
+   enddo
+endif
+! now do the x2 boundary:
+if (my_x==ncpu_x-1) then
+   i=nx2
+   do j=by1,by2
+      f(i-1,j,k)=f(i-1,j,k) - (axy*(f(i,j+1,k) + f(i,j-1,k)) + x_axy*f(i,j,k) )
+   enddo
+   do j=ny1,ny2
+      xb(j,2)=f(i,j,k)
+      f(i,j,k)=0
+   enddo
+endif
+! now do the y1 boundary:
+if (my_y==0) then
+   j=ny1
+   do i=bx1,bx2
+      f(i,j+1,k)=f(i,j+1,k) - (axy*(f(i+1,j,k) + f(i-1,j,k)) + y_axy*f(i,j,k))
+   enddo
+   do i=nx1,nx2
+      yb(i,1)=f(i,j,k)
+      f(i,j,k)=0
+   enddo
+endif
+! now do the y2 boundary:
+if (my_y==ncpu_y-1) then
+   j=ny2
+   do i=bx1,bx2
+      f(i,j-1,k)=f(i,j-1,k) - (axy*(f(i+1,j,k) + f(i-1,j,k)) + y_axy*f(i,j,k))
+   enddo
+   do i=nx1,nx2
+      yb(i,2)=f(i,j,k)
+      f(i,j,k)=0
+   enddo
+endif
+
+
+
+
+#if 0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   if (abs(f2(i,j,k)-f(i,j,k))>1e-12 ) then
+      print *,i,j,k,f(i,j,k),f2(i,j,k)
+   endif
+enddo
+enddo
+enddo
+#endif
+
+
+
+! solve Helm(f) = b with 0 b.c.
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
+
 
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-#ifdef COMPACT
    ! mode imsine(i),jmsine(j),kmsine(k)
    ! sin(x+h)sin(y+h) + sin(x-h)sin(y+h) + 
    ! sin(x+h)sin(y-h) + sin(x-h)sin(y-h) =
@@ -1666,25 +1739,8 @@ do i=nx1,nx2
    xfac = xfac + axy*4*cos(pi*delx*imsine(i))*cos(pi*dely*jmsine(j))
    ! center term:
    xfac = xfac -2/(delx*delx)-2/(dely*dely)+4*axy   
-#else
-   ! [sin(x+h) - 2 sin(x) + sin(x-h)]   = 
-   !
-   ! [ -2 + 2*cos(h)  ]  sin(x)
-   ! 
-   xm = -2 + 2*cos(pi*delx*imsine(i))
-   xm=xm/(delx*delx)
-   ym = -2 + 2*cos(pi*dely*jmsine(j))
-   ym=ym/(dely*dely)
-   zm = -2 + 2*cos(pi*delz*kmsine(k))
-   zm=zm/(delz*delz)
-   xfac=xm+ym+zm
-#endif
 
 
-
-!   if (abs(f(i,j,k))>1e-6) then
-!      print *,imsine(i),jmsine(j),kmsine(k),f(i,j,k)
-!   endif
    xfac = alpha + beta*xfac
    if (imsine(i)+jmsine(j)+kmsine(k)==0) then
       f(i,j,k) = 0
@@ -1708,9 +1764,6 @@ call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
 call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
 call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
-
-
-!print *,maxval(abs(f(nx1:nx2,ny1:ny2,1)-lphi(nx1:nx2,ny1:ny2,1)))
 
 
 !restor boundary values
@@ -1743,7 +1796,6 @@ if (my_y==ncpu_y-1) then
    enddo
 endif
 
-!f=f+phi
 end subroutine
 
 

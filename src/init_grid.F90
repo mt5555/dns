@@ -78,6 +78,33 @@ call MPI_Barrier(comm_3d,ierr)
 
 
 
+if (numerical_method==FOURIER) then
+!
+! this is needed to gaurentee that the sine and cosine modes
+! are on the same processor.  
+!
+
+if (mod(nslabx,2)/=0) then
+   call abort("nslabx must be even")
+endif
+if (mod(nslaby,2)/=0) then
+   call abort("nslaby must be even")
+endif
+if (mod(nslabz,2)/=0 .and. g_nz>1) then
+   call abort("nslabz must be even if g_nz>1")
+endif
+endif
+
+
+
+
+
+
+
+
+
+
+
 ! periodic FFT case:  for output, we include the point at x=1 (same as x=0)
 
 o_nx=g_nx
@@ -173,6 +200,36 @@ do j=1,ny_2dz
    if (z_jmcord(j)==0) z_jmsign(j)=0
    if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
 enddo
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid, bounds over interior (non-boundary) points
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+intx1=nx1
+intx2=nx2
+inty1=ny1
+inty2=ny2
+intz1=nz1
+intz2=nz2
+
+if (bdy_x1==INFLOW0_ONESIDED .and. my_x==0) then
+   intx1=nx1+1
+endif
+if (bdy_x2==INFLOW0_ONESIDED .and. my_x==ncpu_x-1) then
+   intx2=nx2-1
+endif
+if (bdy_y1==INFLOW0_ONESIDED .and. my_y==0) then
+   inty1=ny1+1
+endif
+if (bdy_y2==INFLOW0_ONESIDED .and. my_y==ncpu_y-1) then
+   inty2=ny2-1
+endif
+if (bdy_z1==INFLOW0_ONESIDED .and. my_z==0) then
+   intz1=nz1+1
+endif
+if (bdy_z2==INFLOW0_ONESIDED .and. my_z==ncpu_z-1) then
+   intz2=nz2-1
+endif
+
 
 
 
