@@ -10,10 +10,10 @@ type wnforcing_d
 end type
 
 integer           :: numb1,numb
-integer,parameter :: numb_max=15
+integer,parameter :: numb_max=512
 integer,parameter :: numbs=3         ! max stochastic forcing bands
 real*8            :: FM(numbs)       ! stochastic forcing normalization
-type(wnforcing_d) :: wnforcing(numb_max)
+type(wnforcing_d),allocatable :: wnforcing(:)
 
 integer,private :: ntot=0
 integer :: init_sforcing=0
@@ -48,6 +48,8 @@ if (forcing_type==3) call sforcing12(rhs,Qhat,f_diss,fxx_diss,1)
 ! stochastic, wave numbers 2,3
 if (forcing_type==4) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
+! determinisitic - Balu: single high wave number 
+if (forcing_type==5) call sforcing12(rhs,Qhat,f_diss,fxx_diss,2)
 
 
 
@@ -109,6 +111,7 @@ subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss,model_spec)
 !
 ! model_spec==0    E(1)=E(2)=.5
 ! model_spec==1    Overholt & Pope
+! model_spec==2    Balu
 !
 use params
 use mpi
@@ -127,18 +130,28 @@ if (0==init_sforcing) then
    if (model_spec==0) then
       numb=2   ! apply forcing in bands 1,2
       call sforcing_init()
-      do wn=1,numb
+      do wn=numb1,numb
          ener_target(wn)=.5
       enddo
    endif
    if (model_spec==1) then
       numb=8
       call sforcing_init()
-      do wn=1,numb
+      do wn=numb1,numb
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
+   if (model_spec==2) then
+      numb1=32
+      numb=32
+      call sforcing_init()
+      do wn=numb1,numb
+         ener_target(wn)=1.
+      enddo
+   endif
+   if (numb>numb_max) call abort("sforcing12: numb_max too small")
 endif
+
 
 if (g_u2xave==0) then
    ! on first call, this will not have been computed, so lets
@@ -213,8 +226,10 @@ do wn=numb1,numb
    ! Qf = Q*sqrt(ener_target/ener)
    ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
    tauf=tau_inv*(sqrt(ener_target(wn)/ener(wn))-1)
-   ! if (io_pe==my_pe) &
-   !write(*,'(a,3i4,3f17.10)') 'FORCING:',my_pe,wn,wnforcing(wn)%n,ener(wn),ener_target(wn),tauf
+   if (delt*tauf>.5) tauf=delt/2
+
+!   if (io_pe==my_pe) &
+!   write(*,'(a,3i4,2f17.10,e17.10)') 'FORCING:',my_pe,wn,wnforcing(wn)%n,ener(wn),ener_target(wn),tauf
 
    if (tauf>0) then ! only apply forcing if net input is positive
    do n=1,wnforcing(wn)%n
@@ -274,9 +289,10 @@ integer :: color,key
 character(len=80) :: message
 
 init_sforcing=1
+allocate(wnforcing(numb1:numb))
 
 
-   do n=1,numb
+   do n=numb1,numb
       wnforcing(n)%n=0
    enddo
    
@@ -289,7 +305,7 @@ init_sforcing=1
             km=z_kmcord(k)
 
             xw=sqrt(real(km**2+jm**2+im**2))
-            do n=1,numb
+            do n=numb1,numb
                if (xw>=n-.5 .and. xw<n+.5) then
                   wnforcing(n)%n=wnforcing(n)%n+1
                endif
@@ -300,7 +316,7 @@ init_sforcing=1
    enddo
    
    ! allocate storage
-   do n=1,numb
+   do n=numb1,numb
       i=wnforcing(n)%n
       if (i>0) allocate(wnforcing(n)%index(i,3))
       wnforcing(n)%n=0  ! reset counter to use again below
@@ -315,7 +331,7 @@ init_sforcing=1
             km=z_kmcord(k)
 
             xw=sqrt(real(km**2+jm**2+im**2))
-            do n=1,numb
+            do n=numb1,numb
             if (xw>=n-.5 .and. xw<n+.5) then
                wnforcing(n)%n=wnforcing(n)%n+1
                wnforcing(n)%index(wnforcing(n)%n,1)=i
@@ -331,7 +347,7 @@ init_sforcing=1
 
 
 ntot=0
-do wn=1,numb
+do wn=numb1,numb
    ntot=ntot+wnforcing(wn)%n
 enddo
 
@@ -497,7 +513,7 @@ countmax=1000000
 do count=1,countmax
 
 call gaussian(rmodes,((2*numbs+1)**3) *3)
-do wn=1,numb
+do wn=numb1,numb
 
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
@@ -525,7 +541,7 @@ enddo
 ff=abs(ff/countmax)**(1/Ri)
 print *,'count=',countmax
 print *,'<R,R> ='
-do wn=1,numb
+do wn=numb1,numb
    print *,ff(wn,:)
 enddo
 call abort("end stats")

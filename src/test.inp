@@ -1,8 +1,8 @@
 3            ! input file type
 ns_uvw       ! equations
-decay2048_e  ! initial condition:  KH-blob, KH-anal, iso12
+KH-anal       ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
-none        ! forcing:  none, iso, iso12, iso12w, iso23w
+balu         ! forcing:  none, iso, iso12, iso12w, iso23w
 value        ! viscosity type  (value, smallest, kediff, Re)
 1e-4    ! viscosity coefficient.  (300)
 0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
@@ -12,7 +12,7 @@ fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-0.0          ! time to run
+10.0          ! time to run
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
@@ -20,8 +20,8 @@ periodic     ! z bc
 0.0          ! restart_dt  (0 = restart output disabled)
 -10          ! diag_dt   
 -10          ! screen_dt
-5.0           ! output_dt  (0 = output disabled, except for custom out times)
-1           ! n_output_custom  number of custom output times  
+0.0           ! output_dt  (0 = output disabled, except for custom out times)
+0           ! n_output_custom  number of custom output times  
 00.00       ! custom output times, one per line
 
 
