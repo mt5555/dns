@@ -47,7 +47,7 @@ time_target=time_final
 !  
 !
 
-umax=maxs(4)
+umax=maxs(4)+fcor
 if (ndim==3) then
    mumax = mu/(delx**2) + &
            mu/(dely**2) + &
@@ -65,7 +65,7 @@ endif
 
 
 if (equations==SHALLOW .and. grav>0) then
-   umax=umax+fcor + sqrt(grav*H0)/min(delx,dely)   
+   umax=umax + sqrt(grav*H0)/min(delx,dely)   
 endif
 
 !if u=0, take very small timesteps 
