@@ -109,6 +109,7 @@ Running the code
    line 5    forcing:
               none
               iso12     Relax to E(1)=E(2)=.5
+              iso12_hel Relax E as iso12, also induce helicity
               iso12w    stochastic, white in time, wave numbers 1,2
               iso       Relax to Overholt & Pope spectrum
               iso23w    stochastic, white in time, wave numbers 2,3

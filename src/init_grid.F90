@@ -1188,6 +1188,8 @@ else if (sdata=='iso23w') then
    forcing_type=4
 else if (sdata=='balu') then
    forcing_type=5
+else if (sdata=='iso12_hel') then
+   forcing_type=6
 else 
    call abort("invalid forcing type specified on line 4 on input file")
 endif

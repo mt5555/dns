@@ -1,8 +1,8 @@
 4            ! input file type
 ns_uvw       ! equations
 iso12         ! initial condition:  KH-blob, KH-anal, iso12
-4            ! init condition subtype
-balu         ! forcing:  none, iso, iso12, iso12w, iso23w
+0            ! init condition subtype
+iso12_hel    ! forcing:  none, iso, iso12, iso12w, iso23w
 value        ! viscosity type  (value, smallest, kediff, Re)
 1e-4        ! viscosity coefficient.  (300)
 none        ! hyper vis

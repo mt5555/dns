@@ -52,6 +52,8 @@ if (forcing_type==4) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 ! do nothing - this forcing is handled in ns.F90
 if (forcing_type==5) call sforcing12(rhs,Qhat,f_diss,fxx_diss,2)
 
+! determinisitic with E1=E2=.5, also impose helicity
+if (forcing_type==6) call sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,0)
 
 
 
@@ -321,9 +323,6 @@ if (0==init_sforcing) then
    if (numb>numb_max) call abort("sforcing12_helicity: numb_max too small")
 endif
 
-allocate(rmodes(3,-numb:numb,-numb:numb,-numb:numb))
-allocate(rmodes2(3,-numb:numb,-numb:numb,-numb:numb))
-allocate(cmodes(2,3,-numb:numb,-numb:numb,-numb:numb))
 
 
 if (g_u2xave==0) then
@@ -371,6 +370,9 @@ if (ntot==0) return
 !  
 tau_inv=sqrt(g_u2xave)/.5
 
+allocate(rmodes(-numb:numb,-numb:numb,-numb:numb,3))
+allocate(rmodes2(-numb:numb,-numb:numb,-numb:numb,3))
+allocate(cmodes(2,-numb:numb,-numb:numb,-numb:numb,3))
 
 
 f_diss=0
@@ -389,9 +391,9 @@ do wn=numb1,numb
       if (z_imcord(i)==0) xfac=xfac/2
       ener(wn)=ener(wn)+.5*xfac*(Qhat(k,i,j,1)**2+Qhat(k,i,j,2)**2+Qhat(k,i,j,3)**2)
 
-      rmodes(1,z_imcord(i),z_jmcord(j),z_kmcord(k))=Qhat(k,i,j,1)
-      rmodes(2,z_imcord(i),z_jmcord(j),z_kmcord(k))=Qhat(k,i,j,2)
-      rmodes(3,z_imcord(i),z_jmcord(j),z_kmcord(k))=Qhat(k,i,j,3)
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)=Qhat(k,i,j,1)
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)=Qhat(k,i,j,2)
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)=Qhat(k,i,j,3)
    enddo
 enddo
 #ifdef USE_MPI
@@ -410,16 +412,21 @@ do wn=numb1,numb
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
-      rmodes(:,z_imcord(i),z_jmcord(j),z_kmcord(k))= &
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),:)= &
          sqrt(ener_target(wn)/ener(wn))*&
-         rmodes(:,z_imcord(i),z_jmcord(j),z_kmcord(k))
+         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),:)
    enddo
 enddo
 
 
-! convert to complex FFT coefficients
-call sincos_to_complex(rmodes,cmodes,numb)
+! convert to complex FFT coefficients (for testing)
+!call random_number(rmodes); rmodes2=rmodes
 
+do n=1,3
+   ! note: using rmodes(:,:,:,n) fails under ifc/linux.  why?
+   call sincos_to_complex(rmodes(-numb,-numb,-numb,n),&
+      cmodes(1,-numb,-numb,-numb,n),numb)
+enddo
 
 
 ! apply helicity fix:
@@ -428,18 +435,32 @@ do j=-numb,numb
 do k=-numb,numb
    k2=i**2 + j**2 + k**2
    if (k2 < (.5+numb)**2 ) then
-      RR = cmodes(1,:,i,j,k)
-      II = cmodes(2,:,i,j,k)
+      RR = cmodes(1,i,j,k,:)
+      II = cmodes(2,i,j,k,:)
    endif
 enddo
 enddo
 enddo
 
-
-
 ! convert back:
-call complex_to_sincos(rmodes,cmodes,numb)
+do n=1,3
+   call complex_to_sincos(rmodes(-numb,-numb,-numb,n),&
+      cmodes(1,-numb,-numb,-numb,n),numb)
+enddo
 
+! for testing...
+#if 0
+do i=-numb,numb
+do j=-numb,numb
+do k=-numb,numb
+   if (abs(rmodes(i,j,k,1)-rmodes2(i,j,k,1))>1e-10) then
+   write(*,'(i3,i3,i3,f20.10,f20.10)') i,j,k,rmodes(i,j,k,1),rmodes2(i,j,k,1)
+   endif
+enddo
+enddo
+enddo
+stop
+#endif
 
 
 do wn=numb1,numb
@@ -459,9 +480,9 @@ do wn=numb1,numb
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
 
-      Qdel(1)=tauf*(rmodes(1,z_imcord(i),z_jmcord(j),z_kmcord(k))-Qhat(k,i,j,1))
-      Qdel(2)=tauf*(rmodes(2,z_imcord(i),z_jmcord(j),z_kmcord(k))-Qhat(k,i,j,2))
-      Qdel(3)=tauf*(rmodes(3,z_imcord(i),z_jmcord(j),z_kmcord(k))-Qhat(k,i,j,3))
+      Qdel(1)=tauf*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)-Qhat(k,i,j,1))
+      Qdel(2)=tauf*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)-Qhat(k,i,j,2))
+      Qdel(3)=tauf*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)-Qhat(k,i,j,3))
 
 
       rhs(k,i,j,1) = rhs(k,i,j,1) + Qdel(1)
@@ -472,7 +493,9 @@ do wn=numb1,numb
       if (z_kmcord(k)==0) xfac=xfac/2
       if (z_jmcord(j)==0) xfac=xfac/2
       if (z_imcord(i)==0) xfac=xfac/2
-      f_diss = f_diss + xfac*(Qdel(1)**2 + Qdel(2)**2 + Qdel(3)**2) 
+      f_diss = f_diss + xfac*(Qdel(1)*Qhat(k,i,j,1) +&
+                              Qdel(2)*Qhat(k,i,j,2) + &
+                              Qdel(3)*Qhat(k,i,j,3) ) 
 
       xw=-(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
       fxx_diss = fxx_diss + xfac*xw*(Qdel(1)**2 + Qdel(2)**2 + Qdel(3)**2) 
@@ -1083,11 +1106,6 @@ do km=-nmax,nmax
       call abort("this cant happen")
    endif
 
-   print *,'sign(1,1)=',sign(1,1)
-   print *,'sign(1,0)=',sign(1,0)
-   print *,'sign(1,-1)=',sign(1,-1)
-   stop
-
    cmodes(1,ip,jp,kp)=cmodes(1,ip,jp,kp) + a;    
    cmodes(2,ip,jp,kp)=cmodes(2,ip,jp,kp) + b
 
@@ -1097,20 +1115,20 @@ do km=-nmax,nmax
    cmodes(1,ip,-jp,kp)=cmodes(1,ip,-jp,kp) + a*sign(1,jm)
    cmodes(2,ip,-jp,kp)=cmodes(2,ip,-jp,kp) + b*sign(1,jm)
 
-   cmodes(1,ip,-jp,-kp)=cmodes(1,ip,-jp,-kp) + a*sign(1,jm*km)  
-   cmodes(2,ip,-jp,-kp)=cmodes(2,ip,-jp,-kp) + b*sign(1,jm*km)  
+   cmodes(1,ip,-jp,-kp)=cmodes(1,ip,-jp,-kp) + a*sign(1,jm)*sign(1,km)  
+   cmodes(2,ip,-jp,-kp)=cmodes(2,ip,-jp,-kp) + b*sign(1,jm)*sign(1,km)  
 
    cmodes(1,-ip,jp,kp)=cmodes(1,-ip,jp,kp) + a*sign(1,im)
    cmodes(2,-ip,jp,kp)=cmodes(2,-ip,jp,kp) + b*sign(1,im)
 
-   cmodes(1,-ip,jp,-kp)=cmodes(1,-ip,jp,-kp) + a*sign(1,im*km)
-   cmodes(2,-ip,jp,-kp)=cmodes(2,-ip,jp,-kp) + b*sign(1,im*km)
+   cmodes(1,-ip,jp,-kp)=cmodes(1,-ip,jp,-kp) + a*sign(1,im)*sign(1,km)
+   cmodes(2,-ip,jp,-kp)=cmodes(2,-ip,jp,-kp) + b*sign(1,im)*sign(1,km)
 
-   cmodes(1,-ip,-jp,kp)=cmodes(1,-ip,-jp,kp) + a*sign(1,im*jm)
-   cmodes(2,-ip,-jp,kp)=cmodes(2,-ip,-jp,kp) + b*sign(1,im*jm)
+   cmodes(1,-ip,-jp,kp)=cmodes(1,-ip,-jp,kp) + a*sign(1,im)*sign(1,jm)
+   cmodes(2,-ip,-jp,kp)=cmodes(2,-ip,-jp,kp) + b*sign(1,im)*sign(1,jm)
 
-   cmodes(1,-ip,-jp,-kp)=cmodes(1,-ip,-jp,-kp) + a*sign(1,im*jm*km)
-   cmodes(2,-ip,-jp,-kp)=cmodes(2,-ip,-jp,-kp) + b*sign(1,im*jm*km)
+   cmodes(1,-ip,-jp,-kp)=cmodes(1,-ip,-jp,-kp) + a*sign(1,im)*sign(1,jm)*sign(1,km)
+   cmodes(2,-ip,-jp,-kp)=cmodes(2,-ip,-jp,-kp) + b*sign(1,im)*sign(1,jm)*sign(1,km)
 
 enddo
 enddo

@@ -37,55 +37,9 @@ CPOINTER :: null
 if (init==0) return
 
 
-!random vorticity
-if (rantype==0) then
-do n=1,3
-   ! input from random number generator
-   ! this gives same I.C independent of cpus
-   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.,-1)  
-enddo
-else if (rantype==1) then
-   do n=1,3
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
-            if (xw>=.5 .or. xw<2.5) then
-               xfac = (2*2*2)
-               if (km==0) xfac=xfac/2
-               if (jm==0) xfac=xfac/2
-               if (im==0) xfac=xfac/2
-               
-               call gaussian(theta,1)
-               PSI(i,j,k,n)=theta/xfac
-            endif
-         enddo
-      enddo
-   enddo
-   enddo
-else
-   call abort("lwisotropic():  invalid 'rantype'")
-endif
+! compute U using random vorticity
+call ranvor(Q,PSI,work,work2,rantype)
 
-alpha=0
-beta=1
-do n=1,3
-   call helmholtz_periodic_inv(PSI(1,1,1,n),work,alpha,beta)
-enddo
-if (ndim==2) then
-   ! 2D case, treat PSI(:,:,:,1) = stream function, ignore other components
-   Q=0
-   ! u = PSI_y
-   call der(PSI,Q,work2,work,DX_ONLY,2)     
-   ! v = -PSI_x
-   call der(PSI,Q(1,1,1,2),work2,work,DX_ONLY,1)
-   Q(:,:,:,2)=-Q(:,:,:,2)
-else
-   call vorticity(Q,PSI,work,work2)
-endif
 
 
 !
@@ -108,98 +62,9 @@ enddo
 endif
 
 
+! rescale E to fit enerb_target():
+call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 
-
-do n=1,3
-   call fft3d(Q(1,1,1,n),work) 
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
-
-            xfac = (2*2*2)
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-
-            do nb=1,NUMBANDS
-               if (xw>=nb-.5 .and. xw<nb+.5) &
-                    enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
-            enddo
-            !remaining coefficients to 0:
-            nb=NUMBANDS+1
-            if (xw>=nb-.5) Q(i,j,k,n)=0
-
-         enddo
-      enddo
-   enddo
-enddo
-
-#ifdef USE_MPI
-   enerb_work=enerb
-   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
-
-
-do n=1,3
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
-            
-            do nb=1,NUMBANDS
-            if (xw>=nb-.5 .and. xw<nb+.5) then
-               if (enerb(nb)>0) Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
-            endif
-            enddo
-         enddo
-      enddo
-   enddo
-enddo
-
-ener=0
-enerb=0
-do n=1,3
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
-
-            xfac = (2*2*2)
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-
-            do nb=1,NUMBANDS
-            if (xw>=nb-.5 .and. xw<nb+.5) then
-               enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
-            endif
-            enddo
-            ener=ener+.5*xfac*Q(i,j,k,n)**2
-
-
-         enddo
-      enddo
-   enddo
-enddo
-do n=1,3
-   call ifft3d(Q(1,1,1,n),work) 
-enddo
-#ifdef USE_MPI
-   xfac=ener
-   call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   enerb_work=enerb
-   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
 
 call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,min(NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
@@ -290,23 +155,16 @@ if (init_cond_subtype==0) then
       enerb_target(nb)=fac1*fac2*fac3
    enddo
 else if (init_cond_subtype==1) then
-   p=2;
-   p1=(1+p)/2
-   p2=p/2
-   ku=10
-
-   do nb=1,NUMBANDS
-      xnb = nb
-      fac1=p2**p1 * xnb**p
-      fac2=ku**(p+1)
-      fac3=exp(-p2* (xnb/ku)**2)
-      enerb_target(nb)=fac1*fac3/fac2
-   enddo
-   
+   call livescu_spectrum(enerb_target,NUMBANDS)
 else
    call abort("init_data_decay: bad init_cond_subtype")
 endif
 
+! number of bands to use in initial condtion. doesn't really matter
+! since it will be truncated by sqrt(2)*g_nmin/3 during initial
+! projection & dealias step
+!
+NUMBANDS=.5 + sqrt(2.0)*g_nmin/3  ! round up
 
 
 if (init==0) return
@@ -340,53 +198,17 @@ if (my_pe==io_pe .and. init_cond_subtype==0) then
 endif
 
 
-! number of bands to use in initial condtion. doesn't really matter
-! since it will be truncated by sqrt(2)*g_nmin/3 during initial
-! projection & dealias step
-!
-NUMBANDS=.5 + sqrt(2.0)*g_nmin/3  ! round up
 
 
-
+! random vorticity initial condition:
 if (init==1) then
-call print_message("computing random initial vorticity")
-!random vorticity
-if (rantype==0) then
-do n=1,3
-   ! input from random number generator
-   ! this gives same I.C independent of cpus
-   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.,-1)  
-enddo
-else if (rantype==1) then
-   do n=1,3
-   write(message,*) 'random initial vorticity n=',n   
-   call print_message(message)
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         call gaussian( PSI(nx1,j,k,n), nslabx  )
-         do i=nx1,nx2
-            im=imcord(i)
-            xfac = (2*2*2)
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-            PSI(i,j,k,n)=PSI(i,j,k,n)/xfac
-         enddo
-      enddo
-   enddo
-   enddo
-else
-   call abort("decay():  invalid 'rantype'")
+   call ranvor(Q,PSI,work,work2,rantype)
 endif
 
 
 #if 0
 if (init==1) then
-
 fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
-
 call wallclock(tmx1)
 call udm_write_uvw(fname,0d0,Q,PSI,work,work2)
 call wallclock(tmx2)
@@ -397,135 +219,13 @@ if (io_pe==my_pe) then
 endif
 call close_mpi
 stop
-
 endif
 #endif
 
 
+! rescale energy to match enerb_target:
+call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 
-alpha=0
-beta=1
-do n=1,3
-   write(message,*) 'solving for PSI n=',n   
-   call print_message(message)
-   call helmholtz_periodic_inv(PSI(1,1,1,n),work,alpha,beta)
-enddo
-
-call print_message("computing curl PSI")
-call vorticity(Q,PSI,work,work2)
-call print_message("random initial condition complete")
-endif
-
-
-
-
-!
-! rescale initial data
-!
-call print_message("Rescaling initial condition")
-enerb=0
-do n=1,3
-   write(message,*) 'FFT to spectral space n=',n   
-   call print_message(message)
-   call fft3d(Q(1,1,1,n),work) 
-   write(message,*) 'computing E(k) n=',n   
-   call print_message(message)
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
-
-            xfac = (2*2*2)
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-
-            do nb=1,NUMBANDS
-               if (xw>=nb-.5 .and. xw<nb+.5) &
-                    enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
-            enddo
-            !remaining coefficients to 0:
-            nb=NUMBANDS+1
-            if (xw>=nb-.5) Q(i,j,k,n)=0
-
-         enddo
-      enddo
-   enddo
-enddo
-
-#ifdef USE_MPI
-   enerb_work=enerb
-   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
-
-
-do n=1,3
-   write(message,*) 'normalizing to E_target(k) n=',n   
-   call print_message(message)
-
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
-            
-            do nb=1,NUMBANDS
-            if (xw>=nb-.5 .and. xw<nb+.5) then
-               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
-            endif
-            enddo
-         enddo
-      enddo
-   enddo
-enddo
-
-ener=0
-enerb=0
-do n=1,3
-   write(message,*) 're-computing E(k) n=',n   
-   call print_message(message)
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
-
-            xfac = (2*2*2)
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-
-            do nb=1,NUMBANDS
-            if (xw>=nb-.5 .and. xw<nb+.5) then
-               enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
-            endif
-            enddo
-            ener=ener+.5*xfac*Q(i,j,k,n)**2
-
-
-         enddo
-      enddo
-   enddo
-enddo
-
-do n=1,3
-   write(message,*) 'FFT back to grid space, n=',n   
-   call print_message(message)
-   call ifft3d(Q(1,1,1,n),work) 
-enddo
-#ifdef USE_MPI
-   xfac=ener
-   call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   enerb_work=enerb
-   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
 
 call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,min(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
@@ -826,3 +526,24 @@ end subroutine
 
 
 
+subroutine livescu_spectrum(enerb_target,numb)
+implicit none
+real*8 :: enerb_target(numb)
+integer :: numb
+
+real*8 :: p,p1,p2,ku,xnb,fac1,fac2,fac3
+integer ::  nb
+
+   p=2;
+   p1=(1+p)/2
+   p2=p/2
+   ku=10
+
+   do nb=1,numb
+      xnb = nb
+      fac1=p2**p1 * xnb**p
+      fac2=ku**(p+1)
+      fac3=exp(-p2* (xnb/ku)**2)
+      enerb_target(nb)=fac1*fac3/fac2
+   enddo
+end subroutine

@@ -69,8 +69,6 @@ subroutine init_data_restart(Q,Qhat,work1,work2)
 ! low wave number, quasi isotropic initial condition
 !
 use params
-use mpi
-use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -104,8 +102,6 @@ subroutine init_passive_scalars(Q,Qhat,work1,work2)
 ! low wave number, quasi isotropic initial condition
 !
 use params
-use mpi
-use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,n_var)
@@ -163,8 +159,6 @@ subroutine passive_KE_init(Q,work1,work2)
 ! low wave number, quasi isotropic initial condition
 !
 use params
-use mpi
-use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
@@ -245,69 +239,46 @@ subroutine passive_gaussian_init(Q,work1,work2)
 ! low wave number, quasi isotropic initial condition
 !
 use params
-use mpi
-use fft_interface
+use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 real*8 :: ke2,ke,ke_thresh,check
-integer :: i,j,k,n,ierr
-
+integer :: i,j,k,n,ierr,NUMBANDS
+real*8,allocatable :: enerb_target(:)
+real*8,allocatable :: enerb(:)
+real*8 :: ener
+CPOINTER :: null
 character(len=80) ::  message
 
 write(message,'(a,i3,a)') "Initializing KE correlated passive scalars n=",n,&
                         " ..."
-
-call print_message(message)
-
-ke=0
-do n=1,ndim
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      ke = ke + .5*Q(i,j,k,n)**2
-   enddo
-   enddo
-   enddo
-enddo
-ke=ke/g_nx/g_ny/g_nz
-
-#ifdef USE_MPI
-   ke2=ke
-   call MPI_allreduce(ke2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
-
-
-
-ke_thresh=.82*ke
-
-Q(:,:,:,n)=0
-check=0
-do k=nz1,nz2
-   do j=ny1,ny2
-      do i=nx1,nx2
-         ke = .5*(Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2)
-         if (ke>ke_thresh) then
-            Q(:,:,:,n)=1
-            check=check+1
-         endif
-      enddo
-   enddo
-enddo
-
-check=check/g_nx/g_ny/g_nz
-#ifdef USE_MPI
-   ke2=check
-   call MPI_allreduce(ke2,check,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
-
-
-write(message,'(a,f7.3)') "Mean density: ",check
 call print_message(message)
 
 
+NUMBANDS=.5 + sqrt(2.0)*g_nmin/3  ! round up
+allocate(enerb_target(NUMBANDS))
+allocate(enerb(NUMBANDS))
+
+call livescu_spectrum(enerb_target,NUMBANDS)
+do n=np1,np2
+   call input1(Q(1,1,1,n),work1,work2,null,io_pe,.true.,-1)  
+   call rescale_e(Q(1,1,1,n),work1,ener,enerb,enerb_target,NUMBANDS,1)
+   ! convert to 0,1:
+   ! filter
+   call fft3d(u(1,1,1,i),work)
+   call fft_filter_dealias(u(1,1,1,i))
+   call ifft3d(u(1,1,1,i),work)
+
+   ! laplacian smoothing
+enddo
+
+
+
+deallocate(enerb_target)
+deallocate(enerb)
 end subroutine
 
 
@@ -319,4 +290,202 @@ end subroutine
 
 
 
+subroutine ranvor(Q,PSI,work,work2,rantype)
+use params
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: PSI(nx,ny,nz,3)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+integer :: rantype,n,im,jm,km,i,j,k
+real*8 :: xfac,alpha,beta
+character(len=80) :: message
+CPOINTER :: null
 
+
+call print_message("computing random initial vorticity")
+!random vorticity
+if (rantype==0) then
+do n=1,3
+   ! input from random number generator
+   ! this gives same I.C independent of cpus
+   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.,-1)  
+enddo
+else if (rantype==1) then
+   do n=1,3
+   write(message,*) 'random initial vorticity n=',n   
+   call print_message(message)
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         call gaussian( PSI(nx1,j,k,n), nslabx  )
+         do i=nx1,nx2
+            im=imcord(i)
+            xfac = (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            PSI(i,j,k,n)=PSI(i,j,k,n)/xfac
+         enddo
+      enddo
+   enddo
+   enddo
+else
+   call abort("decay():  invalid 'rantype'")
+endif
+alpha=0
+beta=1
+do n=1,3
+   write(message,*) 'solving for PSI n=',n   
+   call print_message(message)
+   call helmholtz_periodic_inv(PSI(1,1,1,n),work,alpha,beta)
+enddo
+
+call print_message("computing curl PSI")
+if (ndim==2) then
+   ! 2D case, treat PSI(:,:,:,1) = stream function, ignore other components
+   Q=0
+   ! u = PSI_y
+   call der(PSI,Q,work2,work,DX_ONLY,2)     
+   ! v = -PSI_x
+   call der(PSI,Q(1,1,1,2),work2,work,DX_ONLY,1)
+   Q(:,:,:,2)=-Q(:,:,:,2)
+else
+   call vorticity(Q,PSI,work,work2)
+endif
+call print_message("random initial condition complete")
+
+end subroutine
+
+
+
+
+
+
+subroutine rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,nvec)
+!
+! rescale initial data
+!
+use params
+use transpose
+implicit none
+integer :: NUMBANDS,nvec
+real*8 :: Q(nx,ny,nz,nvec)
+real*8 :: work(nx,ny,nz)
+real*8 :: enerb_target(NUMBANDS)
+real*8 :: enerb(NUMBANDS)
+real*8 :: enerb_work(NUMBANDS)
+real*8 :: ener
+
+integer :: n,im,jm,km,i,j,k,nb
+real*8 :: xfac,xw
+character(len=80) :: message
+
+
+call print_message("Rescaling initial condition")
+enerb=0
+do n=1,nvec
+   write(message,*) 'FFT to spectral space n=',n   
+   call print_message(message)
+   call fft3d(Q(1,1,1,n),work) 
+   write(message,*) 'computing E(k) n=',n   
+   call print_message(message)
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+
+            xfac = (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+
+            do nb=1,NUMBANDS
+               if (xw>=nb-.5 .and. xw<nb+.5) &
+                    enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
+            enddo
+            !remaining coefficients to 0:
+            nb=NUMBANDS+1
+            if (xw>=nb-.5) Q(i,j,k,n)=0
+
+         enddo
+      enddo
+   enddo
+enddo
+
+#ifdef USE_MPI
+   enerb_work=enerb
+   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+
+do n=1,nvec
+   write(message,*) 'normalizing to E_target(k) n=',n   
+   call print_message(message)
+
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+            
+            do nb=1,NUMBANDS
+            if (xw>=nb-.5 .and. xw<nb+.5) then
+               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
+            endif
+            enddo
+         enddo
+      enddo
+   enddo
+enddo
+
+ener=0
+enerb=0
+do n=1,nvec
+   write(message,*) 're-computing E(k) n=',n   
+   call print_message(message)
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+
+            xfac = (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+
+            do nb=1,NUMBANDS
+            if (xw>=nb-.5 .and. xw<nb+.5) then
+               enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
+            endif
+            enddo
+            ener=ener+.5*xfac*Q(i,j,k,n)**2
+
+
+         enddo
+      enddo
+   enddo
+enddo
+
+do n=1,nvec
+   write(message,*) 'FFT back to grid space, n=',n   
+   call print_message(message)
+   call ifft3d(Q(1,1,1,n),work) 
+enddo
+#ifdef USE_MPI
+   xfac=ener
+   call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enerb_work=enerb
+   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+end subroutine
