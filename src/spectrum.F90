@@ -887,8 +887,6 @@ integer :: pe             ! compute spectrum on this processor
 real*8 :: Q(nx,ny,nz,3)
 real*8 :: p1(nx,ny,nz,3)
 real*8 :: work(nx,ny,nz)
-real*8 :: spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
-real*8 :: spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
 
 ! local variables
 real*8 rwave
