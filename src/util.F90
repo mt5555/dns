@@ -33,16 +33,22 @@ end subroutine
 
 
 subroutine wallclock(tmx)
+
+#ifdef USE_MPI
+use params
+use mpi
+implicit none
+real*8 tmx
+tmx = MPI_Wtime()
+
+#else
 use params
 implicit none
 integer count,count_rate,count_max
 real*8 tmx
-#ifdef USE_MPI
-real*8 MPI_Wtime
-tmx = MPI_Wtime()
-#else
 call system_clock(count,count_rate,count_max)
 tmx=real(count,r8kind)/real(count_rate,r8kind)
+
 #endif
 
 end subroutine

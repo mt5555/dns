@@ -66,6 +66,7 @@ plot(timeDU,hel,'g')
 title('KE: blue,    d(KE)/dt: black & red,    hel: green');
 hold off
 
+print -dpsc scalars.ps
 
 
 

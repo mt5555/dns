@@ -15,7 +15,7 @@ fid=fopen('test64.sf','r');
 
 times=[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0];
 mkps=1;
-dp=5;
+dp=7;
 
 time=fread(fid,1,'float64');
 while (time>=0 & time<=5000)

@@ -16,8 +16,9 @@ real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
 allocate(Q(nx,ny,nz,n_var))
 
-call wallclock(tmx1)
+
 call init_mpi       
+call wallclock(tmx1)  ! wallclock may use MPI timers, call after init_mpi
 call init_mpi_comm3d()
 call init_grid      
 

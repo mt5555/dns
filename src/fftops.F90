@@ -83,8 +83,7 @@ use params
 use fft_interface
 implicit none
 real*8 u(nx,ny,nz,3)
-real*8          :: p(nx,ny,nz)
-
+real*8 :: p(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: dummy(1)
@@ -93,7 +92,7 @@ real*8 :: beta=1
 
 
 !local variables
-integer i,j,k
+integer i,j,k,n
 
 call divergence(p,u,work,work2)
 
@@ -101,9 +100,15 @@ call divergence(p,u,work,work2)
 call poisson(p,work,alpha,beta)
 
 ! compute u=u-grad(p)
-do i=1,3
-   call der(p,work,dummy,work2,1,i)
-   u(:,:,:,i) = u(:,:,:,i) - work
+do n=1,3
+   call der(p,work,dummy,work2,1,n)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      u(i,j,k,n)=u(i,j,k,n)-work(i,j,k)
+   enddo
+   enddo
+   enddo
 enddo
 
 if (dealias) then
@@ -146,26 +151,44 @@ real*8 d1(nx,ny,nz)
 real*8 work(nx,ny,nz) 
 
 ! local variables
-integer i
+integer i,j,k,n
 real*8 dummy(1)
 
 vor=0
-do i=1,3
+do n=1,3
 
    ! compute u_x, u_xx
-   call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,1)
-   if (i==3) vor(:,:,:,2) = vor(:,:,:,2) - d1
-   if (i==2) vor(:,:,:,3) = vor(:,:,:,3) + d1
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,1)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (n==3) vor(i,j,k,2) = vor(i,j,k,2) - d1(i,j,k)
+      if (n==2) vor(i,j,k,3) = vor(i,j,k,3) + d1(i,j,k)
+   enddo
+   enddo
+   enddo
 
    ! compute u_y, u_yy
-   call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,2)
-   if (i==3) vor(:,:,:,1) = vor(:,:,:,1) + d1
-   if (i==1) vor(:,:,:,3) = vor(:,:,:,3) -d1
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,2)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (n==3) vor(i,j,k,1) = vor(i,j,k,1) + d1(i,j,k)
+      if (n==1) vor(i,j,k,3) = vor(i,j,k,3) -d1(i,j,k)
+   enddo
+   enddo
+   enddo
 
    ! compute u_z, u_zz
-   call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,3)
-   if (i==2) vor(:,:,:,1) = vor(:,:,:,1) -d1
-   if (i==1) vor(:,:,:,2) = vor(:,:,:,2) +d1
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (n==2) vor(i,j,k,1) = vor(i,j,k,1) -d1(i,j,k)
+      if (n==1) vor(i,j,k,2) = vor(i,j,k,2) +d1(i,j,k)
+   enddo
+   enddo
+   enddo
 
 enddo
 
@@ -186,19 +209,31 @@ real*8 work1(nx,ny,nz) ! wk array
 real*8 work2(nx,ny,nz) ! wk array
 
 ! local variables
-integer i
+integer i,j,k,n
 real*8 dummy(1)
 
-i=1
-call der(u(1,1,1,i),div,dummy,work2,DX_ONLY,i)
+n=1
+call der(u(1,1,1,n),div,dummy,work2,DX_ONLY,n)
 
-i=2
-call der(u(1,1,1,i),work1,dummy,work2,DX_ONLY,i)
-div = div+work1
+n=2
+call der(u(1,1,1,n),work1,dummy,work2,DX_ONLY,n)
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   div(i,j,k) = div(i,j,k)+work1(i,j,k)
+enddo
+enddo
+enddo
 
-i=3
-call der(u(1,1,1,i),work1,dummy,work2,DX_ONLY,i)
-div = div+work1
+n=3
+call der(u(1,1,1,n),work1,dummy,work2,DX_ONLY,n)
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   div(i,j,k) = div(i,j,k)+work1(i,j,k)
+enddo
+enddo
+enddo
 
 
 end subroutine
