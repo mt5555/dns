@@ -11,8 +11,9 @@
 
 
 
-#define DX_ONLY     1
-#define DX_AND_DXX  2
+#define DX_AND_DXX 2
+#define DX_ONLY 1
+#define DXONLY 1
 
 #define ncpu_x  mpidims(1)
 #define ncpu_y  mpidims(2)

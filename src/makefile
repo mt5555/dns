@@ -22,10 +22,8 @@ endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
-   MPIINC = -DMPI 
-   MPIF90 = /usr/local/src/mpich/include/mpif.f90
    LDFLAGS = 
-   FFLAGS = -O -DMPI
+   FFLAGS = -O -cpp -DMPI 
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
@@ -47,6 +45,8 @@ OBJS3 = $(MODEL) $(INITS) $(OPS) $(FILEIO)
 
 
 #rules
+%.o: %.f90
+	$(COMPILE)  $< 
 %.o: %.F90
 	$(COMPILE)  $< 
 %.o: %.f
@@ -67,8 +67,8 @@ dep:
 -include .depends
 
 
-mpi.o: $(MPIF90)
-	$(COMPILE) -o mpi.o $(MPIF90)
+#mpi.o: $(MPIF90)
+#	$(COMPILE) -o mpi.o $(MPIF90)
 fft_interface.o:  fft99_interface.F90 macros.h
 	$(COMPILE) -o fft_interface.o fft99_interface.F90
 #fft_interface.o:  compaq_fft_interface.F90 params.o

@@ -88,13 +88,13 @@ real*8 lap2(nx,ny,nz)
 
 ! compute p = div(u)
 i=1
-call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
+call der(u(1,1,1,i),d1,dummy,work,1,i)
 p = d1
 i=2
-call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
+call der(u(1,1,1,i),d1,dummy,work,1,i)
 p = p + d1
 i=3
-call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
+call der(u(1,1,1,i),d1,dummy,work,1,i)
 p = p + d1
 
 divu=p
@@ -105,7 +105,7 @@ call poisson(p,work,alpha,beta)
 
 ! compute u=u-grad(p)
 do i=1,3
-   call der(p,d1,dummy,work,DX_ONLY,i)
+   call der(p,d1,dummy,work,1,i)
    u(:,:,:,i) = u(:,:,:,i) - d1
 enddo
 
@@ -281,7 +281,7 @@ real*8 xfac
                im=(i-nx1)/2
             endif
             xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
-            if (xfac<>0) xfac = 1/xfac
+            if (xfac/=0) xfac = 1/xfac
             p(i,j,k)=p(i,j,k)*xfac
          enddo
       enddo

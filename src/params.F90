@@ -142,15 +142,15 @@ if (g_nz==1) g_nz2=1
 nz_2d=(nz2-nz1+1)/mpidims(1)
 nx_2d=(nx2-nx1+1)/mpidims(2)
 ny_2d=(ny2-ny1+1)/mpidims(3)
-if (0<>mod(nz2-nz1+1,mpidims(1))) then
+if (0/=mod(nz2-nz1+1,mpidims(1))) then
    fail=1
    call print_message("mpidims(1) does not divide nz");
 endif
-if (0<>mod(nx2-nx1+1,mpidims(2))) then
+if (0/=mod(nx2-nx1+1,mpidims(2))) then
    fail=1
    call print_message("mpidims(2) does not divide nx");
 endif
-if (0<>mod(ny2-ny1+1,mpidims(3))) then
+if (0/=mod(ny2-ny1+1,mpidims(3))) then
    fail=1
    call print_message("mpidims(3) does not divide nz");
 endif
@@ -209,7 +209,7 @@ if ( nz2>nz) then
    call print_message("nz is too small. nz must be >=nz2")	
 endif
 
-if (fail<>0) call abort("params.F90 dimension settings failure")
+if (fail/=0) call abort("params.F90 dimension settings failure")
 
 allocate(g_xcord(g_nx))
 allocate(g_ycord(g_ny))
