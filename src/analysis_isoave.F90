@@ -330,7 +330,9 @@ do
          call cclose(fid,ierr)
       endif
    endif
-   
+
+   ! reset our flag, so we will read in the nxt data set
+   read_uvw=.false.   
 
    if (tstart>=0) then   
       time=time+tinc
