@@ -95,7 +95,7 @@ cfl_used_vis=mumax*delt
 !
 if (doit) then
 
-   write(message,'(a,f9.5,a,i5,a,f8.5)') 'time=',time,'(',itime,')  next output=',time_target
+   write(message,'(a,f9.5,a,i5,a,f9.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'for next timestep: delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
