@@ -1,14 +1,15 @@
 #include "macros.h"
-subroutine time_control(time,Q)
+subroutine time_control(itime,time,Q)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: time
+integer :: itime
 
 ! local variables
 integer i,j,k,n
 character*80 message
-real*8 remainder, time_target, maxv(3),umax,mumax,time_next,cfl_used,mx
+real*8 remainder, time_target, maxv(3),umax,mumax,time_next,cfl_used_adv,cfl_used_vis,mx
 logical,external :: check_time
 real*8,external :: norm_divergence
 logical :: doit
@@ -26,18 +27,18 @@ time_target = time_final
 do i=1,3
    maxv(i) = maxval( abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,i)) )
 enddo
-umax=max(maxv(1)/delx,maxv(2)/dely,maxv(3)/delz)
+umax=pi*max(maxv(1)/delx,maxv(2)/dely,maxv(3)/delz)
 #ifdef MPI
    call MPI_REDUCE(umax,MPI_MAX ... )
 #endif
-if (umax> 1000/min(delx,dely,delz)) error_code=1
+if (umax> pi*1000/min(delx,dely,delz)) error_code=1
 
 ! advective CFL
 delt = cfl_adv/umax
 
 ! viscous CFL
 mumax=min(delx,dely,delz)
-mumax = mu/(mumax*mumax)
+mumax = pi*pi*mu/(mumax*mumax)
 delt = min(delt,cfl_vis/mumax)
 
 
@@ -47,7 +48,7 @@ delt = min(delt,delt_max)
 !
 !  restart dumps
 !
-doit=check_time(time,restart_dt,0,0.0,time_next)
+doit=check_time(itime,time,restart_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
    call restart_write(time,Q)
@@ -57,18 +58,21 @@ endif
 !
 !  output dumps
 !
-doit=check_time(time,output_dt,ncustom,custom,time_next)
+doit=check_time(itime,time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
    call output_write(time,Q)
 endif
 
+
+
 !
 ! diagnostic output
 !
-doit=check_time(time,diag_dt,0,0.0,time_next)
+doit=check_time(itime,time,diag_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
+   call output_diags(time,Q)
 endif
 
 
@@ -77,22 +81,27 @@ endif
 !
 ! restrict delt so we hit the next time_target
 !
-doit=check_time(time,screen_dt,0,0.0,time_next)
+doit=check_time(itime,time,screen_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 
 delt = min(delt,time_target-time)
-cfl_used=umax*delt
+cfl_used_adv=umax*delt
+cfl_used_vis=mumax*delt
+
 
 !
-! display diagnostic output
+! display screen output
 !
 if (doit) then
    mx=norm_divergence(Q)
 
-   write(message,'(a,f15.10,a,f12.7,a,f5.3,a,f10.5)') 'time=',time,' delt=',delt, &
-   ' adv cfl=',cfl_used,' next output=',time_target
+   write(message,'(a,f8.5,a,i5,a,f8.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
-   write(message,'(a,4f12.5)') 'max: (u,v,w) div',maxv(1),maxv(2),maxv(3),mx
+
+   write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
+   call print_message(message)	
+
+   write(message,'(a,3f12.5,e12.5)') 'max: (u,v,w) div',maxv(1),maxv(2),maxv(3),mx
    call print_message(message)	
 
    mx=.5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1:3)*Q(nx1:nx2,ny1:ny2,nz1:nz2,1:3))
@@ -162,6 +171,64 @@ close(10)
 
 end subroutine
 
+
+
+
+subroutine output_diags(time,Q)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: time
+
+! local variables
+real*8 :: work(nx,ny,nz)
+real*8 :: p(nx,ny,nz)
+integer i,j,k,n
+integer iwave,iwave_max
+real*8 rwave
+real*8,allocatable ::  spectrum(:)
+
+rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+iwave_max=nint(rwave)
+allocate(spectrum(0:iwave_max))
+spectrum=0
+
+p=0
+do i=1,3
+   p=p+.5*Q(:,:,:,i)*Q(:,:,:,i)  
+enddo
+
+call fft3d(p,work)
+
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+    rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
+    iwave = nint(sqrt(rwave))
+    ASSERT("output_diags: iwave>iwave_max",iwave<=iwave_max)
+    spectrum(iwave)=spectrum(iwave)+p(i,j,k)**2    
+enddo
+enddo
+enddo
+
+#ifdef MPI
+call MPI_REDUCE(spectrum,sum)
+#endif
+
+#if 0
+iwave=max(g_nx,g_ny,g_nz)/2
+do i=1,iwave
+   print *,i,spectrum(i)
+enddo
+rwave=0
+do i=iwave+1,iwave_max
+   rwave=rwave+spectrum(i)
+enddo
+print *,iwave+1,"..",iwave_max,rwave
+#endif
+
+deallocate(spectrum)
+end subroutine
 
 
 
@@ -250,32 +317,36 @@ end subroutine
 
 
 
-logical function check_time(time,dt,ncust,cust,time_next)
+logical function check_time(itime,time,dt,ncust,cust,time_next)
 use params
 implicit none
-integer ncust
+integer ncust,itime
 real*8 :: time,dt,cust(ncust)
 real*8 :: time_next  ! output
 
 !local variables
 real*8 remainder
 integer i
-real*8 :: small=1e-5
+real*8 :: small=1e-7
 
 check_time = .false.
 time_next=time_final
 
+if (time>=time_final-small) check_time=.true.
+if (time==0) check_time=.true.
+
+
 if (dt<0) then
-   check_time=.true.
+   if (mod(itime,nint(abs(dt)))==0) check_time=.true.
 endif
 
 if (dt>0) then
-   remainder=mod(time,dt)
+   remainder=time - int((small+time)/dt)*dt
+   
    if (remainder < small) then
       check_time=.true.
    endif
    time_next = time-remainder+dt
-   if (time>=time_final-small) check_time=.true.
 
    do i=1,ncust
       if (abs(time-cust(i))<small) then

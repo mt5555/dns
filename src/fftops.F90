@@ -170,6 +170,7 @@ call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 ! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
 call fft_laplace_inverse(f,alpha,beta)
+call fft_filter_last(f)
 
 call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
@@ -301,11 +302,10 @@ end subroutine
 ! Filter out the highest cosine mode
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft_filter(p)
+subroutine fft_filter_last(p)
 use params
 implicit none
 real*8 p(nx,ny,nz)
-real*8 alpha,beta
 
 integer i,j,k,im,jm,km
 real*8 xfac
@@ -320,6 +320,39 @@ real*8 xfac
             if ( ((km==g_nz/2) .and. (km>0)) .or. &
                  ((jm==g_ny/2) .and. (jm>0)) .or. &
                  ((im==g_nx/2) .and. (im>0)) )  then
+               p(i,j,k)=0
+            endif
+         enddo
+      enddo
+   enddo
+
+end subroutine
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Filter out last 1/3 of spectrum (de-alias quadratic terms)
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter_dealias(p)
+use params
+implicit none
+real*8 p(nx,ny,nz)
+
+integer i,j,k,im,jm,km
+real*8 xfac
+
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+
+            if ( ((km>=g_nz/3) .and. (km>0)) .or. &
+                 ((jm>=g_ny/3) .and. (jm>0)) .or. &
+                 ((im>=g_nx/3) .and. (im>0)) )  then
                p(i,j,k)=0
             endif
          enddo

@@ -2,13 +2,11 @@ subroutine init_data(Q)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: d1(nx,ny,nz)
-real*8 :: d2(nx,ny,nz)
-real*8 :: d3(nx,ny,nz)
 
 ! local variables
 integer i,j,k,l
 real*8 delta,pi2,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
+real*8 xscale,yscale
 real*8 :: eps=.10
 integer :: km=1
 integer,parameter :: n=500
@@ -18,7 +16,7 @@ real*8 :: x(n),y(n)
 Q=0
 
 
-delta = .10
+delta = .05
 pi2 = 2*pi
 delsq = delta**2
 
@@ -29,15 +27,19 @@ delgam = delalf/km         !SO ALL PERIODS HAVE TOTAL CIRC=1
 do i=0,n
 enddo
 
+xscale=2
+yscale=4
+
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
-
-   xval=2*(xcord(i)-.5)         ! x ranges from -1 .. 1
+  
+   xval=xscale*(xcord(i)-.5)         ! x ranges from -1 .. 1
    if (ycord(j)<=.5) then
-      yval=4*(ycord(j)-.25)  ! bottom 50% goes from -.5 .. .5
+      yval=yscale*(ycord(j)-.25)  ! bottom 50% goes from -.1 .. .1
    else
-      yval=-4*(ycord(j)-.75) ! top 50% goes from .5 .. -.5
+      yval=-yscale*(ycord(j)-.75) ! top 50% goes from .1 .. -.1
+      xval=-xval	
    endif
 
 
@@ -58,30 +60,47 @@ do k=nz1,nz2
       vv = vv + difx/denom
    enddo
 
-   Q(i,j,k,1) = uu/pi2*delgam
-   Q(i,j,k,2) = vv/pi2*delgam
+   Q(i,j,k,1) = 5*uu*delgam/(pi2*xscale)
+   Q(i,j,k,2) = 5*vv*delgam/(pi2*yscale)
 
 enddo
 enddo
 enddo
-
-
-! remove that pesky highest cosine mode
-do i=1,3
-   call fft3d(Q(1,1,1,i),d1)
-   call fft_filter(Q(1,1,1,i))
-   call ifft3d(Q(1,1,1,i),d1)
-enddo
-call divfree(Q,d1,d2,d3)
-
-call bc_preloop
-
 
 end subroutine
 
 
 
 
+
+
+
+subroutine init_data_projection(Q)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+
+! local variables
+integer i
+real*8 :: d1(nx,ny,nz)
+real*8 :: d2(nx,ny,nz)
+real*8 :: d3(nx,ny,nz)
+
+
+! remove that pesky highest cosine mode
+do i=1,3
+   call fft3d(Q(1,1,1,i),d1)
+   if (dealias) then
+      call fft_filter_dealias(Q(1,1,1,i))
+   else
+      call fft_filter_last(Q(1,1,1,i))
+   endif
+   call ifft3d(Q(1,1,1,i),d1)
+enddo
+call divfree(Q,d1,d2,d3)
+call bc_preloop(Q)
+
+end subroutine
 
 
 

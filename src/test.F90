@@ -73,23 +73,31 @@ character*80 message
 integer i,j,k,dim
 
 input=0
-do dim=1,3
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
 
-if (dim==1) input(i,j,k,dim)= xcord(i)*(xcord(i)-1)*ycord(j)*(ycord(j)-1)  
-!if (dim==1) input(i,j,k,dim)= sin(2*3*pi*xcord(i))*cos(2*4*pi*ycord(j))
+input(i,j,k,1)= xcord(i)*(xcord(i)-1)*ycord(j)*(ycord(j)-1)  
+!input(i,j,k,1)= sin(2*3*pi*xcord(i))*cos(2*4*pi*ycord(j))
 
-enddo
+input(i,j,k,2)= exp((xcord(i)-1))*exp(ycord(j))
+!input(i,j,k,2)= sin(2*3*pi*xcord(i))*cos(2*4*pi*ycord(j))
+
+if (nslabz>1)  then
+   input(i,j,k,3)= xcord(i)*(xcord(i)-1)*ycord(j)*(ycord(j)-1)  
+endif
+
 enddo
 enddo
 enddo
 
 ! remove that pesky highest cosine mode
-call fft3d(input,work)
-call fft_filter(input)
-call ifft3d(input,work)
+do i=1,3
+call fft3d(input(1,1,1,i),work)
+call fft_filter_last(input(1,1,1,i))
+call ifft3d(input(1,1,1,i),work)
+enddo
+
 
 
 call divfree(input,p,work,d1)

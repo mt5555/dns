@@ -75,10 +75,13 @@ call print_message(message)
 if (my_pe==io_pe) then
    read(*,*) input_file_type
    if (input_file_type==0) then
-      call read0_type()
+      call read_type0()
    else
       call abort("bad input file")
    endif
+   !  u_t = mu * (2 pi k)^2
+   print *,'Diffusion damping time on smallest scale: ',&
+     1/(mu*pi*pi*(g_nx**2 + g_ny**2 + g_nz**2))
 endif
 
 #ifdef MPI
@@ -125,9 +128,13 @@ endif
 
 read(*,'(a12)') sdata
 if (sdata=='fft') then
+   dealias=.false.
+else if (sdata=='fft-dealias') then
+   dealias=.true.
 else
    call abort("only 'fft' derivative method supported")
 endif
+
 
 read(*,'(a12)') sdata
 if (sdata=='periodic') then

@@ -1,29 +1,50 @@
-=================================================================================
-input file format for input file type=0:
-
-0            ! input file type
-value        ! viscosity type  (value, smallest, damping_time)
-.1           ! viscosity coefficient.  
-fft          ! derivative method  (fft, 4th)
-periodic     ! x bc  (periodic, no-slip)
-periodic     ! y bc
-periodic     ! z bc
-1.0          ! final time
-.8           ! cfl  (0 = disabled, use min_dt)
-0            ! min_dt  
-1            ! max_dt 
-
-.1            ! output_dt  (0 = output disabled, except for custom output times)
-5             ! n_output_custom  number of custom output times  
-.1,.2,.55,.88 ! custom output times (this line present even n_output_custom=0)
-.1            ! restart_dt  (0 = restart output disabled)
-.1            ! diag_dt
-
-=================================================================================
-
-
-
 Notes:
+
+CFL:  
+
+dealiased, vis=0
+cfl_adv
+10.0 unstable
+5.0  stable, results bad at t=.5
+4.5  ok,
+
+
+aliased:  mu=0
+10.0 unstable
+5.0  unstable
+2.5  unstable, t=.64
+1.5  unstable t=.63
+0.5  unstable t=.63
+
+aliased:  mu=.0001    (damping time .031s)
+cfl=4.0: unstable t=.438  
+cfl=2.0: looks good at t=1, blows up at t=5.3
+cfl=1.0: ?
+
+aliased:  mu=.00001   (damping time: .31s)
+cfl=2.0:  unstable at t=?
+cfl=1.0:  looks bad at t=.5, unstable t=.75
+cfl=.5:   noisy at t=.5, but 8 nice rollups, unstable at t=.75
+
+
+
+
+
+
+HEAT EQU.  fft, aliased
+cfl_vis
+ 1.5  unstable t=.23 for vis=.01,  t=6.3 for vis=.001, t=.022 for vis=.1
+ 1.45 stable to t=1.0 for vis=.01, unstable with vis=.1 t=.1
+ 1.4  stable to t=1.0 for vis=.01, stable to t=.14 with vis=.1
+
+
+
+
+
+
+
+
+
 poisson solve:  inner most tranform_to_z/transform_from_z pair
 could be removed if we can compute the wave numbers of all
 the coefficients in the z-decomposition .  

@@ -11,6 +11,7 @@ write(*,'(a)') pre // message
 #ifdef USE_MPI
    call MPI_abort(comm_3d,1,ierr)
 #endif
+stop
 end subroutine
 
 
