@@ -59,7 +59,10 @@ fid2=-1;
 %fid=endianopen('/home2/skurien/rotation/Test2/Test0002.scalars','r');
 %nx = 128;
 
-fid=endianopen('/home2/skurien/dns/src/sk128_alpha40/sk128_v5e-4_alpha400000.0000.scalars','r');
+%fid=endianopen('/home2/skurien/dns/src/sk128_alpha40/sk128_v5e-4_alpha400000.0000.scalars','r');
+%nx = 128;
+
+fid=endianopen('/home2/skurien/rotation/Rot1/Rot10000.0000.scalars','r');
 nx = 128;
 
 
@@ -84,7 +87,7 @@ while (1)
   mu=fread(fid,1,'float64');
   alpha=fread(fid,1,'float64');
   
-  [nints,ns,nscalars]
+[nints,ns,nscalars];
   data1=fread(fid,[nints,ns],'float64');
   data2=fread(fid,[nints,ns],'float64');
 
