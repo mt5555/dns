@@ -3,8 +3,8 @@
 !
 ! note: most test subroutines are ifdef'd out because they
 !       generate compilation errors (pgf90/linux) if the memeory
-!       is 256^3 per cpu.  other fortran compilers are ok, so there
-!       might be a pgf90 option to fix this
+!       is 256^3 per cpu.  ifc does not complain, so maybe there is
+!       a pgf90 compiler option to fix this?
 !
 
 subroutine test
