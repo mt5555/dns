@@ -401,6 +401,7 @@ integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
 integer :: initial_live_procs      ! total number of cpus
 integer :: ncpus                   ! number of cpus in cartesian communicator
 integer :: comm_3d                 ! the MPI cartesian communcator
+integer :: comm_1                  ! communicator with just io_pe
 
 
 

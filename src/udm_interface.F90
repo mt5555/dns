@@ -36,6 +36,8 @@ character*(2) dotudm
 
 ! character*(6) dbgname
 
+integer*8 fidmpi,infoin
+
 #ifdef HAVE_UDM
 
 #include "UDMFCInterfaceF.h"
@@ -46,7 +48,25 @@ character*(2) dotudm
    len1 = len_trim(rundir)
    len2 = len_trim(runname)
    fnameudm = rundir(1:len1) // runname(1:len2) // message(2:10) //'.h5'// char(0) 
+
+   if (io_pe==my_pe) then
+   call print_message("opening MPI file")
+   call MPI_Info_create(infoin,ierr)
+   call MPI_Info_set(infoin, "striping_factor", "128",ierr) 	
+   call MPI_Info_set(infoin, "striping_unit",  "8388608",ierr)
+   call MPI_File_open(comm_1,fnameudm, &
+           MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
+           infoin, fidmpi,ierr)
+   call print_message("closing MPI file")
+   call MPI_File_close(fidmpi,ierr)
+   call print_message("done")
+   endif
+
+   call print_message("opening file")
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_CREATE, fidudm, ierr)
+   call print_message("done with UDM open")
+
+
 
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)

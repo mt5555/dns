@@ -31,6 +31,10 @@ call mpi_comm_rank(MPI_COMM_WORLD,my_world_pe,ierr2)
 if (ierr2/=0) call abort("mpi_comm_rank failure")
 call mpi_comm_size(MPI_COMM_WORLD,initial_live_procs,ierr3)
 if (ierr3/=0) call abort("mpi_comm_size failure")
+
+
+
+
 #endif
 
 
@@ -48,7 +52,7 @@ use mpi
 
 implicit none
 logical isperiodic(3),reorder
-integer ierr1,ierr2,ierr3,rank
+integer ierr1,ierr2,ierr3,rank,key,color
 character(len=80) message
 
 if (ncpu_x * ncpu_y * ncpu_z /= ncpus) then
@@ -80,12 +84,28 @@ if (ierr1/=0) call abort("mpi_cart_get failure")
 ! get processor number with coords = mpicoords
 call mpi_cart_rank(comm_3d,mpicoords,my_pe,ierr2)
 
+
+! create a communicator with just io_pe in it:
+color = 0
+if (my_pe==io_pe) color=1
+key=0
+
+! everyone with ntot>0 joins a new group, comm_sforcing
+call MPI_Comm_split(comm_3d,color,key,comm_1,ierr2);
+if (color==0) call MPI_Comm_free(comm_1,ierr2)
+
+
+
+
 write(message,'(a,i5,a,i3,a,i3,a,i3)') "Running parallel.  NCPUS=", &
    ncpus," = ",ncpu_x," x",ncpu_y," x",ncpu_z
 call print_message(message)
 #else
 call print_message("Running single threaded")
 #endif
+
+
+
 end subroutine
 
 

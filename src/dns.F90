@@ -309,6 +309,10 @@ do
       tims(2:ntimers)=0
       call wallclock(tmx1)     ! start the main timer *AFTER* 1 complete time step:
       tims(4)=tmx_save
+      if (io_pe==my_pe) then
+         print *,'time_control: ',tims(4)
+         print *,'MB/s:  ',8.0*3.0*g_nx*g_ny*g_nz/1024./1024./tims(4)
+      endif		
    endif
 
    itime=itime+1
