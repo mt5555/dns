@@ -49,8 +49,8 @@ real*8 :: Q3(nx,ny,nz,n_var)
 real*8 :: Q4(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 
-! never use work1,work2,rhs,q4
-call rk4reshape(time,Q,Q2(1,1,1,1),Q2(1,1,1,2),Q3(1,1,1,1),Q3(1,1,1,2),work1)
+! not used: work1, rhs, Q3,Q4
+call rk4reshape(time,Q,Q(1,1,1,3),Q2(1,1,1,1),Q2(1,1,1,2),Q2(1,1,1,3),work1)
 end subroutine
 
 
@@ -70,6 +70,7 @@ real*8 :: work(nx,ny)
 real*8 :: vel,u,v
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
+integer,save :: btype
 
 
 if (firstcall) then
@@ -88,10 +89,25 @@ if (firstcall) then
       call abort("Error: dnsgrid cannot handle alpha>0.")
    endif
 
+   if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
+      ! periodic
+      btype=0
+   else if  ( &
+        ! not periodic, but can still do with all ghostcells:
+        ((bdy_x1==PERIODIC) .or. (bdy_x1==REFLECT) .or. (bdy_x1==REFLECT_ODD)) .and. &
+        ((bdy_x2==PERIODIC) .or. (bdy_x2==REFLECT) .or. (bdy_x2==REFLECT_ODD)) .and. &
+        ((bdy_y1==PERIODIC) .or. (bdy_y1==REFLECT) .or. (bdy_y1==REFLECT_ODD)) .and. &
+        ((bdy_y2==PERIODIC) .or. (bdy_y2==REFLECT) .or. (bdy_y2==REFLECT_ODD))  ) then
+        btype=1
+   else
+      btype=2
+   endif
+
    ! initial vorticity should have been set on the boundary, so
    ! we can compute PSI right now:
-   call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work)
+   call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work,btype)
    call bc_impose(Q(1,1,1),Q(1,1,2))
+
 endif
 
 
@@ -114,7 +130,7 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs,work)
+call compute_psi(w_tmp,psi,rhs,work,btype)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
@@ -123,19 +139,19 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs,work)
+call compute_psi(w_tmp,psi,rhs,work,btype)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
 call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs,work)
+call compute_psi(w_tmp,psi,rhs,work,btype)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 call bc_impose(Q(1,1,1),Q(1,1,2))
 
-call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work)
+call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work,btype)
 time = time + delt
 
 
@@ -166,29 +182,43 @@ end subroutine
 
 
 
-subroutine compute_psi(w,psi,b,work)
+subroutine compute_psi(w,psi,b,work,btype)
+!
+!  btype=0   all periodic  use periodic FFT solver 
+!  btype=1   all periodic,reflect, reflect-odd
+!                use ghost cell CG solver (no boundaries)
+!  btype=2   use biotsavart for boundary and dirichlet solver
+!
 use params
 implicit none
 real*8 w(nx,ny)
 real*8 psi(nx,ny)
 real*8 work(nx,ny)
 real*8 b(nx,ny)
+integer :: btype
 
 !local
 real*8 :: one=1,zero=0,tol=1e-8
-external helmholtz_dirichlet,helmholtz_periodic
-
+external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
 
 
 
 ! if all b.c. periodic:
-if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
+if (btype==0) then
    psi=-w
    call helmholtz_periodic_inv(psi,work,zero,one)
 
    !psi=0  ! initial guess
    !b=-w
    !call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic,.true.)
+
+else if (btype==1) then
+   ! this code can handle any compination of PERIODIC, REFLECT, REFLECT-ODD:
+
+   b=-w  ! be sure to copy ghost cell data also!
+   ! apply compact correction to b:
+   call helmholtz_dirichlet_setup(b,psi,work,0)
+   call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
 
 else
    psi=0  ! initial guess
@@ -197,11 +227,12 @@ else
    b=-w  ! be sure to copy ghost cell data also!
 
    ! copy b.c. from psi into 'b', and apply compact correction to b:
-   call helmholtz_dirichlet_setup(b,psi,work)
+   call helmholtz_dirichlet_setup(b,psi,work,1)
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
 
-   !update PSI 1st row of ghost cells so that we are 2nd order differences
+   !update PSI 1st row of ghost cells so that our 4th order differences
+   !near the boundary look like 2nd order centered
    call bc_onesided(psi)
 endif
 
@@ -217,6 +248,7 @@ end subroutine
 
 
 subroutine bc_impose(w,psi)
+!
 ! on non-periodic or non-reflective boundarys:
 !
 ! set w=0 on boundary for inflow
@@ -369,30 +401,39 @@ end subroutine
 
 
 
+
+
+
 subroutine bc_biotsavart(w,psi)
-! on non-preiodic or non-reflective boundarys:
-!
+! on non-periodic or non-reflective boundarys:
 ! use biot-savar law to compute boundary data for PSI.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!c     Finds psi on boundary from w using Biot-Savart
-!c
-!c     psi = -(1/4pi)*sum w(i,j)*logterm(i,j, 0,k,w)*Delta A - ubar*y
-!c
-!c     is the streamfunction in a reference frame moving with the 
-!c     predetermined velocity ubar
+!
+! except for y1 boundary, where we set PSI=0
+!
+!     Finds psi on boundary from w using Biot-Savart
+!
+!     psi = -(1/4pi)*sum w(i,j)*logterm(i,j, 0,k,w)*Delta A - ubar*y
+!
+!     is the streamfunction in a reference frame moving with the 
+!     predetermined velocity ubar
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 use params
+use mpi
 implicit none
 real*8 w(nx,ny)
 real*8 psi(nx,ny)
 
 ! local
-integer i,j,k
+integer i,j,k,l,ierr
 real*8 :: dela
 real*8,external :: logterm
 real*8 :: ubar=0
-real*8 :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,x or y,left or right)
+real*8 :: eps=1e-8
+real*8 :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
+                                      ! psi_b(k,1,2) = x2 boundary
+                                      ! psi_b(k,2,1) = y1 boundary
+                                      ! psi_b(k,2,2) = y2 boundary
 real*8 :: temp(max(g_ny,g_nx),2,2)
 
 
@@ -401,17 +442,24 @@ psi_b=0
 
 do j=ny1,ny2
 do i=nx1,nx2
-!   if (abs(w(i,j)).ge.eps) then
+   if (abs(w(i,j)).ge.eps) then
       do k=1,g_nx  !,10
          psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
       enddo
       do k=2,g_ny  !,10
-         psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,g_nx,k)
+         psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
          psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
       enddo
-!   endif
+   endif
 enddo
 enddo
+
+#if 0
+C     INTERPOLATE TO INTERMEDIATE POINTS
+      call intpsi(psi)
+#endif
+
+
 #ifdef USE_MPI
 temp=psi_b
 k=max(g_ny,g_nx)*4
@@ -419,21 +467,54 @@ call MPI_allreduce(temp,psi_b,k,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
-#if 0
-C     INTERPOLATE TO INTERMEDIATE POINTS
-      call intpsi(psi)
+! add ubar correction
+! only needs to be done on processer which owns boundary data
+! but lets have everyone do it for now...
+dela = delx*dely/(4*pi)
+do k=1,g_nx
+   ! y2 boundary
+   psi_b(k,2,2) = psi_b(k,2,2)*dela - ubar*g_ycord(g_ny)
+enddo
+do k=2,g_ny
+   ! x1,x2 boundary
+   psi_b(k,1,1) = psi_b(k,1,1)*dela  - ubar*g_ycord(k)
+   psi_b(k,1,2) = psi_b(k,1,2)*dela  - ubar*g_ycord(k)
+enddo
 
-      dela = delx*dely/(4*pi)
-      do k=0,ni
-        psi(k,nj) = psi(k,nj)*dela - ubar*ycord(nj)
-c        write(*,'(i5,3f10.5)')k,psi(k,nj)
-      enddo
-      do k=1,nj-1
-        psi( 0,k) = psi( 0,k)*dela  - ubar*ycord(k)
-        psi(ni,k) = psi(ni,k)*dela  - ubar*ycord(k)
-c        write(*,'(i5,3f10.5)')k,psi(0,k),psi(ni,k)
-      enddo
-#endif
+
+! set PSI boundary data:
+
+if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
+   do j=ny1,ny2
+      l = j-ny1+1 + nslaby*my_y
+      psi(nx1,j)= psi_b(L,1,1)
+   enddo
+endif
+if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
+   do j=ny1,ny2
+      l = j-ny1+1 + nslaby*my_y
+      psi(nx2,j)= psi_b(L,1,2)
+   enddo
+endif
+
+if (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED) then
+   do i=nx1,nx2
+      l = i-nx1+1 + nslabx*my_x
+      psi(i,ny1)= psi_b(L,2,1)
+   enddo
+endif
+
+if (my_y==ncpu_y-1   .and. bdy_y2==INFLOW0_ONESIDED) then
+   do i=nx1,nx2
+      l = i-nx1+1 + nslabx*my_x
+      psi(i,ny2)= psi_b(L,2,2)
+   enddo
+endif
+
+
+
+
+
 
 return
 end subroutine
@@ -457,7 +538,6 @@ denom1 = difx**2 + dify**2
 denom2 = difx**2 + sumy**2
 
 logterm = log(denom1/denom2)
-
 end function 
 
 

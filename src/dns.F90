@@ -8,7 +8,6 @@
 program DNS
 use params
 use mpi
-use structf
 implicit none
 real*8,save :: Q(nx,ny,nz,n_var)
 real*8,save :: q1(nx,ny,nz,n_var)
@@ -22,7 +21,8 @@ real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 call init_mpi       
 call wallclock(tmx1)  ! wallclock may use MPI timers, call after init_mpi
 call init_mpi_comm3d()
-call init_grid      
+
+call init_model()
 
 !write(message,'(a)') 'Running some tests'
 !call print_message(message)

@@ -1,4 +1,19 @@
 #include "macros.h"
+subroutine init_model
+use params
+use structf
+use fft_interface
+use transpose
+
+call params_init()
+call transpose_init()
+call fft_interface_init()
+call init_input_file()
+call init_grid      
+
+end subroutine
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! initialization for fft grid
@@ -8,6 +23,180 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine init_grid
+use params
+use structf
+use fft_interface
+use mpi
+implicit none
+
+!local variables
+real*8 :: one=1
+integer i,j,k,l,ierr
+character(len=80) message
+
+
+#ifdef USE_MPI
+call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
+call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
+call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(mu_hyper,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(cfl_adv,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(cfl_vis,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(delt_min,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(delt_max,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(restart_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+
+
+call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+if (.not. allocated(custom)) allocate(custom(ncustom))
+call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
+call MPI_Barrier(comm_3d,ierr)
+
+#endif
+
+
+
+! periodic FFT case:  for output, we include the point at x=1 (same as x=0)
+
+o_nx=g_nx
+if (bdy_x1==PERIODIC) o_nx=g_nx+1
+
+o_ny=g_ny
+if (bdy_y1==PERIODIC) o_ny=g_ny+1
+
+o_nz=g_nz
+if (bdy_z1==PERIODIC) o_nz=g_nz+1
+if (g_nz==1) o_nz=1
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! global grid data
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+delx = one/(o_nx-1)
+dely = one/(o_ny-1)
+if (o_nz==1) then
+   delz=1
+else
+   delz = one/(o_nz-1)
+endif
+
+do i=1,o_nx
+   g_xcord(i)=(i-1)*delx	
+enddo
+do j=1,o_ny
+   g_ycord(j)=(j-1)*dely	
+enddo
+do k=1,o_nz
+   g_zcord(k)=(k-1)*delz	
+enddo
+
+call fft_get_mcord(g_imcord,g_nx)
+call fft_get_mcord(g_jmcord,g_ny)
+call fft_get_mcord(g_kmcord,g_nz)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid data  3D decomposition
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+do i=nx1,nx2
+   l = i-nx1+1 + nslabx*my_x
+   xcord(i)=g_xcord(l)
+   imcord(i)=g_imcord(l)
+   imsign(i)=sign(1,imcord(i))
+   if (imcord(i)==0) imsign(i)=0
+   if (imcord(i)==g_nx/2) imsign(i)=0
+enddo
+do j=ny1,ny2
+   l = j-ny1+1 + nslaby*my_y
+   ycord(j)=g_ycord(l)
+   jmcord(j)=g_jmcord(l)
+   jmsign(j)=sign(1,jmcord(j))
+   if (jmcord(j)==0) jmsign(j)=0
+   if (jmcord(j)==g_ny/2) jmsign(j)=0
+enddo
+do k=nz1,nz2
+   l = k-nz1+1 + nslabz*my_z
+   zcord(k)=g_zcord(l)
+   kmcord(k)=g_kmcord(l)
+   kmsign(k)=sign(1,kmcord(k))
+   if (kmcord(k)==0) kmsign(k)=0
+   if (kmcord(k)==g_nz/2) kmsign(k)=0
+enddo
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid data, z-decomposition
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+do i=nx1,nx2
+   z_imcord(i-nx1+1)=imcord(i)
+   z_imsign(i-nx1+1)=imsign(i)
+enddo
+
+z_kmcord=g_kmcord
+do k=1,g_nz
+   z_kmsign(k)=sign(1,z_kmcord(k))
+   if (z_kmcord(k)==0) z_kmsign(k)=0
+   if (z_kmcord(k)==g_nz/2) z_kmsign(k)=0
+enddo
+
+
+do j=1,ny_2dz
+   L = -1 + ny1 + j + my_z*ny_2dz      ! ncpy_z*ny_2dz = nslaby
+   z_jmcord(j)=jmcord(L)
+   z_jmsign(j)=sign(1,z_jmcord(j))
+   if (z_jmcord(j)==0) z_jmsign(j)=0
+   if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
+enddo
+
+
+
+!
+! scale alpha now that we know delx
+!
+if (alpha_value>=1.0) then
+   alpha_value=alpha_value*min(delx,dely,delz)
+endif
+write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
+     alpha_value,alpha_value/min(delx,dely,delz)
+call print_message(message)
+
+write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
+call print_message(message)
+write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
+call print_message(message)
+
+
+
+end subroutine
+
+
+
+
+
+subroutine init_input_file()
 use params
 use structf
 use transpose
@@ -21,15 +210,6 @@ integer i,j,k,l,ierr
 character(len=80) message
 integer input_file_type
 integer,external :: iargc
-
-
-
-call params_init()
-call transpose_init()
-call fft_interface_init()
-
-
-
 if (my_pe==io_pe) then
    !
    ! command line parameters
@@ -145,155 +325,18 @@ endif
 
 endif
 
-
-
-
-#ifdef USE_MPI
-call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
-call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
-call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(mu_hyper,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(cfl_adv,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(cfl_vis,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(delt_min,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(delt_max,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(restart_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-
-
-call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-if (.not. allocated(custom)) allocate(custom(ncustom))
-call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
-call MPI_Barrier(comm_3d,ierr)
-
-#endif
-
-
-
-! periodic FFT case:  for output, we include the point at x=1 (same as x=0)
-o_nx=g_nx+1
-o_ny=g_ny+1
-o_nz=g_nz+1
-if (g_nz==1) o_nz=1
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! global grid data
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-delx = one/g_nx
-dely = one/g_ny
-delz = one/g_nz
-
-do i=1,o_nx
-   g_xcord(i)=(i-1)*delx	
-enddo
-do j=1,o_ny
-   g_ycord(j)=(j-1)*dely	
-enddo
-do k=1,o_nz
-   g_zcord(k)=(k-1)*delz	
-enddo
-
-call fft_get_mcord(g_imcord,g_nx)
-call fft_get_mcord(g_jmcord,g_ny)
-call fft_get_mcord(g_kmcord,g_nz)
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! local grid data  3D decomposition
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-do i=nx1,nx2
-   l = i-nx1+1 + nslabx*my_x
-   xcord(i)=g_xcord(l)
-   imcord(i)=g_imcord(l)
-   imsign(i)=sign(1,imcord(i))
-   if (imcord(i)==0) imsign(i)=0
-   if (imcord(i)==g_nx/2) imsign(i)=0
-enddo
-do j=ny1,ny2
-   l = j-ny1+1 + nslaby*my_y
-   ycord(j)=g_ycord(l)
-   jmcord(j)=g_jmcord(l)
-   jmsign(j)=sign(1,jmcord(j))
-   if (jmcord(j)==0) jmsign(j)=0
-   if (jmcord(j)==g_ny/2) jmsign(j)=0
-enddo
-do k=nz1,nz2
-   l = k-nz1+1 + nslabz*my_z
-   zcord(k)=g_zcord(l)
-   kmcord(k)=g_kmcord(l)
-   kmsign(k)=sign(1,kmcord(k))
-   if (kmcord(k)==0) kmsign(k)=0
-   if (kmcord(k)==g_nz/2) kmsign(k)=0
-enddo
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! local grid data, z-decomposition
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do i=nx1,nx2
-   z_imcord(i-nx1+1)=imcord(i)
-   z_imsign(i-nx1+1)=imsign(i)
-enddo
-
-z_kmcord=g_kmcord
-do k=1,g_nz
-   z_kmsign(k)=sign(1,z_kmcord(k))
-   if (z_kmcord(k)==0) z_kmsign(k)=0
-   if (z_kmcord(k)==g_nz/2) z_kmsign(k)=0
-enddo
-
-
-do j=1,ny_2dz
-   L = -1 + ny1 + j + my_z*ny_2dz      ! ncpy_z*ny_2dz = nslaby
-   z_jmcord(j)=jmcord(L)
-   z_jmsign(j)=sign(1,z_jmcord(j))
-   if (z_jmcord(j)==0) z_jmsign(j)=0
-   if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
-enddo
-
-
-
-!
-! scale alpha now that we know delx
-!
-if (alpha_value>=1.0) then
-   alpha_value=alpha_value*min(delx,dely,delz)
-endif
-write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
-     alpha_value,alpha_value/min(delx,dely,delz)
-call print_message(message)
-
-write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
-call print_message(message)
-write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
-call print_message(message)
-
-
-
 end subroutine
+
+
+
+
+
+
+
+
+
+
+
 
 
 

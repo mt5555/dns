@@ -9,11 +9,15 @@ use params
 !call test_fft
 !call test_poisson
 !call test_divfree
-call test_dirichlet
+call test_poisson_dirichlet
+call test_poisson_ghost
 
 end subroutine
 
-subroutine test_dirichlet
+
+
+
+subroutine test_poisson_dirichlet
 use params
 use ghost
 implicit none
@@ -33,6 +37,13 @@ b=0
 psi=0
 work=0
 lpsi=0
+
+bdy_x1=INFLOW0_ONESIDED
+bdy_x2=INFLOW0_ONESIDED
+bdy_y1=INFLOW0_ONESIDED
+bdy_y2=INFLOW0_ONESIDED
+call init_grid()
+
 
 ! psi = x**2 + y**2    
 ! laplacian = 4
@@ -70,7 +81,7 @@ enddo
 ! copy b.c. from psi into 'b', and apply compact correction to b:
 call ghost_update_x(b,1)
 call ghost_update_y(b,1)
-call helmholtz_dirichlet_setup(b,psi,work)
+call helmholtz_dirichlet_setup(b,psi,work,1)
 
 
 #undef CONVERT_TO_ZERO_ON_BDY
@@ -86,6 +97,8 @@ psi=psi+phi
 
 !call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
+
 
 #endif
 
@@ -108,9 +121,83 @@ maxval(abs(psi(  nx1:nx2,ny1:ny2)-psi_exact(nx1:nx2,ny1:ny2)     ))
 
 
 #endif
+
+end subroutine
+
+
+
+
+
+
+subroutine test_poisson_ghost
+use params
+use ghost
+implicit none
+external helmholtz_periodic_ghost
+
+real*8 b(nx,ny)
+real*8 psi(nx,ny)
+real*8 psi_exact(nx,ny)
+real*8 lpsi(nx,ny)
+real*8 work(nx,ny)
+real*8 :: zero=0,one=1
+real*8 :: tol=1e-8
+integer i,j,k,n
+b=0
+psi=0
+work=0
+lpsi=0
+
+! psi = x**2 + y**2    
+! laplacian = 4
+
+! set b.c. periodoic in X
+! set b.c. reflect-odd in Y
+
+bdy_x1=REFLECT
+bdy_x2=REFLECT
+bdy_y1=REFLECT_ODD
+bdy_y2=REFLECT_ODD
+call init_grid()
+
+do j=ny1,ny2
+do i=nx1,nx2
+!   psi_exact(i,j)=xcord(i)/delx
+!   b(i,j)=0
+
+   psi_exact(i,j)=cos(pi*xcord(i))*sin(pi*ycord(j))
+   b(i,j)=-2*pi*pi*cos(pi*xcord(i))*sin(pi*ycord(j))
+enddo
+enddo
+
+
+
+psi=psi_exact
+! muck around with psi to give CG something to iterate on:
+psi=0
+
+
+! copy b.c. from psi into 'b', and apply compact correction to b:
+call ghost_update_x(b,1)
+call ghost_update_y(b,1)
+call helmholtz_dirichlet_setup(b,psi,work,0)
+
+call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
+
+
+print *,'helmholtz_periodic_ghost solver error: ',&
+maxval(abs(psi(  nx1:nx2,ny1:ny2)-psi_exact(nx1:nx2,ny1:ny2)     ))
 stop
 
 end subroutine
+
+
+
+
+
+
+
+
 
 
 subroutine test_fft_fd

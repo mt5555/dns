@@ -1190,14 +1190,14 @@ end subroutine
 
 
 #define COMPACT
-subroutine helmholtz_dirichlet_setup(f,p,work)
+subroutine helmholtz_dirichlet_setup(f,p,work,setbdy)
 !
 ! for compact: replace f with:   f + h**2/12 (fxx + fyy)
 ! in the interior!
 !
-! THEN, set boundary values in f to those given in p.
+! THEN, if setbdy==1 set boundary values in f to those given in p.
 !
-! be sure to have called ghost_update(f) before!
+! be sure to have called ghost_update(f) before calling this routine!
 !
 use params
 use ghost
@@ -1205,7 +1205,7 @@ implicit none
 real*8 f(nx,ny,nz)    ! input
 real*8 p(nx,ny,nz)    ! output
 real*8 work(nx,ny,nz)   
-integer i,j,k
+integer i,j,k,setbdy
 
 
 if (ndim==2) then
@@ -1231,7 +1231,7 @@ if (ndim==2) then
 #endif
 
       
-
+   if (setbdy==1) then
    ! now overwrite boundary with same data as in p
    if (my_x==0) then
       do j=ny1,ny2
@@ -1253,7 +1253,7 @@ if (ndim==2) then
          f(i,ny2,k)=p(i,ny2,k)
       enddo
    endif
-
+   endif
 
 else
    stop 'helm_rhs_correction: 3D not yet coded'
@@ -1409,6 +1409,123 @@ else if (ndim==3) then
       endif
 
       
+      lf(i,j,k)=alpha*f(i,j,k)+ &
+            beta*(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx) +&
+            beta*(f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))/(dely*dely) +&
+            beta*(f(i,j,k+1)-2*f(i,j,k)+f(i,j,k-1))/(delz*delz) 
+   enddo
+   enddo
+   enddo
+
+endif
+
+
+end subroutine
+
+
+subroutine helmholtz_periodic_ghost(f,lf,alpha,beta,work)
+!
+!  no boundary conditions:   useing ghost cell data
+!               works for PERIODIC and RELFECT, REFLECT_ODD
+!  input: f
+!  output: lf
+!
+!     lf = [alpha + beta*laplacian](f)
+!
+!  2nd order uses the regular stencil:     
+!  x=1/delx**2
+!  y=1/dely**2
+!                 y
+!           x  -2x-2y   x
+!                 y
+!
+!  4th order compact uses above + a  * D2Y D2
+!  where a= (1/x+1/y)/12
+!
+!
+!                 y                   xy  -2xy    xy
+!           x  -2x-2y   x   +   a   -2xy   4xy  -2xy 
+!                 y                   xy  -2xy    xy
+!
+! which is:
+!
+!              axy       y  -2axy         axy
+!           x-2axy    -2x-2y+4axy      x-2axy
+!              axy       y  -2axy         axy
+!
+use params
+use ghost
+implicit none
+real*8 f(nx,ny,nz)    ! input
+real*8 lf(nx,ny,nz)    ! output
+real*8 work(nx,ny,nz)
+real*8 :: alpha
+real*8 :: beta
+
+!local
+integer n,i,j,k
+
+
+if (ndim==2) then
+   call ghost_update_x(f,1)
+
+   k=1
+
+#ifdef COMPACT
+   ! work = Dx(f)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      work(i,j,k)=(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx)
+   enddo
+   enddo
+   call ghost_update_y(work,1)
+#endif
+
+   call ghost_update_y(f,1)
+
+   do j=ny1,ny2
+   do i=nx1,nx2
+      lf(i,j,k)=(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx) + &
+                (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))/(dely*dely)
+
+#if 0
+      if (i==3 .and. j==130) then
+         print *,i,j,lf(i,j,k)
+         print *,'x: ',f(i-1,j,k),f(i,j,k),f(i+1,j,k)
+         print *,'y: ',f(i,j-1,k),f(i,j,k),f(i,j+1,k)
+         stop
+      endif
+#endif
+
+      ! add the DyDx(f) term:
+#ifdef COMPACT
+      lf(i,j,k)=lf(i,j,k) + ((delx*delx+dely*dely)/12)* &
+             (work(i,j+1,k)-2*work(i,j,k)+work(i,j-1,k))/(dely*dely)
+#endif
+
+      if (alpha==0) then
+         lf(i,j,k)=beta*lf(i,j,k)
+      else
+         lf(i,j,k)=alpha*f(i,j,k)+beta*lf(i,j,k) 
+#ifdef COMPACT
+         lf(i,j,k)=lf(i,j,k) + &
+            alpha*(                                       &
+                     (f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k)) + &
+                     (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))   &
+                   ) / 12
+#endif
+
+      endif
+      
+   enddo
+   enddo
+else if (ndim==3) then
+   call ghost_update_x(f,1)
+   call ghost_update_y(f,1)
+   call ghost_update_z(f,1)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
       lf(i,j,k)=alpha*f(i,j,k)+ &
             beta*(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx) +&
             beta*(f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))/(dely*dely) +&

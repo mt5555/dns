@@ -47,7 +47,7 @@ tinc=.25
 
 call init_mpi       
 call init_mpi_comm3d()
-call init_grid      
+call init_model()
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
