@@ -5,8 +5,8 @@ nx=256; delx_over_eta=1.73; epsilon=95.0;
 name='/scratch1/taylorm/iso12_250A0022.000'
 nx=250; delx_over_eta=.80; epsilon=3.9;
 
-name='../src/temp0000.0000'
-nx=64; delx_over_eta=1.0; epsilon=1.0;
+name='../src/test0000.5000'
+nx=256; delx_over_eta=.7; epsilon=3.0;
 
 
 fid=fopen([name,'.isostr'],'r','l');
@@ -17,18 +17,17 @@ cdir=[cdir, 'g','g','g','g','g','g'];  % face diagonals
 cdir=[cdir, 'r','r','r','r'];      % body diagonals
 cdir=[cdir, 'b','b','b','b','b','b','b','b','b','b','b','b'];      % 12 (1,2,0) directions
 cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,2) directions
-cdir=[cdir, 'm','m','m','m','m','m','m','m','m','m','m','m'];      % 12 (1,1,2) directions
+cdir=[cdir, 'c','c','c','c','c','c','c','c','c','c','c','c'];      % 12 (1,2,2) directions
 
 
 
 % get the weights:
 w=textread('../src/voronoi/isoave.weights','%f');
-size(w)
 % take every other weight
 w=2*w(1:2:length(w));
+%w=w./w/length(w);  % equally weighted
 
-
-msize=3;   % marker size
+msize=4;   % marker size
 xmax=1000;  % maximum x axis
 
 ndelta=fread(fid,1,'float64');
@@ -67,7 +66,45 @@ if (ntran>=4)
 end
 
 
+disp('1 = Scaling laws for total structure function');
+disp('2 = Scaling laws for positive structure function');
+disp('3 = Scaling laws for positive structure function');
+disp('4 = 2nd and 3rd order isotropy check');
+disp('5 = 2nd and 3rd order isotropy check, x,y,z directions only');
+in=input('Enter choice: ');
 
+if (in==4)
+   klaws=0;
+   check_isotropy=1;
+elseif (in==5)
+   ndir=3;
+   w=w/sum(w(1:ndir));
+   klaws=0;
+   check_isotropy=1;
+else
+   klaws=1;
+   check_isotropy=0;
+end
+
+if (in==2)
+  % D_lll=SP_lll-SN_lll;
+  % but lets change the sign, so  D_lll=SN-SP 
+
+  D_lll=-SP_lll;
+  D1_ltt=-SP1_ltt;
+  D2_ltt=-SP2_ltt;
+end
+if (in==3)
+  D_lll=-SN_lll;
+  D1_ltt=-SN1_ltt;
+  D2_ltt=-SN2_ltt;
+end
+
+
+
+
+
+if (klaws) 
 
 %
 %  the 4/5 law
@@ -83,15 +120,17 @@ for i=1:ndir
 
   semilogx(x,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
   yy = spline(x,y,xx);
+  %plot(xx,yy,[cdir(i)],'LineWidth',.2);
+  
   yyave=yyave+w(i)*yy;
   yyave_sq=yyave_sq + w(i)*yy.^2;
 end
 yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
 
-%semilogx(xx,yyave,'r');
-errorbar(xx,yyave,yyave_sq);
+semilogx(xx,yyave,'k','LineWidth',1.0);
+%errorbar(xx,yyave,yyave_sq);
 title('D_{lll} / r\epsilon   (4/5 law)');
-x=1:xmax; semilogx(x,.8*x./x,':');
+x=1:xmax; semilogx(x,.8*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc 45.ps
@@ -119,8 +158,9 @@ for i=1:ndir
 end
 semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
+semilogx(xx,.5*(yyave1+yyave2),'k','LineWidth',1.0);
 title('D_{ltt} / r\epsilon  (4/15 law)');
-x=1:xmax; semilogx(x,(4/15)*x./x,':');
+x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc 415.ps
@@ -140,14 +180,21 @@ for i=1:ndir
   semilogx(x,y,['.',cdir(i)],'MarkerSize',msize); hold on;
   yyave=yyave+w(i)*spline(x,y,xx);
 end
-semilogx(xx,yyave,'r');
+semilogx(xx,yyave,'k','LineWidth',1.0);
 title('4/3 law');
-x=1:xmax; semilogx(x,(4/3)*x./x,':');
+x=1:xmax; semilogx(x,(4/3)*x./x,'k');
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc 43.ps
 
+end
+
+
+
+
+
+if (check_isotropy)
 
 %
 % Gotoh style isotropy check
@@ -155,7 +202,7 @@ print -dpsc 43.ps
 yyave=0*xx;
 yyave1=0*xx;
 yyave2=0*xx;
-figure(4)
+figure(1)
 for i=1:ndir
   x=r_val(:,i);
   x_box = x/delx_over_eta/nx;  % in code units (box length)
@@ -200,14 +247,14 @@ print -dpsc isocheck.ps
 yyave=0*xx;
 yyave1=0*xx;
 yyave2=0*xx;
-figure(5)
+figure(2)
 for i=1:ndir
   x=r_val(:,i);
   x_box = x/delx_over_eta/nx;  % in code units (box length)
 
-  y  = D_lll(:,i); 
-  y1 = D1_ltt(:,i)./x_box;
-  y2 = D2_ltt(:,i)./x_box;
+  y  = -D_lll(:,i); 
+  y1 = -D1_ltt(:,i)./x_box;
+  y2 = -D2_ltt(:,i)./x_box;
   
   semilogx(x,y1,['.',cdir(i)],'MarkerSize',msize); hold on
   semilogx(x,y2,['.',cdir(i)],'MarkerSize',msize);
@@ -235,4 +282,4 @@ xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc isocheck3.ps
-
+end
