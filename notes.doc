@@ -36,13 +36,17 @@ quick & dirty 64x64x64 timings (1cpu)
 run to .1 
 CFL=1.5/.25
 
-
+truchas (Compaq ES40):       .26  .29  .29
+linux desktop:               
+Autrey (Sun Ultra 60):       .93  .92  .92
+Nirvana (SGI O2)             .94  .95  .94
 linux laptop (PGI F90):     1.06  1.06
 linux laptop (Lahey F90):   1.25  1.25 
-Nirvana (SGI O2)             .94  .95  .94
-Autrey (Sun Ultra 60):       .93  .92  .92
-linux desktop:               
-truchas (Compaq ES40):       .26  .29  .29
+
+
+
+
+
 
 
 
