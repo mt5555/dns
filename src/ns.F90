@@ -419,23 +419,24 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (mu_hyper>=4) then
-   if (dealias==1) then
-      call ke_shell_z(Qhat,ke,numk,dealias_23_kmax2_1,dealias_23_kmax2)
-   else if (dealias==2)
-      call ke_shell_z(Qhat,ke,numk,dealias_sphere_kmax2_1,dealias_sphere_kmax2)
-   else
-      stop 'error - hyperviscosity not tuned for no dealiasing case'
-   endif
+if (mu_hyper>=2) then
    ! units of E = m**2/s**2
    ! units of E(k) = m**3/s**2
    ! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
    ! scaling:  E(kmax)/(kmax**2)(4-.75)
-   hyper_scale = sqrt(ke) * (pi2_squared*dealias_sphere_kmax2)**(-(mu_hyper-.75))
 
    ! du/dt = (sqrt(E(kmax))  [1/ (kmax**8 kmax**alpha) ] k**8  u  
    ! m/s**2  =  m**1.5/s  kmax**-alpha  m/s
    !  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
+   if (dealias==1) then
+      call ke_shell_z(Qhat,ke,numk,dealias_23_kmax2_1,dealias_23_kmax2)
+      hyper_scale = sqrt(ke) * (pi2_squared*dealias_23_kmax2)**(-(mu_hyper-.75))
+   else if (dealias==2) then
+      call ke_shell_z(Qhat,ke,numk,dealias_sphere_kmax2_1,dealias_sphere_kmax2)
+      hyper_scale = sqrt(ke) * (pi2_squared*dealias_sphere_kmax2)**(-(mu_hyper-.75))
+   else
+      stop 'error - hyperviscosity not tuned for no dealiasing case'
+   endif
 endif
 
 
@@ -455,10 +456,8 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=4) then
+            if (mu_hyper>=2) then
                xw_viss=xw_viss + mu_hyper_value*hyper_scale*xw**mu_hyper
-            else if (mu_hyper==2) then
-               xw_viss=xw_viss + mu_hyper_value*xw*xw
             endif
             if (mu_hypo==1 .and. xw>0) then
                xw_viss=xw_viss + mu_hypo_value/xw
