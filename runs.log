@@ -1,5 +1,16 @@
 **********************************************************************************
 12/04/01
+iso12_250D_
+
+iso12 initial condition
+iso12 forcing  (subtype=0:  tau=5)
+CFL=1.5/.25
+mu=.8e-3  
+
+IN
+
+**********************************************************************************
+12/04/01
 iso12_250C_
 
 iso12 initial condition
@@ -24,6 +35,9 @@ R_l = 241
 h/eta= 2.41
 eddy turnover time: around 1.4
 epsilon: about -1.0
+
+4'5 law for delta=32h:   .5954   std=.0879
+
 
 
 
