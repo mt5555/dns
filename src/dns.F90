@@ -227,7 +227,7 @@ do
    maxs(8)=-1  
    if (my_pe==io_pe) then
       if (lsf_time_remaining(lsftime)==0) then
-         maxs(8)=lsftime/100.0
+         maxs(8)=lsftime/60.0
       endif
    endif
 

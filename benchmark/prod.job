@@ -4,7 +4,7 @@
 #XXXX -q large-dq
 #BSUB -J iso12
 #BSUB -G telluride-sh
-#BSUB -W 0:720
+#BSUB -W 720
 #BSUB -n 128 -R "span[ptile=128]"
 
 module list

@@ -54,7 +54,7 @@ end subroutine
 ! update ghostcells of variable p
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine ghost_update(p,nvar)
+subroutine ghost_update_x(p,nvar)
 use params
 use mpi
 implicit none
@@ -66,18 +66,10 @@ real*8 :: p(nx,ny,nz,nvar)
 integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
 real*8 :: recbufx0(nslaby*nslabz*nvar*nghost)
 real*8 :: recbufx1(nslaby*nslabz*nvar*nghost)
-real*8 :: recbufy0(nslabx*nslabz*nvar*nghost)
-real*8 :: recbufy1(nslabx*nslabz*nvar*nghost)
-real*8 :: recbufz0(nslabx*nslaby*nvar*nghost)
-real*8 :: recbufz1(nslabx*nslaby*nvar*nghost)
 
 #ifdef USE_MPI
 real*8 :: sendbufx0(nslaby*nslabz*nvar*nghost)
 real*8 :: sendbufx1(nslaby*nslabz*nvar*nghost)
-real*8 :: sendbufy0(nslabx*nslabz*nvar*nghost)
-real*8 :: sendbufy1(nslabx*nslabz*nvar*nghost)
-real*8 :: sendbufz0(nslabx*nslaby*nvar*nghost)
-real*8 :: sendbufz1(nslabx*nslaby*nvar*nghost)
 integer :: ndata
 integer :: ierr,dest_pe0,dest_pe1,request(12),statuses(MPI_STATUS_SIZE,12)
 integer :: dest_pe3(3),tag
@@ -223,6 +215,71 @@ endif
 
 
 
+#ifdef USE_MPI
+call MPI_waitall(nmesg,request,statuses,ierr) 	
+ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+#endif
+
+l=0
+do n=1,nvar
+do k=nz1,nz2
+do j=ny1,ny2
+do i=1,nghost
+   l=l+1
+   ! left edge:  p(nx1-2,,) then p(nx1-1,,)
+   p(nx1-(nghost-i+1),j,k,n)=recbufx0(l)
+   ! right edge:  p(nx2+1,,) then p(nx2+2,,)
+   p(nx2+i,j,k,n)=recbufx1(l)
+enddo
+enddo
+enddo
+enddo
+
+
+
+
+call wallclock(tmx2)
+tims(13)=tims(13)+(tmx2-tmx1)          
+
+end subroutine
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! update ghostcells of variable p
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine ghost_update_y(p,nvar)
+use params
+use mpi
+implicit none
+integer :: nvar
+real*8 :: p(nx,ny,nz,nvar)
+
+
+!local variables
+integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
+real*8 :: recbufy0(nslabx*nslabz*nvar*nghost)
+real*8 :: recbufy1(nslabx*nslabz*nvar*nghost)
+
+#ifdef USE_MPI
+real*8 :: sendbufy0(nslabx*nslabz*nvar*nghost)
+real*8 :: sendbufy1(nslabx*nslabz*nvar*nghost)
+integer :: ndata
+integer :: ierr,dest_pe0,dest_pe1,request(12),statuses(MPI_STATUS_SIZE,12)
+integer :: dest_pe3(3),tag
+#endif
+
+if (firstcall) call ghost_init
+call wallclock(tmx1)
+nmesg=0
+
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! compute Y direction ghost cells
@@ -348,6 +405,71 @@ else
 #endif
 endif
 
+
+
+
+
+
+#ifdef USE_MPI
+call MPI_waitall(nmesg,request,statuses,ierr) 	
+ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+#endif
+
+
+l=0
+do n=1,nvar
+do k=nz1,nz2
+do j=1,nghost
+do i=nx1,nx2
+   l=l+1
+   ! left edge: 
+   p(i,ny1-(nghost-j+1),k,n)=recbufy0(l)
+   ! right edge: 
+   p(i,ny2+j,k,n)=recbufy1(l)
+enddo
+enddo
+enddo
+enddo
+
+
+
+call wallclock(tmx2)
+tims(13)=tims(13)+(tmx2-tmx1)          
+
+end subroutine
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! update ghostcells of variable p
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine ghost_update_z(p,nvar)
+use params
+use mpi
+implicit none
+integer :: nvar
+real*8 :: p(nx,ny,nz,nvar)
+
+
+!local variables
+integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
+real*8 :: recbufz0(nslabx*nslaby*nvar*nghost)
+real*8 :: recbufz1(nslabx*nslaby*nvar*nghost)
+
+#ifdef USE_MPI
+real*8 :: sendbufz0(nslabx*nslaby*nvar*nghost)
+real*8 :: sendbufz1(nslabx*nslaby*nvar*nghost)
+integer :: ndata
+integer :: ierr,dest_pe0,dest_pe1,request(12),statuses(MPI_STATUS_SIZE,12)
+integer :: dest_pe3(3),tag
+#endif
+
+if (firstcall) call ghost_init
+call wallclock(tmx1)
+nmesg=0
 
 
 
@@ -489,36 +611,9 @@ call MPI_waitall(nmesg,request,statuses,ierr)
 ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
 #endif
 
-l=0
-do n=1,nvar
-
-do k=nz1,nz2
-do j=ny1,ny2
-do i=1,nghost
-   l=l+1
-   ! left edge:  p(nx1-2,,) then p(nx1-1,,)
-   p(nx1-(nghost-i+1),j,k,n)=recbufx0(l)
-   ! right edge:  p(nx2+1,,) then p(nx2+2,,)
-   p(nx2+i,j,k,n)=recbufx1(l)
-enddo
-enddo
-enddo
-
-l=0
-do k=nz1,nz2
-do j=1,nghost
-do i=nx1,nx2
-   l=l+1
-   ! left edge: 
-   p(i,ny1-(nghost-j+1),k,n)=recbufy0(l)
-   ! right edge: 
-   p(i,ny2+j,k,n)=recbufy1(l)
-enddo
-enddo
-enddo
-
 if (ndim==3) then
 l=0
+do n=1,nvar
 do k=1,nghost
 do j=ny1,ny2
 do i=nx1,nx2
@@ -530,10 +625,8 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-endif
-
 enddo
-
+endif
 
 
 

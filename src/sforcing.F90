@@ -15,6 +15,7 @@ integer,private :: ntot=0
 integer :: init_sforcing=0
 integer :: comm_sforcing  ! MPI communicator for all pe's involved in forcing
 
+real*8 :: tau
 contains
 
 
@@ -44,7 +45,7 @@ implicit none
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var) 
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var) 
 integer km,jm,im,i,j,k,n,wn,ierr
-real*8 xw,tau,xfac,f_diss
+real*8 xw,xfac,f_diss,tauf
 real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)
 
 
@@ -80,25 +81,21 @@ enddo
 do wn=1,NUMBANDS
    ! Qf = Q*sqrt(ener_target/ener)
    ! forcing = tau (Qf-Q) = tau * (sqrt(ener_target/ener)-1) Q
-   if (init_cond_subtype==1) then
-      tau=25*(sqrt(ener_target(wn)/ener(wn))-1)
-   else
-      tau=5*(sqrt(ener_target(wn)/ener(wn))-1)
-   endif
+   tauf=tau*(sqrt(ener_target(wn)/ener(wn))-1)
 !   print *,'FORCING:',wn,ener(wn),ener_target(wn)
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
-      rhs(k,i,j,1) = rhs(k,i,j,1) + tau*Qhat(k,i,j,1)
-      rhs(k,i,j,2) = rhs(k,i,j,2) + tau*Qhat(k,i,j,2)
-      rhs(k,i,j,3) = rhs(k,i,j,3) + tau*Qhat(k,i,j,3)
+      rhs(k,i,j,1) = rhs(k,i,j,1) + tauf*Qhat(k,i,j,1)
+      rhs(k,i,j,2) = rhs(k,i,j,2) + tauf*Qhat(k,i,j,2)
+      rhs(k,i,j,3) = rhs(k,i,j,3) + tauf*Qhat(k,i,j,3)
 
       xfac=8
       if (z_kmcord(k)==0) xfac=xfac/2
       if (z_jmcord(j)==0) xfac=xfac/2
       if (z_imcord(i)==0) xfac=xfac/2
-      f_diss = f_diss + xfac*tau*(Qhat(k,i,j,1)**2 + &
+      f_diss = f_diss + xfac*tauf*(Qhat(k,i,j,1)**2 + &
            Qhat(k,i,j,2)**2 + &
            Qhat(k,i,j,3)**2) 
 
@@ -115,8 +112,19 @@ implicit none
 real*8 :: xw
 integer km,jm,im,i,j,k,n,wn,ierr
 integer :: color,key
+character(len=80) :: message
 
 init_sforcing=1
+
+   if (init_cond_subtype==1) then
+      tau=25
+   else if (init_cond_subtype==2) then
+      tau=1
+   else
+      tau=5
+   endif
+   write(message,'(a,f5.2)') 'Forcing relaxation parameter tau=',tau
+   call print_message(message)
 
    do n=1,NUMBANDS
       wnforcing(n)%n=0

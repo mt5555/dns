@@ -10,9 +10,13 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 250B  .2e-3    241   2.41      1.49        1.05      hookup        N/A
 250C  .4e-3    167   1.44      1.44        1.07      hookup        N/A
 250D  .8e-3    114   .850      1.41        1.05      
-
 500   .1e-3    455   2.38      1.44        2.00  
-500   .2e-3 next?
+
+
+
+tau=25  (subtype=1)
+250E   .1e-3   IN
+500B   .1e-3   IN
 
 
 

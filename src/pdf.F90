@@ -805,9 +805,6 @@ u2=u2/g_nx/g_ny/g_nz
 
 ensave=ensave/g_nx/g_ny/g_nz
 
-print *,S2sum,ensave
-
-
 #if 0
 
 ! cj structure functions

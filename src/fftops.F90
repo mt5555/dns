@@ -1,7 +1,8 @@
 #include "macros.h"
 
-! used to try out 2nd order schemes:
-#define CENTER2H
+! used to try out 2nd order scheme:
+#undef CENTER2H
+! used to try out 2nd order, but 2 delx scheme:
 #undef CENTER4H        
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

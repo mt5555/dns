@@ -8,18 +8,8 @@ E&Liu KH problem.
 
 1. LSF time remaining - fix this for CPQ
 
-
-1. verify <s**2> = .5*vor**2    for iso/homogeneity
-
 1. change NS-alpha so forcing always appears as just 'f'
    see nots about ints(3) and ints(9) in params.F90
-
-1. matlab code: 
-       last half averages: 
-          epsilson
-          t_eddy
-          h_eddy
-       compute all momements, with std and error bars
 
 1. 4th order code using ghost cells:
          consctruct 4th order test case with dnsgrid
@@ -32,8 +22,7 @@ E&Liu KH problem.
 
 
 1. if run stops because u>1000, timings are incorrect
-1. specplot: multiply by f^5/3
-1. check restart testcase on mahi (also little endian)
+1. check restart testcase on mahi or CPQ (also little endian)
 2. make suite of runs for diffusion: 32^3, 64^3 128^3 256^3
        plot R_lamba vs mu and h
 

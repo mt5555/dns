@@ -464,6 +464,10 @@ if (compute_struct==1) then
         (ints_e(n+3)/ints_e(n)**1.5,n=1,3)
    call print_message(message)
    
+   write(message,'(a,3f14.8)') 'wSw: ',&
+        (ints_e(10)/ints_e(1)**2)
+   call print_message(message)
+   
    
    if (structf_init==1) then
    if (my_pe==io_pe) then

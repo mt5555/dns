@@ -46,6 +46,34 @@ grid point model) See shallow.doc for some more documentation.
 
 
 
+****************************************************************************
+Running the code
+1. setting the resolution
+2. compiling
+3. the input file
+4. running the code and command line options
+
+
+
+****************************************************************************
+Scripts for testing:
+****************************************************************************
+
+test.sh   tests 2D KH rollup
+          models:  dns, dnsgrid
+          methods:  spectral
+          tests several different dimension paddings
+
+test3d.sh  tests 3D forced isotropic turbulence run
+           models:  dns, dnsgrid
+           methods:  spectral
+           dimensions:  lots
+           tests several different dimension paddings
+           tests restart files
+          
+testg.sh  tests 2D KH rollup          
+          models:  dnsgrid, dnsghost
+          methods:  4th
 
 
 
