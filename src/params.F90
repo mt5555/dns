@@ -48,12 +48,28 @@ integer :: dealias=0                ! 0 = none
                                     ! 1 = 2/3 rule (exact)
                                     ! 2 = sqrt(2)*N/3 rule (approximate)
 
-logical :: rw_spec=.false.          ! set to .true. to read/write dealiased spectral coefficieints 
+!
+! I/O options
+!
+logical :: r_spec=.false.           ! set to .true. to read spectral coefficieints 
+logical :: w_spec=.false.           ! set to .true. to write spectral coefficieints 
                                     ! instead of grid point values 
+integer :: spec_max=-1              ! max number of spectral modes to write
+                                    ! -1 = use dealiased maximum
+
+
 logical :: udm_input=.false.        ! use UDM for input/restart files
 logical :: udm_output=.false.       ! use UDM for output files
 logical :: do_mpi_io=.false.     
 logical :: byteswap_input=.false.   ! byteswap all binary input files
+
+
+                                    ! used by the 'convert' program:
+integer :: convert_opt=-1           ! 0   output uvw  
+                                    !     usefull to convert to/from UDM
+                                    ! 1   output vor1,2,3 
+                                    ! 2   output vor magnitude 
+
 
 real*8  :: g_u2xave=0               ! <ux,ux> updated after each time step  
 

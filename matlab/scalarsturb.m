@@ -23,7 +23,7 @@ name = '/ccs/scratch/taylorm/decay/decay2048'
 
 nt=0;
 times=[0:.25:2.5];
-times=[0,.0167,.0283,.0524,.0650,.0776]
+times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 ]
 for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10),'.scalars-turb'];
@@ -77,7 +77,7 @@ figure(6)
 clf
 %plot(time_e,Sww)
 
-plot(time_e,ux3(1,:)./ux2(1,:).^(3/2),'k')
+plot(time_e,ux3(1,:)./ux2(1,:).^(3/2),'o-k')
 hold on
 plot(time_e,ux3(2,:)./ux2(2,:).^(3/2),'b')
 plot(time_e,ux3(3,:)./ux2(3,:).^(3/2),'g')

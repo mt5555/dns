@@ -1229,7 +1229,7 @@ dealias_nz=min(2+2*km_max,g_nz)
 
 truncation=(dealias_nx < g_nx .or. dealias_ny < g_ny .or. dealias_nz < g_nz)
 if (dealias==0 .and. truncation) then
-   call abort("output1_spec: spectral truncation only supported if dealias>0")
+   call abort("output1_spec: spectral truncation not accurate")
 endif
 
 
@@ -1350,10 +1350,7 @@ dealias_nx=min(2+2*im_max,g_nx)
 dealias_ny=min(2+2*jm_max,g_ny)
 dealias_nz=min(2+2*km_max,g_nz)
 
-truncation=(dealias_nx < g_nx .or. dealias_ny < g_ny .or. dealias_nz < g_nz)
-if (dealias==0 .and. truncation)  then
-   call abort("output1_spec: spectral truncation only supported if dealias>0")
-endif
+!truncation=(dealias_nx < g_nx .or. dealias_ny < g_ny .or. dealias_nz < g_nz)
 
 
 pt=0

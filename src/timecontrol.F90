@@ -314,7 +314,7 @@ if (doit_output) then
 
    write(message,'(f10.4)') 10000.0000 + time
 
-   if (equations==NS_UVW .and. rw_spec) then
+   if (equations==NS_UVW .and. w_spec) then
       call transpose_from_z_3d(Qhat,q1)
 
       ! NS, primitive variables

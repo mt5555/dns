@@ -204,7 +204,7 @@ character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
-if (do_mpi_io ) then
+if (do_mpi_io .and. .not. output_spec ) then
    call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
    return
 endif
@@ -216,26 +216,25 @@ xnz=o_nz
 
 
 if (output_spec) then
-
-   ! default is to write everything:
-   xnx=g_nx
-   xny=g_ny
-   xnz=g_nz
-
-   if (dealias==1) then
-      xnx=2+2*(g_nx/3)
-      xny=2+2*(g_ny/3)
-      xnz=2+2*(g_nz/3)
+   ! determine number of spectral coefficients to output:
+   if (spec_max<0) then
+      ! user did not specify:
+      xnx=g_nx
+      xny=g_ny
+      xnz=g_nz
+      if (dealias==1) then
+         xnx=2+2*(g_nx/3)
+         xny=2+2*(g_ny/3)
+         xnz=2+2*(g_nz/3)
+      endif
+   else
+      ! user specified
+      xnx=min(spec_max,g_nx)
+      xny=min(spec_max,g_ny)
+      xnz=min(spec_max,g_nz)
    endif
-
-   ! if some kind of spectral truncation:
-   if (g_nx==2048) then
-      xnx=384
-      xny=384
-      xnz=384
-   endif
-
 endif
+
 
 if (my_pe==fpe) then
 
@@ -259,7 +258,7 @@ if (my_pe==fpe) then
       call cread8(fid,xnz,1)
       if (output_spec) then
          print *,'Spectrum input data'
-         print *,'number of real coefficients: ',xnx,xny,xnz
+         write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
          if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
             ! we can only upsample low-res data.
             ! to run with high-res data, output a trucated form.  
@@ -290,6 +289,8 @@ if (my_pe==fpe) then
       call cwrite8(fid,xny,1)
       call cwrite8(fid,xnz,1)
       if ( output_spec) then
+         print *,'Spectrum output data'
+         write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
          if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
             ! we can only upsample low-res data.
             ! to run with high-res data, output a trucated form.  
@@ -307,7 +308,12 @@ if (my_pe==fpe) then
 endif
 
 #ifdef USE_MPI
-call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+if (io_read==1) then
+   call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call MPI_bcast(xnx,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call MPI_bcast(xny,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call MPI_bcast(xnz,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+endif
 #endif
 
 ! max wave number to read/write for spectral I/O

@@ -1,7 +1,7 @@
 
 % points on a lighted sphere:
 
-ndir=49;
+ndir=73;
 wname=sprintf('../src/voronoi/isoave.coords%i',ndir);
 w=textread(wname,'%f',1+3*2*ndir);
 n=w(1);

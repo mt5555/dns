@@ -1,4 +1,84 @@
-1. downsampling/upsampling: test 
+document options:
+
+-s                same as -si, -so
+-si               use spectral input
+-so               use spectral output
+-smax gmax        set wave max for spectral output
+                  default: dealias wave max?
+
+doit_model   only mod time
+doit_spec    force initial, since we cant do transfer on final
+
+set truncation to defualt dealiased, unless gmax was specified.
+
+r_spec
+w_spec
+
+
+options used by 'convert' program:
+
+-cout  uvw         output highres u,v,w        
+-cout  vor         output highres vor1,2,3     
+-cout  vorm        output highres ||vor||        (can not be used with -uo)
+
+
+
+run 2048 grid: -mio -uo -cout vor              UDM vor file
+run 2048 grid: -mio -so -smax 384 -cout uvw    spectral uvw file
+run on 384:    -si -out vorm                   input 384 uvw, output 384 vorm
+
+
+*.vor.h5  BOB/UDM 2048^3
+*.vorm    384^3 vor. mag. for dx.
+
+
+test1 32:  restart from reference (27 coeff), save 22 coeff.
+test2 32:  restart from test1
+test3 32:  restart from test1, value diffusion.   t=0:
+
+time=  0.00000(     0)  next output=*********  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0069861 cfl_adv= 1.500 cfl_vis= 0.080                 
+max: (u,v,w)      3.07340785717600     3.69418112148746     3.43868098933755    
+<z-vor>=-0.10408E-14   <hel>=-0.29407E+01   max(vor) 0.66968E+02                
+R_lambda=    40.52374  R=   269.54178 lambda=     0.15005                       
+mesh spacing/eta:        2.6091       2.6091       2.6091                       
+2/3 dealiasing kmax*eta:        0.1278                                          
+eddy turnover time:        1.2137                                               
+ke:  1.5058723054  enstropy:      668.8337         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -2.4813730 f=   0.0000000 alpha=   0.0000000 total=  -2.4813730  
+writing output files at t=    0.0000              
+
+
+test4 30:  restart from test1   same restart as test3?  yes
+test5 48:  restart from test1   same restart as test3?  yes
+
+
+
+big test: take 512^3 data, output 384 spec. 
+          read in 384 spec, output 384 grid vorm.
+          run dx.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 **********************************************************************************

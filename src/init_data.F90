@@ -59,15 +59,15 @@ if (equations==NS_UVW) then
 if (udm_input) then
    call udm_read_uvw(Q,Qhat,work1,work2)
 else
-   if (rw_spec) then
+   if (r_spec) then
    call print_message("Restarting from file restart.[us,vs,ws]")
    fname = rundir(1:len_trim(rundir)) // "restart.us"
-   call singlefile_io2(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe,rw_spec)
+   call singlefile_io2(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
    fname = rundir(1:len_trim(rundir)) // "restart.vs"
-   call singlefile_io2(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe,rw_spec)
+   call singlefile_io2(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
    if (n_var==3) then
       fname = rundir(1:len_trim(rundir)) // "restart.ws"
-      call singlefile_io2(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,rw_spec)
+      call singlefile_io2(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
    endif
    do n=1,ndim
       call ifft3d(Q(1,1,1,n),work1)
@@ -75,12 +75,12 @@ else
    else
    call print_message("Restarting from file restart.[uvw]")
    fname = rundir(1:len_trim(rundir)) // "restart.u"
-   call singlefile_io2(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe,rw_spec)
+   call singlefile_io2(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
    fname = rundir(1:len_trim(rundir)) // "restart.v"
-   call singlefile_io2(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe,rw_spec)
+   call singlefile_io2(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
    if (n_var==3) then
       fname = rundir(1:len_trim(rundir)) // "restart.w"
-      call singlefile_io2(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,rw_spec)
+      call singlefile_io2(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
    endif
    endif
 endif

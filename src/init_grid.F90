@@ -328,7 +328,7 @@ implicit none
 !local variables
 real*8 :: one=1,xfac,diff_2h,kmode
 integer i,j,k,l,ierr
-character(len=80) message
+character(len=80) message,carg
 integer input_file_type
 integer,external :: iargc
 if (my_pe==io_pe) then
@@ -364,16 +364,13 @@ if (my_pe==io_pe) then
 
       if (message(1:2)=="-r") then
          restart=1
-      else if (message(1:2)=="-t") then
-         enable_lsf_timelimit=1
-      else if (message(1:2)=="-s") then
-         rw_spec=.true.
-      else if (message(1:3)=="-ui") then
-         udm_input=.true.
-      else if (message(1:3)=="-uo") then
-         udm_output=.true.
-      else if (message(1:4)=="-mio") then
-         do_mpi_io=.true.
+      else if (message(1:5)=="-cout" .and. len_trim(message)==5) then
+         i=i+1
+         if (i>iargc()) exit
+         call getarg(i,carg)
+         if (carg(1:3)=="uvw") convert_opt=0 
+         if (carg(1:3)=="vor" .and. len_trim(carg)==3) convert_opt=1 
+         if (carg(1:4)=="vorm") convert_opt=2 
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit
@@ -389,11 +386,34 @@ if (my_pe==io_pe) then
          if (i>iargc()) exit
          call getarg(i,inputfile)
          j=len_trim(inputfile)
+      else if (message(1:4)=="-mio") then
+         do_mpi_io=.true.
+      else if (message(1:2)=="-s" .and. len_trim(message)==2) then
+         r_spec=.true.
+         w_spec=.true.
+      else if (message(1:3)=="-si" .and. len_trim(message)==3) then
+         r_spec=.true.
+      else if (message(1:3)=="-so" .and. len_trim(message)==3) then
+         w_spec=.true.
+      else if (message(1:5)=="-smax" .and. len_trim(message)==5) then
+         i=i+1
+         if (i>iargc()) exit
+         call getarg(i,carg)
+         j=len_trim(carg)
+         if (j>0) then
+            read(carg,'(i3)') spec_max
+         endif
+      else if (message(1:2)=="-t") then
+         enable_lsf_timelimit=1
+      else if (message(1:3)=="-ui") then
+         udm_input=.true.
+      else if (message(1:3)=="-uo") then
+         udm_output=.true.
       else if (message(1:1)/="-") then
          ! this must be the runname
          runname=message(1:len_trim(message))
       else
-         print *,'Invalid options.'  
+         print *,'Invalid option:',message
          print *,'./dns [-[t,r,b,s,ui,uo]]  [-i params.inp] [-d rundir] [runname] '
          print *,'-t  enable LSF time remaining check, if compiled in'
          print *,'-r  restart from rundir/restart.[uvw,h5] '
@@ -402,6 +422,7 @@ if (my_pe==io_pe) then
          print *,'-ui restart file is UDM'
          print *,'-ui output to UDM'
          print *,'-mio use MPI-IO'
+         call abort("invalid option")
       endif
    enddo
    print *,'Run name:         ',runname(1:len_trim(runname))
@@ -427,9 +448,6 @@ if (my_pe==io_pe) then
       call abort("bad input file")
    endif
 
-   if (rw_spec .and. dealias/=1) then
-      call abort("Error: -s option only works with fft-dealias method")
-   endif
 
 endif
 
@@ -440,7 +458,10 @@ endif
 call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(rw_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(r_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(w_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(spec_max,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(convert_opt,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(do_mpi_io,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_output,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
