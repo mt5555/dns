@@ -289,7 +289,6 @@ real*8 :: work2(nx,ny,nz)
 ! local variables
 integer i,j,k,l
 real*8 delta,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
-real*8 xscale,yscale
 real*8 :: eps=.10
 integer :: km=1
 integer,parameter :: n=500
