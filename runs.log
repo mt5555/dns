@@ -419,7 +419,9 @@ done:  1.0, 1.1, 1.2, 1.3 1.4, 1.5    1.7, 1.8,  1.9,  2.0, 2.1
 to pull data:
 xpsi get --pfsComp 8 dns/sc1024A/sc1024A0001.000.\[uvw\]
 
-pulled: 1.0
+
+pulled: 1.0, 1.1  1.2IN
+isoave:  1.0 IN
 
 
 
