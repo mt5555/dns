@@ -37,7 +37,7 @@ implicit none
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0           !viscosity
-real*8  :: alpha_model=0        !for the alpha model  
+real*8  :: alpha_value=.1      !for the alpha model  
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
 character(len=80) :: runname
@@ -155,7 +155,7 @@ integer :: error_code =0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer,parameter :: nints=7
+integer,parameter :: nints=8
 real*8 :: ints(nints)=0,maxs(nints)=0
 real*8 :: ints_timeU,ints_timeDU
 
@@ -176,6 +176,7 @@ real*8 :: ints_timeU,ints_timeDU
 ! ints(5) = helicity
 ! ints(6) = delke_tot = Actual d(KE)/dt computed from KE(t) and KE(t+1)
 ! ints(7) = enstrophy (vorticity**2)
+! ints(8) = ke dissapation from alpha model term 
 !
 ! maxs(5) = max vorticity
 !

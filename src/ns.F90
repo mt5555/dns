@@ -1,4 +1,5 @@
 #include "macros.h"
+#define ALPHA_MODEL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  subroutine to take one Runge-Kutta 4th order time step
@@ -61,7 +62,6 @@ if (firstcall) then
 endif
 
 
-
 ! stage 1
 call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2)
 
@@ -78,7 +78,6 @@ do n=1,3
 
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-
 
 
 ! stage 2
@@ -205,7 +204,8 @@ real*8 xfac,tmx1,tmx2
 real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke_diss,ensave,vorave,helave,maxvor,f_diss
+real*8 :: ke_diss,ensave,vorave,helave,maxvor
+real*8 :: f_diss=0,a_diss=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
 real*8 gradu(nx,ny,nz,n_var)
@@ -249,7 +249,7 @@ call wallclock(tmx1)
 !
 
 #ifdef ALPHA_MODEL
-   call ns_alpha_voriticity(gradu,gradv,gradw,Q,work)
+   call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
    call ns_vorticity(rhsg,Qhat,work,p)
    ! call ns_voriticyt2(not_written)
@@ -319,14 +319,6 @@ enddo
 
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! add in alpha model forcing term to the rhs
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! overwrite Q with div(tau)
-! rhs = rhs + helmholtz inverse ( div tau)
-#ifdef ALPHA_MODEL
-call alpha_model_rhs(rhs,Q,gradu,gradv,gradw,work,p)
-#endif
 
 
 
@@ -364,10 +356,22 @@ do j=1,ny_2dz
    enddo
 enddo
 
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! add in forcing
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! add in forcing to rhs
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef ALPHA_MODEL
+! For alpha model, we add Helmholtz inverse(f div(tau))
+! and overwrite Q (used for work arrays)
+call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,f_diss,a_diss)
+#else
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
+#endif
+
+
+
+
 
 !  make rhs div-free
 do j=1,ny_2dz
@@ -430,6 +434,7 @@ if (compute_ints==1) then
    ints(5)=helave/g_nx/g_ny/g_nz
    ints(7)=ensave/g_nx/g_ny/g_nz
    maxs(5)=maxvor
+   ints(8)=a_diss   ! computed in spectral space - dont normalize
 endif
 
 call wallclock(tmx2)
@@ -527,9 +532,10 @@ enddo
 
 end subroutine
 
-
-
-
+!
+!  tau = DD + DD' - D'D
+!  NS(u) = -  (1-a**2 Laplacian)^-1 a**2 div(tau) 
+!
 !
 ! 3 ways to do this:
 ! div on grid, inverse in spectral
@@ -540,27 +546,34 @@ end subroutine
 ! x & y components of div on grid, then transform.  transform z, add then div
 ! 6 der() + 6 z_fft()               transposes: 6+12 x, 6+12y, 6z
 !
-subroutine alpha_model_rhs(rhs,div,gradu,gradv,gradw,work,p)
+subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p,f_diss,a_diss)
 ! compute one entry of work=DD + DD' - D'D  
 ! transform work -> p
 ! compute d(p), apply helmholtz inverse, accumualte into rhs
 
 use params
+use sforcing
 use transpose
 implicit none
 real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)          ! Fourier data at time t
 real*8 p(g_nz2,nslabx,ny_2dz)    
 real*8 work(nx,ny,nz)
+
+! overlapped in memory:
 real*8 div(nx,ny,nz,n_var)
+real*8 divs(g_nz2,nslabx,ny_2dz,n_var)
+
 real*8 gradu(nx,ny,nz,n_var)
 real*8 gradv(nx,ny,nz,n_var)
 real*8 gradw(nx,ny,nz,n_var)
-
+real*8 :: a_diss,f_diss
 
 !local
 integer i,j,k,m1,m2,im,jm,km,l,n
 integer nd
 real*8 :: D(3,3),dummy,xfac
+
 
 div=0
 do m2=1,3
@@ -575,8 +588,9 @@ do m1=1,3
          D(2,nd) = gradv(i,j,k,nd)
          D(3,nd) = gradw(i,j,k,nd)
       enddo
+      work(i,j,k)=0
       do L=1,3
-         work(i,j,k)=D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L) - D(L,m1)*D(L,m2)
+         work(i,j,k)=work(i,j,k) + D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L) - D(L,m1)*D(L,m2)
       enddo
    enddo
    enddo
@@ -584,12 +598,18 @@ do m1=1,3
 
    ! compute div(Tau)  
    call der(work,work,dummy,p,DX_ONLY,m1)
-   div(:,:,:,m2) = div(:,:,:,m2) + work
+   div(nx1:nx2,ny1:ny2,nz1:nz2,m2) = div(nx1:nx2,ny1:ny2,nz1:nz2,m2) +&
+                           alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)
+
 
 enddo
 enddo
 
-! apply inverse operatore to div, accumulate into RHS
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! apply Helmolz to div(tau), accumulate into RHS
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+a_diss=0
 do n=1,3
    call z_fft3d_trashinput(div(1,1,1,n),p,work) 
    do j=1,ny_2dz
@@ -601,15 +621,57 @@ do n=1,3
             
             ! compute laplacian inverse
             xfac= -(im*im +km*km + jm*jm)*pi2_squared      
-            xfac=1 + alpha_model*xfac
+            xfac=1 - alpha_value**2 *xfac
             if (xfac/=0) xfac = 1/xfac
             rhs(k,i,j,n) = rhs(k,i,j,n) + xfac*p(k,i,j)
-            
+
+            xfac=8*xfac
+            if (z_kmcord(k)==0) xfac=xfac/2
+            if (z_jmcord(j)==0) xfac=xfac/2
+            if (z_imcord(i)==0) xfac=xfac/2
+            a_diss = a_diss + xfac*Qhat(k,i,j,n)*p(k,i,j)
+
          enddo
       enddo
    enddo
 enddo
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! apply Helmolz to forcing, accumulate into RHS
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+f_diss=0
+if (forcing_type>0) then
+divs=0
+call sforce(divs,Qhat,f_diss)
+
+
+do n=1,3
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            
+            ! compute laplacian inverse
+            xfac= -(im*im +km*km + jm*jm)*pi2_squared      
+            xfac=1 - alpha_value**2 *xfac
+            if (xfac/=0) xfac = 1/xfac
+            rhs(k,i,j,n) = rhs(k,i,j,n) + xfac*divs(k,i,j,n)
+
+            xfac=8*xfac
+            if (z_kmcord(k)==0) xfac=xfac/2
+            if (z_jmcord(j)==0) xfac=xfac/2
+            if (z_imcord(i)==0) xfac=xfac/2
+            f_diss = f_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
+
+         enddo
+      enddo
+   enddo
+enddo
+
+endif
 
 end subroutine
 

@@ -132,16 +132,16 @@ if (doit) then
    write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
-   write(message,'(3(a,e12.5))') 'ke + .5*alpha*<vor**2>',&
-      ints(1)+.5*alpha_model*ints(7)
+   write(message,'(3(a,e17.9))') 'ke + .5 alpha^2 <vor^2>',&
+      ints(1)+.5*alpha_value**2 * ints(7)
    call print_message(message)	
 
    write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'ke: ',ints(1),'  enstropy: ',&
         ints(7),'        total d/dt(ke): ',delke_tot
    call print_message(message)	
-   write(message,'(a,f12.7,a,f12.7,a,f12.7)') &
-     'd/dt(ke) from:  diffusion=',ints(3),' forcing=',ints(2),&
-     ' total=',(ints(2)+ints(3))
+   write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
+     'd/dt(ke) vis=',ints(3),' f=',ints(2),' alpha=',ints(8),&
+     ' total=',(ints(2)+ints(3)+ints(8))
    call print_message(message)	
    call print_message("")
 endif
