@@ -278,27 +278,26 @@ integer n_var_start,ierr
 logical :: do_mpi_io_save
 CPOINTER fid
 
+! disable periodic extension for header_type<>1 (turn it back on
+! when we are done)
+o_nx_save=o_nx; o_ny_save=o_ny; o_nz_save=o_nz;
+if (header_type==2 .or. header_type==3) then
+   o_nx=g_nx; 
+   o_ny=g_ny;
+   o_nz=g_nz;
+endif
+
+
 if (do_mpi_io .and. .not. output_spec ) then
    call singlefile_mpi_io(time,p,fname,work,work2,io_read,header_type)
+   o_nx=o_nx_save; o_ny=o_ny_save; o_nz=o_nz_save;
    return
 endif
+
 
 ! disable MPI_IO for the calls below:
 do_mpi_io_save=do_mpi_io
 do_mpi_io=.false.
-
-
-! disiable periodic extension for header_type<>1 (turn it back on
-! when we are done)
-o_nx_save=o_nx; o_ny_save=o_ny; o_nz_save=o_nz;
-
-if (header_type==2 .or. header_type==3) then
-!   o_nx=g_nx; 
-!   o_ny=g_ny;
-!   o_nz=g_nz;
-endif
-
-
 
 xnx=o_nx
 xny=o_ny

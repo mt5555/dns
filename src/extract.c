@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
   /* 256^3 blocks: */
   nbig=atoi(argv[2]);
   ncube=atoi(argv[3]);
-  printf("input file: %s ",fname);
+  printf("input file: %s\n ",fname);
   printf("original size: %i  subcube size: %i \n",nbig,ncube); 
 
   size=ncube;
@@ -58,14 +58,16 @@ int main(int argc, char **argv) {
 	}
 
 	/* compute name of subcube: */
-	strcpy(subname,"subcube");
-	subname[7]=c+(ioff/ncube);
-	subname[8]=c+(joff/ncube);
-	subname[9]=c+(koff/ncube);
-        subname[10]=0;
-	printf("output to:  %s  min=%f  max=%f \n",subname,mn,mx);
+	strcpy(subname,fname);
+	i=strlen(subname);
+	subname[i++]='.';
+	subname[i++]=c+(ioff/ncube);
+	subname[i++]=c+(joff/ncube);
+	subname[i++]=c+(koff/ncube);
+        subname[i++]=0;
+	printf("%s min=%f max=%f\n",subname,mn,mx);
 	fid2=fopen(subname,"w");
-!	fwrite(buf,4,ncube*ncube*ncube,fid2);
+	fwrite(buf,4,ncube*ncube*ncube,fid2);
 	fclose(fid2);
       }
     }

@@ -144,13 +144,6 @@ icount=icount+1
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2e"
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
-
-      if (ncpu_x==ncpu_y .and. ncpu_x==ncpu_z .and. ncpu_x>1) then
-         call print_message("outputing multfile norm squared as REAL*4...")
-         ! do a multfile_io to get a bunch of subcubes in seperate files
-         call multfile_io(time,work1,4)
-      endif
-
    endif
    if (convert_opt==4) then  ! -cout 4uvw
       ! 2048^3 needs 192GB storage.  can run on 128 cpus.
@@ -158,8 +151,7 @@ icount=icount+1
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
 
-      do i=4,4  ! use this to process a single .X file
-!      do i=1,3  ! use this to loop over .u,.v,.w
+      do i=1,3  ! use this to loop over .u,.v,.w
          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i)
          call print_message("input file:")	
@@ -174,11 +166,6 @@ icount=icount+1
 	 call print_message(fname(1:len_trim(fname)))
 
          call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
- 	 if (ncpu_x==ncpu_y .and. ncpu_x==ncpu_z .and. ncpu_x>1) then
-            call print_message("outputing multfile as REAL*4...")  
-            ! do a multfile_io to get a bunch of subcubes in seperate files
-            call multfile_io(time,Q,i)
-         endif
       enddo	
 
    endif
