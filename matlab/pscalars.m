@@ -109,10 +109,14 @@ n0(2,:)=pints_e(28,np,:);
 n0(3,:)=pints_e(29,np,:);
 n0=mean(n0,1);
 
+if (ns_e+2 >= 38)
+i=29;  
 for n=1:3
-n0x(1,n,:)=pints_e(27,np,:);   ! x direction N0 for c,n
-n0x(2,n,:)=pints_e(28,np,:);   ! y direction
-n0x(3,n,:)=pints_e(29,np,:);   ! z direciton
+n0x(1,n,:)=pints_e(i+1,np,:);   % x direction N0 for c,n
+n0x(2,n,:)=pints_e(i+2,np,:);   % y direction
+n0x(3,n,:)=pints_e(i+3,np,:);   % z direciton
+i=i+3;
+end
 end
 
 %
@@ -141,6 +145,8 @@ disp(sprintf('epsilon = %f',epsilon(1) ))
 
 epsilon_c=3*(mu./schmidt).*mean(cx2,1);
 lambda_c=sqrt(c2./mean(cx2,1));
+lambda_x_c=sqrt(mean(cx2,1)./mean(cxx2,1));
+
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
 % eta_c = Bachelor scale
 % lambda_c = taylor microscale
@@ -227,9 +233,9 @@ plot(time_e,R_l)
 title('R_\lambda')
 
 
+
 figure(1)
 orient tall
-
 
 % force all axis to be the same.
 % (otherwise, when printing, the plots where we changed y axis above
@@ -247,25 +253,13 @@ pname=sprintf('pscalars%i',np);
 print('-djpeg','-r90',pname); 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
+%
+% some more scalars
+%
 figure(2); clf;
 subplot(4,2,1)
-plot(time_e,lambda)
-title('\lambda')
+plot(time_e,2*pi./n0)
+title('2 \pi / N0')
 
 subplot(4,2,2)
 plot(time_e,lambda_c)
@@ -281,8 +275,14 @@ plot(time_e,eta_c)
 title('\eta_c')
 
 subplot(4,2,5)
-plot(time_e,1./n0)
-title('1/N0')
+plot(time_e,lambda)
+title('\lambda')
+
+
+subplot(4,2,6)
+plot(time_e,lambda_x_c)
+title('\lambda_{\nabla c}')
+
 
 subplot(4,2,7)
 plot(time_e,Vp)
