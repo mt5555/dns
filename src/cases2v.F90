@@ -319,7 +319,7 @@ if (init_cond_subtype ==100) then
    delta=.1
    biotsavart_ubar=.000
    yscale=2.0
-
+   xlocation=1.25
    initial_vor = 1
 endif
 

@@ -1,4 +1,3 @@
-fidu=fopen('test-0-0-0-0000.0000.data');
 
 %
 %########################################################################
@@ -8,20 +7,22 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
+range=0:1:1;
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
-range=[125:10:200];
+%range=[125:10:200];
 %name='../src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx4096d';
 %name='/ccs/scratch/taylorm/vxpair/vx6144e';
-name='/scratch2/taylorm/vx12288b/vx12288b';
-name='/ccs/taylorm/dns/src/vxpair/vx4500a';
+%name='/scratch2/taylorm/vx12288b/vx12288b';
+%name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/scratch/taylorm/vxpair/vx6144e';
+name='/home/scratch/kras/vx1280a/vx1280a';
 
 
 usefig=1;
-mkpr=0;            % make ps and jpeg files
+mkpr=1;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
 

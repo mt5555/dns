@@ -5,13 +5,38 @@ VXPAIR  Kras initial condition
 
 init_cond_subtype=100
 
-640x512
+
 ./gridsetup.py 16 1 1 640 512 1 2 2 0 2 2 0   2
 make dnsvor
 
-
 Running in /home/scratch/kras  (~/data2/kras)
 see RUNME script
+
+vx640a
+640x512  (24M  40min t=5.0 on sulaco 1 cpu)
+   init_cond_subtype=100
+   mu=1e-6
+   hard coded: (code may change later)
+      biotsavart_cutoff=5e-3
+      biotsavart_apply=10
+      delta=.1
+      biotsavart_ubar=.000
+
+
+vx1280a
+1280x1024   (92M  320m? t=5.0 on sulaco 1 cpu)
+   init_cond_subtype=100
+   mu=1e-6
+   hard coded: (code may change later)
+      biotsavart_cutoff=5e-3
+      biotsavart_apply=10
+      delta=.1
+      biotsavart_ubar=.000
+
+vx5120
+5120x4096   (1.5GB  )
+
+
 
 
 
