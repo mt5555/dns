@@ -31,6 +31,10 @@ if ($ncpus > 0) then
    if (`hostname` == node001) then
         set command = "/home/gmpi.pgi/bin/mpirun -np $ncpus  $exe"
    endif
+   if (`hostname` == pinkish.lanl.gov) then
+        set pinkopts = "-o 16 --gm --nper 2"
+        set command = "mpirun $pinkopts -np $ncpus   $exe"
+   endif
    echo $command
 else
    set ncpus = 1
@@ -41,7 +45,17 @@ endif
 make dns
 cd $benchdir
 sed s/NDELT/$3/ step.inp.sed > benchmark.inp
-$command -i benchmark.inp
+
+if (`hostname` == pinkish.lanl.gov) then
+   set pinkhost = `mpirun $pinkopts -np $ncpus hostname`
+   set pinknum = `echo $pinkhost | sed 's/n//' `
+   echo $pinkhost $pinknum
+   bpsh $pinknum mkdir /tmp/taylorm
+   bpcp benchmark.inp {$pinkhost}:/tmp/taylorm
+   $command -i /tmp/taylorm/benchmark.inp -d /tmp/taylorm
+else
+   $command -i benchmark.inp
+endif
 
 
 

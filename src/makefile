@@ -41,6 +41,10 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
                  #-lpthread
    endif
+   ifeq ($(HOST),pinkish.lanl.gov)
+      MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
+      MPILIB =   -L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm 
+   endif
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9560/bin/lf95
