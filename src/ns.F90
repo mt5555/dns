@@ -513,9 +513,9 @@ real*8 dummy(1)
 
 
 do nd=1,3
-call der(Q(1,1,1,1),gradu(1,1,1,nd),dummy,work,1,nd)
-call der(Q(1,1,1,2),gradv(1,1,1,nd),dummy,work,1,nd)
-call der(Q(1,1,1,3),gradw(1,1,1,nd),dummy,work,1,nd)
+call der(Q(1,1,1,1),gradu(1,1,1,nd),dummy,work,DX_ONLYnd)
+call der(Q(1,1,1,2),gradv(1,1,1,nd),dummy,work,DX_ONLY,nd)
+call der(Q(1,1,1,3),gradw(1,1,1,nd),dummy,work,DX_ONLY,nd)
 enddo
 
 
@@ -556,26 +556,30 @@ integer i,j,k
 integer nd
 real*8 :: D(3,3)
 
-do m1=1,3
+div=0
 do m2=1,3
+do m1=1,3
 
-! compute (m1,m2) entry of DD + DD'  - D'D
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   do nd=1,3
-      D(1,nd) = gradu(i,j,k,nd)
-      D(2,nd) = gradv(i,j,k,nd)
-      D(3,nd) = gradw(i,j,k,nd)
+   ! compute Tau(m1,m2)   Tau = DD + DD'  - D'D
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      do nd=1,3
+         D(1,nd) = gradu(i,j,k,nd)
+         D(2,nd) = gradv(i,j,k,nd)
+         D(3,nd) = gradw(i,j,k,nd)
+      enddo
+      do L=1,3
+         work(i,j,k)=D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L) - D(L,m1)*D(L,m2)
+      enddo
    enddo
-   do L=1,3
-      work(i,j,k)=D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L) + D(L,m1)*D(L,m2)
    enddo
-enddo
-enddo
-enddo
-call der(work,work,dummy,work2,1,m2)
-div(:,:,:,m1) = rhs(:,:,:,m1) + work
+   enddo
+
+   ! compute div(Tau)  
+   call der(work,work,dummy,work2,DX_ONLY,m1)
+   div(:,:,:,m2) = div(:,:,:,m2) + work
+
 enddo
 enddo
 
