@@ -9,11 +9,11 @@ init_cond_subtype=100
 ./gridsetup.py 16 1 1 640 512 1 2 2 0 2 2 0   2
 make dnsvor
 
-Running in /home/scratch/kras  (~/data2/kras)
-see RUNME script
+see RUNME script in parent directory
 
 vx640a
 640x512  (24M  40min t=5.0 on sulaco 1 cpu)
+   data stored in: ~/data2/kras
    init_cond_subtype=100
    mu=1e-6
    hard coded: (code may change later)
@@ -25,6 +25,7 @@ vx640a
 
 vx1280a
 1280x1024   (92M  320m? t=5.0 on sulaco 1 cpu)
+   data stored in: ~/data2/kras
    init_cond_subtype=100
    mu=1e-6
    hard coded: (code may change later)
@@ -33,9 +34,42 @@ vx1280a
       delta=.1
       biotsavart_ubar=.000
 
-vx5120
-5120x4096   (1.5GB  )
 
+vx2560a
+2560x2048   (400MB)   IN     ~30hours to t=5 on 2 cpus milkyway
+   data stored in ~/data/kras  
+   init_cond_subtype=100
+   mu=1e-6                                  should also be able to do 1e-7?
+   hard coded: (code may change later)
+      biotsavart_cutoff=5e-3
+      biotsavart_apply=10
+      delta=.1
+      biotsavart_ubar=.000
+
+
+vx5120a
+5120x4096   (1.5GB, run on milkyway, stopped after 1 timestep )
+   data stored in ~/data/kras  
+   init_cond_subtype=100
+   mu=1e-6
+   hard coded: (code may change later)
+      biotsavart_cutoff=5e-3
+      biotsavart_apply=10
+      delta=.1
+      biotsavart_ubar=.000
+
+
+
+vx2560b
+2560x2048   (400MB)   IN   l1
+   data stored in /netscratch/taylorm/kras
+   init_cond_subtype=100
+   mu=1e-7                                  should also be able to do 1e-7?
+   hard coded: (code may change later)
+      biotsavart_cutoff=5e-3
+      biotsavart_apply=50
+      delta=.1
+      biotsavart_ubar=.300
 
 
 

@@ -47,7 +47,7 @@ for i=range
   [x,y,z,psi,time]=getfield(fname);
   psi = squeeze(psi(:,:,1));
 
-  subsample=16;
+  subsample=1;
   if (subsample>1) 
     nx=length(x);
     ny=length(y);

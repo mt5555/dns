@@ -1,26 +1,30 @@
-%
 %########################################################################
 %#  plotting tacers
 %########################################################################
+usefig=1;
+mkpr=0;            % make ps and jpeg files
+mkascii=0;         % output ascii point data
+plot_noni=1;       % plot the non-insert points also
+axis_size=[0,4,0,2];
+ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
 %ts=input('time=? ');
 
 range=0:5:200.0 ;
-range=60;
+range=0:.1:5.0;
 %name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
-name='/ccs/taylorm/dns/src/vxpair/vx4096d';
+%name='/ccs/taylorm/dns/src/vxpair/vx4096d';
 %name='/scratch2/taylorm/vx12288b/vx12288b';
 %name='/home/scratch/vxpair/vx12288/vx12288b';
 
-usefig=1;
-mkpr=1;            % make ps and jpeg files
-mkascii=0;         % output ascii point data
 
-ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
-
+name='/home/scratch/kras/vx1280a/vx1280a'; 
+   plot_noni=0;
+   axis_size=[0,2.5,0,2];
+   mkpr=1;
 
 s=findstr(name,'/');
 s=s(length(s));
@@ -58,13 +62,19 @@ for i=range
     if (1)     
       figure(1); clf;
       plot(tracer(1:nt_ins,1),tracer(1:nt_ins,2))
-      hold on;   
-      plot(tracer(nt_ins+1:nt,1),tracer(nt_ins+1:nt,2),'r.');
-      hold off;
+      if (plot_noni)
+        hold on;   
+        plot(tracer(nt_ins+1:nt,1),tracer(nt_ins+1:nt,2),'r.');
+        hold off;
+      end
       axis equal
-      axis([0,4,0,2]);
+      axis(axis_size);
       title(sprintf('time = %6.2f ',i)); 
-          'pause' ;     pause
+%          'pause' ;     pause
+      if (mkpr)
+         pname=[name,'.tracer.ps'];
+         print('-depsc',pname);
+      end
     end
     
     % output to ASCI file

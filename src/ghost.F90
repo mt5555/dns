@@ -264,8 +264,10 @@ endif
 
 
 #ifdef USE_MPI
-call MPI_waitall(nmesg,request,statuses,ierr) 	
-ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+if (nmesg>0) then
+   call MPI_waitall(nmesg,request,statuses,ierr) 	
+   ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+endif
 #endif
 
 
@@ -461,8 +463,10 @@ endif
 
 
 #ifdef USE_MPI
-call MPI_waitall(nmesg,request,statuses,ierr) 	
-ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+if (nmesg>0) then
+   call MPI_waitall(nmesg,request,statuses,ierr) 	
+   ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+endif
 #endif
 
 
@@ -658,8 +662,10 @@ endif
 
 
 #ifdef USE_MPI
-call MPI_waitall(nmesg,request,statuses,ierr) 	
-ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+if (nmesg>0) then
+   call MPI_waitall(nmesg,request,statuses,ierr) 	
+   ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
+endif
 #endif
 
 if (ndim==3) then
