@@ -136,7 +136,7 @@ call MPI_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 tave=tave/initial_live_procs
 #endif
 
-write(message,'(a,i3,a,2f10.5)') 'wall clock transpose_to_z n=',n,' time=',&
+write(message,'(a,i3,a,2f10.5)') 'wall clock transpose_from_z n=',n,' time=',&
      tave/(2*n),tmax/(2*n)
 call print_message(message)
 

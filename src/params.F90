@@ -320,7 +320,8 @@ endif
 !
 ASSERT("fft_interface_init(): nslabx must be even ",mod(nslabx,2)==0)
 ASSERT("fft_interface_init(): nslaby must be even ",mod(nslaby,2)==0)
-ASSERT("fft_interface_init(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
+ASSERT("fft_interface_init(): nslabz must be even ",&
+        (mod(nslabz,2)==0 .or. g_nz==1))
 
 
 

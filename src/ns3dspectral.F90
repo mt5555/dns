@@ -193,19 +193,19 @@ wz=0
             if (im==g_nx/2) im=0
 
             ! u_x term
-            ux = - im*uhat(i+imsign(i),j,k,1)
+            !ux = - im*uhat(i+imsign(i),j,k,1)
             vx = - im*uhat(i+imsign(i),j,k,2)
             wx = - im*uhat(i+imsign(i),j,k,3)
 
 
             uy = - jm*uhat(i,j+jmsign(j),k,1)
-            vy = - jm*uhat(i,j+jmsign(j),k,2)
+            !vy = - jm*uhat(i,j+jmsign(j),k,2)
             wy = - jm*uhat(i,j+jmsign(j),k,3)
 
 
             uz =  - km*uhat(i,j,k+kmsign(k),1)
             vz =  - km*uhat(i,j,k+kmsign(k),2)
-            wz =  - km*uhat(i,j,k+kmsign(k),3)
+            !wz =  - km*uhat(i,j,k+kmsign(k),3)
 
             rhs(i,j,k,1) = pi2*(wy - vz)
             rhs(i,j,k,2) = pi2*(uz - wx)
@@ -216,11 +216,14 @@ wz=0
    enddo
 
 
+! 3 forward&back z-transforms, 9 ffts.  
 do n=1,3
    call ifft3d(rhs(1,1,1,n),p)
 enddo
 
-
+! alternative:
+! compute all terms above: vx,wx  uy,wy, uz,vz
+! 12 ffts, but only 2 f&b z transforms.  
 
 
 
