@@ -730,7 +730,7 @@ real*8 gradu(nx,ny,nz,n_var)
 !local
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
-integer i,j,k,n,m1,m2
+integer ii,i,j,k,n,m1,m2
 real*8 :: ux1,ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3),u1,u3,u4,u1tmp
 real*8 :: uxx2(3),uxx3(3),uxx4(3),xtmp,u2ux2(3)
 real*8 :: lnux1,lnux2,lnux3,lnux4,xln
@@ -775,7 +775,11 @@ do i=nx1,nx2
       ux4(n)=ux4(n)+x1*x1
 
       ! average over all three directions, so devide by 3 here:
-      xln=log(x1)
+      if (x1>0) then
+         xln=log(x1)
+      else
+         xln=-100
+      endif
       lnux1=lnux1 + xln/3
       lnux2=lnux2 + xln*xln/3
       lnux3=lnux3 + xln*xln*xln/3
@@ -839,6 +843,7 @@ u2ux2=u2ux2/g_nx/g_ny/g_nz;
 
 
 ! we will sum over all pe's below, so do this for non-sums:
+scalars=0
 scalars(1)=0
 if (my_pe==io_pe) scalars(1)=schmidt(np)
 
@@ -852,23 +857,26 @@ scalars(n+6+i)=ux4(n)       ! 9,10,11
 enddo
 i=i+9
 
+! i = 11
 do n=1,3
-scalars(n+i)=uxx2(n)       ! 12
-scalars(n+3+i)=uxx3(n)  
+scalars(n+i)=uxx2(n)       ! 12,13,14
+scalars(n+3+i)=uxx3(n)     ! 15,16,17
 scalars(n+6+i)=uxx4(n)     ! 18,19,20
 enddo
 i=i+9
 
+! i=20
 do n=1,3
 scalars(n+i)=su(n)         ! 21,22,23
 enddo
 i=i+3
 
 i=i+1
-scalars(i)=u3              ! 25
+scalars(i)=u3              ! 24
 i=i+1
-scalars(i)=u4              ! 26
+scalars(i)=u4              ! 25
 
+scalars(26)=0               ! opps, forgot this one
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -928,6 +936,7 @@ i=51
 if (i/=ns) then
    call abort("compute_expensive_pscalars: Error: i/=ns")
 endif
+
 
 #ifdef USE_MPI
    scalars2=scalars
