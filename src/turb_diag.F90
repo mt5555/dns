@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model
 
 ! local variables
-integer,parameter :: nints_e=14
+integer,parameter :: nints_e=23
 real*8 :: ints_e(nints_e)
 real*8 :: x
 integer i,j,k,n,ierr,csig
@@ -411,6 +411,7 @@ real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
+real*8 :: vor2(3),vor3(3),vor4(3)
 real*8 :: dummy(1),S2sum,ensave
 real*8 :: tmx1,tmx2
 
@@ -433,7 +434,9 @@ ux2=0
 ux3=0
 ux4=0
 u2=0
-
+vor2=0
+vor3=0
+vor4=0
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -485,6 +488,9 @@ do i=nx1,nx2
    ux3(3)=ux3(3)+uij*gradw(i,j,k,3)
    ux4(3)=ux4(3)+uij*uij
 
+   vor2=vor2 + vor**2
+   vor3=vor3 + vor**3
+   vor4=vor4 + vor**4
 enddo
 enddo
 enddo
@@ -501,7 +507,7 @@ ensave=ensave/g_nx/g_ny/g_nz
 
 
 
-ASSERT("compute_expensive_scalars: ns too small ",ns>=14)
+ASSERT("compute_expensive_scalars: ns too small ",ns>=23)
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)
@@ -512,6 +518,10 @@ do n=1,3
 scalars(10+n)=u2(n)
 enddo
 scalars(14)=S2sum
+
+scalars(15:17)=vor2
+scalars(18:20)=vor3
+scalars(21:23)=vor4
 
 
 #ifdef USE_MPI
