@@ -12,6 +12,7 @@ if ($#argv == 0 ) then
    echo " 2 = run lots of 3D test cases (different dimensions)"
    echo " p  = run several 3D test cases in parallel (2 and 4 cpus)"
    echo " pr = run several 3D test cases in parallel, with restart"
+   echo " ps = run several 3D test cases in parallel, with spec  restart"
    echo " makeref  = generate new reference output, 3D"
    exit
 endif
@@ -21,11 +22,19 @@ if ($1 == makeref) then
    ./gridsetup.py 1 1 1 32 32 32
    make ; rm -f $refout 
    ./dns -d $rundir reference3d  < $refin > $refout
+   ./dns -s -d $rundir reference3ds  < $refin > $refout
   cat $refout
   cd $rundir
   mv reference3d0000.0000.u restart.u
   mv reference3d0000.0000.v restart.v
   mv reference3d0000.0000.w restart.w
+  mv reference3ds0000.0000.us restart.us
+  mv reference3ds0000.0000.vs restart.vs
+  mv reference3ds0000.0000.ws restart.ws
+
+
+
+
   
 
 endif
@@ -41,6 +50,11 @@ make >& /dev/null ;  rm -f $tmp ; ./dns -d $rundir reference3d  < $refin > $tmp
 echo "***********************************************************"
 echo "with restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  < $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+echo "with spectral restart:"
+make >& /dev/null ;  rm -f $tmp ; ./dns -s -r -d $rundir reference3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
@@ -65,11 +79,14 @@ endif
 
 
 
-if ($1 == p || $1 == pr) then
+if ($1 == p || $1 == pr || $1 == ps) then
 
 if ($1 == pr) then
    set opt = "-r"
    echo USING RESTART
+else if ($1 == ps) then
+   set opt = "-s -r" 
+   echo USING SPEC RESTART   
 else
    set opt = ""
    echo NOT USING RESTART

@@ -43,6 +43,8 @@ integer :: numerical_method=FOURIER ! FOURIER
                                     ! FOURTH_ORDER
                                     ! others?
 logical :: dealias=.false.       
+logical :: rw_spec=.false.          ! set to .true. to read/write dealiased spectral coefficieints 
+                                    ! instead of grid point values 
 
 ! parameter used by psi-vor model:
 ! before using xscale,yscale,zscale, we need to update all FFT

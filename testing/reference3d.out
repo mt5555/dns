@@ -1,5 +1,5 @@
 Running parallel.  NCPUS=    1 =   1 x  1 x  1                                  
- Run name:         reference3d
+ Run name:         reference3ds
  output directory: ../testing/3d/
  Enter input file type: 
  initial condition: iso12               
@@ -20,14 +20,16 @@ Isotropic initial condition in wave numbers:
 0.5 <= wn < 1.5   E=  1.0000  E target=  1.0000                                 
 1.5 <= wn < 2.5   E=  0.3150  E target=  0.3150                                 
 Total E=  1.3150                                                                
-Initial data projection...
-Initial data projection                                                         
+Projecting initial data...
 Time stepping...                                                                
+initial time:    0.0000                                                         
+final time:   *********                                                         
+max number timesteps:         10                                                
 
-time=  0.00000(    0)  next output=990.00000                                    
+time=  0.00000(     0)  next output=990.00000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0079400 cfl_adv= 1.500 cfl_vis= 0.091                 
 max: (u,v,w)      2.64324599019631     2.53244391521344     2.81380068296839    
-<z-vor>=-0.86248E-16   <hel>=-0.26864E+01   max(vor) 0.28892E+02                
+<z-vor>=-0.17355E-15   <hel>=-0.26864E+01   max(vor) 0.28892E+02                
 R_lambda=   103.56222  R=   269.50599                                           
 mesh spacing(eta):        2.0069       2.0069       2.0069                      
 eddy turnover time:        3.0263                                               
@@ -51,52 +53,52 @@ writing output files at t=    0.0000
  1E-10 |*        ************
        +---------------------+
       k=0                 k=  17
-max(div)= 0.67502E-13                                                           
+max(div)= 0.10747E-12                                                           
 
-time=  0.00794(    1)  next output=990.00000                                    
+time=  0.00794(     1)  next output=990.00000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0080582 cfl_adv= 1.500 cfl_vis= 0.092                 
-max: (u,v,w)      2.62248685741844     2.51765018826552     2.81898326081616    
-<z-vor>=-0.86248E-16   <hel>=-0.26864E+01   max(vor) 0.28892E+02                
+max: (u,v,w)      2.62248685741844     2.51765018826551     2.81898326081616    
+<z-vor>=-0.17355E-15   <hel>=-0.26864E+01   max(vor) 0.28892E+02                
 R_lambda=   103.56222  R=   269.50599                                           
 mesh spacing(eta):        2.0069       2.0069       2.0069                      
 eddy turnover time:        3.0263                                               
 ke:  1.3149802711  enstropy:      234.2085         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -0.8690288 f=   0.0000000 alpha=   0.0000000 total=  -0.8690288  
 
-time=  0.01600(    2)  next output=990.00000                                    
+time=  0.01600(     2)  next output=990.00000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0082257 cfl_adv= 1.500 cfl_vis= 0.094                 
 max: (u,v,w)      2.58952533115015     2.51989374832332     2.81331869381845    
-<z-vor>= 0.24503E-15   <hel>=-0.26846E+01   max(vor) 0.29033E+02                
+<z-vor>= 0.13677E-15   <hel>=-0.26846E+01   max(vor) 0.29033E+02                
 R_lambda=   103.33992  R=   269.50599                                           
 mesh spacing(eta):        2.0038       2.0038       2.0038                      
 eddy turnover time:        3.0292                                               
 ke:  1.3081047520  enstropy:      232.7639         total d/dt(ke):  -0.8659391  
 d/dt(ke) vis=  -0.8636687 f=   0.0000000 alpha=   0.0000000 total=  -0.8636687  
 
-time=  0.02422(    3)  next output=990.00000                                    
+time=  0.02422(     3)  next output=990.00000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0084315 cfl_adv= 1.500 cfl_vis= 0.096                 
 max: (u,v,w)      2.57613609597485     2.52726850011001     2.79677632675570    
-<z-vor>= 0.60932E-16   <hel>=-0.26830E+01   max(vor) 0.29466E+02                
+<z-vor>=-0.27322E-16   <hel>=-0.26830E+01   max(vor) 0.29466E+02                
 R_lambda=   102.82447  R=   269.50599                                           
 mesh spacing(eta):        2.0035       2.0035       2.0035                      
 eddy turnover time:        3.0151                                               
 ke:  1.3011505768  enstropy:      232.6103         total d/dt(ke):  -0.8629926  
 d/dt(ke) vis=  -0.8630989 f=   0.0000000 alpha=   0.0000000 total=  -0.8630989  
 
-time=  0.03266(    4)  next output=990.00000                                    
+time=  0.03266(     4)  next output=990.00000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0085851 cfl_adv= 1.500 cfl_vis= 0.098                 
 max: (u,v,w)      2.59016435510900     2.53331569612759     2.77943676875994    
-<z-vor>= 0.59197E-16   <hel>=-0.26816E+01   max(vor) 0.29776E+02                
+<z-vor>=-0.86194E-17   <hel>=-0.26816E+01   max(vor) 0.29776E+02                
 R_lambda=   102.02021  R=   269.50599                                           
 mesh spacing(eta):        2.0059       2.0059       2.0059                      
 eddy turnover time:        2.9844                                               
 ke:  1.2940372160  enstropy:      233.7157         total d/dt(ke):  -0.8647735  
 d/dt(ke) vis=  -0.8672005 f=   0.0000000 alpha=   0.0000000 total=  -0.8672005  
 
-time=  0.08666(   10)  next output=  0.08666                                    
+time=  0.08666(    10)  next output=  0.08666  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0097272 cfl_adv= 1.500 cfl_vis= 0.111                 
 max: (u,v,w)      2.62762648354174     2.53898303033989     2.65442141457086    
-<z-vor>= 0.12436E-15   <hel>=-0.26811E+01   max(vor) 0.35356E+02                
+<z-vor>= 0.35535E-16   <hel>=-0.26811E+01   max(vor) 0.35356E+02                
 R_lambda=    92.30403  R=   269.50599                                           
 mesh spacing(eta):        2.0691       2.0691       2.0691                      
 eddy turnover time:        2.5378                                               
@@ -120,17 +122,15 @@ writing output files at t=    0.0867
  1E-10 |*                   *
        +---------------------+
       k=0                 k=  17
-max(div)= 0.62617E-13                                                           
+max(div)= 0.10481E-12                                                           
 CPU times (min):   (avg/max)
-initialization:      0.02     0.02                                              
-dns_solve:           0.17     0.17                                              
-   time_control            0.01     0.01                                        
-   RHS                     0.12     0.12                                        
-   compute_pdf             0.00     0.00                                        
-   ghost_update            0.00     0.00                                        
-   transpose_to_z          0.01     0.01                                        
-   transpose_from_z        0.01     0.01                                        
-   transpose_to_x          0.01     0.01                                        
-   transpose_from_x        0.02     0.02                                        
-   transpose_to_y          0.02     0.02                                        
-   transpose_from_y        0.02     0.02                                        
+initialization:      0.00     0.00                                              
+dns_solve:           0.05     0.05                                              
+   time_control            0.00     0.00                                        
+   RHS                     0.04     0.04                                        
+   transpose_to_z          0.00     0.00                                        
+   transpose_from_z        0.00     0.00                                        
+   transpose_to_x          0.00     0.00                                        
+   transpose_from_x        0.00     0.00                                        
+   transpose_to_y          0.01     0.01                                        
+   transpose_from_y        0.01     0.01                                        

@@ -23,13 +23,18 @@ Benchmarks for 12288x6144:   RES size: 5.7GB
 ASCI Q    t=.05    t=1 (extrapolated)   t=150
 cpus      
 4x1
-64x1      11.22m    3.74h               23.4d          time_control=2.33
-32x2      10.76                         22.42d                      2.29
-16x4      11.02                                                     2.26
-8x8       12.27
-16x2      
 
-redo with output turned off?
+64x1       9.84     3.28h                20.5d  
+32x2      10.77
+16x4       9.58
+8x8       11.44
+16x2      12.02
+
+128x1      4.89
+
+256x1      
+128x2
+
 
 
 

@@ -1136,8 +1136,8 @@ do x_pe=0,ncpu_x-1
       ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
       jj=0
       do j=1,ny_2dx
-         jj=j
          if (x_jmcord(j)>(g_ny/3)  .and. x_jmcord(j)/=(g_ny/2)) exit
+         jj=j
       enddo
       l=dealias_nx*jj
       if (l>0) buf(1:dealias_nx,1:jj)=pt(1:dealias_nx,k,1:jj)
@@ -1239,10 +1239,11 @@ do x_pe=0,ncpu_x-1
       ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
       jj=0
       do j=1,ny_2dx
-         jj=j
          if (x_jmcord(j)>(g_ny/3)  .and. x_jmcord(j)/=(g_ny/2)) exit
+         jj=j
       enddo
       l=dealias_nx*jj
+
 
       if (my_pe == fpe) then
          ! dont send message to self
@@ -1259,6 +1260,7 @@ do x_pe=0,ncpu_x-1
             ASSERT("output1: MPI_ISend failure",ierr==0)
             call MPI_waitall(1,request,statuses,ierr) 	
             ASSERT("output1: MPI_waitalll failure",ierr==0)
+            pt(1:dealias_nx,k,1:jj)=buf(1:dealias_nx,1:jj)
          endif
 #endif
       endif
@@ -1267,7 +1269,10 @@ do x_pe=0,ncpu_x-1
    if (my_pe==fpe) then
       if (sending_pe==my_pe) then
          ! dont recieve message from self
-         if (l>0) call cread8(fid,buf,l)
+         if (l>0) then
+            call cread8(fid,buf,l)
+            pt(1:dealias_nx,k,1:jj)=buf(1:dealias_nx,1:jj)
+         endif
       else
 #ifdef USE_MPI
          call MPI_IRecv(l,1,MPI_INTEGER,sending_pe,tag,comm_3d,request,ierr)
@@ -1286,9 +1291,6 @@ do x_pe=0,ncpu_x-1
       endif
    endif
 
-   if (l>0) then 
-      pt(1:dealias_nx,k,1:jj)=buf(1:dealias_nx,1:jj)
-   endif
 
 enddo
 enddo
@@ -1297,6 +1299,12 @@ enddo
 enddo
 
 
+n1=g_nx
+n1d=g_nx2
+n2=nslabz
+n2d=nslabz
+n3=ny_2dx
+n3d=ny_2dx
 call transpose_from_x(pt,p,n1,n1d,n2,n2d,n3,n3d)
 
 
@@ -1459,3 +1467,35 @@ end subroutine
 
 
 end module
+
+
+
+
+
+
+
+
+
+subroutine transpose_from_z_3d(Qhat,q1)
+use params
+use transpose
+implicit none
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3)
+real*8 :: q1(nx,ny,nz,3)
+
+! local
+integer :: n1,n1d,n2,n2d,n3,n3d,n
+
+n1=g_nz
+n1d=g_nz2
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+do n=1,ndim
+   call transpose_from_z(Qhat(1,1,1,n),q1(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+end subroutine transpose_from_z_3d
+
+
+

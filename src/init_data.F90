@@ -19,7 +19,7 @@ else
    if (init_cond==2) call init_data_lwisotropic(Q,Qhat,work1,work2,1,0)
    if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,1)
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,1)
-   if (init_cond==5) call init_data_lwisotropic_equal(Q,Qhat,work1,work2,1,1)
+   if (init_cond==5) call init_data_lwisotropic(Q,Qhat,work1,work2,1,1)
 endif
 end subroutine
 
@@ -30,6 +30,7 @@ subroutine init_data_restart(Q,Qhat,work1,work2)
 !
 use params
 use mpi
+use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -39,18 +40,37 @@ real*8 :: work2(nx,ny,nz)
 !local
 character(len=80) message
 character(len=80) fname
+integer :: n
 
 Q=0
 if (equations==NS_UVW) then
+
+   if (rw_spec) then
+   call print_message("Restarting from file restart.[us,vs,ws]")
+   fname = rundir(1:len_trim(rundir)) // "restart.us"
+   call singlefile_io2(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe,rw_spec)
+   fname = rundir(1:len_trim(rundir)) // "restart.vs"
+   call singlefile_io2(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe,rw_spec)
+   if (n_var==3) then
+      fname = rundir(1:len_trim(rundir)) // "restart.ws"
+      call singlefile_io2(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,rw_spec)
+   endif
+   do n=1,ndim
+      call ifft3d(Q(1,1,1,n),work1)
+   enddo
+   else
    call print_message("Restarting from file restart.[uvw]")
    fname = rundir(1:len_trim(rundir)) // "restart.u"
-   call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+   call singlefile_io2(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe,rw_spec)
    fname = rundir(1:len_trim(rundir)) // "restart.v"
-   call singlefile_io(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe)
+   call singlefile_io2(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe,rw_spec)
    if (n_var==3) then
       fname = rundir(1:len_trim(rundir)) // "restart.w"
-      call singlefile_io(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe)
+      call singlefile_io2(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,rw_spec)
    endif
+   endif
+   
+
 else if (equations==SHALLOW) then
    call print_message("Restarting from file restart.[uvh]")
    fname = rundir(1:len_trim(rundir)) // "restart.u"

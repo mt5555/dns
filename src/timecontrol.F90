@@ -2,6 +2,7 @@
 subroutine time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use tracers
+use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)      
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -21,6 +22,7 @@ real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
+integer :: n1,n1d,n2,n2d,n3,n3d
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
 real*8,save :: delea_tot=0,delke_tot=0,delens_tot=0
@@ -28,6 +30,7 @@ real*8,save :: delea_tot=0,delke_tot=0,delens_tot=0
 
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
+
 
 
 call wallclock(tmx1)
@@ -264,7 +267,22 @@ if (doit_output) then
 
    write(message,'(f10.4)') 10000.0000 + time
 
-   if (equations==NS_UVW) then
+   if (equations==NS_UVW .and. rw_spec) then
+      call transpose_from_z_3d(Qhat,q1)
+
+      ! NS, primitive variables
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".us"
+      call singlefile_io2(time,q1(1,1,1,1),fname,work1,work2,0,io_pe,.true.)
+
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vs"
+      call singlefile_io2(time,q1(1,1,1,2),fname,work1,work2,0,io_pe,.true.)
+      if (n_var==3) then
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ws"
+         call singlefile_io2(time,q1(1,1,1,n_var),fname,work1,work2,0,io_pe,.true.)
+      endif
+
+   else if (equations==NS_UVW) then
+
       ! NS, primitive variables
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
       call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)

@@ -330,6 +330,9 @@ if (my_pe==io_pe) then
    !
    !   -r   use a restart file for the initial conditions
    !
+   !   -s   restart and output file are dealiased spectral coefficieints,
+   !        not the default grid point values
+   !
    rundir="./"
    runname="temp"
    i=0
@@ -342,6 +345,8 @@ if (my_pe==io_pe) then
          restart=1
       else if (message(1:2)=="-t") then
          enable_lsf_timelimit=1
+      else if (message(1:2)=="-s") then
+         rw_spec=.true.
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit
@@ -386,6 +391,7 @@ endif
 call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(rw_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(equations,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu_hyper,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

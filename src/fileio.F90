@@ -223,18 +223,13 @@ end subroutine
 
 
 
-
-
-
-
-
-subroutine singlefile_io(time,p,fname,work,work2,read,fpe)
+subroutine singlefile_io(time,p,fname,work,work2,io_read,fpe)
 !
 ! I/O routines where all data goes through a single PE and is
 ! written to a single file
 !
-! read=0    write data to file fname
-! read=1    read data from file fname
+! io_read=0    write data to file fname
+! io_read=1    read data from file fname
 !
 ! fpe       processor to do the file I/O
 !
@@ -242,12 +237,47 @@ use params
 use mpi
 use transpose
 implicit none
-integer :: read  ! =1 for read, 0 for write
+integer :: io_read  ! =1 for read, 0 for write
 integer :: fpe
 real*8 :: time
 real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
 character(len=*) :: fname
+
+call singlefile_io2(time,p,fname,work,work2,io_read,fpe,.false.)
+
+end subroutine
+
+
+
+
+subroutine singlefile_io2(time,p,fname,work,work2,io_read,fpe,output_spec)
+!
+! I/O routines where all data goes through a single PE and is
+! written to a single file
+!
+! io_read=0    write data to file fname
+! io_read=1    read data from file fname
+!
+! fpe       processor to do the file I/O
+!
+! output_spec=.true.     i/o on dealiased spectral coefficients
+! output_spec=.false.    i/o on full 3d array p 
+!                     (grid point data or non-dealiased spec coeff.)
+!
+use params
+use mpi
+use transpose
+implicit none
+integer :: io_read  ! =1 for read, 0 for write
+integer :: fpe
+real*8 :: time
+real*8 :: p(nx,ny,nz)
+real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
+character(len=*) :: fname
+logical :: output_spec
+
+
 
 ! local variables
 integer i,j,k,n
@@ -259,7 +289,7 @@ CPOINTER fid
 
 if (my_pe==fpe) then
 
-   if (read==1) then
+   if (io_read==1) then
       call copen(fname,"r",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
@@ -311,10 +341,19 @@ endif
 call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 #endif
 
-if (read==1) then
-   call input1(p,work,work2,fid,fpe,.false.)
+if (io_read==1) then
+   if (output_spec) then
+      call input1_spec(p,work,work2,fid,fpe)
+   else
+      call input1(p,work,work2,fid,fpe,.false.)
+   endif
 else
-   call output1(p,work,work2,fid,fpe)
+   if (output_spec) then
+      call output1_spec(p,work,work2,fid,fpe)
+   else
+      call output1(p,work,work2,fid,fpe)
+   endif
+
 endif
 if (my_pe==fpe) call cclose(fid,ierr)
 
