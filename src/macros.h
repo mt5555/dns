@@ -11,7 +11,5 @@
 
 
 
-#define SWAP_INDEX      1
-#define DONT_SWAP_INDEX 0
 #define DX_ONLY     1
 #define DX_AND_DXX  2

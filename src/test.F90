@@ -24,7 +24,7 @@ real*8 d1(nx,ny,nz)
 real*8 dummy
 character*80 message
 
-integer i,j,k,dim,n1,n2,n3
+integer i,j,k,dim
 
 input=0
 do dim=1,3
@@ -40,12 +40,9 @@ enddo
 enddo
 
 ! remove that pesky highest cosine mode
-n1=nx2
-n2=ny2
-n3=nz2
-call fft3d(input,work,n1,n2,n3)
-call fft_filter(input,n1,nx,n2,ny,n3,nz)
-call ifft3d(input,work,n1,n2,n3)
+call fft3d(input,work)
+call fft_filter(input)
+call ifft3d(input,work)
 
 
 call divfree(input)
@@ -76,9 +73,9 @@ use params
 implicit none
 
 real*8 work(nx,ny,nz)
-real*8 input(nx,ny,nz)
 real*8 rhs(nx,ny,nz)
-integer i,j,k,n1,n2,n3
+real*8 input(nx,ny,nz)
+integer i,j,k
 real*8 cf1,alpha,beta
 real*8 error
 character*80 message
@@ -109,7 +106,6 @@ do k=nz1,nz2
    rhs(i,j,k)=    -cf1*cf1*4*cos(cf1*ycord(j))    + rhs(i,j,k)
 
    if (nz2>1) then
-
       cf1=4*2*pi 
       input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
       rhs(i,j,k)=    -cf1*cf1*5*cos(cf1*zcord(k))    + rhs(i,j,k)
@@ -132,16 +128,18 @@ enddo
 enddo
 enddo
 
-n1=nx2
-n2=ny2
-n3=nz2
-call fft3d(input,work,n1,n2,n3)
-!call print_modes(input,n1,nx,n2,ny,n3,nz)
-call ifft3d(input,work,n1,n2,n3)
 
 
 rhs = alpha*input + beta*rhs
 call poisson(rhs,work,alpha,beta)
+
+#if 0
+call fft3d(rhs,work)
+call print_modes(rhs)
+call ifft3d(rhs,work)
+#endif
+
+
 
 work=rhs-input
 #if 0
@@ -186,7 +184,6 @@ real*8 inputz(nx,ny,nz)
 real*8 inputzz(nx,ny,nz)
 real*8 cf1,error
 integer i,j,k
-integer n1,n1d,n2,n2d,n3,n3d
 character*80 message
 
 
@@ -235,14 +232,11 @@ enddo
 
 
 output=input
-n1=nx2
-n2=ny2
-n3=nz2
-call fft3d(output,work,n1,n2,n3)
-call print_modes(output,n1,nx,n2,ny,n3,nz)
-call ifft3d(output,work,n1,n2,n3)
+call fft3d(output,work)
+call print_modes(output)
+call ifft3d(output,work)
 
-error=maxval(abs(input(1:n1,1:n2,1:n3)-output(1:n1,1:n2,1:n3)))
+error=maxval(abs(input(nx1:nx2,ny1:ny2,nz1:nz2)-output(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "x-direction Forward-Backward 3D FFT: error=",error
 call print_message(message)
 
@@ -252,11 +246,11 @@ call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call der(input,px,pxx,work,DX_AND_DXX,1)
 
-error=maxval(abs(px(1:n1,1:n2,1:n3)-inputx(1:n1,1:n2,1:n3)))
+error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputx(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "x-direction d/dx error=",error
 call print_message(message)
 
-error=maxval(abs(pxx(1:n1,1:n2,1:n3)-inputxx(1:n1,1:n2,1:n3)))
+error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputxx(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "x-direction d2/dxx error=",error
 call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -266,11 +260,11 @@ call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call der(input,px,pxx,work,DX_AND_DXX,2)
 
-error=maxval(abs(px(1:n1,1:n2,1:n3)-inputy(1:n1,1:n2,1:n3)))
+error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputy(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "y-direction d/dy error=",error
 call print_message(message)
 
-error=maxval(abs(pxx(1:n1,1:n2,1:n3)-inputyy(1:n1,1:n2,1:n3)))
+error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputyy(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "y-direction d2/dyy error=",error
 call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -280,11 +274,11 @@ call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call der(input,px,pxx,work,DX_AND_DXX,3)
 
-error=maxval(abs(px(1:n1,1:n2,1:n3)-inputz(1:n1,1:n2,1:n3)))
+error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputz(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "z-direction d/dz error=",error
 call print_message(message)
 
-error=maxval(abs(pxx(1:n1,1:n2,1:n3)-inputzz(1:n1,1:n2,1:n3)))
+error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputzz(nx1:nx2,ny1:ny2,nz1:nz2)))
 write(message,'(a,e15.10)') "z-direction d2/dzz error=",error
 call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -299,16 +293,16 @@ end subroutine
 
 
 
-subroutine print_modes(output,n1,n1d,n2,n2d,n3,n3d)
+subroutine print_modes(output)
+use params
 implicit none
-integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: output(n1d,n2d,n3d)
+real*8 :: output(nx,ny,nz)
 character*80 message
 integer i,j,k
 
-do i=1,n1
-do j=1,n2
-do k=1,n3
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
     if (abs(output(i,j,k)) > 1e-9) then	
        if (mod(i,2)==0) then
           write(message,'(a,i4,i4,i4,a,2f15.10)') '  sine mode=',(i-1)/2,(j-1)/2,(k-1)/2,&

@@ -41,7 +41,6 @@ sum over m=1..n/2:
 
 
 module fft_interface
-
 implicit none
 integer, parameter ::  num_fftsizes=3
 real*8 :: pi2,pi2_squared
@@ -75,8 +74,23 @@ pi=4*atan(one)
 pi2=2*pi
 pi2_squared=4*pi*pi
 init=1
-
 end subroutine
+
+
+subroutine fft_get_mcord(mcord,n)
+integer n,mcord(:)
+integer i,m
+do i=1,n
+   m=(i-1)/2
+   if (i==2) m=n/2   ! last cosine mode is stored at i=2
+   mcord(i)=m	
+enddo
+end subroutine
+
+
+
+
+
 
 
 subroutine fftinit(n,index)
@@ -132,15 +146,14 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
+integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 w(min(fftblocks,n2)*(n1+1))
-integer n1,n1d,n2,n2d,n3,n3d
 character*80 message_str
 
 integer index,jj,j,k,numffts
-
 if (n1==1) return
-!n1=n1-2
+ASSERT("ifft1: dimension too small ",n1+2<=n1d);
 call getindex(n1,index)
 
 
@@ -149,16 +162,12 @@ do k=1,n3
    j=0  ! j=number of fft's computed for each k
    do while (j<n2)
       numffts=min(fftblocks,n2-j)	
-!      do jj=j+1,j+numffts
-!         p(2,jj,k)=0
-!         p(n1+2,jj,k)=0
-!      enddo
-
-
 
 !     move the last cosine mode back into correct location:
       do  jj=j+1,j+numffts
 	p(n1+1,jj,k)=p(2,jj,k)
+        !p(2,jj,k)=0             ! not needed?
+        !p(n1+2,jj,k)=0          ! not needed?
       enddo     
 
 
@@ -185,6 +194,7 @@ real*8 :: w(min(fftblocks,n2)*(n1+1))
 
 integer index,jj,j,k,numffts
 if (n1==1) return
+ASSERT("fft1: dimension too small ",n1+2<=n1d);
 call getindex(n1,index)
 
 do k=1,n3
@@ -207,8 +217,6 @@ do k=1,n3
       j=j+numffts
    enddo
 enddo
-
-!n1=n1+2 
 end subroutine
 
 
@@ -234,6 +242,7 @@ integer numder,n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,m
 real*8 temp
 ASSERT("fft99_interface.F90: numder<=2",numder<=2)
+ASSERT("fft99_interface.F90: numder>=1",numder>=1)
 
 call fft1(px,n1,n1d,n2,n2d,n3,n3d)
 
@@ -250,16 +259,17 @@ if (numder>=2) then
    enddo
    enddo
    call ifft1(pxx,n1,n1d,n2,n2d,n3,n3d)
-   if (n1>1) n1=n1+2  ! ifft will set n1 back to n1-2, but we need to undo this
-                      ! for transform below
 endif
 
-if (numder>=1) then
    do k=1,n3
    do j=1,n2
-      do m = 0, n1/2
-         ! note: for i=2, m=0, we are actually working with the cos(n1/2) mode
-         ! but d/dx of this mode goes to sin(n1/2) = 0, so just take m=0 
+      ! note: for i=2, m=0, we are actually working with the cos(n1/2) mode
+      ! but d/dx of this mode goes to sin(n1/2) = 0, so just take m=0 
+
+      px(1,j,k)=0                !m=0 cosine mode
+      if( n1>1) px(2,j,k)=0      !m=n1/2 cosine mode
+      do m = 1, n1/2-1
+         i=2*m+1
          temp =  pi2* m * px(i,j,k)
          px(i,j,k) = -pi2 *m * px(i+1,j,k)
          px(i+1,j,k) = temp
@@ -267,92 +277,8 @@ if (numder>=1) then
    enddo
    enddo
    call ifft1(px,n1,n1d,n2,n2d,n3,n3d)
-endif
-end subroutine
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-! Solve  [alpha + beta*Laplacian] p = rhs
-!
-! on input,  p = fourier coefficients of rhs
-! on output, p = fourier coefficients of solution
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft_laplace_inverse(p,n1,n1d,n2,n2d,n3,n3d,alpha,beta)
-real*8 p(n1d,n2d,n3d)
-real*8 alpha,beta
-integer n1,n1d,n2,n2d,n3,n3d
-
-integer i,j,k,im,jm,km
-real*8 xfac
-
-   do k=1,n3
-      km=(k-1)/2
-      if (k==2) then 
-         km=(n3-1)/2
-      else
-         km=(k-1)/2
-      endif
-      do j=1,n2
-         if (j==2) then
-            jm=(n2-1)/2
-         else
-            jm=(j-1)/2
-         endif
-         do i=1,n1
-            if (i==2) then
-               im=(n1-1)/2
-            else
-               im=(i-1)/2
-            endif
-            xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
-            if (xfac<>0) xfac = 1/xfac
-            p(i,j,k)=p(i,j,k)*xfac
-         enddo
-      enddo
-   enddo
 
 end subroutine
-
-
-
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-! Filter out the highest cosine mode
-! This mode has been moved to index = 2, taking the place of
-! sin(0x) = 0 mode
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft_filter(p,n1,n1d,n2,n2d,n3,n3d)
-real*8 p(n1d,n2d,n3d)
-real*8 alpha,beta
-integer n1,n1d,n2,n2d,n3,n3d
-
-integer i,j,k,im,jm,km
-real*8 xfac
-
-   do k=1,n3
-!      km=(k-1)/2
-      do j=1,n2
-!         jm=(j-1)/2
-         do i=1,n1
-!            im=(i-1)/2
-!            if (k > n3-2) p(i,j,k)=0
-!            if (j > n2-2) p(i,j,k)=0
-!            if (i > n1-2) p(i,j,k)=0
-            if (k == 2) p(i,j,k)=0
-            if (j == 2) p(i,j,k)=0
-            if (i == 2) p(i,j,k)=0
-         enddo
-      enddo
-   enddo
-
-end subroutine
-
-
 
 
 end ! module mod_fft_interface

@@ -13,41 +13,45 @@ implicit none
 
 !local variables
 real*8 :: one=1
-integer i,j,k
-
-! periodic case
-o_nx=o_nx+1
-o_ny=o_ny+1
-if (nz>1) then
-   o_nz=o_nz+1
-else
-   o_nz=1
-endif
+integer i,j,k,ii
 
 
 delx = one/g_nx
 dely = one/g_ny
 delz = one/g_nz
 
-do i=1,o_nx
+do i=1,g_nx
    g_xcord(i)=(i-1)*delx	
 enddo
-do j=1,o_ny
+do j=1,g_ny
    g_ycord(j)=(j-1)*dely	
 enddo
-do k=1,o_nz
+do k=1,g_nz
    g_zcord(k)=(k-1)*delz	
 enddo
 
+call fft_get_mcord(g_imcord,g_nx)
+call fft_get_mcord(g_jmcord,g_ny)
+call fft_get_mcord(g_kmcord,g_nz)
+
 do i=nx1,nx2
-   xcord(i)=(i-1)*delx	
+   ii = i-nx1+1 + nslabx*myproc_x
+   xcord(i)=g_xcord(ii)
+   imcord(i)=g_imcord(ii)
 enddo
 do j=ny1,ny2
-   ycord(j)=(j-1)*dely	
+   ii = i-ny1+1 + nslaby*myproc_y
+   ycord(ii)=g_ycord(ii)
+   jmcord(i)=g_jmcord(ii)
 enddo
 do k=nz1,nz2
-   zcord(k)=(k-1)*delz	
+   ii = i-ny1+1 + nslaby*myproc_y
+   zcord(ii)=g_zcord(ii)
+   kmcord(i)=g_kmcord(ii)
 enddo
+
+
+
 
 
 

@@ -10,6 +10,7 @@
 subroutine der(p,px,pxx,pt,numder,index)
 use params
 use fft_interface
+use transform
 implicit none
 
 !input:
@@ -23,45 +24,37 @@ real*8 px(nx,ny,nz)
 
 integer n1,n1d,n2,n2d,n3,n3d
 
-n1=nx2
-n1d=nx
-n2=ny2
-n2d=ny
-n3=nz2
-n3d=nz
-
 
 if (index==1) then
 
-   px=p
-   call fft_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
+   call fft_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d)
+   if (numder==2) then
+      call transpose_from_x(px,pxx,n1,n1d,n2,n2d,n3,n3d)
+   endif
+   call transpose_from_x(pt,px,n1,n1d,n2,n2d,n3,n3d)
+
 
 else if (index==2) then
 
-   call transpose12(p,pt,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_y(p,pt,n1,n1d,n2,n2d,n3,n3d)
    ! 1st derivative returned in pt, 2nd derivative returned in px
    call fft_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d)
    if (numder==2) then
-      call transpose12(px,pxx,DONT_SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_y(px,pxx,n1,n1d,n2,n2d,n3,n3d)
    endif
-   call transpose12(pt,px,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(pt,px,n1,n1d,n2,n2d,n3,n3d)
 
 else if (index==3) then
-   call transpose13(p,pt,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_z(p,pt,n1,n1d,n2,n2d,n3,n3d)
    call fft_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d)
    if (numder==2) then
-      call transpose13(px,pxx,DONT_SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_z(px,pxx,n1,n1d,n2,n2d,n3,n3d)
    endif
-   call transpose13(pt,px,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_z(pt,px,n1,n1d,n2,n2d,n3,n3d)
 
 endif
 
-ASSERT("derivatives.F90 transpose error n1",n1==nx2)
-ASSERT("derivatives.F90 transpose error n1d",n1d==nx)
-ASSERT("derivatives.F90 transpose error n2",n2==ny2)
-ASSERT("derivatives.F90 transpose error n2d",n2d==ny)
-ASSERT("derivatives.F90 transpose error n3",n3==nz2)
-ASSERT("derivatives.F90 transpose error n3d",n3d==nz)
 
 end subroutine
 
@@ -134,6 +127,7 @@ subroutine poisson(f,work,alpha,beta)
 !
 use params
 use fft_interface
+use transform
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
@@ -145,36 +139,34 @@ real*8 :: beta
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
 
-n1=nx2
-n1d=nx
-n2=ny2
-n2d=ny
-n3=nz2
-n3d=nz
 
-call fft1(f,n1,n1d,n2,n2d,n3,n3d)     
-call transpose12(f,work,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose13(work,f,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)  ! y,x,z -> z,x,y
-call fft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
 
 ! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
-call fft_laplace_inverse(f,n1,n1d,n2,n2d,n3,n3d,alpha,beta)
+call fft_laplace_inverse(f,alpha,beta)
 
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-call transpose13(f,work,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)         ! z,x,y -> y,x,z
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose12(work,f,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
 
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
 
-
-ASSERT("poisson.F90 poisson: n1<>nx2",n1==nx2)
-ASSERT("poisson.F90 poisson: n1d<>nx",n1d==nx)
-ASSERT("poisson.F90 poisson: n2<>ny2",n2==ny2)
-ASSERT("poisson.F90 poisson: n2d<>ny",n2d==ny)
-ASSERT("poisson.F90 poisson: n3<>nz2",n3==nz2)
-ASSERT("poisson.F90 poisson: n3d<>nz",n3d==nz)
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
 
 
 
@@ -183,47 +175,31 @@ end
 
 
 
-subroutine fft3d(f,work,n1,n2,n3)
+subroutine fft3d(f,work)
 !
 !  compute the spectrum, ouput in f
-!  also output the dimensions of the fourier coefficints, n1,n2,n3
-!  (since fft99 increases them by 2)
 !
 use params
 use fft_interface
+use transform
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
 integer n1,n1d,n2,n2d,n3,n3d
 
-n1=nx2
-n1d=nx
-n2=ny2
-n2d=ny
-n3=nz2
-n3d=nz
 
-call fft1(f,n1,n1d,n2,n2d,n3,n3d)     
-call transpose12(f,work,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose12(work,f,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)  
-call transpose13(f,work,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> z,y,x
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose13(work,f,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)  
-
-
-! dimension has grown by 2 because of fft99:
-ASSERT("poisson.F90: fft3d: n1<>nx2",n1-2==nx2)
-ASSERT("poisson.F90: fft3d: n1d<>nx",n1d==nx)
-ASSERT("poisson.F90: fft3d: n2<>ny2",n2-2==ny2)
-ASSERT("poisson.F90: fft3d: n2d<>ny",n2d==ny)
-if (n3>1) then
-   ASSERT("poisson.F90: fft3d: n3<>nz2",n3-2==nz2)
-else
-   ASSERT("poisson.F90: fft3d: n3<>nz2",n3==nz2)
-endif
-ASSERT("poisson.F90: fft3d: n3d<>nz",n3d==nz)
-
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 
 end
@@ -231,14 +207,13 @@ end
 
 
 
-subroutine ifft3d(f,work,n1,n2,n3)
+subroutine ifft3d(f,work)
 !
 !  compute inverse fft 3d of f, return in f
-!  n1,n2,n3 = size of fft coefficient array (which could be different
-!  then grid point array)
 !
 use params
 use fft_interface
+use transform
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
@@ -248,29 +223,104 @@ real*8 work(nx,ny,nz) ! work array
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
 
-
-n1d=nx
-n2d=ny
-n3d=nz
-
-
-call transpose13(f,work,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)         ! x,y,z -> z,y,x
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose13(work,f,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)       
-call transpose12(f,work,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)        ! x,y,z -> y,x,z
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose12(work,f,SWAP_INDEX,n1,n1d,n2,n2d,n3,n3d)       
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 
-ASSERT("poisson.F90: ifft3d: n1<>nx2",n1==nx2)
-ASSERT("poisson.F90: ifft3d: n1d<>nx",n1d==nx)
-ASSERT("poisson.F90: ifft3d: n2<>ny2",n2==ny2)
-ASSERT("poisson.F90: ifft3d: n2d<>ny",n2d==ny)
-ASSERT("poisson.F90: ifft3d: n3<>nz2",n3==nz2)
-ASSERT("poisson.F90: ifft3d: n3d<>nz",n3d==nz)
-
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 
 end
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Solve  [alpha + beta*Laplacian] p = rhs
+!
+! on input,  p = fourier coefficients of rhs
+! on output, p = fourier coefficients of solution
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_laplace_inverse(p,alpha,beta)
+use params
+implicit none
+real*8 p(nx,ny,nz)
+real*8 alpha,beta
+
+integer i,j,k,im,jm,km
+real*8 xfac
+
+   do k=nz1,nz2
+      if (k==nz1+1) then 
+         km=(1+nz2-nz1)/2
+      else
+         km=(k-nz1)/2
+      endif
+      do j=ny1,ny2
+         if (j==ny1+1) then
+            jm=(1+ny2-ny1)/2
+         else
+            jm=(j-ny1)/2
+         endif
+         do i=nx1,nx2
+            if (i==nx1+1) then
+               im=(1+nx2-nx1)/2
+            else
+               im=(i-nx1)/2
+            endif
+            xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
+            if (xfac<>0) xfac = 1/xfac
+            p(i,j,k)=p(i,j,k)*xfac
+         enddo
+      enddo
+   enddo
+
+end subroutine
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Filter out the highest cosine mode
+! This mode has been moved to index = 2, taking the place of
+! sin(0x) = 0 mode
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter(p)
+use params
+implicit none
+real*8 p(nx,ny,nz)
+real*8 alpha,beta
+
+integer i,j,k,im,jm,km
+real*8 xfac
+
+   do k=nz1,nz2
+!      km=(k-nz1)/2
+      do j=ny1,ny2
+!         jm=(j-ny1)/2
+         do i=nx1,nx2
+!            im=(i-nx1)/2
+            if (k == nz1+1) p(i,j,k)=0
+            if (j == ny1+1) p(i,j,k)=0
+            if (i == nx1+1) p(i,j,k)=0
+         enddo
+      enddo
+   enddo
+
+end subroutine
 
