@@ -46,9 +46,9 @@ if ($fpath == HPSS) then
    endif
 
    \rm -f restart.*
-   \mv -f $resnameu2  restart.u
-   \mv -f $resnamev2  restart.v
-   \mv -f $resnamew2  restart.w
+   \cp -f $resnameu2  restart.u
+   \cp -f $resnamev2  restart.v
+   \cp -f $resnamew2  restart.w
    if !(-e restart.w) then
       echo "No restart.w file"
       exit 1
@@ -85,9 +85,9 @@ else
    endif
 
    \rm -f restart.*
-   \mv -f $resnameu2  restart.u
-   \mv -f $resnamev2  restart.v
-   \mv -f $resnamew2  restart.w
+   \cp -f $resnameu2  restart.u
+   \cp -f $resnamev2  restart.v
+   \cp -f $resnamew2  restart.w
    if !(-e restart.w) then
       echo "No restart.w file"
       exit 1
