@@ -1316,10 +1316,13 @@ do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
    xfac=8
+   jm=jmcord(j)
+   im=imcord(i)
+   km=kmcord(k)
    if (km==0) xfac=xfac/2
    if (jm==0) xfac=xfac/2
    if (im==0) xfac=xfac/2
-   e1=e1+xfac*(p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
+   e1=e1+.5*xfac*(p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
 enddo
 enddo
 enddo
@@ -1372,7 +1375,7 @@ do j=ny1,ny2
             
             !     compute E(k) and kE(k)
             xw=sqrt(rwave*pi2_squared)
-            e2 = e2 + xfac*(sum(RR*RR)+ sum(II*II))
+            e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_E(iwave)=spec_E(iwave) + xfac*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
 
