@@ -338,12 +338,12 @@ if (doit_output) then
    if (equations==NS_UVW .and. w_spec) then
       call transpose_from_z_3d(Qhat,q1)
       ! convert to nx,ny,nz dimensions for output:
-      call output_uvw(runname,time,q1,q2,work1,work2)
+      call output_uvw(runname,time,q1,q2,work1,work2,1)
    else if (equations==NS_PSIVOR) then
       ! 2D NS psi-vor formulation
-      call output_uvw(runname,time,Qhat,q1,work1,work2)
+      call output_uvw(runname,time,Qhat,q1,work1,work2,1)
    else
-      call output_uvw(runname,time,Q,q1,work1,work2)
+      call output_uvw(runname,time,Q,q1,work1,work2,1)
    endif
    call output_passive(runname,time,Q,work1,work2)
    call print_message("done with output")

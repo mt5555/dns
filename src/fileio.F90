@@ -654,7 +654,7 @@ end subroutine
 
 
 
-subroutine output_uvw(basename,time,Q,q1,work1,work2)
+subroutine output_uvw(basename,time,Q,q1,work1,work2,header_type)
 use params
 use tracers
 use mpi
@@ -666,6 +666,7 @@ real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 character(len=*) :: basename
+integer :: header_type
 
 !local
 character(len=80) message
@@ -681,13 +682,13 @@ if (equations==NS_UVW .and. w_spec) then
    
    ! NS, primitive variables
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".us"
-   call singlefile_io2(time,Q(1,1,1,1),fname,work1,work2,0,io_pe,.true.)
+   call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,0,io_pe,.true.,header_type)
    
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vs"
-   call singlefile_io2(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,.true.)
+   call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,.true.,header_type)
    if (ndim==3) then
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".ws"
-      call singlefile_io2(time,Q(1,1,1,ndim),fname,work1,work2,0,io_pe,.true.)
+      call singlefile_io3(time,Q(1,1,1,ndim),fname,work1,work2,0,io_pe,.true.,header_type)
    endif
    
 else if (equations==NS_UVW) then
@@ -697,17 +698,17 @@ else if (equations==NS_UVW) then
    else
       ! NS, primitive variables
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".u"
-      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+      call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,0,io_pe,.false.,header_type)
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".v"
-      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+      call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_type)
       if (ndim==3) then
          fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".w"
-         call singlefile_io(time,Q(1,1,1,ndim),fname,work1,work2,0,io_pe)
+         call singlefile_io3(time,Q(1,1,1,ndim),fname,work1,work2,0,io_pe,.false.,header_type)
       endif
       if (ndim==2) then
          call vorticity2d(q1,Q,work1,work2)
          fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
-         call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
+         call singlefile_io3(time,q1,fname,work1,work2,0,io_pe,.false.,header_type)
       endif
    endif
    

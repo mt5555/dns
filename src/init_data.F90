@@ -34,7 +34,7 @@ if (restart==1) then
       call init_data_decay(Q,Qhat,work1,work2,2,0,0)
       ! output rescaled data, but with different name:
       fname=runname(1:len_trim(runname)) // '-rescale'
-      call output_uvw(fname,time_initial,Q,Qhat,work1,work2)		  
+      call output_uvw(fname,time_initial,Q,Qhat,work1,work2,1)		  
    endif
 
    if (npassive>0) then

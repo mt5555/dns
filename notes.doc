@@ -1,8 +1,8 @@
 TODO:
    movie:  mpeg1 800x600   too big for WMA on 1gz laptop
                  600x450   try this?
-
       iso12_1024 data:  look at intermittency? 
+
 
 to get files of HPSS with stripe set:
    xpsi get -pfsComp 32 dns/decay2048/\*4026.u

@@ -101,8 +101,10 @@ icount=icount+1
             call fft3d(Q(1,1,1,n),work1)
          enddo
       endif
-      basename=runname(1:len_trim(runname)) // "-new."
-      call output_uvw(basename,time,Q,vor,work1,work2)
+      !basename=runname(1:len_trim(runname)) // "-new."
+      !call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
+      basename=runname(1:len_trim(runname)) // "-raw."
+      call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
    endif
 
    if (convert_opt==1) then  ! -cout vor
@@ -113,7 +115,7 @@ icount=icount+1
       call print_message("computing vorticity...")
       call vorticity(vor,Q,work1,work2)
       call print_message("output vorticity...")
-      call output_uvw(basename,time,vor,Q,work1,work2)
+      call output_uvw(basename,time,vor,Q,work1,work2,1)
    endif
 
    if (convert_opt==2) then  ! -cout vorm
