@@ -92,8 +92,6 @@ endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
    # defaults for asci Q: MPI paths loaded via modules
-   #MPI = -I/usr/opt/MPI/include -DUSE_MPI 
-   #MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
    MPI =  -DUSE_MPI 
    MPILIB =  -lfmpi -lmpi -lelan
    #LSFLIB = -L/lsf/lib -lbat -llsf 
@@ -104,8 +102,6 @@ ifeq ($(UNAME),OSF1)
       -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
       -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
      -lrt -free -lcxxstd -lcxx -lexc -lc
-
-#      -L/usr/opt/MPI/lib \
 
 
    ifeq ($(HOST),milkyway.lanl.gov)

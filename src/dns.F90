@@ -128,6 +128,8 @@ tims_ave=tims_ave/60
 call print_message('CPU times (min):   (avg/max)')
 write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
 call print_message(message)
+write(message,'(a,2f9.2,a)') 'initial I/O:    ',tims_ave(4),tims_max(4)
+call print_message(message)
 write(message,'(a,2f9.2,a,2f10.5)') 'dns_solve:      ',tims_ave(2),tims_max(2),&
 '  per timestep: ',tims_ave(2)/itime,tims_max(2)/itime
 call print_message(message)
@@ -221,7 +223,7 @@ real*8 :: time_old=0
 real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
-real*8 :: tmx1,tmx2
+real*8 :: tmx1,tmx2,tmx_save
 integer,external :: lsf_time_remaining
 integer :: lsftime,i,time_needed
 
@@ -299,10 +301,14 @@ do
    if (itime>=itime_final) time_final=time
    call time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 
+
    if (itime==0) then
       ! set all timers to zero so they dont include initialization
+      ! except for tims(1) and tims(4) which time initializaiton stuff.  
+      tmx_save = tims(3)
       tims(2:ntimers)=0
       call wallclock(tmx1)     ! start the main timer *AFTER* 1 complete time step:
+      tims(4)=tmx_save
    endif
 
    itime=itime+1

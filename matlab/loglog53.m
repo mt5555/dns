@@ -5,7 +5,7 @@ if (nargin==3)
 end
 
 x=(1:n)-1;
-loglog(x,spec(1:n))
+loglog(x, spec(1:n)')
 hold on
 x=2:20;
 y = .5*x.^(-5/3);

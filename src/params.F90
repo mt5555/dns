@@ -362,8 +362,8 @@ integer,parameter :: ntimers=17
 real*8 :: tims(ntimers)=0
 !  tims(1)    time for initialization
 !  tims(2)    total runtime after initialization
-!  tims(3)    time spent in time_control()
-!  tims(4)    not used
+!  tims(3)    time spent in time_control() after initialization
+!  tims(4)    time spend in time_control() during initializaiton
 !  tims(5)    time spent in RHS
 !  tims(6)    transpose_to_z
 !  tims(7)    transpose_from_z
