@@ -61,9 +61,19 @@ if (firstcall) then
 
    if (my_pe==io_pe) then
       open(10,file='bnd')
+      open(11,file='bjacob')
+      open(12,file='bjacin')
       read(10,*) surf_pt_max
       do i=1,surf_pt_max
          read(10,*) surf_loc(i,1),surf_loc(i,2),surf_loc(i,3),dummy
+         read(11,*) jacobian
+         read(12,*) jacobinv
+         do j=1,3
+            do k=1,3
+               jac_for_surf(i,j,k)=jacobian(j,k)
+               jac_inv_surf(i,j,k)=jacobinv(j,k)
+            enddo
+         enddo
       enddo
       close(10)
 
@@ -77,8 +87,8 @@ if (firstcall) then
          read(12,*) jacobinv
          do j=1,3
             do k=1,3
-               jac_mat(i,j,k)=jacobian(j,k)
-               jac_inv(i,j,k)=jacobinv(j,k)
+               jac_for_rev(i,j,k)=jacobian(j,k)
+               jac_inv_rev(i,j,k)=jacobinv(j,k)
             enddo
          enddo
       enddo
@@ -106,49 +116,49 @@ Q_old=Q
 
 ! stage 1
 call ns3D(rhs,Q,time,1,work1,work2,q4)
-call force(rhs,Q,p,time,1)
+call force(rhs,Q,p,time)
 call divfree_gridspace(rhs,p,work1,work2)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
-call force(rhs,Q_tmp,p,time+delt/2.0,0)
+call force(rhs,Q_tmp,p,time+delt/2.0)
 call divfree_gridspace(rhs,p,work1,work2)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
-call force(rhs,Q_tmp,p,time+delt/2.0,0)
+call force(rhs,Q_tmp,p,time+delt/2.0)
 call divfree_gridspace(rhs,p,work1,work2)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0,work1,work2,q4)
-call force(rhs,Q,p,time+delt,0)
+call force(rhs,Q,p,time+delt)
 Q=Q+delt*rhs/6.0
 call divfree_gridspace(Q,p,work1,work2)
-call force(rhs,Q,p,time+delt,0)
+call force(rhs,Q,p,time+delt)
 call divfree_gridspace(Q,p,work1,work2)
 
 elseif(rk3ts) then
 
 ! stage 1
 call ns3D(rhs,Q,time,1,work1,work2,q4)
-call force(rhs,Q,q4,time,1)
+call force(rhs,Q,q4,time)
 call divfree_gridspace(rhs,q4,work1,work2)
-!call force(rhs,Q,q4,time,1)
+!call force(rhs,Q,q4,time)
 !call divfree_gridspace(rhs,q4,work1,work2)
 Q=Q+delt*rhs/3
 
 ! stage 2
 Q_tmp = rhs
 call ns3D(rhs,Q,time+delt/3,0,work1,work2,q4)
-call force(rhs,Q,q4,time,1)
+call force(rhs,Q,q4,time)
 call divfree_gridspace(rhs,q4,work1,work2)
-!call force(rhs,Q,q4,time,1)
+!call force(rhs,Q,q4,time)
 !call divfree_gridspace(rhs,q4,work1,work2)
 rhs = -5*Q_tmp/9 + rhs
 Q=Q + 15*delt*rhs/16
@@ -157,7 +167,7 @@ Q=Q + 15*delt*rhs/16
 ! stage 3
 Q_tmp=rhs
 call ns3D(rhs,Q,time+3*delt/4,0,work1,work2,q4)
-call force(rhs,Q,q4,time,1)
+call force(rhs,Q,q4,time)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
 call divfree_gridspace(Q,q4,work1,work2)
@@ -166,10 +176,10 @@ call divfree_gridspace(Q,q4,work1,work2)
 !nl=0
 !do rks=1,3
 !   nl_old=nl
-!   call force(rhs,Q,p,time,1)
+!   call force(rhs,Q,p,time)
 !   call ns3Djamal(rhs,Q,time,0,work1,work2,q4,nl)
 !   rhs=(coef(rks,1)+coef(rks,2))*rhs - coef(rks,3)*nl - coef(rks,4)*nl_old
-!   call force(rhs,Q,p,time,1)
+!   call force(rhs,Q,p,time)
 !   
 !   Q=Q+delt*rhs
 !   call divfree_gridspace(Q,q4,work1,work2)
