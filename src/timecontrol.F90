@@ -22,6 +22,7 @@ real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
+logical,save :: compute_transfer=0
 integer :: n1,n1d,n2,n2d,n3,n3d
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
@@ -326,12 +327,23 @@ endif
 !
 ! diagnostic output
 !
+if (compute_transfer) then
+   compute_transfer=.false.
+!   call output_transfer()
+endif
+
+
 if (doit_diag) then
 
    if ( g_bdy_x1==PERIODIC .and. &
         g_bdy_y1==PERIODIC .and. &
         g_bdy_z1==PERIODIC) then
+!      call compute_spec
       call output_spec(time,Q,q1,q2,q3,work1,work2)
+
+!     next time we call timecontrol, compute spectrum again
+!     so we can 
+      compute_transfer=.true.
    endif
 
    call output_scalars(time,ints_save,maxs_save,nints,nscalars)

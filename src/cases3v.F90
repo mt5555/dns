@@ -398,33 +398,16 @@ Q(:,:,:,2)=-Q(:,:,:,2)
 if (dealias) call dealias_gridspace(Q,work1)
 
 
-#if 0
-! normalize so <u,u>=U**2
-ke = .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)**2) +  &
-     .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)**2)  
 
 #ifdef USE_MPI
-   ke2=ke
-   call MPI_allreduce(ke2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   ke2=E_0
+   call MPI_allreduce(ke2,E_0,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
-ke=ke/g_nx/g_ny
-Q=sqrt(.5*U**2) * Q/sqrt(ke)
-E_0 = E_0*.5*U**2/ke
-print *,'E_0 = ',E_0
-
-#else
-
 ! normalize so Energy in band k_0 = 3.23448943961018D-002
 Q =   sqrt(3.23448943961018D-002)*Q/sqrt(E_0)
 
-#endif
 
 
-
-
-
-
-if (dealias) call dealias_gridspace(Q,work1)
 
 
 if (equations==SHALLOW) then
