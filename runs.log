@@ -26,9 +26,6 @@ G = ||f|| L^3 / mu^2  =  epsilon^.5/mu^2
 
 
 
-
-
-
 ke  .215
 R_lambda = 50.0    lambda = 50*mu/sqrt(2 KE) = .103 
 mu = 1.35e-3
@@ -70,7 +67,11 @@ iso12_256A  ran to t=11.
                    k2=.5
     mu=1.35e-3:  delx/eta=1.0, R_l=60   epsilon=4   G=1M
 
-temp3_    iso12 forcing, k1=.5, k2=.5, mu=4e-4  IN shankara
+temp      iso12 forcing, k1=.5, k2=.5, mu=1.25e-3
+temp3_    continuing above with mu=4e-4               delx/eta=2.0
+temp4_    continuing above with mu=2e-4               delx/eta=3.46
+temp??    continuing above with mu=3e-4 
+
 
 
 iso_256A  (Qsc)
