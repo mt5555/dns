@@ -67,17 +67,19 @@ iso12_256A  ran to t=11.
                    k2=.5
     mu=1.35e-3:  delx/eta=1.0, R_l=60   epsilon=4   G=1M
 
-iso12_256 (shankara) forcing, k1=.5, k2=.5 
 
-mu=1.25e-3    [0.0,0.75]     delx/eta=.77  next?                 epsilon
-mu=4e-4       (0.75,1.25]    delx/eta=2.0     4/5 law:  .743
-mu=2e-4       (1.25,1.50]    delx/eta=3.46    4/5 law:  .6875
-mu=3e-4       (1.50,1.75]    delx/eta=2.48    4/5 law:  .675
-mu=2.75e-4    (1.75,3.5]  t=2.25      2.64              .69      4.32
-                            2.5       2.56              .68      3.84
-                            2.75      2.58              .79      3.97
-                            3.00      2.70              .64      4.74
-                            3.25      2.52              .70      3.60  
+iso12_256 (shankara) forcing, k1=.5, k2=.5 
+   /ccs/scratch/taylorm/dns:
+
+   mu=1.25e-3    [0.0,0.75]     delx/eta=.77  next?                 epsilon
+   mu=4e-4       (0.75,1.25]    delx/eta=2.0     4/5 law:  .743
+   mu=2e-4       (1.25,1.50]    delx/eta=3.46    4/5 law:  .6875
+   mu=3e-4       (1.50,1.75]    delx/eta=2.48    4/5 law:  .675
+   mu=2.75e-4    (1.75,3.5]  t=2.25      2.64              .69      4.32
+                               2.5       2.56              .68      3.84
+                              2.75      2.58              .79      3.97
+                              3.00      2.70              .64      4.74
+                              3.25      2.52              .70      3.60  
 
 
 iso_256A  (Qsc)
@@ -214,7 +216,12 @@ iso12-256b   1.35e-3    iso12w   .45     .5      75     .5
 
 **********************************************************************************
 4/24/02
-vxpair runs on autry
+vxpair runs on autry, milkyway
+
+stored in: /ccs/scratch/taylorm/vxpair (16Gb)
+and: ~/vxpair  (9Gb)
+
+
 
 6144x3072:  mu=2e-8 a touch noisy, goes away.
             mu=4e-8 ok?

@@ -15,7 +15,7 @@ HOST = $(shell hostname)
 ifeq ($(UNAME),Linux)
    MPI = 
    MPILIB = 
-   ifeq ($(HOST),autrey)
+   ifeq ($(HOST),certs)
       MPI = -DUSE_MPI -I/contrib/lam/include
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif

@@ -434,7 +434,7 @@ endif
 ! apply forcing:
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
 
-
+#if 0
 rhs=0
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
 do j=1,ny_2dz
@@ -455,7 +455,7 @@ enddo
 call z_ifft3d(p,rhsg,work)
 print *,'maxval div: ',maxval(abs(rhsg(nx1:nx2,ny1:ny2,nz1:nz2,1)))
 stop
-
+#endif
 
 
 

@@ -13,11 +13,11 @@
 %fid=fopen('../src/kh/khK.spec','r','l');
 %fid=fopen('../src/sht/rung_5000_0000.0000.spec','r','l');
 
-%fid=fopen('../src/temp0000.0000.spec');
-%fidt=fopen('../src/temp0000.0000.spect');
+fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.spec','r','b');
+fidt=fopen('/ccs/scratch/taylorm/dns/iso12_512.spect','r','b');
 
-fid=fopen('~wingate/dns/src/temp0000.0000.spec');
-fidt=fopen('~wingate/dns/src/temp0000.0000.spect');
+%fid=fopen('~wingate/dns/src/temp0000.0000.spec');
+%fidt=fopen('~wingate/dns/src/temp0000.0000.spect');
 
 
 
@@ -112,6 +112,10 @@ while (time>=0 & time<=9999.3)
     loglog53(n_z,spec_wx,time);     hold on;
     loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
     hold off;
+    orient tall
+    print -depsc spec.ps    
+    pause
+
   end
 
   %
