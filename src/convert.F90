@@ -37,6 +37,7 @@ use params
 use mpi
 use fft_interface
 use spectrum
+use transpose
 implicit none
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: vor(:,:,:,:)
@@ -76,7 +77,8 @@ call init_model
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5) then
+if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5 .or. &
+    convert_opt==10 ) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
    allocate(Q(nx,ny,nz,n_var))
 else if (convert_opt == 4 .or. convert_opt==6) then
@@ -267,6 +269,31 @@ icount=icount+1
       call output_spec(time,time)
       call output_helicity_spec(time,time) 
    endif
+
+   if (convert_opt==10) then ! -cout iotest
+      ! i/o performance
+      call ranvor(Q,PSI,work,work2,1)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
+
+      mpi_maxio=32
+      mpi_stripe="4"
+      call mpi_io_init()
+
+      call wallclock(tmx1)
+      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+      call wallclock(tmx2)
+      tmx2=tmx2-tmx1
+
+      if (io_pe==my_pe) then
+         print *,'cpu time for output: ',tmx2, tmx2/60
+         print *,'data rate MB/s: ',8.*3.*g_nx*g_ny*g_nz/1024./1024./tmx2
+      endif
+      call close_mpi
+      stop
+   endif
+
+
+
 
 
    if (tstart>0) then

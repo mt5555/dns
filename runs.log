@@ -113,8 +113,9 @@ tmix256B  k**2, kmax=10  mu=3e-4   IN t=3.00.
    Then put in Schmidt numbers:  .01, .05, .1, .5, 1.0
 
 tmix256C:  starting from tmix256B, t=1.00
-           ran code with rescale option to generate tmix256B-rescale
-           copied that data to tmix256C0001.000
+           then restart with tmix256B-rescale
+              will run t=0, but will output tmix256B-rescale.[uvw]
+              rename tmix256C00001.0000.[uvw], use as restart             
 
            running to t=.0001 with rescale code turned on. 
                               introduce 10 passive scalars

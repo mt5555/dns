@@ -211,22 +211,6 @@ if (init==1) then
 endif
 
 
-#if 0
-if (init==1) then
-fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
-call wallclock(tmx1)
-call udm_write_uvw(fname,0d0,Q,PSI,work,work2)
-call wallclock(tmx2)
-tmx2=tmx2-tmx1
-if (io_pe==my_pe) then
-   print *,'cpu time for output: ',tmx2, tmx2/60
-   print *,'data rate MB/s: ',8.*3.*g_nx*g_ny*g_nz/1024./1024./tmx2
-endif
-call close_mpi
-stop
-endif
-#endif
-
 
 ! rescale energy to match enerb_target:
 call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)

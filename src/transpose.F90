@@ -11,7 +11,7 @@ integer :: io_nodes(0:ncpu_z),nio,inc,comm_io
 real*8,private :: tmx1,tmx2
 real*8,private,allocatable :: sendbuf(:),recbuf(:)
 
-integer           :: mpi_maxio=32
+integer           :: mpi_maxio=-1
 character(len=4)  :: mpi_stripe="64"
 character(len=12) :: mpi_stride="8388608"
 contains
@@ -61,16 +61,21 @@ if (init==0) then
    call MPI_Comm_free(comm_io,ierr)
 endif
 
-if (g_nx <= 512) then
-   mpi_maxio=4
-   mpi_stripe="4"
-else if (g_nx <= 1024) then
-   mpi_maxio=8
-   mpi_stripe="8"
+if (mpi_maxio<0) then
+   if (g_nx <= 512) then
+      mpi_maxio=4
+      mpi_stripe="4"
+   else if (g_nx <= 1024) then
+      mpi_maxio=8
+      mpi_stripe="8"
+   else
+      ! defaults:  
+      mpi_maxio=32
+      mpi_stripe="64"
+   endif
 else
-   ! leave defaults io cpus=32, stripe=64
+   ! calling program set mpi_maxio, so dont change any values
 endif
-
 
 
 nio=1
