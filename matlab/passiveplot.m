@@ -5,7 +5,7 @@
 %
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-time=1.00;
+time=1.05;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
 
@@ -47,7 +47,12 @@ for type=type_list
       pints_e(:,np)= data1;
     end
     fclose(fid);
-    np=k; 
+    np=11-k; 
+    if (sch ~= pints_e(3,np,1))
+      [sch,pints_e(3,np,1)] 
+      disp('wrong schmidt number in scalars file')
+      return 
+    end  
     c1=squeeze(pints_e(26,np))';
     c2=squeeze(pints_e(4,np))';        % index=2 
     c2=c2-c1.^2; 
