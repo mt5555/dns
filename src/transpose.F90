@@ -58,17 +58,21 @@ if (io_pe==my_pe) then
    print *,'number of mpi_io cpus: ',nio,do_mpi_io
 endif
 
+#ifdef USE_MPI_IO
 do i=0,ncpu_z-1
    dest_pe3(1)=0
    dest_pe3(2)=0
    dest_pe3(3)=inc*(i/inc)
    call mpi_cart_rank(comm_3d,dest_pe3,io_nodes(i),ierr)
 enddo
-
 call MPI_Barrier(comm_3d,ierr)
 !print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_nodes(my_z)
 call MPI_Barrier(comm_3d,ierr)
 if (io_nodes(my_z)<0) call abort("error in MPI-IO decomposition")
+#else
+   io_nodes=0
+#endif
+
 
 #ifdef USE_MPI_IO
 

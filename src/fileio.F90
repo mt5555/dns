@@ -368,8 +368,10 @@ real*8 xnx,xny,xnz
 character(len=80) message
 integer :: n_var_start,ierr,offset=0
 
+#ifdef USE_MPI_IO
 integer statuses(MPI_STATUS_SIZE)
 integer*8 infoin
+#endif
 
 CPOINTER fid
 
