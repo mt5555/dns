@@ -42,7 +42,6 @@ real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
-real*8 ::  binvals(1:100)                           !bin values 
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -1203,6 +1202,7 @@ real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
+real*8 ::  count(0:max(g_nx,g_ny,g_nz))		!count #wavevectors in shell
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
 real*8 :: WR(3),WI(3)
@@ -1320,7 +1320,7 @@ diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
 cos_tta_spec = 0
-
+count = 0
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -1337,15 +1337,11 @@ enddo
 enddo
 enddo
 
-! bin values for pdfs of cos_tta
+! index = a + b*cos_tta; calculate a and b
 minct = -1
 maxct = 1
-ibin = (maxct - minct)/nbin
-a = (nbin+1)/2
-b = (nbin-1)/2
-do i = 0,nbin-1
-binvals(i)=minct+ibin*i
-enddo
+a = (nbin*minct - maxct)/(minct - maxct)
+b = (1 - nbin)/(minct - maxct)
 
 do j=ny1,ny2
    jm=jmcord_exp(j)
@@ -1356,7 +1352,8 @@ do j=ny1,ny2
          
          rwave = im**2 + jm**2 + km**2
          iwave = nint(sqrt(rwave))
-         
+	 count(iwave) = count(iwave) + 1          
+
          !     compute angle between Re and Im parts of u(k)
          RR = cmodes_r(i,j,k,:)
          II = cmodes_i(i,j,k,:)
@@ -1373,7 +1370,6 @@ do j=ny1,ny2
 ! 	histogram of angles
 	ind = nint(a + b*cos_tta)	
 	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
-!        write(6,*)iwave, ind,costta_pdf(iwave,ind)
 	         
          !     cutoff for recalculating the spectra
 !         delta = 0.1      !this value can be changed by hand
@@ -1482,7 +1478,8 @@ do i=iwave+2,iwave_max
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
    spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
-   cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i)   
+   cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i) 
+   costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)  
 enddo
 iwave=iwave+1
 
@@ -1494,9 +1491,10 @@ if (my_pe==io_pe) then
    print *,'total helicity: ',heltot
 endif
    
-!normalize histogram of angles
-costta_pdf = costta_pdf/(nx*ny*nz)
-
+!normalize histograms of cosine values
+do i = 0,iwave
+costta_pdf(i,:) = costta_pdf(i,:)/count(i)
+enddo
 end subroutine
 
 
