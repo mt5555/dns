@@ -41,8 +41,25 @@ fid2=-1;
 %fid=endianopen('/scratch2/taylorm/tmix256B/tmix256B.scalars','r');
 %nx=256;
 
-fid=endianopen('../../helicity_data/helical_forced/sk128_hq_0000.0000.scalars','r');
+%fid=endianopen('../../helicity_data/helical_forced/sk128_hq_0000.0000.scalars','r');
+%nx = 128;
+
+%fid=endianopen('../src/hel128_hpi4/hel128_hpi4_0000.0000.scalars','r');
+%nx = 128;
+
+%fid=endianopen('/home2/skurien/rotation/Test0000.0000.scalars','r');
+%nx = 128;
+
+%fid=endianopen('/home2/skurien/dns/src/sk128_alpha00/v5e-4/sk128_alpha000000.0000.scalars','r');
+%nx = 128;
+
+%fid=endianopen('/home2/skurien/rotation/Test/Test0000.0000.scalars','r');
+%nx = 128;
+
+fid=endianopen('/home2/skurien/rotation/Test2/Test0002.scalars','r');
 nx = 128;
+
+
 
 nscalars=0;
 nscalars_e=0;
@@ -159,7 +176,7 @@ clf
 semilogy(time,ke,'r'); hold on
 %plot(time_2,-ke_diss_tot,'b.')
 plot(time,-ke_diss_d,'b')
-%title('KE: red,    d(KE)/dt: blue');
+title('KE: red,    d(KE)/dt: blue');
 hold off
 xlabel('time')
 print -dpsc ke.ps
