@@ -35,7 +35,6 @@ real*8  :: mu_hyper_value=0   ! hyper viscosity value
 integer :: mu_hypo =0         !large wave number dissipation = (del**-2)**mu_hyper
 real*8  :: mu_hypo_value=0    !viscosity value 
 real*8  :: alpha_value=0      !for the alpha model  
-real*8  :: fcor=0             ! rotation in z-axis
 integer :: infinite_alpha=0   !flag for infinite alpha case
 real*8  :: smagorinsky=0      !for smagorinsky term
 real*8  :: H0=0               ! used by shallow water model
@@ -120,7 +119,7 @@ character(len=80) :: inputfile=''
 real*8  :: pi,pi2,pi2_squared
 
 real*8  :: grav=0  
-real*8  :: fcor=0  
+real*8  :: fcor=0                ! rotation in z-axis 
 integer :: diag_struct=0         ! compute structure funtions on the fly
 integer :: diag_pdfs=0           ! compute pdfs on the fly
 
