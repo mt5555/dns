@@ -9,7 +9,7 @@ type wnforcing_d
    integer, pointer :: index(:,:)
 end type
 
-integer           :: numb
+integer           :: numb1,numb
 integer,parameter :: numb_max=15
 integer,parameter :: numbs=3         ! max stochastic forcing bands
 type(wnforcing_d) :: wnforcing(numb_max)
@@ -35,8 +35,19 @@ real*8 :: Qhat(*)
 real*8 :: rhs(*)
 real*8 :: f_diss,param,fxx_diss
 
-if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss,fxx_diss)
+! determinisitic with E1=E2=.5
+if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss,fxx_diss,0)
+
+! stochastic, wave numbers 1,2
 if (forcing_type==2) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
+
+! determinisitic with Overholt and Pope spectrum
+if (forcing_type==3) call sforcing12(rhs,Qhat,f_diss,fxx_diss,1)
+
+! stochastic, wave numbers 2,3
+if (forcing_type==4) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
+
+
 
 end subroutine
 
@@ -86,36 +97,50 @@ end subroutine
 
 
 
-subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss)
+subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss,model_spec)
 !
 ! Add a forcing term to rhs.
 ! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
 ! Force 3D wave numbers 2 back to the sphere E=2**(-5/3)
 !
+! model_spec==0    E(1)=E(2)=.5
+! model_spec==1    Overholt & Pope
 !
 use params
 use mpi
 implicit none
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+integer :: model_spec
 integer km,jm,im,i,j,k,n,wn,ierr,kfmax
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
 real*8 ener(numb_max),temp(numb_max)
 character(len=80) :: message
 
-if (0==init_sforcing) then
-   numb=2 ! apply forcing in 5 bands
-   call sforcing_init()
-   do wn=1,numb
-      kfmax=6
-      if (wn>=kfmax) then
-         ener_target(wn)=0
-      else
-         ener_target(wn)=real(wn)**(-5./3.)*tanh( (kfmax-wn) / (.3*kfmax) )
-      endif
 
-      ener_target(wn)=.5
-   enddo
+if (0==init_sforcing) then
+   numb1=1
+   if (model_spec==0) then
+      numb=2   ! apply forcing in bands 1,2
+      call sforcing_init()
+      do wn=1,numb
+         ener_target(wn)=.5
+      enddo
+   endif
+   if (model_spec==1) then
+      numb=10 ! apply forcing in 5 bands
+      call sforcing_init()
+      do wn=1,numb
+         kfmax=6
+         if (wn>=kfmax) then
+            ener_target(wn)=0
+         else
+            ener_target(wn)=real(wn)**(-5./3.)*tanh( (kfmax-wn) / (.3*kfmax) )
+         endif
+      enddo
+   endif
+
+
 endif
 
 if (ntot==0) return
@@ -133,7 +158,7 @@ tau_inv=sqrt(g_u2xave)/.5
 
 f_diss=0
 fxx_diss=0
-do wn=1,numb
+do wn=numb1,numb
 
    ener(wn)=0
    do n=1,wnforcing(wn)%n
@@ -153,7 +178,7 @@ enddo
 #endif
 
 
-do wn=1,numb
+do wn=numb1,numb
    ! Qf = Q*sqrt(ener_target/ener)
    ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
    tauf=tau_inv*(sqrt(ener_target(wn)/ener(wn))-1)
@@ -307,6 +332,8 @@ subroutine sforcing_random12(rhs,Qhat,f_diss,fxx_diss,new_f)
 ! if new_f=0, add previously computed forcing stored in rmodes() into RHS. 
 ! if new_f=1, compute a new forcing ONLY, store in rmodes()
 !
+! numb1,numb2:   force bands [numb1,numb2]
+!
 use params
 use mpi
 implicit none
@@ -322,13 +349,21 @@ real*8,save :: tscale=.01
 
 
 if (0==init_sforcing) then
-   numb=2  ! apply forcing in 2 bands
+   if (forcing_type==2) then
+      numb1=1
+      numb=2
+   endif
+   if (forcing_type==4) then
+      numb1=2
+      numb=3
+   endif
+
    call sforcing_init()
    rmodes=0
    tmod=0
 
    ! check that we are not including any wave numbers > numbs
-   do wn=1,numb
+   do wn=numb1,numb
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
@@ -362,7 +397,7 @@ endif
 
 f_diss=0
 fxx_diss=0
-do wn=1,numb
+do wn=numb1,numb
 
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
@@ -428,7 +463,7 @@ do im=-numb,numb
    ! 
    ! 
    k2 = (im**2 + jm**2 + km**2)
-   if (k2 <= (numb+.5)**2) then
+   if ((numb1-.5)**2 <=k2 .and.   k2 <= (numb+.5)**2) then
    ! ignore wave numbers outside of our forcing band 
       if (k2>0) then
          xfac=1/(-2*pi*k2)
