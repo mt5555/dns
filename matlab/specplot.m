@@ -6,7 +6,7 @@
 clear
 movie=1;       % plot all the spectrum, pausing between each one
 movie_plot=0;  % create .ps out of all the spectra
-endian = 'b';  % default endian-ness of spec file
+endian = 'l';  % default endian-ness of spec file
 CK_orig=1.0;
 decay_scale=0;   % special scaling for 2048^3 decaying run
 tsave=[];
@@ -38,10 +38,6 @@ tsave=[];
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';
 
-name='temp0000.0000'; namedir='../src/';
-CK_orig=1.613; decay_scale=0; endian='l';
-% save spectrum at these times:
-movie_plot=0; movie=1; tsave=[2.5 5.0];
 
 %name='alpha1'; namedir='/home/taylorm/';
 %CK_orig=1.613; decay_scale=0; endian='l';
@@ -49,9 +45,13 @@ movie_plot=0; movie=1; tsave=[2.5 5.0];
 %movie_plot=0; movie=1; tsave=[2.5 5.0];
 
 
-name = 'decay2048-new.-sc0001_0000.7019';
-namedir = '/scratch1/taylorm/decay2048/';
-CK_orig=1.613/(2*pi)^2;
+%name = 'decay2048-new.-sc0001_0000.7019';
+%namedir = '/scratch1/taylorm/decay2048/';
+%CK_orig=1.613/(2*pi)^2;
+
+name = 'skhel512a0000.0000';
+namedir = '/home/mt/data/skhel/';
+CK_orig=1.613;
 
 
 
@@ -61,6 +61,7 @@ spec_r_save_fac3=[];
 
 % note: endianopen() will notwork with .spec files
 %because first number is not necessaryly an integer 
+[namedir,name]
 fid=fopen([namedir,name,'.spec'],'r',endian);
 fidt=endianopen([namedir,name,'.spect'],'r');
 fidp=endianopen([namedir,name,'.pspec'],'r');  

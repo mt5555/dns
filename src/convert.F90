@@ -346,7 +346,7 @@ endif
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   px = gradp(1)*(xcord(i)-.5) + gradp(2)*(ycord(i)-.5) + gradp(3)*(zcord(k)-.5)
+   px = gradp(1)*(xcord(i)-.5) + gradp(2)*(ycord(j)-.5) + gradp(3)*(zcord(k)-.5)
    p(i,j,k)=p(i,j,k) - meanp - px 
 enddo
 enddo

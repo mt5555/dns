@@ -20,8 +20,10 @@
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
-name = 'hel256_hpi2_all';
+name = 'skhel512a0009.2781';
+namedir = '/home/mt/data/skhel/';
+%namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
+%name = 'hel256_hpi2_all';
 mu = 2e-4;
 
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel128_h3pi8/';
@@ -70,7 +72,11 @@ end
 %if (time>=1)
 if (time >= 1.5)
 j=j+1
-hspec_ave = hspec_ave + hspec_n + hspec_p;
+if (length(hspec_ave)==0) 
+  hspec_ave = hspec_n + hspec_p;
+else
+  hspec_ave = hspec_ave + hspec_n + hspec_p;
+end
 end
 
 k = [0:n_r-1];

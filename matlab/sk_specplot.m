@@ -29,6 +29,9 @@ tsave=[2.5];
 
 name = 'hel256_hpi2_all';
 namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
+%name = 'skhel512a0000.0000';
+%namedir = '/home/mt/data/skhel/';
+
 mu = 2e-4;
 
 %name = 'Rot10000.0000';
