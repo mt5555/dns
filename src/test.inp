@@ -1,12 +1,12 @@
 2            ! input file type
 iso12        ! initial condition:  KH-blob, KH-anal, iso12, restart
 0            ! init condition subtype
-iso12        ! forcing:  none, iso12
+none        ! forcing:  none, iso12
 kediff       ! viscosity type  (value, smallest, kediff, Re)
-300.0        ! viscosity coefficient.  (300)
+3000.0        ! viscosity coefficient.  (300)
 0.0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
-1            ! compute_structure functions
-4th           ! derivative method  (fft, fft-dealias, 4th)
+0            ! compute_structure functions
+fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc

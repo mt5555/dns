@@ -63,7 +63,7 @@ end subroutine
 
 
 
-subroutine plotASCII(spectrum,n,title)
+subroutine logplotASCII(spectrum,n,title)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! ASCII plot of spectrum(0:n) on a log-log scale
 !
@@ -135,6 +135,75 @@ do i=1,numy-1
    print *,"      |",plot(:,i)
 enddo
 print *,"1E-10 |",plot(:,numy)
+print *,"      +---------------------+"
+write (*,'(a,i4)') "      k=0                 k=",n
+
+endif
+end subroutine
+
+
+
+
+subroutine plotASCII(spectrum,n,title,ymin,ymax)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! ASCII plot of spectrum(0:n) on a log-log scale
+!
+! Y-axis scale is  10^-10 ... 10^0
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+use params
+implicit none
+integer :: n
+real*8  ::  spectrum(0:n),ymin,ymax
+character(len=*) :: title
+
+
+! local variables
+integer,parameter :: numx=20,numy=13
+integer i,j
+character :: plot(0:numx,0:numy)
+real*8 cspec(0:numx)
+real*8 :: delta,ireal
+integer ix,iy
+
+
+if (my_pe==io_pe) then
+cspec=0
+plot=" "
+
+! interpolate
+cspec(0)=spectrum(0)
+do ix=1,numx
+!   ireal = 10**( log10(real(n)) * (ix-1)/real(numx-1) )
+   ireal = n * (ix-1)/real(numx-1) 
+   i=floor(ireal)
+   delta=ireal-i
+   if (i>=0 .and. i<=n-1) then
+      cspec(ix)=spectrum(i)*(1-delta)+spectrum(i+1)*delta
+   endif
+enddo
+
+
+! scale from 0..numy, log scale
+do i=0,numx
+   iy = numy*(cspec(i) - ymax)/(ymin-ymax)
+   if (iy<0) iy=0
+   if (iy>numy) iy=numy
+   cspec(i)=iy
+enddo
+
+do i=0,numx
+    j=cspec(i)
+    plot(i,j)="*"
+enddo
+
+print *
+write(*,'(1x,f6.3,99a)') ymax,"|",plot(:,0),title
+do i=1,numy-1
+   print *,"      |",plot(:,i)
+enddo
+!print *,"1E-10 |",plot(:,numy)
+write(*,'(1x,f6.3,99a)') ymin,"|",plot(:,numy)
 print *,"      +---------------------+"
 write (*,'(a,i4)') "      k=0                 k=",n
 

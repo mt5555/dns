@@ -105,11 +105,11 @@ LINK=$(F90) $(FFLAGS)
 #independent modules/routines (dont use any other modules):
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 #modules/routines which use OBJS1
-OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o 
+OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o spectrum.o ellipse.o 
 
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
-OPS    = ghostops.o fftops.o test.o integrals.o timecontrol.o tracers.o ellipse.o
+OPS    = ghostops.o fftops.o test.o integrals.o timecontrol.o tracers.o 
 FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
@@ -134,7 +134,7 @@ MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SHALLOW    = shallow.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)
 
 # n_var>=2 models  (u,v) and (w,psi)
-MODEL_PSIVOR     = ns_psivor.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(PSIVOR_DIAG)
+MODEL_PSIVOR     = ns_psivor.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(PSIVOR_DIAG)
 
 
 

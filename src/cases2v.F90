@@ -142,6 +142,9 @@ end subroutine
 
 
 
+
+
+
 subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 !
 !  init=0    restart run.  setup parameters and initialize PSI boundary
@@ -325,6 +328,3 @@ real*8 :: w(nx,ny)
 integer :: setmax
 call comp_ellipse(w,setmax)
 end
-
-
-

@@ -3,6 +3,7 @@ subroutine time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use tracers
 use transpose
+use spectrum
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)      
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -22,7 +23,6 @@ real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
-logical,save :: compute_transfer=0
 integer :: n1,n1d,n2,n2d,n3,n3d
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
@@ -329,7 +329,8 @@ endif
 !
 if (compute_transfer) then
    compute_transfer=.false.
-!   call output_transfer()
+   call compute_tran(time,Q,q1,work1,work2)
+   call output_tran(time,Q,q1,q2,q3,work1,work2)
 endif
 
 
@@ -338,11 +339,11 @@ if (doit_diag) then
    if ( g_bdy_x1==PERIODIC .and. &
         g_bdy_y1==PERIODIC .and. &
         g_bdy_z1==PERIODIC) then
-!      call compute_spec
+      call compute_spec(time,Q,q1,work1,work2)
       call output_spec(time,Q,q1,q2,q3,work1,work2)
 
-!     next time we call timecontrol, compute spectrum again
-!     so we can 
+!     set this flag so that for next timestep, we will compute and save
+!     spectral transfer functions:
       compute_transfer=.true.
    endif
 
