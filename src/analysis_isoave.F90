@@ -27,9 +27,10 @@ use mpi
 use isoave
 implicit none
 
-! define this to use a 1 cpu version which uses much less memory
-! as the 1 cpu parallel version:
-#undef SERIAL_ONLY
+! 1 cpu version uses less memory then parallel version
+! but to test parallel version in serial, set this to 1.
+integer :: always_use_parallel_code = 0;
+integer :: use_serial
 
 real*8,save  :: Q(nx,ny,nz,n_var)
 real*8,allocatable  :: q1(:,:,:,:)
@@ -37,10 +38,9 @@ real*8,allocatable  :: q2(:,:,:,:)
 real*8,allocatable  :: q3(:,:,:,:)
 real*8,save         :: work1(nx,ny,nz)
 real*8,save         :: work2(nx,ny,nz)
-#ifndef SERIAL_ONLY
-real*8,save         :: work3(nx,ny,nz)
-real*8,save         :: work4(nx,ny,nz)
-#endif
+real*8,allocatable  :: work3(:,:,:)
+real*8,allocatable  :: work4(:,:,:)
+
 character(len=80) message,sdata
 character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
@@ -50,6 +50,21 @@ real*8 :: kr,ke,ck,xfac,range(3,2)
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
+
+if (ncpus==1) then
+   use_serial=1;
+else
+   use_serial=0;
+endif
+if (always_use_parallel_code==1) use_serial=0;
+if (use_serial==1) then
+   call print_message("using serial version of isoave code")
+else
+   call print_message("using parallel version of isoave code")
+endif
+
+
+
 
 tstart=3.0
 tstop=3.0
@@ -78,12 +93,14 @@ call init_model
 
 !call writepoints(); stop
 
-
-#ifndef SERIAL_ONLY
+if (use_serial==0) then
+! parallel version requires extra data:
 allocate(q1(nx,ny,nz,ndim))
 allocate(q2(nx,ny,nz,ndim))
 allocate(q3(nx,ny,nz,ndim))
-#endif
+allocate(work3(nx,ny,nz))
+allocate(work4(nx,ny,nz))
+endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -99,15 +116,15 @@ do
    write(sdata,'(f10.4)') 10000.0000 + time
    fname = runname(1:len_trim(runname)) // sdata(2:10) // ".u"
    call print_message(fname(1:len_trim(fname)))
-   call singlefile_io(time2,Q(1,1,1,1),fname,q1,q2,1,io_pe)
+   call singlefile_io(time2,Q(1,1,1,1),fname,work1,work2,1,io_pe)
 
    fname = runname(1:len_trim(runname)) // sdata(2:10) // ".v"
    call print_message(fname(1:len_trim(fname)))
-   call singlefile_io(time2,Q(1,1,1,2),fname,q1,q2,1,io_pe)
+   call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,1,io_pe)
 
    fname = runname(1:len_trim(runname)) // sdata(2:10) // ".w"
    call print_message(fname(1:len_trim(fname)))
-   call singlefile_io(time2,Q(1,1,1,3),fname,q1,q2,1,io_pe)
+   call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
    time=time2
 
 
@@ -115,36 +132,36 @@ do
    do j=0,nydecomp-1
    do k=0,nzdecomp-1  
 
-#ifdef SERIAL_ONLY
-      nxlen=nslabx/nxdecomp
-      nylen=nslaby/nydecomp
-      nzlen=nslabz/nzdecomp
-
-      lx1=nx1 + i*nxlen     
-      ly1=ny1 + j*nylen     
-      lz1=nz1 + k*nzlen     
-
-      lx2=lx1 + nxlen-1
-      ly2=ly1 + nylen-1
-      lz2=lz1 + nzlen-1
-
-      ! subcube version cannot run in parallel - it will abort
-      call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
-#else
-      if (nxdecomp*nydecomp*nzdecomp==1) then
-         ! no subcubes:
-         call isoavep(Q,q1,q2,q3)
+      if (use_serial==1) then
+         nxlen=nslabx/nxdecomp
+         nylen=nslaby/nydecomp
+         nzlen=nslabz/nzdecomp
+         
+         lx1=nx1 + i*nxlen     
+         ly1=ny1 + j*nylen     
+         lz1=nz1 + k*nzlen     
+         
+         lx2=lx1 + nxlen-1
+         ly2=ly1 + nylen-1
+         lz2=lz1 + nzlen-1
+         
+         ! subcube version cannot run in parallel - it will abort
+         call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
       else
-         range(1,1)=dble(i)/nxdecomp
-         range(1,2)=dble(i+1)/nxdecomp
-         range(2,1)=dble(j)/nxdecomp
-         range(2,2)=dble(j+1)/nxdecomp
-         range(3,1)=dble(k)/nxdecomp
-         range(3,2)=dble(k+1)/nxdecomp
-         call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
+         if (nxdecomp*nydecomp*nzdecomp==1) then
+            ! no subcubes:
+            call isoavep(Q,q1,q2,q3)
+         else
+            range(1,1)=dble(i)/nxdecomp
+            range(1,2)=dble(i+1)/nxdecomp
+            range(2,1)=dble(j)/nxdecomp
+            range(2,2)=dble(j+1)/nxdecomp
+            range(3,1)=dble(k)/nxdecomp
+            range(3,2)=dble(k+1)/nxdecomp
+            call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
+         endif
       endif
-#endif
-
+      
 
 
       if (my_pe==io_pe) then
