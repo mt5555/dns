@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from string import *
 import os, commands, getopt, sys
-####################################################################################
+##############################################################################
 #
 #  ./cronsub.py [submit] 
 #
@@ -29,15 +29,21 @@ import os, commands, getopt, sys
 #  And it will only generate mail every time a job is submitted to LSF
 #
 #
-####################################################################################
+#############################################################################
+
+
+user="taylorm"
+path="cronlsf/"    #requires that we run from home directory
+                   # which is what cron does. otherwise hard code
+                   # a full path
+
+
 
 submit=0
 if (len(sys.argv)== 2):
     if (sys.argv[1]=="submit"):
         submit=1
 
-path="/home/mt/lanl/dns/benchmark/"
-user="taylorm"
 
 
 # get a list of all jobnames queued in LSF
@@ -46,6 +52,7 @@ cmd = "bjobs -u all"
 if (status!=0):
     print 'Error getting list of LSF jobs'
     sys.exit(1)
+
 
 #parse out to get jobname_running
 jobname_running=[]
@@ -57,7 +64,7 @@ if (len(vout)<2):
     sys.exit(1)
 
 for line in vout:
-    sline=split(line," ")
+    sline=split(line)
     if (jobc==-1) & (len(sline)>=7) & (sline[6]=="JOB_NAME"):
         #find column where job starts:
         jobc=find(line,"JOB_NAME")
@@ -76,6 +83,12 @@ for line in vout:
             sys.exit(1)
         jobname_running.append(out[0]);
         
+
+print "current LSF jobs for user ",user
+if (len(jobname_running)==0):
+    print "<none>"		
+for out in jobname_running:
+    print out
 
 
 
@@ -97,14 +110,14 @@ else:
 cmd = "ls "+path+"*.job"
 (status,out) = commands.getstatusoutput(cmd)
 if (status!=0):
-    print 'Error getting list of scripts'
+    print 'Error: didn''t find any LSF scripts using: ',cmd
     sys.exit(1)
 vjobscript=split(out,"\n")
 
 
 for jobscript in vjobscript:
 
-    print jobscript,
+    print jobscript
     try:
 
         # parse file for the job name
@@ -145,7 +158,7 @@ for jobscript in vjobscript:
 
             
     except IOError,e:
-        print 'FILE_ACCESS_ERROR: ',jobname
+        print 'FILE_ACCESS_ERROR: (resub file?)',jobname
 
     except ValueError,e:
         print 'VALUE_ERROR: ',jobname
