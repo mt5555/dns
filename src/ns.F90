@@ -248,7 +248,7 @@ call wallclock(tmx1)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  PASSIVE SCALARS
-!  compute u dot grad(s)
+!  compute   -u dot grad(s)
 !  to compute grad(s):   from s, compute: s_x, s_y, s_z 
 !                                needs 2 x-transforms (forward and back),
 !                                      2 y-transforms, 
@@ -265,7 +265,7 @@ do ns=np1,np2
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      rhsg(i,j,k,ns)=Q(i,j,k,1)*work(i,j,k)
+      rhsg(i,j,k,ns)=-Q(i,j,k,1)*work(i,j,k)
    enddo
    enddo
    enddo
@@ -274,7 +274,7 @@ do ns=np1,np2
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      rhsg(i,j,k,ns)=rhsg(i,j,k,ns)+Q(i,j,k,n)*work(i,j,k)
+      rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,n)*work(i,j,k)
    enddo
    enddo
    enddo

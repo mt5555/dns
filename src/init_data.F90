@@ -162,6 +162,8 @@ do n=np1,np2
    if (npassive==10) schmidt(n)=schmidt_table(k)
    if (npassive==8) schmidt(n)=schmidt_table(k+1)
    if (npassive==6) schmidt(n)=schmidt_table(k+2)
+   if (npassive==4) schmidt(n)=schmidt_table(k+3)
+   if (npassive==2) schmidt(n)=schmidt_table(k+4)
 
 
    if (my_pe==io_pe) then

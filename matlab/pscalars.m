@@ -49,7 +49,7 @@ end
 end
 
 % look at passive scalar number np
-for np=10:10
+for np=9:9
 
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
@@ -102,7 +102,7 @@ disp(sprintf('lambda = %f',lambda(1) ))
 disp(sprintf('epsilon = %f',epsilon(1) ))
 
 epsilon_c=3*(mu./schmidt).*mean(cx2,1);
-lambda_c=sqrt(c2./mean(cx2));
+lambda_c=sqrt(c2./mean(cx2,1));
 eta_c=eta/sqrt(schmidt);
 
 

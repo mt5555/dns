@@ -708,9 +708,6 @@ uxx4=uxx4/g_nx/g_ny/g_nz
 su=su/g_nx/g_ny/g_nz
 
 
-
-
-
 ASSERT("compute_expensive_pscalars: ns too small ",ns>=23)
 
 ! we will sum over all pe's below, so do this for non-sums:
