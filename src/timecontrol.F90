@@ -64,7 +64,7 @@ endif
 xtmp=1e-8
 umax=max(umax,xtmp)
 delt = cfl_adv/umax                         ! advective CFL
-delt = min(delt,cfl_vis/mumax)              ! viscous CFL
+if (mu>0) delt = min(delt,cfl_vis/mumax)    ! viscous CFL
 delt = max(delt,delt_min)
 delt = min(delt,delt_max)
 
