@@ -1,17 +1,17 @@
 #include "macros.h"
-subroutine time_control(itime,time,Q)
+subroutine time_control(itime,time,Q,ints)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: time
+real*8 :: time,ints(3)
 integer :: itime
 
 ! local variables
 integer i,j,k,n
 character*80 message
 real*8 remainder, time_target, maxv(3),umax,mumax,time_next,cfl_used_adv,cfl_used_vis,mx
+real*8 divx,divi
 logical,external :: check_time
-real*8,external :: norm_divergence
 logical :: doit
 
 time_target = time_final
@@ -93,7 +93,6 @@ cfl_used_vis=mumax*delt
 ! display screen output
 !
 if (doit) then
-   mx=norm_divergence(Q)
 
    write(message,'(a,f8.5,a,i5,a,f8.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
@@ -101,12 +100,17 @@ if (doit) then
    write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
    call print_message(message)	
 
-   write(message,'(a,3f12.5,e12.5)') 'max: (u,v,w) div',maxv(1),maxv(2),maxv(3),mx
+   call compute_div(Q,io_pe,divx,divi)
+   write(message,'(a,3f12.5,a,e12.5)') 'max: (u,v,w) ',maxv(1),maxv(2),maxv(3),' max div',divx
    call print_message(message)	
 
-   mx=.5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1:3)*Q(nx1:nx2,ny1:ny2,nz1:nz2,1:3))
-   mx=mx/(nslabx*nslaby*nslabz)
-   write(message,'(a,4f15.10)') 'ke:',mx
+   mx = ints(3)/(1d-100+ints(2))
+   if (mx>1) mx=1    ! round-off error if ke_viscous > ke_tot
+   if (mx<-1) mx=-1  ! total ke is growing, but viscous term is negative
+   
+   write(message,'(a,f10.2,a,f6.2,a,f6.2,a)') 'ke: ',ints(1),&
+     ' d/dt log(ke) total:',ints(2)/ints(1),&
+     ' d/dt log(ke) diff:',ints(3)/ints(1)
    call print_message(message)	
 
    call print_message("")
@@ -116,23 +120,6 @@ end subroutine
 
 
 
-real*8 function norm_divergence(Q)
-use params
-implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: p(nx,ny,nz)
-real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-real*8 :: mx
-
-call divergence(p,Q,work1,work2)
-mx=maxval(abs(p(nx1:nx2,ny1:ny2,nz1:nz2)))
-#ifdef MPI
-   call MPI_REDUCE(mx,MPI_MAX)
-#endif
-norm_divergence=mx
-return
-end function
 
 
 
@@ -174,6 +161,8 @@ end subroutine
 
 
 
+
+
 subroutine output_diags(time,Q)
 use params
 implicit none
@@ -184,36 +173,17 @@ real*8 :: time
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
 integer i,j,k,n
-integer iwave,iwave_max
-real*8 rwave
-real*8,allocatable ::  spectrum(:)
+integer :: iwave
+real*8,allocatable  ::  spectrum(:)
 
-rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
-iwave_max=nint(rwave)
-allocate(spectrum(0:iwave_max))
-spectrum=0
+iwave=max(g_nx,g_ny,g_nz)
+allocate(spectrum(0:iwave))
 
 p=0
 do i=1,3
    p=p+.5*Q(:,:,:,i)*Q(:,:,:,i)  
 enddo
-
-call fft3d(p,work)
-
-do i=nx1,nx2
-do j=ny1,ny2
-do k=nz1,nz2
-    rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
-    iwave = nint(sqrt(rwave))
-    ASSERT("output_diags: iwave>iwave_max",iwave<=iwave_max)
-    spectrum(iwave)=spectrum(iwave)+p(i,j,k)**2    
-enddo
-enddo
-enddo
-
-#ifdef MPI
-call MPI_REDUCE(spectrum,sum)
-#endif
+call compute_spectrum(p,spectrum,iwave)
 
 #if 0
 iwave=max(g_nx,g_ny,g_nz)/2
@@ -228,6 +198,7 @@ print *,iwave+1,"..",iwave_max,rwave
 #endif
 
 deallocate(spectrum)
+
 end subroutine
 
 

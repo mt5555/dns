@@ -84,6 +84,7 @@ real*8 :: alpha=0
 real*8 :: beta=1
 integer i,j,k
 
+
 call divergence(p,u,work,work2)
 
 ! solve laplacian(p)=div(u)
@@ -95,6 +96,21 @@ do i=1,3
    u(:,:,:,i) = u(:,:,:,i) - work
 enddo
 
+if (dealias) then
+   do i=1,3
+      call fft3d(u(1,1,1,i),work)
+      call fft_filter_dealias(u(1,1,1,i))
+      call ifft3d(u(1,1,1,i),work)
+   enddo
+else
+#if 0
+   do i=1,3
+      call fft3d(u(1,1,1,i),work)
+      call fft_filter_last(u(1,1,1,i))
+      call ifft3d(u(1,1,1,i),work)
+   enddo
+#endif
+endif
 
 end subroutine
 
@@ -170,7 +186,6 @@ call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 ! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
 call fft_laplace_inverse(f,alpha,beta)
-call fft_filter_last(f)
 
 call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
@@ -268,6 +283,8 @@ end
 ! on input,  p = fourier coefficients of rhs
 ! on output, p = fourier coefficients of solution
 !
+! highest mode tweaked so that laplacian = div grad
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft_laplace_inverse(p,alpha,beta)
 use params
@@ -280,10 +297,13 @@ real*8 xfac
 
    do k=nz1,nz2
       km=kmcord(k)
+      if (km==g_nz/2) km=0
       do j=ny1,ny2
          jm=jmcord(j)
+         if (jm==g_ny/2) jm=0
          do i=nx1,nx2
             im=imcord(i)
+            if (im==g_nx/2) im=0
             xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
             if (xfac/=0) xfac = 1/xfac
             p(i,j,k)=p(i,j,k)*xfac

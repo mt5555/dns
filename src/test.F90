@@ -91,12 +91,15 @@ enddo
 enddo
 enddo
 
+#if 0
 ! remove that pesky highest cosine mode
+! no longer needed, we tweaked laplacian so that it = div grad
 do i=1,3
 call fft3d(input(1,1,1,i),work)
-call fft_filter_last(input(1,1,1,i))
+!call fft_filter_last(input(1,1,1,i))
 call ifft3d(input(1,1,1,i),work)
 enddo
+#endif
 
 
 

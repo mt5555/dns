@@ -9,7 +9,6 @@
 !   fft1                             fft along first dimension of 3D array
 !   ifft1	                     ifft along first dimension of 3D array
 !   fft_derivatives                  compute derivatives in grid space
-!   fft_laplace_inverse              invert laplacian in spectral space
 ! 
 ! Routines work on data of the form:  p(n1d,n2d,n3d)
 ! Size of the grid point data         p(1:n1,1:n2,1:n3)

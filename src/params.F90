@@ -87,10 +87,13 @@ real*8 :: diag_dt = 0       ! diagnostics
 real*8 :: screen_dt = 0     ! screen output
 real*8 :: restart_dt = 0    ! restart 
 
-! set non-zero to cause time stepping loop to exit
+! set to > 0 to cause time stepping loop to exit.  if more than one cpu sets
+! error_code > 0, the largest value will be reported.  
+!
 ! error_code = 1   u > 1000
 ! error_code = 2   
 ! error_code = 3   
+!
 integer :: error_code =0
 
 

@@ -86,19 +86,11 @@ real*8 :: d1(nx,ny,nz)
 real*8 :: d2(nx,ny,nz)
 real*8 :: d3(nx,ny,nz)
 
-
-! remove that pesky highest cosine mode
-do i=1,3
-   call fft3d(Q(1,1,1,i),d1)
-   if (dealias) then
-      call fft_filter_dealias(Q(1,1,1,i))
-   else
-      call fft_filter_last(Q(1,1,1,i))
-   endif
-   call ifft3d(Q(1,1,1,i),d1)
-enddo
-call divfree(Q,d1,d2,d3)
 call bc_preloop(Q)
+
+! will also dealias if dealias=1
+call divfree(Q,d1,d2,d3)
+
 
 end subroutine
 

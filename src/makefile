@@ -36,7 +36,7 @@ OBJS1 = params.o util.o  fft99.o fft_interface.o mpi.o
 OBJS2 = transform.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
-OPS    = fftops.o test.o
+OPS    = fftops.o test.o integrals.o
 MODEL  = ns3d.o bc.o
 FILEIO = fileio.o
 OBJS3 = $(MODEL) $(INITS) $(OPS) $(FILEIO)
