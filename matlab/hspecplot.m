@@ -20,9 +20,9 @@
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-%namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
-%name = 'hel256_hpi2_all';
-%mu = 2e-4;
+namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
+name = 'hel256_hpi2_all';
+mu = 2e-4;
 
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel128_h3pi8/';
 %name = 'hel128_h3pi8_0000.0000';
@@ -32,9 +32,9 @@
 %name = 'hel480_hpi2_0000.1000';
 %mu = 2e-4;
 
-namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
-name = 'hel256_h0_0000.8000';
-mu = 2e-4;
+%namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
+%name = 'hel256_h0_0000.8000';
+%mu = 2e-4;
 
 
 % plot all the spectrum:

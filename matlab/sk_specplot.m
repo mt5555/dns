@@ -41,13 +41,13 @@ mu = 2e-4;
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel480_hpi2/';
 %mu = 2e-4;
 
-name = 'hel256_h0_0000.8000';
-namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
-mu = 2e-4;
+%name = 'hel256_h0_0000.8000';
+%namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
+%mu = 2e-4;
 
-namedir = '/home2/skurien/dns/src/';
-name = '2Dhypo1e4_1024_0000.0000';
-mu = 2e-4;
+%namedir = '/home2/skurien/dns/src/';
+%name = '2Dhypo1e3_1024_0000.0000';
+%mu = 2e-4;
 
 % plot all the spectrum:
 movie=1; % 1 to plot all the spectra
@@ -204,14 +204,17 @@ title('Mean energy spectrum');
 ylabel(pname);
 xlabel('k')
 
-% compensated mean spectrum
+% compensated mean spectra
 
 figure(6)
 loglog(k,spec_ave.*k'.^(5/3),'b'); hold on;
-
-     title('5/3 Compensated MEAN energy spectrum');
+loglog(k,spec_ave.*k'.^(4/3),'r');hold on;
+legend('5/3 comp','4/3 comp');
+     title('Compensated MEAN energy spectrum');
 ylabel(pname);
 xlabel('k');
+
+
 
 %compute mean energy
 E = sum(spec_ave);
