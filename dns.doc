@@ -1,11 +1,12 @@
 Models:
 
-ns_grid.F90             NS main development platform 
-ns.F90                  NS and NS-alpha (div tau form) 
-ns_impulse.F90          NS impulse form 
-ns_decomp3.F90          NS 
+ns_grid.F90             2D/3D NS main development platform 
+ns.F90                  2D/3D NS and NS-alpha (div tau form) 
+ns_impulse.F90          2D/3D NS impulse form 
+ns_decomp3.F90          2D/3D NS 
 shallow.F90             2D shallow water equations  
-ns_ghost.F90            NS 4th order 
+ns_ghost.F90            2D/3D NS 4th order 
+ns_psivor.F90           2D NS streamfunction-vorticity form
 
 
 1. ns_grid.F90.  
@@ -44,6 +45,10 @@ div(tau) form of the equations.  Fourier and doubly periodic only (but
 just because we use hyper viscosity.  Could be easily converted to
 grid point model) See shallow.doc for some more documentation.
 
+
+6. ns_ghost.F90
+
+7. ns_psivor.F90
 
 
 ****************************************************************************
