@@ -21,6 +21,8 @@ fidvor=fopen(fname,'r');
   y=fread(fidvor,ny,'float64');
   z=fread(fidvor,nz,'float64');
   
+  if (nargout==3) return; end;
+
   q = fread(fidvor,nx*ny*nz,'float64');
   tmp = fread(fidvor,1,'float64');
   tmp=size(tmp);
