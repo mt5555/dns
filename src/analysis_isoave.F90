@@ -48,10 +48,11 @@ icount=0
 !call set_byteswap_input(1);
 
 
-
 call init_mpi
 call init_mpi_comm3d()
 call init_model
+
+call writepoints()
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.

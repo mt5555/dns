@@ -257,6 +257,66 @@ end subroutine
 
 
 
+!
+! For each direction, find its intersection with the unit sphere
+! (2 points) and output in lat-lon coordinates
+!
+!
+subroutine writepoints()
+use params
+
+!input
+real*8 :: Q(nx,ny,nz,ndim)
+
+!local
+real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
+real*8 :: lat,lon
+integer :: idir,idel,i2,j2,k2,i,j,k,n
+
+if (firstcall) then
+   firstcall=.false.
+   if (ncpu_x*ncpu_y*ncpu_z>1) then
+      call abort("isoave: can only be called if running on 1 cpu")
+   endif
+   call init
+endif
+
+open(97,file="isoave.latlon",form='formatted')
+write(97,*) 2*ndir
+
+do idir=1,ndir
+
+      rhat = dir(:,idir)*delta_val(1)
+      rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+
+      ! convert to lat-lon:
+      !call latlon(rhat,lat,lon)
+      write(97,'(3f25.20)') rhat
+      !call latlon(rhat,lat,lon)
+      write(97,'(3f25.20)') -rhat
+enddo
+
+close(97)
+end subroutine
+
+
+
+subroutine latlon(rhat,lat,lon)
+use params  ! just to get pi
+implicit none
+real*8 rhat(3),lat,lon,cotheta
+
+      if (abs(rhat(1)).lt.1e-9 .and. abs(rhat(2)).lt.1e-9) then 
+         lon=0
+      else
+         lon=atan2(rhat(2),rhat(1))
+      endif
+      !if (lon.lt.0) lon=lon+2*pi
+      cotheta=acos(rhat(3))
+      lat=pi/2-cotheta
+end subroutine
+
+
 
 
 

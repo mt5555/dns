@@ -19,6 +19,12 @@ cdir=[cdir, 'b','b','b','b','b','b','b','b','b','b','b','b'];      % 12 (1,2,0) 
 cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,2) directions
 cdir=[cdir, 'm','m','m','m','m','m','m','m','m','m','m','m'];      % 12 (1,1,2) directions
 
+% get the weights:
+w=textread('../src/voronoi/isoave.weights','%f');
+size(w)
+w=2*w(1:2:length(w));
+
+
 msize=3;   % marker size
 xmax=1000;  % maximum x axis
 
@@ -74,11 +80,9 @@ for i=1:ndir
 
   semilogx(x,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
   yy = spline(x,y,xx);
-  yyave=yyave+yy;
-  yyave_sq=yyave_sq + yy.^2;
+  yyave=yyave+w(i)*yy;
+  yyave_sq=yyave_sq + w(i)*yy.^2;
 end
-yyave=yyave/ndir;
-yyave_sq=yyave_sq/ndir;
 yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
 
 %semilogx(xx,yyave,'r');
@@ -107,11 +111,9 @@ for i=1:ndir
   semilogx(x,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   semilogx(x,y2,['.',cdir(i)],'MarkerSize',msize);
 
-  yyave1=yyave1+spline(x,y1,xx);
-  yyave2=yyave2+spline(x,y2,xx);
+  yyave1=yyave1+w(i)*spline(x,y1,xx);
+  yyave2=yyave2+w(i)*spline(x,y2,xx);
 end
-yyave1=yyave1/ndir;
-yyave2=yyave2/ndir;
 semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
 title('D_{ltt} / r\epsilon  (4/15 law)');
@@ -133,9 +135,8 @@ for i=1:ndir
   y=-(D_lll(:,i) + D1_ltt(:,i) + D2_ltt(:,i))./(x_box*epsilon);
 
   semilogx(x,y,['.',cdir(i)],'MarkerSize',msize); hold on;
-  yyave=yyave+spline(x,y,xx);
+  yyave=yyave+w(i)*spline(x,y,xx);
 end
-yyave=yyave/ndir;
 semilogx(xx,yyave,'r');
 title('4/3 law');
 x=1:xmax; semilogx(x,(4/3)*x./x,':');
@@ -163,12 +164,11 @@ for i=1:ndir
   semilogx(x,y1,['.',cdir(i)],'MarkerSize',msize); hold on
   semilogx(x,y2,['.',cdir(i)],'MarkerSize',msize);
   
-  yyave1=yyave1 + spline(x,y1,xx); 
-  yyave2=yyave2 + spline(x,y2,xx); 
-  yyave=yyave + spline(x,y,xx);  
+  yyave1=yyave1 + w(i)*spline(x,y1,xx); 
+  yyave2=yyave2 + w(i)*spline(x,y2,xx); 
+  yyave=yyave + w(i)*spline(x,y,xx);  
   
 end
-yyave=yyave/ndir; yyave1=yyave1/ndir; yyave2=yyave2/ndir;
 semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
 
@@ -209,12 +209,11 @@ for i=1:ndir
   semilogx(x,y1,['.',cdir(i)],'MarkerSize',msize); hold on
   semilogx(x,y2,['.',cdir(i)],'MarkerSize',msize);
   
-  yyave1=yyave1 + spline(x,y1,xx); 
-  yyave2=yyave2 + spline(x,y2,xx); 
-  yyave=yyave + spline(x,y,xx);  
+  yyave1=yyave1 + w(i)*spline(x,y1,xx); 
+  yyave2=yyave2 + w(i)*spline(x,y2,xx); 
+  yyave=yyave + w(i)*spline(x,y,xx);  
   
 end
-yyave=yyave/ndir; yyave1=yyave1/ndir; yyave2=yyave2/ndir;
 semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
 
