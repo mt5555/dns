@@ -46,7 +46,7 @@ if (nlon==4)
    SN_lll=fread(fid,[ndelta,ndir],'float64');
 end
 if (nlon==11) 
-   Dl=zeroes([ndelta,ndir,9]);
+   Dl=zeros([ndelta,ndir,9]);
    for p=2:10 
      temp=fread(fid,[ndelta,ndir],'float64');
      Dl(:,:,p-1)=temp;
@@ -74,16 +74,16 @@ if (ntran==4)
    SN2_ltt=fread(fid,[ndelta,ndir],'float64');
 end
 if (ntran==12) 
-  Dt1=zeroes([ndelta,ndir,9]);
-  Dt2=zeroes([ndelta,ndir,9]);
+  Dt1=zeros([ndelta,ndir,9]);
+  Dt2=zeros([ndelta,ndir,9]);
   for p=2:10
    temp1=fread(fid,[ndelta,ndir],'float64');    
    temp2=fread(fid,[ndelta,ndir],'float64');    
    Dt1(:,:,p-1)=temp1;
    Dt2(:,:,p-1)=temp2;
    if (p==2)
-     D1_tt=temp1
-     D2_tt=temp2
+     D1_tt=temp1;
+     D2_tt=temp2;
    end
  end 
    D1_ltt=fread(fid,[ndelta,ndir],'float64');

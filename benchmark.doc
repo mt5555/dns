@@ -1,3 +1,94 @@
+**********************************************************************************
+
+512^3 benchmarks
+18Gb memory
+134M gridpoints
+
+                        cpus    cpu per timestep   
+                                (averaging over 5 timesteps)
+O3K                       64        1.40
+                         128        .697 
+                         256        .332
+        2x1x256          512        .394
+500^3                    125     .55
+500^3   2x1x250          500     .209
+
+
+old bluemountain numbers:
+                  500^3 on 125 cpus:         .860
+                  512^3 on  64 cpus:         1.93    
+                  512^3 on  32 cpus:        5.0    
+
+QA:
+                   64    .831
+                  128    .422
+                  256    .221
+ (2x1x256)        512    .169
+ (4x1x128)        1024   .954    ouch!
+
+
+1536 benchmarks
+03K              will not load.
+
+
+
+
+
+**********************************************************************************
+hi-res timings on QSC and QA, before CPU upgrade:
+
+iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
+           3333 timesteps per eddy turnover time
+           assume 1024^3 needs 6666 timesteps per eddy turnover time
+           = 5 days per eddy turnover time on 512 cpus.  
+           2048^3 needs 2*6666 timesteps = 40 days per eddy turnover time
+
+
+
+1024^3 timeings on ASCI Q
+                   5 timesteps
+
+dns:   1x1x512    6.20min 
+
+dnsghost:
+1x1x512           3.17min 
+4x1x256           3.08
+
+
+REDO:
+
+2048^3     
+
+dns:    1x1x512     45.84 (5 timesteps)  9.17m per timestep
+        1x1x1024         5 timesteps     4.35m per timestep
+dnsghost 8x8x8      6.50 (1 timestep)
+dnsghost 2x2x128    insufficient virtual memory
+dnsghost 8x4x16     same
+dnsghost 4x4x32     same
+
+         1x1x1024   size per cpu:  (2052*2052*6)*8*3 *6 = 3.4Gb per cpu.  
+         2x1x512    wont load                             2.2Gb per cpu
+dhsghost 4x1x256    5 timesteps:   2.09m per timestep     1.7Gb per cpu
+dhsghost 2x2x256    5 timesteps:   2.28m per timestep
+
+
+1536^3 
+
+dnsghost 1x1x512   wont load
+dnsghost 8x8x8     2.70m  1 timestep
+dnsghost 2x1x256   1.73m
+dnsghost 2 2 128   2.00m
+dnsghost 4 2 64    2.16
+dnsghost 4 4 32    2.27
+dnsghost 8 4 16    2.32
+
+
+(4 + 1536/n1)(4 + 1536/n2)(4 + 1536/n3)
+
+
+
+**********************************************************************************
+hi-res timings on QSC, before CPU upgrade:
 
 
 t=-1 (one timestep)
