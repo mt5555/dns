@@ -293,17 +293,22 @@ implicit none
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
 integer :: model_spec
-integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax
+integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
 real*8 ener(numb_max),temp(numb_max),Qdel(3)
 real*8,allocatable,save :: rmodes(:,:,:,:)
 real*8,allocatable,save :: rmodes2(:,:,:,:)
 real*8,allocatable,save :: cmodes(:,:,:,:,:)
-real*8 RR(3),II(3), IIp(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
-real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotIIp, mod_IIxk
-real*8 tta, tta_sgn, theta, h_angle, phi 
+real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
+real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
+real*8 costta, tta, tta_sgn, theta, h_angle, phi 
 character(len=80) :: message
 
+!should have h_angle inputted by user eventually
+!h_angle = 0.0d0
+ h_angle = pi/4.0d0
+
+fix = 1
 
 if (0==init_sforcing) then
    numb1=1
@@ -436,46 +441,131 @@ enddo
 do i=-numb,numb
 do j=-numb,numb
 do k=-numb,numb
-   k2=i**2 + j**2 + k**2
+    k2=i**2 + j**2 + k**2
       if (k2 < (.5+numb)**2 ) then
       RR = cmodes(1,i,j,k,:)
       II = cmodes(2,i,j,k,:)
-      mod_rr = sqrt(RR(1)**2 + RR(2)**2 + RR(3)**2)
-      mod_ii = sqrt(II(1)**2 + II(2)**2 + RR(3)**2)
+      mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
+      mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+      RRhat = RR/mod_rr
+      khat(1) = i/sqrt(k2*1.0d0)
+      khat(2) = j/sqrt(k2*1.0d0)
+      khat(3) = k/sqrt(k2*1.0d0)
 
-!     first rotate II and RR into plane orthogonal to k
-      mod_RRxk = sqrt((RR(2)*k - RR(3)*j)**2 + (RR(1)*k - RR(3)*i)**2 + (RR(1)*j - RR(2)*i)**2)
-      RRxk_hat(1) = (RR(2)*k - RR(3)*j)/mod_RRxk
-      RRxk_hat(2) = -(RR(1)*k - RR(3)*i)/mod_RRxk
-      RRxk_hat(3) = (RR(1)*j - RR(2)*i)/mod_RRxk
-      IIp = mod_ii * RRxk_hat
+!     yhat = khat X RRhat (coordinate system with zhat=khat and xhat = RRhat
 
-      mod_IIxk = sqrt((II(2)*k - II(3)*j)**2 + (II(1)*k - II(3)*i)**2 + (II(1)*j - II(2)*i)**2)
-      IIxk_hat(1) = (II(2)*k - II(3)*j)/mod_IIxk
-      IIxk_hat(2) = -(II(1)*k - II(3)*i)/mod_IIxk
-      IIxk_hat(3) = (II(1)*j - II(2)*i)/mod_IIxk
-      RR = mod_rr * IIxk_hat
+      yhat(1) = khat(2)*RRhat(3) - khat(3)*RRhat(2)
+      yhat(2) = - (khat(1)*RRhat(3) - khat(3)*RRhat(1))
+      yhat(3) = khat(1)*RRhat(2) - khat(2)*RRhat(1)
 
-      RRdotIIp = RR(1)*IIp(1) + RR(2)*IIp(2) + RR(3)*IIp(3)
-      tta = acos(RRdotIIp/(mod_rr * mod_ii))
+!     	first check that RR and II are orthogonal to k (incompressibility).
+!       This is confirmed. Comment out.
 
+!	RRdotk = (RR(1)*i + RR(2)*j + RR(3)*k)
+!	IIdotk = (II(1)*i + II(2)*j + II(3)*k)
+!        write(6,*)'RRdotk_ang = ',acos(RRdotk/mod_rr/sqrt(k2*1.0d0)),i,j,k
+!        write(6,*)'IIdotk_ang = ',acos(IIdotk/mod_ii/sqrt(k2*1.0d0)),i,j,k
+
+!     Rotate II and RR into plane orthogonal to k
+!     Don't need to do this for Mark's isotropic forcing since incompressibility!      already ensures this. Comment out.
+
+!      mod_RRxk = sqrt((RR(2)*k - RR(3)*j)**2 + (RR(1)*k - RR(3)*i)**2 + (RR(1)*j - RR(2)*i)**2)
+!      RRxk_hat(1) = (RR(2)*k - RR(3)*j)/mod_RRxk
+!      RRxk_hat(2) = -(RR(1)*k - RR(3)*i)/mod_RRxk
+!      RRxk_hat(3) = (RR(1)*j - RR(2)*i)/mod_RRxk
+!      IIp = mod_ii * RRxk_hat
+
+!     mod_IIxk = sqrt((II(2)*k - II(3)*j)**2 + (II(1)*k - II(3)*i)**2 + (II(1)*j - II(2)*i)**2)
+!      IIxk_hat(1) = (II(2)*k - II(3)*j)/mod_IIxk
+!      IIxk_hat(2) = -(II(1)*k - II(3)*i)/mod_IIxk
+!      IIxk_hat(3) = (II(1)*j - II(2)*i)/mod_IIxk
+!      RR = mod_rr * IIxk_hat
+	
+      if (mod_rr == 0) then
+         fix = 0
+      elseif (mod_ii == 0) then
+         fix = 0
+      elseif (k2 == 0) then
+         fix = 0
+      elseif (h_angle == 0.0d0) then
+         fix = 0
+      endif
+      
+      IIp = II	
+
+!     find angle between RR and IIp (for right-handed rotation from RR into IIp
+      RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
+      costta = (RRdotII/(mod_rr * mod_ii))
+      tta = acos(RRdotII/(mod_rr * mod_ii))
+!      write(6,*)'pre-fix angle bet. RR and II  = ',tta*180/pi
+       
+!     ensure right-handedness for consistency
+         
       RRxIIp(1) = (RR(2)*IIp(3) - RR(3)*IIp(2))
       RRxIIp(2) = -(RR(1)*IIp(3) - RR(3)*IIp(1))
       RRxIIp(3) = (RR(1)*IIp(2) - RR(2)*IIp(1))
       tta_sgn = RRxIIp(1)*i + RRxIIp(2)*j + RRxIIp(3)*k
-
-      if (tta_sgn > 0) then
-         theta = tta
+         
+      if (tta_sgn > 0) then       
+      theta = tta
       elseif (tta_sgn < 0) then
-         theta = 2*pi - tta
+      theta = 2*pi - tta
       endif
-      if (h_angle < theta) then 
-         phi = theta - h_angle
-         II = (cos(phi) + sin(phi)) * IIp
-      elseif (h_angle > theta) then
-         phi = h_angle - theta
-         II = (cos(phi) - sin(phi)) * IIp
+      if (k2 == 12) then
+         write(6,*)'pre-fix angle bet. RR and II  = ',theta*180/pi
       endif
+         
+!     do the transformation if fix = 1
+
+      if (fix == 1) then         
+
+!     write IIp in terms of new coordinate system (z=khat,x=RRhat,y=yhat)
+         
+         II(1) = IIp(1)*RRhat(1) + IIp(2)*RRhat(2) + IIp(3)*RRhat(3)
+         II(2) = IIp(1)*yhat(1) + IIp(2)*yhat(2) + IIp(3)*yhat(3)
+         II(3) = IIp(1)*khat(1) + IIp(2)*khat(2) + IIp(3)*khat(3) !should be zero
+         
+!     if (h_angle < theta) then 
+!     phi = theta - h_angle
+!     rotate II clockwise about khat by phi degrees
+!     IIp(1) = cos(phi)*II(1) + sin(phi)*II(2)
+!     IIp(2) = -sin(phi)*II(1) + cos(phi)*II(2)
+!     IIp(3) = II(3)
+      
+!     elseif (h_angle > theta) then
+!     phi = h_angle - theta
+!     rotate II counter-clockwise about khat by phi degrees
+!     IIp(1) = cos(phi)*II(1) - sin(phi)*II(2)
+!     IIp(2) = sin(phi)*II(1) + cos(phi)*II(2)
+!     IIp(3) = II(3)
+!     endif
+         
+!     set II to have angle h_angle wrt RR
+         IIp(1) = cos(h_angle)*mod_ii
+         IIp(2) = sin(h_angle)*mod_ii
+         IIp(3) = II(3)
+         
+         
+!     check angle between RR and IIp again
+!         tta = acos(IIp(1)/mod_ii)
+!         write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
+         
+!     now write II in old (i,j,k) coordinate system
+         
+         II(1) = IIp(1)*RRhat(1) + IIp(2)*yhat(1) + IIp(3)*khat(1)
+         II(2) = IIp(1)*RRhat(2) + IIp(2)*yhat(2) + IIp(3)*khat(2)
+         II(3) = IIp(1)*RRhat(3) + IIp(2)*yhat(3) + IIp(3)*khat(3)
+         
+      endif   
+
+!     check angle between final RR and II again
+      RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
+      costta = (RRdotII/(mod_rr * mod_ii))
+      tta = acos(costta)
+      if (k2 == 12) then
+         write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
+      endif
+      
       cmodes(1,i,j,k,:) = RR	
       cmodes(2,i,j,k,:) = II	
       endif	
@@ -483,7 +573,8 @@ do k=-numb,numb
       enddo	
       enddo	
       
-!  convert back:
+!     convert back:
+
 do n=1,3
       call complex_to_sincos(rmodes(-numb,-numb,-numb,n),&
       cmodes(1,-numb,-numb,-numb,n),numb)
