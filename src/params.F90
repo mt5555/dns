@@ -334,7 +334,8 @@ real*8 :: ints(nints),maxs(nints)
 ! maxs(6) = time (at end of time step)  T
 ! maxs(7) = time at begining of time step T-1
 ! maxs(8) = time (in min) remaining from LSF job (or -1).
-! maxs(9) = 
+! maxs(9) = error conditions.  0 = no error
+!                              1 = kill signal detected by handler
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! for the shallow water model, we modify the above slightly:

@@ -69,8 +69,9 @@ ifeq ($(UNAME),IRIX64)
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
-   MPI = -DUSE_MPI -I/usr/opt/MPI/include
-   MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+   # defaults for asci Q: MPI paths loaded via modules
+   MPI = -DUSE_MPI 
+   MPILIB = -lfmpi -lmpi -lelan
    LSFLIB = -L/lsf/lib -lbat -llsf 
    LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 

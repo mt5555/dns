@@ -18,6 +18,11 @@ character(len=80) message
 integer ierr,i,j,k,n
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
+! initialize global constants:
+ints=0
+maxs=0
+
+! call set_signal_handlers()
 
 call init_mpi       
 call wallclock(tmx1)  ! wallclock may use MPI timers, call after init_mpi
@@ -187,8 +192,6 @@ integer :: lsftime
 
 
 
-ints=0
-maxs=0
 delt=0
 
 time=time_initial
@@ -233,6 +236,13 @@ do
 
    if (maxs(8)>=0 .and. maxs(8)<15 .and. enable_lsf_timelimit==1) then
       write(message,'(a,f20.10)') "LSF timelimit approaching. Stoping at time=",time
+      call print_message("** OUT OF TIME ****************************************")
+      call print_message(message)
+      itime_final=itime
+   endif
+   
+   if (maxs(9)>0) then
+      write(message,'(a,f10.0)') "Error detected.  error code: ",maxs(9)
       call print_message("** ERROR ****************************************")
       call print_message(message)
       itime_final=itime
@@ -266,6 +276,32 @@ tims(2)=tmx2-tmx1
 
 
 end subroutine
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  called when we catch a signal.  
+!  FORTRAN is not very re-entrant, so be carefull what you do
+!  here.  Some other subroutine has been interrupted, and it will
+!  resume execution when this routine returns.
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+integer(4) function signal_handler(signum)
+use params
+implicit none
+integer(2) signum
+
+! if we got a kill signal, set flag to exit program:
+maxs(9)=1
+
+! what does the return value do?
+signal_handler=1
+end
+
 
 
 
