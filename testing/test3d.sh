@@ -47,6 +47,7 @@ echo "without restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns -d $rundir reference3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
+
 echo "***********************************************************"
 echo "with restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  < $refin > $tmp 
