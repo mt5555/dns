@@ -19,7 +19,15 @@ if ($1 == 96) then
    ./gridsetup.py 1 1 1 96 96 96
    make dns
    cd ../benchmark
-   ../src/dns < $refin 
+   ../src/dns < benchmark256.inp
+endif
+
+if ($1 == 256) then
+   ./gridsetup.py 1 1 1 256 8 256
+   make dns
+   cd ../benchmark
+   ../src/dns < benchmark256.inp
+
 endif
 
 if ($1 == 1024) then

@@ -4,7 +4,7 @@
 #include "fft99_interface.F90"
 #elif (defined USE_CPQFFT)
 #include "fftcpq_interface.F90"
-#elif 
+#else
 #include "fft99_interface.F90"
 #endif
 

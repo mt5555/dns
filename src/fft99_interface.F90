@@ -63,9 +63,6 @@ end type
 type(fftdata_d) :: fftdata(num_fftsizes)
 
 
-integer, parameter ::  fftblocks=2000 ! do fft's in blocks of size fftblocks
-                                      ! set very large to disable blocking and do 
-                                      ! all fft's at once
 private :: fftinit, getindex
 contains 
 
@@ -174,13 +171,13 @@ real*8 p(n1d,n2d,n3d)
 #ifdef USE_SGIFFT
 real*8 w(n1+2)
 #else
-real*8 w(min(fftblocks,n2)*(n1+1))
+real*8 w(n2*(n1+1))
 #endif
 
 real*8 :: scale=1
 character*80 message_str
 
-integer index,jj,j,k,numffts
+integer index,j,k
 if (n1==1) return
 ASSERT("ifft1: dimension too small ",n1+2<=n1d)
 call getindex(n1,index)
@@ -189,25 +186,19 @@ call getindex(n1,index)
 
 j=0  ! j=number of fft's computed for each k
 do k=1,n3
-   j=0  ! j=number of fft's computed for each k
-   do while (j<n2)
-      numffts=min(fftblocks,n2-j)	
+   do j=1,n2
 
-!     move the last cosine mode back into correct location:
-      do  jj=j+1,j+numffts
-	p(n1+1,jj,k)=p(2,jj,k)
-        !p(2,jj,k)=0             ! not needed?
-        !p(n1+2,jj,k)=0          ! not needed?
-      enddo     
+      ! move the last cosine mode back into correct location:
+      p(n1+1,j,k)=p(2,j,k)
+      !p(2,j,k)=0             ! not needed?
+      !p(n1+2,j,k)=0          ! not needed?
+   enddo
 
 #ifdef USE_SGIFFT
-      CALL ZDFFTM (1, n1, numffts, scale, p(1,j+1,k), n1d/2, p(1,j+1,k), n1d,fftdata(index)%trigs, w,0)
+   CALL ZDFFTM (1, n1, n2, scale, p(1,1,k), n1d/2, p(1,1,k), n1d,fftdata(index)%trigs, w,0)
 #else
-      call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,1)
+   call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,1)
 #endif
-
-      j=j+numffts
-   enddo
 enddo
 
 end subroutine
@@ -227,10 +218,10 @@ real*8 :: scale
 #ifdef USE_SGIFFT
 real*8 w(n1+2)
 #else
-real*8 :: w(min(fftblocks,n2)*(n1+1)) 
+real*8 :: w(n2*(n1+1)) 
 #endif
 
-integer index,jj,j,k,numffts
+integer index,j,k
 if (n1==1) return
 ASSERT("fft1: dimension too small ",n1+2<=n1d)
 call getindex(n1,index)
@@ -239,28 +230,22 @@ scale=n1
 scale=1/scale
 
 do k=1,n3
-   j=0  ! j=number of fft's computed for each k
-   do while (j<n2)
-      numffts=min(fftblocks,n2-j)	
-!      do jj=j+1,j+numffts
-!         p(n1+1,jj,k)=0
-!         p(n1+2,jj,k)=0
-!      enddo
-
+   !   do j=1,n2
+   !         p(n1+1,jj,k)=0
+   !         p(n1+2,jj,k)=0
+   !   enddo
+   
 #ifdef USE_SGIFFT 
-      CALL DZFFTM (-1, n1, numffts, scale, p(1,j+1,k), n1d, p(1,j+1,k), n1d/2,fftdata(index)%trigs, w,0)
+   CALL DZFFTM (-1, n1, n2, scale, p(1,1,k), n1d, p(1,1,k), n1d/2,fftdata(index)%trigs, w,0)
 #else
-      call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,-1)
+   call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,-1)
 #endif
-
-!     move the last cosine mode into slot of first sine mode:
-      do  jj=j+1,j+numffts
-	p(2,jj,k)=p(n1+1,jj,k)
-      enddo     
-
-
-      j=j+numffts
+   
+   !     move the last cosine mode into slot of first sine mode:
+   do j=1,n2
+      p(2,j,k)=p(n1+1,j,k)
    enddo
+   
 enddo
 end subroutine
 
