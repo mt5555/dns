@@ -67,22 +67,24 @@ ifeq ($(UNAME),IRIX64)
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
+   MPI = -DUSE_MPI -I/usr/opt/MPI/include
+   MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+   LSFLIB = -L/lsf/lib -lbat -llsf 
+   LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
+
+   ifeq ($(HOST),milkyway.lanl.gov)
+      MPI = -DUSE_MPI -I/usr/opt/MPI196/include
+      MPILIB = -L/usr/opt/MPI196/lib -lfmpi -lmpi 
+      LSFLIB = 
+      LSFFLAGS = 
+   endif
    ifeq ($(HOST),mahi)
       MPI = 
       MPILIB =  
       LSFLIB = 
       LSFFLAGS = 
-   else
-   ifeq ($(HOST),truchas)
-      MPI = -DUSE_MPI -I/usr/opt/MPI190/include
-      MPILIB = -L/usr/opt/MPI190/lib -lfmpi -lmpi 
-   else	
-      MPI = -DUSE_MPI -I/usr/opt/MPI/include
-      MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
-      LSFLIB = -L/lsf/lib -lbat -llsf 
-      LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
-   endif
-   endif
+   endif 
+
 
 
    LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  #-Lstk -lstk 

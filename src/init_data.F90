@@ -489,10 +489,10 @@ real*8 :: work2(nx,ny,nz)
 ! local variables
 CPOINTER :: null
 integer i,j,k,l
-integer :: m
+integer :: m,k_0
 integer :: n,im,jm,km,ixw,ierr
-real*8 :: k_0,xw,xfac ,alpha,beta,dummy
-real*8 :: E_target,ke,pe,ke2
+real*8 :: xw,xfac ,alpha,beta,dummy
+real*8 :: E_target,ke,pe,ke2,E_0
 real*8 :: E_k(0:max(nx,ny,nz))
 real*8 :: E_k2(0:max(nx,ny,nz))
 real*8 :: Len,U,R,F
@@ -608,7 +608,7 @@ enddo
    call MPI_allreduce(E_k2,E_k,max(nx,ny,nz),MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
-
+E_0=0
 do k=nz1,nz2
    km=kmcord(k)
    do j=ny1,ny2
@@ -631,6 +631,10 @@ do k=nz1,nz2
          else
             PSI(i,j,k,n)=0
          endif
+
+         if (k_0==ixw) then
+            E_0 = E_0 + .5*xfac*pi2_squared*xw**2*PSI(i,j,k,n)**2
+         endif
       enddo
    enddo
 enddo
@@ -650,6 +654,7 @@ call der(PSI,Q(1,1,1,2),dummy,work1,DX_ONLY,1)
 if (dealias) call dealias_gridspace(Q,work1)
 
 
+#if 0
 ! normalize so <u,u>=U**2
 ke = .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)**2) +  &
      .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)**2)  
@@ -660,6 +665,18 @@ ke = .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)**2) +  &
 #endif
 ke=ke/g_nx/g_ny
 Q=sqrt(.5*U**2) * Q/sqrt(ke)
+E_0 = E_0*.5*U**2/ke
+print *,'E_0 = ',E_0
+
+#else
+
+! normalize so Energy in band k_0 = 3.23448943961018D-002
+Q =   sqrt(3.23448943961018D-002)*Q/sqrt(E_0)
+
+#endif
+
+
+
 
 
 
