@@ -377,10 +377,11 @@ else if (initial_vor==1) then
       wd(k)  = gamp*(-sin(hold))*delalf
    enddo
    if (io_pe==my_pe) then
-      !do k=1,nd
-      !   write(11,'(i4,2f20.7)') k,yd(k),wd(k)
-      !enddo
-      !close(11)
+      do k=1,nd
+         write(11,'(i4,2f20.7)') k,yd(k),wd(k)
+      enddo
+      close(11)
+      stop
    endif
    wd(nd) = wd(nd)/2
    wd(0) = wd(0)/2
