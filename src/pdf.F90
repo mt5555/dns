@@ -858,7 +858,7 @@ endif
 
 
 ndelta=str(1)%delta_num
-do j=2,NUM_SF
+do j=2,NUM_JPDF
 ASSERT("ndelta must be the same for all U structure functions",ndelta==str(j)%delta_num)
 enddo
 
@@ -908,7 +908,7 @@ do k=1,n3
    enddo
 enddo
 
-do n=1,NUM_SF
+do n=1,NUM_JPDF
 str(n)%ncalls=str(n)%ncalls+1
 enddo
 
