@@ -54,18 +54,10 @@ cvs tag:  'bench602'
 using benchmark/step.inp.sed
 
                       1cpu    2cpu    3cpu     4cpu
-milkyway              .16     .080     .060
+milkyway              .16     .080    .054
+autrey                .21     .17
+shankara1             .28     .21
 
-autrey                .21     .17(run some more)
-
-
-
-
-shankara1             .28
-  1: .291
-  4: .276
-  5: .280
- 10: .277
 
 
 
