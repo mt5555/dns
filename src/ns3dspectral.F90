@@ -39,37 +39,68 @@ Q_old=Q
 
 ! stage 1
 call ns3D(rhs,Q,Q_grid,time,1)
-Q=Q+delt*rhs/6.0
+
+
+do n=1,3
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6.0
+      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2.0
+      Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
+   enddo
+   enddo
+   enddo
+   call ifft3d(Q_grid(1,1,1,n),work)
+enddo
+
 
 ! stage 2
-Q_tmp = Q_old + delt*rhs/2.0
-Q_grid=Q_tmp
+call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+
 do n=1,3
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs/3.0
+      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs/2.0
+      Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
+   enddo
+   enddo
+   enddo
    call ifft3d(Q_grid(1,1,1,n),work)
 enddo
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
-Q=Q+delt*rhs/3.0
 
 ! stage 3
-Q_tmp = Q_old + delt*rhs/2.0
-Q_grid=Q_tmp
+call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+
 do n=1,3
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs/3.0
+      Q_tmp(i,j,k,n) = Q_old(i,j,k,n) + delt*rhs
+      Q_grid(i,j,k,n)=Q_tmp(i,j,k,n)
+   enddo
+   enddo
+   enddo
    call ifft3d(Q_grid(1,1,1,n),work)
 enddo
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
-Q=Q+delt*rhs/3.0
+
 
 ! stage 4
-Q_tmp = Q_old + delt*rhs
-Q_grid=Q_tmp
-do n=1,3
-   call ifft3d(Q_grid(1,1,1,n),work)
-enddo
 call ns3D(rhs,Q_tmp,Q_grid,time+delt,0)
-Q=Q+delt*rhs/6.0
 
-Q_grid=Q
+
 do n=1,3
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs/6.0
+      Q_grid(i,j,k,n)=Q(i,j,k,n)
+   enddo
+   enddo
+   enddo
    call ifft3d(Q_grid(1,1,1,n),work)
 enddo
 
