@@ -56,7 +56,7 @@ ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPI = -DUSE_MPI
    MPILIB = -lmpi 
-   LDFLAGS =  -l scs -Lstk -lstk
+   LDFLAGS =  -l scs #-Lstk -lstk
    FFLAGS = -64 -Ofast -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
    CC = cc -64
 endif
