@@ -116,14 +116,22 @@ y43=yyave;
 pave=yyave;
 nave=yyave;
 
-for i=1:ndir
+ndir_vec=1:ndir;
+%ndir_vec=[1,2,3, 4:3:ndir];
+skip=(length(ndir_vec)~=ndir);
+
+
+for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
 
   y=-D_lll(:,i)./(x*epsilon);
 
   if (plot_points==1) 
-     semilogx(x_plot,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
+     if (skip==0) 
+        semilogx(x_plot,y,['.',cdir(i)],'MarkerSize',msize);   hold on; end;
+     if (skip==1) 
+        semilogx(x_plot,y,['.-',cdir(i)],'MarkerSize',2*msize);   hold on; end;
   end     
   yy = spline(x,y,xx);
   
@@ -140,15 +148,18 @@ for i=1:ndir
   yyave1=yyave1 + w(i)*spline(x,y,xx)/(epsilon);
   
 end
-yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
-max(yyave)
-plot(xx_plot,yyave,'k','LineWidth',1.0); hold on;
-y45=yyave;
 
-title('D_{lll} / r\epsilon   (4/5 law) ');
-ylabel(pname);
-xlabel('r/\eta');
-x=1:xmax; plot(x,(4/5)*x./x,'k');
+yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
+
+y45=yyave;
+if (skip==0) 
+   max(yyave)
+   title('D_{lll} / r\epsilon   (4/5 law) ');
+   ylabel(pname);
+   xlabel('r/\eta');
+   plot(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+   x=1:xmax; plot(x,(4/5)*x./x,'k');
+end
 if (plot_posneg)
   grid
   %plot(xx_plot,nave./pave)
@@ -160,7 +171,7 @@ end
 
 
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
-ax=axis;  axis([1,xmax,0,1.2]);
+ax=axis;  axis([1,xmax,0,1.0]);
 %ax=axis;  axis([1,xmax,0,2.5]);
 hold off;
 if (plot_points==1) 
