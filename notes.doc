@@ -1,15 +1,15 @@
 TODO:
+      email latest cray results
+      update decay website, email charles
       balu work
 
       paper
-        push over compisoave_paper.m 
+        run pulldns on QA
         plots:  iso12w snapshot, iso12w timeseries, time+angle ave. mean.
         make changes outlined in email
         put all figures at end - hard copy only 
 
-      MIMIC test case, and benchmark on ES45 and T90?
-
-      update decay website, email charles
+      MIMIC test case: benchmark on PC and cray
 
       Monika: put in w thru cut output dataset
               fix ellipse iteration 
