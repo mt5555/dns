@@ -77,7 +77,7 @@ enddo
 alpha=0
 beta=1
 do n=1,3
-   call poisson(PSI(1,1,1,n),work,alpha,beta)
+   call helmholtz_inv(PSI(1,1,1,n),work,alpha,beta)
 enddo
 call vorticity(Q,PSI,work,work2)
 

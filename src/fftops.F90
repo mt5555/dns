@@ -129,15 +129,24 @@ real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 !local
-real*8 :: dummy(1)
+real*8 :: dummy(1),tol
 real*8 :: alpha=0
 real*8 :: beta=1
 integer i,j,k,n
 
-call divergence(p,u,work,work2)
+
 
 ! solve laplacian(p)=div(u)
-call poisson(p,work,alpha,beta)
+call divergence(p,u,work,work2)
+call helmholtz_inv(p,work,alpha,beta)
+
+!call divergence(work,u,p,work2)
+!p=0  ! initial guess
+!tol=1e-10
+!call cg(p,work,alpha,beta,tol)
+
+
+
 
 ! compute u=u-grad(p)
 do n=1,3
@@ -280,13 +289,42 @@ end subroutine
 
 
 
+subroutine helmholtz(f,lf,alpha,beta)
+!
+!  input: f
+!  output: lf
+!
+!  lf = [alpha + beta*laplacian](f)
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input
+real*8 lf(nx,ny,nz)    ! output
+real*8 :: alpha
+real*8 :: beta
+
+!local
+real*8 work(nx,ny,nz) ! work array
+real*8 fx(nx,ny,nz) ! work array
+real*8 fxx(nx,ny,nz) ! work array
+integer n
+
+lf=alpha*f
+do n=1,3
+   call der(f,fx,fxx,work,DX_AND_DXX,n)
+   lf=lf+beta*fxx
+enddo
+
+
+end subroutine
 
 
 
 
 
-
-subroutine poisson(f,work,alpha,beta)
+subroutine helmholtz_inv(f,work,alpha,beta)
 !
 !  solve [alpha + beta*laplacian](p) = f
 !  input:  f 

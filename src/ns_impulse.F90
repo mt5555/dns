@@ -52,7 +52,7 @@ Q=Q+delt*rhs/6.0
 Q_tmp = Q_old + delt*rhs/2.0
 Qp=Q_tmp
 do n=1,3
-   call poisson(Qp(1,1,1,n),work1,alpha,beta)
+   call helmholtz_inv(Qp(1,1,1,n),work1,alpha,beta)
 enddo
 call divfree_gridspace(Qp,work1,work2,work3)
 call ns3D(rhs,Q_tmp,Qp,time+delt/2.0,0,work1,work2,work3)
@@ -63,7 +63,7 @@ Q=Q+delt*rhs/3.0
 Q_tmp = Q_old + delt*rhs/2.0
 Qp=Q_tmp
 do n=1,3
-   call poisson(Qp(1,1,1,n),work1,alpha,beta)
+   call helmholtz_inv(Qp(1,1,1,n),work1,alpha,beta)
 enddo
 call divfree_gridspace(Qp,work1,work2,work3)
 call ns3D(rhs,Q_tmp,Qp,time+delt/2.0,0,work1,work2,work3)
@@ -74,7 +74,7 @@ Q=Q+delt*rhs/3.0
 Q_tmp = Q_old + delt*rhs
 Qp=Q_tmp
 do n=1,3
-   call poisson(Qp(1,1,1,n),work1,alpha,beta)
+   call helmholtz_inv(Qp(1,1,1,n),work1,alpha,beta)
 enddo
 call divfree_gridspace(Qp,work1,work2,work3)
 call ns3D(rhs,Q_tmp,Qp,time+delt,0,work1,work2,work3)
@@ -82,7 +82,7 @@ Q=Q+delt*rhs/6.0
 
 Qp=Q
 do n=1,3
-   call poisson(Qp(1,1,1,n),work1,alpha,beta)
+   call helmholtz_inv(Qp(1,1,1,n),work1,alpha,beta)
 enddo
 call divfree_gridspace(Qp,work1,work2,work3)
 

@@ -1,3 +1,4 @@
+#include "macros.h"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Fully resolved compressible Navier Stokes code
@@ -24,9 +25,9 @@ call init_mpi_comm3d()
 call init_grid      
 
 
-write(message,'(a)') 'Running some tests'
-call print_message(message)
-call test           ! optional testing  routines go here
+!write(message,'(a)') 'Running some tests'
+!call print_message(message)
+!call test           ! optional testing  routines go here
 
 
 

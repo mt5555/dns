@@ -728,12 +728,13 @@ rhs=rhs+divs
 
 #elif (defined ITER)
 
+
+#ifdef JACOBI
+
 gradu=div
 divs=0
 p=0
 p2=0
-
-
 do n=1,3
    call z_fft3d_trashinput(gradu(1,1,1,n),p,work) 
    ! solve Helm(divs)=p     
@@ -761,8 +762,20 @@ do n=1,3
    print *,i,maxval(abs(p-p2))/wtot
 
 enddo
-rhs=rhs+divs
 
+
+#else
+   ! perform iteration in grid space
+   gradu=div
+   do n=1,3
+      work=gradu(:,:,:,n)
+      call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,.05d0)
+      call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
+   enddo
+#endif
+
+
+rhs=rhs+divs
 
 
 

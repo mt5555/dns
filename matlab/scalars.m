@@ -176,6 +176,9 @@ if (ns_e>=13)
     u2(i,:)=ints_e(i+11,:);              % < u^2 >
   end
 end
+if (ns_e>=14) 
+    S2=ints_e(14,:);                     % <S2>
+end
 
 
 figure(6)

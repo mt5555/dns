@@ -1,6 +1,6 @@
 bc.o: params.o makefile 
 compaq_fft_interface.o: makefile 
-dns.o: params.o mpi.o structf.o makefile 
+dns.o: macros.h params.o mpi.o structf.o makefile 
 fft99_interface.o: macros.h makefile 
 fftcpq_interface.o: macros.h <cxmldef.for> makefile 
 fft_interface.o: fftstk_interface.F90 fftsgi_interface.F90 fftcpq_interface.F90 fft99_interface.F90 makefile 
@@ -19,8 +19,9 @@ ns_grid.o: macros.h params.o fft_interface.o makefile
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
 params.o: macros.h transpose.h params.h makefile 
 sforcing.o: macros.h params.o mpi.o makefile 
+solve.o: macros.h params.o makefile 
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
-test.o: macros.h params.o mpi.o transpose.o fft_interface.o makefile 
+test.o: macros.h params.o transpose.o mpi.o fft_interface.o makefile 
 transpose.o: macros.h transpose.h params.o mpi.o makefile 
 util.o: macros.h mpi.o params.o makefile 
 fbelimb.o: makefile 

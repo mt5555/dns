@@ -363,7 +363,7 @@ real*8 :: time
 integer nv,nscalars
 real*8 :: ints_save(nv,nscalars)
 real*8 :: maxs_save(nv,nscalars)
-integer,parameter :: nints_e=13
+integer,parameter :: nints_e=14
 real*8 :: ints_e(nints_e)
 
 ! local variables
