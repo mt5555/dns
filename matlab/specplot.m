@@ -33,8 +33,10 @@ endian='l';
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
-%name = 'rot3d_sto0000.0000';
-%namedir = '/home/taylorm/ccs/dns/src/rot3d/';
+
+name = 'rot3d_sto0025.7584';
+namedir = '/home/taylorm/ccs/dns/src/rot3d/';
+
 
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';

@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer,parameter :: nints_e=28,npints_e=23	
+integer,parameter :: nints_e=28,npints_e=24	
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x
@@ -717,7 +717,7 @@ enddo
 
 ! <(a-a0)**2> = < a**2 > - a0**2
 u1=u1/g_nx/g_ny/g_nz
-u2=u2/g_nx/g_ny/g_nz; u2 = u2 - u1*u1
+u2=u2/g_nx/g_ny/g_nz; 
 ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux3/g_nx/g_ny/g_nz
 ux4=ux4/g_nx/g_ny/g_nz
@@ -727,7 +727,7 @@ uxx4=uxx4/g_nx/g_ny/g_nz
 su=su/g_nx/g_ny/g_nz
 
 
-ASSERT("compute_expensive_pscalars: ns too small ",ns>=23)
+ASSERT("compute_expensive_pscalars: ns too small ",ns>=24)
 
 ! we will sum over all pe's below, so do this for non-sums:
 scalars(1)=0
@@ -745,15 +745,18 @@ i=i+9
 
 do n=1,3
 scalars(n+i)=uxx2(n)       ! 12
-scalars(n+3+i)=uxx3(n)
-scalars(n+6+i)=uxx4(n)
+scalars(n+3+i)=uxx3(n)  
+scalars(n+6+i)=uxx4(n)     ! 18,19,20
 enddo
 i=i+9
 
 do n=1,3
-scalars(n+i)=su(n)
+scalars(n+i)=su(n)         ! 21,22,23
 enddo
 i=i+3
+
+scalars(i)=u1              ! 24
+i=i+1
 
 #ifdef USE_MPI
    scalars2=scalars
