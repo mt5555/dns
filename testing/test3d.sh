@@ -9,6 +9,9 @@ set tmp=/tmp/temp.out
 set MPIRUN  = "mpirun -np"
 if (`uname` == OSF1) then
    set MPIRUN =  "prun -n"
+   if (`hostname` == milkyway.lanl.gov ) then
+      set MPIRUN  = "mpirun -np"
+   endif
 endif
 
 
@@ -108,6 +111,10 @@ else
    set opt = ""
    echo NOT USING RESTART
 endif
+if (`uname` == OSF1) then
+   set opt = "$opt -b"
+endif
+echo command line options:  $opt
 
 
 echo "***********************************************************"

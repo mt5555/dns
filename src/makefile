@@ -92,7 +92,7 @@ endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
    # defaults for asci Q: MPI paths loaded via modules
-   MPI =  -DUSE_MPI 
+   MPI =  -DUSE_MPI -DUSE_MPI_IO 
    MPILIB =  -lfmpi -lmpi -lelan
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
@@ -103,6 +103,8 @@ ifeq ($(UNAME),OSF1)
       -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
      -lrt -free -lcxxstd -lcxx -lexc -lc
 
+   LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+
 
    ifeq ($(HOST),milkyway.lanl.gov)
       MPI = -DUSE_MPI -I/usr/opt/MPI196/include
@@ -111,10 +113,10 @@ ifeq ($(UNAME),OSF1)
       #MPILIB =
       LSFLIB = 
       LSFFLAGS = 
+      UDM =  
+      UDMLIB = 
+      LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
    endif
-
-   LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
-   $LDFLAGS =   $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
 
 
    #flag for OPENMP:  -omp

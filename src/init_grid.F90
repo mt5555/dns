@@ -371,6 +371,8 @@ if (my_pe==io_pe) then
          udm_input=.true.
       else if (message(1:3)=="-uo") then
          udm_output=.true.
+      else if (message(1:4)=="-mio") then
+         use_mpi_io=.true.
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit
@@ -398,6 +400,7 @@ if (my_pe==io_pe) then
          print *,'-u1 restart file is 1st generation UDM'
          print *,'-ui restart file is UDM'
          print *,'-ui output to UDM'
+         print *,'-mio use MPI-IO'
       endif
    enddo
    print *,'Run name:         ',runname(1:len_trim(runname))

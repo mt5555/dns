@@ -204,7 +204,7 @@ character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
-if (use_mpi_io) then
+if (use_mpi_io .and. io_read==0) then
    call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
    return
 endif
@@ -358,7 +358,6 @@ real*8 :: time
 real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
 character(len=*) :: fname
-logical :: output_spec
 integer im_max,km_max,jm_max
 
 
@@ -367,38 +366,21 @@ integer im_max,km_max,jm_max
 integer i,j,k,n
 real*8 xnx,xny,xnz
 character(len=80) message
-integer n_var_start,ierr,offset=0
+integer :: n_var_start,ierr,offset=0
+
 integer statuses(MPI_STATUS_SIZE)
+integer*8 infoin
+
 CPOINTER fid
 
-if (use_mpi_io) then
-   call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
-   return
-endif
+#ifndef USE_MPI_IO
+call abort("singilefile_mpi_io: error: code not compiled with MPI-IO")   
+#else
 
 
 xnx=o_nx
 xny=o_ny
 xnz=o_nz
-
-
-if (output_spec) then
-
-   ! default is to write everything:
-   xnx=g_nx
-   xny=g_ny
-   xnz=g_nz
-
-   if (dealias==1) then
-      xnx=2+2*(g_nx/3)
-      xny=2+2*(g_ny/3)
-      xnz=2+2*(g_nz/3)
-   endif
-
-   ! if some kind of spectral truncation:
-
-
-endif
 
 if (my_pe==fpe) then
 
@@ -420,26 +402,12 @@ if (my_pe==fpe) then
       call cread8(fid,xnx,1)
       call cread8(fid,xny,1)
       call cread8(fid,xnz,1)
-      if (output_spec) then
-         print *,'Spectrum input data'
-         print *,'number of real coefficients: ',xnx,xny,xnz
-         if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
-            ! we can only upsample low-res data.
-            ! to run with high-res data, output a trucated form.  
-            call print_message("Error: spectral input requires downsampling to lower resolution")
-            call print_message("Input routines can only upsample.") 
-            call print_message("Output routines can only downsample.") 
-            call print_message("Run code at higher resolution, calling Output to downsample")
-            call abort("error in singlefile_io2")
-         endif
-      else
-         if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
-         if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
-         if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
-         call cread8(fid,g_xcord(1),o_nx)
-         call cread8(fid,g_ycord(1),o_ny)
-         call cread8(fid,g_zcord(1),o_nz)
-      endif
+      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+      call cread8(fid,g_xcord(1),o_nx)
+      call cread8(fid,g_ycord(1),o_ny)
+      call cread8(fid,g_zcord(1),o_nz)
    else
       call MPI_Info_create(infoin,ierr)
       call MPI_Info_set(infoin, "striping_factor", "64",ierr) 	
@@ -457,8 +425,10 @@ if (my_pe==fpe) then
       call MPI_File_write(fid,xnx,1,MPI_REAL8,statuses,ierr)
       call MPI_File_write(fid,xny,1,MPI_REAL8,statuses,ierr)
       call MPI_File_write(fid,xnz,1,MPI_REAL8,statuses,ierr)
-      offset=4
-      call MPI_File_close(fid,ierr)
+      call MPI_File_write(fid,g_xcord(1),o_nx,MPI_REAL8,statuses,ierr)
+      call MPI_File_write(fid,g_ycord(1),o_ny,MPI_REAL8,statuses,ierr)
+      call MPI_File_write(fid,g_zcord(1),o_nz,MPI_REAL8,statuses,ierr)
+      offset=4 + o_nx + o_ny + o_nz
    endif
 endif
 
@@ -477,8 +447,10 @@ if (io_read==1) then
 else
    call output1(p,work,work2,fid,fpe,offset)
 endif
-if (my_pe==fpe) call cclose(fid,ierr)
-
+if (my_pe==fpe) then
+   call MPI_File_close(fid,ierr)
+endif
+#endif
 end subroutine
 
 

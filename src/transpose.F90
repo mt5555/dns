@@ -961,7 +961,9 @@ integer request,statuses(MPI_STATUS_SIZE)
 integer i,j,k,l,extra_k,kuse,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d
 integer :: ny_2dx_actual ,offset
-integer*8 zpos,ypos
+#ifdef USE_MPI_IO
+integer (KIND=MPI_OFFSET_KIND) ::  zpos,ypos
+#endif
 
 ny_2dx_actual = ny_2dx
 
@@ -972,7 +974,6 @@ ASSERT("output1 dimension failure 4",n2==nslabz)
 ASSERT("output1 dimension failure 5",n2d==nslabz)
 ASSERT("output1 dimension failure 6",n3==ny_2dx)
 ASSERT("output1 dimension failure 7",n3d==ny_2dx)
-
 
 if (o_nz>g_nz .and. g_bdy_z1/=PERIODIC) then
    call abort("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
@@ -1063,8 +1064,8 @@ do x_pe=0,ncpu_x-1
          endif
       endif
       if (use_mpi_io) then
-#ifdef USE_MPI
-         zpos = z_pe*nslabz + k 
+#ifdef USE_MPI_IO
+         zpos = z_pe*nslabz + k-1 
          ypos = y_pe*nslaby + x_pe*ny_2dx_actual
          zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
          call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
@@ -1085,10 +1086,10 @@ do x_pe=0,ncpu_x-1
          endif
          if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then     ! append to the end, y-direction
             if (use_mpi_io) then
-#ifdef USE_MPI
-               zpos = z_pe*nslabz + k 
-               ypos = y_pe*nslaby + x_pe*ny_2dx_actual
-               zpos = 8*(zpos*o_nx*o_ny+ypos*o_nx)
+#ifdef USE_MPI_IO
+               zpos = z_pe*nslabz + k -1
+               ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
+               zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
                call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
                call MPI_File_write(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
 #endif
