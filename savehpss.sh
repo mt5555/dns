@@ -21,7 +21,9 @@ EOF
 if ( ( $ext == all ) || ( $ext == diag ) ) then
    echo 'saving diagnostics'
    psi save -d dns/$name $name*.scalars-turb
-   psi save -d dns/$name $name*.isostr $name*.isow2s2 $name*.iso1
+   psi save -d dns/$name $name*.isostr 
+   psi save -d dns/$name $name*.isow2s2
+   psi save -d dns/$name $name*.iso1
    psi save -d dns/$name  $name*.sf
    psi save -d dns/$name $name*.s2v2
    psi save -d dns/$name $name*.jpdf

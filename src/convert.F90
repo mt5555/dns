@@ -121,7 +121,8 @@ icount=icount+1
       enddo
       enddo
       enddo
-      ! output vorticity magnitude
+      call print_message("outputting norm squared as REAL*4...")
+      output_real4=.true.
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2"

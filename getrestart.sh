@@ -1,4 +1,4 @@
-#! /bin/csh -f
+#!/bin/tcsh -f
 #
 # get some restart files from HPSS or specified directory
 # using the specified basename, find the file of the form basename????.????.u
@@ -139,7 +139,7 @@ endif
 else
 
    #search $fpath for newest restart file
-   set resnamew = `\ls {$fpath}/{$name}*.{$ext} | sort | tail -1`
+   set resnamew = `ls {$fpath}/{$name}*.{$ext} | sort | tail -1`
    if ($resnamew =="") then
       echo {$fpath}/{$name}
       echo "Error finding restart file.  Exit"

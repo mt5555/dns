@@ -169,8 +169,8 @@ do
 	 read_uvw=.true.
       endif
       
-      uscale=.01 / pi2               ! (del_u)              units:  m/s
-      epsscale=.01 / pi2**(2./3.)    ! (mu*gradu**2)**1/3   units: 
+!      uscale=.01 / pi2               ! (del_u)              units:  m/s
+!      epsscale=.01 / pi2**(2./3.)    ! (mu*gradu**2)**1/3   units: 
       if (my_pe==io_pe) then
          print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
       endif
