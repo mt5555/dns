@@ -41,6 +41,43 @@ structure function:
 
 
 **********************************************************************************
+parallel timings on blue mountain.  
+Nirvana is too unreliable.  
+
+256x256x256
+
+1x1x128 parallel decompostion
+                          dns_solve      _to_z   _from_z
+original                     1.36         .41     .40
+
+block=1                      1.43         .47     .41
+block=1                      1.36         .44     .38
+
+block=2                      1.33         .41.    .37
+block=2                      1.32         .41     .37
+
+block=4                      1.84         .74     .53
+block=4                      1.32         .44     .33
+block=4                      1.31         .42     .34
+
+
+block=32
+
+block=128                    1.45         .51     .39
+                             1.51         .54     .41
+
+
+
+                          dns_solve      _to_z   _from_z
+original 1x2x64              1.81        .49      .37
+original 1x4x32              1.79        .44      .33
+original 1x8x16      IN
+
+
+
+
+
+**********************************************************************************
 FFT timings. 
 
 *****************************************************************
@@ -58,6 +95,8 @@ STK+PGCC                   1.58  1.58
 Linux laptop Lahey
 FFT99                      1.59  1.58
 STK2+gcc                   1.72  1.71
+
+dunnaway PGI F90            .75
 
 
 Autrey Sun Ultra 60
