@@ -315,6 +315,7 @@ Q=0
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_DIMS, sizesudm, ierr)
    call UDM_INFO_ITEM_SET(infoid, UDM_INFO_STARTS, offsetsudm, ierr)
 
+   call print_message("reading U...")
    CALL UDM_DATASET_READ(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
 
    do k = nz1, nz2  
@@ -329,6 +330,7 @@ Q=0
    enddo
    
    dsnameudm = 'v'//char(0)
+   call print_message("reading V...")
    CALL UDM_DATASET_READ(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
    do k = nz1, nz2       
    k1 = k - nz1 + 1 
@@ -342,6 +344,7 @@ Q=0
    enddo
  
    dsnameudm = 'w'//char(0)
+   call print_message("reading W...")
    CALL UDM_DATASET_READ(dsnameudm,fidudm,UDM_ATOMIC_DOUBLE,infoid,bufudm,ierr)
    do k = nz1, nz2       
    k1 = k - nz1 + 1 
@@ -354,6 +357,7 @@ Q=0
    enddo
    enddo
 
+   call print_message("done.  calling UDM_FILE_CLOSE")
    call UDM_INFO_FREE(1,infoid,ierr)
    call UDM_FILE_CLOSE(fidudm, ierr)
 

@@ -11,7 +11,8 @@ real*8 :: time
 ! local variables
 integer i,j,k,n
 real*8 xnx,xny,xnz,xnv
-character(len=80) message
+character(len=80) message,ftime
+character(len=240) fname
 character(len=20) tmp
 CPOINTER :: fid
 integer ierr
@@ -36,18 +37,15 @@ write(tmp,'(i5)') 10000+my_z
 message=message(1:len_trim(message)) // "-" // tmp(n:5) // "-"
 
 write(tmp,'(f10.4)') 10000.0000 + time
-message=message(1:len_trim(message)) // tmp(2:10)
+ftime=message(1:len_trim(message)) // tmp(2:10)
 
-message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(1:len_trim(message)) // ".data"
-
-!open(unit=10,file=message,form='binary')
-call copen(message,"w",fid,ierr)
+fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) //  &
+        ftime(1:len_trim(ftime)) // ".header"
+call copen(fname,"w",fid,ierr)
 if (ierr/=0) then
-   write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
+   write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
    call abort(message)
 endif
-
-
 
 call cwrite8(fid,time,1)
 xnv=n_var
@@ -58,16 +56,54 @@ call cwrite8(fid,xnx,1)
 call cwrite8(fid,xny,1)
 call cwrite8(fid,xnz,1)
 call cwrite8(fid,xnv,1)
-do n=1,n_var
+call cclose(fid,ierr)
+
+
+fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+   // ftime(1:len_trim(ftime)) // ".u"
+call copen(fname,"w",fid,ierr)
+if (ierr/=0) then
+   write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
+   call abort(message)
+endif
 do k=nz1,nz2
 do j=ny1,ny2
-!do i=nx1,nx2
-   call cwrite8(fid,Q(nx1,j,k,n),nx2-nx1+1)
-!enddo
-enddo
+   call cwrite8(fid,Q(nx1,j,k,1),nx2-nx1+1)
 enddo
 enddo
 call cclose(fid,ierr)
+
+fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+   // ftime(1:len_trim(ftime)) // ".v"
+call copen(fname,"w",fid,ierr)
+if (ierr/=0) then
+   write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
+   call abort(message)
+endif
+do k=nz1,nz2
+do j=ny1,ny2
+   call cwrite8(fid,Q(nx1,j,k,2),nx2-nx1+1)
+enddo
+enddo
+call cclose(fid,ierr)
+
+fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+   // ftime(1:len_trim(ftime)) // ".w"
+call copen(fname,"w",fid,ierr)
+if (ierr/=0) then
+   write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
+   call abort(message)
+endif
+do k=nz1,nz2
+do j=ny1,ny2
+   call cwrite8(fid,Q(nx1,j,k,3),nx2-nx1+1)
+enddo
+enddo
+call cclose(fid,ierr)
+
+
+
+
 
 
 end subroutine
