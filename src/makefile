@@ -175,7 +175,4 @@ params.h:
 	echo "Run gridsetup.py to generage a params.h file!"
 	exit 1
 
-transpose.h:
-	echo "Run gridsetup.py to generage a transpose.h file!"
-	exit 1
 

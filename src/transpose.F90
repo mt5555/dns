@@ -1,5 +1,4 @@
 #include "macros.h"
-#include "transpose.h"
 
 module transpose
 use params
@@ -90,12 +89,16 @@ n3d=ny_2dz
 iproc=my_z
 do j=1,ny_2dz  ! loop over points in a single slab
    jj=ny1 + iproc*ny_2dz +j -1
-   ASSERT("transpose_to_z jj failure 1s",jj<=ny2)
+   !ASSERT("transpose_to_z jj failure 1s",jj<=ny2)
    ASSERT("transpose_to_z jj failure 2s",jj>=ny1)
    do k=nz1,nz2
-      do i=nx1,nx2
+   do i=nx1,nx2
+      if (jj>ny2) then
+         pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=0
+      else
          pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=p(i,jj,k)
-      enddo
+      endif
+   enddo
    enddo
 enddo
 
@@ -124,12 +127,16 @@ do  ! loop over blocks of messages of size nbcount
          L=0
          do j=1,ny_2dz  ! loop over points in a single slab
             jj=ny1 + iproc*ny_2dz +j -1
-            ASSERT("transpose_to_z jj failure 1",jj<=ny2)
+            !ASSERT("transpose_to_z jj failure 1",jj<=ny2)
             ASSERT("transpose_to_z jj failure 2",jj>=ny1)
             do k=nz1,nz2
                do i=nx1,nx2
                   L=L+1
-                  sendbuf(L,nb)=p(i,jj,k)
+                  if (jj>ny2) then
+                     sendbuf(L,nb)=0
+                  else
+                     sendbuf(L,nb)=p(i,jj,k)
+                  endif
                enddo
             enddo
          enddo
@@ -236,11 +243,15 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
    if (iproc==my_z) then
       do j=1,ny_2dz  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dz +j -1
-         ASSERT("transpose_to_z jj failure 1",jj<=ny2)
+         !ASSERT("transpose_to_z jj failure 1",jj<=ny2)
          ASSERT("transpose_to_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
          do i=nx1,nx2
-            pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=p(i,jj,k)
+            if (jj>ny2) then
+               pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=0
+            else
+               pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=p(i,jj,k)
+            endif
          enddo
          enddo
       enddo
@@ -255,12 +266,16 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dz +j -1
-         ASSERT("transpose_to_z jj failure 1",jj<=ny2)
+         !ASSERT("transpose_to_z jj failure 1",jj<=ny2)
          ASSERT("transpose_to_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
          do i=nx1,nx2
             l=l+1
-            sendbuf(l)=p(i,jj,k)
+            if (jj>ny2) then
+               sendbuf(l)=0
+            else
+               sendbuf(l)=p(i,jj,k)
+            endif
          enddo
          enddo
       enddo
@@ -357,13 +372,15 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
    if (iproc==my_z) then
       do j=1,ny_2dz  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dz +j -1
-         ASSERT("transpose_from_z jj failure 1",jj<=ny2)
+         !ASSERT("transpose_from_z jj failure 1",jj<=ny2)
          ASSERT("transpose_from_z jj failure 2",jj>=ny1)
+         if (jj<=ny2) then
          do k=nz1,nz2
          do i=nx1,nx2
             p(i,jj,k)=pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)
          enddo
          enddo
+         endif
       enddo
    else
 
@@ -400,12 +417,12 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dz +j -1
-         ASSERT("transpose_from_z jj failure 1",jj<=ny2)
+         !ASSERT("transpose_from_z jj failure 1",jj<=ny2)
          ASSERT("transpose_from_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
          do i=nx1,nx2
 	    l=l+1
-            p(i,jj,k)=recbuf(l)
+            if (jj<=ny2) p(i,jj,k)=recbuf(l)
          enddo
          enddo
       enddo
@@ -441,8 +458,6 @@ end subroutine
 
 
 
-
-#ifdef TRANSPOSE_X_SPLIT_Y
 
 
 
@@ -493,16 +508,19 @@ n3=ny_2dx
 n3d=ny_2dx
 
 
-
 do iproc=0,mpidims(1)-1  ! loop over each slab
    if (iproc==my_x) then
       do j=1,ny_2dx  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dx +j -1
-         ASSERT("transpose_to_x2 jj failure 1",jj<=ny2)
+         !ASSERT("transpose_to_x2 jj failure 1",jj<=ny2)
          ASSERT("transpose_to_x2 jj failure 2",jj>=ny1)
          do i=nx1,nx2
          do k=nz1,nz2
-            pt(i+iproc*nslabx-nx1+1,k-nz1+1,j)=p(i,jj,k)
+            if (jj<=ny2) then
+               pt(i+iproc*nslabx-nx1+1,k-nz1+1,j)=p(i,jj,k)
+            else
+               pt(i+iproc*nslabx-nx1+1,k-nz1+1,j)=0
+            endif
          enddo
          enddo
       enddo
@@ -518,12 +536,16 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
       l=0
       do j=1,ny_2dx  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dx +j -1
-         ASSERT("transpose_to_x2 jj failure 1",jj<=ny2)
+         !ASSERT("transpose_to_x2 jj failure 1",jj<=ny2)
          ASSERT("transpose_to_x2 jj failure 2",jj>=ny1)
          do i=nx1,nx2
          do k=nz1,nz2
             l=l+1
-            sendbuf(l)=p(i,jj,k)
+            if (jj<=ny2) then
+               sendbuf(l)=p(i,jj,k)
+            else
+               sendbuf(l)=0
+            endif
          enddo
          enddo
       enddo
@@ -608,13 +630,15 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
    if (iproc==my_x) then
       do j=1,ny_2dx  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dx +j -1
-         ASSERT("transpose_from_x2 jj failure 1",jj<=ny2)
+         !ASSERT("transpose_from_x2 jj failure 1",jj<=ny2)
          ASSERT("transpose_from_x2 jj failure 2",jj>=ny1)
+         if (jj<=ny2) then
          do i=nx1,nx2
          do k=nz1,nz2
             p(i,jj,k)=pt(i+iproc*nslabx-nx1+1,k-nz1+1,j)
          enddo
          enddo
+         endif
       enddo
    else
 #ifdef USE_MPI
@@ -649,12 +673,12 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
       l=0
       do j=1,ny_2dx  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dx +j -1
-         ASSERT("transpose_from_x2 jj failure 1",jj<=ny2)
+         !ASSERT("transpose_from_x2 jj failure 1",jj<=ny2)
          ASSERT("transpose_from_x2 jj failure 2",jj>=ny1)
          do i=nx1,nx2
          do k=nz1,nz2
             l=l+1
-            p(i,jj,k)=recbuf(l)
+            if (jj<=ny2) p(i,jj,k)=recbuf(l)
          enddo
          enddo
       enddo
@@ -665,15 +689,6 @@ enddo
 call wallclock(tmx2) 
 tims(9)=tims(9)+(tmx2-tmx1)          
 end subroutine
-
-
-#endif
-
-
-
-
-
-
 
 
 
@@ -741,11 +756,15 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
    if (iproc==my_y) then
       do i=1,nx_2dy  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2dy +i -1
-         ASSERT("transpose_to_y ii failure 1",ii<=nx2)
+         !ASSERT("transpose_to_y ii failure 1",ii<=nx2)
          ASSERT("transpose_to_y ii failure 2",ii>=nx1)
          do j=ny1,ny2
          do k=nz1,nz2
-            pt(j+iproc*nslaby-ny1+1,k-nz1+1,i)=p(ii,j,k)
+            if (ii>nx2) then
+               pt(j+iproc*nslaby-ny1+1,k-nz1+1,i)=0
+            else
+               pt(j+iproc*nslaby-ny1+1,k-nz1+1,i)=p(ii,j,k)
+            endif
          enddo
          enddo
       enddo
@@ -762,12 +781,16 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
       l=0
       do i=1,nx_2dy  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2dy +i -1
-         ASSERT("transpose_to_y ii failure 1",ii<=nx2)
+         !ASSERT("transpose_to_y ii failure 1",ii<=nx2)
          ASSERT("transpose_to_y ii failure 2",ii>=nx1)
          do j=ny1,ny2
          do k=nz1,nz2
             l=l+1
-            sendbuf(l)=p(ii,j,k)
+            if (ii>nx2) then
+               sendbuf(l)=0
+            else
+               sendbuf(l)=p(ii,j,k)
+            endif
          enddo
          enddo
       enddo
@@ -852,13 +875,15 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
    if (iproc==my_y) then
       do i=1,nx_2dy  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2dy +i-1
-         ASSERT("transpose_from_y ii failure 1",ii<=nx2)
+         !ASSERT("transpose_from_y ii failure 1",ii<=nx2)
          ASSERT("transpose_from_y ii failure 2",ii>=nx1)
+         if (ii<=nx2) then
          do j=ny1,ny2
          do k=nz1,nz2
             p(ii,j,k)=pt(j+iproc*nslaby-ny1+1,k-nz1+1,i)
          enddo
          enddo
+         endif
       enddo
    else
 #ifdef USE_MPI
@@ -893,12 +918,12 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
       l=0
       do i=1,nx_2dy  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2dy + i -1
-         ASSERT("transpose_from_y ii failure 1",ii<=nx2)
+         !ASSERT("transpose_from_y ii failure 1",ii<=nx2)
          ASSERT("transpose_from_y ii failure 2",ii>=nx1)
          do j=ny1,ny2
          do k=nz1,nz2
             l=l+1
-            p(ii,j,k)=recbuf(l)
+            if (ii<=nx2) p(ii,j,k)=recbuf(l)
          enddo
          enddo
       enddo
@@ -917,7 +942,6 @@ end subroutine
 
 
 
-#ifdef TRANSPOSE_X_SPLIT_Y
 
 subroutine output1(p,pt,buf,fid,fpe)
 use params
@@ -1151,7 +1175,7 @@ call transpose_from_x(pt,p,n1,n1d,n2,n2d,n3,n3d)
 
 end subroutine
 
-#endif
+
 
 
 

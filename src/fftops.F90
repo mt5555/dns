@@ -1715,18 +1715,19 @@ enddo
 
 
 ! solve Helm(f) = b with 0 b.c.
+#if 0
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
+#endif
+
 call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
 call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)     
 call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
 
-
 call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
 call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
-call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
 
 
 do k=nz1,nz2
@@ -1760,10 +1761,6 @@ enddo
 enddo
 enddo
 
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
-call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
-
 call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
 call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
@@ -1772,6 +1769,11 @@ call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
 call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
 
+#if 0
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
+#endif
 
 !restor boundary values
 if (my_x==0) then

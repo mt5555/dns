@@ -42,6 +42,10 @@ make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin 
 make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
+./gridsetup.py 5 5 1 65 65 1  2 2 0 2 2 0
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 25 ./dnsvor -d /tmp < $refin > $tmp 
+../testing/check.sh $tmp $refout
+
 
 
 endif

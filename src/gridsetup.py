@@ -68,7 +68,6 @@ def fullfactor(n):
 n=range(3)
 ncpu=range(3)
 nslab=range(3)
-lmn=range(3)
 for i in range(3):
    ncpu[i] = atoi(sys.argv[1+i])
 for i in range(3):
@@ -87,44 +86,17 @@ for i in range(3):
       sys.exit(1)
    nslab[i]=n[i]/ncpu[i]		
 
-use_x_z=1
-use_x_y=1
 for i in range(3):
-   j=(i+2) % 3
+   if (i==0):
+      j=1
+   if (i==1):
+      j=0
+   if (i==2):
+      j=1
 
    if (0 <> nslab[j] % ncpu[i]):
-      print "ncpu[",i,"]=",ncpu[i],"does not divide nslab[",j,"]:",nslab[j]
-      if i==0:
-         print "cant use TRANSPOSE_X_SPLIT_Z, will use TRANSPOSE_X_SPLIT_Y"
-         use_x_z=0
-      else:
-         sys.exit(1)
+      print "WARNING: ncpu[",i,"]=",ncpu[i],"does not divide nslab[",j,"]:",nslab[j]
 
-   # also try j=1
-   if i==0:  
-       j=1
-       if (0 <> nslab[j] % ncpu[i]):
-          print "ncpu[",i,"]=",ncpu[i],"does not divide nslab[",j,"]:",nslab[j]
-          print "cant use TRANSPOSE_X_SPLIT_Y, will use TRANSPOSE_X_SPLIT_Z"
-          use_x_y=0
-
-       if use_x_y:   # use this value when possible
-          use_x_z=0  
-          j=1
-          #print 'Using TRANSPOSE_X_SPLIT_Y. '
-
-       if use_x_z:
-          use_x_y=0
-          j=(i+2) % 3  # go back to original value
-          print 'Using TRANSPOSE_X_SPLIT_Z. '
-          print 'Oops: TRANSPOSE_X_SPLIT_Z no longer supported.  Exiting...'
-          sys.exit(1)
-
-
-          
-
-
-   lmn[i]=ncpu[i]/nslab[j]
 
 
 
@@ -137,36 +109,6 @@ for i in range(3):
 print sys.argv[1:]
 print "Total cpus:   ",ncpu[0]*ncpu[1]*ncpu[2],
 print "Grid per cpu: ",nslab[0],nslab[1],nslab[2]
-
-
-fout=open("/tmp/transpose.h",'w')
-fout.write("! Specify the 2D x-coordinate parallel decomposition\n")
-fout.write("! (y and z 2D decompositions are fixed\n")
-fout.write("\n")
-fout.write("! default is TRANSPOSE_X_SPLIT_Y, which can be used with nslabz>=1 \n")
-fout.write("! TRANSPOSE_X_SPLIT_Z gives the original parallel decomposition\n")
-fout.write("! which cant be used with nslabz=1\n")
-fout.write("\n")
-if (use_x_z):
-   fout.write("#define TRANSPOSE_X_SPLIT_Z\n")
-   fout.write("#undef TRANSPOSE_X_SPLIT_Y\n")
-else:
-   fout.write("#undef TRANSPOSE_X_SPLIT_Z\n")
-   fout.write("#define TRANSPOSE_X_SPLIT_Y\n")
-fout.close()
-
-cmd = "diff /tmp/transpose.h transpose.h"
-(status,out) = commands.getstatusoutput(cmd) 
-if (status != 0):
-   print "Creating new transpose.h file.",
-   cmd = "mv -f /tmp/transpose.h transpose.h"
-   status = os.system(cmd)
-else:
-   cmd = "rm -f /tmp/transpose.h"
-   status = os.system(cmd)
-   print "transpose.h file unchanged.",
-
-
 
 
 

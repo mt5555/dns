@@ -20,14 +20,14 @@ ns_ghost.o: macros.h params.o fft_interface.o ghost.o makefile
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
 ns_psivor.o: macros.h params.o fft_interface.o ghost.o makefile 
-params.o: macros.h transpose.h params.h makefile 
+params.o: macros.h params.h makefile 
 sforcing.o: macros.h params.o mpi.o makefile 
 shallow.o: macros.h params.o fft_interface.o sforcing.o transpose.o makefile 
 solve.o: macros.h params.o ghost.o bc.o mpi.o makefile 
 splitspec.o: macros.h makefile 
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 
-transpose.o: macros.h transpose.h params.o mpi.o makefile 
+transpose.o: macros.h params.o mpi.o makefile 
 util.o: macros.h mpi.o params.o makefile 
 fbelimb.o: makefile 
 fft99.o: makefile 

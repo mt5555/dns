@@ -27,7 +27,7 @@ call init_model()
 !write(message,'(a)') 'Running some tests'
 !call print_message(message)
 !call test           ! optional testing  routines go here
-
+!stop
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

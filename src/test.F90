@@ -5,12 +5,12 @@ use params
 
 
 !call test_fft_fd
-!call test_transform
+call test_transform
 !call test_fft
 !call test_poisson
 !call test_divfree
-call test_poisson_dirichlet
-call test_poisson_ghost
+!call test_poisson_dirichlet
+!call test_poisson_ghost
 
 end subroutine
 
@@ -312,12 +312,22 @@ enddo
 enddo
 
 output=0
+call transpose_to_x(input,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,output,n1,n1d,n2,n2d,n3,n3d)
+mx=maxval(abs(input-output))
+call maxvalMPI(mx)
+write(message,*) 'transpose x round trip error:',mx
+call print_message(message)
+
+
+output=0
 call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
 mx=maxval(abs(input-output))
 call maxvalMPI(mx)
 write(message,*) 'transpose z round trip error:',mx
 call print_message(message)
+
 
 output=0
 call transpose_to_y(input,work,n1,n1d,n2,n2d,n3,n3d)
@@ -327,13 +337,6 @@ call maxvalMPI(mx)
 write(message,*) 'transpose y round trip error:',mx
 call print_message(message)
 
-output=0
-call transpose_to_x(input,work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_x(work,output,n1,n1d,n2,n2d,n3,n3d)
-mx=maxval(abs(input-output))
-call maxvalMPI(mx)
-write(message,*) 'transpose x round trip error:',mx
-call print_message(message)
 
 
 

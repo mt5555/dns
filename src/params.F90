@@ -1,5 +1,4 @@
 #include "macros.h"
-#include "transpose.h"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -9,13 +8,7 @@
 ! pick ncpu_x,ncpu_y,ncpu_z	
 ! Then l,m,n, and set:
 !
-! #ifdef TRANSPOSE_X_SPLIT_Z   (NO LONGER SUPPORTED)
-!   
-!    ncpu_x*l=nslabz
-!    ncpu_y*m=nslabx
-!    ncpu_z*n=nslaby
 !
-! #ifdef TRANSPOSE_X_SPLIT_Y        (usefull if nslabz=1)
 !    ncpu_x*l=nslaby
 !    ncpu_y*m=nslabx
 !    ncpu_z*n=nslaby  <==>    n=l*ncpu_x/ncpu_z
@@ -77,6 +70,27 @@ integer :: g_bdy_y1=PERIODIC
 integer :: g_bdy_y2=PERIODIC
 integer :: g_bdy_z1=PERIODIC
 integer :: g_bdy_z2=PERIODIC
+
+
+! flag indicating (if there is a real boundary) if the boundary is at
+! nx2+1 (instead of the usual nx2).  Only used when we need to use the sine transform,
+! sine without this flag, a 400x400 grid would need a len=399 transform.  
+! 
+! setting this flag changes just adds 1 to nx2 along the nx2 boundary. 
+! So make sure that:
+!   1. code is not relying on 2 rows of ghost cells at the nx2 boundary
+!   2. ncpu_y*nx_2dy>=nslabx 
+!
+! parallel: 8x16   grid:  800x1600
+! grid per CPU:  100x100 or 101x101
+!
+! nslabx=100, or 101
+! nx_2dy = 7, ncpu_y*nx_2dy=112 > 101
+!
+integer :: offset_x2=0
+integer :: offset_y2=0
+integer :: offset_z2=0
+
 
 
 character(len=80) :: runname
@@ -337,10 +351,9 @@ real*8 :: tims(ntimers)=0
 ! parallel decompositions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !integer :: ncpu_x=1,ncpu_y=1,ncpu_z=1
-integer,parameter :: nz_2dx=nslabz/ncpu_x     ! TRANSPOSE_X_SPLIT_Z 
-integer,parameter :: ny_2dx=nslaby/ncpu_x     ! TRANSPOSE_X_SPLIT_Y  (usefull if nslabz=1)
-integer,parameter :: nx_2dy=nslabx/ncpu_y     ! TRANSPOSE_Y_SPLIT_X  (always used)
-integer,parameter :: ny_2dz=nslaby/ncpu_z     ! TRANSPOSE_Z_SPLIT_Y  (always used)
+integer :: ny_2dx=nslaby/ncpu_x    
+integer :: nx_2dy=nslabx/ncpu_y    
+integer :: ny_2dz=nslaby/ncpu_z    
 
 integer :: io_pe
 integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
@@ -364,12 +377,6 @@ integer :: comm_3d                 ! the MPI cartesian communcator
 !
 ! for simplicity, we require:
 !
-! #ifdef TRANSPOSE_X_SPLIT_Z 
-!    ncpu_x divides (nz2-nz1+1)   nz_2dx=(nz2-nz1+1)/ncpu_x
-!    ncpu_y divides (nx2-nx1+1)   nx_2dy=(nx2-nx1+1)/ncpu_y
-!    ncpu_z divides (ny2-ny1+1)   ny_2dz=(ny2-ny1+1)/ncpu_z
-!
-! #ifdef TRANSPOSE_X_SPLIT_Y        (usefull if ncpu_z=1)
 !    ncpu_x divides (ny2-ny1+1)   ny_2dx=(ny2-ny1+1)/ncpu_x
 !    ncpu_y divides (nx2-nx1+1)   nx_2dy=(nx2-nx1+1)/ncpu_y
 !    ncpu_z divides (ny2-ny1+1)   ny_2dz=(ny2-ny1+1)/ncpu_z
@@ -380,6 +387,9 @@ integer :: comm_3d                 ! the MPI cartesian communcator
 
 
 contains
+
+
+
 
 subroutine params_init
 character(len=80) message
@@ -398,29 +408,24 @@ endif
 
 
 ! these values must divide with no remainder:
-!nz_2dx=nslabz/ncpu_x     ! TRANSPOSE_X_SPLIT_Z 
-!ny_2dx=nslaby/ncpu_x     ! TRANSPOSE_X_SPLIT_Y  (usefull if nslabz=1)
-!nx_2dy=nslabx/ncpu_y     ! TRANSPOSE_Y_SPLIT_X  (always used)
-!ny_2dz=nslaby/ncpu_z     ! TRANSPOSE_Z_SPLIT_Y  (always used)
-
-#if (!defined TRANSPOSE_X_SPLIT_Z && !defined TRANSPOSE_X_SPLIT_Y)
-   call abort("define TRANSPOSE_X_SPLIT_Y or TRANSPOSE_X_SPLIT_Z in transpose.h") 
-#endif
-
-#ifdef TRANSPOSE_X_SPLIT_Z
-if (0/=mod(nslabz,ncpu_x)) then
-   fail=1
-   call print_message("ncpu_x does not divide nz");
+if (ncpu_x*ny_2dx<nslaby) then
+   call print_message("*WARNING*:  transpose_to_x not perfectly load balanced")
+   ny_2dx=ny_2dx+1
 endif
-#endif
+if (ncpu_y*nx_2dy<nslabx) then
+   nx_2dy=nx_2dy+1
+   call print_message("*WARNING*:  transpose_to_y not perfectly load balanced")
+endif
+if (ncpu_z*ny_2dz<nslaby) then
+   ny_2dz=ny_2dz+1
+   call print_message("*WARNING*:  transpose_to_z not perfectly load balanced")
+endif
 
-#ifdef TRANSPOSE_X_SPLIT_Y
+#if 0
 if (0/=mod(nslaby,ncpu_x)) then
    fail=1
    call print_message("ncpu_x does not divide ny");
 endif
-#endif
-
 if (0/=mod(nslabx,ncpu_y)) then
    fail=1
    call print_message("ncpu_y does not divide nx");
@@ -429,28 +434,14 @@ if (0/=mod(ny2-ny1+1,ncpu_z)) then
    fail=1
    call print_message("ncpu_z does not divide nz");
 endif
+#endif
+
 
 
 
 ! memory contraint: 2D decomposition should fit in a 3D decomposition array
 ! check if: (g_nz2)*nslabx*ny_2d <= nx*ny*nz)
 !
-#ifdef TRANSPOSE_X_SPLIT_Z
-if ((g_nx2)*nz_2dx*real(nslaby,r8kind) > nx*nz*real(ny,r8kind) )  then
-   fail=1
-   call print_message("insufficient storage.");
-   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
-   call print_message(message)	
-   write(message,'(a,f10.0)') "storage needed for 2D x-decomposition: ", &
-     (g_nx2)*nz_2dx*real(nslaby,r8kind)
-   call print_message(message)	
-   call print_message("You might also try #define TRANSPOSE_X_SPLIT_Y in transpose.h")
-
-endif
-#endif
-
-
-#ifdef TRANSPOSE_X_SPLIT_Y
 if ((g_nx2)*ny_2dx*real(nslabz,r8kind) > nx*nz*real(ny,r8kind) )  then
    fail=1
    call print_message("insufficient storage.");
@@ -459,10 +450,8 @@ if ((g_nx2)*ny_2dx*real(nslabz,r8kind) > nx*nz*real(ny,r8kind) )  then
    write(message,'(a,f10.0)') "storage needed for 2D x-decomposition: ", &
      (g_nx2)*ny_2dx*real(nslabz,r8kind)
    call print_message(message)	
-   call print_message("You might also try #define TRANSPOSE_X_SPLIT_Z in transpose.h")
-
 endif
-#endif
+
 
 
 
