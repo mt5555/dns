@@ -90,7 +90,7 @@ if not padset:
 
 for i in range(3):
    if (0 <> n[i] % ncpu[i]):
-      print "n[",i,"]",n[i],"not divisable by ncpu[",i,"]=",ncpu[i]
+      print "ERROR: n[",i,"]",n[i],"not divisable by ncpu[",i,"]=",ncpu[i]
       sys.exit(1)
    nslab[i]=n[i]/ncpu[i]		
 

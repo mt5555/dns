@@ -99,7 +99,8 @@ Linux box sizes:          3D array size: 3*8*n**3.  5 big arrays per run.
  96^3    120M            20M per array, 100M total.  
 128^3    281M            48M per array
 
-extrapolated:256^3   2.25Gb           .375M per variable
+extrapolated:
+256^3   2.25Gb           .375M per variable
 480^3:  15Gb
 512^3:  18Gb             3Gb per variable  (9GB per timestep.  4.5gb   130m gridpoints
 1024^3  144Gb            24Gb per variable                             1b gridpoints

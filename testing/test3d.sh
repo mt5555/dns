@@ -92,6 +92,7 @@ else
    echo NOT USING RESTART
 endif
 
+
 echo "***********************************************************"
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
 make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns $opt -d $rundir reference3d  < $refin > $tmp 

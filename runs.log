@@ -17,16 +17,16 @@ REDO:
 dns:    1x1x512     45.84 (5 timesteps)
 dnsghost 8x8x8      6.50 (1 timestep)
 dnsghost 2x2x128    insufficient virtual memory
-dnsghost 8x4x16       IN-running
-dnsghost 4x4x32       IN
+dnsghost 8x4x16     same
+dnsghost 4x4x32     same
 
 
 1536^3 
 
 dnsghost 1x1x512   wont load
-dnsghost 8x8x8     3.69m  1 timestep
-dnsghost 2x1x256   2.46m
-dnsghost 2 2 128   2.83m
+dnsghost 8x8x8     2.70m  1 timestep
+dnsghost 2x1x256   1.73m
+dnsghost 2 2 128   2.00m
 dnsghost 4 2 64
 
 

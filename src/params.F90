@@ -451,13 +451,16 @@ endif
 if (ncpu_x*ny_2dx<nslaby) then
    call print_message("*WARNING*:  transpose_to_x not perfectly load balanced")
    ny_2dx=ny_2dx+1
+   ny_2dx=ny_2dx + mod(ny_2dx,2)
 endif
 if (ncpu_y*nx_2dy<nslabx) then
    nx_2dy=nx_2dy+1
+   nx_2dy=nx_2dy + mod(nx_2dy,2)
    call print_message("*WARNING*:  transpose_to_y not perfectly load balanced")
 endif
 if (ncpu_z*ny_2dz<nslaby) then
    ny_2dz=ny_2dz+1
+   ny_2dz=ny_2dz + mod(ny_2dz,2)
    call print_message("*WARNING*:  transpose_to_z not perfectly load balanced")
 endif
 

@@ -47,17 +47,24 @@ real*8 :: rhs(nx,ny,nz,3)
 real*8 :: q4z(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: rhsz(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: f_diss
+
+! local
 integer :: n
+real*8 :: fdiss
 
 q4=Q
 do n=1,3
    call z_fft3d_trashinput(q4(1,1,1,n),rhsz(1,1,1,n),work)
 enddo
 q4z=0
-call sforce(q4z,rhsz,f_diss)
+call sforce(q4z,rhsz,fdiss)
 do n=1,3
    call z_ifft3d(q4z(1,1,1,n),rhs(1,1,1,n),work)
 enddo
+f_diss=fdiss  ! strange bug on SGI, dnsghost, f_diss is non zero here, but
+              ! return value in ns_ghost.F90 is 0.  if we introduce 'fdiss',
+              ! everthing is ok
+return
 end subroutine
 
 
