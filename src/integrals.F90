@@ -2,13 +2,14 @@
 
 subroutine compute_ke(u,pe,ke)
 use params
+use mpi
 implicit none
 integer :: pe             ! compute totals on this processor
 real*8 :: u(nx,ny,nz,3)
 real*8 :: ke
 
 ! local variables
-integer i,j,k,n
+integer i,j,k,n,ierr
 real*8 ke2
                                      ! vor = ints(2)
 
@@ -43,6 +44,7 @@ end subroutine
 
 subroutine compute_div(Q,pe,divmx,divi)
 use params
+use mpi
 implicit none
 integer pe
 real*8 :: Q(nx,ny,nz,n_var)
@@ -52,7 +54,8 @@ real*8 :: divmx,divi
 real*8 :: p(nx,ny,nz)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-integer i,j,k
+real*8 :: g_mx
+integer i,j,k,ierr
 
 divmx=0
 divi=0
@@ -67,9 +70,8 @@ enddo
 enddo
 
 #ifdef USE_MPI
-   call MPI_REDUCE(mx,MPI_MAX)
    g_mx=divmx
-   call MPI_reduce(g_mx,mx,1,MPI_REAL8,MPI_MAX,pe,comm_3d,ierr)
+   call MPI_reduce(g_mx,divmx,1,MPI_REAL8,MPI_MAX,pe,comm_3d,ierr)
    g_mx=divi
    call MPI_reduce(g_mx,divi,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
@@ -87,8 +89,9 @@ end subroutine
 
 subroutine compute_spectrum(p,spectrum,iwave_max,pe)
 use params
+use mpi
 implicit none
-integer :: iwave_max
+integer :: iwave_max,ierr
 integer :: pe             ! compute spectrum on this processor
 real*8 :: p(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)

@@ -50,13 +50,14 @@ end program DNS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine dns_solve(Q)
 use params
+use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 
 
 !local variables
 real*8  :: time=0
-integer :: itime=0
+integer :: itime=0,ierr
 real*8  :: ints(3)       ! ints(1) = ke
                          ! ints(2) = ke dissapation
                          ! ints(3) = ke dissapation from diffusion

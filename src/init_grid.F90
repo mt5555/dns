@@ -9,12 +9,13 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine init_grid
 use params
+use mpi
 use fft_interface
 implicit none
 
 !local variables
 real*8 :: one=1
-integer i,j,k,l
+integer i,j,k,l,ierr
 character*80 message
 integer input_file_type
 
