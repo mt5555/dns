@@ -27,6 +27,9 @@ fid=fopen([name,'.isostr'],'r','l');
 l=findstr('/',name);
 l=l(length(l));
 bname=name(l+1:length(name));
+l=findstr('_',bname);
+pname=bname;
+pname(l)='-';
 
 cdir=[ 'k','k','k' ];  % x,y,zz
 cdir=[cdir, 'g','g','g','g','g','g'];  % face diagonals
@@ -192,6 +195,7 @@ max(yyave)
 plot(xx,yyave,'k','LineWidth',1.0);
 %errorbar(xx,yyave,yyave_sq);
 title('D_{lll} / r\epsilon   (4/5 law)       blue: D-/D+');
+ylabel(pname);
 xlabel('r/\eta');
 x=1:xmax; plot(x,.8*x./x,'k');
 if (plot_posneg)
@@ -262,6 +266,7 @@ semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
 semilogx(xx,.5*(yyave1+yyave2),'k','LineWidth',1.0);
 title('D_{ltt} / r\epsilon  (4/15 law)');
+ylabel(pname);
 xlabel('r/\eta');
 if (plot_posneg)
   grid
@@ -304,6 +309,7 @@ if (plot_posneg)
 end
 semilogx(xx,yyave,'k','LineWidth',1.0);
 title('4/3 law');
+ylabel(pname);
 xlabel('r/\eta');
 x=1:xmax; semilogx(x,(4/3)*x./x,'k');
 xlabel('r/\eta');
@@ -357,8 +363,7 @@ f2 = f(2:l-1) + .5*xx_box(2:l-1).*df;
 f2 = f2 .* xx_box(2:l-1).^(-2/3);
 semilogx(xx(2:l-1),f2,'g');
 title('D_{tt} (points)       angle ave(red)       D_{ll} + .5 r (D_{ll})'' (green)');
-xlabel('r/\eta');
-ylabel('scaled by r^{-2/3}')
+ylabel(pname);
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
@@ -403,7 +408,7 @@ df = ( f(3:l)-f(1:l-2)) ./ (xx_box(3:l)-xx_box(1:l-2));
 df = df./xx_box(2:l-1);
 semilogx(xx(2:l-1),df,'g');
 title('D_{ltt} (points)       angle ave(red)         (r D_{lll})''/6 (green)');
-ylabel('scaled by 1/r')
+ylabel(pname);
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
