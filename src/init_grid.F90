@@ -73,6 +73,8 @@ o_nz=g_nz+1
 delx = one/g_nx
 dely = one/g_ny
 delz = one/g_nz
+if (g_nz==1) delz=0
+deldiag = sqrt(delx**2 + dely**2 + delz**2)
 
 do i=1,o_nx
    g_xcord(i)=(i-1)*delx	

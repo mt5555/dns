@@ -1,16 +1,16 @@
 #include "macros.h"
-subroutine time_control(itime,time,Q,ints,maxs)
+subroutine time_control(itime,time,Q)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: time,ints(*),maxs(*)
+real*8 :: time
 integer :: itime
 
 ! local variables
 integer i,j,k,n
 character*80 message
-real*8 remainder, time_target, umax,mumax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 divx,divi,tmx1,tmx2
+real*8 remainder, time_target, umax,time_next,cfl_used_adv,cfl_used_vis,mx
+real*8 divx,divi,tmx1,tmx2,del
 logical,external :: check_time
 logical :: doit
 
@@ -25,20 +25,16 @@ time_target = time_final
 ! viscous CFL =  delt*mu/delx^2  delt <= CFL*delx^2/mu
 !  
 !
-umax=max(maxs(1)/delx,maxs(2)/dely,maxs(3)/delz)
-if (umax> 1000/min(delx,dely,delz)) error_code=1
 
-! advective CFL
-delt = cfl_adv/umax
+umax=maxs(4)
+if (umax> 1000) error_code=1
 
-! viscous CFL
-mumax=min(delx,dely,delz)
-mumax = mu/(mumax*mumax)
-delt = min(delt,cfl_vis/mumax)
-
-
+delt = cfl_adv*deldiag/umax                  ! advective CFL
+delt = min(delt,cfl_vis*deldiag**2/mu)       ! viscous CFL
 delt = max(delt,delt_min)
 delt = min(delt,delt_max)
+
+
 
 !
 !  restart dumps
@@ -50,6 +46,8 @@ if (doit) then
 endif
 
 
+
+
 !
 !  output dumps
 !
@@ -58,6 +56,8 @@ time_target=min(time_target,time_next)
 if (doit) then
    call output_write(time,Q)
 endif
+
+
 
 
 !
@@ -71,26 +71,31 @@ endif
 
 
 
+
+
 !
 ! restrict delt so we hit the next time_target
 !
 doit=check_time(itime,time,screen_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
+! also output first 5 timesteps, unless screen_dt==0
+if (itime<5 .and. screen_dt/=0) doit=.true.
 
 delt = min(delt,time_target-time)
-cfl_used_adv=umax*delt
-cfl_used_vis=mumax*delt
+! compute CFL used for next time step.
+cfl_used_adv=umax*delt/deldiag
+cfl_used_vis=mu*delt/deldiag
 
 
 !
 ! display screen output
 !
-if (doit .or. itime<5) then
+if (doit) then
 
    write(message,'(a,f9.5,a,i5,a,f8.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
 
-   write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
+   write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'for next timestep: delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
    call print_message(message)	
 
    write(message,'(a,3f22.15)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)

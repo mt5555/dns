@@ -1,4 +1,37 @@
-subroutine init_data(Q)
+subroutine init_data_test(Q)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: work(nx,ny,nz)
+integer km,jm,im,i,j,k,n
+
+do n=1,3
+call fft3d(Q(1,1,1,n),work)
+
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+
+            Q(i,j,k,n) = .001
+
+         enddo
+      enddo
+   enddo
+
+call ifft3d(Q(1,1,1,n),work)
+enddo
+
+end subroutine
+
+
+
+
+
+
+subroutine init_data_kh(Q)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
@@ -12,7 +45,6 @@ integer :: km=1
 integer,parameter :: n=500
 real*8 :: x(0:n),y(0:n)
 
-! uniform flow to the right
 Q=0
 
 

@@ -38,34 +38,34 @@ Time stepping...
        +---------------+
        k=0           k= 65
 time=  0.00000(    0)  next output= 0.10000                                     
-delt=0.0096731 cfl_adv= 1.500 cfl_vis= 0.158                                    
-max: (u,v,w)      1.211479631395962     0.120259032747895     0.000000000000000 
+for next timestep: delt=0.0112918 cfl_adv= 1.500 cfl_vis= 0.001                 
+max: (u,v,w)      1.211479631395963     0.120259032747895     0.000000000000000 
 max(div)= 0.22082E-12   <z-vor>=-0.36595E-09   <hel>= 0.00000E+00               
-ke:   0.3574915702 d/dt log(ke) tot:********* d/dt log(ke) diffusion: -0.69277  
+ke:   0.3574915702 d/dt log(ke) tot:  0.00000 d/dt log(ke) diffusion: -0.69277  
 
-time=  0.00967(    1)  next output= 0.10000                                     
-delt=0.0096965 cfl_adv= 1.500 cfl_vis= 0.159                                    
-max: (u,v,w)      1.208558413644318     0.119689878391622     0.000000000000000 
-max(div)= 0.16698E-12   <z-vor>=-0.31997E-09   <hel>= 0.00000E+00               
-ke:   0.3552158556 d/dt log(ke) tot: -0.66231 d/dt log(ke) diffusion: -0.69721  
+time=  0.01129(    1)  next output= 0.10000                                     
+for next timestep: delt=0.0113577 cfl_adv= 1.500 cfl_vis= 0.001                 
+max: (u,v,w)      1.207962329744483     0.119730117621207     0.000000000000000 
+max(div)= 0.17142E-12   <z-vor>=-0.31997E-09   <hel>= 0.00000E+00               
+ke:   0.3548555307 d/dt log(ke) tot: -0.65786 d/dt log(ke) diffusion: -0.69791  
 
-time=  0.01937(    2)  next output= 0.10000                                     
-delt=0.0097274 cfl_adv= 1.500 cfl_vis= 0.159                                    
-max: (u,v,w)      1.204711426455888     0.119883728702443     0.000000000000000 
-max(div)= 0.16520E-12   <z-vor>=-0.21860E-09   <hel>= 0.00000E+00               
-ke:   0.3531287971 d/dt log(ke) tot: -0.60952 d/dt log(ke) diffusion: -0.63499  
+time=  0.02265(    2)  next output= 0.10000                                     
+for next timestep: delt=0.0114460 cfl_adv= 1.500 cfl_vis= 0.001                 
+max: (u,v,w)      1.203266282312622     0.119915445186740     0.000000000000000 
+max(div)= 0.15632E-12   <z-vor>= 0.30197E-10   <hel>= 0.00000E+00               
+ke:   0.3524578498 d/dt log(ke) tot: -0.59896 d/dt log(ke) diffusion: -0.62707  
 
-time=  0.02910(    3)  next output= 0.10000                                     
-delt=0.0097658 cfl_adv= 1.500 cfl_vis= 0.160                                    
-max: (u,v,w)      1.199984248058013     0.119962674991677     0.000000000000000 
-max(div)= 0.16875E-12   <z-vor>= 0.93057E-10   <hel>= 0.00000E+00               
-ke:   0.3511826742 d/dt log(ke) tot: -0.56969 d/dt log(ke) diffusion: -0.58954  
+time=  0.03410(    3)  next output= 0.10000                                     
+for next timestep: delt=0.0115611 cfl_adv= 1.500 cfl_vis= 0.001                 
+max: (u,v,w)      1.197190496275707     0.119998053435506     0.000000000000000 
+max(div)= 0.16698E-12   <z-vor>= 0.42719E-10   <hel>= 0.00000E+00               
+ke:   0.3502299028 d/dt log(ke) tot: -0.55577 d/dt log(ke) diffusion: -0.57723  
 
-time=  0.03886(    4)  next output= 0.10000                                     
-delt=0.0098116 cfl_adv= 1.500 cfl_vis= 0.161                                    
-max: (u,v,w)      1.194378807036229     0.120071167505335     0.000000000000000 
-max(div)= 0.16076E-12   <z-vor>=-0.16960E-09   <hel>= 0.00000E+00               
-ke:   0.3493472789 d/dt log(ke) tot: -0.53798 d/dt log(ke) diffusion: -0.55417  
+time=  0.04566(    4)  next output= 0.10000                                     
+for next timestep: delt=0.0116521 cfl_adv= 1.500 cfl_vis= 0.001                 
+max: (u,v,w)      1.192566809183758     0.121201454516229     0.000000000000000 
+max(div)= 0.15632E-12   <z-vor>= 0.81987E-10   <hel>= 0.00000E+00               
+ke:   0.3481291805 d/dt log(ke) tot: -0.52195 d/dt log(ke) diffusion: -0.53924  
 
  
  1E0   | *               KE spectrum
@@ -81,13 +81,13 @@ ke:   0.3493472789 d/dt log(ke) tot: -0.53798 d/dt log(ke) diffusion: -0.55417
  1E-10 |* *           **
        +---------------+
        k=0           k= 65
-time=  0.10000(   11)  next output= 0.10000                                     
-delt=0.0000000 cfl_adv= 0.000 cfl_vis= 0.000                                    
-max: (u,v,w)      1.180825097487208     0.134696464721052     0.000000000000000 
-max(div)= 0.15010E-12   <z-vor>= 0.43406E-10   <hel>= 0.00000E+00               
-ke:   0.3396159444 d/dt log(ke) tot: -0.41690 d/dt log(ke) diffusion: -0.41828  
+time=  0.10000(    9)  next output= 0.10000                                     
+for next timestep: delt=0.0000000 cfl_adv= 0.000 cfl_vis= 0.000                 
+max: (u,v,w)      1.180825612706518     0.134696504374179     0.000000000000000 
+max(div)= 0.12967E-12   <z-vor>= 0.61656E-10   <hel>= 0.00000E+00               
+ke:   0.3396159458 d/dt log(ke) tot: -0.42075 d/dt log(ke) diffusion: -0.42611  
 
 CPU times:
-initialization:    2.85400 s                                                    
-dns_solve:         9.47100 s                                                    
-   time_control:      0.06500 s (.007)                                          
+initialization:    2.74500 s                                                    
+dns_solve:         8.14300 s                                                    
+   time_control:      0.06600 s (.008)                                          

@@ -75,6 +75,7 @@ integer,parameter :: nslabz=nz2-nz1+1
 real*8 :: xcord(nx),delx
 real*8 :: ycord(ny),dely
 real*8 :: zcord(nz),delz
+real*8 :: deldiag                 ! sqrt(delx**2 + dely**2 + delz**2)
 real*8,allocatable :: g_xcord(:)  
 real*8,allocatable :: g_ycord(:)  
 real*8,allocatable :: g_zcord(:)  
@@ -116,17 +117,23 @@ integer :: error_code =0
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 integer,parameter :: nints=5
+real*8 :: ints(nints),maxs(nints),ints_timeU,ints_timeDU
 !
+! Quantities involving only Q are computed in the timestep
+! routine, at the current time = ints_timeU:  
 !
-! storage allocated locally, but:
 ! ints(1) = ke
 ! ints(2) = ke dissapation
+! maxs(1,2,3) = max U,V,W
+! maxs(4) = max velocity
+!
+! Quantities involving derivatives are computed when the RHS is computed
+! and thus the data is at the prevous timestep = ints_timeDU
+! 
 ! ints(3) = ke dissapation from diffusion
 ! ints(4) = vor 
 ! ints(5) = helicity
-! maxs(1,2,3) = max U,V,W
-! maxs(4) = vor
-! maxs(5) =  helicty
+!
 !
 
 integer,parameter :: ntimers=5
