@@ -132,7 +132,8 @@ for i in range(3):
    facs[i]=fullfactor(n[i])
 
 
-print sys.argv[1:-1]
+print sys.argv[1:]
+print "Total cpus:   ",ncpu[0]*ncpu[1]*ncpu[2]
 print "Grid per cpu: ",nslab[0],nslab[1],nslab[2]
 
 
