@@ -1212,7 +1212,7 @@ endif
 ! 0,-3,1   xfac=4   efac=32
 ! 0,0,1   xfac=2   efac=16
 ! 0,0,0   xfac=1   efac=8
-im=1
+im=24
 jm=-2
 km=7
 print *,'initial mode: im,jm,km: ',im,jm,km
@@ -1485,16 +1485,6 @@ real*8 :: cmodes_i(nx,ny,nz)
 real*8 :: a,b,mx
 integer :: i,j,k,im,jm,km,ii,jj,kk,sm,i0,i1,j0,j1,k0,k1,ck
 
-mx=maxval(abs(p))
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   if ( imcord(i)==g_nx/2 ) p(i,j,k)=0
-   if ( jmcord(j0)==g_ny/2 ) p(i,j,k)=0
-   if ( kmcord(k0)==g_nz/2 ) p(i,j,k)=0
-enddo
-enddo
-enddo
 
 
 cmodes_r=0
@@ -1558,6 +1548,17 @@ do i=nx1,nx2,2
       else
          call abort("this cant happen")
       endif
+
+      ! cos(N/2) mode is stored with the cos(0) mode.
+      ! we ignore cos(N/2) mode, and pretend it is the sin(0) mode
+      ! which must be zero:
+      if ( imcord(ii)==g_nx/2 .or. jmcord(jj)==g_ny/2 .or. &
+          kmcord(kk)==g_nz/2 ) then
+         a=0
+         b=0
+      endif
+
+
 
       cmodes_r(i0,j0,k0)=cmodes_r(i0,j0,k0) + a;    
       cmodes_i(i0,j0,k0)=cmodes_i(i0,j0,k0) + b
