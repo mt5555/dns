@@ -27,6 +27,7 @@ w=textread('../src/voronoi/isoave.weights','%f');
 w=2*w(1:2:length(w));
 %w=w./w/length(w);  % equally weighted
 
+
 msize=4;   % marker size
 xmax=1000;  % maximum x axis
 
@@ -65,14 +66,24 @@ if (ntran>=4)
    SN2_ltt=fread(fid,[ndelta,ndir],'float64');
 end
 
+% D_lll=SP_lll-SN_lll;
+% but to make SP and SN have the same sign as D, multipl
+% by -1 so:  D=SN-SP
+SP_lll=-SP_lll;
+SN_lll=-SN_lll;
+SP1_ltt=-SP1_ltt;
+SN1_ltt=-SN1_ltt;
+SP2_ltt=-SP2_ltt;
+SN2_ltt=-SN2_ltt;
+
 
 disp('1 = Scaling laws for total structure function');
-disp('2 = Scaling laws for positive structure function');
-disp('3 = Scaling laws for positive structure function');
+disp('2 = Scaling laws and also plot D+/-');
 disp('4 = 2nd and 3rd order isotropy check');
 disp('5 = 2nd and 3rd order isotropy check, x,y,z directions only');
 in=input('Enter choice: ');
 
+plot_posneg=0;
 if (in==4)
    klaws=0;
    check_isotropy=1;
@@ -84,21 +95,12 @@ elseif (in==5)
 else
    klaws=1;
    check_isotropy=0;
+   if (in==2) 
+     plot_posneg=1;
+   end
 end
 
-if (in==2)
-  % D_lll=SP_lll-SN_lll;
-  % but lets change the sign, so  D_lll=SN-SP 
 
-  D_lll=-SP_lll;
-  D1_ltt=-SP1_ltt;
-  D2_ltt=-SP2_ltt;
-end
-if (in==3)
-  D_lll=-SN_lll;
-  D1_ltt=-SN1_ltt;
-  D2_ltt=-SN2_ltt;
-end
 
 
 
@@ -113,6 +115,9 @@ figure(1)
 yyave=0*xx;
 yyave_sq=0*xx;
 
+yyave1=yyave;
+yyave2=yyave;
+
 for i=1:ndir
   x=r_val(:,i);
   x_box = x/delx_over_eta/nx;  % in code units (box length)
@@ -124,16 +129,28 @@ for i=1:ndir
   
   yyave=yyave+w(i)*yy;
   yyave_sq=yyave_sq + w(i)*yy.^2;
+  
+  % positive and negative parts:
+  y=-SP_lll(:,i)./(x_box*epsilon);
+  yyave1=yyave1+w(i)*spline(x,y,xx);
+  y=-SN_lll(:,i)./(x_box*epsilon);
+  yyave2=yyave2+w(i)*spline(x,y,xx);
+  
 end
 yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
 
 semilogx(xx,yyave,'k','LineWidth',1.0);
 %errorbar(xx,yyave,yyave_sq);
-title('D_{lll} / r\epsilon   (4/5 law)');
+title('D_{lll} / r\epsilon   (4/5 law)       blue: D-/D+');
 x=1:xmax; semilogx(x,.8*x./x,'k');
+if (plot_posneg)
+  semilogx(xx,yyave1)
+  semilogx(xx,yyave2)
+end
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print -dpsc 45.ps
+
 
 
 
