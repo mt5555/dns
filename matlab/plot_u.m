@@ -2,7 +2,7 @@ function plot_u(fid,time,dp)
 %
 %read in the U,V,W structure functions
 %
-components=['U','V','W'];
+components=['u','v','w'];
 var=['x','y','z'];
 
 axmax=0;

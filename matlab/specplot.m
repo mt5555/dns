@@ -3,22 +3,13 @@
 %#  plot of DNS spectrum output file
 %########################################################################
 %
-%   call cwrite8(fid,time,1)
-%   call cwrite8(fid,1+iwave,1)
-%   call cwrite8(fid,spectrum,1+iwave)
-%   call cwrite8(fid,1+g_nx/2,1)
-%   call cwrite8(fid,spec_x,1+g_nx/2)
-%   call cwrite8(fid,1+g_ny/2,1)
-%   call cwrite8(fid,spec_y,1+g_ny/2)
-%   call cwrite8(fid,1+g_nz/2,1)
-%   call cwrite8(fid,spec_z,1+g_nz/2)
-%
 
 range=0:50;
 %range = 1
 %range=0:.5:2;
 
-fid=fopen('test64.spec','r');
+fid=fopen('test32.spec','r','l');
+%fid=fopen('n128.spec','r','b');
 
 
 time=fread(fid,1,'float64');

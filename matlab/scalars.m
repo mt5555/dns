@@ -10,7 +10,8 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-fid=fopen('test64.scalars','r');
+%fid=fopen('test32.scalars','r','l');
+fid=fopen('n128.scalars','r','b');
 
 nscalars=0;
 while (1) 
