@@ -324,7 +324,7 @@ Q=0
    if (dimsudm .ne. 3) call abort("ERROR: datafile is wrong")
    CALL UDM_INFO_ITEM_GET(infoid, UDM_INFO_DIMS_TOTAL, gsizesudm, ierr)
 
-   if (base(1:len_trim(base)=="restart") then
+   if (base(1:len_trim(base))=="restart") then
    if (gsizesudm(1) .ne. (ncpu_z *(nz2 - nz1 + 1)))    &
        call abort("ERROR: nz, ncpu_z in param.h not consistent the datafile")
    if (gsizesudm(2) .ne. (ncpu_y *(ny2 - ny1 + 1)))    &

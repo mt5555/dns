@@ -22,7 +22,8 @@ clear all;
 name = '/ccs/scratch/taylorm/decay/decay2048'
 
 nt=0;
-times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357 .2400 .2500 .2600 .2700  ];
+times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357 .24 .25 .26 .27];
+times=[times,.29:.01:.35];
 for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10),'.scalars-turb'];

@@ -35,9 +35,9 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
 
 ! input file
-tstart=3.0
-tstop=3.0
-tinc=.10
+tstart=.32
+tstop=.32
+tinc=1.0
 icount=0
 call init_mpi       
 call init_mpi_comm3d()
@@ -54,6 +54,10 @@ do
 icount=icount+1
 
    call input_uvw(time,Q,vor,work1,work2)
+   print *,'max U: ',&
+        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
+        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
+        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
 
    if (convert_opt==0) then  ! -cout uvw  
       ! just reoutput the variables:
@@ -79,6 +83,7 @@ icount=icount+1
    if (convert_opt==2) then  ! -cout vorm
       call print_message("computing vorticity magnitude...")
       call vorticity(vor,Q,work1,work2)
+      vor=Q
       do k=nz1,nz2
       do j=ny1,ny2
       do i=nx1,nx2

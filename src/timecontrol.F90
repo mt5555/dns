@@ -150,7 +150,6 @@ time_target=min(time_target,time_next)
 
 !
 ! diagnostic output (scalars, spectrum).  
-!
 doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next,1,0)
 time_target=min(time_target,time_next)
 

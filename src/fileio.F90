@@ -529,7 +529,7 @@ Q=0
 if (equations==NS_UVW) then
 
 if (udm_input) then
-   call udm_read_uvw(time,base,Q,work1,work2)
+   call udm_read_uvw(time_in,base,Q,work1,work2)
 else
    if (r_spec) then
       fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".us"
