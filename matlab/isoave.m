@@ -12,11 +12,12 @@ nx=64; delx_over_eta=1.0; epsilon=1.0;
 fid=fopen([name,'.isostr'],'r','l');
 eta = 1/(nx*delx_over_eta);
  
-cdir=[ 1,1,1 ];  % x,y,zz
-cdir=[cdir, 2,2,2,2,2,2];  % face diagonals
-cdir=[cdir, 3,3,3,3];      % body diagonals
-cdir=[cdir, 4,4,4,4,4,4,4,4,4,4,4,4];      % 12 (1,2,0) directions
-cdir=[cdir, 5,5,5,5,5,5,5,5,5,5,5,5];      % 12 (1,1,2) directions
+cdir=[ 'k','k','k' ];  % x,y,zz
+cdir=[cdir, 'g','g','g','g','g','g'];  % face diagonals
+cdir=[cdir, 'r','r','r','r'];      % body diagonals
+cdir=[cdir, 'b','b','b','b','b','b','b','b','b','b','b','b'];      % 12 (1,2,0) directions
+cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,2) directions
+cdir=[cdir, 'm','m','m','m','m','m','m','m','m','m','m','m'];      % 12 (1,1,2) directions
 
 
 
@@ -60,9 +61,8 @@ for i=1:ndir
   y1 = D1_tt(:,i).*x_box.^(-2/3);
   y2 = D2_tt(:,i).*x_box.^(-2/3);
   
-  semilogx(x,y1,'.'); hold on
-  semilogx(x,y2,'.');
-  title('D_{tt} r^{-2/3} (blue)       angle ave(red)       F(D_{ll}) (green)');
+  semilogx(x,y1,['.',cdir(i)]); hold on
+  semilogx(x,y2,['.',cdir(i)]);
   
   yyave1=yyave1 + spline(x,y1,xx); 
   yyave2=yyave2 + spline(x,y2,xx); 
@@ -83,6 +83,7 @@ df = ( f(3:l)-f(1:l-2)) ./ (xx_box(3:l)-xx_box(1:l-2));
 f2 = f(2:l-1) + .5*xx_box(2:l-1).*df;
 f2 = f2 .* xx_box(2:l-1).^(-2/3);
 semilogx(xx(2:l-1),f2,'g');
+title('D_{tt} r^{-2/3} (blue)       angle ave(red)       F(D_{ll}) (green)');
 hold off;
 print -dpsc isocheck.ps
 
@@ -99,13 +100,60 @@ for i=1:ndir
   x_box = x/delx_over_eta/nx;  % in code units (box length)
   y=-D_lll(:,i)./(x_box*epsilon);
 
-  semilogx(x,y,'.');
-  title('D_{lll} / r\epsilon');
-  hold on;
+  semilogx(x,y,['.',cdir(i)]);   hold on;
   yyave=yyave+spline(x,y,xx);
 end
 yyave=yyave/ndir;
 semilogx(xx,yyave,'r');
+title('D_{lll} / r\epsilon');
+hold off;
+
+
+
+%
+%  the 4/15 law
+%
+figure(3)
+yyave1=0*xx;
+yyave2=0*xx;
+for i=1:ndir
+  x=r_val(:,i);
+  x_box = x/delx_over_eta/nx;  % in code units (box length)
+  y1=-D1_ltt(:,i)./(x_box*epsilon);
+  y2=-D2_ltt(:,i)./(x_box*epsilon);
+
+  semilogx(x,y1,['.',cdir(i)]); hold on;
+  semilogx(x,y2,['.',cdir(i)]);
+
+  yyave1=yyave1+spline(x,y1,xx);
+  yyave2=yyave2+spline(x,y2,xx);
+end
+yyave1=yyave1/ndir;
+yyave2=yyave2/ndir;
+semilogx(xx,yyave1,'r');
+semilogx(xx,yyave2,'r');
+title('D_{ltt} / r\epsilon');
+hold off;
+
+
+
+%
+%  the 4/3 law
+%
+yyave=0*xx;
+figure(4)
+yyave=0*xx;
+for i=1:ndir
+  x=r_val(:,i);
+  x_box = x/delx_over_eta/nx;  % in code units (box length)
+  y=-(D_lll(:,i) + D1_ltt(:,i) + D2_ltt(:,i))./(x_box*epsilon);
+
+  semilogx(x,y,['.',cdir(i)]); hold on;
+  yyave=yyave+spline(x,y,xx);
+end
+yyave=yyave/ndir;
+semilogx(xx,yyave,'r');
+title('4/3 law');
 hold off;
 
 

@@ -13,7 +13,7 @@
 module isoave
 implicit none
 
-integer,parameter :: ndir=37
+integer,parameter :: ndir=49
 integer,parameter :: ndelta_max=72
 integer :: dir(3,ndir)
 integer :: ndelta
@@ -344,9 +344,27 @@ dir(:,35)=(/1,1,-2/)
 dir(:,36)=(/1,2,-1/)
 dir(:,37)=(/2,1,-1/)
 
-if (ndir/=37) then
-   call abort("isoave: ndir /= 37")
+! 2,2,1 directions
+dir(:,38)=(/1,2,2/)
+dir(:,39)=(/2,1,2/)
+dir(:,40)=(/2,2,1/)
+
+dir(:,41)=(/-1,2,2/)
+dir(:,42)=(/-2,1,2/)
+dir(:,43)=(/-2,2,1/)
+
+dir(:,44)=(/1,-2,2/)
+dir(:,45)=(/2,-1,2/)
+dir(:,46)=(/2,-2,1/)
+
+dir(:,47)=(/1,2,-2/)
+dir(:,48)=(/2,1,-2/)
+dir(:,49)=(/2,2,-1/)
+if (ndir/=49) then
+   call abort("isoave: ndir /= 49")
 endif
+
+
 allocate(D_ll(ndelta,ndir))
 allocate(D_lll(ndelta,ndir))
 allocate(D_tt(ndelta,ndir,2))
