@@ -35,8 +35,13 @@ fid2=-1;
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
 %nx=1024;
 
+<<<<<<< scalars.m
+fid=fopen('../src/sk128_alpha25/sk128_alpha250000.0000.scalars','r');
+nx=128;
+=======
 %fid=fopen('../src/sk128_alpha0/sktest128_alpha00000.0000.scalars','r');
 %nx=128;
+>>>>>>> 1.49
 
 fid=endianopen('/scratch2/taylorm/tmix256B/tmix256B.scalars','r');
 nx=256;
@@ -156,7 +161,7 @@ clf
 semilogy(time,ke,'r'); hold on
 %plot(time_2,-ke_diss_tot,'b.')
 plot(time,-ke_diss_d,'b')
-title('KE: red,    d(KE)/dt: blue');
+%title('KE: red,    d(KE)/dt: blue');
 hold off
 xlabel('time')
 print -dpsc ke.ps
@@ -182,10 +187,11 @@ xlabel('time')
 print -djpeg -r72 vor.jpg
 
 
-
-figure(2); subplot(1,1,1)
-plot(time,R_l)
-title('R_\lambda')
+figure(2);  hold on;
+plot(time,R_l,'b'); hold on;
+plot(time,R_l_ke,'r'); hold on;
+title('R_\lambda');
+legend('R_{\lambda}', 'R_{\lambda}(total KE)')
 xlabel('time')
 print -djpeg -r72 rl.jpg
 
@@ -238,19 +244,5 @@ epsilon_ke = epsilon_ke(length(epsilon_ke)/2:length(epsilon_ke));
 epsilon_ke = sum(epsilon_ke)/length(epsilon_ke);
 disp(sprintf('epsilon_ke (averaged over last haf of data) = %f ',epsilon_ke));
 
-
-
-
-
 print -depsc scalars.ps
-
-
-
-
-
-
-
-
-
-
 

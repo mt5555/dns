@@ -21,9 +21,10 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
+
 %name='sk2560000.0000';
 %namedir='/scratch2/taylorm/sk256/';
-%CK_orig=1.613;
+CK_orig=1.613;
 
 %name='tmix256C0001.0000';
 %namedir='/scratch2/taylorm/tmix256C/';
@@ -34,15 +35,8 @@ tsave=[];
 %CK_orig=1.613;
 
 
-name='decay2048';
-namedir='/ccs/scratch/taylorm/decay/';
-CK_orig=1.613; decay_scale=1;
-% save spectrum at these times:
-tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
-movie=0;
-
-
-
+name = 'sk128_alpha15/sk128_alpha150000.0000';
+namedir = '/home/skurien/dns/src/';
 
 
 spec_r_save=[];
@@ -96,8 +90,6 @@ while (time>=.0 & time<=9999.3)
   fac3=.5 + atan( 10*log10(knum2'*eta)+12.58 ) / pi;
   fac3 = 1 + .522*fac3;
 
-
-    
   n_x=fread(fid,1,'float64');
   spec_ux=spec_scale*fread(fid,n_x,'float64');
   spec_vx=spec_scale*fread(fid,n_x,'float64');  
@@ -140,16 +132,16 @@ while (time>=.0 & time<=9999.3)
     loglog53(n_r-1,spec_r,stitle,CK); hold on;
 
     spec_r=spec_r./fac3;
-    loglog53(n_r-1,spec_r,stitle,CK); hold off;
+    loglog53(n_r-1,spec_r,stitle,CK); hold on;
 
 
     
     % longitudinal spectraum
-    figure(2)
+    figure(4)
     subplot(2,1,1);
     loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
     loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
-    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold off;
+    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
     
     % transverse spectraum
 
@@ -160,7 +152,7 @@ while (time>=.0 & time<=9999.3)
     loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
     loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
     loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
-    hold off;
+   hold on;
   end
   end
 
@@ -258,6 +250,7 @@ while (time>=.0 & time<=9999.3)
   end
   
   time=fread(fid,1,'float64');
+  time
   if (fidt>=0) 
     num_spec=fread(fidt,1,'float64');
     time_t=fread(fidt,1,'float64');

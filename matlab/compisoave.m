@@ -119,7 +119,7 @@ pave=yyave;
 nave=yyave;
 
 ndir_vec=1:ndir;
-%ndir_vec=[1,2,3, 4:3:ndir];
+ndir_vec=[1,2,3, 4:3:ndir];
 skip=(length(ndir_vec)~=ndir);
 
 
@@ -159,7 +159,7 @@ if (skip==0)
    title('D_{lll} / r\epsilon   (4/5 law) ');
    ylabel(pname);
    xlabel('r/\eta');
-   plot(xx_plot,yyave,'k','LineWidth',1.0); hold on;
+   semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
    x=1:xmax; plot(x,(4/5)*x./x,'k');
 end
 if (plot_posneg)
@@ -177,8 +177,8 @@ ax=axis;  axis([1,xmax,0,1.0]);
 %ax=axis;  axis([1,xmax,0,2.5]);
 hold off;
 if (plot_points==1) 
-print('-dpsc',[bname,'_45.ps']);
-print -djpeg 45.jpg
+%print('-dpsc',[bname,'_45.ps']);
+%print -djpeg 45.jpg
 end
 
 if (0) 
@@ -254,8 +254,8 @@ x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,0,.3]);
 hold off;
 if (plot_points==1) 
-print('-dpsc',[bname,'_415.ps']);
-print -djpeg 415.jpg
+%print('-dpsc',[bname,'_415.ps']);
+%print -djpeg 415.jpg
 end
 
 %
@@ -300,8 +300,8 @@ ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 ax=axis;  axis([1,xmax,0,1]);
 hold off;
 if (plot_points==1) 
-print('-dpsc',[bname,'_43.ps']);
-print -djpeg 43.jpg
+%print('-dpsc',[bname,'_43.ps']);
+%print -djpeg 43.jpg
 end
 
 

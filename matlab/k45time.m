@@ -34,13 +34,14 @@ ext='.isostr';
 %ext='.new.isostr';
 %times=[1:.1:2.0];
 
-name = '/home/skurien/helicity_data/check256_hq_';
+name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
+ext='.new.isostr';
 
-[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params
+[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext)
 
 nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
 teddy=1;
-ext='.new.isostr';
+
 times=[0:1:30];
 
 ndir_use=0;
@@ -78,7 +79,7 @@ for t=times
       plot_posneg=0;
       check_isotropy=0;
       
-      [y45,y415,y43,eps,h_eps]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
+      [y45,y415,y43,eps,h_eps]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
       
       
       mx45_iso_localeps(k)=max(y45);
@@ -149,13 +150,13 @@ print -dpsc k45time.ps
 
 
 figure(9); clf
-
+scale = 1; %scale = 4/5 if need to normalize out the 4/5th
 for i=[1:1:73]
-  %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,y45_ave(:,i)/0.8,'g-','LineWidth',2.0); hold on
+  %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',1.0); hold on
+  semilogx(xx_plot,y45_ave(:,i)/scale,'g-','LineWidth',1.0); hold on
 end
-%semilogx(xx_plot,y45_iso_ave/0.8,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y45_iso_ave/0.8,'b','LineWidth',2.0); hold on
+%semilogx(xx_plot,y45_iso_ave/scale,'k','LineWidth',1.0); hold on
+semilogx(xx_plot,y45_iso_ave/scale,'b','LineWidth',1.0); hold on
 axis([1 1000 0 1.0])
 x=1:1000; plot(x,(4/5)*x./x,'k');
 hold off;
@@ -172,13 +173,13 @@ offset=y45_iso_ave;
 stdr=0*offset;
 
 for i=[1:1:73]
-  %semilogx(xx_plot,(y45_ave(:,i)-offset),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,(y45_ave(:,i)-offset)/0.8,'m-','LineWidth',2.0); hold on
+  %semilogx(xx_plot,(y45_ave(:,i)-offset),'k:','LineWidth',1.0); hold on
+  semilogx(xx_plot,(y45_ave(:,i)-offset)/scale,'m-','LineWidth',1.0); hold on
   stdr=stdr+(y45_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
-%semilogx(xx_plot,y45_iso_ave-offset,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,(y45_iso_ave-offset)/0.8,'b','LineWidth',2.0); hold on
+%semilogx(xx_plot,y45_iso_ave-offset,'k','LineWidth',1.0); hold on
+semilogx(xx_plot,(y45_iso_ave-offset)/scale,'b','LineWidth',1.0); hold on
 axis([1 1000 -.2 .2])
 x=1:1000; plot(x,(4/5)*x./x,'k');
 hold off;

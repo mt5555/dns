@@ -10,13 +10,15 @@ delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
 ext='.isostr';
 
-name = '/home/skurien/helicity_data/check256_hq_';
+name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
 
-[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params
+
+ext='.new.isostr';
+[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext)
 
 nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
 teddy=1;
-ext='.new.isostr';
+
 times=[0:1:30];
 
 
@@ -27,8 +29,6 @@ ndir_use=0;
 time_and_angle_ave=1;
 
 k=0;
-
-
 
 
 xx=(1:.5:(nx./2.5)) / nx;
@@ -46,7 +46,7 @@ for t=times
   disp([fname,ext]);
   fid=fopen([fname,ext]);
   if (fid<0) ;
-    disp('error openining file, skipping...');
+    disp('error opening file, skipping...');
   else
     fclose(fid);
     times_plot=[times_plot,t];
@@ -61,8 +61,11 @@ for t=times
       
       
       mx215_iso_localeps(k)=max(y215);
-      mx215_iso(k)=max(y215)*eps/epsilon;
-      
+      mx215_iso(k)=max(y215)*h_eps/h_epsilon;
+      mn215_iso_localeps(k)=y215(1);
+      mn215_iso(k) = y215(1)*h_eps/h_epsilon;
+
+
       y215_iso_ave=y215_iso_ave+y215';
       
     end    
@@ -85,6 +88,9 @@ for t=times
       mx215_localeps(k,dir)=max(y215);
       mx215(k,dir)=max(y215)*h_eps_l/h_epsilon;
       
+      mn215_localeps(k,dir)=y215(1);
+      mn215(k,dir) = y215(1)*h_eps_l/h_epsilon;
+
       y215_ave(:,dir)=y215_ave(:,dir)+y215';
     end
   end
@@ -112,19 +118,21 @@ load k215data_t0
 load k215data_t1 
 end
 
+scale = 1  % scale = 2/15 if normalizing by prefactor as well
 
 figure(5); clf; hold on; 
-for i=2:2
-%   plot(times/teddy,mx215_localeps(1:length(times),i),'k:','LineWidth',2.0);
-   plot(times/teddy,mx215_localeps(1:length(times),i),'g-','LineWidth',2.0);
+for i=50:50 %three  directions
+
+plot(times/teddy,mx215_localeps(1:length(times),i)/scale,'g-','LineWidth',1.0);hold on;
+plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
 end
-%plot(times/teddy,mx215_iso_localeps,'k-','LineWidth',2.0);
-plot(times/teddy,mx215_iso_localeps,'b-','LineWidth',2.0);
+plot(times/teddy,mx215_iso_localeps/scale,'b-','LineWidth',1.0);hold on;
+plot(times/teddy,mn215_iso_localeps/scale,'k-','LineWidth',1.0);hold on;
 ax=axis;
-axis( [ax(1),ax(2),.5,1.0] );
-plot(times,(2/15)*times./times,'k');
+axis( [ax(1),ax(2),0,1] );
+%plot(times,(2/15)*times./times,'k');
 hold off;
-ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+ylabel('Normalized peak value for H\_ltt (single-dir and angle-avg)','FontSize',16);
 xlabel('time','FontSize',16)
 print -dpsc k215time.ps
 
@@ -133,15 +141,15 @@ figure(6); clf
 
 for i=[1:1:73]
   %semilogx(xx_plot,y215_ave(:,i),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,-(y215_ave(:,i))/(2/15),'r-','LineWidth',2.0); hold on
+  semilogx(xx_plot,-(y215_ave(:,i)),'r-','LineWidth',1.0); hold on
 end
 %semilogx(xx_plot,y215_iso_ave,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y215_iso_ave/(2/15),'b','LineWidth',2.0); hold on
-axis([1 1000 0 1.0])
+semilogx(xx_plot,y215_iso_ave,'b','LineWidth',2.0); hold on
+axis([1 1000 -0.05 0.15])
 x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
-title('H_{ltt} / r^2\h_{epsilon}   (2/15 law) ');
-ylabel('H_{ltt}/h_{epsilon}r^2','FontSize',16);
+title('H_{ltt} / r^2\h   (2/15 law) Ensemble averaged');
+ylabel('H_{ltt}/h r^2','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 
 print -dpsc k215mean.ps
@@ -153,18 +161,18 @@ offset=y215_iso_ave;
 stdr=0*offset;
 
 for i=[1:1:73]
-  %semilogx(xx_plot,(y215_ave(:,i)-offset),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,(-y215_ave(:,i)-offset)/(2/15),'k-','LineWidth',2.0); hold on
+  %semilogx(xx_plot,(y215_ave(:,i)-offset),'k:','LineWidth',1.0); hold on
+  semilogx(xx_plot,(-y215_ave(:,i)-offset)/scale,'k-','LineWidth',1.0); hold on
   stdr=stdr+(y215_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
 %semilogx(xx_plot,y215_iso_ave-offset,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,(y215_iso_ave-offset)/(2/15),'b','LineWidth',2.0); hold on
+semilogx(xx_plot,(y215_iso_ave-offset)/scale,'b','LineWidth',1.0); hold on
 axis([1 1000 -.2 .2])
-x=1:1000; plot(x,(2/15)*x./x,'k');
+%x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
-%title('H_{ltt} / r^2\h_{\epsilon}   (2/15 law) ');
-ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+title('timemean(H_{ltt}(dir)-H_{ltt}(avg))/(2/15) Measure of anisotropy ');
+%ylabel('< (v(x+r)u(x)w(x) - w(x+r)u(x)v(x) > / (h_{\epsilon} r^2)','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 
 

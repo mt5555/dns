@@ -34,10 +34,9 @@ else
    %name = '/home/skurien/dns/src/sk128_alpha0';
    %times=0.5
 
-   name = '/scratch2/taylorm/tmix256B/tmix256B'
-   times=[0:.5:3]
 
-end
+name = '/home/skurien/dns/src/sk128_alpha15/sk128_alpha15';
+times=[1,2,3]
 
 nt=0;
 for t=times
