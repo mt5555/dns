@@ -811,8 +811,7 @@ do i=nx1,nx2
     if (mu_hyper==4) then
        xw=xw**4  ! viscosity = (del**2)**mu_hyper
     endif
-    denergy=-xfac*mu*xw*p(i,j,k)*p(i,j,k)
-    spec_d(iwave)=spec_d(iwave)+denergy
+    spec_d(iwave)=spec_d(iwave)  -mu*xw*energy
 
     ! compute k E(k)
     xw=sqrt(rwave*pi2_squared)
