@@ -57,13 +57,8 @@ do k=nz1,nz2
 
    enddo
 
-   print *,'B'
-   stop
-
    Q(i,j,k,1) = 5*uu*delgam/(pi2*xscale)
    Q(i,j,k,2) = 5*vv*delgam/(pi2*yscale)
-
-   print *,'bottom of loop'
 
 enddo
 enddo

@@ -25,7 +25,6 @@ call test           ! optional testing  routines go here
 write(message,'(a)') 'Initial data'
 call print_message(message)
 call init_data(Q)             ! set up initial data 
-print *,'hi'
 write(message,'(a)') 'Initial data projection'
 call print_message(message)
 call init_data_projection(Q)  ! impose constrains on initial data
