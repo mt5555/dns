@@ -34,6 +34,7 @@ S = .01, .05, .1, .5, 1.0
 
 **********************************************************************************
 2/28/02
+>>>>>>> 1.159
 
 VXPAIR
 new run  testing voriticty interpolation along a line thru vorticity max
@@ -47,6 +48,9 @@ Running in /ccs/taylorm/dns/src/vxpair: (MOVE LATER?)
 vx4096c   mu=7e-8  ran to t=100
           init_cond_subtype=1 (no PSI boundary update)
 
+
+BUG discovered in comp_ellipse: mxw_init was being reset
+every timestep.  Fixed 3/7/02 for vx4096d below:
 
 vx4096d   mu=7e-8   IN
           init_cond_subtype=2 (PSI boundary update every 50 timesteps)

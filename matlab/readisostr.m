@@ -130,6 +130,10 @@ if (nscalars>=7)
   mu=fread(fid,1,'float64');   
   ke=fread(fid,1,'float64');
   epsilon=fread(fid,1,'float64'); 
+  [h_epsilon,count]=fread(fid,1,'float64');  % this is not in all data files
+                                             % so allow for error on read
+  if (count~=1) h_epsilon=0; end;
+
   eta = (mu^3 / epsilon)^.25;
   delx_over_eta=(1/nx)/eta;
 end

@@ -22,7 +22,7 @@ clear;
 %name='/ccs/taylorm/dns/src/vxpair/vx6144d';
 %times=[0.00:.02:50.0];
 
-name='/home/taylorm/ccs/dns/src/vxpair/vx4096c';
+name='/home/taylorm/ccs/dns/src/vxpair/vx4096d';
 times=[0:.1:150];
 
 plot_vor_contour=0;

@@ -8,7 +8,7 @@ clear;
 
 
 
-name='/home/taylorm/ccs/dns/src/vxpair/vx4096c';
+name='/home/taylorm/ccs/dns/src/vxpair/vx4096d';
 times=[0:.1:150];
 
 
@@ -38,7 +38,7 @@ for t=times
      fclose(fid);
      k=k+1;
      timev(k)=time;
-     wlinev(1:10,k)=wline(1:10) ;
+     wlinev(1:9,k)=wline(1:9) ;
      xcv(k)=xc;
      ycv(k)=yc; 
   else
@@ -51,7 +51,7 @@ figure(3); clf;
 subplot(2,1,1)
 hold on;
 subplot(2,1,1)
-for i=2:9
+for i=1:8
   plot(timev,wlinev(i,:),[ccol(i)]);
 end
 ylabel('vorticity')
