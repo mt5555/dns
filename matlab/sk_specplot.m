@@ -52,8 +52,16 @@ mu = 2e-4;
 %name = '2Dhypo1e3_1024_0000.0000';
 %mu = 2e-4;
 
+%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_pi2/';
+%name = 'skhel512_hpi2';
+%mu = 1e-4;
+
+namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_pi2/';
+name = 'sc1024A';
+mu = 1e-4;
+
 % plot all the spectrum:
-movie=1; % 1 to plot all the spectra
+movie=0; % 1 to plot all the spectra
 
 spec_r_save=[];
 spec_r_save_fac3=[];

@@ -39,6 +39,9 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0005.8000.new'
 nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
 
+name='/home2/skurien/helicity_data/helical_forced/hel512_hpi2/skhel512a0002.0000.new'
+nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=186
+
 
 ndir_use=73;
 
