@@ -388,14 +388,13 @@ type(pdf_structure_function) :: str(NUM_SF)
 
 ! local variables
 real*8  :: del,delv(3)
-real*8  :: tmx1,tmx2
 integer :: bin,idel,i,j,k,i2,nsf,ndelta
 
 if (structf_init==0) then
    structf_init=1
    call init_pdf_module()
 endif
-call wallclock(tmx1)
+
 
 ndelta=str(1)%delta_num
 do j=2,NUM_SF
@@ -467,8 +466,6 @@ do n=1,NUM_SF
 str(n)%ncalls=str(n)%ncalls+1
 enddo
 
-call wallclock(tmx2)
-tims(12)=tims(12)+(tmx2-tmx1)
 end subroutine
 
 
@@ -486,7 +483,6 @@ real*8 :: ux(nx,ny,nz)
 
 ! local variables
 real*8  :: del
-real*8  :: tmx1,tmx2
 integer :: bin,idel,i,j,k,i2,nsf
 
 if (structf_init==0) then
@@ -495,7 +491,6 @@ if (structf_init==0) then
 endif
 
 
-call wallclock(tmx1)
 
 do k=nz1,nz2
    do j=ny1,ny2
@@ -515,8 +510,6 @@ do k=nz1,nz2
 enddo
 
 epsilon%ncalls=epsilon%ncalls+1
-call wallclock(tmx2)
-tims(12)=tims(12)+(tmx2-tmx1)
 end subroutine
 
 
@@ -561,7 +554,9 @@ logical :: compx,compy,compz
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,n
 real*8 dummy(1)
+real*8 :: tmx1,tmx2
 
+call wallclock(tmx1)
 
 if (struct_nx>0) countx=mod(countx+1,struct_nx)  
 if (struct_ny>0) county=mod(county+1,struct_ny)  
@@ -663,6 +658,9 @@ if (compz) then
 
 endif
 
+call wallclock(tmx2)
+tims(12)=tims(12)+(tmx2-tmx1)
+
 end subroutine
 
 
@@ -694,6 +692,9 @@ integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),sum(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
 real*8 dummy(1)
+real*8 :: tmx1,tmx2
+
+call wallclock(tmx1)
 
 do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
@@ -803,6 +804,8 @@ enddo
 #endif
 
 
+call wallclock(tmx2)
+tims(12)=tims(12)+(tmx2-tmx1)
 
 end subroutine
 

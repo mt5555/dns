@@ -64,7 +64,7 @@ n128_100  kediss(2/3)=100 e=-1.03    R_l=225 KE=.78   cpu: 134m
 
 
 256^3  
-iso12_256_200  kediss(2/3)=200 e=-1.00  R_l=325  KE=.78  mu=
+iso12_256_200  kediss(2/3)=200 e=-1.00  R_l=325  KE=.78  mu=?
 h/eta = 1/(256*eta) = 3.63
      spherical looks ok, but in >5/3 region has a < 5/3 region (not level)
      x,y,z: hook up

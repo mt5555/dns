@@ -109,10 +109,18 @@ if (nscalars > nsize) then
 
    deallocate(ints_copy)
 
-   nsize=nscalars+100
+   nsize=nsize+100
 endif
 ints_save(1:nints,nscalars)=ints(1:nints)
 maxs_save(1:nints,nscalars)=maxs(1:nints)
+
+#if 0
+if (nscalars==nsize) then
+   call output_ints(ints_save,maxs_save,nints,nscalars)
+   nscalars=0
+endif
+#endif
+
 
 
 
@@ -207,7 +215,7 @@ delt = min(delt,time_target-time)
 
 
 call wallclock(tmx2)
-tims(3)=tmx2-tmx1
+tims(3)=tims(3) + (tmx2-tmx1)
 
 
 
