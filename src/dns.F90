@@ -38,7 +38,8 @@ write(message,'(a)') 'Initial data'
 call print_message(message)
 Q=0
 if (restart==1) then
-   !if (init_cond==?) call initialize forcing if needed...
+   ! initialize some constants, if needed:
+   if (init_cond==3) call init_data_sht(Q,q1,work1,work2)
    call init_data_restart(Q,work1,work2)
 else
    if (init_cond==0) call init_data_khblob(Q,q1,work1,work2)

@@ -16,7 +16,7 @@ fid=fopen('/tmp/test0000.0000.spec','r','l');
 
 time=fread(fid,1,'float64');
 j=0;
-while (time>=0 & time<=.0001)
+while (time>=0 & time<=.3)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');

@@ -376,7 +376,7 @@ k_0=14
 m=25
 U=1.0        ! velocity scale  U normalized below so that KE=.5 U**2 = .5
 Len=1.0/k_0  ! length scale, determined by mode k_0 above
-H=.005       ! height scale, arbritrary, chosen so KE+PE = 1
+
 
 ! set 
 ! R = Rossby number
@@ -387,11 +387,14 @@ if (init_cond_subtype==0) then
 else if (init_cond_subtype==1) then
    R=.25
    F=.05
+else if (init_cond_subtype==2) then
+   R=1.0
+   F=.3
 else
    call abort("init_data_swt(): init_cond_subtype set to unsupported value")
 endif
    
-
+H= 2/(U/F)**2           ! height scale, arbritrary, chosen so PE = 1
 
 ! set dimensionless constants used in code: f-plane and gravity:
 fcor=U/(R*Len)

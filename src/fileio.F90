@@ -49,7 +49,7 @@ endif
 
 if (grav>0) then
    H=sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))/g_nx/g_ny/g_nz
-   umax=fcor + sqrt(grav*H)/min(delx,dely)   
+   umax=umax+fcor + sqrt(grav*H)/min(delx,dely)   
 endif
 
 
@@ -108,6 +108,7 @@ ke1=ints(6)
 ea0=ea1
 ea1 = ints(6) + .5*alpha_value**2 * ints(2)
 
+t1=max(t1,time_initial)
 t0=t1                       ! previous previous time level 
 t1=maxs(7)                  ! previous time level  (most quantities known at this time
 
@@ -118,8 +119,6 @@ else
    delke_tot=0
    delea_tot=0
 endif
-
-
 
 
 
