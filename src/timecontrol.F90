@@ -327,11 +327,19 @@ endif
 ! diagnostic output
 !
 if (doit_diag) then
-   call output_spec(time,Q,q1,q2,q3,work1,work2)
+
+   if ( g_bdy_x1==PERIODIC .and. &
+        g_bdy_y1==PERIODIC .and. &
+        g_bdy_z1==PERIODIC) then
+      call output_spec(time,Q,q1,q2,q3,work1,work2)
+   endif
+
    call output_scalars(time,ints_save,maxs_save,nints,nscalars)
    nscalars=0
+
    ! model specific output:
-   call output_model(time,Q,q1,q2,q3,work1,work2)
+   call output_model(time,Q,Qhat,q1,q2,q3,work1,work2)
+
 else if (diag_dt==0) then
    ! if diagnostics are turned off, dont save the scalars!
    nscalars=0  

@@ -150,6 +150,7 @@ subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 use params
 use tracers
 use bc
+use ellipse
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -273,7 +274,7 @@ do i=bx1,bx2
    Qhat(i,j,1,2)= psisum*delx*dely/(4*pi)  - biotsavart_ubar*ycord(j)
 enddo
 enddo
-
+call comp_ellipse_reshape(w,1)  ! use initial w to set max vorticity for ellipse contours
 
 ! We are generating an initial condition, so store w in Q(:,:,:,3)
 ! otherwise, initial condition was read in, and is already in Q(:,:,:,3)

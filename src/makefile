@@ -105,7 +105,7 @@ LINK=$(F90) $(FFLAGS)
 #independent modules/routines (dont use any other modules):
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 #modules/routines which use OBJS1
-OBJS2 = transpose.o  solve.o ghost.o bc.o  tracers.o sforcing.o
+OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o 
 
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
@@ -117,7 +117,7 @@ OBJS3 = $(INITS) $(OPS) $(FILEIO)
 TURB_DIAG = structf.o turb_diag.o
 
 #diagnostics for VXPAIR runs:
-PSIVOR_DIAG = psivor_diag.o
+PSIVOR_DIAG = psivor_diag.o tracers.o ellipse.o
 
 #diagnostics for shallow water:
 SHALLOW_DIAG =  shallow_diag.o 

@@ -378,7 +378,7 @@ if (rk4stage==4) then
    if (numt>(3*numt_max/4)) call enlarge_tracers()
    j=numt
    call insert(tracer(1,1),tracer(1,2),tracer(1,ndim+1))
-   if (j/=numt) then
+   if (j/=numt .and. mod(numt,50)==0) then
       write(message,'(a,i5)') "tracers(): inserted points. numt=",numt
       call print_message(message)
    endif

@@ -58,6 +58,7 @@ subroutine rk4reshape(time,Q,w0,psi0,rhs,w_old,w_tmp,psi,work)
 use params
 use bc
 use tracers
+use ellipse
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,n_var)
@@ -166,6 +167,8 @@ call bcw_impose(w0)
 
 call compute_psi(w0,psi0,rhs,work,psi,comp_psi_rk4)
 time = time + delt
+
+call comp_ellipse(w0,0)
 
 
 ! compute KE, max U  

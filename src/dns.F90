@@ -132,6 +132,10 @@ if (tims_max(16)>0) then
    write(message,'(a,2f9.2,a,f4.3,a)') '   tracer_advance     ',tims_ave(16),tims_max(16)
    call print_message(message)
 endif
+if (tims_max(17)>0) then
+   write(message,'(a,2f9.2,a,f4.3,a)') '   elliptical contours',tims_ave(17),tims_max(17)
+   call print_message(message)
+endif
 
 
 call close_mpi

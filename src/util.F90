@@ -181,3 +181,40 @@ enddo
 
 end subroutine
 
+
+
+
+      SUBROUTINE interp4(y0,y1,y2,y3,newx,ynew)
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!c     Interpolates "y" to xloc position
+!
+!
+!     y0,y1,y2,y3 is data specified at points 0,1,2,3
+!     newx should be a point between 0 and 3
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      implicit none
+      integer i,n,xbeg
+      real*8 x0,x1,x2,x3,y0,y1,y2,y3,ynew
+      real*8 denom0,denom1,denom2,denom3,fact0,fact1,fact2,fact3,newx
+
+      x0 = 0
+      x1 = 1
+      x2 = 2
+      x3 = 3
+
+      denom0 = -6  !(x0-x1)*(x0-x2)*(x0-x3)   ! (-1)(-2)(-3)=-6
+      denom1 =  2  !(x1-x0)*(x1-x2)*(x1-x3)   ! ( 1)(-1)(-2)= 2
+      denom2 = -2  !(x2-x0)*(x2-x1)*(x2-x3)   ! ( 2)( 1)(-1)=-2
+      denom3 =  6  !(x3-x0)*(x3-x1)*(x3-x2)   ! ( 3)( 2)( 1)= 6
+
+      fact0 = (newx-x1)*(newx-x2)*(newx-x3)/denom0
+      fact1 = (newx-x0)*(newx-x2)*(newx-x3)/denom1
+      fact2 = (newx-x0)*(newx-x1)*(newx-x3)/denom2
+      fact3 = (newx-x0)*(newx-x1)*(newx-x2)/denom3
+      
+      ynew = y0*fact0 + y1*fact1 + y2*fact2 + y3*fact3
+
+      return
+      end subroutine
+
+
