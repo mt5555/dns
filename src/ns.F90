@@ -203,6 +203,11 @@ integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke_diss,vorave,helave,maxvor,f_diss
 real*8 :: vor(3)
+#ifdef ALPHA_MODEL
+real*8 gradu(nx,ny,nz,n_var)
+real*8 gradv(nx,ny,nz,n_var)
+real*8 gradw(nx,ny,nz,n_var)
+#endif
 
 !
 ! NOTE: for Fourier Coefficients with mode  im=g_nx/2, this is the
@@ -240,7 +245,7 @@ call wallclock(tmx1)
 !
 
 #ifdef ALPHA_MODEL
-   call ns_alpha_voriticity(gradu,gradv,gradw,Qhat,Q,work,p)
+   call ns_alpha_voriticity(gradu,gradv,gradw,Q,work)
 #else
    call ns_vorticity(rhsg,Qhat,work,p)
    ! call ns_voriticyt2(not_written)
@@ -311,11 +316,10 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in alpha model forcing term to the rhs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! compute one entry of work=DD + DD' - D'D  
-! transform work -> p
-! compute d(p), apply helmholtz inverse, accumualte into rhs
 #ifdef ALPHA_MODEL
-call alpha_model_rhs(rhs,gradu,gradv,gradw,work,p)
+! overwrite Q with div(tau)
+! rhs = rhs + helmholtz inverse ( div tau)
+call alpha_model_rhs(rhs,Q,gradu,gradv,gradw,work,p)
 #endif
 
 
@@ -485,3 +489,101 @@ enddo
 call z_ifft3d(p,rhsg(1,1,1,n),work)
 enddo
 end subroutine
+
+
+
+
+
+
+
+subroutine ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
+use params
+use transpose
+implicit none
+real*8 Q(nx,ny,nz,n_var)
+real*8 gradu(nx,ny,nz,n_var)
+real*8 gradv(nx,ny,nz,n_var)
+real*8 gradw(nx,ny,nz,n_var)
+real*8 work(nx,ny,nz)
+
+!local
+integer nd
+real*8 dummy(1)
+
+
+do nd=1,3
+call der(Q(1,1,1,1),gradu(1,1,1,nd),dummy,work,1,nd)
+call der(Q(1,1,1,2),gradv(1,1,1,nd),dummy,work,1,nd)
+call der(Q(1,1,1,3),gradw(1,1,1,nd),dummy,work,1,nd)
+enddo
+
+
+end subroutine
+
+
+
+#ifdef ALPHA_MODEL
+!
+! 3 ways to do this:
+! div on grid, inverse in spectral
+!          9 der() + 3 z_fft()      transposes: 6+6 x, 6+6 y, 6+3z
+! div & inverse in spectral
+!         9 z_fft()                 tranposes: 18x,18y,9z
+!
+! x & y components of div on grid, then transform.  transform z, add then div
+! 6 der() + 6 z_fft()               transposes: 6+12 x, 6+12y, 6z
+!
+subroutine alpha_model_rhs(rhs,div,gradu,gradv,gradw,work,p)
+! compute one entry of work=DD + DD' - D'D  
+! transform work -> p
+! compute d(p), apply helmholtz inverse, accumualte into rhs
+
+use params
+use transpose
+implicit none
+real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 work(nx,ny,nz)
+real*8 div(nx,ny,nz,n_var)
+real*8 gradu(nx,ny,nz,n_var)
+real*8 gradv(nx,ny,nz,n_var)
+real*8 gradw(nx,ny,nz,n_var)
+
+
+!local
+integer i,j,k
+integer nd
+real*8 :: D(3,3)
+
+do m1=1,3
+do m2=1,3
+
+! compute (m1,m2) entry of DD + DD'  - D'D
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   do nd=1,3
+      D(1,nd) = gradu(i,j,k,nd)
+      D(2,nd) = gradv(i,j,k,nd)
+      D(3,nd) = gradw(i,j,k,nd)
+   enddo
+   do L=1,3
+      work(i,j,k)=D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L) + D(L,m1)*D(L,m2)
+   enddo
+enddo
+enddo
+enddo
+call der(work,work,dummy,work2,1,m2)
+div(:,:,:,m1) = rhs(:,:,:,m1) + work
+enddo
+enddo
+
+! apply inverse operatore to div, accumulate into RHS
+do n=1,3
+   call z_fft3d_trashinput(div(1,1,1,n),p,work) 
+   rhs(:,:,:,n)=laplace inverse (work)
+enddo
+
+
+end subroutine
+#endif

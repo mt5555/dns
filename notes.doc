@@ -1,10 +1,10 @@
 TODO:
 
-
-1. PDF for e
-2. use a mpi defined type for the buffer->2d array copy in transpose.F90
-3. post more messages at once in tranpose.F90?  
-6. divergence: go to Shashkov formula?  
+1.  alpha model
+2.  4th order differences
+10. use a mpi defined type for the buffer->2d array copy in transpose.F90
+100. post more messages at once in tranpose.F90?  
+101. divergence: go to Shashkov formula?  
 
 **********************************************************************************
 sizes
