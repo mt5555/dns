@@ -11,6 +11,15 @@ delta=.1
 KIWI: 4 cpus  time(min) per timestep:  .468   timestep ~ .0011s
       2 cpus                           .644
 
+shankara:
+2      .
+4      .
+8:     . 
+16:    .161   (4.7 days to t=50)
+
+delt=.0012
+time_per_timestep(m)*50/.0012/60 = time for run in hours
+
 
 **********************************************************************************
 10/3/2004
