@@ -32,6 +32,9 @@ CK_orig=1.613;
 %tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 
 
+name = 'sk128_alpha00000.0000';
+namedir = '/home/skurien/dns/src/'
+
 
 % plot all the spectrum:
 movie=1;

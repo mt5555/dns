@@ -512,8 +512,6 @@ if (my_pe==io_pe) then
 endif
 
 
-
-
 #ifdef USE_MPI
 call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)

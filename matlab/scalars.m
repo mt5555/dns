@@ -35,6 +35,8 @@ nx=256;
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
 %nx=1024;
 
+fid=fopen('../src/sk128_alpha0/sktest128_alpha00000.0000.scalars','r');
+nx=128;
 
 nscalars=0;
 nscalars_e=0;
@@ -184,9 +186,14 @@ title('R_\lambda')
 xlabel('time')
 print -djpeg -r72 rl.jpg
 
+figure(3);
+plot(time,lambda)
+     title('\lambda')
+     xlabel('time')
+print -djpeg -r72 lambda.jpg
 
 
-figure(3); subplot(1,1,1)
+figure(4); subplot(1,1,1)
 plot(time,eta* nx*pi*2*sqrt(2)/3 )
 title('k_{nmax} \eta')
 xlabel('time')

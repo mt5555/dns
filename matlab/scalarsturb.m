@@ -28,6 +28,8 @@ times=[times,.24:.01:4.0];
 %name = '/ccs/scratch/taylorm/dns/sc512A'
 %times=3;
 
+name = '/home/skurien/dns/src/sk128_alpha0';
+times=0.5
 
 nt=0;
 for t=times

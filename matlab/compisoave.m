@@ -1,4 +1,4 @@
-function [y45,y415,y43,epsilon,h_epsilon]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
+function [y45,y415,y43,epsilon,h_epsilon,y215]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
 %
 % compute angle average and plot a single snapshot
 % klaws==1   4/5ths and other laws
@@ -87,6 +87,7 @@ R_lambda = lambda*sqrt(2*ke/3)/mu;
 
 disp(sprintf('KE:      %f  2pi units: %f',ke,ke*4*pi*pi));
 disp(sprintf('epsilon: %f  2pi units: %f',epsilon,epsilon*4*pi*pi));
+disp(sprintf('h_epsilon: %f  2pi units: %f',h_epsilon,h_epsilon*2*pi));
 disp(sprintf('mu:      %f  2pi units: %f',mu,mu*4*pi*pi));
 disp(sprintf('eta:     %f  2pi units: %f',eta,eta*2*pi));
 disp(sprintf('lambda:  %f  2pi units: %f',lambda,lambda*2*pi));
@@ -304,10 +305,21 @@ print -djpeg 43.jpg
 end
 
 
+
+
+
+end
+
+
+
+
+
+
+
 %
 %  the 2/15 law
 %
-if (0)
+if (klaws==3)
 yyave=0*xx;
 figure(4); subplot(1,1,1);
 yyave=0*xx;
@@ -317,7 +329,7 @@ for i=1:ndir
   x = r_val(:,i);                       % units of box length
   x_plot=x*nx*delx_over_eta;            % units of r/eta
 
-  y=H_ltt(:,i)./(epsilon*(x.^2));
+  y=H_ltt(:,i)./(h_epsilon*(x.^2));
 
   semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
   yyave=yyave+w(i)*spline(x,y,xx);
@@ -337,11 +349,6 @@ if (plot_points==1)
 print('-dpsc',[bname,'_215.ps']);
 print -djpeg 215.jpg
 end
-end
-
-
-
-
 end
 
 

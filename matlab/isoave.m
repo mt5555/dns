@@ -33,6 +33,8 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
 %nx=2048; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
+name = '/home/skurien/helicity_data/check256_hq_0001.0000.new'
+
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
@@ -45,6 +47,7 @@ disp('4 = 2nd and 3rd order isotropy check');
 disp('5 = 2nd and 3rd order isotropy check, x,y,z directions only');
 disp('6 = Scaling laws for total structure function (for paper)');
 disp('7 = plot 4th order functions');
+disp('8 = plot helical structure functions');
 in=input('Enter choice: ');
 
 
@@ -58,6 +61,9 @@ elseif (in==5)
    check_isotropy=1;
 elseif (in==7)
    klaws=2;
+   check_isotropy=0;
+elseif (in==8)
+   klaws=3;
    check_isotropy=0;
 else
    klaws=1;
@@ -73,20 +79,18 @@ xx=(1:.5:(nx./2.5)) / nx;
 if (in==6) 
   compisoave_paper(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 else
-  [y45,y415,y43,eps]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
+  [y45,y415,y43,eps,h_eps]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 end
+
+return
+
+
 
   
 xx_plot=xx*nx*delx_over_eta;
-return
 figure(10); hold off;
 semilogx(xx_plot,y45,'k'); hold on;
 axis([1,1000,0,1.5]);
-
-
-
-return
-
 
 
 yysum=0*y45;

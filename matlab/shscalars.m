@@ -12,8 +12,8 @@ range=0:50;
 %range=0:.5:2;
 
 
-fid=fopen('../src/temp20000.0000.scalars','r','l'); 
-
+%fid=fopen('../src/temp20000.0000.scalars','r','l'); 
+fid = fopen('/home/skurien/dns/src/sk128_alpha00000.0000.scalars','r','l')
 
 
 nscalars=0;

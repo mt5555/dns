@@ -176,7 +176,7 @@ x=ndelta; call cwrite8(fid,x,1)
 x=ndir;   call cwrite8(fid,x,1)   
 x=pmax-1+5;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 x=pmax-1+3;    call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
-x=7;      call cwrite8(fid,x,1)   ! number of scalars
+x=8;      call cwrite8(fid,x,1)   ! number of scalars
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
 
@@ -234,7 +234,8 @@ do idir=1,ndir
 enddo
 enddo
 
-
+! NOTE: if you add scalars here, be sure to update
+! the number of scalars field in the header above.
 call cwrite8(fid,time,1)
 x=g_nx; call cwrite8(fid,x,1)
 x=g_ny; call cwrite8(fid,x,1)
@@ -242,7 +243,7 @@ x=g_nz; call cwrite8(fid,x,1)
 call cwrite8(fid,mu,1)
 call cwrite8(fid,ke,1)
 call cwrite8(fid,epsilon,1)
-if (h_epsilon>0) call cwrite8(fid,h_epsilon,1)
+call cwrite8(fid,h_epsilon,1)
 
 
 end subroutine
