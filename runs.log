@@ -115,9 +115,12 @@ iso12_256B (QA)  IN
 
 
 
+iso12w_512B
+   in QA
+   same as  iso12w_512A, but with zero initial condition
+   FM=5/(2pi)**2, mu=6e-4/(2pi)**2
 
-
-
+ 
 iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2  
 
                Run to t=2.9:   R_l = 260
@@ -144,12 +147,20 @@ FUTURE RUNS:
 iso12_500B   as above, but using dnsgrid?
              dnsgrid with lower-tol CG?
 
-i12_1024A    mu=.35e-4  
+iso12_640    mu=.6e-4 on guyot?
+    1x1x320  IN this weekend?    (lower iso12_256 to 128 cpus???)
+
+i12_1024A run at mu=.35e-4  ???
+
      256:  2.75e-4
      500:  1.00e-4
+     640:   .7e-4     delx=2.7  push this a little with mu=.6
+     768:   .53e-4
     1024:  0.35e-4  
 
 
+
+  
 
 
 

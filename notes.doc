@@ -1,6 +1,3 @@
-
-
-
 initial results were promising (Chen).  That data was 
 from just the coordinate directions, and from a single snapshot.
 Advent of bigger computers, more statisics were computed
@@ -13,6 +10,30 @@ eddy turnover times
 Results computed with
 averaging over many snapshots did not look so good.
 
+
+TODO:
+iso12w512A  why non-isotropic?
+            check 2nd order isotropy for a single direction
+            check 2nd order isotropy for average of 3 direction
+            check time averages vs. angle averages
+            email Gotoh  
+
+<> = time average
+[] = angle average.  f(0) = [f(a)]
+
+measure of isotropy:
+L2_over_all_a:     sqrt [  ( <f(a)> - <[f(a)]> )^2   ]
+
+
+iso12w512B  different initial condition
+               see if same coordinate bias persists
+
+iso12_500A  check isotropic
+            check time averages vs. angle averages
+            
+
+iso12_512 (O3K)  look at intermittency? 
+                 
 
 
 
@@ -52,15 +73,7 @@ check spectrum and parallel spectrum.  using testcase?
 101. divergence: go to Shashkov formula?  
 
 **********************************************************************************
-S. Chen run:
-513^3  R_lambda=220
-25 values of r
-holds for r=80..180
-
-
-
-**********************************************************************************
-
+memory use:
 Q: 512x512x256: formula                 288Mb per cpu
                 observed:               334M
 
@@ -89,10 +102,14 @@ extrapolated:
 256^3   2.25Gb           .375M per variable
 480^3:  15Gb
 512^3:  18Gb             3Gb per variable  (9GB per timestep.  4.5gb   130m gridpoints
+640^3   29Gb
+768^3   51Gb
 1024^3  144Gb            24Gb per variable                             1b gridpoints
 1536^3  486Gb
 2048^3  1152Gb           192Gb per variable    
+3072^3  3240Gb           needs at least 1620 cpus.  6x1x512?  
 4096^3  9216Gb           1536Gb per variable      
+                         needs 4.6K cpus at 2GB per cpu
 
 **********************************************************************************
 analytic CFL:  for RK4, norm(G)<2.4

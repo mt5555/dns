@@ -61,7 +61,6 @@ endif
 ! 
 if (compute_struct==1) then
 
-
    ! angle averaged functions:
    call isoavep(Q,q1,q2,q3)
    if (my_pe==io_pe) then
@@ -82,7 +81,8 @@ if (compute_struct==1) then
 
    call compute_all_pdfs(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
    
-   
+#if 0   
+   crashes if using 0 initial condition
    write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
         (ints_e(n+3)/ints_e(n)**1.5,n=1,3)
    call print_message(message)
@@ -90,7 +90,7 @@ if (compute_struct==1) then
    write(message,'(a,3f14.8)') 'wSw: ',&
         (ints_e(10)/ints_e(1)**2)
    call print_message(message)
-   
+#endif   
    
    if (structf_init==1) then
    if (my_pe==io_pe) then

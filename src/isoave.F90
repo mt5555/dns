@@ -224,6 +224,8 @@ enddo
 #endif
 
 epsilon=mu*ke_diss/ntot
+if (epsilon==0) epsilon=1e-20
+
 ke=ke/ntot
 
 

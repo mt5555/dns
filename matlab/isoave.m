@@ -28,7 +28,7 @@ ext='.isostr';
 %name='/ccs/taylorm/shankara/dns/src/iso12_256_0003.0000'
 %ext='.isostr001';
 
-name='/ccs/taylorm/shankara/dns/src/iso12_5120000.4000'
+name='/ccs/taylorm/shankara/dns/src/iso12_5120000.9000'
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')

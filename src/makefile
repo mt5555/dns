@@ -99,14 +99,6 @@ ifeq ($(UNAME),OSF1)
       LSFLIB = 
       LSFFLAGS = 
    endif
-   ifeq ($(HOST),mahi)
-      MPI = 
-      MPILIB =  
-      LSFLIB = 
-      LSFFLAGS = 
-   endif 
-
-
 
    LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  #-Lstk -lstk 
 
