@@ -448,6 +448,8 @@ if (my_pe==io_pe) then
             convert_opt=7 
          else if (carg(1:15)=="extract_subcube") then
             convert_opt=8 
+         else if (carg(1:11)=="spec_window") then
+            convert_opt=9 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abort("-cout unrecognized option")

@@ -54,7 +54,7 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=.8
+tstart=.7019
 tstop=.32
 tinc=1.0
 
@@ -251,7 +251,7 @@ icount=icount+1
       call print_message("computing gradu ")
       call gradu_stats(time,Q,vor,work1,work2)
    endif
-   if (convert_opt==8) then  ! -cout rot_gradu
+   if (convert_opt==8) then  ! -cout extract_subcube
       call input_uvw(time,Q,vor,work1,work2,1)
       call print_message("computing gradu ")
       call gradu_rotate_subcubes(time,Q,vor,work1,work2)
