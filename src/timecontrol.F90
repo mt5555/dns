@@ -199,7 +199,9 @@ if (doit_screen) then
    ! lambda**2 = (2/3) KE / (1/15)epsilon/mu  = 10 KE mu / epsilon
    ! R_lambda = lambda*sqrt(2 KE/3)/mu 
    !    
-   !
+   ! units:  epsilon:  m^2/s^3
+   !         KE        m^2/s^2
+   !         mu        m^2/s
    !
    if (mu>0 .and. ndim>2 .and. ke_diss<0) then
       lambda=sqrt(  5*(2*ints(6))/ints(2)  )
