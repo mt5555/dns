@@ -280,7 +280,8 @@ icount=icount+1
          enddo
       enddo
       call print_message('performing io test')
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+          // message(2:10) // ".iotest"
 
       mpi_maxio=32
       mpi_stripe="4"
@@ -292,6 +293,7 @@ icount=icount+1
       tmx2=tmx2-tmx1
 
       if (io_pe==my_pe) then
+         print *,'stripe=',mpi_stripe
          print *,'cpu time for output: ',tmx2, tmx2/60
          print *,'data rate MB/s: ',8.*3.*g_nx*g_ny*g_nz/1024./1024./tmx2
       endif
