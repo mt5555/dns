@@ -112,7 +112,7 @@ if (io_pe==my_pe) then
 !      enddo
 !      call cwrite8(fid,xell,npd)
 !      call cwrite8(fid,yell,npd)
-      call cwrite8(Rad(1,nell),npd)
+      call cwrite8(fid,Rad(1,nell),npd)
    enddo
    call cclose(fid,ierr)
 endif
