@@ -16,8 +16,9 @@ REDO:
 
 dns:    1x1x512     45.84 (5 timesteps)
 dnsghost 8x8x8      6.50 (1 timestep)
-dnsghost 2x2x128      IN  see bench2048.o
-dnsghost 4x2x64       IN
+dnsghost 2x2x128    insufficient virtual memory
+dnsghost 8x4x16       IN-running
+dnsghost 4x4x32       IN
 
 
 1536^3 
