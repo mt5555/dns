@@ -444,7 +444,7 @@ else
    access="a"
 endif
 
-if (transfer_comp_time<>time_old) then
+if (transfer_comp_time/=time_old) then
    call print_message("WARNING: transfer spectrum not calculated")	
    return
 endif

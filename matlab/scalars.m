@@ -14,7 +14,8 @@ range=0:50;
 %fid=fopen('iso12_256_200.scalars','r','b'); 
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
-fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r','b'); 
+%fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r','b'); 
+fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
 
@@ -99,18 +100,27 @@ disp(sprintf('max vor_z = %e',max(vor_z)));
 figure(5)
 clf
 hold on
-plot(time,ke,'g')
-plot(time_2,ke_diss_tot,'r')
+plot(time,ke,'r')
+%plot(time_2,ke_diss_tot,'r')
 plot(time,ke_diss_f+ke_diss_d,'k')
-plot(time,ke_diss_f,'b')
+%plot(time,ke_diss_f,'b')
 plot(time,ke_diss_d,'b')
 plot(time,hel,'g')
-title('KE: green,    d(KE)/dt: black and red,    hel: green');
+title('KE: red,    d(KE)/dt: blue,    hel: green');
 hold off
+xlabel('time')
+print -dpsc ke.ps
 
 
 lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
 R_l = lambda.*sqrt(2*ints(6,:)/3)/mu;
+
+figure(2)
+plot(time,R_l)
+title('R_\lambda')
+xlabel('time')
+print -dpsc rl.ps
+
 
 % Kolm. micro scale
 eta = (mu^3 ./ abs(ke_diss_d)).^(.25);

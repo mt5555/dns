@@ -67,7 +67,7 @@ icount=icount+1
          enddo
       endif
       basename=runname(1:len_trim(runname)) // "-new."
-      call output_uvw(basename,time,Q,work1,work2,dummy)
+      call output_uvw(basename,time,Q,work1,work2,vor)
    endif
 
    if (convert_opt==1) then  ! -cout vor
@@ -77,7 +77,7 @@ icount=icount+1
       call print_message("computing vorticity...")
       call vorticity(vor,Q,work1,work2)
       call print_message("output vorticity...")
-      call output_uvw(basename,time,vor,work1,work2,dummy)
+      call output_uvw(basename,time,vor,work1,work2,Q)
    endif
 
    if (convert_opt==2) then  ! -cout vorm

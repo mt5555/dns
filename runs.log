@@ -82,6 +82,10 @@ big test: take 512^3 data, output 384 spec.
 10/31/02
 QB pre-science run.
 
+.4020:  last non-rescaled run.
+        rescale run started from this time.  
+.4027:  rescaled run, after 1 timestep 
+
 
 1. initial value: restart + rescale.  call daniel to talk about this
        decay2048_e   initial condition
@@ -493,7 +497,10 @@ iso12_500A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
 
 iso12_512 (ON O3K)   done
    t=0...5  mu=2.75e-4
-   t>.5     mu=1e-4
+   t=.5 to 3.7  mu=1e-4
+   t=3.5 ->     ran on QA.  
+   so data after 3.7 switches to little endian
+   (scalars switches at 3.5)
 
 
 
