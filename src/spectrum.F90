@@ -1016,10 +1016,10 @@ do j=ny1,ny2
          co_energy(2) = energy*p1(i,j,k,1)*p1(i,j,k,3)
          co_energy(3) = energy*p1(i,j,k,2)*p1(i,j,k,3)
 
-         cospec_x(abs(im),:)=cospec_x(abs(im),:)+co_energy(:)
-         cospec_y(abs(jm),:)=cospec_x(abs(jm),:)+co_energy(:)
-         cospec_z(abs(km),:)=cospec_x(abs(km),:)+co_energy(:)
-         cospec_r(iwave,:)=cospec_r(iwave,:)+co_energy(:)
+         cospec_x(abs(im),1:ndim)=cospec_x(abs(im),1:ndim)+co_energy(1:ndim)
+         cospec_y(abs(jm),1:ndim)=cospec_x(abs(jm),1:ndim)+co_energy(1:ndim)
+         cospec_z(abs(km),1:ndim)=cospec_x(abs(km),1:ndim)+co_energy(1:ndim)
+         cospec_r(iwave,1:ndim)=cospec_r(iwave,1:ndim)+co_energy(1:ndim)
 
 
          energy = energy*(p1(i,j,k,1)*(wy-vz) + &
