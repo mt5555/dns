@@ -127,7 +127,7 @@ real*8 work(nx,ny,nz)
 
 ! local variables
 integer i
-real*8 dummy
+real*8 dummy(1)
 do i=1,3
 
    ! compute u_x, u_xx
@@ -165,7 +165,7 @@ real*8 work2(nx,ny,nz) ! wk array
 
 ! local variables
 integer i
-real*8 dummy
+real*8 dummy(1)
 
 i=1
 call der(u(1,1,1,i),div,dummy,work2,DX_ONLY,i)

@@ -76,7 +76,7 @@ do
    call rk4(time,Q,ints,maxs)
    itime=itime+1
 
-#ifdef MPI
+#ifdef USE_MPI
    ints_buf=ints
    call MPI_allreduce(ints_buf,ints,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    ints_buf=maxs

@@ -84,7 +84,7 @@ if (my_pe==io_pe) then
      1/(mu*pi*pi*(g_nx**2 + g_ny**2 + g_nz**2))
 endif
 
-#ifdef MPI
+#ifdef USE_MPI
 call MPI_BROADCAST
 mu
 time_final

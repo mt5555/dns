@@ -94,7 +94,8 @@ real*8 :: p(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)
 
 ! local variables
-real*8 rwave,iwave
+real*8 rwave
+integer :: iwave
 real*8 :: spectrum_in(0:iwave_max)
 real*8 :: work(nx,ny,nz)
 integer i,j,k
