@@ -103,6 +103,10 @@ iso12_500A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
                   4.00                  .807
                   3.00                  .768
 
+iso12_256A (shankara)
+    alpha=infinity
+    mu=1e-4
+
 
 
 iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2  

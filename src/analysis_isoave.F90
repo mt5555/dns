@@ -51,14 +51,14 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-tstart=1.75
-tstop=1.75
+tstart=3.0
+tstop=3.0
 tinc=.25
 icount=0
 
-nxdecomp=2
-nydecomp=2
-nzdecomp=2
+nxdecomp=1
+nydecomp=1
+nzdecomp=1
 
 !call set_byteswap_input(1);
 
