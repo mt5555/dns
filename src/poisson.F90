@@ -1,24 +1,26 @@
-poisson(f,work)
+#include "macros.h"
+
+subroutine poisson(f,work)
 !
 !  solve laplacian(p) = f
-!  overrite f with the solution p 
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
 !
-implicit none
 use params
-! input/output
-real*8 f(nxd,nyd,nzd)
-! work array
-real*8 work(nxd,nyd,nzd)
+use fft_interface
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+real*8 work(nx,ny,nz) ! work array
 
 !local
 integer n1,n1d,n2,n2d,n3,n3d
 
-n1=nx
-n1d=nxd
-n2=ny
-n2d=nyd
-n3=nz
-n3d=nzd
+n1=nx2
+n1d=nx
+n2=ny2
+n2d=ny
+n3=nz2
+n3d=nz
 
 call fft(f,n1,n1d,n2,n2d,n3,n3d)          
 call transpose12(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
@@ -35,11 +37,11 @@ call transpose12(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
 call ifft(f,n1,n1d,n2,n2d,n3,n3d)
 
 
-ASSERT(n1==nx)
-ASSERT(n1d==nxd)
-ASSERT(n2==ny)
-ASSERT(n2d==nyd)
-ASSERT(n3==nz)
-ASSERT(n3d==nzd)
+ASSERT("poisson.F90",n1==nx2)
+ASSERT("poisson.F90",n1d==nx)
+ASSERT("poisson.F90",n2==ny2)
+ASSERT("poisson.F90",n2d==ny)
+ASSERT("poisson.F90",n3==nz2)
+ASSERT("poisson.F90",n3d==nz)
 
 end

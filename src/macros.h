@@ -4,3 +4,7 @@
 #define rho_index 4
 #define e_index 5
 
+#ifdef NDEBUG
+#else
+#define ASSERT(str,cond) if (cond) call abort(str)
+#endif
