@@ -26,11 +26,10 @@ time_target = time_final
 !  
 !
 
+umax=maxs(4)
 if (g_nz>1) then
-   umax=maxs(1)/delx+maxs(2)/dely+maxs(3)/delz
    mumax = mu*(1/delx**2 + 1/dely**2 + 1/delz**2)
 else
-   umax=maxs(1)/delx+maxs(2)/dely
    mumax = mu*(1/delx**2 + 1/dely**2)
 endif
 
@@ -112,10 +111,9 @@ if (doit) then
    mx=ints(1)/g_nx/g_ny/g_nz  ! dont mult all the ints together, overflow!
    
    write(message,'(a,f13.10,a,f10.5,a,f10.5,a)') 'ke: ',mx,&
-     ' d/dt log(ke) tot:',ints(2)/ints(1),&
-     ' d/dt log(ke) diffusion:',ints(3)/ints(1)
+     '  d/dt log(ke): tot=',delke_tot/ints(1),&
+     ' diffusion=',ints(3)/ints(1)
    call print_message(message)	
-
    call print_message("")
 endif
 
@@ -217,7 +215,7 @@ integer i,j,k,n
 integer :: iwave,iwave_max
 real*8,allocatable  ::  spectrum(:),spectrum1(:)
 
-integer,parameter :: numx=15,numy=10
+integer,parameter :: numx=20,numy=13
 character :: plot(0:numx,0:numy)
 real*8 cspec(0:numx)
 integer ix,iy
@@ -273,8 +271,8 @@ do i=1,numy-1
    print *,"      |",plot(:,i)
 enddo
 print *,"1E-10 |",plot(:,numy)
-print *,"      +---------------+"
-print *,"      k=0           k=",iwave
+print *,"      +---------------------+"
+print *,"      k=0                 k=",iwave
 
 endif
 
@@ -354,6 +352,7 @@ real*8 :: small=1e-7
 check_time = .false.
 time_next=time_final
 if (dt==0) return
+
 
 if (time>=time_final-small) check_time=.true.
 if (time==0) check_time=.true.

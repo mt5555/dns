@@ -83,6 +83,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 !local variables
 real*8  :: time=0
 integer :: itime=0,ierr
+character*80 message
 
 ints=0
 maxs=0
@@ -92,10 +93,9 @@ delt=0
 
 do 
    call rk4(time,Q)
-
-   if (maxs(4)> 1000) then
-      print *,"max U > 1000"
-      print *,"Stoping at time=",time
+   
+   if (maxval(maxs(1:3))> 1000) then
+      print *,"max U > 1000. Stoping at time=",time
       time_final=time
    endif
 
@@ -134,6 +134,11 @@ real*8 :: ints_buf(nints)
 
 time_old=ints_timeU
 ke_old=ints(1)
+
+
+#define USE_RK4
+#ifdef USE_RK4
+
 Q_old=Q
 
 
@@ -160,6 +165,43 @@ call ns3D(rhs,Q_tmp,time+delt,0)
 Q=Q+delt*rhs/6.0
 call divfree(Q,Q_tmp)
 
+#else
+
+#if 0
+U = Un
+G = F(U,tn)
+U = U + 1/3 dt G
+G = -5/9 G + F(U,tn+1/3 dt)
+U = U + 15/16 dt G
+G = - 153/128 G + F(U,tn+3/4dt)
+U(n+1)=U + 8/15 G
+#endif
+
+! stage 1
+call ns3D(rhs,Q,time,1)
+call divfree(rhs,Q_old)
+Q=Q+delt*rhs/3
+
+! stage 2
+Q_tmp = rhs
+call ns3D(rhs,Q,time+delt/3,0)
+rhs = -5*Q_tmp/9 + rhs
+call divfree(rhs,Q_old)
+Q=Q + 15*delt*rhs/16
+
+
+! stage 3
+Q_tmp=rhs
+call ns3D(rhs,Q,time+3*delt/4,0)
+rhs = -153*Q_tmp/128 + rhs
+call divfree(rhs,Q_old)
+Q=Q+8*delt*rhs/15
+
+#endif
+
+
+
+
 time = time + delt
 
 
@@ -174,12 +216,11 @@ do i=nx1,nx2
       ints(1)=ints(1)+.5*Q(i,j,k,n)**2  ! KE
       maxs(n)=max(maxs(n),abs(Q(i,j,k,n)))   ! max u,v,w
    enddo
-   vel = Q(i,j,k,1)**2 + Q(i,j,k,2)**2 + Q(i,j,k,3)**2 
+   vel = abs(Q(i,j,k,1))/delx + abs(Q(i,j,k,2))/dely + abs(Q(i,j,k,3))/delz
    maxs(4)=max(maxs(4),vel)
 enddo
 enddo
 enddo
-if (n==1) maxs(4)=sqrt(maxs(4))
 
 
 #ifdef USE_MPI
@@ -189,25 +230,15 @@ if (n==1) maxs(4)=sqrt(maxs(4))
    call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
    ! KE total dissapation 
-   ints(2)=ints_timeU-time_old
-   if (ints(2)>0) ints(2)=(ints(1)-ke_old)/ints(2)
+   delke_tot=ints_timeU-time_old
+   if (delke_tot>0) delke_tot=(ints(1)-ke_old)/delke_tot
 
 
 end subroutine rk4  
 
 
 
-#if 0
 
-U = Un
-G = F(U,tn)
-U = U + 1/3 dt G
-G = -5/9 G + F(U,tn+1/3 dt)
-U = U + 15/16 dt G
-G = - 153/128 G + F(U,tn+3/4dt)
-U(n+1)=U + 8/15 G
-
-#endif
 
 
 

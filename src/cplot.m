@@ -1,6 +1,6 @@
 fidu=fopen('test-0-0-0-0000.0000.data');
-%fidvor=fopen('test0000.0000.vor','r','b');
-fidvor=fopen('test0000.5000.vor','r');
+%fidvor=fopen('test0000.5000.vor','r');
+fidvor=fopen('test0005.0000.vor','r');
 
 %
 %########################################################################
@@ -28,7 +28,7 @@ vor = squeeze(q(:,:,1));
 figure(2)
 pcolor(x,y,vor')
 shading interp
-
+axis square
 
 
 

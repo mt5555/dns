@@ -116,19 +116,22 @@ integer :: error_code =0
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 integer,parameter :: nints=5
-real*8 :: ints(nints),maxs(nints),ints_timeU,ints_timeDU
+real*8 :: ints(nints)=0,maxs(nints)=0
+real*8 :: ints_timeU,ints_timeDU
+real*8 :: delke_tot        ! d KE /dt from most recent time step
+
 !
 ! Quantities involving only Q are computed in the timestep
 ! routine, at the current time = ints_timeU:  
 !
 ! ints(1) = ke
-! ints(2) = ke dissapation
 ! maxs(1,2,3) = max U,V,W
-! maxs(4) = max velocity
+! maxs(4) = max (U/delx + V/dely + W/delz)  used for CFL
 !
 ! Quantities involving derivatives are computed when the RHS is computed
 ! and thus the data is at the prevous timestep = ints_timeDU
 ! 
+! ints(2) = ke dissapation from forcing
 ! ints(3) = ke dissapation from diffusion
 ! ints(4) = vor 
 ! ints(5) = helicity

@@ -8,7 +8,7 @@ periodic     ! y bc
 periodic     ! z bc
 .10          ! final time
 1.5          ! adv cfl  (0 = disabled, use min_dt)
-.25           ! vis cfl  (0 = disabled, use min_dt)
+.55           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
 0.0           ! restart_dt  (0 = restart output disabled)
