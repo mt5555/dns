@@ -79,7 +79,8 @@ Running the code
              KH-blob    initial velocity computed from a specified
                         vortex sheet
              KH-anal    analytic KH problem from E & Lui
-             iso12      random, with -5/3 spectrum in E(1) and E(2)
+             iso12      random phases, with spectrum in E(k) given
+                        by init_cond_subtype
              vxpair     Monika's vortex instability problem
              iso12e     quick version of iso12 (gives different
                         answers for different parallel decompositions,
@@ -103,6 +104,7 @@ Running the code
               iso12w    stochastic, white in time, wave numbers 1,2
               iso       Relax to Overholt & Pope spectrum
               iso23w    stochastic, white in time, wave numbers 2,3
+              balu      Relax to E(10)=1 
 
    line 6    viscosity type.  
                value:      data on line 7 is actual value

@@ -525,6 +525,18 @@ do j=1,ny_2dz
             rhs(k,i,j,3)=0
          endif
 
+#if 0
+         if (forcing_type==5) then
+         ! balu forcing: keep mode=10 fixed.
+         ! in 2D: modes (0,10) and (6,8)
+         if (90.25 <= im**2+jm**2 + km**2 .and. im**2+jm**2+km**2<110.25) then
+            rhs(k,i,j,1)=0
+            rhs(k,i,j,2)=0
+            rhs(k,i,j,3)=0
+         endif
+         endif
+#endif
+
       enddo
    enddo
 enddo

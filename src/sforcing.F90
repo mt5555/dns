@@ -49,6 +49,7 @@ if (forcing_type==3) call sforcing12(rhs,Qhat,f_diss,fxx_diss,1)
 if (forcing_type==4) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
 ! determinisitic - Balu: single high wave number 
+! do nothing - this forcing is handled in ns.F90
 if (forcing_type==5) call sforcing12(rhs,Qhat,f_diss,fxx_diss,2)
 
 
