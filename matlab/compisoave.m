@@ -29,7 +29,8 @@ xmax=1000;  % maximum x axis
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
     SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt] ...
      = readisostr( [name,ext] );
- 
+
+
 eta = (mu^3 / epsilon)^.25;
 delx_over_eta=(1/nx)/eta;
 

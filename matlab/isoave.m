@@ -24,6 +24,12 @@ nx=512; delx_over_eta=2.74; epsilon=3.89;
 name='/ccs/scratch/taylorm/sk/check256_0000.8000'
 nx=256; delx_over_eta=1.0; epsilon=1.0;
 
+name='/ccs/scratch/taylorm/decay/decay2048-1024.0000.6491'
+nx=1024; delx_over_eta=2.73*2; epsilon=.04;
+
+name='/ccs/scratch/taylorm/decay/decay20480000.5551.new'
+nx=2048; delx_over_eta=2.73*2; epsilon=.04;
+
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')

@@ -43,12 +43,20 @@ end subroutine
 
 
 
-subroutine mpi_io_init
+subroutine mpi_io_init(init)
 !
 ! set up all the I/O processors
 ! and create communicator, comm_io
 !
+! init=1   first time, create comm_io
+! init=0   not first time - free comm_io, create a new comm_io
+!
 integer i,dest_pe3(3),key,color,ierr
+
+if (init==0) then
+   ! release the old communicator, construct a new one:
+   call MPI_Comm_free(comm_io,ierr)
+endif
 
 nio=1
 nio=min(mpi_maxio,ncpu_z)
@@ -88,7 +96,7 @@ key=0
 
 ! everyone with color=1 joins a new group, comm_sforcing
 call MPI_Comm_split(comm_3d,color,key,comm_io,ierr);
-if (color==0) call MPI_Comm_free(comm_io,ierr)
+!if (color==0) call MPI_Comm_free(comm_io,ierr)
 
 
 end subroutine

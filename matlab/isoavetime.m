@@ -29,10 +29,10 @@ ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
 % this type of averging is expensive:
-time_and_angle_ave=0;
+time_and_angle_ave=1;
 
 k=0;
-times=[0:.1:6.4];
+times=[1:.1:7.0];
 
 
 
@@ -98,20 +98,36 @@ times=times_plot;
 y45_ave=y45_ave/length(times);
 y45_iso_ave=y45_iso_ave/length(times);
 
+if (0)
+
+% averging starting at t=0:
+save k45data_t0 teddy times mx45_localeps mx45_iso_localeps ...
+      y45_ave y45_iso_ave xx_plot
+
+% averging starting at t=1:
+save k45data_t1 teddy times mx45_localeps mx45_iso_localeps ...
+      y45_ave y45_iso_ave xx_plot
+
+% load data from t=0 (averaged wrong!) for isoave paper:
+load k45data_t1 
+
+% load data from t=1 (for time averaged) for isoave paper:
+load k45data_t1 
+end
 
 
 figure(4); clf; hold on; 
 for i=2:2
    plot(times/teddy,mx45_localeps(1:length(times),i));
 end
-%plot(times/teddy,mx45_iso_localeps,'g');
+plot(times/teddy,mx45_iso_localeps,'g');
 ax=axis;
 axis( [ax(1),ax(2),.5,1.0] );
 plot(times,(4/5)*times./times,'k');
 hold off;
 title('MAX (D_{lll} / r\epsilon)   (4/5 law) ');
 xlabel('time');
-print -dpsc k45time.ps
+%print -dpsc k45time.ps
 
 
 figure(5); clf

@@ -14,7 +14,7 @@ call transpose_init()
 call fft_interface_init()
 call init_input_file()
 call init_grid()     
-call mpi_io_init() 
+call mpi_io_init(1) 
 
 #ifdef BYTESWAP_INPUT
    call set_byteswap_input(1);

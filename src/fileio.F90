@@ -206,7 +206,7 @@ integer n_var_start,ierr
 CPOINTER fid
 
 if (do_mpi_io .and. .not. output_spec ) then
-   call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
+   call singlefile_mpi_io(time,p,fname,work,work2,io_read)
    return
 endif
 
@@ -347,7 +347,7 @@ end subroutine
 
 
 
-subroutine singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
+subroutine singlefile_mpi_io(time,p,fname,work,work2,io_read)
 !
 ! I/O routines where all data goes through a single PE and is
 ! written to a single file
@@ -393,12 +393,22 @@ call abort("singilefile_mpi_io: error: code not compiled with MPI-IO")
 #else
 
 
+
+!
+! do a check to see if all cpus can read /scratch2:
+! if not, recompute io_nodes:
+! call mpi_init_io(0)
+!
+
+
+fpe=io_nodes(0)
+
 xnx=o_nx
 xny=o_ny
 xnz=o_nz
 
 
-if (io_nodes(my_z)==my_pe .or. fpe==my_pe) then
+if (io_nodes(my_z)==my_pe) then
    call print_message("MPI-IO open...")
    if (io_read==1) then
       call MPI_File_open(comm_io,fname, &
@@ -474,7 +484,7 @@ else
    call output1(p,work,work2,fid,fpe,offset)
 endif
 
-if (io_nodes(my_z)==my_pe .or. fpe==my_pe) then
+if (io_nodes(my_z)==my_pe) then
    call MPI_File_close(fid,ierr)
 endif
 #endif
