@@ -215,9 +215,9 @@ if (my_pe==fpe) then
       ! now output the crossing times:
       if (ncross>0) then
          if (cross_access=="0") then
-            access="w"
+            cross_access="w"
          else
-            access="a"
+            cross_access="a"
          endif
          write(message,'(f10.4)') 10000.0000 + time_initial
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // &
