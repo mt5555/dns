@@ -92,7 +92,7 @@ ifeq ($(UNAME),OSF1)
 
    #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -recursive -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   FFLAGS = -fast  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
+   FFLAGS = -fast -recursive -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
    CC = cc $(LSFFLAGS)
 endif
 
