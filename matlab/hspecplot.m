@@ -4,9 +4,9 @@
 %########################################################################
 %
 
-%name = 'helicity_data/helicity_spc/check256_hq_cat30';
-%namedir = '/home2/skurien/';
-%mu = 6.0d-3;
+name = 'helicity_data/helicity_spc/check256_hq_cat30';
+namedir = '/home2/skurien/';
+mu = 6.0d-3;
 
 %name = 'helicity_data/sc1024_data/sc1024A0002.0000';
 %mu = 0.35e-4;
@@ -17,9 +17,9 @@
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-namedir = '/home2/skurien/helicity_data/helical_forced/';
-name = 'hel256_hpi2/hel256_hpi2_cat';
-mu = 2e-4;
+%namedir = '/home2/skurien/helicity_data/helical_forced/';
+%name = 'hel256_hpi2/hel256_hpi2_cat';
+%mu = 2e-4;
 
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5e-4;

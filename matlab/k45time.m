@@ -28,12 +28,12 @@ ext='.isostr';
 %nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
 
 name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_'
-nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
+nx=256; delx_over_eta=3.13; epsilon=2.72; teddy=1.05; % R_l=186
 pname = 'hel256\_hpi2\_'
 
 ext='.new.isostr';
 %times=[1:.1:7.0];
-times = [4.2:0.2:9.0];
+times = [4.2:0.2:10.2];
 
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
 %nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
@@ -70,7 +70,7 @@ for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10)];
   disp([fname,ext]);
-ppname = ]pname,tstr(2:10),ext];
+ppname = [pname,tstr(2:10),ext];
   fid=fopen([fname,ext]);
   if (fid<0) ;
     disp('error openining file, skipping...');
@@ -138,12 +138,11 @@ load k45data_t1
 end
 
 
-figure(8); clf; hold on; 
-for i=2:2
-%   plot(times/teddy,mx45_localeps(1:length(times),i),'k:','LineWidth',2.0);
-   plot(times/teddy,mx45_localeps(1:length(times),i),'g-','LineWidth',2.0);
+figure(8); clf; hold on;
+scale = 4/5; %scale = 2/15 is normalizing by prefactor as well 
+for i=1:1:1 % directions
+ plot(times/teddy,mx45_localeps(1:length(times),i)/scale,'g-','LineWidth',2.0);
 end
-%plot(times/teddy,mx45_iso_localeps,'k-','LineWidth',2.0);
 plot(times/teddy,mx45_iso_localeps,'b-','LineWidth',2.0);
 ax=axis;
 axis( [ax(1),ax(2),.5,1.0] );
@@ -152,7 +151,7 @@ hold off;
 ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
 xlabel('time','FontSize',16)
      title(ppname);
-print('-dpsc', 'k215time.ps']
+     print('-dpsc', 'k215time.ps')
 
 
 figure(9); clf

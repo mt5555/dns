@@ -9,17 +9,22 @@ nx=1;
 delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
 
-%name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
-name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
-pname = 'hel256\_hpi2\_'
+name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
+pname = 'check256_hq_';
+ext = '.new.isostr';
+times=[0:1:30];
+nx = 256;
 
-ext='.new.isostr';
-times=[4.2:0.2:9.0];
-%times=[0:1:30];
+%name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
+%pname = 'hel256\_hpi2\_';
+%ext='.new.isostr';
+%times=[4.2:0.2:10.2];
+%nx = 256;
+
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 
-nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
-teddy=1;
+delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
+teddy=1.05;
 
 
 
