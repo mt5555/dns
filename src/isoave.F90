@@ -1343,31 +1343,6 @@ do p=8,min(10,pmax)
 enddo
 #endif
 
-u_l=abs(u_l)**(-.2)
-u_t1=abs(u_t1)**(-.2)
-u_t2=abs(u_t2)**(-.2)
-
-u_l_sq=u_l*u_l              ! **.4
-u_t1_sq=u_t1*u_t1
-u_t2_sq=u_t2*u_t2
-
-Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq*u_l_sq   ! ** -.8
-Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq*u_t1_sq
-Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq*u_t2_sq
-
-Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq   ! ** -.6
-Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
-Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
-
-Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq    ! ** -.4
-Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq
-Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq
-
-Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l       ! ** -.2
-Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1
-Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2
-
-
 u_l=abs(u_l)
 u_t1=abs(u_t1)
 u_t2=abs(u_t2)
@@ -1400,6 +1375,32 @@ Dt(idel,idir,2,9)=Dt(idel,idir,2,9) + u_t2*u_t2_sq*u_t2_3
 Dl(idel,idir,10)  =  Dl(idel,idir,10) + u_l*u_l       ! ** 2
 Dt(idel,idir,1,10)=Dt(idel,idir,1,10) + u_t1*u_t1
 Dt(idel,idir,2,10)=Dt(idel,idir,2,10) + u_t2*u_t2
+
+
+u_l=(u_l)**(-.2)
+u_t1=(u_t1)**(-.2)
+u_t2=(u_t2)**(-.2)
+
+u_l_sq=u_l*u_l              ! **.4
+u_t1_sq=u_t1*u_t1
+u_t2_sq=u_t2*u_t2
+
+Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq*u_l_sq   ! ** -.8
+Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq*u_t1_sq
+Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq*u_t2_sq
+
+Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq   ! ** -.6
+Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
+Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
+
+Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq    ! ** -.4
+Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq
+Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq
+
+Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l       ! ** -.2
+Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1
+Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2
+
 
 
 

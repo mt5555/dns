@@ -76,7 +76,7 @@ compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
 compute_fractional_power=.false.   
-compute_hspec=.true.
+compute_hspec=.false.
 read_uvw=.false.
 
 tstart=4.0
@@ -259,7 +259,7 @@ do
          if (my_pe==io_pe) then
             write(sdata,'(f10.4)') 10000.0000 + time
             if (compute_fractional_power) then
-               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf"
+               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf2"
             else
                fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
             endif
