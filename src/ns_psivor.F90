@@ -83,12 +83,12 @@ integer :: comp_psi_rk4=0      ! compute psi on boundary after RK stage 4?
 ncall=ncall+1
 
 
-if (biotsavart_apply==-1) then
-   ! do not update psi on boundary
-else
+if (biotsavart_apply>0) then
    comp_psi0=1
    comp_psi_rk4=0
    if (mod(ncall,biotsavart_apply)==0) comp_psi_rk4=1
+else
+   ! do not update psi on boundary
 endif
 
 

@@ -212,6 +212,19 @@ if (init_cond_subtype ==2) then
    xscale=4
 endif
 
+
+if (init_cond_subtype ==3) then
+! special quick init case for performance
+   biotsavart_cutoff=5e-2
+   biotsavart_apply=-2  ! disabled
+   delta=.2
+   biotsavart_ubar=.089
+   yscale=2
+endif
+
+
+
+
 ! set xscale so that delx=dely
 xscale = yscale*(g_nx+offset_bdy-1)/(g_ny+offset_bdy-1)
 call init_grid()   ! redo grid points since we changed scalings
@@ -276,7 +289,11 @@ if (biotsavart_apply==-1) then
    ! psi on the boundary fixed for all time from the initial conditon:
    call print_message("Setting PSI boundary values (fixed for all time)")
    call bc_biotsavart(w,Qhat(1,1,1,2),1)  ! recompute PSI on boundary from w
-   !call set_biotsavart(Qhat)    ! set based on PSI computed above 
+else if (biotsavart_apply==-2) then
+   ! psi on the boundary fixed for all time from the initial conditon:
+   ! short cut for PSI boundary values
+   call print_message("Setting PSI boundary values (fixed for all time)")
+   call set_biotsavart(Qhat)    ! set based on PSI computed above 
 else
    ! psi on the boundary always computed from w in time stepping loop.
 endif

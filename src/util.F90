@@ -24,11 +24,17 @@ end subroutine
 
 subroutine print_message(message)
 use params
+use mpi
 implicit none
 character(len=*) message
+integer :: ierr
 if (my_pe==io_pe) then
    write(*,'(a)') message
 endif
+
+! for parallel debugging with print_message():
+!call MPI_Barrier(comm_3d,ierr)
+
 end subroutine
 
 

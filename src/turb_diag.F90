@@ -54,36 +54,33 @@ if (compute_struct==1) then
    endif
    call outputSF(time,fid)
    if (my_pe==io_pe) call cclose(fid,ierr)
-
-   call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
-endif
-
-! output turb scalars
-if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time_initial
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".scalars-turb"
-   call copen(message,access,fid,ierr)
-   if (ierr/=0) then
-      write(message,'(a,i5)') "diag_output(): Error opening .scalars-turb file errno=",ierr
-      call abort(message)
    endif
-   x=nints_e; call cwrite8(fid,x,1)
-   call cwrite8(fid,time,1)
-   call cwrite8(fid,ints_e,nints_e)
 
 
-   call cclose(fid,ierr)
-   if (ierr/=0) then
-      write(message,'(a,i5)') "diag_output(): Error closing .scalars-turb file errno=",ierr
-      call abort(message)
+   ! output turb scalars
+   if (my_pe==io_pe) then
+      write(message,'(f10.4)') 10000.0000 + time_initial
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".scalars-turb"
+      call copen(message,access,fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "diag_output(): Error opening .scalars-turb file errno=",ierr
+         call abort(message)
+      endif
+      x=nints_e; call cwrite8(fid,x,1)
+      call cwrite8(fid,time,1)
+      call cwrite8(fid,ints_e,nints_e)
+      
+      
+      call cclose(fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "diag_output(): Error closing .scalars-turb file errno=",ierr
+         call abort(message)
+      endif
    endif
 endif
 
-
-
-
-
-endif
+! time averaged dissapation and forcing:
+call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
 
 end subroutine
 
@@ -106,18 +103,22 @@ real*8 :: time
 
 ! local
 integer :: i,j,k,n,n1,n2,ierr
-real*8,save :: diss(nx,ny,nz)
-real*8,save :: diss2(nx,ny,nz)
-real*8,save :: uf(nx,ny,nz)
-real*8,save :: uf2(nx,ny,nz)
+real*8,save,allocatable :: diss(:,:,:)
+real*8,save,allocatable :: diss2(:,:,:)
+real*8,save,allocatable :: uf(:,:,:)
+real*8,save,allocatable :: uf2(:,:,:)
 integer,save :: ntave=0
 real*8 :: f_diss,x
 character(len=80) message
-character(len=80) fname
+character(len=280) fname
 
 
 
 if (ntave==0) then
+   allocate(diss(nx,ny,nz))
+   allocate(diss2(nx,ny,nz))
+   allocate(uf(nx,ny,nz))
+   allocate(uf2(nx,ny,nz))
    diss=0
    diss2=0
    uf=0
@@ -156,22 +157,22 @@ uf2=(uf2*(ntave-1) + wsum**2) / ntave
 if (time>=time_final) then
    ! time to save the output
    write(message,'(f10.4)') 10000.0000 + time_initial
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".diss"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".diss"
    x=ntave
    call singlefile_io(x,diss,fname,work1,dxx,0,io_pe)
 
    write(message,'(f10.4)') 10000.0000 + time_initial
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".diss2"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".diss2"
    x=ntave
    call singlefile_io(x,diss2,fname,work1,dxx,0,io_pe)
 
    write(message,'(f10.4)') 10000.0000 + time_initial
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".uf"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".uf"
    x=ntave
    call singlefile_io(x,uf,fname,work1,dxx,0,io_pe)
 
    write(message,'(f10.4)') 10000.0000 + time_initial
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".uf2"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".uf2"
    x=ntave
    call singlefile_io(x,uf2,fname,work1,dxx,0,io_pe)
 

@@ -10,15 +10,24 @@ dnsghost:
 4x1x256           3.08
 
 
+REDO:
+
 2000^3            1 timestep
 
-dns: 1x1x512      11.05min  
+dns:    1x1x512      11.05min  
+dnsghost 8x8x8     wont load
 
-dnsghost
-1x1x512 wont load
-2x1x256 wont load
-4x1x128
-8x1x64
+1536^3 
+
+dnsghost 1x1x512   wont load
+dnsghost 8x8x8     3.69m  1 timestep
+dnsghost 2x1x256   2.46m
+dnsghost 2 2 128   2.83m
+dnsghost 4 2 64
+
+
+(4 + 1536/n1)(4 + 1536/n2)(4 + 1536/n3)
+
 
 
 
@@ -42,14 +51,22 @@ mu=2e-8.  a touch noisy in one snapshot that I saw, went away.
 
 if we use mu^3/4 rule, new grid:  10332x5000.  So lets go with 12288x6144.
 
+12000x6000  t=-5   t=.05(extrapolated)
+120 cpus
+BlueMtn:  
+120x1:     1.09    10.46
+60x2:
+30x4:
 
 Benchmarks for 12288x6144:   RES size: 5.7GB
+
 ASCI Q    t=.05    t=1 (extrapolated)   t=150
 cpus      
+2x1       39.05 
 4x1
 8x1
 16x1
-32x1      20.02
+32x1      20.02   
 
 64x1       9.84     3.28h                20.5d  
 32x2      10.77
