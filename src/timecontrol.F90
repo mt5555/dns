@@ -214,11 +214,7 @@ if (doit_screen) then
       else
          epsilon=-(  -mu*ints(1)  )
       endif
-<<<<<<< timecontrol.F90
       lambda=sqrt( mu*(2*ea1/3) / (epsilon/15) )
-=======
-      lambda=sqrt( mu*(2*ea1/3) / (epsilon/15) )
->>>>>>> 1.40
 
 
       write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ea1/3)/mu, &
