@@ -1,0 +1,104 @@
+#! /bin/csh 
+#BSUB -o prod.o -e prod.e
+#BSUB -q small
+#XXXX -q large-dq
+#BSUB -J dns
+#BSUB -W 0:720
+#BSUB -n 128 -R "span[ptile=128]"
+
+module list
+
+# number of cpus to use for mpirun:
+set NCPU = 128
+
+set SRC=$HOME/dns/src
+set name = iso12_512_
+#set refin=$HOME/dns/prod/benchmark128.inp
+set refin=$HOME/dns/prod/prod256.inp
+
+# number of times to resubmit:
+set resub = 20
+set resub_file = $SRC/{$name}resub
+
+
+
+cd $SRC
+./gridsetup.py 1 1 $NCPU 256 256 256
+make -j 4 dns
+    
+if (!(-d /scratch/taylorm)) then
+   mkdir /scratch/taylorm
+endif
+cp dns  /scratch/taylorm/dns
+
+cd /scratch/taylorm
+
+if ($restart == 1) then
+
+   # check for resub limit
+   set out = `$SRC/lsfcheck $resub_file $resub`
+   if ($out != SMALLER) then
+      echo 'resubmit limit reached.  limit=' $resub 'value in file:'
+      cat $resub_file
+      exit 1
+   endif
+
+   #search HPSS for newest restart file
+   set resname = `psi ls -t dns/{$name}\*.u | sort | tail -1`
+   if ($resname =="") then
+      echo "Error finding restart file.  Exit"
+      exit 1
+   else
+      echo "Using restart file: " $resname
+   endif
+
+   psi <<EOF
+   cd dns
+   get {$name}.u
+   get {$name}.v
+   get {$name}.w
+   EOF
+   mv -f {$name}.u  restart.u
+   mv -f {$name}.v  restart.v
+   mv -f {$name}.w  restart.w
+
+   mpirun -np $NCPU ./dns -r -d . $name < $refin 
+else
+   mpirun -np $NCPU ./dns  -d . $name < $refin 
+endif
+
+
+
+
+#remove empty files before saving to HPSS:
+find . -size 0 -exec rm -f {} \; -print
+
+
+psi <<EOF
+cd dns
+save {$name}\*.sf
+save {$name}\*.scalars
+save {$name}\*.spec
+save {$name}\*.u
+save {$name}\*.v
+save {$name}\*.w
+EOF
+
+
+# ssrun -workshop mpirun -np 128 ../src/dns < $refin 
+# prof ssrun_output_file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
