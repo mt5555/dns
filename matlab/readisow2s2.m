@@ -9,8 +9,8 @@ ndir  =fread(fid,1,'float64');
 ncor  =fread(fid,1,'float64');
 r0means = fread(fid,ncor,'float64');
 
-ncor
-r0means
+%ncor
+%r0means
 
 r_val=fread(fid,[ndelta,ndir],'float64');
 if (ncor==3) 

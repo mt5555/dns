@@ -265,7 +265,7 @@ end subroutine
 !                                    structure functions
 !
 !  stype=2   assume Q = (w,s), the vorticity and strain.  compute CJ's 
-!            correlations, of the form <w(x)s(x+r>
+!            correlations, of the form <w(x)s(x+r)>
 !
 !  stype=1   assume Q = scalar.  compute <(h(x+r)-h(x))^p>  p=2..6
 !                   
@@ -286,7 +286,7 @@ real*8 :: Qst(g_nz2,nslabx,ny_2dz,n_var)  ! transpose
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
-real*8 :: dummy(3),xtmp,ntot
+real*8 :: dummy(pmax),xtmp,ntot
 character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,nd
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,csig
@@ -374,9 +374,9 @@ if (stype==2) then
    enddo
    enddo
    enddo
-   w2s2_mean=w2s2_mean/g_nx/g_ny/g_nz
+   w2s2_mean=w2s2_mean/ntot
 #ifdef USE_MPI
-   dummy=w2s2_mean
+   dummy(1:3)=w2s2_mean
    call MPI_allreduce(dummy,w2s2_mean,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
@@ -395,7 +395,11 @@ if (stype==1) then
    enddo
    enddo
    enddo
-   Dl_mean=Dl_mean/g_nx/g_ny/g_nz
+   Dl_mean=Dl_mean/ntot
+#ifdef USE_MPI
+   dummy(2:pmax)=Dl_mean(2:pmax)
+   call MPI_allreduce(dummy(2),Dl_mean(2),pmax-1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
 endif
 
 
@@ -1017,7 +1021,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
             call accumulate_cj_str(idir,idel, &
               Q(k,i,j,1),Q(k,i,j,2),&
               Q(k2,i2,j,1),Q(k2,i2,j,2))
-         else if (stype==2) then
+         else if (stype==1) then
             call accumulate_scalar_str(idir,idel, &
               Q(k,i,j,1),Q(k2,i2,j,1))
          else
@@ -1265,10 +1269,9 @@ integer :: idir,idel
 integer :: p
 
 
-! compute:  <w^2w^2(r)>,  <s^2s^2(r)>, <w^2s^2(r)>  
-w2s2(idel,idir,1)=w2s2(idel,idir,1)+u1*ur1
-w2s2(idel,idir,2)=w2s2(idel,idir,2)+u2*ur2
-w2s2(idel,idir,3)=w2s2(idel,idir,3)+u1*ur2
+w2s2(idel,idir,1)=w2s2(idel,idir,1)+u1*ur1      ! w(x)*w(x+r)
+w2s2(idel,idir,2)=w2s2(idel,idir,2)+u2*ur2      ! s(x)*s(x+r)
+w2s2(idel,idir,3)=w2s2(idel,idir,3)+u1*ur2      ! w(x)*s(x+r)
 
 
 end subroutine 

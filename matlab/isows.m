@@ -3,7 +3,7 @@ name='/home/mt/iso12_512'
 nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0;
 
 ext='.new.isostr';
-ext2='.isow2s2';
+ext2='.new.isow2s2';
 
 times=[7.0:.1:7.0];
 xx=(1:.5:(nx./2.5)) / nx;
@@ -80,17 +80,18 @@ w2s2ave=0*xx;
 D_llttave=0*xx;
 D_llllave=0*xx;
 
-for i=1:ndir
+for i=1:3 %ndir
   x = r_val(:,i);                 % units of box length
   x_plot=x*nx*delx_over_eta_l;    % units of r/eta
 
-if (0)
+if (0)  
   %Dl=Dl(ndelta,ndir,p-1);  for <del_u**p>  p=2..10
   p=4;
   y1=Dl(:,i,p-1);
   semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   D_llllave=D_llllave+w(i)*spline(x,y1,xx);
-  
+
+
   y1=D_lltt(:,i);
   semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   D_llttave=D_llttave+w(i)*spline(x,y1,xx);
@@ -102,25 +103,33 @@ end
 
   
 
-  y1=w2w2(:,i);
-  %semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
-  plot(x_plot,y1,['.-',cdir(i)],'MarkerSize',msize); hold on;
+
+
+  y1=w2w2(:,i)/w2w2(1,i);
+  %semilogx(x_plot,y1,['.-',cdir(i)],'MarkerSize',msize); hold on;
+  plot(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   w2w2ave=w2w2ave+w(i)*spline(x,y1,xx);
 
-if (0)
-  y1=s2s2(:,i);
-  semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
+  y1=s2s2(:,i)/s2s2(1,i);
+  %semilogx(x_plot,y1,['.-',cdir(i)],'MarkerSize',msize); hold on;
+  plot(x_plot,y1,['o',cdir(i)],'MarkerSize',msize); hold on;
   s2s2ave=s2s2ave+w(i)*spline(x,y1,xx);
 
+  [s2s2(:,i)./s2s2(1,i)-w2w2(:,i)/w2w2(1,i)]
 
-  y1=w2s2(:,i);
-  semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
+if (0)
+  y1=w2s2(:,i)/w2s2(1,i);
+  %semilogx(x_plot,y1,['*-',cdir(i)],'MarkerSize',msize); hold on;
+  plot(x_plot,y1,['.-',cdir(i)],'MarkerSize',msize); hold on;
   w2s2ave=w2s2ave+w(i)*spline(x,y1,xx);
 end
 
+
+
+
 end
 
-semilogx(xx_plot,w2w2ave,'r','LineWidth',1.0); hold on;
+%semilogx(xx_plot,w2w2ave,'r','LineWidth',1.0); hold on;
 %semilogx(xx_plot,s2s2ave,'g','LineWidth',1.0); hold on;
 %semilogx(xx_plot,w2s2ave,'b','LineWidth',1.0); hold on;
 
@@ -129,7 +138,8 @@ ylabel(' ');
 xlabel('r/\eta');
 %x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
-axis([-1,50,ax(3),ax(4)]);
+axis([.1,xmax,ax(3),ax(4)]);
+axis([0,100,ax(3),ax(4)]); 
 hold off;
 
 %print('-dpsc',[name,ext,'_w2s2.ps']);
