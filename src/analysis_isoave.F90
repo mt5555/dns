@@ -95,17 +95,23 @@ endif
 
 !call writepoints(); stop
 
-allocate(Q(nx,ny,nz,ndim))
-allocate(work1(nx,ny,nz))
-allocate(work2(nx,ny,nz))
 
-if (use_serial==0) then
+if (use_serial==1) then
+   allocate(Q(nx,ny,nz,ndim))
+   allocate(work1(nx,ny,nz))
+   allocate(work2(nx,ny,nz))
+else
    ! parallel version requires extra data:
+   allocate(Q(nx,ny,nz,ndim))
    allocate(q1(nx,ny,nz,ndim))
    allocate(q2(nx,ny,nz,ndim))
    allocate(q3(nx,ny,nz,ndim))
-   allocate(work3(nx,ny,nz))
-   allocate(work4(nx,ny,nz))
+   if (nxdecomp*nydecomp*nzdecomp>1) then
+      allocate(work1(nx,ny,nz))
+      allocate(work2(nx,ny,nz))
+      allocate(work3(nx,ny,nz))
+      allocate(work4(nx,ny,nz))
+   endif
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -113,15 +119,21 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Q=0
 
-!  read in SK's data, and compute helical structure function
-!call convert_sk(Q,work1,work2);  stop;
+if (use_serial==1) then
+   !  read in SK's data, and compute helical structure function
+   !call convert_sk(Q,work1,work2);  stop;
+endif
 
 
 time=tstart
 do
    icount=icount+1
 
-   call dataio(time,Q,work1,work2,1)
+   if (use_serial==1) then
+      call dataio(time,Q,work1,work2,1)
+   else
+      call dataio(time,Q,q1,q2,1)
+   endif
 
    do i=0,nxdecomp-1
    do j=0,nydecomp-1

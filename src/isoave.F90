@@ -1067,7 +1067,7 @@ if (comp_sk_helical) then
    ur_t1 = ur1*rperp1(1)+ur2*rperp1(2)+ur3*rperp1(3)
    ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
    H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
-   H_tt(idel,idir)=H_ltt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
+   H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 endif
 
 do p=2,pmax
