@@ -12,7 +12,7 @@ import os, commands, getopt, sys
 def getdoto(file):
     tmp=split(file,".")
     extension=tmp[-1]
-    fileo=file[:find(file,extension)-1] + ".o"
+    fileo=file[:-(len(extension)+1)] + ".o"
     return fileo
 
 
@@ -59,12 +59,12 @@ for file in sys.argv[1:]:
     fileo=getdoto(file)
     deps=parse(file)
     l=len(deps)
+    print fileo + ":", 
     if (l>0):
-        print fileo + ":", 
         for i in range(0,len(deps)):
             print deps[i],
-        print "makefile",
-        print ""
+    print "makefile",
+    print ""
 
         
     

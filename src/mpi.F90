@@ -29,6 +29,7 @@ end module
 ! dummy module, not using mpi, but code can still have "use mpi" statment
 !
 module mpi
+integer dummy_mpi_variable
 end module
 
 #endif

@@ -10,6 +10,8 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 character*80 message
 
+
+
 call init_mpi       
 
 write(message,'(a)') 'Initializing grid and b.c.'
@@ -24,7 +26,7 @@ write(message,'(a)') 'Running some tests'
 call print_message(message)
 call test           ! optional testing  routines go here
 
-!call dns_solve(Q)
+call dns_solve(Q)
 
 write(message,'(a)') 'Cleaning up...'
 call close_mpi
@@ -56,18 +58,23 @@ integer itime
 
 
 ! set delt based on CFL?
-delt = .01
+delt = .001
 
-call out(time,Q)  ! output initial data
+call out(0,time,Q)  ! output initial data
 
 do itime=1,itime_max
 
    call rk4(time,Q)
 
-   if (mod(itime,itime_output)==1 .or. itime==itime_max .or. error_code>0) then
+   if (mod(itime,itime_output)==0 .or. itime==itime_max .or. error_code>0) then
       write(*,'(a,4f12.5)') 'after rk4',time,maxval(Q(:,:,:,1)),&
            maxval(Q(:,:,:,2)),maxval(Q(:,:,:,3))
-      call out(time,Q)
+
+      write(*,'(a,f12.5)') "CFL_x",(maxval(abs(Q(:,:,:,1)))*delt)/delx
+      write(*,'(a,f12.5)') "CFL_y",(maxval(abs(Q(:,:,:,2)))*delt)/dely
+      write(*,'(a,f12.5)') "CFL_z",(maxval(abs(Q(:,:,:,3)))*delt)/delz
+
+      call out(itime,time,Q)
    endif
 
    if (error_code>0) then

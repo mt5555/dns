@@ -242,35 +242,59 @@ inputyy=0
 inputz = 0
 inputzz=0
 
-
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
    input(i,j,k)=.333
+enddo
+enddo
+enddo
 
+
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
    cf1=2*pi
    input(i,j,k)=           2*sin(cf1*xcord(i))  + input(i,j,k)
    inputx(i,j,k)=      cf1*2*cos(cf1*xcord(i))  + inputx(i,j,k)
    inputxx(i,j,k)=-cf1*cf1*2*sin(cf1*xcord(i))  + inputxx(i,j,k)
+enddo
+enddo
+enddo
 
+
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
    cf1=3*2*pi
    input(i,j,k)=           3*cos(cf1*xcord(i))    + input(i,j,k)
    inputx(i,j,k)=     -cf1*3*sin(cf1*xcord(i))    + inputx(i,j,k)
    inputxx(i,j,k)=-cf1*cf1*3*cos(cf1*xcord(i))    + inputxx(i,j,k)
+enddo
+enddo
+enddo
 
 
+
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
    cf1=5*2*pi 
    input(i,j,k)=           4*cos(cf1*ycord(j))    + input(i,j,k)
    inputy(i,j,k)=     -cf1*4*sin(cf1*ycord(j))    + inputy(i,j,k)
    inputyy(i,j,k)=-cf1*cf1*4*cos(cf1*ycord(j))    + inputyy(i,j,k)
 
+enddo
+enddo
+enddo
 
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
    cf1=4*2*pi 
    input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
    inputz(i,j,k)=     -cf1*5*sin(cf1*zcord(k))    + inputz(i,j,k)
    inputzz(i,j,k)=-cf1*cf1*5*cos(cf1*zcord(k))    + inputzz(i,j,k)
-
-
 enddo
 enddo
 enddo

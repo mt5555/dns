@@ -2,20 +2,21 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!  module containing all global parameters
-!  like mesh data
+!  module containing all global parameters like mesh data
 !
 ! To create a valid file:  
 ! Set nx1,nx2,ny1,ny2,nz1,nz2   and nx,ny,nz
 ! pick l,m,n, and then set:
 !
-! mpidims(1)=l*(nz2-nz1+1)
-! mpidims(2)=m*(nx2-nx1+1)
-! mpidims(3)=n*(ny2-ny1+1)
+! ncpu_x*l=(nz2-nz1+1)
+! ncpu_y*m=(nx2-nx1+1)
+! ncpu_z*n=(ny2-ny1+1)
 !
-! g_nx=mpidims(1)*(nx2-nx1+1)
-! g_ny=mpidims(2)*(ny2-ny1+1)
-! g_nz=mpidims(3)*(nz2-nz1+1)
+!
+! params_init() will set the global grid by:
+! g_nx=ncpu_x*(nx2-nx1+1) = l*nslabz*nslabx
+! g_ny=ncpu_y*(ny2-ny1+1) = m*nslabx*nslaby
+! g_nz=ncpu_z*(nz2-nz1+1) = n*nslaby*nslabz
 !
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -39,14 +40,16 @@ real*8  :: pi,pi2_squared
 integer :: g_nx,g_ny,g_nz    ! dimension of global grid (unique data)
 integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
                              ! (because FFT99 requires 2 extra points)
-                             
+ 
+
 
 ! mesh dimensions on a single processor
-integer,parameter :: n_var=3                  ! number of prognostic variables
-integer,parameter :: nx=18,ny=18,nz=18         ! dimension of grid & data
-integer,parameter :: nx1=1,nx2=16              ! upper and lower bounds of non-ghost data
-integer,parameter :: ny1=1,ny2=16             ! upper and lower bounds of non-ghost data
-integer,parameter :: nz1=1,nz2=16             ! upper and lower bounds of non-ghost data
+#include "user_params.h"
+!integer,parameter :: n_var=3                  ! number of prognostic variables
+!integer,parameter :: nx=18,ny=18,nz=18         ! dimension of grid & data
+!integer,parameter :: nx1=1,nx2=16              ! upper and lower bounds of non-ghost data
+!integer,parameter :: ny1=1,ny2=16             ! upper and lower bounds of non-ghost data
+!integer,parameter :: nz1=1,nz2=16             ! upper and lower bounds of non-ghost data
 
 ! number of actual data points
 integer,parameter :: nslabx=nx2-nx1+1
@@ -70,8 +73,8 @@ integer,allocatable :: g_kmcord(:)
 ! time stepping
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: delt
-integer, parameter :: itime_max=1000   ! number of time steps
-integer, parameter :: itime_output=10  ! output every itime_output time steps
+integer :: itime_max=1000   ! number of time steps
+integer :: itime_output=10  ! output every itime_output time steps
 
 
 ! set non-zero to cause time stepping loop to exit
@@ -87,32 +90,33 @@ integer :: error_code
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! parallel decompositions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer :: mpidims(3)
+!integer :: ncpu_x=1,ncpu_y=1,ncpu_z=1
+integer :: ncpu_z
 integer :: nx_2d,ny_2d,nz_2d
 integer :: io_pe
-integer :: my_world_pe,my_pe,mpicoords(3)
+integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
 integer :: initial_live_procs
 integer :: comm_3d                 ! the MPI cartesian communcator
 
 
 
 !
-! cpu decomposition, 3D:   mpidims(1) * mpidims(2) * mpidims(3)
-! mpidims(1) = g_nx/(nx2-nx1+1)
-! mpidims(2) = g_ny/(ny2-ny1+1)
-! mpidims(3) = g_nz/(nz2-nz1+1)
+! cpu decomposition, 3D:   ncpu_x * ncpu_y * ncpu_z
+! ncpu_x = g_nx/(nx2-nx1+1)
+! ncpu_y = g_ny/(ny2-ny1+1)
+! ncpu_z = g_nz/(nz2-nz1+1)
 !
 ! 2D cpu decomposition,  GRID                        CPU
 ! (+2 needed because of FFT99)
-! x-direction:  g_nx2,(nslaby*nslabz)/mpidims(1)     mpidims(2)*(mpidims(1)*mpidims(3))
-! y-direction:  g_ny2,(nslabz*nslabx)/mpidims(2)     mpidims(3)*(mpidims(2)*mpidims(1))
-! z-direction:  g_nz2,(nslabx*nslaby)/mpidims(3)     mpidims(1)*(mpidims(3)*mpidims(2))
+! x-direction:  g_nx2,(nslaby*nslabz)/ncpu_x     ncpu_y*(ncpu_x*ncpu_z)
+! y-direction:  g_ny2,(nslabz*nslabx)/ncpu_y     ncpu_z*(ncpu_y*ncpu_x)
+! z-direction:  g_nz2,(nslabx*nslaby)/ncpu_z     ncpu_x*(ncpu_z*ncpu_y)
 !
 !
 ! for simplicity, we require:
-!    mpidims(1) divides (nz2-nz1+1)   nz_2d=(nz2-nz1+1)/mpidims(1)
-!    mpidims(2) divides (nx2-nx1+1)   nx_2d=(nx2-nx1+1)/mpidims(2)
-!    mpidims(3) divides (ny2-ny1+1)   ny_2d=(ny2-ny1+1)/mpidims(3)
+!    ncpu_x divides (nz2-nz1+1)   nz_2d=(nz2-nz1+1)/ncpu_x
+!    ncpu_y divides (nx2-nx1+1)   nx_2d=(nx2-nx1+1)/ncpu_y
+!    ncpu_z divides (ny2-ny1+1)   ny_2d=(ny2-ny1+1)/ncpu_z
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -129,9 +133,9 @@ real*8 :: one=1
 pi=4*atan(one)
 pi2_squared=4*pi*pi
 
-g_nx=(nx2-nx1+1)*mpidims(1)
-g_ny=(ny2-ny1+1)*mpidims(2)
-g_nz=(nz2-nz1+1)*mpidims(3)
+g_nx=(nx2-nx1+1)*ncpu_x
+g_ny=(ny2-ny1+1)*ncpu_y
+g_nz=(nz2-nz1+1)*ncpu_z
 g_nx2=g_nx+2
 g_ny2=g_ny+2
 g_nz2=g_nz+2
@@ -139,20 +143,20 @@ if (g_nz==1) g_nz2=1
 
 
 ! these values must divide with no remainder:
-nz_2d=(nz2-nz1+1)/mpidims(1)
-nx_2d=(nx2-nx1+1)/mpidims(2)
-ny_2d=(ny2-ny1+1)/mpidims(3)
-if (0/=mod(nz2-nz1+1,mpidims(1))) then
+nz_2d=(nz2-nz1+1)/ncpu_x
+nx_2d=(nx2-nx1+1)/ncpu_y
+ny_2d=(ny2-ny1+1)/ncpu_z
+if (0/=mod(nz2-nz1+1,ncpu_x)) then
    fail=1
-   call print_message("mpidims(1) does not divide nz");
+   call print_message("ncpu_x does not divide nz");
 endif
-if (0/=mod(nx2-nx1+1,mpidims(2))) then
+if (0/=mod(nx2-nx1+1,ncpu_y)) then
    fail=1
-   call print_message("mpidims(2) does not divide nx");
+   call print_message("ncpu_y does not divide nx");
 endif
-if (0/=mod(ny2-ny1+1,mpidims(3))) then
+if (0/=mod(ny2-ny1+1,ncpu_z)) then
    fail=1
-   call print_message("mpidims(3) does not divide nz");
+   call print_message("ncpu_z does not divide nz");
 endif
 
 

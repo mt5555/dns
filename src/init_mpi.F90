@@ -11,13 +11,12 @@ character*80 message
 
 my_pe=0
 mpicoords=0
-mpidims=1
+mpidims(1)=ncpu_x
+mpidims(2)=ncpu_y
+mpidims(3)=ncpu_z
 io_pe=0
 initial_live_procs=1
 
-ncpu_x=1
-ncpu_y=1
-ncpu_z=1
 my_x=0
 my_y=0
 my_z=0

@@ -1,6 +1,6 @@
 #include "macros.h"
 
-subroutine ns3d(Q,rhs,time)
+subroutine ns3d(rhs,Q,time)
 !
 ! vor(1) = w_y - v_z
 ! vor(2) = u_z - w_x 

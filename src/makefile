@@ -15,7 +15,8 @@ ifeq ($(UNAME),SunOS)
    MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
    MPI = -DUSE_MPI -I/usr/local/src/mpich/include
    LDFLAGS = 
-   FFLAGS = -fast -DSUNOS $(MPI)
+   # default -fast is -xvector=yes, but this introduces bugs in test.F90!
+   FFLAGS = -fast -xvector=no  -DSUNOS $(MPI)
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
@@ -61,14 +62,20 @@ clean:
 dep:
 	./mkdep.py *.F90 *.f  > .depends
 
-
 -include .depends
 
+fft_interface.o:  fft99_interface.o
+	cp -f fft99_interface.o fft_interface.o
+#fft_interface.o:  compaq_fft_interface.o
+#	cp -f fft99_interface.o fft_interface.o
 
-fft_interface.o:  fft99_interface.F90 macros.h
-	$(COMPILE) -o fft_interface.o fft99_interface.F90
-#fft_interface.o:  compaq_fft_interface.F90 params.o
-#	$(COMPILE) compaq_fft_interface.F90
+user_params.h:  
+	echo "Run gridsetup.py to generage a user_params.h file!"
+	exit 1
+
+
+
+
 
 
 
