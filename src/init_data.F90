@@ -159,7 +159,8 @@ do n=np1,np2
    endif
 
    if (count>2 .and. passive_type(n)==passive_type(n1)) then
-      call print_message('Re-using i.c. from passive scalar ',n1)
+      write(message,'(a,i3)') 'Re-using i.c. from passive scalar ',n1
+      call print_message(message)
       Q(:,:,:,n)=Q(:,:,:,n1) 
    else
       if (passive_type(n)==0) call passive_gaussian_init(Q,work1,work2,n)

@@ -55,6 +55,18 @@ for t=times
     if (nt==0) 
       ints_e= data1;
     else
+      ni1=size(ints_e); ni1=ni1(1);
+      ni2=size(data1); ni2=ni2(1);
+      if (ni2>ni1)
+        % the input data is larger - this means that at some point during
+        % the run,  we added attitional scalars.  pad out old data with NaN's
+        ints_e=[ints_e;NaN*ints_e(1:ni2-ni1,:)];
+      end
+      if (ni1>ni2)
+        % the input data is smaller - this means that at some point during
+        % the run,  we removed attitional scalars.  pad out input NaN's
+        data1=[data1;NaN*ni2:ni1-1];
+      end
       ints_e= [ints_e,data1];
     end
     nt=nt+1;
@@ -99,6 +111,19 @@ for i=1:3
    uxx2(i,:)=ints_e(i+26,:);    % < uxx^2 > 
 end
 end
+if (ns_e>=37)
+  for i=1:3; u1(i,:)=ints_e(i+29,:);   end;   % < u1 >
+  for i=1:3; u3(i,:)=ints_e(i+32,:);   end;   % < u3 >
+  for i=1:3; u4(i,:)=ints_e(i+35,:);   end;   % < u4 >
+end
+
+
+% zero crossing
+if (ns_e>=43)
+  for i=1:3; nu(i,:)=ints_e(i+38,:); end;  % N0 for (u,v,w), long. direction
+  for i=1:3; nux(i,:)=ints_e(i+38,:); end; % N0 for ux,vy,wz, long. direction
+end
+
 
 figure(6)
 clf

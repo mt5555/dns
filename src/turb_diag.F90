@@ -678,7 +678,6 @@ call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1(3),scalars(40))
 
 i=40
 u1=0  ! it's a deriavitve, so we know mean=0
-do n=1,3
 ! zero crossing of dissipation: 
 call transpose_to_x(gradu(1,1,1,1),work,n1,n1d,n2,n2d,n3,n3d)
 call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1,scalars(i+1))
@@ -687,8 +686,7 @@ call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1,scalars(i+2))
 call transpose_to_z(gradw(1,1,1,3),work,n1,n1d,n2,n2d,n3,n3d)
 call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1,scalars(i+3))
 i=i+3
-enddo
-! i=49
+! i=43
 
 
 

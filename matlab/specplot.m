@@ -107,6 +107,10 @@ while (time>=.0 & time<=9999.3)
     spec_r=spec_r*eps^(2/3);
     CK=CK_orig*eps_orig^(2/3);
   end
+  
+  ke=sum(spec_r')            % spec_r = .5u_k**2
+  ke_diss=mu*2*sum(knum.^2 * (2*pi)^2 .* spec_r')   
+  L11 = ((3*pi)/(4*ke)) * sum(spec_r'./(knum*2*pi))  
 
   knum2=knum;
   knum2(1)=.000001;
@@ -262,8 +266,10 @@ while (time>=.0 & time<=9999.3)
      figure(5); clf; subplot(1,1,1)
 
      np_r=fread(fidp,1,'float64');
-     for np=1:npassive  %! 1 ! this should be 1:npassive   after we fix data! 
+     for np=1:npassive 
         pspec_r(:,np)=fread(fidp,np_r,'float64');
+        c2(np)=sum(pspec_r(:,np)); 
+        L11c(np) = ((3*pi)/(2*c2)) * sum(pspec_r(:,np)'./(knum*2*pi))  
      end
      ts=sprintf('passive scalars t=%f',time);
      loglog53(np_r,pspec_r,ts,1.0,3); 

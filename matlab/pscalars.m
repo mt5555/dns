@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0100:.01:2.55];
+times=[.75:.01:1.00];
 
 
 if (readdata)
@@ -60,8 +60,12 @@ for t=times
     for p=1:npmax
       [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
       vtot = sum(pdf);
-      Vpdata(p,nt) = sum(pdf.*(bins>=.25 & bins <=.75));
-      Vpdata(p,nt)=Vpdata(p,nt)/vtot;
+      Vpdata25(p,nt) = sum(pdf.*(bins>=.25 & bins <=.75));
+      Vpdata25(p,nt)=Vpdata25(p,nt)/vtot;
+      Vpdata20(p,nt) = sum(pdf.*(bins>=.20 & bins <=.80));
+      Vpdata20(p,nt)=Vpdata20(p,nt)/vtot;
+      Vpdata15(p,nt) = sum(pdf.*(bins>=.15 & bins <=.85));
+      Vpdata15(p,nt)=Vpdata15(p,nt)/vtot;
       c1pdf(p,nt)=sum(pdf.*bins);
       c2pdf(p,nt)=sum(pdf.*(bins-c1pdf(p,nt)).^2);
       c4pdf(p,nt)=sum(pdf.*(bins-c1pdf(p,nt)).^4);
@@ -73,9 +77,11 @@ end
 end
 
 % look at passive scalar number np
-for np=1:10;
+for np=1:8;
 
-Vp=Vpdata(np,:);
+Vp25=Vpdata25(np,:);
+Vp20=Vpdata20(np,:);
+Vp15=Vpdata15(np,:);
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
 schmidt=squeeze(pints_e(3,np,:))';   % index=1 from fortran data file
@@ -112,8 +118,8 @@ c4=squeeze(c4)';
 
 
 n0(1,:)=pints_e(29,np,:);
-n0_8(1,:)=pints_e(30,np,:);
-n0_9(1,:)=pints_e(31,np,:);
+n0_8(1,:)=pints_e(30,np,:);   % .3 after mean removed
+n0_9(1,:)=pints_e(31,np,:);   % .4 after mean removed  
 
 n0(2,:)=pints_e(32,np,:);
 n0_8(2,:)=pints_e(33,np,:);
@@ -135,9 +141,9 @@ n0x(3,n,:)=pints_e(i+3,np,:);   % z direciton
 i=i+3;
 end
 
-n0x_t=(n0x(1,1,:)+n0x(2,2,:)+n0x(3,3,:))/3;
+%n0x_t=(n0x(1,1,:)+n0x(2,2,:)+n0x(3,3,:))/3;
 n0x_l=(n0x(1,2,:)+n0x(1,3,:)+n0x(2,1,:)+n0x(2,3,:)+n0x(3,1,:)+n0x(3,2,:))/6;
-n0x_t=squeeze(n0x_t);
+%n0x_t=squeeze(n0x_t);
 n0x_l=squeeze(n0x_l);
 
 %
@@ -167,6 +173,11 @@ disp(sprintf('epsilon = %f',epsilon(1) ))
 epsilon_c=3*(mu./schmidt).*mean(cx2,1);
 lambda_c=sqrt(c2./mean(cx2,1));
 lambda_x_c=sqrt(mean(cx2,1)./mean(cxx2,1));
+
+% mean=.5, so zero crossing of .9 is a=.4
+lambda_c_9 = lambda_c.*exp(.16./(2*c2));
+lambda_c_8 = lambda_c.*exp(.09./(2*c2));
+
 
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
 % eta_c = Bachelor scale
@@ -201,7 +212,6 @@ Su = mean(ux3,1)./mean(ux2,1).^1.5  ;
 Suc = mean(cu,1)./(sqrt(mean(ux2,1)).*mean(cx2,1));
 G = (mean(u2,1) .* mean(uxx2,1))./mean(ux2).^2;
 Gc = (c2 .* mean(cxx2,1) )./(mean(cx2,1).^2);
-Vp2 = Vp.*lambda_c./eta_c;
 
 
 
@@ -297,8 +307,8 @@ subplot(4,2,2)
 title(' ')
 
 subplot(4,2,3)
-plot(time_e,c4pdf(np,:)./(c2pdf(np,:).^2))
-title('Kurtosis ')
+plot(time_e,c4./c2.^2,time_e,mean(u4)./mean(u2).^2)
+title('Kurtosis (c,u)')
 
 subplot(4,2,4)
 %plot(time_e,0*lambda_c)
@@ -306,8 +316,9 @@ title(' ')
 
 
 subplot(4,2,5)
-plot(time_e,pi*n0.*lambda_c)
-title('\pi N_u \lambda,    \pi N_c \lambda_c')
+plot(time_e,pi*mean(nu).*lambda,time_e,pi*n0.*lambda_c,...
+     time_e,pi*n0_8.*lambda_c_8,time_e,pi*n0_9.*lambda_c_9)
+title('\pi N_u \lambda,    \pi N_c \lambda_c (.5,.8,.9)')
 
 
 subplot(4,2,6)
@@ -317,7 +328,7 @@ title('\pi N_{\nabla}_c 2 \eta_c, 2 \eta_c / \lambda_{\nabla}_c,   \pi N_{\nabla
 
 
 subplot(4,2,7)
-plot(time_e,1-Vp,time_e,4*c2)
+plot(time_e,1-Vp25,time_e,1-Vp20,time_e,1-Vp15,time_e,4*c2)
 title('m_{% pf}, 4<c^2>')
 
 

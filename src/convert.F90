@@ -369,17 +369,15 @@ endif
 #endif
 
 
-meanp=0
 gradp=0
 grad_count=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   meanp=meanp+p(i,j,k)
-   px=(2*(p(i+1,j,k)-p(i-1,j,k))/3 - (p(i+2,j,k)-p(i-2,j,k))/12)/delx
-   py=(2*(p(i,j+1,k)-p(i,j-1,k))/3 - (p(i,j+2,k)-p(i,j-2,k))/12)/dely
-   pz=(2*(p(i,j,k+1)-p(i,j,k-1))/3 - (p(i,j,k+2)-p(i,j,k-2))/12)/delz
-   if (xinside(i)==1 .and. yinside(j)==1 .and. zinsize(k)==1) then 
+   if (xinside(i)==1 .and. yinside(j)==1 .and. zinside(k)==1) then 
+      px=(2*(p(i+1,j,k)-p(i-1,j,k))/3 - (p(i+2,j,k)-p(i-2,j,k))/12)/delx
+      py=(2*(p(i,j+1,k)-p(i,j-1,k))/3 - (p(i,j+2,k)-p(i,j-2,k))/12)/dely
+      pz=(2*(p(i,j,k+1)-p(i,j,k-1))/3 - (p(i,j,k+2)-p(i,j,k-2))/12)/delz
       grad_count=grad_count+1
       gradp(1)=gradp(1)+px
       gradp(2)=gradp(2)+py
@@ -390,28 +388,56 @@ enddo
 enddo
 
 #ifdef USE_MPI
-px=meanp
-call MPI_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 gradp2=gradp
 call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+i=grad_count
+call MPI_allreduce(i,grad_count,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif
-
-meanp=meanp/g_nx/g_ny/g_nz
 gradp=gradp/grad_count
-if (io_pe==my_pe) then
-   print *,'mean, gradp:   ',meanp,gradp(1:3)
-endif
 
 
-! detrend:   p = meanp  + gradp (x-x0) + p'
+! remove gradiant
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
    px = gradp(1)*(xcord(i)-.5) + gradp(2)*(ycord(j)-.5) + gradp(3)*(zcord(k)-.5)
-   p(i,j,k)=p(i,j,k) - meanp - px 
+   p(i,j,k)=p(i,j,k) -  px 
 enddo
 enddo
 enddo
+
+
+meanp=0
+grad_count=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   meanp=meanp+p(i,j,k)
+enddo
+enddo
+enddo
+#ifdef USE_MPI
+px=meanp
+call MPI_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+meanp=meanp/g_nx/g_ny/g_nz
+
+! remove mean
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   p(i,j,k)=p(i,j,k) - meanp
+enddo
+enddo
+enddo
+
+
+if (io_pe==my_pe) then
+   print *,'mean: ',meanp
+   write(*,'(a,3f15.5)') 'grap*4         ',4*gradp(1:3)
+endif
+
+
 
 
 ! compute means again and see if we really detrended the data:
@@ -443,7 +469,8 @@ call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 meanp=meanp/g_nx/g_ny/g_nz
 gradp=gradp/g_nx/g_ny/g_nz
 if (io_pe==my_pe) then
-   print *,'detrended mean, gradp:   ',meanp,gradp(1:3)
+   print *,'detrended mean :   ',meanp
+   write(*,'(a,3f15.5)') 'detrended 4*gradp:   ',4*gradp(1:3)
 endif
 #endif
 
