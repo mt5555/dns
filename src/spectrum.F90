@@ -63,7 +63,7 @@ q1=Q
 
 
 do i=1,ndim
-   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_x(0,1),&
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_x(0,i),&
        spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
    spec_r=spec_r+.5*spec_r2
 enddo
