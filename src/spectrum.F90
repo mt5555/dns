@@ -1212,8 +1212,8 @@ endif
 ! 0,-3,1   xfac=4   efac=32
 ! 0,0,1   xfac=2   efac=16
 ! 0,0,0   xfac=1   efac=8
-im=24
-jm=-2
+im=-4
+jm=3
 km=7
 print *,'initial mode: im,jm,km: ',im,jm,km
 
@@ -1259,8 +1259,6 @@ do i=nx1,nx2
    im=imcord(i)
    jm=jmcord(j)
    km=kmcord(k)
-   rp = cmodes_r(i,j,k,1)
-   ip = cmodes_i(i,j,k,1)
    if (abs(p1(i,j,k,1))>1e-14 ) then
       write(*,'(3i4,f10.5)') im,jm,km,p1(i,j,k,1)
    endif
