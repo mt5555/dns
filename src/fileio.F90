@@ -92,6 +92,7 @@ integer nv,nscalars
 real*8 :: ints_save(nv,nscalars)
 real*8 :: maxs_save(nv,nscalars)
 
+
 ! local variables
 real*8 :: x
 integer i,j,k,n,ierr
@@ -269,6 +270,8 @@ if (my_pe==fpe) then
             call abort("error in singlefile_io2")
          endif
       else
+         print *,'grid input data'
+         write(*,'(a,3f5.0)') 'number of grid points: ',xnx,xny,xnz
          if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
          if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
          if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
@@ -433,9 +436,9 @@ if (my_pe==fpe) then
       call MPI_File_read(fid,xnx,1,MPI_REAL8,statuses,ierr)
       call MPI_File_read(fid,xny,1,MPI_REAL8,statuses,ierr)
       call MPI_File_read(fid,xnz,1,MPI_REAL8,statuses,ierr)
-      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+      if (int(xnx)/=o_nx) call abort("Error: mpi-io data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abort("Error: mpi-io data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abort("Error: mpi-io data file nz <> nz set in params.h");
       call MPI_File_read(fid,g_xcord(1),o_nx,MPI_REAL8,statuses,ierr)
       call MPI_File_read(fid,g_ycord(1),o_ny,MPI_REAL8,statuses,ierr)
       call MPI_File_read(fid,g_zcord(1),o_nz,MPI_REAL8,statuses,ierr)
@@ -529,21 +532,21 @@ if (udm_input) then
    call udm_read_uvw(time,base,Q,work1,work2)
 else
    if (r_spec) then
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".us"
-   call print_message("Input: ")
-   call print_message(fname)
-   call singlefile_io2(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vs"
-   call print_message(fname)
-   call singlefile_io2(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
-   if (n_var==3) then
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".ws"
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".us"
+      call print_message("Input: ")
       call print_message(fname)
-      call singlefile_io2(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
-   endif
-   do n=1,ndim
-      call ifft3d(Q(1,1,1,n),work1)
-   enddo
+      call singlefile_io2(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vs"
+      call print_message(fname)
+      call singlefile_io2(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
+      if (n_var==3) then
+         fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".ws"
+         call print_message(fname)
+         call singlefile_io2(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
+      endif
+      do n=1,ndim
+         call ifft3d(Q(1,1,1,n),work1)
+      enddo
    else
       fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
       call print_message("Input: ")
@@ -590,7 +593,7 @@ end subroutine
 
 
 
-subroutine output_uvw(time,Q,work1,work2,work3)
+subroutine output_uvw(basename,time,Q,work1,work2,work3)
 use params
 use mpi
 use fft_interface
@@ -600,6 +603,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: work3(nx,ny,nz)   ! only used if ndim==2
+character(len=*) :: basename
 
 !local
 character(len=80) message
@@ -614,57 +618,57 @@ write(message,'(f10.4)') 10000.0000 + time
 if (equations==NS_UVW .and. w_spec) then
    
    ! NS, primitive variables
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".us"
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".us"
    call singlefile_io2(time,Q(1,1,1,1),fname,work1,work2,0,io_pe,.true.)
    
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vs"
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vs"
    call singlefile_io2(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,.true.)
    if (n_var==3) then
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ws"
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".ws"
       call singlefile_io2(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe,.true.)
    endif
    
 else if (equations==NS_UVW) then
    if (udm_output) then
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".h5"
       call udm_write_uvw(fname,time,Q,work1,work2)
    else
       ! NS, primitive variables
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".u"
       call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".v"
       call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
       if (n_var==3) then
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
+         fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".w"
          call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
       endif
       if (ndim==2) then
          call vorticity2d(work3,Q,work1,work2)
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+         fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
          call singlefile_io(time,work3,fname,work1,work2,0,io_pe)
       endif
    endif
    
 else if (equations==SHALLOW) then
    ! shallow water 2D
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".u"
    call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".v"
    call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
    if (n_var==3) then
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h"
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".h"
       call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
    endif
    if (ndim==2) then
       call vorticity2d(work3,Q,work1,work2)
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
       call singlefile_io(time,work3,fname,work1,work2,0,io_pe)
    endif
 else if (equations==NS_PSIVOR) then
    ! 2D NS psi-vor formulation
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
    call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".psi"
    call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
 endif
 

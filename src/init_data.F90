@@ -8,10 +8,6 @@ real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 if (restart==1) then
-#ifdef BYTESWAP_INPUT
-   call set_byteswap_input(1);
-#endif
-   if (byteswap_input) call set_byteswap_input(1);
 
    ! initialize some constants, if needed on restart runs:
    if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)      ! set grav, fcor

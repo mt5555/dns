@@ -16,6 +16,11 @@ call init_input_file()
 call init_grid()     
 call mpi_io_init() 
 
+#ifdef BYTESWAP_INPUT
+   call set_byteswap_input(1);
+#endif
+   if (byteswap_input) call set_byteswap_input(1);
+
 
 !
 ! scale alpha now that we know delx
@@ -362,15 +367,22 @@ if (my_pe==io_pe) then
       if (i>iargc()) exit
       call getarg(i,message)
 
-      if (message(1:2)=="-r") then
-         restart=1
+      if (message(1:2)=="-b") then
+         byteswap_input=.true.
       else if (message(1:5)=="-cout" .and. len_trim(message)==5) then
          i=i+1
-         if (i>iargc()) exit
+         if (i>iargc()) call abort("-cout option requires an argument")
          call getarg(i,carg)
-         if (carg(1:3)=="uvw") convert_opt=0 
-         if (carg(1:3)=="vor" .and. len_trim(carg)==3) convert_opt=1 
-         if (carg(1:4)=="vorm") convert_opt=2 
+         if (carg(1:3)=="uvw") then
+            convert_opt=0 
+         else if (carg(1:3)=="vor" .and. len_trim(carg)==3) then
+            convert_opt=1 
+         else if (carg(1:4)=="vorm") then
+            convert_opt=2 
+         else
+            print *,'cout option: ',carg(1:len_trim(carg))
+            call abort("-cout unrecognized option")
+         endif
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit
@@ -388,6 +400,8 @@ if (my_pe==io_pe) then
          j=len_trim(inputfile)
       else if (message(1:4)=="-mio") then
          do_mpi_io=.true.
+      else if (message(1:2)=="-r") then
+         restart=1
       else if (message(1:2)=="-s" .and. len_trim(message)==2) then
          r_spec=.true.
          w_spec=.true.
@@ -461,6 +475,7 @@ call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(r_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(w_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(spec_max,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(byteswap_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(convert_opt,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(do_mpi_io,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

@@ -218,6 +218,9 @@ splitspec:  splitspec.o fileioc.o
 conv:  conv.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 	$(LINK) -o conv conv.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
+convert:  convert.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+	$(LINK) -o convert convert.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG) $(LDFLAGS) $(MPILIB)
+
 analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis analysis.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 

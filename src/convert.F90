@@ -18,7 +18,7 @@
 !  to compile and run:   make analysis ; analysis
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-program anal
+program convert
 use params
 use mpi
 use fft_interface
@@ -32,16 +32,13 @@ character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
-real*8 :: kr,ke,ck,xfac
+real*8 :: kr,ke,ck,xfac,dummy
 
 ! input file
-basename="I_a0"
-print *,basename
-tstart=0
-tstop=11.3
+tstart=3.0
+tstop=3.0
 tinc=.10
 icount=0
-vorsave=0
 call init_mpi       
 call init_mpi_comm3d()
 call init_model
@@ -55,27 +52,32 @@ Q=0
 time=tstart
 do
 icount=icount+1
-print *,'icount = ',icount
 
-   call input_uvw(time,Q,work1,work2)
+   call input_uvw(time,Q,vor,work1,work2)
 
-   if (convert_opt==0) then
+   if (convert_opt==0) then  ! -cout uvw  
       ! just reoutput the variables:
       if (w_spec) then
          do n=1,3
             call fft3d(Q(1,1,1,n),work1)
          enddo
       endif
-      call output_uvw(time2,Q,work1,work2,dummy)
+      basename=runname(1:len_trim(runname)) // "-new."
+      call output_uvw(basename,time,Q,work1,work2,dummy)
    endif
 
-   if (convert_opt==1) then
-      ! output vorticity
+   if (convert_opt==1) then  ! -cout vor
+      ! outputing vorticity
+      basename=runname(1:len_trim(runname)) // "-vor."
+
+      call print_message("computing vorticity...")
       call vorticity(vor,Q,work1,work2)
-      call output_uvw(time2,vor,work1,work2,dummy)
+      call print_message("output vorticity...")
+      call output_uvw(basename,time,vor,work1,work2,dummy)
    endif
 
-   if (convert_opt==2) then
+   if (convert_opt==2) then  ! -cout vorm
+      call print_message("computing vorticity magnitude...")
       call vorticity(vor,Q,work1,work2)
       do k=nz1,nz2
       do j=ny1,ny2
@@ -86,15 +88,18 @@ print *,'icount = ',icount
       enddo
       ! output vorticity magnitude
       write(sdata,'(f10.4)') 10000.0000 + time
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorm"
-      call singlefile_io2(time,work1,fname,vor,work2,0,io_pe,.true.)
+      call singlefile_io2(time,work1,fname,vor,work2,0,io_pe,.false.)
    endif
 
-
+   time=time+tinc
+   if (time > max(tstop,tstart)) exit
+   if (time < min(tstop,tstart)) exit
 enddo
 
 
 call close_mpi
-end program anal
+end program
 
 
