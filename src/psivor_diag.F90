@@ -20,8 +20,11 @@ logical :: doit_model,doit_diag
 if (.not.doit_model) return
 
 call tracers_save(io_pe,time)
-call comp_ellipse(Qhat(1,1,1,1),0,0)
-call ellipse_output(time)
+
+if (init_cond_subtype<100) then
+   call comp_ellipse(Qhat(1,1,1,1),0,0)
+   call ellipse_output(time)
+endif
 
 
 end subroutine
