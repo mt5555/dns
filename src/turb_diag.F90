@@ -3,6 +3,7 @@ subroutine output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use structf
 use spectrum
+use isoave
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(*)
@@ -64,9 +65,9 @@ if (compute_struct==1) then
    ! angle averaged functions:
    call isoavep(Q,q1,q2,q3)
    if (my_pe==io_pe) then
-      write(sdata,'(f10.4)') 10000.0000 + time
-      fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
-      call copen(fname,"w",fid,ierr)
+      write(message,'(f10.4)') 10000.0000 + time
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".isostr"
+      call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
          call abort(message)
