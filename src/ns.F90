@@ -1,5 +1,5 @@
 #include "macros.h"
-#define ALPHA_MODEL
+#undef ALPHA_MODEL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  subroutine to take one Runge-Kutta 4th order time step
@@ -59,6 +59,11 @@ if (firstcall) then
    if (.not. dealias) then
       call abort("Error: using ns3dspectral model, which must be run dealiased")
    endif
+#ifndef ALPHA_MODEL
+   if (alpha_value/=0) then
+      call abort("Error: alpha>0 but this is not the alpha model!")
+   endif
+#endif   
 endif
 
 
@@ -204,7 +209,7 @@ real*8 xw,xfac,tmx1,tmx2
 real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke_diss2,ke_diss,ensave,vorave,helave,maxvor
+real*8 :: ke,gradu_diss,ke_diss,ensave,vorave,helave,maxvor
 real*8 :: f_diss=0,a_diss=0,normuf=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
@@ -325,8 +330,9 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ke=0
 ke_diss=0
-ke_diss2=0
+gradu_diss=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nslabx
@@ -347,11 +353,15 @@ do j=1,ny_2dz
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
 
+            ke = ke + .5*xfac*(Qhat(k,i,j,1)**2 + &
+                                Qhat(k,i,j,2)**2 + &
+                                Qhat(k,i,j,3)**2) 
+
             ke_diss = ke_diss + xfac*xw*(Qhat(k,i,j,1)**2 + &
                                 Qhat(k,i,j,2)**2 + &
                                 Qhat(k,i,j,3)**2) 
 
-            ke_diss2 = ke_diss2 + xfac*xw*xw*(Qhat(k,i,j,1)**2 + &
+            gradu_diss = gradu_diss + xfac*xw*xw*(Qhat(k,i,j,1)**2 + &
                                 Qhat(k,i,j,2)**2 + &
                                 Qhat(k,i,j,3)**2) 
 
@@ -432,16 +442,19 @@ enddo
 
 
 if (compute_ints==1) then
+   ! note: dont noramlize quantities computed in spectral space,
+   ! but normalize quantities computed in grid space by /g_nx/g_ny/g_nz
    ints_timeDU=time
-   ints(2)=ke_diss   ! computed in spectral space - dont have to normalize
-   ints(3)=f_diss    ! computed in spectral space - dont have to normalize
+   ints(2)=ke_diss   
+   ints(3)=f_diss    
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
+   ints(6)=ke        
    ints(7)=ensave/g_nx/g_ny/g_nz
    maxs(5)=maxvor
-   ints(8)=a_diss    ! computed in spectral space - dont normalize
+   ints(8)=a_diss    
    ints(9)=normuf
-   ints(10)=ke_diss2
+   ints(10)=gradu_diss
 endif
 
 call wallclock(tmx2)

@@ -385,8 +385,8 @@ if (forcing_type>0) call sforcing(rhs,Qhat,f_diss)
 
 if (compute_ints==1) then
    ints_timeDU=time
-   ints(2)=f_diss
-   ints(3)=ke_diss
+   ints(2)=ke_diss
+   ints(3)=f_diss
    ints(4)=vor
    ints(5)=hel
    maxs(5)=maxvor

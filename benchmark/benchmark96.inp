@@ -7,6 +7,7 @@ none         ! forcing:  none, iso12
 0            ! struct_nz
 value        ! viscosity type  (value, smallest, kediff, Re)
 2e-4         ! viscosity coefficient.  
+0            ! alpha
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc

@@ -50,6 +50,9 @@ endif
 !    mu = diff_2h / (2 2pi 2pi k**2)
 ! 
 
+write(message,'(a,e10.4)') 'NS-alpha value=',alpha_value
+call print_message(message)
+
 write(message,'(a,e10.4)') 'Diffusion coefficient mu=',mu
 call print_message(message)
 
@@ -86,6 +89,7 @@ call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 
 
 if (.not. allocated(custom)) allocate(custom(ncustom))
@@ -320,6 +324,7 @@ else
    call abort("invalid forcing type specified on line 4 on input file")
 endif
 
+
 read(*,*) struct_nx
 if (struct_nx==1) call abort("struct_nx = 1 in input file not allowed")
 read(*,*) struct_ny
@@ -339,6 +344,9 @@ else if (sdata=='kediff') then
 else 
    call abort("only viscosity type 'value' supported")
 endif
+
+read(*,*) alpha_value
+
 
 read(*,'(a12)') sdata
 if (sdata=='fft') then

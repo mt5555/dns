@@ -131,6 +131,7 @@ integer :: itime_final
 character(len=80) message
 real*8 :: time_old,delke_tot,delea_tot,dt
 real*8 :: ea_new=0,ea_old
+real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
 
 ints_timeU=0
@@ -147,7 +148,6 @@ endif
 
 do 
    time_old=ints_timeU
-   ints(6)=ints(1)
    ea_old=ea_new
 
    call rk4(time,Q,Qhat,Qw2)

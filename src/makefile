@@ -87,10 +87,10 @@ OPS    = fftops.o test.o integrals.o
 FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
-MODEL_GRID       = ns_grid.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC_SLOW  = ns_decomp3.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC       = ns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-
+MODEL_GRID       = ns_grid.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SPEC_SLOW  = ns_decomp3.o dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SPEC       = ns.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_ALPHA      = ns_alpha.o dns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 #rules
@@ -103,14 +103,17 @@ MODEL_SPEC       = ns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 %.o: %.c
 	$(CC) -c -o $@ $< 
 
-dns:  $(MODEL_SPEC) dns.o 
-	$(LINK) -o dns dns.o $(MODEL_SPEC) $(LDFLAGS) $(MPILIB)
+dns:  $(MODEL_SPEC) 
+	$(LINK) -o dns $(MODEL_SPEC) $(LDFLAGS) $(MPILIB)
 
-dnsgrid:  $(MODEL_GRID) dns.o 
-	$(LINK) -o dns dns.o $(MODEL_GRID) $(LDFLAGS) $(MPILIB)
+dnsa:  $(MODEL_ALPHA) 
+	$(LINK) -o dnsa $(MODEL_ALPHA) $(LDFLAGS) $(MPILIB)
 
-dnsslow:  $(MODEL_SPEC_SLOW) dns.o 
-	$(LINK) -o dns dns.o $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)
+dnsgrid:  $(MODEL_GRID) 
+	$(LINK) -o dnsgrid $(MODEL_GRID) $(LDFLAGS) $(MPILIB)
+
+dnsslow:  $(MODEL_SPEC_SLOW) 
+	$(LINK) -o dns $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)
 
 
 clean: 
@@ -121,6 +124,8 @@ dep:
 
 -include .depends
 
+ns_alpha.o: ns.F90
+	$(COMPILE) -DALPHA_MODEL -o ns_alpha.o ns.F90
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"

@@ -137,13 +137,15 @@ real*8 d1(nx,ny,nz)
 real*8 d2(nx,ny,nz)
 real*8 work(nx,ny,nz)
 real*8 dummy,tmx1,tmx2
-real*8 :: ke_diss,ke_diss2,vor,hel
+real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss
 integer n,i,j,k,numder
 
 call wallclock(tmx1)
 
+ke=0
 ke_diss=0
 ke_diss2=0
+gradu_diss=0
 vor=0
 hel=0
 numder=DX_ONLY
@@ -161,12 +163,14 @@ do n=1,3
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
+      ke = ke + .5*Q(i,j,k,n)**2
 
       rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,1)*d1(i,j,k) 
 
       ! Q,d1,d2 are in cache, so we can do these sums for free?
-      ke_diss=ke_diss + mu*Q(i,j,k,n)*d2(i,j,k)
-      ke_diss2=ke_diss2 - mu*d1(i,j,k)**2
+      ke_diss=ke_diss - Q(i,j,k,n)*d2(i,j,k)
+      ke_diss2=ke_diss2 + d1(i,j,k)**2
+      gradu_diss=gradu_diss + d2(i,j,k)**2
       if (n==2) then  ! dv/dx, part of vor(3)
          vor=vor + d1(i,j,k)
          hel=hel + Q(i,j,k,3)*d1(i,j,k)
@@ -189,8 +193,9 @@ do n=1,3
 
       rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,2)*d1(i,j,k) 
 
-      ke_diss=ke_diss + mu*Q(i,j,k,n)*d2(i,j,k)
-      ke_diss2=ke_diss2 - mu*d1(i,j,k)**2
+      ke_diss=ke_diss - Q(i,j,k,n)*d2(i,j,k)
+      ke_diss2=ke_diss2  + d1(i,j,k)**2
+      gradu_diss=gradu_diss + d2(i,j,k)**2
       if (n==1) then  ! du/dy part of vor(3)
          vor=vor - d1(i,j,k)
          hel=hel - Q(i,j,k,3)*d1(i,j,k)
@@ -214,8 +219,9 @@ do n=1,3
 
       rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,3)*d1(i,j,k) 
 
-      ke_diss=ke_diss + mu*Q(i,j,k,n)*d2(i,j,k)
-      ke_diss2=ke_diss2 - mu*d1(i,j,k)**2
+      ke_diss=ke_diss - Q(i,j,k,n)*d2(i,j,k)
+      ke_diss2=ke_diss2 + d1(i,j,k)**2
+      gradu_diss=gradu_diss + d2(i,j,k)**2
       if (n==1) then  ! du/dz part of vor(2)
          hel=hel + Q(i,j,k,2)*d1(i,j,k)
       endif
@@ -241,9 +247,15 @@ call divfree(rhs,work)
 
 if (compute_ints==1) then
    ints_timeDU=time
-   ints(3)=ke_diss2/g_nx/g_ny/g_nz
+   ints(2)=ke_diss2/g_nx/g_ny/g_nz
+   !ints(3) = forcing terms
    ints(4)=vor/g_nx/g_ny/g_nz
    ints(5)=hel/g_nx/g_ny/g_nz
+   ints(6)=ke/g_nx/g_ny/g_nz
+   ints(7)=ints(2)  ! this is only true for periodic incompressible case
+   ! ints(8) = < u,div(tau)' >   (alpha model only)
+   ! ints(9)  = < u,f >  (alpha model only)
+   ints(10)=gradu_diss/g_nx/g_ny/g_nz
 endif
 
 call wallclock(tmx2)

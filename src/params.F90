@@ -37,7 +37,7 @@ implicit none
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0           !viscosity
-real*8  :: alpha_value=.1      !for the alpha model  
+real*8  :: alpha_value=0      !for the alpha model  
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
 character(len=80) :: runname
@@ -188,12 +188,13 @@ real*8 :: ints_timeU,ints_timeDU
 ! and thus the data is at the prevous timestep = ints_timeDU
 ! 
 ! ints(2) = < u_x,u_x >
-! ints(3) = < u,f >    (for alpha model, <u,f'> )
+! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
+!                    non-alpha-mode: F=f.  Alpha model F=f'
 ! ints(4) = z-component of vorticity
 ! ints(5) = helicity
 ! ints(6) = ke
 ! ints(7) = enstrophy (vorticity**2)
-! ints(8) = < u,div(tau)' ||   (alpha model only)
+! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < u,f >  (alpha model only)
 ! ints(10) = < u_xx,u_xx >
 !                           
