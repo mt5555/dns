@@ -483,27 +483,6 @@ call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
 call transpose_to_z(f,fout,n1,n1d,n2,n2d,n3,n3d)
 call fft1(fout,n1,n1d,n2,n2d,n3,n3d)
 
-do n1=nx1,nx2
-   f(n1,ny1,nz1)=n1*(my_x+1)
-enddo
-
-if (my_pe==0) then
-   do n1=1,nx
-      print *,my_pe,n1,f(n1,ny1,nz1)
-   enddo
-endif
-
-call ghost_update(f,1)
-
-if (my_pe==0) then
-   print *
-   do n1=1,nx
-      print *,my_pe,n1,f(n1,ny1,nz1)
-   enddo
-endif
-
-stop
-
 
 end
 

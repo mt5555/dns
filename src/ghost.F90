@@ -63,15 +63,23 @@ real*8 :: p(nx,ny,nz,nvar)
 
 
 !local variables
-integer :: i,j,k,n,l,nmesg,x1,x2,y1,y2,z1,z2
+integer :: i,j,k,n,l,nmesg,x0,x1,y0,y1,z0,z1
+real*8 :: recbufx0(nslaby*nslabz*nvar*nghost)
 real*8 :: recbufx1(nslaby*nslabz*nvar*nghost)
-real*8 :: recbufx2(nslaby*nslabz*nvar*nghost)
+real*8 :: recbufy0(nslabx*nslabz*nvar*nghost)
+real*8 :: recbufy1(nslabx*nslabz*nvar*nghost)
+real*8 :: recbufz0(nslabx*nslaby*nvar*nghost)
+real*8 :: recbufz1(nslabx*nslaby*nvar*nghost)
 
 #ifdef USE_MPI
+real*8 :: sendbufx0(nslaby*nslabz*nvar*nghost)
 real*8 :: sendbufx1(nslaby*nslabz*nvar*nghost)
-real*8 :: sendbufx2(nslaby*nslabz*nvar*nghost)
+real*8 :: sendbufy0(nslabx*nslabz*nvar*nghost)
+real*8 :: sendbufy1(nslabx*nslabz*nvar*nghost)
+real*8 :: sendbufz0(nslabx*nslaby*nvar*nghost)
+real*8 :: sendbufz1(nslabx*nslaby*nvar*nghost)
 integer :: ndata
-integer :: ierr,dest_pe1,dest_pe2,request(12),statuses(MPI_STATUS_SIZE,12)
+integer :: ierr,dest_pe0,dest_pe1,request(12),statuses(MPI_STATUS_SIZE,12)
 integer :: dest_pe3(3),tag
 #endif
 
@@ -79,45 +87,46 @@ if (firstcall) call ghost_init
 call wallclock(tmx1)
 nmesg=0
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! compute X direction ghost cells
 !
-x1=my_x-1
-if (x1<0) then
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+x0=my_x-1
+if (x0<0) then
    if (periodic==1) then
-      x1=ncpu_x-1
+      x0=ncpu_x-1
    else
-      x1=my_x
+      x0=my_x
    endif
 endif
 
-x2=my_x+1
-if (x2>=ncpu_x) then
+x1=my_x+1
+if (x1>=ncpu_x) then
    if (periodic==1) then
-      x2=0
+      x1=0
    else
-      x2=my_x
+      x1=my_x
    endif
 endif
 
 
 #ifdef USE_MPI
 ndata=nvar*nslaby*nslabz*nghost
-
-
-dest_pe3(1)=x1
+dest_pe3(1)=x0
 dest_pe3(2)=my_y
 dest_pe3(3)=my_z
+call mpi_cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
+dest_pe3(1)=x1
 call mpi_cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
-dest_pe3(1)=x2
-call mpi_cart_rank(comm_3d,dest_pe3,dest_pe2,ierr)
 #endif
 
 
 
 
 ! get information of left edge ghost cells of X direction:
-if (x1==my_x) then
+if (x0==my_x) then
    l=0
    do n=1,nvar
    do k=nz1,nz2
@@ -126,10 +135,10 @@ if (x1==my_x) then
       l=l+1
       if (periodic==1) then
          !periodic:  nx2-1,nx2-0  -->   nx1-2,nx1-1
-         recbufx1(l)=p(nx2-i,j,k,n)
+         recbufx0(l)=p(nx2-i,j,k,n)
       else if (reflect==1) then
          !reflection:  nx1+2,nx1+1  -->   nx1-2,nx1-1
-         recbufx1(l)=p(nx1+i+1,j,k,n)
+         recbufx0(l)=p(nx1+i+1,j,k,n)
       else
          ! call boundary conditions for x=0
       endif
@@ -145,26 +154,26 @@ else
    do j=ny1,ny2
    do i=0,nghost-1
       ! regular ghost cell update
-      ! nx1,nx1+1 on this processor goes to nx2+1,nx2+2 on dest_pe1
+      ! nx1,nx1+1 on this processor goes to nx2+1,nx2+2 on dest_pe0
       l=l+1
-      sendbufx1(l)=p(nx1+i,j,k,n)
+      sendbufx0(l)=p(nx1+i,j,k,n)
    enddo
    enddo
    enddo
    enddo
    tag=2
    nmesg=nmesg+1
-   call MPI_IRecv(recbufx1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbufx0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 
    tag=1
    nmesg=nmesg+1
-   call MPI_ISend(sendbufx1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbufx0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 
 
 ! get information for right edge ghost cells of X direction:
-if (x2==my_x) then
+if (x1==my_x) then
    l=0
    do n=1,nvar
    do k=nz1,nz2
@@ -173,10 +182,10 @@ if (x2==my_x) then
       l=l+1
       if (periodic==1) then
          !periodic:  nx1,nx1+1  -->   nx2+1,nx2+2
-         recbufx2(l)=p(nx1+i-1,j,k,n)
+         recbufx1(l)=p(nx1+i-1,j,k,n)
       else if (reflect==1) then
          !reflection:  nx2-1,nx2-2  -->   nx2+1,nx2+2
-         recbufx2(l)=p(nx2-i,j,k,n)
+         recbufx1(l)=p(nx2-i,j,k,n)
       else
          ! call boundary conditions for x=1  
       endif
@@ -192,9 +201,9 @@ else
    do j=ny1,ny2
    do i=nghost-1,0,-1
       ! regular ghost cell update
-      ! nx2-1,nx2 on this processor goes to nx1-2,nx1-1 on dest_pe2
+      ! nx2-1,nx2 on this processor goes to nx1-2,nx1-1 on dest_pe1
       l=l+1
-      sendbufx2(l)=p(nx2-i,j,k,n)
+      sendbufx1(l)=p(nx2-i,j,k,n)
    enddo
    enddo
    enddo
@@ -202,13 +211,276 @@ else
 
    tag=1
    nmesg=nmesg+1
-   call MPI_IRecv(recbufx2,ndata,MPI_REAL8,dest_pe2,tag,comm_3d,request(nmesg),ierr)
+   call MPI_IRecv(recbufx1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 
    tag=2
    nmesg=nmesg+1
-   call MPI_ISend(sendbufx2,ndata,MPI_REAL8,dest_pe2,tag,comm_3d,request(nmesg),ierr)
+   call MPI_ISend(sendbufx1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! compute Y direction ghost cells
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+y0=my_y-1
+if (y0<0) then
+   if (periodic==1) then
+      y0=ncpu_y-1
+   else
+      y0=my_y
+   endif
+endif
+
+y1=my_y+1
+if (y1>=ncpu_y) then
+   if (periodic==1) then
+      y1=0
+   else
+      y1=my_y
+   endif
+endif
+
+
+#ifdef USE_MPI
+ndata=nvar*nslabx*nslabz*nghost
+dest_pe3(1)=my_x
+dest_pe3(2)=y0
+dest_pe3(3)=my_z
+call mpi_cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
+dest_pe3(2)=y1
+call mpi_cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
+#endif
+
+
+
+
+! get information of left edge ghost cells of Y direction:
+if (y0==my_y) then
+   l=0
+   do n=1,nvar
+   do k=nz1,nz2
+   do j=(nghost-1),0,-1
+   do i=nx1,nx2
+      l=l+1
+      if (periodic==1) then
+         recbufy0(l)=p(i,ny2-j,k,n)
+      else if (reflect==1) then
+         recbufy0(l)=p(i,ny1+j+1,k,n)
+      else
+         ! call boundary conditions for y=0
+      endif
+   enddo
+   enddo
+   enddo
+   enddo
+else
+#ifdef USE_MPI
+   l=0
+   do n=1,nvar
+   do k=nz1,nz2
+   do j=0,nghost-1
+   do i=nx1,nx2
+      ! regular ghost cell update
+      l=l+1
+      sendbufy0(l)=p(i,ny1+j,k,n)
+   enddo
+   enddo
+   enddo
+   enddo
+   tag=20
+   nmesg=nmesg+1
+   call MPI_IRecv(recbufy0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+
+   tag=10
+   nmesg=nmesg+1
+   call MPI_ISend(sendbufy0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+#endif
+endif
+
+
+! get information for right edge ghost cells of X direction:
+if (y1==my_y) then
+   l=0
+   do n=1,nvar
+   do k=nz1,nz2
+   do j=1,nghost
+   do i=nx1,nx2
+      l=l+1
+      if (periodic==1) then
+         recbufy1(l)=p(i,ny1+j-1,k,n)
+      else if (reflect==1) then
+         recbufy1(l)=p(i,ny2-j,k,n)
+      else
+         ! call boundary conditions for x=1  
+      endif
+   enddo
+   enddo
+   enddo
+   enddo
+else
+#ifdef USE_MPI
+   l=0
+   do n=1,nvar
+   do k=nz1,nz2
+   do j=nghost-1,0,-1
+   do i=nx1,nx2
+      ! regular ghost cell update
+      l=l+1
+      sendbufy1(l)=p(i,ny2-j,k,n)
+   enddo
+   enddo
+   enddo
+   enddo
+
+   tag=10
+   nmesg=nmesg+1
+   call MPI_IRecv(recbufy1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+
+   tag=20
+   nmesg=nmesg+1
+   call MPI_ISend(sendbufy1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+#endif
+endif
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! compute Z direction ghost cells
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (nslabz>1) then
+z0=my_z-1
+if (z0<0) then
+   if (periodic==1) then
+      z0=ncpu_z-1
+   else
+      z0=my_z
+   endif
+endif
+
+z1=my_z+1
+if (z1>=ncpu_z) then
+   if (periodic==1) then
+      z1=0
+   else
+      z1=my_z
+   endif
+endif
+
+
+#ifdef USE_MPI
+ndata=nvar*nslabx*nslaby*nghost
+dest_pe3(1)=my_x
+dest_pe3(2)=my_y
+dest_pe3(3)=z0
+call mpi_cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
+dest_pe3(3)=z1
+call mpi_cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
+#endif
+
+
+
+
+! get information of left edge ghost cells of Z direction:
+if (z0==my_z) then
+   l=0
+   do n=1,nvar
+   do k=(nghost-1),0,-1
+   do j=ny1,ny2
+   do i=nx1,nx2
+      l=l+1
+      if (periodic==1) then
+         recbufz0(l)=p(i,j,nz2-k,n)
+      else if (reflect==1) then
+         recbufz0(l)=p(i,j,nz1+k+1,n)
+      else
+         ! call boundary conditions for y=0
+      endif
+   enddo
+   enddo
+   enddo
+   enddo
+else
+#ifdef USE_MPI
+   l=0
+   do n=1,nvar
+   do k=0,nghost-1
+   do j=ny1,ny2
+   do i=nx1,nx2
+      ! regular ghost cell update
+      l=l+1
+      sendbufz0(l)=p(i,j,nz1+k,n)
+   enddo
+   enddo
+   enddo
+   enddo
+   tag=200
+   nmesg=nmesg+1
+   call MPI_IRecv(recbufz0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+
+   tag=100
+   nmesg=nmesg+1
+   call MPI_ISend(sendbufz0,ndata,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+#endif
+endif
+
+
+! get information for right edge ghost cells of X direction:
+if (z1==my_z) then
+   l=0
+   do n=1,nvar
+   do k=1,nghost
+   do j=ny1,ny2
+   do i=nx1,nx2
+      l=l+1
+      if (periodic==1) then
+         recbufz1(l)=p(i,j,nz1+k-1,n)
+      else if (reflect==1) then
+         recbufz1(l)=p(i,j,nz2-k,n)
+      else
+         ! call boundary conditions for x=1  
+      endif
+   enddo
+   enddo
+   enddo
+   enddo
+else
+#ifdef USE_MPI
+   l=0
+   do n=1,nvar
+   do k=nghost-1,0,-1
+   do j=ny1,ny2
+   do i=nx1,nx2
+      ! regular ghost cell update
+      l=l+1
+      sendbufz1(l)=p(i,j,nz2-k,n)
+   enddo
+   enddo
+   enddo
+   enddo
+
+   tag=100
+   nmesg=nmesg+1
+   call MPI_IRecv(recbufz1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+
+   tag=200
+   nmesg=nmesg+1
+   call MPI_ISend(sendbufz1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+#endif
+endif
+endif
+
+
 
 
 
@@ -219,18 +491,50 @@ ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
 
 l=0
 do n=1,nvar
+
 do k=nz1,nz2
 do j=ny1,ny2
 do i=1,nghost
    l=l+1
    ! left edge:  p(nx1-2,,) then p(nx1-1,,)
-   p(nx1-(nghost-i+1),j,k,n)=recbufx1(l)
+   p(nx1-(nghost-i+1),j,k,n)=recbufx0(l)
    ! right edge:  p(nx2+1,,) then p(nx2+2,,)
-   p(nx2+i,j,k,n)=recbufx2(l)
+   p(nx2+i,j,k,n)=recbufx1(l)
 enddo
 enddo
 enddo
+
+l=0
+do k=nz1,nz2
+do j=1,nghost
+do i=nx1,nx2
+   l=l+1
+   ! left edge: 
+   p(i,ny1-(nghost-j+1),k,n)=recbufy0(l)
+   ! right edge: 
+   p(i,ny2+j,k,n)=recbufy1(l)
 enddo
+enddo
+enddo
+
+if (nslabz>1) then
+l=0
+do k=1,nghost
+do j=ny1,ny2
+do i=nx1,nx2
+   l=l+1
+   ! left edge: 
+   p(i,j,nz1-(nghost-k+1),n)=recbufz0(l)
+   ! right edge: 
+   p(i,j,nz2+k,n)=recbufz1(l)
+enddo
+enddo
+enddo
+endif
+
+enddo
+
+
 
 
 call wallclock(tmx2)
