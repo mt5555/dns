@@ -51,6 +51,51 @@ private init
 contains
 
 
+subroutine writeisoave(fid)
+implicit none
+
+CPOINTER fid
+!local
+integer :: i,idir
+real*8 :: x
+
+
+x=ndelta; call cwrite8(fid,x,1)   
+x=ndir;   call cwrite8(fid,x,1)   
+x=2;      call cwrite8(fid,x,1)   ! number of longitudinal
+x=3;      call cwrite8(fid,x,1)   ! number of transverse
+
+! write out the r values
+do idir=1,ndir
+   call cwrite8(fid,r_val(1,idir),ndelta)
+enddo
+
+! longitudinal
+do idir=1,ndir
+   call cwrite8(fid,D_ll(1,idir),ndelta)
+enddo
+do idir=1,ndir
+   call cwrite8(fid,D_lll(1,idir),ndelta)
+enddo
+
+! transverse
+do i=1,2
+do idir=1,ndir
+   call cwrite8(fid,D_tt(1,idir,i),ndelta)
+enddo
+enddo
+do i=1,2
+do idir=1,ndir
+   call cwrite8(fid,D_ltt(1,idir,i),ndelta)
+enddo
+enddo
+end subroutine
+
+
+
+
+
+
 
 subroutine isoave1(Q)
 use params
@@ -295,9 +340,9 @@ do idel=1,ndelta
 do idir=1,ndir
    rvec = dir(:,idir)*delta_val(idel)
    r_val(idel,idir) =(rvec(1)**2+rvec(2)**2+rvec(3)**2)
+   r_val(idel,idir) = sqrt(r_val(idel,idir))
 enddo
 enddo
-r_val=sqrt(r_val)
 
 
 end subroutine
