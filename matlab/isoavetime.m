@@ -29,7 +29,7 @@ ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
 % this type of averging is expensive:
-time_and_angle_ave=1;
+time_and_angle_ave=0;
 
 k=0
 times=[1:.1:3.7];
@@ -98,6 +98,10 @@ plot(times/teddy,mx45_iso_localeps,'g')
 ax=axis
 axis( [ax(1),ax(2),.5,1.0] );
 hold off;
+title('MAX (D_{lll} / r\epsilon)   (4/5 law) ');
+xlabel('time');
+print -dpsc k45time.ps
+
 
 figure(5); clf
 for i=1:3
@@ -106,6 +110,10 @@ end
   semilogx(xx_plot,y45_iso_ave,'k'); hold on
 axis([1 1000 0 1.0])
 hold off;
+title('D_{lll} / r\epsilon   (4/5 law) ');
+xlabel('r/\eta');
+print -dpsc k45mean.ps
+
 
 
 starttime=1;
