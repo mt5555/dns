@@ -18,7 +18,7 @@ ext='.isostr';
 %name='/ccs/scratch/taylorm/check256_0000.8000'
 name='/ccs/scratch/taylorm/dns/iso12/iso12_5120002.7000'
 %name='/ccs/scratch/taylorm/dns/iso12/iso12_5120007.0000'
-%nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
+nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %ext='.isostr001';
 
 %name='/ccs/scratch/taylorm/sk/check256_0000.8000'
@@ -33,12 +33,16 @@ name='/ccs/scratch/taylorm/dns/iso12/iso12_5120002.7000'
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
+
+%name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
+%nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
+
+
+
+
+
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
-
-name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
-nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
-
 
 disp('1 = Scaling laws for total structure function');
 disp('2 = Scaling laws and also plot D+/-');

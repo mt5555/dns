@@ -69,14 +69,16 @@ cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,3) 
 if (ndir==3)
   w=ones([1,3])/3;
 else
-  equalw=1;
+  equalw=0;
   if (equalw) 
     % put this in to use equally weighted:
     w=ones([1,ndir])/ndir;
+    disp(sprintf('Using equall weights for spherical integration'))
   else
     % get the weights:
-    wname=sprintf('../src/voronoi/isoave.weights %i',ndir);
-    w=textread(wname,'                  %f');
+    wname=sprintf('../src/voronoi/isoave.weights%i',ndir);
+    disp(sprintf('Reading Voronio weights from file:  %s',wname))
+    w=textread(wname,'%f');
     % take every other weight
     w=2*w(1:2:length(w));
   end
