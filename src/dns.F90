@@ -171,7 +171,7 @@ real*8  :: time=0
 integer :: itime=0,ierr,n
 integer :: itime_final=2**30
 character(len=80) message
-real*8 :: time_old_old,time_old=0,delke_tot,delea_tot,dt
+real*8 :: time_old_old,time_old=0,delke_tot=0,delea_tot=0,dt
 real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)

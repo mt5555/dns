@@ -1,5 +1,9 @@
 TODO:
 
+1. specplot: multiply by f^5/3
+1. check restart testcase on mahi (also little endian)
+2. plot R_lamba vs mu and viscosity
+0. uninitialized variable in sfocing.com - triggers mpi_allreduce problems
 1. check new structure functions.  
 2. make suite of runs for diffusion: 32^3, 64^3 128^3
 0. Bullets for Darryl
@@ -7,9 +11,20 @@ TODO:
 2.  4th order differences
 4. 2D shallow water case
 
+check spectrum and rotated spectrum  (scalar)  ok for short times.
+check spectrum and parallel spectrum.  using testcase?
+
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  
 101. divergence: go to Shashkov formula?  
+
+**********************************************************************************
+S. Chen run:
+513^3  R_lambda=220
+25 values of r
+holds for r=80..180
+
+
 
 **********************************************************************************
 
@@ -29,7 +44,7 @@ Nirvana:  32Gb per box.  optimal is 225M per CPU.
 
 QidSE:  16x4 cpus.  64Gb memory
 Qid:   128x4        512Gb memory
-                         
+
 
 Linux box sizes:          3D array size: 3*8*n**3.  5 big arrays per run.
                                                     total size about 6 arrays
@@ -37,51 +52,53 @@ Linux box sizes:          3D array size: 3*8*n**3.  5 big arrays per run.
  96^3    120M            20M per array, 100M total.  
 128^3    281M            48M per array
 
-                         Q: 327M residint 539Mvsz
-
 extrapolated:
 256^3   2.25Gb           .375M per variable
 480^3:  15Gb
-512^3:  18Gb             3Gb per vairalbe
-1024^3  144Gb            24Gb per variable
-
+512^3:  18Gb             3Gb per variable  (9GB per timestep.  4.5gb   130m gridpoints
+1024^3  144Gb            24Gb per variable                             1b gridpoints
 2048^3  1152Gb           192Gb per variable      
 4096^3  9216Gb           1536Gb per variable      
 
-size = .1*n^3/64^3 
 
-grid:  (n/256)**3 (n/256)
 
-t=-43  (.05)                         Nirv    BlueMtn      
-one box timings:  256 on 32 cpus             > 15min
-                  256 on 64 cpus     9.11m    8.32
-                  256 on 128 cpus    7.65m    4.11m         
-                  250 on 125 cpus    7.65m    3.98m
+t=-43  (.05)                         Nirv    BlueMtn       10eddy
+one box timings:  256 on 32 cpus             > 15min       
+                  256 on 64 cpus     9.11m    8.32        
+                  256 on 128 cpus    7.65m    4.11m       
+                  250 on 125 cpus    7.65m    3.98m       
 
-                  384 on 128 cpus.           no
-                  375 on 125 cpus.           no
-                  360 on 120 cpus.           no
                   400 on 5x1x25              27.03m
                   400 on 1x100               32.09m
 
-t=-1  (one time step)
-                  512^3 on 128 cpus:         4.81
-                  512^3 on 256 cpus:         in
-t=-5  (5 time step)
-                  512^3 on 128 cpus:         
-                  512^3 on 256 cpus:         
+
+
+t=-4  (5 time step)                     Nirv Bmtn   Q       8K timesteps
+                  512^3 on 32 cpus:                 12.43    13.8d
+                  512^3 on 64 cpus:                  5.07    5.6
+                  512^3 on 128:                      2.54    2.8
+                  512^3 on 256:                      1.22    1.4
+                  500^3 on 500:                      0.94    1.0
+                                                    
+                  500^3 on 125 cpus:         4.30             4.7d
+                  512^3 on  64 cpus:         9.66             10.7
+                  512^3 on  32 cpus:        25.0              27
+
+                                                            16K timesteps
+                 1000^3 on 500 cpus:                 5.64    13d
+                 1024^3 on 256 cpus:                  ?
+
+
  
-
-                                 Nirv      Blue
-256 on 128cpus:          2,2,10:   11.84     8.14      
-                         0,0,0:     6.89     3.97
-                         2,2,0:    11.23
-                         0,0,10:             4.53
-                         10,10,10:  8.57     5.36 
+t=-19 (20 time steps)                   Nirv Bmtn  Q        4K timesteps
+                  256^3 on 32 cpus:                5.72m    19h
+                  256^3 on 16 cpus:               10.52m    
+                  256^3 on  8 cpus:               18.97m  
 
 
-128 on 64cpus  t=.5  diag_dt=.1 
-                       10,10,10:    5.79
+                  256^3 on 128 cpus:     6.89  3.97(how many timesteps???)
+                                            check bluemountain output files
+
 
 
 **********************************************************************************

@@ -1,7 +1,7 @@
 function loglog53(n,spec,time)
 
 x=(1:n)-1;
-loglog(x,spec)
+loglog(x,spec(1:n))
 hold on
 x=2:20;
 y = .5*x.^(-5/3);

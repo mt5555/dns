@@ -12,7 +12,11 @@ range=0:50;
 
 %fid=fopen('test32.scalars','r','l');
 %fid=fopen('n128.scalars','r','b');
-fid=fopen('../src/test32.scalars','r','l');
+%fid=fopen('../src/test32.scalars','r','l');
+%fid=fopen('../src/output/n32_25.scalars','r','l');
+fid=fopen('../src/output/n128_100.scalars','r','b');
+
+
 
 nscalars=0;
 nscalars_e=0;
@@ -110,7 +114,7 @@ end
 Sww=ints_e(11,:);
 if (ns_e>=13) 
   for i=1:3
-    u2(i,:)=ints_e(i+11,:)              % < u^2 >
+    u2(i,:)=ints_e(i+11,:);              % < u^2 >
   end
 end
 
