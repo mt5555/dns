@@ -56,10 +56,72 @@ grid point model) See shallow.doc for some more documentation.
 
 
 ****************************************************************************
+
+
+
 Running the code
 1. setting the resolution
+
 2. compiling
+
 3. the input file
+
+   line 1.  input file type.  0,1,2 or 3.  
+   Each input file type has its own routine to read in the parameters
+   in init_grid.F90.  3 is the newest input file format and the others
+   should be considered obsolete.
+
+   line 2   equations. valid values:    ns_uvw
+                                        ns_psivor
+                                        shallow
+
+   line 3  initial condition
+             KH-blob    initial velocity computed from a specified
+                        vortex sheet
+             KH-anal    analytic KH problem from E & Lui
+             iso12      random, with -5/3 spectrum in E(1) and E(2)
+             vxpair     Monika's vortex instability problem
+             iso12e     quick version of iso12 (gives different
+                        answers for different parallel decompositions,
+                        and may not be as isotropic)
+             sht        shallow water testcases from McWilliams and Polvani
+
+
+   line 4   initial condition subtype
+            see initital condition subroutines in cases2v.F90, cases3v.F90
+
+   line 5    forcing:
+              none
+              iso12     Relax to E(1)=E(2)=.5
+              iso12w    stochastic, white in time, wave numbers 1,2
+              iso       Relax to Overholt & Pope spectrum
+              iso23w    stochastic, white in time, wave numbers 2,3
+
+   line 6    viscosity type.  
+               value:      data on line 7 is actual value
+               smallest:   use smallest grid will support (not coded?)
+               kediff      data on line 7 is KE dissipation rate of smallest 
+                           scale
+               Re          data on line 7 is Re (not coded?)
+               hyper       data on line 7 is ??? (check code)
+
+
+   line 7    viscosity data, see line 6.
+
+   line 8    alpha    alpha=0:      dont use alpha model
+                      0<alpha<=1    value of alpha
+                      alpha>1       value of alpha in units of delx
+                      allpha=9999   run with alpha=infinity (not coded?)
+
+   line 9     smagorinsky   0:      dont use
+
+
+ 
+               
+
+
+
+
 4. running the code and command line options
 
 5. restart files.

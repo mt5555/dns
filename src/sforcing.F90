@@ -435,7 +435,8 @@ real*8 :: rmodes(-numbs:numbs,-numbs:numbs,-numbs:numbs,3)
 
 integer km,jm,im,i,j,k,n,wn,ierr,k2,count,countmax
 real*8 xw,xfac,f_diss
-real*8 :: R(-numbs:numbs,-numbs:numbs,-numbs:numbs,3,2),Rr,Ri,FM(numbs)
+real*8 :: R(-numbs:numbs,-numbs:numbs,-numbs:numbs,3,2),Rr,Ri
+real*8,save :: FM(numbs)
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
