@@ -146,7 +146,7 @@ else
    endif
 endif
 
-if (compute_cj) then
+if (compute_cj .or. compute_hfree) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
 endif
 
@@ -161,6 +161,12 @@ if (use_serial==1) then
    !call convert_sk(Q,work1,work2);  stop;
 endif
 
+! run test, then exit
+call compute_hfree_spec(Q,q1,q2,q3)
+stop
+
+
+
 
 time=tstart
 do
@@ -170,10 +176,8 @@ do
       fname= rundir(1:len_trim(rundir)) // tname(1:len_trim(tname))
       if (icount==1)  open(83,file=fname)
       read(83,*,err=100,end=100) time
-   endif	
-
-
-
+   endif
+   
 
    if (compute_pdfs) then
       if (my_pe==io_pe) then
@@ -241,21 +245,19 @@ do
       call output_helicity_spec(time,time)
     endif
       
-      if (compute_hfree) then
-         if (.not. read_uvw) then	
-            if (use_serial==1) then
-               stop 'compute_hfree needs q1,q2 allocated'
-               call input_uvw(time,Q,dummy,work1,work2,header_type)
-               Q=Q*scale;
-            else
-               call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-               Q=Q*scale;
-            endif
-            read_uvw=.true.	
-         endif
-         call compute_hfree_spec(Q,q2,q1,0)
-         call output_hfree_spec(time,time)
-      endif
+    if (compute_hfree) then
+       if (.not. read_uvw) then	
+          if (use_serial==1) then
+             stop 'compute_hfree needs q1,q2 allocated'
+          else
+             call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+             Q=Q*scale;
+          endif
+          read_uvw=.true.	
+       endif
+       call compute_hfree_spec(Q,q1,q2,q3)
+       call output_hfree_spec(time,time)
+    endif
       
 
       if (compute_uvw) then

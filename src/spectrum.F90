@@ -1176,16 +1176,17 @@ end subroutine
 
 
 
-subroutine compute_hfree_spec(p1,cmodes_r,cmodes_i)
+subroutine compute_hfree_spec(pgrid,cmodes_r,cmodes_i,p1)
 !
 !
 use params
 use mpi
 implicit none
 integer :: ierr,skip_fft
+real*8 :: pgrid(nx,ny,nz,3)
+real*8 :: cmodes_r(nx,ny,nz,3)
+real*8 :: cmodes_i(nx,ny,nz,3)
 real*8 :: p1(nx,ny,nz,3)
-real*8 :: cmodes(nx,ny,nz,2,3)
-
 
 
 ! local variables
@@ -1194,102 +1195,145 @@ real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
-real*8 :: cmodes_r(nx,ny,nz,3)
-real*8 :: cmodes_i(nx,ny,nz,3)
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
-real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii,&
-      cos_tta, delta
+real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
+real*8 :: cos_tta, delta,rp,ip
 integer i,j,k,jm,km,im,iwave_max,n
 
-      if (ndim<3) then
-         call abort("compute_helicity_specturm: can only be used in 3D")
-      endif
-      
-      
-      rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
-      iwave_max=nint(rwave)
-      
-      do n = 1,3
-         call sincos_to_complex_field(p1(1,1,1,n),cmodes_r(1,1,1,n),cmodes_i(1,1,1,n))
-      enddo
-      
+complex*16 tmp
 
-      hetot=0
-      diss1=0
-      diss2=0
-      spec_helicity_rp=0
-      spec_helicity_rn=0
-      cos_tta_spec = 0
+if (ndim<3) then
+   call abort("compute_helicity_specturm: can only be used in 3D")
+endif
+      
+      
+rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+iwave_max=nint(rwave)
 
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
-            do k=nz1,nz2
-               km=kmcord(k)
-               
-               rwave = im**2 + jm**2 + km**2
-               iwave = nint(sqrt(rwave))
-               
-!     compute angle between Re and Im parts of u(k)
-               RR = cmodes_r(i,j,k,:)
-               II = cmodes_i(i,j,k,:)
-               
-               mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
-               mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
-               
-               cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
-               (mod_rr*mod_ii)
-               
-!     spectrum of angles
-               cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
-               
-!     cutoff for recalculating the spectra
-               delta = 0.1      !this value can be changed by hand
-               
-!     omit modes where cos_tta is less than cutoff delta
-               if (cos_tta > delta) then
+im=4
+jm=-3
+km=2 
+print *,'initial mode: im,jm,km: ',im,jm,km
+
+pgrid=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   tmp=im*pi2*(0,1)*xcord(i) + &
+       jm*pi2*(0,1)*ycord(j) + &
+       km*pi2*(0,1)*zcord(k) 
+   tmp=exp(tmp)
+   pgrid(i,j,k,1)=real(tmp)
+enddo
+enddo
+enddo
+
+
+p1=pgrid
+! compute fft in phat. (use cmodes_r as work array)
+do n = 1,3
+   call fft3d(p1(1,1,1,n),cmodes_r)
+enddo
+do n = 1,3
+   call sincos_to_complex_field(p1(1,1,1,n),cmodes_r(1,1,1,n),cmodes_i(1,1,1,n))
+enddo
+
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   ! wave number (im,jm,km)   im positive or negative
+   im=imcord(i)
+   jm=jmcord(j)
+   km=kmcord(k)
+   rp = cmodes_r(i,j,k,1)
+   ip = cmodes_i(i,j,k,2)
+   if (abs(rp)>1e-14 .or. abs(ip)>1e-14) then
+      write(*,'(3i4,2f20.8)') im,jm,km,rp,ip
+   endif
+enddo
+enddo
+enddo
+return
+
+
+
+hetot=0
+diss1=0
+diss2=0
+spec_helicity_rp=0
+spec_helicity_rn=0
+cos_tta_spec = 0
+
+do j=ny1,ny2
+   jm=jmcord(j)
+   do i=nx1,nx2
+      im=imcord(i)
+      do k=nz1,nz2
+         km=kmcord(k)
+         
+         rwave = im**2 + jm**2 + km**2
+         iwave = nint(sqrt(rwave))
+         
+         !     compute angle between Re and Im parts of u(k)
+         RR = cmodes_r(i,j,k,:)
+         II = cmodes_i(i,j,k,:)
+         
+         mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
+         mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+         
+         cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
+              (mod_rr*mod_ii)
+         
+         !     spectrum of angles
+         cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
+         
+         !     cutoff for recalculating the spectra
+         delta = 0.1      !this value can be changed by hand
+         
+         !     omit modes where cos_tta is less than cutoff delta
+         if (cos_tta > delta) then
             
-!     ux = - pi2*im*p1(i+imsign(i),j,k,1)
-                  vx = - pi2*im*p1(i+imsign(i),j,k,2)
-                  wx = - pi2*im*p1(i+imsign(i),j,k,3)
-                  
-                  uy = - pi2*jm*p1(i,j+jmsign(j),k,1)
-!     vy = - pi2*jm*p1(i,j+jmsign(j),k,2)
-                  wy = - pi2*jm*p1(i,j+jmsign(j),k,3)
-                  
-                  uz =  - pi2*km*p1(i,j,k+kmsign(k),1)
-                  vz =  - pi2*km*p1(i,j,k+kmsign(k),2)
-!     wz =  - pi2*km*p1(i,j,k+kmsign(k),3)
-                  
-!     vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
-
-                  energy = 8
-                  if (km==0) energy=energy/2
-                  if (jm==0) energy=energy/2
-                  if (im==0) energy=energy/2
-                  
-!     compute E(k) and kE(k)
-                  xw=sqrt(rwave*pi2_squared)
-                  spec_E(iwave)=spec_E(iwave) + 	energy* &
-                  (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
-                  spec_kEk(iwave)=spec_kEk(iwave) + xw*energy* &
-                  (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
-                  
-                  energy = energy*(p1(i,j,k,1)*(wy-vz) + &
-                  p1(i,j,k,2)*(uz-wx) + p1(i,j,k,3)*(vx-uy)) 
-                  if (energy>0) spec_helicity_rp(iwave)= & 
-                  spec_helicity_rp(iwave)+energy
-                  if (energy<0) spec_helicity_rn(iwave)= &
-                  spec_helicity_rn(iwave) + energy
-                  
-                  hetot=hetot+energy
-                  diss1=diss1 -2*energy*iwave**2*pi2_squared
-                  diss2=diss2 -2*energy*rwave*pi2_squared
-               endif
-            enddo
-         enddo
+            !     ux = - pi2*im*p1(i+imsign(i),j,k,1)
+            vx = - pi2*im*p1(i+imsign(i),j,k,2)
+            wx = - pi2*im*p1(i+imsign(i),j,k,3)
+            
+            uy = - pi2*jm*p1(i,j+jmsign(j),k,1)
+            !     vy = - pi2*jm*p1(i,j+jmsign(j),k,2)
+            wy = - pi2*jm*p1(i,j+jmsign(j),k,3)
+            
+            uz =  - pi2*km*p1(i,j,k+kmsign(k),1)
+            vz =  - pi2*km*p1(i,j,k+kmsign(k),2)
+            !     wz =  - pi2*km*p1(i,j,k+kmsign(k),3)
+            
+            !     vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
+            
+            energy = 8
+            if (km==0) energy=energy/2
+            if (jm==0) energy=energy/2
+            if (im==0) energy=energy/2
+            
+            !     compute E(k) and kE(k)
+            xw=sqrt(rwave*pi2_squared)
+            spec_E(iwave)=spec_E(iwave) + 	energy* &
+                 (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
+            spec_kEk(iwave)=spec_kEk(iwave) + xw*energy* &
+                 (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
+            
+            energy = energy*(p1(i,j,k,1)*(wy-vz) + &
+                 p1(i,j,k,2)*(uz-wx) + p1(i,j,k,3)*(vx-uy)) 
+            if (energy>0) spec_helicity_rp(iwave)= & 
+                 spec_helicity_rp(iwave)+energy
+            if (energy<0) spec_helicity_rn(iwave)= &
+                 spec_helicity_rn(iwave) + energy
+            
+            hetot=hetot+energy
+            diss1=diss1 -2*energy*iwave**2*pi2_squared
+            diss2=diss2 -2*energy*rwave*pi2_squared
+         endif
       enddo
+   enddo
+enddo
 
 
 #ifdef USE_MPI
@@ -1386,9 +1430,9 @@ subroutine sincos_to_complex_field(p,cmodes_r,cmodes_i)
   convert set of sine and cosine FFT coefficients to complex coefficients
   After calling this routine, here is a loop that will extract the modes:
 
-do k=nz1,nz2,2
-do j=ny1,ny2,2
-do i=nx1,nx2,2
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
    ! wave number (im,jm,km)   im positive or negative
    im=imcord(i)
    jm=jmcord(j)
@@ -1412,8 +1456,48 @@ integer :: nmax
 real*8 :: p(nx,ny,nz)
 real*8 :: cmodes_r(nx,ny,nz)
 real*8 :: cmodes_i(nx,ny,nz)
-real*8 :: a,b
-integer :: i,j,k,im,jm,km,ii,jj,kk,sm,i0,i1,j0,j1,k0,k1
+integer :: imcord2(nx),jmcord2(ny),kmcord2(nz)  ! fft modes local
+real*8 :: a,b,mx
+integer :: i,j,k,im,jm,km,ii,jj,kk,sm,i0,i1,j0,j1,k0,k1,ck
+
+mx=maxval(abs(p))
+! setup cop of wave number array, but pretend the cos(N/2) term is
+! the (normally missing since it is 0) sin(0x) term:
+imcord2=imcord
+jmcord2=jmcord
+kmcord2=kmcord
+do k=nz1,nz2,2
+do j=ny1,ny2,2
+do i=nx1,nx2,2
+   i0=i
+   i1=i+1
+   j0=j
+   j1=j+1
+   k0=k
+   k1=k+1
+   ck=0
+   if ( imcord(i0)==0 ) then
+      imcord2(i1)=0
+      ck=1
+   endif
+   if ( jmcord(j0)==0 ) then
+      jmcord2(j1)=0
+      ck=1
+   endif
+   if ( kmcord(k0)==0 ) then
+      kmcord2(k1)=0
+      ck=1
+   endif
+   if (ck==1) then
+      if (abs(p(i1,j1,k1)) > mx*1e-13) then
+         print *,i1,j1,k1,p(i1,j1,k1)
+         call abort("Error: sincos_to_complex_field data not dealised")
+      endif
+   endif
+enddo
+enddo
+enddo
+
 
 cmodes_r=0
 cmodes_i=0
@@ -1421,8 +1505,6 @@ cmodes_i=0
 do k=nz1,nz2,2
 do j=ny1,ny2,2
 do i=nx1,nx2,2
-
-
 
    i0=i
    i1=i+1
@@ -1432,24 +1514,24 @@ do i=nx1,nx2,2
    k1=k+1
    
    ! verify that this processer has all 8 modes:
-   if (  abs(imcord(i0))/=abs(imcord(i1)) .or. &
-         abs(jmcord(j0))/=abs(jmcord(j1)) .or. & 
-         abs(kmcord(k0))/=abs(kmcord(k1)) ) then
+   if (  abs(imcord2(i0))/=abs(imcord2(i1)) .or. &
+         abs(jmcord2(j0))/=abs(jmcord2(j1)) .or. & 
+         abs(kmcord2(k0))/=abs(kmcord2(k1)) ) then
       print *,'not all modes are on this processor: '
-      print *,i0,imcord(i0),imcord(i1)
-      print *,j0,imcord(j0),imcord(j1)
-      print *,k0,imcord(k0),imcord(k1)
+      print *,i0,imcord2(i0),imcord2(i1)
+      print *,j0,jmcord2(j0),jmcord2(j1)
+      print *,k0,kmcord2(k0),kmcord2(k1)
       call abort(" ")
    endif
 
    ! make sure that i0 is the positive mode, i1 is the negative mode:
-   if ( imcord(i0)<0 .or. imcord(i1)>0 .or.  &
-        jmcord(j0)<0 .or. jmcord(j1)>0 .or.  & 
-        kmcord(k0)<0 .or. kmcord(k1)>0 ) then
+   if ( imcord2(i0)<0 .or. imcord2(i1)>0 .or.  &
+        jmcord2(j0)<0 .or. jmcord2(j1)>0 .or.  & 
+        kmcord2(k0)<0 .or. kmcord2(k1)>0 ) then
       print *,'we have the sign wrong?'
-      print *,i0,imcord(i0),imcord(i1)
-      print *,j0,imcord(j0),imcord(j1)
-      print *,k0,imcord(k0),imcord(k1)
+      print *,i0,imcord2(i0),imcord2(i1)
+      print *,j0,imcord2(j0),imcord2(j1)
+      print *,k0,imcord2(k0),imcord2(k1)
       call abort(" ")
    endif
 
@@ -1460,9 +1542,9 @@ do i=nx1,nx2,2
    do kk=k0,k1      
 
       ! sin/cos mode 
-      im=imcord(ii)
-      jm=jmcord(jj)
-      km=kmcord(kk)
+      im=imcord2(ii)
+      jm=jmcord2(jj)
+      km=kmcord2(kk)
    
       a=0; b=0
       ! count the number if sin() terms:
