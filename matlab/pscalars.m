@@ -49,22 +49,24 @@ np=1;
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
 schmidt=squeeze(pints_e(3,np,:)/128)';
-s2=squeeze(pints_e(4,np,:))';
+c2=squeeze(pints_e(4,np,:))';
 
-sx2(1,:)=pints_e(5,np,:);
-sx2(2,:)=pints_e(6,np,:);
-sx2(3,:)=pints_e(7,np,:);
-sx3(1,:)=pints_e(8,np,:);
-sx3(2,:)=pints_e(9,np,:);
-sx3(3,:)=pints_e(10,np,:);
+cx2(1,:)=pints_e(5,np,:);
+cx2(2,:)=pints_e(6,np,:);
+cx2(3,:)=pints_e(7,np,:);
+cx3(1,:)=pints_e(8,np,:);
+cx3(2,:)=pints_e(9,np,:);
+cx3(3,:)=pints_e(10,np,:);
 
-sxx2(1,:)=pints_e(14,np,:);
-sxx2(2,:)=pints_e(15,np,:);
-sxx2(3,:)=pints_e(16,np,:);
+cxx2(1,:)=pints_e(14,np,:);
+cxx2(2,:)=pints_e(15,np,:);
+cxx2(3,:)=pints_e(16,np,:);
 
-su(1,:)=pints_e(23,np,:);
-su(2,:)=pints_e(24,np,:);
-su(3,:)=pints_e(25,np,:);
+cu(1,:)=pints_e(23,np,:);
+cu(2,:)=pints_e(24,np,:);
+cu(3,:)=pints_e(25,np,:);
+
+
 
 
 %
@@ -80,6 +82,10 @@ ke=.5*sum(u2,1);
 epsilon=15*mu.*mean(ux2,1);                   % only uses ux^2, vy^2, wz^2
 lambda=sqrt( mu.*(2*ke/3) ./ (epsilon/15)  );
 R_l = lambda.*sqrt(2*ke/3)./mu;
+Rt= R_l*R_l*3/20;
+eta = mu^3/epsilon;
+
+
 
 disp(sprintf('mu = %f',mu ))
 disp(sprintf('ke = %f',ke ))
@@ -87,15 +93,44 @@ disp(sprintf('R_l = %f',R_l ))
 disp(sprintf('lambda = %f',lambda ))
 disp(sprintf('epsilon = %f',epsilon ))
 
-epsilon_s=15*(mu./schmidt).*s2/3;  
-lambda_s=sqrt(s2./mean(sx2));
+epsilon_c=3*(mu./schmidt).*mean(cx2,1);
+lambda_c=sqrt(c2./mean(sx2));
+eta_c=eta/sqrt(schmidt);
+
+
 
 disp(' ')
 disp(sprintf('passive scalar n=%i',np))
 disp(sprintf('schmidt = %f',schmidt ))
-disp(sprintf('s2 = %f',s2 ))
-disp(sprintf('lambda_s = %f',lambda_s ))
-disp(sprintf('epsilon_s = %f',epsilon_s ))
+disp(sprintf('s2 = %f',c2 ))
+disp(sprintf('lambda_c = %f',lambda_s ))
+disp(sprintf('epsilon_c = %f',epsilon_s ))
+
+
+%
+%data for Ray:
+% 
+% average over x,y,z directions:
+
+
+Su = mean(ux3,1)/mean(ux2,1)^1.5  ;
+Suc = -mean(cu,1)/sqrt(mean(ux2,1))/mean(cx2,1)
+G = mean(u2,1) * mean(uxx2,1)/mean(ux2)^2;
+Gc = mean(c2,1) * mean(cxx2,1)/mean(cx2)^2;
+
+
+ff = Su*sqrt(Rt)*7/3/sqrt(15);
+ff = ff + G*7/15;
+
+r=3*(lambda/lambda_c)^2 /5 / schmidt; 
+gg = sqrt(5/3)*Suc*sqrt(Rt) + r*Gc;
+
+
+
+
+
+
+
 
 
 
