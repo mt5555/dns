@@ -7,7 +7,7 @@
 
 %ts=input('time=? ');
 
-range=1:1:5;
+range=4:1:4;
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
 %range=[125:10:200];
@@ -17,8 +17,8 @@ range=1:1:5;
 %name='/scratch2/taylorm/vx12288b/vx12288b';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
-%name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a';
-name='/home/scratch/kras/vx1280a/vx1280a';
+name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a';
+%name='/home/scratch/kras/vx1280a/vx1280a';
 
 
 usefig=1;
@@ -74,11 +74,13 @@ for i=range
       shading interp
     else
       v = -12:1:3;
+      v = -7:1:5;
       v=2.^v;
       %v = 4.5*[3/4, 1/2, .4 , 1/4, 1/8]
       %v=  [3.3938    2.2626    1.1313    0.5656];
-      contour(x,y,vor',v)
+      contour(x,y,vor',v,'b')
       hold on
+      contour(x,y,vor',-v,'g')
       contour(x,y,vor',[.005 .005],'r')
       hold off
     end

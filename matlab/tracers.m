@@ -11,7 +11,7 @@ ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];
 %ts=input('time=? ');
 
 range=0:5:200.0 ;
-range=0:.1:5.0;
+range=0:.2:5.0;
 %name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
@@ -21,7 +21,8 @@ range=0:.1:5.0;
 %name='/home/scratch/vxpair/vx12288/vx12288b';
 
 
-name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a'; 
+%name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a'; 
+name='/ccs/scratch/taylorm/kras/vx2560b/vx2560b'; 
 %name='/home/scratch/kras/vx1280a/vx1280a'; 
    plot_noni=0;
    axis_size=[0,2.5,0,2];
@@ -74,7 +75,7 @@ for i=range
       axis equal
       axis(axis_size);
       title(sprintf('time = %6.2f ',i)); 
-          'pause' ;     pause
+%          'pause' ;     pause
       if (mkpr)
          pname=[name,'.tracer.ps'];
          print('-depsc',pname);

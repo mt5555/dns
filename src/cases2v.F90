@@ -322,6 +322,19 @@ if (init_cond_subtype ==100) then
    xlocation=.75
    initial_vor = 1
 endif
+if (init_cond_subtype ==101) then
+   ! Kras iniital condition.  run to t=5, with nu=1e-6
+   ! x:  -2 ... 0.5          5*32      25% more grid points in x
+   ! y:  0.. 2               4*32
+   ! [5N,4N] = [640,512]  
+   biotsavart_cutoff=5e-3
+   biotsavart_apply=50
+   delta=.05
+   biotsavart_ubar=.100
+   yscale=2.0
+   xlocation=.75
+   initial_vor = 1
+endif
 
 
 ! set xscale so that delx=dely
