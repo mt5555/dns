@@ -140,6 +140,17 @@ do
    do j=0,nydecomp-1
    do k=0,nzdecomp-1  
 
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
+         if (nxdecomp*nydecomp*nzdecomp>1) then
+            write(sdata,'(3i1)') i,j,k
+            fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
+         endif
+
+         print *,fname
+      endif
+
       if (use_serial==1) then
          nxlen=nslabx/nxdecomp
          nylen=nslaby/nydecomp
@@ -173,14 +184,6 @@ do
 
 
       if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
-         if (nxdecomp*nydecomp*nzdecomp>1) then
-            write(sdata,'(3i1)') i,j,k
-            fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
-         endif
-
-         print *,fname
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
