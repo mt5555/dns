@@ -26,8 +26,8 @@ ifeq ($(UNAME),Linux)
       # with ifc compiler?
       #MPI = -DUSE_MPI -DUSE_MPICH -I/opt/scali/contrib/mpich/include
       #MPILIB = -L/opt/scali/contrib/mpich/lib -lfmpich -lmpich
-      MPI = -DUSE_MPI -I/usr/include
-      MPILIB =  -L/opt/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+      MPI = -DUSE_MPI -I/users/contrib/lam/include
+      MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
 
    ## Lahey
