@@ -57,19 +57,20 @@ tims(2)=tmx2-tmx1
 
 
 
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Print timing information
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 tims_max=tims
 tims_ave=tims
 #ifdef USE_MPI
-   call MPI_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-   call MPI_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   tims_ave=tims_ave/initial_live_procs
+!   call MPI_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+!   call MPI_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+!   tims_ave=tims_ave/initial_live_procs
 #endif
 tims_max=tims_max/60
 tims_ave=tims_ave/60
+
+
 
 call print_message('CPU times (min):   (avg/max)')
 write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
