@@ -10,6 +10,11 @@ ifeq ($(UNAME),Linux)
    LDFLAGS = --staticlink
    FDFLAGS = -O
 endif
+ifeq ($(UNAME),SunOS)
+   F90 = f95
+   LDFLAGS = 
+   FDFLAGS = -O
+endif
 
 COMPILE=$(F90) -c $(FFLAGS)
 LINK=$(F90) $(FFLAGS) $(LDFLAGS)

@@ -68,7 +68,7 @@ integer i
 real*8  :: pi,one=1
 
 do i=1,num_fftsizes
-   fftdata(i).size=0	
+   fftdata(i)%size = 0	
 enddo
 pi=4*atan(one)
 pi2=2*pi
@@ -100,9 +100,9 @@ character*80 message
 if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initialize first!");
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
 
-fftdata(index).size=n
-allocate(fftdata(index).trigs(3*n/2+1))
-call set99(fftdata(index).trigs,fftdata(index).ifax,n)
+fftdata(index)%size=n
+allocate(fftdata(index)%trigs(3*n/2+1))
+call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
 
 
 write(message,'(a,i6)') 'Initializing FFT of size n=',n
@@ -127,11 +127,11 @@ do
       call abort(message_str)
    endif
 
-   if (fftdata(i).size==0) then
+   if (fftdata(i)%size==0) then
       call fftinit(n1,i)      
       exit 
    endif
-   if (n1==fftdata(i).size) exit 
+   if (n1==fftdata(i)%size) exit 
 enddo
 index=i
 end subroutine
@@ -171,7 +171,7 @@ do k=1,n3
       enddo     
 
 
-      call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,1)
+      call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,1)
 
       j=j+numffts
    enddo
@@ -206,7 +206,7 @@ do k=1,n3
 !         p(n1+2,jj,k)=0
 !      enddo
 
-      call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,-1)
+      call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,-1)
 
 !     move the last cosine mode into slot of first sine mode:
       do  jj=j+1,j+numffts
