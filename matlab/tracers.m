@@ -21,7 +21,8 @@ range=0:5:50.0 ;
 %name='/home/scratch/vxpair/vx12288/vx12288b';
 
 
-name='/data/vxpair/vx4800a/vx4800a'; axis_size=[0,3,0,1.8];
+%name='/data/vxpair/vx4800a/vx4800a'; axis_size=[0,3,0,1.8];
+name='/data/vxpair/vx2400a/vx2400a'; axis_size=[0,3,0,1.8];
 
 
 %name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a'; 

@@ -10,7 +10,7 @@ clear;
 %name='/home/taylorm/ccs/dns/src/vxpair/vx4500a';
 %times=[0:.1:180];
 
-name='/data/vxpair/vx4800a/vx4800a'; 
+name='/data/vxpair/vx2400a/vx2400a'; 
 times=[0:.1:50];
 
 %name='/scratch2/taylorm/vx12288b/vx12288b';

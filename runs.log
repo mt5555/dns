@@ -9,6 +9,7 @@ viscosity = 1e-7
 
 
 ./gridsetup.py NCPU 1 1 4800 2880 1 2 2 0 2 2 0 2
+./gridsetup.py NCPU 1 1 2400 1440 1 2 2 0 2 2 0 2
 
 KIWI: 4 cpus  time(min) per timestep:  .468   timestep ~ .0011s
       2 cpus                           .644
@@ -34,7 +35,18 @@ time_per_timestep(m)*50/.0012/60 = time for run in hours
 
 
 vx4800a   delta=.1, viscosity=1e-7 init_subtype=6
-IN (shankara)
+          4800x2880  
+          yscale=1.8  xlocation=1.5    
+
+vx2400a:  same input file as above
+   delta = .1, viscosity=1e-7
+   ubar = 0.098
+   jack ran this problem:  2640x1520  domain:  [-1.7 , 1.6]  x [0 1.9]
+   I'm running:  2400x1440  domain:  [-1.5 , 1.5]  x [0  1.8]
+IN shankara
+
+NEXT:?
+vx4800b  NEW RUN with delta=.05, viscosity=1e-7.  same ubar? init_subtype?
 
 
 

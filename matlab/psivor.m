@@ -20,7 +20,8 @@ range=50:10:50;
 %name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a';
 %name='/ccs/scratch/taylorm/kras/vx2560c/vx2560c';
 %name='/ccs/scratch/taylorm/kras/vx5120a/vx5120a';
-name='/data/vxpair/vx4800a/vx4800a'
+%name='/data/vxpair/vx4800a/vx4800a'
+name='/data/vxpair/vx2400a/vx2400a'
 %name='/home/scratch/kras/vx1280a/vx1280a';
 
 

@@ -311,7 +311,6 @@ endif
 
 
 if (init_cond_subtype ==6) then
-! the standard initial condition for delta=.2
    biotsavart_cutoff=5e-3
    biotsavart_apply=50
    delta=.1
