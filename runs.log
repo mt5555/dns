@@ -119,6 +119,18 @@ iso12_256B (QA)  done
 iso12_256C (QA)  
     alpha=infinity
     mu=.25e-4  
+iso12_256D
+    F = 1, .128
+    alpha=infinity
+    mu=.25e-4  
+iso12_256E
+    F = 1, 4.5
+    alpha=infinity
+    mu=.25e-4  
+iso12_256F
+    decay case
+    alpha=infinity
+    mu=.25e-4  
 
 
 
