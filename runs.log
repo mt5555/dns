@@ -1,4 +1,28 @@
 **********************************************************************************
+2/20/02
+1024^3 timeings on ASCI Q
+                   5 timesteps
+
+dns:   1x1x512    6.20min 
+
+dnsghost:
+1x1x512           3.17min 
+4x1x256           3.08
+
+
+2000^3            1 timestep
+
+dns: 1x1x512      11.05min  
+
+dnsghost
+1x1x512 wont load
+2x1x256 wont load
+4x1x128
+8x1x64
+
+
+
+**********************************************************************************
 2/12/02
 
 milkyway runs
@@ -141,6 +165,7 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 250H  5000h   500    668   7.16/1.42 1.42        2.95
 
 250I  .8e-3   500    180   1.13      1.27        3.23      same as G, with new diags
+      continuing...  with time averages
 250J  .8e-3   500   (same as G, but with 4th order)
 
 

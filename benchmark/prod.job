@@ -53,7 +53,7 @@ make -j 4 dns
 if ($restart == 1) then
 
    #search HPSS for newest restart file
-   $HOME/dns/getrestart.sh $name
+   $HOME/dns/getrestart.sh $name HPSS
    if (!($status==0)) then
       exit 1
    endif
@@ -76,17 +76,7 @@ endif
 #remove empty files before saving to HPSS:
 echo 'removing size 0 files'
 find . -size 0 -exec rm -f {} \; -print
-
-# NOTE: EOF MUST START IN COLUMN 1, AS BELOW:
-psi <<EOF
-cd dns
-save {$name}\*.sf
-save {$name}\*.scalars
-save {$name}\*.spec
-save {$name}\*.u
-save {$name}\*.v
-save {$name}\*.w
-EOF
+$HOME/dns/savehpss.sh
 
 
 

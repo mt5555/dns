@@ -243,8 +243,11 @@ do
    if (itime>=itime_final) time_final=time
    call time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 
-   ! start the main timer *AFTER* 1 complete time step:
-   if (itime==0) call wallclock(tmx1)
+   if (itime==0) then
+      ! set all timers to zero so they dont include initialization
+      tims(2:ntimers)=0
+      call wallclock(tmx1)     ! start the main timer *AFTER* 1 complete time step:
+   endif
 
    itime=itime+1
    if (time >= time_final) exit
