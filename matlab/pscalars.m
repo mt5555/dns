@@ -4,13 +4,19 @@
 %    
 %
 
-%readdata=0;
-clear all; readdata=1;
+readdata=0;
+%clear all; readdata=1;
+
+
+if (readdata==0 & ~exist('cxx2'))
+   % force reading of new data anyway
+   clear all; readdata=1;
+end
 
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:1.11];
+times=[1.0000:.01:1.48];
 
 
 if (readdata)
@@ -48,7 +54,7 @@ end
 end
 
 % look at passive scalar number np
-for np=1:1
+for np=5:5
 
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
@@ -77,8 +83,9 @@ cxx4(3,:)=pints_e(22,np,:);
 cu(1,:)=pints_e(23,np,:);
 cu(2,:)=pints_e(24,np,:);
 cu(3,:)=pints_e(25,np,:);
-c1(:)=pints_e(26,np,:);
-
+c1=pints_e(26,np,:);
+c1=squeeze(c1)';
+c2=c2-c1.^2;
 
 %
 % isotropic relations (may not exactly agree with data from scalars.m)
@@ -107,7 +114,7 @@ disp(sprintf('epsilon = %f',epsilon(1) ))
 epsilon_c=3*(mu./schmidt).*mean(cx2,1);
 lambda_c=sqrt(c2./mean(cx2,1));
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
-eta_c=(mu./schmidt).^3 ./ epsilon_c            %eta/sqrt(schmidt);
+eta_c=(mu./schmidt).^3 ./ epsilon_c;            %eta/sqrt(schmidt);
 
 
 
@@ -126,7 +133,7 @@ disp(sprintf('epsilon_c = %f',epsilon_c(1) ))
 
 
 Su = mean(ux3,1)./mean(ux2,1).^1.5  ;
-Suc = -mean(cu,1)./(sqrt(mean(ux2,1)).*mean(cx2,1));
+Suc = mean(cu,1)./(sqrt(mean(ux2,1)).*mean(cx2,1));
 G = (mean(u2,1) .* mean(uxx2,1))./mean(ux2).^2;
 Gc = (c2 .* mean(cxx2,1) )./(mean(cx2,1).^2);
 
@@ -140,6 +147,7 @@ gg = sqrt(5/3)*Suc.*sqrt(Rt) + r.*Gc;
 
 
 figure(1); clf;
+
 
 subplot(5,2,1)
 plot(time_e,Su)
@@ -163,6 +171,7 @@ subplot(5,2,5)
 plot(time_e,ff)
 title('f')
 
+
 subplot(5,2,6)
 plot(time_e,gg)
 title('g')
@@ -184,7 +193,33 @@ subplot(5,2,10)
 plot(time_e,R_l)
 title('R_\lambda')
 
+
+figure(1)
 orient tall
+
+% change some of the plots:
+subplot(5,2,5)
+ax=axis;
+axis([ax(1),ax(2),0,2]);
+subplot(5,2,6)
+ax=axis;
+axis([ax(1),ax(2),0,10]);
+subplot(5,2,9)
+ax=axis;
+axis([ax(1),ax(2),0,4]);
+
+% force all axis to be the same.
+% (otherwise, when printing, the plots where we changed y axis above
+% will have a different x-axis.  wierd
+% Note: might instead try some of the print "render" options - see
+% notes in 'help print' about screen and printed output not matching
+for i=1:10
+  subplot(5,2,i)
+  ax=axis;
+  axis([ax(1),ax(2),ax(3),ax(4)]);
+end
+
+
 pname=sprintf('pscalars%i',np);
 print('-djpeg','-r90',pname); 
 

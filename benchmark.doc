@@ -281,6 +281,10 @@ shankara-LAM(ethernet).27                                    .200
 pinkish???            .25                                    .050 
 pinkish-lampi                                                .037
 
+-xW vecorization. cant use on Athlon, doesn't help that much:
+sandboxx with -xW      .202
+sandboxx w/o  -xW      .207   
+
 ./bench.sh 160 0 20
 544M
 
