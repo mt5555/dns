@@ -35,16 +35,14 @@ fid2=-1;
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
 %nx=1024;
 
-<<<<<<< scalars.m
-fid=fopen('../src/sk128_alpha25/sk128_alpha250000.0000.scalars','r');
-nx=128;
-=======
-%fid=fopen('../src/sk128_alpha0/sktest128_alpha00000.0000.scalars','r');
+%fid=fopen('../src/sk128_alpha25/sk128_alpha250000.0000.scalars','r');
 %nx=128;
->>>>>>> 1.49
 
-fid=endianopen('/scratch2/taylorm/tmix256B/tmix256B.scalars','r');
-nx=256;
+%fid=endianopen('/scratch2/taylorm/tmix256B/tmix256B.scalars','r');
+%nx=256;
+
+fid=endianopen('../../helicity_data/helical_forced/sk128_hq_0000.0000.scalars','r');
+nx = 128;
 
 nscalars=0;
 nscalars_e=0;
