@@ -81,6 +81,9 @@ iwave_max=nint(rwave)
 p=pin
 call fft3d(p,work)
 spectrum=0
+spectrum_x=0
+spectrum_y=0
+spectrum_z=0
 
 do i=nx1,nx2
 do j=ny1,ny2
@@ -115,7 +118,7 @@ spectrum_in=spectrum_z
 call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
 
-iwave = max(g_nx,g_ny,g_nz)
+iwave = min(g_nx,g_ny,g_nz)
 iwave = (iwave/2)           ! max wave number in sphere.
 
 ! for all waves outside sphere, sum into one wave number:

@@ -77,6 +77,7 @@ if (my_pe==io_pe) then
 cspec=0
 plot=" "
 
+! bin all values
 do i=0,n
    if (i==0) then
       ix=0
@@ -88,6 +89,7 @@ do i=0,n
    cspec(ix)=cspec(ix)+spectrum(i)
 enddo
 
+! scale from 0..numy, log scale
 do i=0,numx
    iy = -(numy/10.0) * log10(1d-200+cspec(i))  ! ranges from 0..numy
    if (iy<0) iy=0
