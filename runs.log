@@ -241,7 +241,9 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 500    .1e-3    5     455   2.38      1.44        2.00     hook 1e-2     kink
 500B   .1e-3  25 (stopped)
 
-
+512    1.35e-3  500   131    .37      1.22        3.14
+512b   1.35e-3  (same as above, but different initial condition)
+   
 
 Energy:
 250   1.31 down to .76
