@@ -35,6 +35,7 @@ for t=times
      yc=fread(fid,1,'float64');
      yline=fread(fid,nline,'float64');
      wline=fread(fid,nline,'float64');
+     fclose(fid);
      k=k+1;
      timev(k)=time;
      wlinev(1:10,k)=wline(1:10) ;

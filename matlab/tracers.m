@@ -5,11 +5,12 @@
 
 %ts=input('time=? ');
 
-range=20.00:5.0:1000.0 ;
-name='../src/temp';
+range=109:.25:1000.0 ;
+%name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
-name='/home/mt/lanl/vxpair/vx6144e';
+name='/ccs/taylorm/dns/src/vxpair/vx4096c';
+
 
 usefig=1;
 mkpr=1;            % make ps and jpeg files

@@ -12,6 +12,10 @@ Running in /ccs/taylorm/dns/src/vxpair: (MOVE LATER?)
 vx4096c   mu=7e-8  IN shankara
 
 
+Make a new run with BIOTSAVAR recomputed every 50 timesteps.
+Fix tracers leaving domain: dont crash
+vxline tracers: reset back to origin.  
+
 
 
 
