@@ -57,7 +57,7 @@ endif
 Q_old=Q
 
 ! stage 1
-call getrhs(rhs,Q,Q_grid,time,1,work1,work2)
+call getrhs(rhs,Q,Q_grid,time,1,work1,work2,1)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
@@ -66,7 +66,7 @@ Q_grid=Q_tmp
 do n=1,3
    call ifft3d(Q_grid(1,1,n),work1)
 enddo
-call getrhs(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2)
+call getrhs(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2,2)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
@@ -75,7 +75,7 @@ Q_grid=Q_tmp
 do n=1,3
    call ifft3d(Q_grid(1,1,n),work1)
 enddo
-call getrhs(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2)
+call getrhs(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2,3)
 Q=Q+delt*rhs/3.0
 
 
@@ -85,7 +85,7 @@ Q_grid=Q_tmp
 do n=1,3
    call ifft3d(Q_grid(1,1,n),work1)
 enddo
-call getrhs(rhs,Q_tmp,Q_grid,time+delt,0,work1,work2)
+call getrhs(rhs,Q_tmp,Q_grid,time+delt,0,work1,work2,4)
 Q=Q+delt*rhs/6.0
 
 
@@ -124,7 +124,7 @@ if (itime>2) dtf=2*delt
 
 
 QM=Q
-call getrhs(rhs,Q,Q_grid,time,1,work1,work2)
+call getrhs(rhs,Q,Q_grid,time,1,work1,work2,1)
 Q=QS + DTF*rhs
 
 if (itime.eq.1) time=DTF+time
@@ -175,7 +175,7 @@ end subroutine rk4
 
 
 
-subroutine getrhs(rhs,Qhat,Q,time,compute_ints,work,work2)
+subroutine getrhs(rhs,Qhat,Q,time,compute_ints,work,work2,rkstage)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -194,13 +194,14 @@ subroutine getrhs(rhs,Qhat,Q,time,compute_ints,work,work2)
 use params
 use fft_interface
 use spectrum
+use sforcing
 implicit none
 
 ! input
 real*8 Q(nx,ny,n_var)
 real*8 Qhat(nx,ny,n_var)
 real*8 time
-integer compute_ints
+integer compute_ints,rkstage
 
 ! output
 real*8 rhs(nx,ny,n_var)
@@ -214,8 +215,9 @@ real*8 :: gradu(nx,ny,2)
 real*8 :: gradv(nx,ny,2)
 real*8 :: gradh(nx,ny,2)
 real*8 :: divtau(nx,ny,2)
-real*8 dummy,tmx1,tmx2
+real*8 dummy,tmx1,tmx2,f_diss,fxx_diss
 real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss,normdx,smag_diss
+real*8,save :: f_diss_ave
 integer n,i,j,k
 integer im,jm
 real*8 XFAC,hx,hy,normS
@@ -228,8 +230,22 @@ pe=0
 normdx=0
 ke_diss=0
 vor=0
+smag_diss=0
 
 
+! compute stochastic forcing function which will be used
+! for all RK stages in this time step
+if (rkstage==1) then
+   f_diss_ave=0
+   ! compute new forcing function for stochastic,
+   ! white in time forcing.  computed at beginning of each RK4 stage
+   if (forcing_type==2 .or. forcing_type==4) then
+      call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
+   else if (forcing_type==8) then
+      ! trashes rhs - used as work array
+      call stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,1)  
+   endif
+endif
 
 
 ! compute grad(h)
@@ -279,6 +295,16 @@ enddo
 enddo
 
 
+
+! apply forcing:
+if (forcing_type>0) then
+   call sforce(rhs,Qhat,f_diss,fxx_diss)
+   ! average over all 4 stages
+   f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
+   ! this is not computed correcly, so set to zero
+   f_diss_ave=0
+   ! we need to compute < u h , f >
+endif
 
 
 if (alpha_value>0) then
@@ -453,6 +479,13 @@ if (compute_ints==1) then
    endif
 
 
+if (forcing_type==8) then
+   ! in this case, f_diss from stage 1 is not very accurate, so use
+   ! the average.  Reason: at small scales, forcing has a huge 
+   ! effect.  stage1: u & f uncorrelated, <u,f>=small.  But
+   ! after a few stages, u & f very correlated, <u,v>=large.  
+   ints(3)=f_diss_ave
+endif
 
 endif
 

@@ -376,6 +376,7 @@ real*8 :: E_k(0:max(nx,ny,nz))
 real*8 :: E_k2(0:max(nx,ny,nz))
 real*8 :: Len,U,R,F
 character(len=80) :: message
+logical :: init_zero=.false.
 
 k_0=14  
 if (equations==NS_UVW) then
@@ -432,6 +433,14 @@ else if (init_cond_subtype==12) then   ! run M
 else if (init_cond_subtype==13) then   ! run N
    R=.4
    F=.1
+else if (init_cond_subtype==100) then   ! run N
+   R=.05
+   F=.05
+   init_zero=.true.
+else if (init_cond_subtype==101) then   ! run N
+   R=1.0
+   F=.05
+   init_zero=.true.
 else
    call abort("init_data_swt(): init_cond_subtype set to unsupported value")
 endif
@@ -449,6 +458,13 @@ if (init==0) return
 
 
 Q=0
+
+! use zero initial condition?
+if (init_zero) then
+   Q(:,:,:,n_var)= H0 
+   return
+endif
+
 ! random vorticity
 call input1(PSI,work1,work2,null,io_pe,.true.,-1)  
 
