@@ -42,7 +42,7 @@ if (rantype==0) then
 do n=1,3
    ! input from random number generator
    ! this gives same I.C independent of cpus
-   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.)  
+   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.,-1)  
 enddo
 else if (rantype==1) then
    do n=1,3
@@ -313,7 +313,7 @@ if (rantype==0) then
 do n=1,3
    ! input from random number generator
    ! this gives same I.C independent of cpus
-   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.)  
+   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.,-1)  
 enddo
 else if (rantype==1) then
    do n=1,3
@@ -629,7 +629,7 @@ if (init==0) return
 
 Q=0
 ! random vorticity
-call input1(PSI,work1,work2,null,io_pe,.true.)  
+call input1(PSI,work1,work2,null,io_pe,.true.,-1)  
 
 ! invert to get PSI
 alpha=0

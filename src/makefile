@@ -107,7 +107,7 @@ ifeq ($(UNAME),OSF1)
 
 
    ifeq ($(HOST),milkyway.lanl.gov)
-      MPI = -DUSE_MPI -I/usr/opt/MPI196/include
+      MPI =  -DUSE_MPI_IO  -DUSE_MPI -I/usr/opt/MPI196/include
       MPILIB = -L/usr/opt/MPI196/lib -lfmpi -lmpi 
       #MPI = 
       #MPILIB =

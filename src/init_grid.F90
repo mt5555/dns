@@ -13,7 +13,8 @@ call params_init()
 call transpose_init()
 call fft_interface_init()
 call init_input_file()
-call init_grid()          
+call init_grid()     
+call mpi_io_init() 
 
 
 !
@@ -440,6 +441,7 @@ call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(rw_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(use_mpi_io,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_output,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(equations,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

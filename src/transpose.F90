@@ -6,14 +6,19 @@ use mpi
 implicit none
 
 
+
 real*8,private :: tmx1,tmx2
 real*8,private,allocatable :: sendbuf(:),recbuf(:)
+
+integer :: io_mpi(0:ncpu_z),nio,inc,comm_io
 
 contains
 
 subroutine transpose_init
+
 #ifdef USE_MPI
 integer max_size
+
 max_size=1
 if (ncpu_z>1) then
    max_size=max(max_size,nslabx*nslabz*ny_2dz)
@@ -28,7 +33,56 @@ endif
 allocate (sendbuf(max_size))
 allocate (recbuf(max_size))
 
+
+
 #endif
+end subroutine
+
+
+
+
+subroutine mpi_io_init
+integer i,dest_pe3(3),key,color,ierr
+
+!
+! set up all the I/O processors
+! and create communicator, comm_io
+!
+nio=1
+if (use_mpi_io) then
+   nio=min(64,ncpu_z)
+endif
+inc=ncpu_z/nio
+
+if (io_pe==my_pe) then
+   print *,'number of mpi_io cpus: ',nio,use_mpi_io
+endif
+
+do i=0,ncpu_z-1
+   dest_pe3(1)=0
+   dest_pe3(2)=0
+   dest_pe3(3)=i/inc
+   call mpi_cart_rank(comm_3d,dest_pe3,io_mpi(i),ierr)
+enddo
+
+call MPI_Barrier(comm_3d,ierr)
+print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_mpi(my_z)
+call MPI_Barrier(comm_3d,ierr)
+
+#ifdef USE_MPI_IO
+
+! am i an io pe?
+key=0
+color=0
+if (io_mpi(my_z)==my_pe) color=1
+key=0
+
+! everyone with color=1 joins a new group, comm_sforcing
+call MPI_Comm_split(comm_3d,color,key,comm_io,ierr);
+if (color==0) call MPI_Comm_free(comm_io,ierr)
+
+#endif
+
 
 end subroutine
 
@@ -943,29 +997,33 @@ end subroutine
 
 
 
-subroutine output1(p,pt,buf,fid,fpe,offset)
+subroutine output1(p,pt,buf,fid,fpe_main,offset)
 use params
 use mpi
 CPOINTER fid
-integer :: fpe           ! cpu to do the I/O
+integer :: fpe_main             ! cpu to do the I/O
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
 real*8 :: buf(o_nx,ny_2dx)
 
 ! local vars
 real*8 saved_edge(o_nx)
-integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
+integer :: sending_pe,ierr,tag,z_pe,y_pe,x_pe
+integer i,j,k,l,extra_k,kuse,dest_pe3(3),fpe
+integer n1,n1d,n2,n2d,n3,n3d
+integer :: ny_2dx_actual ,offset
+integer :: first_seek
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
-integer i,j,k,l,extra_k,kuse,dest_pe3(3)
-integer n1,n1d,n2,n2d,n3,n3d
-integer :: ny_2dx_actual ,offset
 #ifdef USE_MPI_IO
 integer (KIND=MPI_OFFSET_KIND) ::  zpos,ypos
 #endif
 
 ny_2dx_actual = ny_2dx
+
+first_seek=.true.
+
 
 call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
 ASSERT("output1 dimension failure 2",n1==g_nx)
@@ -981,6 +1039,7 @@ endif
 
 do z_pe=0,ncpu_z-1
 extra_k=0
+fpe=io_mpi(z_pe)
 if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
@@ -1068,7 +1127,10 @@ do x_pe=0,ncpu_x-1
          zpos = z_pe*nslabz + k-1 
          ypos = y_pe*nslaby + x_pe*ny_2dx_actual
          zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
-         call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+         if (first_seek) then
+            call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+            first_seek=.false.
+         endif
          call MPI_File_write(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
 #endif
       else
@@ -1090,7 +1152,7 @@ do x_pe=0,ncpu_x-1
                zpos = z_pe*nslabz + k -1
                ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
                zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
-               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+!               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
                call MPI_File_write(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
 #endif
             else
@@ -1397,15 +1459,16 @@ end subroutine
 !  parallel decomposition
 !
 !
-subroutine input1(p,pt,buf,fid,fpe,random)
+subroutine input1(p,pt,buf,fid,fpe_main,random,offset)
 use params
 use mpi
-integer :: fpe         ! cpu to do all the file I/O
+integer :: fpe_main         ! cpu to do all the file I/O
 
 CPOINTER fid
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
 real*8 :: buf(o_nx,ny_2dx)
+integer :: offset,first_seek,fpe
 
 ! local vars
 real*8 saved_edge(o_nx)
@@ -1416,10 +1479,14 @@ logical :: random
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
+#ifdef USE_MPI_IO
+integer (KIND=MPI_OFFSET_KIND) ::  zpos,ypos
+#endif
 integer i,j,k,l,extra_k,kuse,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d
 integer :: ny_2dx_actual 
 ny_2dx_actual = ny_2dx
+first_seek=.true.
 
 if (o_nz>g_nz .and. g_bdy_z1/=PERIODIC) then
    call abort("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
@@ -1428,6 +1495,7 @@ endif
 
 do z_pe=0,ncpu_z-1
 extra_k=0
+fpe=io_mpi(z_pe)
 if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
@@ -1467,7 +1535,20 @@ do x_pe=0,ncpu_x-1
       if (random) then
          call random_data(buf,o_nx*ny_2dx_actual)
       else
-         call cread8(fid,buf,o_nx*ny_2dx_actual)
+         if (use_mpi_io) then
+#ifdef USE_MPI_IO
+            zpos = z_pe*nslabz + k-1 
+            ypos = y_pe*nslaby + x_pe*ny_2dx_actual
+            zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
+            if (first_seek) then
+               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+               first_seek=.false.
+            endif
+            call MPI_File_read(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
+#endif
+         else
+            call cread8(fid,buf,o_nx*ny_2dx_actual)
+         endif
       endif
 
       if (o_ny>g_ny) then
@@ -1476,7 +1557,17 @@ do x_pe=0,ncpu_x-1
          if (random) then
             call random_data(saved_edge,o_nx)
          else
-            call cread8(fid,saved_edge,o_nx)      
+            if (use_mpi_io) then
+#ifdef USE_MPI_IO
+               zpos = z_pe*nslabz + k -1
+               ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
+               zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
+               !               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+               call MPI_File_read(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
+#endif
+            else
+               call cread8(fid,saved_edge,o_nx)      
+            endif
          endif
       endif
       endif

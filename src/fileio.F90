@@ -204,7 +204,7 @@ character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
-if (use_mpi_io .and. io_read==0) then
+if (use_mpi_io ) then
    call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
    return
 endif
@@ -316,7 +316,7 @@ if (io_read==1) then
    if (output_spec) then
       call input1_spec(p,work,work2,fid,fpe,im_max,jm_max,km_max)
    else
-      call input1(p,work,work2,fid,fpe,.false.)
+      call input1(p,work,work2,fid,fpe,.false.,-1)
    endif
 else
    if (output_spec) then
@@ -382,45 +382,52 @@ xnx=o_nx
 xny=o_ny
 xnz=o_nz
 
-if (my_pe==fpe) then
 
+if (io_mpi(my_z)==my_pe) then
+   call print_message("MPI-IO open...")
    if (io_read==1) then
-      call copen(fname,"r",fid,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
-         call print_message(message)
-         call print_message(fname)
-         call abort("")
-      endif
-      call cread8e(fid,time,1,ierr)
-      if (ierr/=1) then
-         write(message,'(a,i5)') "singlefile_io(): Error reading file"
-         call print_message(message)
-         call print_message(fname)
-         call abort("")
-      endif
-      call cread8(fid,xnx,1)
-      call cread8(fid,xny,1)
-      call cread8(fid,xnz,1)
-      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
-      call cread8(fid,g_xcord(1),o_nx)
-      call cread8(fid,g_ycord(1),o_ny)
-      call cread8(fid,g_zcord(1),o_nz)
+      call MPI_File_open(comm_io,fname, &
+           MPI_MODE_RDONLY ,&
+           MPI_INFO_NULL, fid,ierr)
    else
       call MPI_Info_create(infoin,ierr)
       call MPI_Info_set(infoin, "striping_factor", "64",ierr) 	
       call MPI_Info_set(infoin, "striping_unit",  "8388608",ierr)
-      call MPI_File_open(comm_1,fname, &
+      call MPI_File_open(comm_io,fname, &
            MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
            infoin, fid,ierr)
+   endif
+   if (ierr/=0) then
+      write(message,'(a,i5)') "singlefile_mpi_io(): Error opening file. Error no=",ierr
+      call print_message(message)
+      call print_message(fname)
+      call abort("")
+   endif
+   call print_message("MPI-IO open finished")
+endif
+
+
+
+if (my_pe==fpe) then
+
+   if (io_read==1) then
+      call MPI_File_read(fid,time,1,MPI_REAL8,statuses,ierr)
       if (ierr/=0) then
-         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
+         write(message,'(a,i5)') "singlefile_io(): Error time reading file"
          call print_message(message)
          call print_message(fname)
          call abort("")
       endif
+      call MPI_File_read(fid,xnx,1,MPI_REAL8,statuses,ierr)
+      call MPI_File_read(fid,xny,1,MPI_REAL8,statuses,ierr)
+      call MPI_File_read(fid,xnz,1,MPI_REAL8,statuses,ierr)
+      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+      call MPI_File_read(fid,g_xcord(1),o_nx,MPI_REAL8,statuses,ierr)
+      call MPI_File_read(fid,g_ycord(1),o_ny,MPI_REAL8,statuses,ierr)
+      call MPI_File_read(fid,g_zcord(1),o_nz,MPI_REAL8,statuses,ierr)
+   else
       call MPI_File_write(fid,time,1,MPI_REAL8,statuses,ierr)
       call MPI_File_write(fid,xnx,1,MPI_REAL8,statuses,ierr)
       call MPI_File_write(fid,xny,1,MPI_REAL8,statuses,ierr)
@@ -428,9 +435,13 @@ if (my_pe==fpe) then
       call MPI_File_write(fid,g_xcord(1),o_nx,MPI_REAL8,statuses,ierr)
       call MPI_File_write(fid,g_ycord(1),o_ny,MPI_REAL8,statuses,ierr)
       call MPI_File_write(fid,g_zcord(1),o_nz,MPI_REAL8,statuses,ierr)
-      offset=4 + o_nx + o_ny + o_nz
    endif
 endif
+
+!
+! If you add/remove any header data above, be sure to adjust this count:
+!
+offset=4 + o_nx + o_ny + o_nz
 
 #ifdef USE_MPI
 call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
@@ -443,7 +454,7 @@ km_max=xnz/2-1
 
 
 if (io_read==1) then
-   call input1(p,work,work2,fid,fpe,.false.)
+   call input1(p,work,work2,fid,fpe,.false.,offset)
 else
    call output1(p,work,work2,fid,fpe,offset)
 endif
