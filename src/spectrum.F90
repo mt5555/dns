@@ -575,7 +575,6 @@ if (my_pe==io_pe) then
    call cwrite8(fid,cos_tta_spec,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
-   write(6,*)costta_pdf(1,:)
    do i=1,1+iwave
       tmp_pdf=costta_pdf(i,:)
       call cwrite8(fid,tmp_pdf,nbin)
@@ -1495,7 +1494,8 @@ if (my_pe==io_pe) then
    print *,'total helicity: ',heltot
 endif
    
-
+!normalize histogram of angles
+costta_pdf = costta_pdf/(nx*ny*nz)
 
 end subroutine
 
