@@ -84,22 +84,30 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 
 
         mu    tau    R_l   h/eta    turnover    epsilon   xyz-spec      R-spec
-250   .1e-3    5     347   4.04      1.53        1.04      hookup        N/A
-250E  .1e-3   25     513   5.20      1.36        2.87 
-250F  .1e-3  500     529   5.34      1.33        3.18
+250   .1e-3    5     347   4.04      1.53        1.04      vear 1e-1     N/A
+250E  .1e-3   25     513   5.20      1.36        2.87      vear 1e-1 
+250F  .1e-3  500     529   5.34      1.33        3.18      vear 1e-1
 
 250B  .2e-3    5     241   2.41      1.49        1.05      hookup        N/A
-250C  .4e-3    5     167   1.44      1.44        1.07      hookup        N/A
-250D  .8e-3    5     114   .850      1.41        1.05      
-250G  .8e-3   500 IN
-250H  5000h   500 IN?
+250C  .4e-3    5     167   1.44      1.44        1.07      hook 1e-3     N/A
+250D  .8e-3    5     114   .850      1.41        1.05      hook 1e-6     N/A
+250G  .8e-3   500    178   1.14      1.23        3.39      hook 1e-4     good
+250H  5000h   500    668   7.16/1.42 1.42        2.95
 
 
 
-500    .1e-3    5     455   2.38      1.44        2.00  
+500    .1e-3    5     455   2.38      1.44        2.00     hook 1e-2     kink
 500B   .1e-3  25 (stopped)
 
 
+
+Energy:
+250   1.31 down to .76
+250E  1.31 up to 2.24
+250F  1.31 up to 2.37
+
+250D  1.31 down to .71
+250G  1.31 up to 2.22
 
 
 

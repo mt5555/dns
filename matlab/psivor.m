@@ -102,8 +102,9 @@ for i=range
     end
     
     title(stitle);
-    axis([0,max(x),0,max(y)]);
     axis equal
+    axis([0,max(x),0,max(y)]);
+
 
     subplot(2,1,2)
 
@@ -114,8 +115,9 @@ for i=range
       v=20;                             % use 20 contours
       contour(x,y,psi',v)
     end
-    axis([0,max(x),0,max(y)]);
     axis equal
+    axis([0,max(x),0,max(y)]);
+
     
     
 

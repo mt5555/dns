@@ -90,7 +90,7 @@ end
 l=size(ints);
 l=l(2);
 
-ke_diss_d=-mu*ints(2,:);
+ke_diss_d=ints(10,:);
 ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 vor_z=ints(4,:);
 hel=ints(5,:);
