@@ -9,17 +9,17 @@ nx=1;
 delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
 
-name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
-pname = 'check256_hq_';
-ext = '.new.isostr';
-times=[0:1:1];
-nx = 256;
-
-%name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
-%pname = 'hel256\_hpi2\_';
-%ext='.new.isostr';
-%times=[4.2:0.2:10.2];
+%name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
+%pname = 'check256_hq_';
+%ext = '.new.isostr';
+%times=[0:1:30];
 %nx = 256;
+
+name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
+pname = 'hel256\_hpi2\_';
+ext='.new.isostr';
+times=[4.2:0.2:10.0];
+nx = 256;
 
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 
@@ -172,17 +172,14 @@ offset=y215_iso_ave;
 stdr=0*offset;
 scale = 2/15; % scale = 2/15 if need to factor out the 4/5, 1 otherwise
 for i=[1:1:73]
-  %semilogx(xx_plot,(y215_ave(:,i)-offset),'k:','LineWidth',1.0); hold on
-  semilogx(xx_plot,(y215_ave(:,i)-offset)/scale,'k-','LineWidth',1.0); hold on
+  semilogx(xx_plot,abs(y215_ave(:,i)-offset)/offset,'k-','LineWidth',1.0); hold on
   stdr=stdr+(y215_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
-%semilogx(xx_plot,y215_iso_ave-offset,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,(y215_iso_ave-offset)/scale,'b','LineWidth',1.0); hold on
 %axis([1 1000 -.2 .2])
 %x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
-title('timemean(H_{ltt}(dir)-H_{ltt}(avg))/(2/15) Measure of anisotropy ');
+title('timemean(H_{ltt}(dir)-H_{ltt}(avg))/H_{ltt}(avg) Measure of anisotropy ');
 ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
 

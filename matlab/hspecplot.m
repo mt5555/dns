@@ -2,11 +2,14 @@
 %########################################################################
 %#  plot of DNS helicity spectrum output file
 %########################################################################
-%
+% make sure viscosity is in Marks units. All the .hspec files (even those from 
+% Takeshi's data are in Marks units already
 
-%name = 'helicity_data/helicity_spc/check256_hq_cat30';
+%name = 'helicity_data/helicity_spc/check256_hq_0000.0000';
 %namedir = '/home2/skurien/';
-%mu = 6.0d-3;
+%mu = 6.0d-3;                          % viscosity in Takeshi's units
+%scaling = 2*pi;                       %2pi for Takeshi data, 1 otherwise;
+%mu = mu/scaling^2;
 
 %name = 'helicity_data/sc1024_data/sc1024A0002.0000';
 %mu = 0.35e-4;
@@ -18,7 +21,7 @@
 %mu = 5.0e-4;
 
 namedir = '/home2/skurien/helicity_data/helical_forced/';
-name = 'hel256_hpi2/hel256_hpi2_cat';
+name = 'hel256_hpi2/hel256_hpi2_all';
 mu = 2e-4;
 
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
@@ -50,10 +53,6 @@ time
   n_r=fread(fid,1,'float64');
   hspec_n=fread(fid,n_r,'float64');
 hspec_p = fread(fid,n_r,'float64');
-scaling = 1;                       %2pi for Takeshi data, 1 otherwise;
-
-hspec_n = hspec_n*scaling;
-hspec_p = hspec_p*scaling;
 
 if (j == 1) 
      hspec_ave = hspec_n + hspec_p;
@@ -97,12 +96,15 @@ legend('|H_-(k)| k^{5/3}','H_+(k) k^{5/3}','H(k) k^{5/3}')
 
 
 
-%compute total helicity for snapshot
+% compute total helicity for snapshot -- in Mark's units
+% multiply by 2*pi^2 to get Takeshi's units
 H = sum(hspec_p+hspec_n);
 disp(sprintf('Total helicity = %d',H))
 
-%compute dissipation rate of helicity -- BUT THIS IS WRONG?
-h = -2*mu*sum((hspec_p+hspec_n).*(k'*scaling).^2);
+% compute dissipation rate of helicity -- in Mark's units 
+% multiply dissipation rate by 2*pi to get Takeshi's units
+
+h = -2*mu*sum((hspec_p+hspec_n).*(k'*2*pi).^2);
 disp(sprintf('Mean helicity dissipation rate = %d',h));
 
 figure(23)

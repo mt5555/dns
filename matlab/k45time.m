@@ -178,14 +178,11 @@ offset=y45_iso_ave;
 stdr=0*offset;
 scale = 4/5; % scale = 4/5 if need to factor out the 4/5 
 for i=[1:1:73]
-  %semilogx(xx_plot,(y45_ave(:,i)-offset),'k:','LineWidth',1.0); hold on
-  semilogx(xx_plot,(y45_ave(:,i)-offset)/scale,'m-','LineWidth',1.0); hold on
+  semilogx(xx_plot,abs(y45_ave(:,i)-offset)/offset,'m-','LineWidth',1.0); hold on
   stdr=stdr+(y45_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
-%semilogx(xx_plot,y45_iso_ave-offset,'k','LineWidth',1.0); hold on
-semilogx(xx_plot,(y45_iso_ave-offset)/scale,'b','LineWidth',1.0); hold on
-title('Measure of anisotropy - 4/5 law');
+title('Measure of anisotropy - 4/5 law; |D_{lll}(dir) - D_{lll}(ave)|/D_lll(ave)');
 ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
 
