@@ -7,6 +7,7 @@
 program DNS
 implicit none
 
+call init_model
 call init_mpi
 call init_data
 call bc_preloop
@@ -30,7 +31,7 @@ end program DNS
 subroutine dns_solve
 implicit none
 use params
-real*8 :: bigq(nvard,-2:imaxd,-2:jmaxd,-2:kmaxd)
+real*8 :: Q(nxd,nyd,nzd,nvard)
 real*8 :: time
 
 ! set delt based on CFL?
@@ -43,7 +44,7 @@ do itime=1,itime_max
    call rk4
 
    if (mod(i,itime_ouput)=1 .or. itime=itime_max .or. error_code>0) then
-      call out(time,bigq)
+      call out(time,Q)
    endif
 
    if (error_code>0) then
@@ -57,6 +58,8 @@ end do
 
 
 
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  subroutine to take one Runge-Kutta 4th order time step
@@ -65,10 +68,10 @@ end do
 subroutine rk4(time,bigq)
 implicit none
 use params
-real*8 intent(in):: time,bigq(nvard,imaxd,jmaxd,kmaxd)
-real*8 :: bigq_old(nvard,imaxd,jmaxd,kmaxd)
-real*8 :: bigq_tmp(nvard,imaxd,jmaxd,kmaxd)
-real*8 :: rhs(nvard,imaxd,jmaxd,kmaxd)
+real*8 intent(in):: time,Q(nxd,nyd,nzd,nvard)
+real*8 :: Q_old(nxd,nyd,nzd,nvard)
+real*8 :: Q_tmp(nxd,nyd,nzd,nvard)
+real*8 :: rhs(nxd,nyd,nzd,nvard)
 
 biq_old=bigq
 
