@@ -9,7 +9,8 @@
 ! pick ncpu_x,ncpu_y,ncpu_z	
 ! Then l,m,n, and set:
 !
-! #ifdef TRANSPOSE_X_SPLIT_Z
+! #ifdef TRANSPOSE_X_SPLIT_Z   (NO LONGER SUPPORTED)
+!   
 !    ncpu_x*l=nslabz
 !    ncpu_y*m=nslabx
 !    ncpu_z*n=nslaby
@@ -141,13 +142,20 @@ real*8 :: delke_tot        ! d KE /dt from most recent time step
 !
 !
 
-integer,parameter :: ntimers=5
+integer,parameter :: ntimers=11
 real*8 :: tims(ntimers)=0
 !  tims(1)    time for initialization
 !  tims(2)    total runtime after initialization
 !  tims(3)    time spent in time_control()
-!  tims(4)    time spent in transpose
+!  tims(4)    not used
 !  tims(5)    time spent in RHS
+!  tims(6)    transpose_to_z
+!  tims(7)    transpose_from_z
+!  tims(8)    transpose_to_x
+!  tims(9)    transpose_from_x
+!  tims(10)    transpose_to_y
+!  tims(11)    transpose_from_y
+!
 !
 
 

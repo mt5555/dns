@@ -11,9 +11,17 @@ end subroutine
 
 
 
-
-
-
+subroutine maxvalMPI(error)
+use mpi
+use params
+implicit none
+real*8 error,tmp
+integer ierr
+#ifdef USE_MPI
+   tmp=error
+   call MPI_allreduce(tmp,error,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+end subroutine
 
 
 
@@ -46,6 +54,7 @@ output=0
 call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
 mx=maxval(abs(input-output))
+call maxvalMPI(mx)
 write(message,*) 'transpose z round trip error:',mx
 call print_message(message)
 
@@ -53,6 +62,7 @@ output=0
 call transpose_to_y(input,work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_y(work,output,n1,n1d,n2,n2d,n3,n3d)
 mx=maxval(abs(input-output))
+call maxvalMPI(mx)
 write(message,*) 'transpose y round trip error:',mx
 call print_message(message)
 
@@ -60,6 +70,7 @@ output=0
 call transpose_to_x(input,work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_x(work,output,n1,n1d,n2,n2d,n3,n3d)
 mx=maxval(abs(input-output))
+call maxvalMPI(mx)
 write(message,*) 'transpose x round trip error:',mx
 call print_message(message)
 
@@ -158,7 +169,7 @@ real*8 rhs(nx,ny,nz)
 real*8 input(nx,ny,nz)
 integer i,j,k
 real*8 cf1,alpha,beta
-real*8 error
+real*8 error,tmp
 character*80 message
 
 alpha=1
@@ -186,15 +197,15 @@ do k=nz1,nz2
    input(i,j,k)=           4*cos(cf1*ycord(j))    + input(i,j,k)
    rhs(i,j,k)=    -cf1*cf1*4*cos(cf1*ycord(j))    + rhs(i,j,k)
 
-   if (nslabz>1) then
+   if (g_nz>=6) then
       cf1=2*2*pi 
       input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
       rhs(i,j,k)=    -cf1*cf1*5*cos(cf1*zcord(k))    + rhs(i,j,k)
-
+   endif
+   if (g_nz>=8) then
       cf1=3*2*pi 
       input(i,j,k)=           2*sin(cf1*zcord(k))    + input(i,j,k)
       rhs(i,j,k)=    -cf1*cf1*2*sin(cf1*zcord(k))    + rhs(i,j,k)
-
    endif
 
    cf1=1*2*pi 
@@ -214,13 +225,6 @@ enddo
 rhs = alpha*input + beta*rhs
 call poisson(rhs,work,alpha,beta)
 
-#if 0
-call fft3d(rhs,work)
-call print_modes(rhs)
-call ifft3d(rhs,work)
-#endif
-
-
 
 work=rhs-input
 #if 0
@@ -228,17 +232,31 @@ do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
    if (abs(work(i,j,k))>1e-9) then
-	print *,i,j,k,rhs(i,j,k),input(i,j,k)
+	write(*,'(3i5,2e15.7)') i,j,k,rhs(i,j,k),input(i,j,k)
    endif	
 enddo
 enddo
 enddo
 #endif
 error=maxval(abs(work(nx1:nx2,ny1:ny2,nz1:nz2)));
+call maxvalMPI(error)
 write(message,'(a,f6.2,a,f6.2,a,e15.8)') 'Laplace solver alpha=',alpha,' beta=',beta,&
    '  error=',error
 call print_message(message)
 
+
+#if 0
+call print_message("Laplace solver data:")
+call print_message("analytic solution")
+call fft3d(input,work)
+call print_modes(input)
+call ifft3d(input,work)
+
+call print_message("computed solution")
+call fft3d(rhs,work)
+call print_modes(rhs)
+call ifft3d(rhs,work)
+#endif
 
 
 
@@ -346,11 +364,13 @@ enddo
 call der(input,px,pxx,work,DX_AND_DXX,1)
 
 error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputx(nx1:nx2,ny1:ny2,nz1:nz2)))
+call maxvalMPI(error)
 write(message,'(a,e15.10)') "x-direction d/dx error=",error
 call print_message(message)
 
 
 error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputxx(nx1:nx2,ny1:ny2,nz1:nz2)))
+call maxvalMPI(error)
 write(message,'(a,e15.10)') "x-direction d2/dxx error=",error
 call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -363,10 +383,12 @@ call print_message(message)
 call der(input,px,pxx,work,DX_AND_DXX,2)
 
 error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputy(nx1:nx2,ny1:ny2,nz1:nz2)))
+call maxvalMPI(error)
 write(message,'(a,e15.10)') "y-direction d/dy error=",error
 call print_message(message)
 
 error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputyy(nx1:nx2,ny1:ny2,nz1:nz2)))
+call maxvalMPI(error)
 write(message,'(a,e15.10)') "y-direction d2/dyy error=",error
 call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -380,10 +402,12 @@ call print_message(message)
 call der(input,px,pxx,work,DX_AND_DXX,3)
 
 error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputz(nx1:nx2,ny1:ny2,nz1:nz2)))
+call maxvalMPI(error)
 write(message,'(a,e15.10)') "z-direction d/dz error=",error
 call print_message(message)
 
 error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputzz(nx1:nx2,ny1:ny2,nz1:nz2)))
+call maxvalMPI(error)
 write(message,'(a,e15.10)') "z-direction d2/dzz error=",error
 call print_message(message)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -399,6 +423,7 @@ call print_modes(output)
 call ifft3d(output,work)
 
 error=maxval(abs(input(nx1:nx2,ny1:ny2,nz1:nz2)-output(nx1:nx2,ny1:ny2,nz1:nz2)))
+call maxvalMPI(error)
 write(message,'(a,e15.10)') "x-direction Forward-Backward 3D FFT: error=",error
 call print_message(message)
 

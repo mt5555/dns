@@ -393,6 +393,8 @@ end subroutine
 subroutine fft_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d)
 use params ! just needed for pi
 use fft_interface
+implicit none
+
 real*8 px(n1d,n2d,n3d)
 real*8 pxx(n1d,n2d,n3d)
 integer numder,n1,n1d,n2,n2d,n3,n3d

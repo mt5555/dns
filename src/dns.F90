@@ -71,11 +71,21 @@ write(message,'(a,f9.2,a)') 'initialization: ',tims(1),' m'
 call print_message(message)
 write(message,'(a,f9.2,a)') 'dns_solve:      ',tims(2),' m'
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   time_control + children:    ',tims(3),' m'
+write(message,'(a,f9.2,a,f4.3,a)') '   time_control       ',tims(3),' m'
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   RHS + children:             ',tims(5),' m'
+write(message,'(a,f9.2,a,f4.3,a)') '   RHS                ',tims(5),' m'
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   transpose + children:       ',tims(4),' m'
+write(message,'(a,f9.2,a,f4.3,a)') '   transpose_to_z     ',tims(6),' m'
+call print_message(message)
+write(message,'(a,f9.2,a,f4.3,a)') '   transpose_from_z   ',tims(7),' m'
+call print_message(message)
+write(message,'(a,f9.2,a,f4.3,a)') '   transpose_to_x     ',tims(8),' m'
+call print_message(message)
+write(message,'(a,f9.2,a,f4.3,a)') '   transpose_from_x   ',tims(9),' m'
+call print_message(message)
+write(message,'(a,f9.2,a,f4.3,a)') '   transpose_to_y     ',tims(10),' m'
+call print_message(message)
+write(message,'(a,f9.2,a,f4.3,a)') '   transpose_from_y   ',tims(11),' m'
 call print_message(message)
 
 call close_mpi

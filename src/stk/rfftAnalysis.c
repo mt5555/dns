@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2001 University Corporation for Atmospheric Research 
  *       
- * $Id: rfftAnalysis.c,v 1.3 2001-08-20 22:38:54 mt Exp $
+ * $Id: rfftAnalysis.c,v 1.4 2001-08-23 18:49:13 mt Exp $
  */
 
 #include "rfft.h"
@@ -136,8 +136,8 @@ re-order output:    0 4 1 1 2 2 3 3 *
       }
     else
       { /* answer is in out=c+1.  do a little re-ordering */
-        c[0]=c[1];
-        c[1]=c[n-1];  
+          c[0]=c[1] /* = out[0] */;
+          c[1]=c[n] /* = out[n-1] */;  
       }
 }
 
