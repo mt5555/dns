@@ -92,22 +92,22 @@ while (time>=0 & time<=5000)
   npdf=fread(fid,1,'float64');
   [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
   figure(3)
-  p=1;
+  p=3;
   str=sum(pdf.*bins.^p);
   mx=max(bins - bins.*(pdf==0));
   mn=min(bins - bins.*(pdf==0));        % min over non zero values
   bar(bins,pdf)
   ax=axis;
-  %axis([-1,1,ax(3),ax(4)]);
-  axis([0,25.0,0,.01]);
-  text='| \nabla U |^{2/3}';
-  title(text)
-  xlabel(sprintf('min=%.4f  max=%.4f  ncalls=%i str(%i)=%.5f',mn,mx,n_call,p,str));
+  axis([0,5.0,ax(3),ax(4)]);
+  text='[   \mu|\nabla U|^2   ]^{1/3}';
+  title(text) 
+  xlabel(sprintf('[%.3f,%.3f] nc=%i <e>=%.5f',mn,mx,n_call,str));
   %title(sprintf('Time=                  %.4f',time)); 
+  set(gca,'YTickLabel','')    
   
+
   disp('done...')
   pause  
-  
   time=fread(fid,1,'float64');
 end
 
