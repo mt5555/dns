@@ -5,11 +5,16 @@ E&Liu KH problem.
        1e-4:  a touch noisy
        2e-4: looks good, a little too smoothed 
                    
-1. update_ghost() routine, then start upgrading FD code
+1. 4th order code using ghost cells:
+         consctruct 4th order test case with dnsgrid
+         write ns_ghost, testing agains above
+         
+
 2. streamfunction-vorticity 2d code  
 3. benchmark FD + transform with different decomposisitons
 4. construct convergence test for KH 1024 problem
       compare with spectral, 4th, 4th+1st order grad, or 1st order div
+
 
 1. if run stops because u>1000, timings are incorrect
 1. specplot: multiply by f^5/3
