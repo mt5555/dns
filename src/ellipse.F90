@@ -301,7 +301,7 @@ integer :: nell
 !local
 real*8 :: mxcord2(2)
 real*8 :: wcontour,winterp
-real*8 :: Rdelta,tmp
+real*8 :: Rdelta,tmp(2),tmpout(2)
 integer :: np,count,ierr
 
 !
@@ -315,29 +315,44 @@ integer :: np,count,ierr
    do np=1,npd
       ! find Rad so that:  w(Rad cosc(np), Rad sinc(np)) = wcontour
 
-      Rdelta=.001
+      Rdelta=.01
       r(np)=Rdelta
 
       count=0
       do 
          call interp4w(w,mxcord(1),mxcord(2),r(np),cosc(np),sinc(np),winterp)
-         if (winterp>wcontour) r(np)=r(np)+Rdelta ! undershoot
-         if (winterp<=wcontour) then ! overshoot
+         if (winterp<-9d10) then
+            r(np)=-9d20  ! not on this CPU
+         else if (winterp>wcontour) then
+            r(np)=r(np)+Rdelta ! undershoot
+         else if (winterp<=wcontour) then ! overshoot
             Rdelta=Rdelta/2
             r(np)=r(np)-Rdelta
          endif
-         if (winterp<-9d10) then
-            r(np)=-9d20  ! not on this CPU
-         endif
 #ifdef USE_MPI
-         tmp=r(np)
-         call MPI_allreduce(tmp,r(np),1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+         ! r(np):  one cpu has valid (positive) value, the rest
+         ! have -9d20.  so take MAX to update all r(np) on all cpus.
+         ! For Rdelta, we want to give all processors the value 
+         ! from the cpu which contained the interpolation point. 
+         ! Since Rdelta is fixed, or decreasing, taking the MIN will
+         ! achive this: 
+         tmp(1)=r(np)
+         tmp(2)=-Rdelta
+         call MPI_allreduce(tmp,tmpout,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+         r(np)=tmpout(1)
+         Rdelta=-tmpout(2)  
 #endif
          !print *,'w,w',winterp,wcontour
          !print *,r(np),Rdelta
          if (Rdelta < contour_eps) exit
          count=count+1
-         if (count>1000 .or. r(np)<-9d10) call abort("findellipse() count iteration failure")
+         if (count>5000 .or. r(np)<-9d10) then
+            print *,'r(np)=',r(np),np
+            print *,'count=',count
+            print *,mxcord(1),r(np),cosc(np)
+            print *,mxcord(2),r(np),sinc(np)
+            call abort("findellipse() count iteration failure")
+         endif
       enddo
    enddo
    endif

@@ -76,10 +76,10 @@ ifeq ($(UNAME),OSF1)
    LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
    ifeq ($(HOST),milkyway.lanl.gov)
-      #MPI = -DUSE_MPI -I/usr/opt/MPI196/include
-      #MPILIB = -L/usr/opt/MPI196/lib -lfmpi -lmpi 
-      MPI = 
-      MPILIB =
+      MPI = -DUSE_MPI -I/usr/opt/MPI196/include
+      MPILIB = -L/usr/opt/MPI196/lib -lfmpi -lmpi 
+      #MPI = 
+      #MPILIB =
       LSFLIB = 
       LSFFLAGS = 
    endif
