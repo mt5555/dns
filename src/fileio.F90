@@ -269,25 +269,26 @@ character(len=*) :: fname
 logical :: output_spec
 integer im_max,km_max,jm_max
 
-
-
 ! local variables
-integer i,j,k,n, header_type, o_nx_save,o_ny_save,o_nz_save
-real*8 xnx,xny,xnz
-character(len=80) message
-integer n_var_start,ierr
+integer :: i,j,k,n, header_type
+real*8 :: xnx,xny,xnz
+character(len=80) :: message
+integer :: n_var_start,ierr
 logical :: do_mpi_io_save
-CPOINTER fid
+integer :: o_nx_save,o_ny_save,o_nz_save
+CPOINTER :: fid
+
 
 ! disable periodic extension for header_type<>1 (turn it back on
 ! when we are done)
-o_nx_save=o_nx; o_ny_save=o_ny; o_nz_save=o_nz;
+o_nx_save=o_nx; 
+o_ny_save=o_ny; 
+o_nz_save=o_nz;
 if (header_type==2 .or. header_type==3 .or. header_type==4) then
    o_nx=g_nx; 
    o_ny=g_ny;
    o_nz=g_nz;
 endif
-
 
 if (do_mpi_io .and. .not. output_spec ) then
    call singlefile_mpi_io(time,p,fname,work,work2,io_read,header_type)
@@ -373,8 +374,8 @@ else
    endif
 
 endif
-if (my_pe==fpe) call cclose(fid,ierr)
 
+if (my_pe==fpe) call cclose(fid,ierr)
 
 o_nx=o_nx_save; o_ny=o_ny_save; o_nz=o_nz_save;
 do_mpi_io=do_mpi_io_save

@@ -135,7 +135,7 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine transpose_to_z(p,pt,n1,n1d,n2,n2d,n3,n3d)
-use params
+!use params
 real*8 p(nx,ny,nz)
 real*8 pt(g_nz2,nslabx,ny_2dz)
 integer n1,n1d,n2,n2d,n3,n3d
@@ -293,7 +293,7 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine transpose_to_z(p,pt,n1,n1d,n2,n2d,n3,n3d)
-use params
+!use params
 real*8 p(nx,ny,nz)
 real*8 pt(g_nz2,nslabx,ny_2dz)
 integer n1,n1d,n2,n2d,n3,n3d
@@ -422,7 +422,7 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine transpose_from_z(pt,p,n1,n1d,n2,n2d,n3,n3d)
-use params
+!use params
 real*8 p(nx,ny,nz)
 real*8 pt(g_nz2,nslabx,ny_2dz)
 integer n1,n1d,n2,n2d,n3,n3d
@@ -562,7 +562,7 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
-use params
+!use params
 real*8 p(nx,ny,nz)
 real*8 pt(g_nx2,nslabz,ny_2dx)
 integer n1,n1d,n2,n2d,n3,n3d
@@ -678,7 +678,7 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine transpose_from_x(pt,p,n1,n1d,n2,n2d,n3,n3d)
-use params
+!use params
 
 real*8 p(nx,ny,nz)
 real*8 pt(g_nx2,nslabz,ny_2dx)
@@ -805,7 +805,7 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine transpose_to_y(p,pt,n1,n1d,n2,n2d,n3,n3d)
-use params
+!use params
 
 real*8 p(nx,ny,nz)
 real*8 pt(g_ny2,nslabz,nx_2dy)
@@ -921,7 +921,7 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine transpose_from_y(pt,p,n1,n1d,n2,n2d,n3,n3d)
-use params
+!use params
 
 real*8 p(nx,ny,nz)
 real*8 pt(g_ny2,nslabz,nx_2dy)
@@ -1032,8 +1032,8 @@ end subroutine
 
 
 subroutine output1(p,pt,buf,fid,fpe_main,offset)
-use params
-use mpi
+!use params
+!use mpi
 CPOINTER fid
 integer :: fpe_main             ! cpu to do the I/O
 real*8 :: p(nx,ny,nz)
@@ -1233,8 +1233,8 @@ end subroutine
 !  
 
 subroutine output1_spec(p,pt,buf,fid,fpe,im_max,jm_max,km_max)
-use params
-use mpi
+!use params
+!use mpi
 
 CPOINTER fid
 integer :: fpe,im_max,jm_max,km_max       ! cpu to do the I/O
@@ -1356,8 +1356,8 @@ end subroutine
 
 
 subroutine input1_spec(p,pt,buf,fid,fpe,im_max,jm_max,km_max)
-use params
-use mpi
+!use params
+!use mpi
 
 CPOINTER fid
 integer :: fpe,im_max,jm_max,km_max           ! cpu to do the I/O
@@ -1491,8 +1491,8 @@ end subroutine
 !
 !
 subroutine input1(p,pt,buf,fid,fpe_main,random,offset)
-use params
-use mpi
+!use params
+!use mpi
 integer :: fpe_main         ! cpu to do all the file I/O
 
 CPOINTER fid
@@ -1662,7 +1662,7 @@ end subroutine
 
 
 subroutine transpose_from_z_3d(Qhat,q1)
-use params
+!use params
 implicit none
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)

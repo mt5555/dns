@@ -17,10 +17,10 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
-name='tmix256D-noscalars0000.0000';
-namedir='/scratch2/taylorm/tmix256D-noscalars/';
-CK_orig=1.613; movie_plot=0; endian='l';
-mu=3e-4;
+%name='tmix256D-noscalars0000.0000';
+%namedir='/scratch2/taylorm/tmix256D-noscalars/';
+%CK_orig=1.613; movie_plot=0; endian='l';
+%mu=3e-4;
 
 %name='decay2048-ave64.-new.0000.4026';
 %name='decay2048-ave32.-new.0000.4026';
@@ -35,6 +35,10 @@ mu=3e-4;
 
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
+
+name = 'temp0000.0000';
+namedir = '../src/';
+mu=1e-9;
 
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';

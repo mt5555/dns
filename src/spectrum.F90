@@ -1176,18 +1176,15 @@ end subroutine
 
 
 
-subroutine compute_hfree_spec(Q,p1,work,skip_fft)
-! skip_fft=0:
-!      input: p1 (which should be Qhat).  Q is not used.  
+subroutine compute_hfree_spec(p1,cmodes_r,cmodes_i)
 !
 !
 use params
 use mpi
 implicit none
 integer :: ierr,skip_fft
-real*8 :: Q(nx,ny,nz,*)
-real*8 :: p1(nx,ny,nz,*)
-real*8 :: work(nx,ny,nz)
+real*8 :: p1(nx,ny,nz,2)
+real*8 :: cmodes(nx,ny,nz,2,3)
 
 
 
@@ -1197,7 +1194,8 @@ real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
-real*8 :: cmodes(2,nx,ny,nz,3)
+real*8 :: cmodes_r(nx,ny,nz,3)
+real*8 :: cmodes_i(nx,ny,nz,3)
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii,&
       cos_tta, delta
@@ -1207,18 +1205,12 @@ integer i,j,k,jm,km,im,iwave_max,n
          call abort("compute_helicity_specturm: can only be used in 3D")
       endif
       
-      if (skip_fft==0) then
-         p1(:,:,:,1:3)=Q(:,:,:,1:3)
-         do n=1,3
-         call fft3d(p1(1,1,1,n),work)
-      enddo
-      endif
       
       rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
       iwave_max=nint(rwave)
       
       do n = 1,3
-         call sincos_to_complex(p1(1,1,1,n),cmodes(1,1,1,1,n),g_nmax)
+         call sincos_to_complex_field(p1(1,1,1,n),cmodes_r(1,1,1,n),cmodes_i(1,1,1,n))
       enddo
       
 
@@ -1240,8 +1232,8 @@ integer i,j,k,jm,km,im,iwave_max,n
                iwave = nint(sqrt(rwave))
                
 !     compute angle between Re and Im parts of u(k)
-               RR = cmodes(1,i,j,k,:)
-               II = cmodes(2,i,j,k,:)
+               RR = cmodes_r(i,j,k,:)
+               II = cmodes_i(i,j,k,:)
                
                mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
                mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
@@ -1372,109 +1364,151 @@ end subroutine
 
 
 
+
+subroutine sincos_to_complex_field(p,cmodes_r,cmodes_i)
 #if 0
-subroutine sincos_to_complex_field(p,cp)
-!
-!  convert set of sine and cosine FFT coefficients to complex coefficients
-!
-#if 0
-   conversion to complex coefficients:
-        a cos(lx) cos(my) cos(nz)
-      
-        sign(>=0)=1
-        sign(<0)=-1
+  TODO: debug this subroutine.  
+  let p = Real part of (exp(i x + j y + k z ))
 
-        p = number of negative values in sign(l), sign(m), sign(n):   
-        1/i**0    1
-        1/i**1   -i
-        1/i**2   -1
-        1/i**3    i
+  tmp = im*pi2*(0,1)*xcord(i) + &
+        jm*pi2*(0,1)*ycord(j) + &
+        km*pi2*(0,1)*zcord(k)  
+
+   p(i,j,k)=real(tmp)
 
 
-        a/(8 i**p) (exp(ilx)+sign(l)exp(-ilx))
-                   (exp(imy)+sign(m)exp(-imy))
-                   (exp(inz)+sign(n)exp(-inz))
 
-        ( l, m, n)
-        ( l, m,-n) sign(n)
-        ( l,-m, n) sign(m)
-        ( l,-m,-n) sign(n)*sign(m)
-        (-l, m, n) sign(l)
-        (-l, m,-n) sign(l)*sign(n)
-        (-l,-m, n) sign(l)*sign(m)
-        (-l,-m,-n) sign(l)*sign(m)*sign(n)
+  
+  call this routine, print out non-zero modes 
+  and see what we get.
+
+
+  convert set of sine and cosine FFT coefficients to complex coefficients
+  After calling this routine, here is a loop that will extract the modes:
+
+do k=nz1,nz2,2
+do j=ny1,ny2,2
+do i=nx1,nx2,2
+   ! wave number (im,jm,km)   im positive or negative
+   im=imcord(i)
+   jm=jmcord(j)
+   km=kmcord(k)
+
+   real_part = cp(i,j,k,1)
+   imag_part = cp(i,j,k,2)
+
+enddo
+enddo
+enddo
+
+
+For details of the 8x8 transform that maps sin/cos to complex
+coefficients, see the sincos_to_complex routine in sforcing.F90
 
 #endif      
 use params
 implicit none
 integer :: nmax
 real*8 :: p(nx,ny,nz)
-real*8 :: cp(2,nx,ny,nz)
+real*8 :: cmodes_r(nx,ny,nz)
+real*8 :: cmodes_i(nx,ny,nz)
 real*8 :: a,b
-integer :: i,j,k,im,jm,km,imax,sm,ip,jp,kp
+integer :: i,j,k,im,jm,km,ii,jj,kk,sm,i0,i1,j0,j1,k0,k1
 
-imax=2*nmax+2
-cmodes=0
+cmodes_r=0
+cmodes_i=0
 
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   im=imcord(i)
-   jm=jmcord(j)
-   km=kmcord(k)
-
-   ip=abs(im)
-   jp=abs(jm)
-   kp=abs(km)
+do k=nz1,nz2,2
+do j=ny1,ny2,2
+do i=nx1,nx2,2
 
 
-   a=0; b=0
 
-   ! count the number if sin() terms:
-   sm=0; if (im<0) sm=sm+1;  if (jm<0) sm=sm+1;  if (km<0) sm=sm+1
-
-   if (sm==0) then
-      a=rmodes(im,jm,km)/8
-   else if (sm==1) then
-      b=-rmodes(im,jm,km)/8
-   else if (sm==2) then
-      a=-rmodes(im,jm,km)/8
-   else if (sm==3) then
-      b=rmodes(im,jm,km)/8
-   else
-      call abort("this cant happen")
+   i0=i
+   i1=i+1
+   j0=j
+   j1=j+1
+   k0=k
+   k1=k+1
+   
+   ! verify that this processer has all 8 modes:
+   if (  abs(imcord(i0))/=abs(imcord(i1)) .or. &
+         abs(jmcord(j0))/=abs(jmcord(j1)) .or. & 
+         abs(kmcord(k0))/=abs(kmcord(k1)) ) then
+      print *,'not all modes are on this processor: '
+      print *,i0,imcord(i0),imcord(i1)
+      print *,j0,imcord(j0),imcord(j1)
+      print *,k0,imcord(k0),imcord(k1)
+      call abort(" ")
    endif
 
-   cmodes(1,ip,jp,kp)=cmodes(1,ip,jp,kp) + a;    
-   cmodes(2,ip,jp,kp)=cmodes(2,ip,jp,kp) + b
+   ! make sure that i0 is the positive mode, i1 is the negative mode:
+   if ( imcord(i0)<0 .or. imcord(i1)>0 .or.  &
+        jmcord(j0)<0 .or. jmcord(j1)>0 .or.  & 
+        kmcord(k0)<0 .or. kmcord(k1)>0 ) then
+      print *,'we have the sign wrong?'
+      print *,i0,imcord(i0),imcord(i1)
+      print *,j0,imcord(j0),imcord(j1)
+      print *,k0,imcord(k0),imcord(k1)
+      call abort(" ")
+   endif
 
-   cmodes(1,ip,jp,-kp)=cmodes(1,ip,jp,-kp) + a*sign(1,km)   
-   cmodes(2,ip,jp,-kp)=cmodes(2,ip,jp,-kp) + b*sign(1,km)
 
-   cmodes(1,ip,-jp,kp)=cmodes(1,ip,-jp,kp) + a*sign(1,jm)
-   cmodes(2,ip,-jp,kp)=cmodes(2,ip,-jp,kp) + b*sign(1,jm)
+   ! loop over the 8 sin/cos modes, mapping into 8 complex modes
+   do ii=i0,i1
+   do jj=j0,j1
+   do kk=k0,k1      
 
-   cmodes(1,ip,-jp,-kp)=cmodes(1,ip,-jp,-kp) + a*sign(1,jm)*sign(1,km)  
-   cmodes(2,ip,-jp,-kp)=cmodes(2,ip,-jp,-kp) + b*sign(1,jm)*sign(1,km)  
+      ! sin/cos mode 
+      im=imcord(ii)
+      jm=jmcord(jj)
+      km=kmcord(kk)
+   
+      a=0; b=0
+      ! count the number if sin() terms:
+      sm=0; if (im<0) sm=sm+1;  if (jm<0) sm=sm+1;  if (km<0) sm=sm+1
+      if (sm==0) then
+         a=p(ii,jj,kk)/8
+      else if (sm==1) then
+         b=-p(ii,jj,kk)/8
+      else if (sm==2) then
+         a=-p(ii,jj,kk)/8
+      else if (sm==3) then
+         b=p(ii,jj,kk)/8
+      else
+         call abort("this cant happen")
+      endif
 
-   cmodes(1,-ip,jp,kp)=cmodes(1,-ip,jp,kp) + a*sign(1,im)
-   cmodes(2,-ip,jp,kp)=cmodes(2,-ip,jp,kp) + b*sign(1,im)
+      cmodes_r(i0,j0,k0)=cmodes_r(i0,j0,k0) + a;    
+      cmodes_i(i0,j0,k0)=cmodes_i(i0,j0,k0) + b
 
-   cmodes(1,-ip,jp,-kp)=cmodes(1,-ip,jp,-kp) + a*sign(1,im)*sign(1,km)
-   cmodes(2,-ip,jp,-kp)=cmodes(2,-ip,jp,-kp) + b*sign(1,im)*sign(1,km)
+      cmodes_r(i0,j0,k1)=cmodes_r(i0,j0,k1) + a*sign(1,km)   
+      cmodes_i(i0,j0,k1)=cmodes_i(i0,j0,k1) + b*sign(1,km)
+      
+      cmodes_r(i0,j1,k0)=cmodes_r(i0,j1,k0) + a*sign(1,jm)
+      cmodes_i(i0,j1,k0)=cmodes_i(i0,j1,k0) + b*sign(1,jm)
+      
+      cmodes_r(i0,j1,k1)=cmodes_r(i0,j1,k1) + a*sign(1,jm)*sign(1,km)  
+      cmodes_i(i0,j1,k1)=cmodes_i(i0,j1,k1) + b*sign(1,jm)*sign(1,km)  
 
-   cmodes(1,-ip,-jp,kp)=cmodes(1,-ip,-jp,kp) + a*sign(1,im)*sign(1,jm)
-   cmodes(2,-ip,-jp,kp)=cmodes(2,-ip,-jp,kp) + b*sign(1,im)*sign(1,jm)
+      cmodes_r(i1,j0,k0)=cmodes_r(i1,j0,k0) + a*sign(1,im)
+      cmodes_i(i1,j0,k0)=cmodes_i(i1,j0,k0) + b*sign(1,im)
 
-   cmodes(1,-ip,-jp,-kp)=cmodes(1,-ip,-jp,-kp) + a*sign(1,im)*sign(1,jm)*sign(1,km)
-   cmodes(2,-ip,-jp,-kp)=cmodes(2,-ip,-jp,-kp) + b*sign(1,im)*sign(1,jm)*sign(1,km)
+      cmodes_r(i1,j0,k1)=cmodes_r(i1,j0,k1) + a*sign(1,im)*sign(1,km)
+      cmodes_i(i1,j0,k1)=cmodes_i(i1,j0,k1) + b*sign(1,im)*sign(1,km)
 
+      cmodes_r(i1,j1,k0)=cmodes_r(i1,j1,k0) + a*sign(1,im)*sign(1,jm)
+      cmodes_i(i1,j1,k0)=cmodes_i(i1,j1,k0) + b*sign(1,im)*sign(1,jm)
+
+      cmodes_r(i1,j1,k1)=cmodes_r(i1,j1,k1) + a*sign(1,im)*sign(1,jm)*sign(1,km)
+      cmodes_i(i1,j1,k1)=cmodes_i(i1,j1,k1) + b*sign(1,im)*sign(1,jm)*sign(1,km)
+
+   enddo
+   enddo
+   enddo
 enddo
 enddo
 enddo
 end subroutine
-#endif
-
-
 
 end module
