@@ -1197,6 +1197,7 @@ real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
+real*8 :: WR(3),WI(3)
 real*8 :: cos_tta, delta,rp,ip,e1,e2,xfac
 integer i,j,k,jm,km,im,iwave_max,n
 
@@ -1212,9 +1213,9 @@ endif
 ! 0,-3,1   xfac=4   efac=32
 ! 0,0,1   xfac=2   efac=16
 ! 0,0,0   xfac=1   efac=8
-im=-4
-jm=3
-km=7
+im=1
+jm=0
+km=0
 print *,'initial mode: im,jm,km: ',im,jm,km
 
 pgrid=0
@@ -1310,11 +1311,11 @@ spec_helicity_rn=0
 cos_tta_spec = 0
 
 do j=ny1,ny2
-   jm=jmcord(j)
+   jm=jmcord_exp(j)
    do i=nx1,nx2
-      im=imcord(i)
+      im=imcord_exp(i)
       do k=nz1,nz2
-         km=kmcord(k)
+         km=kmcord_exp(k)
          
          rwave = im**2 + jm**2 + km**2
          iwave = nint(sqrt(rwave))
@@ -1338,31 +1339,20 @@ do j=ny1,ny2
          !     omit modes where cos_tta is less than cutoff delta
          if (cos_tta > delta) then
             
-            !     ux = - pi2*im*p1(i+imsign(i),j,k,1)
-            vx = - pi2*im*p1(i+imsign(i),j,k,2)
-            wx = - pi2*im*p1(i+imsign(i),j,k,3)
+            ! compute vorticity           
+            ! sqrt(-1) * (im,jm,km) cross (RR+sqrt(-1)II)
+            WR=0
+            WI=0  
             
-            uy = - pi2*jm*p1(i,j+jmsign(j),k,1)
-            !     vy = - pi2*jm*p1(i,j+jmsign(j),k,2)
-            wy = - pi2*jm*p1(i,j+jmsign(j),k,3)
-            
-            uz =  - pi2*km*p1(i,j,k+kmsign(k),1)
-            vz =  - pi2*km*p1(i,j,k+kmsign(k),2)
-            !     wz =  - pi2*km*p1(i,j,k+kmsign(k),3)
-            
-            !     vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
-            
-            energy = 8
+            energy = 64
             if (km==0) energy=energy/2
             if (jm==0) energy=energy/2
             if (im==0) energy=energy/2
             
             !     compute E(k) and kE(k)
             xw=sqrt(rwave*pi2_squared)
-            spec_E(iwave)=spec_E(iwave) + 	energy* &
-                 (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
-            spec_kEk(iwave)=spec_kEk(iwave) + xw*energy* &
-                 (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
+            spec_E(iwave)=spec_E(iwave) + energy*(sum(RR*RR)+ sum(II*II))
+            spec_kEk(iwave)=spec_kEk(iwave) + xw*energy*(sum(RR*RR)+ sum(II*II))
             
             energy = energy*(p1(i,j,k,1)*(wy-vz) + &
                  p1(i,j,k,2)*(uz-wx) + p1(i,j,k,3)*(vx-uy)) 
