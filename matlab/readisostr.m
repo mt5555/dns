@@ -133,6 +133,12 @@ if (nscalars>=7)
   eta = (mu^3 / epsilon)^.25;
   delx_over_eta=(1/nx)/eta;
 end
+
+tmp = fread(fid,1,'float64');
+tmp=size(tmp);
+if (tmp(1)~=0) 
+  disp('Error reading input file...')
+end
 fclose(fid);
 
 

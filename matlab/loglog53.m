@@ -6,7 +6,7 @@ end
 
 s=size(spec);
 s=s(2);
-ccol=[ 'b','g','r','c','m','y' ];  
+ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
 
 x=(1:n)-1;

@@ -1,6 +1,10 @@
 name='/ccs/scratch/taylorm/dns/iso12_512'
-name='/home/mt/iso12_512'
+%name='/home/mt/iso12_512'
 nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0;
+S2norm=2.1217e+04;
+w2norm=4.2435e+04;
+
+
 
 ext='.new.isostr';
 ext2='.new.isow2s2';
@@ -98,7 +102,6 @@ for i=1:ndir
   semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   D_llllave=D_llllave+w(i)*spline(x,y1,xx);
 
-
   y1=D_lltt(:,i);
   semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   D_llttave=D_llttave+w(i)*spline(x,y1,xx);
@@ -125,6 +128,17 @@ print -djpeg u4.jpg
 %
 %  w,s
 %
+xnorm=1;
+if (0)
+for i=1:ndir
+  x = r_val2(:,i);                       % units of box length
+  y1=s2s2(:,i);
+  s2s2ave=s2s2ave+w(i)*spline(x,y1,xx);
+end
+xnorm=s2s2ave(length(s2s2ave));
+s2s2ave=0*s2s2ave;
+end
+
 figure(2); clf
 for i=1:ndir
 
@@ -133,22 +147,20 @@ for i=1:ndir
   x_plot=x*nx*delx_over_eta_l;          % units of r/eta
 
 
-  y1=w2w2(:,i)/w2w2(1,i);
+  y1=w2w2(:,i)/xnorm;
   semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   %plot(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   w2w2ave=w2w2ave+w(i)*spline(x,y1,xx);
 
-  y1=s2s2(:,i)/s2s2(1,i);
+  y1=s2s2(:,i)/xnorm;
   %semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   plot(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   s2s2ave=s2s2ave+w(i)*spline(x,y1,xx);
 
-
-  y1=w2s2(:,i)/w2s2(1,i);
+  y1=w2s2(:,i)/xnorm;
   %semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   plot(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
   w2s2ave=w2s2ave+w(i)*spline(x,y1,xx);
-
 
 end
 
@@ -156,10 +168,12 @@ semilogx(xx_plot,w2w2ave,'r','LineWidth',1.0); hold on;
 semilogx(xx_plot,s2s2ave,'g','LineWidth',1.0); hold on;
 semilogx(xx_plot,w2s2ave,'b','LineWidth',1.0); hold on;
 
-title('w2w2, s2s2, w2s2   normalized to 1 at r=0');
+title('w2(0)w2(r), s2(0)s2(r), w2(0)s2(r)');
 ylabel(' ');
 xlabel('r/\eta');
-%x=1:xmax; semilogx(x,(4/15)*x./x,'k');
+x=1:xmax; plot(x,w2norm^2.*x./x,'k');
+x=1:xmax; plot(x,S2norm^2.*x./x,'k');
+x=1:xmax; plot(x,w2norm.*S2norm.*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 axis([1,xmax,ax(3),ax(4)]);
 hold off;
