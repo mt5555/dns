@@ -1007,6 +1007,8 @@ rwave=diss1
 call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 rwave=diss2
 call MPI_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+rwave=hetot
+call MPI_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
 if (my_pe==io_pe) then
    print *,'helicity: ',hetot
