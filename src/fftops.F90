@@ -1606,7 +1606,7 @@ integer :: im,jm,km,i,j,k,n
          do k=1,g_nz
             km=z_kmcord(k)
             xw = jm*jm + im*im + km*km 
-            if (dealias_sphere_kmax2_1 < xw  .and. xw <= dealias_sphere_kmax2) then
+            if (kstart2 < xw  .and. xw <= kstop2) then
                numk=numk+1
                xfac = 2*2*2
                if (km==0) xfac=xfac/2

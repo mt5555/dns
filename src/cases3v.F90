@@ -70,7 +70,7 @@ call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,min(NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
    write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
         "  E target=",enerb_target(nb)
-   call print_message(message)
+   call print_message(message(1:79))
 enddo
 write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)
@@ -231,7 +231,7 @@ call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,min(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
    write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
         "  E target=",enerb_target(nb)
-   call print_message(message)
+   call print_message(message(1:79))
 enddo
 write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)
@@ -286,6 +286,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: PSI(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+real*8 :: Omega
 integer :: init,nb
 character(len=240) :: message
 integer,parameter :: NUMBANDS=100
@@ -296,10 +297,14 @@ fcor=1
 zscale=1
 
 if (init_cond_subtype==0) then
-   fcor=1
+   Omega=48
+   fcor=2*Omega
    zscale=1
 endif
 
+if (io_pe==my_pe) then
+   print *,'Omega = ',Omega
+endif
 
 if (init==0) return
 
@@ -325,7 +330,7 @@ call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,min(NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
    write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
         "  E target=",enerb_target(nb)
-   call print_message(message)
+   call print_message(message(1:79))
 enddo
 write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)

@@ -226,8 +226,9 @@ integer n,i,j,k,im,km,jm,ns,numk
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
 real*8 :: p_diss(n_var),pke(n_var)
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper8_scale
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
+real*8,save :: f_diss_ave
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
 real*8,save :: gradu(nx,ny,nz,n_var)
@@ -410,10 +411,13 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (mu_hyper==8) then
+if (mu_hyper>=4) then
    call ke_shell_z(Qhat,ke,numk,dealias_sphere_kmax2_1,dealias_sphere_kmax2)
-   ke=ke/numk
-   hyper8_scale = 5.0*ke * dealias_sphere_kmax**(-8.5)/pi2_squared
+   ! units of E = m**2/s**2
+   ! units of E(k) = m**3/s**2
+   ! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
+   ! scaling:  E(kmax)/(kmax**2)(4-.75)
+   hyper_scale = ke * (pi2_squared*dealias_sphere_kmax2)**(-(mu_hyper-.75))
 endif
 
 
@@ -433,10 +437,8 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper==8) then
-               xw_viss=xw_viss + mu_hyper_value*hyper8_scale*xw**8
-            else if (mu_hyper==4) then
-               xw_viss=xw_viss + mu_hyper_value*xw**4
+            if (mu_hyper>=4) then
+               xw_viss=xw_viss + mu_hyper_value*hyper_scale*xw**mu_hyper
             else if (mu_hyper==2) then
                xw_viss=xw_viss + mu_hyper_value*xw*xw
             endif
@@ -510,15 +512,23 @@ endif
 call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,a_diss)
 #endif
 
-
-if (forcing_type==2 .or. forcing_type==4) then
-   ! compute new forcing function
-   ! white in time, computed at beginning of each RK4 stage
-   if (rkstage==1) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
+if (rkstage==1) then
+   f_diss_ave=0
+   ! compute new forcing function for stochastic,
+   ! white in time forcing.  computed at beginning of each RK4 stage
+   if (forcing_type==2 .or. forcing_type==4) then
+      call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
+   else if (forcing_type==8) then
+      ! trashes Q - used as work array
+      call stochastic_highwaveno(Q,Qhat,f_diss,fxx_diss,1)  
+   endif
 endif
-
 ! apply forcing:
-if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
+if (forcing_type>0) then
+   call sforce(rhs,Qhat,f_diss,fxx_diss)
+   ! average over all 4 stages
+   f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
+endif
 
 #if 0
 rhs=0
@@ -697,6 +707,14 @@ if (compute_ints==1) then
 
 !   ints(6)=pke(4)
 !   ints(10)=-p_diss(4)
+endif
+
+if (forcing_type==8) then
+   ! in this case, f_diss from stage 1 is not very accurate, so use
+   ! the average.  Reason: at small scales, forcing has a huge 
+   ! effect.  stage1: u & f uncorrelated, <u,f>=small.  But
+   ! after a few stages, u & f very correlated, <u,v>=large.  
+   ints(3)=f_diss_ave
 endif
 
 call wallclock(tmx2)

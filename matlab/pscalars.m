@@ -4,14 +4,13 @@
 %    
 %
 
-readdata=0;
-%clear all; readdata=1;
+%readdata=0;
+clear all; readdata=1;
 
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:1.20];
-
+times=[1.0000:.01:1.05];
 
 
 if (readdata)
@@ -49,7 +48,7 @@ end
 end
 
 % look at passive scalar number np
-for np=5:5
+for np=10:10
 
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';

@@ -30,9 +30,11 @@ endian='l';
 
 
 
-
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
+
+name = 'temp0000.0000';
+namedir = '../src/';
 
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';
@@ -253,7 +255,6 @@ while (time>=.0 & time<=9999.3)
      end
      ts=sprintf('passive scalars t=%f',time);
      loglog53(np_r,pspec_r,ts,1.0,3); 
-     hold off; 
 
      np_x=fread(fidp,1,'float64');
      for np=1:npassive    
@@ -270,13 +271,28 @@ while (time>=.0 & time<=9999.3)
         pspec_z=fread(fidp,np_z,'float64');
      end
 
-     np=1;
-     c2=sum(pspec_r(:,np));     
+     np=10;
      x=(0:np_r-1)';
-     cx2=sum((x.^2).*pspec_r(:,np));     % 3<c,1*c,1>
-     cxx2=sum((x.^4).*pspec_r(:,np));    % 3<c,11*c,11> 
+     c2=sum(pspec_r(2:np_r,np));     
+     cx2=sum((x.^2).*pspec_r(:,np))/3;     % 3<c,1*c,1>
+     cxx2=sum((x.^4).*pspec_r(:,np))/3;    % 3<c,11*c,11> 
      %[c2,cx2,cxx2]
-     c2*(cxx2/3)/(cx2*cx2/9)
+     Gc=c2*(cxx2)/(cx2*cx2);
+
+     disp(sprintf('t=%f  <c> Gc  %f  %f  %f  %f ',time,pspec_r(1,np),Gc))
+
+     hold on;
+     x=1:1000;
+     xt=1e5*((.001+x).^-5);
+     plot(x,xt);
+%     xt=1e5*((.001+x).^-7);
+%     plot(x,xt);
+     hold off; 
+% $$$      c2=sum(xt);
+% $$$      cx2=sum((x.^2).*xt);
+% $$$      cxx2=sum((x.^4).*xt);
+% $$$      c2*(cxx2/3)/(cx2*cx2/9)
+
   end
 
 

@@ -567,6 +567,7 @@ call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(forcing_peak_waveno,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
@@ -1463,6 +1464,9 @@ else if (sdata=='iso_high_24') then
 else if (sdata=='iso_high_16') then
    forcing_peak_waveno=16
    forcing_type=7
+else if (sdata=='sto_high_24') then
+   forcing_peak_waveno=24
+   forcing_type=8
 else 
    call abort("invalid forcing type specified on line 4 on input file")
 endif
@@ -1509,6 +1513,9 @@ else if (sdata=='hyper4') then
    mu_hyper_value = rvalue
 else if (sdata=='hyper8') then
    mu_hyper=4
+   mu_hyper_value = rvalue
+else if (sdata=='hyper16') then
+   mu_hyper=8
    mu_hyper_value = rvalue
 else 
    call abort("non supported hyper viscosity type")

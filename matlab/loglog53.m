@@ -36,9 +36,11 @@ end
 % used by passive scalars
 if (option==3) 
    x_ck=1:500;
-   scalep = 0;
    plaw=-5/3;
-   ax=[1,1e4,1e-6,1.0];
+   scalep = 0;
+   ax=[1,1e4,1e-12,1.0];
+   scalep = 4;
+   ax=[1,1e4,1e-9,1000.0];
 end
 
 

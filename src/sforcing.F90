@@ -58,6 +58,9 @@ if (forcing_type==6) call sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,0)
 ! determinisitic - high wavenumber
 if (forcing_type==7) call sforcing12(rhs,Qhat,f_diss,fxx_diss,3)
 
+! stochastic high wavenumber forcing
+if (forcing_type==8) call stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,0)
+
 
 
 end subroutine
@@ -858,6 +861,193 @@ do wn=numb1,numb
 
 enddo
 
+
+
+end subroutine 
+   
+
+
+
+subroutine stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,new_f)
+!
+! Add a forcing term to rhs.
+! Random, isotropic, homogenious in first 2 wave nubmers
+!
+! if new_f=0, add previously computed forcing stored in rmodes() into RHS. 
+!
+! if new_f=1, compute a new forcing ONLY, store in internal static variable
+!             This will TRASH rhs - used as a work array
+!
+! numb1,numb2:   force bands [numb1,numb2]
+!
+use params
+use mpi
+implicit none
+integer :: new_f
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+integer km,jm,im,i,j,k,n,ierr,ntest,wn,wn2,ii
+real*8 xfac,f_diss,fsum,fxx_diss,vor(3),ux,uy,uz,wx,wy,wz,vx,vy,vz,xw
+real*8,save,allocatable :: fhat(:,:,:,:)
+
+
+real*8 ener(512),ener2(512),ener_test(512)
+integer,save :: numk(512),numk2(512)
+real*8,save :: ener_target(512)
+
+
+
+
+if (0==init_sforcing) then
+   init_sforcing=1
+   allocate(fhat(g_nz2,nslabx,ny_2dz,3))
+   if (forcing_type==8) then
+      numb1=16
+      numb=32    ! must be <= 512
+      ener_target=0
+      do wn=numb1,numb
+         ener_target(wn)=exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
+      enddo
+
+      ! compute number of coefficients in each band
+      numk=0
+      do j=1,ny_2dz
+         jm=z_jmcord(j)
+         do i=1,nslabx
+            im=z_imcord(i)
+            do k=1,g_nz
+               km=z_kmcord(k)
+               wn=sqrt(real(im*im+jm*jm+km*km))
+               if (wn<=numb) numk(wn)=numk(wn)+1
+            enddo
+         enddo
+      enddo
+#ifdef USE_MPI
+      numk2=numk
+      call MPI_allreduce(numk2,numk,numb,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+#endif      
+   endif
+endif
+
+
+
+ntest=1  ! set > 1 to run some stats tests
+if (new_f==1) then
+   ener2=0
+   ener_test=0
+   do ii=1,ntest
+
+   ! compute forcing function fhat:
+   ener=0
+   call gaussian(rhs,g_nz2*nslabx*ny_2dz*3)
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            wn2=im*im+jm*jm+km*km
+            wn=sqrt(real(wn2))
+            if (numb1 <= wn .and. wn <= numb .and. delt>0) then
+               
+               xfac=8
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+
+               ! f=curl f
+               ! compute gradient  dp/dx
+               uy= - jm*rhs(k,i,j+z_jmsign(j),1)
+               uz= - km*rhs(k+z_kmsign(k),i,j,1)
+               vx= - im*rhs(k,i+z_imsign(i),j,2)
+               vz= - km*rhs(k+z_kmsign(k),i,j,2)
+               wx= - im*rhs(k,i+z_imsign(i),j,3)
+               wy= - jm*rhs(k,i,j+z_jmsign(j),3)
+
+               vor(1) = wy - vz
+               vor(2) = uz - wx 
+               vor(3) = vx - uy
+
+               ! scale out various shell factors:
+               vor=vor/sqrt(xfac*numk(wn)*3.0)
+               ! undo curl scaling:
+               vor = vor * sqrt(1.5)/ wn
+               ! vorticity now scaled so that E(wn)=1
+
+               do n=1,3
+                  vor(n)=vor(n)*sqrt(ener_target(wn)/delt)
+                  fhat(k,i,j,n)=vor(n)
+!                  fhat(k,i,j,n)=rhs(k,i,j,n)/sqrt(xfac*numk(wn)*3.0)
+                  ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
+               enddo
+            else
+               do n=1,3
+                  fhat(k,i,j,n)=0
+               enddo
+            endif
+         enddo
+      enddo
+   enddo
+
+   if (ntest>1) then
+   if (io_pe==my_pe) print *,"iter=",ntest
+#ifdef USE_MPI
+   ener2=ener
+   call MPI_allreduce(ener2,ener,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif      
+   ener_test=ener_test+ener/ntest
+   endif
+   enddo
+
+   if (ntest>1) then
+   if (io_pe==my_pe) then
+      print *,'forcing:  ',sum(ener_test(numb1:numb))
+      do n=numb1,numb
+         print *,n,numk(n),ener_test(n),ener_target(n)
+      enddo
+   endif
+   stop
+   endif
+
+   return
+endif
+
+
+! apply forcing function:
+f_diss=0
+fxx_diss=0
+
+do n=1,ndim
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         rhs(k,i,j,n)=rhs(k,i,j,n) + fhat(k,i,j,n)
+         
+         xfac=8
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+         fsum= Qhat(k,i,j,n)*fhat(k,i,j,n)
+         
+         f_diss = f_diss + xfac*fsum
+         xw=-(im*im + jm*jm + km*km)*pi2_squared
+         fxx_diss = fxx_diss + xfac*xw*fsum
+      enddo
+   enddo
+enddo
+enddo
+
+
+#if 0
+call MPI_allreduce(f_diss,xfac,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+if (io_pe==my_pe) then
+   print *,'f_diss: ',xfac,maxval(fhat)
+endif
+#endif
 
 
 end subroutine 

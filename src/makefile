@@ -119,6 +119,14 @@ ifeq ($(UNAME),OSF1)
    UDMLIB = 
    LDFLAGS =  -lcxml 
 
+   # check for MPI module loaded:
+   MPIMODULE = $(shell echo $$LD_LIBRARY_PATH | grep MPI)
+   ifneq ($(MPIMODULE),)
+      MPI_VERSION=
+   else
+      MPI_VERSION=lampi
+   endif
+
 
    # QSC
    HNAME = $(shell hostname | grep qsc)

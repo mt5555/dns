@@ -665,7 +665,7 @@ real*8 gradu(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3)
+real*8 :: ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3),u1
 real*8 :: uxx2(3),uxx3(3),uxx4(3)
 
 !
@@ -681,6 +681,7 @@ enddo
 ux2=0
 ux3=0
 ux4=0
+u1=0
 u2=0
 su=0
 uxx2=0
@@ -691,6 +692,7 @@ uxx4=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
+    u1=u1+Q(i,j,k,np)
     u2=u2+Q(i,j,k,np)**2
 
    ! if we use grads(i,j,k,1)**3, do we preserve the sign?  
@@ -713,7 +715,9 @@ enddo
 enddo
 enddo
 
-u2=u2/g_nx/g_ny/g_nz
+! <(a-a0)**2> = < a**2 > - a0**2
+u1=u1/g_nx/g_ny/g_nz
+u2=u2/g_nx/g_ny/g_nz; u2 = u2 - u1*u1
 ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux3/g_nx/g_ny/g_nz
 ux4=ux4/g_nx/g_ny/g_nz
@@ -733,14 +737,14 @@ scalars(2)=u2
 i=2
 
 do n=1,3
-scalars(n+i)=ux2(n)
-scalars(n+3+i)=ux3(n)
-scalars(n+6+i)=ux4(n)
+scalars(n+i)=ux2(n)         ! 3,4,5
+scalars(n+3+i)=ux3(n)       ! 6,7,8
+scalars(n+6+i)=ux4(n)       ! 9,10,11
 enddo
 i=i+9
 
 do n=1,3
-scalars(n+i)=uxx2(n)
+scalars(n+i)=uxx2(n)       ! 12
 scalars(n+3+i)=uxx3(n)
 scalars(n+6+i)=uxx4(n)
 enddo
@@ -756,7 +760,7 @@ i=i+3
    call MPI_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
-!su=u2*uxx2/(ux2*ux2)
+!su=u2*uxx2/(ux2*ux2)   scalars(2)*scalars(12,13,14)/scalars(3,4,5)
 !print *,'G_theta=',su
 
 end subroutine
