@@ -311,7 +311,7 @@ integer :: nell
 !local
 real*8 :: mxcord2(2)
 real*8 :: wcontour,winterp
-real*8 :: Rdelta
+real*8 :: Rdelta,tmp
 integer :: np,count,ierr
 
 !
@@ -325,7 +325,7 @@ integer :: np,count,ierr
    do np=1,npd
       ! find Rad so that:  w(Rad cosc(np), Rad sinc(np)) = wcontour
 
-      Rdelta=.01
+      Rdelta=.001
       r(np)=Rdelta
 
       count=0
