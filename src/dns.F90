@@ -62,9 +62,6 @@ endif
 call MPI_Barrier(comm_3d,ierr)
 #endif
 
-print *,maxval(Q(:,:,:,1))
-print *,maxval(Q(:,:,:,2))
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
