@@ -185,6 +185,11 @@ do n=np1,np2
       ! filter
       call fft3d(Q(1,1,1,n),work1)
       call fft_filter_dealias(Q(1,1,1,n))
+
+      work2=Q(:,:,:,n)
+      call ifft3d(work2,work1)
+      call global_min(work2,mn)
+      call global_max(work2,mx)
       
       ! laplacian smoothing:
       ! du/dt  =  laplacian(u)
@@ -207,12 +212,14 @@ do n=np1,np2
                enddo
             enddo
          enddo
-         if (iter>10) then  ! start checking 'mx'
-            call ifft3d(Q(1,1,1,n),work1)
-            call global_min(Q(1,1,1,n),mn)
-            call global_max(Q(1,1,1,n),mx)
+         if (iter>=10) then  ! start checking 'mx'
+            work2=Q(:,:,:,n)
+            call ifft3d(work2,work1)
+            call global_min(work2,mn)
+            call global_max(work2,mx)
          endif
       enddo
+      call ifft3d(Q(1,1,1,n),work1)
       write(message,'(a,2f17.5,a,i3)') 'after smoothing: min/max: ',mn,mx,'  iter=',iter
       call print_message(message)	
    else
