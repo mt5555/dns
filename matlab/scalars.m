@@ -26,7 +26,7 @@ fid2=-1;
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+fid=fopen('/ccs/scratch/taylorm/dns/decay/decay2048.scalars','r','l'); 
 nx=2048;
 
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
@@ -50,15 +50,15 @@ nx=2048;
 %fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
 %nx=128;
 
-fid=endianopen('/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_all.scalars','r');
-nx=256;
+%fid=endianopen('/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_all.scalars','r');
+%nx=256;
 
 
 %fid=endianopen('/home2/skurien/helicity_data/helical_forced/hel480_hpi2/hel480_hpi2_0000.1000.scalars','r');
 %nx=480;
 
-fid=endianopen('/home2/skurien/dns/src/2Dhypo1e4_1024_0000.0000.scalars','r');
-nx=1024;
+%fid=endianopen('/home2/skurien/dns/src/2Dhypo1e4_1024_0000.0000.scalars','r');
+%nx=1024;
 
 nscalars=0;
 nscalars_e=0;
@@ -137,9 +137,20 @@ time=maxs(7,:);
 
 Ea = ints(6,:) + .5*alpha^2 *ints(2,:); % at time
 
-time_2 = .5*(time(2:l)+time(1:l-1));
-ke_diss_tot=(ke(2:l)-ke(1:l-1))./(time(2:l)-time(1:l-1));
-Ea_diss_tot=(Ea(2:l)-Ea(1:l-1))./(time(2:l)-time(1:l-1));
+time_2=[];
+ke_diss_tot=[];
+Ea_diss_tot=[];
+j=0
+for i=2:l
+  % skip repeats, and skip data with large KE increase
+  % since it is probably due to decaying run re-adjustment:
+  if ((time(i)-time(i-1))>1e-5 & (ke(i)-ke(i-1))<.01  )
+    j=j+1;
+    time_2(j) = .5*(time(i)+time(i-1));
+    ke_diss_tot(j)=(ke(i)-ke(i-1))./(time(i)-time(i-1));
+    Ea_diss_tot(j)=(Ea(i)-Ea(i-1))./(time(i)-time(i-1));
+  end
+end
 
 ke_v=ke + alpha^4*ints(1,:)/2 + 2*alpha^2*ints(2,:)/2;
 
