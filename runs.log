@@ -88,8 +88,9 @@ vx5120a                            IN lightning
 
 vx7680a
 7680x5760
-   run on lightning, about 9 hours for t=1.0
-   copied to ~/data2/kras
+   run on lightning 128cpus, about 9 hours for t=1.0
+   lightning run: ~/data2/kras  (ran to t=1.5)
+   shankara run:  ~/data/kras   (ran to t=0.5 19.7h)   
    init_cond_subtype=103   (smaller domain then the other cases above)
    mu=1e-6                               
    hard coded: (code may change later)
