@@ -360,7 +360,9 @@ if (my_pe==io_pe) then
    !   -t   enable LSF timelimit feature.  Only needed if you are 
    !        running under LSF and dont want the code to stop with 30min left
    !
-   !   -r   use a restart file for the initial conditions
+   !   -r     use a restart file for the initial conditions
+   !   -nors  but dont use a restart file for passive scalars
+   !          (usefull for adding scalars to a restart run)
    !
    !   -b   enable bytewsap_input
    !
@@ -374,6 +376,7 @@ if (my_pe==io_pe) then
    !   -smax  <n>   output n spectral coefficients
    !
    !   -mio  use mpi-io with a stripe of 64 for grid point I/O
+   !
    !
    !   -cout <text>   type of data to output for the convert.F90 program
    !                   "uvw", "vor", "vorm", "norm2"
@@ -446,6 +449,8 @@ if (my_pe==io_pe) then
          do_mpi_io=.true.
       else if (message(1:2)=="-r") then
          restart=1
+      else if (message(1:5)=="-nors") then
+         compute_passive_on_restart=.true.
       else if (message(1:2)=="-s" .and. len_trim(message)==2) then
          r_spec=.true.
          w_spec=.true.
@@ -521,6 +526,7 @@ call MPI_bcast(user_specified_isodir,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(w_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(spec_max,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(byteswap_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(compute_passive_on_restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(convert_opt,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(do_mpi_io,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

@@ -67,6 +67,8 @@ logical :: do_mpi_io=.false.
 logical :: byteswap_input=.false.   ! byteswap all binary input files
 integer :: output_size=8            ! output real*8
 integer :: input_size=8             ! input real*8
+logical :: compute_passive_on_restart = .false.
+
 
 !
 ! options used by various utility programs:

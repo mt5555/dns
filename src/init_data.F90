@@ -84,12 +84,14 @@ Q=0
 time_initial=-1
 call input_uvw(time_initial,Q,Qhat,work1,work2,1)
 
+if (compute_passive_on_restart) then
+   if (npassive>0) call init_passive_scalars(Q,Qhat,work1,work2)
+else
+   call input_passive(runname,time_initial,Q,work1,work2)
+endif
+
 write(message,'(a,f10.4)') "restart time=",time_initial
 call print_message(message)
-
-if (npassive>0) then
-   call init_passive_scalars(Q,Qhat,work1,work2)
-endif
 
 end subroutine
 

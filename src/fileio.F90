@@ -741,6 +741,80 @@ end subroutine
 
 
 
+subroutine output_passive(basename,time,Q,work1,work2)
+use params
+use tracers
+use mpi
+use fft_interface
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+character(len=*) :: basename
+
+!local
+character(len=80) message
+character(len=80) fname
+character(len=80) base,ext
+integer :: n
+real*8 :: time
+
+if (npassive==0) return
+
+write(message,'(f10.4)') 10000.0000 + time
+
+do n=np1,np2
+   write(ext,'(i3)') 100 + n-np1+1
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+        // message(2:10) // '.s' // ext(2:3)
+   call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,0,io_pe)
+enddo
+
+end subroutine
+
+
+
+
+
+
+
+subroutine input_passive(basename,time,Q,work1,work2)
+use params
+use tracers
+use mpi
+use fft_interface
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+character(len=*) :: basename
+
+!local
+character(len=80) message
+character(len=80) fname
+character(len=80) base,ext
+integer :: n
+real*8 :: time
+
+if (npassive==0) return
+
+write(message,'(f10.4)') 10000.0000 + time
+
+do n=np1,np2
+   write(ext,'(i3)') 100 + n-np1+1
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+        // message(2:10) // '.s' // ext(2:3)
+   call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
+enddo
+
+end subroutine
+
+
+
+
+
 
 
 

@@ -332,6 +332,7 @@ if (doit_output) then
    else
       call output_uvw(runname,time,Q,q1,work1,work2)
    endif
+   call output_passive(runname,time,Q,work1,work2)
    call print_message("done with output")
 
 endif
