@@ -83,7 +83,7 @@ df = ( f(3:l)-f(1:l-2)) ./ (xx_box(3:l)-xx_box(1:l-2));
 f2 = f(2:l-1) + .5*xx_box(2:l-1).*df;
 f2 = f2 .* xx_box(2:l-1).^(-2/3);
 semilogx(xx(2:l-1),f2,'g');
-title('D_{tt} r^{-2/3} (blue)       angle ave(red)       F(D_{ll}) (green)');
+title('D_{tt} r^{-2/3} (points)       angle ave(red)       F(D_{ll}) (green)');
 hold off;
 print -dpsc isocheck.ps
 
@@ -108,7 +108,7 @@ semilogx(xx,yyave,'r');
 title('D_{lll} / r\epsilon   (4/5 law)');
 semilogx(xx,.8*xx./xx,':');
 hold off;
-
+print -dpsc 45.ps
 
 
 %
@@ -136,7 +136,7 @@ semilogx(xx,yyave2,'r');
 title('D_{ltt} / r\epsilon  (4/15 law)');
 semilogx(xx,(4/15)*xx./xx,':');
 hold off;
-
+print -dpsc 415.ps
 
 
 %
@@ -158,6 +158,6 @@ semilogx(xx,yyave,'r');
 title('4/3 law');
 semilogx(xx,(4/3)*xx./xx,':');
 hold off;
-
+print -dpsc 43.ps
 
 

@@ -45,6 +45,10 @@ tstop=11.0
 tinc=1.0
 icount=0
 
+!call set_byteswap_input(1);
+
+
+
 call init_mpi
 call init_mpi_comm3d()
 call init_model
@@ -62,15 +66,15 @@ do
 
    write(sdata,'(f10.4)') 10000.0000 + time
    fname = basename(1:len_trim(basename)) // sdata(2:10) // ".u"
-   if (my_pe==io_pe) then
-      print *,'filename: ',fname(1:len_trim(fname))
-   endif
+   print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,1),fname,work1,work2,1,io_pe)
 
    fname = basename(1:len_trim(basename)) // sdata(2:10) // ".v"
+   print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,1,io_pe)
 
    fname = basename(1:len_trim(basename)) // sdata(2:10) // ".w"
+   print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
 
 

@@ -130,7 +130,7 @@ do idir=1,ndir
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',&
            dir(:,idir),')'
 
-      rhat = dir(:,idir)*delta_val(idel)
+      rhat = dir(:,idir)*delta_val(1)
       rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
       call compute_perp(rhat,rperp1,rperp2)
 

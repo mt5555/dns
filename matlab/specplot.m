@@ -133,7 +133,7 @@ while (time>=0 & time<=9999.3)
   title(sprintf('E Flux'));
   
   'pause...'
-  %pause
+  pause
 
   
   time=fread(fid,1,'float64');
