@@ -15,20 +15,11 @@ ext='.isostr';
 %nx=250; delx_over_eta=.80; epsilon=3.9;
 
 
-%name='/scratch1/taylorm/iso12_500A0002.0000'
-%name='/scratch1/taylorm/iso12_500A0003.0000'
-%name='/scratch1/taylorm/iso12_500A0004.0000'
-%name='/scratch1/taylorm/iso12w512A0008.0000'
-
-
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0000.7500'
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.0000'
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.5000'
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0001.7500'
-%name='/ccs/taylorm/shankara/dns/src/iso12_256_0003.0000'
+%name='/ccs/taylorm/dns/src/check256_0000.8000'
+name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
 %ext='.isostr001';
 
-name='/ccs/taylorm/dns/src/check256_0000.8000'
+
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')

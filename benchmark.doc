@@ -1,4 +1,43 @@
 **********************************************************************************
+hi-res timings on QA, AFTER CPU upgrade:
+
+iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
+           3333 timesteps per eddy turnover time
+           assume 1024^3 needs 6666 timesteps per eddy turnover time
+           = 5 days per eddy turnover time on 512 cpus.  
+
+           2048^3 needs 2*6666 timesteps = 40 days per eddy turnover time
+           on 1024 cpus.  
+
+
+1024^3  144Gb            24Gb per variable                             1b gridpoints
+1536^3  486Gb
+2048^3  1152Gb           192Gb per variable    
+3072^3  3240Gb           needs at least 1620 cpus.  6x1x512?  
+                          try 3x1x512  
+
+
+
+                  cpu time per timestep
+                   (running 5 timesteps)
+1024^3 
+     1x1x512
+
+1536
+     1x1x768 
+     2x1x768 
+     4x1x768 
+
+2048^3     
+      1x1x512     
+      1x1x1024    
+      2x1x1024
+      2x2x512
+      4x1x1024
+
+
+
+**********************************************************************************
 
 512^3 benchmarks
 18Gb memory
@@ -41,8 +80,14 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
            3333 timesteps per eddy turnover time
            assume 1024^3 needs 6666 timesteps per eddy turnover time
            = 5 days per eddy turnover time on 512 cpus.  
-           2048^3 needs 2*6666 timesteps = 40 days per eddy turnover time
 
+           2048^3 needs 2*6666 timesteps = 40 days per eddy turnover time
+           on 1024 cpus.  
+
+
+2048^3  1152Gb           192Gb per variable    
+3072^3  3240Gb           needs at least 1620 cpus.  6x1x512?  
+                          try 3x1x512  
 
 
 1024^3 timeings on ASCI Q
@@ -61,6 +106,9 @@ REDO:
 
 dns:    1x1x512     45.84 (5 timesteps)  9.17m per timestep
         1x1x1024         5 timesteps     4.35m per timestep
+        2x1x1024
+        2x2x512
+
 dnsghost 8x8x8      6.50 (1 timestep)
 dnsghost 2x2x128    insufficient virtual memory
 dnsghost 8x4x16     same

@@ -811,7 +811,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
          call accumulate_str(idir,idel, &
               Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),&
-              Q(i2,j2,k2,1),Q(i2,j2,k2,2),Q(i2,j2,k2,3), &
+              Q(i2,j2,k,1),Q(i2,j2,k,2),Q(i2,j2,k,3), &
               rhat,rperp1,rperp2)
 
          
