@@ -1412,17 +1412,22 @@ u_l_3=u_l**.2
 
 u_l=u_l**2.85
 
-Dl(idel,idir,2)  =  Dl(idel,idir,2)  + u_l_sq                    ! 2.45
-Dl(idel,idir,3)  =  Dl(idel,idir,3)  + u_l_sq*u_l_3              ! 2.55
-Dl(idel,idir,4)  =  Dl(idel,idir,4)  + u_l_sq*u_l_3*u_l_3        ! 2.65
-Dl(idel,idir,5)  =  Dl(idel,idir,5)  + u_l_sq*u_l_3*u_l_3*u_l_3  ! 2.75
-
 Dl(idel,idir,6)  =  Dl(idel,idir,6)  + u_l                       ! 2.85
-
 Dl(idel,idir,7)  =  Dl(idel,idir,7)  + u_l*u_l_sq                ! 2.95
 Dl(idel,idir, 8) =  Dl(idel,idir, 8) + u_l*u_l_3                ! 3.05
 Dl(idel,idir, 8) =  Dl(idel,idir, 9) + u_l*u_l_sq*u_l_3         ! 3.15
 Dl(idel,idir,10) =  Dl(idel,idir,10) + u_l*u_l_3*u_l_3          ! 3.25
+
+
+u_l_sq=1/u_l_sq   ! -.1
+u_l_3=1/u_l_3     ! -.2
+
+Dl(idel,idir,5)  =  Dl(idel,idir,5)  + u_l*u_l_sq                    ! 2.75
+Dl(idel,idir,4)  =  Dl(idel,idir,4)  + u_l*u_l_3                     ! 2.65
+Dl(idel,idir,3)  =  Dl(idel,idir,3)  + u_l*u_l_sq*u_l_3              ! 2.55
+Dl(idel,idir,2)  =  Dl(idel,idir,2)  + u_l*u_l_3*u_l_3               ! 2.45
+
+
 
 
 
