@@ -8,11 +8,16 @@ forcing in wave numbers 1&2, or 2&3,
 tuned so that epsilon=.5
 R_l and E are too low when compared to Gotoh's results.
 
-Try:  mu=.75e-3  IN milkyway
-      R_l=113  epsilon=.5  ke=.5  
 
-check definition of R_l vs. Gotoh paper?
-        
+  mu      epsilon   ke     R_l
+.75e-3      .5      .5      65
+1.35e-3     .09    .08      20
+1.35e-3     .27    .22      29
+1.35e-3     .55    .30      29
+
+
+
+
 
 
 ke  .215
