@@ -55,12 +55,18 @@ rhs(:,:,:,2)=mu*rhs(:,:,:,2) + Q(:,:,:,3)*vor(:,:,:,1) - Q(:,:,:,1)*vor(:,:,:,3)
 rhs(:,:,:,3)=mu*rhs(:,:,:,2) + Q(:,:,:,1)*vor(:,:,:,2) - Q(:,:,:,2)*vor(:,:,:,1)
 
 
-! compute d2 = div(q cross vor)
-d2=0
-do i=1,3
-   call der(vor(1,1,1,i),d1,dummy,work,1,i)
-   d2 = d2+d1
-enddo
+! compute d2 = div(q cross vor), or use the full rhs
+i=1
+call der(rhs(1,1,1,i),d1,dummy,work,1,i)
+d2 = d1
+i=2
+call der(rhs(1,1,1,i),d1,dummy,work,1,i)
+d2 = d2+d1
+i=3
+call der(rhs(1,1,1,i),d1,dummy,work,1,i)
+d2 = d2+d1
+
+
 
 ! solve laplacian p = div(q cross vor).  d2 is overritten with p. 
 call poisson(d2,work)
@@ -68,7 +74,7 @@ call poisson(d2,work)
 ! add grad p to the RHS  (p still stored in d2)
 do i=1,3
    call der(d2,d1,dummy,work,1,i)
-   rhs(:,:,:,i) = rhs(:,:,:,i) + d2
+   rhs(:,:,:,i) = rhs(:,:,:,i) + d1
 enddo
 
 end

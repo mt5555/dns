@@ -1,5 +1,5 @@
 C
-C $Id: fft99.f,v 1.1 2001-05-10 19:08:58 mat Exp $
+C $Id: fft99.f,v 1.2 2001-06-28 22:58:57 mt Exp $
 C
       subroutine fft99(a,work,trigs,ifax,inc,jump,n,lot,isign)
       implicit real*8 (a-h), real*8 (o-z)
@@ -620,6 +620,7 @@ c
       la=la*ifax(k+1)
    80 continue
 c
+
       if (isign.eq.-1) go to 130
 c
 c     if necessary, transfer data from work area

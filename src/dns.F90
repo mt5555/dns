@@ -17,7 +17,7 @@ write(message,'(a)') 'Initializing mpi '
 call print_message(message)
 call init_mpi       
 
-write(message,'(a)') 'Initializing grid'
+write(message,'(a)') 'Initializing grid and b.c.'
 call print_message(message)
 call init_grid      
 

@@ -1,3 +1,4 @@
+#include "macros.h"
 #if 0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -80,16 +81,15 @@ end subroutine
 
 subroutine fftinit(n,index)
 integer n,index
-real*8,allocatable,target  :: trigdata(:)
 character*80 message
 
 if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initialize first!");
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
 
-allocate(trigdata(3*n/2+1))
 fftdata(index).size=n
-call set99(trigdata,fftdata(index).ifax,n)
-fftdata(index).trigs => trigdata
+allocate(fftdata(index).trigs(3*n/2+1))
+call set99(fftdata(index).trigs,fftdata(index).ifax,n)
+
 
 write(message,'(a,i6)') 'Initializing FFT of size n=',n
 call print_message(message)
@@ -102,7 +102,8 @@ subroutine getindex(n1,index)
 integer n1,index
 
 character*80 message_str
-integer i
+integer i,k
+
 
 i=0
 do 
@@ -114,9 +115,9 @@ do
 
    if (fftdata(i).size==0) then
       call fftinit(n1,i)      
-      exit
+      exit 
    endif
-   if (n1==fftdata(i).size) exit
+   if (n1==fftdata(i).size) exit 
 enddo
 index=i
 end subroutine
@@ -166,13 +167,13 @@ end subroutine
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft(p,n1,n1d,n2,n2d,n3,n3d)
-real*8 p(n1d,n2d,n3d)
-real*8 w(min(fftblocks,n2)*(n1+1))
 integer n1,n1d,n2,n2d,n3,n3d
+real*8 p(n1d,n2d,n3d)
+real*8 :: w(min(fftblocks,n2)*(n1+1)) 
 
 integer index,jj,j,k,numffts
-
 call getindex(n1,index)
+
 do k=1,n3
    j=0  ! j=number of fft's computed for each k
    do while (j<n2)
@@ -182,10 +183,11 @@ do k=1,n3
 !         p(n1+2,jj,k)=0
 !      enddo
 
-      call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,n2,-1)
+      call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,-1)
       j=j+numffts
    enddo
 enddo
+
 
 end subroutine
 
@@ -211,17 +213,21 @@ integer numder,n1,n1d,n2,n2d,n3,n3d
 
 integer i,j,k,m
 real*8 temp
+ASSERT("fft99_interface.F90: numder<=2",numder<=2)
 
 call fft(px,n1,n1d,n2,n2d,n3,n3d)
 
 if (numder>=2) then
    do k=1,n3
    do j=1,n2
-   do m = 0, n1/2
-      i = 2*m+1
-      pxx(i,j,k) = -m*m * pi2_squared * px(i,j,k)
-      pxx(i+1,j,k) = -m*m * pi2_squared * px(i+1,j,k)
-   enddo
+      do i=1,n1
+         m=(i-1)/2
+         pxx(i,j,k) = -m*m * pi2_squared * px(i,j,k)
+      enddo
+      ! tweak do that dxx = (dx)(dx)
+      ! this is because we have a cos((n1/2) 2pi x) mode, but no sine!
+      pxx(n1+1,j,k) = 0
+      pxx(n1+2,j,k) = 0
    enddo
    enddo
    call ifft(pxx,n1,n1d,n2,n2d,n3,n3d)
@@ -230,12 +236,14 @@ endif
 if (numder>=1) then
    do k=1,n3
    do j=1,n2
-   do m = 0, n1/2
-      i = 2*m+1
-      temp =  pi2* m * px(i,j,k)
-      px(i,j,k) = -pi2 *m * px(i+1,j,k)
-      px(i+1,j,k) = temp
-   enddo
+      do m = 0, n1/2-1
+         i = 2*m+1
+         temp =  pi2* m * px(i,j,k)
+         px(i,j,k) = -pi2 *m * px(i+1,j,k)
+         px(i+1,j,k) = temp
+      enddo
+      px(n1+1,j,k)=0
+      px(n1+2,j,k)=0
    enddo
    enddo
    call ifft(px,n1,n1d,n2,n2d,n3,n3d)
@@ -268,9 +276,39 @@ real*8 xfac
             xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
             if (xfac<>0) xfac = 1/xfac
             p(i,j,k)=p(i,j,k)*xfac
-!            if (abs(p(i,j,k))>1e-6) then
-!	       print *,im,jm,km,p(i,j,k)
-!            endif
+         enddo
+      enddo
+   enddo
+
+end subroutine
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Filter out the highest cosine mode
+!
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter(p,n1,n1d,n2,n2d,n3,n3d)
+real*8 p(n1d,n2d,n3d)
+real*8 alpha,beta
+integer n1,n1d,n2,n2d,n3,n3d
+
+integer i,j,k,im,jm,km
+real*8 xfac
+
+   do k=1,n3+2
+      km=(k-1)/2
+      do j=1,n2+2
+         jm=(j-1)/2
+         do i=1,n1+2
+            im=(i-1)/2
+            if (km == n3/2) p(i,j,k)=0
+            if (jm == n2/2) p(i,j,k)=0
+            if (im == n1/2) p(i,j,k)=0
          enddo
       enddo
    enddo
