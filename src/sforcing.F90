@@ -322,8 +322,8 @@ character(len=80) :: message
 
 if (0==init_sforcing) then
    !should have h_angle inputted by user eventually
-   !h_angle = 0.0d0
-   h_angle = pi/2
+   h_angle = 0.0d0
+!   h_angle = pi/2
    cos_h_angle=cos(h_angle)
    sin_h_angle=sin(h_angle)
 
@@ -469,8 +469,8 @@ do k=-numb,numb
          fix = 0
       elseif (mod_ii == 0) then
          fix = 0
-      elseif (h_angle == 0.0d0) then
-         fix = 0
+!      elseif (h_angle == 0.0d0) then
+!         fix = 0
       endif
       
 !     do the transformation if fix = 1
@@ -529,11 +529,11 @@ do k=-numb,numb
          
 !         check angle between RR and IIp 
 !         acos(IIp(1)/mod_ii) == h_angle, or IIp(1)/mod_ii == cos(h_angle)
-         if (abs(IIp(1) - mod_ii*(cos_h_angle)) >1e-10*mod_ii) then
-            tta = acos(IIp(1)/mod_ii)
-            print *,'h_angle = ',h_angle
-            write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
-         endif
+!         if (abs(IIp(1) - mod_ii*(cos_h_angle)) >1e-10*mod_ii) then
+!            tta = acos(IIp(1)/mod_ii)
+!            print *,'h_angle = ',tta
+!            write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
+!         endif
          
          ! now write II in old (i,j,k) coordinate system
          
@@ -544,13 +544,14 @@ do k=-numb,numb
 
 
 !        check angle between final RR and II again
-         RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
-         costta = (RRdotII/(mod_rr * mod_ii))
-         if (abs(costta - cos_h_angle) >1e-10) then
-            tta = acos(costta)
-            print *,'h_angle = ',h_angle
-            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
-         endif
+!         RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
+!         costta = (RRdotII/(mod_rr * mod_ii))
+!	write(6,*),'costta =',costta
+!         if (abs(costta - cos_h_angle) >1e-10) then
+!            tta = acos(costta)
+!           write(6,*),'h_angle = ',h_angle
+!            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
+!         endif
 
       
          cmodes(1,i,j,k,:) = RR	
