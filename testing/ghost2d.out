@@ -1,0 +1,109 @@
+Running parallel.  NCPUS=    1 =   1 x  1 x  1                                  
+ Run name:         temp
+ output directory: ./
+ Enter input file type: 
+Diffusion coefficient mu=0.1000E-02                                             
+Diffusion d/dt(KE)/KE on mode k =    1.:     0.08                               
+Diffusion d/dt(KE)/KE on mode k =   91.:   646.81                               
+NS-Alpha:  alpha, alpha/h :    0.00000000    0.0000                             
+Global grid:    128 x   128 x     1                                             
+Local grid (with padding):    130 x   130 x     1                               
+Initial data                                                                    
+Using thin shear layer initial condition
+Projecting initial data...
+Initializing FFT99 of size n=   128                                             
+Time stepping...                                                                
+initial time:    0.0000                                                         
+final time:      0.1000                                                         
+max number timesteps: 1073741824                                                
+
+time=  0.00000(     0)  next output=  0.10000  LSF minutes left:    -1. F       
+for next timestep: delt=0.0111607 cfl_adv= 1.500 cfl_vis= 0.366                 
+max: (u,v,w)      1.00000000000000     0.05000000074506     0.00000000000000    
+<z-vor>= 0.11300E-15   <hel>= 0.00000E+00   max(vor) 0.00000E+00                
+ke:  0.4901669953  enstropy:      415.7104         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -0.4157104 f=   0.0000000 alpha=   0.0000000 total=  -0.4157104  
+ 
+ 1E0   | ***                  KE spectrum    0.0000   
+       |      *              
+       |    ** ** *          
+       |         * **        
+       |              ***    
+       |             *   *   
+       |                  *  
+       |                   * 
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+ 1E-10 |*                   *
+       +---------------------+
+      k=0                 k=  65
+max(div)= 0.00000E+00                                                           
+
+time=  0.01116(     1)  next output=  0.10000  LSF minutes left:    -1. F       
+for next timestep: delt=0.0110587 cfl_adv= 1.500 cfl_vis= 0.362                 
+max: (u,v,w)      1.00956531028968     0.05015099525819     0.00000000000000    
+<z-vor>= 0.11300E-15   <hel>= 0.00000E+00   max(vor) 0.00000E+00                
+ke:  0.4901669953  enstropy:      415.7104         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -0.4157104 f=   0.0000000 alpha=   0.0000000 total=  -0.4157104  
+
+time=  0.02222(     2)  next output=  0.10000  LSF minutes left:    -1. F       
+for next timestep: delt=0.0110365 cfl_adv= 1.500 cfl_vis= 0.362                 
+max: (u,v,w)      1.01148636776321     0.05059979962746     0.00000000000000    
+<z-vor>=-0.25311E-14   <hel>= 0.00000E+00   max(vor) 0.00000E+00                
+ke:  0.4860067620  enstropy:      335.5152         total d/dt(ke):  -0.3727569  
+d/dt(ke) vis=  -0.3355152 f=   0.0000000 alpha=   0.0000000 total=  -0.3355152  
+
+time=  0.03326(     3)  next output=  0.10000  LSF minutes left:    -1. F       
+for next timestep: delt=0.0109728 cfl_adv= 1.500 cfl_vis= 0.360                 
+max: (u,v,w)      1.01729392243208     0.05134466685131     0.00000000000000    
+<z-vor>=-0.12578E-14   <hel>= 0.00000E+00   max(vor) 0.00000E+00                
+ke:  0.4826074991  enstropy:      282.6345         total d/dt(ke):  -0.3073838  
+d/dt(ke) vis=  -0.2826345 f=   0.0000000 alpha=   0.0000000 total=  -0.2826345  
+
+time=  0.04423(     4)  next output=  0.10000  LSF minutes left:    -1. F       
+for next timestep: delt=0.0109172 cfl_adv= 1.500 cfl_vis= 0.358                 
+max: (u,v,w)      1.02227091630213     0.05235284323400     0.00000000000000    
+<z-vor>=-0.31988E-14   <hel>= 0.00000E+00   max(vor) 0.00000E+00                
+ke:  0.4797020093  enstropy:      245.9819         total d/dt(ke):  -0.2632614  
+d/dt(ke) vis=  -0.2459819 f=   0.0000000 alpha=   0.0000000 total=  -0.2459819  
+
+time=  0.10000(    10)  next output=  0.10000  LSF minutes left:    -1. F       
+for next timestep: delt=0.0107034 cfl_adv= 1.500 cfl_vis= 0.351                 
+max: (u,v,w)      1.04199893681924     0.06031262064109     0.00000000000000    
+<z-vor>=-0.42615E-14   <hel>= 0.00000E+00   max(vor) 0.00000E+00                
+ke:  0.4673461042  enstropy:      153.7705         total d/dt(ke):  -0.1578767  
+d/dt(ke) vis=  -0.1537705 f=   0.0000000 alpha=   0.0000000 total=  -0.1537705  
+ 
+ 1E0   | ***                  KE spectrum    0.1000   
+       |      *              
+       |    ** **            
+       |         ****        
+       |                     
+       |              *      
+       |             * *     
+       |                *    
+       |                 * * 
+       |                     
+       |                  *  
+       |                     
+       |                     
+ 1E-10 |*                   *
+       +---------------------+
+      k=0                 k=  65
+max(div)= 0.20279E-13                                                           
+CPU times (min):   (avg/max)
+initialization:      0.00     0.00                                              
+dns_solve:           0.01     0.01                                              
+   time_control            0.00     0.00                                        
+   RHS                     0.00     0.00                                        
+   compute_pdf             0.00     0.00                                        
+   ghost_update            0.00     0.00                                        
+   transpose_to_z          0.00     0.00                                        
+   transpose_from_z        0.00     0.00                                        
+   transpose_to_x          0.00     0.00                                        
+   transpose_from_x        0.00     0.00                                        
+   transpose_to_y          0.00     0.00                                        
+   transpose_from_y        0.00     0.00                                        
