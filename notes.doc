@@ -12,12 +12,14 @@ E&Liu KH problem.
    see nots about ints(3) and ints(9) in params.F90
 
 1. 4th order code using ghost cells:
-        dnsgrid using new dxx is running kh 1024 problem on autry
-        check results when that finishes:  khO, compare to khN
-        run khP, with dnsghost, compare with khO
+
+        khO  dnsgrid using new dxx on autry (done)
+        compare agains khN
+        run khP, with dnsghost, compare with khO    IN
+        run khQ, with dnsvor, compare with khO      done
+
         benchmark parallel decompostions
          
-2. streamfunction-vorticity 2d code  
 3. benchmark FD + transform with different decomposisitons
 4. construct convergence test for KH 1024 problem
       compare with spectral, 4th, 4th+1st order grad, or 1st order div
