@@ -31,17 +31,17 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc,iproc2
 integer i,j,k,jj,l
-integer :: maxbuf=1   ! maximum number of MPI buffers
+integer,parameter :: maxbuf=1   ! maximum number of MPI buffers
 integer :: n          ! loop over message blocks
 integer :: ncount     ! number of message blocks
 integer :: nb         ! loop over MPI buffers
 integer :: nbcount    ! actual number of MPI buffers
 
 #ifdef USE_MPI
-real*8 sendbuf(nslabx*nslabz*ny_2dz,maxbuf)
-real*8 recbuf(nslabx*nslabz*ny_2dz,maxbuf)
-integer ierr,dest_pe,request(maxbuf,2),statuses(MPI_STATUS_SIZE,2*maxbuf)
-integer dest_pe3(3),tag
+real*8 :: sendbuf(nslabx*nslabz*ny_2dz,maxbuf)
+real*8 :: recbuf(nslabx*nslabz*ny_2dz,maxbuf)
+integer :: ierr,dest_pe,request(maxbuf,2),statuses(MPI_STATUS_SIZE,2*maxbuf)
+integer :: dest_pe3(3),tag
 #endif
 
 call wallclock(tmx1)
