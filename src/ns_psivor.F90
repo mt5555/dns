@@ -118,7 +118,7 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,0)
+call compute_psi(w_tmp,psi,rhs,work,psi0,1)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
@@ -127,14 +127,14 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,0)
+call compute_psi(w_tmp,psi,rhs,work,psi0,1)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,0)
+call compute_psi(w_tmp,psi,rhs,work,psi0,1)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 call bc_impose(Q(1,1,3),psi0)

@@ -112,8 +112,8 @@ if (runbs==1) then
 ! init to zero on boundary
 psi_b=0
 
-do j=inty1,inty2
-do i=intx1,intx2
+do j=ny1,ny2
+do i=nx1,nx2
    if (abs(w(i,j)).ge.eps) then
       do k=1,g_nx  !,10
          psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
