@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:1.48];
+times=[1.0000:.01:1.65];
 
 
 if (readdata)
@@ -50,12 +50,29 @@ for t=times
     fclose(fid);
     [nt,ns_e]
   end
+  
+  pdfname=[name,tstr(2:10),'.spdf']
+  fid=fopen(pdfname,'r','l');
+  if (fid>=0)
+    time=fread(fid,1,'float64');
+    npmax=fread(fid,1,'float64');         
+    np=1;
+    for p=1:npmax
+      [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
+      vtot = sum(pdf);
+      Vpdata(p,nt) = sum(pdf.*(bins>=.02 & bins <=.98));
+      Vpdata(p,nt)=Vpdata(p,nt)/vtot;
+    end
+  else
+    Vp=zeros([10,nt]);
+  end
 end
 end
 
 % look at passive scalar number np
-for np=5:5
+for np=1:10
 
+Vp=Vpdata(np,:);
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
 schmidt=squeeze(pints_e(3,np,:))';   % index=1 from fortran data file
@@ -101,7 +118,7 @@ epsilon=15*mu.*mean(ux2,1);                   % only uses ux^2, vy^2, wz^2
 lambda=sqrt( mu.*(2*ke/3) ./ (epsilon/15)  );
 R_l = lambda.*sqrt(2*ke/3)./mu;
 Rt= R_l.*R_l*3/20;
-eta = mu.^3./epsilon;
+eta = (mu.^3./epsilon).^(.25);
 
 
 
@@ -115,7 +132,7 @@ epsilon_c=3*(mu./schmidt).*mean(cx2,1);
 lambda_c=sqrt(c2./mean(cx2,1));
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
 %eta_c=(mu./schmidt).^3 ./ epsilon_c            
-eta_c=eta/sqrt(schmidt);
+eta_c=eta./sqrt(schmidt);
 
 
 
@@ -138,6 +155,8 @@ Su = mean(ux3,1)./mean(ux2,1).^1.5  ;
 Suc = mean(cu,1)./(sqrt(mean(ux2,1)).*mean(cx2,1));
 G = (mean(u2,1) .* mean(uxx2,1))./mean(ux2).^2;
 Gc = (c2 .* mean(cxx2,1) )./(mean(cx2,1).^2);
+Vp2 = Vp.*lambda_c./eta_c;
+
 
 
 ff = Su.*sqrt(Rt)*7/3/sqrt(15);
@@ -151,47 +170,45 @@ gg = sqrt(5/3)*Suc.*sqrt(Rt) + r.*Gc;
 figure(1); clf;
 
 
-subplot(5,2,1)
+subplot(4,2,1)
 plot(time_e,Su)
 title('S_u')
 
-subplot(5,2,2)
+subplot(4,2,2)
 plot(time_e,Suc)
 title('S_{u\theta}')
 
-subplot(5,2,3)
+subplot(4,2,3)
 plot(time_e,G)
 title('G')
 
-subplot(5,2,4)
+subplot(4,2,4)
 plot(time_e,Gc)
 title('G_\theta')
 
 
 
-subplot(5,2,5)
+subplot(4,2,5)
 plot(time_e,ff)
 title('f')
+ax=axis;
+axis([ax(1),ax(2),0,2]);
 
 
-subplot(5,2,6)
+subplot(4,2,6)
 plot(time_e,gg)
 title('g')
+ax=axis;
+axis([ax(1),ax(2),0,10]);
 
 
-subplot(5,2,7)
-plot(time_e,lambda)
-title('\lambda')
-
-subplot(5,2,8)
-plot(time_e,lambda_c)
-title('\lambda_\theta')
-
-subplot(5,2,9)
+subplot(4,2,7)
 plot(time_e,r)
 title('r')
+ax=axis;
+axis([ax(1),ax(2),0,4]);
 
-subplot(5,2,10)
+subplot(4,2,8)
 plot(time_e,R_l)
 title('R_\lambda')
 
@@ -199,24 +216,14 @@ title('R_\lambda')
 figure(1)
 orient tall
 
-% change some of the plots:
-subplot(5,2,5)
-ax=axis;
-axis([ax(1),ax(2),0,2]);
-subplot(5,2,6)
-ax=axis;
-axis([ax(1),ax(2),0,10]);
-subplot(5,2,9)
-ax=axis;
-axis([ax(1),ax(2),0,4]);
 
 % force all axis to be the same.
 % (otherwise, when printing, the plots where we changed y axis above
 % will have a different x-axis.  wierd
 % Note: might instead try some of the print "render" options - see
 % notes in 'help print' about screen and printed output not matching
-for i=1:10
-  subplot(5,2,i)
+for i=1:8
+  subplot(4,2,i)
   ax=axis;
   axis([ax(1),ax(2),ax(3),ax(4)]);
 end
@@ -240,35 +247,30 @@ print('-djpeg','-r90',pname);
 
 
 
-
-fid=fopen([name,'.spdf'],'r','l');
-time=fread(fid,1,'float64');
-npmax=fread(fid,1,'float64');         
-np=1;
-for p=1:npmax
-  [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
-  vtot = sum(pdf);
-  Vp(p) = sum(pdf.*(bins>=.02 & bins <=.98));
-  Vp(p)=Vp(p)/vtot;
-end
-  
-
    
 figure(2); clf;
-subplot(5,2,1)
+subplot(4,2,1)
+plot(time_e,lambda)
+title('\lambda')
+
+subplot(4,2,2)
+plot(time_e,lambda_c)
+title('\lambda_\theta')
+
+
+subplot(4,2,3)
 plot(time_e,eta)
 title('\eta')
 
-subplot(5,2,2)
+subplot(4,2,4)
 plot(time_e,eta_c)
 title('\eta_{\theta}')
 
-subplot(5,2,3)
+subplot(4,2,5)
 plot(time_e,Vp)
-title('\%mix')
+title('%mix')
 
-Vp2 = Vp*lambda_c/eta_c
-subplot(5,2,4)
+subplot(4,2,6)
 plot(time_e,Vp2)
 title('%mix \lambda_{\theta} / \eta_{\theta}')
 
