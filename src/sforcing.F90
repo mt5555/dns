@@ -397,7 +397,7 @@ do im=-2,2
    xfac = (im**2 + jm**2 + km**2)
    if (xfac>0) xfac=1/(-2*pi*xfac)
    !if (delt>0) xfac=xfac/sqrt(delt)
-   xfac=xfac/100
+   !xfac=xfac
    
    do n=1,3
       psix_r(n) = -im*R(k,n,2)*xfac
