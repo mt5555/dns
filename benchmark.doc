@@ -11,6 +11,15 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
 
            2048^3 needs 2*6666 timesteps.  at 2.70m per timestep
            (2048 cpus, 2 rails), that's 25 days for 1 eddy turnover time.
+
+           R_lambda=750  kmax*eta=1
+           2*6666*4.1 = 38 days per eddy turnover time
+           R_lambda=1100  kmax*eta=1
+           4096^3     = 2432 days per eddy turnover time.
+
+           Umax = max( |u| + |v| + |w| ) 
+           CFL=1.5 = Umax delt/delx 
+
             
 
 

@@ -51,14 +51,23 @@ user="taylorm"
                    # a full path
 
 # are we on IRIX or OSF1?
-(status,out) = commands.getstatusoutput("uname")
+(status,out) = commands.getstatusoutput("hostname")
 if (status==0):
-    if (out=="IRIX64"):
+    if (out=="qbfe1"):
         bsub="bsub"
-        path="cronlsf/"
-    else:
+        path="cronqb/"
+    elif (out=="qafe1"):
         bsub="bsub"
         path="cronqa/"
+    elif (out=="qscfe1"):
+        bsub="bsub"
+        path="cronqsc/"
+    elif (out=="bluemountain"):
+        bsub="bsub"
+        path="cronlsf/"
+    else:	
+        print 'Error getting hostname'
+        sys.exit(1)
 else:
     print 'Error getting OS type'
     sys.exit(1)

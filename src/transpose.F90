@@ -11,7 +11,7 @@ integer :: io_nodes(0:ncpu_z),nio,inc,comm_io
 real*8,private :: tmx1,tmx2
 real*8,private,allocatable :: sendbuf(:),recbuf(:)
 
-integer           :: mpi_maxio=28
+integer           :: mpi_maxio=32
 character(len=4)  :: mpi_stripe="64"
 character(len=12) :: mpi_stride="8388608"
 contains
@@ -59,6 +59,18 @@ if (init==0) then
    ! release the old communicator, construct a new one:
    call MPI_Comm_free(comm_io,ierr)
 endif
+
+if (ncpu_x*ncpu_y*ncpu_z <= 256) then
+   mpi_maxio=4
+   mpi_stripe="4"
+else if (ncpu_x*ncpu_y*ncpu_z <= 512) then
+   mpi_maxio=8
+   mpi_stripe="8"
+else
+   ! leave defaults io cpus=32, stipe=64
+endif
+
+
 
 nio=1
 nio=min(mpi_maxio,ncpu_z)
