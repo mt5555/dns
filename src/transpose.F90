@@ -61,10 +61,10 @@ if (init==0) then
    call MPI_Comm_free(comm_io,ierr)
 endif
 
-if (ncpu_x*ncpu_y*ncpu_z <= 256) then
+if (g_nx <= 512) then
    mpi_maxio=4
    mpi_stripe="4"
-else if (ncpu_x*ncpu_y*ncpu_z <= 512) then
+else if (g_nx <= 1024) then
    mpi_maxio=8
    mpi_stripe="8"
 else

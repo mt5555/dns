@@ -153,6 +153,8 @@ icount=icount+1
       do i=1,3
          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i)
+         call print_message("input file:")	
+	 call print_message(fname)
          call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
          print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
 

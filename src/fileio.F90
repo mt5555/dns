@@ -183,7 +183,7 @@ real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
 character(len=*) :: fname
 
-call singlefile_io3(time,p,fname,work,work2,io_read,fpe,.false.,1,8)
+call singlefile_io3(time,p,fname,work,work2,io_read,fpe,.false.,1)
 
 end subroutine
 
@@ -210,7 +210,7 @@ real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
 character(len=*) :: fname
 logical :: output_spec
 
-call singlefile_io3(time,p,fname,work,work2,io_read,fpe,output_spec,1,8)
+call singlefile_io3(time,p,fname,work,work2,io_read,fpe,output_spec,1)
 
 end subroutine
 
@@ -218,7 +218,7 @@ end subroutine
 
 
 subroutine singlefile_io3(time,p,fname,work,work2,io_read,fpe,&
-output_spec,header_type,data_size)
+output_spec,header_type)
 !
 ! I/O routines where all data goes through a single PE and is
 ! written to a single file
@@ -237,8 +237,6 @@ output_spec,header_type,data_size)
 !                 2   no headers
 !                 3   ensight headers
 !
-! data_size = 4 or 8 for real*4 or real*8
-!             data_size=4 not supported for MPI-IO or output_spec
 !
 use params
 use mpi
@@ -246,7 +244,6 @@ use transpose
 implicit none
 integer :: io_read  ! =1 for read, 0 for write
 integer :: fpe
-integer :: data_size
 real*8 :: time
 real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
@@ -378,7 +375,6 @@ character(len=*) :: fname
 integer im_max,km_max,jm_max
 
 
-
 ! local variables
 integer i,j,k,n
 real*8 xnx,xny,xnz
@@ -393,7 +389,7 @@ integer*8 infoin
 CPOINTER fid
 
 #ifndef USE_MPI_IO
-call abort("singilefile_mpi_io: error: code not compiled with MPI-IO")   
+call abort("singlefile_mpi_io: error: code not compiled with MPI-IO")   
 #else
 
 
