@@ -5,21 +5,19 @@ init_cond_subtype==1
 mu=1e-4
 w=0, cutoff=0, bito_savart init only
 
-t=1.5  NIRVANA timings              t=15
-1024x1024  on 5x5:    3.3 min
-1024x1024  on 25x1:   3.21min        32min
-2305x1025 on 5x5      9 min          90min
-2305x1025 on 1x25     in                         1e-7
-
-8192x4096  on 16x8    5.42m to go to t=.01
-                      56.5 days to go to t=150
-           on 128x1   MPI rec sig10. crashed
-           on 64x2    5.63m to go to t=.01
-
 2049x1025 autrey                     t=15: 508min     3.5d for t=150
 
-3072x1536 milkyway 2x1    t=.1  4.29      t=15  (607m)
+3072x1536 milkyway 2x1    t=.1  4.29      t=15  (607m)  vx3072_
+3072x1536 milkyway 2x1                     t=15  IN     vx3072_onesided_
 3072x1536 autrey   2x1    t=.1  6.67
+
+
+milkyway:
+4096x2048 milkyway    t=.1: 19.68m
+                             8.19m (4 cpus 4x1)
+                            11.52m ( 2 cpus 2x1)
+                             8.48  ( 4 cpus 2x2)
+
 
 BlueMtn  
 6400x3200 25x5      t=.01 .67m    t=.1:  3.13m  t=.2: 6.08min
@@ -27,11 +25,6 @@ BlueMtn
 8000x4000 25x5      t=.05  3.36             
 8000x4000 5x25      t=.05  3.56
 
-
-4096x2048 milkyway    t=.1: 19.68m
-                             8.19m (4 cpus 4x1)
-                            11.52m ( 2 cpus 2x1)
-                             8.48  ( 4 cpus 2x2)
 
 
 

@@ -58,8 +58,8 @@ ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPI = -DUSE_MPI
    MPILIB = -lmpi 
-   #LSFLIB = -L /lsf/lib64 -lbat -llsf 
-   #LSFFLAGS = -I/usr/include -I/lsf/share/include -DUSE_LSFTIME
+   LSFLIB = -L /lsf/lib64 -lbat -llsf 
+   LSFFLAGS = -I/usr/include -I/lsf/share/include -DUSE_LSFTIME
 
    LDFLAGS =  -l scs $(LSFLIB)  #-Lstk -lstk
    FFLAGS = -64 -Ofast -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)

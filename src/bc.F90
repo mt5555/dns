@@ -111,7 +111,7 @@ real*8 :: u,v
 if REALBOUNDARY(bdy_x1) then
    !             nx1   nx1+1   nx1+2    nx1+3
    ! stencil (   -1             1              ) /2h
-   !                    -3      4        1     ) /2h
+   !                    -3      4       -1     ) /2h
    !      
    !
    !         -(nx1) + (nx1+2)  = -3(nx1+1) + 4(nx1+2) + (nx1+3)
@@ -119,7 +119,7 @@ if REALBOUNDARY(bdy_x1) then
    do j=by1,by2
 
       if (bdy_x1==INFLOW0_ONESIDED) then
-         w(bx1,j)= 3*w(bx1+1,j)-3*w(bx1+2,j)-w(bx1+3,j)
+         w(bx1,j)= 3*w(bx1+1,j)-3*w(bx1+2,j)+w(bx1+3,j)
       else
          w(bx1,j)=0
       endif
@@ -154,7 +154,7 @@ if REALBOUNDARY(bdy_y2) then
          if (xcord(i)<=xscale/2) then
             w(i,by2)=0
          else
-            w(i,by2)=  3*w(i,by2-1) - 3*w(i,by2-2) - w(i,by2-3)
+            w(i,by2)=  3*w(i,by2-1) - 3*w(i,by2-2) + w(i,by2-3)
          endif
       else
          w(i,by2)=0

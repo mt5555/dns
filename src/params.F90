@@ -541,7 +541,7 @@ allocate(z_kmcord(g_nz))
 allocate(z_imsign(nx))
 allocate(z_jmsign(ny_2dz))
 allocate(z_kmsign(g_nz))
-allocate(y_imsine(ny_2dz))
+allocate(y_imsine(nx_2dy))
 
 pi=1
 pi=4*atan(pi)
