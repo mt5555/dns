@@ -152,7 +152,8 @@ SP_lll=0
 SN_ltt=0
 SN_lll=0
 
-!$omp parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
+
+!$XXX parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
 do idir=1,ndir
 
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',&
@@ -175,12 +176,12 @@ do idir=1,ndir
       
 #endif
 
-
+!$omp parallel do private(rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
    do idel=1,ndelta
 
       rvec = dir(:,idir)*delta_val(idel)
       ! dont bother computing deltas above 50% domain size
-      if ( (rvec(1)**2+rvec(2)**2+rvec(3)**2) >= g_nmin**2/4) exit
+      if ( (rvec(1)**2+rvec(2)**2+rvec(3)**2) < g_nmin**2/4) then
       
       if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
       if (rvec(2)<0) rvec(2)=rvec(2)+nslaby
@@ -238,9 +239,11 @@ do idir=1,ndir
       enddo
       enddo
       enddo
-enddo
+      endif
 enddo
 !$omp end parallel do
+enddo
+
 
 D_ll=D_ll/g_nx/g_ny/g_nz
 D_tt=D_tt/g_nx/g_ny/g_nz

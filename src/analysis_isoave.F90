@@ -40,7 +40,7 @@ CPOINTER :: fid
 ! input file
 basename="temp"
 print *,basename
-tstart=0
+tstart=.5
 tstop=11.0
 tinc=1.0
 icount=0
