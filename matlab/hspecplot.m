@@ -36,9 +36,6 @@ namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
 name = 'hel256_h0_0000.8000';
 mu = 2e-4;
 
-namedir = '/home2/skurien/dns/src/';
-name = '2Dhypo1e4_1024_0000.0000';
-mu = 2e-4;
 
 % plot all the spectrum:
 movie=1;
