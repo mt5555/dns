@@ -38,9 +38,9 @@ real*8 :: kr,ke,ck,xfac
 CPOINTER :: fid
 
 ! input file
-basename="temp"
+basename="temp4_"
 print *,basename
-tstart=.5
+tstart=1.5
 tstop=11.0
 tinc=1.0
 icount=0
