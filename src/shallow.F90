@@ -366,12 +366,19 @@ if (alpha_value>0) then
       !call ifft3d(work,work2)
       divtau(:,:,n)=work  ! use RHS as our initial guess also
       work=work*Q(:,:,3)
+
+#if 0
+      work2=H0   ! solve simplified version of the equations
+      call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,work2,&
+        helmholtz_hform_periodic,.true.)
+#else
       call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
         helmholtz_hform_periodic,.true.)
 !      call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
 !        helmholtz_hform_periodic,.false.)
       !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
       !  helmholtz_hform_periodic,.true.)
+#endif
    enddo
 
    do j=ny1,ny2

@@ -342,13 +342,13 @@ real*8 :: ints(nints),maxs(nints)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! for the shallow water model, we modify the above slightly:
-! ints(1) = < h u_xx,-del**4 u >   
+! ints(1) = < u_xx,-del**4 u >   
 ! ints(2) = < h u_x,u_x >   
 ! ints(5) = .5 < h u , u >                 KE
 ! ints(6) = .5 < h u , u >  + g H^2        KE+PE
 ! ints(8) = < h u,div(tau)' >              NOT COMPUTED YET
 !                              
-! ints(10) = mu*< h u, -del**4 u >   hyper diffusion term + smag. diffusion
+! ints(10) = mu*< u, -del**4 u >   hyper diffusion term + smag. diffusion
 !
 ! E = ints(6) = KE+PE
 ! dE/dt = ints(10)   + ints(8)

@@ -1,11 +1,11 @@
 3            ! input file type
 shallow      ! equations (shallow, ns_psivor, ns_uvw)
 sht          ! initial condition:  shallow water turbulence
-8            ! init condition subtype
+0            ! init condition subtype
 none         ! forcing:  none, iso12
 hyper        ! viscosity type  (hyper)
 5000         ! viscosity value (ke dissapation rate of 2h mode)  5000 
-.0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+2.0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky coefficient (0=disabled)
 0            ! compute_structure functions
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
