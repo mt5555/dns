@@ -39,10 +39,10 @@ if (compute_transfer) then
 endif
 
 
-
-if (.not.doit_model) return
-
-
+! compute spectrum
+! always compute at first timestep because transfer cannot be computed
+! on last timestep.   
+if (doit_model .or. time==time_initial) then
 if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
@@ -53,6 +53,10 @@ if ( g_bdy_x1==PERIODIC .and. &
    !spectral transfer functions:
    compute_transfer=.true.
 endif
+endif
+
+
+if (.not.doit_model) return
 
 !
 ! the "expensive" scalars

@@ -154,7 +154,9 @@ doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next,1,0)
 time_target=min(time_target,time_next)
 
 !
-! model specific output.  
+! model specific output.  usually expensive, so dont
+!                         compute on first or last timestep
+!                         unless it happens to be a daig_dt interval
 ! dns:      structure functions and time averages
 ! disnvor:  elliptical contours
 !
