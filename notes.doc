@@ -1,15 +1,15 @@
 1. put in CJ functions
+2. hyper viscosity in NS code
+3. check Energy for 250^3 runs
+
 
 2. ns_ghost:  4th order code using ghost cells:
         benchmark parallel decompostions
 
 3. psi-vor code:
-        fix output1/input1 for non-perfect decompositions
-        benchmark parallel run (see runs.log)
-        set PSI interp ON if wcutoff>0
+        fix output1/input1 for non-perfect decompositions? not really needed.  
 
 
-1. hyper viscosity in NS code
 1. change NS-alpha so forcing always appears as just 'f'
    see nots about ints(3) and ints(9) in params.F90
 2. construct convergence test for KH problem

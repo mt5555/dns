@@ -89,14 +89,20 @@ end subroutine
 
 
 
-
-
 subroutine bcw_impose(w)
 !
 ! on non-periodic or non-reflective boundarys:
 !
 ! set w=0 on boundary for inflow
-! interpolate for outflow
+! interpolate for outflow.
+!
+! set boundary so that centered differences one away are the same as
+! onesided differnces at that point.  
+! we get the same anser if we do this for: 
+!    2nd order d/dx centered = 2nd order d/dx onesided 
+!    2nd order dd/dxx centered = 1st order dd/dxx onsided
+!    2nd order extrapolation
+!    
 !  
 use params
 implicit none
