@@ -78,7 +78,7 @@ integer :: in_numt
 
 
 numt_max=2*numt_max
-call print_message("Increasig size of tracer array")
+call print_message("Increasing size of tracer array")
 write(message,'(a,i5)') "new size=",numt_max
 call print_message(message)
 
@@ -477,7 +477,7 @@ if (rk4stage==4) then
 
 
    ! insert points into tracer() if necessary:
-   if (numt>(3*numt_max/4)) call enlarge_tracers()
+   if (numt> (3*numt_max)/4 ) call enlarge_tracers()
    j=numt
    call insert(tracer(1,1),tracer(1,2),tracer(1,ndim+1))
    if (j/=numt .and. mod(numt,50)==0) then

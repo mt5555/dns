@@ -18,7 +18,7 @@ logical :: doit_model
 
 if (.not.doit_model) return
 
-call comp_ellipse(Qhat(1,1,1,1),0)
+call comp_ellipse(Qhat(1,1,1,1),0,0)
 call ellipse_output(time)
 
 

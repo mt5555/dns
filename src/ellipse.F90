@@ -155,13 +155,12 @@ end subroutine
 
 
 
-
-subroutine comp_ellipse(w,setmax)
+subroutine comp_ellipse(w,setmax,center_only)
 use params
 use mpi
 implicit none
 real*8 :: w(nx,ny)
-integer :: setmax
+integer :: setmax,center_only
 
 !local
 integer :: nell,np,ierr,i
@@ -175,8 +174,9 @@ if (init==0) call ellipse_init()
 call findcenter(w,center)
 if (setmax==1) then
    mxw_init=mxw
-   return
 endif
+if (center_only==1) return
+
 
 if (mxw_init<=0) then
    call abort("ellipse(): mxw_init was not set")

@@ -331,7 +331,7 @@ do i=bx1,bx2
    Qhat(i,j,nz1,2)= psisum*delx*dely/(4*pi)  - biotsavart_ubar*ycord(j)
 enddo
 enddo
-call comp_ellipse_reshape(w,1)  ! use initial w to set max vorticity for ellipse contours
+call comp_ellipse_reshape(w,1,1)  ! use initial w to set max vorticity for ellipse contours
 
 ! We are generating an initial condition, so store w in Qhat(:,:,:,1)
 ! otherwise, initial condition was read in, and is already in Qhat(:,:,:,1)
@@ -385,11 +385,11 @@ end subroutine
 
 
 
-subroutine comp_ellipse_reshape(w,setmax)
+subroutine comp_ellipse_reshape(w,setmax,center_only)
 use params
 use ellipse
 implicit none
 real*8 :: w(nx,ny)
-integer :: setmax
-call comp_ellipse(w,setmax)
+integer :: setmax,center_only
+call comp_ellipse(w,setmax,center_only)
 end
