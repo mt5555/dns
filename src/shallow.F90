@@ -191,6 +191,7 @@ subroutine getrhs(rhs,Qhat,Q,time,compute_ints,work,work2)
 !
 use params
 use fft_interface
+use spectrum
 implicit none
 
 ! input
@@ -393,10 +394,108 @@ else
 endif
 
 
+
+! use gradu to store -del**4 U to compute viscous KE dissapation
+! use gradv to store del U to compute viscous KE dissapation (for alpha)
+gradu=0
+do j=ny1,ny2
+   jm=abs(jmcord(j))
+   do i=nx1,nx2
+      im=abs(imcord(i))
+      
+      ! laplacian  del U
+      xfac=-((im*im + jm*jm )*pi2_squared)
+      gradv(i,j,1)=xfac*Qhat(i,j,1)
+      gradv(i,j,2)=xfac*Qhat(i,j,2)
+      
+      ! -del**4 
+      xfac=-(xfac**4)
+      gradu(i,j,1)=xfac*Qhat(i,j,1)
+      gradu(i,j,2)=xfac*Qhat(i,j,2)
+      
+   enddo
+enddo
+
+! back to gridspace:
+call ifft3d(gradu(1,1,1),work)
+call ifft3d(gradu(1,1,2),work)
+
+#define POSDEF_HYPERVIS
+#ifdef POSDEF_HYPERVIS
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,1)=rhs(i,j,1)+mu*gradu(i,j,1)/Q(i,j,3)
+      rhs(i,j,2)=rhs(i,j,2)+mu*gradu(i,j,2)/Q(i,j,3)
+   enddo
+   enddo
+#endif
+
+
+! compute ke_diss = energy disspation from hyperviscosity:
+if (compute_ints==1) then
+   call ifft3d(gradv(1,1,1),work)
+   call ifft3d(gradv(1,1,2),work)
+   do j=ny1,ny2
+   do i=nx1,nx2
+#ifdef POSDEF_HYPERVIS
+      ke_diss = ke_diss + (Q(i,j,1)*gradu(i,j,1) &
+                        + Q(i,j,2)*gradu(i,j,2)) 
+      gradu_diss = gradu_diss + (gradu(i,j,1)*gradv(i,j,1) &
+                        + gradu(i,j,2)*gradv(i,j,2)) 
+#else
+      ke_diss = ke_diss + (Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &
+                        + Q(i,j,3)*Q(i,j,2)*gradu(i,j,2)) 
+      gradu_diss = gradu_diss + (Q(i,j,3)*gradu(i,j,1)*gradv(i,j,1) &
+                        + Q(i,j,3)*gradu(i,j,2)*gradv(i,j,2)) 
+#endif
+   enddo
+   enddo
+
+   ints(1)=gradu_diss/g_nx/g_ny
+   ints(2)=normdx/g_nx/g_ny
+   !ints(3) = 
+   ints(4)=vor/g_nx/g_ny
+   ints(6)=(ke+pe)/g_nx/g_ny
+   ints(5)=ke/g_nx/g_ny
+   !ints(7)
+   ints(8)=a_diss/g_nx/g_ny         ! < Hu,div(tau)' >  
+   ! ints(9)  = 
+   ints(10)=(smag_diss+mu*ke_diss)/g_nx/g_ny     ! u dot laplacian u
+
+   if (compute_transfer) then
+#ifndef POSDEF_HYPERVIS
+      call abort("shallow.F90: computation of transfer function requires POSDEF")
+#endif
+      transfer_comp_time=time
+      spec_diff=0
+      do n=1,2
+
+         do j=ny1,ny2
+            jm=abs(jmcord(j))
+            do i=nx1,nx2
+               im=abs(imcord(i))
+               
+               ! laplacian  del U
+               xfac=((im*im + jm*jm )*pi2_squared)
+               xfac=(xfac**4)
+               work(i,j)=sqrt(xfac)*Qhat(i,j,n)
+            enddo
+         enddo
+
+         call compute_spectrum_fft(work,work,io_pe,spec_tmp)
+         spec_diff=spec_diff - mu*spec_tmp
+      enddo
+   endif
+endif
+
+
+
 ! back to spectral space:
 do n=1,3
    call fft3d(rhs(1,1,n),work)
 enddo
+
+
 
 ! hyper viscosity and dealias:
 !
@@ -412,56 +511,21 @@ do j=ny1,ny2
          rhs(i,j,1)=0
          rhs(i,j,2)=0
          rhs(i,j,3)=0
+#ifndef POSDEF_HYPERVIS
       else
-         ! laplacian  del U
-         xfac=-((im*im + jm*jm )*pi2_squared)
-         gradv(i,j,1)=xfac*Qhat(i,j,1)
-         gradv(i,j,2)=xfac*Qhat(i,j,2)
-
-         ! -del**4 
-         xfac=-(xfac**4)
-         gradu(i,j,1)=xfac*Qhat(i,j,1)
-         gradu(i,j,2)=xfac*Qhat(i,j,2)
-
          ! - mu del**4
+         xfac=-((im*im + jm*jm )*pi2_squared)
+         xfac=-(xfac**4)
          xfac=mu*xfac
          rhs(i,j,1)=rhs(i,j,1) + xfac*Qhat(i,j,1)
          rhs(i,j,2)=rhs(i,j,2) + xfac*Qhat(i,j,2)
+#endif
       endif
    enddo
 enddo
 
 
 
-
-! compute ke_diss = energy disspation from hyperviscosity:
-if (compute_ints==1) then
-   call ifft3d(gradu(1,1,1),work)
-   call ifft3d(gradu(1,1,2),work)
-   call ifft3d(gradv(1,1,1),work)
-   call ifft3d(gradv(1,1,2),work)
-   do j=ny1,ny2
-   do i=nx1,nx2
-      ke_diss = ke_diss + (Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &
-                        + Q(i,j,3)*Q(i,j,2)*gradu(i,j,2)) 
-      gradu_diss = gradu_diss + (Q(i,j,3)*gradu(i,j,1)*gradv(i,j,1) &
-                        + Q(i,j,3)*gradu(i,j,2)*gradv(i,j,2)) 
-   enddo
-   enddo
-
-   ints(1)=gradu_diss/g_nx/g_ny
-   ints(2)=normdx/g_nx/g_ny
-   !ints(3) = forcing terms
-
-   ints(4)=vor/g_nx/g_ny
-   ints(6)=(ke+pe)/g_nx/g_ny
-   ints(5)=ke/g_nx/g_ny
-
-   !ints(7)
-   ints(8)=a_diss/g_nx/g_ny         ! < Hu,div(tau)' >  
-   ! ints(9)  = < u,f >  (alpha model only)
-   ints(10)=(smag_diss+mu*ke_diss)/g_nx/g_ny     ! u dot laplacian u
-endif
 
 call wallclock(tmx2)
 tims(5)=tims(5)+(tmx2-tmx1)

@@ -17,6 +17,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 logical :: doit_model
 
+real*8 :: tsave
 
 if (compute_transfer) then
    ! spec_r computed last time step
@@ -24,9 +25,7 @@ if (compute_transfer) then
    ! beginning of this flag (becuase compute_transfer flag was set)
    ! So they are all known at time_old. Now compute spec_r_new 
    ! (used to compute edot_r at mid-time level)
-   call compute_Edotspec(time,Q,q1,work1,work2)
-
-   stop 'THIS-NEEDS-WORK'
+   call compute_Edotspec_shallow(time,Q,q1,work1,work2)
 
    ! e_dot_r    known at (time + time_old)/2
    ! spec_diff  known at time_old
@@ -34,11 +33,16 @@ if (compute_transfer) then
    ! flag still set = .true.
 
    spec_diff_new=spec_diff  
+   tsave=transfer_comp_time
    call getrhs(q1,Qhat,Q,time,1,work1,work2)
+   transfer_comp_time=tsave
+
    spec_diff = (spec_diff_new+spec_diff)/2
    
    ! output all the spectrum:
    call output_tran(time,Q,q1,q2,q3,work1,work2)
+
+
    compute_transfer=.false.
 endif
 
@@ -53,7 +57,7 @@ if ( g_bdy_x1==PERIODIC .and. &
    
    !set this flag so that for next timestep, we will compute and save
    !spectral transfer functions:
-   !compute_transfer=.true.
+   compute_transfer=.true.
 endif
 
 
