@@ -23,6 +23,13 @@ real*8,private ::  time_old=-1
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
 
+! cospectrum in x,y,z directions.
+! n_var=1,3:  uv, uw, vw
+real*8,private ::  cospec_x(0:g_nx/2,n_var)   
+real*8,private ::  cospec_y(0:g_ny/2,n_var)
+real*8,private ::  cospec_z(0:g_nz/2,n_var)
+
+
 integer,private :: iwave=-1
 
 
@@ -490,6 +497,28 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_helicity_rn,1+iwave)
    call cwrite8(fid,spec_helicity_rp,1+iwave)
    call cclose(fid,ierr)
+
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".cospec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "output_cospec(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   x=g_nx/2; call cwrite8(fid,x,1)
+   x=g_ny/2; call cwrite8(fid,x,1)
+   x=g_nz/2; call cwrite8(fid,x,1)
+   call cwrite8(fid,time,1)
+   do i=1,3
+      call cwrite8(fid,cospec_x(0,i),g_nx/2+1)
+   enddo
+   do i=1,3
+      call cwrite8(fid,cospec_y(0,i),g_ny/2+1)
+   enddo
+   do i=1,3
+      call cwrite8(fid,cospec_z(0,i),g_nz/2+1)
+   enddo
+   call cclose(fid,ierr)
 endif
 end subroutine
 
@@ -936,7 +965,7 @@ real*8 :: work(nx,ny,nz)
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
-real*8 :: diss1,diss2,hetot
+real*8 :: diss1,diss2,hetot,co_energy(3)
 integer i,j,k,jm,km,im,iwave_max,n
 
 if (skip_fft==0) then
@@ -954,6 +983,9 @@ diss1=0
 diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
+cospec_x=0
+cospec_y=0
+cospec_z=0
 
 do j=ny1,ny2
    jm=jmcord(j)
@@ -965,7 +997,6 @@ do j=ny1,ny2
          rwave = im**2 + jm**2 + km**2
          iwave = nint(sqrt(rwave))
          
-
          !ux = - pi2*im*p1(i+imsign(i),j,k,1)
          vx = - pi2*im*p1(i+imsign(i),j,k,2)
          wx = - pi2*im*p1(i+imsign(i),j,k,3)
@@ -984,11 +1015,23 @@ do j=ny1,ny2
          if (km==0) energy=energy/2
          if (jm==0) energy=energy/2
          if (im==0) energy=energy/2
+
+         co_energy(1) = energy*p1(i,j,k,1)*p1(i,j,k,2)
+         co_energy(2) = energy*p1(i,j,k,1)*p1(i,j,k,3)
+         co_energy(3) = energy*p1(i,j,k,2)*p1(i,j,k,3)
+
+         cospec_x(abs(im),:)=cospec_x(abs(im),:)+co_energy(:)
+         cospec_y(abs(jm),:)=cospec_x(abs(jm),:)+co_energy(:)
+         cospec_z(abs(km),:)=cospec_x(abs(km),:)+co_energy(:)
+
+
          energy = energy*(p1(i,j,k,1)*(wy-vz) + &
                           p1(i,j,k,2)*(uz-wx) + &
                           p1(i,j,k,3)*(vx-uy)) 
          if (energy>0) spec_helicity_rp(iwave)=spec_helicity_rp(iwave)+energy
          if (energy<0) spec_helicity_rn(iwave)=spec_helicity_rn(iwave)+energy
+
+
 
          hetot=hetot+energy
          diss1=diss1 -2*energy*iwave**2*pi2_squared

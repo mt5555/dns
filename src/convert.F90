@@ -248,28 +248,7 @@ icount=icount+1
    if (convert_opt==7) then  ! -cout gradu
       call input_uvw(time,Q,vor,work1,work2,1)
       call print_message("computing gradu ")
-      do i=1,3
-      do j=1,3    
-         ! u_i,j
-         write(message,'(a,i1,a,i1,a)') 'computing u_',i,',',j,' ...'
-         call print_message(message)
-         call der(Q(1,1,1,i),vor,work1,work2,DX_ONLY,j)
-
-         write(sdata,'(f10.4)') 10000.0000 + time
-         write(ext,'(2i1)') i,j
-         basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-         fname = basename(1:len_trim(basename)) // sdata(2:10) // '.' // ext(1:2)
-         call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
-
-         if (j==1) then
-            basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-                  // "-raw"
-            fname = basename(1:len_trim(basename)) // sdata(2:10) // "." &
-            // extension(i:i)
-            call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
-         endif
-      enddo
-      enddo
+      call gradu_stats(time,Q,vor,work1,work2)
    endif
 
 
@@ -289,3 +268,134 @@ call close_mpi
 end program
 
 
+
+
+
+
+
+subroutine gradu_stats(time,Q,vor,work1,work2)
+use params
+use mpi
+use fft_interface
+use subcubes
+implicit none
+real*8 :: time
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: vor(nx,ny,nz)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+integer i,j
+character(len=280) basename,fname,sdata,message
+character(len=4) :: extension="uvwX"
+character(len=8) :: ext2,ext
+
+integer :: sc
+integer,parameter :: ssize=128
+real*8 :: dx(1:2*ssize),dy(1:2*ssize),dz(1:2*ssize)
+real*8 :: data(ssize,ssize,ssize)
+real*8 :: dslice(2*ssize,2*ssize,1)
+real*8 :: mat(3,3,3)
+real*8,allocatable :: gradu(:,:,:)
+real*8,allocatable :: gradu2(:,:,:)
+integer :: i2,j2,k2,k
+
+call setup_subcubes(ssize)
+allocate(gradu(3,3,nsubcube))
+allocate(gradu2(3,3,nsubcube))
+gradu=0
+gradu2=0
+
+do i=1,3
+do j=1,3    
+   ! u_i,j
+   write(message,'(a,i1,a,i1,a)') 'computing u_',i,',',j,' ...'
+   call print_message(message)
+   call der(Q(1,1,1,i),vor,work1,work2,DX_ONLY,j)
+
+   do sc=1,nsubcube
+      dx(1:ssize)=subcube_corner(1,sc)+subcube_cords(:)
+      dy(1:ssize)=subcube_corner(2,sc)+subcube_cords(:)
+      dz(1:ssize)=subcube_corner(3,sc)+subcube_cords(:)
+      call interp_subcube(ssize,ssize,ssize,dx,dy,dz,data,vor,0,mat)
+      do k2=1,ssize
+      do j2=1,ssize
+      do i2=1,ssize
+         gradu(i,j,sc)=gradu(sc,i,j)+data(i2,j2,k2)
+         gradu2(i,j,sc)=gradu2(sc,i,j)+data(i2,j2,k2)**2
+      enddo
+      enddo
+      enddo
+      gradu(sc,i,j)=gradu(sc,i,j)/ssize/ssize/ssize
+      gradu2(sc,i,j)=gradu2(sc,i,j)/ssize/ssize/ssize
+   enddo
+
+#if 0   
+   write(sdata,'(f10.4)') 10000.0000 + time
+   write(ext,'(2i1)') i,j
+   basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+   fname = basename(1:len_trim(basename)) // sdata(2:10) // '.' // ext(1:2)
+   call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+   
+   if (j==1) then
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+           // "-raw"
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // "." &
+           // extension(i:i)
+      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+   endif
+#endif
+enddo
+enddo
+
+! output the gradu matricies:
+write(sdata,'(f10.4)') 10000.0000 + time
+write(ext,'(2i1)') i,j
+basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu'
+open(15,file=fname,form='formatted')
+do sc=1,nsubcube
+   write(15,'(3ef12.8,i5)') subcube_corner(1:3,sc),ssize
+   do i=1,3
+      write(15,'(3e20.10)') (gradu(i,j,sc),j=1,3)
+   enddo
+enddo
+close(15)
+
+
+
+write(sdata,'(f10.4)') 10000.0000 + time
+write(ext,'(2i1)') i,j
+basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu2'
+open(15,file=fname,form='formatted')
+do sc=1,nsubcube
+   write(15,'(3ef12.8,i5)') subcube_corner(1:3,sc),ssize
+   do i=1,3
+      write(15,'(3e20.10)') (gradu2(i,j,sc),j=1,3)
+   enddo
+enddo
+close(15)
+
+return
+
+
+! loop thru gradu matrix, looking for selections
+do sc=1,nsubcube
+   write(sdata,'(f10.4)') 10000.0000 + time
+   write(ext,'(i5)') sc  ! 10000
+   basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+   fname = basename(1:len_trim(basename)) // sdata(2:10) // '.sc' // ext(2:5)
+
+
+   ! select on gradu(:,:,sc)
+   dx(:)=subcube_corner(1,sc)+wsubcube_cords(:)
+   dy(:)=subcube_corner(2,sc)+wsubcube_cords(:)
+   dz(:)=subcube_corner(3,sc)+wsubcube_cords(:)
+   do k=1,2*ssize
+      call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,vor,0,mat)
+      ! output this slab:
+   enddo
+enddo
+
+
+end subroutine

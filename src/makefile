@@ -180,7 +180,7 @@ FILEIO = fileio.o fileioc.o udm_interface.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
 #diagnostics for 3d turbulence runs:
-TURB_DIAG = pdf.o turb_diag.o isoave.o
+TURB_DIAG = pdf.o turb_diag.o isoave.o subcubes.o
 
 #diagnostics for compressible DNS runs:
 CDNS_DIAG = pdf.o cdns_diag.F90

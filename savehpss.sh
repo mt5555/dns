@@ -34,6 +34,7 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
    psi store -d dns/$name  $name*.scalars
    psi store -d dns/$name  $name*.spec
    psi store -d dns/$name  $name*.hspec
+   psi store -d dns/$name  $name*.cospec
    psi store -d dns/$name  $name*.pspec
    psi store -d dns/$name $name*.spect
    psi store -d dns/$name $name*.cross

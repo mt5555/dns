@@ -6,19 +6,21 @@ cases2v.o: macros.h params.o tracers.o ellipse.o bc.o makefile
 cases3v.o: macros.h params.o mpi.o transpose.o makefile 
 cdns_diag.o: macros.h params.o pdf.o spectrum.o sforcing.o fft_interface.o transpose.o makefile 
 cns.o: macros.h params.o ghost.o sforcing.o fft_interface.o transpose.o makefile 
+convert.o: macros.h params.o mpi.o fft_interface.o subcubes.o makefile 
 conv.o: macros.h params.o transpose.o makefile 
-convert.o: macros.h params.o mpi.o fft_interface.o makefile 
 dns.o: macros.h params.o mpi.o tracers.o makefile 
 ellipse.o: macros.h params.o mpi.o makefile 
 fft99_interface.o: macros.h makefile 
-fft_interface.o: fftstk_interface.F90 fftsgi_interface.F90 fftcpq_interface.F90 fft99_interface.F90 makefile 
 fftcpq_interface.o: macros.h <cxmldef.for> makefile 
+fft_interface.o: fftstk_interface.F90 fftsgi_interface.F90 fftcpq_interface.F90 fft99_interface.F90 makefile 
 fftops.o: macros.h params.o fft_interface.o transpose.o mpi.o makefile 
 fftsgi_interface.o: macros.h makefile 
 fftstk_interface.o: macros.h makefile 
 fileio.o: macros.h params.o mpi.o transpose.o tracers.o fft_interface.o makefile 
 ghost.o: macros.h params.o mpi.o makefile 
+ghost-nonghostcells.o: macros.h params.o mpi.o makefile 
 ghostops.o: macros.h params.o fft_interface.o ghost.o transpose.o makefile 
+ghost-yesghost.o: macros.h params.o mpi.o makefile 
 ibm.o: macros.h params.o fft_interface.o makefile 
 init_data.o: macros.h params.o mpi.o transpose.o makefile 
 init_grid.o: macros.h params.o fft_interface.o transpose.o mpi.o makefile 
@@ -26,8 +28,8 @@ init_mpi.o: macros.h params.o mpi.o makefile
 integrals.o: macros.h params.o mpi.o makefile 
 isoave.o: macros.h params.o transpose.o mpi.o makefile 
 mpi.o: makefile 
-ns.o: macros.h params.o sforcing.o spectrum.o makefile 
 ns_decomp3.o: macros.h params.o transpose.o makefile 
+ns.o: macros.h params.o sforcing.o spectrum.o makefile 
 ns_ghost.o: macros.h params.o ghost.o sforcing.o fft_interface.o transpose.o makefile 
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 ns_ibm.o: macros.h params.o ibm.o fft_interface.o makefile 
@@ -38,11 +40,12 @@ particles.o: macros.h params.o mpi.o ghost.o makefile
 pdf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 psivor_diag.o: macros.h params.o ellipse.o tracers.o makefile 
 sforcing.o: macros.h params.o fft_interface.o mpi.o makefile 
-shallow.o: macros.h params.o fft_interface.o spectrum.o sforcing.o transpose.o makefile 
 shallow_diag.o: macros.h params.o spectrum.o makefile 
+shallow.o: macros.h params.o fft_interface.o spectrum.o sforcing.o transpose.o makefile 
 solve.o: macros.h params.o ghost.o bc.o mpi.o makefile 
 spectrum.o: macros.h params.o mpi.o makefile 
 splitspec.o: macros.h makefile 
+subcubes.o: macros.h params.o mpi.o makefile 
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 
 timecontrol.o: macros.h params.o transpose.o makefile 
 tracers.o: macros.h params.o ellipse.o mpi.o ghost.o makefile 

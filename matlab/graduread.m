@@ -121,12 +121,8 @@ image(squeeze(gradu(:,:,1,1,1)),'CDataMapping','scaled' );
 title('\nabla u \epsilon^{-1/3} L^{2/3}')
 caxis([mn,mx])
 colorbar
-print -dpsc -r72  gradu-colormap.ps
-print -djpeg -r72  gradu-colormap.jpg
-
-
-
-
+print -dpsc -r72  gradu-stats.ps
+print -djpeg -r72  gradu-stats.jpg
 
 
 
@@ -169,17 +165,21 @@ for i=1:8
 
         if (count==m1*m2)
           count=0;
-          figcount=figcount+1
-          subplot(m1,m2,1)
-          text(.5,0,sprintf('threshold=%f,%f std',small/diag_std,large/diag_std));
-          print('-dpsc',sprintf('gradu-%i.ps',figcount)); 
-          print('-djpeg','-r72',sprintf('gradu-%i.jpg',figcount)); 
+          disp('warning: more than 25 subcubes selected. only the last plot will be saved');
         end
+
 
       end 
     end
   end
 end
+
+subplot(m1,m2,1)
+text(.5,0,sprintf('threshold(std)=%.2f, %.2f',small/diag_std,large/diag_std));
+figure(1);
+print('-dpsc',sprintf('gradu-set.ps'));
+print('-djpeg','-r72',sprintf('gradu-set.jpg'));
+
 
 
 
