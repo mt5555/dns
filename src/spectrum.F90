@@ -444,7 +444,10 @@ else
    access="a"
 endif
 
-ASSERT("output_tran: transfer_comp_time<>time_old",transfer_comp_time==time_old)
+if (transfer_comp_time<>time_old) then
+   call print_message("WARNING: transfer spectrum not calculated")	
+   return
+endif
 
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time_initial
