@@ -24,7 +24,7 @@ use mpi
 use fft_interface
 implicit none
 real*8,save  :: Q(nx,ny,nz,n_var)
-real*8,save  :: vor(nx,ny,nz,n_var)
+real*8,allocatable  :: vor(:,:,:,:)
 real*8,save  :: work1(nx,ny,nz)
 real*8,save  :: work2(nx,ny,nz)
 character(len=80) message,sdata,tname
@@ -57,6 +57,12 @@ call init_model
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Q=0
+
+if (convert_opt == 3) then
+   allocate(vor(1,1,1,1)) ! dummy variable -wont be used
+else
+   allocate(vor(nx,ny,nz,n_var))
+endif
 
 
 time=tstart
@@ -126,9 +132,9 @@ icount=icount+1
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2"
-      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,2)
+      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2e"
-      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,3)
+      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
    endif
 
    if (tstart>0) then
