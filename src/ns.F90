@@ -420,7 +420,13 @@ endif
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (mu_hyper>=4) then
-   call ke_shell_z(Qhat,ke,numk,dealias_sphere_kmax2_1,dealias_sphere_kmax2)
+   if (dealias==1) then
+      call ke_shell_z(Qhat,ke,numk,dealias_23_kmax2_1,dealias_23_kmax2)
+   else if (dealias==2)
+      call ke_shell_z(Qhat,ke,numk,dealias_sphere_kmax2_1,dealias_sphere_kmax2)
+   else
+      stop 'error - hyperviscosity not tuned for no dealiasing case'
+   endif
    ! units of E = m**2/s**2
    ! units of E(k) = m**3/s**2
    ! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
