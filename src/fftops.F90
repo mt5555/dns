@@ -135,30 +135,30 @@ enddo
             ! compute the divergence
             p(i,j,k)=0
             if (mod(i-nx1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - pi2*im*u(i+1,j,k,1)
+               p(i,j,k)=p(i,j,k) - im*u(i+1,j,k,1)
             else
-               p(i,j,k)=p(i,j,k) + pi2*im*u(i-1,j,k,1)
+               p(i,j,k)=p(i,j,k) + im*u(i-1,j,k,1)
             endif
 
             if (mod(j-ny1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - pi2*jm*u(i,j+1,k,2)
+               p(i,j,k)=p(i,j,k) - jm*u(i,j+1,k,2)
             else
-               p(i,j,k)=p(i,j,k) + pi2*jm*u(i,j-1,k,2)
+               p(i,j,k)=p(i,j,k) + jm*u(i,j-1,k,2)
             endif
 
             if (g_nz>1) then
             if (mod(k-nz1+1,2)==1) then
-               p(i,j,k)=p(i,j,k) - pi2*km*u(i,j,k+1,3)
+               p(i,j,k)=p(i,j,k) - km*u(i,j,k+1,3)
             else
-               p(i,j,k)=p(i,j,k) + pi2*km*u(i,j,k-1,3)
+               p(i,j,k)=p(i,j,k) + km*u(i,j,k-1,3)
             endif
             endif
-
 
             ! compute laplacian inverse
-            xfac= pi2*pi2*(im*im +km*km + jm*jm)
-            if (xfac/=0) xfac = 1/xfac
-            p(i,j,k)=-xfac*p(i,j,k)
+            xfac= (im*im +km*km + jm*jm)
+            if (xfac/=0) xfac = -1/xfac
+            p(i,j,k)=xfac*p(i,j,k)
+
 
          enddo
       enddo
@@ -176,19 +176,20 @@ enddo
 
             ! compute gradient  dp/dx
             if (mod(i-nx1+1,2)==1) then
-               uu= - pi2*im*p(i+1,j,k)
+               uu= - im*p(i+1,j,k)
+
             else
-               uu= + pi2*im*p(i-1,j,k)
+               uu= + im*p(i-1,j,k)
             endif
             if (mod(j-ny1+1,2)==1) then
-               vv= - pi2*jm*p(i,j+1,k)
+               vv= - jm*p(i,j+1,k)
             else
-               vv= + pi2*jm*p(i,j-1,k)
+               vv= + jm*p(i,j-1,k)
             endif
             if (mod(k-nz1+1,2)==1) then
-               ww= - pi2*km*p(i,j,k+1)
+               ww= - km*p(i,j,k+1)
             else
-               ww= + pi2*km*p(i,j,k-1)
+               ww= + km*p(i,j,k-1)
             endif
 
             u(i,j,k,1)=u(i,j,k,1) - uu
