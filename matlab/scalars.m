@@ -26,8 +26,8 @@ fid2=-1;
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-%fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
-%nx=2048;
+fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+nx=2048;
 
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
@@ -62,11 +62,11 @@ fid2=-1;
 %fid=endianopen('/home2/skurien/dns/src/sk128_alpha40/sk128_v5e-4_alpha400000.0000.scalars','r');
 %nx = 128;
 
-fid=endianopen('/home2/skurien/rotation/Rot1/Rot10000.0000.scalars','r');
-nx = 128;
+%fid=endianopen('/home2/skurien/rotation/Rot1/Rot10000.0000.scalars','r');
+%nx = 128;
 
-fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
-nx=128;
+%fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
+%nx=128;
 
 nscalars=0;
 nscalars_e=0;
@@ -191,6 +191,12 @@ hold off
 xlabel('time')
 print -dpsc ke.ps
 print -djpeg -r72 ke.jpg
+%fout=fopen('ke.out','wt');
+%for i=1:length(time)
+%n   fprintf(fout,'%.14f, %.14f, %.14f\n',time(i),ke(i),-ke_diss_d(i));
+%end
+%fclose(fout)
+
 
 figure(7)
 plot(time,maxvor,'r'); hold on;

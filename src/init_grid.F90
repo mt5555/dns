@@ -85,9 +85,10 @@ do n=np1,np2
    schmidt(n)=input_schmidt(i)
    passive_type(n)=input_passive_type(i)
 enddo
+if (npassive>0) then
 deallocate(input_passive_type)
 deallocate(input_schmidt)
-
+endif
 
 end subroutine
 
