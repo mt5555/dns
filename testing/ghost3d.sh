@@ -22,7 +22,7 @@ if ($1 == makeref) then
    make dnsgrid; rm -f $refout 
    ./dnsgrid -d $rundir ghost3d  < $refin > $refout
   cat $refout
-  cd ../testing/3d
+  cd $rundir
   mv ghost3d0000.0000.u restart.u
   mv ghost3d0000.0000.v restart.v
   mv ghost3d0000.0000.w restart.w
@@ -31,7 +31,7 @@ if ($1 == makeref) then
 endif
 
 if ($1 == 1) then
-./gridsetup.py 1 1 1 32 32 32
+./gridsetup.py 1 1 1 32 32 32  2 2 2 2 2 2
 
 echo "***********************************************************"
 echo "without restart:"

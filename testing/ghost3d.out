@@ -126,11 +126,11 @@ max(div)= 0.11768E-13
 CPU times (min):   (avg/max)
 initialization:      0.00     0.00                                              
 dns_solve:           0.17     0.17                                              
-   time_control            0.02     0.02                                        
-   RHS                     0.03     0.03                                        
-   transpose_to_z          0.02     0.02                                        
+   time_control            0.00     0.00                                        
+   RHS                     0.08     0.08                                        
+   transpose_to_z          0.00     0.00                                        
    transpose_from_z        0.00     0.00                                        
    transpose_to_x          0.00     0.00                                        
-   transpose_from_x        0.00     0.00                                        
+   transpose_from_x        0.02     0.02                                        
    transpose_to_y          0.00     0.00                                        
-   transpose_from_y        0.03     0.03                                        
+   transpose_from_y        0.00     0.00                                        

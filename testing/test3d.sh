@@ -22,7 +22,7 @@ if ($1 == makeref) then
    make ; rm -f $refout 
    ./dns -d $rundir reference3d  < $refin > $refout
   cat $refout
-  cd ../testing/3d
+  cd $rundir
   mv reference3d0000.0000.u restart.u
   mv reference3d0000.0000.v restart.v
   mv reference3d0000.0000.w restart.w
