@@ -101,12 +101,20 @@ if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initial
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
 
 fftdata(index)%size=n
+#ifdef SGIFFT
+allocate(fftdata(index)%trigs(n+15))
+#else
 allocate(fftdata(index)%trigs(3*n/2+1))
+#endif
 
 write(message,'(a,i6)') 'Initializing FFT of size n=',n
 call print_message(message)
 
+#ifdef SGIFFT
 call set99(fftdata(index)%trigs,fftdata(index)%ifax,n)
+#else
+CALL DZFFTM (0, n, 0, 0, 0, 0, 0, 0, fftdata(index)%trigs, 0,0)
+#endif
 if (n<0) call abort("Error; invalid value of n for fft");
 
 end subroutine
@@ -150,7 +158,12 @@ end subroutine
 subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
+#ifdef SGIFFT
+real*8 w(n1+2)
+#else
 real*8 w(min(fftblocks,n2)*(n1+1))
+#endif
+real*8 scale
 character*80 message_str
 
 integer index,jj,j,k,numffts
@@ -158,6 +171,8 @@ if (n1==1) return
 ASSERT("ifft1: dimension too small ",n1+2<=n1d);
 call getindex(n1,index)
 
+scale=n
+scale=1/scale
 
 j=0  ! j=number of fft's computed for each k
 do k=1,n3
@@ -172,8 +187,11 @@ do k=1,n3
         !p(n1+2,jj,k)=0          ! not needed?
       enddo     
 
-
+#ifdef SGIFFT
+      CALL DZFFTM (1, n1, numffts, scale, p(1,j+1,k), n1d, p(1,j+1,k), n1d,fftdata(index)%trigs, w,0)
+#else
       call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,1)
+#endif
 
       j=j+numffts
    enddo
@@ -192,7 +210,12 @@ end subroutine
 subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
+#ifdef SGIFFT
+real*8 scale=1
+real*8 w(n1+2)
+#else
 real*8 :: w(min(fftblocks,n2)*(n1+1)) 
+#endif
 
 integer index,jj,j,k,numffts
 if (n1==1) return
@@ -208,7 +231,11 @@ do k=1,n3
 !         p(n1+2,jj,k)=0
 !      enddo
 
+#ifdef SGIFFT
+      CALL DZFFTM (-1, n1, numffts, scale, p(1,j+1,k), n1d, p(1,j+1,k), n1d,fftdata(index)%trigs, w,0)
+#else
       call fft991(p(1,j+1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,numffts,-1)
+#endif
 
 !     move the last cosine mode into slot of first sine mode:
       do  jj=j+1,j+numffts

@@ -1,13 +1,13 @@
 0            ! input file type
 test         ! runname
 value        ! viscosity type  (value, smallest, damping_time, Re)
-.000          ! viscosity coefficient.  
+.0001        ! viscosity coefficient.  
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
 1.0          ! final time
-1.4          ! adv cfl  (0 = disabled, use min_dt)
+.90          ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
