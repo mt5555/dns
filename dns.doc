@@ -66,9 +66,9 @@ Running the code
 
 3. the input file
 
-   line 1.  input file type.  0,1,2 or 3.  
+   line 1.  input file type.  0-4
    Each input file type has its own routine to read in the parameters
-   in init_grid.F90.  3 is the newest input file format and the others
+   in init_grid.F90.  4 is the newest input file format and the others
    should be considered obsolete.
 
    line 2   equations. valid values:    ns_uvw

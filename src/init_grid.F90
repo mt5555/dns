@@ -560,7 +560,7 @@ call MPI_bcast(g_bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(diag_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(smagorinsky,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 
@@ -732,6 +732,7 @@ read(5,*) delt_min
 read(5,*) delt_max
 read(5,*) restart_dt
 read(5,*) diag_dt
+model_dt=diag_dt
 read(5,*) screen_dt
 read(5,*) output_dt
 read(5,*) ncustom
@@ -743,7 +744,7 @@ enddo
 init_cond=1           ! KH analytic - default initial condition
 init_cond_subtype=0   ! default parameters
 forcing_type=0   ! no forcing
-compute_struct=0
+diag_struct=0
 alpha_value=0
 
 
@@ -829,7 +830,7 @@ else
 endif
 
 read(5,*) alpha_value
-read(5,*) compute_struct
+read(5,*) diag_struct
 
 
 read(5,'(a12)') sdata
@@ -901,6 +902,7 @@ read(5,*) delt_min
 read(5,*) delt_max
 read(5,*) restart_dt
 read(5,*) diag_dt
+model_dt=diag_dt
 read(5,*) screen_dt
 read(5,*) output_dt
 read(5,*) ncustom
@@ -1029,7 +1031,7 @@ endif
 
 read(5,*) alpha_value
 read(5,*) smagorinsky
-read(5,*) compute_struct
+read(5,*) diag_struct
 
 
 read(5,'(a12)') sdata
@@ -1101,6 +1103,7 @@ read(5,*) delt_min
 read(5,*) delt_max
 read(5,*) restart_dt
 read(5,*) diag_dt
+model_dt=diag_dt
 read(5,*) screen_dt
 read(5,*) output_dt
 read(5,*) ncustom
@@ -1266,7 +1269,7 @@ endif
 
 read(5,*) alpha_value
 read(5,*) smagorinsky
-read(5,*) compute_struct
+read(5,*) diag_struct
 
 
 read(5,'(a12)') sdata

@@ -120,8 +120,8 @@ real*8  :: pi,pi2,pi2_squared
 
 real*8  :: grav=0  
 real*8  :: fcor=0  
-integer :: compute_struct=0
-
+integer :: diag_struct=0         ! compute structure funtions on the fly
+integer :: diag_pdfs=0           ! compute pdfs on the fly
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! initial condition and forcing

@@ -1,31 +1,23 @@
 #include "macros.h"
-#undef COMP_JPDF
 
 module structf
+use params
 implicit none
 
-! compute structure functions every "struct_n*" time steps
-! x and y structure functions can be computed with no additional
-! transforms at most every other timestep. (struct_nx,y >= 2)
 !
-! struct_nz controls z structure functions, and the epsilon 1 point
-! structure functions.  This requires 2 extra z-tranpose plus
-! an x and y tranpose.   
 !
-! structure functions are output every 'diag_dt' time interval.  
-! Set struct_n* is very large to only compute structure functions
-! once per diag_dt time interval.  
+! compute velocity and epsilon PDFs  and joint PDFs
 ! 
 ! 
 !
+logical ::  compute_uvw_pdfs=.true.
+logical ::  compute_uvw_jpdfs=.false.
+logical ::  compute_passive_pdfs=.true.
+
 real*8 :: uscale=.01             ! bin size for vel increment
 real*8 :: epsscale=.01           ! bin size for epsilon increment
+real*8 :: pscale=.01             ! bin size for scalar increment
 
-
-integer :: struct_nx=0 
-integer :: struct_ny=0          ! every "struct_n*" time steps
-integer :: struct_nz=0          !
-integer :: countx=-1,county=-1,countz=-1
 
 
 integer           :: structf_init=0
@@ -34,13 +26,9 @@ integer           :: delta_val(delta_num_max)
 integer :: numx=0,numy=0,numz=0          ! actual number of delta's in each direction
                                          ! allowed by the grid
 
-
 ! max range:  10 ... 10
 integer,parameter :: pdf_max_bin=4000
 integer,parameter :: jpdf_max_bin=200
-
-
-
 
 
 type pdf_structure_function
@@ -97,7 +85,11 @@ end type
 ! are raised to the 1/4 power before binning up the PDF.  
 !
 integer,parameter :: NUM_SF=8
-type(pdf_structure_function) ::  SF(NUM_SF,3),epsilon
+type(pdf_structure_function) ::  SF(NUM_SF,3)
+type(pdf_structure_function) ::  epsilon
+! number of scalar structure functions:  params.F90::npassive 
+! which is never more than n_var-2
+type(pdf_structure_function) ::  SCALARS(n_var-2)  
 
 integer :: overflow=0    ! count the number of overflow messages
 integer :: joverflow=0    ! count the number of overflow messages
@@ -226,13 +218,21 @@ do i=1,NUM_SF
 enddo
 call init_pdf(epsilon,100,epsscale,1)
 
-#ifdef COMP_JPDF
+if (npassive==0) compute_passive_pdfs=.false.
+if (compute_passive_pdfs) then
+do i=1,npassive
+   call init_pdf(SCALARS(i),100,pscale,1)
+enddo
+endif
+
+
+if (compute_uvw_jpdfs) then
 do i=1,NUM_JPDF
    call init_jpdf(jpdf_v(i,1),100,.1d0, min(numx,numy))
    call init_jpdf(jpdf_v(i,2),100,.1d0, min(numx,numz))
    call init_jpdf(jpdf_v(i,3),100,.1d0, min(numy,numz))
 enddo
-#endif
+endif
 end subroutine
 
 
@@ -417,7 +417,9 @@ subroutine output_pdf(time,fid,fidj,fidS)
 use params
 implicit none
 real*8 time
-CPOINTER fid,fidj,fidS
+CPOINTER fid   ! velcoity PDFs
+CPOINTER fidj  ! joint velocity PDFs
+CPOINTER fidS  ! passive scalar PDFs
 
 integer i,j,ierr,ndelta,numm
 character(len=80) message
@@ -427,11 +429,6 @@ if (structf_init==0) then
    call abort("Error: output_pdf() called, but structf module not initialized")
 endif
 
-! reset structure function counters
-countx=-1
-county=-1
-countz=-1
-
 
 do j=1,3
 do i=1,NUM_SF
@@ -440,13 +437,19 @@ enddo
 enddo
 call mpisum_pdf(epsilon)
 
-#ifdef COMP_JPDF
+if (compute_passive_pdfs) then
+do i=1,npassive
+   call mpisum_pdf(SCALARS(i))
+enddo	
+endif
+
+if (compute_uvw_jpdfs) then
 do j=1,3
 do i=1,NUM_JPDF
    call mpisum_jpdf(jpdf_v(i,j))
 enddo
 enddo
-#endif
+endif
 
 
 
@@ -463,17 +466,25 @@ if (my_pe==io_pe) then
    x=1 ; call cwrite8(fid,x,1)
    call normalize_and_write_pdf(fid,epsilon,epsilon%nbin)   
 
-#ifdef COMP_JPDF
-   call cwrite8(fidj,time,1)
-   ! number of structure functions
-   x=NUM_SF ; call cwrite8(fidj,x,1)
-   do i=1,NUM_JPDF
-   do j=1,3
-      call normalize_and_write_jpdf(fidj,jpdf_v(i,j),jpdf_v(i,j)%nbin)
-   enddo
-   enddo
-#endif
+   if (compute_passive_pdfs) then
+      call cwrite8(fidS,time,1)
+      ! number of structure functions
+      x=npassive ; call cwrite8(fidS,x,1)
+      do i=1,npassive
+         call normalize_and_write_pdf(fidS,SCALARS(i),epsilon%nbin)   
+      enddo	
+   endif
 
+   if (compute_uvw_jpdfs) then
+      call cwrite8(fidj,time,1)
+      ! number of structure functions
+      x=NUM_SF ; call cwrite8(fidj,x,1)
+      do i=1,NUM_JPDF
+      do j=1,3
+         call normalize_and_write_jpdf(fidj,jpdf_v(i,j),jpdf_v(i,j)%nbin)
+      enddo
+      enddo
+   endif
 endif
 
 
@@ -488,7 +499,14 @@ enddo
 epsilon%ncalls=0
 epsilon%pdf=0
 
-#ifdef COMP_JPDF
+if (compute_passive_pdfs) then
+   do i=1,npassive
+      SCALARS(i)%ncalls=0
+      SCALARS(i)%pdf=0
+   enddo	
+endif
+
+if (compute_uvw_jpdfs) then
 do i=1,NUM_JPDF
 do j=1,3
    ! reset JPDF's
@@ -496,7 +514,7 @@ do j=1,3
    jpdf_v(i,j)%pdf=0
 enddo
 enddo
-#endif
+endif
 
 end subroutine
 
@@ -924,14 +942,15 @@ end subroutine
 
 
 
-subroutine compute_pdf_epsilon(ux)
+subroutine compute_pdf_scalar(ux,pdfdata)
 !
-! compute a pdf of epsilon.  < epsilon > = KE diffusion. 
-! ux = norm(grad(u))**2
+! compute a pdf of a scalar, 1 point corrolation
+! 
 !
 use params
 implicit none
 real*8 :: ux(nx,ny,nz)
+type(pdf_structure_function) ::  pdfdata
 
 ! local variables
 real*8  :: del
@@ -948,174 +967,22 @@ do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
          ! compute structure functions for U,V,W 
-         del=ux(i,j,k)**one_third
-         del = del/epsilon%pdf_bin_size
+         del=ux(i,j,k)
+         del = del/pdfdata%pdf_bin_size
          bin = nint(del)
 
          ! increase the size of our PDF function
-         if (abs(bin)>epsilon%nbin) call resize_pdf(epsilon,abs(bin)+10) 
+         if (abs(bin)>pdfdata%nbin) call resize_pdf(pdfdata,abs(bin)+10) 
          if (bin>pdf_max_bin) bin=pdf_max_bin
          if (bin<-pdf_max_bin) bin=-pdf_max_bin
-         epsilon%pdf(bin,1)=epsilon%pdf(bin,1)+1
+         pdfdata%pdf(bin,1)=pdfdata%pdf(bin,1)+1
       enddo
    enddo
 enddo
 
-epsilon%ncalls=epsilon%ncalls+1
+pdfdata%ncalls=pdfdata%ncalls+1
 end subroutine
 
-
-
-#if 0
-
-subroutine z_ifft3d_str(fin,f,w1,Qt,works,work)
-!
-!  compute inverse fft 3d of fin, return in f
-!  fin and f can overlap in memory
-!  Also compute structure functions.
-!
-!  This routine can compute PDF's of structure functions in the x direction
-!  or y direction (but not both) and in the z direction.
-! 
-!  compx   compute PDF in x direction of U
-!  compy   compute PDF in y direction of U
-!  compz   compute PDF in z direction of U and epsilon = gradU**2
-!
-! only one of compx or compy can be computed per call.
-! compx or compy can be computed w/o any additional transposes.
-! compz requires an additional z-transpose.
-!
-use params
-use fft_interface
-use transpose
-implicit none
-real*8 fin(g_nz2,nslabx,ny_2dz,3)  ! input
-real*8 f(nx,ny,nz,3)               ! output
-real*8 w1(nx,ny,nz,3)
-real*8 Qt(nx,ny,nz,3)    
-
-! overlapped in memory:
-real*8 work(nx,ny,nz)
-real*8 works(g_nz2,nslabx,ny_2dz)
-
-
-logical :: compx,compy,compz
-
-
-!local
-integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k,n
-real*8 dummy(1)
-real*8 :: tmx1,tmx2
-
-call wallclock(tmx1)
-
-if (struct_nx>0) countx=mod(countx+1,struct_nx)  
-if (struct_ny>0) county=mod(county+1,struct_ny)  
-if (struct_nz>0) countz=mod(countz+1,struct_nz)  
-compx=(countx==0)
-compy=(county==1)
-compz=(countz==0)
-
-
-
-
-n1=g_nz
-n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
-n3=ny_2dz
-n3d=ny_2dz
-
-do n=1,3
-   works=fin(:,:,:,n)
-   call ifft1(works,n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_z(works,f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-
-if (compx) then
-   do n=1,3
-      call transpose_to_y(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_y(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      
-      call transpose_to_x(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_x(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   enddo
-   call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
-   
-else ! compy, or default (compute no structure functions)
-   do n=1,3
-      call transpose_to_x(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_x(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      
-      call transpose_to_y(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_y(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   enddo
-   if (compy) call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
-endif
-
-if (compz) then
-
-   ! compute:
-   ! 1. epsilon PDF calculations
-   ! 2. z-direction Q PDF
-   !
-   !   Qt = x or y transpose of (u,v,w)
-   !
-   work=0
-   do n=1,3
-      if (compx) then
-         ! Qt = x transpoe of (u,v,w), computed above
-         ! compute x derivative
-         call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
-         call transpose_from_x(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
-         work=work+w1(:,:,:,1)**2
-
-         ! compute y derivative
-         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),DX_ONLY,2)
-         work=work+w1(:,:,:,1)**2
-
-      else
-         ! Qt = y transpoe of (u,v,w), computed above
-         call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
-         call transpose_from_y(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
-         work=work+w1(:,:,:,1)**2
-
-         ! compute x derivative
-         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),DX_ONLY,1)
-         work=work+w1(:,:,:,1)**2
-      endif
-   enddo
-
-   ! do the Z component
-   do n=1,3
-      call transpose_to_z(f(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   enddo
-   ! Qt = z transpose of (u,v,w)
-   ! compute regular structure functions:
-    call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
-
-   ! add in epsilon component
-   do n=1,3
-      call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_z(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
-      work=work+w1(:,:,:,1)**2
-   enddo
-   work=mu*work
-   call compute_pdf_epsilon(work)
-
-endif
-
-call wallclock(tmx2)
-tims(12)=tims(12)+(tmx2-tmx1)
-
-end subroutine
-
-#endif
 
 
 
@@ -1131,7 +998,7 @@ use fft_interface
 use transpose
 implicit none
 integer :: ns
-real*8 Q(nx,ny,nz,3)    
+real*8 Q(nx,ny,nz,n_var)    
 real*8 gradu(nx,ny,nz,3)    
 
 !local
@@ -1149,27 +1016,27 @@ do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
-#ifdef COMP_JPDF
-call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
-#endif
+if (compute_uvw_jpdfs) then
+   call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
+endif
 
 call print_message("computing v pdfs...")
 do n=1,3
    call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
-#ifdef COMP_JPDF
-call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
-#endif
+if (compute_uvw_jpdfs) then
+   call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
+endif
 
 call print_message("computing w pdfs...")
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
-#ifdef COMP_JPDF
-call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
-#endif
+if (compute_uvw_jpdfs) then
+   call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
+endif
 
 call print_message("computing eps pdfs...")
 gradu=0
@@ -1186,8 +1053,14 @@ do n=1,3
    call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
    gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
 enddo
-gradu=mu*gradu
-call compute_pdf_epsilon(gradu)
+gradu=mu*gradu; gradu=gradu**one_third
+call compute_pdf_scalar(gradu,epsilon)
+
+if (compute_passive_pdfs) then
+   do i=1,npassive
+      call compute_pdf_scalar(Q(1,1,1,i),SCALARS(i)) 
+   enddo
+endif
 call print_message("done with pdfs.")
 
 

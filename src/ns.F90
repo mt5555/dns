@@ -91,7 +91,6 @@ do n=1,n_var
    enddo
    enddo
    enddo
-
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
@@ -149,7 +148,6 @@ do n=1,n_var
    enddo
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-!call z_ifft3d_str(Q,Q_grid,rhs,Q_tmp,work,work)
 
 time = time + delt
 

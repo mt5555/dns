@@ -99,7 +99,7 @@ call compute_expensive_scalars(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
 !
 ! output structure functions and time averaged forcing
 ! 
-if (compute_struct==1) then
+if (diag_struct==1) then
 
    ! angle averaged functions:
    call isoavep(Q,q1,q2,q3,3,csig)
@@ -115,10 +115,10 @@ if (compute_struct==1) then
       call writeisoave(fid,time)
       call cclose(fid,ierr)
    endif
+endif
 
 
-
-#if 1
+if (diag_pdfs==1) then
    ! uscale=.01 / pi2
    ! epsscale=.01 / pi2_squared  
    call compute_all_pdfs(Q,q1)
@@ -135,30 +135,32 @@ if (compute_struct==1) then
          call abort(message)
       endif
 
-!      write(message,'(f10.4)') 10000.0000 + time
-!      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".jpdf"
-!      call copen(message,"w",fidj,ierr)
-!      if (ierr/=0) then
-!         write(message,'(a,i5)') "output_model(): Error opening .jpdf file errno=",ierr
-!         call abort(message)
-!      endif
+      if (compute_uvw_jpdfs) then
+      write(message,'(f10.4)') 10000.0000 + time
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".jpdf"
+      call copen(message,"w",fidj,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .jpdf file errno=",ierr
+         call abort(message)
+      endif
+      endif
 
-!      write(message,'(f10.4)') 10000.0000 + time
-!      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".s2v2"
-!      call copen(message,"w",fidS,ierr)
-!      if (ierr/=0) then
-!         write(message,'(a,i5)') "output_model(): Error opening .s2v2 file errno=",ierr
-!         call abort(message)
-!      endif
+      if (compute_passive_pdfs) then
+      write(message,'(f10.4)') 10000.0000 + time
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spdf"
+      call copen(message,"w",fidS,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+         call abort(message)
+      endif
+      endif
 
    endif
    call output_pdf(time,fid,fidj,fidS)
    if (my_pe==io_pe) call cclose(fid,ierr)
-!   if (my_pe==io_pe) call cclose(fidj,ierr)
-!   if (my_pe==io_pe) call cclose(fidS,ierr)
+   if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
+   if (compute_passive_pdfs .and. my_pe==io_pe) call cclose(fidS,ierr)
    endif
-#endif
-
 endif
 
 ! time averaged dissapation and forcing:

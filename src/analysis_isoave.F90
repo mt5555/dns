@@ -181,6 +181,13 @@ do
             write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
             call abort(message)
          endif
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.spdf"
+         print *,fname
+         call copen(fname,"w",fid2,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+            call abort(message)
+         endif
       endif
       
       if (.not. read_uvw) then
@@ -198,6 +205,7 @@ do
 
       call output_pdf(time,fid,fid1,fid2)
       if (my_pe==io_pe) call cclose(fid,ierr)
+      if (my_pe==io_pe) call cclose(fid2,ierr)
    endif
 
 
