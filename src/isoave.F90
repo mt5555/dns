@@ -273,7 +273,7 @@ do n=1,3
 enddo   
    
 
-do idir=6,ndir
+do idir=1,ndir
 
    if (my_pe==io_pe) then
       write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
