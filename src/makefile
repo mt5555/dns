@@ -13,19 +13,22 @@ HOST = $(shell hostname)
 
 
 ifeq ($(UNAME),Linux)
+   #VENDOR=LAHEY
+   #VENDOR=PGI
+   VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),certs)
       MPI = -DUSE_MPI -I/contrib/lam/include
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
+   ifeq ($(HOST),jmac.lanl.gov)
+	VENDOR=LAHEY
+   endif
    ifeq ($(HOST),shankara1)
       MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
-   VENDOR=LAHEY
-   #VENDOR=PGI
-   #VENDOR=INTEL
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9560/bin/lf95
@@ -211,7 +214,7 @@ analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 clean: 
-	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi dnsvor
+	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi dnsvor 
 
 dep:
 	./mkdep.py *.F90 *.f  > .depends
