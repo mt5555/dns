@@ -35,8 +35,8 @@ if (firstcall) then
       call fft3d(Q(1,1,n),work1)
       if (dealias) call fft_filter_dealias(Q(1,1,n))
    enddo
-   if (equations/=1) then
-      call print_message("Error: shallow water model can only run equations=1")
+   if (equations/=SHALLOW) then
+      call print_message("Error: shallow water model can only run equations=SHALLOW")
       call abort("initial conditions are probably incorrect.")
    endif
    if (ndim/=2) then

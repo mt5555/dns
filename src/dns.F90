@@ -49,12 +49,10 @@ else
    if (init_cond==4) call init_data_kh_psivor(Q,q1,work1,work2)
 endif
 
-if (equations==0) then
-   ! NS
+if (equations==NS_UVW) then
    call print_message('Projecting initial data...')
-   call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
-else if (equations==1) then
-   ! shallow water
+   call divfree_gridspace(Q,work1,work2,q1) 
+else if (equations==SHALLOW .or. equations==NS_PSIVOR) then
    if (dealias)  then
       call print_message('Dealiasing initial data...')
       call dealias_gridspace(Q,work1)

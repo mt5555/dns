@@ -9,17 +9,18 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:50;
 %range = 1
-range=0:.25:.75;
-%range=[.75];
+%range=0:.25:.75;
+range=[.75];
 name='../src/impulse/kh24';
 %name='../src/kh/khK';
-%name='../src/kh/khN';
+name='../src/kh/khN';  %nopq
 %name='/tmp/test';
 
-mkpr=0;            % make ps and jpeg files
+mkpr=1;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
-mplot=2;           % set to nonzero to put mplot plots per figure
+mplot=2;           % set to nonzero to put 'mplot' plots per figure
 
+mplot=min(mplot,length(range));
 
 s=findstr(name,'/');
 s=s(length(s));
@@ -94,7 +95,7 @@ for i=range
     figure(1)
     if (kplot==1) clf; end;
     vor = squeeze(q(:,:,1));
-    if (mplot>0) 
+    if (mplot>1) 
       subplot(mplot,1,kplot)
       kplot=mod(kplot,mplot)+1;
     end
@@ -113,10 +114,7 @@ for i=range
     axis square
   end
   
-
-  
   if (kplot==1)
-
     if (mkpr) 
       if (mplot>0)
         orient tall

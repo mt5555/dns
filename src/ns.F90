@@ -56,7 +56,7 @@ if (firstcall) then
    if (.not. dealias) then
       call abort("Error: using ns3dspectral model, which must be run dealiased")
    endif
-   if (numerical_method/=0) then
+   if (numerical_method/=FOURIER) then
       call abort("Error: ns3dspectral model requires FFT method.")
    endif
 #ifndef ALPHA_MODEL

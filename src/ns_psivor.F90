@@ -40,8 +40,8 @@ logical,save :: firstcall=.true.
 
 if (firstcall) then
    firstcall=.false.
-   if (equations/=2) then
-      call print_message("Error: psi-vor model can only run equations=2 (psi-vor)")
+   if (equations/=NS_PSIVOR) then
+      call print_message("Error: psi-vor model can only run equations=NS_PSIVOR")
       call abort("initial conditions are probably incorrect.")
    endif
    if (ndim/=2) then
@@ -54,8 +54,11 @@ if (firstcall) then
       call abort("Error: dnsgrid cannot handle alpha>0.")
    endif
 
-   call bc_impose(Q(1,1,1))
-   call compute_psi(Q(1,1,2),Q(1,1,1),rhs)
+   ! initial vorticity should have been set on the boundary, so
+   ! we can compute PSI right now:
+   call compute_psi(Q(1,1,1),Q(1,1,2),rhs)
+   ! now use PSI to get u,v to impose inflow b.c. on vorticity:
+   call bc_impose(Q(1,1,1),Q(1,1,2))
 endif
 
 
@@ -77,8 +80,8 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
-call bc_impose(w_tmp)
-call compute_psi(psi,w_tmp,rhs)
+call bc_impose(w_tmp,Q(1,1,2))  ! use PSI at starting time for (u,v) b.c.
+call compute_psi(w_tmp,psi,rhs)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
@@ -86,21 +89,21 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
-call bc_impose(w_tmp)
-call compute_psi(psi,w_tmp,rhs)
+call bc_impose(w_tmp,Q(1,1,2))
+call compute_psi(w_tmp,psi,rhs)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
-call bc_impose(w_tmp)
-call compute_psi(psi,w_tmp,rhs)
+call bc_impose(w_tmp,Q(1,1,2))
+call compute_psi(w_tmp,psi,rhs)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 
 
-call bc_impose(Q(1,1,1))
-call compute_psi(Q(1,1,2),Q(1,1,1),rhs)
+call bc_impose(Q(1,1,1),Q(1,1,2))
+call compute_psi(Q(1,1,1),Q(1,1,2),rhs)
 time = time + delt
 
 
@@ -114,10 +117,10 @@ call ghost_update_y_reshape(Q(1,1,2),1)
 maxs(1:4)=0
 do j=ny1,ny2
 do i=nx1,nx2
-   u=-( 2*(Q(i,j+1,2)-Q(i,j-1,2))/3 -  &
+   u=( 2*(Q(i,j+1,2)-Q(i,j-1,2))/3 -  &
         (Q(i,j+2,2)-Q(i,j-2,2))/12          )/dely
 
-   v=( 2*(Q(i+1,j,2)-Q(i-1,j,2))/3 -  &
+   v=-( 2*(Q(i+1,j,2)-Q(i-1,j,2))/3 -  &
         (Q(i+2,j,2)-Q(i-2,j,2))/12          )/delx
 
    maxs(1)=max(maxs(1),abs(u))
@@ -134,7 +137,7 @@ end subroutine
 
 
 
-subroutine compute_psi(psi,w,work)
+subroutine compute_psi(w,psi,work)
 use params
 implicit none
 real*8 w(nx,ny)
@@ -142,25 +145,31 @@ real*8 psi(nx,ny)
 real*8 work(nx,ny)
 
 !local
-real*8 :: mone=-1,zero=0
+real*8 :: mone=-1,zero=0,tol=1e-10
+external helmholtz_dirichlet,helmholtz_periodic
 
-psi=w
-!update PSI on boundary using bio-savar law
-call bc_biosavar(psi,w)
+
 
 
 ! if all b.c. periodic:
-call helmholtz_periodic_inv(psi,work,zero,mone)
+if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
+   psi=w
+   call helmholtz_periodic_inv(psi,work,zero,mone)
 
-! CG solver.  if all b.c. periodic, turn on preconditioner and it
-! should just take one iteration!
-!work = -w
-!psi=0
-!call cgsolver(psi,work,zero,mone,1d-8,zero,helmholtz_periodic,.true.)
-!
+   !psi=0  ! initial guess
+   !call cgsolver(psi,work,zero,mone,tol,work,helmholtz_periodic,.false.)
+   !call cgsolver(psi,work,zero,mone,tol,work,helmholtz_periodic,.true.)
+else
+   psi=0  ! initial guess
+   !update PSI on boundary using bio-savar law
+   call bc_biotsavart(w,psi)
+   call cgsolver(psi,w,zero,mone,tol,work,helmholtz_dirichlet,.false.)
 
-!update PSI 1st row of ghost cells so that we are 2nd order differences
-call bc_onesided(psi)
+   !update PSI 1st row of ghost cells so that we are 2nd order differences
+   call bc_onesided(psi)
+endif
+
+
 end subroutine
 
 
@@ -168,12 +177,13 @@ end subroutine
 
 
 
-subroutine bc_impose(w)
+subroutine bc_impose(w,psi)
 ! apply non-periodic or non-reflective b.c.
 !(preiodic and reflective are automatically hanlded with ghost_update)
 use params
 implicit none
 real*8 w(nx,ny)
+real*8 psi(nx,ny)
 
 
 end subroutine
@@ -196,7 +206,7 @@ end subroutine
 
 
 
-subroutine bc_biosavar(psi,w)
+subroutine bc_biotsavart(w,psi)
 ! on non-preiodic or non-reflective boundarys:
 !
 ! use biot-savar law to compute boundary data for PSI.
@@ -260,10 +270,10 @@ call ghost_update_y_reshape(w,1)
 
 do j=ny1,ny2
 do i=nx1,nx2
-   u=-( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
+   u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
         (psi(i,j+2)-psi(i,j-2))/12          )/dely
 
-   v=( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
+   v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
         (psi(i+2,j)-psi(i-2,j))/12          )/delx
 
    dx=( 2*(w(i+1,j)-w(i-1,j))/3 -  &

@@ -22,7 +22,7 @@ subroutine cgsolver(sol,b,a1,a2,tol,h,matvec,precond)
 !
 ! tol = tolerance for convergence (10e-6 is sufficient)
 !
-! if equations=1  (shallow water equations), then
+! if equations=SHALLOW  (shallow water equations), then
 ! h = height field.  (and helmholtz = [a1 + a2 (1/h) div h grad] )
 !
 ! routines called

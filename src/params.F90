@@ -42,13 +42,21 @@ real*8  :: alpha_value=0      !for the alpha model
 real*8  :: H0=0               ! for shallow water model
 integer,parameter :: r8kind=kind(mu)
 logical :: enable_lsf_timelimit = .false.
-integer :: equations=0             ! 0 = NS / NS-alpha
-                                   ! 1 = Shallow water / shallow water-alpha
-                                   ! 2 = NS Streamfunction-Vorticity
-integer :: numerical_method=0      ! 0 = FFT
-                                   ! 1 = 4th order F.D.
-                                   ! 2 = MPDATA 
-logical :: dealias       
+integer :: equations=NS_UVW        ! NS_UVW    = NS / NS-alpha
+                                   ! SHALLOW   = Shallow water / shallow water-alpha
+                                   ! NS_PSIVOR = NS Streamfunction-Vorticity
+integer :: numerical_method=FOURIER ! FOURIER
+                                    ! FORTH_ORDER
+                                    ! others?
+logical :: dealias=0       
+
+! boundary conditions
+integer :: bdy_x1=PERIODIC
+integer :: bdy_x2=PERIODIC
+integer :: bdy_y1=PERIODIC
+integer :: bdy_y2=PERIODIC
+integer :: bdy_z1=PERIODIC
+integer :: bdy_z2=PERIODIC
 
 
 character(len=80) :: runname

@@ -171,6 +171,12 @@ call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 
@@ -321,13 +327,13 @@ endif
 
 read(*,'(a12)') sdata
 if (sdata=='fft') then
-   numerical_method=0
+   numerical_method=FOURIER
    dealias=.false.
 else if (sdata=='fft-dealias') then
-   numerical_method=0
+   numerical_method=FOURIER
    dealias=.true.
 else if (sdata=='4th') then
-   numerical_method=1
+   numerical_method=FORTH_ORDER
    dealias=.false.
 else
    call abort("only 'fft' derivative method supported")
@@ -462,13 +468,13 @@ read(*,*) compute_struct
 read(*,'(a12)') sdata
 print *,'method: ',sdata
 if (sdata=='fft') then
-   numerical_method=0
+   numerical_method=FOURIER
    dealias=.false.
 else if (sdata=='fft-dealias') then
-   numerical_method=0
+   numerical_method=FOURIER
    dealias=.true.
 else if (sdata=='4th') then
-   numerical_method=1
+   numerical_method=FORTH_ORDER
    dealias=.false.
 else
    print *,'value=',sdata
@@ -479,22 +485,37 @@ endif
 read(*,'(a12)') sdata
 print *,'b.c. x-direction: ',sdata
 if (sdata=='periodic') then
+   bdy_x1=PERIODIC
+   bdy_x2=PERIODIC
+else if (sdata=='in0/onesided') then
+   bdy_x1=INFLOW0_ONESIDED
+   bdy_x2=INFLOW0_ONESIDED
 else
-   call abort("only 'perodic' b.c. supported")
+   call abort("x boundary condition not supported")
 endif
 
 read(*,'(a12)') sdata
 print *,'b.c. y-direction: ',sdata
 if (sdata=='periodic') then
+   bdy_y1=PERIODIC
+   bdy_y2=PERIODIC
+else if (sdata=='reflect') then
+   bdy_y1=REFLECT
+   bdy_y2=REFLECT
+else if (sdata=='custom0') then
+   bdy_y1=REFLECT_ODD
+   bdy_y2=INFLOW0_ONESIDED
 else
-   call abort("only 'perodic' b.c. supported")
+   call abort("y boundary condition not supported")
 endif
 
 read(*,'(a12)') sdata
 print *,'b.c. z-direction: ',sdata
 if (sdata=='periodic') then
+   bdy_z1=PERIODIC
+   bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported")
+   call abort("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(*,*) time_final
@@ -511,6 +532,17 @@ allocate(custom(ncustom))
 do i=1,ncustom
    read(*,*) custom(i)
 enddo
+
+
+if (numerical_method==FOURIER) then
+   ! make sure boundary conditons are periodic:
+   if (bdy_x1/=PERIODIC .or. bdy_x2/=PERIODIC .or. &
+       bdy_y1/=PERIODIC .or. bdy_y2/=PERIODIC .or. &
+       bdy_z1/=PERIODIC .or. bdy_z2/=PERIODIC) then
+      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+   endif
+endif
+
 
 end subroutine
 

@@ -15,7 +15,7 @@ character(len=80) message
 character(len=80) fname
 
 Q=0
-if (equations==0) then
+if (equations==NS_UVW) then
    call print_message("Restarting from file restart.[uvw]")
    fname = rundir(1:len_trim(rundir)) // "restart.u"
    call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
@@ -23,7 +23,7 @@ if (equations==0) then
    call singlefile_io(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe)
    fname = rundir(1:len_trim(rundir)) // "restart.w"
    call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
-else if (equations==1) then
+else if (equations==SHALLOW) then
    call print_message("Restarting from file restart.[uvh]")
    fname = rundir(1:len_trim(rundir)) // "restart.u"
    call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
@@ -31,7 +31,7 @@ else if (equations==1) then
    call singlefile_io(time_initial,Q(1,1,1,2),fname,work1,work2,1,io_pe)
    fname = rundir(1:len_trim(rundir)) // "restart.h"
    call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
-else if (equations==2) then
+else if (equations==NS_PSIVOR) then
    call print_message("Restarting from file restart.vor")
    fname = rundir(1:len_trim(rundir)) // "restart.vor"
    call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
@@ -373,7 +373,7 @@ real*8 :: eps
 real*8 :: amp
 
 Q=0
-equations=2
+equations=NS_PSIVOR
 
 if (init_cond_subtype==0) then
    call print_message("Using thin shear layer initial condition")
@@ -445,7 +445,7 @@ real*8 :: E_k2(0:max(nx,ny,nz))
 real*8 :: Len,U,R,F
 character(len=80) :: message
 
-equations = 1   ! shallow water equations, not the default NS equations
+equations = SHALLOW   ! shallow water equations, not the default NS equations
 
 k_0=14  
 m=25
@@ -653,24 +653,6 @@ end subroutine
 
 
 
-
-
-
-
-subroutine init_data_projection(Q,d1,d2,d3)
-use params
-use fft_interface
-implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: d1(nx,ny,nz)
-real*8 :: d2(nx,ny,nz)
-real*8 :: d3(nx,ny,nz)
-
-! will also dealias if dealias=1
-call divfree_gridspace(Q,d1,d2,d3)
-
-
-end subroutine
 
 
 

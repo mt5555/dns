@@ -241,7 +241,7 @@ if (doit_output) then
 
    write(message,'(f10.4)') 10000.0000 + time
 
-   if (equations==0) then
+   if (equations==NS_UVW) then
       ! NS, primitive variables
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
       call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
@@ -255,7 +255,7 @@ if (doit_output) then
          call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
       endif
 
-   else if (equations==1) then
+   else if (equations==SHALLOW) then
       ! shallow water 2D
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
       call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
@@ -269,7 +269,7 @@ if (doit_output) then
          call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
    endif
 
-   else if (equations==2) then
+   else if (equations==NS_PSIVOR) then
       ! 2D NS psi-vor formulation
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
       call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
@@ -430,11 +430,11 @@ spec_y=0
 spec_z=0
 
 q1=Q
-if (equations==2) then
+if (equations==NS_PSIVOR) then
    q1=0
    call der(Q(1,1,1,2),q1(1,1,1,2),work1,work2,DX_ONLY,1) ! psi_x
    call der(Q(1,1,1,2),q1(1,1,1,1),work1,work2,DX_ONLY,2) ! psi_y
-   q1(:,:,:,1)=-q1(:,:,:,1)
+   q1(:,:,:,2)=-q1(:,:,:,2)
 endif
 
 do i=1,ndim
@@ -452,7 +452,7 @@ call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_z,g_nz/2,message)
 
 ! for incompressible equations, print divergence as diagnostic:
-if (equations==0) then
+if (equations==NS_UVW) then
    call compute_div(Q,q1,work1,work2,divx,divi)
    write(message,'(3(a,e12.5))') 'max(div)=',divx
    call print_message(message)	

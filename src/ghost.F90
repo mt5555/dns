@@ -6,8 +6,6 @@ implicit none
 
 real*8,private :: tmx1,tmx2
 integer,private :: nghost=2
-integer,private :: periodic=1
-integer,private :: reflect=0
 
 logical,save :: firstcall=.true.
 
@@ -87,7 +85,7 @@ nmesg=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 x0=my_x-1
 if (x0<0) then
-   if (periodic==1) then
+   if (bdy_x1==PERIODIC) then
       x0=ncpu_x-1
    else
       x0=my_x
@@ -96,7 +94,7 @@ endif
 
 x1=my_x+1
 if (x1>=ncpu_x) then
-   if (periodic==1) then
+   if (bdy_x2==PERIODIC) then
       x1=0
    else
       x1=my_x
@@ -125,14 +123,15 @@ if (x0==my_x) then
    do j=ny1,ny2
    do i=(nghost-1),0,-1
       l=l+1
-      if (periodic==1) then
+      if (bdy_x1==PERIODIC) then
          !periodic:  nx2-1,nx2-0  -->   nx1-2,nx1-1
          recbufx0(l)=p(nx2-i,j,k,n)
-      else if (reflect==1) then
+      else if (bdy_x1==REFLECT) then
          !reflection:  nx1+2,nx1+1  -->   nx1-2,nx1-1
          recbufx0(l)=p(nx1+i+1,j,k,n)
-      else
-         ! call boundary conditions for x=0
+      else if (bdy_x1==REFLECT_ODD) then
+         !reflection:  nx1+2,nx1+1  -->   nx1-2,nx1-1
+         recbufx0(l)=-p(nx1+i+1,j,k,n)
       endif
    enddo
    enddo
@@ -172,14 +171,15 @@ if (x1==my_x) then
    do j=ny1,ny2
    do i=1,nghost
       l=l+1
-      if (periodic==1) then
+      if (bdy_x2==PERIODIC) then
          !periodic:  nx1,nx1+1  -->   nx2+1,nx2+2
          recbufx1(l)=p(nx1+i-1,j,k,n)
-      else if (reflect==1) then
+      else if (bdy_x2==REFLECT) then
          !reflection:  nx2-1,nx2-2  -->   nx2+1,nx2+2
          recbufx1(l)=p(nx2-i,j,k,n)
-      else
-         ! call boundary conditions for x=1  
+      else if (bdy_x2==REFLECT_ODD) then
+         !reflection:  nx2-1,nx2-2  -->   nx2+1,nx2+2
+         recbufx1(l)=-p(nx2-i,j,k,n)
       endif
    enddo
    enddo
@@ -287,7 +287,7 @@ nmesg=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 y0=my_y-1
 if (y0<0) then
-   if (periodic==1) then
+   if (bdy_y1==PERIODIC) then
       y0=ncpu_y-1
    else
       y0=my_y
@@ -296,7 +296,7 @@ endif
 
 y1=my_y+1
 if (y1>=ncpu_y) then
-   if (periodic==1) then
+   if (bdy_y2==PERIODIC) then
       y1=0
    else
       y1=my_y
@@ -325,12 +325,12 @@ if (y0==my_y) then
    do j=(nghost-1),0,-1
    do i=nx1,nx2
       l=l+1
-      if (periodic==1) then
+      if (bdy_y1==PERIODIC) then
          recbufy0(l)=p(i,ny2-j,k,n)
-      else if (reflect==1) then
+      else if (bdy_y1==REFLECT) then
          recbufy0(l)=p(i,ny1+j+1,k,n)
-      else
-         ! call boundary conditions for y=0
+      else if (bdy_y1==REFLECT_ODD) then
+         recbufy0(l)=-p(i,ny1+j+1,k,n)
       endif
    enddo
    enddo
@@ -369,12 +369,12 @@ if (y1==my_y) then
    do j=1,nghost
    do i=nx1,nx2
       l=l+1
-      if (periodic==1) then
+      if (bdy_y2==PERIODIC) then
          recbufy1(l)=p(i,ny1+j-1,k,n)
-      else if (reflect==1) then
+      else if (bdy_y2==REFLECT) then
          recbufy1(l)=p(i,ny2-j,k,n)
-      else
-         ! call boundary conditions for x=1  
+      else if (bdy_y2==REFLECT_ODD) then
+         recbufy1(l)=-p(i,ny2-j,k,n)
       endif
    enddo
    enddo
@@ -483,7 +483,7 @@ nmesg=0
 if (ndim==3) then
 z0=my_z-1
 if (z0<0) then
-   if (periodic==1) then
+   if (bdy_z1==PERIODIC) then
       z0=ncpu_z-1
    else
       z0=my_z
@@ -492,7 +492,7 @@ endif
 
 z1=my_z+1
 if (z1>=ncpu_z) then
-   if (periodic==1) then
+   if (bdy_z2==PERIODIC) then
       z1=0
    else
       z1=my_z
@@ -521,12 +521,12 @@ if (z0==my_z) then
    do j=ny1,ny2
    do i=nx1,nx2
       l=l+1
-      if (periodic==1) then
+      if (bdy_z1==PERIODIC) then
          recbufz0(l)=p(i,j,nz2-k,n)
-      else if (reflect==1) then
+      else if (bdy_z1==REFLECT) then
          recbufz0(l)=p(i,j,nz1+k+1,n)
-      else
-         ! call boundary conditions for y=0
+      else if (bdy_z1==REFLECT_ODD) then
+         recbufz0(l)=-p(i,j,nz1+k+1,n)
       endif
    enddo
    enddo
@@ -565,12 +565,12 @@ if (z1==my_z) then
    do j=ny1,ny2
    do i=nx1,nx2
       l=l+1
-      if (periodic==1) then
+      if (bdy_z2==PERIODIC) then
          recbufz1(l)=p(i,j,nz1+k-1,n)
-      else if (reflect==1) then
+      else if (bdy_z2==REFLECT) then
          recbufz1(l)=p(i,j,nz2-k,n)
-      else
-         ! call boundary conditions for x=1  
+      else if (bdy_z2==REFLECT_ODD) then
+         recbufz1(l)=-p(i,j,nz2-k,n)
       endif
    enddo
    enddo

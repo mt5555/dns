@@ -31,7 +31,7 @@ real*8 px(nx,ny,nz)
 
 integer n1,n1d,n2,n2d,n3,n3d
 
-if (numerical_method==1) then
+if (numerical_method==FORTH_ORDER) then
 
 if (index==1) then
 
@@ -134,17 +134,21 @@ real*8 :: dummy(1),tol
 real*8 :: alpha=0
 real*8 :: beta=1
 integer i,j,k,n
-
+external helmholtz_periodic,helmholtz_dirichlet
 
 
 ! solve laplacian(p)=div(u)
-call divergence(p,u,work,work2)
-call helmholtz_periodic_inv(p,work,alpha,beta)
 
-!call divergence(work,u,p,work2)
-!p=0  ! initial guess
-!tol=1e-10
-!call cgsolver(p,work,alpha,beta,tol,...)
+if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC .and. bdy_z1==PERIODIC) then
+   call divergence(p,u,work,work2)
+   call helmholtz_periodic_inv(p,work,alpha,beta)
+else
+   stop 'divfree_gridspace: only supports periodic case'
+   call divergence(work,u,p,work2)
+   p=0  ! initial guess
+   tol=1e-10
+   call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_dirichlet,.false.)
+endif
 
 
 
@@ -542,7 +546,7 @@ real*8 alpha,beta
 integer i,j,k,im,jm,km
 real*8 xfac,xm,ym,zm
 
-if (numerical_method==1) then
+if (numerical_method==FORTH_ORDER) then
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
