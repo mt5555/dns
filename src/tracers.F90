@@ -149,7 +149,12 @@ end subroutine
 
 
 
-subroutine tracer_advance(psi,rk4stage)
+subroutine tracer_advance(psi,ugrid,rk4stage)
+!
+!  input:  psi  stream function
+!          rk4stage  = 1,2,3,4 to denote which rk4 stage
+!
+!  work array: ugrid 
 !
 ! stage 1:
 !    tracer_old=tracer
@@ -177,8 +182,10 @@ subroutine tracer_advance(psi,rk4stage)
 !
 use params
 use mpi
+use ghost
 implicit none
 real*8 :: psi(nx,ny)
+real*8 :: ugrid(nx,ny,2)
 integer :: rk4stage
 
 !local
@@ -205,23 +212,46 @@ else if (rk4stage==4) then
 endif
 
 
+do j=inty1,inty2
+do i=intx1,intx2
+      
+      ugrid(i,j,1)=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
+           (psi(i,j+2)-psi(i,j-2))/12          )/dely
+      
+      ugrid(i,j,2)=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
+           (psi(i+2,j)-psi(i-2,j))/12          )/delx
+      
+enddo
+enddo
+
+call ghost_update_x(ugrid,2)
+call ghost_update_y(ugrid,2)
+
+
 
 ! interpolate psi to position in tracer_tmp
 do i=1,numt
    ! find cpu which owns the grid point tracer(i,:)
-   if (xcord(bx1)<=tracer_tmp(i,1) .and. tracer_tmp(i,1)<xcord(bx2) .and. &
-       ycord(by1)<=tracer_tmp(i,2) .and. tracer_tmp(i,2)<ycord(by2) ) then
+   if (xcord(intx1)<=tracer_tmp(i,1) .and. tracer_tmp(i,1)<xcord(intx2) .and. &
+       ycord(inty1)<=tracer_tmp(i,2) .and. tracer_tmp(i,2)<ycord(inty2) ) then
 
       ! find ii,jj so that point is in box:
-      ! ii,ii+1,ii+2,ii+3   and jj,jj+1,jj+2,jj+3
+      ! ii-1,ii,ii+1,ii+2   and jj-1,jj,jj+1,jj+2
+      ii = intx1 + floor( (tracer_tmp(i,1)-xcord(intx1))/delx )
+      jj = inty1 + floor( (tracer_tmp(i,2)-ycord(inty1))/dely )
+      ASSERT("advance_tracers(): ii interp error",ii<intx2)
+      ASSERT("advance_tracers(): jj interp error",jj<inty2)
+
       ! interpolate trhs
-      do j=1,3
+
+      ! advance
+      do j=1,ndim
          tracer(i,j)=tracer(i,j)+c1*trhs(j)
          tracer_tmp(i,j)=tracer_old(i,j)+c2*trhs(j)
       enddo
    else
-      ! point does not belong to my_pe, set xt=yt=xtrhs=ytrhs=0
-      do j=1,3
+      ! point does not belong to my_pe, set position to 0
+      do j=1,ndim
          tracer(i,j)=0
          tracer_tmp(i,j)=0
       enddo
@@ -233,9 +263,23 @@ enddo
 #ifdef USE_MPI
    tracer_work=tracer
    call MPI_allreduce(tracer_work,tracer,n_var*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   tracer_work=tracer_tmp
-   call MPI_allreduce(tracer_work,tracer_tmp,n_var*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   if (rk4sgate/=4) then
+      ! not necessary on last stage - we no longer need tracer_tmp
+      tracer_work=tracer_tmp
+      call MPI_allreduce(tracer_work,tracer_tmp,n_var*numt,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   endif
 #endif
+
+
+
+if (rk4stage==4) then
+   ! insert points into tracer() if necessary:
+
+endif
+
+
+
+
 
 end subroutine
 

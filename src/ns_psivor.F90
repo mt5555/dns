@@ -133,7 +133,7 @@ w_old=w0
 
 
 ! stage 1
-call ns2D(rhs,w0,psi0,time,1); call tracer_advance(psi0,1)
+call ns2D(rhs,w0,psi0,time,1); call tracer_advance(psi0,Q,1)
 w0=w0+delt*rhs/6.0 
 
 
@@ -141,7 +141,7 @@ w0=w0+delt*rhs/6.0
 w_tmp = w_old + delt*rhs/2.0
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
-call ns2D(rhs,w_tmp,psi,time+delt/2.0,0); call tracer_advance(psi,2)
+call ns2D(rhs,w_tmp,psi,time+delt/2.0,0); call tracer_advance(psi,Q,2)
 w0=w0+delt*rhs/3.0
 
 
@@ -149,7 +149,7 @@ w0=w0+delt*rhs/3.0
 w_tmp = w_old + delt*rhs/2.0
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
-call ns2D(rhs,w_tmp,psi,time+delt/2.0,0) ; call tracer_advance(psi,3)
+call ns2D(rhs,w_tmp,psi,time+delt/2.0,0) ; call tracer_advance(psi,Q,3)
 w0=w0+delt*rhs/3.0
 
 
@@ -158,7 +158,7 @@ w0=w0+delt*rhs/3.0
 w_tmp = w_old + delt*rhs
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
-call ns2D(rhs,w_tmp,psi,time+delt,0) ; call tracer_advance(psi,4)
+call ns2D(rhs,w_tmp,psi,time+delt,0) ; call tracer_advance(psi,Q,4)
 w0=w0+delt*rhs/6.0
 call bcw_impose(w0)
 
