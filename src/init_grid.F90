@@ -109,7 +109,7 @@ implicit none
 
 !local variables
 real*8 :: one=1
-integer i,j,k,l,ierr
+integer i,j,k,l,ierr,i0,i1,j0,j1,k0,k1
 character(len=80) message
 
 
@@ -282,6 +282,28 @@ do k=bz1,bz2
    if (kmcord(k)==0) kmsign(k)=0
    if (kmcord(k)==g_nz/2) kmsign(k)=0
 enddo
+
+imcord_exp=imcord
+jmcord_exp=jmcord
+kmcord_exp=kmcord
+do i=nx1,nx2,2
+   i0=i
+   i1=i+1
+   if ( imcord(i0)==0 ) imcord_exp(i1)=0
+enddo
+do j=ny1,ny2,2
+   j0=j
+   j1=j+1
+   if ( jmcord(j0)==0 ) jmcord_exp(j1)=0
+enddo
+do k=nz1,nz2,2
+   k0=k
+   k1=k+1
+   if ( kmcord(k0)==0 ) kmcord_exp(k1)=0
+enddo
+
+
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

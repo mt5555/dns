@@ -258,9 +258,11 @@ integer,allocatable :: g_imcord(:)
 integer,allocatable :: g_jmcord(:)  
 integer,allocatable :: g_kmcord(:)  
 
-! fft modes, local 3D decompostion
+! fft modes, local 3D decompostion, sin/cos basis
 integer :: imcord(nxd),jmcord(nyd),kmcord(nzd)  ! fft modes local
 integer :: imsign(nxd),jmsign(nyd),kmsign(nzd)  ! fft modes local
+! fft modes, local 3D decomposition, exponential basis
+integer :: imcord_exp(nxd),jmcord_exp(nyd),kmcord_exp(nzd) 
 
 ! fft modes, local z-decompostion
 integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local

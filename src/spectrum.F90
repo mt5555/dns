@@ -1197,7 +1197,7 @@ real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
-real*8 :: cos_tta, delta,rp,ip
+real*8 :: cos_tta, delta,rp,ip,e1,e2,xfac
 integer i,j,k,jm,km,im,iwave_max,n
 
 complex*16 tmp
@@ -1205,14 +1205,16 @@ complex*16 tmp
 if (ndim<3) then
    call abort("compute_helicity_specturm: can only be used in 3D")
 endif
-      
-      
-rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
-iwave_max=nint(rwave)
 
-im=4
-jm=-3
-km=2 
+#define TESTEXP
+#ifdef TESTEXP
+! 5,-3,1   xfac=8   efac=64    N=64
+! 0,-3,1   xfac=4   efac=32
+! 0,0,1   xfac=2   efac=16
+! 0,0,0   xfac=1   efac=8
+im=1
+jm=-2
+km=7
 print *,'initial mode: im,jm,km: ',im,jm,km
 
 pgrid=0
@@ -1227,10 +1229,10 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-
+#endif
 
 p1=pgrid
-! compute fft in phat. (use cmodes_r as work array)
+! compute fft in p1. (use cmodes_r as work array)
 do n = 1,3
    call fft3d(p1(1,1,1,n),cmodes_r)
 enddo
@@ -1238,7 +1240,18 @@ do n = 1,3
    call sincos_to_complex_field(p1(1,1,1,n),cmodes_r(1,1,1,n),cmodes_i(1,1,1,n))
 enddo
 
-
+#ifdef TESTEXP
+rp=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   rp=rp+pgrid(i,j,k,1)**2
+enddo
+enddo
+enddo
+print *,'energy (grid space) = ',rp/g_nx/g_ny/g_nz
+e1=0
+e2=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
@@ -1247,17 +1260,50 @@ do i=nx1,nx2
    jm=jmcord(j)
    km=kmcord(k)
    rp = cmodes_r(i,j,k,1)
-   ip = cmodes_i(i,j,k,2)
-   if (abs(rp)>1e-14 .or. abs(ip)>1e-14) then
-      write(*,'(3i4,2f20.8)') im,jm,km,rp,ip
+   ip = cmodes_i(i,j,k,1)
+   if (abs(p1(i,j,k,1))>1e-14 ) then
+      write(*,'(3i4,f10.5)') im,jm,km,p1(i,j,k,1)
    endif
+
+   xfac=8
+   if (km==0) xfac=xfac/2
+   if (jm==0) xfac=xfac/2
+   if (im==0) xfac=xfac/2
+   e1=e1+xfac*p1(i,j,k,1)**2
 enddo
 enddo
 enddo
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   ! wave number (im,jm,km)   im positive or negative
+   im=imcord_exp(i)
+   jm=jmcord_exp(j)
+   km=kmcord_exp(k)
+   rp = cmodes_r(i,j,k,1)
+   ip = cmodes_i(i,j,k,1)
+   if (abs(rp)>1e-14 .or. abs(ip)>1e-14  ) then
+      write(*,'(3i4,a,f10.5,a,f10.5,a,f10.5)') im,jm,km,&
+      '  (',rp,',',ip,')  '
+   endif
+
+   xfac=64
+   if (km==0) xfac=xfac/2
+   if (jm==0) xfac=xfac/2
+   if (im==0) xfac=xfac/2
+   e2=e2+xfac*(rp**2+ip**2)
+enddo
+enddo
+enddo
+print *,'energy (sin/cos) = ',e1
+print *,'energy (complex) = ',e2
 return
+#endif
 
 
-
+rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+iwave_max=nint(rwave)
 hetot=0
 diss1=0
 diss2=0
@@ -1411,22 +1457,6 @@ end subroutine
 
 subroutine sincos_to_complex_field(p,cmodes_r,cmodes_i)
 #if 0
-  TODO: debug this subroutine.  
-  let p = Real part of (exp(i x + j y + k z ))
-
-  tmp = im*pi2*(0,1)*xcord(i) + &
-        jm*pi2*(0,1)*ycord(j) + &
-        km*pi2*(0,1)*zcord(k)  
-
-   p(i,j,k)=real(tmp)
-
-
-
-  
-  call this routine, print out non-zero modes 
-  and see what we get.
-
-
   convert set of sine and cosine FFT coefficients to complex coefficients
   After calling this routine, here is a loop that will extract the modes:
 
@@ -1437,18 +1467,14 @@ do i=nx1,nx2
    im=imcord(i)
    jm=jmcord(j)
    km=kmcord(k)
-
-   real_part = cp(i,j,k,1)
-   imag_part = cp(i,j,k,2)
-
+   real_part = c_r(i,j,k)
+   imag_part = c_i(i,j,k)
 enddo
 enddo
 enddo
-
 
 For details of the 8x8 transform that maps sin/cos to complex
 coefficients, see the sincos_to_complex routine in sforcing.F90
-
 #endif      
 use params
 implicit none
@@ -1456,44 +1482,16 @@ integer :: nmax
 real*8 :: p(nx,ny,nz)
 real*8 :: cmodes_r(nx,ny,nz)
 real*8 :: cmodes_i(nx,ny,nz)
-integer :: imcord2(nx),jmcord2(ny),kmcord2(nz)  ! fft modes local
 real*8 :: a,b,mx
 integer :: i,j,k,im,jm,km,ii,jj,kk,sm,i0,i1,j0,j1,k0,k1,ck
 
 mx=maxval(abs(p))
-! setup cop of wave number array, but pretend the cos(N/2) term is
-! the (normally missing since it is 0) sin(0x) term:
-imcord2=imcord
-jmcord2=jmcord
-kmcord2=kmcord
-do k=nz1,nz2,2
-do j=ny1,ny2,2
-do i=nx1,nx2,2
-   i0=i
-   i1=i+1
-   j0=j
-   j1=j+1
-   k0=k
-   k1=k+1
-   ck=0
-   if ( imcord(i0)==0 ) then
-      imcord2(i1)=0
-      ck=1
-   endif
-   if ( jmcord(j0)==0 ) then
-      jmcord2(j1)=0
-      ck=1
-   endif
-   if ( kmcord(k0)==0 ) then
-      kmcord2(k1)=0
-      ck=1
-   endif
-   if (ck==1) then
-      if (abs(p(i1,j1,k1)) > mx*1e-13) then
-         print *,i1,j1,k1,p(i1,j1,k1)
-         call abort("Error: sincos_to_complex_field data not dealised")
-      endif
-   endif
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   if ( imcord(i)==g_nx/2 ) p(i,j,k)=0
+   if ( jmcord(j0)==g_ny/2 ) p(i,j,k)=0
+   if ( kmcord(k0)==g_nz/2 ) p(i,j,k)=0
 enddo
 enddo
 enddo
@@ -1514,24 +1512,24 @@ do i=nx1,nx2,2
    k1=k+1
    
    ! verify that this processer has all 8 modes:
-   if (  abs(imcord2(i0))/=abs(imcord2(i1)) .or. &
-         abs(jmcord2(j0))/=abs(jmcord2(j1)) .or. & 
-         abs(kmcord2(k0))/=abs(kmcord2(k1)) ) then
+   if (  abs(imcord_exp(i0))/=abs(imcord_exp(i1)) .or. &
+         abs(jmcord_exp(j0))/=abs(jmcord_exp(j1)) .or. & 
+         abs(kmcord_exp(k0))/=abs(kmcord_exp(k1)) ) then
       print *,'not all modes are on this processor: '
-      print *,i0,imcord2(i0),imcord2(i1)
-      print *,j0,jmcord2(j0),jmcord2(j1)
-      print *,k0,kmcord2(k0),kmcord2(k1)
+      print *,i0,imcord_exp(i0),imcord_exp(i1)
+      print *,j0,jmcord_exp(j0),jmcord_exp(j1)
+      print *,k0,kmcord_exp(k0),kmcord_exp(k1)
       call abort(" ")
    endif
 
    ! make sure that i0 is the positive mode, i1 is the negative mode:
-   if ( imcord2(i0)<0 .or. imcord2(i1)>0 .or.  &
-        jmcord2(j0)<0 .or. jmcord2(j1)>0 .or.  & 
-        kmcord2(k0)<0 .or. kmcord2(k1)>0 ) then
+   if ( imcord_exp(i0)<0 .or. imcord_exp(i1)>0 .or.  &
+        jmcord_exp(j0)<0 .or. jmcord_exp(j1)>0 .or.  & 
+        kmcord_exp(k0)<0 .or. kmcord_exp(k1)>0 ) then
       print *,'we have the sign wrong?'
-      print *,i0,imcord2(i0),imcord2(i1)
-      print *,j0,imcord2(j0),imcord2(j1)
-      print *,k0,imcord2(k0),imcord2(k1)
+      print *,i0,imcord_exp(i0),imcord_exp(i1)
+      print *,j0,imcord_exp(j0),imcord_exp(j1)
+      print *,k0,imcord_exp(k0),imcord_exp(k1)
       call abort(" ")
    endif
 
@@ -1542,9 +1540,9 @@ do i=nx1,nx2,2
    do kk=k0,k1      
 
       ! sin/cos mode 
-      im=imcord2(ii)
-      jm=jmcord2(jj)
-      km=kmcord2(kk)
+      im=imcord_exp(ii)
+      jm=jmcord_exp(jj)
+      km=kmcord_exp(kk)
    
       a=0; b=0
       ! count the number if sin() terms:
