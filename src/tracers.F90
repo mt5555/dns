@@ -598,7 +598,7 @@ end subroutine
       real*8 :: cutoff,xsave,ysave,alfsave
 
       integer,save :: jctr=1
-      real*8 :: epsd=.025**2  ! .1**2
+      real*8 :: epsd=.01**2  ! .1**2
       cutoff=cos(pi/30)
 
       if (numt_insert<0) numt_insert=numt

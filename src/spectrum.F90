@@ -816,8 +816,7 @@ do i=nx1,nx2
 
     ! compute k E(k)
     xw=sqrt(rwave*pi2_squared)
-    denergy=-xfac*xw*p(i,j,k)*p(i,j,k)
-    spec_k(iwave)=spec_k(iwave)+denergy
+    spec_k(iwave)=spec_k(iwave)+xw*energy
 
 
 enddo
