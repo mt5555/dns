@@ -273,6 +273,7 @@ forcing_type=0   ! no forcing
 struct_nx=0
 struct_ny=0
 struct_nz=0
+alpha_value=0
 
 end subroutine
 
