@@ -566,7 +566,7 @@ real*8 :: work2(nx,ny,nz)
 
 !local
 character(len=80) message
-character(len=80) fname
+character(len=280) fname
 character(len=80) base
 integer :: n,header_type
 real*8 :: time
@@ -692,7 +692,7 @@ integer :: header_type
 
 !local
 character(len=80) message
-character(len=80) fname
+character(len=280) fname
 character(len=80) base
 integer :: n
 real*8 :: time
