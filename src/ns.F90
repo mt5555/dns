@@ -46,6 +46,9 @@ integer n1,n1d,n2,n2d,n3,n3d
 logical,save :: firstcall=.true.
 
 
+
+
+
 if (firstcall) then
    firstcall=.false.
    do n=1,3
@@ -430,6 +433,28 @@ endif
 
 ! apply forcing:
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
+
+
+rhs=0
+if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         ! compute the divergence
+         p(k,i,j)= - im*rhs(k,i+z_imsign(i),j,1) &
+              - jm*rhs(k,i,j+z_jmsign(j),2) &
+              - km*rhs(k+z_kmsign(k),i,j,3)
+
+      enddo
+   enddo
+enddo
+call z_ifft3d(p,rhsg,work)
+print *,'maxval div: ',maxval(abs(rhsg(nx1:nx2,ny1:ny2,nz1:nz2,1)))
+stop
 
 
 

@@ -375,7 +375,6 @@ real*8 xw,xfac,f_diss,fsum,fxx_diss
 real*8,save :: rmodes(-numbs:numbs,-numbs:numbs,-numbs:numbs,3)       ! value at time tmod
 real*8,save :: tmod,tmod_old
 real*8,save :: tscale=.01
-real*8      :: rmodes2(-numbs:numbs,-numbs:numbs,-numbs:numbs,3)   
 
 
 if (0==init_sforcing) then
@@ -424,11 +423,13 @@ if (ntot==0) return
 !
 ! Compute a new forcing function?  
 !
+#if 0
 if (new_f==1) then
    call random12(rmodes)
    return
 endif
-#if 0
+
+#else
 if (new_f==1) then
    if (my_pe==io_pe) call random12(rmodes)
 #ifdef USE_MPI
@@ -436,6 +437,7 @@ if (new_f==1) then
 #endif
    return
 endif
+
 #endif
 
 

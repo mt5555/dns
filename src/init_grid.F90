@@ -5,6 +5,21 @@ use fft_interface
 use transpose
 implicit none
 character(len=80) ::  message
+integer,allocatable :: seed(:)
+integer :: k
+
+
+! set the seed - otherwise it will be the same for all CPUs,
+! producing a bad initial condition
+call random_seed(size=k)
+allocate(seed(k))
+call random_seed(get=seed)
+seed=seed+my_pe
+call random_seed(put=seed)
+deallocate(seed)
+
+
+
 
 call params_init()
 call transpose_init()

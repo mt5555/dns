@@ -23,7 +23,6 @@ real*8 :: work2(nx,ny,nz)
 ! local variables
 real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr,nb
-integer,allocatable :: seed(:)
 integer,parameter :: NUMBANDS=15
 real*8 xw,enerb(NUMBANDS),enerb_target(NUMBANDS),ener,xfac,theta
 real*8 enerb_work(NUMBANDS)
@@ -36,14 +35,6 @@ CPOINTER :: null
 
 !random vorticity
 
-! set the seed - otherwise it will be the same for all CPUs,
-! producing a bad initial condition
-call random_seed(size=k)
-allocate(seed(k))
-call random_seed(get=seed)
-seed=seed+my_pe
-call random_seed(put=seed)
-deallocate(seed)
 
 if (rantype==0) then
 do n=1,3
