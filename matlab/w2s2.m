@@ -1,11 +1,15 @@
 name='/ccs/scratch/taylorm/dns/iso12_512'
 name='/home/mt/iso12_512'
-nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
+nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0;
+
+ext='.isostr';
+ext2='.isow2s2';
 
 times=[7.0:.1:7.0];
 xx=(1:.5:(nx./2.5)) / nx;
 xx_plot=(1:.5:(nx./2.5)) *delx_over_eta;   % units of r/eta
 
+t=times(1);
 tstr=sprintf('%10.4f',t+10000);
 fname=[name,tstr(2:10)];
 disp([fname,ext]);
@@ -14,8 +18,8 @@ disp([fname,ext]);
 [nx,ndelta,ndir,r_val,ke,eps_l,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
     SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt,D_lltt,Dl] ...
-     = readisostr([fname,ext])
-[ndelta_2,ndir_2,r_val_2,w2w2,s2s2,w2s2] = readisow2s2([fname,ext])    
+     = readisostr([fname,ext]);
+[ndelta_2,ndir_2,r_val_2,w2w2,s2s2,w2s2] = readisow2s2([fname,ext2]);
     
     
 eta_l = (mu^3 / eps_l)^.25;
