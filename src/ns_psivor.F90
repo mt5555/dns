@@ -72,6 +72,7 @@ logical,save :: firstcall=.true.
 integer,save :: btype
 
 
+
 if (firstcall) then
    firstcall=.false.
    if (equations/=NS_PSIVOR) then
@@ -118,7 +119,7 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,1)
+call compute_psi(w_tmp,psi,rhs,work,psi0,0)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
@@ -127,14 +128,14 @@ Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,1)
+call compute_psi(w_tmp,psi,rhs,work,psi0,0)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
 call bc_impose(w_tmp,psi0)
-call compute_psi(w_tmp,psi,rhs,work,psi0,1)
+call compute_psi(w_tmp,psi,rhs,work,psi0,0)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,3)=Q(:,:,3)+delt*rhs/6.0
 call bc_impose(Q(1,1,3),psi0)
@@ -192,7 +193,7 @@ real*8 psi(nx,ny)
 integer i,j
 real*8 :: u,v
 
-if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
+if REALBOUNDARY(bdy_x1) then
    !             nx1   nx1+1   nx1+2    nx1+3
    ! stencil (   -1             1              ) /2h
    !                    -3      4        1     ) /2h
@@ -213,7 +214,7 @@ if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
       endif
    enddo
 endif
-if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
+if REALBOUNDARY(bdy_x2) then
    do j=ny1,ny2
 
       i=nx2-1
@@ -230,7 +231,7 @@ if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
 endif
 
 
-if (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED) then
+if REALBOUNDARY(bdy_y1) then
    do i=nx1,nx2
 
       j=ny1+1
@@ -245,7 +246,7 @@ if (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED) then
    enddo
 endif
 
-if (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED) then
+if REALBOUNDARY(bdy_y2) then
    do i=nx1,nx2
 
       j=ny2-1
@@ -326,8 +327,8 @@ do i=intx1,intx2
         (psi(i+2,j)-psi(i-2,j))/12          )/delx
 
 
-   if ((my_x==0 .and. bdy_x1==INFLOW0_ONESIDED .and. i<=nx1+2) .or. &
-       (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED .and. i>=nx2-2)) then
+   if ( (REALBOUNDARY(bdy_x1) .and. i<=nx1+2) .or. &
+        (REALBOUNDARY(bdy_x2) .and. i>=nx2-2) ) then
       ! centered, 2nd order
       dx=( w(i+1,j)-w(i-1,j) ) / (2*delx)
       dxx=(w(i+1,j)-2*w(i,j)+w(i-1,j) ) / (delx*delx)
@@ -339,8 +340,8 @@ do i=intx1,intx2
    endif
 
 
-   if ((my_y==0 .and. bdy_y1==INFLOW0_ONESIDED .and. j<=ny1+2) .or. &
-       (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED .and. j>=ny2-2)) then
+   if ( (REALBOUNDARY(bdy_y1) .and. j<=ny1+2) .or. &
+        (REALBOUNDARY(bdy_y2) .and. j>=ny2-2)) then
       ! centered, 2nd order
       dy=( w(i,j+1)-w(i,j-1) ) / (2*dely)
       dyy=(w(i,j+1)-2*w(i,j)+w(i,j-1) ) / (dely*dely)

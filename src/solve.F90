@@ -257,22 +257,24 @@ integer,save :: btype=-1
 external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
 integer i,j
 
-
+! check global boundary conditions and see what kind of solver we need
 if (btype==-1) then
-   if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
+   if (g_bdy_x1==PERIODIC .and. g_bdy_y1==PERIODIC) then
       ! periodic
       btype=0
    else if  ( &
         ! not periodic, but can still do with all ghostcells:
-        ((bdy_x1==PERIODIC) .or. (bdy_x1==REFLECT) .or. (bdy_x1==REFLECT_ODD)) .and. &
-        ((bdy_x2==PERIODIC) .or. (bdy_x2==REFLECT) .or. (bdy_x2==REFLECT_ODD)) .and. &
-        ((bdy_y1==PERIODIC) .or. (bdy_y1==REFLECT) .or. (bdy_y1==REFLECT_ODD)) .and. &
-        ((bdy_y2==PERIODIC) .or. (bdy_y2==REFLECT) .or. (bdy_y2==REFLECT_ODD))  ) then
+        ((g_bdy_x1==PERIODIC) .or. (g_bdy_x1==REFLECT) .or. (g_bdy_x1==REFLECT_ODD)) .and. &
+        ((g_bdy_x2==PERIODIC) .or. (g_bdy_x2==REFLECT) .or. (g_bdy_x2==REFLECT_ODD)) .and. &
+        ((g_bdy_y1==PERIODIC) .or. (g_bdy_y1==REFLECT) .or. (g_bdy_y1==REFLECT_ODD)) .and. &
+        ((g_bdy_y2==PERIODIC) .or. (g_bdy_y2==REFLECT) .or. (g_bdy_y2==REFLECT_ODD))  ) then
         btype=1
-   else if (bdy_x1==INFLOW0_ONESIDED .and. bdy_x2==INFLOW0_ONESIDED .and. &
-            bdy_y1==REFLECT_ODD .and. bdy_y2==INFLOW0_ONESIDED) then
+   else if (g_bdy_x1==INFLOW0_ONESIDED .and. g_bdy_x2==INFLOW0_ONESIDED .and. &
+            g_bdy_y1==REFLECT_ODD .and. g_bdy_y2==INFLOW0_ONESIDED) then
       btype=2
    else
+      ! other types of b.c. not supported, mostly because bc_biotsavart
+      ! is hard-coded for btype=2
       call abort("compute_psi(): specified boundery conditions not supported")
    endif
 endif
@@ -304,9 +306,9 @@ else if (btype==2) then
 
    b=-w  ! be sure to copy ghost cell data also!
 
-
    ! apply compact correction to 'b', then set b.c. of b:
    call helmholtz_dirichlet_setup(b,psi,work,1)
+
    psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
    !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 

@@ -379,16 +379,40 @@ real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
 
 
 if (init_cond_subtype ==0) then
+! 660x380   290min.  t=30  mu=1e-4
+! [-1.7, 1.6]  [0 1.9]   delx=dely=.005
+!OR:
+! [ 0 , 3.3 ]  sheet at .1.7
+!
+! scaled up to 720x400:   yscale=2
+!                         xscale=3.6   
+!
+   biotsavart_cutoff=.001  ! .005
    delta=.2
    ubar=.089
    yscale=3
 endif
 
+if (init_cond_subtype ==1) then
+! 660x380   290min.  t=30  mu=1e-4
+! [-1.7, 1.6]  [0 1.9]   delx=dely=.005
+!OR:
+! [ 0 , 3.3 ]  sheet at .1.7
+!
+! scaled up to 720x400:   yscale=2
+!                         xscale=3.6   
+!
+   biotsavart_cutoff=.001  ! .005
+   delta=.2
+   ubar=.089
+   yscale=2
+endif
+
 ! choose xscale so that delx*xscale = dely*yscale
-xscale = yscale*delx/dely
+xscale = yscale*dely/delx
 
 ! scale velocity in y direction (units: m/s)
-ubar = ubar/yscale
+ubar = ubar/xscale
 
 ! scale the viscosity (units: m**2/s)
 mu_x=mu/(xscale**2)
@@ -431,11 +455,18 @@ do j=ny1,ny2
    enddo
    w(i,j,1) = delsq*sum/pi
    testmax = max(testmax,w(i,j,1))
+
+
+
 enddo
 !if (mod(i,20).eq.0) print*,'i=',i,w(i,nj/2)
 enddo
+
+
  
 print*,'wmax=',testmax
+call zero_boundary(w)
+#if 0
 ! set w=0 on the boundary
 do i=nx1,nx2
    w(i,ny1,1) = 0
@@ -445,8 +476,13 @@ do j=ny1,ny2
    w(nx1,j,1)=0
    w(nx2,j,1)=0
 enddo
+#endif
 
 Q(:,:,:,3)=w
+
+
+
+
 
 
 end subroutine

@@ -95,13 +95,13 @@ real*8 px(nx,ny,nz)
 
 integer n1,n1d,n2,n2d,n3,n3d
 
-if (bdy_y1/=PERIODIC) then
+if (g_bdy_x1/=PERIODIC ) then
    call abort('der() can only handle periodic boundaries')
 endif
-if (bdy_y1/=PERIODIC) then
+if (g_bdy_y1/=PERIODIC) then
    call abort('der() can only handle periodic boundaries')
 endif
-if (bdy_z1/=PERIODIC) then
+if (g_bdy_z1/=PERIODIC ) then
    call abort('der() can only handle periodic boundaries')
 endif
 
@@ -216,7 +216,9 @@ external helmholtz_periodic,helmholtz_dirichlet
 
 ! solve laplacian(p)=div(u)
 
-if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC .and. bdy_z1==PERIODIC) then
+if ( g_bdy_x1==PERIODIC .and. &
+     g_bdy_y1==PERIODIC .and. &
+     g_bdy_z1==PERIODIC) then
    call divergence(p,u,work,work2)
    call helmholtz_periodic_inv(p,work,alpha,beta)
 
@@ -224,13 +226,9 @@ if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC .and. bdy_z1==PERIODIC) then
    !p=0  ! initial guess
    !tol=1e-10
    !call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic,.false.)
-
 else
-   stop 'divfree_gridspace: only supports periodic case'
-   call divergence(work,u,p,work2)
-   p=0  ! initial guess
-   tol=1e-10
-   call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_dirichlet,.false.)
+   ! might try divfree_ghost
+   stop 'divfree_gridspace: only supports periodic/reflection case'
 endif
 
 
@@ -1157,6 +1155,7 @@ if (ndim==2) then
       
    if (setbdy==1) then
    ! now overwrite boundary with same data as in p
+   ! include ghost cells
    if (my_x==0) then
       do j=ny1,ny2
          f(nx1,j,k)=p(nx1,j,k)
@@ -1416,14 +1415,6 @@ if (ndim==2) then
       lf(i,j,k)=(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx) + &
                 (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))/(dely*dely)
 
-#if 0
-      if (i==3 .and. j==130) then
-         print *,i,j,lf(i,j,k)
-         print *,'x: ',f(i-1,j,k),f(i,j,k),f(i+1,j,k)
-         print *,'y: ',f(i,j-1,k),f(i,j,k),f(i,j+1,k)
-         stop
-      endif
-#endif
 
       ! add the DyDx(f) term:
 #ifdef COMPACT
@@ -1521,6 +1512,7 @@ subroutine helmholtz_dirichlet_inv(f,work,alpha,beta)
 !
 use params
 use fft_interface
+use ghost
 use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
@@ -1583,9 +1575,19 @@ if (ndim/=2) then
    call abort("helmholtz_dirichlet_inv() not coded for 3D compact")
 endif
 axy=(delx**2+dely**2)/(12*delx*delx*dely*dely)
+
+! this is only needed to compute helmholtz() near the boundary
+! when converting problem to 0 b.c. problem (f=f-lphi requires
+! ghost cell data to compute lphi for the COMPACT case
+call ghost_update_x(f,1)
+call ghost_update_y(f,1)
+
 #else
 axy=0
+
 #endif
+
+
 x_axy=1/(delx*delx) - 2*axy
 y_axy=1/(dely*dely) - 2*axy
 
@@ -1615,6 +1617,13 @@ endif
 
 
 ! set loop indexes to loop over all points just inside boundary:
+bx1=nx1
+bx2=nx2
+by1=ny1
+by2=ny2
+bz1=nz1
+bz2=nz2
+
 if (my_x==0) then
    bx1=nx1+1
 endif
@@ -1633,8 +1642,6 @@ endif
 if (my_z==ncpu_z-1) then
    bz2=nz2-1
 endif
-
-
 
 
 
@@ -1688,23 +1695,23 @@ if (my_y==ncpu_y-1) then
       yb(i,2)=f(i,j,k)
       f(i,j,k)=0
    enddo
+
+
 endif
 
-
-
-
 #if 0
-do k=nz1,nz2
+k=1
 do j=ny1,ny2
 do i=nx1,nx2
-   if (abs(f2(i,j,k)-f(i,j,k))>1e-12 ) then
-      print *,i,j,k,f(i,j,k),f2(i,j,k)
+   if (abs(f(i,j,k)-f2(i,j,k))>1e-6) then
+      print *,nx1,nx2
+      print *,ny1,ny2
+      print *,i,j,f(i,j,k),f2(i,j,k)
+      stop
    endif
 enddo
 enddo
-enddo
 #endif
-
 
 
 ! solve Helm(f) = b with 0 b.c.
@@ -1795,7 +1802,6 @@ if (my_y==ncpu_y-1) then
       f(i,j,k)=yb(i,2)
    enddo
 endif
-
 end subroutine
 
 

@@ -1,4 +1,4 @@
-Running single threaded
+Running parallel.  NCPUS=    1 =   1 x  1 x  1                                  
  Run name:         temp
  output directory: /tmp/
  Enter input file type: 
@@ -24,7 +24,7 @@ Initializing FFT99 of size n=   128
 
 time=  0.00000(     0)  next output=  0.05000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.1535488 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.11267663544282     0.09772682361228     0.00000000000000    
+max: (u,v,w)      0.11267663571255     0.09772682357024     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.63755E-02   max(vor) 0.45208E+01                
 ke:  0.0013158499  enstropy:        0.1663         total d/dt(ke):   0.0000000  
 total d/dt(w) vis=      0.0000000   mu <w,w_xx>=      -0.0127510                
@@ -32,45 +32,44 @@ writing output files at t=    0.0000
 
 time=  0.05000(     1)  next output=  0.10000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.1535749 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.11238810918784     0.09803515649152     0.00000000000000    
+max: (u,v,w)      0.11238813477050     0.09803515002928     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.63755E-02   max(vor) 0.45208E+01                
 ke:  0.0013158551  enstropy:        0.1663         total d/dt(ke):   0.0000000  
 total d/dt(w) vis=      0.0000000   mu <w,w_xx>=      -0.0127510                
 
 time=  0.10000(     2)  next output=  0.15000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.1537084 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.11203285055648     0.09833679064712     0.00000000000000    
+max: (u,v,w)      0.11203290318642     0.09833678011031     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.62979E-02   max(vor) 0.44842E+01                
-ke:  0.0013149251  enstropy:        0.1657         total d/dt(ke):  -0.0000186  
+ke:  0.0013149250  enstropy:        0.1657         total d/dt(ke):  -0.0000186  
 total d/dt(w) vis=     -0.0126685   mu <w,w_xx>=      -0.0125957                
 
 time=  0.15000(     3)  next output=  0.20000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.1539557 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.11161623687628     0.09862811583514     0.00000000000000    
+max: (u,v,w)      0.11161631964062     0.09862810307242     0.00000000000000    
 <z-vor>= 0.10189E+00   <hel>=-0.62234E-02   max(vor) 0.44370E+01                
-ke:  0.0013139977  enstropy:        0.1651         total d/dt(ke):  -0.0000185  
-total d/dt(w) vis=     -0.0125087   mu <w,w_xx>=      -0.0124469                
+ke:  0.0013139976  enstropy:        0.1651         total d/dt(ke):  -0.0000185  
+total d/dt(w) vis=     -0.0125087   mu <w,w_xx>=      -0.0124468                
 
 time=  0.20000(     4)  next output=  0.25000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.1538919 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.11114415930782     0.09890534485594     0.00000000000000    
-<z-vor>= 0.10188E+00   <hel>=-0.61520E-02   max(vor) 0.43808E+01                
-ke:  0.0013130764  enstropy:        0.1645         total d/dt(ke):  -0.0000184  
+max: (u,v,w)      0.11114427186869     0.09890533190028     0.00000000000000    
+<z-vor>= 0.10188E+00   <hel>=-0.61520E-02   max(vor) 0.43807E+01                
+ke:  0.0013130762  enstropy:        0.1645         total d/dt(ke):  -0.0000184  
 total d/dt(w) vis=     -0.0123560   mu <w,w_xx>=      -0.0123040                
 
 time=  0.25000(     5)  next output=  0.25000  LSF minutes left:    -1. 0       
 for next timestep: delt=0.1537371 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.11062438345902     0.09916402990165     0.00000000000000    
+max: (u,v,w)      0.11062452762243     0.09916401760046     0.00000000000000    
 <z-vor>= 0.10188E+00   <hel>=-0.60835E-02   max(vor) 0.43167E+01                
-ke:  0.0013121470  enstropy:        0.1639         total d/dt(ke):  -0.0000186  
+ke:  0.0013121468  enstropy:        0.1639         total d/dt(ke):  -0.0000186  
 total d/dt(w) vis=     -0.0122103   mu <w,w_xx>=      -0.0121669                
 writing output files at t=    0.2500                                            
 CPU times (min):   (avg/max)
 initialization:      0.00     0.00                                              
-dns_solve:           0.07     0.07                                              
+dns_solve:           0.01     0.01                                              
    time_control            0.00     0.00                                        
    RHS                     0.00     0.00                                        
-   compute_pdf             0.00     0.00                                        
    ghost_update            0.00     0.00                                        
    transpose_to_z          0.00     0.00                                        
    transpose_from_z        0.00     0.00                                        
@@ -78,3 +77,4 @@ dns_solve:           0.07     0.07
    transpose_from_x        0.00     0.00                                        
    transpose_to_y          0.00     0.00                                        
    transpose_from_y        0.00     0.00                                        
+   Biot-Savart             0.01     0.01                                        

@@ -23,7 +23,7 @@ if ($1 == makeref) then
 endif
 
 if ($1 == 1) then
-
+echo 'out = ' $tmp
    ./gridsetup.py 1 1 1 65 65 1 2 2 0 2 2 0
 make dnsvor >& /dev/null ;  rm -f $tmp ; ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
@@ -34,17 +34,14 @@ endif
 if ($1 == p) then
 
 
-./gridsetup.py 2 1 1 65 65 1  2 2 0 2 2 0
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin > $tmp 
+./gridsetup.py 5 1 1 65 65 1  2 2 0 2 2 0
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
-./gridsetup.py 1 2 1 65 65 1  2 2 0 2 2 0
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin > $tmp 
+./gridsetup.py 1 5 1 65 65 1  2 2 0 2 2 0
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
-./gridsetup.py 2 2 1 65 65 1  2 2 0 2 2 0
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dnsvor -d /tmp < $refin > $tmp 
-../testing/check.sh $tmp $refout
 
 
 endif

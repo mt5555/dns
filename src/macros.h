@@ -26,10 +26,20 @@
 #define FORTH_ORDER    1
 
 ! types of boundary conditions
+! these boundaries are not 'real', and are just handled by the
+! parallel ghost cell update:
 #define PERIODIC 0
 #define REFLECT  1
 #define REFLECT_ODD        2
-#define INFLOW0_ONESIDED   3
+#define INTERNAL           3
+
+! these are the real boundaries and must be
+! treated with code outside of the ghost cell update:
+! to check if a boundary is a 'real' boundary, use for example:  
+!  REALBOUNDARY(bdy_x1)
+#define REALBOUNDARY(bdy)    (bdy>=100)
+#define INFLOW0            100
+#define INFLOW0_ONESIDED   101
 
 
 

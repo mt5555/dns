@@ -8,14 +8,14 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 %range=0:.05:1.00;
-range=0:.25:10.0;
+range=0:1.0:100.0;
 %range=[.00];
 name='../src/impulse/kh24';
 %name='../src/kh/khK';
 %name='../src/kh/khQ';  %nopq
 name='../src/temp';
 
-figure(1)
+usefig=1;
 mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
@@ -42,7 +42,6 @@ for i=range
   z=fread(fidvor,nz,'float64');
   x = x*(nx/ny);
   
-  
   q = fread(fidvor,nx*ny*nz,'float64');
   tmp = fread(fidvor,1,'float64');
   tmp=size(tmp);
@@ -68,7 +67,7 @@ for i=range
   x=fread(fidvor,nx,'float64');
   y=fread(fidvor,ny,'float64');
   z=fread(fidvor,nz,'float64');
-  x=x*(nx/ny);
+  x = x*(nx/ny);
   
   q = fread(fidvor,nx*ny*nz,'float64');
   tmp = fread(fidvor,1,'float64');
@@ -86,7 +85,7 @@ for i=range
   
   
   stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,qmax)
-
+  figure(usefig)
   
     %
     %  2D field.  options set above:
@@ -99,16 +98,19 @@ for i=range
       pcolor(x,y,vor')
       shading interp
     else
-      v = -12:1:3;
+      v = -6:1:3;
       v=2.^v;
       contour(x,y,vor',v)
       hold on
+      v = -12:1:-7;
+      v=2.^v;
+      contour(x,y,vor',v,'r')
       contour(x,y,vor',[0 0],'k')
       hold off
     end
     
     title(stitle);
-    axis equal
+    axis image
 
     
     subplot(2,1,2)
@@ -120,7 +122,7 @@ for i=range
       v=20;                             % use 20 contours
       contour(x,y,psi',v)
     end
-    axis equal
+    axis image
     
     
 

@@ -161,7 +161,7 @@ analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 clean: 
-	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi 
+	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi dnsvor
 
 dep:
 	./mkdep.py *.F90 *.f  > .depends

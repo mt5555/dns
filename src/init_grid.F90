@@ -59,12 +59,12 @@ call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_y2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(g_bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(compute_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 
@@ -108,13 +108,13 @@ endif
 ! periodic FFT case:  for output, we include the point at x=1 (same as x=0)
 
 o_nx=g_nx
-if (bdy_x1==PERIODIC) o_nx=g_nx+1
+if (g_bdy_x1==PERIODIC) o_nx=g_nx+1
 
 o_ny=g_ny
-if (bdy_y1==PERIODIC) o_ny=g_ny+1
+if (g_bdy_y1==PERIODIC) o_ny=g_ny+1
 
 o_nz=g_nz
-if (bdy_z1==PERIODIC) o_nz=g_nz+1
+if (g_bdy_z1==PERIODIC) o_nz=g_nz+1
 if (g_nz==1) o_nz=1
 
 
@@ -211,22 +211,37 @@ inty2=ny2
 intz1=nz1
 intz2=nz2
 
-if (bdy_x1==INFLOW0_ONESIDED .and. my_x==0) then
+bdy_x1=g_bdy_x1
+bdy_x2=g_bdy_x2
+bdy_y1=g_bdy_y1
+bdy_y2=g_bdy_y2
+bdy_z1=g_bdy_z1
+bdy_z2=g_bdy_z2
+
+if (my_x/=0) bdy_x1=INTERNAL
+if (my_x/=ncpu_x-1) bdy_x2=INTERNAL
+if (my_y/=0) bdy_y1=INTERNAL
+if (my_y/=ncpu_y-1) bdy_y2=INTERNAL
+if (my_z/=0) bdy_z1=INTERNAL
+if (my_z/=ncpu_z-1) bdy_z2=INTERNAL
+
+
+if REALBOUNDARY(bdy_x1) then
    intx1=nx1+1
 endif
-if (bdy_x2==INFLOW0_ONESIDED .and. my_x==ncpu_x-1) then
+if REALBOUNDARY(bdy_x2) then
    intx2=nx2-1
 endif
-if (bdy_y1==INFLOW0_ONESIDED .and. my_y==0) then
+if REALBOUNDARY(bdy_y1) then
    inty1=ny1+1
 endif
-if (bdy_y2==INFLOW0_ONESIDED .and. my_y==ncpu_y-1) then
+if REALBOUNDARY(bdy_y2) then
    inty2=ny2-1
 endif
-if (bdy_z1==INFLOW0_ONESIDED .and. my_z==0) then
+if REALBOUNDARY(bdy_z1) then
    intz1=nz1+1
 endif
-if (bdy_z2==INFLOW0_ONESIDED .and. my_z==ncpu_z-1) then
+if REALBOUNDARY(bdy_z2) then
    intz2=nz2-1
 endif
 
@@ -589,11 +604,11 @@ endif
 read(*,'(a12)') sdata
 print *,'b.c. x-direction: ',sdata
 if (sdata=='periodic') then
-   bdy_x1=PERIODIC
-   bdy_x2=PERIODIC
+   g_bdy_x1=PERIODIC
+   g_bdy_x2=PERIODIC
 else if (sdata=='in0/onesided') then
-   bdy_x1=INFLOW0_ONESIDED
-   bdy_x2=INFLOW0_ONESIDED
+   g_bdy_x1=INFLOW0_ONESIDED
+   g_bdy_x2=INFLOW0_ONESIDED
 else
    call abort("x boundary condition not supported")
 endif
@@ -601,14 +616,14 @@ endif
 read(*,'(a12)') sdata
 print *,'b.c. y-direction: ',sdata
 if (sdata=='periodic') then
-   bdy_y1=PERIODIC
-   bdy_y2=PERIODIC
+   g_bdy_y1=PERIODIC
+   g_bdy_y2=PERIODIC
 else if (sdata=='reflect') then
-   bdy_y1=REFLECT
-   bdy_y2=REFLECT
+   g_bdy_y1=REFLECT
+   g_bdy_y2=REFLECT
 else if (sdata=='custom0') then
-   bdy_y1=REFLECT_ODD
-   bdy_y2=INFLOW0_ONESIDED
+   g_bdy_y1=REFLECT_ODD
+   g_bdy_y2=INFLOW0_ONESIDED
 else
    call abort("y boundary condition not supported")
 endif
@@ -616,8 +631,8 @@ endif
 read(*,'(a12)') sdata
 print *,'b.c. z-direction: ',sdata
 if (sdata=='periodic') then
-   bdy_z1=PERIODIC
-   bdy_z2=PERIODIC
+   g_bdy_z1=PERIODIC
+   g_bdy_z2=PERIODIC
 else
    call abort("only 'perodic' b.c. supported in z-direction")
 endif
@@ -640,9 +655,9 @@ enddo
 
 if (numerical_method==FOURIER) then
    ! make sure boundary conditons are periodic:
-   if (bdy_x1/=PERIODIC .or. bdy_x2/=PERIODIC .or. &
-       bdy_y1/=PERIODIC .or. bdy_y2/=PERIODIC .or. &
-       bdy_z1/=PERIODIC .or. bdy_z2/=PERIODIC) then
+   if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
+       g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
+       g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
       call abort("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif

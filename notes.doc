@@ -6,7 +6,7 @@
 
 3. psi-vor code:
         put in interpolation for PSI boundary values
-        matlab code: 65x65 should look same as 129x65
+        cgsolver on 721x401 case: SEGFAULT
 
 1. hyper viscosity in NS code
 1. change NS-alpha so forcing always appears as just 'f'

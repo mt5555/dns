@@ -42,26 +42,26 @@ Q_old=Q
 
 ! stage 1
 call ns3D(rhs,Q,time,1)
-call divfree_ghost(rhs,p,work1)
+call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0)
-call divfree_ghost(rhs,p,work1)
+call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0)
-call divfree_ghost(rhs,p,work1)
+call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0)
 Q=Q+delt*rhs/6.0
-call divfree_ghost(Q,p,work1)
+call divfree_ghost(Q,p,work1,Q_tmp)
 
 
 
@@ -71,13 +71,13 @@ call divfree_ghost(Q,p,work1)
 
 ! stage 1
 call ns3D(rhs,Q,time,1)
-call divfree_ghost(rhs,p,work1)
+call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/3
 
 ! stage 2
 Q_tmp = rhs
 call ns3D(rhs,Q,time+delt/3,0)
-call divfree_ghost(rhs,p,work1)
+call divfree_ghost(rhs,p,work1,Q_tmp)
 rhs = -5*Q_tmp/9 + rhs
 Q=Q + 15*delt*rhs/16
 
@@ -87,7 +87,7 @@ Q_tmp=rhs
 call ns3D(rhs,Q,time+3*delt/4,0)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
-call divfree_ghost(Q,p,work1)
+call divfree_ghost(Q,p,work1,Q_tmp)
 
 
 #endif
@@ -300,7 +300,7 @@ end
 
 
 
-subroutine divfree_ghost(u,p,work)
+subroutine divfree_ghost(u,p,work,work2)
 !
 ! make u divergence free
 !    solve:  div(u) = laplacian(p)
@@ -315,19 +315,17 @@ implicit none
 real*8 :: u(nx,ny,nz,3)
 real*8 :: p(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 
 !local
 real*8 :: dummy(1),tol
 real*8 :: alpha=0
 real*8 :: beta=1
 integer i,j,k,n
-external helmholtz_periodic,helmholtz_dirichlet
+external helmholtz_periodic,helmholtz_dirichlet,helmholtz_periodic_ghost
 
 
 ! solve laplacian(p)=div(u)
-
-if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC .and. bdy_z1==PERIODIC) then
-
    ! p = ux+vy+wz
    call ghost_update_x(u(1,1,1,1),1)
    call ghost_update_y(u(1,1,1,2),1)
@@ -351,12 +349,26 @@ if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC .and. bdy_z1==PERIODIC) then
    enddo
 
 
+if ( g_bdy_x1==PERIODIC .and. &
+     g_bdy_y1==PERIODIC .and. &
+     g_bdy_z1==PERIODIC ) then
+
    call helmholtz_periodic_inv(p,work,alpha,beta)
    !work=p  ! RHS
    !p=0  ! initial guess
    !tol=1e-10
    !call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic,.false.)
 
+else if ( (.not.REALBOUNDARY(g_bdy_x1)) .and. &
+          (.not.REALBOUNDARY(g_bdy_x2)) .and. &
+          (.not.REALBOUNDARY(g_bdy_y1)) .and. &
+          (.not.REALBOUNDARY(g_bdy_y2)) .and. &
+          (.not.REALBOUNDARY(g_bdy_z1)) .and. &
+          (.not.REALBOUNDARY(g_bdy_z2)) ) then
+   work=p  ! RHS
+   p=0  ! initial guess
+   tol=1e-8
+   call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic_ghost,.false.)
 else
    stop 'divfree_ghost: only supports periodic case'
 endif

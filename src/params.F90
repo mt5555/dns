@@ -54,18 +54,29 @@ logical :: dealias=.false.
 real*8 :: xscale=1
 real*8 :: yscale=1
 real*8 :: zscale=1
+real*8 :: biotsavart_cutoff
 real*8 :: ubar=0
 real*8 :: mu_x,mu_y,mu_z ! since we allow scaling in both x and y,
                          ! have to allow two differenent viscosities
 
 
-! boundary conditions
+! local boundary conditions
+! usually these will be INTERNAL, meaning the boundary is just
+! an internal processor boundary
 integer :: bdy_x1=PERIODIC
 integer :: bdy_x2=PERIODIC
 integer :: bdy_y1=PERIODIC
 integer :: bdy_y2=PERIODIC
 integer :: bdy_z1=PERIODIC
 integer :: bdy_z2=PERIODIC
+
+! global boundary conditions.  boundary conditions at x=0, 1, y=0,1
+integer :: g_bdy_x1=PERIODIC
+integer :: g_bdy_x2=PERIODIC
+integer :: g_bdy_y1=PERIODIC
+integer :: g_bdy_y2=PERIODIC
+integer :: g_bdy_z1=PERIODIC
+integer :: g_bdy_z2=PERIODIC
 
 
 character(len=80) :: runname
