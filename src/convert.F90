@@ -248,16 +248,21 @@ icount=icount+1
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
    endif
    if (convert_opt==7) then  ! -cout gradu
+      ! compute <gradu> for all subcubes, output in asci file
       call input_uvw(time,Q,vor,work1,work2,1)
       call print_message("computing gradu ")
       call gradu_stats(time,Q,vor,work1,work2)
    endif
    if (convert_opt==8) then  ! -cout extract_subcube
+      ! read asci file for list of subcubes to extractg
+      ! rotate (if necessary) to align gradient with x axis
+      ! output raw brick-of-floats for each rotated subcube
       call input_uvw(time,Q,vor,work1,work2,1)
       call print_message("extracting subcubes ")
       call gradu_rotate_subcubes(time,Q,vor,work1,work2)
    endif
    if (convert_opt==9) then  ! -cout spec_window  
+      ! read input data, detrend, window, output spectrum and cospectrum
       !call input_uvw(time,Q,vor,work1,work2,1) ! DNS default headers
       call input_uvw(time,Q,vor,work1,work2,2) ! no headers
       call print_message("computing spectrum ")
@@ -752,20 +757,43 @@ do
       write(*,'(a,3f12.5)') 'corner: ',corner(1:3)
    endif
 
-
+   ! compute corner of larger cube containing subcube (x0(:))
    x0(1) = corner(1) - ssize*delx/2
    x0(2) = corner(2) - ssize*dely/2
    x0(3) = corner(3) - ssize*delz/2
 
+   ! compute 3 corner points connected to x0(:)
    x1 = x0; x1(1)=x0(1) + 2*ssize*delx
    x2 = x0; x2(2)=x0(2) + 2*ssize*dely
    x3 = x0; x3(3)=x0(3) + 2*ssize*delz
 
    ! compute rotation matrix from gradu(3,3):
    ! apply rotation to x0,x1,x2,x3
-   irot=0
+  
+   ! find largest element of gradu()
+   if (il==1 .and. jl==2) then
+      ! no rotation needed
+   else if (il==1 .and. jl==3) then
+      ! swap 2 & 3 axis
+   else if (il==2 .and. jl==3) then
+      ! swap 1 & 2, swap 3 & 2
+   else if (il==2 .and. jl==1) then
+      ! swap 1 & 2
+   else if (il==3 .and. jl==1) then
+      ! swap 1 & 2, swap 3 & 1
+   else if (il==3 .and. jl==2) then
+      ! swap 3 & 1
+   else
+      call abort("error: largest <gradu> element is on diagional")
+   endif
 
 
+   irot=0  ! irot=0: uses closest gridpoint.  for 0 or 90 degree rotations
+           ! irot=1: 4th order interpolation 
+
+   ! compute unit vectors
+   ! x0 + unit vectors will be used to generate grid of points
+   ! where we need to interpolate
    e01=(x1-x0)/(2*ssize*delx)
    e02=(x2-x0)/(2*ssize*dely)
    e03=(x3-x0)/(2*ssize*delz)
