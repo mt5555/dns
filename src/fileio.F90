@@ -18,10 +18,11 @@ integer :: iflag
 ! local variables
 integer i,j,k,n
 real*8 xnx,xny,xnz,xnv
+real*4 :: buf(nx)
 character(len=80) message,ftime
 character(len=240) fname
 character(len=20) tmp
-character(len=3) :: extension="uvw"
+character(len=3) :: extension="uvwX"
 CPOINTER :: fid
 integer ierr
 
@@ -72,16 +73,31 @@ endif
 if (iflag>0) then
 fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
    // ftime(1:len_trim(ftime)) // "." // extension(iflag:iflag)
+if (output_size==4) then
+   fname = fname(1:len_trim(fname)) // "4"
+endif
+
 call copen(fname,"w",fid,ierr)
 if (ierr/=0) then
    write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
    call abort(message)
 endif
-do k=nz1,nz2
-do j=ny1,ny2
-   call cwrite8(fid,Q(nx1,j,k),nx2-nx1+1)
-enddo
-enddo
+
+if (output_size==8) then
+   do k=nz1,nz2
+   do j=ny1,ny2
+      call cwrite8(fid,Q(nx1,j,k),nx2-nx1+1)
+   enddo
+   enddo
+else
+   do k=nz1,nz2
+   do j=ny1,ny2
+      buf=Q(:,j,k)
+      call cwrite4(fid,buf(nx1),nx2-nx1+1)
+   enddo
+   enddo
+endif
+
 call cclose(fid,ierr)
 endif
 
