@@ -323,7 +323,7 @@ character(len=80) :: message
 if (0==init_sforcing) then
    !should have h_angle inputted by user eventually
    !h_angle = 0.0d0
-   h_angle = pi/4.0d0
+   h_angle = pi/2
    cos_h_angle=cos(h_angle)
    sin_h_angle=sin(h_angle)
 
