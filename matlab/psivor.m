@@ -46,15 +46,7 @@ for i=range
   [x,y,z,psi,time]=getfield(fname);
   psi = squeeze(psi(:,:,1));
 
-<<<<<<< psivor.m
-<<<<<<< psivor.m
-  subsample=8;
-=======
-  subsample=4;
->>>>>>> 1.38
-=======
   subsample=16;
->>>>>>> 1.39
   if (subsample>1) 
     nx=length(x);
     ny=length(y);

@@ -6,20 +6,19 @@ clear;
 
 %ts=input('time=? ');
 
-
-
 %name='/home/taylorm/ccs/dns/src/vxpair/vx4096d';
 name='/home/taylorm/ccs/dns/src/vxpair/vx4500a';
 times=[0:.1:180];
-
-
 
 name='/scratch2/taylorm/vx12288b/vx12288b';
 times=[0:.1:180];
 
 
-ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
+ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
+i=find(name=='/');
+i=i(length(i))
+pname=name(i+1:length(name));
 
 timev=[];
 wlinev=zeros([10,1]);
@@ -56,6 +55,7 @@ end
 figure(3); clf;
 subplot(2,1,1)
 hold on;
+title(pname)
 subplot(2,1,1)
 for i=1:8
   plot(timev,wlinev(i,:),[ccol(i)]);

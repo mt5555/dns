@@ -9,9 +9,9 @@ range=50:10:150.0 ;
 %name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
+%name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/taylorm/dns/src/vxpair/vx4096d';
 name='/scratch2/taylorm/vx12288b/vx12288b';
-
 
 
 usefig=1;
@@ -62,7 +62,7 @@ for i=range
       axis equal
       axis([0,4,0,2]);
       title(sprintf('time = %6.2f ',i)); 
-      %    'pause' ;     pause
+          'pause' ;     pause
     end
   end
 end
