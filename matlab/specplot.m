@@ -3,6 +3,7 @@
 %#  plot of DNS spectrum output file
 %########################################################################
 %
+movie=1; % plot all the spectrum, pausing between each one:
 CK_orig=1.0;
 decay_scale=0;
 tsave=[];
@@ -24,26 +25,24 @@ tsave=[];
 %namedir='/scratch2/taylorm/sk256/';
 %CK_orig=1.613;
 
-name='tmix256C0001.0000';
-namedir='/scratch2/taylorm/tmix256C/';
-CK_orig=1.613;
+%name='tmix256C0001.0000';
+%namedir='/scratch2/taylorm/tmix256C/';
+%CK_orig=1.613;
 
 %name='tmix256B0000.0000';
 %namedir='/scratch2/taylorm/tmix256B/';
 %CK_orig=1.613;
 
 
-%name='decay2048';
-%namedir='/ccs/scratch/taylorm/decay/';
-%CK_orig=1.613; decay_scale=1;
-%% save spectrum at these times:
-%tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
+name='decay2048';
+namedir='/ccs/scratch/taylorm/decay/';
+CK_orig=1.613; decay_scale=1;
+% save spectrum at these times:
+tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
+movie=0;
 
 
 
-
-% plot all the spectrum:
-movie=1;
 
 
 spec_r_save=[];
@@ -273,11 +272,17 @@ if (fidt>0) fclose(fidt); end;
 
 if (length(spec_r_save>1) )
 figure(1); clf;
-loglog53(n_r,spec_r_save,'KE spectrum',CK);
+loglog53(n_r,spec_r_save,'KE spectrum',CK,1);
 print -djpeg -r72 spec.jpg
 print -depsc -r600 spec.ps
 figure(2); clf;
-loglog53(n_r,spec_r_save_fac3,'KE / bottleneck-factor',CK);
-print -djpeg -r72 speck3.jpg
+%loglog53(n_r,spec_r_save_fac3,'KE / bottleneck-factor',CK);
+%print -djpeg -r72 speck3.jpg
+
+k2=0:n_r-1;
+k2=k2.^2;
+spec=diag(k2) * spec_r_save_fac3(1:n_r,:);
+loglog53(n_r,spec,'Enstrophy spectrum',CK,2);
+print -djpeg -r72 enstrophy.jpg
 end
 
