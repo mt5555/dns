@@ -1,4 +1,8 @@
-function loglog53(n,spec,time)
+function loglog53(n,spec,time,stitle)
+
+if (nargin==3)
+  stitle=sprintf('Spectrum t=%8.4f',time);
+end
 
 x=(1:n)-1;
 loglog(x,spec(1:n))
@@ -7,7 +11,7 @@ x=2:20;
 y = .5*x.^(-5/3);
 loglog(x,y,'r')
 axis([1,200,1e-8,1]);
-title(sprintf('Spectrum t=              %8.4f',time));
+title(stitle);
 hold off
 
 

@@ -76,25 +76,39 @@ while (time>=0 & time<=9999.3)
   
   if (n_z==1) 
     figure(4);
-    subplot(3,1,1);
+    subplot(2,1,1);
     loglog53(n_r,spec_r,time);
-    subplot(3,1,2);
+    subplot(2,1,2);
     loglog53(n_x,spec_ux,time);
-    subplot(3,1,3);
+    hold on;
     loglog53(n_y,spec_vy,time);
+    hold off;
     %print -depsc spec.ps    
     %pause
   else
     figure(4);
-    subplot(2,2,1);
+    clf
+    %spherical wave number
+    subplot(3,1,1);
     loglog53(n_r-1,spec_r,time);
-    subplot(2,2,2);
-    loglog53(n_x,spec_ux,time);
-    subplot(2,2,3);
-    loglog53(n_y,spec_vy,time);
-    subplot(2,2,4);
-    loglog53(n_z,spec_wz,time);
-    %M(j)=getframe(gcf);
+    
+    % longitudinal spectraum
+    subplot(3,1,2);
+    loglog53(n_x,spec_ux,time);     hold on;
+    loglog53(n_y,spec_vy,time);     hold on;
+    loglog53(n_z,spec_wz,time,'longitudinal 1D spectrum');     hold off;
+    
+    % transverse spectraum
+    subplot(3,1,3);
+    loglog53(n_x,spec_uy,time);     hold on;
+    loglog53(n_x,spec_uz,time);     hold on;
+    loglog53(n_y,spec_vx,time);     hold on;
+    loglog53(n_y,spec_vz,time);     hold on;
+    loglog53(n_z,spec_wx,time);     hold on;
+    loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
+    hold off;
+    
+    
   end
 
   figure(1);
