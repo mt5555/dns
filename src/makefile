@@ -92,14 +92,17 @@ endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
    # defaults for asci Q: MPI paths loaded via modules
-   # to enable openMP  -omp ?? 
    MPI = -DUSE_MPI 
    MPILIB = -lfmpi -lmpi -lelan
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
    UDM = -I../../udm/udm/include -DHAVE_UDM 
-   UDMLIB = -L../../udm/udm/lib -ludm 
+   UDMLOC = ../../udm/udm/lib 
+   UDMLIB = -rpath ${UDMLOC} -L${UDMLOC} -ludm \
+             -L/usr/local/packages/HDF5-1.4.2/lib -B static -lhdf5 \
+             -B dynamic -lmpio 
+
 
    ifeq ($(HOST),milkyway.lanl.gov)
       MPI = -DUSE_MPI -I/usr/opt/MPI196/include
@@ -110,7 +113,7 @@ ifeq ($(UNAME),OSF1)
       LSFFLAGS = 
    endif
 
-   LDFLAGS =  $(MPILIB) -lcxml $(LSFLIB)  $(UDMLIB) #-Lstk -lstk 
+   LDFLAGS =  -lcxml $(LSFLIB)  $(UDMLIB) #-Lstk -lstk 
 
    #flag for OPENMP:  -omp
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
