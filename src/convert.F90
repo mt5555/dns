@@ -75,11 +75,12 @@ icount=icount+1
       read(83,*,err=100,end=100) time
    endif	
 
+   Q=0
    call input_uvw(time,Q,vor,work1,work2)
-!   print *,'max U: ',&
-!        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
-!        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
-!        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
+   print *,'max input: ',&
+        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
+        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
+        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
 
    if (convert_opt==0) then  ! -cout uvw  
       ! just reoutput the variables:

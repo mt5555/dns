@@ -62,6 +62,13 @@ void FORTRAN(ccwrite4) (FILE **fid,char *buf,int *len) {
     if (*len>0) fwrite(buf,4,*len,*fid);
 }
 
+/*
+  Write 1 byte chars
+*/
+void FORTRAN(ccwrite1) (FILE **fid,char *buf,int *len) {
+    if (*len>0) fwrite(buf,1,*len,*fid);
+}
+
 
 
 

@@ -232,6 +232,8 @@ Q=0
    call print_message("Restarting from UDM file:")
    call print_message(fnameudm)
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_READ, fidudm, ierr)
+   write(message,'(a,i5)') "UDM_FILE_OPEN ierr=",ierr
+   call print_message(message)
 
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)

@@ -769,7 +769,7 @@ end subroutine header1_io
 
 
 
-subroutine header3_io(io_read,output_spec,fid,xnx,xny,xnz)
+subroutine header3_io(io_read,fid,xnx,xny,xnz)
 !
 ! header is 3 lines of text, with each line exactly 80 characters
 !
@@ -783,8 +783,8 @@ real*8 :: time,xnx,xny,xnz
 logical :: output_spec
 
 ! local
-integer :: ierr
-character(len=80) message
+integer :: ierr,i
+character(len=80) :: message
 
 time=-1
 xnx=-1
@@ -802,11 +802,11 @@ if (io_read==1) then
    call cread8e(fid,message,10,ierr)
 else
    message="turbulence" // char(0)
-   call cwrite8(fid,message,10)
+   call ccwrite1(fid,message,80)
    message="part" // char(0)
-   call cwrite8(fid,message,10)
+   call ccwrite1(fid,message,80)
    message="block" // char(0)
-   call cwrite8(fid,message,10)
+   call ccwrite1(fid,message,80)
 endif
 end subroutine header3_io
 
@@ -816,7 +816,7 @@ end subroutine header3_io
 
 
 
-subroutine header2_io(io_read,output_spec,fid,xnx,xny,xnz)
+subroutine header2_io(io_read,fid,xnx,xny,xnz)
 use params
 use mpi
 use transpose
