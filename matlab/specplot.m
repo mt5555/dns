@@ -16,8 +16,9 @@
 %fid=fopen('../src/temp0000.0000.spec');
 %fidt=fopen('../src/temp0000.0000.spect');
 
-fid=fopen('/ccs/taylorm/dns/src/temp0000.0000.spec');
-fidt=fopen('/ccs/taylorm/dns/src/temp0000.0000.spect');
+fid=fopen('~wingate/dns/src/temp0000.0000.spec');
+fidt=fopen('~wingate/dns/src/temp0000.0000.spect');
+
 
 
 

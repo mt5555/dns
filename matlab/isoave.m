@@ -45,11 +45,6 @@ nscalers =fread(fid,1,'float64');
 nnew2 =fread(fid,1,'float64');
 
 r_val=fread(fid,[ndelta,ndir],'float64');
-r_val=r_val*delx_over_eta;            % convert to units of r/eta:
-xx=(1:1.0:(nx./2.5))*delx_over_eta;   % units of r/eta
-xx_box = xx/delx_over_eta/nx;         % in code units (box length)
-
-
 if (nlon>=2) 
    D_ll=fread(fid,[ndelta,ndir],'float64');
    D_lll=fread(fid,[ndelta,ndir],'float64');
@@ -72,8 +67,10 @@ if (ntran>=4)
    SN2_ltt=fread(fid,[ndelta,ndir],'float64');
 end
 
+mu=0;
+ke=0;
 eta = 1/(nx*delx_over_eta);
-if (nscalars==7) then
+if (nscalars==7) 
   time=fread(fid,1,'float64');
   nx=fread(fid,1,'float64');
   ny=fread(fid,1,'float64');
@@ -82,22 +79,24 @@ if (nscalars==7) then
   ke=fread(fid,1,'float64');
   epsilon=fread(fid,1,'float64');
   eta = (mu^3 / epsilon)^.25;
-  delx_over_eta=
-endif
+  delx_over_eta=(1/nx)/eta;
+end
 
-lambda=10*ke*mu/epsilon       ! single direction lambda
+r_val=r_val*delx_over_eta;            % convert to units of r/eta:
+xx=(1:1.0:(nx./2.5))*delx_over_eta;   % units of r/eta
+xx_box = xx/delx_over_eta/nx;         % in code units (box length)
+
+lambda=10*ke*mu/epsilon;       % single direction lambda
 R_lambda = lambda*sqrt(2*ke/3)/mu 
 
 
-print *,'KE:      ',ke
-print *,'epsilon: ',epsilon
-print *,'mu       ',mu
-print *
-print *,'eta      ',eta
-print *,'delx/eta ',(1/g_nmin)/eta
-print *,'lambda   ',lambda
-print *,'R_l      ',R_lambda
-
+disp(sprintf('KE: %f',ke));
+disp(sprintf('epsilon: %f',epsilon));
+disp(sprintf('mu: %f',mu));
+disp(sprintf('eta: %f',eta));
+disp(sprintf('delx/eta ',delx_over_eta));
+disp(sprintf('lambda:  ',lambda));
+disp(sprintf('R_l:  ',R_lambda));
 
 
 
