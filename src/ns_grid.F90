@@ -33,10 +33,9 @@ endif
 
 ! define this if we are justing using ns_grid to get the pressure,
 ! not for a run
-#define EXTRACT_PRESSURE
-
+#undef EXTRACT_PRESSURE
 #ifdef EXTRACT_PRESSURE
-
+print *,'dnsgrid configured diagnose and output the pressure only:',base
 ! pressure w original u:
 call ns3D(rhs,Q,time,0,work1,work2,q4)
 call divfree_gridspace(rhs,q4,work1,work2)

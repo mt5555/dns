@@ -142,17 +142,6 @@ do n=1,n_var
    do i=1,nslabx
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6
-
-      im=z_imcord(i)
-      jm=z_jmcord(j)
-      km=z_kmcord(k)
-      if (dealias_remove(abs(im),abs(jm),abs(km))) then
-         if (rhs(k,i,j,n) /= 0 .or. Q(k,i,j,n)/=0 ) then
-            print *,'im,jm,km ',im,jm,km,rhs(k,i,j,n),Q(k,i,j,n)
-         endif
-      else
-!         print *,'keeping: ',im,jm,km
-      endif
    enddo
    enddo
    enddo
