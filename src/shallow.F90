@@ -274,8 +274,6 @@ enddo
 
 if (alpha_value>0) then
    call alpha_model_forcing(Q,divtau,gradu,gradv,work,work2)
-
-
    ! Apply Helmholtz inverse to:   div(tau) - grav grad(h)
 
    ! a_diss should be the KE dissapation from the div(tau) term,
@@ -290,7 +288,6 @@ if (alpha_value>0) then
       !call fft_filter_dealias(work)
       !call ifft3d(work,work2)
       divtau(:,:,n)=work  ! use RHS as our initial guess also
-
       work=work*Q(:,:,3)
       call cgsolver(divtau(1,1,n),work,1d0,-alpha_value**2,1d-10,Q(1,1,3),&
         helmholtz_hform_periodic,.true.)

@@ -113,7 +113,7 @@ if (err<tol1) goto 200
    err=sqrt(alpha)
    !write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' ||RHS||=',res_init,' residual: ',err
 
-if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
+   if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
 200 continue
 
 if (itqmr>25 .and. (my_pe==io_pe)) then

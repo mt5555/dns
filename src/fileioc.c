@@ -17,6 +17,15 @@ Fortran callable wrappers to C binary I/O
 #include <errno.h>
 extern int errno;
 
+
+static int byteswap_input=0;
+
+void FORTRAN(set_byteswap_input)(int val) {
+   byteswap_input=val;
+}
+
+
+
 void FORTRAN(copen) (char fname[80],char mode[1],FILE **fid,int *err ) {
     int i;
     char cname[80];     
@@ -47,12 +56,30 @@ void FORTRAN(cwrite8) (FILE **fid,char *buf,int *len) {
     if (*len>0) fwrite(buf,8,*len,*fid);
 }
 
+
+
+
+void byteswap8(char *buf,int len) {
+    int i,j;
+    char swap[8];
+    for (i=0; i<len; ++i) {
+        for (j=0; j<8; ++j) {
+            swap[j]=buf[8*i + 7-j];
+        }
+        for (j=0; j<8; ++j) {
+            buf[8*i + j]=swap[j];
+        }
+    }
+}
+
+
 /*
   Read 8 byte numbers 
  */
 void FORTRAN(cread8) (FILE **fid, char *buf,int *len) {
     int n;
     n=fread(buf,8,*len,*fid);
+    if (byteswap_input) byteswap8(buf,n);
 }
 
 /*
@@ -60,4 +87,6 @@ void FORTRAN(cread8) (FILE **fid, char *buf,int *len) {
  */
 void FORTRAN(cread8e) (FILE **fid, char *buf,int *len,int *olen) {
     *olen=fread(buf,8,*len,*fid);
+    if (byteswap_input) byteswap8(buf,*olen);
 }
+

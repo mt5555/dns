@@ -20,6 +20,6 @@ periodic     ! z bc
 -1           ! screen_dt
 .10          ! output_dt  (0 = output disabled, except for custom output times)
 1            ! n_output_custom  number of custom output times  
-990.00       ! custom output times, one per line
+.009         ! custom output times, one per line
 
 
