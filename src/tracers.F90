@@ -37,7 +37,7 @@ real*8,private,allocatable :: tracer_work(:,:)
 
 integer,parameter :: ncross_max=5000
 integer :: ncross=0
-real*8  :: cross(ncross_max,2)
+real*8  :: cross(ncross_max,3)
 
 
 character(len=80),private :: message
@@ -244,6 +244,7 @@ if (my_pe==fpe) then
          call cwrite8(fid,x,1)
          call cwrite8(fid,cross(1,1),ncross)
          call cwrite8(fid,cross(1,2),ncross)
+         call cwrite8(fid,cross(1,3),ncross)
          call cclose(fid,ierr)
          ncross=0
       endif
@@ -365,7 +366,6 @@ call ghost_update_y(ugrid,2)
 
 ! keep the last point, along y=0 boundary, from crossing over.
 ! (velocity = x direction only, so this only happens from roundoff
-tracer_tmp(numt,2)=0
 if (numt_insert>0) tracer_tmp(numt_insert,2)=0
 
 
@@ -438,7 +438,7 @@ do i=1,numt
          enddo
       endif
    else
-      ! print *,'tracer has left the domain: '
+      ! print *,'tracer has left the domain: ',i
       ! write(*,'(2i5,2e14.5,f5.0)') my_pe,i,tracer(i,1),tracer(i,2),tracer(i,3)
       ! call abort("tracer_advance(): point has left domain") 
    endif
@@ -516,6 +516,7 @@ do k=numt_insert+1,numt
       endif
       ncross=ncross+1
       cross(ncross,1)=tnew(k,ndim+1)  ! particle label
+      cross(ncross,3)=tnew(k,2)       ! y-coordinate
       ! linear interpolate for crossing time
       cross(ncross,2)=&
            time_new*(center(1)-told(k,1))/(tnew(k,1)-told(k,1))  +  &
@@ -709,7 +710,7 @@ end subroutine
       implicit none
       integer n,jctr
       real*8 x(0:*),y(0:*)
-      real*8 x0,x1,y0,y1,cross
+      real*8 x0,x1,y0,y1,crossp
 
 !     Find curvature at j = jctr (>=1)
 
@@ -718,24 +719,24 @@ end subroutine
       x1 = x(jctr+1) - x(jctr)
       y1 = y(jctr+1) - y(jctr)
 
-      cross = x0*y1 - y0*x1
-      if (cross.lt.0) then
-         do 10 while ( (cross.lt.0.).and.(jctr.le.(n-2)) )
+      crossp = x0*y1 - y0*x1
+      if (crossp.lt.0) then
+         do 10 while ( (crossp.lt.0.).and.(jctr.le.(n-2)) )
             x0 = -x1
             y0 = -y1
             jctr = jctr + 1
             x1 = x(jctr+1) - x(jctr)
             y1 = y(jctr+1) - y(jctr)
-            cross = x0*y1 - y0*x1
+            crossp = x0*y1 - y0*x1
 10       continue
       else
-         do 15 while ( (cross.gt.0.).and.(jctr.ge.2) )
+         do 15 while ( (crossp.gt.0.).and.(jctr.ge.2) )
             x1 = -x0
             y1 = -y0
             jctr = jctr - 1
             x0 = x(jctr-1) - x(jctr)
             y0 = y(jctr-1) - y(jctr)
-            cross = x0*y1 - y0*x1
+            crossp = x0*y1 - y0*x1
 15       continue
       endif
 !      print*,'jctr = ',jctr
