@@ -3,7 +3,8 @@ Angle averging:  153 calls to transpose_z()
      1 stage RK:   9 transpose_z().  = 36 transposes per timestep
      angle averaging:  4.25 timesteps.
 
-     check this with timeings?
+     check this with timeings?  512^3:  30min.  timestep: .2 min
+                         cost = 150 timesteps
 
 
 

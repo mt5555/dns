@@ -115,7 +115,7 @@ print -dpsc ke.ps
 lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
 R_l = lambda.*sqrt(2*ints(6,:)/3)/mu;
 
-figure(2)
+figure(2); subplot(1,1,1)
 plot(time,R_l)
 title('R_\lambda')
 xlabel('time')
@@ -124,6 +124,13 @@ print -dpsc rl.ps
 
 % Kolm. micro scale
 eta = (mu^3 ./ abs(ke_diss_d)).^(.25);
+
+figure(3); subplot(1,1,1)
+plot(time,eta* 1024*2*pi*2*sqrt(2)/3 )
+title('k_{nmax} \eta')
+xlabel('time')
+print -djpeg -r72 kmaxeta.jpg
+
 
 
 % averge eta to a number
@@ -139,6 +146,7 @@ disp(sprintf('R_l (average over last half of data) = %f ',R_l));
 disp(sprintf('1/250 in units of eta:  %f',(1/250)/eta));
 disp(sprintf('1/500 in units of eta:  %f',(1/500)/eta));
 disp(sprintf('1/512 in units of eta:  %f',(1/512)/eta));
+disp(sprintf('1/2048 in units of eta:  %f',(1/2048)/eta));
 
 tturn=-2*ke./ke_diss_d;
 tturn = tturn(length(tturn)/2:length(tturn));

@@ -8,19 +8,20 @@
 % name of the file, without the ".spec" extension
 name='cj20000.0000';
 namedir='/ccs/taylorm/dns/src/';
-filetype='l';
 
 name='temp0000.0000';
 namedir='../src/';
-filetype='l';
 
+name='decay2048';
+namedir='/ccs/scratch/taylorm/decay/';
 
+% save spectrum at these times:
+tsave=[0 .40 .43];
+spec_r_save=[];
 
-
-
-
-fid=fopen([namedir,name,'.spec'],'r',filetype);
-fidt=fopen([namedir,name,'.spect'],'r',filetype);
+fid=endianopen([namedir,name,'.spec'],'r');
+fidt=endianopen([namedir,name,'.spect'],'r');
+fidt=-1;
 
 time=fread(fid,1,'float64');
 num_spect=0;
@@ -53,6 +54,49 @@ while (time>=0 & time<=9999.3)
   spec_uz=fread(fid,n_z,'float64');
   spec_vz=fread(fid,n_z,'float64');
   spec_wz=fread(fid,n_z,'float64');  
+
+
+  i=find(time==tsave);
+  if (length(i)>=1) 
+     tsave(i)
+     spec_r_save=[spec_r_save, spec_r];
+  end 
+  
+  figure(1);clf;
+  if (n_z==1) 
+    subplot(2,1,1);
+    loglog53(n_r,spec_r,time);
+    subplot(2,1,2);
+    loglog53(n_x,spec_ux,time);
+    hold on;
+    loglog53(n_y,spec_vy,time);
+    hold off;
+  else
+    %spherical wave number
+    figure(1)
+    subplot(1,1,1);
+    loglog53(n_r-1,spec_r,time);
+
+    
+    % longitudinal spectraum
+    figure(2)
+    subplot(2,1,1);
+    loglog53(n_x,spec_ux,time);     hold on;
+    loglog53(n_y,spec_vy,time);     hold on;
+    loglog53(n_z,spec_wz,time,'longitudinal 1D spectrum');     hold off;
+    
+    % transverse spectraum
+    subplot(2,1,2);
+    loglog53(n_x,spec_uy,time);     hold on;
+    loglog53(n_x,spec_uz,time);     hold on;
+    loglog53(n_y,spec_vx,time);     hold on;
+    loglog53(n_y,spec_vz,time);     hold on;
+    loglog53(n_z,spec_wx,time);     hold on;
+    loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
+    hold off;
+  end
+
+
   
   %
   % NOW read the transfer spectrum
@@ -105,39 +149,6 @@ while (time>=0 & time<=9999.3)
 
   
   
-  
-  figure(1);clf;
-  if (n_z==1) 
-    subplot(2,1,1);
-    loglog53(n_r,spec_r,time);
-    subplot(2,1,2);
-    loglog53(n_x,spec_ux,time);
-    hold on;
-    loglog53(n_y,spec_vy,time);
-    hold off;
-  else
-    %spherical wave number
-    figure(1)
-    subplot(1,1,1);
-    loglog53(n_r-1,spec_r,time);
-    
-    % longitudinal spectraum
-    figure(2)
-    subplot(2,1,1);
-    loglog53(n_x,spec_ux,time);     hold on;
-    loglog53(n_y,spec_vy,time);     hold on;
-    loglog53(n_z,spec_wz,time,'longitudinal 1D spectrum');     hold off;
-    
-    % transverse spectraum
-    subplot(2,1,2);
-    loglog53(n_x,spec_uy,time);     hold on;
-    loglog53(n_x,spec_uz,time);     hold on;
-    loglog53(n_y,spec_vx,time);     hold on;
-    loglog53(n_y,spec_vz,time);     hold on;
-    loglog53(n_z,spec_wx,time);     hold on;
-    loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
-    hold off;
-  end
 
   if (num_spect>0)
   %
@@ -160,8 +171,10 @@ while (time>=0 & time<=9999.3)
   grid;
   title(sprintf('E Flux'));
   end
+
+
   
-  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.1)<.01) )
+  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.4020)<.01) )
     disp('making ps files ...' )
     figure(1)
     print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
@@ -169,7 +182,7 @@ while (time>=0 & time<=9999.3)
       figure(2)
       print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
     end
-    disp('pause')
+%    disp('pause')
 %    pause
   end     
   
@@ -178,9 +191,17 @@ while (time>=0 & time<=9999.3)
   time=fread(fid,1,'float64');
   if (fidt>=0) 
     num_spec=fread(fidt,1,'float64');
-    time_t=fread(fidt,1,'float64')
+    time_t=fread(fidt,1,'float64');
   end
 end
 
 fclose(fid);
 if (fidt>0) fclose(fidt); end;
+
+if (length(spec_r_save>1) )
+figure(1); clf;
+loglog53(n_r,spec_r_save,.43,...
+'KE: Blue: t=0.0 and .4027    Green: t=0.4    Red: t=.43');
+print -djpeg spec.jpg
+end
+

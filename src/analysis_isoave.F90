@@ -54,8 +54,8 @@ CPOINTER :: fid
 
 
 
-tstart=.8
-tstop=1.0
+tstart=4.4223
+tstop=4.4223
 tinc=-.50
 icount=0
 
@@ -63,7 +63,7 @@ nxdecomp=1
 nydecomp=1
 nzdecomp=1
 
-comp_sk_helical=.true.;  print *,'Also computing H_ltt...'
+!comp_sk_helical=.true;  print *,'Also computing H_ltt...'
 
 
 
