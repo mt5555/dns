@@ -1,5 +1,5 @@
 analysis.o: macros.h params.o mpi.o fft_interface.o makefile 
-analysis_isoave.o: macros.h params.o mpi.o isoave.o structf.o makefile 
+analysis_isoave.o: macros.h params.o mpi.o isoave.o structf.o spectrum.o makefile 
 analysis_rms.o: macros.h params.o mpi.o fft_interface.o sforcing.o makefile 
 bc.o: macros.h params.o mpi.o ghost.o makefile 
 cases2v.o: macros.h params.o tracers.o ellipse.o bc.o makefile 

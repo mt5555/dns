@@ -18,6 +18,15 @@ implicit none
 integer,parameter :: ndir_max=73
 integer,parameter :: ndelta_max=100
 integer,parameter :: pmax=10       ! has to be 6 or greater
+
+!
+!  if this is .false., we compute velocity structure functions to the power p, p=2..pmax
+!  if this is .true., we compute using fractional powers from the array below:
+!
+logical           :: compute_fractional_power = .false.
+
+
+real*8 :: fractional_power(2:pmax) 
 integer :: dir(3,ndir_max)
 integer :: ndelta,ndir
 integer :: delta_val(ndelta_max)   ! delta values (in terms of grid points)
@@ -1266,7 +1275,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3)
 
 real*8 :: delu1,delu2,delu3
 real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
-real*8 :: u_t1_sq,u_t2_sq,u_l_sq
+real*8 :: u_t1_sq,u_t2_sq,u_l_sq,xp
 integer :: p,idel,idir
 
 delu1=ur1-u1
@@ -1290,6 +1299,16 @@ H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
 H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 
 
+if (compute_fractional_power) then
+do p=2,pmax
+   xp=fractional_power(p)
+   Dl(idel,idir,p)=Dl(idel,idir,p) + abs(u_l)**xp
+   Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + abs(u_t1)**xp
+   Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + abs(u_t2)**xp
+enddo
+
+else
+
 Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq
 Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq
 Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq
@@ -1311,11 +1330,13 @@ Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1_sq*u_t1_sq*u_t1_sq
 Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2_sq*u_t2_sq*u_t2_sq
 
 ! this loop is very expensive.  
-do p=7,pmax
+do p=7,min(10,pmax)
    Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
    Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
    Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
 enddo
+endif
+
 
 D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1_sq
 D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2_sq
@@ -1468,6 +1489,23 @@ subroutine init
 use params
 integer :: i,j,idel,idir,max_delta
 real*8 :: rvec(3)
+
+
+! fractional powers
+if (pmax<10) then
+   call abort("pmax set too small") 
+endif
+
+fractional_power(2)=.1
+fractional_power(3)=.2
+fractional_power(4)=.3
+fractional_power(5)=.4
+fractional_power(6)=.5
+fractional_power(7)=.6
+fractional_power(8)=.7
+fractional_power(9)=.8
+fractional_power(10)=.9
+
 
 
 

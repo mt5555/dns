@@ -74,6 +74,7 @@ compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
+compute_fractional_power=.false.   
 compute_hspec=.true.
 read_uvw=.false.
 
