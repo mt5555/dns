@@ -348,6 +348,17 @@ if (init_cond_subtype ==102) then
    xlocation=.75
    initial_vor = 1
 endif
+if (init_cond_subtype ==103) then
+   ! Kras iniital condition.  run to t=5, with nu=1e-6
+   ! [4N,3N] = [7680,5760]
+   biotsavart_cutoff=5e-3
+   biotsavart_apply=100
+   delta=.025
+   biotsavart_ubar=.100
+   yscale=1.5
+   xlocation=.75
+   initial_vor = 1
+endif
 
 
 ! set xscale so that delx=dely
