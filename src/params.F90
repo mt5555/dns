@@ -65,7 +65,7 @@ logical :: udm_input=.false.        ! use UDM for input/restart files
 logical :: udm_output=.false.       ! use UDM for output files
 logical :: do_mpi_io=.false.     
 logical :: byteswap_input=.false.   ! byteswap all binary input files
-
+logical :: output_real4=.false.
 
 !
 ! options used by various utility programs:

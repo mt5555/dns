@@ -364,7 +364,7 @@ if (my_pe==io_pe) then
    !   -mio  use mpi-io with a stripe of 64 for grid point I/O
    !
    !   -cout <text>   type of data to output for the convert.F90 program
-   !                   "uvw", "vor", "vorm"
+   !                   "uvw", "vor", "vorm", "norm2"
    !
    !   -isodir <n>    use at most n directions in isoave calculation
    !   -isodel <n>    use seperation distances at most n grid points.
@@ -389,6 +389,8 @@ if (my_pe==io_pe) then
             convert_opt=1 
          else if (carg(1:4)=="vorm") then
             convert_opt=2 
+         else if (carg(1:5)=="norm2") then
+            convert_opt=3 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abort("-cout unrecognized option")

@@ -50,13 +50,13 @@ void FORTRAN(cclose) (FILE **fid,int *err) {
 
 
 /*
-  Write 8 byte numbers 
+  Write 8 byte floats
 */
 void FORTRAN(ccwrite8) (FILE **fid,char *buf,int *len) {
     if (*len>0) fwrite(buf,8,*len,*fid);
 }
 /*
-  Write 8 byte numbers 
+  Write 4 byte floats
 */
 void FORTRAN(ccwrite4) (FILE **fid,char *buf,int *len) {
     if (*len>0) fwrite(buf,4,*len,*fid);
