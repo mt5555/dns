@@ -16,6 +16,8 @@ run to time=3.  Looks good.
 
 128x128 can handle mu=.0002 to t=1.  What happens if we run longer?
 
+KH inintial condition:
+
 4th order:
 
 CFL=2.0   t=4 noisy, but just two large blobs
@@ -40,7 +42,6 @@ CFL=1.0   t=50 looks good.
 3rd order cost: 3/1.20 = 2.5
 
 So for this problem, might as well use rk4.
-
 
 
 

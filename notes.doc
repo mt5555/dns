@@ -1,6 +1,5 @@
 TODO:
 
-1. tune fftblocksize in fft99_interface.F90  (number of ffts to do at once)
 1.1  FFT in blocks - faster if they are dimensioned:  x(lot,128)?  
 2. use a mpi communcator for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
@@ -23,7 +22,19 @@ the coefficients in the z-decomposition .
 structure function:
  <  [ u(x+l)-u(x) ]^p  >   
 
-replace KE diffusion with grad u squared
+
+**********************************************************************************
+FFT timings.  So quick & dirty fft timings (512x512x1) on Nirvana:
+
+fft99:  115s
+stk:     96s
+sgi:     87s
+
+
+quick & dirty 64x64x64 timings (1cpu)  
+laptop:  124s
+nirvana: 110s
+
 
 
 
