@@ -5,7 +5,7 @@ sht          ! initial condition:  shallow water turbulence
 none         ! forcing:  none, iso12
 hyper        ! viscosity type  (hyper)
 5000         ! viscosity value (ke dissapation rate of 2h mode)  5000 
-.015625         ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+.0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky coefficient (0=disabled)
 0            ! compute_structure functions
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)

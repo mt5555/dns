@@ -56,8 +56,8 @@ end type
 !  SF(i,j)     PDF of delta_j(u_i)     i'th component of u, j'th direction
 !
 !  3rd order:
-!  SF(i+3,j)   i==j:   delta_j(u_j) delta_j(u_i**2)                     
-!              i<>j:   delta_j(u_j) delta_j(u_1**2 + u_2**2 + u_3**2)   
+!  SF(i+3,j)   i<>j:   delta_j(u_j) delta_j(u_i**2)                     
+!              i==j:   delta_j(u_j) delta_j(u_1**2 + u_2**2 + u_3**2)   
 !
 ! 4th order
 !  SF(i+6)    (i,j)
