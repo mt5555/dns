@@ -102,10 +102,10 @@ if (nscalars > nsize) then
    allocate(ints_save(nints,nsize+100))
    ints_save(1:nints,1:nsize)=ints_copy(1:nints,1:nsize)
 
-   ints_copy=ints_maxs
-   deallocate(ints_maxs)
-   allocate(ints_maxs(nints,nsize+100))
-   ints_maxs(1:nints,1:nsize)=ints_copy(1:nints,1:nsize)
+   ints_copy=maxs_save
+   deallocate(maxs_save)
+   allocate(maxs_save(nints,nsize+100))
+   maxs_save(1:nints,1:nsize)=ints_copy(1:nints,1:nsize)
 
    deallocate(ints_copy)
 
