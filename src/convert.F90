@@ -53,7 +53,7 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=.4026
+tstart=.8
 tstop=.32
 tinc=1.0
 
@@ -378,6 +378,7 @@ close(15)
 
 return
 
+call ghost_update(vor,1)
 
 ! loop thru gradu matrix, looking for selections
 do sc=1,nsubcube
