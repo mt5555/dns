@@ -98,21 +98,21 @@ if (io_pe==my_pe) then
    endif
 
    
-   call cwrite8(fid,time,1)
    tmp=nelld
    call cwrite8(fid,tmp,1)
    tmp=npd
    call cwrite8(fid,tmp,1)
+   call cwrite8(fid,time,1)
+   call cwrite8(fid,center,2)
 
    do nell=1,nelld
-      do np=1,npd
-         !xell(np)=ccord(1,nell)+Rad2(np,nell)*cosc(np)
-         !yell(np)=ccord(2,nell)+Rad2(np,nell)*sinc(np)
-         xell(np)=center(1)+Rad(np,nell)*cosc(np)
-         yell(np)=center(2)+Rad(np,nell)*sinc(np)
-      enddo
-      call cwrite8(fid,xell,npd)
-      call cwrite8(fid,yell,npd)
+!      do np=1,npd
+!         xell(np)=center(1)+Rad(np,nell)*cosc(np)
+!         yell(np)=center(2)+Rad(np,nell)*sinc(np)
+!      enddo
+!      call cwrite8(fid,xell,npd)
+!      call cwrite8(fid,yell,npd)
+      call cwrite8(Rad(1,nell),npd)
    enddo
    call cclose(fid,ierr)
 endif
