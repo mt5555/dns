@@ -149,7 +149,7 @@ for jobscript in vjobscript:
 
 
         if len(jobname)==0:
-            ContinueEx,"job does not have a BSUB -J option: "+jobname
+            raise ContinueEx,"job does not have a BSUB -J option: "+jobname
 
         # for idbsub, #BSUB -n 64 line is ignored, we have to add this
         # to the idbsub line
@@ -161,7 +161,7 @@ for jobscript in vjobscript:
         # check if it is in que
         i=jobname in jobname_running
         if i:
-            ContinueEx,"job already running."
+            raise ContinueEx,"job already running."
 
         
         # check resub count in file jobname.resub
@@ -171,7 +171,7 @@ for jobscript in vjobscript:
         fid.close()
         fvalue=atoi(line)
         if (fvalue<=0):
-            ContinueEx,"job counter reached 0"
+            raise ContinueEx,"job counter reached 0"
         fvalue=fvalue-1
         fid=open(jobresub,'w')
         fid.write(str(fvalue)+"\n")

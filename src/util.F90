@@ -159,7 +159,6 @@ integer i,j1,j2
 
 ! n=10:  i=1..5   j1max=9, j2max=10 
 ! n=11:  i=1..6   j1max=11, j2max=12(ignored)
-ran1=2*ran1-1
 do i=1,(n+1)/2
    j1=2*i-1
    j2=j1+1
