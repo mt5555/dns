@@ -271,8 +271,11 @@ if (btype==-1) then
         ((bdy_y1==PERIODIC) .or. (bdy_y1==REFLECT) .or. (bdy_y1==REFLECT_ODD)) .and. &
         ((bdy_y2==PERIODIC) .or. (bdy_y2==REFLECT) .or. (bdy_y2==REFLECT_ODD))  ) then
         btype=1
-   else
+   else if (bdy_x1==INFLOW0_ONESIDED .and. bdy_x2==INFLOW0_ONESIDED .and. &
+            bdy_y1==REFLECT_ODD .and. bdy_y2==INFLOW0_ONESIDED) then
       btype=2
+   else
+      call abort("compute_psi(): boundery conditions not supported")
    endif
 endif
 
@@ -297,7 +300,7 @@ else if (btype==1) then
    call helmholtz_dirichlet_setup(b,psi,work,0)
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
 
-else
+else if (btype==2) then
    psi=0  ! initial guess
    call bc_biotsavart(w,psi)    !update PSI on boundary using biot-savart law
 
