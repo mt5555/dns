@@ -563,8 +563,8 @@ if (my_pe==io_pe) then
       write(message,'(a,i5)')"output_hfree_spec(): Error opening file errno=",ierr
       call abort(message)
    endif
-   x=1+iwave; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)   
    call cwrite8(fid,spec_helicity_rn,1+iwave)
    call cwrite8(fid,spec_helicity_rp,1+iwave)
    call cwrite8(fid,spec_E,1+iwave)
