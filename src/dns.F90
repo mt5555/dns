@@ -210,9 +210,9 @@ if (time_final<0) then
 else
    time_final=time_final+time_initial
 endif
-write(message,'(a,f20.10)') "initial time: ",time_initial
+write(message,'(a,f9.4)') "initial time: ",time_initial
 call print_message(message)
-write(message,'(a,f20.10)') "final time:   ",time_final
+write(message,'(a,f9.4)') "final time:   ",time_final
 call print_message(message)
 write(message,'(a,i10)') "max number timesteps: ",itime_final
 call print_message(message)

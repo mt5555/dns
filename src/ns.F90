@@ -734,9 +734,9 @@ gradu=div
 do n=1,3
    work=gradu(:,:,:,n)
 #ifdef JACOBI
-   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0,dummy)
+   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0,dummy,.false.,.false.)
 #else
-   call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,.03d0)
+   call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,.03d0,dummy,.false.,.false.)
 #endif
    call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
 enddo

@@ -1,16 +1,18 @@
 #include "macros.h"
 
-#define PRECOND
 
 
-subroutine jacobi(sol,b,a1,a2,tol,h)
+subroutine jacobi(sol,b,a1,a2,tol,h,h_form,precond)
 !
-! Jacobi iteration for solving   [a1 + a2 Laplacian] x = b
+! Jacobi iteration for solving   
 !
-! for shallow water equations, we are solving:
+! if h_form=.false.:   [a1 + a2 Laplacian] x = b
+!
+! if h_form=.true.:
 !                 [ a1 + 1/h a2 div h grad ] = b
 ! so we first multiply through by h to get a SPD system:
 !                 [ h a1 + a2 div h grad ] = h b
+! 
 !
 ! input parameters:
 ! b   = rhs
@@ -29,6 +31,7 @@ real*8 :: sol(nx,ny,nz)
 real*8 :: b(nx,ny,nz)
 real*8 :: h(nx,ny,nz)
 real*8 :: tol,a1,a2
+logical :: h_form,precond
 
 !local 
 real*8 :: R(nx,ny,nz)
@@ -48,19 +51,17 @@ w = a1 - a2*(pi2/(3*min(delx,dely,delz)))**2
 w=2.5*w  ! safety factor
 w = 1/w
 
-if (equations==1) b=h*b
+if (h_form) b=h*b
 
-#ifdef PRECOND
-call helmholtz_inv(b,work,a1,a2)
-w=1
-#endif
+if (precond) then
+   call helmholtz_inv(b,work,a1,a2)
+   w=1
+endif
 
 
 
-call helmholtz(sol,R,a1,a2,h)
-#ifdef PRECOND
-call helmholtz_inv(R,work,a1,a2)
-#endif
+call helmholtz(sol,R,a1,a2,h,h_form)
+if (precond) call helmholtz_inv(R,work,a1,a2)
 R=b-R
 sol = sol + w*R
 
@@ -79,10 +80,8 @@ itqmr=0
 do 
    itqmr = itqmr+1
    
-   call helmholtz(sol,R,a1,a2,h)
-#ifdef PRECOND
-   call helmholtz_inv(R,work,a1,a2)
-#endif
+   call helmholtz(sol,R,a1,a2,h,h_form)
+   if (precond) call helmholtz_inv(R,work,a1,a2)
 
    R=b-R
    sol = sol + w*R
@@ -105,22 +104,12 @@ end subroutine
 
 
 
-subroutine cg(sol,b,a1,a2,tol)
-real*8 :: dummy
-call cg_shallow(sol,b,a1,a2,tol,dummy)
-end subroutine
-
-
-
-
-
-
-subroutine cg_shallow(sol,b,a1,a2,tol,h)
+subroutine cg(sol,b,a1,a2,tol,h,h_form,precond)
 !
 ! CG for solving:
-!   equations=0:    [a1 + a2 Laplacian] x = b
+!   h_form=.false.:    [a1 + a2 Laplacian] x = b
 !
-! for shallow water equations, we are solving:
+! for h_form=.true.:
 !                 [ a1 + 1/h a2 div h grad ] = b
 ! so we first multiply through by h to get a SPD system:
 !                 [ h a1 + a2 div h grad ] = h b
@@ -149,6 +138,7 @@ real*8 :: h(nx,ny,nz)
 real*8 :: sol(nx,ny,nz)
 real*8 :: b(nx,ny,nz)
 real*8 :: tol,a1,a2
+logical :: h_form,precond
 
 !local 
 real*8 :: P(nx,ny,nz)
@@ -159,23 +149,19 @@ real*8 :: work(nx,ny,nz)
 real*8,external  :: ddot
 
 integer i,j
-real*8 alpha,sigma,tau,beta,err,err_old
-real*8 res_init,tol1,pa1,pa2
+real*8 alpha,sigma,tau,beta,err
+real*8 res_init,tol1
 integer itqmr
 integer itermax
 
-if (equations==1) b=h*b
+if (h_form) b=h*b
 
 
-pa1=1
-pa2=0
-#ifdef PRECOND
-pa1=a1
-pa2=a2
-call helmholtz_inv(b,work,pa1,pa2)
-! use preconditioned value as initial guess also:
-sol=b
-#endif
+if (precond) then
+   call helmholtz_inv(b,work,a1,a2)
+   ! use preconditioned value as initial guess also:
+   sol=b
+endif
 
 
 itermax=1000
@@ -191,42 +177,36 @@ err=1d99
 
 itqmr=0
 
-50    continue
-      call helmholtz(sol,R,a1,a2,h)
-#ifdef PRECOND
-      call helmholtz_inv(R,work,pa1,pa2)
-#endif
-      R=b-R
-      P=R
-      alpha=ddot(R,R)
+call helmholtz(sol,R,a1,a2,h,h_form)
+if (precond) call helmholtz_inv(R,work,a1,a2)
+R=b-R
+P=R
+alpha=ddot(R,R)
 
-100   continue
-      itqmr = itqmr+1
-      sigma = alpha
+100 continue
+   itqmr = itqmr+1
+   sigma = alpha
 
-      call helmholtz(P,AP,a1,a2,h)
-#ifdef PRECOND
-      call helmholtz_inv(AP,work,pa1,pa2)
-#endif
-      tau = sigma/ ddot(P,AP)
+   call helmholtz(P,AP,a1,a2,h,h_form)
+   if (precond) call helmholtz_inv(AP,work,a1,a2)
 
-      sol=sol+P*tau
-      R = R - AP*tau
+   tau = sigma/ ddot(P,AP)
 
-      alpha = ddot(R,R)
-      beta = alpha/sigma
-      P=R + P*beta
+   sol=sol+P*tau
+   R = R - AP*tau
+   
+   alpha = ddot(R,R)
+   beta = alpha/sigma
+   P=R + P*beta
+   
+   err=sqrt(alpha)
+if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
 
-      err_old=err
-      err=sqrt(alpha)
-
-      if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
-
-      write(*,444) itqmr,res_init,err
-444   format('CG iter=',i4,' ||RHS||, residual=',e11.6,'  ',e11.6)
-
+if (itqmr>25) then
+   write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' || RHS ||',res_init,' residual: ',err
+endif
+   
 if (itqmr>=itermax) then
-   print *,'min/max',minval(h),maxval(h)
    stop 'CG iteration failure'   
 endif
 end subroutine
@@ -271,12 +251,16 @@ end function
 
 
 
-subroutine helmholtz(f,lf,alpha,beta,h)
+subroutine helmholtz(f,lf,alpha,beta,h,h_form)
 !
 !  input: f
 !  output: lf
 !
-!  lf = [alpha + beta*laplacian](f)
+!  if h_form=0:
+!     lf = [alpha + beta*laplacian](f)
+!
+!  if h_form=1
+!      lf = [h*alpha + beta*div h grad](f)
 !
 use params
 use fft_interface
@@ -287,6 +271,7 @@ real*8 lf(nx,ny,nz)    ! output
 real*8 h(nx,ny,nz)    ! height field (used only for shallow water equations)
 real*8 :: alpha
 real*8 :: beta
+logical :: h_form
 
 !local
 real*8 work(nx,ny,nz)    ! work array
@@ -295,7 +280,7 @@ real*8 fxx(nx,ny,nz)     ! work array
 real*8 dummy
 integer n
 
-if (equations==1) then
+if (h_form) then
    do n=1,2
       call der(f,gradf(1,1,1,n),dummy,work,DX_ONLY,n)
       gradf(:,:,:,n)=h*gradf(:,:,:,n)

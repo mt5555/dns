@@ -143,7 +143,7 @@ call helmholtz_inv(p,work,alpha,beta)
 !call divergence(work,u,p,work2)
 !p=0  ! initial guess
 !tol=1e-10
-!call cg(p,work,alpha,beta,tol)
+!call cg(p,work,alpha,beta,tol,dummy)
 
 
 

@@ -281,8 +281,8 @@ if (alpha_value>0) then
       !call ifft3d(work,work2)
       divtau(:,:,n)=work  ! use RHS as our initial guess also
 
-      call cg_shallow(divtau(1,1,n),work,1d0,-alpha_value**2,1d-8,Q(1,1,3))
-      !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-6,Q(1,1,3))
+      call cg(divtau(1,1,n),work,1d0,-alpha_value**2,1d-8,Q(1,1,3),.true.,.true.)
+      !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-6,Q(1,1,3),.true.,.true.)
       !call helmholtz_inv(divtau(1,1,n),work,1d0,-alpha_value**2)
    enddo
 
