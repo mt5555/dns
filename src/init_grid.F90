@@ -12,6 +12,7 @@ call fft_interface_init()
 call init_input_file()
 call init_grid()          
 
+
 !
 ! scale alpha now that we know delx
 !

@@ -21,15 +21,9 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
    ifeq ($(HOST),shankara1)
-      # sca cluster has mpich and lam installed as RPMs, but with 
-      #fortran wrappers using two underscores.  cant call these routines
-      # with ifc compiler?
-      #MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I/opt/scali/contrib/mpich/include
-      #MPILIB = -L/opt/scali/contrib/mpich/lib -lfmpich -lmpich
-      MPI = -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
+      MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
-
    ## Lahey
    ##F90 = /usr/local/lf9560/bin/lf95
    #F90 = lf95
@@ -51,6 +45,7 @@ ifeq ($(UNAME),Linux)
    CC=gcc
    FFLAGS =  -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
+
 
 endif
 ifeq ($(UNAME),SunOS)
