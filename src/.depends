@@ -8,6 +8,7 @@ fftops.o: macros.h params.o fft_interface.o transpose.o makefile
 fftsgi_interface.o: macros.h makefile 
 fftstk_interface.o: macros.h makefile 
 fileio.o: macros.h params.o structf.o transpose.o makefile 
+ghost.o: macros.h params.o mpi.o makefile 
 init_data.o: macros.h params.o mpi.o transpose.o fft_interface.o makefile 
 init_grid.o: macros.h params.o structf.o transpose.o fft_interface.o mpi.o makefile 
 init_mpi.o: macros.h params.o mpi.o makefile 

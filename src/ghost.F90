@@ -8,9 +8,6 @@ implicit none
 
 real*8,private :: tmx1,tmx2
 
-real*8,private :: sendbufx(nslabx,nghost)
-real*8,private :: recbufx(nslabx,nghost)
-
 integer,private :: nghost=2
 
 
@@ -23,16 +20,20 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine ghost_update(p,nvar)
 use params
+implicit none
 real*8 :: p(nx,ny,nz,nvar)
+integer :: nvar
 
 
 !local variables
-integer i,j,k,n,l
+integer :: i,j,k,n,l,nmesg,x1,x2,y1,y2,z1,z2
+real*8 :: recbufx1(nslaby*nslabz*nvar)
+real*8 :: recbufx2(nslaby*nslabz*nvar)
 
 #ifdef USE_MPI
-real*8 :: sendbuf(nslabx*nslabz*ny_2dz,maxbuf)
-real*8 :: recbuf(nslabx*nslabz*ny_2dz,maxbuf)
-integer :: ndata,nmesg
+real*8 :: sendbufx1(nslaby*nslabz*nvar)
+real*8 :: sendbufx2(nslaby*nslabz*nvar)
+integer :: ndata
 integer :: ierr,dest_pe1,dest_pe2,request(12),statuses(MPI_STATUS_SIZE,12)
 integer :: dest_pe3(3),tag
 #endif
@@ -90,6 +91,7 @@ if (x1==my_x) then
    enddo
    enddo
 else
+#ifdef USE_MPI
    l=0
    do n=1,nvar
    do k=nz1,nz2
@@ -107,6 +109,7 @@ else
    call MPI_IRecv(recbufx1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
    nmesg=nmesg+1
    call MPI_ISend(sendbufx1,ndata,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+#endif
 endif
 
 
@@ -127,6 +130,7 @@ if (x2==my_x) then
    enddo
    enddo
 else
+#ifdef USE_MPI
    l=0
    do n=1,nvar
    do k=nz1,nz2
@@ -144,6 +148,7 @@ else
    call MPI_IRecv(recbufx2,ndata,MPI_REAL8,dest_pe2,tag,comm_3d,request(nmesg),ierr)
    nmesg=nmesg+1
    call MPI_ISend(sendbufx2,ndata,MPI_REAL8,dest_pe2,tag,comm_3d,request(nmesg),ierr)
+#endif
 endif
 
 
@@ -178,5 +183,6 @@ enddo
 
 
 
-end
+end subroutine
 
+end module
