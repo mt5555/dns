@@ -49,7 +49,7 @@ real*8 :: pi2,pi2_squared
 
 integer :: init=0
 type fftdata_d
-   real*8,dimension(:),pointer :: trigs
+   CPOINTER,dimension(:),pointer :: trigs
    integer :: ifax(13)
    integer :: size
 end type

@@ -54,13 +54,14 @@ OBJS2 = transpose.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o integrals.o
-FILEIO = fileio.o
+FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
 MODEL_GRID  = ns3d.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC  = ns3dspectral.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 
 
+CC = gcc
 
 #rules
 %.o: %.f90
@@ -69,6 +70,8 @@ MODEL_SPEC  = ns3dspectral.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 	$(COMPILE)  $< 
 %.o: %.f
 	$(COMPILE) -o $@ $< 
+%.o: %.c
+	$(CC) -c -o $@ $< 
 
 dns:  $(MODEL_SPEC) dns.o 
 	$(LINK) -o dns dns.o $(MODEL_SPEC) $(LDFLAGS) $(MPILIB)

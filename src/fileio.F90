@@ -151,6 +151,8 @@ integer i,j,k,n
 real*8 xnx,xny,xnz,xnv
 character*80 message
 character*20 tmp
+CPOINTER :: fid
+integer ierr
 
 n=max(mpidims(1),mpidims(2),mpidims(3))
 if (n<10) then
@@ -175,26 +177,35 @@ write(tmp,'(f10.4)') 10000.0000 + time
 message=message(1:len_trim(message)) // tmp(2:10)
 
 message = runname(1:len_trim(runname)) // message(1:len_trim(message)) // ".data"
-open(unit=10,file=message,form='binary')
+
+!open(unit=10,file=message,form='binary')
+call copen(message,"w",fid,ierr)
+if (ierr/=0) then
+   write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
+   call abort(message)
+endif
 
 
 
-write(10) time
+call cwrite8(fid,time,1)
 xnv=n_var
 xnx=nslabx
 xny=nslaby
 xnz=nslabz
-write(10) xnx,xny,xnz,xnv
+call cwrite8(fid,xnx,1)
+call cwrite8(fid,xny,1)
+call cwrite8(fid,xnz,1)
+call cwrite8(fid,xnv,1)
 do n=1,n_var
 do k=nz1,nz2
 do j=ny1,ny2
-do i=nx1,nx2
-   write(10) Q(i,j,k,n)	
+!do i=nx1,nx2
+   call cwrite8(fid,Q(nx1,j,k,n),nx2-nx1+1)
+!enddo
 enddo
 enddo
 enddo
-enddo
-close(10)
+call cclose(fid)
 
 
 end subroutine
@@ -298,7 +309,8 @@ real*8 xnx,xny,xnz
 real*8 :: vor(nx,ny,nz,n_var)
 real*8 :: d1(nx,ny,nz),work(nx,ny,nz)
 character*80 message
-integer n_var_start
+integer n_var_start,ierr
+CPOINTER fid
 
 call vorticity(vor,Q,d1,work)
 
@@ -306,20 +318,28 @@ call vorticity(vor,Q,d1,work)
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time
    message = runname(1:len_trim(runname)) // message(2:10) // ".vor"
-   open(unit=11,file=message,form='binary')
+   !open(unit=11,file=message,form='binary')
+   call copen(message,"w",fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
+      call abort(message)
+   endif
 
-   write(11) time
+
+   call cwrite8(fid,time,1)
    xnx=o_nx
    xny=o_ny
    xnz=o_nz
-   write(11) xnx,xny,xnz
-   write(11) g_xcord(1:o_nx)
-   write(11) g_ycord(1:o_ny)
-   write(11) g_zcord(1:o_nz)
+   call cwrite8(fid,xnx,1)
+   call cwrite8(fid,xny,1)
+   call cwrite8(fid,xnz,1)
+   call cwrite8(fid,g_xcord(1),o_nx)
+   call cwrite8(fid,g_ycord(1),o_nx)
+   call cwrite8(fid,g_zcord(1),o_nx)
 endif
 
-call output1(vor(1,1,1,3),work,11)
-if (my_pe==io_pe) close(11)
+call output1(vor(1,1,1,3),work,fid)
+if (my_pe==io_pe) call cclose(fid)
 
 end subroutine
 

@@ -984,7 +984,7 @@ end subroutine
 
 #ifdef TRANSPOSE_X_SPLIT_Z
 
-subroutine output1(p,pt,unit)
+subroutine output1(p,pt,fid)
 use params
 use mpi
 implicit none
@@ -994,7 +994,8 @@ real*8 :: pt(g_nx2,nslaby,nz_2dx)
 ! local vars
 real*8 buf(o_nx,nslaby)
 real*8 saved_edge(o_nx)
-integer sending_pe,ierr,tag,unit,z_pe,y_pe,x_pe
+integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
+CPOINTER fid
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
@@ -1062,7 +1063,7 @@ do y_pe=0,ncpu_y-1
       endif
       
       if (o_nx==g_nx+1) buf(o_nx,:)=buf(1,:)  ! append to the end, x-direction
-      write(unit) buf
+      call cwrite8(fid,buf,o_nx*nslaby)
 
 
       if (o_ny==g_ny+1) then
@@ -1071,7 +1072,7 @@ do y_pe=0,ncpu_y-1
          saved_edge=buf(:,1)
       endif   
       if (y_pe==ncpu_y-1) then                ! append to the end, y-direction
-         write(unit) saved_edge
+         call cwrite8(fid,saved_edge,o_nx)
       endif
       endif
 
@@ -1087,7 +1088,7 @@ end subroutine
 
 #ifdef TRANSPOSE_X_SPLIT_Y
 
-subroutine output1(p,pt,unit)
+subroutine output1(p,pt,fid)
 use params
 use mpi
 implicit none
@@ -1097,7 +1098,8 @@ real*8 :: pt(g_nx2,nslabz,ny_2dx)
 ! local vars
 real*8 buf(o_nx,ny_2dx)
 real*8 saved_edge(o_nx)
-integer sending_pe,ierr,tag,unit,z_pe,y_pe,x_pe
+integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
+CPOINTER fid
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
@@ -1173,7 +1175,7 @@ do x_pe=0,ncpu_x-1
       endif
       
       if (o_nx==g_nx+1) buf(o_nx,:)=buf(1,:)  ! append to the end, x-direction
-      write(unit) buf
+      call cwrite8(fid,buf,o_nx*ny_2dx)
 
       if (o_ny==g_ny+1) then
       if (y_pe==0 .and. x_pe==0) then
@@ -1181,7 +1183,7 @@ do x_pe=0,ncpu_x-1
          saved_edge=buf(:,1)
       endif   
       if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then     ! append to the end, y-direction
-         write(unit) saved_edge
+         call cwrite8(fid,saved_edge,o_nx)
       endif
       endif
 
