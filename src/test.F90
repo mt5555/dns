@@ -324,6 +324,7 @@ enddo
 enddo
 enddo
 
+
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
@@ -334,6 +335,7 @@ do k=nz1,nz2
 enddo
 enddo
 enddo
+
 
 
 

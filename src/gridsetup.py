@@ -108,15 +108,15 @@ for i in range(3):
           print "cant use TRANSPOSE_X_SPLIT_Y"
           use_x_y=0
 
-       if use_x_z:
-          use_x_y=0
-          j=(i+2) % 3  # go back to original value
-          print 'Using TRANSPOSE_X_SPLIT_Z.  Updating transpose.h'
-
        if use_x_y:   # use this value when possible
           use_x_z=0  
           j=1
           print 'Using TRANSPOSE_X_SPLIT_Y.  Updating transpose.h'
+
+       if use_x_z:
+          use_x_y=0
+          j=(i+2) % 3  # go back to original value
+          print 'Using TRANSPOSE_X_SPLIT_Z.  Updating transpose.h'
 
 
           
