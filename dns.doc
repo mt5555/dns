@@ -86,6 +86,9 @@ Running the code
                         and may not be as isotropic)
              sht        shallow water testcases from McWilliams and Polvani
              zero       flow at rest
+             decay      Meneveau's spectrum (slow init, but reproducable)
+             decay_e    same as decay, not reproducible with different parallel
+                        decomposition
 
 
    line 4   initial condition subtype

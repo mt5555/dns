@@ -13,7 +13,7 @@ loglog(x,y,'r')
 y = .5*x.^(-3);
 loglog(x,y,'r')
 
-axis([1,200,1e-6,1]);
+axis([1,1e4,1e-6,1]);
 title(stitle);
 hold off
 

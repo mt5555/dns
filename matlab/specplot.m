@@ -7,12 +7,15 @@
 
 % name of the file, without the ".spec" extension
 name='cj20000.0000';
-
-% directory where files are located:
 namedir='/ccs/taylorm/dns/src/';
-
-% big-endian or little-endian 'l' or 'b':
 filetype='l';
+
+name='temp0000.0000';
+namedir='../src/';
+filetype='l';
+
+
+
 
 
 
@@ -33,6 +36,9 @@ while (time>=0 & time<=9999.3)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
+  
+  if (max(spec_r)<.01) spec_r=spec_r*(2*pi)^2; end;    
+    
   n_x=fread(fid,1,'float64');
   spec_ux=fread(fid,n_x,'float64');  
   spec_vx=fread(fid,n_x,'float64');  

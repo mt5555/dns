@@ -6,8 +6,13 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
            assume 1024^3 needs 6666 timesteps per eddy turnover time
            = 5 days per eddy turnover time on 512 cpus.  
 
-           2048^3 needs 2*6666 timesteps = 40 days per eddy turnover time
-           on 1024 cpus.  
+           1536^3 needs 9999 timesteps.  2min per timestep, 14days.
+            
+
+           2048^3 needs 2*6666 timesteps.  at 2.70m per timestep
+           (2048 cpus, 2 rails), that's 25 days for 1 eddy turnover time.
+            
+
 
 
 1024^3  144Gb            24Gb per variable                             1b gridpoints
@@ -21,11 +26,11 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
                   cpu time per timestep
                    (running 5 timesteps) 
 512^3
-    1x1x64              .813
-    1x1x128             .393   
-    1x1x256             .195     
-    2x1x256             .158    
-    4x1x256             .116 
+    1x1x64              .813       (with forcing)
+    1x1x128             .393       (with forcing)
+    1x1x256             .195       (with forcing)
+    2x1x256             .158       (with focfing)
+    4x1x256             .116       (with forcing)
 
     4x2x128   
     2x2x256   (doesn't work)
@@ -33,21 +38,24 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
 
 
 1024^3 
-     1x1x128  3.76
-     1x1x256  1.89
-     1x1x512  1.04  
-     2x1x512  in   
-
+     1x1x128  3.76               (with forcing)
+     1x1x256  1.89               (with forcing)
+     1x1x512  1.04               (with forcing)
+     2x1x512  0.684
+     4x1x412  0.539
 
 1536
-     1x1x768 
-     2x1x768   
-
+     1x1x384    
+     1x1x512
+     1x1x768    2.05
+     2x1x768    1.50
+     3x1x768    1.46
 
 2048^3     
       1x1x512     failed to load. try from scratch1? 
-      1x1x1024      12.8min!  3x slower than old timing.  try again?  IN
-      2x1x1024
+      1x1x1024    (with focing: 12.8min!  3x slower than old timing.  try again?  IN
+      1x1x1024     4.18, 4.18, 3.63(2x rail)
+      2x1x1024     3.04    with 2x rail: estmate: 2.70
       4x1x1024
 
 

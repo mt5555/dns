@@ -8,6 +8,12 @@ cj1  mu=1e-4   alpha=16h   power spectra starting to turn at tail
 cj3  mu=25e-4  alpha=0     delx/eta = .94   too viscous. 
 cj2  mu=10e-4  alpha=0     delx/eta = 1.9  killed at t=2.1  epsilon=3.6
 
+cj12 mu=6.25e-4   NEXT
+cj13 mu=1.5e-4  
+cj14 mu=.4e-4     
+
+
+
 cj4  mu=25e-4  alpha=6h  
 cj5  mu=6.25e-4  alpha=6h    epsilon=1.1
 cj6  mu=1.5e-4  alpha=6h  
@@ -15,10 +21,9 @@ cj7  mu=.4e-4  alpha=6h
 
 above runs are done, and stored on /ccs/taylorm/dns/src
 
-IN /users:
 
 cj8  mu=25e-4   alpha=1h  
-cj9  mu=6.25e-4  alpha=1h    epsilon=1.1
+cj9  mu=6.25e-4  alpha=1h  
 cj10  mu=1.5e-4  alpha=1h  
 cj11  mu=.4e-4  alpha=1h  
 
@@ -44,6 +49,8 @@ iso12w256A IN QA  up to t=88 so far
 IN:
    at t=90 changed  FM = 18/(2pi)**2 
                     epsilon=  
+   run to t=137, still running
+
 
 
 
