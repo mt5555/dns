@@ -20,17 +20,21 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
+name='sk2560000.0000';
+namedir='/scratch2/taylorm/sk256/';
+CK_orig=1.613;
 
-name='decay2048';
-namedir='/ccs/scratch/taylorm/decay/';
-CK_orig=1.613; decay_scale=1;
-% save spectrum at these times:
-tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
+
+%name='decay2048';
+%namedir='/ccs/scratch/taylorm/decay/';
+%CK_orig=1.613; decay_scale=1;
+%% save spectrum at these times:
+%tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 
 
 
 % plot all the spectrum:
-movie=0;
+movie=1;
 
 
 spec_r_save=[];

@@ -109,6 +109,11 @@ time_2 = .5*(time(2:l)+time(1:l-1));
 ke_diss_tot=(ke(2:l)-ke(1:l-1))./(time(2:l)-time(1:l-1));
 Ea_diss_tot=(Ea(2:l)-Ea(1:l-1))./(time(2:l)-time(1:l-1));
 
+epsilon=-(  ke_diss_d-mu*alpha^2*ints(1,:) )
+lambda=sqrt( mu*(2*Ea/3) / (epsilon/15)  )
+R_l = lambda.*sqrt(2*Ea/3)/mu;
+R_large = 1 * sqrt(2*Ea) / mu;
+eta = (mu^3 ./ abs(epsilon)).^(.25);
 
 
 disp(sprintf('max vor_z = %e',max(vor_z)));
@@ -156,11 +161,7 @@ title('maximum vorticity component')
 xlabel('time')
 print -djpeg -r72 vor.jpg
 
-epsilon=-(  ke_diss_d-mu*alpha^2*ints(1,:) )
-lambda=sqrt( mu*(2*Ea/3) / (epsilon/15)  )
-R_l = lambda.*sqrt(2*Ea/3)/mu;
 
-R_large = 1 * sqrt(2*Ea) / mu;
 
 figure(2); subplot(1,1,1)
 plot(time,R_l)
@@ -169,8 +170,6 @@ xlabel('time')
 print -djpeg -r72 rl.jpg
 
 
-% Kolm. micro scale
-eta = (mu^3 ./ abs(ke_diss_d)).^(.25);
 
 figure(3); subplot(1,1,1)
 plot(time,eta* nx*pi*2*sqrt(2)/3 )
