@@ -223,9 +223,9 @@ call wallclock(tmx1)
 
 
 ! compute vorticity-hat, store in RHS
-! 3 z-transposes, 9 ffts.  
-! 6 x-transposes  (forward+back)
-! 6 y-traanposes  (forward+back)
+! z_ifft3d:  transpose:  1z,2x,2y  FFT: 1x,1y,1z
+! call it three times:  transpose:  3z,6x,6y
+!                       FFT: 9
 !
 do n=1,3
 do j=1,ny_2dz
@@ -262,14 +262,24 @@ enddo
 call z_ifft3d(p,rhsg(1,1,1,n),work)
 enddo
 ! alternative:
-! compute from Q_grid: vx,wx  uy,wy      8 ffts, transposes: 4x,4y
-!              Qhat:   vz,uz             6 ffts, transposes: 2z,2x,2y
+! d/dx or d/dy of one variable: 2 fft, 2 transpose
 !
-
+! compute from Q_grid: vx,wx  uy,wy      8 fft, transpose: 4x, 4y
 !
-! for epsilon, and alpha model, we also need:
-! wz   ux  vy
+!               
+! compute from Qhat: uz,vz: 2 calls to z_ifft3d:
+!                                      2z,4x,4y  + 6 FFT              
 !
+!  total:  14 fft, 2z, 8x,8y
+!
+! for alpha model, we need all 9 terms.
+! From Qhat: 9 calls to z_ifft3d: 9Z,18x,18y,27FFT
+! From Qgrid: x: 6fft, 6x
+!             y: 6fft, 6y
+!             z: 6fft, 6z   
+!
+! z-der from Qhat:      3z,6x,6y,9FFT
+! x,yder from Qgrid:       6x,6y,12FFT 
 
 
 

@@ -83,10 +83,12 @@ Nirvana FFT99
 Nirvana STK                
 
 Truchas (Compaq ES40)
-FFT99 
-STK2  
-CPQ   
+FFT99,params                 1.03   1.03
+CPQ,params                   1.00   1.00
 
+STK2,auto                    1.07   1.07
+FFT99,auto                   1.03   1.03
+CPQ,auto                     0.99   0.99
 
 *****************************************************************
 1 CPU  512x512x1
