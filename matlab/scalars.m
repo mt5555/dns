@@ -20,14 +20,14 @@ fid2=-1;
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-%fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
-%nx=2048;
+fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+nx=2048;
 
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
 
-fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
-nx=1024;
+%fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
+%nx=1024;
 
 
 nscalars=0;
@@ -138,16 +138,16 @@ print -djpeg -r72 ke.jpg
 
 figure(7)
 plot(time,maxvor,'r'); hold on;
-plot(.4188,2500,'o')
-plot(.4328,2500,'o')
-plot(.4603,2500,'o')
-plot(.4894,2500,'o')
-plot(.5551,2500,'o')
-plot(.6034,2500,'o')
-plot(.8149,2500,'o')
+%plot(.4188,2500,'o')
+%plot(.4328,2500,'o')
+%plot(.4603,2500,'o')
+plot(.4894,2500,'.')
+%plot(.5551,2500,'o')
+%plot(.6034,2500,'o')
+%plot(.8149,2500,'o')
 plot(time,50000*ke,'k');
 hold off;
-axis([0,1,0,5000]);
+%axis([0,1,0,5000]);
 title('maximum vorticity component')
 
 

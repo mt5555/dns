@@ -7,14 +7,14 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
-range=0:.1:100.00;
+%range=0:.1:100.00;
 %range=50:5.0:100.0;
-%range=[.00];
+range=[1.00];
 %name='../src/kh1024'; 
-name='../src/turb2d'; 
+name='../src/kh/khK';
 
 mkpr=0;            % make ps and jpeg files
-mkcontour=0;       % use pcolor or contour
+mkcontour=1;       % use pcolor or contour
 mplot=1;           % set to nonzero to put 'mplot' plots per figure
 
 mplot=min(mplot,length(range));
@@ -123,7 +123,7 @@ for i=range
       end
       pname=[name,'.vor.ps'];
       disp('creating ps...')
-      print('-depsc',pname);
+      print('-depsc','-r 600',pname);
       pname=[name,'.vor.jpg'];
       disp('creating jpg...')
       print('-djpeg','-r 96',pname);

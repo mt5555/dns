@@ -23,7 +23,7 @@ if ($ncpus > 0) then
         set command = "mpirun -np $ncpus -npn 2 ../src/dns"
 #       set command = "mpirun -np $ncpus -npn 1 ../src/dns"
    endif
-   if (`hostname` == node001m) then
+   if (`hostname` == node001) then
         set command = "/home/gmpi.pgi/bin/mpirun -np $ncpus  ../src/dns"
    endif
    echo $command

@@ -160,8 +160,8 @@ end
 
 
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
-ax=axis;  axis([1,xmax,0,1]);
-ax=axis;  axis([1,xmax,0,2.5]);
+ax=axis;  axis([1,xmax,0,1.2]);
+%ax=axis;  axis([1,xmax,0,2.5]);
 hold off;
 if (plot_points==1) 
 print('-dpsc',[bname,'_45.ps']);

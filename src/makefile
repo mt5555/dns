@@ -16,8 +16,8 @@ F77FIXED=
 
 ifeq ($(UNAME),Linux)
    #VENDOR=LAHEY
-   VENDOR=PGI
-   #VENDOR=INTEL
+   #VENDOR=PGI
+   VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),certs)
@@ -35,7 +35,8 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DUSE_MPI -I/users/contrib/lam/include
       MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
-   ifeq ($(HOST),node001m)
+   ifeq ($(HOST),node001)
+      VENDOR=PGI
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
       MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
 #-lpthread

@@ -32,7 +32,7 @@ ext='.isostr';
 name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
 nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
 ext='.new.isostr';
-times=[1:.1:1.7];
+times=[1:.1:2.0];
 
 
 ndir_use=0;

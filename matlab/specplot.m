@@ -5,26 +5,34 @@
 %
 CK_orig=1.0;
 decay_scale=0;
+tsave=[];
 
 % name of the file, without the ".spec" extension
-name='cj20000.0000';
-namedir='/ccs/taylorm/dns/src/';
+%name='cj20000.0000';
+%namedir='/ccs/taylorm/dns/src/';
 
 %name='temp0000.0000';
 %namedir='/ccs/taylorm/dns/src/';
 
 
+
+%name='sc1024A';
+%namedir='/ccs/scratch/taylorm/dns/sc1024A/';
+%CK_orig=1.613;
+
+
 name='decay2048';
 namedir='/ccs/scratch/taylorm/decay/';
 CK_orig=1.613; decay_scale=1;
+% save spectrum at these times:
+tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
+
 
 
 % plot all the spectrum:
 movie=0;
 
 
-% save spectrum at these times:
-tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 spec_r_save=[];
 spec_r_save_fac3=[];
 
@@ -40,6 +48,7 @@ if (fidt>=0)
 end
 
 
+CK=CK_orig;
 j=0;
 while (time>=.0 & time<=9999.3)
   j=j+1;
@@ -220,7 +229,7 @@ while (time>=.0 & time<=9999.3)
 
 
   if (movie==1)  
-  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.45)<.01) )
+  if ( ( (2*time-floor(2*time))<.01) | (abs(time-2.0)<.01) )
     disp('making ps files ...' )
     figure(1)
     print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
@@ -253,6 +262,7 @@ if (length(spec_r_save>1) )
 figure(1); clf;
 loglog53(n_r,spec_r_save,'KE spectrum',CK);
 print -djpeg -r72 spec.jpg
+print -depsc -r600 spec.ps
 figure(2); clf;
 loglog53(n_r,spec_r_save_fac3,'KE / bottleneck-factor',CK);
 print -djpeg -r72 speck3.jpg
