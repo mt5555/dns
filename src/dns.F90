@@ -23,7 +23,7 @@ call init_grid
 
 write(message,'(a)') 'Running some tests'
 call print_message(message)
-call test           ! optional testing  routines go here
+!call test           ! optional testing  routines go here
 
 
 
@@ -125,7 +125,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8  :: time=0
 integer :: itime=0,ierr,n
 character*80 message
-real*8 :: ke_old,time_old
+real*8 :: ke_old,time_old,delke_tot
 real*8 :: ints_buf(nints)
 
 ints=0
@@ -151,13 +151,17 @@ do
    delke_tot=ints_timeU-time_old
    if (delke_tot>0) delke_tot=(ints(1)-ke_old)/delke_tot
 
+!  storage of some extra quantities:
+   ints(6)=delke_tot
+   maxs(6)=ints_timeU
+   maxs(7)=ints_timeDU
    
    if (maxval(maxs(1:3))> 1000) then
       print *,"max U > 1000. Stoping at time=",time
       time_final=time
    endif
 
-   call time_control(itime,time,Q,ints,maxs)
+   call time_control(itime,time,Q)
    itime=itime+1
    if (time >= time_final) exit
 enddo

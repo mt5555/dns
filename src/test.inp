@@ -2,8 +2,8 @@
 test         ! runname
 iso12        ! initial condition:  KH-blob, KH-anal, iso12
 iso12        ! forcing:  none, iso12
-value        ! viscosity type  (value, smallest, damping_time, Re)
-2e-4         ! viscosity coefficient.  
+kediff       ! viscosity type  (value, smallest, kediff, Re)
+200.0        ! viscosity coefficient.  
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc

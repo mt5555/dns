@@ -10,9 +10,12 @@ integer :: itime
 integer i,j,k,n
 character*80 message
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 divx,divi,tmx1,tmx2,del
+real*8 divx,divi,tmx1,tmx2,del,delke_tot
 logical,external :: check_time
 logical :: doit
+
+real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:)
+integer,save :: nscalars=0,nsize=0
 
 call wallclock(tmx1)
 time_target = time_final
@@ -39,7 +42,6 @@ delt = max(delt,delt_min)
 delt = min(delt,delt_max)
 
 
-
 !
 !  restart dumps
 !
@@ -62,6 +64,23 @@ if (doit) then
 endif
 
 
+!
+! accumulate scalers into an array, output during 
+! diagnositc output
+!
+nscalars=nscalars+1
+if (nscalars > nsize) then
+   nsize=nscalars+100
+   ! scalar arrays need to be enlarged
+   if (allocated(ints_save)) deallocate(ints_save)
+   allocate(ints_save(nints,nsize))
+   if (allocated(maxs_save)) deallocate(maxs_save)
+   allocate(maxs_save(nints,nsize))
+endif
+ints_save(1:nints,nscalars)=ints(1:nints)
+maxs_save(1:nints,nscalars)=maxs(1:nints)
+
+
 
 
 !
@@ -70,7 +89,8 @@ endif
 doit=check_time(itime,time,diag_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
-   call output_diags(time,Q)
+   call output_diags(time,Q,ints_save,maxs_save,nints,nscalars)
+   nscalars=0
 endif
 
 
@@ -94,6 +114,7 @@ cfl_used_vis=mumax*delt
 ! display screen output
 !
 if (doit) then
+   delke_tot=ints(6)
 
    write(message,'(a,f9.5,a,i5,a,f9.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
@@ -216,12 +237,16 @@ end subroutine
 
 
 
-subroutine output_diags(time,Q)
+subroutine output_diags(time,Q,ints_save,maxs_save,nv,nscalars)
 use params
 use structf
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: time
+integer nv,nscalars
+real*8 :: ints_save(nv,nscalars)
+real*8 :: maxs_save(nv,nscalars)
+
 
 ! local variables
 integer i,j,k,n
@@ -232,8 +257,12 @@ real*8 spec_z(0:g_nz/2)
 real*8 x
 real*8,allocatable  ::  spectrum(:),spectrum1(:)
 character*80 :: message
+character :: access
 CPOINTER fid
 
+! append to output files, unless time=0 create a new file 
+access="a"
+if (time==0) access="w"
 
 iwave_max=max(g_nx,g_ny,g_nz)
 allocate(spectrum(0:iwave_max))
@@ -246,20 +275,21 @@ do i=1,3
    call compute_spectrum(Q(:,:,:,i),spectrum1,spec_x,spec_y,spec_z,iwave,io_pe)
    spectrum=spectrum+.5*spectrum1
 enddo
-call plotASCII(spectrum,iwave," KE spectrum")
-!call plotASCII(spec_x,g_nx/2," KE x-spectrum")
-!call plotASCII(spec_y,g_ny/2," KE y-spectrum")
-!call plotASCII(spec_z,g_nz/2," KE z-spectrum")
+write(message,'(a,f10.4)') " KE spectrum",time
+call plotASCII(spectrum,iwave,message)
+!call plotASCII(spec_x,g_nx/2,message)
+!call plotASCII(spec_y,g_ny/2,message)
+!call plotASCII(spec_z,g_nz/2,message)
 
 
 
 
 
 if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time
+!   write(message,'(f10.4)') 10000.0000 + time
 !   message = runname(1:len_trim(runname)) // message(2:10) // ".spec"
    message = runname(1:len_trim(runname)) // ".spec"
-   call copen(message,"a",fid,ierr)
+   call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
       call abort(message)
@@ -284,10 +314,10 @@ deallocate(spectrum1)
 
 
 if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time
+!   write(message,'(f10.4)') 10000.0000 + time
 !   message = runname(1:len_trim(runname)) // message(2:10) // ".sf"
    message = runname(1:len_trim(runname)) // ".sf"
-   call copen(message,"a",fid,ierr)
+   call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "outputSF(): Error opening file errno=",ierr
       call abort(message)
@@ -295,6 +325,25 @@ if (my_pe==io_pe) then
 endif
 call outputSF(time,fid)
 if (my_pe==io_pe) call cclose(fid)
+
+
+
+
+if (my_pe==io_pe) then
+!   write(message,'(f10.4)') 10000.0000 + time
+   message = runname(1:len_trim(runname)) // ".scalars"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "diag_output(): Error opening .scalars file errno=",ierr
+      call abort(message)
+   endif
+   x=nv; call cwrite8(fid,x,1)
+   x=nscalars; call cwrite8(fid,x,1)
+   call cwrite8(fid,ints_save,nv*nscalars);
+   call cwrite8(fid,maxs_save,nv*nscalars);
+   call cclose(fid)
+endif
+
 
 end subroutine
 

@@ -137,10 +137,9 @@ integer :: error_code =0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer,parameter :: nints=5
+integer,parameter :: nints=7
 real*8 :: ints(nints)=0,maxs(nints)=0
 real*8 :: ints_timeU,ints_timeDU
-real*8 :: delke_tot        ! d KE /dt from most recent time step
 
 !
 ! Quantities involving only Q are computed in the timestep
@@ -157,9 +156,13 @@ real*8 :: delke_tot        ! d KE /dt from most recent time step
 ! ints(3) = ke dissapation from diffusion
 ! ints(4) = vor 
 ! ints(5) = helicity
+! ints(6) = delke_tot = Actual d(KE)/dt computed from KE(t) and KE(t+1)
 !
 ! maxs(5) = max vorticity
 !
+! for convience, we store the time data in maxs(6:7)
+! maxs(6) = ints_timeU
+! maxs(7) = ints_timeDU
 !
 
 integer,parameter :: ntimers=11

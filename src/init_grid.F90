@@ -14,7 +14,7 @@ use fft_interface
 implicit none
 
 !local variables
-real*8 :: one=1
+real*8 :: one=1,xfac,diff_2h,kmode
 integer i,j,k,l,ierr
 character*80 message
 integer input_file_type
@@ -35,9 +35,32 @@ if (my_pe==io_pe) then
    endif
 endif
 
-write(message,*) 'Diffusion d/dt(log u_2delx) = ',&
-     (mu*pi*pi*(g_nx**2 + g_ny**2 + g_nz**2)),' s^-1'
+! Diffusion of mode k:
+! d/dt (.5 u**2)  = - mu 2pi 2pi k k u**2
+!
+! d/dt (KE) / KE = - 2 mu 2pi 2pi k**2,  
+! USE k = the dealiased highest mode, k = g_nx/3
+!
+! if mu is chosen for a given value of diff_2h,
+! 
+!    mu = diff_2h / (2 2pi 2pi k**2)
+! 
+
+write(message,'(a,e10.4)') 'Diffusion coefficient mu=',mu
 call print_message(message)
+
+kmode=1
+xfac = 2*2*pi*2*pi*kmode**2
+diff_2h =  mu*xfac
+write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+call print_message(message)
+
+kmode = sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+xfac = 2*2*pi*2*pi*kmode**2
+diff_2h =  mu*xfac
+write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+call print_message(message)
+
 
 
 #ifdef USE_MPI
@@ -185,7 +208,7 @@ read(*,*) rvalue
 if (sdata=='value') then
    mu=rvalue
 else 
-   call abort("only viscosity type 'value' supported")
+   call abort("only viscosity type 'value' supported for input format=0")
 endif
 
 read(*,'(a12)') sdata
@@ -250,7 +273,7 @@ implicit none
 !local variables
 character*80 message
 character*20 sdata
-real*8 rvalue
+real*8 rvalue,xfac,kmode
 integer i
 
 
@@ -290,6 +313,11 @@ read(*,'(a12)') sdata
 read(*,*) rvalue
 if (sdata=='value') then
    mu=rvalue
+else if (sdata=='kediff') then
+   kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+   xfac = 2*2*pi*2*pi*kmode**2
+   ! diff_2h =  mu*xfac
+   mu = rvalue/xfac
 else 
    call abort("only viscosity type 'value' supported")
 endif
