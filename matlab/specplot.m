@@ -6,18 +6,12 @@
 
 
 
-%fid=fopen('test32.spec','r','l');
-%fid=fopen('iso12_256_200.spec','r','b');
 
-%fid=fopen('../src/impulse/kh4.spec','r','l');
-%fid=fopen('../src/kh/khK.spec','r','l');
-%fid=fopen('../src/sht/rung_5000_0000.0000.spec','r','l');
+%fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.spec','r','b');
+%fidt=fopen('/ccs/scratch/taylorm/dns/iso12_512.spect','r','b');
 
-fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.spec','r','b');
-fidt=fopen('/ccs/scratch/taylorm/dns/iso12_512.spect','r','b');
-
-%fid=fopen('~wingate/dns/src/temp0000.0000.spec');
-%fidt=fopen('~wingate/dns/src/temp0000.0000.spect');
+fid=fopen('../src/temp0000.0000.spec');
+fidt=fopen('../src/temp0000.0000.spect');
 
 
 
@@ -71,11 +65,28 @@ while (time>=0 & time<=9999.3)
     n_r=fread(fidt,1,'float64');
     spec_tot=fread(fidt,n_r,'float64');
     spec_f=0*spec_tot;    
+    spec_model=0*spec_tot;
+
     time_terms=fread(fidt,1,'float64');  
     n_r=fread(fidt,1,'float64');
     spec_diff=fread(fidt,n_r,'float64');
 
     spec_transfer=spec_tot-spec_diff;
+  end
+  if (num_spect==3) % Shallow water & modeling transfer spectrum
+    n_r=fread(fidt,1,'float64');
+    spec_tot=fread(fidt,n_r,'float64');
+    spec_f=0*spec_tot;    
+
+    time_terms=fread(fidt,1,'float64');  
+    n_r=fread(fidt,1,'float64');
+    spec_diff=fread(fidt,n_r,'float64');
+
+    time_terms=fread(fidt,1,'float64');  
+    n_r=fread(fidt,1,'float64');
+    spec_model=fread(fidt,n_r,'float64');
+
+    spec_transfer=spec_tot-spec_diff-spec_model;
   end
 
   
@@ -125,7 +136,7 @@ while (time>=0 & time<=9999.3)
   subplot(2,1,1)
   x=0:n_r-1;
   %semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_f,'b');
-  semilogx(x,spec_transfer,'k',x,spec_diff,'r');
+  semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_model,'y');
   title(sprintf('T_k (black)      D_k (red)        time = %f ',time));
   subplot(2,1,2)
   %semilogx(x,spec_transfer+spec_diff+spec_f,x,spec_tot,'o');

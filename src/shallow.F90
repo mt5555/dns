@@ -539,7 +539,7 @@ real*8 :: normS,dummy
 integer :: i,j
 
 #define SMAGH 1
-!#define SMAGH (1/Q(i,j,3))
+!#define SMAGH (1/Q(:,:,3))
 
 
 smag_diss=0
