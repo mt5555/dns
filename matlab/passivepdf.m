@@ -7,11 +7,12 @@
 clear all;
 
 
-fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.0500.spdf','r','l');
+fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.0000.spdf','r','l');
 %fid=fopen('../src/temp0000.0000.spdf','r','l');
 
 time1=fread(fid,1,'float64');
 npmax=fread(fid,1,'float64');         
+disp(sprintf('npassive = %i',npmax))
 
 figure(1); clf; subplot(5,2,1)
 
