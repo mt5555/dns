@@ -26,8 +26,8 @@ fid2=-1;
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-%fid=fopen('/ccs/scratch/taylorm/dns/decay/decay2048.scalars','r','l'); 
-%nx=2048;
+fid=fopen('/home/mataylo/codes/dnsdata/decay/decay2048.scalars','r','l'); 
+nx=2048;
 
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
@@ -38,8 +38,8 @@ fid2=-1;
 %fid=fopen('../src/sk128_alpha25/sk128_alpha250000.0000.scalars','r');
 %nx=128;
 
-fid=endianopen('/scratch2/taylorm/tmix256D-noscalars/tmix256D-noscalars0000.0000.scalars','r');
-nx=256;
+%fid=endianopen('/scratch2/taylorm/tmix256D-noscalars/tmix256D-noscalars0000.0000.scalars','r');
+%nx=256;
 
 %fid=endianopen('/home2/skurien/dns/src/sk128_alpha00/v5e-4/sk128_alpha000000.0000.scalars','r');
 %nx = 128;
@@ -149,6 +149,7 @@ time_2=[];
 ke_diss_tot=[];
 Ea_diss_tot=[];
 h_diss_tot=[];
+ke_diss_d_ave2=[];
 j=0
 for i=2:l
   % skip repeats, and skip data with large KE increase
@@ -159,6 +160,7 @@ for i=2:l
     ke_diss_tot(j)=(ke(i)-ke(i-1))./(time(i)-time(i-1));
     Ea_diss_tot(j)=(Ea(i)-Ea(i-1))./(time(i)-time(i-1));
     h_diss_tot(j)=(hel(i)-hel(i-1))./(time(i)-time(i-1));
+    ke_diss_d_ave2(j)=.5*(ke_diss_d(i)+ke_diss_d(i-1));
   end
 end
 
@@ -180,6 +182,29 @@ R_l_ke=lambda_ke.*sqrt(2*ke/3)/mu;
 
 
 disp(sprintf('max vor_z = %e',max(vor_z)));
+
+
+figure(2);  hold on;
+plot(time,R_l,'b'); hold on;
+plot(time,R_l_ke,'r'); hold on;
+title('R_\lambda');
+legend('R_{\lambda}', 'R_{\lambda}(total KE)')
+xlabel('time')
+print -djpeg -r72 rl.jpg
+
+figure(4); subplot(1,1,1)
+plot(time,eta* nx*pi*2*sqrt(2)/3 )
+title('k_{nmax} \eta')
+xlabel('time')
+print -djpeg -r72 kmaxeta.jpg
+
+
+figure(3);
+plot(time,lambda)
+     title('\lambda')
+     xlabel('time')
+print -djpeg -r72 lambda.jpg
+
 
 figure(5)
 clf
@@ -224,33 +249,34 @@ plot(time,50000*ke,'k');
 hold off;
 %axis([0,1,0,5000]);
 title('maximum vorticity component')
-
-
-
 xlabel('time')
 print -djpeg -r72 vor.jpg
 
 
-figure(2);  hold on;
-plot(time,R_l,'b'); hold on;
-plot(time,R_l_ke,'r'); hold on;
-title('R_\lambda');
-legend('R_{\lambda}', 'R_{\lambda}(total KE)')
+% compute dissipation error:
+% average time to mid point values:
+figure(8)
+clf
+hold on
+plot(time_2,ke_diss_tot,'r')
+plot(time,ke_diss_d,'b')
+%plot(time_2,ke_diss_d_ave2,'k')
+title('\epsilon: blue  d(KE)/dt: red');
+hold off
 xlabel('time')
-print -djpeg -r72 rl.jpg
-
-figure(3);
-plot(time,lambda)
-     title('\lambda')
-     xlabel('time')
-print -djpeg -r72 lambda.jpg
 
 
-figure(4); subplot(1,1,1)
-plot(time,eta* nx*pi*2*sqrt(2)/3 )
-title('k_{nmax} \eta')
-xlabel('time')
-print -djpeg -r72 kmaxeta.jpg
+
+
+
+
+
+
+
+
+
+
+
 
 
 
