@@ -10,8 +10,8 @@
 %fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.spec','r','b');
 %fidt=fopen('/ccs/scratch/taylorm/dns/iso12_512.spect','r','b');
 
-fid=fopen('../src/temp0000.0000.spec');
-fidt=fopen('../src/temp0000.0000.spect');
+fid=fopen('../src/temp20000.0000.spec');
+fidt=fopen('../src/temp20000.0000.spect');
 
 
 
@@ -136,8 +136,9 @@ while (time>=0 & time<=9999.3)
   subplot(2,1,1)
   x=0:n_r-1;
   %semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_f,'b');
-  semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_model,'y');
-  title(sprintf('T_k (black)      D_k (red)        time = %f ',time));
+  semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_model,'c',x,spec_tot,'y');
+  title(sprintf('T_k (black)    D_k (red)    M_k(cyan)   dEk/dt(yellow)      time = %f ',time));
+
   subplot(2,1,2)
   %semilogx(x,spec_transfer+spec_diff+spec_f,x,spec_tot,'o');
   flux=0*spec_transfer;
@@ -147,14 +148,14 @@ while (time>=0 & time<=9999.3)
   semilogx(x,flux); 
   grid;
   title(sprintf('E Flux'));
-  
+
   'pause...'
   pause
 
   
   time=fread(fid,1,'float64');
   num_spec=fread(fidt,1,'float64');
-  time_t=fread(fidt,1,'float64');
+  time_t=fread(fidt,1,'float64')
 end
 
 fclose(fid);

@@ -30,7 +30,7 @@ if (compute_transfer) then
    ! e_dot_r    known at (time + time_old)/2
    ! spec_diff,spec_model  known at time_old
    ! compute spec_diff at 'time' be re-calling getrhs with compute_transfer
-   ! flag still set = .true.
+   ! flag still set = .true. and compute_ints==1
 
    spec_diff_new=spec_diff  
    spec_model_new=spec_model

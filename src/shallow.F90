@@ -278,11 +278,6 @@ do i=nx1,nx2
 enddo
 enddo
 
-! smagorinsky terms
-if (smagorinsky>0) then
-   ! divtau used for work storage
-   call add_smagorinsky(rhs,Q,gradu,gradv,divtau,work,work2,smag_diss)
-endif
 
 
 
@@ -299,8 +294,20 @@ if (alpha_value>0) then
    enddo
    enddo
 
-
-
+   if (compute_transfer .and. compute_ints==1) then
+      spec_model=0
+      do n=1,2
+         do j=ny1,ny2   
+         do i=nx1,nx2
+            divtau(i,j,n)=Q(i,j,3)*(divtau(i,j,n) + grav*gradh(i,j,n))
+         enddo
+         enddo
+         call fft3d(divtau(1,1,n),work)
+         call compute_spectrum_fft(Qhat(1,1,n),divtau(1,1,n),io_pe,spec_tmp)
+         spec_model=spec_model + spec_tmp
+      enddo
+   endif
+   
 else
    ! g grad(h) 
    do j=ny1,ny2
@@ -310,6 +317,41 @@ else
    enddo
    enddo
 endif
+
+! smagorinsky terms
+!
+if (smagorinsky>0) then
+   ! divtau used for smag. term
+   ! gradh used for work storage
+   call compute_smagorinsky(divtau,Q,gradu,gradv,gradh,work,work2,smag_diss)
+   rhs(:,:,1:2)=rhs(:,:,1:2)+divtau(:,:,1:2)
+
+
+   if (compute_transfer .and. compute_ints==1) then
+      ! E dissipation from smagorinsky (or alpha term):
+      !       h*U dot modeling_term
+      ! which we write as:
+      !       U dot (h*modeling_term)
+      ! and fourier transform each of those to compute the 
+      ! spectrum for smagorinsky
+      !
+      spec_model=0
+      do n=1,2
+         divtau(:,:,n)=divtau(:,:,n)*Q(:,:,3)
+         call fft3d(divtau(1,1,n),work)
+         call compute_spectrum_fft(Qhat(1,1,n),divtau(1,1,n),io_pe,spec_tmp)
+         spec_model=spec_model + spec_tmp
+      enddo
+   endif
+endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  gradh, gradu, gradv have now been used for work storage
+!  and no longer have gradient information below this point
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -387,68 +429,23 @@ if (compute_ints==1) then
 #ifndef POSDEF_HYPERVIS
       call abort("shallow.F90: computation of transfer function requires POSDEF")
 #endif
-      ! E dissipation from smagorinsky (or alpha term):
-      !       h*U dot modeling_term
-      ! which we write as:
-      !       U dot (h*modeling_term)
-      ! and fourier transform each of those to compute the 
-      ! spectrum for smagorinsky
-      !
-      ! first compute h*modeling_term and store in divtau
-      !
-      divtau=0
-      if (smagorinsky>0) then
-         do n=1,2
-            call der(Q(1,1,1),gradu(1,1,n),dummy,work,DX_ONLY,n)
-            call der(Q(1,1,2),gradv(1,1,n),dummy,work,DX_ONLY,n)
-         enddo
-         ! compute smag. term in divtau.  divtau used for work array
-         divtau=0
-         call add_smagorinsky(divtau,Q,gradu,gradv,divtau,work,work2,smag_diss)
-         divtau(:,:,1)=divtau(:,:,1)*Q(:,:,3)
-         divtau(:,:,2)=divtau(:,:,2)*Q(:,:,3)
-         call fft3d(divtau(1,1,1),work)
-         call fft3d(divtau(1,1,2),work)
-      endif
-
-      if (alpha_value>0) then
-         do n=1,2
-            call der(Q(1,1,1),gradu(1,1,n),dummy,work,DX_ONLY,n)
-            call der(Q(1,1,2),gradv(1,1,n),dummy,work,DX_ONLY,n)
-         enddo
-         call compute_divtau(Q,divtau,gradu,gradv,gradh,work,work2)
-         do j=ny1,ny2   
-         do i=nx1,nx2
-         do n=1,2
-            divtau(i,j,n)=Q(i,j,3)*(divtau(i,j,n) + grav*gradh(i,j,n))
-         enddo
-         enddo
-         enddo
-         call fft3d(divtau(1,1,1),work)
-         call fft3d(divtau(1,1,2),work)
-      endif
 
 
       transfer_comp_time=time
       spec_diff=0
-      spec_model=0
       do n=1,2
          do j=ny1,ny2
             jm=abs(jmcord(j))
             do i=nx1,nx2
                im=abs(imcord(i))
-               
                ! laplacian  del U
                xfac=((im*im + jm*jm )*pi2_squared)
                xfac=(xfac**4)
                work(i,j)=sqrt(xfac)*Qhat(i,j,n)
             enddo
          enddo
-
          call compute_spectrum_fft(work,work,io_pe,spec_tmp)
          spec_diff=spec_diff - mu*spec_tmp
-         call compute_spectrum_fft(work,divtau(1,1,n),io_pe,spec_tmp)
-         spec_model=spec_model + spec_tmp
       enddo
 
       
@@ -504,7 +501,7 @@ end
 
 
 
-subroutine add_smagorinsky(rhs,Q,gradu,gradv,s1,work,work2,smag_diss)
+subroutine compute_smagorinsky(rhs,Q,gradu,gradv,s1,work,work2,smag_diss)
 !
 !  add smagorinsky term into rhs
 !
@@ -535,7 +532,7 @@ real*8 :: normS,dummy
 integer :: i,j
 
 
-
+rhs=0
 smag_diss=0
 normS=0
    do j=ny1,ny2
