@@ -8,7 +8,8 @@ clear;
 
 
 
-name='/home/taylorm/ccs/dns/src/vxpair/vx4096d';
+%name='/home/taylorm/ccs/dns/src/vxpair/vx4096d';
+name='/home/taylorm/ccs/dns/src/vxpair/vx4500a';
 times=[0:.1:150];
 
 
