@@ -50,6 +50,9 @@ if (forcing_type==4) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
 
 
+
+
+
 end subroutine
 
 
@@ -423,13 +426,6 @@ if (ntot==0) return
 !
 ! Compute a new forcing function?  
 !
-#if 1
-if (new_f==1) then
-   call random12(rmodes)
-   return
-endif
-
-#else
 if (new_f==1) then
    if (my_pe==io_pe) call random12(rmodes)
 #ifdef USE_MPI
@@ -438,17 +434,16 @@ if (new_f==1) then
    return
 endif
 
-#endif
 
 
 f_diss=0
 fxx_diss=0
 do wn=numb1,numb
-   print *,'my_pe wave number  n',my_pe,wn,wnforcing(wn)%n
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
+
       rhs(k,i,j,1)=rhs(k,i,j,1) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)
       rhs(k,i,j,2)=rhs(k,i,j,2) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)
       rhs(k,i,j,3)=rhs(k,i,j,3) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)

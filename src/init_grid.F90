@@ -20,7 +20,6 @@ deallocate(seed)
 
 
 
-
 call params_init()
 call transpose_init()
 call fft_interface_init()
