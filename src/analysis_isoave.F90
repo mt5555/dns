@@ -27,8 +27,9 @@ use mpi
 use isoave
 implicit none
 real*8,save  :: Q(nx,ny,nz,n_var)
-real*8,save  :: work1(nx,ny,nz)
-real*8,save  :: work2(nx,ny,nz)
+real*8,allocatable  :: q1(:,:,:,:)
+real*8,allocatable  :: q2(:,:,:,:)
+real*8,allocatable  :: q3(:,:,:,:)
 character(len=80) message,sdata
 character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
@@ -39,14 +40,14 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-tstart=1.75
-tstop=1.75
+tstart=0
+tstop=0
 tinc=1.0
 icount=0
 
-nxdecomp=2
-nydecomp=2
-nzdecomp=2
+nxdecomp=1
+nydecomp=1
+nzdecomp=1
 
 !call set_byteswap_input(1);
 
@@ -69,34 +70,41 @@ print *,runname
 !call writepoints(); stop
 
 
+if (nxdecomp*nydecomp*nzdecomp>1) then
+   ! in this case, we only need 2 work areas.  we are running in
+   ! serial, so we have to save as much memory as possible
+   allocate(q1(nx,ny,nz,1))
+   allocate(q2(nx,ny,nz,1))
+else
+   allocate(q1(nx,ny,nz,ndim))
+   allocate(q2(nx,ny,nz,ndim))
+   allocate(q3(nx,ny,nz,ndim))
+endif
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Q=0
 
-if (ncpu_x*ncpu_y*ncpu_z>1) then
-   call halt("analysis_isoave can only be run serial")
-endif
 
 
 time=tstart
 do
    icount=icount+1
-   print *,'icount = ',icount
 
    write(sdata,'(f10.4)') 10000.0000 + time
    fname = runname(1:len_trim(runname)) // sdata(2:10) // ".u"
-   print *,'filename: ',fname(1:len_trim(fname))
-   call singlefile_io(time2,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+   call print_message(fname(1:len_trim(fname)))
+   call singlefile_io(time2,Q(1,1,1,1),fname,q1,q2,1,io_pe)
 
    fname = runname(1:len_trim(runname)) // sdata(2:10) // ".v"
-   print *,'filename: ',fname(1:len_trim(fname))
-   call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,1,io_pe)
+   call print_message(fname(1:len_trim(fname)))
+   call singlefile_io(time2,Q(1,1,1,2),fname,q1,q2,1,io_pe)
 
    fname = runname(1:len_trim(runname)) // sdata(2:10) // ".w"
-   print *,'filename: ',fname(1:len_trim(fname))
-   call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+   call print_message(fname(1:len_trim(fname)))
+   call singlefile_io(time2,Q(1,1,1,3),fname,q1,q2,1,io_pe)
    time=time2
 
 
@@ -115,22 +123,37 @@ do
       ly2=ly1 + nylen-1
       lz2=lz1 + nzlen-1
 
-      call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
 
-      write(sdata,'(f10.4)') 10000.0000 + time
-      fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
-      if (nxdecomp*nydecomp*nzdecomp>1) then
-         write(sdata,'(3i1)') i,j,k
-         fname=fname(1:len_trim(fname)) // sdata(1:3)
+      if (nxdecomp*nydecomp*nzdecomp==1) then
+         ! no subcubes:
+         call isoavep(Q,q1,q2,q3)
+         ! debug version:
+         ! print *,'calling 1 cpu verison for debug'
+         ! call isoave1(Q,q1,q2,nx1,nx2,ny1,ny2,nz1,nz2)
+      else
+         ! subcube version cannot run in parallel - it will abort
+         call isoave1(Q,q1,q2,lx1,lx2,ly1,ly2,lz1,lz2)
       endif
-      print *,fname
-      call copen(fname,"w",fid,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
-         call abort(message)
+
+
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
+         if (nxdecomp*nydecomp*nzdecomp>1) then
+            write(sdata,'(3i1)') i,j,k
+            fname=fname(1:len_trim(fname)) // sdata(1:3)
+         endif
+
+         print *,fname
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
+            call abort(message)
+         endif
+         call writeisoave(fid,time)
+         call cclose(fid,ierr)
       endif
-      call writeisoave(fid,time)
-      call cclose(fid,ierr)
+
    enddo
    enddo
    enddo
