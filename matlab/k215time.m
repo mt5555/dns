@@ -53,7 +53,7 @@ for t=times
     k=k+1;
 
     if (time_and_angle_ave==1) 
-      klaws=3;                          % compute 4/5 laws
+      klaws=3;                          % compute 2/15 laws
       plot_posneg=0;
       check_isotropy=0;
       
@@ -113,7 +113,7 @@ load k215data_t1
 end
 
 
-figure(4); clf; hold on; 
+figure(5); clf; hold on; 
 for i=2:2
 %   plot(times/teddy,mx215_localeps(1:length(times),i),'k:','LineWidth',2.0);
    plot(times/teddy,mx215_localeps(1:length(times),i),'g-','LineWidth',2.0);
@@ -129,7 +129,7 @@ xlabel('time','FontSize',16)
 print -dpsc k215time.ps
 
 
-figure(5); clf
+figure(6); clf
 
 for i=[1:1:31]
   %semilogx(xx_plot,y215_ave(:,i),'k:','LineWidth',2.0); hold on
@@ -148,11 +148,11 @@ print -dpsc k215mean.ps
 
 
 
-figure(6); clf
+figure(7); clf
 offset=y215_iso_ave;
 stdr=0*offset;
 
-for i=1:15
+for i=[1:1:31]
   %semilogx(xx_plot,y215_ave(:,i)-offset,'k:','LineWidth',2.0); hold on
   semilogx(xx_plot,-y215_ave(:,i)-offset,'k-','LineWidth',2.0); hold on
   stdr=stdr+(y215_ave(:,i)-offset).^2;
