@@ -62,13 +62,11 @@ real*8 res_init,tol1
 integer itqmr
 integer itermax
 
-
 if (precond) then
    call helmholtz_periodic_inv(b,work,a1,a2)
    ! use preconditioned value as initial guess also:
    sol=b
 endif
-
 
 itermax=5000
 res_init=sqrt(ddot(b,b))          
@@ -113,12 +111,12 @@ if (err<tol1) goto 200
    P=R + P*beta
    
    err=sqrt(alpha)
-   write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' ||RHS||=',res_init,' residual: ',err
+   !write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' ||RHS||=',res_init,' residual: ',err
 
 if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
 200 continue
 
-if (itqmr>25) then
+if (itqmr>25 .and. (my_pe==io_pe)) then
    write(*,'(a,i4,a,e11.6,a,e11.6)')  'Final CG iter=',itqmr,' || RHS ||=',res_init,' residual: ',err
 endif
 
@@ -456,10 +454,10 @@ use mpi
 implicit none
 real*8 :: a(nx,ny,nz)
 real*8 :: b(nx,ny,nz)
-real*8 :: sm
 
 ! local
 integer :: i,j,k ,ierr
+real*8 :: sm
 
 ddot=0
 do k=nz1,nz2
