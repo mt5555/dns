@@ -67,10 +67,10 @@ iso12_256A  ran to t=11.
                    k2=.5
     mu=1.35e-3:  delx/eta=1.0, R_l=60   epsilon=4   G=1M
 
-temp      iso12 forcing, k1=.5, k2=.5, mu=1.25e-3
-temp3_    continuing above with mu=4e-4               delx/eta=2.0
-temp4_    continuing above with mu=2e-4               delx/eta=3.46
-temp??    continuing above with mu=3e-4 
+temp      iso12 forcing, k1=.5, k2=.5, mu=1.25e-3      [0,.5]
+temp3_    continuing above with mu=4e-4              (.5,1.0]  delx/eta=2.0
+temp4_    continuing above with mu=2e-4               (1,1.5]  delx/eta=3.46
+temp5     continuing above with mu=3e-4               (1.5,?]
 
 
 

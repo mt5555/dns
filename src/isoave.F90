@@ -171,7 +171,8 @@ SN_ltt=0
 SN_lll=0
 
 
-
+ke_diss=0
+ke=0
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),d1,dummy,work,1,m)

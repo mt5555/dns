@@ -7,14 +7,8 @@
 %name='/scratch1/taylorm/iso12_250A0022.000'
 %nx=250; delx_over_eta=.80; epsilon=3.9;
 
-%name='../src/test0000.5000'
-%nx=256; delx_over_eta=.7; epsilon=3.0;
+name='../src/iso12_256_0001.0000'
 
-name='../src/test0001.0000'
-nx=256; delx_over_eta=2.00; epsilon=4.3081;
-
-%name='../src/test0001.5000'
-%nx=256; delx_over_eta=3.46; epsilon=4.93;
 
 
 fid=fopen([name,'.isostr'],'r','l');
