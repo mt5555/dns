@@ -35,7 +35,7 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DUSE_MPI -I/users/contrib/lam/include
       MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
-   ifeq ($(HOST),marx)
+   ifeq ($(HOST),node001m)
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
       MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
 #-lpthread
@@ -53,8 +53,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),PGI)
    F90 = pgf90
    CC=pgcc
-   #FFLAGS = -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif 
 
