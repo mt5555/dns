@@ -1,5 +1,5 @@
 #! /bin/csh 
-#BSUB -o nb128.o -e bench.e
+#BSUB -o nb1.o -e bench.e
 #BSUB -q small-d
 #BSUB -J dns
 #BSUB -W 0:15
@@ -14,17 +14,4 @@ cd ../src
 make -j 4 dns
 cd ../benchmark
 mpirun -np 128 ../src/dns < $refin 
-
-#cd ../src
-#./gridsetup.py 2 8 8 256 256 256
-#make -j 4 dns
-#cd ../benchmark
-#mpirun -np 128 ../src/dns < $refin 
-
-#cd ../src
-#./gridsetup.py 4 4 8 256 256 256
-#make -j 4 dns
-#cd ../benchmark
-#mpirun -np 128 ../src/dns < $refin 
-
 

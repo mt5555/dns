@@ -35,9 +35,9 @@ implicit none
 real*8 input(nx,ny,nz)
 real*8 output(nx,ny,nz)
 real*8 work(g_nz2,nx,ny)
-real*8 mx,tx1,tx2
+real*8 mx,tx1,tx2,tmax,tave
 integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k,n
+integer i,j,k,n,ierr
 character*80 message
 
 input=0
@@ -95,28 +95,58 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  benchmark the transforms
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-n=10
+n=50
+
 call wallclock(tx1)
 do i=1,n
 call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_z(work,input,n1,n1d,n2,n2d,n3,n3d)
 enddo
 call wallclock(tx2)
-write(message,'(a,i3,a,f10.5)') 'wall clock transpose_to_z n=',n,' time=',tx2-tx1
+
+tmax=tx2-tx1
+tave=tx2-tx1
+#ifdef USE_MPI
+tx2=tmax
+call MPI_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+tx2=tave
+call MPI_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+tave=tave/initial_live_procs
+#endif
+
+write(message,'(a,i3,a,2f10.5)') 'wall clock transpose_to_z n=',n,' time=',&
+     tave/(2*n),tmax/(2*n)
 call print_message(message)
+
 
 call wallclock(tx1)
 do i=1,n
 call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(output,work,n1,n1d,n2,n2d,n3,n3d)
 enddo
 call wallclock(tx2)
-write(message,'(a,i3,a,f10.5)') 'wall clock transpose_to_z n=',n,' time=',tx2-tx1
+
+tmax=tx2-tx1
+tave=tx2-tx1
+#ifdef USE_MPI
+tx2=tmax
+call MPI_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+tx2=tave
+call MPI_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+tave=tave/initial_live_procs
+#endif
+
+write(message,'(a,i3,a,2f10.5)') 'wall clock transpose_to_z n=',n,' time=',&
+     tave/(2*n),tmax/(2*n)
 call print_message(message)
 
 
 
-
-
 end subroutine
+
+
+
+
 
 
 

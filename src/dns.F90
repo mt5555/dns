@@ -11,7 +11,7 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 character*80 message
 integer ierr
-real*8 tmx1,tmx2,temp(ntimers)
+real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
 
 call wallclock(tmx1)
@@ -51,7 +51,7 @@ tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
 call wallclock(tmx1)
-call dns_solve(Q)
+! call dns_solve(Q)
 call wallclock(tmx2)
 tims(2)=tmx2-tmx1
 
@@ -61,31 +61,36 @@ tims(2)=tmx2-tmx1
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Print timing information
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+tims_max=tims
+tims_ave=tims
 #ifdef USE_MPI
-   temp=tims
-   call MPI_allreduce(temp,tims,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   tims_ave=tims_ave/initial_live_procs
 #endif
-tims=tims/60
-call print_message('CPU times:')
-write(message,'(a,f9.2,a)') 'initialization: ',tims(1),' m'
+tims_max=tims_max/60
+tims_ave=tims_ave/60
+
+call print_message('CPU times (min):   (avg/max)')
+write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
 call print_message(message)
-write(message,'(a,f9.2,a)') 'dns_solve:      ',tims(2),' m'
+write(message,'(a,2f9.2,a)') 'dns_solve:      ',tims_ave(2),tims_max(2)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   time_control       ',tims(3),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   time_control       ',tims_ave(3),tims_max(3)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   RHS                ',tims(5),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   RHS                ',tims_ave(5),tims_max(5)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   transpose_to_z     ',tims(6),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_z     ',tims_ave(6),tims_max(6)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   transpose_from_z   ',tims(7),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_z   ',tims_ave(7),tims_max(7)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   transpose_to_x     ',tims(8),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_x     ',tims_ave(8),tims_max(8)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   transpose_from_x   ',tims(9),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_x   ',tims_ave(9),tims_max(9)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   transpose_to_y     ',tims(10),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_y     ',tims_ave(10),tims_max(10)
 call print_message(message)
-write(message,'(a,f9.2,a,f4.3,a)') '   transpose_from_y   ',tims(11),' m'
+write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_y   ',tims_ave(11),tims_max(11)
 call print_message(message)
 
 call close_mpi
