@@ -612,16 +612,22 @@ if (my_pe==fpe) then
          call print_message(fname)
          call abort("")
       endif
-      call cread8(fid,time,1)
+      call cread8e(fid,time,1,ierr)
+      if (ierr/=1) then
+         write(message,'(a,i5)') "singlefile_io(): Error reading file"
+         call print_message(message)
+         call print_message(fname)
+         call abort("")
+      endif
       xnx=o_nx
       xny=o_ny
       xnz=o_nz
       call cread8(fid,xnx,1)
       call cread8(fid,xny,1)
       call cread8(fid,xnz,1)
-      if (int(xnx)/=o_nx) call abort("Error: restart file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abort("Error: restart file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abort("Error: restart file nz <> nz set in params.h");
+      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
       call cread8(fid,g_xcord(1),o_nx)
       call cread8(fid,g_ycord(1),o_ny)
       call cread8(fid,g_zcord(1),o_nz)

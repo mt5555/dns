@@ -154,6 +154,9 @@ dnsslow:  $(MODEL_SPEC_SLOW)
 splitspec:  splitspec.o fileioc.o
 	$(LINK) -o splitspec splitspec.o fileioc.o
 
+analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o analysis analysis.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+
 
 
 clean: 
