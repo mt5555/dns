@@ -19,7 +19,7 @@ real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,lambda
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
-real*8 :: t0,t1,t2,ke0,ke1,ea0,ea1
+real*8 :: t0,t1,t2,ke0,ke1,ea0,ea1,eta,ett
 real*8 :: delea_tot=0,delke_tot=0
 
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
@@ -164,7 +164,19 @@ if (doit_screen) then
       delea_tot=(ea1-ea0)/(t1-t0)
    endif
 
-
+   ! K. microscale
+   ! eta = (mu^3/epsilon)^.25
+   ! epsilon = delke_tot
+   eta = (mu**3 / (mu*ints(2)))**.25
+   write(message,'(a,3f13.4)') 'mesh spacing(eta): ',&
+        delx/eta,dely/eta,delz/eta
+   call print_message(message)	
+   
+   !eddy turn over time
+   ! 
+   ett=2*ke1/(mu*ints(2))
+   write(message,'(a,3f13.4)') 'eddy turnover time: ',ett
+   call print_message(message)	
 
    write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'Ea: ',&
         ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
