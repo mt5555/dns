@@ -3,6 +3,13 @@
 #cd ../src
 set refin=benchmark1.inp
 set benchdir=~/dns/benchmark
+if (! -e $benchdir) then
+   set benchdir=~/lanl/dns/benchmark
+endif
+if (! -e $benchdir) then
+   echo  $benchdir does not exist
+   exit 1
+endif
 set exe=`pwd`/dns
 echo $exe
 

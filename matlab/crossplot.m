@@ -5,7 +5,8 @@
 
 %name='/ccs/scratch/taylorm/vxpair/vx4096b.cross';
 %name='/ccs/taylorm/dns/src/vxpair/vx6144d0000.0000.cross';
-name='/ccs/taylorm/dns/src/vxpair/vx4096d0000.0000.cross';
+%name='/ccs/taylorm/dns/src/vxpair/vx4096d0000.0000.cross';
+name='/home/scratch/vxpair/vx12288/vx12288b.cross';
 fid=endianopen(name,'r');
 
 label=[];
@@ -34,6 +35,7 @@ minl=min(label);
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
+figure(1); hold off; clf;
 subplot(1,1,1)
 minl=500;
 for i=minl:maxl

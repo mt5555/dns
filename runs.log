@@ -113,6 +113,19 @@ time to 0.1.  4.99min = 5.2days
 16x4:                                                     17.16
 
 
+started vx12288b run on QSC
+
+./gridsetup.py 16 4 1 12288 6144 1 2 2 0 2 2 0   2
+init cond subtype==4  (biot-savart every 100 timesteps)
+vx12288b   PSI boundary recomputed every 100 timesteps
+run to t=179 so far.  
+data on HPSS:  dns/vx12288b
+
+some data pulled to certs:  ~/data2/vxpair/vx12288b  up to t=189.9
+
+
+
+
 **********************************************************************************
 2/21/02
 NS-alpha runs.

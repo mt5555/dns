@@ -1,19 +1,36 @@
 **********************************************************************************
 
 3/25/03
-LAMPI (CVS 3-24-03)
+LAMPI (CVS 3-24-03), QSC
 256^3  
-
+          
 1x1x8       0.625        
 1x1x16:     0.36340        in-repeat for predictability
 1x1x32:     0.18887 
 1x1x64:     0.08524 
 
 
-512^3     queued
-1x1x64
-1x1x128
-1x1x256
+512^3     
+1x1x64      0.86919 0.87976
+1x1x128     0.43432 
+1x1x256     0.207
+
+                                                16            32     64
+CNLS cluster                                  .759          .366   .190   
+
+
+PINKISH:
+             mpirun --gm --nper 2       lampi  2 per node
+256^3
+1x1x8         2.02639, 1.98
+1x1x16        .766                        1.03
+1x1x32        .460                        .475 
+1x1x64        .206                        .199
+1x1x128       .11476, .11304
+
+512^3
+1x1x128       1.24
+
 
 
 
@@ -262,7 +279,8 @@ shankara.old  (2x2)   .28     .19               .093  .064   .050
 shankara 4ring        .27     .14               .059  .062   .047
 shankara-LAM(ethernet).27                                    .200
 
-
+pinkish???            .25                                    .050 
+pinkish-lampi                                                .037
 
 ./bench.sh 160 0 20
 544M
@@ -299,6 +317,8 @@ shankara                                 ?    .750      ?
 CNLS cluster                                  .759          .366   .190   
 
 QSC-lampi:                            .625
+pinkish                                2.03                 .471          .113
+
 
 
 ./bench.sh 288 8  20
