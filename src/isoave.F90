@@ -13,6 +13,7 @@
 module isoave
 implicit none
 
+
 integer,parameter :: ndir=73
 integer,parameter :: ndelta_max=73
 integer :: dir(3,ndir)
@@ -356,23 +357,23 @@ SN_lll=SN_lll/ntot
 allocate(dwork2(ndelta,ndir))
 allocate(dwork3(ndelta,ndir,2))
    dwork2=D_ll
-   call MPI_allreduce(dwork2,D_ll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork2,D_ll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork3=D_tt
-   call MPI_allreduce(dwork3,D_tt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork3,D_tt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork3=D_ltt
-   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork2=D_lll
-   call MPI_allreduce(dwork2,D_lll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork2,D_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 
 
    dwork3=SP_ltt
-   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork2=SP_lll
-   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork3=SN_ltt
-   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork2=SN_lll
-   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 
 
 
@@ -885,7 +886,6 @@ dir(:,6)=(/0,1,1/)
 dir(:,7)=(/-1,1,0/)
 dir(:,8)=(/-1,0,1/)
 dir(:,9)=(/0,-1,1/)
-
 
 ! body diagonals
 dir(:,10)=(/1,1,1/)

@@ -40,8 +40,8 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-tstart=3.25
-tstop=3.25
+tstart=1.75
+tstop=1.75
 tinc=1.0
 icount=0
 
@@ -104,17 +104,6 @@ do
    call print_message(fname(1:len_trim(fname)))
    call singlefile_io(time2,Q(1,1,1,3),fname,q1,q2,1,io_pe)
    time=time2
-
-   do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         Q(i,j,k,1)=i
-         Q(i,j,k,2)=j
-         Q(i,j,k,3)=k
-      enddo
-      enddo
-      enddo
-
 
 
    do i=0,nxdecomp-1
