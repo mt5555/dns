@@ -264,6 +264,7 @@ if (my_pe==io_pe) then
       call abort(message)
    endif
 
+   call cwrite8(fid,time,1)
    call cwrite8(fid,1+iwave,1)
    call cwrite8(fid,spectrum,1+iwave)
    call cwrite8(fid,1+g_nx/2,1)
