@@ -19,6 +19,7 @@ end
 
 subroutine rk4reshape(time,Q_grid,Q,rhs)
 use params
+use structf
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
@@ -39,7 +40,7 @@ integer,save :: count2=0,count10=0
 
 
 count2=mod(count2+1,2)     ! toggles between 0 and 1
-count10=mod(count10+1,2)   ! toggles between 0...9
+count10=mod(count10+1,10)   ! toggles between 0...9
 
 if (firstcall) then
    firstcall=.false.
@@ -121,7 +122,7 @@ do n=1,3
    enddo
    enddo
 
-   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),n,(count2==0),(count10==0))
+   call z_ifft3d_str(Q(1,1,1,n),Q_grid(1,1,1,n),n,(count2==0),(count10==0))
 enddo
 
 

@@ -20,7 +20,7 @@ type pdf_structure_function
 !
 ! pdf%data(-bin:bin,delta_num,npdfs)
 !
-integer*8,allocatable :: pdf(:,:)
+real*8,allocatable :: pdf(:,:)
 integer             :: nbin         ! number of bins
 integer             :: ncalls       ! number of instances PDF has been computed
                                ! (i.e. we may compute the PDF for 10 time steps
@@ -99,22 +99,24 @@ integer :: bin
 type(pdf_structure_function) :: str2
 integer n
 
-
 n=str%nbin
+if (bin<n) call abort("resize_pdf: attempting to shrink pdf");
+if (bin==n) return;
 
 ! make a copy of data
 allocate(str2%pdf(-n:n,delta_num))
 str2%pdf=str%pdf
 str2%ncalls=str%ncalls
 
-
 ! create a larger structure function
 deallocate(str%pdf)
 allocate(str%pdf(-bin:bin,delta_num))
 
 ! copy data into new, larger structure function
-str%pdf(-n:n,:)=str2%pdf
+str%pdf=0
+str%pdf(-n:n,:)=str2%pdf(-n:n,:)
 str%ncalls=str2%ncalls
+str%nbin=bin
 
 ! delete the copy of original data
 deallocate(str2%pdf)
@@ -132,20 +134,21 @@ subroutine outputSF(time,fid)
 use params
 implicit none
 real*8 time
+CPOINTER fid
 
 integer i,ierr
 character*80 message
 real*8 x
-CPOINTER fid
 
 
 do i=1,NUM_SF
-   call mpisum_pdf(SF(i,1));  
+   call mpisum_pdf(SF(i,1))  
    call mpisum_pdf(SF(i,2))
    call mpisum_pdf(SF(i,3))
 enddo
 
 if (my_pe==io_pe) then
+   call cwrite8(fid,time,1)
    ! number of structure functions
    x=3 ; call cwrite8(fid,x,1)
    do i=1,NUM_SF
@@ -173,12 +176,12 @@ end subroutine
 
 
 subroutine normalize_and_write_pdf(fid,str,nbin)
+use params
 implicit none
 integer i,ierr,nbin
 CPOINTER :: fid
 type(pdf_structure_function) :: str
-real*8 x,pdfdata(nbin:nbin,delta_num)
-
+real*8 x,pdfdata(-nbin:nbin,delta_num)
 
 ! the delta values
 x=delta_num; call cwrite8(fid,x,1)
@@ -190,10 +193,14 @@ enddo
 call cwrite8(fid,pdf_bin_size,1)
 x=str%nbin; call cwrite8(fid,x,1)
 x=str%ncalls; call cwrite8(fid,x,1)
-pdfdata=str%pdf / (2*nbin+1)
+
+! normalize
+pdfdata=str%pdf
+x=max(str%ncalls,1)
+pdfdata=pdfdata / x;
+pdfdata=pdfdata/g_nx/g_ny/g_nz
+
 call cwrite8(fid,pdfdata,(2*nbin+1)*delta_num)
-
-
 end subroutine
 
 
@@ -217,8 +224,8 @@ type(pdf_structure_function) :: str
 
 ! local variables
 type(pdf_structure_function) :: totstr
-integer,allocatable :: pdfdata(:,:)
-integer :: bin,ierr
+real*8,allocatable :: pdfdata(:,:)
+integer :: bin,ierr,n
 
 
 
@@ -226,18 +233,20 @@ integer :: bin,ierr
 ! find maximum value of bin  MPI max
 call MPI_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
 
-! resize to bin
+! resize all str's to size bin
 call resize_pdf(str,bin)
 
 ! MPI sum into totstr.
 ! str%pdf(-bin:bin) = 2*bin+1 data points
 
+n=(2*bin+1)*delta_num
 if (my_pe == io_pe) then
    allocate(pdfdata(-bin:bin,delta_num))
-   call MPI_reduce(str%pdf,pdfdata,2*str%nbin+1,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
+   call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
    str%pdf=pdfdata
+   deallocate(pdfdata)
 else
-   call MPI_reduce(str%pdf,0,2*str%nbin+1,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
+   call MPI_reduce(str%pdf,0,n,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
 endif
 
 #endif
@@ -287,9 +296,7 @@ do k=1,n3
 
                ! increase the size of our PDF function
                if (abs(bin)>str%nbin) call resize_pdf(str,abs(bin)) 
-
                str%pdf(bin,idel)=str%pdf(bin,idel)+1
-                     
             enddo
          endif
       enddo

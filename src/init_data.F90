@@ -83,20 +83,39 @@ do n=1,3
          enddo
       enddo
    enddo
-   call ifft3d(Q(1,1,1,n),work) 
 enddo
 
 ener=0
+ener1=0
+ener2=0
 do n=1,3
    do k=nz1,nz2
+      km=kmcord(k)
       do j=ny1,ny2
+         jm=jmcord(j)
          do i=nx1,nx2
-            ener=ener+.5*Q(i,j,k,n)**2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+
+            xfac = (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            if (xw>=.5 .and. xw<1.5) then
+               ener1=ener1+.5*xfac*Q(i,j,k,n)**2
+            else if (xw>=1.5 .and. xw<2.5) then
+               ener2=ener2+.5*xfac*Q(i,j,k,n)**2
+            endif
+            ener=ener+.5*xfac*Q(i,j,k,n)**2
+
+
          enddo
       enddo
    enddo
 enddo
-ener=ener/g_nx/g_ny/g_nz
+do n=1,3
+   call ifft3d(Q(1,1,1,n),work) 
+enddo
 #ifdef USE_MPI
    xfac=ener
    call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
