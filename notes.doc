@@ -1,3 +1,6 @@
+check bluemountain: 250J  4th order dnsghost run
+check asciQ:  1000^3 benchmark and 32x1 dnsvor submitted.
+
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  
 

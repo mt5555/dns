@@ -23,6 +23,9 @@ Benchmarks for 12288x6144:   RES size: 5.7GB
 ASCI Q    t=.05    t=1 (extrapolated)   t=150
 cpus      
 4x1
+8x1
+16x1
+32x1  
 
 64x1       9.84     3.28h                20.5d  
 32x2      10.77
@@ -38,7 +41,7 @@ cpus
 32x8       3.03
 
 
-128x4    IN
+128x4      1.63    .54h                   3.4d
 
 
 **********************************************************************************
@@ -138,6 +141,7 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 250H  5000h   500    668   7.16/1.42 1.42        2.95
 
 250I  .8e-3   500   (same as G, but with new diags)
+250J  .8e-3   500   (same as G, but with 4th order)
 
 
 
