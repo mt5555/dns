@@ -298,6 +298,7 @@ else if (sdata=='KH-anal') then
 else if (sdata=='iso12') then
    init_cond=2
 else 
+   print *,'value = ',sdata
    call abort("invalid initial condtion specified on line 3 on input file")
 endif
 
@@ -337,6 +338,7 @@ if (sdata=='fft') then
 else if (sdata=='fft-dealias') then
    dealias=.true.
 else
+   print *,'value=',sdata
    call abort("only 'fft' derivative method supported")
 endif
 
