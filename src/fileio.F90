@@ -1,15 +1,15 @@
 #include "macros.h"
-subroutine time_control(itime,time,Q,ints)
+subroutine time_control(itime,time,Q,ints,maxs)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: time,ints(3)
+real*8 :: time,ints(*),maxs(*)
 integer :: itime
 
 ! local variables
 integer i,j,k,n
 character*80 message
-real*8 remainder, time_target, maxv(3),umax,mumax,time_next,cfl_used_adv,cfl_used_vis,mx
+real*8 remainder, time_target, umax,mumax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 divx,divi
 logical,external :: check_time
 logical :: doit
@@ -24,13 +24,7 @@ time_target = time_final
 ! viscous CFL =  delt*mu/delx^2  delt <= CFL*delx^2/mu
 !  
 !
-do i=1,3
-   maxv(i) = maxval( abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,i)) )
-enddo
-umax=pi*max(maxv(1)/delx,maxv(2)/dely,maxv(3)/delz)
-#ifdef MPI
-   call MPI_REDUCE(umax,MPI_MAX ... )
-#endif
+umax=pi*max(maxs(1)/delx,maxs(2)/dely,maxs(3)/delz)
 if (umax> pi*1000/min(delx,dely,delz)) error_code=1
 
 ! advective CFL
@@ -101,7 +95,7 @@ if (doit) then
    call print_message(message)	
 
    call compute_div(Q,io_pe,divx,divi)
-   write(message,'(a,3f12.5,a,e12.5)') 'max: (u,v,w) ',maxv(1),maxv(2),maxv(3),' max div',divx
+   write(message,'(a,3f12.5,a,e12.5)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3),' max div',divx
    call print_message(message)	
 
    mx = ints(3)/(1d-100+ints(2))
@@ -110,7 +104,7 @@ if (doit) then
    
    write(message,'(a,f10.2,a,f6.2,a,f6.2,a)') 'ke: ',ints(1),&
      ' d/dt log(ke) total:',ints(2)/ints(1),&
-     ' d/dt log(ke) diff:',ints(3)/ints(1)
+     ' d/dt log(ke) diffusion:',ints(3)/ints(1)
    call print_message(message)	
 
    call print_message("")
@@ -136,7 +130,8 @@ real*8 xnx,xny,xnz,xnv
 character*80 message
 
 write(message,'(f9.4)') 1000.0000 + time
-message = "data" // message(2:9) // ".out"
+message = runname(1:len_trim(runname)) // message(2:9) // ".data"
+
 open(unit=10,file=message,form='binary')
 
 write(10) time
@@ -243,7 +238,7 @@ enddo
 
 
 write(message,'(f9.4)') 1000.0000 + time
-message = "vor" // message(2:9) // ".out"
+message = runname(1:len_trim(runname)) // message(2:9) // ".vor"
 open(unit=10,file=message,form='binary')
 
 

@@ -111,11 +111,19 @@ use params
 implicit none
 
 !local variables
-
 character*80 message
 character*20 sdata
 real*8 rvalue
 integer i
+
+
+read(*,'(a)') message
+do i=1,80
+   if (message(i:i)==' ') then
+      runname=message(1:i-1)
+      exit
+   endif
+enddo
 
 
 read(*,'(a12)') sdata

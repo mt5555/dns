@@ -31,6 +31,7 @@ real*8  :: mu=0           !viscosity
 real*8  :: pi,pi2_squared
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
+character*80 :: runname
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -34,39 +34,6 @@ end subroutine
 
 
 
-#if 0
-subroutine compute_ke_diff(Q,delt,pe,ke,ke_diff,ke_diff_vis)
-use params
-implicit none
-integer pe
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: divmx,divi
-
-!local variablesn
-real*8 :: Q_tmp(nx,ny,nz,n_var)
-real*8 :: work(nx,ny,nz)
-integer i,j,k
-
-Q_tmp=Q
-diff=0
-call ns3D(rhs,Q_old,time,diff)
-call divfree(rhs,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
-Q_tmp=Q+delt*rhs
-
-! estimate of total KE disapation:
-! d/dt(.5*Q^2) 
-call compute_ke(Q_tmp,io_pe,tmp)
-call compute_ke(Q_old,io_pe,ke_diss_tot)
-ke_diss_tot = (tmp-ke_diss_tot)/delt
-
-Q_old=.5*(Q_tmp+Q_old)
-diff=Q_old*diff
-ke_diss_diff=sum(diff(nx1:nx2,ny1:ny2,nz1:nz2,1:3))
-
-print *,'delta ke: ',ke_diss_tot,ke_diss_diff
-end subroutine
-#endif
-
 
 
 

@@ -35,15 +35,11 @@ do i=1,3
    ! compute u_x, u_xx
    call der(Q(1,1,1,i),d1,d2,work,DX_AND_DXX,1)
    rhs(:,:,:,i) = rhs(:,:,:,i) + mu*d2 - Q(:,:,:,1)*d1
-!   if (i==3) vor(:,:,:,2) = vor(:,:,:,2) - d1
-!   if (i==2) vor(:,:,:,3) = vor(:,:,:,3) + d1
    ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,i)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
 
    ! compute u_y, u_yy
    call der(Q(1,1,1,i),d1,d2,work,DX_AND_DXX,2)
    rhs(:,:,:,i) = rhs(:,:,:,i) + mu*d2 - Q(:,:,:,2)*d1
-!   if (i==3) vor(:,:,:,1) = vor(:,:,:,1) + d1
-!   if (i==1) vor(:,:,:,3) = vor(:,:,:,3) -d1
    ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,i)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
 
 
@@ -51,10 +47,7 @@ do i=1,3
    ! compute u_z, u_zz
    call der(Q(1,1,1,i),d1,d2,work,DX_AND_DXX,3)
    rhs(:,:,:,i) = rhs(:,:,:,i) + mu*d2 - Q(:,:,:,3)*d1
-!   if (i==2) vor(:,:,:,1) = vor(:,:,:,1) -d1
-!   if (i==1) vor(:,:,:,2) = vor(:,:,:,2) +d1
    ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,i)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
-
 
 enddo
 

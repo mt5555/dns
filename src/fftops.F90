@@ -115,6 +115,42 @@ endif
 end subroutine
 
 
+subroutine vorticity(vor,u,d1,work)
+use params
+use fft_interface
+use transform
+implicit none
+real*8 u(nx,ny,nz,3)    ! input
+real*8 vor(nx,ny,nz,3)    ! output
+real*8 d1(nx,ny,nz) 
+real*8 work(nx,ny,nz) 
+
+! local variables
+integer i
+real*8 dummy
+do i=1,3
+
+   ! compute u_x, u_xx
+   call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,1)
+   if (i==3) vor(:,:,:,2) = vor(:,:,:,2) - d1
+   if (i==2) vor(:,:,:,3) = vor(:,:,:,3) + d1
+
+   ! compute u_y, u_yy
+   call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,2)
+   if (i==3) vor(:,:,:,1) = vor(:,:,:,1) + d1
+   if (i==1) vor(:,:,:,3) = vor(:,:,:,3) -d1
+
+   ! compute u_z, u_zz
+   call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,3)
+   if (i==2) vor(:,:,:,1) = vor(:,:,:,1) -d1
+   if (i==1) vor(:,:,:,2) = vor(:,:,:,2) +d1
+
+enddo
+
+
+end subroutine
+
+
 
 
 subroutine divergence(div,u,work1,work2)
@@ -144,6 +180,9 @@ div = div+work1
 
 
 end subroutine
+
+
+
 
 
 

@@ -1,4 +1,5 @@
 0            ! input file type
+test         ! runname
 value        ! viscosity type  (value, smallest, damping_time, Re)
 .001         ! viscosity coefficient.  
 fft          ! derivative method  (fft, fft-dealias, 4th)

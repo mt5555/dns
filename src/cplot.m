@@ -1,5 +1,5 @@
 fidu=fopen('data000.5000.out');
-fidvor=fopen('vor001.9000.out');
+fidvor=fopen('vor005.2000.out');
 
 
 %time=fscanf(fidu,'%e',1);
