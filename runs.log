@@ -8,15 +8,16 @@ QB pre-science run.
        decay2048_s   rescale the initial condition
 
 2. UDM: test on qidse:
-     run test suite with my code w/restart:
-             ../testing/test3d.sh pr   (parallel, restart)  WORKS
-     run test suite, orig restart, UDM output
-     run test suite with UDM restart 
+     run test suite with my code w/parallel UDM restart: 
+            ../testing/test3d.sh pudm
+            works!  tried it with 3 different restart.h5 files,
+            created with 3 different parallel decomposisitons
 
      test using 512^3 restart data on QB
      1x1x256 decomposisiton
-     run code, restarting from iso12_5120003.0000.[uvw]
-          outputting UDM
+     run code 10 timesteps,  restart and run another 10 timesteps
+
+     run code 10 timesteps,  restart and run another 10 timesteps
 
      1x1x256 decomposisiton
      run code, restarting from UDM
