@@ -293,18 +293,24 @@ character(len=8) :: ext2,ext
 integer :: sc
 integer,parameter :: ssize=128
 real*8 :: dx(1:2*ssize),dy(1:2*ssize),dz(1:2*ssize)
-real*8 :: data(ssize,ssize,ssize)
 real*8 :: dslice(2*ssize,2*ssize,1)
 real*8 :: mat(3,3,3)
+real*8,allocatable :: data(:,:,:)
 real*8,allocatable :: gradu(:,:,:)
 real*8,allocatable :: gradu2(:,:,:)
 integer :: i2,j2,k2,k
 
 call setup_subcubes(ssize)
+write(message,'(a,i5)') 'number of subcubes: ',nsubcube
+call print_message(message)
+
+
 allocate(gradu(3,3,nsubcube))
 allocate(gradu2(3,3,nsubcube))
+allocate(data(ssize,ssize,ssize))
 gradu=0
 gradu2=0
+
 
 do i=1,3
 do j=1,3    
@@ -382,6 +388,11 @@ do sc=1,nsubcube
 enddo
 close(15)
 endif
+
+
+deallocate(data)
+deallocate(gradu)
+deallocate(gradu2)
 
 return
 

@@ -54,7 +54,9 @@ real*8 :: diff,ax,ay,az
 
 subcube_size=ssize*delx
 wsubcube_size=2*subcube_size   ! 2x larger
-diff = ssize*delx/2  ! overlap 50%
+!diff = ssize*delx     ! no overlap
+!diff = ssize*delx/2  ! overlap 50%
+diff = ssize*delx*.75  ! 25% overlap
 
 
 if (allocated(subcube_cords)) deallocate(subcube_cords)
