@@ -1,3 +1,4 @@
+#include "macros.h"
 subroutine init_data_lwisotropic(Q)
 !
 ! low wave number, quasi isotropic initial condition
