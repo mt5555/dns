@@ -5,7 +5,6 @@
 #endif
 
 
-
 #define DX_AND_DXX 2
 #define DX_ONLY 1
 

@@ -35,6 +35,11 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DUSE_MPI -I/users/contrib/lam/include
       MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
+   ifeq ($(HOST),node001m)
+      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.gcc/include
+      MPILIB =  -L/home/gmpi.gcc/lib  -lfmpich  -lmpich 
+# -L/usr/gm/lib/ -lgm -lpthread
+   endif
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9560/bin/lf95
