@@ -127,6 +127,7 @@ SHALLOW_DIAG =  shallow_diag.o
 # n_var>=3 models:  (u,v,w) or (u,v,h)
 # but they can still be run on 2D problems with nz=1
 MODEL_GRID       = ns_grid.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_IBMGRID    = ns_ibm.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_GHOST      = ns_ghost.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
@@ -154,6 +155,9 @@ dns:  $(MODEL_SPEC)
 
 dnsa:  $(MODEL_ALPHA) 
 	$(LINK) -o dnsa $(MODEL_ALPHA) $(LDFLAGS) $(MPILIB)
+
+dnsibm:  $(MODEL_IBMGRID) 
+	$(LINK) -o dnsibm $(MODEL_IBMGRID) $(LDFLAGS) $(MPILIB)
 
 dnsgrid:  $(MODEL_GRID) 
 	$(LINK) -o dnsgrid $(MODEL_GRID) $(LDFLAGS) $(MPILIB)
