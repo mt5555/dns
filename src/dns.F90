@@ -71,7 +71,7 @@ call MPI_Barrier(comm_3d,ierr)
 
 
 
-! rset the random seed based on initial time, 
+! reset the random seed based on initial time, 
 ! so we dont have the same seed every time we restart. 
 call random_seed(size=k)
 allocate(seed(k))
