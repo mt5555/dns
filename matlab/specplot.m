@@ -3,7 +3,9 @@
 %#  plot of DNS spectrum output file
 %########################################################################
 %
-movie=1; % plot all the spectrum, pausing between each one:
+clear
+movie=1;       % plot all the spectrum, pausing between each one
+movie_plot=0;  % create .ps out of all the spectra
 CK_orig=1.0;
 decay_scale=0;
 tsave=[];
@@ -26,9 +28,10 @@ tsave=[];
 %namedir='/scratch2/taylorm/sk256/';
 CK_orig=1.613;
 
-name='tmix256C0001.0509';
+name='tmix256C';
 namedir='/scratch2/taylorm/tmix256C/';
 CK_orig=1.613;
+movie_plot=1;
 
 
 %name='decay2048'; namedir='/ccs/scratch/taylorm/decay/';
@@ -37,8 +40,8 @@ CK_orig=1.613;
 %movie=0; tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 
 
-name = 'sk128_alpha15/sk128_alpha150000.0000';
-namedir = '/home/skurien/dns/src/';
+%name = 'sk128_alpha15/sk128_alpha150000.0000';
+%namedir = '/home/skurien/dns/src/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -243,28 +246,31 @@ while (time>=.0 & time<=9999.3)
      npassive=fread(fidp,1,'float64'); 
      time_p=fread(fidp,1,'float64');
 
-     figure(4); clf; subplot(1,1,1)
+     figure(5); clf; subplot(1,1,1)
 
      np_r=fread(fidp,1,'float64');
-     for np=1:npassive    
+     for np=1:1 ! this should be 1:npassive   after we fix data! 
         pspec_r(:,np)=fread(fidp,np_r,'float64');
      end
-     loglog53(np_r,pspec_r,'passive scalars',1.0,3); hold on;
-     hold off;
+     %loglog53(np_r,pspec_r,'passive scalars',1.0,3); 
+     %hold off; 
 
      np_x=fread(fidp,1,'float64');
      for np=1:npassive    
-        pspec_x=spec_scale*fread(fidp,np_x,'float64');
+        pspec_x(:,np)=fread(fidp,np_x,'float64');
      end
+     ts=sprintf('passive scalars t=%f',time);
+     loglog53(np_x,pspec_x,ts,1.0,3); 
+     hold off; 
 
      np_y=fread(fidp,1,'float64');
      for np=1:npassive    
-        pspec_y=spec_scale*fread(fidp,np_y,'float64');
+        pspec_y=fread(fidp,np_y,'float64');
      end
      
      np_z=fread(fidp,1,'float64');
      for np=1:npassive    
-        pspec_z=spec_scale*fread(fidp,np_z,'float64');
+        pspec_z=fread(fidp,np_z,'float64');
      end
 
      
@@ -272,8 +278,8 @@ while (time>=.0 & time<=9999.3)
 
 
   % make PS files out of plots:
-  if (movie==1)  
-  if ( ( (2*time-floor(2*time))<.01) | (abs(time-2.0)<.01) )
+  if (movie_plot==1)  
+  if (1) % ( (2*time-floor(2*time))<.01) | (abs(time-2.0)<.01) )
     disp('making ps files ...' )
     figure(1)
     print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
@@ -281,6 +287,10 @@ while (time>=.0 & time<=9999.3)
       figure(2)
       print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
     end
+    if (fidp>-1) 
+      figure(5)
+      print ('-djpeg','-r72',sprintf('pspec%.2f.jpg',time))
+    end       
     disp('pause')
     pause
   else     

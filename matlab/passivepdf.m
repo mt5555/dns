@@ -7,10 +7,10 @@
 clear all;
 
 
-fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.0000.spdf','r','l');
+fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.1000.spdf','r','l');
 %fid=fopen('../src/temp0000.0000.spdf','r','l');
 
-time1=fread(fid,1,'float64');
+time=fread(fid,1,'float64');
 npmax=fread(fid,1,'float64');         
 disp(sprintf('npassive = %i',npmax))
 
@@ -28,14 +28,18 @@ for p=1:npmax
    subplot(5,2,p) 
    plot(bins,pdf)
    ax=axis;
-   axis([-.5,1.5,ax(3),.3]);
+   axis([-.5,1.5,ax(3),.2]);
    xlabel(sprintf('[%.3f,%.3f] <s^2>=%.5f',mn,mx,s2));
-   %title(sprintf('passive scalar  t=%.4f',time)); 
    set(gca,'YTickLabel','')    
+   if (p==1) 
+      title(sprintf('t=%.4f',time)); 
+   end
 
    
 
 end
-
+times=sprintf('%.4f',time+10000);
+times=times(2:length(times));
 orient tall
-print -dpsc ppdf.ps
+print('-dpsc',['ppdf',times,'.ps']); 
+print('-djpeg',['ppdf',times,'.jpg']); 

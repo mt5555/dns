@@ -421,7 +421,7 @@ if (my_pe==io_pe) then
    call cwrite8(fid,time,1)
 
    x=1+iwave; call cwrite8(fid,x,1)
-   do i=np2,np2
+   do i=np1,np2
       call cwrite8(fid,spec_r(0,i),1+iwave) 
    enddo
 

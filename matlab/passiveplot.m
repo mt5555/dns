@@ -6,37 +6,38 @@
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-ext='.s01';
-times=[1.0509];
+time=1.0984;
+times=sprintf('%.5f',time+10000);
+times=times(2:length(times)-1);
 
-s=findstr(name,'/');
-s=s(length(s));
-shortname=name(s+1:length(name));
+npassive=10;
+for np=1:npassive
+  ext=sprintf('%3i',np+100);
+  ext=ext(2:length(ext));
+  ext=['.s',ext];
+  
+  s=findstr(name,'/');
+  s=s(length(s));
+  shortname=name(s+1:length(name));
 
-
-
-   ts = sprintf('%9.5f',10000+times);
-   ts=ts(2:10);
-   fname=[name,ts,ext]
+   fname=[name,times,ext]
    [x,y,z,s,time]=getfield(fname);
-   smax=max(max(s.^2));
-   [m1,slice1]=max(smax);
-   [m1,slice2]=min(smax);
+   smax=max(max(s));
+   [mx,slice1]=max(smax);
+   smax=min(min(s));
+   [mn,slice2]=min(smax);
 
 
-   subplot(2,1,1)
+   subplot(npassive/2,2,np)
    splot=squeeze(s(:,:,slice1));
    pcolor(x,y,splot')
-
-   stitle=sprintf('%s    time=%.2f  max=%f',shortname,time)
-   title(stitle);
+   
+   stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
+   if (np==1) title(stitle); end;
    axis equal
    axis([0,max(x),0,max(y)]);
    shading interp
+end
+   orient tall
+   print('-djpeg','-r200',['p',times,'.jpg']); 
 
-   subplot(2,1,2)
-   splot=squeeze(s(:,:,slice1));
-   pcolor(x,y,splot')
-   axis equal
-   axis([0,max(x),0,max(y)]);
-   shading interp
