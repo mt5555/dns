@@ -104,6 +104,7 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 ! init_cond_subtype: 
 !     0               use 2048^3 parameters with kmax eta = 1
 !     1               use Livescu initial spectrum
+!     2               use Tzaki initial spectrum
 !
 use params
 use mpi
@@ -156,6 +157,10 @@ if (init_cond_subtype==0) then
    enddo
 else if (init_cond_subtype==1) then
    call livescu_spectrum(enerb_target,NUMBANDS)
+else if (init_cond_subtype==2) then
+   do nb=1,NUMBANDS
+	enerb_target(nb) = nb**(-5./3.)
+   enddo
 else
    call abort("init_data_decay: bad init_cond_subtype")
 endif
