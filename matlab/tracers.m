@@ -22,7 +22,8 @@ range=0:.2:5.0;
 
 
 %name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a'; 
-name='/ccs/scratch/taylorm/kras/vx2560b/vx2560b'; 
+%name='/ccs/scratch/taylorm/kras/vx2560b/vx2560b'; 
+name='/ccs/scratch/taylorm/kras/vx2560c/vx2560c'; 
 %name='/home/scratch/kras/vx1280a/vx1280a'; 
    plot_noni=0;
    axis_size=[0,2.5,0,2];
@@ -75,11 +76,11 @@ for i=range
       axis equal
       axis(axis_size);
       title(sprintf('time = %6.2f ',i)); 
-%          'pause' ;     pause
       if (mkpr)
          pname=[name,'.tracer.ps'];
          print('-depsc',pname);
       end
+      'pause' ;     pause
     end
     
     % output to ASCI file

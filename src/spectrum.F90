@@ -707,6 +707,7 @@ real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)
 real*8 :: spec_d(0:iwave_max)
+real*8 :: spec_kEk(0:iwave_max)
 real*8 :: spectrum_x(0:g_nx/2)
 real*8 :: spectrum_y(0:g_ny/2)
 real*8 :: spectrum_z(0:g_nz/2)
@@ -757,6 +758,11 @@ do i=nx1,nx2
     endif
     denergy=-xfac*mu*xw*p(i,j,k)*p(i,j,k)
     spec_d(iwave)=spec_d(iwave)+denergy
+
+    ! compute k E(k)
+    xw=sqrt(rwave*pi2_squared)
+    denergy=-xfac*xw*p(i,j,k)*p(i,j,k)
+    spec_kEk(iwave)=spec_kEk(iwave)+denergy
 
 
 enddo
