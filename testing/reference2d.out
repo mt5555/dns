@@ -7,28 +7,30 @@ Running some tests
  transpose z round trip error:   0.0000000000000000E+000                        
  transpose y round trip error:   0.0000000000000000E+000                        
  transpose x round trip error:   0.0000000000000000E+000                        
+wall clock transpose_to_z n= 50 time=   0.00078   0.00078                       
+wall clock transpose_from_z n= 50 time=   0.00082   0.00082                     
 Initializing stk FFT of size n=   128                                           
-x-direction d/dx error=.6536993169E-12                                          
-x-direction d2/dxx error=.2241904440E-09                                        
-y-direction d/dy error=.8526512829E-12                                          
-y-direction d2/dyy error=.2546585165E-09                                        
+x-direction d/dx error=.7247535905E-12                                          
+x-direction d2/dxx error=.2122533260E-09                                        
+y-direction d/dy error=.7673861546E-12                                          
+y-direction d2/dyy error=.2301021595E-09                                        
 z-direction d/dz error=.0000000000E+00                                          
 z-direction d2/dzz error=.1776528792E+04                                        
-   1   1   1mode=   0   0   0 val=   5.3330000043                               
-   1  11   1mode=   0   5   0 val=   2.0000000000                               
-   4   1   1mode=   1   0   0 val=  -1.0000000000                               
-   7   1   1mode=   3   0   0 val=   1.5000000000                               
+   1   1   1mode=   0   0   0 val=  0.5333000E+01
+   1  11   1mode=   0   5   0 val=  0.2000000E+01
+   4   1   1mode=  -1   0   0 val= -0.1000000E+01
+   7   1   1mode=   3   0   0 val=  0.1500000E+01
 x-direction Forward-Backward 3D FFT: error=.5329070518E-14                      
-Laplace solver alpha=  1.00 beta=  0.50  error= 0.13677948E-12                  
-maxval of divergence = .13656E-12                                               
+Laplace solver alpha=  1.00 beta=  0.50  error= 0.12434498E-12                  
+maxval of divergence = .12550E-12                                               
 Initial data                                                                    
 Time stepping...                                                                
 
  1E0   | *                    KE spectrum
-       |                     
-       |      * *            
-       |         * ***       
-       |              ****   
+       |      *              
+       |        ** *         
+       |            *****    
+       |                 *   
        |                     
        |                     
        |                     
@@ -39,63 +41,68 @@ Time stepping...
        |                     
  1E-10 |* **** *  *       ***
        +---------------------+
-       k=0                 k=           65
+      k=0                 k=  65
 time=  0.00000(    0)  next output= 0.10000                                     
 for next timestep: delt=0.0105711 cfl_adv= 1.500 cfl_vis= 0.346                 
-max: (u,v,w)      1.058561716503954     0.050000000745058     0.000000000000000 
-max(div)= 0.00000E+00   <z-vor>= 0.83400E-10   <hel>= 0.00000E+00               
+max: (u,v,w)      1.058561716503953     0.050000000745058     0.000000000000000 
+max(div)= 0.00000E+00   <z-vor>= 0.56235E-10   <hel>= 0.00000E+00               
 ke:  0.4900072007  d/dt log(ke): tot=   0.00000 diffusion=  -0.91507            
 
 time=  0.01057(    1)  next output= 0.10000                                     
 for next timestep: delt=0.0109783 cfl_adv= 1.500 cfl_vis= 0.360                 
-max: (u,v,w)      1.017378870562829     0.050143996298281     0.000000000000000 
-max(div)= 0.64026E-13   <z-vor>= 0.83400E-10   <hel>= 0.00000E+00               
-ke:  0.4858922698  d/dt log(ke): tot=  -0.80113 diffusion=  -0.92282            
+max: (u,v,w)      1.017379610056682     0.050144361723534     0.000000000000000 
+max(div)= 0.73684E-13   <z-vor>= 0.56235E-10   <hel>= 0.00000E+00               
+ke:  0.4858922699  d/dt log(ke): tot=  -0.80113 diffusion=  -0.92282            
 
 time=  0.02155(    2)  next output= 0.10000                                     
-for next timestep: delt=0.0109954 cfl_adv= 1.500 cfl_vis= 0.360                 
-max: (u,v,w)      1.015472593268531     0.050599374361688     0.000000000000000 
-max(div)= 0.57088E-13   <z-vor>=-0.53297E-10   <hel>= 0.00000E+00               
-ke:  0.4825050435  d/dt log(ke): tot=  -0.63945 diffusion=  -0.70829            
+for next timestep: delt=0.0109955 cfl_adv= 1.500 cfl_vis= 0.360                 
+max: (u,v,w)      1.015472354871908     0.050600211173455     0.000000000000000 
+max(div)= 0.59946E-13   <z-vor>= 0.88574E-10   <hel>= 0.00000E+00               
+ke:  0.4825050414  d/dt log(ke): tot=  -0.63945 diffusion=  -0.70829            
 
 time=  0.03254(    3)  next output= 0.10000                                     
 for next timestep: delt=0.0109775 cfl_adv= 1.500 cfl_vis= 0.360                 
-max: (u,v,w)      1.016871778316931     0.051306770096954     0.000000000000000 
-max(div)= 0.63508E-13   <z-vor>= 0.17170E-09   <hel>= 0.00000E+00               
-ke:  0.4796408872  d/dt log(ke): tot=  -0.54309 diffusion=  -0.58536            
+max: (u,v,w)      1.016871237406072     0.051307017981092     0.000000000000000 
+max(div)= 0.61368E-13   <z-vor>= 0.68349E-11   <hel>= 0.00000E+00               
+ke:  0.4796408799  d/dt log(ke): tot=  -0.54308 diffusion=  -0.58536            
 
 time=  0.04352(    4)  next output= 0.10000                                     
-for next timestep: delt=0.0109413 cfl_adv= 1.500 cfl_vis= 0.359                 
-max: (u,v,w)      1.019949492858611     0.052271504525405     0.000000000000000 
-max(div)= 0.72494E-13   <z-vor>= 0.50003E-10   <hel>= 0.00000E+00               
-ke:  0.4771252986  d/dt log(ke): tot=  -0.48029 diffusion=  -0.50901            
+for next timestep: delt=0.0109414 cfl_adv= 1.500 cfl_vis= 0.359                 
+max: (u,v,w)      1.019948386793339     0.052270710527400     0.000000000000000 
+max(div)= 0.55844E-13   <z-vor>=-0.88948E-10   <hel>= 0.00000E+00               
+ke:  0.4771252831  d/dt log(ke): tot=  -0.48029 diffusion=  -0.50901            
 
 
  1E0   | *                    KE spectrum
-       |                     
-       |      * *            
-       |         * *         
+       |      *              
+       |        **           
+       |           *         
        |            **       
        |              *      
-       |               *     
-       |    *                
+       |    *          *     
        |       *        *    
        |          *          
+       |                     
        |                 *   
        |                     
        |                     
  1E-10 |* ** *            ***
        +---------------------+
-       k=0                 k=           65
+      k=0                 k=  65
 time=  0.10000(   10)  next output= 0.10000                                     
 for next timestep: delt=0.0107184 cfl_adv= 1.500 cfl_vis= 0.351                 
-max: (u,v,w)      1.040505340136630     0.060370340010701     0.000000000000000 
-max(div)= 0.54318E-13   <z-vor>=-0.19609E-09   <hel>= 0.00000E+00               
-ke:  0.4670405503  d/dt log(ke): tot=  -0.32652 diffusion=  -0.32816            
+max: (u,v,w)      1.040505254060681     0.060370237600165     0.000000000000000 
+max(div)= 0.56377E-13   <z-vor>= 0.21182E-09   <hel>= 0.00000E+00               
+ke:  0.4670405504  d/dt log(ke): tot=  -0.32652 diffusion=  -0.32816            
 
-CPU times:
-initialization:      0.00 m                                                     
-dns_solve:           0.07 m                                                     
-   time_control + children:         0.00 m                                      
-   RHS + children:                  0.05 m                                      
-   transpose + children:            0.02 m                                      
+CPU times (min):   (avg/max)
+initialization:      0.01     0.01                                              
+dns_solve:           0.07     0.07                                              
+   time_control            0.00     0.00                                        
+   RHS                     0.04     0.04                                        
+   transpose_to_z          0.01     0.01                                        
+   transpose_from_z        0.00     0.00                                        
+   transpose_to_x          0.00     0.00                                        
+   transpose_from_x        0.00     0.00                                        
+   transpose_to_y          0.00     0.00                                        
+   transpose_from_y        0.00     0.00                                        

@@ -11,6 +11,7 @@ if ($#argv == 0 ) then
    echo " 2 = run lots of 2D test cases (different dimensions)"
    echo " 3 = run several 3D test cases (different dimensions)"
    echo " 3p = run several 3D test cases in parallel"
+   echo " makeref  = generate new reference output, 2D"
    exit
 endif
 
