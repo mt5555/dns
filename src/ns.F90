@@ -219,7 +219,7 @@ real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss
-real*8 :: f_diss=0,a_diss=0,normuf=0
+real*8 :: f_diss=0,a_diss=0,fxx_diss
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
 real*8,save :: gradu(nx,ny,nz,n_var)
@@ -415,47 +415,28 @@ endif
 ! add in forcing to rhs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef ALPHA_MODEL
-! For alpha model, we add Helmholtz inverse(f div(tau))
+! For alpha model, we add Helmholtz inverse(div(tau))
 ! and overwrite Q (used for work arrays)
-call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,f_diss,a_diss,normuf)
-#else
-
-!
-! temporary, until we get Pope's forcing?
-!
-! white in time - so pick a new random force at beginning of
-! each time step.  
-!
-
-if (forcing_type==2) then
-   if (rkstage==1) call sforcing_random12(rhs,Qhat,f_diss,1)  ! compute new forcing function
-   call sforcing_random12(rhs,Qhat,f_diss,0)  ! apply it
-
-#if 0
-   ! check divfree status of rhs
-   rhs=0
-   call sforcing_random12(rhs,Qhat,f_diss,0)  ! apply it
-   do n=1,3
-      call z_ifft3d(rhs(1,1,1,n),Q(1,1,1,n),work)
-   enddo
-   call divergence(work,Q,rhs,Qhat)
-   print *,maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
-   print *,maxval(work(nx1:nx2,ny1:ny2,nz1:nz2))
-   print *,minval(work(nx1:nx2,ny1:ny2,nz1:nz2))
-   stop
+call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,a_diss)
 #endif
 
+
+if (forcing_type==2 .and. rkstage==1) then
+   ! compute new forcing function
+   ! white in time, computed at beginning of each RK4 stage
+   if (rkstage==1) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
 endif
 
-!if (forcing_type==2 .and. rkstage==4) then
-!   call sforcing_random12(rhs,Qhat,f_diss,1)  ! compute new forcing function
-!   call sforcing_random12(rhs,Qhat,f_diss,0)  ! apply it
-!endif
-
-if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
-#endif
+! apply forcing:
+if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss,ux2ave)
 
 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! compute information for transfer spectrum
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (compute_ints==1 .and. compute_transfer) then
    spec_f=-spec_f
    do n=1,3
@@ -539,7 +520,7 @@ if (compute_ints==1) then
    ints(6)=ke        
    ints(7)=ensave/g_nx/g_ny/g_nz
    ints(8)=a_diss    
-   ints(9)=normuf
+   ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-mu*ke_diss                 ! <u,u_xx>
 
    maxs(5)=maxvor
@@ -655,8 +636,7 @@ end subroutine
 ! x & y components of div on grid, then transform.  transform z, add then div
 ! 6 der() + 6 z_fft()               transposes: 6+12 x, 6+12y, 6z
 !
-subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p, &
-f_diss,a_diss,normuf)
+subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p,a_diss)
 ! compute one entry of work=DD + DD' - D'D  
 ! transform work -> p
 ! compute d(p), apply helmholtz inverse, accumualte into rhs
@@ -867,19 +847,6 @@ call helminv(rhs,divs,Qhat,a_diss)
 #endif
 
 
-
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! apply Helmolz to forcing, accumulate into RHS
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-f_diss=0
-if (forcing_type>0) then
-   ! compute forcing, store in divs
-   divs=0
-   call sforce(divs,Qhat,normuf)
-   call helminv(rhs,divs,Qhat,f_diss)
-endif
 
 end subroutine
 

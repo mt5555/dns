@@ -8,20 +8,23 @@ type wnforcing_d
    ! note: SGI f90 does not allow allocatable arrays in a struct
    integer, pointer :: index(:,:)
 end type
-#define NUMBANDS 2
-type(wnforcing_d) :: wnforcing(NUMBANDS)
+
+integer           :: numb
+integer,parameter :: numb_max=15
+type(wnforcing_d) :: wnforcing(numb_max)
 
 integer,private :: ntot=0
 integer :: init_sforcing=0
 integer :: comm_sforcing  ! MPI communicator for all pe's involved in forcing
 
-real*8 :: tau
+real*8 :: ener_target(numb_max)
+
 contains
 
 
 
 
-subroutine sforce(rhs,Qhat,f_diss)
+subroutine sforce(rhs,Qhat,f_diss,fxx_diss,param)
 !
 ! Add a forcing term to rhs, in spectral space.
 !
@@ -29,16 +32,17 @@ use params
 implicit none
 real*8 :: Qhat(*)
 real*8 :: rhs(*)
-real*8 :: f_diss
-if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss)
-!if (forcing_type==2) call sforcing_random12(rhs,Qhat,f_diss,0)
+real*8 :: f_diss,param,fxx_diss
+
+if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss,fxx_diss,param)
+if (forcing_type==2) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
 end subroutine
 
 
 
 
-subroutine gforce(Q,rhs,rhsz,q4,q4z,work,f_diss)
+subroutine gforce(Q,rhs,rhsz,q4,q4z,work,f_diss,fxx_diss)
 !
 ! store forcing term to rhs, in gird space
 !
@@ -51,24 +55,53 @@ real*8 :: q4(nx,ny,nz,3)
 real*8 :: rhs(nx,ny,nz,3)
 real*8 :: q4z(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: rhsz(g_nz2,nslabx,ny_2dz,3) 
-real*8 :: f_diss
+real*8 :: f_diss,fxx_diss
 
 ! local
 integer :: n
-real*8 :: fdiss
+real*8 :: fdiss,fxxdiss,xfac,xw,ux2ave
+integer im,jm,km,i,j,k
+
 
 q4=Q
 do n=1,3
    call z_fft3d_trashinput(q4(1,1,1,n),rhsz(1,1,1,n),work)
 enddo
 q4z=0
-call sforce(q4z,rhsz,fdiss)
+
+! compute <ux,ux> from rhsz:
+ux2ave=0
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+            xw=(im*im + jm*jm + km*km)*pi2_squared
+            xfac = 2*2*2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            ux2ave = ux2ave + xfac*xw*(rhsz(k,i,j,1)**2 + &
+                                rhsz(k,i,j,2)**2 + &
+                                rhsz(k,i,j,3)**2) 
+
+
+      enddo
+   enddo
+enddo
+
+
+
+call sforce(q4z,rhsz,fdiss,fxxdiss,ux2ave)
 do n=1,3
    call z_ifft3d(q4z(1,1,1,n),rhs(1,1,1,n),work)
 enddo
 f_diss=fdiss  ! strange bug on SGI, dnsghost, f_diss is non zero here, but
               ! return value in ns_ghost.F90 is 0.  if we introduce 'fdiss',
               ! everthing is ok
+fxx_diss=fxxdiss
 return
 end subroutine
 
@@ -77,45 +110,54 @@ end subroutine
 
 
 
-subroutine sforcing12(rhs,Qhat,f_diss)
+subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss,ux2ave)
 !
 ! Add a forcing term to rhs.
 ! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
 ! Force 3D wave numbers 2 back to the sphere E=2**(-5/3)
+!
+! ux2ave = < ux, ux > 
 !
 use params
 use mpi
 implicit none
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
-integer km,jm,im,i,j,k,n,wn,ierr
-real*8 xw,xfac,f_diss,tauf
-real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)
+integer km,jm,im,i,j,k,n,wn,ierr,kfmax
+real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
+real*8 ener(numb_max),temp(numb_max),ux2ave
 character(len=80) :: message
 
 if (0==init_sforcing) then
+   numb=5 ! apply forcing in 5 bands
    call sforcing_init()
-   if (init_cond_subtype==1) then
-      tau=25
-   else if (init_cond_subtype==2) then
-      tau=1
-   else if (init_cond_subtype==3) then
-      tau=500
-   else
-      tau=5
-   endif
-   write(message,'(a,f8.2)') 'Forcing relaxation parameter tau=',tau
-   call print_message(message)
+   do wn=1,numb
+      kfmax=6
+      if (wn>=kfmax) then
+         ener_target(wn)=0
+      else
+         ener_target(wn)=wn**(-5/3)*tanh( (kfmax-wn) / (.3*kfmax) )
+      endif
+   enddo
 
 endif
 if (ntot==0) return
 
+
+! relaxation coefficient (below) and kfmax (above) 
+! comes from Overhold and Pope 1998.    .5 = tau/tau_kolmogorov
+! tau = .5 tau_kolmogorov = .5 eta^2 / mu = .5 sqrt(mu/epsilon) = 
+!                                           .5/sqrt( <ux,ux> ) 
+!  
+tau_inv=sqrt(ux2ave)/.5
+
+
 ! only CPUS which belong to "comm_sforcing" beyond this point!
 
 f_diss=0
-do wn=1,NUMBANDS
-   ener_target(wn)=wn**(-5.0/3.0)
-   if (wn>2) ener_target(wn)=wn**(-7.0/3.0)
+fxx_diss=0
+do wn=1,numb
+
 
    ener(wn)=0
    do n=1,wnforcing(wn)%n
@@ -131,16 +173,17 @@ do wn=1,NUMBANDS
 enddo
 #ifdef USE_MPI
    temp=ener
-   call MPI_allreduce(temp,ener,NUMBANDS,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
-!   call MPI_allreduce(temp,ener,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call MPI_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
 #endif
 
 
-do wn=1,NUMBANDS
+do wn=1,numb
    ! Qf = Q*sqrt(ener_target/ener)
-   ! forcing = tau (Qf-Q) = tau * (sqrt(ener_target/ener)-1) Q
-   tauf=tau*(sqrt(ener_target(wn)/ener(wn))-1)
+   ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
+   tauf=tau_inv*(sqrt(ener_target(wn)/ener(wn))-1)
 !   print *,'FORCING:',wn,ener(wn),ener_target(wn)
+
+   if (tauf>0) then ! only apply forcing if net input is positive
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
@@ -157,7 +200,16 @@ do wn=1,NUMBANDS
            Qhat(k,i,j,2)**2 + &
            Qhat(k,i,j,3)**2) 
 
+      xw=(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
+      fxx_diss = fxx_diss + xfac*tauf*xw*(Qhat(k,i,j,1)**2 + &
+                                Qhat(k,i,j,2)**2 + &
+                                Qhat(k,i,j,3)**2) 
+
+
+
    enddo
+   endif
+
 enddo
 end subroutine 
    
@@ -191,7 +243,7 @@ character(len=80) :: message
 init_sforcing=1
 
 
-   do n=1,NUMBANDS
+   do n=1,numb
       wnforcing(n)%n=0
    enddo
    
@@ -204,7 +256,7 @@ init_sforcing=1
             km=z_kmcord(k)
 
             xw=sqrt(real(km**2+jm**2+im**2))
-            do n=1,NUMBANDS
+            do n=1,numb
                if (xw>=n-.5 .and. xw<n+.5) then
                   wnforcing(n)%n=wnforcing(n)%n+1
                endif
@@ -215,7 +267,7 @@ init_sforcing=1
    enddo
    
    ! allocate storage
-   do n=1,NUMBANDS
+   do n=1,numb
       i=wnforcing(n)%n
       if (i>0) allocate(wnforcing(n)%index(i,3))
       wnforcing(n)%n=0  ! reset counter to use again below
@@ -230,7 +282,7 @@ init_sforcing=1
             km=z_kmcord(k)
 
             xw=sqrt(real(km**2+jm**2+im**2))
-            do n=1,NUMBANDS
+            do n=1,numb
             if (xw>=n-.5 .and. xw<n+.5) then
                wnforcing(n)%n=wnforcing(n)%n+1
                wnforcing(n)%index(wnforcing(n)%n,1)=i
@@ -246,7 +298,7 @@ init_sforcing=1
 
 
 ntot=0
-do wn=1,NUMBANDS
+do wn=1,numb
    ntot=ntot+wnforcing(wn)%n
 enddo
 
@@ -271,7 +323,7 @@ end subroutine
 
 
 
-subroutine sforcing_random12(rhs,Qhat,f_diss,new_f)
+subroutine sforcing_random12(rhs,Qhat,f_diss,fxx_diss,new_f)
 !
 ! Add a forcing term to rhs.
 ! Random, isotropic, homogenious in first 2 wave nubmers
@@ -286,7 +338,7 @@ integer :: new_f
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
 integer km,jm,im,i,j,k,n,wn,ierr
-real*8 xw,xfac,f_diss,tauf
+real*8 xw,xfac,f_diss,fsum,fxx_diss
 
 real*8,save :: rmodes(-2:2,-2:2,-2:2,3)       ! value at time tmod
 real*8,save :: rmodes_old(-2:2,-2:2,-2:2,3)   ! value at time tmod_old
@@ -295,12 +347,13 @@ real*8,save :: tscale=.01
 
 
 if (0==init_sforcing) then
+   numb=2  ! apply forcing in 2 bands
    call sforcing_init()
    rmodes=0
    tmod=0
 
    ! check that we are not including any wave numbers > 2
-   do wn=1,NUMBANDS
+   do wn=1,numb
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
@@ -333,7 +386,8 @@ endif
 
 
 f_diss=0
-do wn=1,NUMBANDS
+fxx_diss=0
+do wn=1,numb
 
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
@@ -347,10 +401,15 @@ do wn=1,NUMBANDS
       if (z_kmcord(k)==0) xfac=xfac/2
       if (z_jmcord(j)==0) xfac=xfac/2
       if (z_imcord(i)==0) xfac=xfac/2
-      f_diss = f_diss + xfac*( &
+      fsum= ( &
          Qhat(k,i,j,1)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1) +&
          Qhat(k,i,j,2)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2) +&
          Qhat(k,i,j,3)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3) )
+      
+      f_diss = f_diss + xfac*fsum
+      xw=(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
+      fxx_diss = fxx_diss + xfac*xw*fsum
+
 
    enddo
 
@@ -370,7 +429,7 @@ implicit none
 real*8 :: rmodes(-2:2,-2:2,-2:2,3)       
 
 integer km,jm,im,i,j,k,n,wn,ierr,k2
-real*8 xw,xfac,f_diss,tauf
+real*8 xw,xfac,f_diss
 real*8 :: R(-2:2,-2:2,-2:2,3,2),Rr,Ri,F1,F2
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
@@ -402,8 +461,8 @@ do im=-2,2
    if (delt>0) xfac=xfac/sqrt(delt)
    ! normalize so that < R**2 >   = F1  in wave number 1
    ! normalize so that < R**2 >   = F2  in wave number 2
-   F1 = 1 
-   F2 = 1
+   F1 = 5 
+   F2 = 5
    if (k2 <= 1.5**2) then
       xfac=xfac*sqrt(F1/60)
    else if (k2 <= 2.5**2)  then

@@ -104,7 +104,7 @@ end subroutine
 
 
 
-
+#if 0
 subroutine compute_time_averages(Q,Qhat,f,wsum,work1,dxx,time)
 use params
 use sforcing
@@ -198,7 +198,7 @@ endif
 
 
 end subroutine
-
+#endif
 
 
 

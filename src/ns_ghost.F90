@@ -160,7 +160,7 @@ real*8 rhs(nx,ny,nz,n_var)
 
 !local
 real*8 dummy,tmx1,tmx2
-real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss,d1,d2,f_diss
+real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss,d1,d2,f_diss,fxx_diss
 integer n,i,j,k
 
 call wallclock(tmx1)
@@ -179,7 +179,7 @@ hel=0
 rhs=0
 if (forcing_type>0) then
    ! very inefficient spectral forcing:  
-   call gforce(Q,rhs,rhs,q4,q4,work,f_diss)
+   call gforce(Q,rhs,rhs,q4,q4,work,f_diss,fxx_diss)
 endif
 
 
@@ -289,7 +289,7 @@ if (compute_ints==1) then
    ints(6)=ke/g_nx/g_ny/g_nz
    ints(7)=ints(2)  ! this is only true for periodic incompressible case
    ! ints(8) = < u,div(tau)' >   (alpha model only)
-   ! ints(9)  = < u,f >  (alpha model only)
+   ints(9)  = fxx_diss  ! < uxx,f >  (alpha model only)
    ints(10)=mu*ke_diss/g_nx/g_ny/g_nz     ! u dot laplacian u
 
 endif

@@ -291,21 +291,15 @@ real*8 :: ints(nints),maxs(nints)
 ! KE = ints(6)
 ! KE dissapation:  ints(10) + ints(3) + ints(8)
 !      ints(10) = mu*< u_x,u_x >
-!      ints(3) = < u,f' >           
+!      ints(3) = < u,f  >           
 !      ints(8) = < u,div(tau)' >
 !
 ! E-alpha = ints(6) + .5*alpha**2 ints(2)
-! E-alpha dissapation =   ints(10) + ints(9) - mu*alpha**2 * ints(1)
+! E-alpha dissapation =   ints(10) - mu*alpha**2 * ints(1) + 
+!                          ints(3) - alpha**2*ints(9) 
 !      ints(1)= < u_xx,u_xx>
-!      ints(9) = < u,f >
+!      ints(9) = < uxx,f >
 !  
-! Note: we are going to change the forcing so that it always appears
-! on the RHS as just f. 
-!    KE dissapation term:              <u,f>
-!    E_alpha term:          <u,H(f) > = <u,f> + alpha**2 <uxx,f>
-!   so make ints(3) = <u,f>
-!           ints(9) = <uxx,f>
-!    and no need to ever compute f'  
 !
 ! These quantities are computed in the timestep
 ! routine, at the current time T:
@@ -318,14 +312,13 @@ real*8 :: ints(nints),maxs(nints)
 ! 
 ! ints(1) = < u_xx,u_xx >   (or < u_xx, -del**4 u>)
 ! ints(2) = < u_x,u_x >   
-! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
-!                    non-alpha-mode: F=f.  Alpha model F=f'
+! ints(3) = < u,f > 
 ! ints(4) = integral of z-component of vorticity
 ! ints(5) = helicity  (or: mu*<w,w_xx> enstrophy diffusion)
 ! ints(6) = .5 < u,u >
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
-! ints(9)  = < u,f >  (alpha model only)
+! ints(9)  = < uxx,f > 
 ! ints(10) = mu*< u, del u >   diffusion (or mu*<u,-del**4 u>)
 ! maxs(5) = max vorticity
 !

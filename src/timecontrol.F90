@@ -228,8 +228,9 @@ if (doit_screen) then
 
    write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
         ke_diss-mu*alpha_value**2*ints(1),&
-        ' f=',ints(9),'                      tot=',&
-        ke_diss-mu*alpha_value**2*ints(1) + ints(9)
+        ' f=',ints(3) - alpha_value**2*ints(9),&
+         '                      tot=',&
+        ke_diss-mu*alpha_value**2*ints(1) + ints(3) - alpha_value**2*ints(9)
    call print_message(message)	
    endif
 
