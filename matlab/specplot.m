@@ -6,6 +6,8 @@
 clear
 movie=1;       % plot all the spectrum, pausing between each one
 movie_plot=0;  % create .ps out of all the spectra
+movie_times=[];% create .ps files out of only these times
+               % if [], create .ps file out of every plot
 endian = 'l';  % default endian-ness of spec file
 CK_orig=1.0;
 decay_scale=0;   % special scaling for 2048^3 decaying run
@@ -17,10 +19,18 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
+<<<<<<< specplot.m
+name='tmix256D';
+namedir='/home/taylorm/data/dns/tmix/tmix256D/';
+CK_orig=1.613; movie_plot=1; endian='l';
+movie_times=.3:.1:1;
+mu=1.75e-4;
+=======
 %name='tmix256D-noscalars0000.0000';
 %namedir='/scratch2/taylorm/tmix256D-noscalars/';
 %CK_orig=1.613; movie_plot=0; endian='l';
 %mu=3e-4;
+>>>>>>> 1.72
 
 %name='decay2048-ave64.-new.0000.4026';
 %name='decay2048-ave32.-new.0000.4026';
@@ -28,10 +38,12 @@ tsave=[];
 %movie_plot=0; CK_orig=1.613; decay_scale=1; endian='l';
 
 
-%name='decay2048'; namedir='/ccs/scratch/taylorm/decay/';
-%CK_orig=1.613; decay_scale=1; endian='l';
-%% save spectrum at these times:
-%movie_plot=1; movie=1; tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
+%  name='decay2048'; namedir='/home/taylorm/data/dns/decay/';
+%  CK_orig=1.613; decay_scale=1; endian='l';
+%  % save spectrum at these times:
+%  movie_plot=0; movie=1; 
+%  tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
+%  tsave=[0 .41 .7 1.0  1.3  1.6 ];
 
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
@@ -84,7 +96,7 @@ fidp=endianopen([namedir,name,'.pspec'],'r');
 fidco=endianopen([namedir,name,'.cospec'],'r');  
 
 
-%fidt=-1;
+fidt=-1;
 %fidp=-1;
 
 time=fread(fid,1,'float64')
@@ -97,7 +109,7 @@ end
 
 CK=CK_orig;
 j=0;
-while (time>=.0 & time<=9999.3)
+while (time>=.0 & time<=1.6)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
@@ -109,7 +121,7 @@ while (time>=.0 & time<=9999.3)
   if (decay_scale) 
     % convert to 2pi units:
     mu=3.4424e-6*(2*pi)^2;
-    eps = mu*2*sum(knum.^2 * (2*pi)^2 .* spec_r')
+    eps = mu*2*sum(knum.^2 * (2*pi)^2 .* spec_r');
     eta = (mu^3 ./ eps).^(.25);
     if (j==1) eps_orig=eps; end;
     
@@ -181,22 +193,22 @@ while (time>=.0 & time<=9999.3)
 
     
     % longitudinal spectraum
-    figure(4)
-    subplot(2,1,1);
-    loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
-    loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
-    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
-    hold off;
-    % transverse spectraum
-
-    subplot(2,1,2);
-    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
-    loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
-    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
-    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
-    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
-    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
-    hold off;
+%    figure(4)
+%    subplot(2,1,1);
+%    loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
+%    loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
+%    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
+%    hold off;
+    
+%    % transverse spectraum
+%    subplot(2,1,2);
+%    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
+%    loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
+%    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
+%    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
+%    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
+%    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
+%    hold off;
   end
   end
 
@@ -384,23 +396,23 @@ while (time>=.0 & time<=9999.3)
 
   % make PS files out of plots:
   if (movie_plot==1)  
-  if (1) % ( (2*time-floor(2*time))<.01) | (abs(time-2.0)<.01) )
+  if (isempty(movie_times) |  1==max(abs(time-movie_times)<.001) )    
     disp('making ps files ...' )
     figure(1)
-    print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
+    print ('-depsc',sprintf('%s_%.2f.eps',name,time))
     if (num_spect>0) 
       figure(2)
-      print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
+      print ('-depsc',sprintf('%s_%.2f_t.eps',name,time))
     end
     if (fidp>-1) 
       figure(5)
-      print ('-djpeg','-r72',sprintf('pspec%.2f.jpg',time))
+      print ('-depsc',sprintf('pspec%.2f.eps',time))
     end       
     disp('pause')
     pause
   else     
-    disp('pause')
-    pause
+    %disp('pause')
+    %pause
   end
   end
 
@@ -429,7 +441,7 @@ if (fidt>0) fclose(fidt); end;
 
 if (length(spec_r_save>1) )
 figure(1); clf;
-loglog53(n_r,spec_r_save,'KE spectrum',CK,1);
+loglog53(n_r,spec_r_save,'KE spectrum',CK,5);
 print -djpeg -r72 spec.jpg
 print -depsc -r600 spec.ps
 figure(2); clf;

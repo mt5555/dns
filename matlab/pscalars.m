@@ -1,5 +1,5 @@
 %
-%   matlab script to read DNS output files *.scalars-turb
+%   matlab script to read DNS output files *.pscalars-turb
 %
 %    
 %
@@ -14,9 +14,8 @@ if (readdata==0 & ~exist('cxx2'))
 end
 
 
-
-name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[.77:.01:3.5];
+name = '/home/taylorm/data/dns/tmix/tmix256D/tmix256D'
+times=[.30:.01:2.0];
 
 
 if (readdata)
@@ -119,6 +118,12 @@ c3=squeeze(c3)';
 c4=pints_e(28,np,:);
 c4=squeeze(c4)';
 
+if (max(c4)==0) % bug in one version of dns code, stored c3,c4,0 instead of c1,c3,c4
+   c4=c3;
+   c3=c1;
+   c1=zeros(size(c4));
+end
+
 
 n0(1,:)=pints_e(29,np,:);
 n0_8(1,:)=pints_e(30,np,:);   % .3 after mean removed
@@ -148,10 +153,10 @@ c2cx2(1,:)=pints_e(45+2,np,:);
 c2cx2(2,:)=pints_e(46+2,np,:);
 c2cx2(3,:)=pints_e(47+2,np,:);
 
-lncx1(:)=pints_e(48+2,np,:);
-lncx2(:)=pints_e(49+2,np,:);
-lncx3(:)=pints_e(50+2,np,:);
-lncx4(:)=pints_e(51+2,np,:);
+lncx1=pints_e(48+2,np,:);
+lncx2=pints_e(49+2,np,:);
+lncx3=pints_e(50+2,np,:);
+lncx4=pints_e(51+2,np,:);
 
 
 
@@ -253,8 +258,8 @@ title('S_u,  S_{uc}')
 subplot(4,2,2)
 plot(time_e,ff,time_e,gg)
 title('f,  g')
-%ax=axis;
-%axis([ax(1),ax(2),0,2]);
+ax=axis;
+axis([ax(1),ax(2),0,4]);
 
 
 subplot(4,2,3)
@@ -285,7 +290,7 @@ title('R_\lambda')
 
 subplot(4,2,8)
 plot(time_e,pi*n0,time_e,pi*n0_8,time_e,pi*n0_9)
-title(' ')
+title('N0,N0_8,N0_9')
 
 
 figure(1)
@@ -304,7 +309,7 @@ end
 
 
 pname=sprintf('pscalars%i',np);
-print('-djpeg','-r90',pname); 
+%print('-djpeg','-r90',pname); 
 print('-depsc',pname); 
 
 
@@ -337,8 +342,8 @@ title('\pi N_{\nabla}_c 2 \eta_c, 2 \eta_c / \lambda_{\nabla}_c,   \pi N_{\nabla
 subplot(4,2,5)
 plot(time_e,pi*n0_8.*lambda_c_8,time_e,pi*n0_9.*lambda_c_9)
 title('\pi N_a \lambda_a (a=.8,.9)')
-ax=axis;
-axis([.75,1.2,ax(3),ax(4)]);
+%ax=axis;
+%axis([.75,1.2,ax(3),ax(4)]);
 
 
 
@@ -359,7 +364,7 @@ plot(time_e,4*c2,'k','LineWidth',2.0)
 hold off;
 title('m_{% pf} (.75, .8, .85) , 4<c^2>')
 ax=axis;
-axis([.75,1.2,ax(3),ax(4)]);
+%axis([.75,1.2,ax(3),ax(4)]);
 
 
 

@@ -4,13 +4,13 @@
 %########################################################################
 %
 
-name = '/scratch2/taylorm/tmix256C/tmix256C'
-time=1.05;
+name = '/home/taylorm/data/dns/tmix/tmix256D/tmix256D'
+time=.3;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
 
-schmidt_list=[.01 .05 .1 .5 1];
-type_list=0:1;
+schmidt_list=[.05 .1 .5 1];
+type_list=[0,3];
 npassive=length(schmidt_list)*length(type_list);
 
 k=0;
@@ -47,7 +47,7 @@ for type=type_list
       pints_e(:,np)= data1;
     end
     fclose(fid);
-    np=11-k; 
+    np=npassive+1-k; 
     if (sch ~= pints_e(3,np,1))
       [sch,pints_e(3,np,1)] 
       disp('wrong schmidt number in scalars file')
@@ -95,18 +95,21 @@ for type=type_list
    smax=min(min(s));
    [mn,slice2]=min(smax);
 
-   figure(1);
+   figure(3);
    subplot(npassive/2,2,k)
    splot=squeeze(s(:,:,slice1));
-   plot(splot(:,1))
+   plot(x,splot(:,1))
+   axis([0 1 -.2 1.2]);
    
-% $$$    pcolor(x,y,splot')
-% $$$    stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
-% $$$    if (k==1) title(stitle); end;
-% $$$    axis equal
-% $$$    axis([0,max(x),0,max(y)]);
-% $$$    shading interp
-% $$$    caxis([0 1]) 
+   figure(1);
+   subplot(npassive/2,2,k)
+   pcolor(x,y,splot')
+   stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
+   if (k==1) title(stitle); end;
+   axis equal
+   axis([0,max(x),0,max(y)]);
+   shading interp
+   caxis([0 1]) 
 
    
 
@@ -140,7 +143,13 @@ end
 figure(1)
 orient tall
 print('-djpeg','-r125',['p',times,'.jpg']); 
+print('-depsc',['p',times,'.eps']); 
 figure(2)
 orient tall
 print('-djpeg','-r125',['pz',times,'.jpg']); 
+print('-depsc',['pz',times,'.eps']); 
+figure(3)
+orient tall
+print('-djpeg','-r125',['pc',times,'.jpg']); 
+print('-depsc',['pc',times,'.eps']); 
 

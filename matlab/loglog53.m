@@ -2,6 +2,8 @@ function loglog53(n,spec,stitle,CK,option)
 
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
+x=(1:n)-1;
+scale1=1;
 
 if (nargin==4) option=0; end;
 
@@ -39,8 +41,8 @@ if (option==3)
    plaw=-5/3;
    scalep = 0;
    ax=[1,1e4,1e-12,1.0];
-   scalep = 4;
-   ax=[1,1e4,1e-9,1000.0];
+   %scalep = 4;
+   %ax=[1,1e4,1e-9,1000.0];
 end
 
 % used by passive scalars
@@ -50,13 +52,23 @@ if (option==4)
    scalep = 0;
    ax=[1,1e4,1e-6,1.0];
 end
+% decay2048 KE:
+if (option==5) 
+   x_ck=1;      % dont plot 5/3 line
+   scalep = 0;
+   plaw=-5/3;
+   ax=[1,1e4,1e-7,1.0];
+   x=1.25*x;    % rescale x axis so peak match KCM plot
+   scale1=3;    % rescale E to match KCM plot 
+end
 
 
-x=(1:n)-1;
-scale=x.^scalep;
+
+scale=scale1*x.^scalep;
 s=size(spec);
 s=s(2);
 for i=1:s
+%   loglog(x, scale.*spec(1:n,i)',ccol(i),'LineWidth',2.0); hold on;
    loglog(x, scale.*spec(1:n,i)',ccol(i)); hold on;
 end
 

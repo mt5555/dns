@@ -7,14 +7,14 @@
 clear all;
 
 
-fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0002.0000.spdf','r','l');
+fid=fopen('/home/taylorm/data/dns/tmix/tmix256D/tmix256D0001.0000.spdf','r','l');
 %fid=fopen('../src/temp0000.0000.spdf','r','l');
 
 time=fread(fid,1,'float64');
 npmax=fread(fid,1,'float64');         
 disp(sprintf('npassive = %i',npmax))
 
-figure(1); clf; subplot(5,2,1)
+figure(1); clf; subplot(npmax/2,2,1)
 
 np=1;
 for p=1:npmax
@@ -32,10 +32,10 @@ for p=1:npmax
    mx=max(bins - bins.*(pdf==0));
    mn=min(bins - bins.*(pdf==0));        % min over non zero values
    
-   subplot(5,2,p) 
+   subplot(npmax/2,2,p) 
    plot(bins,pdf)
    ax=axis;
-   axis([-.1, 1.1, 0, .06]);
+   axis([-.1, 1.1, 0, .15]);
    xlabel(sprintf('<c^2>=%.4f  K=%.4f ',c2,c4/c2/c2));
    set(gca,'YTickLabel','')    
    if (p==1) 
@@ -49,4 +49,4 @@ times=sprintf('%.4f',time+10000);
 times=times(2:length(times));
 orient tall
 print('-dpsc',['ppdf',times,'.ps']); 
-print('-djpeg',['ppdf',times,'.jpg']); 
+%print('-djpeg',['ppdf',times,'.jpg']); 
