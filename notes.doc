@@ -1,7 +1,15 @@
 TODO:
 
-1.  alpha model
+bmtn: job running: 1 stage RK, with MPI buffers increased
+and b47&b48
+
+
+3D test case
+1.  finish alpha model, test conserved quantitiy
 2.  4th order differences
+3.  3D forced test case
+4. 2D shallow water case
+
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  
 101. divergence: go to Shashkov formula?  
