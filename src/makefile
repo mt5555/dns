@@ -24,10 +24,10 @@ ifeq ($(UNAME),Linux)
       # sca cluster has mpich and lam installed as RPMs, but with 
       #fortran wrappers using two underscores.  cant call these routines
       # with ifc compiler?
-      #MPI = -DUSE_MPI -DUSE_MPICH -I/opt/scali/contrib/mpich/include
+      #MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I/opt/scali/contrib/mpich/include
       #MPILIB = -L/opt/scali/contrib/mpich/lib -lfmpich -lmpich
-      MPI = -DUSE_MPI -I/users/contrib/lam/include
-      MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+      MPI = -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
+      MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
 
    ## Lahey
