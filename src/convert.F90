@@ -37,7 +37,6 @@ use params
 use mpi
 use fft_interface
 use spectrum
-use transpose
 implicit none
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: vor(:,:,:,:)
@@ -49,7 +48,7 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-real*8 :: schmidt_in,mn,mx,tmx1,tmx2
+real*8 :: schmidt_in,mn,mx
 integer :: type_in
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -283,22 +282,28 @@ icount=icount+1
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
           // message(2:10) // ".iotest"
 
-      mpi_maxio=32
-      mpi_stripe="4"
-      call mpi_io_init(0)
-
-      call wallclock(tmx1)
-      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
-      call wallclock(tmx2)
-      tmx2=tmx2-tmx1
-
-      if (io_pe==my_pe) then
-         print *,'stripe=',mpi_stripe
-         print *,'cpu time for output: ',tmx2, tmx2/60
-         print *,'data rate MB/s: ',8.*3.*g_nx*g_ny*g_nz/1024./1024./tmx2
+      ! stripe, num_cpus, 
+      if (ncpu_z>=4) then
+         call iotest(4,2,fname,Q,work1,work2)
       endif
-      call close_mpi
-      stop
+      if (ncpu_z>=8) then
+         call iotest(4,4,fname,Q,work1,work2)
+         call iotest(8,4,fname,Q,work1,work2)
+      endif
+      if (ncpu_z>=16) then
+         call iotest(8,8,fname,Q,work1,work2)
+         call iotest(4,8,fname,Q,work1,work2)
+         call iotest(16,8,fname,Q,work1,work2)
+      endif
+      if (ncpu_z>=32) then
+         call iotest(8,16,fname,Q,work1,work2)
+         call iotest(16,16,fname,Q,work1,work2)
+      endif
+      if (ncpu_z>=64) then
+         call iotest(16,32,fname,Q,work1,work2)
+      endif
+
+
    endif
 
 
@@ -319,6 +324,38 @@ endif
 100 continue
 call close_mpi
 end program
+
+
+
+
+subroutine iotest(stripe,num_io_cpu,fname,p,work1,work2)
+use transpose
+implicit none
+real*8 :: p(nx,ny,nz)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+character(len=*) :: fname
+integer :: num_io_cpu,stripe
+real*8 :: tmx1,tmx2    
+
+mpi_maxio=num_io_cpu
+write(mpi_stripe,'(i3)') stripe
+call mpi_io_init(0)
+
+call wallclock(tmx1)
+call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+call wallclock(tmx2)
+tmx2=tmx2-tmx1
+
+if (io_pe==my_pe) then
+   print *,'stripe=',mpi_stripe
+   write(*,'(a,f12.5,a,f12.5,a)') 'cpu time for output: ',tmx2,'s (',tmx2/60,'m)'
+   print *,'data rate MB/s: ',8.*3.*g_nx*g_ny*g_nz/1024./1024./tmx2
+endif
+
+end subroutine iotest
+
+
 
 
 
