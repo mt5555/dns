@@ -15,6 +15,8 @@ real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
+
+call comp_ellipse(Qhat(1,1,1,1),0)
 call ellipse_output(time)
 
 

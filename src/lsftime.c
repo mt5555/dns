@@ -7,7 +7,6 @@
 
 
 
-#ifdef USE_LSFTIME
 
 #if 0
 To use this in fortran:
@@ -47,6 +46,7 @@ Jerry
 #include        <time.h>
 #include        <lsf/lsbatch.h>
 
+int     SigURG=0;
 
 /************************************************************************/
 /*      Prototypes:                                                     */
@@ -58,7 +58,6 @@ extern  void    ExceptionHandler( int nSignal );
 extern  int     lsf_time_remaining(int *TTRL);
 
 
-        int     SigInt;
 
 
 /************************************************************************/
@@ -129,13 +128,27 @@ extern  void    CleanUp( void )
 {
         fprintf( stderr, "\nWe are now terminating ...\n" );
 }
+#endif
+
+
+
+
+
+
+
+
+#include        <stdio.h>
+#include        <signal.h>
+#include        <errno.h>
+#include        <stdlib.h>
+#include        <time.h>
+
+int     sigURG=0;
 
 
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/
-
-
 extern  void    ExceptionHandler( int nSignal )
 {
 
@@ -148,19 +161,35 @@ extern  void    ExceptionHandler( int nSignal )
 
         if( signal( nSignal, ExceptionHandler ) == SIG_ERR )
         {
-                fprintf( stderr, "Can not reset signal %d\n", nSignal );
-                exit( nSignal );
+                fprintf( stderr, "**WARNING** Can not reset signal %d\n", nSignal );
         }
 
 
         /*      Indicate that the signal has been caught        */
-
-
-        SigInt = nSignal;
+        sigURG=1;
 
 
 }
-#endif
+
+void  FORTRAN(set_sigurghandler)(void) {
+
+        if( signal( SIGINT, ExceptionHandler ) == SIG_ERR ) {
+                fprintf( stderr, "** WARNING** Can't catch signal SIGINT" );
+        }
+
+}
+
+void FORTRAN(caught_sigurg)(int *i) {
+
+*i=sigURG;
+
+}
+
+
+
+
+#ifdef USE_LSFTIME
+#include        <lsf/lsbatch.h>
 
 /************************************************************************/
 /*            lsf_time_remaining                                        */
@@ -173,11 +202,6 @@ extern  void    ExceptionHandler( int nSignal )
 /*                                                                      */
 /* Written by Jerry Melendez, CIC-7                                     */
 /************************************************************************/
-
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <lsf/lsbatch.h>
 
 extern  int     FORTRAN(lsf_time_remaining)(int *TTRL) {
     /* typedef enum    { FALSE = 0, TRUE = 1 } Bool_t;*/

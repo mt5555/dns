@@ -22,7 +22,7 @@ real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 ints=0
 maxs=0
 
-! call set_signal_handlers()
+call set_sigurghandler()
 
 call init_mpi       
 call wallclock(tmx1)  ! wallclock may use MPI timers, call after init_mpi
@@ -188,7 +188,7 @@ real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
 real*8 :: tmx1,tmx2
 integer,external :: lsf_time_remaining
-integer :: lsftime
+integer :: lsftime,i
 
 
 
@@ -223,6 +223,7 @@ do
          maxs(8)=lsftime/60.0
       endif
    endif
+   call caught_sigurg(i); maxs(9)=i;
 
 #ifdef USE_MPI
    ints_buf=ints

@@ -1,4 +1,26 @@
 **********************************************************************************
+4/24/02
+vxpair runs on autry
+
+3072x1536:  mu=1e-7 ok.  mu=2e-8 a touch noisy, goes away.
+            mu=4e-8 ok?
+            using delx goes like eta goes like mu^3/4 rule:  
+              (4e-8)^(3/4)*3072 = mu^(3/4) * N
+              .00869/N = mu^3/4 
+
+
+2048x1024
+./gridsetup.py 1 1 1 2048 1024 1 2 2 0 2 2 0
+make dnsvor
+
+
+vx2048a   mu=6e-8  (formula above gives: mu=6.87e-8)
+
+
+
+
+
+**********************************************************************************
 2/20/02
 1024^3 timeings on ASCI Q
                    5 timesteps

@@ -129,6 +129,8 @@ endif
 !
 
 
+! find the location of peak vorticity (needed by tracer_advance)
+call comp_ellipse(w0,1)
 
 w_old=w0
 
@@ -168,7 +170,6 @@ call bcw_impose(w0)
 call compute_psi(w0,psi0,rhs,work,psi,comp_psi_rk4)
 time = time + delt
 
-call comp_ellipse(w0,0)
 
 
 ! compute KE, max U  

@@ -31,7 +31,7 @@ for i=range
   ts = sprintf('%9.5f',10000+ts);
   ts=ts(2:10);
 
-  ts=[name,ts,'.vor']
+  ts=[name,ts,'.u']
   fidvor=fopen(ts,'r');
   time=fread(fidvor,1,'float64')
   data=fread(fidvor,3,'float64');
@@ -59,7 +59,7 @@ for i=range
   ts=sprintf('%s    time=%.2f  max=%f',shortname,time,qmax)
 
   
-  if (nz>=4) 
+  if (nz>=4 & 0) 
     %
     %  3D field, plot 4 sections in a 2x2 subplot window
     %
@@ -130,8 +130,7 @@ for i=range
       print('-djpeg','-r 96',pname);
     end
 
-    'pause'
-    %pause
+    'pause'; pause
   end
 end
 return

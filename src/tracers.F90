@@ -224,6 +224,7 @@ if (my_pe==fpe) then
       x=ncross
       call cwrite8(fid,x,1)
       call cwrite8(fid,cross,ncross*2)
+      call cclose(fid,ierr)
       ncross=0
    endif
 endif

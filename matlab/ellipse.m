@@ -6,7 +6,8 @@
 %ts=input('time=? ');
 
 %name='../src/temp';
-name='../src/temp0000.0000.ellipse';
+%name='../src/temp0000.0000.ellipse';
+name='../src/vxpair/vx2048a0000.0000.ellipse';
 fid=fopen(name,'r');
 
   

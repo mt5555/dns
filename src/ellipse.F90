@@ -49,8 +49,7 @@ wval(4)=4/8.
 wval(5)=3/8.
 wval(6)=2/8.
 wval(7)=1/8.
-
-if (nelld /= 4) then
+if (nelld /= 7) then
    call abort("ellipse init error")
 endif
 
