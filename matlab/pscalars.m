@@ -105,21 +105,34 @@ cu(2,:)=pints_e(24,np,:);
 cu(3,:)=pints_e(25,np,:);
 c1=pints_e(26,np,:);
 c1=squeeze(c1)';
-c2=c2-c1.^2;
+c3=pints_e(27,np,:);
+c3=squeeze(c3)';
+c4=pints_e(28,np,:);
+c4=squeeze(c4)';
 
-n0(1,:)=pints_e(27,np,:);
-n0(2,:)=pints_e(28,np,:);
-n0(3,:)=pints_e(29,np,:);
+
+n0(1,:)=pints_e(29,np,:);
+n0_8(1,:)=pints_e(30,np,:);
+n0_9(1,:)=pints_e(31,np,:);
+
+n0(2,:)=pints_e(32,np,:);
+n0_8(2,:)=pints_e(33,np,:);
+n0_9(2,:)=pints_e(34,np,:);
+
+n0(3,:)=pints_e(35,np,:);
+n0_8(3,:)=pints_e(36,np,:);
+n0_9(3,:)=pints_e(37,np,:);
+
 n0=mean(n0,1);
+n0_8=mean(n0_8,1);
+n0_9=mean(n0_9,1);
 
-if (ns_e+2 >= 38)
-i=29;  
+i=37;
 for n=1:3
 n0x(1,n,:)=pints_e(i+1,np,:);   % x direction N0 for c,n
 n0x(2,n,:)=pints_e(i+2,np,:);   % y direction
 n0x(3,n,:)=pints_e(i+3,np,:);   % z direciton
 i=i+3;
-end
 end
 
 n0x_t=(n0x(1,1,:)+n0x(2,2,:)+n0x(3,3,:))/3;

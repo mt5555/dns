@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer,parameter :: nints_e=28,npints_e=36
+integer,parameter :: nints_e=43,npints_e=44
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
@@ -472,10 +472,11 @@ real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
+real*8 :: u1(3),u3(3),u4(3)
 real*8 :: vor2(3),vor3(3),vor4(3)
 real*8 :: uxx2(3)
 real*8 :: dummy(1),S2sum,ensave,S4sum,S2,S4,S2w2
-real*8 :: tmx1,tmx2,xtmp
+real*8 :: tmx1,tmx2,xtmp,u1tmp(3)
 
 !
 ! compute derivatives
@@ -523,7 +524,7 @@ Sww=0
 ux2=0
 ux3=0
 ux4=0
-u2=0
+u1=0
 vor2=0
 vor3=0
 vor4=0
@@ -532,7 +533,7 @@ do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
    do n=1,3
-      u2(n)=u2(n)+Q(i,j,k,n)**2
+      u1(n)=u1(n)+Q(i,j,k,n)
    enddo
 
    vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
@@ -603,15 +604,38 @@ ux4=ux4/g_nx/g_ny/g_nz
 vor2=vor2/g_nx/g_ny/g_nz
 vor3=vor3/g_nx/g_ny/g_nz
 vor4=vor4/g_nx/g_ny/g_nz
-u2=u2/g_nx/g_ny/g_nz
 uxx2=uxx2/g_nx/g_ny/g_nz
-
+u1=u1/g_nx/g_ny/g_nz
 ensave=ensave/g_nx/g_ny/g_nz
 
 
+#ifdef USE_MPI
+   call MPI_allreduce(u1,u1tmp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#else
+   u1tmp=u1
+#endif
+u2=0
+u3=0
+u4=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   do n=1,3
+      xtmp=(Q(i,j,k,n)-u1tmp(n))**2
+      u2(n)=u2(n)+xtmp
+      u3(n)=u3(n)+xtmp*(Q(i,j,k,n)-u1tmp(n))
+      u4(n)=u4(n)+xtmp*xtmp
+   enddo
+enddo
+enddo
+enddo
+
+u2=u2/g_nx/g_ny/g_nz
+u3=u3/g_nx/g_ny/g_nz
+u4=u4/g_nx/g_ny/g_nz
 
 
-ASSERT("compute_expensive_scalars: ns too small ",ns>=28)
+ASSERT("compute_expensive_scalars: ns too small ",ns>=43)
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)
@@ -630,11 +654,42 @@ scalars(21:23)=vor4
 scalars(24)=S4sum
 scalars(25)=S2w2
 scalars(26:28)=uxx2
+scalars(29:31)=u1
+scalars(32:34)=u3
+scalars(35:37)=u4
 
 #ifdef USE_MPI
    scalars2=scalars
    call MPI_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
+
+
+
+! zero crossing:  (mean is in u1)
+! long. only.  
+call transpose_to_x(Q(1,1,1,1),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1(1),scalars(38))
+call transpose_to_y(Q(1,1,1,2),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1(2),scalars(39))
+call transpose_to_z(Q(1,1,1,3),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1(3),scalars(40))
+
+
+
+ux1=0  ! it's a deriavitve, so we know mean=0
+do n=1,3
+! zero crossing of dissipation: 
+call transpose_to_x(gradu(1,1,1,1),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(41))
+call transpose_to_y(gradv(1,1,1,2),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(42))
+call transpose_to_z(gradw(1,1,1,3),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(43))
+i=i+3
+enddo
+
+
+
 
 
 end subroutine
@@ -669,7 +724,7 @@ real*8 gradu(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: ux1,ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3),u1
+real*8 :: ux1,ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3),u1,u3,u4,u1tmp
 real*8 :: uxx2(3),uxx3(3),uxx4(3)
 
 !
@@ -687,6 +742,8 @@ ux3=0
 ux4=0
 u1=0
 u2=0
+u3=0
+u4=0
 su=0
 uxx2=0
 uxx3=0
@@ -697,7 +754,6 @@ do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
     u1=u1+Q(i,j,k,np)
-    u2=u2+Q(i,j,k,np)**2
 
    ! if we use grads(i,j,k,1)**3, do we preserve the sign?  
    ! lets not put f90 to that test!
@@ -721,7 +777,6 @@ enddo
 
 ! <(a-a0)**2> = < a**2 > - a0**2
 u1=u1/g_nx/g_ny/g_nz
-u2=u2/g_nx/g_ny/g_nz; 
 ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux3/g_nx/g_ny/g_nz
 ux4=ux4/g_nx/g_ny/g_nz
@@ -729,6 +784,30 @@ uxx2=uxx2/g_nx/g_ny/g_nz
 uxx3=uxx3/g_nx/g_ny/g_nz
 uxx4=uxx4/g_nx/g_ny/g_nz
 su=su/g_nx/g_ny/g_nz
+
+
+#ifdef USE_MPI
+   call MPI_allreduce(u1,u1tmp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#else
+   u1tmp=u1
+#endif
+
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+    xtmp=(Q(i,j,k,np)-u1tmp)**2
+    u2=u2+xtmp
+    u3=u3+xtmp*(Q(i,j,k,np)-u1tmp)
+    u4=u4+xtmp*xtmp
+enddo
+enddo
+enddo
+u2=u2/g_nx/g_ny/g_nz; 
+u3=u3/g_nx/g_ny/g_nz; 
+u4=u4/g_nx/g_ny/g_nz; 
+
+
 
 
 ! we will sum over all pe's below, so do this for non-sums:
@@ -759,6 +838,10 @@ i=i+3
 
 i=i+1
 scalars(i)=u1              ! 24
+i=i+1
+scalars(i)=u3              ! 25
+i=i+1
+scalars(i)=u4              ! 26
 
 
 #ifdef USE_MPI
@@ -772,13 +855,27 @@ scalars(i)=u1              ! 24
 
 
 ! zero crossing:  (mean is in pints_e(24,n))
+! other values:
+ux1=.8; ux2=.9
 call transpose_to_x(Q(1,1,1,np),work,n1,n1d,n2,n2d,n3,n3d)
-call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(i+1))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(27))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(28))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux2,scalars(29))
+
 call transpose_to_y(Q(1,1,1,np),work,n1,n1d,n2,n2d,n3,n3d)
-call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(i+2))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(30))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(31))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux2,scalars(32))
+
 call transpose_to_z(Q(1,1,1,np),work,n1,n1d,n2,n2d,n3,n3d)
-call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(i+3))
-i=i+3
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(33))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(34))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux2,scalars(35))
+i=35
+
+
+
+
 
 
 ux1=0  ! it's a deriavitve, so we know mean=0
@@ -792,7 +889,6 @@ call transpose_to_z(grads(1,1,1,n),work,n1,n1d,n2,n2d,n3,n3d)
 call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(i+3))
 i=i+3
 enddo
-
 
 
 
