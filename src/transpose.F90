@@ -943,7 +943,7 @@ end subroutine
 
 
 
-subroutine output1(p,pt,buf,fid,fpe)
+subroutine output1(p,pt,buf,fid,fpe,offset)
 use params
 use mpi
 CPOINTER fid
@@ -960,7 +960,9 @@ integer request,statuses(MPI_STATUS_SIZE)
 #endif
 integer i,j,k,l,extra_k,kuse,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d
-integer :: ny_2dx_actual 
+integer :: ny_2dx_actual ,offset
+integer*8 zpos,ypos
+
 ny_2dx_actual = ny_2dx
 
 call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
@@ -1045,7 +1047,14 @@ do x_pe=0,ncpu_x-1
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 #endif
       endif
-      
+
+      !
+      !  we now have the slab of data at position:
+      !  zpos = z_pe*nslabz + k 
+      !  ypos = y_pe*nslaby + x_pe*ny_2dx_actual
+      !
+      !  so the offset is:  zpos*(o_nx*o_ny) + ypos*o_nx
+      !
       if (o_nx>g_nx) then
          if (g_bdy_x1==PERIODIC) then
             buf(o_nx,:)=buf(1,:)  ! append to the end, x-direction
@@ -1053,7 +1062,17 @@ do x_pe=0,ncpu_x-1
             buf(o_nx,:)=0
          endif
       endif
-      call cwrite8(fid,buf,o_nx*ny_2dx_actual)
+      if (use_mpi_io) then
+#ifdef USE_MPI
+         zpos = z_pe*nslabz + k 
+         ypos = y_pe*nslaby + x_pe*ny_2dx_actual
+         zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
+         call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+         call MPI_File_write(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
+#endif
+      else
+         call cwrite8(fid,buf,o_nx*ny_2dx_actual)
+      endif
 
       if (o_ny>g_ny) then
          if (y_pe==0 .and. x_pe==0) then
@@ -1065,7 +1084,17 @@ do x_pe=0,ncpu_x-1
             endif
          endif
          if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then     ! append to the end, y-direction
-            call cwrite8(fid,saved_edge,o_nx)
+            if (use_mpi_io) then
+#ifdef USE_MPI
+               zpos = z_pe*nslabz + k 
+               ypos = y_pe*nslaby + x_pe*ny_2dx_actual
+               zpos = 8*(zpos*o_nx*o_ny+ypos*o_nx)
+               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+               call MPI_File_write(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
+#endif
+            else
+               call cwrite8(fid,saved_edge,o_nx)
+            endif
          endif
       endif
 

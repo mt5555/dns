@@ -204,9 +204,16 @@ character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
+if (use_mpi_io) then
+   call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
+   return
+endif
+
+
 xnx=o_nx
 xny=o_ny
 xnz=o_nz
+
 
 if (output_spec) then
 
@@ -315,9 +322,160 @@ else
    if (output_spec) then
       call output1_spec(p,work,work2,fid,fpe,im_max,jm_max,km_max)
    else
-      call output1(p,work,work2,fid,fpe)
+      call output1(p,work,work2,fid,fpe,-1)
    endif
 
+endif
+if (my_pe==fpe) call cclose(fid,ierr)
+
+end subroutine
+
+
+
+
+
+subroutine singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
+!
+! I/O routines where all data goes through a single PE and is
+! written to a single file
+!
+! io_read=0    write data to file fname
+! io_read=1    read data from file fname
+!
+! fpe       processor to do the file I/O
+!
+! output_spec=.true.     i/o on 2/3 dealiased spectral coefficients
+! output_spec=.false.    i/o on full 3d array p 
+!                     (grid point data or non-dealiased spec coeff.)
+!
+use params
+use mpi
+use transpose
+implicit none
+integer :: io_read  ! =1 for read, 0 for write
+integer :: fpe
+real*8 :: time
+real*8 :: p(nx,ny,nz)
+real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
+character(len=*) :: fname
+logical :: output_spec
+integer im_max,km_max,jm_max
+
+
+
+! local variables
+integer i,j,k,n
+real*8 xnx,xny,xnz
+character(len=80) message
+integer n_var_start,ierr,offset=0
+integer statuses(MPI_STATUS_SIZE)
+CPOINTER fid
+
+if (use_mpi_io) then
+   call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
+   return
+endif
+
+
+xnx=o_nx
+xny=o_ny
+xnz=o_nz
+
+
+if (output_spec) then
+
+   ! default is to write everything:
+   xnx=g_nx
+   xny=g_ny
+   xnz=g_nz
+
+   if (dealias==1) then
+      xnx=2+2*(g_nx/3)
+      xny=2+2*(g_ny/3)
+      xnz=2+2*(g_nz/3)
+   endif
+
+   ! if some kind of spectral truncation:
+
+
+endif
+
+if (my_pe==fpe) then
+
+   if (io_read==1) then
+      call copen(fname,"r",fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
+         call print_message(message)
+         call print_message(fname)
+         call abort("")
+      endif
+      call cread8e(fid,time,1,ierr)
+      if (ierr/=1) then
+         write(message,'(a,i5)') "singlefile_io(): Error reading file"
+         call print_message(message)
+         call print_message(fname)
+         call abort("")
+      endif
+      call cread8(fid,xnx,1)
+      call cread8(fid,xny,1)
+      call cread8(fid,xnz,1)
+      if (output_spec) then
+         print *,'Spectrum input data'
+         print *,'number of real coefficients: ',xnx,xny,xnz
+         if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
+            ! we can only upsample low-res data.
+            ! to run with high-res data, output a trucated form.  
+            call print_message("Error: spectral input requires downsampling to lower resolution")
+            call print_message("Input routines can only upsample.") 
+            call print_message("Output routines can only downsample.") 
+            call print_message("Run code at higher resolution, calling Output to downsample")
+            call abort("error in singlefile_io2")
+         endif
+      else
+         if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
+         if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
+         if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+         call cread8(fid,g_xcord(1),o_nx)
+         call cread8(fid,g_ycord(1),o_ny)
+         call cread8(fid,g_zcord(1),o_nz)
+      endif
+   else
+      call MPI_Info_create(infoin,ierr)
+      call MPI_Info_set(infoin, "striping_factor", "64",ierr) 	
+      call MPI_Info_set(infoin, "striping_unit",  "8388608",ierr)
+      call MPI_File_open(comm_1,fname, &
+           MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
+           infoin, fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
+         call print_message(message)
+         call print_message(fname)
+         call abort("")
+      endif
+      call MPI_File_write(fid,time,1,MPI_REAL8,statuses,ierr)
+      call MPI_File_write(fid,xnx,1,MPI_REAL8,statuses,ierr)
+      call MPI_File_write(fid,xny,1,MPI_REAL8,statuses,ierr)
+      call MPI_File_write(fid,xnz,1,MPI_REAL8,statuses,ierr)
+      offset=4
+      call MPI_File_close(fid,ierr)
+   endif
+endif
+
+#ifdef USE_MPI
+call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+#endif
+
+! max wave number to read/write for spectral I/O
+im_max=xnx/2-1
+jm_max=xny/2-1
+km_max=xnz/2-1
+
+
+if (io_read==1) then
+   call input1(p,work,work2,fid,fpe,.false.)
+else
+   call output1(p,work,work2,fid,fpe,offset)
 endif
 if (my_pe==fpe) call cclose(fid,ierr)
 

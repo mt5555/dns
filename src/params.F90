@@ -52,6 +52,7 @@ logical :: rw_spec=.false.          ! set to .true. to read/write dealiased spec
                                     ! instead of grid point values 
 logical :: udm_input=.false.        ! use UDM for input/restart files
 logical :: udm_output=.false.       ! use UDM for output files
+logical :: use_mpi_io=.false.     
 logical :: byteswap_input=.false.   ! byteswap all binary input files
 
 real*8  :: g_u2xave=0               ! <ux,ux> updated after each time step  
