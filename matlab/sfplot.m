@@ -15,6 +15,7 @@ fid=fopen('test64.sf','r');
 
 times=[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0];
 mkps=1;
+dp=5;
 
 time=fread(fid,1,'float64');
 while (time>=0 & time<=5000)
@@ -34,7 +35,7 @@ while (time>=0 & time<=5000)
   
   if (plotu) 
     figure(1)
-    plot_u(fid,time);
+    plot_u(fid,time,dp);
     if (mkps) 
       orient landscape
       print -dpsc sf1.ps
@@ -46,7 +47,7 @@ while (time>=0 & time<=5000)
 
   if (plottran)
     figure(2)
-    plot_tran(fid,time);
+    plot_tran(fid,time,dp);
     if (mkps) 
       orient landscape
       print -dpsc sf2.ps

@@ -46,9 +46,12 @@ one box timings:  256 on 32 cpus            > 15min
                   400 on 5x1x25              27.03m
                   400 on 1x100               32.09m
 
-t=.01
-two box timings:  512 on 256 cpus   pend
-                  500 on 250 cpus.           in
+t=-1  (one time step)
+                  512^3 on 128 cpus:         4.81
+                  512^3 on 256 cpus:         in
+t=-5  (5 time step)
+                  512^3 on 128 cpus:         
+                  512^3 on 256 cpus:         
 
 
 
