@@ -139,6 +139,7 @@ integer im,jm,km,i2,j2,k2
 real*8 :: uu,vv,ww,xfac
 
 
+
 ASSERT("divfree(): nslabx must be even ",mod(nslabx,2)==0)
 ASSERT("divfree(): nslaby must be even ",mod(nslaby,2)==0)
 ASSERT("divfree(): nslabz must be even ",(mod(nslabz,2)==0 .or. nslabz==1))
@@ -224,7 +225,6 @@ enddo
          enddo
       enddo
    enddo
-
 
 do i=1,3
    if (dealias) call fft_filter_dealias(u(1,1,1,i))

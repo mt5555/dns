@@ -84,7 +84,7 @@ cfl_used_vis=mumax*delt
 !
 ! display screen output
 !
-if (doit) then
+if (doit .or. itime<5) then
 
    write(message,'(a,f9.5,a,i5,a,f8.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
@@ -189,34 +189,74 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: time
 
 ! local variables
-real*8 :: work(nx,ny,nz)
-real*8 :: p(nx,ny,nz)
 integer i,j,k,n
-integer :: iwave
-real*8,allocatable  ::  spectrum(:)
+integer :: iwave,iwave_max
+real*8,allocatable  ::  spectrum(:),spectrum1(:)
 
-iwave=max(g_nx,g_ny,g_nz)
-allocate(spectrum(0:iwave))
+integer,parameter :: numx=15,numy=10
+character :: plot(0:numx,0:numy)
+real*8 cspec(0:numx)
+integer ix,iy
 
-p=0
+iwave_max=max(g_nx,g_ny,g_nz)
+allocate(spectrum(0:iwave_max))
+allocate(spectrum1(0:iwave_max))
+spectrum=0
+spectrum1=0
+
 do i=1,3
-   p=p+.5*Q(:,:,:,i)*Q(:,:,:,i)  
+   iwave=iwave_max
+   call compute_spectrum(Q(:,:,:,i),spectrum1,iwave,io_pe)
+   spectrum=spectrum+.5*spectrum1
 enddo
-call compute_spectrum(p,spectrum,iwave,io_pe)
 
-#if 0
-iwave=max(g_nx,g_ny,g_nz)/2
-do i=1,iwave
-   print *,i,spectrum(i)
+
+
+if (my_pe==io_pe) then
+! ASCII plot of KE spectrum
+! number of waves:  1..iwave+1
+! energy range:     1 .. 10e-10  log:  0 .. -10
+!
+cspec=0
+plot=" "
+
+do i=0,iwave
+   if (i==0) then
+      ix=0
+   else
+      ix=1 + ( (numx-1)*log10(real(i))/log10(real(iwave)) )     ! ranges from 1..numx
+   endif
+   if (ix<0) ix=0
+   if (ix>numx) ix=numx
+   cspec(ix)=cspec(ix)+spectrum(i)
 enddo
-rwave=0
-do i=iwave+1,iwave_max
-   rwave=rwave+spectrum(i)
+
+do i=0,numx
+   iy = -(numy/10.0) * log10(1d-200+cspec(i))  ! ranges from 0..numy
+   if (iy<0) iy=0
+   if (iy>numy) iy=numy
+   cspec(i)=iy
 enddo
-print *,iwave+1,"..",iwave_max,rwave
-#endif
+
+do i=0,numx
+    j=cspec(i)
+    plot(i,j)="*"
+enddo
+
+print *
+print *,"1E0   |",plot(:,0)," KE spectrum"
+do i=1,numy-1
+   print *,"      |",plot(:,i)
+enddo
+print *,"1E-10 |",plot(:,numy)
+print *,"      +---------------+"
+print *,"      k=0           k=",iwave
+
+endif
+
 
 deallocate(spectrum)
+deallocate(spectrum1)
 
 end subroutine
 

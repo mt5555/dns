@@ -126,6 +126,7 @@ integer i,j,k,n,ierr
 
 Q_old=Q
 
+
 ! stage 1
 call ns3D(rhs,Q_old,time,1,ints)
 call divfree(rhs,Q_tmp)

@@ -51,16 +51,17 @@ end subroutine
 
 
 
-subroutine compute_spectrum(p,spectrum,iwave_max,pe)
+subroutine compute_spectrum(pin,spectrum,iwave_max,pe)
 use params
 use mpi
 implicit none
 integer :: iwave_max,ierr
 integer :: pe             ! compute spectrum on this processor
-real*8 :: p(nx,ny,nz)
+real*8 :: pin(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)
 
 ! local variables
+real*8 :: p(nx,ny,nz)
 real*8 rwave
 integer :: iwave
 real*8 :: spectrum_in(0:iwave_max)
@@ -73,7 +74,7 @@ if (nint(rwave)>iwave_max) then
 endif
 iwave_max=nint(rwave)
 
-
+p=pin
 call fft3d(p,work)
 spectrum=0
 
@@ -92,5 +93,16 @@ enddo
 spectrum_in=spectrum
 call MPI_reduce(spectrum_in,spectrum,iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
+
+iwave = max(g_nx,g_ny,g_nz)
+iwave = (iwave/2)           ! max wave number in sphere.
+
+! for all waves outside sphere, sum into one wave number:
+do i=iwave+2,iwave_max
+   spectrum(iwave+1)=spectrum(iwave+1)+spectrum(i)
+enddo
+iwave_max=iwave+1
+
+
 
 end subroutine

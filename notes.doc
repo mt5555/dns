@@ -18,30 +18,32 @@ aliased:  mu=0
 
 aliased:  mu=.00001 
 1.0  unstable
-.10  IN dosadi  looks stable still running...
+.10  unstable by t=10, probably earlier
 
 
 aliased:  mu=.0001  
 cfl
 1.0  KE osscillationg around t=.8
-.6:  IN
+.6:  unstable at t=18
+
+aliased:  mu=.001  
+cfl .6: unstable at t=10
+aliased:  mu=.01  
+cfl .6: STABLE - ran KE from 5000 down to 3
 
 
 
 
 
 
-
-plots at t=.5:
-mu=.0001:  more viscous than dealiased.
-mu=.00001: about the same
-mu=.000001: about the same
-
-
-
-HEAT EQU.  fft, aliased
+HEAT EQU.  fft, dealiased
+mu=.01
 cfl_vis
-  ?
+.40    unstable
+.35    unstable
+.30    stable - ran unil KE reduced 90%
+.25    stable - ran until KE reduced 80%
+ .1    stable - ran until KE reduced 50%.   
 
 
 
@@ -50,9 +52,9 @@ cfl_vis
 
 
 
+NOTES:
 
-
-poisson solve:  inner most tranform_to_z/transform_from_z pair
+(1) poisson solve:  inner most tranform_to_z/transform_from_z pair
 could be removed if we can compute the wave numbers of all
 the coefficients in the z-decomposition .  
 
