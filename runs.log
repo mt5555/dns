@@ -41,7 +41,6 @@ vx2560b
 
 
 
-
 vx2560c
 2560x2048   (400MB)   IN   l1
    data stored in /netscratch/taylorm/kras
@@ -51,6 +50,17 @@ vx2560c
       biotsavart_cutoff=5e-3
       biotsavart_apply=50
       delta=.05
+      biotsavart_ubar=.1
+
+vx5120a                            IN lightning
+5120x4096  
+   data stored in node 168
+   init_cond_subtype=102
+   mu=1e-6                               
+   hard coded: (code may change later)
+      biotsavart_cutoff=5e-3
+      biotsavart_apply=50
+      delta=.025
       biotsavart_ubar=.1
 
 
