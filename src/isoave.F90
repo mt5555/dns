@@ -62,8 +62,10 @@ real*8 :: x
 
 x=ndelta; call cwrite8(fid,x,1)   
 x=ndir;   call cwrite8(fid,x,1)   
-x=2;      call cwrite8(fid,x,1)   ! number of longitudinal
-x=3;      call cwrite8(fid,x,1)   ! number of transverse
+x=2;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
+x=3;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
+x=0;      call cwrite8(fid,x,1)   ! number of future type1
+x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
 ! write out the r values
 do idir=1,ndir
