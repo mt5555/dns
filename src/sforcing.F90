@@ -480,11 +480,13 @@ real*8 :: R(-numbs:numbs,-numbs:numbs,-numbs:numbs,3,2),Rr,Ri
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
-real*8 :: ff(numbs)
+real*8 :: ff(numbs,3)
 
-#undef GATHER_STATS
+#define GATHER_STATS
 #ifdef GATHER_STATS
-countmax=5000
+ff=0
+Ri=3
+countmax=1000000
 do count=1,countmax
 
 call gaussian(rmodes,((2*numbs+1)**3) *3)
@@ -501,18 +503,24 @@ do wn=1,numb
       if (z_imcord(i)==0) xfac=xfac/2
 
 
-      ff(wn)= ff(wn) + xfac*( &
-         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)**2 +&
-         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)**2 +&
-         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)**2 )
+      ff(wn,1)= ff(wn,1) + xfac*( &
+         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)**Ri )
+      ff(wn,2)= ff(wn,2) + xfac*( &
+         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)**Ri )
+      ff(wn,3)= ff(wn,3) + xfac*( &
+         rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)**Ri )
+
 
    enddo
 
 enddo
 enddo
-ff=ff/countmax
+ff=abs(ff/countmax)**(1/Ri)
 print *,'count=',countmax
-print *,'<R,R> =',ff
+print *,'<R,R> ='
+do wn=1,numb
+   print *,ff(wn,:)
+enddo
 call abort("end stats")
 #endif
 

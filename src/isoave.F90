@@ -39,6 +39,13 @@ logical :: firstcall=.true.
 !   D_ltt = u_l * u_t1**2
 !
 !
+!   u_l**p   p=2:1:10                       9    9
+!   u_t**p   p=2:1:10                      9*2 = 18
+!   u_l**p u_t**q    p=2,4,6  q=2,4,6      9*2 = 18
+!   Dl(:,:,9)
+!   Dt(:,:,2,9)
+!   Dlt(:,:,2,3,3)
+!   
 !
 real*8,allocatable  :: D_ll(:,:)         ! D_ll(ndelta,ndir)
 real*8,allocatable  :: D_lll(:,:)        ! D_lll(ndelta,ndir)
@@ -169,8 +176,8 @@ real*8 :: range(3,2)
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
-real*8 :: dummy,xtmp
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,ntot
+real*8 :: dummy,xtmp,ntot
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr
 
 if (firstcall) then
@@ -196,7 +203,7 @@ SN_lll=0
 
 ke_diss=0
 ke=0
-ntot=g_nx*g_ny*g_nz
+ntot=real(g_nx)*g_ny*g_nz
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
@@ -418,8 +425,8 @@ real*8 :: subcube_st(g_nz2,nslabx,ny_2dz)
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
-real*8 :: dummy,xtmp
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,ntot
+real*8 :: dummy,xtmp,ntot
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr
 
 if (firstcall) then
@@ -487,8 +494,8 @@ enddo
    call MPI_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ke
    call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   i=ntot
-   call MPI_allreduce(i,ntot,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+   xtmp=ntot
+   call MPI_allreduce(xtmp,ntot,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 epsilon=mu*ke_diss/ntot
@@ -673,8 +680,8 @@ integer :: lx1,lx2,lz1,lz2,ly1,ly2
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
-real*8 :: dummy
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ntot
+real*8 :: dummy,ntot
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m
 
 if (firstcall) then
    if (ncpu_x*ncpu_y*ncpu_z>1) then
@@ -710,7 +717,7 @@ do n=1,ndim
       enddo
    enddo
 enddo
-ntot=(lz2-lz1+1)*(ly2-ly1+1)*(lx2-lx1+1)
+ntot=real(lz2-lz1+1)*(ly2-ly1+1)*(lx2-lx1+1)
 epsilon=mu*ke_diss/ntot
 ke=ke/ntot
 

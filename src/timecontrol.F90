@@ -117,7 +117,11 @@ ens1=ints(7)
 ke0=ke1
 ke1=ints(6)
 ea0=ea1
-ea1 = ints(6) + .5*alpha_value**2 * ints(2)
+if (infinite_alpha==0) then
+   ea1 = ints(6) + .5*alpha_value**2 * ints(2)
+else
+   ea1 = .5*ints(2)
+endif
 
 t1=max(t1,time_initial)
 t0=t1                       ! previous previous time level 
@@ -239,18 +243,24 @@ if (doit_screen) then
    ! alpha model information
    !
    if (alpha_value>0) then
-   write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'Ea: ',&
-        ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
-   call print_message(message)	
-
-   write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
-        ke_diss-mu*alpha_value**2*ints(1),&
-        ' f=',ints(3) - alpha_value**2*ints(9),&
-         '                      tot=',&
-        ke_diss-mu*alpha_value**2*ints(1) + ints(3) - alpha_value**2*ints(9)
-   call print_message(message)	
+      write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'Ea: ',&
+           ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
+      call print_message(message)	
+      
+      if (infinite_alpha==0) then
+         write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
+              ke_diss-mu*alpha_value**2*ints(1),&
+              ' f=',ints(3) - alpha_value**2*ints(9),&
+              '                      tot=',&
+              ke_diss-mu*alpha_value**2*ints(1) + ints(3) - alpha_value**2*ints(9)
+      else
+         write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
+              mu*ints(1),' f=',ints(9),&
+              '                      tot=', -mu*ints(1) - ints(9)
+      endif
+      call print_message(message)	
    endif
-
+   
    if (ke1>99) then
    write(message,'(a,f13.8,a,f13.4,a,f12.7)') 'ke: ',ke1,'  enstropy: ',&
         ints(7),'         total d/dt(ke):',delke_tot

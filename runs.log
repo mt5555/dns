@@ -227,7 +227,7 @@ vx2048d   vx2048d.inp  mu=4e-7   looks good
 
 vx4096a                mu=1e-7   done, looks good
 vx4096b                mu=7e-8   extremly small amount of noise at t=50
-
+1
                        mu=4e-8   save, conservative choice?
 vx6144a                mu=3e-8   looks good - but if you zoom in 
                                  there is a microscopic amount of noise.
@@ -238,6 +238,15 @@ vx6144b                mu=2e-8   a touch noisy, goes away
 
 **********************************************************************************
 2/20/02
+
+iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
+           3333 timesteps per eddy turnover time
+           assume 1024^3 needs 6666 timesteps per eddy turnover time
+           = 5 days per eddy turnover time on 512 cpus.  
+           2048^3 needs 2*6666 timesteps = 40 days per eddy turnover time
+
+
+
 1024^3 timeings on ASCI Q
                    5 timesteps
 
@@ -252,11 +261,17 @@ REDO:
 
 2048^3     
 
-dns:    1x1x512     45.84 (5 timesteps)
+dns:    1x1x512     45.84 (5 timesteps)  9.17m per timestep
+        1x1x1024         5 timesteps     4.35m per timestep
 dnsghost 8x8x8      6.50 (1 timestep)
 dnsghost 2x2x128    insufficient virtual memory
 dnsghost 8x4x16     same
 dnsghost 4x4x32     same
+
+         1x1x1024   size per cpu:  (2052*2052*6)*8*3 *6 = 3.4Gb per cpu.  
+         2x1x512    wont load                             2.2Gb per cpu
+dhsghost 4x1x256    5 timesteps:   2.09m per timestep     1.7Gb per cpu
+dhsghost 2x2x256    5 timesteps:   IN
 
 
 1536^3 

@@ -704,11 +704,12 @@ do m1=1,3
    ! compute div(Tau)  
    call der(work,work,dummy,p,DX_ONLY,m2)
    div(nx1:nx2,ny1:ny2,nz1:nz2,m1) = div(nx1:nx2,ny1:ny2,nz1:nz2,m1) -&
-                           alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)
+        work(nx1:nx2,ny1:ny2,nz1:nz2)
 
 
 enddo
 enddo
+if (infinite_alpha==0) div=alpha_value**2 * div
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -718,7 +719,7 @@ enddo
 ! also return a_diss, the KE dissapation from div(tau) term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #undef TOPHAT
-#define ITER
+#undef ITER
 
 #ifdef TOPHAT
 
@@ -888,6 +889,7 @@ do j=1,ny_2dz
               ((abs(jm)> g_ny/3) ) .or. &
               ((abs(im)> g_nx/3) ) )  then
             out(k,i,j)=in(k,i,j)
+            stop 'fix this with new dealias function'
          else
             ! compute laplacian inverse
             xfac= -(im*im +km*km + jm*jm)*pi2_squared      
@@ -925,8 +927,10 @@ do n=1,3
             km=z_kmcord(k)
             
             ! compute laplacian inverse
-            xfac= -(im*im +km*km + jm*jm)*pi2_squared      
-            xfac=1 - alpha_value**2 *xfac
+            xfac= (im*im +km*km + jm*jm)*pi2_squared      
+            if (infinite_alpha==0) then
+               xfac=1 + alpha_value**2 *xfac
+            endif
             if (xfac/=0) xfac = 1/xfac
             rhs(k,i,j,n) = rhs(k,i,j,n) + xfac*divs(k,i,j,n)
 

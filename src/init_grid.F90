@@ -16,7 +16,9 @@ call init_grid()
 !
 ! scale alpha now that we know delx
 !
-if (alpha_value>=1.0) then
+if (alpha_value>=1e10) then
+   infinite_alpha=1
+else if (alpha_value>=1.0) then
    alpha_value=alpha_value*min(delx,dely,delz)
 endif
 write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
