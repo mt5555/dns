@@ -99,7 +99,7 @@ if (n>1000000) call abort("fft_james_interface.F90: n>1 million")
 
 fftdata(index)%size=n
 
-write(message,'(a,i6)') 'Initializing FFT of size n=',n
+write(message,'(a,i6)') 'Initializing stk FFT of size n=',n
 call print_message(message)
 
 call rfft_init(n,fftdata(index)%ptrigs)

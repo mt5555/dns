@@ -27,7 +27,7 @@ endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
-   LDFLAGS =  -l scs
+   LDFLAGS =  -l scs -Lstk -lstk
    FFLAGS = -64 -O3 -macro_expand -DUSE_MPI  -DIRIX64  -DSGIFFT
 endif
 
