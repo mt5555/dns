@@ -47,7 +47,8 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-real*8 :: schmidt_in,type_in,mn,mx
+real*8 :: schmidt_in,mn,mx
+integer :: type_in
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
@@ -222,20 +223,23 @@ icount=icount+1
 
    if (convert_opt==6) then  ! -cout passive
       schmidt_in=1.0
-      type_in=0.0
+      type_in=0
       write(message,'(f10.4)') 10000.0000 + time
       write(ext,'(f8.3)') 1000 + schmidt_in
       write(ext2,'(i3)') 100+type_in
-      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
+      call print_message(rundir)
+      call print_message(runname)
       call print_message(fname)	
       call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
       call global_min(Q,mn)
       call global_max(Q,mx)
-      write(message,'(a,i3,a,2f17.5)') 'passive scalar min/max: ',mn,mx
+      write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
       call print_message(message)	
 
-      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+      write(message,'(f10.4)') 10000.0000 + time
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
           // '-raw'
       call print_message(fname)
