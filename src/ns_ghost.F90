@@ -4,7 +4,7 @@
 !  subroutine to take one Runge-Kutta 4th order time step
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q,rhs,Q_old,Q_tmp,q4,work1,work2)
+subroutine rk4(time,Q,rhs,Q_old,Q_tmp,q4,work1,p)
 use params
 implicit none
 real*8 :: time
@@ -12,9 +12,9 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
-real*8 :: q4(nx,ny,nz,n_var)
+real*8 :: q4(nx,ny,nz,n_var)     ! not used
 real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
+real*8 :: p(nx,ny,nz)
 
 ! local variables
 real*8 :: vel
@@ -42,26 +42,26 @@ Q_old=Q
 
 ! stage 1
 call ns3D(rhs,Q,time,1)
-call divfree_gridspace(rhs,q4,work1,work2)
+call divfree_ghost(rhs,p,work1)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0)
-call divfree_gridspace(rhs,q4,work1,work2)
+call divfree_ghost(rhs,p,work1)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0)
-call divfree_gridspace(rhs,q4,work1,work2)
+call divfree_ghost(rhs,p,work1)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0)
 Q=Q+delt*rhs/6.0
-call divfree_gridspace(Q,q4,work1,work2)
+call divfree_ghost(Q,p,work1)
 
 
 
@@ -71,13 +71,13 @@ call divfree_gridspace(Q,q4,work1,work2)
 
 ! stage 1
 call ns3D(rhs,Q,time,1)
-call divfree_gridspace(rhs,q4,work1,work2)
+call divfree_ghost(rhs,p,work1)
 Q=Q+delt*rhs/3
 
 ! stage 2
 Q_tmp = rhs
 call ns3D(rhs,Q,time+delt/3,0)
-call divfree_gridspace(rhs,q4,work1,work2)
+call divfree_ghost(rhs,p,work1)
 rhs = -5*Q_tmp/9 + rhs
 Q=Q + 15*delt*rhs/16
 
@@ -87,7 +87,7 @@ Q_tmp=rhs
 call ns3D(rhs,Q,time+3*delt/4,0)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
-call divfree_gridspace(Q,q4,work1,work2)
+call divfree_ghost(Q,p,work1)
 
 
 #endif
@@ -247,7 +247,7 @@ do n=1,ndim
    do i=nx1,nx2
 
       d1=( 2*(Q(i,j,k+1,n)-Q(i,j,k-1,n))/3 -  &
-                  (Q(i,j,k+2,n)-Q(i,j,k-2,n))/12          )/dely
+                  (Q(i,j,k+2,n)-Q(i,j,k-2,n))/12          )/delz
       d2=(-Q(i,j,k+2,n) + 16*Q(i,j,k+1,n) - 30*Q(i,j,k,n) + &
                    16*Q(i,j,k-1,n) - Q(i,j,k-2,n)) / (12*delz*delz)
       rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2 - Q(i,j,k,3)*d1
@@ -300,3 +300,91 @@ end
 
 
 
+subroutine divfree_ghost(u,p,work)
+!
+! make u divergence free
+!    solve:  div(u) = laplacian(p)
+!    then:   unew = u - grad(p)
+!    
+! 
+!
+use params
+use fft_interface
+use ghost
+implicit none
+real*8 :: u(nx,ny,nz,3)
+real*8 :: p(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
+
+!local
+real*8 :: dummy(1),tol
+real*8 :: alpha=0
+real*8 :: beta=1
+integer i,j,k,n
+external helmholtz_periodic,helmholtz_dirichlet
+
+
+! solve laplacian(p)=div(u)
+
+if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC .and. bdy_z1==PERIODIC) then
+
+   ! p = ux+vy+wz
+   call ghost_update_x(u(1,1,1,1),1)
+   call ghost_update_y(u(1,1,1,2),1)
+   if (ndim==3) call ghost_update_z(u(1,1,1,3),1)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      p(i,j,k)=  &
+        ( 2*(u(i+1,j,k,1)-u(i-1,j,k,1))/3 -  (u(i+2,j,k,1)-u(i-2,j,k,1))/12 )/delx
+   
+      p(i,j,k)=p(i,j,k)+&
+        ( 2*(u(i,j+1,k,2)-u(i,j-1,k,2))/3 -  (u(i,j+2,k,2)-u(i,j-2,k,2))/12 )/dely
+   
+   if (ndim==3) then
+      p(i,j,k)=p(i,j,k)+&
+           ( 2*(u(i,j,k+1,3)-u(i,j,k-1,3))/3 -  (u(i,j,k+2,3)-u(i,j,k-2,3))/12 )/delz
+   endif
+
+   enddo
+   enddo
+   enddo
+
+
+   call helmholtz_periodic_inv(p,work,alpha,beta)
+   !work=p  ! RHS
+   !p=0  ! initial guess
+   !tol=1e-10
+   !call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic,.false.)
+
+else
+   stop 'divfree_ghost: only supports periodic case'
+endif
+
+
+
+
+! compute u=u-grad(p)
+call ghost_update_x(p,1)
+call ghost_update_y(p,1)
+if (ndim==3) call ghost_update_z(p,1)
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   u(i,j,k,1)=u(i,j,k,1)-   &
+        ( 2*(p(i+1,j,k)-p(i-1,j,k))/3 -  (p(i+2,j,k)-p(i-2,j,k))/12 )/delx
+   
+   u(i,j,k,2)=u(i,j,k,2)-   &
+        ( 2*(p(i,j+1,k)-p(i,j-1,k))/3 -  (p(i,j+2,k)-p(i,j-2,k))/12 )/dely
+   
+   if (ndim==3) then
+      u(i,j,k,3)=u(i,j,k,3)-   &
+           ( 2*(p(i,j,k+1)-p(i,j,k-1))/3 -  (p(i,j,k+2)-p(i,j,k-2))/12 )/delz
+   endif
+enddo
+enddo
+enddo
+
+
+end subroutine

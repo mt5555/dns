@@ -95,7 +95,7 @@ for i in range(3):
    if (0 <> nslab[j] % ncpu[i]):
       print "ncpu[",i,"]=",ncpu[i],"does not divide nslab[",j,"]:",nslab[j]
       if i==0:
-         print "cant use TRANSPOSE_X_SPLIT_Z"
+         print "cant use TRANSPOSE_X_SPLIT_Z, will use TRANSPOSE_X_SPLIT_Y"
          use_x_z=0
       else:
          sys.exit(1)
@@ -105,7 +105,7 @@ for i in range(3):
        j=1
        if (0 <> nslab[j] % ncpu[i]):
           print "ncpu[",i,"]=",ncpu[i],"does not divide nslab[",j,"]:",nslab[j]
-          print "cant use TRANSPOSE_X_SPLIT_Y"
+          print "cant use TRANSPOSE_X_SPLIT_Y, will use TRANSPOSE_X_SPLIT_Z"
           use_x_y=0
 
        if use_x_y:   # use this value when possible
