@@ -70,7 +70,7 @@ ke=ints(5,:);
 tote=ints(6,:);   %  
 
 pe=tote-ke;
-pe=pe-pe(1)+ke(1);
+%pe=pe-pe(1)+ke(1);
 tote=ke+pe;
 
 

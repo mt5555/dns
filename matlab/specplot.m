@@ -10,8 +10,8 @@
 %fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.spec','r','b');
 %fidt=fopen('/ccs/scratch/taylorm/dns/iso12_512.spect','r','b');
 
-fid=fopen('../src/temp20000.0000.spec');
-fidt=fopen('../src/temp20000.0000.spect');
+fid=fopen('../src/temp0000.0000.spec');
+fidt=fopen('../src/temp0000.0000.spect');
 
 
 
