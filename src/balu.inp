@@ -1,0 +1,40 @@
+5            ! input file type
+ns_uvw       ! equations
+zero        ! initial condition:  KH-blob, KH-anal, iso12
+0            ! init condition subtype
+sto_high_10  ! forcing:  none, iso, iso12, iso12w, iso23w
+value        ! viscosity type  (value, smallest, kediff, Re)
+1e-4          ! viscosity coefficient.  (300)
+hyper16       ! hyper viscosity power: none, hyper4, hyper8
+0.0          ! coefficient  suggested value: 2000.  
+hypo2         ! hypo viscsoity: none, hypo2 
+10.000         ! hypo viscsosity coefficient  Balu:  315.0
+0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+.0            ! smagorinsky
+0            ! compute_structure functions
+0            ! compute PDF's
+fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+10.0          ! time to run
+1.50         ! adv cfl  (0 = disabled, use min_dt)
+.25           ! vis cfl  (0 = disabled, use min_dt)
+0             ! min_dt  
+1             ! max_dt 
+0.0          ! restart_dt  (0 = restart output disabled)
+1.0          ! diag_dt   
+.1            ! model_dt  
+-10          ! screen_dt
+5.0           ! output_dt  (0 = output disabled, except for custom out times)
+0           ! n_output_custom  number of custom output times  
+00.00       ! custom output times, one per line
+
+
+
+Notes:
+2d problem use for alpha model studies
+16 cpus, 512x512 grid:   ./gridsetup.py 16 1 1 512 512 1
+make dnsa
+./dnsa -i balu.inp
+
