@@ -32,6 +32,7 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
+divi=divi/g_nx/g_ny/g_nz
 
 #ifdef USE_MPI
    g_mx=divmx
@@ -91,7 +92,7 @@ do i=nx1,nx2
     rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
     iwave = nint(sqrt(rwave))
 
-    energy = 8.0 ! *(g_nx*g_ny*g_nz)
+    energy = 8.0
     if (kmcord(k)==0) energy=energy/2
     if (jmcord(j)==0) energy=energy/2
     if (imcord(i)==0) energy=energy/2

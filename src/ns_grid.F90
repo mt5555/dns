@@ -94,7 +94,7 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-
+ints(1)=ints(1)/g_nx/g_ny/g_nz
 
 
 
@@ -241,9 +241,9 @@ call divfree(rhs,work)
 
 if (compute_ints==1) then
    ints_timeDU=time
-   ints(3)=ke_diss2
-   ints(4)=vor
-   ints(5)=hel
+   ints(3)=ke_diss2/g_nx/g_ny/g_nz
+   ints(4)=vor/g_nx/g_ny/g_nz
+   ints(5)=hel/g_nx/g_ny/g_nz
 endif
 
 call wallclock(tmx2)

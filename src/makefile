@@ -107,6 +107,9 @@ dns:  $(MODEL_SPEC) dns.o
 dnsgrid:  $(MODEL_GRID) dns.o 
 	$(LINK) -o dns dns.o $(MODEL_GRID) $(LDFLAGS) $(MPILIB)
 
+dnsslow:  $(MODEL_SPEC_SLOW) dns.o 
+	$(LINK) -o dns dns.o $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)
+
 
 clean: 
 	rm -f *.o *.mod dns  

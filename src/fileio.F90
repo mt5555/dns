@@ -108,9 +108,7 @@ if (doit) then
    write(message,'(3(a,e12.5))') 'max(div)=',divx,'   <z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
-   mx=ints(1)/g_nx/g_ny/g_nz  ! dont mult all the ints together, overflow!
-   
-   write(message,'(a,f13.10,a,f10.5,a,f10.5,a)') 'ke: ',mx,&
+   write(message,'(a,f13.10,a,f10.5,a,f10.5,a)') 'ke: ',ints(1),&
      '  d/dt log(ke): tot=',delke_tot/ints(1),&
      ' diffusion=',ints(3)/ints(1)
    call print_message(message)	

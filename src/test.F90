@@ -483,19 +483,21 @@ end subroutine
 subroutine print_modes(output)
 use params
 implicit none
-real*8 :: output(nx,ny,nz)
+real*8 :: output(nx,ny,nz),wn
 character*80 message
 integer :: i,j,k,count=0
 
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
-    if (abs(output(i,j,k)) > 1e-9 .and. count<50) then	
+    wn=sqrt(real(imcord(i)**2+jmcord(j)**2+kmcord(k)**2))
+    if (abs(output(i,j,k)) > 1e-10 .and. count<100 ) then	
        count=count+1
-       write(*,'(i4,i4,i4,a,i4,i4,i4,a,2e15.7)') i,j,k,'mode=',imcord(i),jmcord(j),kmcord(k),&
+       write(*,'(i4,i4,i4,a,i4,i4,i4,f6.2,a,2e15.7)') i,j,k,&
+           ' mode=',imcord(i),jmcord(j),kmcord(k),wn,&
             ' val=',output(i,j,k)
-       if (count==50) then
-          call print_message("count>50 will not print any more modes")
+       if (count==100) then
+          call print_message("count>100 will not print any more modes")
        endif
     endif
 enddo

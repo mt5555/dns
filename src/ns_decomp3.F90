@@ -129,7 +129,7 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-
+ints(1)=ints(1)/g_nx/g_ny/g_nz
 
 
 
@@ -301,7 +301,7 @@ ke_diss = 0
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
 
-            xfac = 2*2*2*xfac*(g_nx*g_ny*g_nz)
+            xfac = 2*2*2*xfac
             if (kmcord(k)==0) xfac=xfac/2
             if (jmcord(j)==0) xfac=xfac/2
             if (imcord(i)==0) xfac=xfac/2

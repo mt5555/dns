@@ -141,9 +141,7 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-
-
-
+ints(1)=ints(1)/g_nx/g_ny/g_nz
 
 end subroutine 
 
@@ -321,7 +319,7 @@ do j=1,ny_2dz
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
 
-            xfac = 2*2*2*xfac*(g_nx*g_ny*g_nz)
+            xfac = 2*2*2*xfac
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
@@ -393,9 +391,9 @@ enddo
 
 if (compute_ints==1) then
    ints_timeDU=time
-   ints(3)=ke_diss
-   ints(4)=vor
-   ints(5)=hel
+   ints(3)=ke_diss      ! computed in spectral space - dont have to normalize
+   ints(4)=vor/g_nx/g_ny/g_nz
+   ints(5)=hel/g_nx/g_ny/g_nz
    maxs(5)=maxvor
 endif
 

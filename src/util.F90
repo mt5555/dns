@@ -70,6 +70,7 @@ integer,parameter :: numx=20,numy=13
 integer i,j
 character :: plot(0:numx,0:numy)
 real*8 cspec(0:numx)
+real*8 :: delta,ireal
 integer ix,iy
 
 
@@ -77,6 +78,7 @@ if (my_pe==io_pe) then
 cspec=0
 plot=" "
 
+#if 0
 ! bin all values
 do i=0,n
    if (i==0) then
@@ -88,6 +90,19 @@ do i=0,n
    if (ix>numx) ix=numx
    cspec(ix)=cspec(ix)+spectrum(i)
 enddo
+#endif
+
+! interpolate
+cspec(0)=spectrum(0)
+do ix=1,numx
+   ireal = 10**( log10(real(n)) * (ix-1)/real(numx-1) )
+   i=floor(ireal)
+   delta=ireal-i
+   if (i>=0 .and. i<=n-1) then
+      cspec(ix)=spectrum(i)*(1-delta)+spectrum(i+1)*delta
+   endif
+enddo
+
 
 ! scale from 0..numy, log scale
 do i=0,numx

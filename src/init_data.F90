@@ -7,9 +7,12 @@ subroutine init_data_lwisotropic(Q)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: PSI(nx,ny,nz,n_var)
 real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 integer km,jm,im,i,j,k,n,wn
-real*8 xw,ener_target,ener,xfac
+real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
+character*80 message
 
 type wnforcing_d
    real*8  :: wn
@@ -47,7 +50,6 @@ enddo
 do n=1,2
    i=wnforcing(n)%n
    allocate(wnforcing(n)%index(i,3))
-   print *,'wave no=',wnforcing(n)%wn,' number of coeffs=',wnforcing(n)%n
    wnforcing(n)%n=0  ! reset counter to use again below
 enddo
 
@@ -77,53 +79,91 @@ do k=nz1,nz2
 enddo
 
 
-do wn=1,2
-   ener_target=(wnforcing(wn)%wn)**(-5.0/3.0)
-   do 
-      !random initial condition
-      !pick a random point in the n dimensional sphere
-      ! 1. first pick a randome point in R^n
-      ! 2. through away points outside the sphere.  
-      ! 3. When we get a point inside, project onto the surface.    
-      ener=0
-      do n=1,6 !wnforcing(wn)%n
-         i=wnforcing(1)%index(n,1)
-         j=wnforcing(1)%index(n,2)
-         k=wnforcing(1)%index(n,3)
-         km=kmcord(k)
-         jm=jmcord(j)
-         im=imcord(i)
-         call random_number(Q(i,j,k,1))
-         call random_number(Q(i,j,k,2))
-         call random_number(Q(i,j,k,3))
-         Q(i,j,k,:)=2*Q(i,j,k,:)-1
 
-         xfac = 2*2*2*(g_nx*g_ny*g_nz)
-         xfac=1
-!         if (km==0) xfac=xfac/2
-!         if (jm==0) xfac=xfac/2
-!         if (im==0) xfac=xfac/2
-         ener=ener + xfac*(Q(i,j,k,1)**2 + Q(i,j,k,2)**2 + Q(i,j,k,3)**2)
-      enddo
-!MPI SUM
-      ener=sqrt(ener)
-      print *,ener,wnforcing(wn)%n
-      if (ener<=1 .and. ener>.000001) exit
-   enddo
-   stop
-   ! normalize
-   do n=1,wnforcing(wn)%n
-      i=wnforcing(1)%index(n,1)
-      j=wnforcing(1)%index(n,2)
-      k=wnforcing(1)%index(n,3)
-      Q(i,j,k,:)=Q(i,j,k,:)*sqrt(ener_target/ener)
-   enddo
 
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   do n=1,3
+      call random_number(PSI(i,j,k,n))
+   enddo
 enddo
+enddo
+enddo
+call vorticity(Q,PSI,work,work2)
+
+ener1=0
+ener2=0
+ener1_target=1.0**(-5.0/3.0)
+ener2_target=2.0**(-5.0/3.0)
 
 do n=1,3
-   call ifft3d(Q(1,1,1,n),work)  ! use rhs as a work array
+   call fft3d(Q(1,1,1,n),work) 
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+
+            xfac = .5 * (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            if (xw>=.5 .and. xw<1.5) then
+               ener1=ener1+xfac*Q(i,j,k,n)**2
+            else if (xw>=1.5 .and. xw<2.5) then
+               ener2=ener2+xfac*Q(i,j,k,n)**2
+            else
+               Q(i,j,k,n)=0
+            endif
+         enddo
+      enddo
+   enddo
 enddo
+
+
+
+do n=1,3
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+
+            xfac = .5 * (2*2*2)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            if (xw>=.5 .and. xw<1.5) then
+               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(ener1_target/(ener1))
+            else if (xw>=1.5 .and. xw<2.5) then
+               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(ener2_target/(ener2))
+            endif
+         enddo
+      enddo
+   enddo
+   call ifft3d(Q(1,1,1,n),work) 
+enddo
+
+ener=0
+do n=1,3
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            ener=ener+.5*Q(i,j,k,n)**2
+         enddo
+      enddo
+   enddo
+enddo
+
+print *,'targets',ener1_target,ener2_target
+print *,'tot E=',ener/g_nx/g_ny/g_nz
+call output_diags(0.0,Q)
+
 
 
 end subroutine
