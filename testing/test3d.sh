@@ -6,6 +6,12 @@ set refout=../testing/reference3d.out
 set rundir=../testing/3d
 set tmp=/tmp/temp.out
 
+set MPIRUN  = "mpirun -np"
+if (`uname` == OSF1) then
+   set MPIRUN =  "prun -n"
+endif
+
+
 if ($#argv == 0 ) then
    echo "./test3d.sh [1,2,p]"
    echo " 1 = run dns and dnsgrid with and without restart, simple 3D test case"
@@ -102,22 +108,22 @@ endif
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 1 2 1 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 1 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 2 32 32 32 2 3 4 4 3 2 
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./dns $opt -d $rundir reference3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 

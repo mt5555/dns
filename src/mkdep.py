@@ -41,7 +41,7 @@ def parse(file):
                 if name[-1]=='"' :
                     name=name[:-1]
                 # dont include system directories:
-                if (name[0:4] <>"/usr") and (name[0:4] <> "/opt") and (name[0:4] <> "mpif") :
+                if (name[0:4] <>"/usr") and (name[0:4] <> "/opt") and (name[0:4] <> "mpif") and (name[0:3] <> "UDM") :
                     if use:
                         name = name + ".o"
                     if name not in deps:
