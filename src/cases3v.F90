@@ -476,25 +476,24 @@ call print_message(message)
 
 if (my_pe==io_pe) then 
 ! compute some stats:
-enerb=enerb*2*pi*2*pi   ! convert back to L=2pi units
 ener=0
 ens=0
 do nb=1,NUMBANDS
    ener=ener+enerb(nb)
-   ens=ens+2 * nb**2 * enerb(nb)
+   ens=ens+2 * (2*pi*nb)**2 * enerb(nb)
 enddo
-mu_m=mu*2*pi*2*pi      ! use our viscosity
+mu_m=mu
 epsilon=mu_m*ens
-!epsilon=2.76029
 
 print *,'stats computed from initial condition and our viscosity:'
-print *,'epsilon: ',epsilon
-print *,'energy:  ',ener
-print *,'u1       ',sqrt(2*ener/3)
+print *,'epsilon: ',epsilon, epsilon*pi2_squared
+print *,'energy:  ',ener, ener*pi2_squared
+print *,'u1       ',sqrt(2*ener/3), sqrt(2*ener/3)*pi2 
 print *,'u1,1     ',epsilon/mu_m/15
-print *,'lambda   ',sqrt(10*ener*mu_m/epsilon)
+print *,'lambda   ',sqrt(10*ener*mu_m/epsilon),sqrt(10*ener*mu_m/epsilon)*pi2
 print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
-print *,'eta      ',(mu_m**3 / epsilon ) **.25
+print *,'eta      ',    (mu_m**3 / epsilon ) **.25, &
+                    pi2*(mu_m**3 / epsilon ) **.25, 
 print *,'eddy time',2*ener/epsilon
 endif
 
