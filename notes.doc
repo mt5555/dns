@@ -6,8 +6,6 @@ E&Liu KH problem.
        2e-4: looks good, a little too smoothed 
                    
                                    
-              
-
 1. update_ghost() routine, then start upgrading FD code
 2. streamfunction-vorticity 2d code  
 3. benchmark FD + transform with different decomposisitons

@@ -223,7 +223,7 @@ if (init_cond_subtype==0) then
    amp=.05
 else if (init_cond_subtype==1) then
    ! E & Liu case:
-   call print_message("Using thick shear layer initial condition")
+   call print_message("Using E & Liu shear layer initial condition")
    eps=10*pi
    amp=.25
 else if (init_cond_subtype==3) then
@@ -233,7 +233,8 @@ else if (init_cond_subtype==3) then
    amp=.05
 endif
 
-
+! thickness = 1/eps
+! gridpoints per transition layer: nx/eps
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2

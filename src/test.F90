@@ -2,12 +2,109 @@
 subroutine test
 use params
 
+
+! fft of fd operatrions:
+call test_fft_fd
+
 call test_transform
 call test_fft
 call test_poisson
 call test_divfree
 
+
 end subroutine
+
+
+
+subroutine test_fft_fd
+use params
+use transpose
+implicit none
+
+real*8 work(nx,ny,nz)
+real*8 work2(nx,ny,nz)
+real*8 input(nx,ny,nz)
+real*8 div(nx,ny,nz)
+real*8 grad(nx,ny,nz,3)
+real*8 dummy(1)
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k,i0,i1,i2,i3,im,j1,k1
+character(len=80) message
+
+input = 0
+
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+   input(i,j,k)=0
+   if (imcord(i)==-2 .and. &
+       jmcord(j)== 1 .and. &
+       kmcord(k)==-3 ) then
+      input(i,j,k)=1
+   endif
+enddo
+enddo
+enddo
+call ifft3d(input,work)
+! compute grad
+do i=1,3
+   call der(input,grad(1,1,1,i),dummy,work,DX_ONLY,i)
+enddo
+
+! compute div(grad)
+div=0
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+   i1=i+1
+   if (i1>nx2) i1=i1-nx2
+   j1=j+1
+   if (j1>ny2) j1=j1-ny2
+   k1=k+1
+   if (k1>nz2) k1=k1-nz2
+   div(i,j,k)=( &
+     (grad(i1,j ,k, 1)-grad(i,j, k, 1)) + &
+     (grad(i1,j1,k, 1)-grad(i,j1,k, 1)) + &
+     (grad(i1,j ,k1,1)-grad(i,j, k1,1)) + &
+     (grad(i1,j1,k1,1)-grad(i,j1,k1,1))  ) / (4*delx)
+
+   div(i,j,k)=div(i,j,k) + ( &
+     (grad(i ,j1,k ,2)-grad(i ,j,k ,2)) + &
+     (grad(i1,j1,k ,2)-grad(i1,j,k ,2)) + &
+     (grad(i ,j1,k1,2)-grad(i ,j,k1,2)) + &
+     (grad(i1,j1,k1,2)-grad(i1,j,k1,2))  ) / (4*dely)
+
+   div(i,j,k)=div(i,j,k) + ( &
+     (grad(i ,j ,k1,3)-grad(i ,j ,k,3)) + &
+     (grad(i1,j ,k1,3)-grad(i1,j ,k,3)) + &
+     (grad(i ,j1,k1,3)-grad(i ,j1,k,3)) + &
+     (grad(i1,j1,k1,3)-grad(i1,j1,k,3))  ) / (4*delz)
+
+enddo
+enddo
+enddo
+!call divergence(div,grad,work,work2)
+
+call fft3d(div,work)
+call print_modes(div)
+
+do i=1,3
+print *,'grad modes'
+call fft3d(grad(1,1,1,i),work)
+call print_modes(grad(1,1,1,i))
+enddo
+
+stop
+end subroutine
+
+
+
+
+
+
+
+
+
 
 
 
