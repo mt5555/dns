@@ -217,8 +217,8 @@ real*8 p(g_nz2,nslabx,ny_2dz)
 !local
 
 real*8 xw,xfac,tmx1,tmx2,xw_viss
-real*8 uu,vv,ww
-integer n,i,j,k,im,km,jm
+real*8 uu,vv,ww,dummy
+integer n,i,j,k,im,km,jm,nscalars
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
@@ -238,6 +238,50 @@ real*8,save :: gradw(nx,ny,nz,n_var)
 ! we just dont wory about the case when im=g_nx/2.
 !
 call wallclock(tmx1)
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  PASSIVE SCALARS
+!  compute u dot grad(s)
+!  to compute grad(s):   from s, compute: s_x, s_y, s_z 
+!                                needs 2 x-transforms (forward and back),
+!                                      2 y-transforms, 
+!                                      2 z-transforms
+!                        from shat:   shat_x, shat_y, shat_z:
+!                                     3 x-transforms (back only)
+!                                     3 y-transforms 
+!                                     3 z-transforms
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+do nscalars=4,n_var
+
+   ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,1)
+   call der(Q(1,1,1,nscalars),work,dummy,p,DX_ONLY,1)  ! s_x
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhsg(i,j,k,nscalars)=Q(i,j,k,1)*work(i,j,k)
+   enddo
+   enddo
+   enddo
+   do n=2,ndim
+   call der(Q(1,1,1,nscalars),work,dummy,p,DX_ONLY,n)  ! s_y and s_z
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhsg(i,j,k,nscalars)=rhsg(i,j,k,nscalars)+Q(i,j,k,n)*work(i,j,k)
+   enddo
+   enddo
+   enddo
+   enddo
+   ! we cannot dealias here, because below we use rhsg(:,:,:,3),
+   ! which coult potentially trash some of rhs(:,:,:,4)
+enddo
+
+
+
 
 
 
@@ -270,6 +314,7 @@ call wallclock(tmx1)
    call ns_vorticity(rhsg,Qhat,work,p)
    ! call ns_voriticyt2(not_written)
 #endif
+
 
 
 
@@ -540,6 +585,33 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! dealias the RHS scalars:
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+do nscalars=4,n_var
+   ! FFT into p
+   call z_fft3d_trashinput(rhsg(1,1,1,nscalars),p,work)
+
+   ! de-alias, and store in RHS(:,:,:,nscalars)
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            if ( dealias_remove(abs(im),abs(jm),abs(km))) then
+               rhs(k,i,j,nscalars)=0
+            else
+               rhs(k,i,j,nscalars)=p(k,i,j)
+            endif
+         enddo
+      enddo
+   enddo
+
+enddo
+
+
 
 if (compute_ints==1 .and. compute_transfer) then
    spec_rhs=0

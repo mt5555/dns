@@ -551,7 +551,9 @@ call MPI_bcast(smagorinsky,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 
 call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 if (.not. allocated(custom)) allocate(custom(ncustom))
-call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
+if (ncustom>0) then
+   call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
+endif
 call MPI_Barrier(comm_3d,ierr)
 
 #endif
