@@ -14,7 +14,7 @@
 !  -cout norm2
 !  -cout passive    convert passive scalar file
 !                   need to specify shmidt_in and type_in below
-!  -cout gradu      output u_i,j
+!  -cout gradu      output <u_i,j>  matrixes for subcubes
 !
 !
 ! To run, set the base name of the file and the times of interest
@@ -250,6 +250,11 @@ icount=icount+1
       call print_message("computing gradu ")
       call gradu_stats(time,Q,vor,work1,work2)
    endif
+   if (convert_opt==8) then  ! -cout rot_gradu
+      call input_uvw(time,Q,vor,work1,work2,1)
+      call print_message("computing gradu ")
+      call gradu_rotate_subcubes(time,Q,vor,work1,work2)
+   endif
 
 
    if (tstart>0) then
@@ -273,7 +278,7 @@ end program
 
 
 
-subroutine gradu_stats(time,Q,vor,work1,work2)
+subroutine gradu_rotate_subcubes(time,Q,vor,work1,work2)
 use params
 use mpi
 use fft_interface
@@ -293,7 +298,6 @@ character(len=8) :: ext2,ext
 integer :: sc
 integer,parameter :: ssize=128
 real*8 :: dx(1:2*ssize),dy(1:2*ssize),dz(1:2*ssize)
-real*8 :: dslice(2*ssize,2*ssize,1)
 real*8 :: mat(3,3,3)
 real*8,allocatable :: data(:,:,:)
 real*8,allocatable :: gradu(:,:,:,:)
@@ -377,27 +381,86 @@ endif
 deallocate(data)
 deallocate(gradu)
 
-return
+end subroutine
 
-call ghost_update(vor,1)
 
-! loop thru gradu matrix, looking for selections
-do sc=1,nsubcube
+
+
+
+
+
+subroutine gradu_stats(time,Q,vor,work1,work2)
+use params
+use mpi
+use fft_interface
+use subcubes
+use ghost
+implicit none
+real*8 :: time
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: vor(nx,ny,nz)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+integer :: i,j,k,ierr
+character(len=280) basename,fname,sdata
+character(len=80) :: message
+character(len=4) :: extension="uvwX"
+character(len=8) :: ext2,ext
+
+integer :: sc
+integer :: ssize
+real*8,allocatable  :: dx(:),dy(:),dz(:)
+real*8,allocatable :: dslice(:,:,:)
+real*8 :: mat(3,3,3),gradu(3,3)
+real*8 :: corner(3),wcorner(3)
+CPOINTER :: fid
+
+! update ghost cell data
+call ghost_update_x(Q,3)
+call ghost_update_y(Q,3)
+call ghost_update_z(Q,3)
+
+! check to make sure we have 2 ghost cells in all directions:
+ASSERT("check ghostcells",.false.)
+
+sc=0  ! subcube counter
+do
+   sc=sc+1
+   ! read coordinates of subcube corner and size (gridpoints)
+   ! corner(1:3), ssize, gradu
+   ASSERT("read in subcubes",.false.)
+
+   ! compute rotation matrix from gradu(3,3):
+   ASSERT("compute rotation matrix",.false.)   
+
+   ! allocate memory:
+   allocate(dx(2*ssize))
+   allocate(dy(2*ssize))
+   allocate(dz(2*ssize))
+   allocate(dslice(2*ssize,2*ssize,1) )
+
+   ! compute filename.  use runname+time+".sc#"
    write(sdata,'(f10.4)') 10000.0000 + time
    write(ext,'(i5)') sc  ! 10000
    basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
    fname = basename(1:len_trim(basename)) // sdata(2:10) // '.sc' // ext(2:5)
 
-
    ! select a subcube 2x larger containg the sc'th subcube:
-   dx(:)=wsubcube_corner(1,sc)+wsubcube_cords(:)
-   dy(:)=wsubcube_corner(2,sc)+wsubcube_cords(:)
-   dz(:)=wsubcube_corner(3,sc)+wsubcube_cords(:)
-   do k=1,2*ssize
+   do i=1,2*ssize
+      dx(i)=ssize*delx/2  + corner(1) + (i-1)*delx
+      dy(i)=ssize*dely/2  + corner(2) + (i-1)*dely
+      dz(i)=ssize*delz/2  + corner(3) + (i-1)*delz
+   enddo
+
+   call copen(fname,"w",fid,ierr)
+
+   do k=1,2*ssize ! loop over all z-slices
+      ! interpolate 1 slice of data
       call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,vor,0,mat)
       ! output this slab:
+      call cwrite8(fid,dslice,2*ssize*2*ssize)
    enddo
+   call cclose(fid,ierr)
+
 enddo
-
-
 end subroutine

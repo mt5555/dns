@@ -446,6 +446,8 @@ if (my_pe==io_pe) then
             convert_opt=6 
          else if (carg(1:5)=="gradu") then
             convert_opt=7 
+         else if (carg(1:9)=="rot_gradu") then
+            convert_opt=8 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abort("-cout unrecognized option")

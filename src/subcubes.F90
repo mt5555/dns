@@ -137,7 +137,7 @@ real*8 :: field(nx,ny,nz)
 integer :: irot
 real*8 :: rmatrix(3,3,3)
 
-real*8 :: xi,yi,zi
+real*8 :: xi,yi,zi,pos(3)
 integer :: n1(nsx),n2(nsy),n3(nsz),i,j,k,igrid,jgrid,kgrid
 #ifdef USE_MPI
 real*8,allocatable :: data2(:,:,:)
@@ -181,32 +181,16 @@ do k=1,nsz
       do i=1,nsx
 
          if (irot==1) then
-            xi=dx(i)
-            yi=dy(j)
-            zi=dz(k)
+            pos(1)=dx(i)
+            pos(2)=dy(j)
+            pos(3)=dz(k)
+
             !rotate to (xi,yi,zi), and map back into [0,1]
             !call rotate(xi,yi,zi,rmatrix)
-            ! find cell containing (xi,yi,zi):
-
-            ! find position in global grid:
-            igrid = 1 + floor( (xi-g_xcord(1))/delx )
-            jgrid = 1 + floor( (yi-g_ycord(1))/dely )
-            kgrid = 1 + floor( (zi-g_zcord(1))/delz )
-
-            ! compute a new point in the center of the above cell:
-            ! (do this to avoid problems with 2 cpus both claiming a point
-            ! on the boundary of a cell)
-            xi=.5*(g_xcord(igrid)+g_xcord(igrid+1))
-            yi=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
-            zi=.5*(g_zcord(kgrid)+g_zcord(kgrid+1))
-
-            ! find cpu which owns this cell (xi,yi,zi):
-            igrid=(xi-xcord(nx1))/delx
-            jgrid=(yi-ycord(ny1))/dely
-            kgrid=(zi-zcord(nz1))/delz
+            ASSERT("rotate!",.false.)
 
             ! interpolate:
-            
+            call interp3d(data(i,j,k),field,pos)            
          else
             if (n1(i)==0 .or. n2(j)==0 .or. n3(k)==0) then
                data(i,j,k)=-9d200
@@ -253,4 +237,82 @@ enddo
 
 end subroutine
 
-end module
+
+
+
+
+
+subroutine interp3d(field_interp,field,pos)
+! data:  field(i,j,k)
+! interpolation point:  pos(1:3)
+! output:  field_interp
+
+! input
+real*8 :: field(nx,ny,nz)
+real*8 :: pos(3),field_interp
+
+! local
+real*8 :: Q2d(4,4)
+real*8 :: Q1d(4)
+integer :: jj,kk,igrid,jgrid,kgrid,jc,kc
+real*8 :: xc,yc,zc
+
+
+! find position in global grid:
+igrid = 1 + floor( (pos(1)-g_xcord(1))/delx )
+jgrid = 1 + floor( (pos(2)-g_ycord(1))/dely )
+kgrid = 1 + floor( (pos(3)-g_zcord(1))/delz )
+
+! compute a new point in the center of the above cell:
+! (do this to avoid problems with 2 cpus both claiming a point
+! on the boundary of a cell)
+xc=.5*(g_xcord(igrid)+g_xcord(igrid+1))
+yc=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
+zc=.5*(g_zcord(kgrid)+g_zcord(kgrid+1))
+
+! find cpu which owns this cell (xi,yi,zi):
+igrid=(xc-xcord(nx1))/delx
+jgrid=(yc-ycord(ny1))/dely
+kgrid=(zc-zcord(nz1))/delz
+
+! find cpu which owns the grid point (xc,yc)
+if (xcord(nx1)<xc .and. xc<xcord(nx2)+delx .and. &
+     ycord(ny1)<yc .and. yc<ycord(ny2)+dely .and. &
+     zcord(nz1)<zc .and. zc<zcord(nz2)+delz ) then
+   
+
+   ! 3d --> 2d y-z planes --> 1d z-lines --> point
+   do kk=1,4
+      do jj=1,4
+         ! interpolate xcord(igrid-1:igrid+2) to xcord=particle(i,1)
+         ! onto 2-d planes in y-z
+         ! data  field(igrid-1:igrid+2, jgrid-2+jj) 
+         xc = 1 + (pos(1)-xcord(igrid))/delx
+         jc = jgrid-2+jj
+         kc = kgrid-2+kk
+         call interp4(field(igrid-1,jc,kc),field(igrid,jc,kc),&
+              field(igrid+1,jc,kc),field(igrid+2,jc,kc),&
+              xc,Q2d(jj,kk))
+      enddo
+   enddo
+   
+   do kk=1,4
+      ! interpolate ycord(jgrid-1:jgrid+2) to ycord=particle(j,1)
+      ! onto lines in z
+      ! data  field(igrid-1:igrid+2, jgrid-2+jj) 
+      yc = 1 + (pos(2)-ycord(jgrid))/dely
+      call interp4(Q2d(1,kk),Q2d(2,kk),Q2d(3,kk),Q2d(4,kk),yc,Q1d(kk))
+   enddo
+   
+   ! interpolate zcord(kgrid-1:kgrid+2) to zcord=particle(k,2)
+   ! data:  Q1d(1:4,j)
+   zc = 1 + (pos(3)-zcord(kgrid))/delz
+   call interp4(Q1d(1),Q1d(2),Q1d(3),Q1d(4),zc,field_interp)
+else
+   field_interp=-9d100
+endif
+
+
+end subroutine interp3d
+   
+end module 
