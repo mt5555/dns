@@ -77,7 +77,6 @@ vx2560c
 
 vx5120a                            IN lightning
 5120x4096  
-   data stored in node 168
    init_cond_subtype=102
    mu=1e-6                               
    hard coded: (code may change later)
@@ -86,6 +85,19 @@ vx5120a                            IN lightning
       delta=.025
       biotsavart_ubar=.1
 
+
+vx7680a
+7680x5760
+   run on lightning, about 9 hours for t=1.0
+   copied to ~/data2/kras
+   init_cond_subtype=103   (smaller domain then the other cases above)
+   mu=1e-6                               
+   hard coded: (code may change later)
+      biotsavart_cutoff=5e-3
+      biotsavart_apply=100
+      delta=.025
+      biotsavart_ubar=.1
+    
 
 
 
