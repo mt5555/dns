@@ -739,7 +739,7 @@ PSI(:,:,:,1)= fcor*Q(:,:,:,2)
 PSI(:,:,:,2)=-fcor*Q(:,:,:,1)
 
 ! advection and viscous terms
-k=1
+k=nz1
 do n=1,2
 
    ! compute u_x

@@ -202,15 +202,15 @@ for i=1:ndir
   yyave1=yyave1+w(i)*spline(x,y1,xx);
   yyave2=yyave2+w(i)*spline(x,y2,xx);
   
-  y1=-SP1_ltt(:,i)./(x*epsilon);
+  y1=-.5*(SP2_ltt(:,i)+SP1_ltt(:,i))./(x*epsilon);
   pave=pave++w(i)*spline(x,y1,xx);
-  y1=-SN1_ltt(:,i)./(x*epsilon);
+  y1=-.5*(SN2_ltt(:,i)+SN1_ltt(:,i))./(x*epsilon);
   nave=nave++w(i)*spline(x,y1,xx);
   
 
 end
-semilogx(xx_plot,yyave1,'r'); hold on;
-semilogx(xx_plot,yyave2,'r');
+%semilogx(xx_plot,yyave1,'r'); hold on;
+%semilogx(xx_plot,yyave2,'r');
 semilogx(xx_plot,.5*(yyave1+yyave2),'k','LineWidth',1.0);
 title('D_{ltt} / r\epsilon  (4/15 law)');
 y415=.5*(yyave1+yyave2);
@@ -344,8 +344,7 @@ for i=1:ndir
   yyave=yyave + w(i)*spline(x,y,xx);  
   
 end
-semilogx(xx_plot,yyave1,'r');
-semilogx(xx_plot,yyave2,'r');
+semilogx(xx_plot,.5*(yyave1+yyave2),'r');
 
 
 %
@@ -391,8 +390,7 @@ for i=1:ndir
   yyave=yyave + w(i)*spline(x,y,xx);  
   
 end
-semilogx(xx_plot,yyave1,'r');
-semilogx(xx_plot,yyave2,'r');
+semilogx(xx_plot,.5*(yyave1+yyave2),'r');
 
 
 %
