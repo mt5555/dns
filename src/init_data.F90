@@ -358,7 +358,11 @@ end subroutine
 
 
 
-subroutine init_data_vxpair(Q,q1,work1,w)
+subroutine init_data_vxpair(Q,q1,work1,w,init)
+!
+!  init=0    setup parameters only
+!  init=1    setup parameters and compute initial conditoin
+!
 use params
 use ghost
 use bc
@@ -367,6 +371,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: w(nx,ny,nz)
+integer :: init
 
 ! local variables
 integer :: i,j,k,l,use3d=0,n
@@ -420,6 +425,8 @@ ubar = ubar
 equations=NS_PSIVOR
 Q=0
 
+
+if (init==0) return
 
 ! INITIALIZES VORTEX SHEET (XS,YS,WS,NS)
 delalf = pi/(2*nd)
@@ -477,7 +484,12 @@ end subroutine
 
 
 
-subroutine init_data_sht(Q,PSI,work1,work2)
+subroutine init_data_sht(Q,PSI,work1,work2,init)
+!
+!   init=0   setup paraemeters only
+!   init=1   setup paraemeters and compute initial condition
+!
+!
 use params
 use transpose
 implicit none
@@ -485,6 +497,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: PSI(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+integer :: init
 
 ! local variables
 CPOINTER :: null
@@ -564,6 +577,8 @@ grav=U**2/(H0*F**2)
 
 write(message,'(a,2f6.2)') "R, F parameters: ",R,F
 call print_message(message)
+
+if (init==0) return
 
 
 Q=0

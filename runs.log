@@ -16,10 +16,23 @@ t=1.5  NIRVANA timings              t=15
            on 128x1   MPI rec sig10. crashed
            on 64x2    5.63m to go to t=.01
 
-2049x1025 autrey                     508min     3.5d for t=150
+2049x1025 autrey                     t=15: 508min     3.5d for t=150
+3072x1536 autrey 2 cpu:  
 
-4096x2048 autrey      IN?  segfault
+3072x1536 milkyway    t=.1: 
 
+
+
+
+6  arrays, 3 variables, 8  bytes each:   6*3*8*
+(actual resident size about 50% smaller because dnsvor does not use all arrays)
+32768*16384 = 70.4G
+16384x8192  = 17.6G    
+8192x4096  = 4.4G    
+4096x2048  = 1.1G
+3072x1536  = .729G    wont run on autry, 1 cpu.  
+2048x1024  = .3G    
+     
 
 
 **********************************************************************************

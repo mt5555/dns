@@ -33,7 +33,8 @@ ifeq ($(UNAME),Linux)
    ## PGI
    #F90 = pgf90
    #CC=pgcc
-   #FFLAGS = -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   ##FFLAGS = -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
    ##LDFLAGS = -Lstk -lstk
 
 

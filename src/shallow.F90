@@ -209,7 +209,7 @@ real*8 :: pe,ke,ke_diss,a_diss,ke_diss2,vor,gradu_diss,normdx
 integer n,i,j,k
 integer im,jm
 real*8 XFAC,hx,hy
-external :: helmholtz_hform_periodic
+external helmholtz_hform_periodic
 
 
 call wallclock(tmx1)
