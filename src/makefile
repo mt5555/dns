@@ -270,6 +270,9 @@ convert:  convert.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 analysis:  analysis.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis analysis.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
+analysis2:  analysis2.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o analysis2 analysis2.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+
 analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_rms analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 

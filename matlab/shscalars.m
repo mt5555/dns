@@ -13,7 +13,7 @@ range=0:50;
 
 
 %fid=fopen('../src/temp20000.0000.scalars','r','l'); 
-fid = fopen('/home/skurien/dns/src/sk128_alpha00000.0000.scalars','r','l')
+fid = fopen('/home/wingate/ccs/period/Aa0/Data/Aa00011.2200.scalars','r','b')
 
 
 nscalars=0;
@@ -21,10 +21,10 @@ nscalars_e=0;
 while (1) 
   [ni,count]=fread(fid,1,'float64');
   if (count~=1) break; end;
-  nints=ni;
-  ns=fread(fid,1,'float64');
-  mu=fread(fid,1,'float64');
-  alpha=fread(fid,1,'float64');
+  nints=ni
+  ns=fread(fid,1,'float64')
+  mu=fread(fid,1,'float64')
+  alpha=fread(fid,1,'float64')
   
   [nints,ns,nscalars]
   data1=fread(fid,[nints,ns],'float64');

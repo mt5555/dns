@@ -38,12 +38,13 @@ real*8,save  :: vorfilt(nx,ny,nz),pvfilt(nx,ny,nz)
 character(len=80) message,sdata
 character(len=280) basename,fname,fnamewrite
 integer ierr,i,j,k,n,km,im,jm,icount,ictof,ivorsave,ntrunc
-integer icentroid
+integer icentroid,iscalars
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac
 CPOINTER :: fscalar
-real*8, allocatable :: ints(:,:),maxs(:,:)
+real*8, allocatable :: integrals(:,:),maximums(:,:)
+real*8, save :: alpha
 integer ni,ns,nb
 
 
@@ -58,6 +59,8 @@ icount=0  ! A counter for averaging to compute time averages
 ictof = 0 ! If 1 then flip endian sign
 ivorsave=0 ! If 1 then compute an averaged vorticity
 ntrunc = 32 ! If not zero find Q with wave numbers ntrunc and above
+iscalars = 1 ! If not zero read in scalars (for energy as a function&
+             ! of time, etc)
 call init_mpi       
 call init_mpi_comm3d()
 call init_model
@@ -80,34 +83,39 @@ if (init_cond==3) call init_data_sht(Q,vor,work1,work2)
 !
 ! example code to read .scalar files:
 !
+if(iscalars.ne.0) then
+  call copen("/home/wingate/ccs/period/Aa0/Data/Aa00011.2200.scalars","r",fscalar,ierr) 
+  nb=0
+  do
+     call cread8e(fscalar,ni,1,ierr)
+     write(6,*) "ni = ",ni
+     if (ierr/=1) exit  ! error reading file
+     if (.not. allocated(integrals)) then
+        allocate(integrals(ni,100000))
+        allocate(maximums(ni,100000))
+     endif
+     call cread8e(fscalar,ns,1,ierr)
+     call cread8e(fscalar,mu,1,ierr)
+     call cread8e(fscalar,alpha,1,ierr)
+     write(6,*) "ns = ",ns
+     write(6,*) "nu = ",mu
+     write(6,*) "alpha = ",alpha
+     do n=1,ns
+        nb=nb+1
+        if (nb>100000) call abort("analysis: error: nb too small")
+        call cread8e(fscalar,integrals(1,nb),ni,ierr)
+        call cread8e(fscalar,maximums(1,nb),ni,ierr)
+     enddo
+  enddo
+  call cclose(fscalar,ierr)
 
-call copen("filename.scalar","r",fscalar,ierr) 
-nb=0
-do
-   cread8e(fscalar,ni,1,ierr)
-   if (ierr/=1) break  ! error reading file
-   if (.not. allocated(ints)) then
-      allocate(ints(ni,10000))
-      allocate(maxs(ni,10000))
-   endif
-   cread8e(fscalar,ns,1,ierr)
-   cread8e(fscalar,mu,1,ierr)
-   cread8e(fscalar,alpha,1,ierr)
-   do n=1,ns
-      nb=nb+1
-      if (nb>10000) call abort("analysis: error: nb too small")
-      cread8e(fscalar,ints(1,nb),ni,ierr)
-      cread8e(fscalar,maxs(1,nb),ni,ierr)
-   enddo
-enddo
-call cclose(fscalar,ierr)
-
-! time:   maxs(7,:)
-! ke:     ints(5,:)
-! tot_e:  ints(6,:)
+! time:   maximums(7,:)
+! ke:     integrals(5,:)
+! tot_e:  integrals(6,:)
 !
 
-
+stop
+endif
 
 time=tstart
 do

@@ -54,18 +54,42 @@ namedir = '/home/mt/data/skhel/';
 CK_orig=1.613;
 
 
+<<<<<<< specplot.m
+<<<<<<< specplot.m
+%name = 'Rot10002.0000';
+%namedir = '/home2/skurien/rotation/Rot1/';
+name='all';
+namedir='/home/wingate/ccs/Rotation/Rot1/';
+=======
+name = 'Rot10000.0000';
+namedir = '/ccs/wingate/Rotation/Rot1/';
+>>>>>>> 1.54
+=======
+>>>>>>> 1.65
 
 
 spec_r_save=[];
 spec_r_save_fac3=[];
 
+<<<<<<< specplot.m
+%fid=endianopen([namedir,name,'.spec'],'r');
+%fidt=endianopen([namedir,name,'.spect'],'r');
+=======
 % note: endianopen() will notwork with .spec files
 %because first number is not necessaryly an integer 
 [namedir,name]
 fid=fopen([namedir,name,'.spec'],'r',endian);
 fidt=endianopen([namedir,name,'.spect'],'r');
+>>>>>>> 1.54
 fidp=endianopen([namedir,name,'.pspec'],'r');  
+<<<<<<< specplot.m
+fid=fopen([namedir,name,'.spec'],'r','b');
+fidt=fopen([namedir,name,'.spect'],'r','l');
+
+
+=======
 fidco=endianopen([namedir,name,'.cospec'],'r');  
+>>>>>>> 1.65
 %fidt=-1;
 %fidp=-1;
 
