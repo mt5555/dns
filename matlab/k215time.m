@@ -8,18 +8,21 @@ ke=0;
 nx=1;
 delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
-ext='.isostr';
 
-name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
-
+%name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
+name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
 
 ext='.new.isostr';
-[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext)
+times=[4.2:0.2:4.8];
+
+[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 
 nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
 teddy=1;
 
-times=[0:1:30];
+%times = [0:1:30];
+
+
 
 
 ndir_use=0;
@@ -121,7 +124,7 @@ end
 scale = 1  % scale = 2/15 if normalizing by prefactor as well
 
 figure(5); clf; hold on; 
-for i=50:50 %three  directions
+for i=1:1:73 %directions
 
 plot(times/teddy,mx215_localeps(1:length(times),i)/scale,'g-','LineWidth',1.0);hold on;
 plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
@@ -141,12 +144,12 @@ figure(6); clf
 
 for i=[1:1:73]
   %semilogx(xx_plot,y215_ave(:,i),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,-(y215_ave(:,i)),'r-','LineWidth',1.0); hold on
+  semilogx(xx_plot,(y215_ave(:,i)),'r-','LineWidth',1.0); hold on
 end
 %semilogx(xx_plot,y215_iso_ave,'k','LineWidth',2.0); hold on
 semilogx(xx_plot,y215_iso_ave,'b','LineWidth',2.0); hold on
-axis([1 1000 -0.05 0.15])
-x=1:1000; plot(x,(2/15)*x./x,'k');
+%axis([1 1000 -0.05 0.15])
+x=1:100; plot(x,(2/15)*x./x,'k');
 hold off;
 title('H_{ltt} / r^2\h   (2/15 law) Ensemble averaged');
 ylabel('H_{ltt}/h r^2','FontSize',16);
@@ -159,7 +162,7 @@ print -dpsc k215mean.ps
 figure(7); clf
 offset=y215_iso_ave;
 stdr=0*offset;
-
+scale = 2/15; % scale = 2/15 if need to factor out the 4/5, 1 otherwise
 for i=[1:1:73]
   %semilogx(xx_plot,(y215_ave(:,i)-offset),'k:','LineWidth',1.0); hold on
   semilogx(xx_plot,(-y215_ave(:,i)-offset)/scale,'k-','LineWidth',1.0); hold on
@@ -168,7 +171,7 @@ end
 stdr=sqrt(stdr/15)./offset;
 %semilogx(xx_plot,y215_iso_ave-offset,'k','LineWidth',2.0); hold on
 semilogx(xx_plot,(y215_iso_ave-offset)/scale,'b','LineWidth',1.0); hold on
-axis([1 1000 -.2 .2])
+%axis([1 1000 -.2 .2])
 %x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
 title('timemean(H_{ltt}(dir)-H_{ltt}(avg))/(2/15) Measure of anisotropy ');

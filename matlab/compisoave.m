@@ -337,7 +337,7 @@ for i=1:ndir
   x = r_val(:,i);                       % units of box length
   x_plot=x*nx*delx_over_eta;            % units of r/eta
 
-  y=H_ltt(:,i)./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition
+  y=-H_ltt(:,i)./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition
 
   semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
   yyave=yyave+w(i)*spline(x,y,xx);
@@ -346,6 +346,7 @@ end
 
 semilogx(xx_plot,yyave,'k','LineWidth',2.5);
 y215=yyave;
+max(yyave)
 title('2/15 law');
 ylabel(pname);
 xlabel('r/\eta');

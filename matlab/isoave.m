@@ -15,7 +15,9 @@ ext='.isostr';
 %nx=250; delx_over_eta=.80; epsilon=3.9;
 
 
+%name='/ccs/scratch/taylorm/check256_0000.8000'
 name='/ccs/scratch/taylorm/dns/iso12/iso12_5120002.7000'
+%name='/ccs/scratch/taylorm/dns/iso12/iso12_5120007.0000'
 nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %ext='.isostr001';
 
@@ -31,15 +33,15 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-
 %name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
-name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
-nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
+name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0004.8000.new'
+nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
 
 
 ndir_use=49;
+
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
 disp('1 = Scaling laws for total structure function');
@@ -80,7 +82,7 @@ xx=(1:.5:(nx./2.5)) / nx;
 if (in==6) 
   compisoave_paper(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 else
-  [y45,y415,y43,eps,h_eps]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
+  [y45,y415,y43,eps,h_eps,y215]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 end
 
 return

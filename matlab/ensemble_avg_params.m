@@ -4,6 +4,7 @@ function [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,t
 avg_eps = 0;
 avg_heps = 0;
 avg_delx_over_eta = 0;
+lent = length(times)
 
 for t=times;
   tstr=sprintf('%10.4f',t+10000);
@@ -22,8 +23,8 @@ for t=times;
 eta = (mu^3 /eps_l)^.25;
 delx_over_eta=(1/nx)/eta;
 
-avg_delx_over_eta = avg_delx_over_eta + delx_over_eta/30;
-avg_eps = avg_eps + eps_l/30;
-avg_heps = avg_heps + h_eps_l/30;
+avg_delx_over_eta = avg_delx_over_eta + delx_over_eta/lent;
+avg_eps = avg_eps + eps_l/lent;
+avg_heps = avg_heps + h_eps_l/lent;
 
 end
