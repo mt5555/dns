@@ -159,6 +159,11 @@ do n=np1,np2
       call abort("Error: passive_scalar_init(): schmidt_table too small.")
    endif
    schmidt(n)=schmidt_table(k)
+   if (npassive==10) schmidt(n)=schmidt_table(k)
+   if (npassive==8) schmidt(n)=schmidt_table(k+1)
+   if (npassive==6) schmidt(n)=schmidt_table(k+2)
+
+
    if (my_pe==io_pe) then
       write(*,'(i4,f11.3,i7)') n-np1+1,schmidt(n),passive_type(n)
    endif

@@ -228,7 +228,6 @@ integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 integer :: ndim       ! 2 or 3 dimensions.  ndim = (g_nz==1 ? 2 : 3)
 integer :: npassive = 0   ! number of passive scalars
-integer :: npassive_name_offset = 1   ! passive scalar file names:  s01, s02, ...
 integer :: np1=1,np2=0    ! passive scalars Q(:,:,:,np1:np2)
 real*8  :: schmidt(n_var)       ! schmidt number for passive scalars
 integer :: passive_type(n_var)  ! type of passive scalar 0 = Gaussian -> 0,1

@@ -766,9 +766,9 @@ if (npassive==0) return
 write(message,'(f10.4)') 10000.0000 + time
 
 do n=np1,np2
-   write(ext,'(i3)') 100 + n-np1+1
+   write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
-        // message(2:10) // '.s' // ext(2:3)
+        // message(2:10) // '.s' // ext(2:len_trim(ext))
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,0,io_pe)
 enddo
 
@@ -804,9 +804,9 @@ if (npassive==0) return
 
 do n=np1,np2
    write(message,'(f10.4)') 10000.0000 + time
-   write(ext,'(i3)') 100 + n-np1+npassive_name_offset
+   write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
-        // message(2:10) // '.s' // ext(2:3)
+        // message(2:10) // '.s' // ext(2:len_trim(ext))
    call print_message(fname)	
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
 
