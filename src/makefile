@@ -14,9 +14,9 @@ endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
    MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
-   MPIINC = -DMPI 
+   MPI = -DMPI -I/usr/local/src/mpich/include
    LDFLAGS = 
-   FFLAGS = -O -DMPI -DSUNOS
+   FFLAGS = -O -DSUNOS $(MPI)
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90

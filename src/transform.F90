@@ -266,8 +266,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,kk,l
+#ifdef MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
+integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
+integer dest_pe3(3),tag
+#endif
 
 
 
@@ -356,8 +360,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,kk,l
+#ifdef MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
+integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
+integer dest_pe3(3),tag
+#endif
 
 !
 ! each cube is broken, along the z axis, into mpidims(1) slabs of
@@ -469,8 +477,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,ii,l
+#ifdef MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
+integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
+integer dest_pe3(3),tag
+#endif
 
 !
 ! each cube is broken, along the x axis, into mpidims(2) slabs of
@@ -555,8 +567,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,ii,l
+#ifdef MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
+integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
+integer dest_pe3(3),tag
+#endif
 
 !
 ! each cube is broken, along the x axis, into mpidims(2) slabs of
