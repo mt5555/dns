@@ -92,17 +92,20 @@ endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
    # defaults for asci Q: MPI paths loaded via modules
-   MPI = -I/usr/opt/MPI/include -DUSE_MPI 
-   MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+   #MPI = -I/usr/opt/MPI/include -DUSE_MPI 
+   #MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+   MPI =  -DUSE_MPI 
+   MPILIB =  -lfmpi -lmpi -lelan
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
    UDM = -I$(HOME)/udm/udm/include -DHAVE_UDM 
    UDMLIB = -L$(HOME)/udm/udm/lib \
       -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
-      -L/usr/opt/MPI/lib \
       -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
      -lrt -free -lcxxstd -lcxx -lexc -lc
+
+#      -L/usr/opt/MPI/lib \
 
 
    ifeq ($(HOST),milkyway.lanl.gov)
@@ -114,14 +117,16 @@ ifeq ($(UNAME),OSF1)
       LSFFLAGS = 
    endif
 
-   LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+   #LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+   LDFLAGS =   $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+
 
    #flag for OPENMP:  -omp
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
    # shallow water model cannot use -automatic
-   #FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
-   FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
+   FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_FFT99 $(UDM)
+   #FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
    CC = cc $(LSFFLAGS)
 endif
 
