@@ -1,4 +1,19 @@
 **********************************************************************************
+11/30/01
+iso12_250B_
+
+iso12 initial condition
+iso12 forcing  (subtype=0:  tau=5)
+CFL=1.5/.25
+mu=.2e-3  
+
+same as iso12_250B_, but with mu 2x larger
+
+IN
+
+
+
+**********************************************************************************
 11/28/01
 iso12_500_
 
@@ -78,6 +93,14 @@ kh18     NS-alpha alpha=4h   fixed 40 iterations   residual: .13
 
 kh21     NS-alpha alpha=2h   fixed 40 iterations   residual: .13
 
+rerun with tolerence?
+
+
+CG
+kh22     NS-alpha, alpha=4h  tol=.05d0  (about 10 iterations???)
+                                        looks shitty
+kh24     NS-alpha, alpha=4h  tol=.03d0  t=.5 ok, t=.75 bad  (about 20 iterations)
+kh23     NS-alpha, alpha=4h  tol=.01d0  looks nice, about 30 iterations
 
 
 
