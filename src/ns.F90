@@ -24,7 +24,6 @@ end
 
 subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2)
 use params
-use structf
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)

@@ -31,8 +31,9 @@ if (restart==1) then
 
    if (npassive>0) then
    if (compute_passive_on_restart) then
-      call init_passive_scalars(Q,Qhat,work1,work2)
+      call init_passive_scalars(1,Q,Qhat,work1,work2)
    else
+      call init_passive_scalars(0,Q,Qhat,work1,work2)
       call input_passive(runname,time_initial,Q,work1,work2)
    endif
    endif
@@ -49,7 +50,7 @@ else
    if (init_cond==8) call init_data_decay(Q,Qhat,work1,work2,1,1,0)
 
    if (npassive>0) then
-      call init_passive_scalars(Q,Qhat,work1,work2)
+      call init_passive_scalars(1,Q,Qhat,work1,work2)
    endif
 
    if (equations==NS_UVW) then
@@ -107,9 +108,13 @@ end subroutine
 
 
 
-subroutine init_passive_scalars(Q,Qhat,work1,work2)
+subroutine init_passive_scalars(init,Q,Qhat,work1,work2)
 !
 ! low wave number, quasi isotropic initial condition
+!
+! init=0    initialize schmidt number only
+! init=1    initialize schmidt number and passive scalar data
+!
 !
 use params
 implicit none
@@ -118,7 +123,7 @@ real*8 :: Qhat(nx,ny,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: schmidt_table(5),xfac
-integer :: n,k,i,j,im,jm,km
+integer :: n,k,i,j,im,jm,km,init
 
 schmidt=0
 passive_type=0
@@ -147,6 +152,9 @@ do n=np1,np2
       write(*,'(i4,f11.3,i7)') n-np1+1,schmidt(n),passive_type(n)
    endif
 enddo
+
+
+if (init==0) return
 
 
 do n=np1,np2
@@ -207,7 +215,7 @@ integer :: i,j,k,n,ierr
 
 character(len=80) ::  message
 
-write(message,'(a,i3,a)') "Initializing KE correlated passive scalar n=",np
+write(message,'(a,i3,a)') "Initializing KE correlated double delta passive scalar n=",np
 call print_message(message)
 
 ke=0
@@ -290,7 +298,7 @@ real*8 :: ener
 CPOINTER :: null
 character(len=80) ::  message
 
-write(message,'(a,i3,a)') "Initializing KE correlated passive scalars n=",np," ..."
+write(message,'(a,i3,a)') "Initializing double delta passive scalars n=",np," ..."
 call print_message(message)
 
 

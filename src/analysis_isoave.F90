@@ -25,7 +25,7 @@ program anal
 use params
 use mpi
 use isoave
-use structf
+use pdf
 use spectrum
 implicit none
 

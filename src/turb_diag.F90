@@ -1,7 +1,7 @@
 #include "macros.h"
 subroutine output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
-use structf
+use pdf
 use spectrum
 use isoave
 implicit none

@@ -595,10 +595,10 @@ else
       fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vs"
       call print_message(fname)
       call singlefile_io2(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
-      if (n_var==3) then
+      if (ndim==3) then
          fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".ws"
          call print_message(fname)
-         call singlefile_io2(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
+         call singlefile_io2(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec)
       endif
       do n=1,ndim
          call ifft3d(Q(1,1,1,n),work1)
@@ -685,9 +685,9 @@ if (equations==NS_UVW .and. w_spec) then
    
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vs"
    call singlefile_io2(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,.true.)
-   if (n_var==3) then
+   if (ndim==3) then
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".ws"
-      call singlefile_io2(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe,.true.)
+      call singlefile_io2(time,Q(1,1,1,ndim),fname,work1,work2,0,io_pe,.true.)
    endif
    
 else if (equations==NS_UVW) then
@@ -700,9 +700,9 @@ else if (equations==NS_UVW) then
       call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".v"
       call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
-      if (n_var==3) then
+      if (ndim==3) then
          fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".w"
-         call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
+         call singlefile_io(time,Q(1,1,1,ndim),fname,work1,work2,0,io_pe)
       endif
       if (ndim==2) then
          call vorticity2d(q1,Q,work1,work2)
@@ -720,7 +720,7 @@ else if (equations==SHALLOW) then
    if (n_var==3) then
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".h"
       call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
-   endif
+   endif	
    if (ndim==2) then
       call vorticity2d(q1,Q,work1,work2)
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
@@ -807,6 +807,9 @@ do n=np1,np2
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
         // message(2:10) // '.s' // ext(2:3)
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
+   write(message,'(a,i3,a,2f17.5)') 'passive scalar n=',n,' min/max: ',&
+     minval(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)),&	
+     maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,n))
 enddo
 
 end subroutine

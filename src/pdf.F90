@@ -1,6 +1,6 @@
 #include "macros.h"
 
-module structf
+module pdf
 use params
 implicit none
 
@@ -471,7 +471,7 @@ if (my_pe==io_pe) then
       ! number of structure functions
       x=npassive ; call cwrite8(fidS,x,1)
       do i=1,npassive
-         call normalize_and_write_pdf(fidS,SCALARS(i),epsilon%nbin)   
+         call normalize_and_write_pdf(fidS,SCALARS(i),SCALARS(i)%nbin)   
       enddo	
    endif
 
@@ -560,7 +560,13 @@ pdfdata=pdfdata/g_nx/g_ny/g_nz
 x=1
 if (str%ncalls==0) x=0
 do j=1,ndelta
-   ASSERT("n_and_w(): bad normalization",1e-9>abs(x - sum(pdfdata(:,j)))  )
+   if (1e-9<abs(x - sum(pdfdata(:,j)))) then 
+      print *,'ndelta = ',j
+      print *,'sum:     ',sum(pdfdata(:,j))
+      print *,'un-norm: ',sum(str%pdf),g_nx*g_ny*g_nz
+      print *,'ncalls:  ',str%ncalls 	
+      print *,'nbin:    ',str%nbin,nbin
+   endif
 enddo
 
 
@@ -1053,7 +1059,7 @@ do n=1,3
    call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
    gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
 enddo
-gradu=mu*gradu; gradu=gradu**one_third
+gradu=mu*gradu; gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
 call compute_pdf_scalar(gradu,epsilon)
 
 if (compute_passive_pdfs) then
