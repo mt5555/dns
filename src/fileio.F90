@@ -804,7 +804,7 @@ if (npassive==0) return
 
 do n=np1,np2
    write(message,'(f10.4)') 10000.0000 + time
-   write(ext,'(i3)') 100 + n-np1+1
+   write(ext,'(i3)') 100 + n-np1+npassive_name_offset
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
         // message(2:10) // '.s' // ext(2:3)
    call print_message(fname)	
