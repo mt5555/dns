@@ -52,15 +52,19 @@ Schmidt number runs.
 
 S = .01, .05, .1, .5, 1.0  
 
-tmix256A  
-mu=2.75e-4     run to t=.1, check Re, kmax*eta
+
+
+mu=3.00e-4          R_l=70   kmax_eta=1.5     teddy=.7
+mu=2.75e-4     run to t=.1, check Re, kmax*eta 
                t=0: R_l=77  kmax*eta=1.4
 mu=2.00e-4          R_l=106  kmax*eta=1.2
 
-mu=3.00e-4   NEXT
 
 
+tmix256A  
+mu=3e-4   IN t=3.00
 
+run this to t=3.00, look at stats, compute when to re-init. 
 
 
 
@@ -809,7 +813,7 @@ iso12-256b   1.35e-3    iso12w   .45     .5      75     .5
 vxpair runs on autry, milkyway
 
 stored in: /ccs/scratch/taylorm/vxpair (16Gb)
-and: ~/vxpair  (9Gb)
+and: ~data2/vxpair  (9Gb)
 
 
 

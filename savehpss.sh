@@ -27,12 +27,18 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
    psi save -d dns/$name  $name*.sf
    psi save -d dns/$name $name*.s2v2
    psi save -d dns/$name $name*.jpdf
+   psi save -d dns/$name $name*.vxline
+   psi save -d dns/$name $name*.tracer
+
    psi store -d dns/$name  $name*.scalars
    psi store -d dns/$name  $name*.spec
    psi store -d dns/$name $name*.spect
+   psi store -d dns/$name $name*.cross
+
    if ( $ext == all ) then
       echo 'saving uvw'
       psi save -d dns/$name $name*00.h5 $name*00.u  $name*00.v   $name*00.w
+      psi save -d dns/$name $name*00.vor $name*00.psi
    endif
 else
    echo 'saving .' $ext ' files'

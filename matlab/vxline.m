@@ -13,6 +13,11 @@ name='/home/taylorm/ccs/dns/src/vxpair/vx4500a';
 times=[0:.1:150];
 
 
+
+name='/scratch2/taylorm/vx12288b/vx12288b';
+times=[0:.1:25];
+
+
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
 

@@ -10,9 +10,12 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
+range=[20:10:105];
 range=[3.4216:10:105];
 %name='../src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx4096d';
+%name='/ccs/scratch/taylorm/vxpair/vx6144e';
+name='/scratch2/taylorm/vx12288b/vx12288b';
 name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/scratch/taylorm/vxpair/vx6144e';
 
@@ -43,7 +46,7 @@ for i=range
   [x,y,z,psi,time]=getfield(fname);
   psi = squeeze(psi(:,:,1));
 
-  subsample=16;
+  subsample=4;
   if (subsample>1) 
     nx=length(x);
     ny=length(y);
