@@ -204,7 +204,15 @@ if (doit_screen) then
    !
    if (mu>0 .and. ndim>2 .and. ke_diss<0) then
       lambda=sqrt(  5*(2*ints(6))/ints(2)  )
-      epsilon=-ke_diss
+
+!      epsilon=-ke_diss
+      if (infinite_alpha==0) then
+         epsilon=-(  ke_diss-mu*alpha_value**2*ints(1) )
+      else
+         epsilon=-(  -mu*ints(1)  )
+      endif
+
+
       write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6)/3)/mu, &
            '  R=',1/mu,' lambda=',lambda
       call print_message(message)	
