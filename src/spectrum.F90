@@ -573,7 +573,8 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_E,1+iwave)
    call cwrite8(fid,spec_kEk,1+iwave)
    call cwrite8(fid,cos_tta_spec,1+iwave)
-   call cwrite8(fid,nbin,1)
+   x=nbin
+   call cwrite8(fid,x,1)
    write(6,*)costta_pdf(1,:)
    do i=1,1+iwave
       tmp_pdf=costta_pdf(1,:)
