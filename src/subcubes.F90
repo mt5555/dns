@@ -63,10 +63,10 @@ if (allocated(wsubcube_cords)) deallocate(wsubcube_cords)
 allocate(subcube_cords(ssize))
 allocate(wsubcube_cords(ssize*2))
 do i=1,ssize
-   subcube_cords(i)=(i-1)/g_nx
+   subcube_cords(i)=(i-1)*delx
 enddo
 do i=1,2*ssize
-   wsubcube_cords(i)=(i-1)/g_nx - subcube_size/2
+   wsubcube_cords(i)=(i-1)*delx - subcube_size/2
 enddo
 
 
@@ -149,9 +149,12 @@ do k=1,nsz
          zi=dz(k)
          !if (irot==1) call rotate(xi,yi,zi,rmatrix)
 
-         n3=nz1 + (zi-zcord(nz1))/delz
-         n2=ny1 + (yi-ycord(ny1))/dely
-         n1=nx1 + (xi-xcord(nx1))/delx
+         n3=(zi-zcord(nz1))/delz
+         n3=n3+nz1
+         n2=(yi-ycord(ny1))/dely
+         n2=n2+ny1
+         n1=(xi-xcord(nx1))/delx
+         n1=n1+nx1
 
          if (n1>=nx1 .and. n1<=nx2 .and. n2>=ny1 .and. n2<=ny2 .and. &
              n3>=nz1 .and. n3<=nz2) then
@@ -165,10 +168,35 @@ do k=1,nsz
    enddo
 enddo
 #ifdef USE_MPI
-if (.not. allocated(data2)) allocate(data2(nsx,nsy,nsz))
+allocate(data2(nsx,nsy,nsz))
 data2=data
 call mpi_reduce(data2,data,nsx*nsy*nsz,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
+deallocate(data2)
 #endif
+
+
+do k=1,nsz
+   do j=1,nsy
+      do i=1,nsx
+
+         xi=dx(i)
+         yi=dy(j)
+         zi=dz(k)
+         !if (irot==1) call rotate(xi,yi,zi,rmatrix)
+
+         n3=(zi-zcord(nz1))/delz
+         n3=n3+nz1
+         n2=(yi-ycord(ny1))/dely
+         n2=n2+ny1
+         n1=(xi-xcord(nx1))/delx
+         n1=n1+nx1
+
+         if (data(i,j,k)<-9d199) then
+            print *,my_pe,n1,n2,n3
+         endif
+      enddo
+   enddo
+enddo
 
 end subroutine
 

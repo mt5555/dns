@@ -299,9 +299,7 @@ real*8,allocatable :: gradu(:,:,:)
 real*8,allocatable :: gradu2(:,:,:)
 integer :: i2,j2,k2,k
 
-call print_message("setting up subcubes")
 call setup_subcubes(ssize)
-call print_message("done setting up subcubes")
 allocate(gradu(3,3,nsubcube))
 allocate(gradu2(3,3,nsubcube))
 gradu=0
@@ -319,16 +317,20 @@ do j=1,3
       dy(1:ssize)=subcube_corner(2,sc)+subcube_cords(:)
       dz(1:ssize)=subcube_corner(3,sc)+subcube_cords(:)
       call interp_subcube(ssize,ssize,ssize,dx,dy,dz,data,vor,0,mat)
-      do k2=1,ssize
-      do j2=1,ssize
-      do i2=1,ssize
-         gradu(i,j,sc)=gradu(sc,i,j)+data(i2,j2,k2)
-         gradu2(i,j,sc)=gradu2(sc,i,j)+data(i2,j2,k2)**2
-      enddo
-      enddo
-      enddo
-      gradu(sc,i,j)=gradu(sc,i,j)/ssize/ssize/ssize
-      gradu2(sc,i,j)=gradu2(sc,i,j)/ssize/ssize/ssize
+
+      if (io_pe==my_pe) then
+         ! data() only computed on io_pe
+         do k2=1,ssize
+         do j2=1,ssize
+         do i2=1,ssize
+            gradu(i,j,sc)=gradu(i,j,sc)+data(i2,j2,k2)
+            gradu2(i,j,sc)=gradu2(i,j,sc)+data(i2,j2,k2)**2
+         enddo
+         enddo
+         enddo
+         gradu(i,j,sc)=gradu(i,j,sc)/ssize/ssize/ssize
+         gradu2(i,j,sc)=gradu2(i,j,sc)/ssize/ssize/ssize
+      endif
    enddo
 
 #if 0   
@@ -350,6 +352,7 @@ enddo
 enddo
 
 ! output the gradu matricies:
+if (io_pe==my_pe) then
 write(sdata,'(f10.4)') 10000.0000 + time
 write(ext,'(2i1)') i,j
 basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
@@ -377,6 +380,7 @@ do sc=1,nsubcube
    enddo
 enddo
 close(15)
+endif
 
 return
 
