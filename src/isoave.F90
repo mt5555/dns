@@ -44,6 +44,14 @@ real*8,allocatable  :: D_lll(:,:)        ! D_lll(ndelta,ndir)
 real*8,allocatable  :: D_tt(:,:,:)       ! D_tt(ndelta,ndir,2)    
 real*8,allocatable  :: D_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
+! signed (positive part) of above
+real*8,allocatable  :: SP_lll(:,:)        ! D_lll(ndelta,ndir)
+real*8,allocatable  :: SP_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
+
+! signed (positive part) of above
+real*8,allocatable  :: SN_lll(:,:)        ! D_lll(ndelta,ndir)
+real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
+
 
 
 private init
@@ -62,8 +70,8 @@ real*8 :: x
 
 x=ndelta; call cwrite8(fid,x,1)   
 x=ndir;   call cwrite8(fid,x,1)   
-x=2;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
-x=2;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
+x=4;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
+x=4;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
 x=0;      call cwrite8(fid,x,1)   ! number of future type1
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
@@ -79,6 +87,12 @@ enddo
 do idir=1,ndir
    call cwrite8(fid,D_lll(1,idir),ndelta)
 enddo
+do idir=1,ndir
+   call cwrite8(fid,SP_lll(1,idir),ndelta)
+enddo
+do idir=1,ndir
+   call cwrite8(fid,SN_lll(1,idir),ndelta)
+enddo
 
 ! transverse
 do i=1,2
@@ -89,6 +103,16 @@ enddo
 do i=1,2
 do idir=1,ndir
    call cwrite8(fid,D_ltt(1,idir,i),ndelta)
+enddo
+enddo
+do i=1,2
+do idir=1,ndir
+   call cwrite8(fid,SP_ltt(1,idir,i),ndelta)
+enddo
+enddo
+do i=1,2
+do idir=1,ndir
+   call cwrite8(fid,SN_ltt(1,idir,i),ndelta)
 enddo
 enddo
 end subroutine
@@ -123,6 +147,10 @@ D_ll=0
 D_tt=0
 D_ltt=0
 D_lll=0
+SP_ltt=0
+SP_lll=0
+SN_ltt=0
+SN_lll=0
 
 !$omp parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
 do idir=1,ndir
@@ -196,6 +224,16 @@ do idir=1,ndir
          D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
          D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
          D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+
+         if (u_l>=0) then
+            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
+            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
+            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
+         else
+            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
+            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
+            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
+         endif
          
       enddo
       enddo
@@ -208,6 +246,11 @@ D_ll=D_ll/g_nx/g_ny/g_nz
 D_tt=D_tt/g_nx/g_ny/g_nz
 D_ltt=D_ltt/g_nx/g_ny/g_nz
 D_lll=D_lll/g_nx/g_ny/g_nz
+
+SP_ltt=SP_ltt/g_nx/g_ny/g_nz
+SP_lll=SP_lll/g_nx/g_ny/g_nz
+SN_ltt=SN_ltt/g_nx/g_ny/g_nz
+SN_lll=SN_lll/g_nx/g_ny/g_nz
 
 
 end subroutine
@@ -369,6 +412,12 @@ allocate(D_ll(ndelta,ndir))
 allocate(D_lll(ndelta,ndir))
 allocate(D_tt(ndelta,ndir,2))
 allocate(D_ltt(ndelta,ndir,2))
+
+allocate(SP_lll(ndelta,ndir))
+allocate(SP_ltt(ndelta,ndir,2))
+
+allocate(SN_lll(ndelta,ndir))
+allocate(SN_ltt(ndelta,ndir,2))
 
 
 do idel=1,ndelta
