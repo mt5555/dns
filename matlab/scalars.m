@@ -13,7 +13,7 @@ range=0:50;
 
 
 %fid=fopen('../src/impulse/kh5.scalars','r','l'); 
-fid=fopen('../src/kh/khM.scalars','r','l'); 
+fid=fopen('../src/kh/khN.scalars','r','l'); 
 
 
 

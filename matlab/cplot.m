@@ -9,13 +9,22 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:50;
 %range = 1
-range=0:.10:2;
-%range=[.750 ];
-%name='../src/impulse/kh18';
-%name='../src/kh/khL';
-name='/tmp/test';
-mkpr=0;
+%range=0:.25:.75;
+range=[.50 .75];
+name='../src/impulse/kh20';
+%name='../src/kh/khN';
+%name='/tmp/test';
 
+mkpr=1;            % make ps and jpeg files
+mkcontour=1;       % use pcolor or contour
+mplot=2;           % set to nonzero to put mplot plots per figure
+
+
+s=findstr(name,'/');
+s=s(length(s));
+shortname=name(s+1:length(name));
+
+kplot=1;
 for i=range
   ts=i;
   ts = sprintf('%9.5f',10000+ts);
@@ -40,7 +49,8 @@ for i=range
     disp('Error reading input file...')
   end
   fclose(fidvor);
-  ts=sprintf('time=%f  %ix%ix%i',time,nx,ny,nz);
+  %ts=sprintf('%s    time=%.2f  %ix%ix%i',shortname,time,nx,ny,nz);
+  ts=sprintf('%s    time=%.2f  max=%f',shortname,time,max(max(abs(vor))))
   
   q = reshape(q,nx,ny,nz);
   qmax=max(max(max(q)));
@@ -48,7 +58,10 @@ for i=range
 
   
   if (nz>=4) 
-    figure(2)
+    %
+    %  3D field, plot 4 sections in a 2x2 subplot window
+    %
+    figure(1)
     for i=1:4
        subplot(2,2,i)
        nzi=1 + (i-1)*nz/4;
@@ -63,7 +76,7 @@ for i=range
        shading interp
        axis square
      end
-     figure(1)
+     figure(2)
      clf;
      q=shiftdim(q,2);
      isosurface(z,x,y,q,50);
@@ -71,12 +84,19 @@ for i=range
      view([30,30]);
  
   else
+    %
+    %  2D field.  options set above:
+    %  mkcontour=0,1    use pcolor, or contour plot
+    %  mplot=N        plot in a subplot(n,1) window
+    %
+    figure(1)
+    if (kplot==1) clf; end;
     vor = squeeze(q(:,:,1));
-    figure(2)
-    clf
-    
-    contour=0;
-    if (contour==0)
+    if (mplot>0) 
+      subplot(mplot,1,kplot)
+      kplot=mod(kplot,mplot)+1;
+    end
+    if (mkcontour==0)
       pcolor(x,y,vor')
       shading interp
     else
@@ -89,7 +109,16 @@ for i=range
     
     title(ts);
     axis square
+  end
+  
+
+  
+  if (kplot==1)
+
     if (mkpr) 
+      if (mplot>0)
+        orient tall
+      end
       pname=[name,'.vor.ps'];
       disp('creating ps...')
       print('-depsc',pname);
@@ -97,11 +126,10 @@ for i=range
       disp('creating jpg...')
       print('-djpeg','-r 96',pname);
     end
+
+    'pause'
+    pause
   end
-  
-  
-  'pause'
-  pause
 end
 return
 

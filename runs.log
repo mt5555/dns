@@ -78,7 +78,8 @@ mu=5e-5         same.  CFL=1.5 triggers assymetic rollup
                        CFL=1.45 ok
 
 
-kkN  1024x1024  mu = 2.5e-5    CFL: 1.50/.25   IN
+
+kkN  1024x1024  mu = 2.5e-5    CFL: 1.50/.25   looks good.
      4th order method.  
 
 
