@@ -235,7 +235,7 @@ enddo
 
 #ifdef USE_MPI
    vxline_w2(1:vxline_count)=vxline_w(1:vxline_count)
-   call MPI_allreduce(vxline_w2,vxline_w,vxline_count,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(vxline_w2,vxline_w,vxline_count,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 
@@ -351,7 +351,7 @@ enddo
 enddo
 #ifdef USE_MPI
    wfine2=wfine
-   call MPI_allreduce(wfine2,wfine,(2*sh+1)*(2*sh+1),MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(wfine2,wfine,(2*sh+1)*(2*sh+1),MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 
@@ -371,7 +371,7 @@ enddo
 
 #ifdef USE_MPI
    tmp1=mxw_finegrid
-   call MPI_allreduce(tmp1,tmp2,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(tmp1,tmp2,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    if (tmp2==mxw_finegrid) then
       ! we have the maximum.  leave mxcord unchanged
    else
@@ -379,7 +379,7 @@ enddo
       mxcord_finegrid=-9d20
    endif
    mxcord2=mxcord_finegrid
-   call MPI_allreduce(mxcord2,mxcord_finegrid,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(mxcord2,mxcord_finegrid,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 end subroutine
@@ -416,7 +416,7 @@ enddo
 
 #ifdef USE_MPI
    tmp1=mxw
-   call MPI_allreduce(tmp1,tmp2,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(tmp1,tmp2,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    if (tmp2==mxw) then
       ! we have the maximum.  leave mxcord unchanged
    else
@@ -424,7 +424,7 @@ enddo
       mxcord=-9d20
    endif
    mxcord2=mxcord
-   call MPI_allreduce(mxcord2,mxcord,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(mxcord2,mxcord,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 end subroutine
 
@@ -483,7 +483,7 @@ integer :: np,count,ierr
          ! achive this: 
          tmp(1)=r(np)
          tmp(2)=-Rdelta
-         call MPI_allreduce(tmp,tmpout,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+         call mpi_allreduce(tmp,tmpout,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
          r(np)=tmpout(1)
          Rdelta=-tmpout(2)  
 #endif
@@ -561,7 +561,7 @@ integer :: reset
          endif
 #ifdef USE_MPI
          mxcord2=Rint
-         call MPI_allreduce(mxcord2,Rint,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+         call mpi_allreduce(mxcord2,Rint,2,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
          r(np)=(Rint(1)+Rint(2))/2
          if (Rint(2)-Rint(1) < contour_eps) exit

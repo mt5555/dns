@@ -17,7 +17,7 @@ call flush(6)
 #endif
 
 #ifdef USE_MPI
-   call MPI_abort(comm_3d,1,ierr)
+   call mpi_abort(comm_3d,1,ierr)
 #endif
 stop
 end subroutine
@@ -34,7 +34,7 @@ if (my_pe==io_pe) then
 endif
 
 ! for parallel debugging with print_message():
-!call MPI_Barrier(comm_3d,ierr)
+!call mpi_barrier(comm_3d,ierr)
 
 end subroutine
 
@@ -45,8 +45,8 @@ subroutine wallclock(tmx)
 use params
 use mpi
 implicit none
-real*8 tmx
-tmx = MPI_Wtime()
+real*8 tmx,mpi_wtime
+tmx = mpi_wtime()
 
 #else
 use params

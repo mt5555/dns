@@ -90,8 +90,8 @@ if (my_pe==io_pe) color=1
 key=0
 
 ! everyone with ntot>0 joins a new group, comm_sforcing
-call MPI_Comm_split(comm_3d,color,key,comm_1,ierr2);
-if (color==0) call MPI_Comm_free(comm_1,ierr2)
+call mpi_comm_split(comm_3d,color,key,comm_1,ierr2);
+if (color==0) call mpi_comm_free(comm_1,ierr2)
 
 
 
@@ -116,7 +116,7 @@ use mpi
 integer ierr
 
 #ifdef USE_MPI
-call MPI_Finalize(ierr)
+call mpi_finalize(ierr)
 #endif
 
 end subroutine

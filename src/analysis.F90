@@ -294,9 +294,9 @@ do
    enddo
 #ifdef USE_MPI
 !   xfac=ke
-!   call MPI_allreduce(xfac,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+!   call mpi_allreduce(xfac,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 !   xfac=ck
-!  call MPI_allreduce(xfac,ck,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+!  call mpi_allreduce(xfac,ck,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
    if (my_pe==io_pe) then
       print *,'ck = ',ck

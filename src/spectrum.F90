@@ -820,16 +820,16 @@ enddo
 
 #ifdef USE_MPI
 spectrum_in=spectrum
-call MPI_reduce(spectrum_in,spectrum,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spectrum,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in(0:g_nx/2)=spectrum_x
-call MPI_reduce(spectrum_in,spectrum_x,1+(g_nx/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spectrum_x,1+(g_nx/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in(0:g_ny/2)=spectrum_y
-call MPI_reduce(spectrum_in,spectrum_y,1+(g_ny/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spectrum_y,1+(g_ny/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in(0:g_nz/2)=spectrum_z
-call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 spectrum_in=spec_d
-call MPI_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 #endif
 
@@ -909,7 +909,7 @@ enddo
 
 #ifdef USE_MPI
 spec_r_in=spec
-call MPI_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
 if (g_nz == 1)  then
@@ -976,7 +976,7 @@ enddo
 
 #ifdef USE_MPI
 spec_r_in=spec
-call MPI_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
 if (g_nz == 1)  then
@@ -1113,31 +1113,31 @@ enddo
 
 #ifdef USE_MPI
 spec_r_in=spec_helicity_rp
-call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
-call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_kEk
-call MPI_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 do n=1,ndim
    spec_r_in=cospec_r(:,n)
-   call MPI_reduce(spec_r_in,cospec_r(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(spec_r_in,cospec_r(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 enddo
 
 spec_x_in=cospec_x
-call MPI_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_y_in=cospec_y
-call MPI_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_z_in=cospec_z
-call MPI_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
 rwave=diss1
-call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 rwave=diss2
-call MPI_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 rwave=hetot
-call MPI_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
 
@@ -1294,35 +1294,35 @@ integer i,j,k,jm,km,im,iwave_max,n
 
 #ifdef USE_MPI
 spec_r_in=spec_helicity_rp
-call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
-call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_E
-call MPI_reduce(spec_r_in,spec_E,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec_E,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_kEk
-call MPI_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in = cos_tta_spec
-call MPI_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 do n=1,ndim
    spec_r_in=cospec_r(:,n)
-   call MPI_reduce(spec_r_in,cospec_r(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(spec_r_in,cospec_r(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 enddo
 
 spec_x_in=cospec_x
-call MPI_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_y_in=cospec_y
-call MPI_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_z_in=cospec_z
-call MPI_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
 rwave=diss1
-call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 rwave=diss2
-call MPI_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 rwave=hetot
-call MPI_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
 

@@ -294,7 +294,7 @@ real*8 error,tmp
 integer ierr
 #ifdef USE_MPI
    tmp=error
-   call MPI_allreduce(tmp,error,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(tmp,error,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 end subroutine
 
@@ -370,9 +370,9 @@ tmax=tx2-tx1
 tave=tx2-tx1
 #ifdef USE_MPI
 tx2=tmax
-call MPI_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 tx2=tave
-call MPI_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 tave=tave/ncpus
 #endif
 
@@ -394,9 +394,9 @@ tmax=tx2-tx1
 tave=tx2-tx1
 #ifdef USE_MPI
 tx2=tmax
-call MPI_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(tx2,tmax,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 tx2=tave
-call MPI_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(tx2,tave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 tave=tave/ncpus
 #endif
 

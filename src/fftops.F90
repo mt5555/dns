@@ -1557,7 +1557,7 @@ integer :: ierr
 mn=minval(p(nx1:nx2,ny1:ny2,nz1:nz2))
 #ifdef USE_MPI
 mn2=mn
-call MPI_allreduce(mn2,mn,1,MPI_REAL8,MPI_MIN,comm_3d,ierr)
+call mpi_allreduce(mn2,mn,1,MPI_REAL8,MPI_MIN,comm_3d,ierr)
 #endif
 
 end subroutine
@@ -1576,7 +1576,7 @@ integer :: ierr
 mx=maxval(p(nx1:nx2,ny1:ny2,nz1:nz2))
 #ifdef USE_MPI
 mx2=mx
-call MPI_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 end subroutine
@@ -1623,7 +1623,7 @@ integer :: im,jm,km,i,j,k,n
    enddo
 #ifdef USE_MPI
    xw = ke
-   call MPI_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 end subroutine
 
@@ -1672,7 +1672,7 @@ integer :: im,jm,km,i,j,k,n
    enddo
 #ifdef USE_MPI
    xw = ke
-   call MPI_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 end subroutine
 

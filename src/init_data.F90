@@ -273,7 +273,7 @@ ke=ke/g_nx/g_ny/g_nz
 
 #ifdef USE_MPI
    ke2=ke
-   call MPI_allreduce(ke2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(ke2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -303,7 +303,7 @@ enddo
 check=check/g_nx/g_ny/g_nz
 #ifdef USE_MPI
    ke2=check
-   call MPI_allreduce(ke2,check,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(ke2,check,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -519,7 +519,7 @@ enddo
 
 #ifdef USE_MPI
    enerb_work=enerb
-   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -583,8 +583,8 @@ do n=1,nvec
 enddo
 #ifdef USE_MPI
    xfac=ener
-   call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    enerb_work=enerb
-   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 end subroutine

@@ -207,12 +207,12 @@ endif
 
 #ifdef USE_MPI
 if (read==1) then
-   call MPI_bcast(nump,1,MPI_INTEGER,fpe,comm_3d ,ierr)
+   call mpi_bcast(nump,1,MPI_INTEGER,fpe,comm_3d ,ierr)
    if (my_pe/=fpe) then
       nump_in=nump
       call allocate_particles(nump_in)      
    endif
-   call MPI_bcast(particle,(2*ndim+1)*nump_max,MPI_REAL8,fpe,comm_3d ,ierr)
+   call mpi_bcast(particle,(2*ndim+1)*nump_max,MPI_REAL8,fpe,comm_3d ,ierr)
 endif
 #endif
 
@@ -393,11 +393,11 @@ enddo
 
 #ifdef USE_MPI
    particle_work=particle
-   call MPI_allreduce(particle_work,particle,(2*ndim+1)*nump_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(particle_work,particle,(2*ndim+1)*nump_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    if (rk4stage/=4) then
       ! not necessary on last stage - we no longer need particle_tmp
       particle_work(:,1:2*ndim)=particle_tmp(:,1:2*ndim)
-      call MPI_allreduce(particle_work,particle_tmp,2*ndim*nump_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+      call mpi_allreduce(particle_work,particle_tmp,2*ndim*nump_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    endif
 #endif
 

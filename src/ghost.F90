@@ -196,11 +196,11 @@ else
    enddo
    tag=2
    nmesg=nmesg+1
-   call MPI_IRecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call mpi_irecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 
    tag=1
    nmesg=nmesg+1
-   call MPI_ISend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call mpi_isend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 90 continue
@@ -251,11 +251,11 @@ else
 
    tag=1
    nmesg=nmesg+1
-   call MPI_IRecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call mpi_irecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 
    tag=2
    nmesg=nmesg+1
-   call MPI_ISend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call mpi_isend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 100 continue
@@ -265,7 +265,7 @@ endif
 
 #ifdef USE_MPI
 if (nmesg>0) then
-   call MPI_waitall(nmesg,request,statuses,ierr) 	
+   call mpi_waitall(nmesg,request,statuses,ierr) 	
    ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
 endif
 #endif
@@ -401,11 +401,11 @@ else
    enddo
    tag=20
    nmesg=nmesg+1
-   call MPI_IRecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call mpi_irecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 
    tag=10
    nmesg=nmesg+1
-   call MPI_ISend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call mpi_isend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 90 continue
@@ -449,11 +449,11 @@ else
 
    tag=10
    nmesg=nmesg+1
-   call MPI_IRecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call mpi_irecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 
    tag=20
    nmesg=nmesg+1
-   call MPI_ISend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call mpi_isend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 100 continue
@@ -464,7 +464,7 @@ endif
 
 #ifdef USE_MPI
 if (nmesg>0) then
-   call MPI_waitall(nmesg,request,statuses,ierr) 	
+   call mpi_waitall(nmesg,request,statuses,ierr) 	
    ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
 endif
 #endif
@@ -600,11 +600,11 @@ else
    enddo
    tag=200
    nmesg=nmesg+1
-   call MPI_IRecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call mpi_irecv(recbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 
    tag=100
    nmesg=nmesg+1
-   call MPI_ISend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
+   call mpi_isend(sendbuf0,l,MPI_REAL8,dest_pe0,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 90 continue
@@ -648,11 +648,11 @@ else
 
    tag=100
    nmesg=nmesg+1
-   call MPI_IRecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call mpi_irecv(recbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 
    tag=200
    nmesg=nmesg+1
-   call MPI_ISend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
+   call mpi_isend(sendbuf1,l,MPI_REAL8,dest_pe1,tag,comm_3d,request(nmesg),ierr)
 #endif
 endif
 endif
@@ -663,7 +663,7 @@ endif
 
 #ifdef USE_MPI
 if (nmesg>0) then
-   call MPI_waitall(nmesg,request,statuses,ierr) 	
+   call mpi_waitall(nmesg,request,statuses,ierr) 	
    ASSERT("ghost cell update:  MPI_waitalll failure 1",ierr==0)
 endif
 #endif

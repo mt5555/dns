@@ -58,7 +58,7 @@ integer i,dest_pe3(3),key,color,ierr
 #ifdef USE_MPI_IO
 if (init==0) then
    ! release the old communicator, construct a new one:
-   call MPI_Comm_free(comm_io,ierr)
+   call mpi_comm_free(comm_io,ierr)
 endif
 
 if (mpi_maxio<0) then
@@ -98,9 +98,9 @@ if (nio>1) then
       dest_pe3(3)=inc*(i/inc)
       call mpi_cart_rank(comm_3d,dest_pe3,io_nodes(i),ierr)
    enddo
-   call MPI_Barrier(comm_3d,ierr)
+   call mpi_barrier(comm_3d,ierr)
 !print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_nodes(my_z)
-   call MPI_Barrier(comm_3d,ierr)
+   call mpi_barrier(comm_3d,ierr)
    if (io_nodes(my_z)<0) call abort("error in MPI-IO decomposition")
 else
    io_nodes=0
@@ -114,8 +114,8 @@ if (io_nodes(my_z)==my_pe) color=1
 key=0
 
 ! everyone with color=1 joins a new group, comm_sforcing
-call MPI_Comm_split(comm_3d,color,key,comm_io,ierr);
-!if (color==0) call MPI_Comm_free(comm_io,ierr)
+call mpi_comm_split(comm_3d,color,key,comm_io,ierr);
+!if (color==0) call mpi_comm_free(comm_io,ierr)
 
 #endif
 end subroutine
@@ -209,7 +209,7 @@ do  ! loop over blocks of messages of size nbcount
 
          tag=my_z
          L=nslabz*nslabx*ny_2dz
-         call MPI_IRecv(recbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,1),ierr)
+         call mpi_irecv(recbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,1),ierr)
          ASSERT("transpose_to_z: MPI_IRecv failure 1",ierr==0)
 
          L=0
@@ -230,7 +230,7 @@ do  ! loop over blocks of messages of size nbcount
          enddo
          
          tag=iproc
-         call MPI_ISend(sendbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,2),ierr)
+         call mpi_isend(sendbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,2),ierr)
          ASSERT("transpose_to_z: MPI_ISend failure 1",ierr==0)
       endif
    enddo
@@ -240,7 +240,7 @@ do  ! loop over blocks of messages of size nbcount
    nbcount=nb
    if (nbcount>0) then
       ! wait for all receives to finish
-      call MPI_waitall(nbcount,request(1,1),statuses,ierr) 	
+      call mpi_waitall(nbcount,request(1,1),statuses,ierr) 	
       ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
 
       ! copy data out of receive buffers   
@@ -262,7 +262,7 @@ do  ! loop over blocks of messages of size nbcount
       enddo
 
       ! wait for all sends to finish
-      call MPI_waitall(nbcount,request(1,2),statuses,ierr) 	
+      call mpi_waitall(nbcount,request(1,2),statuses,ierr) 	
       ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
    endif
 
@@ -370,12 +370,12 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 
 !     send/rec buffer to (my_x,my_y,iproc)
       tag=my_z
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_to_z: MPI_IRecv failure 1",ierr==0)
       tag=iproc
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      call mpi_isend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("transpose_to_z: MPI_ISend failure 1",ierr==0)
-      call MPI_waitall(2,request,statuses,ierr) 	
+      call mpi_waitall(2,request,statuses,ierr) 	
       ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
 
       l=0
@@ -493,12 +493,12 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 
 
       tag=my_z
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_from_z: MPI_IRecv failure 1",ierr==0)
       tag=iproc
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      call mpi_isend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("transpose_from_z: MPI_ISend failure 1",ierr==0)
-      call MPI_waitall(2,request,statuses,ierr) 	
+      call mpi_waitall(2,request,statuses,ierr) 	
       ASSERT("transpose_from_z: MPI_waitalll failure 1",ierr==0)
 
 
@@ -640,12 +640,12 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
 
 !     send/rec buffer 
       tag=my_x
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_to_x2: MPI_IRecv failure 1",ierr==0)
       tag=iproc
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      call mpi_isend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("transpose_to_x2: MPI_ISend failure 1",ierr==0)
-      call MPI_waitall(2,request,statuses,ierr) 	
+      call mpi_waitall(2,request,statuses,ierr) 	
       ASSERT("transpose_to_x2: MPI_waitalll failure 1",ierr==0)
 
 
@@ -749,12 +749,12 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
 
 !     send/rec buffer 
       tag=my_x
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_from_x2: MPI_IRecv failure 1",ierr==0)
       tag=iproc
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      call mpi_isend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("transpose_from_x2: MPI_ISend failure 1",ierr==0)
-      call MPI_waitall(2,request,statuses,ierr) 	
+      call mpi_waitall(2,request,statuses,ierr) 	
       ASSERT("transpose_from_x2: MPI_waitalll failure 1",ierr==0)
 
 
@@ -885,12 +885,12 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
 
 !     send/rec buffer 
       tag=my_y
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_to_y: MPI_IRecv failure 1",ierr==0)
       tag=iproc
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      call mpi_isend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("transpose_to_y: MPI_ISend failure 1",ierr==0)
-      call MPI_waitall(2,request,statuses,ierr) 	
+      call mpi_waitall(2,request,statuses,ierr) 	
       ASSERT("transpose_to_y: MPI_waitalll failure 1",ierr==0)
 
 
@@ -994,12 +994,12 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
 
 !     send/rec buffer 
       tag=my_y
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_from_y: MPI_IRecv failure 1",ierr==0)
       tag=iproc
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      call mpi_isend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("transpose_from_y: MPI_ISend failure 1",ierr==0)
-      call MPI_waitall(2,request,statuses,ierr) 	
+      call mpi_waitall(2,request,statuses,ierr) 	
       ASSERT("transpose_from_y: MPI_waitalll failure 1",ierr==0)
 
 
@@ -1123,9 +1123,9 @@ do x_pe=0,ncpu_x-1
       else
 #ifdef USE_MPI
          tag=1
-         call MPI_ISend(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
+         call mpi_isend(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_ISend failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
+         call mpi_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 #endif
       endif
@@ -1136,9 +1136,9 @@ do x_pe=0,ncpu_x-1
          ! dont recieve message from self
       else
 #ifdef USE_MPI
-         call MPI_IRecv(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
+         call mpi_irecv(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_IRecv failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
+         call mpi_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 #endif
       endif
@@ -1163,7 +1163,7 @@ do x_pe=0,ncpu_x-1
          ypos = y_pe*nslaby + x_pe*ny_2dx_actual
          zpos = output_size*(offset + zpos*o_nx*o_ny+ypos*o_nx)
          if (first_seek) then
-            call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+            call mpi_file_seek(fid,zpos,MPI_SEEK_SET,ierr)
             first_seek=.false.
          endif
       endif
@@ -1187,8 +1187,8 @@ do x_pe=0,ncpu_x-1
 !              zpos = z_pe*nslabz + k -1
 !              ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
 !              zpos = output_size*(offset + zpos*o_nx*o_ny+ypos*o_nx)
-!              call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
-!              call MPI_File_write(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
+!              call mpi_file_seek(fid,zpos,MPI_SEEK_SET,ierr)
+!              call mpi_file_write(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
 #endif
             endif
             call mwrite8(fid,saved_edge,o_nx)
@@ -1306,16 +1306,16 @@ do x_pe=0,ncpu_x-1
       else
 #ifdef USE_MPI
          tag=1
-         call MPI_ISend(l,1,MPI_INTEGER,fpe,tag,comm_3d,request(2),ierr)
+         call mpi_isend(l,1,MPI_INTEGER,fpe,tag,comm_3d,request(2),ierr)
          ASSERT("output1: MPI_ISend failure",ierr==0)
 
          if (l==0) then
-            call MPI_waitall(1,request,statuses,ierr) 	
+            call mpi_waitall(1,request,statuses,ierr) 	
             ASSERT("output1: MPI_waitalll failure",ierr==0)
          else
-            call MPI_ISend(buf,l,MPI_REAL8,fpe,tag,comm_3d,request(1),ierr)
+            call mpi_isend(buf,l,MPI_REAL8,fpe,tag,comm_3d,request(1),ierr)
             ASSERT("output1: MPI_ISend failure",ierr==0)
-            call MPI_waitall(2,request,statuses,ierr) 	
+            call mpi_waitall(2,request,statuses,ierr) 	
             ASSERT("output1: MPI_waitalll failure",ierr==0)
          endif
 #endif
@@ -1327,14 +1327,14 @@ do x_pe=0,ncpu_x-1
          ! dont recieve message from self
       else
 #ifdef USE_MPI
-         call MPI_IRecv(l,1,MPI_INTEGER,sending_pe,tag,comm_3d,request,ierr)
+         call mpi_irecv(l,1,MPI_INTEGER,sending_pe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_IRecv failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
+         call mpi_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
          if (l>0) then
-            call MPI_IRecv(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
+            call mpi_irecv(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
             ASSERT("output1: MPI_IRecv failure",ierr==0)
-            call MPI_waitall(1,request,statuses,ierr) 	
+            call mpi_waitall(1,request,statuses,ierr) 	
             ASSERT("output1: MPI_waitalll failure",ierr==0)
          endif
 #endif
@@ -1417,15 +1417,15 @@ do x_pe=0,ncpu_x-1
       else
 #ifdef USE_MPI
          tag=1
-         call MPI_ISend(l,1,MPI_INTEGER,fpe,tag,comm_3d,request,ierr)
+         call mpi_isend(l,1,MPI_INTEGER,fpe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_ISend failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
+         call mpi_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 
          if (l>0) then
-            call MPI_IRecv(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
+            call mpi_irecv(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
             ASSERT("output1: MPI_ISend failure",ierr==0)
-            call MPI_waitall(1,request,statuses,ierr) 	
+            call mpi_waitall(1,request,statuses,ierr) 	
             ASSERT("output1: MPI_waitalll failure",ierr==0)
             pt(1:dealias_nx,k,1:jj)=buf(1:dealias_nx,1:jj)
          endif
@@ -1442,16 +1442,16 @@ do x_pe=0,ncpu_x-1
          endif
       else
 #ifdef USE_MPI
-         call MPI_IRecv(l,1,MPI_INTEGER,sending_pe,tag,comm_3d,request,ierr)
+         call mpi_irecv(l,1,MPI_INTEGER,sending_pe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_IRecv failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
+         call mpi_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 
          if (l>0) then
             call mread8(fid,buf,l)
-            call MPI_ISend(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
+            call mpi_isend(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
             ASSERT("output1: MPI_IRecv failure",ierr==0)
-            call MPI_waitall(1,request,statuses,ierr) 	
+            call mpi_waitall(1,request,statuses,ierr) 	
             ASSERT("output1: MPI_waitalll failure",ierr==0)
          endif
 #endif
@@ -1574,10 +1574,10 @@ do x_pe=0,ncpu_x-1
             ypos = y_pe*nslaby + x_pe*ny_2dx_actual
             zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
             if (first_seek) then
-               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+               call mpi_file_seek(fid,zpos,MPI_SEEK_SET,ierr)
                first_seek=.false.
             endif
-            call MPI_File_read(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
+            call mpi_file_read(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
 #endif
          else
             call mread8(fid,buf,o_nx*ny_2dx_actual)
@@ -1595,8 +1595,8 @@ do x_pe=0,ncpu_x-1
                zpos = z_pe*nslabz + k -1
                ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
                zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
-               !               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
-               call MPI_File_read(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
+               !               call mpi_file_seek(fid,zpos,MPI_SEEK_SET,ierr)
+               call mpi_file_read(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
 #endif
             else
                call mread8(fid,saved_edge,o_nx)      
@@ -1612,9 +1612,9 @@ do x_pe=0,ncpu_x-1
          ! dont send message to self
       else
 #ifdef USE_MPI
-         call MPI_ISend(buf,l,MPI_REAL8,destination_pe,tag,comm_3d,request,ierr)
+         call mpi_isend(buf,l,MPI_REAL8,destination_pe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_IRecv failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
+         call mpi_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 #endif
       endif
@@ -1627,9 +1627,9 @@ do x_pe=0,ncpu_x-1
       else
 #ifdef USE_MPI
          tag=1
-         call MPI_IRecv(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
+         call mpi_irecv(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_ISend failure",ierr==0)
-         call MPI_waitall(1,request,statuses,ierr) 	
+         call mpi_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 #endif
       endif
@@ -1735,9 +1735,9 @@ endif
 if (do_mpi_io) then 
 #ifdef USE_MPI_IO
    if (input_size==4) then	
-      call MPI_File_read(fid,buf4,len,MPI_REAL4,statuses,ierr)
+      call mpi_file_read(fid,buf4,len,MPI_REAL4,statuses,ierr)
    else
-      call MPI_File_read(fid,buf,len,MPI_REAL8,statuses,ierr)
+      call mpi_file_read(fid,buf,len,MPI_REAL8,statuses,ierr)
    endif
    if (ierr==0) ierr=len  ! return length read, if OK
 #else
@@ -1775,7 +1775,7 @@ integer statuses(MPI_STATUS_SIZE)
 
 if (do_mpi_io) then 
 #ifdef USE_MPI_IO
-   call MPI_File_read(fid,buf,len,MPI_BYTE,statuses,ierr)
+   call mpi_file_read(fid,buf,len,MPI_BYTE,statuses,ierr)
    if (ierr==0) ierr=len  ! return length read, if OK
 #else
    call abort("MPI_IO support not compiled in")	
@@ -1809,9 +1809,9 @@ endif
 if (do_mpi_io) then 
 #ifdef USE_MPI_IO
    if (output_size==4) then
-      call MPI_File_write(fid,buf4,len,MPI_REAL4,statuses,ierr)
+      call mpi_file_write(fid,buf4,len,MPI_REAL4,statuses,ierr)
    else
-      call MPI_File_write(fid,buf,len,MPI_REAL8,statuses,ierr)
+      call mpi_file_write(fid,buf,len,MPI_REAL8,statuses,ierr)
    endif
 #else
    call abort("MPI_IO support not compiled in")	
@@ -1844,7 +1844,7 @@ integer statuses(MPI_STATUS_SIZE)
 
 if (do_mpi_io) then 
 #ifdef USE_MPI_IO
-   call MPI_File_write(fid,buf,len,MPI_BYTE,statuses,ierr)
+   call mpi_file_write(fid,buf,len,MPI_BYTE,statuses,ierr)
 #else
    call abort("MPI_IO support not compiled in")	
 #endif

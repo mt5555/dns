@@ -347,10 +347,10 @@ endif
 
 #ifdef USE_MPI
 if (io_read==1) then
-   call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-   call MPI_bcast(xnx,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-   call MPI_bcast(xny,1,MPI_REAL8,io_pe,comm_3d ,ierr)
-   call MPI_bcast(xnz,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call mpi_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call mpi_bcast(xnx,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call mpi_bcast(xny,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call mpi_bcast(xnz,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 endif
 #endif
 
@@ -450,17 +450,17 @@ xnz=o_nz
 if (io_nodes(my_z)==my_pe) then
    call print_message("MPI-IO open...")
    if (io_read==1) then
-      call MPI_File_open(comm_io,fname, &
+      call mpi_file_open(comm_io,fname, &
            MPI_MODE_RDONLY ,&
            MPI_INFO_NULL, fid,ierr)
    else
       ! if file exists, then new stripe and stride settings are ignored,
       ! so delete file first
-      call MPI_File_delete(fname,MPI_INFO_NULL,ierr)
-      call MPI_Info_create(infoin,ierr)
-      call MPI_Info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
-      call MPI_Info_set(infoin, "striping_unit", mpi_stride ,ierr)
-      call MPI_File_open(comm_io,fname, &
+      call mpi_file_delete(fname,MPI_INFO_NULL,ierr)
+      call mpi_Info_create(infoin,ierr)
+      call mpi_Info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
+      call mpi_Info_set(infoin, "striping_unit", mpi_stride ,ierr)
+      call mpi_file_open(comm_io,fname, &
            MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
            infoin, fid,ierr)
    endif
@@ -514,7 +514,7 @@ if (header_type==4) then
 endif
 
 #ifdef USE_MPI
-call MPI_bcast(time,1,MPI_REAL8,fpe,comm_3d ,ierr)
+call mpi_bcast(time,1,MPI_REAL8,fpe,comm_3d ,ierr)
 #endif
 
 if (io_read==1) then
@@ -524,7 +524,7 @@ else
 endif
 
 if (io_nodes(my_z)==my_pe) then
-   call MPI_File_close(fid,ierr)
+   call mpi_file_close(fid,ierr)
 endif
 #endif
 end subroutine

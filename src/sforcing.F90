@@ -198,7 +198,7 @@ if (g_u2xave==0) then
    enddo
 #ifdef USE_MPI
    xw=g_u2xave
-   call MPI_allreduce(xw,g_u2xave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xw,g_u2xave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 endif
@@ -235,7 +235,7 @@ do wn=numb1,numb
 enddo
 #ifdef USE_MPI
    temp=ener
-   call MPI_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   call mpi_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
 #endif
 
 
@@ -375,7 +375,7 @@ if (g_u2xave==0) then
    enddo
 #ifdef USE_MPI
    xw=g_u2xave
-   call MPI_allreduce(xw,g_u2xave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xw,g_u2xave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 endif
@@ -422,11 +422,11 @@ do wn=numb1,numb
 enddo
 #ifdef USE_MPI
    temp=ener
-   call MPI_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   call mpi_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
    rmodes2=rmodes
    i=2*numb+1
    i=3*i*i*i
-   call MPI_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   call mpi_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
 #endif
 
 
@@ -712,8 +712,8 @@ key=0
 
 ! everyone with ntot>0 joins a new group, comm_sforcing
 #ifdef USE_MPI
-call MPI_Comm_split(comm_3d,color,key,comm_sforcing,ierr);
-if (ntot==0) call MPI_Comm_free(comm_sforcing,ierr)
+call mpi_comm_split(comm_3d,color,key,comm_sforcing,ierr);
+if (ntot==0) call mpi_comm_free(comm_sforcing,ierr)
 #endif
 
 
@@ -800,7 +800,7 @@ if (ntot==0) return
 if (new_f==1) then
    if (my_pe==io_pe) call random12(rmodes)
 #ifdef USE_MPI
-   call MPI_bcast(rmodes,3*(2*numbs+1)**3,MPI_REAL8,io_pe,comm_sforcing ,ierr)
+   call mpi_bcast(rmodes,3*(2*numbs+1)**3,MPI_REAL8,io_pe,comm_sforcing ,ierr)
 #endif
    return
 endif
@@ -900,7 +900,7 @@ if (0==init_sforcing) then
       enddo
 #ifdef USE_MPI
       numk2=numk
-      call MPI_allreduce(numk2,numk,numb,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+      call mpi_allreduce(numk2,numk,numb,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif      
    endif
 endif
@@ -982,7 +982,7 @@ if (new_f==1) then
       if (io_pe==my_pe) print *,"iter=",ii,numb1,numb,sum(ener(numb1:numb))
 #ifdef USE_MPI
       ener2=ener
-      call MPI_allreduce(ener2,ener,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      call mpi_allreduce(ener2,ener,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif      
       ener_test=ener_test+ener/ntest
    endif
@@ -1032,7 +1032,7 @@ enddo
 
 
 #if 0
-call MPI_allreduce(f_diss,xfac,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(f_diss,xfac,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 if (io_pe==my_pe) then
    print *,'f_diss: ',xfac,maxval(fhat)
 endif
@@ -1245,7 +1245,7 @@ enddo
 i=2*nmax+1
 i=i*i*i
 rmodes2=rmodes
-call MPI_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 
 #endif
 

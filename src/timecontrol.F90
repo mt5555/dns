@@ -32,7 +32,6 @@ real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
 
 
-
 call wallclock(tmx1)
 
 
@@ -158,7 +157,6 @@ else
    delea_tot=0
    delens_tot=0
 endif
-
 
 
 doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next,1,0)
@@ -361,7 +359,6 @@ if (doit_output) then
    call print_message("done with output")
 
 endif
-
 
 !
 ! diagnostic output

@@ -505,9 +505,9 @@ enddo
 
 #ifdef USE_MPI
 gradp2=gradp
-call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 i=grad_count
-call MPI_allreduce(i,grad_count,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(i,grad_count,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif
 gradp=gradp/grad_count
 
@@ -534,7 +534,7 @@ enddo
 enddo
 #ifdef USE_MPI
 px=meanp
-call MPI_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 meanp=meanp/g_nx/g_ny/g_nz
 
@@ -577,9 +577,9 @@ enddo
 
 #ifdef USE_MPI
 px=meanp
-call MPI_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 gradp2=gradp
-call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 meanp=meanp/g_nx/g_ny/g_nz

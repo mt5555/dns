@@ -681,8 +681,8 @@ integer :: bin,ierr,n,ndelta,ncalls
 
 #ifdef USE_MPI
 ! find maximum value of bin  MPI max
-call MPI_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
-call MPI_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
 str%ncalls=ncalls  ! in case io_pe has ncalls=0
 
 ! resize all str's to size bin
@@ -695,11 +695,11 @@ ndelta=str%delta_num
 n=(2*bin+1)*ndelta
 if (my_pe == io_pe) then
    allocate(pdfdata(-bin:bin,ndelta))
-   call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    str%pdf=pdfdata
    deallocate(pdfdata)
 else
-   call MPI_reduce(str%pdf,0,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(str%pdf,0,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 endif
 
 #endif
@@ -733,8 +733,8 @@ integer :: bin,ierr,n,ndelta,ncalls
 
 #ifdef USE_MPI
 ! find maximum value of bin  MPI max
-call MPI_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
-call MPI_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
 str%ncalls=ncalls  ! in case io_pe has ncalls=0
 
 ! resize all str's to size bin
@@ -747,11 +747,11 @@ ndelta=str%delta_num
 n=(2*bin+1)*(2*bin+1)*ndelta
 if (my_pe == io_pe) then
    allocate(pdfdata(-bin:bin,-bin:bin,ndelta))
-   call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    str%pdf=pdfdata
    deallocate(pdfdata)
 else
-   call MPI_reduce(str%pdf,0,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(str%pdf,0,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 endif
 
 #endif

@@ -400,11 +400,11 @@ enddo
 
 #ifdef USE_MPI
    xtmp=ke_diss
-   call MPI_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ke
-   call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=h_diss
-   call MPI_allreduce(xtmp,h_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xtmp,h_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -449,7 +449,7 @@ if (stype==2) then
    w2s2_mean=w2s2_mean/ntot
 #ifdef USE_MPI
    dummy(1:3)=w2s2_mean
-   call MPI_allreduce(dummy,w2s2_mean,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(dummy,w2s2_mean,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 endif
@@ -470,7 +470,7 @@ if (stype==1) then
    Dl_mean=Dl_mean/ntot
 #ifdef USE_MPI
    dummy(2:pmax)=Dl_mean(2:pmax)
-   call MPI_allreduce(dummy(2),Dl_mean(2),pmax-1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(dummy(2),Dl_mean(2),pmax-1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 endif
 
@@ -483,7 +483,7 @@ do idir=1,ndir
    call caught_sig(csig); 
 #ifdef USE_MPI
    i=csig;
-   call MPI_allreduce(i,csig,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(i,csig,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
 #endif
    if (csig>0) exit;
 
@@ -708,11 +708,11 @@ enddo
 
 #ifdef USE_MPI
    xtmp=ke_diss
-   call MPI_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ke
-   call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ntot
-   call MPI_allreduce(xtmp,ntot,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(xtmp,ntot,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 epsilon=mu*ke_diss/ntot
@@ -1910,36 +1910,36 @@ w2s2=w2s2/ntot
 #ifdef USE_MPI
    do p=2,pmax
       dwork2=Dl(:,:,p)
-      call MPI_reduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+      call mpi_reduce(dwork2,Dl(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
       dwork3=Dt(:,:,:,p)
-      call MPI_reduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+      call mpi_reduce(dwork3,Dt(1,1,1,p),ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    enddo
 
    dwork2=H_ltt
-   call MPI_reduce(dwork2,H_ltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork2,H_ltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=H_tt
-   call MPI_reduce(dwork2,H_tt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork2,H_tt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
    dwork3=D_ltt
-   call MPI_reduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=D_lltt
-   call MPI_reduce(dwork2,D_lltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork2,D_lltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
    dwork3=SP_ltt
-   call MPI_reduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=SP_lll
-   call MPI_reduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork3=SN_ltt
-   call MPI_reduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=SN_lll
-   call MPI_reduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call mpi_reduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
    do p=1,3
       dwork2=w2s2(:,:,p)
-      call MPI_reduce(dwork2,w2s2(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+      call mpi_reduce(dwork2,w2s2(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    enddo
 
 

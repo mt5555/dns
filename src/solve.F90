@@ -362,7 +362,7 @@ enddo
 
 #ifdef USE_MPI
 sm=ddot
-call MPI_allreduce(sm,ddot,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(sm,ddot,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 return

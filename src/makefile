@@ -15,8 +15,8 @@ F77FIXED=
 
 
 ifeq ($(UNAME),Linux)
-   VENDOR=LAHEY
-   #VENDOR=PGI
+   #VENDOR=LAHEY
+   VENDOR=PGI
    #VENDOR=INTEL
    MPI = 
    MPILIB = 
@@ -27,42 +27,23 @@ ifeq ($(UNAME),Linux)
       #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
       #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
    endif
-   ifeq ($(HOST),ll-1.lanl.gov)
-      VENDOR=PGI
-      MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I$(HOME)/lampi/l1/include
-      MPILIB =  -L$(HOME)/lampi/l1/lib -lmpi
+   ifeq ($(HOST),dosadi)
+      VENDOR=INTEL8
+      MPI = -DUSE_MPI -DMPI_DOUBLEU
+      MPILIB =   -llamf77mpi -lmpi -llam 
    endif
    ifeq ($(HOST),darkstar)
       #MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I$(HOME)/lampi/include
       #MPILIB =  -Xlinker -rpath $(HOME)/lampi/lib -L$(HOME)/lampi/lib -lmpi
    endif
-   ifeq ($(HOST),jmac.lanl.gov)
-	VENDOR=LAHEY
-   endif
    ifeq ($(HOST),brain)
       MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
-   endif
-   ifeq ($(HOST),shankara1)
-      MPI = -DNDEBUG -DUSE_MPI -I/users/contrib/lam/include
-      MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
-   endif
-   ifeq ($(HOST),node001)
-      VENDOR=PGI
-      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
-      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
-      #-lpthread
    endif
    ifeq ($(HOST),pinkish.lanl.gov)
       #MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
       #MPILIB =-L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm -lpthread
       MPI =  -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_LAMPI -I/home/taylorm/lampi/pinkish/include
-      MPILIB = -L /home/taylorm/lampi/pinkish/lib -lmpi
-   endif
-   ifeq ($(MPI_VERSION),lampi)
-      # LAMPI
-      MPI =  -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_LAMPI \
-           -I/home/taylorm/lampi/pinkish/include
       MPILIB = -L /home/taylorm/lampi/pinkish/lib -lmpi
    endif
 

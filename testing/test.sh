@@ -75,6 +75,39 @@ echo "running restart dns case"
 ./dns -r -d $rundir < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
+endif
+
+if ($1 == 1p) then
+
+./gridsetup.py 1 1 1 128 128 1  
+make >& /dev/null ;  rm -f $tmp ; 
+echo "running restart dns 1x1x1"
+mpirun -x LD_LIBRARY_PATH -np 1 ./dns -r -d $rundir -i  $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+./gridsetup.py 2 1 1 128 128 1  
+make >& /dev/null ;  rm -f $tmp ; 
+echo "running restart dns 2x1x1"
+mpirun -x LD_LIBRARY_PATH -np 2 ./dns -r -d $rundir -i  $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+./gridsetup.py 1 2 1 128 128 1  
+make >& /dev/null ;  rm -f $tmp ; 
+echo "running restart dns 1x2x1"
+mpirun -x LD_LIBRARY_PATH -np 2 ./dns -r -d $rundir -i  $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+./gridsetup.py 8 1 1 128 128 1  
+make >& /dev/null ;  rm -f $tmp ; 
+echo "running restart dns 8x1x1"
+mpirun -x LD_LIBRARY_PATH -np 8 ./dns -r -d $rundir -i  $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+./gridsetup.py 1 8 1 128 128 1  
+make >& /dev/null ;  rm -f $tmp ; 
+echo "running restart dns 1x8x1"
+mpirun -x LD_LIBRARY_PATH -np 8 ./dns -r -d $rundir -i  $refin > $tmp 
+../testing/check.sh $tmp $refout
 
 endif
 

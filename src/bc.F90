@@ -340,7 +340,7 @@ endif
 
 #ifdef USE_MPI
 psi_b_temp=psi_b
-call MPI_allreduce(psi_b_temp,psi_b,4*bsize,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(psi_b_temp,psi_b,4*bsize,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 !print *,'psib',psi_b(o_ny,1,1)

@@ -478,7 +478,7 @@ scalars(26:28)=uxx2
 
 #ifdef USE_MPI
    scalars2=scalars
-   call MPI_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -605,7 +605,7 @@ i=i+3
 
 #ifdef USE_MPI
    scalars2=scalars
-   call MPI_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 

@@ -619,7 +619,7 @@ ensave=ensave/g_nx/g_ny/g_nz
 
 
 #ifdef USE_MPI
-   call MPI_allreduce(u1,u1tmp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(u1,u1tmp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #else
    u1tmp=u1
 #endif
@@ -670,7 +670,7 @@ scalars(35:37)=u4
 
 #ifdef USE_MPI
    scalars2=scalars
-   call MPI_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -814,7 +814,7 @@ lnux4=lnux4/g_nx/g_ny/g_nz
 
 
 #ifdef USE_MPI
-   call MPI_allreduce(u1,u1tmp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(u1,u1tmp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #else
    u1tmp=u1
 #endif
@@ -938,7 +938,7 @@ endif
 
 #ifdef USE_MPI
    scalars2=scalars
-   call MPI_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 !su=u2*uxx2/(ux2*ux2)   scalars(2)*scalars(12,13,14)/scalars(3,4,5)
 !print *,'G_theta=',su
@@ -990,11 +990,11 @@ enddo
 
 #ifdef USE_MPI
 xtmp=N0
-call MPI_allreduce(xtmp,N0,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(xtmp,N0,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 !ave2=avelen
-!call MPI_allreduce(ave2,avelen,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+!call mpi_allreduce(ave2,avelen,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 count1=raycount
-call MPI_allreduce(count1,raycount,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(count1,raycount,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif
 
 N0 = N0/raycount

@@ -498,7 +498,7 @@ enddo
 
 #ifdef USE_MPI
    E_k2=E_k
-   call MPI_allreduce(E_k2,E_k,max(nx,ny,nz),MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(E_k2,E_k,max(nx,ny,nz),MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 E_0=0
@@ -552,7 +552,7 @@ if (dealias>0) call dealias_gridspace(Q,work1)
 
 #ifdef USE_MPI
    ke2=E_0
-   call MPI_allreduce(ke2,E_0,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(ke2,E_0,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 ! normalize so Energy in band k_0 = 3.23448943961018D-002
 Q =   sqrt(3.23448943961018D-002)*Q/sqrt(E_0)

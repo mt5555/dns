@@ -36,9 +36,9 @@ divi=divi/g_nx/g_ny/g_nz
 
 #ifdef USE_MPI
    g_mx=divmx
-   call MPI_allreduce(g_mx,divmx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(g_mx,divmx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    g_mx=divi
-   call MPI_allreduce(g_mx,divi,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(g_mx,divi,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 end subroutine
 

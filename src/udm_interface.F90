@@ -51,13 +51,13 @@ integer*8 fidmpi,infoin
 #if 0
    if (io_pe==my_pe) then
    call print_message("attempting to set stripe")
-   call MPI_Info_create(infoin,ierr)
-   call MPI_Info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
-   call MPI_Info_set(infoin, "striping_unit", mpi_stride ,ierr)
-   call MPI_File_open(comm_1,fnameudm, &
+   call mpi_Info_create(infoin,ierr)
+   call mpi_Info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
+   call mpi_Info_set(infoin, "striping_unit", mpi_stride ,ierr)
+   call mpi_file_open(comm_1,fnameudm, &
            MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
            infoin, fidmpi,ierr)
-   call MPI_File_close(fidmpi,ierr)
+   call mpi_file_close(fidmpi,ierr)
    endif
 #endif
 

@@ -256,13 +256,13 @@ endif
 
 #ifdef USE_MPI
 if (read==1) then
-   call MPI_bcast(numt,1,MPI_INTEGER,fpe,comm_3d ,ierr)
-   call MPI_bcast(numt_insert,1,MPI_INTEGER,fpe,comm_3d ,ierr)
+   call mpi_bcast(numt,1,MPI_INTEGER,fpe,comm_3d ,ierr)
+   call mpi_bcast(numt_insert,1,MPI_INTEGER,fpe,comm_3d ,ierr)
    if (my_pe/=fpe) then
       numt_in=numt
       call allocate_tracers(numt_in)      
    endif
-   call MPI_bcast(tracer,(ndim+1)*numt_max,MPI_REAL8,fpe,comm_3d ,ierr)
+   call mpi_bcast(tracer,(ndim+1)*numt_max,MPI_REAL8,fpe,comm_3d ,ierr)
 endif
 #endif
 
@@ -451,11 +451,11 @@ enddo
 
 #ifdef USE_MPI
    tracer_work=tracer
-   call MPI_allreduce(tracer_work,tracer,(ndim+1)*numt_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(tracer_work,tracer,(ndim+1)*numt_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    if (rk4stage/=4) then
       ! not necessary on last stage - we no longer need tracer_tmp
       tracer_work(:,1:ndim)=tracer_tmp(:,1:ndim)
-      call MPI_allreduce(tracer_work,tracer_tmp,ndim*numt_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+      call mpi_allreduce(tracer_work,tracer_tmp,ndim*numt_max,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    endif
 #endif
 

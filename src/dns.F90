@@ -66,7 +66,7 @@ call init_data(Q,Qhat,q1,work1,work2)
 
 
 #ifdef USE_MPI
-call MPI_Barrier(comm_3d,ierr)
+call mpi_barrier(comm_3d,ierr)
 #endif
 
 
@@ -106,8 +106,8 @@ call dns_solve(Q,Qhat,q1,work1,work2,itime)
 tims_max=tims
 tims_ave=tims
 #ifdef USE_MPI
-   call MPI_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-   call MPI_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    tims_ave=tims_ave/ncpus
 #endif
 tims_max=tims_max/60
@@ -261,9 +261,9 @@ do
 
 #ifdef USE_MPI
    ints_buf=ints
-   call MPI_allreduce(ints_buf,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(ints_buf,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    ints_buf=maxs
-   call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
    g_u2xave=ints(2)
 
@@ -292,9 +292,9 @@ do
       itime_final=itime
    endif
 
+
    if (itime>=itime_final) time_final=time
    call time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
-
 
    if (itime==0) then
       ! set all timers to zero so they dont include initialization
@@ -306,7 +306,7 @@ do
    endif
 
    itime=itime+1
-   if (time >= time_final) exit
+   if (time >= time_final-1e-15) exit
 
 enddo
 itime=itime -1  ! total number of time steps taken
