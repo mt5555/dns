@@ -335,7 +335,6 @@ character(len=8) :: ext2,ext
 integer :: sc
 integer,parameter :: ssize=128
 real*8 :: dx(1:2*ssize),dy(1:2*ssize),dz(1:2*ssize)
-real*8 :: mat(3,3,3)
 real*8,allocatable :: data(:,:,:)
 real*8,allocatable :: gradu(:,:,:,:)
 integer :: i2,j2,k2,k,ip
@@ -361,7 +360,7 @@ do j=1,3
       dx(1:ssize)=subcube_corner(1,sc)+subcube_cords(:)
       dy(1:ssize)=subcube_corner(2,sc)+subcube_cords(:)
       dz(1:ssize)=subcube_corner(3,sc)+subcube_cords(:)
-!      call extract_subcube(ssize,ssize,ssize,dx,dy,dz,data,vor,0,mat)
+      call extract_subcube(ssize,ssize,ssize,dx,dy,dz,data,vor)
 
       if (io_pe==my_pe) then
          ! data() only computed on io_pe

@@ -126,7 +126,7 @@ end subroutine
 
 subroutine interp_subcube(ssize,k1,k2,x0,e01,e02,e03,data,field,irot)
 !
-! interpolate to the points dx(1:ns),dy(1:ns),dz(1:ns)
+! interpolate to the points x+dx(1:ns),y+dy(1:ns),z+dz(1:ns)
 !
 ! NOTE: only io_pe will have the correct, interpolated data
 !
@@ -186,6 +186,112 @@ enddo
 allocate(data2(ssize,ssize,k2-k1+1))
 data2=data
 call mpi_reduce(data2,data,ssize*ssize*(k2-k1+1),MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
+deallocate(data2)
+#endif
+
+#if 0
+do k=1,nsz
+   do j=1,nsy
+      do i=1,nsx
+
+         xi=dx(i)
+         yi=dy(j)
+         zi=dz(k)
+         !if (irot==1) call rotate(xi,yi,zi,rmatrix)
+
+         n3=(zi-zcord(nz1))/delz
+         n3=n3+nz1
+         n2=(yi-ycord(ny1))/dely
+         n2=n2+ny1
+         n1=(xi-xcord(nx1))/delx
+         n1=n1+nx1
+
+         if (data(i,j,k)<-9d199) then
+            print *,my_pe,n1,n2,n3
+         endif
+      enddo
+   enddo
+enddo
+#endif
+
+end subroutine
+
+
+
+
+
+
+
+subroutine extract_subcube(nsx,nsy,nsz,dx,dy,dz,data,field)
+!
+! extract the gridpoints dx(1:ns),dy(1:ns),dz(1:ns) from the global data
+!
+! NOTE: only io_pe will have the correct, interpolated data
+!
+integer :: nsx,nsy,nsz
+real*8 :: dx(nsx),dy(nsy),dz(nsz)
+real*8 :: data(nsx,nsy,nsz)
+real*8 :: field(nx,ny,nz)
+integer :: irot
+real*8 :: rmatrix(3,3,3)
+
+real*8 :: xi,yi,zi,pos(3)
+integer :: n1(nsx),n2(nsy),n3(nsz),i,j,k,igrid,jgrid,kgrid
+#ifdef USE_MPI
+real*8,allocatable :: data2(:,:,:)
+integer :: ierr
+#endif
+
+!if (io_pe==my_pe) then
+!   print *,'interpolating to subcube: '
+!   print *,dx(1),dy(1),dz(1)
+!   print *,dx(nsx),dy(nsy),dz(nsz)
+!endif
+
+do i=1,nsx
+   xi=dx(i)
+   if (xi<g_xcord(1)) xi=xi+1;
+   if (xi>g_xcord(g_nx)) xi=xi-1;
+   n1(i)=(xi-xcord(nx1))/delx
+   n1(i)=n1(i)+nx1
+   if (n1(i)<nx1 .or. n1(i)>nx2) n1(i)=0 !flag indicating not on this cpu
+enddo
+do j=1,nsy
+   yi=dy(j)
+   if (yi<g_ycord(1)) yi=yi+1;
+   if (yi>g_ycord(g_ny)) yi=yi-1;
+   n2(j)=(yi-ycord(ny1))/dely
+   n2(j)=n2(j)+ny1
+   if (n2(j)<ny1 .or. n2(j)>ny2) n2(j)=0 !flag indicating not on this cpu
+enddo
+do k=1,nsz
+   zi=dz(k)
+   if (zi<g_zcord(1)) zi=zi+1;
+   if (zi>g_zcord(g_nz)) zi=zi-1;
+   n3(k)=(zi-zcord(nz1))/delz
+   n3(k)=n3(k)+nz1
+   if (n3(k)<nz1 .or. n3(k)>nz2) n3(k)=0 !flag indicating not on this cpu
+enddo
+
+
+do k=1,nsz
+   do j=1,nsy
+      do i=1,nsx
+
+         if (n1(i)==0 .or. n2(j)==0 .or. n3(k)==0) then
+            data(i,j,k)=-9d200
+         else
+            ! we have this data, copy;
+            data(i,j,k)=field(n1(i),n2(j),n3(k))
+         endif
+         
+      enddo
+   enddo
+enddo
+#ifdef USE_MPI
+allocate(data2(nsx,nsy,nsz))
+data2=data
+call mpi_reduce(data2,data,nsx*nsy*nsz,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
 deallocate(data2)
 #endif
 
