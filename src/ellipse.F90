@@ -300,7 +300,7 @@ end subroutine
 
 
 
-#if 0
+#if 1
 subroutine findellipse(w,nell,mxcord,r)
 use params
 use mpi
@@ -357,7 +357,7 @@ end subroutine
 
 
 
-
+#if 0
 subroutine findellipse(w,nell,ccord,r)
 use params
 use mpi
@@ -434,7 +434,7 @@ integer :: reset
    endif
 
 end subroutine
-
+#endif
 
 
 

@@ -8,7 +8,7 @@
 range=0.00:1.0:1000.0 ;
 name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
-name='/data/vxpair/vx2048a';
+name='../src/vxpair/vx2048a';
 
 
 usefig=1;
@@ -46,8 +46,7 @@ for i=range
   axis([0,4,0,2]);
   title(sprintf('time = %6.2f ',i)); 
 
-    'pause'
-    pause
+%    'pause' ;     pause
 end
 return
 
