@@ -1,43 +1,18 @@
+email: Bonnie answer
+       UDM team: qb1533  
+
+Meneauvau: check schedule, register
+
 .isostr and .smal.isostr for iso12_5120000.0000 check that they agree
                      in matlab
-
-look at new .isostr from QA 2048^3
-
 isoave.F90: run cj analyis QSC on forced data.
 512^3:     can run analysis if we to a two array analysis. isoavep2()?
-           time isoavep2 vs isoavep
+                                             time isoavep2 vs isoavep
 
-prepair 10min talk
 update UDM code.
 
 
 
-doit_model   only mod time
-doit_spec    force initial, since we cant do transfer on final
-
-
-document options:
-
--s                same as -si, -so
--si               use spectral input
--so               use spectral output
--smax gmax        set wave max for spectral output
-                  default: dealias wave max?
-
-options used by 'convert' program:
--cout  uvw         output highres u,v,w        
--cout  vor         output highres vor1,2,3     
--cout  vorm        output highres ||vor||        (can not be used with -uo)
-
-
-
-run 2048 grid: -mio -uo -cout vor              UDM vor file
-run 2048 grid: -mio -so -smax 384 -cout uvw    spectral uvw file
-run on 384:    -si -cout vorm                   input spec 384 uvw, output 384 vorm
-
-
-*.vor.h5  BOB/UDM 2048^3
-*.vorm    384^3 vor. mag. for dx.
 
 
 test1 32:  restart from reference (27 coeff), save 22 coeff.

@@ -24,8 +24,6 @@ integer :: ndelta,ndir
 integer :: delta_val(ndelta_max)   ! delta values (in terms of grid points)
 real*8  :: r_val(ndelta_max,ndir_max)      ! actual distance for each delta value
 
-logical :: comp_sk_helical=.false.  ! compute SK's helical str function
-
 integer :: ntranspose               ! number of data transpose operations performed
 
 logical :: firstcall=.true.
@@ -50,6 +48,7 @@ real*8  :: Dl_mean(2:pmax)
 real*8,allocatable  :: Dl(:,:,:)         ! longitudinal, p=2..10
 real*8,allocatable  :: Dt(:,:,:,:)       ! transverse, p=2..10
 real*8,allocatable  :: D_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
+real*8,allocatable  :: D_lltt(:,:)       ! 
 
 real*8,allocatable  :: H_ltt(:,:)      ! H_ltt(ndelta,ndir)    
 real*8,allocatable  :: H_tt(:,:)       ! 
@@ -176,11 +175,7 @@ if (my_pe/=io_pe) return
 
 x=ndelta; call cwrite8(fid,x,1)   
 x=ndir;   call cwrite8(fid,x,1)   
-if (comp_sk_helical) then
-   x=pmax-1+2+2;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
-else
-   x=pmax-1+2;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
-endif
+x=pmax-1+5;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 x=pmax-1+3;    call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
 x=7;      call cwrite8(fid,x,1)   ! number of scalars
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
@@ -204,14 +199,15 @@ enddo
 do idir=1,ndir
    call cwrite8(fid,SN_lll(1,idir),ndelta)
 enddo
-if (comp_sk_helical) then
 do idir=1,ndir
    call cwrite8(fid,H_ltt(1,idir),ndelta)
 enddo
 do idir=1,ndir
    call cwrite8(fid,H_tt(1,idir),ndelta)
 enddo
-endif
+do idir=1,ndir
+   call cwrite8(fid,D_lltt(1,idir),ndelta)
+enddo
 
 
 ! transverse
@@ -1187,15 +1183,14 @@ delu3=ur3-u3
 u_l  = delu1*rhat(1)+delu2*rhat(2)+delu3*rhat(3)
 u_t1 = delu1*rperp1(1)+delu2*rperp1(2)+delu3*rperp1(3)
 u_t2 = delu1*rperp2(1)+delu2*rperp2(2)+delu3*rperp2(3)
-if (comp_sk_helical) then
-   ! HELICAL structure function
-   ux_t1 = u1*rperp1(1)+u2*rperp1(2)+u3*rperp1(3)
-   ux_t2 = u1*rperp2(1)+u2*rperp2(2)+u3*rperp2(3)
-   ur_t1 = ur1*rperp1(1)+ur2*rperp1(2)+ur3*rperp1(3)
-   ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
-   H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
-   H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
-endif
+
+! HELICAL structure function
+ux_t1 = u1*rperp1(1)+u2*rperp1(2)+u3*rperp1(3)
+ux_t2 = u1*rperp2(1)+u2*rperp2(2)+u3*rperp2(3)
+ur_t1 = ur1*rperp1(1)+ur2*rperp1(2)+ur3*rperp1(3)
+ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
+H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
+H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 
 do p=2,pmax
    Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
@@ -1205,6 +1200,8 @@ enddo
 
 D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
 D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+D_lltt(idel,idir)=D_lltt(idel,idir) + u_l**2 * .5*(u_t1**2 + u_t2**2)
+
 
 if (u_l>=0) then
    SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
@@ -1549,6 +1546,7 @@ allocate(dwork3(ndelta,ndir,2))
 allocate(Dl(ndelta,ndir,2:pmax))
 allocate(Dt(ndelta,ndir,2,2:pmax))
 allocate(D_ltt(ndelta,ndir,2))
+allocate(D_lltt(ndelta,ndir))
 
 allocate(H_ltt(ndelta,ndir))
 allocate(H_tt(ndelta,ndir))
@@ -1617,6 +1615,7 @@ real*8 :: ntot
 integer :: ierr,p
 Dl=Dl/ntot
 Dt=Dt/ntot
+D_lltt=D_lltt/ntot
 D_ltt=D_ltt/ntot
 H_ltt=H_ltt/ntot
 H_tt=H_tt/ntot
@@ -1644,6 +1643,8 @@ w2s2=w2s2/ntot
 
    dwork3=D_ltt
    call MPI_reduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   dwork2=D_lltt
+   call MPI_reduce(dwork3,D_lltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
    dwork3=SP_ltt
@@ -1669,6 +1670,7 @@ subroutine zero_str
 Dl=0
 Dt=0
 D_ltt=0
+D_lltt=0
 H_ltt=0
 H_tt=0
 SP_ltt=0

@@ -66,8 +66,6 @@ nxdecomp=1
 nydecomp=1
 nzdecomp=1
 
-!comp_sk_helical=.true;  print *,'Also computing H_ltt...'
-
 
 
 ! these lines are modifed by some sed scripts for automatic running
@@ -75,7 +73,8 @@ nzdecomp=1
 ! nxdecomp,nydecomp,nzdecom, etc.
 !SEDtstart
 !SEDdecomp
-
+!SEDcompcj
+!SEDcompscalar
 
 
 call init_mpi

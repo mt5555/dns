@@ -118,9 +118,11 @@ end
 
 figure(4); clf; hold on; 
 for i=2:2
-   plot(times/teddy,mx45_localeps(1:length(times),i),'k:','LineWidth',2.0);
+%   plot(times/teddy,mx45_localeps(1:length(times),i),'k:','LineWidth',2.0);
+   plot(times/teddy,mx45_localeps(1:length(times),i),'g-','LineWidth',2.0);
 end
-plot(times/teddy,mx45_iso_localeps,'k-','LineWidth',2.0);
+%plot(times/teddy,mx45_iso_localeps,'k-','LineWidth',2.0);
+plot(times/teddy,mx45_iso_localeps,'b-','LineWidth',2.0);
 ax=axis;
 axis( [ax(1),ax(2),.5,1.0] );
 plot(times,(4/5)*times./times,'k');
@@ -132,9 +134,11 @@ print -dpsc k45time.ps
 
 figure(5); clf
 for i=[1,5,13]
-  semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',2.0); hold on
+  %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',2.0); hold on
+  semilogx(xx_plot,y45_ave(:,i),'g-','LineWidth',2.0); hold on
 end
-semilogx(xx_plot,y45_iso_ave,'k','LineWidth',2.0); hold on
+%semilogx(xx_plot,y45_iso_ave,'k','LineWidth',2.0); hold on
+semilogx(xx_plot,y45_iso_ave,'b','LineWidth',2.0); hold on
 axis([1 1000 0 1.0])
 x=1:1000; plot(x,(4/5)*x./x,'k');
 hold off;
