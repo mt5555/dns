@@ -11,9 +11,10 @@ eta = 1/(nx*delx_over_eta);
 
 %name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
 name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
+pname = 'hel256\_hpi2\_'
 
 ext='.new.isostr';
-times=[4.2:0.2:7.4];
+times=[4.2:0.2:9.0];
 %times=[0:1:30];
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 
@@ -44,6 +45,7 @@ for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10)];
   disp([fname,ext]);
+ppname = [pname,tstr(2:10),ext];
   fid=fopen([fname,ext]);
   if (fid<0) ;
     disp('error opening file, skipping...');
@@ -135,6 +137,7 @@ title('Green - dir max; Red - dir first pt; Blue - avg max; Black - avg first pt
 hold off;
 
 xlabel('time','FontSize',16)
+     ylabel(ppname)
      grid on;
 print -dpsc k215time.ps
 
@@ -151,8 +154,8 @@ max(y215_iso_ave)
 %axis([1 1000 -0.05 0.15])
 x=1:1000; plot(x,(2/15)*x./x/scale,'k');
 hold off;
-title('H_{ltt} / r^2\h   (2/15 law) Ensemble averaged');
-ylabel('H_{ltt}/h r^2','FontSize',16);
+title('H_{ltt} /h r^2   (2/15 law) Ensemble averaged');
+ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
 
 print -dpsc k215mean.ps
@@ -175,7 +178,7 @@ semilogx(xx_plot,(y215_iso_ave-offset)/scale,'b','LineWidth',1.0); hold on
 %x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
 title('timemean(H_{ltt}(dir)-H_{ltt}(avg))/(2/15) Measure of anisotropy ');
-%ylabel('< (v(x+r)u(x)w(x) - w(x+r)u(x)v(x) > / (h_{\epsilon} r^2)','FontSize',16);
+ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
 
 

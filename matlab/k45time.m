@@ -29,11 +29,11 @@ ext='.isostr';
 
 name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_'
 nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
-
+pname = 'hel256\_hpi2\_'
 
 ext='.new.isostr';
 %times=[1:.1:7.0];
-times = [4.2:0.2:7.4];
+times = [4.2:0.2:9.0];
 
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
 %nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
@@ -70,6 +70,7 @@ for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10)];
   disp([fname,ext]);
+ppname = ]pname,tstr(2:10),ext];
   fid=fopen([fname,ext]);
   if (fid<0) ;
     disp('error openining file, skipping...');
@@ -150,7 +151,8 @@ plot(times,(4/5)*times./times,'k');
 hold off;
 ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
 xlabel('time','FontSize',16)
-print -dpsc k45time.ps
+     title(ppname);
+print('-dpsc', 'k215time.ps']
 
 
 figure(9); clf
@@ -164,7 +166,7 @@ semilogx(xx_plot,y45_iso_ave/scale,'b','LineWidth',1.0); hold on
 axis([1 1000 0 1.0])
 x=1:1000; plot(x,(4/5)*x./x/scale,'k');
 hold off;
-%title('D_{lll} / r\epsilon   (4/5 law) ');
+title(ppname);
 ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 
@@ -185,7 +187,7 @@ stdr=sqrt(stdr/15)./offset;
 %semilogx(xx_plot,y45_iso_ave-offset,'k','LineWidth',1.0); hold on
 semilogx(xx_plot,(y45_iso_ave-offset)/scale,'b','LineWidth',1.0); hold on
 title('Measure of anisotropy - 4/5 law');
-%ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
 
 
