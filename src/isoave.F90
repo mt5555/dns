@@ -11,8 +11,6 @@
 !
 !
 
-! compute SK's helical structure function
-
 module isoave
 implicit none
 

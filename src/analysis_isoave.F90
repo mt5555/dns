@@ -62,17 +62,17 @@ CPOINTER :: fid,fid1,fid2
 !    4              4 byte (fortran) header 
 !
 
-header_type=1; scale=1;
-!header_type=4; scale=1/(2*pi)
+!header_type=1; scale=1;
+header_type=4; scale=1/(2*pi)   ! for Takeshi's data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.true.
 read_uvw=.false.
 
-tstart=.8
-tstop=.8
-tinc=-.50
+tstart=1
+tstop=30
+tinc=1.
 icount=0
 
 nxdecomp=1
