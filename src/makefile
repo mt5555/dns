@@ -16,8 +16,8 @@ F77FIXED=
 
 ifeq ($(UNAME),Linux)
    #VENDOR=LAHEY
-   #VENDOR=PGI
-   VENDOR=INTEL
+   VENDOR=PGI
+   #VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),sulaco)
@@ -57,7 +57,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),PGI)
    F90 = pgf90
    CC=pgcc
-   FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -Mrecursive  -fast -DLINUX $(MPI)  -DUSE_FFT99 
    #FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif 

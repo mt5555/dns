@@ -3,7 +3,6 @@
 !
 ! compute structure functions for many different directions
 ! in the periodic cube.
-! must be run on only 1 cpu.
 !
 !
 ! To run, set the base name of the file and the times of interest
@@ -18,7 +17,7 @@
 !             temp0000.5000.[uvw]
 !             temp0001.0000.[uvw]
 !
-!  to compile and run:   make analysis ; analysis
+!  to compile and run:   make analysis_isoave ; analysis_isoave
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 program anal
