@@ -11,8 +11,9 @@ src/kh
 
 kh  1024x1024  mu = 2.5e-5    CFL: 1.5/.25   asymetric answer.  CFL, or resolution?
                                              cfl_vis has no effect above .073
+                                             rerun?
 
-khH 1024x1024  mu = 2.5e-5    CFL: 1.25/.25  submit next
+khH 1024x1024  mu = 2.5e-5    CFL: 1.25/.25  IN
 
 khG 1024x1024  mu = 2.5e-5    CFL: .75/.25   looks great at t=1
 
