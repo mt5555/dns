@@ -568,7 +568,7 @@ end subroutine
       real*8 x(0:numt_max-1),y(0:numt_max-1),alf(0:numt_max-1),&
             newalf,newx,newy,asq,bsq,csq,cosalf,x0,y0,&
             denom0,denom1,denom2,denom3,fact0,fact1,fact2,fact3
-      real*8 :: cutoff,xsave,ysave
+      real*8 :: cutoff,xsave,ysave,alfsave
 
       integer,save :: jctr=1
       real*8 :: epsd=.01  ! .1**2
@@ -586,6 +586,7 @@ end subroutine
       ! make a copy of point x(n+1),y(n+1), since we will temporarily trash it:
       xsave=x(n+1)
       ysave=y(n+1)
+      alfsave=alf(n+1)
       x(n+1)   =  x(n-1)
       y(n+1)   = -y(n-1)
       alf(n+1) = 2*alf(n)-alf(n-1)
@@ -669,6 +670,7 @@ end subroutine
       ! restor point n+1:
       x(n+1)=xsave
       y(n+1)=ysave
+      alf(n+1)=alfsave
 
       return
       end subroutine
