@@ -101,6 +101,9 @@ time_old=time
 spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 #endif
 
+! q1 already contains the FFT of Q, so set skip_fft (last arg) to 1:
+call compute_helicity_spectrum(Q,q1,io_pe,1)
+
 end subroutine
 
 
@@ -907,11 +910,18 @@ end subroutine
 
 
 
-subroutine compute_helicity_spectrum(Q,p1,work,pe)
+subroutine compute_helicity_spectrum(Q,p1,work,pe,skip_fft)
+!
+! skip_fft=1:
+!       input: Q    p1, work are work arrays
+! skip_fft=0:
+!      input: p1 (which should be Qhat).  Q is not used.  
+!
+!
 use params
 use mpi
 implicit none
-integer :: ierr
+integer :: ierr,skip_fft
 integer :: pe             ! compute spectrum on this processor
 real*8 :: Q(nx,ny,nz,3)
 real*8 :: p1(nx,ny,nz,3)
@@ -923,10 +933,12 @@ real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy,vx,wx,uy,wy,uz,vz
 integer i,j,k,jm,km,im,iwave_max,n
 
+if (skip_fft==0) then
 p1=Q
 do n=1,3
    call fft3d(p1(1,1,1,n),work)
 enddo
+endif
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
 iwave_max=nint(rwave)
