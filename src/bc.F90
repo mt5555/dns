@@ -102,7 +102,9 @@ real*8 :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
                                       ! psi_b(k,2,1) = y1 boundary
                                       ! psi_b(k,2,2) = y2 boundary
 real*8 :: temp(max(g_ny,g_nx),2,2)
+real*8 tmx1,tmx2
 
+call wallclock(tmx1)
 
 ! init to zero on boundary
 psi_b=0
@@ -180,9 +182,8 @@ if (my_y==ncpu_y-1   .and. bdy_y2==INFLOW0_ONESIDED) then
 endif
 
 
-
-
-
+call wallclock(tmx2)
+tims(14)=tims(14)+(tmx2-tmx1)
 
 
 return
