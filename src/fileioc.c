@@ -48,8 +48,16 @@ void FORTRAN(cwrite8) (FILE **fid,char *buf,int *len) {
 }
 
 /*
-  Write 8 byte numbers 
+  Read 8 byte numbers 
  */
 void FORTRAN(cread8) (FILE **fid, char *buf,int *len) {
-    fread(buf,8,*len,*fid);
+    int n;
+    n=fread(buf,8,*len,*fid);
+}
+
+/*
+  Read 8 byte numbers , also return number of numbers read
+ */
+void FORTRAN(cread8e) (FILE **fid, char *buf,int *len,int *olen) {
+    *olen=fread(buf,8,*len,*fid);
 }

@@ -151,6 +151,9 @@ dnss:  $(MODEL_SHALLOW)
 dnsslow:  $(MODEL_SPEC_SLOW) 
 	$(LINK) -o dns $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)
 
+splitspec:  splitspec.o fileioc.o
+	$(LINK) -o splitspec splitspec.o fileioc.o
+
 
 
 clean: 
