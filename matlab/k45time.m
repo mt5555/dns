@@ -138,6 +138,7 @@ print -dpsc k45time.ps
 
 
 figure(5); clf
+
 for i=[1,5,13]
   %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',2.0); hold on
   semilogx(xx_plot,y45_ave(:,i),'g-','LineWidth',2.0); hold on
@@ -152,6 +153,30 @@ ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 
 print -dpsc k45mean.ps
+
+
+
+figure(5); clf
+offset=y45_iso_ave;
+stdr=0*offset;
+
+for i=1:15
+  %semilogx(xx_plot,y45_ave(:,i)-offset,'k:','LineWidth',2.0); hold on
+  semilogx(xx_plot,y45_ave(:,i)-offset,'g-','LineWidth',2.0); hold on
+  stdr=stdr+(y45_ave(:,i)-offset).^2;
+end
+stdr=sqrt(stdr/15)./offset;
+%semilogx(xx_plot,y45_iso_ave-offset,'k','LineWidth',2.0); hold on
+semilogx(xx_plot,y45_iso_ave-offset,'b','LineWidth',2.0); hold on
+axis([1 1000 -.2 .2])
+x=1:1000; plot(x,(4/5)*x./x,'k');
+hold off;
+%title('D_{lll} / r\epsilon   (4/5 law) ');
+ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+xlabel('r/\eta','FontSize',16);
+
+
+
 
 
 

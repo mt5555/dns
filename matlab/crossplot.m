@@ -32,7 +32,9 @@ minl=min(label);
 for i=minl:maxl
   index=find(label==i);
   ti=times(index);
-  plot(ti,ti./ti,'o'); hold on;
+  l=length(ti);
+  ti=ti(2:l)-ti(1:l-1);
+  plot(ti); hold on;
 end
 hold off;
 

@@ -26,6 +26,7 @@ ext='.isostr';
 name='/ccs/scratch/taylorm/dns/iso12_512'
 nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
 %ext='.isostr001';
+times=[1:.1:7.0];
 
 
 
@@ -35,7 +36,7 @@ ndir_use=0;
 
 
 k=0;
-times=[1:.1:7.0];
+
 
 
 
@@ -93,7 +94,7 @@ ylll_ave=ylll_ave/length(times);
 yltt_ave=yltt_ave/length(times);
 
 figure(5); clf
-for i=[2]
+for i=[1]
   yll=yll_ave(:,i);
   ytt=ytt_ave(:,i)' .*xx.^(-2/3);
   ylll=ylll_ave(:,i);
