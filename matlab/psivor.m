@@ -10,15 +10,11 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
-range=[100:10:100];
+range=[100:10:105];
 %name='../src/vxpair/vx6144b_';
-name='/ccs/taylorm/dns/src/vxpair/vx4096d';
-%name='/ccs/taylorm/dns/src/vxpair/vx3072_';
-%name='../src/vxpair/vx4096a';
-%name='../src/vxpair/vx6144a';
-%name='/data/vxpair/vx2048a';
-%name='/data/vxpair/vx2048c';
-%name='/data/vxpair/vx2048d';
+%name='/ccs/taylorm/dns/src/vxpair/vx4096d';
+name='/ccs/scratch/taylorm/vxpair/vx6144e';
+
 
 usefig=1;
 mkpr=0;            % make ps and jpeg files
@@ -46,7 +42,7 @@ for i=range
   [x,y,z,psi,time]=getfield(fname);
   psi = squeeze(psi(:,:,1));
 
-  subsample=2;
+  subsample=16;
   if (subsample>1) 
     nx=length(x);
     ny=length(y);

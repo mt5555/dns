@@ -278,7 +278,7 @@ if (init_cond_subtype ==4) then
    biotsavart_apply=100
    delta=.2
    biotsavart_ubar=.089
-   yscale=2
+   yscale=1.9
 endif
 
 
@@ -289,7 +289,9 @@ xscale = yscale*(g_nx+offset_bdy-1)/(g_ny+offset_bdy-1)
 call init_grid()   ! redo grid points since we changed scalings
 
 
-xlocation=xscale/2
+xlocation=2.0
+
+
 
 ! initialize the crossing and vxline points:
 vxline_count=9
