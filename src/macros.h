@@ -1,4 +1,4 @@
-#ifdef MPI_DOUBLEU
+#ifdef MPI_UNDERSCORE
 #define mpi_reduce mpi_reduce_
 #define mpi_allreduce mpi_allreduce_
 #define mpi_bcast mpi_bcast_

@@ -7,9 +7,6 @@ TODO:
 to get files of HPSS with stripe set:
    xpsi get -pfsComp 32 dns/decay2048/\*4026.u
 
-email: Bonnie answer about cyber security
-       Goeff: jobs?
-
 Angle averging:  153 calls to transpose_z()
      1 stage RK:   9 transpose_z().  = 36 transposes per timestep
      angle averaging:  4.25 timesteps.

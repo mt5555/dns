@@ -29,7 +29,7 @@ ifeq ($(UNAME),Linux)
    endif
    ifeq ($(HOST),dosadi)
       VENDOR=INTEL8
-      MPI = -DUSE_MPI -DMPI_DOUBLEU
+      MPI = -DUSE_MPI -DMPI_UNDERSCORE
       MPILIB =   -llamf77mpi -lmpi -llam 
    endif
    ifeq ($(HOST),darkstar)
