@@ -69,10 +69,8 @@ if (my_pe==io_pe) then
    print *,'Enter input file type: '
    read(*,*) input_file_type
    if (input_file_type==0) then
-      print *,'Calling read_type0()'
       call read_type0()
    else if (input_file_type==2) then
-      print *,'Calling read_type1()'
       call read_type2()
    else
       ! if you add a new variable and new input type, be sure to add
@@ -133,6 +131,7 @@ call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

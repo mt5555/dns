@@ -1,18 +1,17 @@
 Running parallel.  NCPUS=    1 =   1 x  1 x  1                                  
+ Run name:         reference3d
+ output directory: ../testing/3d/
  Enter input file type: 
- Calling read_type1()
- name: reference3d
- directory: ../testing/3d/
  initial condition: iso12               
  forcing: none                
  method: fft-dealias         
  b.c. x-direction: periodic            
  b.c. y-direction: periodic            
  b.c. z-direction: periodic            
-NS-alpha value=0.0000E+00                                                       
 Diffusion coefficient mu=0.3710E-02                                             
 Diffusion d/dt(KE)/KE on mode k =    1.:     0.29                               
 Diffusion d/dt(KE)/KE on mode k =   18.:   100.00                               
+NS-Alpha:  alpha, alpha/h :    0.00000000    0.0000                             
 Global grid:     32 x    32 x    32                                             
 Local grid (with padding):     34 x    34 x    34                               
 Initial data                                                                    
@@ -29,10 +28,12 @@ for next timestep: delt=0.0079400 cfl_adv= 1.500 cfl_vis= 0.091
 max: (u,v,w)      2.643245990196310     2.532443915213435     2.813800682968389 
 <z-vor>=-0.38977E-16   <hel>=-0.26864E+01   max(vor) 0.28892E+02                
 R_lambda=   103.56222  R=   269.50599                                           
+mesh spacing(eta):        2.0069       2.0069       2.0069                      
+eddy turnover time:        3.0263                                               
 Ea:  1.3149802711   |gradU|:      234.2085         total d/dt(Ea):   0.0000000  
-ke:  1.3149802711  enstropy:      234.2085        total d/dt(ke):    0.0000000  
+ke:  1.3149802711  enstropy:      234.2085         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -0.8690288 f=   0.0000000 alpha=   0.0000000 total=  -0.8690288  
-writing output files...
+writing output files at t=    0.0000                                            
  
  1E0   | *******              KE spectrum    0.0000   
        |        *            
@@ -51,15 +52,16 @@ writing output files...
        +---------------------+
       k=0                 k=  17
 max(div)= 0.10125E-12                                                           
-skewness ux,vw,wz:     0.00000903    0.00000962    0.00001132                   
 
 time=  0.00794(    1)  next output=990.00000                                    
 for next timestep: delt=0.0080582 cfl_adv= 1.500 cfl_vis= 0.092                 
 max: (u,v,w)      2.622486857418436     2.517650188265515     2.818983260816157 
 <z-vor>=-0.38977E-16   <hel>=-0.26864E+01   max(vor) 0.28892E+02                
 R_lambda=   103.56222  R=   269.50599                                           
+mesh spacing(eta):        2.0069       2.0069       2.0069                      
+eddy turnover time:        3.0263                                               
 Ea:  1.3149802711   |gradU|:      234.2085         total d/dt(Ea):   0.0000000  
-ke:  1.3149802711  enstropy:      234.2085        total d/dt(ke):    0.0000000  
+ke:  1.3149802711  enstropy:      234.2085         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -0.8690288 f=   0.0000000 alpha=   0.0000000 total=  -0.8690288  
 
 time=  0.01600(    2)  next output=990.00000                                    
@@ -67,8 +69,10 @@ for next timestep: delt=0.0082257 cfl_adv= 1.500 cfl_vis= 0.094
 max: (u,v,w)      2.589525331150153     2.519893748323322     2.813318693818446 
 <z-vor>= 0.13688E-15   <hel>=-0.26846E+01   max(vor) 0.29033E+02                
 R_lambda=   103.33992  R=   269.50599                                           
-Ea:  1.3081047520   |gradU|:      232.7639         total d/dt(Ea):   0.0000000  
-ke:  1.3081047520  enstropy:      232.7639        total d/dt(ke):    0.0000000  
+mesh spacing(eta):        2.0038       2.0038       2.0038                      
+eddy turnover time:        3.0292                                               
+Ea:  1.3081047520   |gradU|:      232.7639         total d/dt(Ea):  -0.8659391  
+ke:  1.3081047520  enstropy:      232.7639         total d/dt(ke):  -0.8659391  
 d/dt(ke) vis=  -0.8636687 f=   0.0000000 alpha=   0.0000000 total=  -0.8636687  
 
 time=  0.02422(    3)  next output=990.00000                                    
@@ -76,8 +80,10 @@ for next timestep: delt=0.0084315 cfl_adv= 1.500 cfl_vis= 0.096
 max: (u,v,w)      2.576136095974848     2.527268500110012     2.796776326755703 
 <z-vor>=-0.29393E-15   <hel>=-0.26830E+01   max(vor) 0.29466E+02                
 R_lambda=   102.82447  R=   269.50599                                           
+mesh spacing(eta):        2.0035       2.0035       2.0035                      
+eddy turnover time:        3.0151                                               
 Ea:  1.3011505768   |gradU|:      232.6103         total d/dt(Ea):  -0.8629926  
-ke:  1.3011505768  enstropy:      232.6103        total d/dt(ke):   -0.8629926  
+ke:  1.3011505768  enstropy:      232.6103         total d/dt(ke):  -0.8629926  
 d/dt(ke) vis=  -0.8630989 f=   0.0000000 alpha=   0.0000000 total=  -0.8630989  
 
 time=  0.03266(    4)  next output=990.00000                                    
@@ -85,8 +91,10 @@ for next timestep: delt=0.0085851 cfl_adv= 1.500 cfl_vis= 0.098
 max: (u,v,w)      2.590164355109002     2.533315696127592     2.779436768759941 
 <z-vor>= 0.79526E-16   <hel>=-0.26816E+01   max(vor) 0.29776E+02                
 R_lambda=   102.02021  R=   269.50599                                           
+mesh spacing(eta):        2.0059       2.0059       2.0059                      
+eddy turnover time:        2.9844                                               
 Ea:  1.2940372160   |gradU|:      233.7157         total d/dt(Ea):  -0.8647735  
-ke:  1.2940372160  enstropy:      233.7157        total d/dt(ke):   -0.8647735  
+ke:  1.2940372160  enstropy:      233.7157         total d/dt(ke):  -0.8647735  
 d/dt(ke) vis=  -0.8672005 f=   0.0000000 alpha=   0.0000000 total=  -0.8672005  
 
 time=  0.08666(   10)  next output=  0.08666                                    
@@ -94,10 +102,12 @@ for next timestep: delt=0.0097272 cfl_adv= 1.500 cfl_vis= 0.111
 max: (u,v,w)      2.627626483541736     2.538983030339886     2.654421414570863 
 <z-vor>=-0.59441E-16   <hel>=-0.26811E+01   max(vor) 0.35356E+02                
 R_lambda=    92.30403  R=   269.50599                                           
+mesh spacing(eta):        2.0691       2.0691       2.0691                      
+eddy turnover time:        2.5378                                               
 Ea:  1.2457069642   |gradU|:      264.5802         total d/dt(Ea):  -0.9671555  
-ke:  1.2457069642  enstropy:      264.5802        total d/dt(ke):   -0.9671555  
+ke:  1.2457069642  enstropy:      264.5802         total d/dt(ke):  -0.9671555  
 d/dt(ke) vis=  -0.9817228 f=   0.0000000 alpha=   0.0000000 total=  -0.9817228  
-writing output files...
+writing output files at t=    0.0867                                            
  
  1E0   | *******              KE spectrum    0.0867   
        |        **           
@@ -116,13 +126,12 @@ writing output files...
        +---------------------+
       k=0                 k=  17
 max(div)= 0.11458E-12                                                           
-skewness ux,vw,wz:     0.00000850    0.00000772    0.00001018                   
 CPU times (min):   (avg/max)
 initialization:      0.00     0.00                                              
-dns_solve:           0.09     0.09                                              
-   time_control            0.04     0.04                                        
-   RHS                     0.04     0.04                                        
-   compute_pdf             0.04     0.04                                        
+dns_solve:           0.07     0.07                                              
+   time_control            0.00     0.00                                        
+   RHS                     0.05     0.05                                        
+   compute_pdf             0.00     0.00                                        
    transpose_to_z          0.00     0.00                                        
    transpose_from_z        0.00     0.00                                        
    transpose_to_x          0.01     0.01                                        

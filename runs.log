@@ -53,8 +53,11 @@ kh  1024x1024  mu = 2.5e-5    CFL: 1.5/.25   asymetric answer.  CFL, or resoluti
                                              cfl_vis has no effect above .073
                                              rerun?
 
-khI 1024x1024  mu = 2.5e-5    CFL: 1.50/.25  RERUN above  INNNNNN  
+khI 1024x1024  mu = 2.5e-5    CFL: 1.50/.25  repeat kh run
                                              check scalars as progressing
+                                             yes - can see unstable at .25
+
+khJ 1024x1024  mu = 2.5e-5    CFL: 1.40/.25  IN
 
 khH 1024x1024  mu = 2.5e-5    CFL: 1.25/.25  looks great at t=1.0
 khG 1024x1024  mu = 2.5e-5    CFL: .75/.25   looks great at t=1

@@ -1,23 +1,6 @@
-
-Add to .job:
-
-#remove empty files before saving to HPSS:
-find . -size 0 -exec rm -f {} \; -print
-
-#search HPSS for newest restart file
-set resname = `psi ls -t dns/{$name}\*.u | sort | tail -1`
-if ($resname =="") then
-   echo "Error"
-else
-   echo "Using restart file: " $resname
-endif
-
-
-
 1. if run stops because u>1000, timings are incorrect
 1. specplot: multiply by f^5/3
 1. check restart testcase on mahi (also little endian)
-0. uninitialized variable in sfocing.com - triggers mpi_allreduce problems
 1. check new structure functions.  
 2. make suite of runs for diffusion: 32^3, 64^3 128^3 256^3
        plot R_lamba vs mu and h

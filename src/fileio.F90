@@ -19,8 +19,9 @@ real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,lambda
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
-real*8 :: t0,t1=0,t2=0,ke0,ke1=0,ea0,ea1=0,eta,ett
-real*8 :: delea_tot=0,delke_tot=0
+real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
+real*8,save :: delea_tot=0,delke_tot=0
+
 
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
@@ -93,6 +94,28 @@ ints_save(1:nints,nscalars)=ints(1:nints)
 maxs_save(1:nints,nscalars)=maxs(1:nints)
 
 
+!
+! KE total dissapation 
+! t0,t1  three time levels
+!
+ke0=ke1
+ke1=ints(6)
+ea0=ea1
+ea1 = ints(6) + .5*alpha_value**2 * ints(2)
+
+t0=t1                       ! previous previous time level 
+t1=maxs(7)                  ! previous time level  (most quantities known at this time
+
+if (t1-t0>0) then
+   delke_tot=(ke1-ke0)/(t1-t0)
+   delea_tot=(ea1-ea0)/(t1-t0)
+else
+   delke_tot=0
+   delea_tot=0
+endif
+
+
+
 
 
 doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next)
@@ -134,24 +157,6 @@ if (doit_screen) then
            '   max(vor)',maxs(5)
    call print_message(message)	
 
-
-   !
-   ! KE total dissapation 
-   ! t0,t1,t2  three time levels
-   !
-   ke0=ke1
-   ke1=ints(6)
-   ea0=ea1
-   ea1 = ints(6) + .5*alpha_value**2 * ints(2)
-
-   t0=t1                       ! previous previous time level 
-   t1=t2                       ! previous time level  (most quantities known at this time
-   t2=maxs(6)                  ! current time level
-
-   if (t1-t0>0) then
-      delke_tot=(ke1-ke0)/(t1-t0)
-      delea_tot=(ea1-ea0)/(t1-t0)
-   endif
 
 
 
@@ -197,7 +202,7 @@ if (doit_screen) then
    endif
 
    write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'ke: ',ke1,'  enstropy: ',&
-        ints(7),'        total d/dt(ke): ',delke_tot
+        ints(7),'         total d/dt(ke):',delke_tot
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
      'd/dt(ke) vis=',-mu*ints(2),' f=',ints(3),' alpha=',ints(8),&

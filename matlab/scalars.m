@@ -11,11 +11,9 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-%fid=fopen('test32.scalars','r','l');
-%fid=fopen('n128.scalars','r','b');
-%fid=fopen('../src/test32.scalars','r','l');
-%fid=fopen('iso12_256_200.scalars','r','b'); apply_fix=1;
-fid=fopen('../src/impulse/kh5.scalars','r','l'); 
+
+%fid=fopen('../src/impulse/kh5.scalars','r','l'); 
+fid=fopen('../src/kh/khH.scalars','r','l'); 
 
 
 
@@ -121,7 +119,7 @@ disp(sprintf('max vor_z = %e',max(vor_z)));
 figure(5)
 clf
 hold on
-plot(time,ke)
+plot(time,ke-ke(1))
 plot(time_2,ke_diss_tot,'r')
 plot(time,ke_diss_f+ke_diss_d,'k')
 plot(time,ke_diss_f,'k')
