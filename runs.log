@@ -1,3 +1,21 @@
+**********************************************************************************
+10/24/03
+
+VXPAIR  Kras initial condition
+
+init_cond_subtype=100
+
+640x512
+./gridsetup.py 16 1 1 640 512 1 2 2 0 2 2 0   2
+make dnsvor
+
+
+Running in /home/scratch/kras  (~/data2/kras)
+see RUNME script
+
+
+
+
 
 **********************************************************************************
 8/26/03

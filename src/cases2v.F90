@@ -207,16 +207,30 @@ real*8 :: w(nx,ny,nz)
 integer :: init
 
 ! local variables
-integer :: i,j,k,l,use3d=0,n
+integer :: i,j,k,l,use3d=0,n,initial_vor
 real*8 :: eps
 real*8 :: amp,vx,uy
 real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,wsum,psisum,delalf,testmax
 real*8 :: delta,xlocation
 integer,parameter :: nd=200
 real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
+real*8 :: a0,a1,a2,a3,b0,b1,b2,b3,yalf,gamp
+
+
+a0 =  -0.86887373086487
+a1 =   22.19093784381875
+a2 =  -52.31046126329605
+a3 =   34.05681079318104 
+
+b0 =  1.4
+b1 = 0 
+b2 = 20 
+b3 =  -2000.0/45.0
+
 
 offset_bdy=1
 xlocation=-1   ! not yet set
+initial_vor=0
 
 if (init_cond_subtype ==0) then
 !  my standard test case:
@@ -254,6 +268,7 @@ endif
 
 
 if (init_cond_subtype ==2) then
+! the standard initial condition for delta=.2
    biotsavart_cutoff=5e-3
    biotsavart_apply=50
    delta=.2
@@ -274,7 +289,8 @@ endif
 
 
 if (init_cond_subtype ==4) then
-   ! same as type=3, but bs_apply=100
+   ! tweaked version of type 2, to run a little faster
+   ! used for highest resolution run.
    biotsavart_cutoff=5e-3
    biotsavart_apply=100
    delta=.2
@@ -283,6 +299,7 @@ if (init_cond_subtype ==4) then
 endif
 
 if (init_cond_subtype ==5) then
+! the standard initial condition for delta=.1
    biotsavart_cutoff=5e-3
    biotsavart_apply=100
    delta=.1
@@ -292,6 +309,19 @@ if (init_cond_subtype ==5) then
 endif
 
 
+if (init_cond_subtype ==100) then
+   ! Kras iniital condition.  run to t=5, with nu=1e-6
+   ! x:  -2 ... 0.5          5*32      25% more grid points in x
+   ! y:  0.. 2               4*32
+   ! [5N,4N] = [640,512]  
+   biotsavart_cutoff=5e-3
+   biotsavart_apply=10
+   delta=.1
+   biotsavart_ubar=.000
+   yscale=2.0
+
+   initial_vor = 1
+endif
 
 
 ! set xscale so that delx=dely
@@ -299,6 +329,7 @@ xscale = yscale*(g_nx+offset_bdy-1)/(g_ny+offset_bdy-1)
 call init_grid()   ! redo grid points since we changed scalings
 
 
+! xlocation not set.  default value:
 if (xlocation<0) xlocation=2.0
 
 
@@ -318,17 +349,45 @@ Q=0
 
 
 ! INITIALIZES VORTEX SHEET (XS,YS,WS,NS)
-delalf = pi/(2*nd)
-do k=0,nd
-   hold = k*delalf
-   xd(k)  = xlocation
-   yd(k)  = cos(hold)
-   wd(k)  = cos(hold)*delalf
-enddo
-wd(nd) = wd(nd)/2
-wd(0) = wd(0)/2
-yd(nd) = 0
-
+if (initial_vor==0) then
+   delalf = pi/(2*nd)
+   do k=0,nd
+      hold = k*delalf
+      xd(k)  = xlocation
+      yd(k)  = cos(hold)
+      wd(k)  = cos(hold)*delalf
+   enddo
+   wd(nd) = wd(nd)/2
+   wd(0) = wd(0)/2
+   yd(nd) = 0
+else if (initial_vor==1) then
+   delalf = pi/(2*nd)
+   do k=0,nd
+      hold = k*delalf
+      xd(k)  = xlocation
+      yd(k)  = cos(hold)
+      yalf = -sin(hold)
+      if (yd(k)<.3) then
+         gamp  = b1 + 2*b2*yd(k) + 3*b3*yd(k)*yd(k)
+      else if (yd(k)<.7) then
+         gamp  = a1 + 2*a2*yd(k) + 3*a3*yd(k)*yd(k)
+      else 
+         gamp  = yalf  ! -y/sqrt(1-y^2)
+      endif
+      wd(k)  = gamp*(-sin(hold))*delalf
+   enddo
+   if (io_pe==my_pe) then
+      !do k=1,nd
+      !   write(11,'(i4,2f20.7)') k,yd(k),wd(k)
+      !enddo
+      !close(11)
+   endif
+   wd(nd) = wd(nd)/2
+   wd(0) = wd(0)/2
+   yd(nd) = 0
+else
+   call abort("error vxpair(): bad value of initial_vor")
+endif
 
 delsq = delta**2
 !   INITIALIZES VORTICITY ON THE GRID = VORTICITY INDUCED
