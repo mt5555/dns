@@ -297,7 +297,7 @@ real*8 :: dslice(2*ssize,2*ssize,1)
 real*8 :: mat(3,3,3)
 real*8,allocatable :: data(:,:,:)
 real*8,allocatable :: gradu(:,:,:,:)
-integer :: i2,j2,k2,k
+integer :: i2,j2,k2,k,ip
 
 call setup_subcubes(ssize)
 write(message,'(a,i5)') 'number of subcubes: ',nsubcube
@@ -357,7 +357,7 @@ enddo
 
 ! output the gradu matricies:
 if (io_pe==my_pe) then
-do ip=1,7
+do ip=1,2
 write(sdata,'(f10.4)') 10000.0000 + time
 write(ext,'(i1)') ip
 basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
