@@ -51,7 +51,7 @@ if (my_pe==io_pe) then
       if (message(1:2)=="-r") then
          restart=1
       else if (message(1:2)=="-t") then
-         enable_lsf_timelimit=.true.
+         enable_lsf_timelimit=1
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit
@@ -165,6 +165,7 @@ call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

@@ -41,7 +41,7 @@ real*8  :: mu_hyper=0         !set to 1 to enable hyper viscosity
 real*8  :: alpha_value=0      !for the alpha model  
 real*8  :: H0=0               ! for shallow water model
 integer,parameter :: r8kind=kind(mu)
-logical :: enable_lsf_timelimit = .false.
+integer :: enable_lsf_timelimit = 0
 integer :: equations=NS_UVW        ! NS_UVW    = NS / NS-alpha
                                    ! SHALLOW   = Shallow water / shallow water-alpha
                                    ! NS_PSIVOR = NS Streamfunction-Vorticity
