@@ -1,0 +1,47 @@
+
+Computational grid:
+
+Arrays are dimensioned as:
+
+u(-2:imaxd,-2:jmaxd,-2:kmaxd)
+
+The processor is expected to compute for 
+
+u(0:imax,0:jmax,0:kmax)
+
+The routine bc_loop() fills in the ghost cell region with
+data (either by message passing, or boundary conditions).
+
+
+
+*** Periodic Case, i-direction: ***
+
+Boundary/ghost cells are filled in via:
+ 
+cpu with left boundary             cpu with right boundary 
+
+u(-1,:,:)                   <=          u(imax,:,:)
+u(-2,:,:)                   <=          u(imax-1,:,:)
+
+u(0,:,:)                    =>          u(imax+1,:,:)
+u(1,:,:)                    =>          u(imax+2,:,:)
+
+
+
+*** wall boundary case, j-direction: ***
+
+Momentum equations computed for:  u(:,1:jmax-1,:)
+Compact differencing is used on:  u(:,0:jmax,:), gives solution u(:,1:jmax-1,:)
+derivatives at the wall computed by hand.  
+
+du_tangent=0
+du_normal=one sided differences
+rho_tangent = prescribed via b.c.
+rho_normal = 0 (not needed because multiplied by u_tangent)
+
+u_rhs at boundary = 0
+rho_rhs at boundary:  computed 
+
+
+
+

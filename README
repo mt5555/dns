@@ -1,0 +1,15 @@
+Outline of code:
+
+
+dns.F90            main program.  RK4 time stepping loop.  
+macros.h           all #defines go in here
+params.F90         global parameters like mesh spacing
+
+ns2d.F90           2D compressible Navier-Stokes time tendencies
+               
+
+ 
+
+
+
+
