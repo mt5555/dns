@@ -54,39 +54,8 @@ make -j 4 dns
 if ($restart == 1) then
 
    #search HPSS for newest restart file
-   set resnameu = `psi ls -t dns/{$name}\*.u | sort | tail -1`
-   if ($resnameu =="") then
-      echo "Error finding restart file.  Exit"
-      exit 1
-   else
-      set resnamev = `psi ls -t dns/{$name}\*.v | sort | tail -1`
-      set resnamew = `psi ls -t dns/{$name}\*.w | sort | tail -1`
-      echo "Using restart files: " 
-      echo $resnameu
-      echo $resnamev
-      echo $resnamew
-   endif
-   set resnameu2 = `basename $resnameu`
-   set resnamev2 = `basename $resnamev`
-   set resnamew2 = `basename $resnamew`
-
-   # check to see if files are left over from last run: 
-   if !(-e $resnameu2) then
-      psi get $resnameu
-   endif
-   if !(-e $resnamev2) then
-      psi get $resnamev
-   endif
-   if !(-e $resnamew2) then
-      psi get $resnamew
-   endif
-
-   \rm -f restart.*
-   \mv -f $resnameu2  restart.u
-   \mv -f $resnamev2  restart.v
-   \mv -f $resnamew2  restart.w
-   if !(-e restart.w) then
-      echo "No restart.w file"
+   $HOME/dns/getrestart.sh $name
+   if (!($status==0)) then
       exit 1
    endif
    $MPIRUN ./dns -t -r -d . $name < $refin 
