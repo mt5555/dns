@@ -46,6 +46,17 @@ To build the code on one of the above systems, just run:
       % make
 
 
+Compiling the code on Windows using Visual Studio and Intel Fortran 90:
+      I haven't done this yet, but it should be possible.
+      I think these options need to be added in various configuration
+      pull down windows:
+
+      Intel fortran compiler options:  -Vaxlib -w90 -O1 -tpp7
+      Preprocessor options:   -DLINUX -DUSE_FFT99
+
+
+
+
 Step 3.
 Running the code.
 
