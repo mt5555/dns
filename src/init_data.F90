@@ -11,11 +11,22 @@ real*8 :: work2(nx,ny,nz)
 if (restart==1) then
 
    ! initialize some constants, if needed on restart runs:
-   if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)      ! set grav, fcor
 
+   ! set grav, fcor
+   if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)   
+
+   ! set xscale, yscale, offset grid 
+   if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0)   
+
+   !
+   ! read input data from restart files
+   !
    call init_data_restart(Q,Qhat,work1,work2)
 
-   if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0)  ! set xscale, yscale... 
+   ! set boundary data using input data.
+   if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,2)  
+
+   ! rescale Energy spectrum
    if (init_cond==9) call init_data_decay(Q,Qhat,work1,work2,2,0,0)
 
 else

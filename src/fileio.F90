@@ -271,7 +271,7 @@ if (my_pe==fpe) then
          endif
       else
          print *,'grid input data'
-         write(*,'(a,3f5.0)') 'number of grid points: ',xnx,xny,xnz
+         write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
          if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
          if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
          if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");

@@ -189,8 +189,9 @@ end subroutine
 
 subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 !
-!  init=0    restart run.  setup parameters and initialize PSI boundary
+!  init=0    setup parameters only
 !  init=1    setup parameters and compute initial conditoin
+!  init=2    setup parameter and initialize PSI boundary
 !
 use params
 use tracers
@@ -274,8 +275,11 @@ xscale = yscale*(g_nx+offset_bdy-1)/(g_ny+offset_bdy-1)
 call init_grid()   ! redo grid points since we changed scalings
 
 
-
 xlocation=xscale/2
+if (init==0) return
+
+
+
 Q=0
 
 
