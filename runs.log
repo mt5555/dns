@@ -1,5 +1,23 @@
 **********************************************************************************
-6/14/00
+6/28/02
+KH with thin sheet for Chris Brislawn
+
+CFL = 1.45   
+mu=5e-5
+KH-anal
+subtype=0
+fft-sphere
+
+output: every t=2
+
+
+
+
+
+
+
+**********************************************************************************
+6/14/02
 
 new iso12 forcing:
 force so shells 1 and 2 each  E=.5
