@@ -68,14 +68,14 @@ call init_model
 !    4              4 byte (fortran) header 
 !
 
-!header_type=1; scale=1;
-header_type=4; scale=1/(2*pi)   ! for Takeshi's data
+header_type=1; scale=1;
+!header_type=4; scale=1/(2*pi)   ! for Takeshi's data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
-compute_uvw=.false.
+compute_uvw=.true.
 compute_fractional_power=.false.   
-compute_hspec=.true.
+compute_hspec=.false.
 read_uvw=.false.
 
 tstart=0
@@ -241,7 +241,11 @@ do
 
          if (my_pe==io_pe) then
             write(sdata,'(f10.4)') 10000.0000 + time
-            fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
+            if (compute_fractional_power) then
+               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf"
+            else
+               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
+            endif
             if (nxdecomp*nydecomp*nzdecomp>1) then
                write(sdata,'(3i1)') i,j,k
                fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
