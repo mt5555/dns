@@ -278,7 +278,7 @@ end program
 
 
 
-subroutine gradu_rotate_subcubes(time,Q,vor,work1,work2)
+subroutine gradu_stats(time,Q,vor,work1,work2)
 use params
 use mpi
 use fft_interface
@@ -389,7 +389,7 @@ end subroutine
 
 
 
-subroutine gradu_stats(time,Q,vor,work1,work2)
+subroutine gradu_rotate_subcubes(time,Q,vor,work1,work2)
 use params
 use mpi
 use fft_interface
@@ -415,20 +415,32 @@ real*8 :: mat(3,3,3),gradu(3,3)
 real*8 :: corner(3),wcorner(3)
 CPOINTER :: fid
 
+! check to make sure we have 2 ghost cells in all directions:
+if (nx1<3 .or. nx2+2>nx)&
+     call abort('Error: insufficient ghost cells in x direction')
+if (ny1<3 .or. ny2+2>ny)&
+     call abort('Error: insufficient ghost cells in y direction')
+if (ny1<3 .or. ny2+2>nz)&
+     call abort('Error: insufficient ghost cells in z direction')
+
 ! update ghost cell data
 call ghost_update_x(Q,3)
 call ghost_update_y(Q,3)
 call ghost_update_z(Q,3)
 
-! check to make sure we have 2 ghost cells in all directions:
-ASSERT("check ghostcells",.false.)
+
+fname= rundir(1:len_trim(rundir)) // "subcubes.lst"
+open(84,err=100,file=fname)
 
 sc=0  ! subcube counter
 do
    sc=sc+1
    ! read coordinates of subcube corner and size (gridpoints)
    ! corner(1:3), ssize, gradu
-   ASSERT("read in subcubes",.false.)
+   read(83,*,err=100,end=100) corner(1),corner(2),corner(3),ssize
+   do i=1,3
+      read(83,*,err=100,end=100) (gradu(i,j),j=1,3)
+   enddo
 
    ! compute rotation matrix from gradu(3,3):
    ASSERT("compute rotation matrix",.false.)   
@@ -439,28 +451,38 @@ do
    allocate(dz(2*ssize))
    allocate(dslice(2*ssize,2*ssize,1) )
 
-   ! compute filename.  use runname+time+".sc#"
-   write(sdata,'(f10.4)') 10000.0000 + time
-   write(ext,'(i5)') sc  ! 10000
-   basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-   fname = basename(1:len_trim(basename)) // sdata(2:10) // '.sc' // ext(2:5)
 
    ! select a subcube 2x larger containg the sc'th subcube:
    do i=1,2*ssize
-      dx(i)=ssize*delx/2  + corner(1) + (i-1)*delx
-      dy(i)=ssize*dely/2  + corner(2) + (i-1)*dely
-      dz(i)=ssize*delz/2  + corner(3) + (i-1)*delz
+      dx(i)=-ssize*delx/2  + corner(1) + (i-1)*delx
+      dy(i)=-ssize*dely/2  + corner(2) + (i-1)*dely
+      dz(i)=-ssize*delz/2  + corner(3) + (i-1)*delz
    enddo
 
-   call copen(fname,"w",fid,ierr)
-
-   do k=1,2*ssize ! loop over all z-slices
-      ! interpolate 1 slice of data
-      call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,vor,0,mat)
-      ! output this slab:
-      call cwrite8(fid,dslice,2*ssize*2*ssize)
+   do j=1,3
+      ! compute filename.  use runname+time+".sc#"
+      write(sdata,'(f10.4)') 10000.0000 + time
+      write(ext,'(i5)') sc  ! 10000
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // '.' // &
+             extension(j:j) // '-' // ext(2:5)
+      call copen(fname,"w",fid,ierr)
+      
+      do k=1,2*ssize ! loop over all z-slices
+         ! interpolate 1 slice of data
+         call interp_subcube(2*ssize,2*ssize,1,dx,dy,dz(k),dslice,Q(1,1,1,j),0,mat)
+         ! output this slab:
+         call cwrite8(fid,dslice,2*ssize*2*ssize)
+      enddo
+      
+      call cclose(fid,ierr)
    enddo
-   call cclose(fid,ierr)
+
+
 
 enddo
+return
+
+100 continue
+call print_message("Error reading subcube list file...")
 end subroutine
