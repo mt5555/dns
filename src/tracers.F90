@@ -230,7 +230,8 @@ if (my_pe==fpe) then
       endif
       x=ncross
       call cwrite8(fid,x,1)
-      call cwrite8(fid,cross,ncross*2)
+      call cwrite8(fid,cross(1,1),ncross)
+      call cwrite8(fid,cross(1,2),ncross)
       call cclose(fid,ierr)
       ncross=0
    endif
@@ -468,8 +469,8 @@ do k=numt_insert+1,numt
       cross(ncross,1)=tnew(k,ndim+1)  ! particle label
       ! linear interpolate for crossing time
       cross(ncross,2)=&
-time_new*(center(1)-told(k,1))/(tnew(k,1)-told(k,1))  +  &
-time_old*(tnew(k,1)-center(1))/(tnew(k,1)-told(k,1))
+           time_new*(center(1)-told(k,1))/(tnew(k,1)-told(k,1))  +  &
+           time_old*(tnew(k,1)-center(1))/(tnew(k,1)-told(k,1))
 
 
    endif

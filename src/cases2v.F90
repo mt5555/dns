@@ -249,7 +249,6 @@ if (init_cond_subtype ==2) then
    delta=.2
    biotsavart_ubar=.089
    yscale=2
-   xscale=4
 endif
 
 
