@@ -129,6 +129,9 @@ call fft_get_mcord(g_kmcord,g_nz)
 ! local grid data  3D decomposition
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+imsine=0              
+imsign=0   
+imcord=0
 do i=nx1,nx2
    l = i-nx1+1 + nslabx*my_x
    xcord(i)=g_xcord(l)
@@ -138,6 +141,11 @@ do i=nx1,nx2
    if (imcord(i)==0) imsign(i)=0
    if (imcord(i)==g_nx/2) imsign(i)=0
 enddo
+
+
+jmcord=0
+jmsign=0
+jmsine=0
 do j=ny1,ny2
    l = j-ny1+1 + nslaby*my_y
    ycord(j)=g_ycord(l)
@@ -147,6 +155,10 @@ do j=ny1,ny2
    if (jmcord(j)==0) jmsign(j)=0
    if (jmcord(j)==g_ny/2) jmsign(j)=0
 enddo
+
+kmcord=0
+kmsign=0
+kmsine=0
 do k=nz1,nz2
    l = k-nz1+1 + nslabz*my_z
    zcord(k)=g_zcord(l)
@@ -155,6 +167,19 @@ do k=nz1,nz2
    kmsign(k)=sign(1,kmcord(k))
    if (kmcord(k)==0) kmsign(k)=0
    if (kmcord(k)==g_nz/2) kmsign(k)=0
+enddo
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! special data used for y-decomposition sine transform
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+do i=1,nx_2dy
+   k= -1 + nx1 + i + my_y*nx_2dy    ! nslabx/ncpu_y   
+   if (k>nx2) then
+      y_imsine(i)=0  ! this is possible if domain decompostion is not perfect
+   else
+      y_imsine(i)=imsine(k)
+   endif
 enddo
 
 
@@ -176,7 +201,11 @@ enddo
 
 do j=1,ny_2dz
    L = -1 + ny1 + j + my_z*ny_2dz      ! ncpy_z*ny_2dz = nslaby
-   z_jmcord(j)=jmcord(L)
+   if (L>ny2) then
+      z_jmcord(j)=0  ! possible, for not-perfect load balance cases
+   else
+      z_jmcord(j)=jmcord(L)
+   endif
    z_jmsign(j)=sign(1,z_jmcord(j))
    if (z_jmcord(j)==0) z_jmsign(j)=0
    if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0

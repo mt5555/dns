@@ -186,6 +186,7 @@ integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
 integer,allocatable :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
 
 ! sine modes, local 3D decomp:
+integer,allocatable :: y_imsine(:)  ! ny_2dz
 integer :: imsine(nxd)
 integer :: jmsine(nyd)
 integer :: kmsine(nzd)
@@ -511,8 +512,7 @@ allocate(z_kmcord(g_nz))
 allocate(z_imsign(nx))
 allocate(z_jmsign(ny_2dz))
 allocate(z_kmsign(g_nz))
-
-
+allocate(y_imsine(ny_2dz))
 
 pi=1
 pi=4*atan(pi)

@@ -1,8 +1,8 @@
 1. put in CJ functions
 
 2. ns_ghost:  4th order code using ghost cells:
-        add 3d test case (nsgrid vs nsghost)
         benchmark parallel decompostions
+        fix output1/input1 for non-perfect decompositions
 
 3. psi-vor code:
         put in interpolation for PSI boundary values

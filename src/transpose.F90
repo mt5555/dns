@@ -960,7 +960,8 @@ integer request,statuses(MPI_STATUS_SIZE)
 #endif
 integer i,j,k,l,extra_k,kuse,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d
-
+integer :: ny_2dx_actual 
+ny_2dx_actual = ny_2dx
 
 call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
 ASSERT("output1 dimension failure 2",n1==g_nx)
@@ -977,9 +978,21 @@ if (z_pe==ncpu_z-1 .and. o_nz==g_nz+1) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
 do x_pe=0,ncpu_x-1
+   ! for non-perfect load balanced cases, the last few columns
+   ! of data will not be real data.
+   ! Find the largest value jx<=ny_2dx such that the corresponding
+   ! value of j in the 3D decompositoin is i<=ny2
+   ! set ny_2dx_actual = jx. 
+   ! formula:  
+   ! 
+   ! ny2 == j == -1 + ny1 + jx + my_x*ny_2dx    
+   ! nslaby = jx + my_x*ny_2dx
+   ! jx = nslaby - my_x*ny_2dx
+
+
 
    ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
-   l=o_nx*ny_2dx
+   l=o_nx*ny_2dx_actual
 
    if (k>nslabz) then 
       ! this is the periodic z-direction case. refetch data at z=0
@@ -1030,7 +1043,7 @@ do x_pe=0,ncpu_x-1
       endif
       
       if (o_nx==g_nx+1) buf(o_nx,:)=buf(1,:)  ! append to the end, x-direction
-      call cwrite8(fid,buf,o_nx*ny_2dx)
+      call cwrite8(fid,buf,o_nx*ny_2dx_actual)
 
       if (o_ny==g_ny+1) then
       if (y_pe==0 .and. x_pe==0) then
@@ -1072,11 +1085,14 @@ real*8 saved_edge(o_nx)
 integer destination_pe,ierr,tag,z_pe,y_pe,x_pe
 logical :: random
 
+
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
 integer i,j,k,l,extra_k,kuse,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d
+integer :: ny_2dx_actual 
+ny_2dx_actual = ny_2dx
 
 do z_pe=0,ncpu_z-1
 extra_k=0
@@ -1085,8 +1101,14 @@ do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
 do x_pe=0,ncpu_x-1
 
+   ! for non-perfect load balanced cases, the last few columns
+   ! of data will not be real data.
+   ! Find the largest value ix<=ny_2dx such that the corresponding
+   ! value of i in the 3D decompositoin is i<=nx2
+   ! set ny_2dx_actual = ix. 
+
    ! output pt(1:g_nx,k,1:ny_2dx) from cpus: x_pe,y_pe,z_pe
-   l=o_nx*ny_2dx
+   l=o_nx*ny_2dx_actual
 
    if (k>nslabz) then 
       ! this is the periodic z-direction case. refetch data at z=0
@@ -1111,9 +1133,9 @@ do x_pe=0,ncpu_x-1
 
    if (my_pe==fpe) then
       if (random) then
-         call random_data(buf,o_nx*ny_2dx)
+         call random_data(buf,o_nx*ny_2dx_actual)
       else
-         call cread8(fid,buf,o_nx*ny_2dx)
+         call cread8(fid,buf,o_nx*ny_2dx_actual)
       endif
 
       if (o_ny==g_ny+1) then

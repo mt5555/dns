@@ -1516,7 +1516,8 @@ use ghost
 use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
-real*8 work(nx,ny,nz) ! work array
+!real*8 work(nx,ny,nz) ! work array
+real*8 work(g_ny2,nslabz,nx_2dy)
 real*8 :: alpha
 real*8 :: beta
 
@@ -1524,7 +1525,7 @@ real*8 :: beta
 !local
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
-real*8 xm,ym,zm,xfac
+real*8 xm,ym,zm,xfac,im,jm
 real*8 :: axy,x_axy,y_axy
 real*8 :: xb(ny,2),yb(nx,2)
 integer :: bx1,bx2,by1,by2,bz1,bz2
@@ -1597,6 +1598,9 @@ y_axy=1/(dely*dely) - 2*axy
 if (beta==0) then
    f=f/alpha
    return
+endif
+if (alpha/=0) then
+   call abort("helmholtz_dirichlet_inv() cant yet handle alpha=0")
 endif
 !
 !  let phi = f on the boundary, 0 inside
@@ -1727,12 +1731,11 @@ call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
 call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
 
 
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
+do k=1,nslabz
+do j=2,g_ny-1
+do i=1,nx_2dy
    ! mode imsine(i),jmsine(j),kmsine(k)
    ! sin(x+h)sin(y+h) + sin(x-h)sin(y+h) + 
    ! sin(x+h)sin(y-h) + sin(x-h)sin(y-h) =
@@ -1740,20 +1743,22 @@ do i=nx1,nx2
    !   [  2*cos(h)  ]  sin(x) [sin(y+h)+sin(y-h) ]  = 
    !
    !   [  4*cos(hx) cos(hy) ]  sin(x) sin(y)
+
+   im=y_imsine(i)
+   jm=j-1
    
-   xfac = x_axy*2*cos(pi*delx*imsine(i)/xscale)         ! x term
-   xfac = xfac + y_axy*2*cos(pi*dely*jmsine(j)/yscale)  ! y term
+   xfac = x_axy*2*cos(pi*delx*im/xscale)         ! x term
+   xfac = xfac + y_axy*2*cos(pi*dely*jm/yscale)  ! y term
    ! diagonal terms:
-   xfac = xfac + axy*4*cos(pi*delx*imsine(i)/xscale)*cos(pi*dely*jmsine(j)/yscale)
+   xfac = xfac + axy*4*cos(pi*delx*im/xscale)*cos(pi*dely*jm/yscale)
    ! center term:
    xfac = xfac -2/(delx*delx)-2/(dely*dely)+4*axy   
 
-
    xfac = alpha + beta*xfac
-   if (imsine(i)+jmsine(j)+kmsine(k)==0) then
-      f(i,j,k) = 0
+   if (im+jm==0 ) then
+      work(j,k,i) = 0
    else
-      f(i,j,k) = f(i,j,k)/xfac
+      work(j,k,i) = work(j,k,i)/xfac
    endif
      
  
@@ -1761,7 +1766,8 @@ enddo
 enddo
 enddo
 
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
+
+
 call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
 
@@ -1915,6 +1921,14 @@ end
 ! odd extension:
 !   1 2 3 4 5 -4 -3 -2  0 0      (fft does not include last periodic point)
 !                                and we add 2 for padding
+! fft:
+!   0 -0 1  -1  2  -2  3  -3 4 -4
+! repacked fft:
+!   0 4 1  -1  2  -2  3  -3  
+! removal of cosine terms:
+!  4  -1  -2 -3              (we picked up a cos(4x) mode by mistake, instead
+!                             of the sin(0x) mode.  But sin(0x) mode is always 0
+!                             and cos(4x) mode is zero since our data is odd)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
