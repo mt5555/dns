@@ -408,7 +408,7 @@ if (my_pe==io_pe) then
          if (i>iargc()) exit
          call getarg(i,inputfile)
          j=len_trim(inputfile)
-      else if (message(1:2)=="-isodir" .and. len_trim(message)==7) then
+      else if (message(1:7)=="-isodir" .and. len_trim(message)==7) then
          i=i+1
          if (i>iargc()) exit
          call getarg(i,carg)
@@ -416,7 +416,7 @@ if (my_pe==io_pe) then
          if (j>0) then
             read(carg,'(i5)') user_specified_isodir
          endif
-      else if (message(1:2)=="-isodel" .and. len_trim(message)==7) then
+      else if (message(1:7)=="-isodel" .and. len_trim(message)==7) then
          i=i+1
          if (i>iargc()) exit
          call getarg(i,carg)

@@ -56,7 +56,7 @@ if (status==0):
     if (out=="qbfe1"):
         bsub="bsub"
         path="cronqb/"
-    elif (out=="qafe1"):
+    elif (out=="qfe1"):
         bsub="bsub"
         path="cronqa/"
     elif (out=="qscfe1"):

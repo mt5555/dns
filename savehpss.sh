@@ -18,7 +18,7 @@ save $name*.jpdf
 store $name*.scalars
 store $name*.spec
 store $name*.spect
-save $name*.h5 $name*.u $name*.v $name*.w
+save $name*.h5 $name*.v $name*.u  $name*.w
 EOF
 
 
