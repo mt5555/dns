@@ -51,7 +51,6 @@ integer :: dealias=0                ! 0 = none
 logical :: rw_spec=.false.          ! set to .true. to read/write dealiased spectral coefficieints 
                                     ! instead of grid point values 
 logical :: udm_input=.false.        ! use UDM for input/restart files
-logical :: udm_input_old=.false.    ! use UDM for input/restart files
 logical :: udm_output=.false.       ! use UDM for output files
 logical :: byteswap_input=.false.   ! byteswap all binary input files
 

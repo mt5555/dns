@@ -130,6 +130,8 @@ write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
 call print_message(message)
 write(message,'(a,2f9.2,a)') 'initial output: ',tims_ave(4),tims_max(4)
 call print_message(message)
+
+if (itime==0) itime=1
 write(message,'(a,2f9.2,a,2f10.5)') 'dns_solve:      ',tims_ave(2),tims_max(2),&
 '  per timestep: ',tims_ave(2)/itime,tims_max(2)/itime
 call print_message(message)
@@ -309,10 +311,6 @@ do
       tims(2:ntimers)=0
       call wallclock(tmx1)     ! start the main timer *AFTER* 1 complete time step:
       tims(4)=tmx_save
-      if (io_pe==my_pe) then
-         print *,'time_control: ',tims(4)
-         print *,'MB/s:  ',8.0*3.0*g_nx*g_ny*g_nz/1024./1024./tims(4)
-      endif		
    endif
 
    itime=itime+1

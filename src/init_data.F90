@@ -58,8 +58,6 @@ if (equations==NS_UVW) then
 
 if (udm_input) then
    call udm_read_uvw(Q,Qhat,work1,work2)
-else if (udm_input_old) then
-   call udm_read_uvw_old(Q,Qhat,work1,work2)
 else
    if (rw_spec) then
    call print_message("Restarting from file restart.[us,vs,ws]")

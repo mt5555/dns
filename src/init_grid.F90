@@ -347,7 +347,6 @@ if (my_pe==io_pe) then
    !   -b   enable bytewsap_input
    !
    !
-   !   -u1  read older, 1st generation UDM input files
    !   -ui  use UDM for input
    !   -uo  use UDM for output
    !
@@ -370,8 +369,6 @@ if (my_pe==io_pe) then
          rw_spec=.true.
       else if (message(1:3)=="-ui") then
          udm_input=.true.
-      else if (message(1:3)=="-u1") then
-         udm_input_old=.true.
       else if (message(1:3)=="-uo") then
          udm_output=.true.
       else if (message(1:2)=="-d") then

@@ -230,8 +230,9 @@ integer,parameter :: NUMBANDS_MAX=1024
 real*8 xw,ener,xfac,theta
 real*8 ::  enerb_target(NUMBANDS_MAX),enerb_work(NUMBANDS_MAX),enerb(NUMBANDS_MAX)
 real*8 :: xnb,ep23,lenscale,eta,fac1,fac2,fac3,ens,epsilon,mu_m
+real*8 :: tmx1,tmx2
 
-character(len=80) message
+character(len=80) message,fname
 CPOINTER :: null
 
 
@@ -337,6 +338,27 @@ else if (rantype==1) then
 else
    call abort("decay():  invalid 'rantype'")
 endif
+
+
+
+if (init==1) then
+
+fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
+
+call wallclock(tmx1)
+call udm_write_uvw(fname,0d0,Q,PSI,work,work2)
+call wallclock(tmx2)
+tmx2=tmx2-tmx1
+if (io_pe==my_pe) then
+   print *,'cpu time for output: ',tmx2, tmx2/60
+   print *,'data rate MB/s: ',8.*3.*g_nx*g_ny*g_nz/1024./1024./tmx2
+endif
+call close_mpi
+stop
+
+endif
+
+
 
 
 alpha=0
