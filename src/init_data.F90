@@ -298,7 +298,12 @@ check=0
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
-         ke = .5*(Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2)
+
+         ke = .5*Q(i,j,k,1)**2
+         do n=2,ndim
+            ke = ke + .5*Q(i,j,k,n)**2
+         enddo
+
          if (ke>ke_thresh) then
             Q(i,j,k,np)=1
             check=check+1
