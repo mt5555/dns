@@ -232,8 +232,10 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 !
 ! rantype=  0    intialize using a gaussian, in grid space
 ! rantype=  1    initalize using E=constant and random phase
+!                  (faster, but not independed of parallel decomp)
 !
 ! restype = 0    use 2048^3 parameters with kmax eta = 1
+! restype = 1    use Livescu initial spectrum
 !
 use params
 use mpi
@@ -272,24 +274,26 @@ if (restype==0) then
    lenscale = .3155
    eta = 9.765e-4
    mu_m=1.359e-4 ! *.7  !   *.89
+   do nb=1,NUMBANDS
+      xnb = nb
+      fac1 = 1.613*ep23*xnb**(-5d0/3d0)
+      
+      fac2 = ( (xnb*lenscale)**1.2 + .39 )**0.833 
+      fac2 = (xnb*lenscale/fac2)**(17d0/3d0)
+      fac2 = fac2 * exp(-2.1*xnb*eta)
+      
+      fac3=.5 + atan( 10*log10(xnb*eta)+12.58 ) / pi
+      fac3 = 1 + .522*fac3
+      
+      enerb_target(nb)=fac1*fac2*fac3
+   enddo
+else if (restype==1) then
+   ! schmidt number and tracer initialization:
 else
    call abort("init_data_decay: bad restype")
 endif
 
 
-do nb=1,NUMBANDS
-   xnb = nb
-   fac1 = 1.613*ep23*xnb**(-5d0/3d0)
-
-   fac2 = ( (xnb*lenscale)**1.2 + .39 )**0.833 
-   fac2 = (xnb*lenscale/fac2)**(17d0/3d0)
-   fac2 = fac2 * exp(-2.1*xnb*eta)
-
-   fac3=.5 + atan( 10*log10(xnb*eta)+12.58 ) / pi
-   fac3 = 1 + .522*fac3
-
-   enerb_target(nb)=fac1*fac2*fac3
-enddo
 
 
 

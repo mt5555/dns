@@ -592,6 +592,7 @@ do j=1,ny_2dz
 enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! passive scalars:
 ! dealias the RHS scalars, and add diffusion:
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do ns=np1,np2
@@ -609,7 +610,7 @@ do ns=np1,np2
                rhs(k,i,j,ns)=0
             else
                xw=(im*im + jm*jm + km*km)*pi2_squared
-               xw_viss=mu*xw
+               xw_viss=xw*mu/schmidt(ns)
                rhs(k,i,j,ns)=p(k,i,j) - xw_viss*Qhat(k,i,j,ns)
             endif
          enddo
