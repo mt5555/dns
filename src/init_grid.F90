@@ -85,20 +85,18 @@ if (my_pe==io_pe) then
 endif
 
 #ifdef USE_MPI
-call MPI_BROADCAST
-mu
-time_final
-cfl_adv
-cfl_vis
-delt_min
-delt_max
-restart_dt
-diag_dt
-screen_dt
-output_dt
-ncustom
-custom(ncustom)
-
+call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(cfl_adv,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(cfl_vis,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(delt_min,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(delt_max,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(restart_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d ,ierr)
 #endif
 
 

@@ -25,7 +25,7 @@ enddo
 ke=ke/2
 
 
-#ifdef MPI
+#ifdef USE_MPI
 ke2=ke
 call MPI_reduce(ke2,ke,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
@@ -66,7 +66,7 @@ enddo
 enddo
 enddo
 
-#ifdef MPI
+#ifdef USE_MPI
    call MPI_REDUCE(mx,MPI_MAX)
    g_mx=divmx
    call MPI_reduce(g_mx,mx,1,MPI_REAL8,MPI_MAX,pe,comm_3d,ierr)
@@ -121,7 +121,7 @@ enddo
 enddo
 enddo
 
-#ifdef MPI
+#ifdef USE_MPI
 spectrum_in=spectrum
 call MPI_reduce(spectrum_in,spectrum,iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
