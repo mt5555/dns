@@ -239,8 +239,8 @@ integer :: kmsine(nzd)
 integer,parameter :: g_nx=nslabx*ncpu_x
 integer,parameter :: g_ny=nslaby*ncpu_y
 integer,parameter :: g_nz=nslabz*ncpu_z
-integer,parameter :: g_nmax=max(g_nx,g_ny,g_nz)
-integer,parameter :: g_nmin=min(g_nx,g_ny,g_nz)
+integer           :: g_nmax
+integer           :: g_nmin
 ! 2/3 rule dealias kmax
 integer,parameter :: dealias_nx = 2+2*(g_nx/3)
 integer,parameter :: dealias_ny = 2+2*(g_ny/3)
@@ -439,9 +439,14 @@ g_ny2=g_ny+2
 g_nz2=g_nz+2
 ndim=3
 
+g_nmax=max(g_nx,g_ny,g_nz)
+g_nmin=min(g_nx,g_ny,g_nz)
+
 if (g_nz==1) then
    g_nz2=1
    ndim=2
+   g_nmax=max(g_nx,g_ny)
+   g_nmin=min(g_nx,g_ny)
 endif
 
 ! spherical dealiasing:  sqrt(2) N/3

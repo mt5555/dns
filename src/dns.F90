@@ -45,6 +45,8 @@ call print_message(message)
 Q=0
 call init_data(Q,Qhat,work1,work2)
 
+
+
 if (equations==NS_UVW) then
    call print_message('Projecting initial data...')
    call divfree_gridspace(Q,work1,work2,q1) 
@@ -59,6 +61,9 @@ endif
 #ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
 #endif
+
+print *,maxval(Q(:,:,:,1))
+print *,maxval(Q(:,:,:,2))
 
 
 
