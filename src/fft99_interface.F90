@@ -182,7 +182,7 @@ character*80 message_str
 
 integer index,jj,j,k,numffts
 if (n1==1) return
-ASSERT("ifft1: dimension too small ",n1+2<=n1d);
+ASSERT("ifft1: dimension too small ",n1+2<=n1d;)
 call getindex(n1,index)
 
 

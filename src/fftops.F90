@@ -461,6 +461,7 @@ integer i,j,k
 integer im,jm,km,i2,j2,k2
 real*8 :: uu,vv,ww,xfac
 
+
 do i=1,3
    call fft3d(u(1,1,1,i),p)
 enddo

@@ -55,7 +55,7 @@ real*8 :: x(0:n),y(0:n)
 
 Q=0
 
-k=1
+k=nz1
 eps=200
 do j=ny1,ny2
 do i=nx1,nx2
@@ -172,8 +172,6 @@ real*8 :: Q(nx,ny,nz,n_var)
 ! local variables
 integer i
 real*8 :: d1(nx,ny,nz)
-real*8 :: d2(nx,ny,nz)
-real*8 :: d3(nx,ny,nz)
 
 call bc_preloop(Q)
 

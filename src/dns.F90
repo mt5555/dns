@@ -24,35 +24,47 @@ write(message,'(a)') 'Running some tests'
 call print_message(message)
 call test           ! optional testing  routines go here
 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  Set initial data, make it divergence free
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 write(message,'(a)') 'Initial data'
 call print_message(message)
 !call init_data_test(Q)             ! set up initial data 
 !call init_data_khblob(Q)
 call init_data_kh(Q)             ! set up initial data 
-
 write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data
 
-call wallclock(tmx2)
 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  Solve the equations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+call wallclock(tmx2)
 write(message,'(a)') 'Time stepping...'
 call print_message(message)
-
 ! set all counters to zero (so they dont include initialization)
 tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
-
 call wallclock(tmx1)
 call dns_solve(Q)
 call wallclock(tmx2)
 tims(2)=tmx2-tmx1
 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Print timing information
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef USE_MPI
    temp=tims
    call MPI_allreduce(temp,tims,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
-
 tims=tims/60
 call print_message('CPU times:')
 write(message,'(a,f9.2,a)') 'initialization: ',tims(1),' m'

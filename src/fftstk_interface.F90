@@ -14,10 +14,12 @@
 ! Size of the grid point data         p(1:n1,1:n2,1:n3)
 ! Size of fourier coefficients        p(1:n1,1:n2,1:n3)
 !
-! grid space data:    1 2 3 4 5 6 7 8 * *
+! grid space data:    1 2 3 4 5 6 7 8 * 
 ! 
-! fourier space:      0 1 1 2 2 3 3 4 * *
-! rearranged:         0 4 1 1 2 2 3 3 * *
+! fourier space:      * 0 1 1 2 2 3 3 4 
+! rearranged:         0 4 1 1 2 2 3 3 *
+!
+
 !
 
 
@@ -51,7 +53,7 @@ integer, parameter ::  num_fftsizes=3
 
 integer :: init=0
 type fftdata_d
-   real*8 :: ptrigs   ! used as a C pointer.  make sure at least 64bit
+   CPOINTER :: ptrigs
    integer :: size
 end type
 type(fftdata_d) :: fftdata(num_fftsizes)
@@ -153,7 +155,7 @@ integer index,i,k,j
 real*8 tmp
 
 if (n1==1) return
-ASSERT("ifft1: dimension too small ",n1<=n1d);
+ASSERT("ifft1: dimension too small ",1+n1<=n1d);
 call getindex(n1,index)
 
 do k=1,n3
@@ -184,7 +186,7 @@ integer index,i,j,k
 real*8 tmp
 
 if (n1==1) return
-ASSERT("fft1: dimension too small ",n1<=n1d);
+ASSERT("fft1: dimension too small ",1+n1<=n1d);
 call getindex(n1,index)
 
 
