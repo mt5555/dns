@@ -145,10 +145,16 @@ fout.write("! default is TRANSPOSE_X_SPLIT_Y, which can be used with nslabz>=1 \
 fout.write("! TRANSPOSE_X_SPLIT_Z gives the original parallel decomposition\n")
 fout.write("! which cant be used with nslabz=1\n")
 fout.write("\n")
+if (use_x_z):
+   fout.write("#define TRANSPOSE_X_SPLIT_Z\n")
+   fout.write("#undef TRANSPOSE_X_SPLIT_Y\n")
+else:
+   fout.write("#undef TRANSPOSE_X_SPLIT_Z\n")
+   fout.write("#define TRANSPOSE_X_SPLIT_Y\n")
+fout.close()
 
 cmd = "diff /tmp/transpose.h transpose.h"
 (status,out) = commands.getstatusoutput(cmd) 
-
 if (status != 0):
    print "Creating new transpose.h file"
    cmd = "mv -f /tmp/transpose.h transpose.h"
@@ -159,13 +165,6 @@ else:
 
 
 
-if (use_x_z):
-   fout.write("#define TRANSPOSE_X_SPLIT_Z\n")
-   fout.write("#undef TRANSPOSE_X_SPLIT_Y\n")
-else:
-   fout.write("#undef TRANSPOSE_X_SPLIT_Z\n")
-   fout.write("#define TRANSPOSE_X_SPLIT_Y\n")
-fout.close()
 
 
 fout=open("/tmp/params.h",'w')
