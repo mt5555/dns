@@ -369,8 +369,8 @@ if (io_pe==my_pe) then
             write(15,'(3e18.10)') (gradu(i,j,sc,ip),j=1,3)
          enddo
       enddo
+      close(15)
    enddo
-   close(15)
 endif
 
 

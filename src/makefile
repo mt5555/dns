@@ -44,14 +44,16 @@ ifeq ($(UNAME),Linux)
       #-lpthread
    endif
    ifeq ($(HOST),pinkish.lanl.gov)
-      MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
-      MPILIB =-L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm -lpthread
+      #MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
+      #MPILIB =-L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm -lpthread
+      MPI =  -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_LAMPI -I/home/taylorm/lampi/pinkish/include
+      MPILIB = -L /home/taylorm/lampi/pinkish/lib -lmpi
    endif
    ifeq ($(MPI_VERSION),lampi)
       # LAMPI
       MPI =  -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_LAMPI \
-           -I/home/taylorm/liblampi/include
-      MPILIB = -L /home/taylorm/liblampi/lib -lmpi
+           -I/home/taylorm/lampi/pinkish/include
+      MPILIB = -L /home/taylorm/lampi/pinkish/lib -lmpi
    endif
 
 
