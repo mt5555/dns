@@ -11,7 +11,7 @@ cd dns
 mkdir $name
 cd $name
 save $name*.scalars-turb
-save $name*.isostr
+save $name*.isostr $name*.isow2s2 $name*.iso1
 save $name*.sf
 save $name*.s2v2
 save $name*.jpdf
