@@ -36,11 +36,11 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0004.8000.new'
+name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0005.8000.new'
 nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
 
 
-ndir_use=49;
+ndir_use=73;
 
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 

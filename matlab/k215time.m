@@ -18,7 +18,7 @@ eta = 1/(nx*delx_over_eta);
 name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
 pname = 'hel256\_hpi2\_';
 ext='.new.isostr';
-times=[4.2:0.2:10.0];
+times=[4.2:0.2:15.8];
 nx = 256;
 
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)

@@ -45,7 +45,7 @@ hspec_ave = hspec_n + hspec_p;
 [time,count]=fread(fid,1,'float64');
 j = 0;
 while (time >=.0 & time <= 9999.3)
-j=j+1
+j=j+1;
 if (count==0) 
    disp('error reading hspec file')
 end

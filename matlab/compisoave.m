@@ -1,4 +1,4 @@
-function [y45,y415,y43,epsilon,h_epsilon,y215]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
+function [y45,y415,y43,epsilon,h_epsilon,y215,ytt]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
 %
 % compute angle average and plot a single snapshot
 % klaws==1   4/5ths  and other laws
@@ -319,18 +319,14 @@ end
 end
 
 
-
-
-
-
-
 %
-%  the 2/15 law
+%  the 2/15 law 
 %
 if (klaws==3)
 yyave=0*xx;
 figure(4); subplot(1,1,1);
 yyave=0*xx;
+yttave = 0*xx;
 pave=yyave;
 nave=yyave;
 for i=1:ndir
@@ -338,13 +334,15 @@ for i=1:ndir
   x_plot=x*nx*delx_over_eta;            % units of r/eta
 
   y=-H_ltt(:,i)./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition
-
+  
   semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
   yyave=yyave+w(i)*spline(x,y,xx);
+
 
 end
 
 semilogx(xx_plot,yyave,'k','LineWidth',2.5);
+
 y215=yyave;
 max(yyave)
 title('2/15 law');
@@ -358,6 +356,35 @@ if (plot_points==1)
 print('-dpsc',[bname,'_215.ps']);
 print -djpeg 215.jpg
 end
+
+% the second-order helical structure function (H_tt) scaling
+htt = 1; %set to 0 if do not want these plots
+if (htt)
+     figure(5);
+yttave = 0*xx;
+for i=1:ndir
+  x = r_val(:,i);                       % units of box length
+  x_plot=x*nx*delx_over_eta;            % units of r/eta
+
+
+     ytt = H_tt(:,i);
+
+     semilogx(x_plot,abs(ytt),['o-'cdir(i)],'MarkerSize',msize); hold on;
+     yttave = yttave + w(i)*spline(x,ytt,xx);
+
+end
+
+     ytt = yttave;
+     semilogx(xx_plot,abs(yttave),'k','LineWidth',2.5);hold on;
+     title('H_{tt}')
+     ylabel(pname);
+xlabel('r/\eta');
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+hold off;
+end
+
+
+
 end
 
 
