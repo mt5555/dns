@@ -7,6 +7,7 @@
 program DNS
 use params
 use mpi
+use structf
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 character*80 message
@@ -37,7 +38,7 @@ if (init_cond==2) call init_data_lwisotropic(Q)
 
 write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data
-
+call init_pdf_module()        ! initialize structure functions  
 
 
 

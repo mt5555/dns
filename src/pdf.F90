@@ -4,10 +4,13 @@ module structf
 implicit none
 
 integer,parameter :: delta_num=10
-integer,parameter :: pdf_max_bin=1000
-real*8            :: pdf_bin_size = .1
-
 integer           :: delta_val(delta_num)
+
+! max range:  10 ... 10
+integer,parameter :: pdf_max_bin=1000
+real*8            :: pdf_bin_size = .01
+
+
 
 
 
@@ -71,9 +74,12 @@ implicit none
 type(pdf_structure_function) :: str
 integer :: bin
 
+if (allocated(str%pdf)) deallocate(str%pdf)
+
 str%nbin=bin
 allocate(str%pdf(-bin:bin,delta_num))
 str%pdf=0
+str%ncalls=0
 
 end subroutine
 
@@ -99,6 +105,8 @@ n=str%nbin
 ! make a copy of data
 allocate(str2%pdf(-n:n,delta_num))
 str2%pdf=str%pdf
+str2%ncalls=str%ncalls
+
 
 ! create a larger structure function
 deallocate(str%pdf)
@@ -106,11 +114,92 @@ allocate(str%pdf(-bin:bin,delta_num))
 
 ! copy data into new, larger structure function
 str%pdf(-n:n,:)=str2%pdf
+str%ncalls=str2%ncalls
 
 ! delete the copy of original data
 deallocate(str2%pdf)
 
 end subroutine
+
+
+
+
+
+subroutine outputSF()
+use params
+implicit none
+integer i
+
+do i=1,NUM_SF
+   call mpisum_pdf(SF(i,1))
+   call mpisum_pdf(SF(i,2))
+   call mpisum_pdf(SF(i,3))
+enddo
+
+if (my_pe==io_pe) then
+do i=1,NUM_SF
+   call output_pdf(SF(i,1))   
+   call output_pdf(SF(i,2))   
+   call output_pdf(SF(i,3))   
+
+   ! reset PDF's
+   SF(i,1)%ncalls=0
+   SF(i,1)%pdf=0
+   SF(i,2)%ncalls=0
+   SF(i,2)%pdf=0
+   SF(i,3)%ncalls=0
+   SF(i,3)%pdf=0
+
+enddo      
+endif
+
+
+end subroutine
+
+
+
+
+
+subroutine mpisum_pdf(str)
+!
+! sum PDF's over all CPUs into one PDF on cpu = io_pe
+!
+use params
+use mpi
+implicit none
+type(pdf_structure_function) :: str
+
+
+! local variables
+type(pdf_structure_function) :: totstr
+integer,allocatable :: pdfdata(:,:)
+integer :: bin,ierr
+
+
+
+#ifdef USE_MPI
+! find maximum value of bin  MPI max
+call MPI_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+
+! resize to bin
+call resize_pdf(str,bin)
+
+! MPI sum into totstr.
+! str%pdf(-bin:bin) = 2*bin+1 data points
+
+if (my_pe == io_pe) then
+   allocate(pdfdata(-bin:bin,delta_num))
+   call MPI_reduce(str%pdf,pdfdata,2*str%nbin+1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
+   str%pdf=pdfdata
+else
+   call MPI_reduce(str%pdf,0,2*str%nbin+1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
+endif
+
+#endif
+
+end subroutine
+
+
 
 
 
@@ -122,7 +211,7 @@ subroutine compute_pdf(Q,n1,n1d,n2,n2d,n3,n3d,str)
 ! for all the values of delta given by delta_val(:)
 !
 implicit none
-real*8 :: n1,n1d,n2,n2d,n3,n3d
+integer :: n1,n1d,n2,n2d,n3,n3d
 real*8 :: Q(n1d,n2d,n3d)
 type(pdf_structure_function) :: str
 
@@ -161,7 +250,96 @@ do k=1,n3
       enddo
    enddo
 enddo
+str%ncalls=str%ncalls+1
 end subroutine
 
 
+
+
+
+subroutine z_ifft3d_str(fin,f,strid,compy_instead_of_x,compz)
+!
+!  compute inverse fft 3d of fin, return in f
+!  fin and f can overlap in memory
+!  Also compute structure functions.
+!  strid=1    U
+!        2    V
+!        3    W
+!
+!  This routine can compute PDF's of structure functions in the x direction
+!  or y direction (but not both) and in the z direction.
+! 
+!  compy_instead_of_x    compute PDF in y direction instead of x
+!  compz                 also compute PDF in z direction
+!
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 f(nx,ny,nz)    ! output
+real*8 work(nx,ny,nz) ! work array
+real*8 work2(g_nz2,nslabx,ny_2dz) ! work array
+logical :: compy_instead_of_x,compz
+integer strid
+
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+
+work2=fin
+call ifft1(work2,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work2,f,n1,n1d,n2,n2d,n3,n3d)
+
+if (compy_instead_of_x) then
+
+   call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+   call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+   call compute_pdf(work,n1,n1d,n2,n2d,n3,n3d,SF(strid,2))
+   call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+   
+else
+
+   call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+   
+   
+   call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+   call compute_pdf(work,n1,n1d,n2,n2d,n3,n3d,SF(strid,1))
+   call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+endif
+
+if (compz) then
+   call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call compute_pdf(work,n1,n1d,n2,n2d,n3,n3d,SF(strid,3))
+endif
+
+
+end
+
+
+
+
+
+
+
+
+
 end module
+

@@ -76,9 +76,9 @@ LINK=$(F90) $(FFLAGS)
 
 
 #independent modules/routines (dont use any other modules):
-OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o structf.o
+OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o 
 #modules/routines which use OBJS1
-OBJS2 = transpose.o 
+OBJS2 = transpose.o structf.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o integrals.o

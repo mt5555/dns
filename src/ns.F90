@@ -35,8 +35,11 @@ real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d
 logical,save :: firstcall=.true.
+integer,save :: count2=0,count10=0
 
 
+count2=mod(count2+1,2)     ! toggles between 0 and 1
+count10=mod(count10+1,2)   ! toggles between 0...9
 
 if (firstcall) then
    firstcall=.false.
@@ -118,7 +121,7 @@ do n=1,3
    enddo
    enddo
 
-   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n))
+   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),n,(count2==0),(count10==0))
 enddo
 
 
