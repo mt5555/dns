@@ -1012,8 +1012,8 @@ call MPI_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
 if (my_pe==io_pe) then
    print *,'helicity: ',hetot
-   print *,'helicity dissipation (spectrum): ',diss1
-   print *,'helicity dissipation (exact):    ',diss2
+   print *,'helicity dissipation (spectrum): ',diss1*mu
+   print *,'helicity dissipation (exact):    ',diss2*mu
 endif
 
 if (g_nz == 1)  then
