@@ -6,6 +6,7 @@
 #BSUB -n 128 -R "span[ptile=128]"
 
 set NCPU=128 
+newcshrc
 
 set refin=benchmark_sgi.inp
 

@@ -44,7 +44,7 @@ ifeq ($(UNAME),IRIX64)
    MPI = -DUSE_MPI
    MPILIB = -lmpi 
    LDFLAGS =  -l scs -Lstk -lstk
-   FFLAGS = -64 -O3 -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
+   FFLAGS = -64 -Ofast -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
    CC = cc -64
 endif
 ifeq ($(UNAME),OSF1)

@@ -85,19 +85,17 @@ spectrum_x=0
 spectrum_y=0
 spectrum_z=0
 
-do i=nx1,nx2
-do j=ny1,ny2
 do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
     rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
     iwave = nint(sqrt(rwave))
-    ASSERT("compute spectrum: iwave>iwave_max",iwave<=iwave_max)
 
     energy = 8.0 ! *(g_nx*g_ny*g_nz)
     if (kmcord(k)==0) energy=energy/2
     if (jmcord(j)==0) energy=energy/2
     if (imcord(i)==0) energy=energy/2
-
-    energy=energy*p(i,j,k)**2
+    energy=energy*p(i,j,k)*p(i,j,k)
 
     spectrum(iwave)=spectrum(iwave)+energy
     spectrum_x(abs(imcord(i)))=spectrum_x(abs(imcord(i))) + energy
@@ -107,6 +105,7 @@ do k=nz1,nz2
 enddo
 enddo
 enddo
+
 
 #ifdef USE_MPI
 spectrum_in=spectrum
@@ -132,9 +131,7 @@ do i=iwave+2,iwave_max
 enddo
 iwave_max=iwave+1
 
-do i=1,10
-	print *,i,spectrum(i)
-enddo
+
 
 end subroutine
 
