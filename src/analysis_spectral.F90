@@ -82,8 +82,8 @@ compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.true.		!extracting helicity-free modes
 
-tstart=9.0
-tstop=9.0
+tstart=4.2
+tstop=4.2
 tinc=0.2
 icount=0
 

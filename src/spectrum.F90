@@ -1199,10 +1199,10 @@ real*8 :: p1(nx,ny,nz,3)
 ! local variables
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
+real*8 :: count(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
-real*8 ::  count(0:max(g_nx,g_ny,g_nz))		!count #wavevectors in shell
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
 real*8 :: WR(3),WI(3)
@@ -1320,7 +1320,6 @@ diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
 cos_tta_spec = 0
-count = 0
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -1352,7 +1351,6 @@ do j=ny1,ny2
          
          rwave = im**2 + jm**2 + km**2
          iwave = nint(sqrt(rwave))
-	 count(iwave) = count(iwave) + 1          
 
          !     compute angle between Re and Im parts of u(k)
          RR = cmodes_r(i,j,k,:)
@@ -1363,14 +1361,23 @@ do j=ny1,ny2
          
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
-         
-         !     spectrum of angles         
-         cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
 	
+	if (im>0) then
+	if (jm>0) then	
+	if (km>0) then	
 ! 	histogram of angles
 	ind = nint(a + b*cos_tta)	
 	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
-	         
+
+!     spectrum of angles         
+        cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
+
+	count(iwave) = count(iwave)+1
+	
+	endif
+	endif
+	endif		         
+
          !     cutoff for recalculating the spectra
 !         delta = 0.1      !this value can be changed by hand
          
@@ -1404,6 +1411,7 @@ do j=ny1,ny2
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
                  spec_helicity_rn(iwave) + energy
+
             
             hetot=hetot+energy
             diss1=diss1 -2*energy*iwave**2*pi2_squared
@@ -1425,6 +1433,8 @@ spec_r_in=spec_kEk
 call mpi_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in = cos_tta_spec
 call mpi_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in = count
+call mpi_reduce(spec_r_in,count,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 do n = 1,nbin
    spec_r_in = costta_pdf(:,n)
@@ -1435,6 +1445,7 @@ do n=1,ndim
    spec_r_in=cospec_r(:,n)
    call mpi_reduce(spec_r_in,cospec_r(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 enddo
+
 
 spec_x_in=cospec_x
 call mpi_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
@@ -1456,6 +1467,10 @@ rwave=e2
 call mpi_reduce(rwave,e2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
+!average costta values over sphere
+do i = 1,iwave+1
+cos_tta_spec(i) = cos_tta_spec(i)/count(i)
+enddo
 
 if (my_pe==io_pe) then
    print *,'KE: (from sin/cos modes)',e1
@@ -1479,8 +1494,11 @@ do i=iwave+2,iwave_max
    spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
    cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i) 
-   costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)  
+   costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
 enddo
+
+
+
 iwave=iwave+1
 
 if (my_pe==io_pe) then
@@ -1491,13 +1509,7 @@ if (my_pe==io_pe) then
    print *,'total helicity: ',heltot
 endif
    
-!normalize histograms of cosine values
-do i = 0,iwave
-costta_pdf(i,:) = costta_pdf(i,:)/count(i)
-enddo
 end subroutine
-
-
 
 
 
