@@ -64,7 +64,8 @@ use params
 use mpi
 integer ierr
 
+#ifdef MPI
 call MPI_Finalize(ierr)
-
+#endif
 
 end subroutine
