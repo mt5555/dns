@@ -10,8 +10,9 @@ module list
 
 # number of cpus to use for mpirun:
 set NCPU = 128
+# name of job file to resubmit
+set JOB=prod.job
 
-set SRC=$HOME/dns/src
 set name = iso12_256_
 #set refin=$HOME/dns/prod/benchmark128.inp
 set refin=$HOME/dns/prod/prod256.inp
@@ -20,6 +21,10 @@ set refin=$HOME/dns/prod/prod256.inp
 set restart = 1
 set resub = 20
 set resub_file = $SRC/{$name}resub
+
+set HDIR=`pwd`
+set SRC=$HOME/dns/src
+
 
 
 
@@ -59,30 +64,45 @@ if ($restart == 1) then
       echo $resnamev
       echo $resnamew
    endif
+   set resnameu2 = `basename $resnameu`
+   set resnamev2 = `basename $resnamev`
+   set resnamew2 = `basename $resnamew`
 
-# NOTE: EOF MUST START IN COLUMN 1, AS BELOW:
-   psi <<EOF
-get $resnameu
-get $resnamev
-get $resnamew
-EOF
+   # check to see if files are left over from last run: 
+   if !(-e $resnameu2) then
+      psi get $resnameu
+   endif
+   if !(-e $resnamev2) then
+      psi get $resnamev
+   endif
+   if !(-e $resnamew2) then
+      psi get $resnamew
+   endif
 
-   set resnameu = `basename $resnameu`
-   set resnamev = `basename $resnamev`
-   set resnamew = `basename $resnamew`
-
-   \mv -f $resnameu  restart.u
-   \mv -f $resnamev  restart.v
-   \mv -f $resnamew  restart.w
+   \rm -f restart.*
+   \mv -f $resnameu2  restart.u
+   \mv -f $resnamev2  restart.v
+   \mv -f $resnamew2  restart.w
    if !(-e restart.w) then
       echo "No restart.w file"
       exit 1
    endif
-   mpirun -np $NCPU ./dns -r -d . $name < $refin 
+   #mpirun -np $NCPU ./dns -r -d . $name < $refin 
+   prun -n $NCPU ./dns -r -d . $name < $refin 
 else
    echo 'Initial run.  writing a 0 to ' $resub_file 
    echo '0' > $resub_file
-   #mpirun -np $NCPU ./dns  -d . $name < $refin 
+
+   #cleanup:  
+   \rm -f {$name}\*.sf
+   \rm -f {$name}\*.scalars
+   \rm -f {$name}\*.spec
+   \rm -f {$name}\*.u
+   \rm -f {$name}\*.v
+   \rm -f {$name}\*.w
+
+   mpirun -np $NCPU ./dns  -d . $name < $refin
+   prun -n $NCPU ./dns  -d . $name < $refin  
 endif
 
 
@@ -92,6 +112,7 @@ endif
 echo 'removing size 0 files'
 find . -size 0 -exec rm -f {} \; -print
 
+# NOTE: EOF MUST START IN COLUMN 1, AS BELOW:
 psi <<EOF
 cd dns
 save {$name}\*.sf
@@ -101,6 +122,11 @@ save {$name}\*.u
 save {$name}\*.v
 save {$name}\*.w
 EOF
+
+if ($restart == 1) then
+    cd $HDIR
+    idbsub -n $NCPU < $JOB
+endif
 
 
 # ssrun -workshop mpirun -np 128 ../src/dns < $refin 

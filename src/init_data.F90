@@ -69,7 +69,7 @@ deallocate(seed)
 do n=1,3
    ! input from random number generator
    ! this gives same I.C independent of cpus
-   call input1(PSI(1,1,1,n),Q,work,null,io_pe)  
+   call input1(PSI(1,1,1,n),Q,work,null,io_pe,.true.)  
 enddo
 
 
