@@ -445,7 +445,7 @@ endif
 
 
 if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time_initial
+   write(message,'(f10.4)') 10000.0000 + time
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".hspec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
