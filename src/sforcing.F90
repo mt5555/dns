@@ -916,10 +916,11 @@ subroutine zdecomp_to_rmodes(p,rmodes,nmax)
 use params
 use mpi
 implicit none
+integer :: nmax
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: rmodes2(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: p(g_nz2,nslabx,ny_2dz)
-integer :: nmax,i,j,k,ierr
+integer :: i,j,k,ierr
 
 rmodes=0
 do j=1,ny_2dz
