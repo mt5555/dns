@@ -125,8 +125,6 @@ end subroutine
 
 
 
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Compute 3D in-place iFFT of p
@@ -142,7 +140,7 @@ character*80 message_str
 integer index,jj,j,k,numffts
 
 if (n1==1) return
-n1=n1-2
+!n1=n1-2
 call getindex(n1,index)
 
 
@@ -155,7 +153,17 @@ do k=1,n3
 !         p(2,jj,k)=0
 !         p(n1+2,jj,k)=0
 !      enddo
+
+
+
+!     move the last cosine mode back into correct location:
+      do  jj=j+1,j+numffts
+	p(n1+1,jj,k)=p(2,jj,k)
+      enddo     
+
+
       call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,1)
+
       j=j+numffts
    enddo
 enddo
@@ -189,11 +197,18 @@ do k=1,n3
 !      enddo
 
       call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,-1)
+
+!     move the last cosine mode into slot of first sine mode:
+      do  jj=j+1,j+numffts
+	p(2,jj,k)=p(n1+1,jj,k)
+      enddo     
+
+
       j=j+numffts
    enddo
 enddo
 
-n1=n1+2 
+!n1=n1+2 
 end subroutine
 
 
@@ -225,14 +240,13 @@ call fft1(px,n1,n1d,n2,n2d,n3,n3d)
 if (numder>=2) then
    do k=1,n3
    do j=1,n2
-      do i=1,n1-2
+      do i=1,n1
+         ! note: for i=2, we are actually working with the cos(n1/2) mode
+         ! but d/dx of this mode goes to sin(n1/2) = 0 on our grid, so we
+         ! just take m=0 to make sure that dxx = dx dx
          m=(i-1)/2
          pxx(i,j,k) = -m*m * pi2_squared * px(i,j,k)
       enddo
-      ! tweak do that dxx = (dx)(dx)
-      ! this is because we have a cos((n1/2) 2pi x) mode, but no sine!
-      if (n1>1) pxx(n1-1,j,k) = 0
-      pxx(n1,j,k) = 0
    enddo
    enddo
    call ifft1(pxx,n1,n1d,n2,n2d,n3,n3d)
@@ -243,14 +257,13 @@ endif
 if (numder>=1) then
    do k=1,n3
    do j=1,n2
-      do m = 0, n1/2-2
-         i = 2*m+1
+      do m = 0, n1/2
+         ! note: for i=2, m=0, we are actually working with the cos(n1/2) mode
+         ! but d/dx of this mode goes to sin(n1/2) = 0, so just take m=0 
          temp =  pi2* m * px(i,j,k)
          px(i,j,k) = -pi2 *m * px(i+1,j,k)
          px(i+1,j,k) = temp
       enddo
-      if (n1>1) px(n1-1,j,k)=0
-      px(n1,j,k)=0
    enddo
    enddo
    call ifft1(px,n1,n1d,n2,n2d,n3,n3d)
@@ -276,10 +289,23 @@ real*8 xfac
 
    do k=1,n3
       km=(k-1)/2
+      if (k==2) then 
+         km=(n3-1)/2
+      else
+         km=(k-1)/2
+      endif
       do j=1,n2
-         jm=(j-1)/2
+         if (j==2) then
+            jm=(n2-1)/2
+         else
+            jm=(j-1)/2
+         endif
          do i=1,n1
-            im=(i-1)/2
+            if (i==2) then
+               im=(n1-1)/2
+            else
+               im=(i-1)/2
+            endif
             xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
             if (xfac<>0) xfac = 1/xfac
             p(i,j,k)=p(i,j,k)*xfac
@@ -296,7 +322,8 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Filter out the highest cosine mode
-!
+! This mode has been moved to index = 2, taking the place of
+! sin(0x) = 0 mode
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft_filter(p,n1,n1d,n2,n2d,n3,n3d)
@@ -313,9 +340,12 @@ real*8 xfac
 !         jm=(j-1)/2
          do i=1,n1
 !            im=(i-1)/2
-            if (k > n3-2) p(i,j,k)=0
-            if (j > n2-2) p(i,j,k)=0
-            if (i > n1-2) p(i,j,k)=0
+!            if (k > n3-2) p(i,j,k)=0
+!            if (j > n2-2) p(i,j,k)=0
+!            if (i > n1-2) p(i,j,k)=0
+            if (k == 2) p(i,j,k)=0
+            if (j == 2) p(i,j,k)=0
+            if (i == 2) p(i,j,k)=0
          enddo
       enddo
    enddo
