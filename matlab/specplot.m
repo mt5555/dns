@@ -5,9 +5,15 @@
 %
 
 
-name='cj1';
+% name of the file, without the ".spec" extension
+name='cj20000.0000';
+
+% directory where files are located:
 namedir='/ccs/taylorm/dns/src/';
+
+% big-endian or little-endian 'l' or 'b':
 filetype='l';
+
 
 
 fid=fopen([namedir,name,'.spec'],'r',filetype);

@@ -2,10 +2,18 @@
 10/21/02
 
 128^3
-alpha=16 delx
-mu=5e-4  ok for NS?
 
-1e-4 IN
+cj1  mu=1e-4   alpha=16h   power spectra starting to turn at tail
+
+cj3  mu=25e-4  alpha=0     delx/eta = .94   too viscous. 
+cj2  mu=10e-4  alpha=0     delx/eta = 1.9  killed at t=2.1
+
+cj4  mu=25e-4  alpha=6h  
+cj5  mu=6.25e-4  alpha=6h  
+cj6  mu=1.5e-4  alpha=6h  
+cj7  mu=.4e-4  alpha=6h  
+
+
 
 
 

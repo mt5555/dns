@@ -25,27 +25,28 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
     1x1x128             .393   
     1x1x256             .195     
     2x1x256             .158    
-    4x1x256  IN          
+    4x1x256             .116 
 
-    4x2x128  
+    4x2x128   
     2x2x256   (doesn't work)
 
 
 
 1024^3 
-     1x1x256   ?
-     1x1x512   ?
-     2x1x512   ?  
-     2x2x512
+     1x1x128  3.76
+     1x1x256  1.89
+     1x1x512  1.04  
+     2x1x512  in   
+
 
 1536
      1x1x768 
-     2x1x768 
-     4x1x768 
+     2x1x768   
+
 
 2048^3     
-      1x1x512     
-      1x1x1024    in4
+      1x1x512     failed to load. try from scratch1? 
+      1x1x1024      12.8min!  3x slower than old timing.  try again?  IN
       2x1x1024
       4x1x1024
 
@@ -121,7 +122,8 @@ REDO:
 dns:    1x1x512     45.84 (5 timesteps)  9.17m per timestep
         1x1x1024         5 timesteps     4.35m per timestep
         2x1x1024
-        2x2x512
+        4x1x1024
+
 
 dnsghost 8x8x8      6.50 (1 timestep)
 dnsghost 2x2x128    insufficient virtual memory
