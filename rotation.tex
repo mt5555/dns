@@ -224,6 +224,17 @@ is given by
 \[
 \Delta k_x = 2 \pi, \qquad  \Delta k_y = 2 \pi, \qquad  \Delta k_z = 2 \pi / L 
 \]
+In our DNS code, we index our arrays of Fourier coefficients
+with integers $(l,m,n)$, with $l=0 \dots N_x/2$, 
+$m=0 \dots N_y/2$ and 
+$n=0 \dots N_z/2$.
+The relation between wave number and
+these integers is 
+given by
+\[
+k_x = l \Delta k_x,, \qquad  k_y = m \Delta k_y, \qquad  k_z = n  \Delta k_z
+\]
+
 
 The total energy is
 \[
@@ -248,40 +259,56 @@ where we have chosen to use a shell thickness of $\Delta k_z$.
 \frac{(k-1/2)^2}{L^2} < l^2 + m^2 + \frac{n^2}{L^2} < \frac{(k+1/2)^2}{L^2}
 \]  
 
+
+
+
 \section{Computing 2D Energy Spectra (in an annulus)}
 There are two different 2D spectra we need to compute. 
-\begin{eqnarray*}
-E_0(k_h) &=& E(k_h, k_z=0) \\
-E(k_h) &=& \frac{2}{N_z}\sum_{k_z=0}^{\pi N_z/L} E(k_h,k_z) 
-\end{eqnarray*}
-where $k_h = \sqrt{(k_x^2 + k_y^2)} = \sqrt{(2\pi l)^2 + (2\pi m)^2}$. The 2D shell (annulus) thickness is now
-determined by the horizontal wavenumber spacings. Therefore 
 \begin{eqnarray}
-E_0(k_h) = \sum_{l,m,n=0}  |  {\hat u_1}(l,m,n=0) |^2 +
+E_0(k_h) &=& E(k_h, k_z=0) 
+\label{E:SPECa} \\
+E(k_h) &=& \frac{2}{N_z}\sum_{k_z=0}^{\pi N_z/L} E(k_h,k_z) 
+\label{E:SPECb}
+\end{eqnarray}
+where $k_h = \sqrt{(k_x^2 + k_y^2)} = \sqrt{(2\pi l)^2 + (2\pi m)^2}$. 
+Eq.~\ref{E:SPECa} represents the power spectrum of the 2D field
+obtained by vertically averaging the original 3D field.
+Eq.~\ref{E:SPECb} represents
+the power spectrum of the full 3D field, but instead of 
+summing the energy within spherical shells, the sum is
+taken over the annular region between concentric cylinders
+(whose axis are in the $z$ direction).
+
+
+The 2D shell (annulus) thickness is now
+determined by the horizontal wavenumber spacings. Therefore 
+\begin{eqnarray*}
+E_0(k) = \sum_{l,m,n=0}  |  {\hat u_1}(l,m,n=0) |^2 +
  |  {\hat u_2}(l,m,n=0) |^2 + 
  |  L {\hat u_3}(l,m,n=0) |^2
-\end{eqnarray}
+\end{eqnarray*}
 where the sum is taken over all integers $(l,m,n=0)$ such that
 \[
-(\Delta k_x)^2 (k_h-1/2)^2 < (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_x)^2 (k_h+1/2)^2 
+(\Delta k_x)^2 (k-1/2)^2 < (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_x)^2 (k+1/2)^2 
 \]
-where we have chosen to use a shell thickness of $\Delta k_x = \Delta
+and with $k_x=k \Delta k_x$ for integers $k$.  
+we have chosen to use a shell thickness of $\Delta k_x = \Delta
 k_y = 2\pi$. Scaling out the $2\pi$, we get
 \[
-(k_h-1/2)^2 < l^2 + m^2 < (k_h+1/2)^2.
+(k-1/2)^2 < l^2 + m^2 < (k+1/2)^2.
 \]  
 
 The second spectrum is computed the same way as above except that now
 we $average$ over all $n$ for a given 2D shell:
 \begin{eqnarray}
-E(k_h) = \frac{2}{N_z}\sum_{n}  |  {\hat u_1}(l,m,n) |^2 +
+E(k) = \frac{2}{N_z}\sum_{n}  |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
  |  L {\hat u_3}(l,m,n) |^2
 \end{eqnarray}
 where for each $n$ the contribution to the shell $k_h$ is 
 taken over all integers $(l,m)$ such that
 \[
-(k_h-1/2)^2 < l^2 + m^2 < (k_h+1/2)^2.
+(k-1/2)^2 < l^2 + m^2 < (k+1/2)^2.
 \]  
 
 
