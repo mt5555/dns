@@ -88,14 +88,17 @@ end program DNS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine dns_solve(Q)
 use params
+use mpi
+
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 
 !local variables
-real*8 :: Q_hat(nx,ny,nz,n_var)
 real*8  :: time=0
 integer :: itime=0,ierr,n
 character*80 message
+real*8 :: ke_old,time_old
+real*8 :: ints_buf(nints)
 
 ints=0
 maxs=0
@@ -105,8 +108,21 @@ delt=0
 
 
 do 
+   time_old=ints_timeU
+   ke_old=ints(1)
 
-   call rk4(time,Q,Q_hat)
+   call rk4(time,Q)
+
+#ifdef USE_MPI
+   ints_buf=ints
+   call MPI_allreduce(ints_buf,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   ints_buf=maxs
+   call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+   ! KE total dissapation 
+   delke_tot=ints_timeU-time_old
+   if (delke_tot>0) delke_tot=(ints(1)-ke_old)/delke_tot
+
    
    if (maxval(maxs(1:3))> 1000) then
       print *,"max U > 1000. Stoping at time=",time
@@ -124,147 +140,6 @@ end subroutine
 
 
 
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!  subroutine to take one Runge-Kutta 4th order time step
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q_grid,Q)
-use params
-use mpi
-implicit none
-real*8 :: time
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Q_grid(nx,ny,nz,n_var)
-
-! local variables
-real*8 :: Q_old(nx,ny,nz,n_var)
-real*8 :: Q_tmp(nx,ny,nz,n_var)
-real*8 :: rhs(nx,ny,nz,n_var)
-real*8 :: work(nx,ny,nz)
-real*8 :: ke_old,time_old,vel
-real*8 :: ints_buf(nints)
-integer i,j,k,n,ierr
-logical,save :: firstcall=.true.
-
-
-time_old=ints_timeU
-ke_old=ints(1)
-
-if (firstcall) then
-   firstcall=.false.
-   Q=Q_grid
-   do n=1,3
-      call fft3d(Q(1,1,1,n),work)
-   enddo
-endif
-
-
-
-
-#define USE_RK4
-#ifdef USE_RK4
-
-Q_old=Q
-
-
-! stage 1
-call ns3D(rhs,Q,Q_grid,time,1)
-Q=Q+delt*rhs/6.0
-
-! stage 2
-Q_tmp = Q_old + delt*rhs/2.0
-Q_grid=Q_tmp
-do n=1,3
-   call ifft3d(Q_grid(1,1,1,n),work)
-enddo
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
-Q=Q+delt*rhs/3.0
-
-! stage 3
-Q_tmp = Q_old + delt*rhs/2.0
-Q_grid=Q_tmp
-do n=1,3
-   call ifft3d(Q_grid(1,1,1,n),work)
-enddo
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
-Q=Q+delt*rhs/3.0
-
-! stage 4
-Q_tmp = Q_old + delt*rhs
-Q_grid=Q_tmp
-do n=1,3
-   call ifft3d(Q_grid(1,1,1,n),work)
-enddo
-call ns3D(rhs,Q_tmp,Q_grid,time+delt,0)
-Q=Q+delt*rhs/6.0
-
-Q_grid=Q
-do n=1,3
-   call ifft3d(Q_grid(1,1,1,n),work)
-enddo
-
-
-
-#else
-broken!!
-! stage 1
-call ns3D(rhs,Q,time,1)
-Q=Q+delt*rhs/3
-
-! stage 2
-Q_tmp = rhs
-call ns3D(rhs,Q,time+delt/3,0)
-rhs = -5*Q_tmp/9 + rhs
-Q=Q + 15*delt*rhs/16
-
-
-! stage 3
-Q_tmp=rhs
-call ns3D(rhs,Q,time+3*delt/4,0)
-rhs = -153*Q_tmp/128 + rhs
-Q=Q+8*delt*rhs/15
-
-#endif
-
-
-
-
-time = time + delt
-
-
-! compute KE, max U  
-ints_timeU=time
-ints(1)=0
-maxs(1:4)=0
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   do n=1,3
-      ints(1)=ints(1)+.5*Q_grid(i,j,k,n)**2  ! KE
-      maxs(n)=max(maxs(n),abs(Q_grid(i,j,k,n)))   ! max u,v,w
-   enddo
-   vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz
-   maxs(4)=max(maxs(4),vel)
-enddo
-enddo
-enddo
-
-
-#ifdef USE_MPI
-   ints_buf=ints
-   call MPI_allreduce(ints_buf,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   ints_buf=maxs
-   call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
-   ! KE total dissapation 
-   delke_tot=ints_timeU-time_old
-   if (delke_tot>0) delke_tot=(ints(1)-ke_old)/delke_tot
-
-
-end subroutine rk4  
 
 
 

@@ -1,6 +1,110 @@
 #include "macros.h"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  subroutine to take one Runge-Kutta 4th order time step
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine rk4(time,Q)
+use params
+implicit none
+real*8 :: time
+real*8 :: Q(nx,ny,nz,n_var)
 
-subroutine ns3d(rhs,Qhat,Q,time,compute_ints)
+! local variables
+real*8 :: Q_old(nx,ny,nz,n_var)
+real*8 :: Q_tmp(nx,ny,nz,n_var)
+real*8 :: rhs(nx,ny,nz,n_var)
+real*8 :: ints_buf(nints),vel
+integer i,j,k,n,ierr
+logical,save :: firstcall=.true.
+
+
+
+
+
+
+#define USE_RK4
+#ifdef USE_RK4
+
+Q_old=Q
+
+
+! stage 1
+call ns3D(rhs,Q,time,1)
+Q=Q+delt*rhs/6.0
+
+! stage 2
+Q_tmp = Q_old + delt*rhs/2.0
+call ns3D(rhs,Q_tmp,time+delt/2.0,0)
+Q=Q+delt*rhs/3.0
+
+! stage 3
+Q_tmp = Q_old + delt*rhs/2.0
+call ns3D(rhs,Q_tmp,time+delt/2.0,0)
+Q=Q+delt*rhs/3.0
+
+! stage 4
+Q_tmp = Q_old + delt*rhs
+call ns3D(rhs,Q_tmp,time+delt,0)
+Q=Q+delt*rhs/6.0
+
+
+
+
+#else
+
+! stage 1
+call ns3D(rhs,Q,time,1)
+Q=Q+delt*rhs/3
+
+! stage 2
+Q_tmp = rhs
+call ns3D(rhs,Q,time+delt/3,0)
+rhs = -5*Q_tmp/9 + rhs
+Q=Q + 15*delt*rhs/16
+
+
+! stage 3
+Q_tmp=rhs
+call ns3D(rhs,Q,time+3*delt/4,0)
+rhs = -153*Q_tmp/128 + rhs
+Q=Q+8*delt*rhs/15
+
+#endif
+
+
+
+
+time = time + delt
+
+
+! compute KE, max U  
+ints_timeU=time
+ints(1)=0
+maxs(1:4)=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   do n=1,3
+      ints(1)=ints(1)+.5*Q(i,j,k,n)**2  ! KE
+      maxs(n)=max(maxs(n),abs(Q(i,j,k,n)))   ! max u,v,w
+   enddo
+   vel = abs(Q(i,j,k,1))/delx + abs(Q(i,j,k,2))/dely + abs(Q(i,j,k,3))/delz
+   maxs(4)=max(maxs(4),vel)
+enddo
+enddo
+enddo
+
+
+
+
+end subroutine rk4  
+
+
+
+
+
+subroutine ns3d(rhs,Q,time,compute_ints)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
