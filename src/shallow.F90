@@ -432,6 +432,9 @@ do j=ny1,ny2
    enddo
 enddo
 
+
+
+
 ! compute ke_diss = energy disspation from hyperviscosity:
 if (compute_ints==1) then
    call ifft3d(gradu(1,1,1),work)
@@ -446,12 +449,7 @@ if (compute_ints==1) then
                         + Q(i,j,3)*gradu(i,j,2)*gradv(i,j,2)) 
    enddo
    enddo
-endif
 
-
-
-
-if (compute_ints==1) then
    ints(1)=gradu_diss/g_nx/g_ny
    ints(2)=normdx/g_nx/g_ny
    !ints(3) = forcing terms

@@ -237,13 +237,6 @@ call wallclock(tmx1)
 
 
 
-if (compute_ints==1 .and. compute_transfer) then
-   do n=1,3
-      call compute_spectrum_z_fft(Qhat(1,1,1,n),io_pe,spec_velocity(0,n))
-   enddo
-endif
-
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! compute  ds/da(grid) from shat:    1 call to z_ifft3d
@@ -341,10 +334,11 @@ enddo
 
 
 if (compute_ints==1 .and. compute_transfer) then
+   spec_diff=0
    do n=1,3
-      call compute_spectrum_z_fft(rhs(1,1,1,n),io_pe,spec_term(0,n))
+      call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),io_pe,spec_tmp)
+      spec_diff=spec_diff+spec_tmp
    enddo
-   call transfer_spec_components(time,spec_diff,spec_velocity,spec_term,0)
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -401,11 +395,17 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
+
 if (compute_ints==1 .and. compute_transfer) then
-   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
-   call transfer_spec_components(time,spec_diff,spec_velocity,spec_term,1)
-   call transfer_spec_components(time,spec_f,spec_velocity,spec_term,0)
+   spec_diff=-spec_diff
+   spec_f=0
+   do n=1,3
+      call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),io_pe,spec_tmp)
+      spec_diff=spec_diff+spec_tmp
+      spec_f=spec_f+spec_tmp
+   enddo
 endif
+
 
 
 
@@ -422,8 +422,11 @@ if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
 
 
 if (compute_ints==1 .and. compute_transfer) then
-   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
-   call transfer_spec_components(time,spec_f,spec_velocity,spec_term,1)
+   spec_f=-spec_f
+   do n=1,3
+      call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),io_pe,spec_tmp)
+      spec_f=spec_f+spec_tmp
+   enddo
 endif
 
 
@@ -480,9 +483,13 @@ do j=1,ny_2dz
 enddo
 
 if (compute_ints==1 .and. compute_transfer) then
-   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
-   call transfer_spec_components(time,spec_rhs,spec_velocity,spec_term,0)
+   spec_rhs=0
+   do n=1,3
+      call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),io_pe,spec_tmp)
+      spec_rhs=spec_rhs+spec_tmp
+   enddo
 endif
+
 
 
 if (compute_ints==1) then

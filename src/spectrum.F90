@@ -8,24 +8,6 @@ implicit none
 module to compute spherical and other 1D spectrums and
 transfer function spectrums
 
-
-Example on how to compute spectrum of u dot forcing term:
-
-if (compute_integrals .and. compute_transfer) then
-   call compute_spectrum_z_fft(Qhat,io_pe,spec_velocity)
-   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
-   call transfer_spec_components(time,spec_f,spec_velocity,spec_term,0)
-endif
-
-< accumulate forcing into rhs... >
-
-if (compute_integrals .and. compute_transfer) then
-   call compute_spectrum_z_fft(rhs,io_pe,spec_term)
-   call transfer_spec_components(time,spec_f,spec_velocity,spec_term,1)
-endif
-   
-
-
 #endif
 
 logical :: compute_transfer=.false.
@@ -46,57 +28,12 @@ real*8,private :: transfer_comp_time         ! time at which below terms evaluat
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
 real*8 ::  spec_rhs(0:max(g_nx,g_ny,g_nz))   ! transfer spec of u dot RHS
-real*8 ::  spec_velocity(0:max(g_nx,g_ny,g_nz),3)     ! provided for calling program to use
-real*8 ::  spec_term(0:max(g_nx,g_ny,g_nz),3)     ! provided for calling program to use
+
+real*8 ::  spec_tmp(0:max(g_nx,g_ny,g_nz))   ! storage, for calling program convienience
 
 contains
 
 
-
-
-
-
-subroutine transfer_spec_components(time,spec_tot,spec_u,spec_t,accum)
-!
-!  
-!  spec_u:  spectrum of 3 components of velocity
-!  spec_t:  spectrum of 3 components of a term in the equations
-!
-! OUTPUT:
-!  spec_tot:  spec_u dot spec_t             if accum=0
-!  spec_tot:  spec_u dot spec_t - spec_tot    if accum=1
-! 
-!  usually, use accum=0.  But to compute spectrum of a function which is
-!  accumulated directly into the rhs, call this routine with rhs spectrum before 
-!  (with accum=0) and then call with rhs after (with accum=1)
-! 
-use params
-implicit none
-integer :: operation,accum,decomp
-real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_u(0:max(g_nx,g_ny,g_nz),3)
-real*8 ::  spec_t(0:max(g_nx,g_ny,g_nz),3)
-real*8 :: time
-
-! local
-real*8 ::  spec_new(0:max(g_nx,g_ny,g_nz))
-integer i,n
-
-if (accum==0)  then
-   spec_tot=0
-else
-   spec_tot=-spec_tot
-endif
-
-do n=1,ndim
-do i=1,iwave
-   spec_tot(i)=spec_tot(i) + spec_t(i,n)*spec_u(i,n)
-enddo
-enddo
-
-transfer_comp_time=time
-
-end subroutine
 
 
 
@@ -158,7 +95,6 @@ real*8 :: time
 !local
 integer :: iwave_max,i
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
-real*8 :: diss_tot
 character(len=80) :: message
 
 iwave_max=max(g_nx,g_ny,g_nz)
@@ -173,22 +109,16 @@ q1=Q
 ! compute spectrum in spec_r
 do i=1,ndim
    call fft3d(q1(1,1,1,i),work1)
-   call compute_spectrum_fft(q1(1,1,1,i),io_pe,spec_r2,iwave_max)
+   call compute_spectrum_fft(q1(1,1,1,i),q1(1,1,1,i),io_pe,spec_r2,iwave_max)
    spec_r=spec_r+.5*spec_r2
 enddo
 
 ! compute time rate of change in transfer_r()
 if (time-time_old > 0) then
 
-   diss_tot=0
    do i=0,iwave
       transfer_r(i)=(spec_r(i)-spec_r_old(i) ) / (time-time_old)
-      diss_tot = diss_tot + transfer_r(i)
    enddo
-   
-   print *,'diss tot: ',diss_tot
-   print *,'min: ',minval(transfer_r(0:iwave)) 
-   print *,'max: ',maxval(transfer_r(0:iwave)) 
    
 endif
 
@@ -293,6 +223,8 @@ integer :: ierr
 character,save :: access="0"
 
 real*8 :: x,ymax,ymax2
+real*8 :: sum_tot, sum_tot2, sum_diss, sum_f
+
 character(len=80) :: message
 CPOINTER fid
 
@@ -305,25 +237,6 @@ if (access=="0") then
 else
    access="a"
 endif
-
-
-ymax=maxval(transfer_r(0:iwave))
-ymax=max(ymax,-minval(transfer_r(0:iwave)))
-
-ymax2=.001
-if (ymax>ymax2) ymax2=.0025
-if (ymax>ymax2) ymax2=.0050
-if (ymax>ymax2) ymax2=.0100
-if (ymax>ymax2) ymax2=.0250
-if (ymax>ymax2) ymax2=.0500
-if (ymax>ymax2) ymax2=.1000
-if (ymax>ymax2) ymax2=.2500
-if (ymax>ymax2) ymax2=.5000
-if (ymax>ymax2) ymax2=1
-
-
-write(message,'(a,f10.4)') " KE transfer spectrum",time
-call plotascii(transfer_r,iwave,message(1:25),-ymax2,ymax2)
 
 
 
@@ -354,9 +267,48 @@ if (my_pe==io_pe) then
    x=1+iwave; call cwrite8(fid,x,1)
    call cwrite8(fid,spec_f,1+iwave)
 
-
-
    call cclose(fid,ierr)
+
+
+   sum_tot=0
+   sum_tot2=0
+   sum_diss=0
+   sum_f=0
+   do i=0,iwave
+      write(*,'(i4,5f12.4)') i,transfer_r(i),&
+           spec_r(i)+spec_diff(i)+spec_f(i), &
+           spec_r(i),spec_diff(i),spec_f(i)
+      sum_tot=sum_tot+transfer_r(i)
+      sum_tot2=sum_tot2+spec_rhs(i)
+      sum_f=sum_f + spec_f(i)
+      sum_diss=sum_diss + spec_diff(i)
+   enddo
+   print *,'diss tot:  ',sum_tot
+   print *,'diss tot2: ',sum_tot2
+   print *,'sum_f:     ',sum_f
+   print *,'sum_diff:  ',sum_diss
+   print *,'min: ',minval(transfer_r(0:iwave)) 
+   print *,'max: ',maxval(transfer_r(0:iwave)) 
+   
+
+   ymax=maxval(spec_r(0:iwave))
+   ymax=max(ymax,-minval(spec_r(0:iwave)))
+   
+   ymax2=.001
+   if (ymax>ymax2) ymax2=.0025
+   if (ymax>ymax2) ymax2=.0050
+   if (ymax>ymax2) ymax2=.0100
+   if (ymax>ymax2) ymax2=.0250
+   if (ymax>ymax2) ymax2=.0500
+   if (ymax>ymax2) ymax2=.1000
+   if (ymax>ymax2) ymax2=.2500
+   if (ymax>ymax2) ymax2=.5000
+   if (ymax>ymax2) ymax2=1
+   
+   
+   write(message,'(a,f10.4)') " KE transfer spectrum",time
+   call plotascii(spec_r,iwave,message(1:25),-ymax2,ymax2)
+   
 endif
 end subroutine
 
@@ -469,13 +421,14 @@ end subroutine
 
 
 
-subroutine compute_spectrum_fft(p,pe,spec_r,iwave_max)
+subroutine compute_spectrum_fft(p1,p2,pe,spec_r,iwave_max)
 use params
 use mpi
 implicit none
 integer :: iwave_max,ierr
 integer :: pe             ! compute spectrum on this processor
-real*8 :: p(nx,ny,nz)
+real*8 :: p1(nx,ny,nz)
+real*8 :: p2(nx,ny,nz)
 real*8 :: spec_r(0:iwave_max)
 
 ! local variables
@@ -503,7 +456,7 @@ do i=nx1,nx2
     if (kmcord(k)==0) energy=energy/2
     if (jmcord(j)==0) energy=energy/2
     if (imcord(i)==0) energy=energy/2
-    energy=energy*p(i,j,k)*p(i,j,k)
+    energy=energy*p1(i,j,k)*p2(i,j,k)
 
     spec_r(iwave)=spec_r(iwave)+energy
 
@@ -537,13 +490,14 @@ end subroutine
 
 
 
-subroutine compute_spectrum_z_fft(p,pe,spec_r)
+subroutine compute_spectrum_z_fft(p1,p2,pe,spec_r)
 use params
 use mpi
 implicit none
 integer :: ierr
 integer :: pe             ! compute spectrum on this processor
-real*8 :: p(g_nz2,nslabx,ny_2dz)
+real*8 :: p1(g_nz2,nslabx,ny_2dz)
+real*8 :: p2(g_nz2,nslabx,ny_2dz)
 real*8 :: spec_r(0:max(g_nx,g_ny,g_nz))
 
 ! local variables
@@ -572,7 +526,7 @@ do j=1,ny_2dz
          if (km==0) energy=energy/2
          if (jm==0) energy=energy/2
          if (im==0) energy=energy/2
-         energy=energy*p(i,j,k)*p(i,j,k)
+         energy=energy*p1(i,j,k)*p2(i,j,k)
          
          spec_r(iwave)=spec_r(iwave)+energy
          
