@@ -25,8 +25,8 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
    psi save -d dns/$name $name*.isow2s2
    psi save -d dns/$name $name*.iso1
    psi save -d dns/$name  $name*.sf
-   psi save -d dns/$name $name*.s2v2
    psi save -d dns/$name $name*.jpdf
+   psi save -d dns/$name $name*.spdf
    psi save -d dns/$name $name*.vxline
    psi save -d dns/$name $name*.tracer
 

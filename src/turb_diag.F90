@@ -6,7 +6,7 @@ use spectrum
 use isoave
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(*)
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: q2(nx,ny,nz,n_var)
 real*8 :: q3(nx,ny,nz,n_var)
@@ -16,8 +16,9 @@ real*8 :: time
 logical :: doit_model
 
 ! local variables
-integer,parameter :: nints_e=25
+integer,parameter :: nints_e=28,npints_e=24	
 real*8 :: ints_e(nints_e)
+real*8 :: pints_e(npints_e,n_var)
 real*8 :: x
 integer i,j,k,n,ierr,csig
 character(len=80) :: message
@@ -61,7 +62,20 @@ if (.not.doit_model) return
 !
 ! the "expensive" scalars
 !
-call compute_expensive_scalars(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
+
+   call compute_expensive_scalars(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
+   if (npassive>0) then
+      ! copy data computed above so that q3 = (ux,vy,wz)
+      q3(:,:,:,1)=q1(:,:,:,1)
+      q3(:,:,:,2)=q2(:,:,:,2)
+      !q3(:,:,:,3)=q3(:,:,:,3)
+      do n=np1,np2
+         call compute_expensive_pscalars(Q,n,q1,q2,q3,work1,&
+              pints_e(1,n),npints_e)
+      enddo
+   endif
+
+
    if (minval(ints_e(1:3))>0) then
       write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
            (ints_e(n+3)/ints_e(n)**1.5,n=1,3)
@@ -85,13 +99,27 @@ call compute_expensive_scalars(Q,q1,q2,q3,work1,work2,ints_e,nints_e)
       x=nints_e; call cwrite8(fid,x,1)
       call cwrite8(fid,time,1)
       call cwrite8(fid,ints_e,nints_e)
-      
-      
       call cclose(fid,ierr)
+   endif
+
+
+   ! output turb passive scalars data
+   if (my_pe==io_pe .and. npassive>0) then
+      write(message,'(f10.4)') 10000.0000 + time
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".pscalars-turb"
+      call copen(message,"w",fid,ierr)
       if (ierr/=0) then
-         write(message,'(a,i5)') "diag_output(): Error closing .scalars-turb file errno=",ierr
+         write(message,'(a,i5)') "diag_output(): Error opening .pscalars-turb file errno=",ierr
          call abort(message)
       endif
+      x=nints_e; call cwrite8(fid,x,1)
+      x=npassive; call cwrite8(fid,x,1)
+      call cwrite8(fid,time,1)
+      do n=np1,np2	
+         call cwrite8(fid,pints_e(1,n),nints_e)
+      enddo	 
+      
+      call cclose(fid,ierr)
    endif
 
 
@@ -421,17 +449,44 @@ integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
 real*8 :: vor2(3),vor3(3),vor4(3)
+real*8 :: uxx2(3)
 real*8 :: dummy(1),S2sum,ensave,S4sum,S2,S4,S2w2
 real*8 :: tmx1,tmx2,xtmp
 
-
-
-
+!
+! compute derivatives
+!
+uxx2=0
 do n=1,3
-   call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,work,DX_ONLY,n)
-   call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,work,DX_ONLY,n)
-   call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,work,DX_ONLY,n)
+   if (n==1) then
+      call der(Q(1,1,1,1),gradu(1,1,1,n),work2,work,DX_AND_DXX,n)
+   else
+      call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,work,DX_ONLY,n)
+   endif
+
+   if (n==2) then
+      call der(Q(1,1,1,2),gradv(1,1,1,n),work2,work,DX_AND_DXX,n)
+   else
+      call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,work,DX_ONLY,n)
+   endif
+
+   if (n==3) then
+      call der(Q(1,1,1,3),gradw(1,1,1,n),work2,work,DX_AND_DXX,n)
+   else
+      call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,work,DX_ONLY,n)
+   endif
+
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      uxx2(n)=uxx2(n)+work2(i,j,k)*2
+   enddo
+   enddo
+   enddo   
 enddo
+
+
+
 
 
 
@@ -525,13 +580,14 @@ vor2=vor2/g_nx/g_ny/g_nz
 vor3=vor3/g_nx/g_ny/g_nz
 vor4=vor4/g_nx/g_ny/g_nz
 u2=u2/g_nx/g_ny/g_nz
+uxx2=uxx2/g_nx/g_ny/g_nz
 
 ensave=ensave/g_nx/g_ny/g_nz
 
 
 
 
-ASSERT("compute_expensive_scalars: ns too small ",ns>=25)
+ASSERT("compute_expensive_scalars: ns too small ",ns>=28)
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)
@@ -549,10 +605,136 @@ scalars(21:23)=vor4
 
 scalars(24)=S4sum
 scalars(25)=S2w2
+scalars(26:28)=uxx2
 
 #ifdef USE_MPI
    scalars2=scalars
    call MPI_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+
+end subroutine
+
+
+
+
+
+
+
+
+
+
+subroutine compute_expensive_pscalars(Q,np,grads,grads2,gradu,work,scalars,ns)
+!
+! INPUT:  Q,np, gradu = (ux,vy,wz)
+! 
+use params
+use fft_interface
+use transpose
+implicit none
+integer :: ns,np
+real*8 :: scalars(ns)
+real*8 Q(nx,ny,nz,n_var)    
+real*8 work(nx,ny,nz)
+real*8 grads(nx,ny,nz,n_var)    
+real*8 grads2(nx,ny,nz,n_var)    
+real*8 gradu(nx,ny,nz,n_var)  
+
+!local
+real*8 :: scalars2(ns)
+integer n1,n1d,n2,n2d,n3,n3d,ierr
+integer i,j,k,n,m1,m2
+real*8 :: ux2(3),ux3(3),ux4(3),u2,uij,su(3)
+real*8 :: uxx2(3),uxx3(3),uxx4(3)
+
+!
+!  gradu = ux,vy,wz,
+!
+! grads = d/dx, d/dy and d/dz
+! grads2 = d/dxx, d/dyy and d/dzz
+do n=1,3
+   call der(Q(1,1,1,np),grads(1,1,1,n),grads2(1,1,1,n),work,DX_AND_DXX,n)
+enddo
+
+
+! scalars
+ux2=0
+ux3=0
+ux4=0
+u2=0
+su=0
+uxx2=0
+uxx3=0
+uxx4=0
+
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+    u2=u2+Q(i,j,k,np)**2
+
+   ! if we use grads(i,j,k,1)**3, do we preserve the sign?  
+   ! lets not put f90 to that test!
+   do n=1,3
+      uij=grads(i,j,k,n)**2
+      ux2(n)=ux2(n)+uij
+      ux3(n)=ux3(n)+uij*grads(i,j,k,n)
+      ux4(n)=ux4(n)+uij*uij
+
+      uij=grads2(i,j,k,n)**2
+      uxx2(n)=uxx2(n)+uij
+      uxx3(n)=uxx3(n)+uij*grads2(i,j,k,n)
+      uxx4(n)=uxx4(n)+uij*uij
+
+      su(n) = su(n) + gradu(i,j,k,n)*grads(i,j,k,n)*grads(i,j,k,n)
+   enddo
+
+enddo
+enddo
+enddo
+
+u2=u2/g_nx/g_ny/g_nz
+ux2=ux2/g_nx/g_ny/g_nz
+ux3=ux3/g_nx/g_ny/g_nz
+ux4=ux4/g_nx/g_ny/g_nz
+uxx2=uxx2/g_nx/g_ny/g_nz
+uxx3=uxx3/g_nx/g_ny/g_nz
+uxx4=uxx4/g_nx/g_ny/g_nz
+su=su/g_nx/g_ny/g_nz
+
+
+
+
+
+ASSERT("compute_expensive_pscalars: ns too small ",ns>=24)
+
+scalars(1)=mu
+scalars(2)=schmidt(np)
+scalars(3)=u2
+i=3
+
+do n=1,3
+scalars(n+i)=ux2(n)
+scalars(n+3+i)=ux3(n)
+scalars(n+6+i)=ux4(n)
+enddo
+i=i+9
+
+do n=1,3
+scalars(n+i)=uxx2(n)
+scalars(n+3+i)=uxx3(n)
+scalars(n+6+i)=uxx4(n)
+enddo
+i=i+9
+
+do n=1,3
+scalars(n+i)=su(n)
+enddo
+i=i+3
+
+#ifdef USE_MPI
+   scalars2=scalars
+   call MPI_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 

@@ -87,6 +87,11 @@ for i=1:3
    vor4(i,:)=ints_e(i+21,:);    % < w^4 >
 end
 end
+if (ns_e>=28) 
+for i=1:3
+   uxx2(i,:)=ints_e(i+25,:);    % < uxx^2 > 
+end
+end
 
 figure(6)
 clf
