@@ -2,6 +2,7 @@ Running parallel.  NCPUS=    1 =   1 x  1 x  1
  Run name:         reference3ds
  output directory: ../testing/3d/
  Enter input file type: 
+ input_file_type=           2
  initial condition: iso12               
  forcing: none                
  method: fft-dealias         
@@ -43,14 +44,15 @@ time=  0.00000(     0)  next output=990.00000  LSF minutes left:    -1. 0
 for next timestep: delt=0.0069861 cfl_adv= 1.500 cfl_vis= 0.080                 
 max: (u,v,w)      3.07340785717600     3.69418112148746     3.43868098933755    
 <z-vor>=-0.18908E-15   <hel>=-0.29407E+01   max(vor) 0.66968E+02                
-R_lambda=    70.17986  R=   269.50599                                           
-mesh spacing(eta):        2.6089       2.6089       2.6089                      
+R_lambda=    40.51836  R=   269.50599 lambda=     0.15005                       
+mesh spacing/eta:        2.6089       2.6089       2.6089                       
+2/3 dealiasing kmax*eta:        0.1278                                          
 eddy turnover time:        1.2136                                               
 ke:  1.5058723054  enstropy:      668.8337         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -2.4817025 f=   0.0000000 alpha=   0.0000000 total=  -2.4817025  
 writing output files at t=    0.0000                                            
  
- 1E0   | *******              KE spectrum    0.0000   
+ 1E0   | *******              Energy t=    0.0000     
        |        ****         
        |            *****    
        |                 **  
@@ -72,8 +74,9 @@ time=  0.00699(     1)  next output=990.00000  LSF minutes left:    -1. 0
 for next timestep: delt=0.0071518 cfl_adv= 1.500 cfl_vis= 0.082                 
 max: (u,v,w)      3.02974957343442     3.59090338135298     3.41924897008029    
 <z-vor>=-0.18908E-15   <hel>=-0.29407E+01   max(vor) 0.66968E+02                
-R_lambda=    70.17986  R=   269.50599                                           
-mesh spacing(eta):        2.6089       2.6089       2.6089                      
+R_lambda=    40.51836  R=   269.50599 lambda=     0.15005                       
+mesh spacing/eta:        2.6089       2.6089       2.6089                       
+2/3 dealiasing kmax*eta:        0.1278                                          
 eddy turnover time:        1.2136                                               
 ke:  1.5058723054  enstropy:      668.8337         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -2.4817025 f=   0.0000000 alpha=   0.0000000 total=  -2.4817025  
@@ -82,8 +85,9 @@ time=  0.01414(     2)  next output=990.00000  LSF minutes left:    -1. 0
 for next timestep: delt=0.0072733 cfl_adv= 1.500 cfl_vis= 0.083                 
 max: (u,v,w)      2.99278753858520     3.55547720669259     3.30075496378348    
 <z-vor>= 0.23619E-15   <hel>=-0.29293E+01   max(vor) 0.62010E+02                
-R_lambda=    72.15426  R=   269.50599                                           
-mesh spacing(eta):        2.5587       2.5587       2.5587                      
+R_lambda=    41.65828  R=   269.50599 lambda=     0.15513                       
+mesh spacing/eta:        2.5587       2.5587       2.5587                       
+2/3 dealiasing kmax*eta:        0.1303                                          
 eddy turnover time:        1.2972                                               
 ke:  1.4892123839  enstropy:      618.8083         total d/dt(ke):  -2.3847259  
 d/dt(ke) vis=  -2.2960839 f=   0.0000000 alpha=   0.0000000 total=  -2.2960839  
@@ -92,8 +96,9 @@ time=  0.02141(     3)  next output=990.00000  LSF minutes left:    -1. 0
 for next timestep: delt=0.0074118 cfl_adv= 1.500 cfl_vis= 0.084                 
 max: (u,v,w)      2.98370090839304     3.37951390403810     3.18762163831248    
 <z-vor>=-0.21641E-15   <hel>=-0.29188E+01   max(vor) 0.60374E+02                
-R_lambda=    73.69093  R=   269.50599                                           
-mesh spacing(eta):        2.5184       2.5184       2.5184                      
+R_lambda=    42.54548  R=   269.50599 lambda=     0.15929                       
+mesh spacing/eta:        2.5184       2.5184       2.5184                       
+2/3 dealiasing kmax*eta:        0.1324                                          
 eddy turnover time:        1.3676                                               
 ke:  1.4733192993  enstropy:      580.6742         total d/dt(ke):  -2.2222500  
 d/dt(ke) vis=  -2.1545873 f=   0.0000000 alpha=   0.0000000 total=  -2.1545873  
@@ -102,8 +107,9 @@ time=  0.02882(     4)  next output=990.00000  LSF minutes left:    -1. 0
 for next timestep: delt=0.0076786 cfl_adv= 1.500 cfl_vis= 0.088                 
 max: (u,v,w)      3.00697840126769     3.36276936039820     3.17287009998683    
 <z-vor>= 0.21901E-16   <hel>=-0.29087E+01   max(vor) 0.57591E+02                
-R_lambda=    74.81146  R=   269.50599                                           
-mesh spacing(eta):        2.4864       2.4864       2.4864                      
+R_lambda=    43.19242  R=   269.50599 lambda=     0.16255                       
+mesh spacing/eta:        2.4864       2.4864       2.4864                       
+2/3 dealiasing kmax*eta:        0.1341                                          
 eddy turnover time:        1.4243                                               
 ke:  1.4580545393  enstropy:      551.7955         total d/dt(ke):  -2.0987252  
 d/dt(ke) vis=  -2.0474331 f=   0.0000000 alpha=   0.0000000 total=  -2.0474331  
@@ -112,14 +118,15 @@ time=  0.07629(    10)  next output=  0.07629  LSF minutes left:    -1. 0
 for next timestep: delt=0.0081025 cfl_adv= 1.500 cfl_vis= 0.092                 
 max: (u,v,w)      2.95929488756030     2.83361739452528     3.06420442718305    
 <z-vor>=-0.19120E-15   <hel>=-0.28480E+01   max(vor) 0.54008E+02                
-R_lambda=    75.28064  R=   269.50599                                           
-mesh spacing(eta):        2.4028       2.4028       2.4028                      
+R_lambda=    43.46330  R=   269.50599 lambda=     0.16874                       
+mesh spacing/eta:        2.4028       2.4028       2.4028                       
+2/3 dealiasing kmax*eta:        0.1387                                          
 eddy turnover time:        1.5348                                               
 ke:  1.3701191968  enstropy:      481.1904         total d/dt(ke):  -1.7929000  
 d/dt(ke) vis=  -1.7854534 f=   0.0000000 alpha=   0.0000000 total=  -1.7854534  
 writing output files at t=    0.0763                                            
  
- 1E0   | *******              KE spectrum    0.0763   
+ 1E0   | *******              Energy t=    0.0763     
        |        ****         
        |            ***      
        |               **    
@@ -138,12 +145,12 @@ writing output files at t=    0.0763
 max(div)= 0.11280E-12                                                           
 CPU times (min):   (avg/max)
 initialization:      0.01     0.01                                              
-dns_solve:           0.05     0.05                                              
+dns_solve:           0.05     0.05  per timestep:    0.00529   0.00529          
    time_control            0.00     0.00                                        
-   RHS                     0.03     0.03                                        
+   RHS                     0.04     0.04                                        
    transpose_to_z          0.00     0.00                                        
    transpose_from_z        0.00     0.00                                        
    transpose_to_x          0.00     0.00                                        
    transpose_from_x        0.00     0.00                                        
-   transpose_to_y          0.00     0.00                                        
+   transpose_to_y          0.01     0.01                                        
    transpose_from_y        0.01     0.01                                        

@@ -28,6 +28,13 @@ cj10  mu=1.5e-4  alpha=1h
 cj11  mu=.4e-4  alpha=1h  
 
 
+cj15  alpha=0       mu=0.8e-4
+cj16  alpha=1 delx  mu=0.8e-4
+cj17  alpha=6 delx  mu=0.3e-3
+
+
+
+
 
 
 
