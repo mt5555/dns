@@ -931,7 +931,7 @@ endif
 
 
 
-ntest=100; delt=1.0  ! set > 1 to run some stats tests
+! ntest=100; delt=1.0  ! set > 1 to run some stats tests
 if (new_f==1) then
    ener2=0
    ener_test=0
