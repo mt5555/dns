@@ -197,19 +197,15 @@ if (doit_screen) then
    !       < u1,u1  > =  (1/3)  || u ||^2         = (2/3) KE
    !
    ! lambda**2 = (2/3) KE / (1/15)epsilon/mu  = 10 KE mu / epsilon
-   ! R_lambda = lambda*sqrt(2 KE)/mu 
+   ! R_lambda = lambda*sqrt(2 KE/3)/mu 
    !    
    !
-   ! Goto:
-   !   epsilon = 2 mu * <ux,ux> 
-   !   lambda**2 = 5 KE / (epsilon / (2*mu)) = 10 KE mu / epsilon
-   !   R_lambda = sqrt(<u1,u1>) lambda/mu = sqrt(2/3 KE) lambda/mu
    !
    if (mu>0 .and. ndim>2 .and. ke_diss<0) then
       lambda=sqrt(  5*(2*ints(6))/ints(2)  )
       epsilon=-ke_diss
-      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6))/mu, &
-           '  R=',1/mu
+      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6)/3)/mu, &
+           '  R=',1/mu,' lambda=',lambda
       call print_message(message)	
       
       

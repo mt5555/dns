@@ -348,7 +348,7 @@ if (0==init_sforcing) then
    if (forcing_type==2) then
       numb1=1
       numb=2
-      FM(1) = 15   ! choose these so that mu <ux,ux> = .5
+      FM(1) = 15    ! choose these so that mu <ux,ux> = .5
       FM(2) = 15
       FM(3) = 0
    endif

@@ -193,8 +193,6 @@ write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)
 
 
-
-
 end subroutine
 
 
