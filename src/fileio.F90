@@ -588,7 +588,6 @@ else if (equations==SHALLOW) then
       call singlefile_io(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe)
    endif
 else if (equations==NS_PSIVOR) then
-   call abort("restart error: check it is ok that we setup I.C. before reading data")
    fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vor"
    call print_message("Input: ")
    call print_message(fname)
