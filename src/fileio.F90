@@ -593,10 +593,10 @@ else
       fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
       call print_message(fname)
       call singlefile_io3(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec,header_type)
-      if (n_var==3) then
+      if (ndim==3) then
          fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".w"
          call print_message(fname)
-         call singlefile_io3(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec,header_type)
+         call singlefile_io3(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec,header_type)
       endif
    endif
 endif

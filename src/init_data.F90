@@ -40,6 +40,10 @@ else
    if (init_cond==7) call init_data_decay(Q,Qhat,work1,work2,1,0,0)
    if (init_cond==8) call init_data_decay(Q,Qhat,work1,work2,1,1,0)
 
+   if (npassive>0) then
+      call init_scalars(Q(1,1,1,ndim+1),Qhat(1,1,1,ndim+1),work1,work2)
+   endif
+
    if (equations==NS_UVW) then
       call print_message('Projecting initial data...')
       call divfree_gridspace(Q,work1,work2,q1) 
@@ -51,6 +55,37 @@ else
    endif
 endif
 end subroutine
+
+
+
+
+
+
+subroutine init_scalars(Q,Qhat,work1,work2)
+!
+! low wave number, quasi isotropic initial condition
+!
+use params
+use mpi
+use fft_interface
+implicit none
+real*8 :: Q(nx,ny,nz,npassive)
+real*8 :: Qhat(nx,ny,npassive)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+print *,'init_scalars:  ',npassive 
+Q=0
+
+end subroutine
+
+
+
+
+
+
+
+
 
 
 subroutine init_data_restart(Q,Qhat,work1,work2)

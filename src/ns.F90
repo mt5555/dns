@@ -218,7 +218,7 @@ real*8 p(g_nz2,nslabx,ny_2dz)
 
 real*8 xw,xfac,tmx1,tmx2,xw_viss
 real*8 uu,vv,ww,dummy
-integer n,i,j,k,im,km,jm,nscalars
+integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
@@ -255,23 +255,23 @@ call wallclock(tmx1)
 !                                     3 z-transforms
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do nscalars=4,n_var
+do ns=ndim+1,n_var
 
    ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,1)
-   call der(Q(1,1,1,nscalars),work,dummy,p,DX_ONLY,1)  ! s_x
+   call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,1)  ! s_x
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      rhsg(i,j,k,nscalars)=Q(i,j,k,1)*work(i,j,k)
+      rhsg(i,j,k,ns)=Q(i,j,k,1)*work(i,j,k)
    enddo
    enddo
    enddo
    do n=2,ndim
-   call der(Q(1,1,1,nscalars),work,dummy,p,DX_ONLY,n)  ! s_y and s_z
+   call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,n)  ! s_y and s_z
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      rhsg(i,j,k,nscalars)=rhsg(i,j,k,nscalars)+Q(i,j,k,n)*work(i,j,k)
+      rhsg(i,j,k,ns)=rhsg(i,j,k,ns)+Q(i,j,k,n)*work(i,j,k)
    enddo
    enddo
    enddo
@@ -589,11 +589,11 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! dealias the RHS scalars:
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do nscalars=4,n_var
+do ns=ndim+1,n_var
    ! FFT into p
-   call z_fft3d_trashinput(rhsg(1,1,1,nscalars),p,work)
+   call z_fft3d_trashinput(rhsg(1,1,1,ns),p,work)
 
-   ! de-alias, and store in RHS(:,:,:,nscalars)
+   ! de-alias, and store in RHS(:,:,:,ns)
    do j=1,ny_2dz
       jm=z_jmcord(j)
       do i=1,nslabx
@@ -601,9 +601,9 @@ do nscalars=4,n_var
          do k=1,g_nz
             km=z_kmcord(k)
             if ( dealias_remove(abs(im),abs(jm),abs(km))) then
-               rhs(k,i,j,nscalars)=0
+               rhs(k,i,j,ns)=0
             else
-               rhs(k,i,j,nscalars)=p(k,i,j)
+               rhs(k,i,j,ns)=p(k,i,j)
             endif
          enddo
       enddo

@@ -43,8 +43,17 @@ call print_message(message)
 write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
 call print_message(message)
 
-
-
+!
+! are we also tracking passive scalars?
+!
+if (equations==NS_UVW) then
+   if (n_var>ndim) then
+      ! prognostic variables > ndim are passive scalars:
+      npassive=n_var-ndim
+   endif
+endif
+write(message,'(a,i6)') "Number of passive scalars: ",npassive
+call print_message(message)
 
 end subroutine
 
