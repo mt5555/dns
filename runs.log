@@ -1,3 +1,6 @@
+1. downsampling/upsampling: test 
+
+
 **********************************************************************************
 10/31/02
 QB pre-science run.
@@ -7,7 +10,25 @@ QB pre-science run.
        decay2048_e   initial condition
        decay2048_s   rescale the initial condition
 
-email about rescaling.  
+
+
+50MB/s:  180GB:   61m to write data.  run 6 hours, write data?
+500MB/s:           6m to write data.  output every 2 hours = 50h  
+         diagnostics:   every 25 timesteps?
+
+
+
+
+Now some benchmarks.
+2048^3
+2 1 1024:   
+2 1 1024 with rail option:
+
+1 1 1024
+1 1 1024 with rail option:
+
+
+
 
 
 2. UDM: test on qidse:
@@ -16,43 +37,67 @@ email about rescaling.
             works!  tried it with 3 different restart.h5 files,
             created with 3 different parallel decomposisitons
 
-     test using 512^3 restart data on QB
-     1x1x256 decomposisiton
-     run code 10 timesteps,  restart and run another 10 timesteps
-
-     run code 10 timesteps,  restart and run another 10 timesteps
-
-./gridsetup.py 1 1 256 512 512 512
-prun -n 256 ./dns  < udm.inp 
-mv temp0000.????.u restart.u
-mv temp0000.????.v restart.v
-mv temp0000.????.w restart.w
-
-prun -n 256 ./dns -uo  < udm.inp 
-mv temp0000.????.h5 restart.h5
+test using 512^3 restart data on QB
+1x1x256 decomposisiton
+run code 10 timesteps,  restart and run another 10 timesteps
+run code 10 timesteps,  restart and run another 10 timesteps
+  /scratch1/taylorm/udmtest/restart.*
 
 
-prun -n 256 ./dns -r  < udm.inp   > orig.out
-prun -n 256 ./dns -r -ui -uo  < udm.inp   > udm.out
-
-./gridsetup.py 2 1 128 512 512 512
-prun -n 256 ./dns -r -ui -uo  < udm.inp   > udm2.out
-
-./gridsetup.py 2 1 256 512 512 512
-prun -n 512 ./dns -r -ui -uo  < udm.inp   > udm3.out
-
-
-
-
-
-
-
-
-
-     
+data:  
+serial:  3*1080057920/(5.04*60)/1024/1024 = 10.2
+udm:     3221315704./(1.05*60)/1024/1024  = 49
+CPU times (min):   (avg/max)
+initialization:      0.55     0.55                                              
+dns_solve:           7.13     7.13  per timestep:    0.71284   0.71284          
+   time_control            5.04     5.04                                        
+   RHS                     1.41     1.43                                        
+   transpose_to_z          1.23     2.01                                        
+   transpose_from_z        0.84     0.86                                        
+   transpose_to_x          0.05     0.05                                        
+   transpose_from_x        0.02     0.02                                        
+   transpose_to_y          0.10     0.10                                        
+   transpose_from_y        0.07     0.08                    
 
 
-1. downsampling/upsampling: test 
+time=  0.01734(     0)  next output=*********  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0017043 cfl_adv= 1.500 cfl_vis= 0.005                 
+max: (u,v,w)      0.82344867316324     0.85623639543220     0.86055051090769    
+<z-vor>=-0.12174E-16   <hel>=-0.11408E-01   max(vor) 0.43619E+03                
+R_lambda=   313.37306  R=290495.00349 lambda=     0.00691                       
+mesh spacing/eta:        9.8435       9.8435       9.8435                       
+spherical dealiasing kmax*eta:        0.0479                                    
+eddy turnover time:        2.7761                                               
+ke:  0.0365315377  enstropy:     7645.3726         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -0.0263184 f=   0.0000000 alpha=   0.0000000 total=  -0.0263184  
+
+
+
+time=  0.03477(    10)  next output=  0.03477  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0017786 cfl_adv= 1.500 cfl_vis= 0.005                 
+max: (u,v,w)      0.83086083344794     0.82621640130014     0.87612013435275    
+<z-vor>= 0.30293E-16   <hel>=-0.11222E-01   max(vor) 0.41480E+03                
+R_lambda=   290.86911  R=290495.00349 lambda=     0.00646                       
+mesh spacing/eta:       10.1553      10.1553      10.1553                       
+spherical dealiasing kmax*eta:        0.0464                                    
+eddy turnover time:        2.4209                                               
+ke:  0.0360904728  enstropy:     8661.1591         total d/dt(ke):  -0.0297827  
+d/dt(ke) vis=  -0.0298152 f=   0.0000000 alpha=   0.0000000 total=  -0.0298152  
+
+
+
+restart.* files generated with 1 1 256
+restart.h5 with 1 1 256: pass
+restart.h5 with 2 1 128: pass
+restart.h5 with 2 1 256: pass
+
+restart.* files generated with 2 1 256
+(but restarting from a t=0 restart file) 
+restart.h5 with 2 1 256: pass
+
+
+
+
 
 
 

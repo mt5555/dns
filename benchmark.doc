@@ -59,6 +59,11 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
       4x1x1024
 
 
+on QB
+2048^3
+      1x1x1024     7.22  (1 rail)
+      1x1x512      1.00  (1 rail)  as expected
+
 
 **********************************************************************************
 
@@ -215,7 +220,7 @@ cvs tag:  'bench602'
 121M
 20 timesteps
 
-                      1cpu    2cpu    3cpu     4cpu       6        8
+                      1cpu    2cpu    3cpu     4cpu       6        8    16
 milkyway              .16     .080    .054
 autrey                .21     .17
 shankara.old  (2x2)   .28     .19               .093    .064     .050
@@ -243,7 +248,7 @@ milkyway              6.91    3.33
 shankara.old                                                     1.61
 shankara 4ring                                                   1.53  
 shankara-LAM                                                     3.90
- 
+shankara                                                                .750
 ./bench.sh 288 8  20
 3.2G
 
