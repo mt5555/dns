@@ -14,14 +14,13 @@ ycoord=[];
 while (1) 
   [nc,count]=fread(fid,1,'float64');
   if (count~=1) break; end; 
-  nc 
   if (nc>0)
      data=fread(fid,nc,'float64');  % particle lable
      label=[label;data];
      data=fread(fid,nc,'float64');      % crossing time
      time=[time;data];
      data=fread(fid,nc,'float64');      % crossing time
-     ycoord=[ycorrd;data];
+     ycoord=[ycoord;data];
   end       
 end
 fclose(fid)
@@ -35,15 +34,18 @@ minl=min(label);
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 
+subplot(1,1,1)
 minl=500;
 for i=minl:maxl
   index=find(label==i);
   ti=time(index);
   y=ycoord(index);
-  l=length(ti);
-  if (length(ti)>1) 
-     delt=ti(2:l)-ti(1:l-1);
-     tc=ti(2:l);
+
+  ti0=[0;ti];
+  l=length(ti0);
+  if (length(ti0)>1) 
+     delt=ti0(2:l)-ti0(1:l-1);
+     tc=ti0(2:l);
      plot(tc,delt,[ccol(i-minl+1),'o-']); hold on; 
   end       
 end

@@ -27,14 +27,14 @@ estimage: 6 arrays * 3 dim * N^2 * 8 bytes = 144 N^2
 128   .298
 256   .187
 
-12288^2 IN   below: all those numbers for 2 timesteps then blowup!
+12288^2 
  12    6.78988 
  16    5.24599 
  24      3.58278 
  32      2.74846 
  64      1.37784 
-128    0.70440  
-256    0.37697  
+128    0.70440    redo IN
+256    0.37697    redo IN
 
 
 
@@ -89,8 +89,18 @@ vx4096d   mu=7e-8   IN
 
           vxline tracers: reset every time they cross
 
+**
 
 
+12288x6144 timings: QSC
+./gridsetup.py 16 4 1 12288 6144 1 2 2 0 2 2 0   2
+vx12288a   PSI boundary recomputed every 50 timesteps
+vx12288b   PSI boundary recomputed every 100 timesteps
+
+          vx12288a     vx12288b           redo w/o ellipse:
+64x4:  
+32x4:
+16x4:
 
 
 **********************************************************************************

@@ -272,6 +272,17 @@ endif
 
 
 
+if (init_cond_subtype ==4) then
+   ! same as type=3, but bs_apply=100
+   biotsavart_cutoff=5e-3
+   biotsavart_apply=100
+   delta=.2
+   biotsavart_ubar=.089
+   yscale=2
+endif
+
+
+
 
 ! set xscale so that delx=dely
 xscale = yscale*(g_nx+offset_bdy-1)/(g_ny+offset_bdy-1)

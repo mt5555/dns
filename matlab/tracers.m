@@ -5,7 +5,7 @@
 
 %ts=input('time=? ');
 
-range=0:.1:50.0 ;
+range=0:.1:150.0 ;
 %name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
@@ -50,24 +50,22 @@ for i=range
       vxline_x=[vxline_x , tracer(nt_ins+1:nt,1)];
       vxline_y=[vxline_y , tracer(nt_ins+1:nt,2)];
     end
-    
-    figure(1); clf;
-    plot(tracer(1:nt_ins,1),tracer(1:nt_ins,2))
-    hold on;   
-    plot(tracer(nt_ins+1:nt,1),tracer(nt_ins+1:nt,2),'r.');
-    %for k=1:8
-    %  plot(vxline_x(k,:),vxline_y(k,:),ccol(k));
-    %end 
-    hold off;
-    axis equal
-    axis([0,4,0,2]);
-    title(sprintf('time = %6.2f ',i)); 
-%    'pause' ;     pause
+
+    if (0)     
+      figure(1); clf;
+      plot(tracer(1:nt_ins,1),tracer(1:nt_ins,2))
+      hold on;   
+      plot(tracer(nt_ins+1:nt,1),tracer(nt_ins+1:nt,2),'r.');
+      hold off;
+      axis equal
+      axis([0,4,0,2]);
+      title(sprintf('time = %6.2f ',i)); 
+      %    'pause' ;     pause
+    end
   end
 end
 
 figure(2)
-
 clf;
   hold on;   
   for k=1:8
