@@ -8,9 +8,10 @@
 %
 
 %dir='/ccs/scratch/taylorm/dns/decay/';
-dir='/home/taylorm/furens/';
-%filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
-filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
+%dir='/home/taylorm/furens/';
+dir='/home/taylorm/';
+filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
+%filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
 
 
 
@@ -18,7 +19,7 @@ filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
 gradu=zeros([3,3,1]);
 gradu2=zeros([3,3,1]);
 coords=[];
-fname=[dir,filename,'.gradu'];
+fname=[dir,filename,'.gradu1'];
 fid=fopen(fname);
 if (fid==-1) 
   disp('error opening file'); 
@@ -37,12 +38,15 @@ while 1
   nsubcube=nsubcube+1;
 
   coords=[coords,data(1:3)];
+  ssize=data(4);
   gradu(:,:,nsubcube)=fscanf(fid,'%f',[3,3]);
   
 end
 fclose(fid);
 
 
+fname=[dir,filename,'.select'];
+fidout=fopen(fname,'w');
 fname=[dir,filename,'.gradu2'];
 fid=fopen(fname);
 i=0;
@@ -90,8 +94,8 @@ diag3=reshape(gradu(3,3,:,:,:),[nsubcube ,1]);
 diag1=[diag1;diag2;diag3];
 
 diag_std=std(diag1);
-small=1.4*diag_std;
-large=1.90.*small;
+small=1.2*diag_std;
+large=2.7*diag_std;
 
 
 
@@ -177,8 +181,12 @@ for i=1:nsubcube
       a(mxi,mxj)=0;
       mx_remaining=max(max(abs(a)));
       mxa=abs(mxa);
-%      if (mxa/mx_remaining > 2.40) 
+
       if (mxa>large & mx_remaining < small) 
+        fprintf(fidout,'%f %f %f  %i \n',coords(1:3,i),ssize );
+        for j=1:3
+          fprintf(fidout,'%20.10e %20.10e %20.10e \n',gradu(1:3,j,i));
+        end
         count=count+1;
         if (count==1) subplot(1,1,1); clf; end;
         subplot(m1,m2,count);
@@ -203,7 +211,7 @@ text(.5,0,sprintf('threshold(std)=%.2f, %.2f',small/diag_std,large/diag_std));
 figure(1);
 print('-dpsc',sprintf('gradu-set.ps'));
 print('-djpeg','-r72',sprintf('gradu-set.jpg'));
-
+fclose(fidout);
 
 return
 
