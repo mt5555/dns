@@ -189,8 +189,11 @@ real*8 :: ugrid(nx,ny,2)
 integer :: rk4stage
 
 !local
-integer :: i,j,ii,jj
+integer :: i,j,ii,jj,igrid,jgrid
 real*8 :: trhs(n_var),c1,c2
+real*8 :: Qint(4,n_var)
+real*8 :: xc,yc
+integer :: jc
 integer :: ierr
 
 if (numt==0) return
@@ -235,14 +238,33 @@ do i=1,numt
    if (xcord(intx1)<=tracer_tmp(i,1) .and. tracer_tmp(i,1)<xcord(intx2) .and. &
        ycord(inty1)<=tracer_tmp(i,2) .and. tracer_tmp(i,2)<ycord(inty2) ) then
 
-      ! find ii,jj so that point is in box:
-      ! ii-1,ii,ii+1,ii+2   and jj-1,jj,jj+1,jj+2
-      ii = intx1 + floor( (tracer_tmp(i,1)-xcord(intx1))/delx )
-      jj = inty1 + floor( (tracer_tmp(i,2)-ycord(inty1))/dely )
-      ASSERT("advance_tracers(): ii interp error",ii<intx2)
-      ASSERT("advance_tracers(): jj interp error",jj<inty2)
+      ! find igrid,jgrid so that point is in box:
+      ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
+      igrid = intx1 + floor( (tracer_tmp(i,1)-xcord(intx1))/delx )
+      jgrid = inty1 + floor( (tracer_tmp(i,2)-ycord(inty1))/dely )
+      ASSERT("advance_tracers(): igrid interp error",igrid<intx2)
+      ASSERT("advance_tracers(): jgrid interp error",jgrid<inty2)
+
 
       ! interpolate trhs
+      do jj=1,4
+         ! interpolate xcord(igrid-1:igrid+2) to xcord=tracer(i,1)
+         ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
+         xc = 1 + (tracer_tmp(i,1)-xcord(igrid))/delx
+         jc = jgrid-2+jj
+         do j=1,ndim
+            call interp4(ugrid(igrid-1,jc,j),ugrid(igrid,jc,j),&
+                ugrid(igrid+1,jc,j),ugrid(igrid+2,jc,j),&
+                xc,Qint(jj,j))
+         enddo
+      enddo
+      ! interpolate ycord(jgrid-1:jgrid+2) to ycord=tracer(i,2)
+      ! data:  Qint(1:4,j)
+      yc = 1 + (tracer_tmp(i,2)-ycord(jgrid))/dely
+      do j=1,ndim
+         call interp4(Qint(1,j),Qint(2,j),Qint(3,j),Qint(4,j),yc,trhs(j))
+      enddo
+
 
       ! advance
       do j=1,ndim
@@ -283,6 +305,43 @@ endif
 
 end subroutine
 
+
+
+
+
+
+      SUBROUTINE interp4(y0,y1,y2,y3,newx,ynew)
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!c     Interpolates "y" to xloc position
+!
+!
+!     y0,y1,y2,y3 is data specified at points 0,1,2,3
+!     newx should be a point between 0 and 3
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      implicit none
+      integer i,n,xbeg
+      real*8 x0,x1,x2,x3,y0,y1,y2,y3,ynew
+      real*8 denom0,denom1,denom2,denom3,fact0,fact1,fact2,fact3,newx
+
+      x0 = 0
+      x1 = 1
+      x2 = 2
+      x3 = 3
+
+      denom0 = -6  !(x0-x1)*(x0-x2)*(x0-x3)   ! (-1)(-2)(-3)=-6
+      denom1 =  2  !(x1-x0)*(x1-x2)*(x1-x3)   ! ( 1)(-1)(-2)= 2
+      denom2 = -2  !(x2-x0)*(x2-x1)*(x2-x3)   ! ( 2)( 1)(-1)=-2
+      denom3 =  6  !(x3-x0)*(x3-x1)*(x3-x2)   ! ( 3)( 2)( 1)= 6
+
+      fact0 = (newx-x1)*(newx-x2)*(newx-x3)/denom0
+      fact1 = (newx-x0)*(newx-x2)*(newx-x3)/denom1
+      fact2 = (newx-x0)*(newx-x1)*(newx-x3)/denom2
+      fact3 = (newx-x0)*(newx-x1)*(newx-x2)/denom3
+      
+      ynew = y0*fact0 + y1*fact1 + y2*fact2 + y3*fact3
+
+      return
+      end subroutine
 
 
 
