@@ -241,8 +241,6 @@ do
       read_uvw=.true.	
       endif
 
-      call compute_helicity_spectrum(Q,q2,q1,io_pe)
-      call output_helicity_spec(time)
       
       do i=0,nxdecomp-1
       do j=0,nydecomp-1
