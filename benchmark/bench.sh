@@ -15,6 +15,9 @@ set ncpus = $2
 set command = ../src/dns
 if ($ncpus > 0) then
    set command = "mpirun -np $ncpus ../src/dns"
+   if (`hostname` == shankara1) then
+      set command = "mpirun -np $ncpus -npn 2 ../src/dns"
+   endif
 else
    set ncpus = 1
 endif
@@ -24,5 +27,5 @@ endif
 make dns
 cd ../benchmark
 sed s/NDELT/$3/ step.inp.sed > benchmark.inp
-$command < benchmark.inp
+$command -i benchmark.inp
 

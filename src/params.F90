@@ -82,6 +82,7 @@ integer :: g_bdy_z2=PERIODIC
 
 character(len=80) :: runname
 character(len=80) :: rundir
+character(len=80) :: inputfile=''
 real*8  :: pi,pi2,pi2_squared
 
 real*8  :: grav=0  

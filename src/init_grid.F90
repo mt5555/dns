@@ -325,12 +325,16 @@ if (my_pe==io_pe) then
    ! command line parameters
    ! ./dns -i -r -d rundir  runname  
    !
+   !   -d <dirname>  put all output files in dirname/
+   !
+   !   -i <infile>   take input from infile instead of stdin
+   !
    !   -t   enable LSF timelimit feature.  Only needed if you are 
    !        running under LSF and dont want the code to stop with 30min left
    !
    !   -r   use a restart file for the initial conditions
    !
-   !   -s   restart and output file are dealiased spectral coefficieints,
+   !   -s   restart and output file are 2/3 dealiased spectral coefficieints,
    !        not the default grid point values
    !
    rundir="./"
@@ -357,6 +361,11 @@ if (my_pe==io_pe) then
                rundir(j+1:j+1)="/"
             endif
          endif
+      else if (message(1:2)=="-i") then
+         i=i+1
+         if (i>iargc()) exit
+         call getarg(i,inputfile)
+         j=len_trim(inputfile)
       else if (message(1:1)/="-") then
          ! this must be the runname
          runname=message(1:len_trim(message))
@@ -368,8 +377,14 @@ if (my_pe==io_pe) then
    print *,'Run name:         ',runname(1:len_trim(runname))
    print *,'output directory: ',rundir(1:len_trim(rundir))
 
+   if (len_trim(inputfile)>0) then
+      open(5,file=inputfile)
+      print *,'reading input from file: ',inputfile	
+   endif	
    print *,'Enter input file type: '
    read(*,*) input_file_type
+   print *,'input_file_type=',input_file_type	
+
    if (input_file_type==0) then
       call read_type0()
    else if (input_file_type==2) then
@@ -779,9 +794,8 @@ character(len=20) sdata
 real*8 rvalue,xfac,kmode
 integer i
 
-
 read(*,'(a12)') sdata
-print *,'equations: ',sdata
+write(*,'(a,a)') 'equations: ',sdata(1:1)
 if (sdata=='ns_uvw') then
    equations=NS_UVW
 else if (sdata=='ns_psivor') then
@@ -789,10 +803,9 @@ else if (sdata=='ns_psivor') then
 else if (sdata=='shallow') then
    equations=SHALLOW
 else 
-   print *,'value = >>',sdata,'<<'
+   print *,'value = >>',sdata(1:12),'<<'
    call abort("invalid equations specified")
 endif
-
 
 read(*,'(a12)') sdata
 print *,'initial condition: ',sdata
