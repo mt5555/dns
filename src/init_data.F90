@@ -10,7 +10,7 @@ real*8 xscale,yscale
 real*8 :: eps=.10
 integer :: km=1
 integer,parameter :: n=500
-real*8 :: x(n),y(n)
+real*8 :: x(0:n),y(0:n)
 
 ! uniform flow to the right
 Q=0
@@ -24,8 +24,6 @@ delsq = delta**2
 delalf = 2d0/n
 delgam = delalf/km         !SO ALL PERIODS HAVE TOTAL CIRC=1
 
-do i=0,n
-enddo
 
 xscale=2
 yscale=4
@@ -42,14 +40,12 @@ do k=nz1,nz2
       xval=-xval	
    endif
 
-
-
    uu = 0
    vv = 0
    do l=0,n
-
       ! COMPUTE VELO AT (XCORD(I),YCORD(J)) INDUCED BY BLOB AT (X(L),Y(L))
 !      x(l) = -1 + l*delalf            ! x ranges from -1 .. 1
+
       x(l) = -1 + l*delalf + xval       ! x ranges from xval-1 .. xval+1
       y(l) = eps*sin( km*pi*x(l) )
 
@@ -58,10 +54,16 @@ do k=nz1,nz2
       denom = difx**2 + dify**2 + delsq
       uu = uu - dify/denom
       vv = vv + difx/denom
+
    enddo
+
+   print *,'B'
+   stop
 
    Q(i,j,k,1) = 5*uu*delgam/(pi2*xscale)
    Q(i,j,k,2) = 5*vv*delgam/(pi2*yscale)
+
+   print *,'bottom of loop'
 
 enddo
 enddo
