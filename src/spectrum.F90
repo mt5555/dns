@@ -455,7 +455,7 @@ end subroutine
 subroutine output_helicity_spec(time,time_file)
 use params
 implicit none
-real*8 :: time
+real*8 :: time,time_file
 
 ! local variables
 integer i,j,k,n
