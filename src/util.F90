@@ -1,8 +1,16 @@
 subroutine abort(message)
 implicit none
 character*(*) message
+display_message(message)
+call halt
+end subroutine
+
+
+subroutine display_message(message)
+implicit none
+character*(*) message
 write(*,*) message
-halt
+call halt
 end subroutine
 
 
@@ -11,6 +19,8 @@ implicit none
 real*8 p(nxd,nyd,nzd)
 real*8 pt(nyd,nxd,nzd)
 integer nx,ny,nz,nxd,nyd,nzd
+
+integer i,j,k
 
 do k=1,nz
 do j=1,ny

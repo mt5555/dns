@@ -1,8 +1,11 @@
-der(p,px,pxx,pt,n,index)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  compute derivative along index index=1,2 or 3
-!  n = number of derivatives to compute
+!  n = 1  compute p_x, return in px.   (pxx is not accessed)
+!  n = 2  compute p_xx, return in pxx.  
 !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine der(p,px,pxx,pt,n,index)
 
 implicit none
 use params
@@ -49,7 +52,7 @@ ASSERT(n2d==nyd)
 ASSERT(n3==nz)
 ASSERT(n3d==nzd)
 
-end
+end subroutine
 
 
 

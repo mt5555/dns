@@ -113,20 +113,23 @@ end subroutine
 ! FFT taken along first direction
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine ifft(p,n1,n1d,n2)
-real*8 p(n1d,n2)
+subroutine ifft(p,n1,n1d,n2,n2d,n3,n3d)
+real*8 p(n1d,n2d,n3d)
 real*8 w(min(fftblocks,n2)*(n1+1))
-integer n1,n1d,n2
+integer n1,n1d,n2,n2d,n3,n3d
 character*80 message_str
 
-integer index,j,numffts
+integer index,j,k,numffts
 call getindex(n1,index)
 
 j=0  ! j=number of fft's computed for each k
-do while (j<n2)
-   numffts=min(fftblocks,n2-j)	
-   call fft991(p(1,1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,1)
-   j=j+numffts
+do k=1,n3
+   j=0  ! j=number of fft's computed for each k
+   do while (j<n2)
+      numffts=min(fftblocks,n2-j)	
+      call fft991(p(1,1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,1)
+      j=j+numffts
+   enddo
 enddo
 
 end subroutine
@@ -167,9 +170,9 @@ end subroutine
 !  input: px 
 !  output:
 !     if numder=1   return d/dx along first direction in px
+!                   (and pxx is not accessed) 
 !     if numder=2   return d2/dx2 along first direction in pxx
 !
-!  in both cases, pxx will be used for temporary storage
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d)
