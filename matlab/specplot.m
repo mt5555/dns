@@ -43,14 +43,16 @@ movie_plot=1;
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
-name = 'Rot10002.0000';
-namedir = '/home2/skurien/rotation/Rot1/';
+name = 'Rot10000.0000';
+namedir = '/ccs/wingate/Rotation/Rot1/';
 
 
 spec_r_save=[];
 spec_r_save_fac3=[];
 
-fid=endianopen([namedir,name,'.spec'],'r');
+% note: endianopen() will notwork with .spec files
+%because first number is not necessaryly an integer 
+fid=fopen([namedir,name,'.spec'],'r','b');
 fidt=endianopen([namedir,name,'.spect'],'r');
 fidp=endianopen([namedir,name,'.pspec'],'r');  
 
