@@ -66,9 +66,14 @@ do
    print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,1,io_pe)
 
-   fname = basename(1:len_trim(basename)) // sdata(2:10) // ".w"
+   if (equations==SHALLOW) then
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".h"
+   else
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".w"
+   endif
    print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+
 
    ! compute vorticity 
    call vorticity(vor,Q,work1,work2)
@@ -92,7 +97,6 @@ do
    enddo
 
    n=2 
-
    ! compute the x derivative of n'th component of Q:   
    call der(Q(1,1,1,n),dx,dxx,work1,DX_AND_DXX,1)   
 

@@ -373,14 +373,92 @@ subroutine bc_biotsavart(w,psi)
 ! on non-preiodic or non-reflective boundarys:
 !
 ! use biot-savar law to compute boundary data for PSI.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!c     Finds psi on boundary from w using Biot-Savart
+!c
+!c     psi = -(1/4pi)*sum w(i,j)*logterm(i,j, 0,k,w)*Delta A - ubar*y
+!c
+!c     is the streamfunction in a reference frame moving with the 
+!c     predetermined velocity ubar
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 use params
 implicit none
 real*8 w(nx,ny)
 real*8 psi(nx,ny)
 
+! local
+integer i,j,k
+real*8 :: dela
+real*8,external :: logterm
+real*8 :: ubar=0
+real*8 :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,x or y,left or right)
+real*8 :: temp(max(g_ny,g_nx),2,2)
 
+
+! init to zero on boundary
+psi_b=0
+
+do j=ny1,ny2
+do i=nx1,nx2
+!   if (abs(w(i,j)).ge.eps) then
+      do k=1,g_nx  !,10
+         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
+      enddo
+      do k=2,g_ny  !,10
+         psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,g_nx,k)
+         psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
+      enddo
+!   endif
+enddo
+enddo
+#ifdef USE_MPI
+temp=psi_b
+k=max(g_ny,g_nx)*4
+call MPI_allreduce(temp,psi_b,k,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+
+#if 0
+C     INTERPOLATE TO INTERMEDIATE POINTS
+      call intpsi(psi)
+
+      dela = delx*dely/(4*pi)
+      do k=0,ni
+        psi(k,nj) = psi(k,nj)*dela - ubar*ycord(nj)
+c        write(*,'(i5,3f10.5)')k,psi(k,nj)
+      enddo
+      do k=1,nj-1
+        psi( 0,k) = psi( 0,k)*dela  - ubar*ycord(k)
+        psi(ni,k) = psi(ni,k)*dela  - ubar*ycord(k)
+c        write(*,'(i5,3f10.5)')k,psi(0,k),psi(ni,k)
+      enddo
+#endif
+
+return
 end subroutine
+
+
+
+real*8 FUNCTION logterm(i,j,k,l)
+!
+!     Finds streamfunction at (k,l) induced by filament pair at (i,j)
+!
+use params
+implicit none
+integer i,j,k,l
+real*8 difx,dify,sumy,denom1,denom2
+
+difx = xcord(i) - g_xcord(k)
+dify = ycord(j) - g_ycord(l)
+sumy = ycord(j) + g_ycord(l)
+
+denom1 = difx**2 + dify**2
+denom2 = difx**2 + sumy**2
+
+logterm = log(denom1/denom2)
+
+end function 
 
 
 
