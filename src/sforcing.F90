@@ -315,14 +315,18 @@ real*8,allocatable,save :: cmodes(:,:,:,:,:)
 real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
 real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
 real*8 costta, tta, tta_sgn, theta, h_angle, phi 
+real*8,save :: h_angle,cos_h_angle,sin_h_angle
 character(len=80) :: message
 
-!should have h_angle inputted by user eventually
-!h_angle = 0.0d0
-h_angle = pi/4.0d0
 
 
 if (0==init_sforcing) then
+   !should have h_angle inputted by user eventually
+   !h_angle = 0.0d0
+   h_angle = pi/4.0d0
+   cos_h_angle=cos(h_angle)
+   sin_h_angle=sin(h_angle)
+
    numb1=1
    if (model_spec==0) then
       numb=2   ! apply forcing in bands 1,2
@@ -421,7 +425,7 @@ enddo
    call MPI_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
    rmodes2=rmodes
    i=2*numb+1
-   i=i*i*i
+   i=3*i*i*i
    call MPI_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
 #endif
 
@@ -518,17 +522,20 @@ do k=-numb,numb
          II(3) = IIp(1)*khat(1) + IIp(2)*khat(2) + IIp(3)*khat(3) !should be zero
                   
 !        set II to have angle h_angle wrt RR
-         IIp(1) = cos(h_angle)*mod_ii
-         IIp(2) = sin(h_angle)*mod_ii
+         IIp(1) = cos_h_angle*mod_ii
+         IIp(2) = sin_h_angle*mod_ii
          IIp(3) = II(3)
          
          
 !         check angle between RR and IIp 
-	 
-!         tta = acos(IIp(1)/mod_ii)
-!         write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
+!         acos(IIp(1)/mod_ii) == h_angle, or IIp(1)/mod_ii == cos(h_angle)
+         if (abs(IIp(1) - mod_ii*(cos_h_angle)) >1e-10*mod_ii) then
+            tta = acos(IIp(1)/mod_ii)
+            print *,'h_angle = ',h_angle
+            write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
+         endif
          
-!         now write II in old (i,j,k) coordinate system
+         ! now write II in old (i,j,k) coordinate system
          
          II(1) = IIp(1)*RRhat(1) + IIp(2)*yhat(1) + IIp(3)*khat(1)
          II(2) = IIp(1)*RRhat(2) + IIp(2)*yhat(2) + IIp(3)*khat(2)
@@ -537,12 +544,14 @@ do k=-numb,numb
 
 
 !        check angle between final RR and II again
-!         RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
-!         costta = (RRdotII/(mod_rr * mod_ii))
-!         tta = acos(costta)
-!        if (k2 == 12) then
-!            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
-!        endif
+         RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
+         costta = (RRdotII/(mod_rr * mod_ii))
+         if (abs(costta - cos_h_angle) >1e-10) then
+            tta = acos(costta)
+            print *,'h_angle = ',h_angle
+            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
+         endif
+
       
          cmodes(1,i,j,k,:) = RR	
          cmodes(2,i,j,k,:) = II	
