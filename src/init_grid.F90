@@ -102,6 +102,7 @@ endif
 write(message,'(a,e10.4)') 'Diffusion coefficient mu=',mu
 call print_message(message)
 
+if (mu>0) then
 kmode=1
 xfac = 2*2*pi*2*pi*kmode**2
 diff_2h =  mu*xfac
@@ -109,10 +110,30 @@ write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': '
 call print_message(message)
 
 kmode = sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+if (ndim==2) kmode = sqrt( (g_nx**2 + g_ny**2 )/4.0)
 xfac = 2*2*pi*2*pi*kmode**2
 diff_2h =  mu*xfac
 write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
 call print_message(message)
+endif
+
+if (mu_hyper>0) then
+write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu_hyper
+call print_message(message)
+kmode=1
+xfac = 2* (2*pi*2*pi*kmode**2)**4
+diff_2h =  mu_hyper*xfac
+write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+call print_message(message)
+
+kmode = sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+if (ndim==2) kmode = sqrt( (g_nx**2 + g_ny**2 )/4.0)
+xfac = 2*(2*pi*2*pi*kmode**2)**4
+diff_2h =  mu_hyper*xfac
+write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+call print_message(message)
+endif
+
 
 
 
@@ -120,6 +141,7 @@ call print_message(message)
 call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(mu_hyper,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
@@ -414,7 +436,7 @@ else if (sdata=='hyper') then
       kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
    endif
    xfac = 2* (2*pi*kmode)**8
-   mu = rvalue/xfac
+   mu_hyper = rvalue/xfac
 else 
    call abort("non supported viscosity type")
 endif

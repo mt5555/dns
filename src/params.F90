@@ -37,6 +37,7 @@ implicit none
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0           !viscosity
+real*8  :: mu_hyper=0     !hyper viscosity
 real*8  :: alpha_value=0      !for the alpha model  
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
@@ -222,7 +223,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < u,f >  (alpha model only)
-! ints(10) = ?
+! ints(10) = < u, del**8 u >   hyper diffusion term
 ! maxs(5) = max vorticity
 !
 !
@@ -233,9 +234,11 @@ real*8 :: ints(nints),maxs(nints)
 ! maxs(9) = 
 !
 ! for the shallow water model, we modify the above slightly:
-! ints(2) = < h u , u_xx > 
-! ints(6) = .5 < h u , u >  + g H^2        
-! ints(10) = .5 < h u , u >
+! ints(2) = < h u , u_xx >     diffusion term
+! ints(5) = .5 < h u , u >                 KE
+! ints(6) = .5 < h u , u >  + g H^2        KE+PE
+! ints(8) = < uH,div(tau)' >   (alpha model only)
+! ints(10) = < u, del**8 u >   hyper diffusion term
 !
 integer,parameter :: ntimers=13
 real*8 :: tims(ntimers)=0

@@ -16,7 +16,7 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 tmx1,tmx2,del,lambda,H
+real*8 tmx1,tmx2,del,lambda,H,ke_diss
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
@@ -164,7 +164,7 @@ if (doit_screen) then
 
 
 
-
+   ke_diss = mu*ints(2) + mu_hyper*ints(10)
    ! 
    ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
    ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
@@ -180,14 +180,14 @@ if (doit_screen) then
       ! K. microscale
       ! eta = (mu^3/epsilon)^.25
       ! epsilon = delke_tot
-      eta = (mu**3 / (mu*ints(2)))**.25
+      eta = (mu**3 / (ke_diss))**.25
       write(message,'(a,3f13.4)') 'mesh spacing(eta): ',&
            delx/eta,dely/eta,delz/eta
       call print_message(message)	
       
       !eddy turn over time
       ! 
-      ett=2*ke1/(mu*ints(2))
+      ett=2*ke1/ke_diss
       write(message,'(a,3f13.4)') 'eddy turnover time: ',ett
       call print_message(message)	
    endif
@@ -201,9 +201,9 @@ if (doit_screen) then
    call print_message(message)	
 
    write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
-        -mu*ints(2)-mu*alpha_value**2*ints(1),&
+        -ke_diss-mu*alpha_value**2*ints(1),&
         ' f=',ints(9),'                      tot=',&
-        -mu*ints(2)-mu*alpha_value**2*ints(1) + ints(9)
+        -ke_diss-mu*alpha_value**2*ints(1) + ints(9)
    call print_message(message)	
    endif
 
@@ -216,8 +216,8 @@ if (doit_screen) then
    endif
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
-     'd/dt(ke) vis=',-mu*ints(2),' f=',ints(3),' alpha=',ints(8),&
-     ' total=',(-mu*ints(2)+ints(3)+ints(8))
+     'd/dt(ke) vis=',-ke_diss,' f=',ints(3),' alpha=',ints(8),&
+     ' total=',(-ke_diss+ints(3)+ints(8))
    call print_message(message)	
 endif
 

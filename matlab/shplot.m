@@ -1,5 +1,5 @@
 
-range=0:.05:75;
+range=5.0:1.0:75;
 name='/tmp/test'
 
 
