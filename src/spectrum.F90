@@ -936,7 +936,7 @@ real*8 :: work(nx,ny,nz)
 ! local variables
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
-real*8 :: energy,vx,wx,uy,wy,uz,vz
+real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 integer i,j,k,jm,km,im,iwave_max,n
 
 if (skip_fft==0) then
@@ -949,6 +949,8 @@ endif
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
 iwave_max=nint(rwave)
 
+spec_helicity_rp=0
+spec_helicity_rn=0
 
 do j=ny1,ny2
    jm=jmcord(j)
@@ -996,6 +998,7 @@ spec_r_in=spec_helicity_rn
 call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
 
+
 if (g_nz == 1)  then
    iwave = min(g_nx,g_ny)
 else
@@ -1009,6 +1012,16 @@ do i=iwave+2,iwave_max
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
 enddo
 iwave=iwave+1
+
+if (my_pe==io_pe) then
+   heltot=0
+   do i=0,iwave
+      heltot=heltot+spec_helicity_rp(i)+spec_helicity_rn(i)
+   enddo
+   print *,'total helicity: ',heltot
+endif
+   
+
 
 end subroutine
 

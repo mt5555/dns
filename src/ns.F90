@@ -223,7 +223,7 @@ real*8 xw,xfac,tmx1,tmx2,xw_viss
 real*8 uu,vv,ww,dummy
 integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss
+real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
@@ -361,7 +361,7 @@ do i=nx1,nx2
 
    ! add any rotation to vorticity before computing u cross vor
    if (fcor/=0) then
-      vor(1)=vor(1) + fcor
+      vor(3)=vor(3) + fcor
    endif
    
    !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
@@ -436,22 +436,14 @@ do j=1,ny_2dz
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
 
-            ke = ke + .5*xfac*(Qhat(k,i,j,1)**2 + &
-                                Qhat(k,i,j,2)**2 + &
-                                Qhat(k,i,j,3)**2) 
+            u2=Qhat(k,i,j,1)*Qhat(k,i,j,1) + &
+               Qhat(k,i,j,2)*Qhat(k,i,j,2) + &
+               Qhat(k,i,j,3)*Qhat(k,i,j,3)
 
-            ux2ave = ux2ave + xfac*xw*(Qhat(k,i,j,1)**2 + &
-                                Qhat(k,i,j,2)**2 + &
-                                Qhat(k,i,j,3)**2) 
-
-            ke_diss = ke_diss + xfac*xw_viss*(Qhat(k,i,j,1)**2 + &
-                                Qhat(k,i,j,2)**2 + &
-                                Qhat(k,i,j,3)**2) 
-
-            uxx2ave = uxx2ave + xfac*xw*xw*(Qhat(k,i,j,1)**2 + &
-                                Qhat(k,i,j,2)**2 + &
-                                Qhat(k,i,j,3)**2) 
-
+            ke = ke + .5*xfac*u2
+            ux2ave = ux2ave + xfac*xw*u2
+            ke_diss = ke_diss + xfac*xw_viss*u2
+            uxx2ave = uxx2ave + xfac*xw*xw*u2
          
 
       enddo
