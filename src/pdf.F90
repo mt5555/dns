@@ -192,7 +192,7 @@ call cwrite8(fid,pdf_bin_size,1)
 x=str%nbin; call cwrite8(fid,x,1)
 x=str%ncalls; call cwrite8(fid,x,1)
 pdfdata=str%pdf / (2*nbin+1)
-call cwrite8(fid,pdfdata,2*nbin+1*delta_num)
+call cwrite8(fid,pdfdata,(2*nbin+1)*delta_num)
 
 
 end subroutine
