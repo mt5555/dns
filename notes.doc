@@ -1,9 +1,9 @@
 Goeff: jobs?
 pope's forcing.  phys. fluilds. 1996 Pope and H*
-LDRD-ER proposal 
-joint pdfs
 
-March 25: call Karl-Heinz about parallel I/O
+joint pdfs: debug
+transfer spec: debug
+
 
 
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
@@ -14,16 +14,6 @@ March 25: call Karl-Heinz about parallel I/O
         1000^3  4th and spectral
         2000^3 on 512?
        
-0. homog. tests:
-    sqrt(u**2) in time
-    <u,F> in time
-    <u,lap u> in time
-    find furtherst departure from global mean
-    plot line chart (3 axis) through that point
-    plot time mean + varience, or time_mean over varience?
-
-
-1. make 256**3 run on Nirvana  tau=500
 1. save scalars every 10 timesteps?
 1. Test CJ functions
 

@@ -377,7 +377,6 @@ if (alpha_value>0) then
    do j=ny1,ny2
    do i=nx1,nx2
    do n=1,2
-      !a_diss=a_diss+Q(i,j,3)*Q(i,j,n)*divtau(i,j,n)
       rhs(i,j,n)=rhs(i,j,n)+divtau(i,j,n)
    enddo
    enddo
@@ -424,7 +423,7 @@ do j=ny1,ny2
          gradu(i,j,1)=xfac*Qhat(i,j,1)
          gradu(i,j,2)=xfac*Qhat(i,j,2)
 
-         ! - mu del**8
+         ! - mu del**4
          xfac=mu*xfac
          rhs(i,j,1)=rhs(i,j,1) + xfac*Qhat(i,j,1)
          rhs(i,j,2)=rhs(i,j,2) + xfac*Qhat(i,j,2)

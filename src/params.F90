@@ -286,32 +286,26 @@ integer,parameter :: nints=10
 real*8 :: ints(nints),maxs(nints)
 
 !
-! For NON-ALPHA-MODEL
+! For alpha>0 and alpha==0.      H(f')=f   H(f)=Helmholz(f)
+!
 ! KE = ints(6)
 ! KE dissapation:  ints(10) + ints(3) + ints(8)
-!      ints(3) = < u,f >     
-!      ints(8) = 0
-!      ints(10) = < u, del u >  (or <u, -del**4 u)    
-!
-! for ALPHA-MODEL
-!
-! KE dissapation:  mu*ints(10) + ints(3) + ints(8)
-!      ints(10) = < u_x,u_x >
-!      ints(3) = < u,f' >           Helmholz(f')=f
+!      ints(10) = mu*< u_x,u_x >
+!      ints(3) = < u,f' >           
 !      ints(8) = < u,div(tau)' >
 !
 ! E-alpha = ints(6) + .5*alpha**2 ints(2)
-! E-alpha dissapation =   ints(10) + ints(9) - mu*alpha**2ints(1)
-!      ints(9) = < u,f >
+! E-alpha dissapation =   ints(10) + ints(9) - mu*alpha**2 * ints(1)
 !      ints(1)= < u_xx,u_xx>
+!      ints(9) = < u,f >
 !  
 ! Note: we are going to change the forcing so that it always appears
-! on the RHS as just f.  Then:
+! on the RHS as just f. 
 !    KE dissapation term:              <u,f>
-!    E_alpha term:          <u,H f > = <u,f> + alpha**2 <uxx,f>
+!    E_alpha term:          <u,H(f) > = <u,f> + alpha**2 <uxx,f>
 !   so make ints(3) = <u,f>
 !           ints(9) = <uxx,f>
-!
+!    and no need to ever compute f'  
 !
 ! These quantities are computed in the timestep
 ! routine, at the current time T:
@@ -348,11 +342,11 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(2) = < h u_x,u_x >   
 ! ints(5) = .5 < h u , u >                 KE
 ! ints(6) = .5 < h u , u >  + g H^2        KE+PE
-! ints(8) = < uH,div(tau)' >   (alpha model only. expensive to compute)  
+! ints(8) = < h u,div(tau)' >              NOT COMPUTED YET
 !                              
-! ints(10) = mu*< H u, -del**4 u >   hyper diffusion term
+! ints(10) = mu*< h u, -del**4 u >   hyper diffusion term + smag. diffusion
 !
-! E = ints(6)
+! E = ints(6) = KE+PE
 ! dE/dt = ints(10)   + ints(8)
 !
 ! E_alpha = ints(6) + .5*alpha**2 ints(2)

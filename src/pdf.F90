@@ -99,21 +99,20 @@ real*8  :: one_third = (1d0/3d0)
 !
 !  joint PDF's 
 !
-!  long-long:
-!     delx(u) dely(v)           jpdf_v_lonlon(1)
-!     delx(u) delz(w)           jpdf_v_lonlon(2)
-!     dely(v) delz(w)           jpdf_v_lonlon(3)
-!
-!  tran-tran?  probably not?
-!     dely(u) delx(v)
-!     dely(u) delx(w)
+!     delx(u) delx(v)
+!     delx(u) delx(w)
 !     delx(v) delx(w)
-
+!
+!     dely(u) dely(v)
+!     dely(u) dely(w)
+!     dely(v) dely(w)
+!
 !     delz(u) delz(v)
-!     delz(u) dely(w)
-!     delz(v) dely(w)
-
-type(jpdf_structure_function) ::  jpdf_v_lonlon(3)
+!     delz(u) delz(w)
+!     delz(v) delz(w)
+!
+integer,parameter :: NUM_JPDF=3
+type(jpdf_structure_function) ::  jpdf_v(NUM_JPDF,3)
 
 contains
 
@@ -164,11 +163,11 @@ do i=1,NUM_SF
 enddo
 call init_pdf(epsilon,100,.01d0,1)
 
-
-call init_jpdf(jpdf_v_lonlon(1),100,.1d0, min(numx,numy))
-call init_jpdf(jpdf_v_lonlon(2),100,.1d0, min(numx,numz))
-call init_jpdf(jpdf_v_lonlon(3),100,.1d0, min(numy,numz))
-
+do i=1,NUM_JPDF
+   call init_jpdf(jpdf_v(i,1),100,.1d0, min(numx,numy))
+   call init_jpdf(jpdf_v(i,2),100,.1d0, min(numx,numz))
+   call init_jpdf(jpdf_v(i,3),100,.1d0, min(numy,numz))
+enddo
 end subroutine
 
 
@@ -377,7 +376,9 @@ enddo
 call mpisum_pdf(epsilon)
 
 do j=1,3
-   call mpisum_jpdf(jpdf_v_lonlon(j))
+do i=1,NUM_JPDF
+   call mpisum_jpdf(jpdf_v(i,j))
+enddo
 enddo
 
 
@@ -399,7 +400,7 @@ if (my_pe==io_pe) then
    ! number of structure functions
    !x=NUM_SF ; call cwrite8(fidj,x,1)
    !do j=1,3
-   !   call normalize_and_write_pdf(fidj,jpdf_v_lonlon(j),jpdf_v_lonlon(j)%nbin)
+   !   call normalize_and_write_pdf(fidj,jpdf_v(j),jpdf_v(j)%nbin)
    !enddo
 endif
 
@@ -415,11 +416,12 @@ enddo
 epsilon%ncalls=0
 epsilon%pdf=0
 
-
+do i=1,NUM_JPDF
 do j=1,3
    ! reset JPDF's
-   jpdf_v_lonlon(j)%ncalls=0
-   jpdf_v_lonlon(j)%pdf=0
+   jpdf_v(i,j)%ncalls=0
+   jpdf_v(i,j)%pdf=0
+enddo
 enddo
 
 end subroutine
@@ -796,6 +798,93 @@ end subroutine
 
 
 
+subroutine compute_jpdf(u,v,w,n1,n1d,n2,n2d,n3,n3d,str,ncomp)
+!
+! compute a pdf_structure function along the first dimension of Q
+! for all the values of delta given by delta_val(:)
+!
+!
+! ncomp=1,2 or 3  we are computing them in the x,y or z direction
+!
+use params
+implicit none
+integer :: n1,n1d,n2,n2d,n3,n3d,n,ncomp
+real*8 :: u(n1d,n2d,n3d)
+real*8 :: v(n1d,n2d,n3d)
+real*8 :: w(n1d,n2d,n3d)
+type(jpdf_structure_function) :: str(NUM_JPDF)
+
+! local variables
+real*8  :: del1,del2,delv(3)
+integer :: bin1,bin2,bin,idel,i,j,k,i2,nsf,ndelta
+
+
+if (structf_init==0) then
+   structf_init=1
+   call init_pdf_module()
+endif
+
+
+ndelta=str(1)%delta_num
+do j=2,NUM_SF
+ASSERT("ndelta must be the same for all U structure functions",ndelta==str(j)%delta_num)
+enddo
+
+
+
+do k=1,n3
+   do j=1,n2
+      do idel=1,ndelta
+         if (delta_val(idel) < n1/2) then
+            do i=1,n1
+               ! compute structure functions for U,V,W 
+
+               i2 = i + delta_val(idel)
+               if (i2>n1) i2=i2-n1
+               do n=1,3
+                  if (n==1) then
+                     del1=u(i2,j,k)-u(i,j,k)
+                     del2=v(i2,j,k)-v(i,j,k)
+                  endif
+                  if (n==2) then
+                     del1=u(i2,j,k)-u(i,j,k)
+                     del2=w(i2,j,k)-v(i,j,k)
+                  endif
+                  if (n==3) then
+                     del1=v(i2,j,k)-u(i,j,k)
+                     del2=w(i2,j,k)-v(i,j,k)
+                  endif
+
+                  del1 = del1/str(n)%pdf_bin_size
+                  del2 = del2/str(n)%pdf_bin_size
+                  bin1 = nint(del1)
+                  bin2 = nint(del2)
+                  bin=max(bin1,bin2)
+
+                  ! increase the size of our PDF function
+                  if (abs(bin)>str(n)%nbin) call resize_jpdf(str(n),abs(bin)+10) 
+                  if (bin1>jpdf_max_bin) bin1=jpdf_max_bin
+                  if (bin1<-jpdf_max_bin) bin1=-jpdf_max_bin
+                  if (bin2>jpdf_max_bin) bin2=jpdf_max_bin
+                  if (bin2<-jpdf_max_bin) bin2=-jpdf_max_bin
+
+                  str(n)%pdf(bin1,bin2,idel)=str(n)%pdf(bin1,bin2,idel)+1
+               enddo
+            enddo
+         endif
+      enddo
+   enddo
+enddo
+
+do n=1,NUM_SF
+str(n)%ncalls=str(n)%ncalls+1
+enddo
+
+end subroutine
+
+
+
+
 
 subroutine compute_pdf_epsilon(ux)
 !
@@ -1029,16 +1118,19 @@ do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
+call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
 
 do n=1,3
    call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
+call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
 
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
+call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
 
 
 do n=1,3
