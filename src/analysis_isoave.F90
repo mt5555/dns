@@ -54,7 +54,7 @@ CPOINTER :: fid
 
 
 
-tstart=3.5
+tstart=.8
 tstop=1.0
 tinc=-.50
 icount=0
@@ -63,7 +63,6 @@ nxdecomp=1
 nydecomp=1
 nzdecomp=1
 
-call set_byteswap_input(1);
 comp_sk_helical=.true.;  print *,'Also computing H_ltt...'
 
 

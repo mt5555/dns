@@ -51,6 +51,7 @@ real*8,allocatable  :: Dt(:,:,:,:)       ! transverse, p=2..10
 real*8,allocatable  :: D_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
 real*8,allocatable  :: H_ltt(:,:)      ! H_ltt(ndelta,ndir)    
+real*8,allocatable  :: H_tt(:,:)       ! 
 
 ! signed (positive part) of above
 real*8,allocatable  :: SP_lll(:,:)        ! D_lll(ndelta,ndir)
@@ -88,7 +89,7 @@ if (my_pe/=io_pe) return
 x=ndelta; call cwrite8(fid,x,1)   
 x=ndir;   call cwrite8(fid,x,1)   
 if (comp_sk_helical) then
-   x=pmax-1+2+1;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
+   x=pmax-1+2+2;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 else
    x=pmax-1+2;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 endif
@@ -118,6 +119,9 @@ enddo
 if (comp_sk_helical) then
 do idir=1,ndir
    call cwrite8(fid,H_ltt(1,idir),ndelta)
+enddo
+do idir=1,ndir
+   call cwrite8(fid,H_tt(1,idir),ndelta)
 enddo
 endif
 
@@ -210,6 +214,7 @@ Dl=0
 Dt=0
 D_ltt=0
 H_ltt=0
+H_tt=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -441,6 +446,7 @@ Dl=0
 Dt=0
 D_ltt=0
 H_ltt=0
+H_tt=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -660,6 +666,7 @@ Dl=0
 Dt=0
 D_ltt=0
 H_ltt=0
+H_tt=0
 SP_ltt=0
 SP_lll=0
 SN_ltt=0
@@ -1060,6 +1067,7 @@ if (comp_sk_helical) then
    ur_t1 = ur1*rperp1(1)+ur2*rperp1(2)+ur3*rperp1(3)
    ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
    H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
+   H_tt(idel,idir)=H_ltt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 endif
 
 do p=2,pmax
@@ -1345,6 +1353,7 @@ allocate(Dt(ndelta,ndir,2,2:pmax))
 allocate(D_ltt(ndelta,ndir,2))
 
 allocate(H_ltt(ndelta,ndir))
+allocate(H_tt(ndelta,ndir))
 allocate(SP_lll(ndelta,ndir))
 allocate(SP_ltt(ndelta,ndir,2))
 
@@ -1410,6 +1419,7 @@ Dl=Dl/ntot
 Dt=Dt/ntot
 D_ltt=D_ltt/ntot
 H_ltt=H_ltt/ntot
+H_tt=H_tt/ntot
 
 SP_ltt=SP_ltt/ntot
 SP_lll=SP_lll/ntot
