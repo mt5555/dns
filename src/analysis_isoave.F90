@@ -288,9 +288,10 @@ do
       call output_pdf(time,fid,fid1,fid2)
       if (my_pe==io_pe) call cclose(fid,ierr)
    endif
-   
+
    if (tstart>0) then   
       time=time+tinc
+      if (io_pe==my_pe) print *,'time, tstart, tstop: ',time,tstart,tstop 
       if (time > max(tstop,tstart)+1e-5) exit
       if (time < min(tstop,tstart)-1e-5) exit
    endif
