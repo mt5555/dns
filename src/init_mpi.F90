@@ -14,7 +14,7 @@ character*80 message
 my_pe=0
 mpicoords=0
 mpidims=1
-ioproc=0
+io_pe=0
 initial_live_procs=1
 
 
@@ -52,5 +52,17 @@ call mpi_cart_rank(comm_3d,mpicoords,my_pe,ierr2)
 #endif
 
 print *, "me= ",my_pe,my_world_pe," total procs= ",initial_live_procs
+
+end subroutine
+
+
+
+
+
+subroutine close_mpi
+use params
+use mpi
+
+
 
 end subroutine

@@ -70,7 +70,7 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
       call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("MPI_cart_rank failure 1",ierr==0)
+      ASSERT("transpose_to_z: MPI_cart_rank failure",ierr==0)
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
@@ -88,12 +88,12 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 !     send/rec buffer to (my_x,my_y,iproc)
       tag=my_z
       call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
-      ASSERT("MPI_IRecv failure 1",ierr==0)
+      ASSERT("transpose_to_z: MPI_IRecv failure 1",ierr==0)
       tag=iproc
       call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
-      ASSERT("MPI_ISend failure 1",ierr==0)
+      ASSERT("transpose_to_z: MPI_ISend failure 1",ierr==0)
       call MPI_waitall(2,request,statuses,ierr) 	
-      ASSERT("MPI_waitalll failure 1",ierr==0)
+      ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
@@ -150,12 +150,12 @@ integer dest_pe3(3),tag
 
 ! If any of these fail, then pt was probably not computed
 ! via a call to transpose_to_z().
-ASSERT("transpose_from_x dimension failure 2",n1==g_nz)
-ASSERT("transpose_from_x dimension failure 3",n1d==g_nz2)
-ASSERT("transpose_from_x dimension failure 4",n2==nslabx)
-ASSERT("transpose_from_x dimension failure 5",n2d==nslabx)
-ASSERT("transpose_from_x dimension failure 6",n3==ny_2d)
-ASSERT("transpose_from_x dimension failure 7",n3d==ny_2d)
+ASSERT("transpose_from_z dimension failure 2",n1==g_nz)
+ASSERT("transpose_from_z dimension failure 3",n1d==g_nz2)
+ASSERT("transpose_from_z dimension failure 4",n2==nslabx)
+ASSERT("transpose_from_z dimension failure 5",n2d==nslabx)
+ASSERT("transpose_from_z dimension failure 6",n3==ny_2d)
+ASSERT("transpose_from_z dimension failure 7",n3d==ny_2d)
 
 do iproc=0,mpidims(3)-1  ! loop over each slab
 
@@ -178,7 +178,7 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
       call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("MPI_cart_rank failure 1",ierr==0)
+      ASSERT("transpose_from_z: MPI_cart_rank failure 1",ierr==0)
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
@@ -196,12 +196,12 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 !     send/rec
       tag=my_z
       call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,comm_3d,request(1),ierr)
-      ASSERT("MPI_IRecv failure 1",ierr==0)
+      ASSERT("transpose_from_z: MPI_IRecv failure 1",ierr==0)
       tag=iproc
       call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
-      ASSERT("MPI_ISend failure 1",ierr==0)
+      ASSERT("transpose_from_z: MPI_ISend failure 1",ierr==0)
       call MPI_waitall(2,request,statuses,ierr) 	
-      ASSERT("MPI_waitalll failure 1",ierr==0)
+      ASSERT("transpose_from_z: MPI_waitalll failure 1",ierr==0)
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
@@ -305,6 +305,13 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
       enddo
    else
 #ifdef MPI
+      dest_pe3(1)=iproc
+      dest_pe3(2)=my_y
+      dest_pe3(3)=my_z
+      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
+      ASSERT("transpose_to_x: MPI_cart_rank failure 1",ierr==0)
+
+
       l=0
       do k=1,nz_2d  ! loop over points in a single slab
          kk=nz1 + iproc*nz_2d +k -1
@@ -318,8 +325,16 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (iproc,my_y,mproc_z)
-!     rec  buffer from (iproc,my_y,mproc_z)
+!     send/rec buffer 
+      tag=my_x
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      ASSERT("transpose_to_x: MPI_IRecv failure 1",ierr==0)
+      tag=iproc
+      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      ASSERT("transpose_to_x: MPI_ISend failure 1",ierr==0)
+      call MPI_waitall(2,request,statuses,ierr) 	
+      ASSERT("transpose_to_x: MPI_waitalll failure 1",ierr==0)
+
 
       l=0
       do k=1,nz_2d  ! loop over points in a single slab
@@ -398,6 +413,13 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
       enddo
    else
 #ifdef MPI
+      dest_pe3(1)=iproc
+      dest_pe3(2)=my_y
+      dest_pe3(3)=my_z
+      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
+      ASSERT("transpose_from_x: MPI_cart_rank failure 1",ierr==0)
+
+
       l=0
       do k=1,nz_2d  ! loop over points in a single slab
          kk=nz1 + iproc*nz_2d +k -1
@@ -411,8 +433,17 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (iproc,my_y,mproc_z)
-!     rec  buffer from (iproc,my_y,mproc_z)
+!     send/rec buffer 
+      tag=my_x
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      ASSERT("transpose_from_x: MPI_IRecv failure 1",ierr==0)
+      tag=iproc
+      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      ASSERT("transpose_from_x: MPI_ISend failure 1",ierr==0)
+      call MPI_waitall(2,request,statuses,ierr) 	
+      ASSERT("transpose_from_x: MPI_waitalll failure 1",ierr==0)
+
+
 
       l=0
       do k=1,nz_2d  ! loop over points in a single slab
@@ -514,6 +545,14 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
       enddo
    else
 #ifdef MPI
+      dest_pe3(1)=my_x
+      dest_pe3(2)=iproc
+      dest_pe3(3)=my_z
+      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
+      ASSERT("transpose_to_y: MPI_cart_rank failure 1",ierr==0)
+
+
+
       l=0
       do i=1,nx_2d  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2d +i -1
@@ -527,8 +566,16 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (my_x,iproc,mproc_z)
-!     rec  buffer from (my_x,iproc,mproc_z)
+!     send/rec buffer 
+      tag=my_y
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      ASSERT("transpose_to_y: MPI_IRecv failure 1",ierr==0)
+      tag=iproc
+      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      ASSERT("transpose_to_y: MPI_ISend failure 1",ierr==0)
+      call MPI_waitall(2,request,statuses,ierr) 	
+      ASSERT("transpose_to_y: MPI_waitalll failure 1",ierr==0)
+
 
       l=0
       do i=1,nx_2d  ! loop over points in a single slab
@@ -608,6 +655,13 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
       enddo
    else
 #ifdef MPI
+      dest_pe3(1)=my_x
+      dest_pe3(2)=iproc
+      dest_pe3(3)=my_z
+      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
+      ASSERT("transpose_from_y: MPI_cart_rank failure 1",ierr==0)
+
+
       l=0
       do i=1,nx_2d  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2d +i -1
@@ -621,8 +675,16 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (my_x,iproc,mproc_z)
-!     rec  buffer from (my_x,iproc,mproc_z)
+!     send/rec buffer 
+      tag=my_y
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
+      ASSERT("transpose_from_y: MPI_IRecv failure 1",ierr==0)
+      tag=iproc
+      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
+      ASSERT("transpose_from_y: MPI_ISend failure 1",ierr==0)
+      call MPI_waitall(2,request,statuses,ierr) 	
+      ASSERT("transpose_from_y: MPI_waitalll failure 1",ierr==0)
+
 
       l=0
       do i=1,nx_2d  ! loop over points in a single slab

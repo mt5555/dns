@@ -40,10 +40,13 @@ def parse(file):
                     name=name[1:]
                 if name[-1]=='"' :
                     name=name[:-1]
-                if use:
-                    name = name + ".o"
-                if name not in deps:
-                    deps.append(name)
+                # dont include system directories:
+                if (name[0:4] <>"/usr") and (name[0:4] <> "/opt") and (name[0:4] <> "mpif") :
+                    if use:
+                        name = name + ".o"
+                    if name not in deps:
+                        deps.append(name)
+                        
         line=fid.readline()
     return deps
 

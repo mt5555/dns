@@ -30,7 +30,10 @@ write(message,'(a)') 'Running some tests'
 call print_message(message)
 call test           ! optional testing  routines go here
 
-! call dns_solve(Q)
+call dns_solve(Q)
+
+call close_mpi
+
 
 end program DNS
 
@@ -65,9 +68,10 @@ call out(time,Q)  ! output initial data
 do itime=1,itime_max
 
    call rk4(time,Q)
-   print *,'after rk4',time,maxval(Q(:,:,:,1))
 
    if (mod(itime,itime_output)==1 .or. itime==itime_max .or. error_code>0) then
+      write(*,'(a,4f12.5)') 'after rk4',time,maxval(Q(:,:,:,1)),&
+           maxval(Q(:,:,:,2)),maxval(Q(:,:,:,3))
       call out(time,Q)
    endif
 

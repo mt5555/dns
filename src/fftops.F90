@@ -88,13 +88,13 @@ real*8 lap2(nx,ny,nz)
 
 ! compute p = div(u)
 i=1
-call der(u(1,1,1,i),d1,dummy,work,1,i)
+call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = d1
 i=2
-call der(u(1,1,1,i),d1,dummy,work,1,i)
+call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = p + d1
 i=3
-call der(u(1,1,1,i),d1,dummy,work,1,i)
+call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 p = p + d1
 
 divu=p

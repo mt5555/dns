@@ -1,7 +1,8 @@
 #include "macros.h"
 subroutine test
+use params
 
-call test_parallel
+!call test_parallel
 call test_fft
 call test_poisson
 call test_divfree

@@ -62,13 +62,13 @@ rhs(:,:,:,3)=mu*rhs(:,:,:,2) + Q(:,:,:,1)*vor(:,:,:,2) - Q(:,:,:,2)*vor(:,:,:,1)
 
 ! compute d2 = div(q cross vor), or use the full rhs
 i=1
-call der(rhs(1,1,1,i),d1,dummy,work,1,i)
+call der(rhs(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 d2 = d1
 i=2
-call der(rhs(1,1,1,i),d1,dummy,work,1,i)
+call der(rhs(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 d2 = d2+d1
 i=3
-call der(rhs(1,1,1,i),d1,dummy,work,1,i)
+call der(rhs(1,1,1,i),d1,dummy,work,DX_ONLY,i)
 d2 = d2+d1
 
 

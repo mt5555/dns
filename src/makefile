@@ -9,7 +9,6 @@ ifeq ($(UNAME),Linux)
    F90 = lf95
    LDFLAGS = --staticlink
    FFLAGS = -O -DLINUX
-   MPIF90 = mpi.F90
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
