@@ -57,7 +57,7 @@ endif
 Q_old=Q
 
 ! stage 1
-call getrhs(rhs,Q,Q_grid,time,1,work1,work2,1)
+call getrhs(1,rhs,Q,Q_grid,time,1,work1,work2)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
@@ -66,7 +66,7 @@ Q_grid=Q_tmp
 do n=1,3
    call ifft3d(Q_grid(1,1,n),work1)
 enddo
-call getrhs(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2,2)
+call getrhs(2,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
@@ -75,7 +75,7 @@ Q_grid=Q_tmp
 do n=1,3
    call ifft3d(Q_grid(1,1,n),work1)
 enddo
-call getrhs(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2,3)
+call getrhs(3,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2)
 Q=Q+delt*rhs/3.0
 
 
@@ -85,7 +85,7 @@ Q_grid=Q_tmp
 do n=1,3
    call ifft3d(Q_grid(1,1,n),work1)
 enddo
-call getrhs(rhs,Q_tmp,Q_grid,time+delt,0,work1,work2,4)
+call getrhs(4,rhs,Q_tmp,Q_grid,time+delt,0,work1,work2)
 Q=Q+delt*rhs/6.0
 
 
@@ -124,7 +124,7 @@ if (itime>2) dtf=2*delt
 
 
 QM=Q
-call getrhs(rhs,Q,Q_grid,time,1,work1,work2,1)
+call getrhs(1,rhs,Q,Q_grid,time,1,work1,work2)
 Q=QS + DTF*rhs
 
 if (itime.eq.1) time=DTF+time
@@ -175,7 +175,7 @@ end subroutine rk4
 
 
 
-subroutine getrhs(rhs,Qhat,Q,time,compute_ints,work,work2,rkstage)
+subroutine getrhs(rkstage,rhs,Qhat,Q,time,compute_ints,work,work2)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -198,10 +198,11 @@ use sforcing
 implicit none
 
 ! input
+integer :: compute_ints,rkstage
 real*8 Q(nx,ny,n_var)
 real*8 Qhat(nx,ny,n_var)
 real*8 time
-integer compute_ints,rkstage
+
 
 ! output
 real*8 rhs(nx,ny,n_var)
@@ -232,7 +233,6 @@ ke_diss=0
 vor=0
 smag_diss=0
 
-
 ! compute stochastic forcing function which will be used
 ! for all RK stages in this time step
 if (rkstage==1) then
@@ -246,7 +246,6 @@ if (rkstage==1) then
       call stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,1)  
    endif
 endif
-
 
 ! compute grad(h)
 do n=1,2

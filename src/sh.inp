@@ -1,7 +1,7 @@
 6            ! input file type
 shallow      ! equations (shallow, ns_psivor, ns_uvw)
 sht           ! initial condition:  shallow water turbulence
-100           ! init condition subtype
+1           ! init condition subtype
 none          ! sto_high_10   !  none or sto_high_10  
 value        ! viscosity type
 0.0          ! viscosity value

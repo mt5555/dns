@@ -35,7 +35,7 @@ if (compute_transfer) then
    spec_diff_new=spec_diff  
    spec_model_new=spec_model
    tsave=transfer_comp_time
-   call getrhs(q1,Qhat,Q,time,1,work1,work2)
+   call getrhs(4,q1,Qhat,Q,time,1,work1,work2)
    transfer_comp_time=tsave
 
    spec_diff = (spec_diff_new+spec_diff)/2
