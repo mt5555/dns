@@ -37,7 +37,7 @@ write(message,'(a)') 'Initial data'
 call print_message(message)
 Q=0
 if (restart==1) then
-   call set_byteswap_input(1);
+   !call set_byteswap_input(1);
    ! initialize some constants, if needed:
    if (init_cond==3) call init_data_sht(Q,q1,work1,work2)
    call init_data_restart(Q,work1,work2)
