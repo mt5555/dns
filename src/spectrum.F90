@@ -25,6 +25,7 @@ real*8,private ::  spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
 
 ! cospectrum in x,y,z directions.
 ! n_var=1,3:  uv, uw, vw
+real*8,private ::  cospec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  cospec_x(0:g_nx/2,n_var)   
 real*8,private ::  cospec_y(0:g_ny/2,n_var)
 real*8,private ::  cospec_z(0:g_nz/2,n_var)
@@ -496,6 +497,7 @@ if (my_pe==io_pe) then
    x=g_nx/2; call cwrite8(fid,x,1)
    x=g_ny/2; call cwrite8(fid,x,1)
    x=g_nz/2; call cwrite8(fid,x,1)
+   x=1+iwave; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
    do i=1,3
       call cwrite8(fid,cospec_x(0,i),g_nx/2+1)
@@ -506,6 +508,11 @@ if (my_pe==io_pe) then
    do i=1,3
       call cwrite8(fid,cospec_z(0,i),g_nz/2+1)
    enddo
+   do i=1,3
+      call cwrite8(fid,cospec_r(0,i),1+iwave)
+   enddo
+
+
    call cclose(fid,ierr)
 endif
 end subroutine
@@ -974,6 +981,7 @@ spec_helicity_rn=0
 cospec_x=0
 cospec_y=0
 cospec_z=0
+cospec_r=0
 
 do j=ny1,ny2
    jm=jmcord(j)
@@ -1011,6 +1019,7 @@ do j=ny1,ny2
          cospec_x(abs(im),:)=cospec_x(abs(im),:)+co_energy(:)
          cospec_y(abs(jm),:)=cospec_x(abs(jm),:)+co_energy(:)
          cospec_z(abs(km),:)=cospec_x(abs(km),:)+co_energy(:)
+         cospec_r(iwave,:)=cospec_r(iwave,:)+co_energy(:)
 
 
          energy = energy*(p1(i,j,k,1)*(wy-vz) + &

@@ -261,7 +261,7 @@ icount=icount+1
       call input_uvw(time,Q,vor,work1,work2,2) ! no headers
       call print_message("computing spectrum ")
       do n=1,3
-         call window_data(Q(1,1,1,n),0)
+         call detrend_data(Q(1,1,1,n),0)
       enddo
       call compute_spec(time,Q,vor,work1,work2)
       call output_spec(time,time)
@@ -287,31 +287,159 @@ end program
 
 
 
-subroutine window_data(p,wtype)
+subroutine detrend_data(p,wtype)
 use params
+use mpi
+use ghost
 implicit none
 real*8 :: p(nx,ny,nz)
 integer :: wtype
-integer :: i,j,k
+integer :: i,j,k,ierr
+real*8 :: gradp(3),meanp,gradp2(3),px,py,pz
 real*8 :: xwindow(nx)
 real*8 :: ywindow(ny)
 real*8 :: zwindow(nz)
 
+if (nx1<3 .or. nx2+2>nx)&
+     call abort('Error: insufficient ghost cells in x direction')
+if (ny1<3 .or. ny2+2>ny)&
+     call abort('Error: insufficient ghost cells in y direction')
+if (ny1<3 .or. ny2+2>nz)&
+     call abort('Error: insufficient ghost cells in z direction')
+
+! update ghost cell data
+call ghost_update_x(p,1)
+call ghost_update_y(p,1)
+call ghost_update_z(p,1)
+
+meanp=0
+gradp=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   meanp=meanp+p(i,j,k)
+   px=(2*(p(i+1,j,k)-p(i-1,j,k))/3 - (p(i+2,j,k)-p(i-2,j,k))/12)/delx
+   py=(2*(p(i,j+1,k)-p(i,j-1,k))/3 - (p(i,j+2,k)-p(i,j-2,k))/12)/dely
+   pz=(2*(p(i,j,k+1)-p(i,j,k-1))/3 - (p(i,j,k+2)-p(i,j,k-2))/12)/delz
+   gradp(1)=gradp(1)+px
+   gradp(2)=gradp(2)+py
+   gradp(3)=gradp(3)+pz
+enddo
+enddo
+enddo
+
+#ifdef USE_MPI
+px=meanp
+call MPI_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+gradp2=gradp
+call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+meanp=meanp/g_nx/g_ny/g_nz
+gradp=gradp/g_nx/g_ny/g_nz
+if (io_pe==my_pe) then
+   print *,'mean, gradp:   ',meanp,gradp(1:3)
+endif
+
+
+! detrend:   p = meanp  + gradp (x-x0) + p'
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   px = gradp(1)*(xcord(i)-.5) + gradp(2)*(ycord(i)-.5) + gradp(3)*(zcord(k)-.5)
+   p(i,j,k)=p(i,j,k) - meanp - px 
+enddo
+enddo
+enddo
+
+
+! compute means again and see if we really detrended the data:
+#define DETREND_DEBUG
+#ifdef DETREND_DEBUG
+meanp=0
+gradp=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   meanp=meanp+p(i,j,k)
+   px=(2*(p(i+1,j,k)-p(i-1,j,k))/3 - (p(i+2,j,k)-p(i-2,j,k))/12)/delx
+   py=(2*(p(i,j+1,k)-p(i,j-1,k))/3 - (p(i,j+2,k)-p(i,j-2,k))/12)/dely
+   pz=(2*(p(i,j,k+1)-p(i,j,k-1))/3 - (p(i,j,k+2)-p(i,j,k-2))/12)/delz
+   gradp(1)=gradp(1)+px
+   gradp(2)=gradp(2)+py
+   gradp(3)=gradp(3)+pz
+enddo
+enddo
+enddo
+
+#ifdef USE_MPI
+px=meanp
+call MPI_allreduce(px,meanp,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+gradp2=gradp
+call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+meanp=meanp/g_nx/g_ny/g_nz
+gradp=gradp/g_nx/g_ny/g_nz
+if (io_pe==my_pe) then
+   print *,'detrended mean, gradp:   ',meanp,gradp(1:3)
+endif
+#endif
+
 
 if (wtype==0) then
-   ! flat for middle 50%
+   ! domain: 0..1   
+   ! 0-0.25    .5-.5*cos(x*pi/.25)
+   ! .25-.75   1
+   ! .75-1.0   .5+.5*cos((x-.75)*pi/.25)
+   !
    xwindow=1
    ywindow=1
    zwindow=1
+   do i=nx1,nx2
+      if (xcord(i)<=.25) then
+         xwindow(i)=.5-.5*cos(xcord(i)*pi*4)
+      endif
+      if (xcord(i)>=.75) then
+         xwindow(i)=.5+.5*cos((xcord(i)-.75)*pi*4)
+      endif
+   enddo
+   do j=ny1,ny2
+      if (ycord(j)<=.25) then
+         ywindow(j)=.5-.5*cos(ycord(j)*pi*4)
+      endif
+      if (ycord(j)>=.75) then
+         ywindow(j)=.5+.5*cos((ycord(j)-.75)*pi*4)
+      endif
+   enddo
+   do k=nz1,nz2
+      if (zcord(k)<=.25) then
+         zwindow(k)=.5-.5*cos(zcord(k)*pi*4)
+      endif
+      if (zcord(k)>=.75) then
+         zwindow(i)=.5+.5*cos((zcord(k)-.75)*pi*4)
+      endif
+   enddo
+
 endif
 
-do k=1,nx
-do j=1,nx
-do i=1,nx
+#ifdef DETREND_DEBUG
+if (io_pe==my_pe) then
+!print *,'xwindow: ',xwindow
+!print *,'ywindow: ',ywindow
+!print *,'zwindow: ',zwindow
+endif
+#endif
+
+do k=nz1,nz2
+do j=ny2,ny2
+do i=nx1,nz2
    p(i,j,k)=p(i,j,k)*xwindow(i)*ywindow(j)*zwindow(k)
 enddo
 enddo
 enddo
+
+
 end subroutine
 
 

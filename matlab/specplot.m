@@ -49,7 +49,9 @@ movie_plot=0; movie=1; tsave=[2.5 5.0];
 %movie_plot=0; movie=1; tsave=[2.5 5.0];
 
 
-
+name = 'decay2048-new.-sc0001_0000.7019';
+namedir = '/scratch1/taylorm/decay2048/';
+CK_orig=1.613/(2*pi)^2;
 
 
 
@@ -62,6 +64,7 @@ spec_r_save_fac3=[];
 fid=fopen([namedir,name,'.spec'],'r',endian);
 fidt=endianopen([namedir,name,'.spect'],'r');
 fidp=endianopen([namedir,name,'.pspec'],'r');  
+fidco=endianopen([namedir,name,'.cospec'],'r');  
 %fidt=-1;
 %fidp=-1;
 
@@ -294,6 +297,41 @@ while (time>=.0 & time<=9999.3)
 
 
   end
+
+
+  % now read the cospectrum:
+  if (fidco>-1) 
+     disp('reading co-spectrum')
+     ncox=fread(fidco,1,'float64'); 
+     ncoy=fread(fidco,1,'float64'); 
+     ncoz=fread(fidco,1,'float64'); 
+     ncor=fread(fidco,1,'float64'); 
+     time_co=fread(fidco,1,'float64');
+     % uv, uw, vw:
+     fread(fidco,ncox,'float64');   % 1D spectrum
+     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncox,'float64'); 
+     uv_r=fread(fidco,ncor,'float64');  % 3D spectrum
+     uw_r=fread(fidco,ncor,'float64'); 
+     vw_r=fread(fidco,ncor,'float64'); 
+
+     figure(3); clf;
+     loglog(0:ncor-1,uv_r,'r'); hold on;
+     loglog(0:ncor-1,uw_r,'g');
+     loglog(0:ncor-1,vw_r,'b');
+     loglog(0:ncor-1,-uv_r,'ro'); hold on;
+     loglog(0:ncor-1,-uw_r,'go');
+     loglog(0:ncor-1,-vw_r,'bo');
+     loglog(0:ncor-1,(0:ncor-1).^-(7/3));
+     hold off;
+  end
+
 
 
   % make PS files out of plots:
