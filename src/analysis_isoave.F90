@@ -88,10 +88,6 @@ nxdecomp=1
 nydecomp=1
 nzdecomp=1
 
-if (scale/=1) then
-   print *,'NOTE: scaling data by: ',scale
-endif
-
 
 
 ! to read times from  file times.dat:
@@ -107,6 +103,10 @@ endif
 !SEDcompscalar
 !SEDheadertype
 
+
+if (scale/=1) then
+   print *,'NOTE: scaling data by: ',scale
+endif
 
 
 if (ncpus==1) then
