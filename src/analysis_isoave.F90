@@ -51,7 +51,7 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
-logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs
+logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec
 logical :: read_uvw
 CPOINTER :: fid,fid1,fid2
 
@@ -73,7 +73,8 @@ header_type=4; scale=1/(2*pi)   ! for Takeshi's data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
-compute_uvw=.true.
+compute_uvw=.false.
+compute_hspec=.true.
 read_uvw=.false.
 
 tstart=0
@@ -198,6 +199,23 @@ do
       if (my_pe==io_pe) call cclose(fid,ierr)
    endif
 
+
+
+   if (compute_hspec) then
+      if (.not. read_uvw) then	
+      if (use_serial==1) then
+         call input_uvw(time,Q,dummy,work1,work2,header_type)
+         Q=Q*scale;
+         stop 'compute_hspec needs q1,q2 allocated'
+      else
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
+         Q=Q*scale;
+      endif
+      read_uvw=.true.	
+      endif
+      call compute_helicity_spectrum(Q,q2,q1,io_pe)
+      call output_helicity_spec(time)
+    endif
 
 
 
