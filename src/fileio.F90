@@ -109,7 +109,7 @@ CPOINTER fid
 
 ! append to output files, unless time=0 create a new file 
 access="a"
-if (time==0) access="w"
+if (time==time_initial) access="w"
 
 iwave_max=max(g_nx,g_ny,g_nz)
 spectrum=0
@@ -187,7 +187,7 @@ character :: access
 CPOINTER fid
 
 access="a"
-if (time==0) access="w"
+if (time==time_initial) access="w"
 
 
 if (my_pe==io_pe) then

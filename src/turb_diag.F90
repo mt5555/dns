@@ -21,7 +21,7 @@ character :: access
 CPOINTER fid
 
 access="a"
-if (time==0) access="w"
+if (time==time_initial) access="w"
 
 
 
