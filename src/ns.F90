@@ -360,15 +360,19 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
             xw=(im*im + jm*jm + km*km)*pi2_squared
+            xw_viss=mu*xw
             if (mu_hyper==4) then
-               xw_viss=xw**4
-            else
-               xw_viss=xw
+               xw_viss=xw_viss + mu_hyper_value*xw**4
+            else if (mu_hyper==2) then
+               xw_viss=xw_viss + mu_hyper_value*xw*xw
+            endif
+            if (mu_hypo==1 .and. xw>0) then
+               xw_viss=xw_viss + mu_hypo_value/xw
             endif
 
-            rhs(k,i,j,1)=rhs(k,i,j,1) - mu*xw_viss*Qhat(k,i,j,1)
-            rhs(k,i,j,2)=rhs(k,i,j,2) - mu*xw_viss*Qhat(k,i,j,2)
-            rhs(k,i,j,3)=rhs(k,i,j,3) - mu*xw_viss*Qhat(k,i,j,3)
+            rhs(k,i,j,1)=rhs(k,i,j,1) - xw_viss*Qhat(k,i,j,1)
+            rhs(k,i,j,2)=rhs(k,i,j,2) - xw_viss*Qhat(k,i,j,2)
+            rhs(k,i,j,3)=rhs(k,i,j,3) - xw_viss*Qhat(k,i,j,3)
 
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
@@ -548,7 +552,7 @@ if (compute_ints==1) then
    ints(7)=ensave/g_nx/g_ny/g_nz
    ints(8)=a_diss    
    ints(9)=fxx_diss                     ! < u_xx,f>
-   ints(10)=-mu*ke_diss                 ! <u,u_xx>
+   ints(10)=-ke_diss                 ! <u,u_xx>
 
    maxs(5)=maxvor
 endif

@@ -70,23 +70,45 @@ else
    call abort("lwisotropic():  invalid 'rantype'")
 endif
 
-
 alpha=0
 beta=1
 do n=1,3
    call helmholtz_periodic_inv(PSI(1,1,1,n),work,alpha,beta)
 enddo
-call vorticity(Q,PSI,work,work2)
+if (ndim==2) then
+   ! 2D case, treat PSI(:,:,:,1) = stream function, ignore other components
+   Q=0
+   ! u = PSI_y
+   call der(PSI,Q,work2,work,DX_ONLY,2)     
+   ! v = -PSI_x
+   call der(PSI,Q(1,1,1,2),work2,work,DX_ONLY,1)
+   Q(:,:,:,2)=-Q(:,:,:,2)
+else
+   call vorticity(Q,PSI,work,work2)
+endif
 
 
 !
 !  rescale data to fit energy profile
 !
 enerb=0
+enerb_target=0
+if (init_cond_subtype==0) then
 do nb=1,NUMBANDS
    enerb_target(nb)=real(nb)**(-5.0/3.0)
    if (nb>2)  enerb_target(nb)=real(nb)**(-7.0/3.0)
 enddo
+endif
+
+if (init_cond_subtype==1) then
+! Balu 2D initial condition, with low waver number hypo viscosity
+do nb=8,12
+   enerb_target(nb)=1.0
+enddo
+endif
+
+
+
 
 do n=1,3
    call fft3d(Q(1,1,1,n),work) 
@@ -133,7 +155,7 @@ do n=1,3
             
             do nb=1,NUMBANDS
             if (xw>=nb-.5 .and. xw<nb+.5) then
-               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
+               if (enerb(nb)>0) Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
             endif
             enddo
          enddo

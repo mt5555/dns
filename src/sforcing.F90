@@ -141,12 +141,13 @@ if (0==init_sforcing) then
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
+   ! balu forcing
    if (model_spec==2) then
-      numb1=32
-      numb=32
+      numb1=10
+      numb=10
       call sforcing_init()
       do wn=numb1,numb
-         ener_target(wn)=1.
+         ener_target(wn)=1.0
       enddo
    endif
    if (numb>numb_max) call abort("sforcing12: numb_max too small")

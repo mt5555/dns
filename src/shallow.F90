@@ -368,8 +368,8 @@ do j=ny1,ny2
       gradv(i,j,1)=xfac*Qhat(i,j,1)
       gradv(i,j,2)=xfac*Qhat(i,j,2)
       
-      ! -del**4 
-      xfac=-(xfac**4)
+      ! -laplacian**4 
+      xfac=-(xfac**mu_hyper)
       gradu(i,j,1)=xfac*Qhat(i,j,1)
       gradu(i,j,2)=xfac*Qhat(i,j,2)
       
@@ -384,8 +384,8 @@ call ifft3d(gradu(1,1,2),work)
 #ifdef POSDEF_HYPERVIS
    do j=ny1,ny2
    do i=nx1,nx2
-      rhs(i,j,1)=rhs(i,j,1)+mu*gradu(i,j,1)/Q(i,j,3)
-      rhs(i,j,2)=rhs(i,j,2)+mu*gradu(i,j,2)/Q(i,j,3)
+      rhs(i,j,1)=rhs(i,j,1)+mu_hyper_value*gradu(i,j,1)/Q(i,j,3)
+      rhs(i,j,2)=rhs(i,j,2)+mu_hyper_value*gradu(i,j,2)/Q(i,j,3)
    enddo
    enddo
 #endif
@@ -420,7 +420,7 @@ if (compute_ints==1) then
    !ints(7)
    ints(8)=a_diss/g_nx/g_ny         ! < Hu,div(tau)' >  
    ! ints(9)  = 
-   ints(10)=(smag_diss+mu*ke_diss)/g_nx/g_ny     ! u dot laplacian u
+   ints(10)=(smag_diss+mu_hyper_value*ke_diss)/g_nx/g_ny     ! u dot laplacian u
 
 
 
@@ -445,7 +445,7 @@ if (compute_ints==1) then
             enddo
          enddo
          call compute_spectrum_fft(work,work,io_pe,spec_tmp)
-         spec_diff=spec_diff - mu*spec_tmp
+         spec_diff=spec_diff - mu_hyper_value*spec_tmp
       enddo
 
       
@@ -477,10 +477,10 @@ do j=ny1,ny2
          rhs(i,j,3)=0
 #ifndef POSDEF_HYPERVIS
       else
-         ! - mu del**4
+         ! - mu laplacian**4
          xfac=-((im*im + jm*jm )*pi2_squared)
-         xfac=-(xfac**4)
-         xfac=mu*xfac
+         xfac=-(xfac**mu_hyper)
+         xfac=mu_hyper_value*xfac
          rhs(i,j,1)=rhs(i,j,1) + xfac*Qhat(i,j,1)
          rhs(i,j,2)=rhs(i,j,2) + xfac*Qhat(i,j,2)
 #endif

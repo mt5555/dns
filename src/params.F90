@@ -31,6 +31,9 @@ implicit none
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0               !viscosity
 integer :: mu_hyper=1         !viscosity = (del**2)**mu_hyper
+real*8  :: mu_hyper_value=0   ! hyper viscosity value
+integer :: mu_hypo =0         !large wave number dissipation = (del**-2)**mu_hyper
+real*8  :: mu_hypo_value=0    !viscosity value 
 real*8  :: alpha_value=0      !for the alpha model  
 integer :: infinite_alpha=0   !flag for infinite alpha case
 real*8  :: smagorinsky=0      !for smagorinsky term
@@ -297,6 +300,7 @@ real*8 :: output_dt = 0    ! netcdf output for plotting
 integer :: ncustom =0
 real*8, allocatable :: custom(:)
 real*8 :: diag_dt = 0       ! diagnostics
+real*8 :: model_dt = 0       ! unused
 real*8 :: screen_dt = 0     ! screen output
 real*8 :: restart_dt = 0    ! restart 
 
