@@ -10,7 +10,8 @@ module list
 
 set NCPU=128
 set NCPU_BOX=128
-set refin=$HOME/dns/benchmark/benchmark256.inp
+
+set refin=$HOME/dns/benchmark/benchmark128.inp
 set SRC=$HOME/dns/src
 
 cd $SRC
@@ -18,7 +19,7 @@ cd $SRC
 lockfile -r 10 -! building_lockfile
 if ( $status ) then
 
-   ./gridsetup.py 1 1 $NCPU 256 256 256
+   ./gridsetup.py 1 1 $NCPU 128 128 128
    make -j 4 dns
 
    if (!(-d /scratch/mat)) then

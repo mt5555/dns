@@ -1,5 +1,5 @@
 1            ! input file type
-benchmark256 ! runname
+benchmark128 ! runname
 iso12        ! init cond
 iso12        ! forcing
 10            ! struct_x
@@ -12,14 +12,14 @@ fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
--43          ! final time
+.50          ! final time
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
 0.0          ! restart_dt  (0 = restart output disabled)
--10          ! diag_dt
--10          ! screen_dt
+.10          ! diag_dt
+.10          ! screen_dt
 0.0         ! output_dt  (0 = output disabled, except for custom output times)
 1           ! n_output_custom  number of custom output times  
 9999.111    ! custom output times, one per line
