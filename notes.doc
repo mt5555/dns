@@ -1,4 +1,4 @@
-1. put in CJ functions
+1. Test CJ functions
 
 2. ns_ghost:  4th order code using ghost cells:
         benchmark parallel decompostions

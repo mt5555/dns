@@ -1,6 +1,7 @@
 #include "macros.h"
 subroutine time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
+use tracers
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)      
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -259,6 +260,7 @@ endif
 if (doit_output) then
    write(message,'(a,f10.4)') "writing output files at t=",time
    call print_message(message)
+   call tracers_save(io_pe,time)
 
    write(message,'(f10.4)') 10000.0000 + time
 

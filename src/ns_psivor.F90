@@ -57,6 +57,7 @@ end subroutine
 subroutine rk4reshape(time,Q,w0,psi0,rhs,w_old,w_tmp,psi,work)
 use params
 use bc
+use tracers
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,n_var)
@@ -127,31 +128,29 @@ endif
 !
 
 
+
 w_old=w0
 
 
 ! stage 1
-call ns3D(rhs,w0,psi0,time,1)
-w0=w0+delt*rhs/6.0
-
+call ns2D(rhs,w0,psi0,time,1); call tracer_advance(psi0,1)
+w0=w0+delt*rhs/6.0 
 
 
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
-call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
+call ns2D(rhs,w_tmp,psi,time+delt/2.0,0); call tracer_advance(psi,2)
 w0=w0+delt*rhs/3.0
-
 
 
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
-call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
+call ns2D(rhs,w_tmp,psi,time+delt/2.0,0) ; call tracer_advance(psi,3)
 w0=w0+delt*rhs/3.0
-
 
 
 
@@ -159,7 +158,7 @@ w0=w0+delt*rhs/3.0
 w_tmp = w_old + delt*rhs
 call bcw_impose(w_tmp)
 call compute_psi(w_tmp,psi,rhs,work,psi0,comp_psi_rk13)
-call ns3D(rhs,w_tmp,psi,time+delt,0)
+call ns2D(rhs,w_tmp,psi,time+delt,0) ; call tracer_advance(psi,4)
 w0=w0+delt*rhs/6.0
 call bcw_impose(w0)
 
@@ -203,7 +202,7 @@ end subroutine
 
 
 
-subroutine ns3D(rhs,w,psi,time,compute_ints)
+subroutine ns2D(rhs,w,psi,time,compute_ints)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !

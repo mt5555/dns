@@ -148,7 +148,7 @@ subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 !  init=1    setup parameters and compute initial conditoin
 !
 use params
-use ghost
+use tracers
 use bc
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
@@ -159,6 +159,7 @@ integer :: init
 
 ! local variables
 integer :: i,j,k,l,use3d=0,n
+integer :: numt  ! number of tracers to use
 real*8 :: eps
 real*8 :: amp,vx,uy
 real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,wsum,psisum,delalf,testmax
@@ -283,6 +284,19 @@ endif
 
 
 
+
+if (init==1) then
+   i=100
+   call allocate_tracers(i+1)
+   delalf = pi/(2*i)
+   do k=0,i
+      hold=k*delalf
+      tracer(k+1,1)=xlocation
+      tracer(k+1,2)=cos(hold)
+   enddo
+else
+   call tracers_restart(io_pe)
+endif
 
 end subroutine
 
