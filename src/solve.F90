@@ -22,6 +22,7 @@ real*8 :: tol,a1,a2
 
 !local 
 real*8 :: R(nx,ny,nz)
+real*8 :: dummy
 
 real*8,external  :: ddot
 
@@ -37,9 +38,11 @@ w = a1 - a2*(pi2/(3*min(delx,dely,delz)))**2
 w=2.5*w  ! safter factor
 w = 1/w
 
+if (equations==1) then
+   call abort("error: jacobi() does not support shallow water helmholtz operator") 
+endif
 
-
-call helmholtz(sol,R,a1,a2)
+call helmholtz(sol,R,a1,a2,dummy)
 R=b-R
 sol = sol + w*R
 
@@ -60,7 +63,7 @@ itqmr=0
 do 
    itqmr = itqmr+1
    
-   call helmholtz(sol,R,a1,a2)
+   call helmholtz(sol,R,a1,a2,dummy)
    R=b-R
    sol = sol + w*R
    
@@ -77,11 +80,13 @@ if (itqmr>=itermax) stop 'Jacobi iteration failure'
 end subroutine
 
 
-
-
-
-
 subroutine cg(sol,b,a1,a2,tol)
+real*8 :: dummy
+call cg_shallow(sol,b,a1,a2,tol,dummy)
+end subroutine
+
+
+subroutine cg_shallow(sol,b,a1,a2,tol,h)
 !
 ! CG for solving   [a1 + a2 Laplacian] x = b
 !
@@ -89,6 +94,9 @@ subroutine cg(sol,b,a1,a2,tol)
 ! b   = rhs
 ! sol = starting approximate guess and final soln
 ! tol = tolerance for convergence (10e-6 is sufficient)
+!
+! if equations=1  (shallow water equations), then
+! h = height field.  (and helmholtz = [a1 + a2 (1/h) div h grad] )
 !
 ! routines called
 !
@@ -98,6 +106,7 @@ subroutine cg(sol,b,a1,a2,tol)
 !
 use params
 implicit none
+real*8 :: h(nx,ny,nz)
 real*8 :: sol(nx,ny,nz)
 real*8 :: b(nx,ny,nz)
 real*8 :: tol,a1,a2
@@ -119,7 +128,7 @@ integer itermax
 itermax=1000
 
 
-      call helmholtz(sol,R,a1,a2)
+      call helmholtz(sol,R,a1,a2,h)
       R=b-R
       P=R
 
@@ -140,7 +149,7 @@ itermax=1000
       itqmr = itqmr+1
       sigma = alpha
 
-      call helmholtz(P,AP,a1,a2)
+      call helmholtz(P,AP,a1,a2,h)
       tau = sigma/ ddot(P,AP)
 
       sol=sol+P*tau

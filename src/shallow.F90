@@ -264,36 +264,26 @@ enddo
 
 if (alpha_value>0) then
    call alpha_model_forcing(Q,divtau,gradu,gradv,work,work2)
-   ! Apply Helmholtz inverse to div(tau)
-   ! also return a_diss, the KE dissapation from div(tau) term
+   ! Apply Helmholtz inverse to:   div(tau) - grav grad(h)
+
+   ! a_diss should be the KE dissapation from the div(tau) term,
+   ! a_diss = <uH, Helmholtz^-1(div(tau)-grav grad(h)>  - <u H , grav grad(h)>
+   !        = <Helm(uH),div(tau)-grav grad(h)>  - < u H, grav grad(h)>
+   !        = ...
+   ! which is rather complicated and not computed yet.  
+
    do n=1,2
-
-      !work=divtau(:,:,n)      
-      !call cg(divtau(1,1,n),work,1d0,-alpha_value**2,1d-8)
-
+      work=divtau(:,:,n)-grav*gradh(:,:,n)      
+      !call cg_shallow(divtau(1,1,n),work,1d0,-alpha_value**2,1d-5,Q(1,1,3))
       call helmholtz_inv(divtau(1,1,n),work,1d0,-alpha_value**2)
    enddo
 
    do j=ny1,ny2
    do i=nx1,nx2
    do n=1,2
-      a_diss=a_diss+Q(i,j,3)*Q(i,j,n)*divtau(i,j,n)
+      !a_diss=a_diss+Q(i,j,3)*Q(i,j,n)*divtau(i,j,n)
       rhs(i,j,n)=rhs(i,j,n)+divtau(i,j,n)
    enddo
-   enddo
-   enddo
-
-   ! g grad(h) 
-   do n=1,2
-      !work=gradh(:,:,n)
-      !call cg(gradh(1,1,n),work,1d0,-alpha_value**2,1d-8)
-
-      !call helmholtz_inv(gradh(1,1,n),work,1d0,-alpha_value**2)
-   enddo
-   do j=ny1,ny2
-   do i=nx1,nx2
-      rhs(i,j,1)=rhs(i,j,1)-grav*gradh(i,j,1) 
-      rhs(i,j,2)=rhs(i,j,2)-grav*gradh(i,j,2) 
    enddo
    enddo
 
