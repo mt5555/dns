@@ -41,13 +41,25 @@ time_target=time_final
 !
 ! compute new time step
 !
-! CFL = delt*umax/delx     delt <= CFL*delx/umax
+! linear advection:
+!      u_t + umax grad(u) + f cross u = 0
+! FFT:   uk_t + i (2*pi*k*umax + f) uk = 0
+! stabilityis based on:  2*pi*k*umax + f  =   pi*umax/delx + f
+!                                         =   pi*(umax/delx + f/pi)
+!  
+! So if we base our CFL on umax/delx, we need to divide f by pi.
+!
+! CFL = delt*umax/delx       delt <= CFL*delx/umax
+!
+! with fcor:
+!   CFL = delt*(umax/delx + f/pi)   delt <= CFL/(umax/delx + f/pi)
 !
 ! viscous CFL =  delt*mu/delx^2  delt <= CFL*delx^2/mu
 !  
 !
 
-umax=maxs(4)+fcor
+umax=maxs(4)+fcor/pi
+
 if (ndim==3) then
    mumax = mu/(delx**2) + &
            mu/(dely**2) + &
