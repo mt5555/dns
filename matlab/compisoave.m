@@ -365,6 +365,12 @@ print('-dpsc',[bname,'_isocheck2.ps']);
 print -djpeg isocheck2.jpg
 
 
+figure(3)
+semilogx(xx_plot,.5*(yyave1+yyave2),'r'); hold on;
+semilogx(xx_plot(2:l-1),f2,'g'); hold on ;
+
+
+
 
 
 %
@@ -408,4 +414,16 @@ ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print('-dpsc',[bname,'_isocheck3.ps']);
 print -djpeg isocheck3.jpg
+
+
+figure(3)
+semilogx(xx_plot,.5*(yyave1+yyave2),'r');
+semilogx(xx_plot(2:l-1),df,'g'); 
+title('D_{tt} vs  D_{ll} + .5 r (D_{ll})   and   D_{ltt} vs. (r D_{lll})''/6 (green)');
+ylabel(pname);
+xlabel('r/\eta');
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+hold off;
+print -djpeg isocheck.jpg
+
 end

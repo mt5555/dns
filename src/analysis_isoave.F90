@@ -242,7 +242,7 @@ do
       if (my_pe==io_pe) then
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .isow2s2 file errno=",ierr
+            write(message,'(a,i5)') "output_model(): Error opening .iso1 file errno=",ierr
             call abort(message)
          endif
          call writeisoave_scalar(fid,time)

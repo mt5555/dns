@@ -5,9 +5,8 @@ email: Bonnie answer
 Meneauvau: check schedule, register
 
 check these out:
-  iso12_5120007.000.new.isostr     (compare to original)
-  iso12_5120007.000.new.isow2s2   
-  plot new functions for cj
+  check sc512A data is on HPSS.
+  plot new functions for cj using delx/eta=.5 data
   
 
 512^3:     can run analysis if we to a two array analysis. isoavep2()?
