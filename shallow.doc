@@ -1,0 +1,136 @@
+
+
+1. compile:
+      To setup for a 200x200 grid, on 1 cpu:
+
+      % cd dns/src
+      % ./gridsetup.py 1 1 1 200 200 1
+      % make dnss
+
+2. edit sh.inp  
+      values of interest:
+      line 3, "initial condition subtype"
+         0 = case A from Polvani et a.
+         1 = case B
+         2 = case C
+         3 = case D  etc...
+
+      line 5, hyper viscosity coefficient
+              specifed as the KE dissapation rate of the smallest mode.
+              (larger the value, the more dissapation)
+              I used 5000 for the alpha=0 run, but for alpha>0, this
+              seems much too large.  
+
+      line 7, "alpha"
+          if alpha < 1, then this is the exact value used by the code
+          if alpha >= 1, then alpha is assumed to be given in units of delx
+          for example:  setting alpha to .01, the code will use alpha=.01
+                        setting alpha to 8,   the code will use alpha=8 delx
+
+      line 13, time to run.  For the Polavani runs, 1 eddy turnover
+           time is t=14*2*pi.  So to run 1000 eddy turnover times,
+           set this line to t=11.5
+             
+
+      line 14,  Courant number.  For alpha=0, 1.35 seems to be stable
+           for most of the cases.  
+
+      line 21, output_dt
+           set to .25, and it will output snapshots every t=.25 
+
+
+3.  Running the code:
+
+        ./dnss  output_name  < sh.inp
+
+    Each snapshot is in a file named:
+
+        output_name0000.0000.u
+        output_name0000.0000.v
+        output_name0000.0000.w    (the height field)
+        output_name0000.0000.vor  (vorticity)
+
+    where 0000.0000 is the time of the snapshot.  So for t=0.25,
+    the filename would be:  output_name0000.2500.vor.
+
+    The integral quantities (energy, ke, pe, etc...) for the entire
+    run are in one file:   output_name0000.0000.scalars
+
+    The energy spectrum for the entire run is also in one file:   
+    output_name0000.0000.spec
+
+
+
+
+
+4.  Plotting the results (MATLAB)
+        in the dns/matlab there are two scripts:
+        
+        shplot.m   makes contour plots of the vorticity and height filed
+
+        shscalars.m  plots the energy and dissapaton rates
+
+        At the top of each script, you need to edit the file name
+       
+5.  Plotting the results (OPENDX)
+        the format of the data files is IEEE real*8 with no fortran record
+        seperators, Column order.  
+        
+        time,nx,ny,nz
+        xarray(nx)
+        yarray(ny)
+        zarray(nz)
+        data(nx,ny,nz)
+
+        We include the periodic point in the output, so for 200x200x1 grid,
+        the arrays are of size 201x201x1
+
+        To read this in opendx, we need to tell the data prompter that
+        the grid is 201x201 (we can ignore the last dimension), 
+        and skip all the header information
+        (for the 201x201 case, this is 4+201+201+1 numbers = 3256 bytes)
+
+         In opendx, select "Import Data".  click on "Grid or Scattered file",
+         the click on "Describe Data".  In the Describe Data window,
+         specify a header of size 3256 bytes.  click on "Column order"
+         and select IEEE for "Data format".  For Grid size, enter
+         201x201, and put the filename in the Data file box.  
+
+         On the right side, for field list, select "double" in the
+         "Type" pull down menu.  
+
+
+
+         
+          
+
+
+        
+
+
+
+       
+
+6. Initial conditions:  If you need to modify the initial conditions,
+   they are computed in the routine init_data_sht() in the
+   file init_data.F90.  
+
+   Another thing you might need to adjust is the error tolerence
+   in the CG helmholtz solve.  This is on line 277 in shallow.F90:
+
+   call cg_shallow(divtau(1,1,n),work,1d0,-alpha_value**2,1d-5,Q(1,1,3))
+
+   The tolerence is set to 1d-5 right now.  
+
+
+
+
+
+
+
+
+
+
+              
+
+
