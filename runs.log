@@ -4,7 +4,6 @@
 VXPAIR
 
 
-vx6144c.inp
 mu=4e-8
 ./gridsetup.py 24 1 1 6144 3072 1 2 2 0 2 2 0   2
 
@@ -16,8 +15,6 @@ timings:
                         12x1    test?
                          8x1    test?
 
-24x1 IN 
-
 
 Run with new ellipse code (uses monika's algorithm) and
 fixed .cross output.  (order output has bad .cross data and I've
@@ -28,7 +25,25 @@ was beeing used for the older data?)
 Running in /ccs/taylorm/dns/src/vxpair
 (move later?)
 
+all using vx6144c.inp:
 
+vx6144c.out  ran to t=17
+     65 points per ellipse, 8 contours. 
+     R adjustment (after overshoot) in contour search: R=R/2
+     contour_eps=1e-7
+
+vx6144d.out   ran to t=17
+     32 points per ellipse, 4 contours.  looks jagged
+     R adjustment (after overshoot) in contour search: R=R/10
+     contour_eps=5e-7  (should be the same as 1e-7)
+     
+vx6144e.out   ran to t=17
+     65 points per ellipse, 4 contours. 
+     R adjustment (after overshoot) in contour search: R=R/10
+     R init = .1
+     R overshoot: back off by 3x
+     contour_eps=5e-7  (should be the same as 1e-7)
+     
 
 
 
@@ -271,7 +286,7 @@ IN:
                     epsilon=  
    run to t=137, still running.  lost all *.isoave files up to t=181.
    run 6 turnover times: 7*6 = 42.  Run to t=232.  
-   run 12 turnover times: 7*12 = 84.  Run to t=274.
+   run 12 turnover times: 7*12 = 84.  Run to t=274.  done 284. 
    
  
    

@@ -20,7 +20,7 @@ clear all;
 
 name = '/ccs/scratch/taylorm/decay/decay2048'
 times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357]
-times=[times,.24:.01:3.10];
+times=[times,.24:.01:4.0];
 
 %name = '/ccs/scratch/taylorm/dns/iso12_512'
 %times=7;
@@ -106,7 +106,7 @@ plot(time_e,ux3(3,:)./ux2(3,:).^(3/2),'g')
 %plot(time_e,vor4(3,:)./vor2(3,:).^2,'g')
 
 ax=axis;
-axis([ax(1),ax(2),-.6,-.4]);
+axis([ax(1),ax(2),-.6,-.3]);
 print -djpeg -r72 skew.jpg
 
 hold off

@@ -5,11 +5,11 @@
 
 %ts=input('time=? ');
 
-range=0.00:1.0:1000.0 ;
+range=20.00:10.0:1000.0 ;
 name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
-name='/data/vxpair/vx2048c';
-
+%name='/data/vxpair/vx2048c';
+name='/ccs/taylorm/dns/src/vxpair/vx6144d';
 
 usefig=1;
 mkpr=1;            % make ps and jpeg files
@@ -46,7 +46,7 @@ for i=range
   axis([0,4,0,2]);
   title(sprintf('time = %6.2f ',i)); 
 
-%    'pause' ;     pause
+    'pause' ;     pause
 end
 return
 

@@ -3,8 +3,8 @@
 %#  read in crossing times, plot
 %########################################################################
 
-name='../src/temp';
-name='/ccs/scratch/taylorm/vxpair/vx4096b.cross';
+%name='/ccs/scratch/taylorm/vxpair/vx4096b.cross';
+name='/ccs/taylorm/dns/src/vxpair/vx6144d0000.0000.cross';
 
 fid=endianopen(name,'r');
 
@@ -15,10 +15,10 @@ while (1)
   if (count~=1) break; end; 
   if (nc>0)
      data=fread(fid,nc,'float64');  % particle lable
-     label=[label,data];
+     label=[label;data];
 
      data=fread(fid,nc,'float64');      % crossing time
-     time=[time,data];
+     time=[time;data];
   end       
 end
 fclose(fid)
@@ -34,7 +34,10 @@ for i=minl:maxl
   ti=times(index);
   l=length(ti);
   ti=ti(2:l)-ti(1:l-1);
-  plot(ti); hold on;
+  ti
+  if (length(ti)>0) 
+     plot(ti,'o-'); hold on; 
+  end       
 end
 hold off;
 

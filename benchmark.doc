@@ -34,8 +34,8 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
 
                   cpu time per timestep
                    (running 5 timesteps) 
-512^3
-    1x1x64              .813       (with forcing)
+512^3                                                       SHI_YI
+    1x1x64              .813       (with forcing)             7.6s
     1x1x128             .393       (with forcing)
     1x1x256             .195       (with forcing)
     2x1x256             .158       (with focfing)

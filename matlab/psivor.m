@@ -10,9 +10,9 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
-range=[0:2.5:5];
+range=[30:10:30];
 %name='../src/vxpair/vx6144b_';
-%name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
+name='/ccs/taylorm/dns/src/vxpair/vx6144d';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='../src/vxpair/vx4096a';
 %name='../src/vxpair/vx6144a';
@@ -21,7 +21,7 @@ range=[0:2.5:5];
 %name='/data/vxpair/vx2048d';
 
 usefig=1;
-mkpr=1;            % make ps and jpeg files
+mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
 
@@ -35,52 +35,26 @@ for i=range
   ts=ts(2:10);
 
   fname=[name,ts,'.vor']
-  fidvor=fopen(fname,'r');
-  time=fread(fidvor,1,'float64')
-  data=fread(fidvor,3,'float64');
-  nx=data(1);
-  ny=data(2);
-  nz=data(3);
-  
-  x=fread(fidvor,nx,'float64');
-  y=fread(fidvor,ny,'float64');
-  z=fread(fidvor,nz,'float64');
-  
-  q = fread(fidvor,nx*ny*nz,'float64');
-  tmp = fread(fidvor,1,'float64');
-  tmp=size(tmp);
-  if (tmp(1)~=0) 
-    disp('Error reading input file...')
-  end
-  fclose(fidvor);
-  q = reshape(q,nx,ny,nz);
-  qmax=max(max(max(q)));
-  vor = squeeze(q(:,:,1));
-  disp(sprintf('max vor=                %f ',qmax));
+  [x,y,z,vor,time]=getfield(fname);
+  qmax=max(max(max(vor)));
 
+  vor = squeeze(vor(:,:,1));
+  disp(sprintf('max vor=                %f ',qmax));
     
 
   fname=[name,ts,'.psi']
-  fidvor=fopen(fname,'r');
-  time=fread(fidvor,1,'float64')
-  data=fread(fidvor,3,'float64');
-  nx=data(1);
-  ny=data(2);
-  nz=data(3);
-  
-  x=fread(fidvor,nx,'float64');
-  y=fread(fidvor,ny,'float64');
-  z=fread(fidvor,nz,'float64');
-  
-  q = fread(fidvor,nx*ny*nz,'float64');
-  tmp = fread(fidvor,1,'float64');
-  tmp=size(tmp);
-  if (tmp(1)~=0) 
-    disp('Error reading input file...')
+  [x,y,z,psi,time]=getfield(fname);
+  psi = squeeze(psi(:,:,1));
+
+  subsample=2;
+  if (subsample>1) 
+    nx=length(x);
+    ny=length(y);
+    vor=vor(1:subsample:nx,1:subsample:ny);
+    psi=psi(1:subsample:nx,1:subsample:ny);
+    x=x(1:subsample:nx);
+    y=y(1:subsample:ny);
   end
-  fclose(fidvor);
-  q = reshape(q,nx,ny,nz);
-  psi = squeeze(q(:,:,1));
 
   
 
@@ -101,6 +75,7 @@ for i=range
       v = -12:1:3;
       v=2.^v;
       %v = 4.5*[3/4, 1/2, .4 , 1/4, 1/8]
+      v=  [3.3938    2.2626    1.1313    0.5656];
       contour(x,y,vor',v)
       hold on
       contour(x,y,vor',[.005 .005],'r')

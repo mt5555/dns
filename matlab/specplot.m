@@ -15,8 +15,13 @@ namedir='../src/';
 name='decay2048';
 namedir='/ccs/scratch/taylorm/decay/';
 
+
+% plot all the spectrum:
+movie=0;
+
+
 % save spectrum at these times:
-tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 ];
+tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 spec_r_save=[];
 
 fid=endianopen([namedir,name,'.spec'],'r');
@@ -60,7 +65,8 @@ while (time>=0 & time<=9999.3)
      tsave(i)
      spec_r_save=[spec_r_save, spec_r];
   end 
-  
+
+  if (movie==1)  
   figure(1);clf;
   if (n_z==1) 
     subplot(2,1,1);
@@ -94,7 +100,7 @@ while (time>=0 & time<=9999.3)
     loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
     hold off;
   end
-
+  end
 
   
   %
@@ -172,20 +178,19 @@ while (time>=0 & time<=9999.3)
   end
 
 
-  
-%  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.4020)<.01) )
-  if ( time>2.4 )
+  if (movie==1)  
+  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.4020)<.01) )
     disp('making ps files ...' )
     figure(1)
-%    print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
+    print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
     if (num_spect>0) 
       figure(2)
-%      print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
+      print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
     end
 %    disp('pause')
 %    pause
   end     
-  
+  end
 
   
   time=fread(fid,1,'float64');
