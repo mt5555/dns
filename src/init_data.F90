@@ -474,7 +474,7 @@ if (init==1) Q(:,:,:,3)=w
 
 ! do this even for restart case, because boundary conditions were not
 ! saved in restart file if offset_bdy==1
-call bcw_impose(Q)
+call bcw_impose(Q(1,1,1,3))
 
 ! Set the values of PSI on the boundary coming from the initial condition,
 ! if needed.  
