@@ -1,21 +1,9 @@
 TODO:
 
-move fft_derivatives (from james) into FFTOPTS
-make imcord +/- m for sine or cosine mode!
-
-
-
-1.1  FFT in blocks - faster if they are dimensioned:  x(lot,128)?  
 2. use a mpi communcator for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
-4. loops in ns3d.F90
-5. timers:  time initialization
-            everything after initialization
-            time spent in transpose operator
-            time spent in ns3d
-            time spent in output
-
 6. divergence: go to Shashkov formula?  
+
 
 NOTES:
 
@@ -31,7 +19,7 @@ structure function:
 **********************************************************************************
 FFT timings. 
 
-
+*****************************************************************
 
 64x64x64 timings (1cpu)  
 ./bench.sh 64  
@@ -48,22 +36,27 @@ FFT99                      1.59  1.58
 STK2+gcc                   1.72  1.71
 
 
+Autrey Sun Ultra 60
+FFT99   2.17  2.00 2.01
+STK2    1.53  1.57 
 
-Autrey FFT99  (Sun Ultra 60):    2.17  2.00 2.01
-Autrey STK2   (Sun Ultra 60):    1.53  1.57 
-
-Nirvana SGIFFT                 1.21 1.20 1.20
-Nirvana FFT99                  1.32 1.54 1.35  1.47 
+                                 (Timings too unreliable - have to be
+                                   done on 128cpus?)
+Nirvana SGIFFT                 1.80
+Nirvana SGIFFT 3d multiple     1.52  1.49
+Nirvana FFT99                  1.32 1.54 1.35  1.47   
 Nirvana STK                    1.37 1.37 1.37
 
 
-truchas FFT99 (Compaq ES40):   .34  .34  .34
-truchas STK2  (Compaq ES40):   .39  .39  .39
+Truchas (Compaq ES40)
+FFT99   .34  .34  .34  
+STK2    .39  .39  .39
+CPQ     .42  .42  .42
 
 
+*****************************************************************
 
-
-1024x1024x1 timings (1cpu)  runsize: 380M
+1024x1024x1 timings (1cpu)  run size: 380M
 ./bench.sh 1024
 CFL=1.5/.25
 
@@ -72,17 +65,40 @@ FFT99
 STK+gcc       
 STK+PGCC     
 
-truchas FFT99 (Compaq ES40):    1.70  1.74  
-truchas STK   (Compaq ES40):    1.60
+Truchas Compaq ES40
+FFT99     1.70  1.74  1.74
+STK       1.60  1.59  1.60
+CPQ       1.46  1.46  1.46
+
+
+*****************************************************************
+
+96x96x96 timings (1cpu)  runsize: 320Mb
+./bench.sh 256
+CFL=1.5/.25
+
+Linux laptop Lahey
+STK    3.08
+FFT99  2.85 2.86
 
 
 
+*****************************************************************
+
+256x8x256 timings (1cpu)  runsize: 241M
+./bench.sh 256
+CFL=1.5/.25
 
 
+Linux laptop Lahey
+FFT99        4.48  4.41
+STK+gcc      3.14  3.13
 
 
-
- 
+Truchas Compaq ES40
+FFT99      1.68  1.70
+STK        1.51  1.51
+CPQ        1.52  1.52
 
 
 

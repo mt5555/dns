@@ -31,7 +31,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc,iproc2
 integer i,j,k,jj,l
-integer,parameter :: maxbuf=1   ! maximum number of MPI buffers
+integer,parameter :: maxbuf=min(4,ncpu_z)   ! maximum number of MPI buffers
 integer :: n          ! loop over message blocks
 integer :: ncount     ! number of message blocks
 integer :: nb         ! loop over MPI buffers
@@ -40,7 +40,7 @@ integer :: nbcount    ! actual number of MPI buffers
 #ifdef USE_MPI
 real*8 :: sendbuf(nslabx*nslabz*ny_2dz,maxbuf)
 real*8 :: recbuf(nslabx*nslabz*ny_2dz,maxbuf)
-integer :: ierr,dest_pe,request(maxbuf,2),statuses(MPI_STATUS_SIZE,2*maxbuf)
+integer :: ierr,dest_pe,request(maxbuf,2),statuses(MPI_STATUS_SIZE,maxbuf,2)
 integer :: dest_pe3(3),tag
 #endif
 
@@ -74,6 +74,7 @@ do j=1,ny_2dz  ! loop over points in a single slab
    enddo
 enddo
 
+
 #ifdef USE_MPI
 iproc2=0
 do  ! loop over blocks of messages of size nbcount
@@ -90,6 +91,11 @@ do  ! loop over blocks of messages of size nbcount
          call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
          ASSERT("transpose_to_z: MPI_cart_rank failure",ierr==0)
 
+         tag=my_z
+         L=nslabz*nslabx*ny_2dz
+         call MPI_IRecv(recbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,1),ierr)
+         ASSERT("transpose_to_z: MPI_IRecv failure 1",ierr==0)
+
          L=0
          do j=1,ny_2dz  ! loop over points in a single slab
             jj=ny1 + iproc*ny_2dz +j -1
@@ -103,10 +109,6 @@ do  ! loop over blocks of messages of size nbcount
             enddo
          enddo
          
-         tag=my_z
-         call MPI_IRecv(recbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,1),ierr)
-         ASSERT("transpose_to_z: MPI_IRecv failure 1",ierr==0)
-
          tag=iproc
          call MPI_ISend(sendbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,2),ierr)
          ASSERT("transpose_to_z: MPI_ISend failure 1",ierr==0)
@@ -114,38 +116,43 @@ do  ! loop over blocks of messages of size nbcount
    enddo
 
 
-   ! wait until all messages sent
+   ! wait on all the receives
    nbcount=nb
    if (nbcount>0) then
-      call MPI_waitall(2*nbcount,request,statuses,ierr) 	
+      ! wait for all receives to finish
+      call MPI_waitall(nbcount,request(1,1),statuses,ierr) 	
+      ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
+
+      ! copy data out of receive buffers   
+      nb=0
+      do n=1,ncount
+         iproc=iproc2+n-1
+         if (iproc/=my_z) then
+            nb=nb+1
+            L=0
+            do j=1,ny_2dz  ! loop over points in a single slab
+               do k=nz1,nz2
+                  do i=nx1,nx2
+                     L=L+1
+                     pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=recbuf(L,nb)
+                  enddo
+               enddo
+            enddo
+         endif
+      enddo
+
+      ! wait for all sends to finish
+      call MPI_waitall(nbcount,request(1,2),statuses,ierr) 	
       ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
    endif
 
-   ! copy data out of receive buffers   
-   nb=0
-   do n=1,ncount
-      iproc=iproc2+n-1
-      if (iproc/=my_z) then
-         nb=nb+1
-         L=0
-         do j=1,ny_2dz  ! loop over points in a single slab
-            jj=ny1 + iproc*ny_2dz +j -1
-            ASSERT("transpose_to_z jj failure 3",jj<=ny2)
-            ASSERT("transpose_to_z jj failure 4",jj>=ny1)
-            do k=nz1,nz2
-               do i=nx1,nx2
-                  L=L+1
-                  pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=recbuf(L,nb)
-               enddo
-            enddo
-         enddo
-      endif
-   enddo
 
    iproc2=iproc2+ncount
    ASSERT("iproc2 error 1 ",iproc2<=mpidims(3))
    if (iproc2==mpidims(3)) exit
 enddo
+
+   call MPI_Barrier(comm_3d,ierr)
 #endif
 
 

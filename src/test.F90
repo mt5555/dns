@@ -446,9 +446,8 @@ do j=ny1,ny2
 do k=nz1,nz2
     if (abs(output(i,j,k)) > 1e-9 .and. count<50) then	
        count=count+1
-       write(message,'(i4,i4,i4,a,i4,i4,i4,a,2e15.7)') i,j,k,'mode=',imcord(i),jmcord(j),kmcord(k),&
+       write(*,'(i4,i4,i4,a,i4,i4,i4,a,2e15.7)') i,j,k,'mode=',imcord(i),jmcord(j),kmcord(k),&
             ' val=',output(i,j,k)
-       call print_message(message)
        if (count==50) then
           call print_message("count>50 will not print any more modes")
        endif

@@ -14,7 +14,6 @@ real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
-real*8 :: work(nx,ny,nz)
 real*8 :: ke_old,time_old,vel
 real*8,save :: Q(nx,ny,nz,n_var)
 integer i,j,k,n,ierr
@@ -26,7 +25,7 @@ if (firstcall) then
    firstcall=.false.
    Q=Q_grid
    do n=1,3
-      call fft3d(Q(1,1,1,n),work)
+      call fft3d(Q(1,1,1,n),rhs)  ! use rhs as a work array
    enddo
 endif
 
@@ -51,7 +50,7 @@ do n=1,3
    enddo
    enddo
    enddo
-   call ifft3d(Q_grid(1,1,1,n),work)
+   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
 enddo
 
 
@@ -69,7 +68,7 @@ do n=1,3
    enddo
    enddo
    enddo
-   call ifft3d(Q_grid(1,1,1,n),work)
+   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
 enddo
 
 ! stage 3
@@ -85,7 +84,7 @@ do n=1,3
    enddo
    enddo
    enddo
-   call ifft3d(Q_grid(1,1,1,n),work)
+   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
 enddo
 
 
@@ -102,7 +101,7 @@ do n=1,3
    enddo
    enddo
    enddo
-   call ifft3d(Q_grid(1,1,1,n),work)
+   call ifft3d(Q_grid(1,1,1,n),rhs)   ! use rhs as a work array
 enddo
 
 

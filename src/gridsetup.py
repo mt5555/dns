@@ -117,6 +117,8 @@ for i in range(3):
           use_x_y=0
           j=(i+2) % 3  # go back to original value
           print 'Using TRANSPOSE_X_SPLIT_Z. '
+          print 'Oops: TRANSPOSE_X_SPLIT_Z no longer supported.  Exiting...'
+          sys.exit(1)
 
 
           
