@@ -13,14 +13,15 @@ z=w(3,:);
 
 
 figure(1)
-[xsph,ysph,zsph]=sphere(100);
+[xsph,ysph,zsph]=sphere(200);
 surfl(xsph,ysph,zsph,'light');
 colormap white
 shading interp
 hold on
-plot3(x,y,z,'r.','MarkerSize',8);
+scale=1.01;
+plot3(scale*x,scale*y,scale*z,'k.','MarkerSize',12);
 hold off;
 axis equal
-print -dpsc angle.ps
+print -deps  angle.ps
 
 

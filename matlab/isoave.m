@@ -17,18 +17,18 @@ ext='.isostr';
 
 %name='/ccs/scratch/taylorm/check256_0000.8000'
 %name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
-name='/ccs/scratch/taylorm/dns/iso12_5120003.0000'
-nx=512; delx_over_eta=2.74; epsilon=3.89;
+name='/ccs/scratch/taylorm/dns/iso12_5120005.0000'
+nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %ext='.isostr001';
 
-name='/ccs/scratch/taylorm/sk/check256_0000.8000'
-nx=256; delx_over_eta=1.0; epsilon=1.0;
+%name='/ccs/scratch/taylorm/sk/check256_0000.8000'
+%nx=256; delx_over_eta=1.0; epsilon=1.0;
 
 %name='/ccs/scratch/taylorm/decay/decay2048-1024.0000.6491'
 %nx=1024; delx_over_eta=2.73*2; epsilon=.04;
 
-name='/ccs/scratch/taylorm/decay/decay20480000.6491'
-nx=2048; delx_over_eta=2.73*2; epsilon=.04;
+%name='/ccs/scratch/taylorm/decay/decay20480000.6491'
+%nx=2048; delx_over_eta=2.73*2; epsilon=.04;
 
 
 ndir_use=0;
@@ -41,6 +41,7 @@ disp('1 = Scaling laws for total structure function');
 disp('2 = Scaling laws and also plot D+/-');
 disp('4 = 2nd and 3rd order isotropy check');
 disp('5 = 2nd and 3rd order isotropy check, x,y,z directions only');
+disp('6 = Scaling laws for total structure function (for paper)');
 in=input('Enter choice: ');
 
 
@@ -60,15 +61,17 @@ else
    end
 end
 
-
 xx=(1:.5:(nx./2.5)) / nx;
+%xx=(1:.5:100)/nx;
 
-xx=(1:.5:100)/nx;
+if (in==6) 
+  compisoave_paper(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
+else
+  [y45,y415,y43,eps]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
+end
 
-[y45,y415,y43,eps]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
+  
 xx_plot=xx*nx*delx_over_eta;
-
-
 return
 figure(10); hold off;
 semilogx(xx_plot,y45,'k'); hold on;

@@ -148,9 +148,10 @@ end
 
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
+if (plot_points==1) 
 print('-dpsc',[bname,'_45.ps']);
 print -djpeg 45.jpg
-
+end
 
 if (0) 
 figure(4)
@@ -223,9 +224,10 @@ end
 x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
+if (plot_points==1) 
 print('-dpsc',[bname,'_415.ps']);
 print -djpeg 415.jpg
-
+end
 
 %
 %  the 4/3 law
@@ -267,9 +269,10 @@ x=1:xmax; semilogx(x,(4/3)*x./x,'k');
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
+if (plot_points==1) 
 print('-dpsc',[bname,'_43.ps']);
 print -djpeg 43.jpg
-
+end
 
 
 %
@@ -301,8 +304,10 @@ x=1:xmax; semilogx(x,(2/15)*x./x,'k');
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
+if (plot_points==1) 
 print('-dpsc',[bname,'_215.ps']);
 print -djpeg 215.jpg
+end
 end
 
 
@@ -359,6 +364,7 @@ ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
 print('-dpsc',[bname,'_isocheck2.ps']);
 print -djpeg isocheck2.jpg
+
 
 
 

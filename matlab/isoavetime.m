@@ -118,28 +118,30 @@ end
 
 figure(4); clf; hold on; 
 for i=2:2
-   plot(times/teddy,mx45_localeps(1:length(times),i));
+   plot(times/teddy,mx45_localeps(1:length(times),i),'k:','LineWidth',2.0);
 end
-plot(times/teddy,mx45_iso_localeps,'g');
+plot(times/teddy,mx45_iso_localeps,'k-','LineWidth',2.0);
 ax=axis;
 axis( [ax(1),ax(2),.5,1.0] );
 plot(times,(4/5)*times./times,'k');
 hold off;
-title('MAX (D_{lll} / r\epsilon)   (4/5 law) ');
-xlabel('time');
-%print -dpsc k45time.ps
+ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+xlabel('time','FontSize',16)
+print -dpsc k45time.ps
 
 
 figure(5); clf
-for i=1:3
-  semilogx(xx_plot,y45_ave(:,i)); hold on
+for i=[1,5,13]
+  semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',2.0); hold on
 end
-  semilogx(xx_plot,y45_iso_ave,'k'); hold on
+semilogx(xx_plot,y45_iso_ave,'k','LineWidth',2.0); hold on
 axis([1 1000 0 1.0])
 x=1:1000; plot(x,(4/5)*x./x,'k');
 hold off;
-title('D_{lll} / r\epsilon   (4/5 law) ');
-xlabel('r/\eta');
+%title('D_{lll} / r\epsilon   (4/5 law) ');
+ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+xlabel('r/\eta','FontSize',16);
+
 print -dpsc k45mean.ps
 
 

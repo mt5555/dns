@@ -505,7 +505,7 @@ do i=nx1,nx2
    ux4(3)=ux4(3)+uij*uij
 
    vor2=vor2 + vor**2
-   vor3=vor3 + vor**3
+   vor3=vor3 + vor*vor**2  ! will **3 preserve sign?
    vor4=vor4 + vor**4
 enddo
 enddo

@@ -297,7 +297,10 @@ iso12w256A IN QA  up to t=88 so far
 IN:
    at t=90 changed  FM = 18/(2pi)**2 
                     epsilon=  
-   run to t=137, still running
+   run to t=137, still running.  lost all *.isoave files up to t=181.
+   run 7*6 = 42.  Run to t=232.  
+ 
+   
 
 
 

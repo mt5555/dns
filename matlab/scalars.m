@@ -10,14 +10,15 @@ apply_fix=0;
 range=0:50;
 %range = 1
 %range=0:.5:2;
+fid2=-1;
 
 %fid=fopen('iso12_256_200.scalars','r','b'); 
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
 fid=endianopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r'); 
+fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
-
 
 
 
@@ -26,7 +27,18 @@ nscalars=0;
 nscalars_e=0;
 while (1) 
   [ni,count]=fread(fid,1,'float64');
-  if (count~=1) break; end;
+  if (count~=1) 
+     if (fid2<0) 
+        break; 
+     end
+     fclose(fid);
+     fid=fid2;
+     fid2=-1;
+     [ni,count]=fread(fid,1,'float64');
+     if (count~=1) 
+       break;
+     end
+  end;
   nints=ni;
   ns=fread(fid,1,'float64');
   mu=fread(fid,1,'float64');
@@ -50,12 +62,6 @@ while (1)
   time = fread(fid,1,'float64');
   data1 = fread(fid,[ns_e,1],'float64');
   data1=[time;data1];
-  if (nscalars_e==0) 
-    ints_e= data1;
-  else
-    ints_e= [ints_e,data1];
-  end
-  nscalars_e=nscalars_e+1;
 end
 
 disp(sprintf('nints=%i  total scalars read=%i',nints,nscalars))
@@ -76,7 +82,7 @@ ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 vor_z=ints(4,:);
 hel=ints(5,:);
 ke=ints(6,:);   %  ke 
-% ints(7,:)   enstrophy
+ens = ints(7,:);   %  enstrophy
 % ints(8,:)   < u,div(tau)' >  (alpha model only)
 % ints(9,:)   < u,f>           (alpha model only)
 % ints(1,:)  < u_xx,u_xx> >   (used for E_alpha dissapation term)
@@ -114,6 +120,12 @@ xlabel('time')
 print -dpsc ke.ps
 print -djpeg -r72 ke.jpg
 
+figure(6)
+plot(time,sqrt(ens),'r')
+title('average vorticity magnitude')
+xlabel('time')
+print -djpeg -r72 vor.jpg
+
 
 lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
 R_l = lambda.*sqrt(2*ints(6,:)/3)/mu;
@@ -148,7 +160,7 @@ disp(sprintf('R_l (average over last half of data) = %f ',R_l));
 
 disp(sprintf('1/250 in units of eta:  %f',(1/250)/eta));
 disp(sprintf('1/500 in units of eta:  %f',(1/500)/eta));
-disp(sprintf('1/512 in units of eta:  %f',(1/512)/eta));
+disp(sprintf('1/512 in units of eta:            %f   %f', (1/512)/eta,eta*2*pi*512*sqrt(2)/3 )) ;
 disp(sprintf('1/2048 in units of eta:  %f',(1/2048)/eta));
 
 tturn=-2*ke./ke_diss_d;
