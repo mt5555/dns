@@ -512,6 +512,7 @@ subroutine input_uvw(time,Q,Qhat,work1,work2)
 !
 use params
 use mpi
+use tracers
 use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
@@ -588,6 +589,7 @@ else if (equations==SHALLOW) then
       call singlefile_io(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe)
    endif
 else if (equations==NS_PSIVOR) then
+   call tracers_restart(io_pe)
    fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vor"
    call print_message("Input: ")
    call print_message(fname)
@@ -605,6 +607,7 @@ end subroutine
 
 subroutine output_uvw(basename,time,Q,q1,work1,work2)
 use params
+use tracers
 use mpi
 use fft_interface
 use transpose
@@ -675,6 +678,7 @@ else if (equations==SHALLOW) then
       call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
    endif
 else if (equations==NS_PSIVOR) then
+   call tracers_save(io_pe,time)
    ! 2D NS psi-vor formulation
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
    call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)

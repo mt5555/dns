@@ -1,7 +1,6 @@
 #include "macros.h"
 subroutine time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
-use tracers
 use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)      
@@ -314,7 +313,6 @@ endif
 if (doit_output) then
    write(message,'(a,f10.4)') "writing output files at t=",time
    call print_message(message)
-   call tracers_save(io_pe,time)
    if (equations==NS_UVW .and. w_spec) then
       call transpose_from_z_3d(Qhat,q1)
       ! convert to nx,ny,nz dimensions for output:

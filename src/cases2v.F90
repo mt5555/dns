@@ -189,9 +189,11 @@ end subroutine
 
 subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 !
-!  init=0    setup parameters only
-!  init=1    setup parameters and compute initial conditoin
-!  init=2    setup parameter and initialize PSI boundary
+!  init=0    setup parameters only, then exit
+!  init=1    setup parameters and compute initial condition + b.c.
+!                                 initialize tracers
+!  init=2    setup parameters, initialize b.c. (not saved in restart file)
+!                                 read tracer restart file
 !
 use params
 use tracers
@@ -370,8 +372,6 @@ if (init==1) then
       tracer(k,2)=cos(hold)
       tracer(k,ndim+1)=k   ! "alf" particle lable 
    enddo
-else if (init==0) then
-   call tracers_restart(io_pe)
 endif
 end subroutine
 

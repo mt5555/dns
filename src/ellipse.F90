@@ -14,7 +14,7 @@ module which will compute ellipse centerered around the peak vorticity
 integer,private   :: init = 0
 
 integer,parameter :: nelld = 4  !  number of ellipses
-integer,parameter :: npd   = 32  !  number of points along each ellipse
+integer,parameter :: npd   = 65  !  number of points along each ellipse
 
 
 real*8 :: wval(nelld)         ! vorticity contour values (% of max vorticity)
@@ -90,7 +90,7 @@ if (io_pe==my_pe) then
    fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ellipse2"
    call copen(fname,"w",fid,ierr)
    if (ierr/=0) then
-      write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
+      write(message,'(a,i5)') "output ellipse: Error opening file errno=",ierr
       call abort(message)
    endif
 
@@ -100,8 +100,10 @@ if (io_pe==my_pe) then
    tmp=npd
    call cwrite8(fid,tmp,1)
    call cwrite8(fid,time,1)
+   call cwrite8(fid,center,2)  ! the vorticity max center
 
    do nell=1,nelld
+      call cwrite8(fid,wval(nell)*mxw_init,1)
       call cwrite8(fid,ccord(1,nell),2)
       call cwrite8(fid,Rad2(1,nell),npd)
    enddo
@@ -306,7 +308,7 @@ integer :: np,count,ierr
    do np=1,npd
       ! find Rad so that:  w(Rad cosc(np), Rad sinc(np)) = wcontour
 
-      Rdelta=.01
+      Rdelta=.1
       r(np)=Rdelta
 
       count=0
@@ -317,7 +319,8 @@ integer :: np,count,ierr
          else if (winterp>wcontour) then
             r(np)=r(np)+Rdelta ! undershoot
          else if (winterp<=wcontour) then ! overshoot
-            r(np)=r(np)-Rdelta  ! back to original undershoot value
+            r(np)=r(np)-3*Rdelta  ! back to original undershoot value
+            if (r(np)<0) r(np)=0
             Rdelta=Rdelta/10
             r(np)=r(np)+Rdelta  ! increment by new value
          endif
