@@ -104,21 +104,37 @@ LINK=$(F90) $(FFLAGS)
 #independent modules/routines (dont use any other modules):
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 #modules/routines which use OBJS1
-OBJS2 = transpose.o structf.o sforcing.o solve.o ghost.o bc.o
+OBJS2 = transpose.o  solve.o ghost.o bc.o
+
 #modules/routines which use OBJS1,2
-INITS  = init_mpi.o init_data.o init_grid.o 
-OPS    = ghostops.o fftops.o test.o integrals.o
+INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
+OPS    = ghostops.o fftops.o test.o integrals.o timecontrol.o
 FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
-MODEL_GRID       = ns_grid.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_GHOST      = ns_ghost.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_PSIVOR     = ns_psivor.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_IMPULSE    = ns_impulse.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC_SLOW  = ns_decomp3.o dns.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC       = ns.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_ALPHA      = ns_alpha.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SHALLOW    = shallow.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3)
+#diagnostics for 3d turbulence runs:
+TURB_DIAG = structf.o turb_diag.o
+
+#diagnostics for VXPAIR runs:
+PSIVOR_DIAG = psivor_diag.o
+
+#diagnostics for shallow water:
+SHALLOW_DIAG =  shallow_diag.o 
+
+
+# n_var>=3 models:  (u,v,w) or (u,v,h)
+# but they can still be run on 2D problems with nz=1
+MODEL_GRID       = ns_grid.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_GHOST      = ns_ghost.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC       = ns.o sforcing.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SHALLOW    = shallow.o dns.o   $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)
+
+# n_var>=2 models  (u,v) and (w,psi)
+MODEL_PSIVOR     = ns_psivor.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(PSIVOR_DIAG)
+
 
 
 #rules

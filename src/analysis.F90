@@ -21,7 +21,6 @@
 program anal
 use params
 use mpi
-use structf
 use fft_interface
 implicit none
 real*8,save  :: Q(nx,ny,nz,n_var)

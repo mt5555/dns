@@ -49,7 +49,8 @@ real*8 :: Q2(nx,ny,nz,n_var)
 real*8 :: Q3(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 
-call rk4reshape(time,Q,Qsave(1,1,1,1),Qsave(1,1,1,2),Q2(1,1,1,1),Q2(1,1,1,2),Q2(1,1,1,3),work1,work2)
+call rk4reshape(time,Q,Qsave(1,1,1,1),Qsave(1,1,1,2),Q2(1,1,1,1),Q2(1,1,1,2),&
+Q3(1,1,1,1),work1,work2)
 end subroutine
 
 

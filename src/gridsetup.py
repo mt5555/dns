@@ -10,26 +10,34 @@ import os, commands, getopt, sys
 padset=0
 pad1=[0,0,0]
 pad2=[2,2,2]
+n_var=3
 
-if (len(sys.argv)== 13):
-   padset=1
+
+if (len(sys.argv)>= 14):
+   n_var=atoi(sys.argv[13])
+
+if (len(sys.argv)>= 13):
    for i in range(3):
       pad1[i]=atoi(sys.argv[10+i])
-      pad2[i]=atoi(sys.argv[7+i])
-elif len(sys.argv)==10:
+
+if len(sys.argv)>=10:
    padset=1
    for i in range(3):
       pad2[i]=atoi(sys.argv[7+i])
-elif len(sys.argv)== 7:
+
+if len(sys.argv)>= 7:
    i=0
    #nothing
-else:
+   
+if len(sys.argv)<7:
    #arg       0      1      2      3     4  5  6   7     8   9      10      11   12         
    print 'gridsetup ncpu_x ncpu_y ncpu_z nx ny nz'
    print 'OR:'
    print 'gridsetup ncpu_x ncpu_y ncpu_z nx ny nz  padx pady padz'
    print 'OR:'
    print 'gridsetup ncpu_x ncpu_y ncpu_z nx ny nz  padx pady padz offsetx offsety offsetz'
+   print 'OR:'
+   print 'gridsetup ncpu_x ncpu_y ncpu_z nx ny nz  padx pady padz offsetx offsety offsetz  n_var'
    sys.exit(1) 
 
 
@@ -115,7 +123,7 @@ print "Grid per cpu: ",nslab[0],nslab[1],nslab[2]
 
 fout=open("/tmp/params.h",'w')
 fout.write("! number of prognostic variables:\n" )
-fout.write("integer,parameter :: n_var=3\n")
+fout.write("integer,parameter :: n_var="+str(n_var)+"\n")
 
 fout.write("! parallel decomposition:\n ")
 fout.write("integer,parameter :: ncpu_x="+str(ncpu[0])+"\n" )

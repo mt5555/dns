@@ -30,7 +30,7 @@ make dnsvor >& /dev/null ;  rm -f $tmp ; ./dnsvor -d /tmp < $refin > $tmp
 ../testing/check.sh $tmp $refout
 
 
-   ./gridsetup.py 1 1 1 64 64 1 2 2 0 2 2 0
+   ./gridsetup.py 1 1 1 64 64 1   2 2 0   2 2 0    2
 make dnsvor >& /dev/null ;  rm -f $tmp ; ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
@@ -60,15 +60,15 @@ endif
 if ($1 == po) then
 
 
-./gridsetup.py 2 1 1 64 64 1  2 2 0 2 2 0
+./gridsetup.py 2 1 1 64 64 1  2 2 0 2 2 0     2
 make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
-./gridsetup.py 1 2 1 64 64 1  2 2 0 2 2 0
+./gridsetup.py 1 2 1 64 64 1  2 2 0 2 2 0     2
 make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
-./gridsetup.py 2 2 1 64 64 1  2 2 0 2 2 0
+./gridsetup.py 2 2 1 64 64 1  2 2 0 2 2 0     2
 make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dnsvor -d /tmp < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 

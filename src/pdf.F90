@@ -21,7 +21,6 @@ integer :: struct_nx=0
 integer :: struct_ny=0          ! every "struct_n*" time steps
 integer :: struct_nz=0          !
 integer :: countx=-1,county=-1,countz=-1
-integer :: compute_struct=0
 
 
 integer           :: structf_init=0
@@ -515,7 +514,7 @@ end subroutine
 
 
 
-
+#if 0
 
 subroutine z_ifft3d_str(fin,f,w1,Qt,works,work)
 !
@@ -664,7 +663,7 @@ tims(12)=tims(12)+(tmx2-tmx1)
 
 end subroutine
 
-
+#endif
 
 
 
@@ -884,5 +883,27 @@ tims(12)=tims(12)+(tmx2-tmx1)
 end subroutine
 
 
+
+
+
+
+
+
+
+
 end module
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

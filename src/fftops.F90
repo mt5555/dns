@@ -302,6 +302,8 @@ real*8 work(nx,ny,nz)
 integer i,j,k,n
 real*8 dummy(1)
 
+if (n_var<3) call abort("vorticity() requires n_var>2")
+
 vor=0
 do n=1,ndim
 
@@ -341,6 +343,48 @@ do n=1,ndim
    endif
 
 enddo
+
+
+end subroutine
+
+
+
+subroutine vorticity2d(vor,u,d1,work)
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 u(nx,ny,nz,2)    ! input
+real*8 vor(nx,ny,nz)    ! output
+real*8 d1(nx,ny,nz) 
+real*8 work(nx,ny,nz) 
+
+! local variables
+integer i,j,k,n
+real*8 dummy(1)
+
+vor=0
+
+   n=2
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,1)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      vor(i,j,k) = vor(i,j,k) + d1(i,j,k)
+   enddo
+   enddo
+   enddo
+
+   n=1
+   ! compute u_y, u_yy
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,2)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      vor(i,j,k) = vor(i,j,k) -d1(i,j,k)
+   enddo
+   enddo
+   enddo
 
 
 end subroutine

@@ -80,6 +80,7 @@ real*8  :: pi,pi2,pi2_squared
 
 real*8  :: grav=0  
 real*8  :: fcor=0  
+integer :: compute_struct=0
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

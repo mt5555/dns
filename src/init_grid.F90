@@ -1,7 +1,6 @@
 #include "macros.h"
 subroutine init_model
 use params
-use structf
 use fft_interface
 use transpose
 implicit none
@@ -44,7 +43,6 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine init_grid
 use params
-use structf
 use fft_interface
 use mpi
 implicit none
@@ -277,7 +275,6 @@ end subroutine
 
 subroutine init_input_file()
 use params
-use structf
 use transpose
 use fft_interface
 use mpi
@@ -370,9 +367,6 @@ call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_nx,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_ny,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(struct_nz,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
@@ -461,7 +455,6 @@ end subroutine
 
 subroutine read_type0
 use params
-use structf
 implicit none
 
 !local variables
@@ -540,9 +533,6 @@ init_cond=1           ! KH analytic - default initial condition
 init_cond_subtype=0   ! default parameters
 forcing_type=0   ! no forcing
 compute_struct=0
-struct_nx=0
-struct_ny=0
-struct_nz=0
 alpha_value=0
 
 
@@ -557,7 +547,6 @@ end subroutine
 
 subroutine read_type2
 use params
-use structf
 implicit none
 
 !local variables
