@@ -95,10 +95,17 @@ maxs_save(1:nints,nscalars)=maxs(1:nints)
 
 doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
+! dont write a restart file if we just restarted:
+if (time==time_initial .and. (init_cond==3)) doit_restart=.false.
+
 doit_output=check_time(itime,time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
+! dont write output file if we just restarted:
+if (time==time_initial .and. (init_cond==3)) doit_restart=.false.
+
 doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
+
 doit_screen=check_time(itime,time,screen_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 ! also output first 5 timesteps, unless screen_dt==0
@@ -333,7 +340,6 @@ real*8 :: ints_save(nv,nscalars)
 real*8 :: maxs_save(nv,nscalars)
 integer,parameter :: nints_e=13
 real*8 :: ints_e(nints_e)
-real*8 :: ints_e2(nints_e)
 
 ! local variables
 integer i,j,k,n
@@ -416,6 +422,14 @@ deallocate(spectrum1)
 ! output structure functions
 !
 call compute_all_pdfs(Q,q1,q2,q3,work1,ints_e,nints_e)
+
+
+write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
+(ints_e(n+3)/ints_e(n)**1.5,n=1,3)
+call print_message(message)
+
+
+
 if (structf_init==1) then
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time

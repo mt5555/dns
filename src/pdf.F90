@@ -690,7 +690,7 @@ real*8 gradw(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: vor(3),sum(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
+real*8 :: vor(3),sm(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
 real*8 dummy(1)
 real*8 :: tmx1,tmx2
 
@@ -746,7 +746,7 @@ do i=nx1,nx2
 
    ! compute Sij*wj
    do m1=1,3
-      sum(m1)=0
+      sm(m1)=0
       do m2=1,3
          if (m1==1) uij=gradu(i,j,k,m2)
          if (m1==2) uij=gradv(i,j,k,m2)
@@ -754,11 +754,11 @@ do i=nx1,nx2
          if (m2==1) uji=gradu(i,j,k,m1)
          if (m2==2) uji=gradv(i,j,k,m1)
          if (m2==3) uji=gradw(i,j,k,m1)
-         sum(m1)=sum(m1)+.5*(uij+uji)*vor(m2)
+         sm(m1)=sm(m1)+.5*(uij+uji)*vor(m2)
       enddo
    enddo
    ! compute Sww = wi*(Sij*wj)
-   Sww=Sww+sum(1)*vor(1)+sum(2)*vor(2)+sum(3)*vor(3)
+   Sww=Sww+sm(1)*vor(1)+sm(2)*vor(2)+sm(3)*vor(3)
 
    ! if we use gradu(i,j,k,1)**3, do we preserve the sign?  
    ! lets not put f90 to that test!
@@ -788,6 +788,7 @@ ux3=ux2/g_nx/g_ny/g_nz
 ux4=ux2/g_nx/g_ny/g_nz
 u2=u2/g_nx/g_ny/g_nz
 
+ASSERT("compute_all_pdfs: ns too small ",ns>=13)
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)
@@ -797,6 +798,7 @@ scalars(10)=Sww
 do n=1,3
 scalars(10+n)=u2(n)
 enddo
+
 
 #ifdef USE_MPI
    scalars2=scalars

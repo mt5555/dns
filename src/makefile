@@ -62,10 +62,19 @@ ifeq ($(UNAME),IRIX64)
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
-   #MPI = -DUSE_MPI -I/usr/opt/MPI190/include
-   #MPILIB = -L/usr/opt/MPI190/lib -lfmpi -lmpi 
-   #MPI = -DUSE_MPI -I/usr/opt/MPI/include
-   #MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+   ifeq ($(HOST),mahi)
+      MPI = 
+      MPILIB =  
+   else
+   ifeq ($(HOST),truchas)
+      MPI = -DUSE_MPI -I/usr/opt/MPI190/include
+      MPILIB = -L/usr/opt/MPI190/lib -lfmpi -lmpi 
+   else	
+      MPI = -DUSE_MPI -I/usr/opt/MPI/include
+      MPILIB = -L/usr/opt/MPI/lib -lfmpi -lmpi -lelan
+   endif
+   endif
+
    LDFLAGS =  $(MPILIB) -lcxml #-Lstk -lstk 
 
    #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
