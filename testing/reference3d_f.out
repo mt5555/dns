@@ -1,0 +1,171 @@
+Running single threaded
+ Run name:         reference3ds
+ output directory: ../testing/3df/
+ reading input from file: ../testing/reference3d_f.inp                          
+                           
+ Enter input file type: 
+ input_file_type=           4
+equations: ns_uvw              
+ initial condition: iso12               
+ forcing: iso12               
+ method: fft-sphere          
+ b.c. x-direction: periodic            
+ b.c. y-direction: periodic            
+ b.c. z-direction: periodic            
+Diffusion coefficient mu=0.3710E-02                                             
+Diffusion d/dt(KE)/KE on mode k =    1.:     0.29                               
+Diffusion d/dt(KE)/KE on mode k =   18.:   100.00                               
+NS-Alpha:  alpha, alpha/h :    0.00000000    0.0000                             
+Global grid:     32 x    32 x    32                                             
+Local grid (with padding):     34 x    34 x    34                               
+Number of passive scalars:      0                                               
+Initial data                                                                    
+Initializing FFT99 of size n=    32                                             
+Isotropic initial condition in wave numbers:
+wn=   1+/-.5   E=  0.1000E+01  E target=  0.1000E+01                            
+wn=   2+/-.5   E=  0.3150E+00  E target=  0.3150E+00                            
+wn=   3+/-.5   E=  0.7704E-01  E target=  0.7704E-01                            
+wn=   4+/-.5   E=  0.3937E-01  E target=  0.3937E-01                            
+wn=   5+/-.5   E=  0.2339E-01  E target=  0.2339E-01                            
+wn=   6+/-.5   E=  0.1529E-01  E target=  0.1529E-01                            
+wn=   7+/-.5   E=  0.1067E-01  E target=  0.1067E-01                            
+wn=   8+/-.5   E=  0.7813E-02  E target=  0.7813E-02                            
+wn=   9+/-.5   E=  0.5935E-02  E target=  0.5935E-02                            
+wn=  10+/-.5   E=  0.4642E-02  E target=  0.4642E-02                            
+wn=  11+/-.5   E=  0.3716E-02  E target=  0.3716E-02                            
+wn=  12+/-.5   E=  0.3033E-02  E target=  0.3033E-02                            
+wn=  13+/-.5   E=  0.2517E-02  E target=  0.2517E-02                            
+wn=  14+/-.5   E=  0.2117E-02  E target=  0.2117E-02                            
+wn=  15+/-.5   E=  0.1802E-02  E target=  0.1802E-02                            
+Total E=  1.5123                                                                
+Projecting initial data...
+Time stepping...                                                                
+initial time:    0.0000                                                         
+final time:   *********                                                         
+max number timesteps:         10                                                
+
+time=  0.00000(     0)  next output=*********  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0069337 cfl_adv= 1.500 cfl_vis= 0.079                 
+max: (u,v,w)      3.00894213186094     3.63997881404068     3.34980024554774    
+<z-vor>= 0.15721E-15   <hel>=-0.29254E+01   max(vor) 0.69535E+02                
+R_lambda=    38.46652  R=   269.50599 lambda=     0.14218                       
+mesh spacing/eta:        2.6827       2.6827       2.6827                       
+spherical dealiasing kmax*eta:        1.1041                                    
+eddy turnover time:        1.0897                                               
+ke:  1.5115610682  enstropy:      747.7066         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -2.7743601 f=   8.9546866 alpha=   0.0000000 total=   6.1803265  
+writing output files at t=    0.0000                                            
+ Spectrum output data
+number of real coefficients:   32.  32.  32.
+ Spectrum output data
+number of real coefficients:   32.  32.  32.
+ Spectrum output data
+number of real coefficients:   32.  32.  32.
+done with output
+ 
+ 1E0   | *******              Energy t=    0.0000     
+       |        ****         
+       |            *****    
+       |                 *** 
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+ 1E-10 |*                   *
+       +---------------------+
+      k=0                 k=  17
+max(div)= 0.94147E-13                                                           
+skewness ux,vw,wz:    -0.02310095    0.02367890    0.00053120                   
+wSw:    -0.01221425                                                             
+
+time=  0.00693(     1)  next output=*********  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0069077 cfl_adv= 1.500 cfl_vis= 0.079                 
+max: (u,v,w)      3.08954805883713     3.69793090758536     3.42366096528982    
+<z-vor>= 0.15721E-15   <hel>=-0.29254E+01   max(vor) 0.69535E+02                
+R_lambda=    38.46652  R=   269.50599 lambda=     0.14218                       
+mesh spacing/eta:        2.6827       2.6827       2.6827                       
+spherical dealiasing kmax*eta:        1.1041                                    
+eddy turnover time:        1.0897                                               
+ke:  1.5115610682  enstropy:      747.7066         total d/dt(ke):   0.0000000  
+d/dt(ke) vis=  -2.7743601 f=   8.9546866 alpha=   0.0000000 total=   6.1803265  
+
+time=  0.01384(     2)  next output=*********  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0069432 cfl_adv= 1.500 cfl_vis= 0.079                 
+max: (u,v,w)      3.14789243094662     3.70799645713797     3.40239597570359    
+<z-vor>=-0.35074E-16   <hel>=-0.27419E+01   max(vor) 0.66990E+02                
+R_lambda=    40.83268  R=   269.50599 lambda=     0.14918                       
+mesh spacing/eta:        2.6343       2.6343       2.6343                       
+spherical dealiasing kmax*eta:        1.1244                                    
+eddy turnover time:        1.1996                                               
+ke:  1.5471996348  enstropy:      695.2204         total d/dt(ke):   5.1399316  
+d/dt(ke) vis=  -2.5796103 f=   6.7435498 alpha=   0.0000000 total=   4.1639395  
+
+time=  0.02078(     3)  next output=*********  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0070432 cfl_adv= 1.500 cfl_vis= 0.080                 
+max: (u,v,w)      3.22342039033534     3.62033619892531     3.34266650548582    
+<z-vor>= 0.81153E-16   <hel>=-0.26047E+01   max(vor) 0.67209E+02                
+R_lambda=    42.58628  R=   269.50599 lambda=     0.15445                       
+mesh spacing/eta:        2.5986       2.5986       2.5986                       
+spherical dealiasing kmax*eta:        1.1398                                    
+eddy turnover time:        1.2857                                               
+ke:  1.5701510247  enstropy:      658.2471         total d/dt(ke):   3.3225879  
+d/dt(ke) vis=  -2.4424209 f=   4.8216970 alpha=   0.0000000 total=   2.3792760  
+
+time=  0.02783(     4)  next output=*********  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0071160 cfl_adv= 1.500 cfl_vis= 0.081                 
+max: (u,v,w)      3.28322133131948     3.63001412428125     3.31479534693760    
+<z-vor>= 0.35074E-15   <hel>=-0.25055E+01   max(vor) 0.65231E+02                
+R_lambda=    43.82549  R=   269.50599 lambda=     0.15831                       
+mesh spacing/eta:        2.5717       2.5717       2.5717                       
+spherical dealiasing kmax*eta:        1.1517                                    
+eddy turnover time:        1.3509                                               
+ke:  1.5826153531  enstropy:      631.4554         total d/dt(ke):   1.7951819  
+d/dt(ke) vis=  -2.3430106 f=   3.5185455 alpha=   0.0000000 total=   1.1755349  
+
+time=  0.07261(    10)  next output=  0.07261  LSF minutes left:    -1. 0       
+for next timestep: delt=0.0077026 cfl_adv= 1.500 cfl_vis= 0.088                 
+max: (u,v,w)      3.33244222893660     3.18156394775615     3.32496746676003    
+<z-vor>= 0.97253E-16   <hel>=-0.22157E+01   max(vor) 0.63377E+02                
+R_lambda=    45.04710  R=   269.50599 lambda=     0.16337                       
+mesh spacing/eta:        2.5266       2.5266       2.5266                       
+spherical dealiasing kmax*eta:        1.1723                                    
+eddy turnover time:        1.4385                                               
+ke:  1.5702357427  enstropy:      588.3578         total d/dt(ke):  -0.8124524  
+d/dt(ke) vis=  -2.1830974 f=   1.3540805 alpha=   0.0000000 total=  -0.8290169  
+ 
+ 1E0   | *******              Energy t=    0.0726     
+       |        ****         
+       |            ***      
+       |               **    
+       |                 *** 
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+       |                     
+ 1E-10 |*                   *
+       +---------------------+
+      k=0                 k=  17
+max(div)= 0.90594E-13                                                           
+skewness ux,vw,wz:    -0.33438353   -0.48836360   -0.31621842                   
+wSw:     1.98962713                                                             
+CPU times (min):   (avg/max)
+initialization:      0.01     0.01                                              
+initial output:      0.00     0.00                                              
+dns_solve:           0.15     0.15  per timestep:    0.01533   0.01533          
+   time_control            0.01     0.01                                        
+   RHS                     0.10     0.10                                        
+   transpose_to_z          0.00     0.00                                        
+   transpose_from_z        0.01     0.01                                        
+   transpose_to_x          0.01     0.01                                        
+   transpose_from_x        0.01     0.01                                        
+   transpose_to_y          0.01     0.01                                        
+   transpose_from_y        0.01     0.01                                        
