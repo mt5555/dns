@@ -152,7 +152,7 @@ end subroutine
 !       subcube code will still work)
 !
 !
-subroutine isoavep(Q,Qs,Qt,Qst)
+subroutine isoavep(Q,Qs,Qt,Qst,range)
 use params
 use transpose
 
@@ -161,6 +161,7 @@ real*8 :: Q(nx,ny,nz,ndim)               ! original data
 real*8 :: Qt(g_nz2,nslabx,ny_2dz,ndim)   ! transpose
 real*8 :: Qs(nx,ny,nz,ndim)              ! shifted original data
 real*8 :: Qst(g_nz2,nslabx,ny_2dz,ndim)  ! transpose
+real*8 :: range(3,2)
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
@@ -194,16 +195,26 @@ SN_lll=0
 
 ke_diss=0
 ke=0
+ntot=0
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
       do k=nz1,nz2
+      if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
       do j=ny1,ny2
+      if (ycord(j)>=range(2,1) .and. ycord(j)<range(2,2)) then
       do i=nx1,nx2
+      if (xcord(i)>=range(1,1) .and. xcord(i)<range(1,2)) then
+
+         ntot=ntot+1
          if (m==1) ke = ke + .5*Q(i,j,k,n)**2
          ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
+
+      endif
       enddo
+      endif
       enddo
+      endif
       enddo
    enddo
 enddo
@@ -280,10 +291,10 @@ do idir=1,ndir
 !     if (dir_shift(3)==0 .or. ncpu_z==1) then
       if (dir_shift(3)==0) then  
          ! no shifts - compute directly 
-         call comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_shift,range)
       else if (dir_shift(2)==0) then
          ! no need to shift, y-direction alread 0
-         call comp_str_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift,range)
       else if (mod(dir_shift(2),dir_shift(3))==0) then
          ! 
          ! shift in y by (y/z)*z-index:
@@ -308,7 +319,7 @@ do idir=1,ndir
          do n=1,3
             call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift,range)
       else if (mod(dir_shift(3),dir_shift(2))==0) then
          ! 
          ! shift in z by (z/y)*y-index
@@ -336,7 +347,7 @@ do idir=1,ndir
          do n=1,3
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift)
+         call comp_str_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift,range)
       else
          call abort("parallel computation of direction not supported")
       endif
@@ -567,12 +578,13 @@ end subroutine
 
 
 
-subroutine comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_base,range)
 use params
 implicit none
 !input
 real*8 :: Q(nx,ny,nz,ndim)       
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
+real*8 :: range(3,2)
 
 !local
 real*8 :: rvec(3),delu(3)
@@ -592,8 +604,11 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       
       
       do k=nz1,nz2
+      if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
       do j=ny1,ny2
+      if (ycord(j)>=range(2,1) .and. ycord(j)<range(2,2)) then
       do i=nx1,nx2
+      if (xcord(i)>=range(1,1) .and. xcord(i)<range(1,2)) then
 
          i2 = i + rvec(1)
          do
@@ -634,8 +649,11 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
             SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
          endif
          
+      endif
       enddo
+      endif
       enddo
+      endif
       enddo
       endif
    enddo
@@ -650,12 +668,13 @@ end subroutine
 
 
 
-subroutine comp_str_xz(Q,idir,rhat,rperp1,rperp2,dir_base)
+subroutine comp_str_xz(Q,idir,rhat,rperp1,rperp2,dir_base,range)
 use params
 implicit none
 !input
 real*8 :: Q(g_nz2,nslabx,ny_2dz,ndim)  
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
+real*8 :: range(3,2)
 
 !local
 real*8 :: rvec(3),delu(3)
@@ -674,8 +693,11 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       if (rvec(3)<0) rvec(3)=rvec(3)+g_nz
       
       do j=1,ny_2dz
+      if (z_jmcord(j)>=range(2,1) .and. z_jmcord(j)<range(2,2)) then
       do i=1,nslabx
+      if (z_imcord(i)>=range(1,1) .and. z_imcord(i)<range(1,2)) then
       do k=1,g_nz
+      if (z_kmcord(k)>=range(3,1) .and. z_kmcord(k)<range(3,2)) then
 
 
          i2 = i + rvec(1)
@@ -717,8 +739,11 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
             SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
          endif
          
+      endif
       enddo
+      endif
       enddo
+      endif
       enddo
       endif
    enddo

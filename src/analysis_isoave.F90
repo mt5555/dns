@@ -35,7 +35,7 @@ character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
-real*8 :: kr,ke,ck,xfac
+real*8 :: kr,ke,ck,xfac,range(3,2)
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
@@ -131,6 +131,14 @@ do
          ! subcube version cannot run in parallel - it will abort
          call isoave1(Q,q1,q2,lx1,lx2,ly1,ly2,lz1,lz2)
       endif
+
+      range(1,1)=dble(i)/nxdecomp
+      range(1,2)=dble(i+1)/nxdecomp
+      range(2,1)=dble(j)/nxdecomp
+      range(2,2)=dble(j+1)/nxdecomp
+      range(3,1)=dble(k)/nxdecomp
+      range(3,2)=dble(k+1)/nxdecomp
+      call isoavep(Q,q1,q2,q3,range)
 
 
       if (my_pe==io_pe) then
