@@ -69,7 +69,7 @@ if (nscalars==7)
  eta = (mu^3 / epsilon)^.25;
   delx_over_eta=(1/nx)/eta;
 end
-
+fclose(fid);
 
 %
 % use only 49 directions:
