@@ -4,14 +4,14 @@
 # using the specified basename, find the file of the form basename????.????.u
 # with the newest time stamp (????.????)
 #
-#  getrestart.sh basname HPSS [uvw,h5]        search HPSS
-#  getrestart.sh basname path [uvw,h5]        search path 
-#  getrestart.sh basname path  uvw,h5  all    search both
+#  getrestart.sh basname HPSS [uvw,h5,vor]        search HPSS
+#  getrestart.sh basname path [uvw,h5,vor]        search path 
+#  getrestart.sh basname path [uvw,h5,vor]  all    search both
 #
 #  $1 = basename of restart file. 
 #  $2 = HPSS   get file off of HPSS
 #     = path   get file from specified path
-#  $3   uvw or h5.  default = uvw
+#  $3   uvw or h5 or vor.  default = uvw
 #  $4   "all"
 #
 # status=0  success
@@ -79,7 +79,7 @@ if ($searchall == all) then
 endif
 
 
- if ($fpath == HPSS) then
+if ($fpath == HPSS) then
 
    #search HPSS for newest restart file
    set resnamew = `psi ls dns/{$name}/{$name}\*.{$ext} | sort | tail -1`
@@ -90,13 +90,15 @@ endif
       echo "Using HPSS restart files: " 
       set nametime = `basename $resnamew .{$ext}`
       if ( $ext == "w" ) then
-         set resnameu = `psi ls  dns/{$name}/{$nametime}\*.u | sort | tail -1`
-         set resnamev = `psi ls  dns/{$name}/{$nametime}\*.v | sort | tail -1`
+         #set resnameu = `psi ls  dns/{$name}/{$nametime}\*.u | sort | tail -1`
+         #set resnamev = `psi ls  dns/{$name}/{$nametime}\*.v | sort | tail -1`
+         set resnameu = dns/{$name}/{$nametime}.u
+         set resnamev = dns/{$name}/{$nametime}.v
          echo $resnameu
          echo $resnamev
       endif
       if ( $ext == "vor" ) then
-         set resnamet = `psi ls  dns/{$name}/{$nametime}\*.tracer | sort | tail -1`
+         set resnamet = dns/{$name}/{$nametime}.tracer 
          echo $resnamet
       endif
       echo $resnamew
@@ -172,10 +174,16 @@ else
       echo "Using directory restart files: " 
       set nametime = `basename $resnamew .{$ext}`
       if ( $ext == "w" ) then
-         set resnameu = `ls  {$fpath}/{$nametime}*.u | sort | tail -1`
-         set resnamev = `ls  {$fpath}/{$nametime}*.v | sort | tail -1`
+         #set resnameu = `ls  {$fpath}/{$nametime}*.u | sort | tail -1`
+         #set resnamev = `ls  {$fpath}/{$nametime}*.v | sort | tail -1`
+         set resnameu = {$fpath}/{$nametime}.u 
+         set resnamev = {$fpath}/{$nametime}.v 
          echo $resnameu
          echo $resnamev
+      endif
+      if ( $ext == "vor" ) then
+         set resnamet = {$fpath}/{$nametime}.tracer 
+         echo $resnamet
       endif
       echo $resnamew
    endif

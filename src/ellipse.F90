@@ -90,6 +90,8 @@ character(len=80) :: message
 
 
 if (io_pe==my_pe) then
+
+#ifdef COMP_ELLIPSE_CONTOUR
    print *,'center: ',center
    print *,'nell      Rmin          Rmax        m=1/m0        m=2/m0'
    do nell=1,nelld
@@ -120,7 +122,7 @@ if (io_pe==my_pe) then
       call cwrite8(fid,Rad2(1,nell),npd)
    enddo
    call cclose(fid,ierr)
-
+#endif
 
 
 
@@ -182,7 +184,7 @@ if (mxw_init<=0) then
    call abort("ellipse(): mxw_init was not set")
 endif
 
-
+#ifdef COMP_ELLIPSE_CONTOUR
 
 ! compute coordinates of ellipse:  mxcord + Rad exp(i 2pi theta)
 ! uses binary search and 4th order interpolation
@@ -193,7 +195,7 @@ enddo
 ! iterate to find the "true" center of the ellipse
 call findbestcenter(w,center)
 
-
+#endif
 
 
 
