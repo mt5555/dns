@@ -1,9 +1,9 @@
 ####
-#### $Id: Makefile,v 1.3 2001-08-08 23:18:41 mt Exp $
+#### $Id: Makefile,v 1.4 2001-08-17 17:27:55 mt Exp $
 ####
 
 default:
-	@echo "Usage: $(MAKE) sun | sgi | hp | ibm | alpha | linux | macosx | generic | clean"
+	@echo "Usage: $(MAKE) sun | sgi | hp | ibm | alpha | linux | linuxpgc | macosx | generic | clean"
 
 SRC_COMPLEX=cfft.c cfftAnalysis.c cfftSynthesis.c \
 cfftAnalysisR2.c cfftAnalysisR3.c cfftAnalysisR4.c cfftAnalysisR5.c \
@@ -50,6 +50,9 @@ alpha:
 linux:
 	@$(MAKE) CC=cc CFLAGS="-O3" AR=ar RANLIB=true LIBS="-L. -lstk -lm -lpthread" $(TARGET)
 
+linuxpgc:
+	@$(MAKE) CC=pgcc CFLAGS="-fast" AR=ar RANLIB=true LIBS="-L. -lstk -lm -lpthread" $(TARGET)
+
 macosx:
 	@$(MAKE) CC=cc CFLAGS="-O4" AR=ar RANLIB=ranlib LIBS="-L. -lstk -lm" $(TARGET)
 
@@ -57,7 +60,7 @@ generic:
 	@$(MAKE) CC=cc CFLAGS=-O AR=ar RANLIB=ranlib LIBS="-L. -lstk -lm" $(TARGET) 
 
 .c.o:
-	$(CC) -c $(CFLAGS) $<
+	$(CC) $(CFLAGS) -c  $<
 
 $(OBJ): $(INC)
 
