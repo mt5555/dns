@@ -69,6 +69,12 @@ spec_z=0
 
 q1=Q
 
+!
+!   pe=pe+.5*grav*Q(i,j,3)**2 - .5*grav*H0**2
+!   ke = ke + .5*Q(i,j,3)*Q(i,j,n)**2   n=1,2
+!
+!
+
 
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
@@ -87,6 +93,78 @@ time_old=time
 #ifdef SPEC_DIFF_CHECK
 spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 #endif
+
+end subroutine
+
+
+
+
+
+
+subroutine compute_spec_shallow(time,Q,q1,work1,work2)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: time
+
+!local
+integer :: iwave_max,i
+real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
+
+iwave_max=max(g_nx,g_ny,g_nz)
+spec_r=0
+
+
+
+
+spec_r2=0
+spec_d2=0
+spec_x=0
+spec_y=0
+spec_z=0
+
+
+q1(:,:,:,1)=sqrt(Q(:,:,:,3))*Q(:,:,:,1)
+q1(:,:,:,2)=sqrt(Q(:,:,:,3))*Q(:,:,:,2)
+q1(:,:,:,3)=sqrt(Q(:,:,:,3))
+
+!
+!   pe=pe+.5*grav*Q(i,j,3)**2 - .5*grav*H0**2
+!   ke = ke + .5*Q(i,j,3)*Q(i,j,n)**2   n=1,2
+!
+!   ke = .5 * spec(q1(:,:,:,1)) + .5*spec(q1(:,:,:,2))  
+!   pe = .5*grav* ( spec(q1(:,:,:,3)) - H0**2(0,0,0 mode only)
+!
+!
+!
+!  PE part
+!
+call compute_spectrum(q1(1,1,1,3),work1,work2,spec_r2,spec_d2,&
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+spec_r=spec_r+.5*grav*spec_r2
+spec_r(0)=spec_r(0) - .5*grav*H0**2
+
+!
+!  KE part
+!                 spec_[x,y,z] = KE only
+!
+do i=1,ndim
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+   spec_r=spec_r+.5*spec_r2
+enddo
+spec_x=.5*spec_x
+spec_y=.5*spec_y
+spec_z=.5*spec_z
+
+
+
+time_old=time
+
 
 end subroutine
 
