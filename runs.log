@@ -3,8 +3,10 @@
 
 Evelyn found a bug during restart, at 2048^2?  (or was it 4096^2)
 Checking 2048^2 on 4 cpus (kiwi)
-restart.[uv]  from temp0000.0000, running to t=.01
-run restart to t=.01, compare spectrums at t=.01
+
+IN:  eve1   output: .01, .02
+
+eve2 (next) restart from .01, run to .02
 
 
 
