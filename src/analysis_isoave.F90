@@ -26,6 +26,7 @@ use params
 use mpi
 use isoave
 use structf
+use spectrum
 implicit none
 
 ! 1 cpu version uses less memory then parallel version
@@ -209,9 +210,11 @@ do
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
          Q=Q*scale;
       endif
-
       read_uvw=.true.	
       endif
+
+      call compute_helicity_spectrum(Q,q2,q1,io_pe)
+      call output_helicity_spec(time)
       
       do i=0,nxdecomp-1
       do j=0,nydecomp-1

@@ -20,6 +20,9 @@ real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  time_old=-1
 
+real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
+
 integer,private :: iwave=-1
 
 
@@ -412,6 +415,57 @@ end subroutine
 
 
 
+
+
+
+
+subroutine output_helicity_spec(time)
+use params
+implicit none
+real*8 :: time
+
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x,divx,divi
+character(len=80) :: message
+CPOINTER fid
+
+
+
+
+! append to output files, unless this is first call.
+if (access=="0") then
+   access="w"
+else
+   access="a"
+endif
+
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".hspec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "output_helicity_spec(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_helicity_rn,1+iwave)
+   call cwrite8(fid,spec_helicity_rp,1+iwave)
+   call cclose(fid,ierr)
+endif
+end subroutine
+
+
+
+
+
+
+
 subroutine output_tran(time,Q,q1,q2,q3,work1,work2)
 use params
 implicit none
@@ -640,6 +694,7 @@ do i=nx1,nx2
     denergy=-xfac*mu*xw*p(i,j,k)*p(i,j,k)
     spec_d(iwave)=spec_d(iwave)+denergy
 
+
 enddo
 enddo
 enddo
@@ -813,6 +868,101 @@ iwave = (iwave/2)           ! max wave number in sphere.
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
    spec_r(iwave+1)=spec_r(iwave+1)+spec_r(i)
+enddo
+iwave=iwave+1
+
+end subroutine
+
+
+
+
+
+
+subroutine compute_helicity_spectrum(Q,p1,work,pe)
+use params
+use mpi
+implicit none
+integer :: ierr
+integer :: pe             ! compute spectrum on this processor
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: p1(nx,ny,nz,3)
+real*8 :: work(nx,ny,nz)
+real*8 :: spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
+real*8 :: spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
+
+! local variables
+real*8 rwave
+real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
+real*8 :: energy,vx,wx,uy,wy,uz,vz
+integer i,j,k,jm,km,im,iwave_max,n
+
+p1=Q
+do n=1,3
+   call fft3d(p1(1,1,1,n),work)
+enddo
+
+rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+iwave_max=nint(rwave)
+
+spec_r=0
+
+do j=ny1,ny2
+   jm=jmcord(j)
+   do i=nx1,nx2
+      im=imcord(i)
+      do k=nz1,nz2
+         km=kmcord(k)
+
+         rwave = im**2 + jm**2 + km**2
+         iwave = nint(sqrt(rwave))
+         
+
+         !ux = - pi2*im*p1(i+imsign(i),j,k,1)
+         vx = - pi2*im*p1(i+imsign(i),j,k,2)
+         wx = - pi2*im*p1(i+imsign(i),j,k,3)
+         
+         uy = - pi2*jm*p1(i,j+jmsign(j),k,1)
+         !vy = - pi2*jm*p1(i,j+jmsign(j),k,2)
+         wy = - pi2*jm*p1(i,j+jmsign(j),k,3)
+         
+         uz =  - pi2*km*p1(i,j,k+kmsign(k),1)
+         vz =  - pi2*km*p1(i,j,k+kmsign(k),2)
+         !wz =  - pi2*km*p1(i,j,k+kmsign(k),3)
+      
+         ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
+
+         energy = 8
+         if (km==0) energy=energy/2
+         if (jm==0) energy=energy/2
+         if (im==0) energy=energy/2
+         energy = energy*(p1(i,j,k,1)*(wy-vz) + &
+                          p1(i,j,k,2)*(uz-wx) + &
+                          p1(i,j,k,3)*(vx-uy)) 
+         if (energy>0) spec_helicity_rp(iwave)=spec_helicity_rp(iwave)+energy
+         if (energy<0) spec_helicity_rn(iwave)=spec_helicity_rn(iwave)+energy
+enddo
+enddo
+enddo
+
+
+#ifdef USE_MPI
+spec_r_in=spec_helicity_rp
+call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spec_r_in=spec_helicity_rn
+call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+#endif
+
+if (g_nz == 1)  then
+   iwave = min(g_nx,g_ny)
+else
+   iwave = min(g_nx,g_ny,g_nz)
+endif
+iwave = (iwave/2)           ! max wave number in sphere.
+
+! for all waves outside sphere, sum into one wave number:
+do i=iwave+2,iwave_max
+   spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
+   spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
 enddo
 iwave=iwave+1
 
