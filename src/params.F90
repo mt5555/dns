@@ -82,13 +82,13 @@ integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
 ! NOTE: if these are parameters, then all automatic arrays
 ! in subroutines will be allocated at run time.  This doubles
 ! the amount of memory needed:
-integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
+!integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 ! NOTE: if these are NOT parameters, then all automatic arrays
 ! are placed on the stack, and thus dont take up memory between calls.
 ! this halves the amount of memory needed.  
 ! any performance penaulty?
-!integer           :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
+integer           :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 
 ! number of actual data points
