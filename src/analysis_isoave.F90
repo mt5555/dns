@@ -53,12 +53,12 @@ logical :: compute_cj,compute_scalar, compute_uvw=.true.
 CPOINTER :: fid
 
 
-compute_cj=.false.
+compute_cj=.true.
 compute_scalar=.false.
-compute_uvw=.true.
+compute_uvw=.false.
 
-tstart=4.4223
-tstop=4.4223
+tstart=3.0
+tstop=3.0
 tinc=-.50
 icount=0
 
@@ -224,7 +224,7 @@ do
             write(message,'(a,i5)') "output_model(): Error opening .isow2s2 file errno=",ierr
             call abort(message)
          endif
-         call write_w2s2(fid,time)
+         call writeisoave_w2s2(fid,time)
          call cclose(fid,ierr)
       endif
    endif
@@ -246,7 +246,7 @@ do
             write(message,'(a,i5)') "output_model(): Error opening .isow2s2 file errno=",ierr
             call abort(message)
          endif
-         call write_scalar(fid,time)
+         call writeisoave_scalar(fid,time)
          call cclose(fid,ierr)
       endif
    endif
