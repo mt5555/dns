@@ -361,7 +361,7 @@ integer i,j,k,l
 integer :: m
 integer :: n,im,jm,km,ixw,ierr
 real*8 :: k_0,xw,xfac ,alpha,beta,dummy
-real*8 :: E_target,ke,pe
+real*8 :: E_target,ke,pe,ke2
 real*8 :: E_k(0:max(nx,ny,nz))
 real*8 :: E_k2(0:max(nx,ny,nz))
 real*8 :: Len,U,R,F
@@ -522,6 +522,11 @@ if (dealias) call dealias_gridspace(Q,work1)
 ! normalize so <u,u>=U**2
 ke = .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)**2) +  &
      .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)**2)  
+
+#ifdef USE_MPI
+   ke2=ke
+   call MPI_allreduce(ke2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
 ke=ke/g_nx/g_ny
 Q=sqrt(.5*U**2) * Q/sqrt(ke)
 
