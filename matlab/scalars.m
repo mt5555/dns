@@ -26,14 +26,14 @@ fid2=-1;
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-fid=fopen('/ccs/scratch/taylorm/dns/decay/decay2048.scalars','r','l'); 
-nx=2048;
+%fid=fopen('/ccs/scratch/taylorm/dns/decay/decay2048.scalars','r','l'); 
+%nx=2048;
 
 %fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
 %nx=512;
 
-%fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
-%nx=1024;
+fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
+nx=1024;
 
 %fid=fopen('../src/sk128_alpha25/sk128_alpha250000.0000.scalars','r');
 %nx=128;
@@ -89,6 +89,14 @@ while (1)
     ints=data1;
     maxs=data2;
   else
+    ni1=size(ints); ni1=ni1(1);
+    ni2=size(data1); ni2=ni2(1);
+    if (ni2>ni1)
+      % the input data is larger - this means that at some point during
+      % the run,  we added attitional scalars.  pad out old data with NaN's
+      ints=[ints;NaN*ints(1:ni2-ni1,:)];
+      maxs=[maxs;NaN*maxs(1:ni2-ni1,:)];
+    end
     ints=[ints,data1];
     maxs=[maxs,data2];
   end
