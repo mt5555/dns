@@ -6,8 +6,14 @@ autrey
 src/kh
 
 1024x1024
-kh           mu = 2.5e-5
-khB          mu = 2e-4
+kh           mu = 2.5e-5    CFL: 1.5/.25
+khB          mu = 2e-4           1.5/.25   running at .25 limit
+                                           better, but small glitch at t=.2
+                                           ke disspation doesn't add up.  
+khC          mu = 2e-4           1.5/.10
+
+
+
 
 
 **********************************************************************************
