@@ -216,6 +216,7 @@ integer,parameter :: nd=200
 real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
 
 offset_bdy=1
+xlocation=-1   ! not yet set
 
 if (init_cond_subtype ==0) then
 !  my standard test case:
@@ -282,12 +283,12 @@ if (init_cond_subtype ==4) then
 endif
 
 if (init_cond_subtype ==5) then
-   ! same as type=3, but bs_apply=100
    biotsavart_cutoff=5e-3
    biotsavart_apply=100
    delta=.1
-   biotsavart_ubar=.089
-   yscale=1.9
+   biotsavart_ubar=.097
+   yscale=1.8
+   xlocation=1.5
 endif
 
 
@@ -298,7 +299,7 @@ xscale = yscale*(g_nx+offset_bdy-1)/(g_ny+offset_bdy-1)
 call init_grid()   ! redo grid points since we changed scalings
 
 
-xlocation=2.0
+if (xlocation<0) xlocation=2.0
 
 
 

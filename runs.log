@@ -54,10 +54,10 @@ S = .01, .05, .1, .5, 1.0
 
 tmix256A  
 mu=2.75e-4     run to t=.1, check Re, kmax*eta
+               t=0: R_l=77  kmax*eta=1.4
+mu=2.00e-4          R_l=106  kmax*eta=1.2
 
-
-
-         
+mu=3.00e-4   NEXT
 
 
 
@@ -83,11 +83,14 @@ vx4096c   mu=7e-8  ran to t=100
 BUG discovered in comp_ellipse: mxw_init was being reset
 every timestep.  Fixed 3/7/02 for vx4096d below:
 
-vx4096d   mu=7e-8   IN
+vx4096d   mu=7e-8   ran to t=100
           init_cond_subtype=2 (PSI boundary update every 50 timesteps)
                                w cutoff 5e-3
 
           vxline tracers: reset every time they cross
+
+vx4500a  mu=1e-7  DELTA=.1  IN
+         init_cond_subtype==5  
 
 **
 

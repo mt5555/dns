@@ -107,9 +107,11 @@ subroutine tracers_restart(fpe)
 implicit none
 integer :: fpe
 real*8 :: time=0
+character(len=240) :: fname
 
 call print_message("Restart tracer data from file restart.tracer")
-call tracers_io(1,fpe,'restart.tracer')
+fname = rundir(1:len_trim(rundir)) // 'restart.tracer'
+call tracers_io(1,fpe,fname)
 write(message,'(a,i5)') 'total number of tracers: ',numt
 call print_message(message)
 write(message,'(a,i5)') 'number of insertable tracers: ',numt_insert
