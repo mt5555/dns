@@ -19,7 +19,7 @@ fidt=fopen('../src/temp0000.0000.spect');
 
 
 time=fread(fid,1,'float64');
-num_spec=fread(fidt,1,'float64');
+num_spect=fread(fidt,1,'float64');
 time_t=fread(fidt,1,'float64');
 
 
@@ -46,36 +46,39 @@ while (time>=0 & time<=9999.3)
   %
   % NOW read the transfer spectrum
   %
-  n_r=fread(fidt,1,'float64');
-  spec_tot=fread(fidt,n_r,'float64');
-   
-  time_terms=fread(fidt,1,'float64');  
-  n_r=fread(fidt,1,'float64');
-  spec_transfer=fread(fidt,n_r,'float64');
-
-  time_terms=fread(fidt,1,'float64');  
-  n_r=fread(fidt,1,'float64');
-  spec_diff=fread(fidt,n_r,'float64');
-
-  time_terms=fread(fidt,1,'float64');  
-  n_r=fread(fidt,1,'float64');
-  spec_f=fread(fidt,n_r,'float64');
-
-  % if num_spec>4, read the rest of the spectrums:
-  if (num_spec>4) 
-    for i=1:num_spec-4
-      time_terms=fread(fidt,1,'float64');  
-      n_r=fread(fidt,1,'float64');
-      spec_dummy=fread(fidt,n_r,'float64');
-    end
+  if (num_spect==4) % NS transfer spectrum
+    n_r=fread(fidt,1,'float64');
+    spec_tot=fread(fidt,n_r,'float64');
+    
+    time_terms=fread(fidt,1,'float64');  
+    n_r=fread(fidt,1,'float64');
+    spec_transfer=fread(fidt,n_r,'float64');
+    
+    time_terms=fread(fidt,1,'float64');  
+    n_r=fread(fidt,1,'float64');
+    spec_diff=fread(fidt,n_r,'float64');
+    
+    time_terms=fread(fidt,1,'float64');  
+    n_r=fread(fidt,1,'float64');
+    spec_f=fread(fidt,n_r,'float64');
   end
 
+  if (num_spect==2) % Shallow water transfer spectrum
+    n_r=fread(fidt,1,'float64');
+    spec_tot=fread(fidt,n_r,'float64');
+    spec_f=0*spec_tot;    
+    time_terms=fread(fidt,1,'float64');  
+    n_r=fread(fidt,1,'float64');
+    spec_diff=fread(fidt,n_r,'float64');
+
+    spec_transfer=spec_tot-spec_diff;
+  end
 
   
   
   
+  figure(1);clf;
   if (n_z==1) 
-    figure(4);
     subplot(2,1,1);
     loglog53(n_r,spec_r,time);
     subplot(2,1,2);
@@ -86,8 +89,6 @@ while (time>=0 & time<=9999.3)
     %print -depsc spec.ps    
     %pause
   else
-    figure(4);
-    clf
     %spherical wave number
     subplot(3,1,1);
     loglog53(n_r-1,spec_r,time);
@@ -107,17 +108,20 @@ while (time>=0 & time<=9999.3)
     loglog53(n_z,spec_wx,time);     hold on;
     loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
     hold off;
-    
-    
   end
 
-  figure(1);
+  %
+  % transfer spectrum
+  %
+  figure(2);
   subplot(2,1,1)
   x=0:n_r-1;
-  semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_f,'b');
-  title(sprintf('time = %f ',time));
+  %semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_f,'b');
+  semilogx(x,spec_transfer,'k',x,spec_diff,'r');
+  title(sprintf('T_k (black)      D_k (red)        time = %f ',time));
   subplot(2,1,2)
   semilogx(x,spec_transfer+spec_diff+spec_f,x,spec_tot,'o');
+  title(sprintf('E_k'));
   
   'pause...'
   pause
