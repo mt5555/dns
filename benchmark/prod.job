@@ -35,18 +35,21 @@ else
 endif
 
 
-
-
-cd $SRC
-./gridsetup.py $mesh
-make -j 4 dns
-    
 if (!(-d /scratch/taylorm)) then
    mkdir /scratch/taylorm
 endif
-\cp -f dns  /scratch/taylorm/dns
+if (!(-d /scratch/taylorm)) then
+   echo "/scratch/taylorm does not exist"
+   exit 1
+endif
 
 cd /scratch/taylorm
+\cp -f $SRC/* .
+./gridsetup.py $mesh
+make dep
+make clean
+make -j 4 dns
+
 
 if ($restart == 1) then
 

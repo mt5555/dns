@@ -108,8 +108,8 @@ for out in jobname_running:
     print out
 
 
-
-
+print ' '
+print ' ' 
 
 
 # get a list of all the .job files in ~/cronlsf:
@@ -129,6 +129,7 @@ for jobscript in vjobscript:
         # parse file for the job name
         #print "LSF script: ",jobscript
         jobname="";
+        jobcpus="";
         fid=open(jobscript)
         line=rstrip(fid.readline())
         while line:
@@ -136,12 +137,19 @@ for jobscript in vjobscript:
             if (len(out)>=3) & (out[0]=="#BSUB"):
                 if (out[1]=="-J"):
                     jobname=out[2]
-                    break
+                if (out[1]=="-n"):
+                    jobcpus=out[2]
+
             line=rstrip(fid.readline())
 
 
         if len(jobname)==0:
             raise NameError,"job does not have a BSUB -J option: "+jobname
+
+        # for idbsub, #BSUB -n 64 line is ignored, we have to add this
+        # to the idbsub line
+        if len(jobcpus)>0:
+            jobcpus=" -n "+jobcpus+" "
 
         print 'LSF name: ',jobname
 
@@ -176,7 +184,7 @@ for jobscript in vjobscript:
 
     else:
         # submit job
-        jobcommand = bsub + " < " + jobscript
+        jobcommand = bsub + jobcpus + " < " + jobscript
         print "resub=" + str(fvalue)+" LSF job: "+jobcommand
         if (submit):
             os.system(jobcommand)
