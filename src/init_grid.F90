@@ -91,7 +91,7 @@ call fft_get_mcord(g_kmcord,g_nz)
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! local grid data
+! local grid data  3D decomposition
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 do i=nx1,nx2
@@ -100,6 +100,7 @@ do i=nx1,nx2
    imcord(i)=g_imcord(l)
    imsign(i)=sign(1,imcord(i))
    if (imcord(i)==0) imsign(i)=0
+   if (imcord(i)==g_nx/2) imsign(i)=0
 enddo
 do j=ny1,ny2
    l = j-ny1+1 + nslaby*my_y
@@ -107,6 +108,7 @@ do j=ny1,ny2
    jmcord(j)=g_jmcord(l)
    jmsign(j)=sign(1,jmcord(j))
    if (jmcord(j)==0) jmsign(j)=0
+   if (jmcord(j)==g_ny/2) jmsign(j)=0
 enddo
 do k=nz1,nz2
    l = k-nz1+1 + nslabz*my_z
@@ -114,7 +116,36 @@ do k=nz1,nz2
    kmcord(k)=g_kmcord(l)
    kmsign(k)=sign(1,kmcord(k))
    if (kmcord(k)==0) kmsign(k)=0
+   if (kmcord(k)==g_nz/2) kmsign(k)=0
 enddo
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid data, z-decomposition
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+do i=nx1,nx2
+   z_imcord(i-nx1+1)=imcord(i)
+   z_imsign(i-nx1+1)=imsign(i)
+enddo
+
+z_kmcord=g_kmcord
+do k=1,g_nz
+   z_kmsign=sign(1,z_kmcord(k))
+   if (z_kmcord(k)==0) z_kmsign(k)=0
+   if (z_kmcord(k)==g_nz/2) z_kmsign(k)=0
+enddo
+
+
+do j=1,ny_2dz
+   L = -1 + ny1 + j + my_z*ny_2dz      ! ncpy_z*ny_2dz = nslaby
+   z_jmcord(j)=jmcord(L)
+   z_jmsign(j)=sign(1,z_jmcord(j))
+   if (z_jmcord(j)==0) z_jmsign(j)=0
+   if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
+enddo
+
+
+
 
 write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
 call print_message(message)

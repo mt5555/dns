@@ -79,11 +79,19 @@ real*8 :: zcord(nz),delz
 real*8,allocatable :: g_xcord(:)  
 real*8,allocatable :: g_ycord(:)  
 real*8,allocatable :: g_zcord(:)  
-integer :: imcord(nx),jmcord(ny),kmcord(nz)  ! fft modes local
-integer :: imsign(nx),jmsign(ny),kmsign(nz)  ! fft modes local
-integer,allocatable :: g_imcord(:)           ! fft modes global
+
+! fft modes, global
+integer,allocatable :: g_imcord(:)
 integer,allocatable :: g_jmcord(:)  
 integer,allocatable :: g_kmcord(:)  
+
+! fft modes, local 3D decompostion
+integer :: imcord(nx),jmcord(ny),kmcord(nz)  ! fft modes local
+integer :: imsign(nx),jmsign(ny),kmsign(nz)  ! fft modes local
+
+! fft modes, local z-decompostion
+integer :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
+integer :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -318,10 +326,34 @@ endif
 ! this is needed to gaurentee that the sine and cosine modes
 ! are on the same processor.  
 !
-ASSERT("fft_interface_init(): nslabx must be even ",mod(nslabx,2)==0)
-ASSERT("fft_interface_init(): nslaby must be even ",mod(nslaby,2)==0)
-ASSERT("fft_interface_init(): nslabz must be even ",&
-        (mod(nslabz,2)==0 .or. g_nz==1))
+if (mod(nslabx,2)/=0) then
+   fail=1
+   call print_message("nslabx must be even")
+endif
+if (mod(nslaby,2)/=0) then
+   fail=1
+   call print_message("nslaby must be even")
+endif
+if (mod(nslabz,2)/=0 .and. g_nz>1) then
+   fail=1
+   call print_message("nslabz must be even if g_nz>1")
+endif
+
+
+!
+!  for the full spectral method, we will be working mostly in
+!  the z-transform fourier space, 
+!     pt(g_nz2,nslabx,ny_2dz)
+!  so we also need that ny_2dz is even
+if (mod(ny_2dz,2)/=0) then
+   fail=1
+   call print_message("ny_2dz is not even.  cant run the ns3dspectral model")
+   call print_message("but other models should work fine")
+endif
+
+
+
+
 
 
 
@@ -346,6 +378,15 @@ allocate(g_zcord(g_nz+1))
 allocate(g_imcord(g_nx))
 allocate(g_jmcord(g_ny))
 allocate(g_kmcord(g_nz))
+
+!  Z-decomposition modes:   p(g_nz2,nslabx,ny_2dz)
+allocate(z_imcord(nx))
+allocate(z_jmcord(ny_2dz))
+allocate(z_kmcord(g_nz))
+allocate(z_imsign(nx))
+allocate(z_jmsign(ny_2dz))
+allocate(z_kmsign(g_nz))
+
 
 
 pi=1

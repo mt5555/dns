@@ -83,6 +83,15 @@ end subroutine
 
 
 subroutine fft_get_mcord(mcord,n)
+!
+!  i=1   0 cosine mode             mcord=0
+!  i=2   n/2 cosine mode           mcord=  n/2
+!  i=3   1 cosine mode             mcord =  1
+!  i=4   1 sine mode               mcord = -1
+!  i=5   2 cosine mode             mcord =  2
+!  i=6   2 sine mode               mcord=  -2
+!  etc...
+!
 integer n,mcord(:)
 integer i
 do i=1,n

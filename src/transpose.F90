@@ -6,7 +6,8 @@ use params
 use mpi
 implicit none
 
-real*8 tmx1,tmx2
+
+real*8,private :: tmx1,tmx2
 
 
 

@@ -27,6 +27,9 @@ if (firstcall) then
    do n=1,3
       call fft3d(Q(1,1,1,n),rhs)  ! use rhs as a work array
    enddo
+   if (.not. dealias) then
+      call abort("Error: using ns3dspectral model, which must be run dealiased")
+   endif
 endif
 
 
@@ -138,7 +141,7 @@ end subroutine rk4
 
 
 
-subroutine ns3d(rhs,uhat,Q,time,compute_ints)
+subroutine ns3d(rhs,Qhat,Q,time,compute_ints)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -155,10 +158,11 @@ subroutine ns3d(rhs,uhat,Q,time,compute_ints)
 ! hel = u (w_y-v_z) + v (u_z - w_x)  + w (v_x - u_y)
 !
 use params
+use transpose
 implicit none
 
 ! input
-real*8 uhat(nx,ny,nz,n_var)
+real*8 Qhat(nx,ny,nz,n_var)
 real*8 Q(nx,ny,nz,n_var)
 real*8 time
 integer compute_ints
@@ -172,58 +176,118 @@ real*8 p(nx,ny,nz)
 real*8 xfac,tmx1,tmx2
 real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 integer n,i,j,k,im,km,jm
+integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke_diss,vor,hel,maxvor
+
+
+real*8 tmp(g_nz2,nslabx,ny_2dz,n_var)
+real*8 tmp2(g_nz2,nslabx,ny_2dz,n_var)
+
+
+
+
 
 call wallclock(tmx1)
 
 
+!
+! NOTE: for Fourier Coefficients with mode  im=g_nx/2, this is the
+! sole "cosine" mode.  Its derivative maps to the g_nx/2 sine mode
+! which aliases to 0 on the grid.  So this coefficient should be
+! ignored.  This subroutine assumes everything is dealiased, and so
+! this mode will be removed no matter what we do with it, and so
+! we just dont wory about the case when im=g_nx/2.
+!
+
+
 ! compute vorticity-hat, store in RHS
-uz=0
-vz=0
-wz=0
 
-   do k=nz1,nz2
-      km=kmcord(k)
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2
-         jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2
-            im=imcord(i)
-            if (im==g_nx/2) im=0
+#undef DECOMP3
+#if DECOMP3
+do k=nz1,nz2
+   km=kmcord(k)
+   do j=ny1,ny2
+      jm=jmcord(j)
+      do i=nx1,nx2
+         im=imcord(i)
+         
+         ! u_x term
+         !ux = - im*Qhat(i+imsign(i),j,k,1)
+         vx = - im*Qhat(i+imsign(i),j,k,2)
+         wx = - im*Qhat(i+imsign(i),j,k,3)
+         
+         
+         uy = - jm*Qhat(i,j+jmsign(j),k,1)
+         !vy = - jm*Qhat(i,j+jmsign(j),k,2)
+         wy = - jm*Qhat(i,j+jmsign(j),k,3)
+         
+         
+         uz =  - km*Qhat(i,j,k+kmsign(k),1)
+         vz =  - km*Qhat(i,j,k+kmsign(k),2)
+         !wz =  - km*Qhat(i,j,k+kmsign(k),3)
+         
+         rhs(i,j,k,1) = pi2*(wy - vz)
+         rhs(i,j,k,2) = pi2*(uz - wx)
+         rhs(i,j,k,3) = pi2*(vx - uy)
 
-            ! u_x term
-            !ux = - im*uhat(i+imsign(i),j,k,1)
-            vx = - im*uhat(i+imsign(i),j,k,2)
-            wx = - im*uhat(i+imsign(i),j,k,3)
-
-
-            uy = - jm*uhat(i,j+jmsign(j),k,1)
-            !vy = - jm*uhat(i,j+jmsign(j),k,2)
-            wy = - jm*uhat(i,j+jmsign(j),k,3)
-
-
-            uz =  - km*uhat(i,j,k+kmsign(k),1)
-            vz =  - km*uhat(i,j,k+kmsign(k),2)
-            !wz =  - km*uhat(i,j,k+kmsign(k),3)
-
-            rhs(i,j,k,1) = pi2*(wy - vz)
-            rhs(i,j,k,2) = pi2*(uz - wx)
-            rhs(i,j,k,3) = pi2*(vx - uy)
-
-         enddo
       enddo
    enddo
-
-
+enddo
 ! 3 forward&back z-transforms, 9 ffts.  
 do n=1,3
-   call ifft3d(rhs(1,1,1,n),p)
+   call ifft3d(rhs(1,1,1,n),p,n1,n1d,n2,n2d,n3,n3d)
 enddo
+
+
+#else
+
+
+do n=1,3
+   call transpose_to_z(Qhat(1,1,1,n),tmp(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+
+do k=1,g_nz
+   km=z_kmcord(k)
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+
+         ! u_x term
+         vx = - im*tmp(k,i+z_imsign(i),j,2)
+         wx = - im*tmp(k,i+z_imsign(i),j,3)
+         
+         uy = - jm*tmp(k,i,j+z_jmsign(j),1)
+         wy = - jm*tmp(k,i,j+z_jmsign(j),3)
+         
+         uz =  - km*tmp(k+z_kmsign(k),i,j,1)
+         vz =  - km*tmp(k+z_kmsign(k),i,j,2)
+         
+         tmp2(k,i,j,1) = pi2*(wy - vz)
+         tmp2(k,i,j,2) = pi2*(uz - wx)
+         tmp2(k,i,j,3) = pi2*(vx - uy)
+
+         
+      enddo
+   enddo
+enddo
+! 3 forward&back z-transforms, 9 ffts.  
+do n=1,3
+   call z_ifft3d(tmp2(1,1,1,n),rhs(1,1,1,n),p)
+enddo
+
+#endif
+
+
 
 ! alternative:
 ! compute all terms above: vx,wx  uy,wy, uz,vz
 ! 12 ffts, but only 2 f&b z transforms.  
+
+
+
+
+
 
 
 
@@ -273,18 +337,15 @@ ke_diss = 0
 !  diffusion
    do k=nz1,nz2
       km=kmcord(k)
-      if (km==g_nz/2) km=0
       do j=ny1,ny2
          jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
          do i=nx1,nx2
             im=imcord(i)
-            if (im==g_nx/2) im=0
 
             xfac=-mu*(im*im + jm*jm + km*km)*pi2_squared
-            rhs(i,j,k,1)=rhs(i,j,k,1) + xfac*uhat(i,j,k,1)
-            rhs(i,j,k,2)=rhs(i,j,k,2) + xfac*uhat(i,j,k,2)
-            rhs(i,j,k,3)=rhs(i,j,k,3) + xfac*uhat(i,j,k,3)
+            rhs(i,j,k,1)=rhs(i,j,k,1) + xfac*Qhat(i,j,k,1)
+            rhs(i,j,k,2)=rhs(i,j,k,2) + xfac*Qhat(i,j,k,2)
+            rhs(i,j,k,3)=rhs(i,j,k,3) + xfac*Qhat(i,j,k,3)
 
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
@@ -294,9 +355,9 @@ ke_diss = 0
             if (jmcord(j)==0) xfac=xfac/2
             if (imcord(i)==0) xfac=xfac/2
 
-            ke_diss = ke_diss + xfac*uhat(i,j,k,1)**2 + &
-                                xfac*uhat(i,j,k,2)**2 + &
-                                xfac*uhat(i,j,k,3)**2 
+            ke_diss = ke_diss + xfac*Qhat(i,j,k,1)**2 + &
+                                xfac*Qhat(i,j,k,2)**2 + &
+                                xfac*Qhat(i,j,k,3)**2 
 
          enddo
       enddo
@@ -306,13 +367,10 @@ ke_diss = 0
 !  make rhs div-free
    do k=nz1,nz2
       km=kmcord(k)
-      if (km==g_nz/2) km=0
       do j=ny1,ny2
          jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
          do i=nx1,nx2
             im=imcord(i)
-            if (im==g_nx/2) im=0
 
             ! compute the divergence
             p(i,j,k)= - im*rhs(i+imsign(i),j,k,1) &
@@ -332,13 +390,10 @@ ke_diss = 0
 
    do k=nz1,nz2
       km=kmcord(k)
-      if (km==g_nz/2) km=0
       do j=ny1,ny2
          jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
          do i=nx1,nx2
             im=imcord(i)
-            if (im==g_nx/2) im=0
 
             ! compute gradient  dp/dx
             uu= - im*p(i+imsign(i),j,k) 
@@ -349,13 +404,20 @@ ke_diss = 0
             rhs(i,j,k,2)=rhs(i,j,k,2) - vv 
             rhs(i,j,k,3)=rhs(i,j,k,3) - ww 
 
+
+            ! dealias           
+            if ( ((abs(km)> g_nz/3) .and. (km/=0)) .or. &
+                 ((abs(jm)> g_ny/3) .and. (jm/=0)) .or. &
+                 ((abs(im)> g_nx/3) .and. (im/=0)) )  then
+               rhs(i,j,k,1)=0
+               rhs(i,j,k,2)=0
+               rhs(i,j,k,3)=0
+            endif
+
+
          enddo
       enddo
    enddo
-
-do n=1,3
-   if (dealias) call fft_filter_dealias(rhs(1,1,1,n))
-enddo
 
 
 

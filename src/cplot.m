@@ -7,9 +7,9 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
-%range=0:50;
+range=0:50;
 %range = 1
-range=0:.5:2;
+%range=0:.5:2;
 
 for i=range
   ts=i;

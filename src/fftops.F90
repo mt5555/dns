@@ -289,7 +289,6 @@ call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
 
-
 call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
@@ -338,7 +337,7 @@ end
 
 
 
-subroutine fft3d_partial(f,work)
+subroutine z_fft3d(f,fout,work)
 !
 !  compute the spectrum, ouput in f
 !
@@ -346,7 +345,8 @@ use params
 use fft_interface
 use transpose
 implicit none
-real*8 f(nx,ny,nz)    ! input/output
+real*8 f(nx,ny,nz)
+real*8 fout(*)           ! input/output
 real*8 work(nx,ny,nz) ! work array
 integer n1,n1d,n2,n2d,n3,n3d
 
@@ -360,8 +360,8 @@ call fft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
-call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_z(f,fout,n1,n1d,n2,n2d,n3,n3d)
+call fft1(fout,n1,n1d,n2,n2d,n3,n3d)
 
 
 end
@@ -369,7 +369,7 @@ end
 
 
 
-subroutine ifft3d_partial(f,work)
+subroutine z_ifft3d(fin,f,work)
 !
 !  compute inverse fft 3d of f, return in f
 !
@@ -377,6 +377,7 @@ use params
 use fft_interface
 use transpose
 implicit none
+real*8 fin(*)
 real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
 
@@ -385,8 +386,16 @@ real*8 work(nx,ny,nz) ! work array
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
 
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+
+
+call ifft1(fin,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(fin,f,n1,n1d,n2,n2d,n3,n3d)
 
 call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
@@ -821,9 +830,9 @@ real*8 xfac
          do i=nx1,nx2
             im=abs(imcord(i))
 
-            if ( ((km>=g_nz/3) .and. (km>0)) .or. &
-                 ((jm>=g_ny/3) .and. (jm>0)) .or. &
-                 ((im>=g_nx/3) .and. (im>0)) )  then
+            if ( (km>g_nz/3)  .or. &
+                 (jm>g_ny/3)  .or. &
+                 (im>g_nx/3) )  then
                p(i,j,k)=0
             endif
          enddo
