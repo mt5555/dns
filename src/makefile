@@ -11,6 +11,7 @@ UNAME = $(shell uname)
 ARCH = $(shell uname -m)
 
 
+
 ifeq ($(UNAME),Linux)
    HOST = $(shell hostname)
    ifeq ($(HOST),darkstar)
@@ -21,6 +22,7 @@ ifeq ($(UNAME),Linux)
    F90 = lf95
    FFLAGS = -O -DLINUX $(MPI) -DUSE_STKFFT
    LDFLAGS = --staticlink  -Lstk -lstk
+   CC = gcc
 
    #F90 = pgf90
    #FFLAGS = -fast -DLINUX $(MPI)  -DUSE_STKFFT
@@ -31,7 +33,9 @@ ifeq ($(UNAME),SunOS)
    #MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
    #MPI = -DUSE_MPI -I/usr/local/src/mpich/include
    # default -fast is -xvector=yes, but this introduces bugs in test.F90!
-   FFLAGS = -fast -xvector=no -xarch=v9  -DSUNOS $(MPI)
+   FFLAGS = -fast -xvector=no -xarch=v9  -DSUNOS $(MPI) #-DUSE_STKFFT
+   LDFLAGS = -Lstk -lstk
+   CC = cc -xarch=v9 -c
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
@@ -66,8 +70,6 @@ OBJS3 = $(INITS) $(OPS) $(FILEIO)
 MODEL_GRID  = ns3d.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC  = ns3dspectral.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 
-
-CC = gcc
 
 #rules
 %.o: %.f90
