@@ -167,13 +167,14 @@ end subroutine
 
 real*8 function ddot(a,b)
 use params
+use mpi
 implicit none
 real*8 :: a(nx,ny,nz)
 real*8 :: b(nx,ny,nz)
 real*8 :: sm
 
 ! local
-integer :: i,j,k 
+integer :: i,j,k ,ierr
 
 ddot=0
 do k=nz1,nz2

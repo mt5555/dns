@@ -21,8 +21,8 @@ contains
 subroutine ghost_update(p,nvar)
 use params
 implicit none
-real*8 :: p(nx,ny,nz,nvar)
 integer :: nvar
+real*8 :: p(nx,ny,nz,nvar)
 
 
 !local variables
