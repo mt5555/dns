@@ -309,6 +309,18 @@ if (init_cond_subtype ==5) then
 endif
 
 
+
+if (init_cond_subtype ==6) then
+! the standard initial condition for delta=.2
+   biotsavart_cutoff=5e-3
+   biotsavart_apply=50
+   delta=.1
+   biotsavart_ubar=.098
+   yscale=1.75
+endif
+
+
+
 if (init_cond_subtype ==100) then
    ! Kras iniital condition.  run to t=5, with nu=1e-6
    ! x:  -2 ... 0.5          5*32      25% more grid points in x
