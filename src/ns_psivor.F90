@@ -168,7 +168,7 @@ else
    b=-w
    ! copy b.c. from psi into 'b', and apply compact correction to b:
    call helmholtz_dirichlet_setup(b,psi)
-   call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
    !update PSI 1st row of ghost cells so that we are 2nd order differences
    call bc_onesided(psi)

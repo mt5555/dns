@@ -1136,7 +1136,7 @@ end subroutine
 
 
 
-
+#undef COMPACT
 subroutine helmholtz_dirichlet_setup(f,p)
 !
 ! compact laplace solver really solves:
@@ -1160,11 +1160,11 @@ if (ndim==2) then
    k=1
    do j=ny1,ny2
    do i=nx1,nx2
-      if (my_x==0 .and. i==nx1) continue
-      if (my_x==ncpu_x-1 .and. i==nx2) continue
+      if (my_x==0 .and. i==nx1) cycle
+      if (my_x==ncpu_x-1 .and. i==nx2) cycle
 
-      if (my_y==0 .and. j==ny1) continue
-      if (my_y==ncpu_y-1 .and. j==ny2) continue
+      if (my_y==0 .and. j==ny1) cycle
+      if (my_y==ncpu_y-1 .and. j==ny2) cycle
 
 #ifdef COMPACT
       f(i,j,k)=f(i,j,k) + &
@@ -1218,7 +1218,7 @@ subroutine helmholtz_dirichlet(f,lf,alpha,beta,work)
 !
 !     lf = [alpha + beta*laplacian](f)
 !
-!     lf on the boundary unchanged.
+!     lf on the boundary copied from f.
 !
 use params
 use ghost
@@ -1252,14 +1252,17 @@ if (ndim==2) then
 
    do j=ny1,ny2
    do i=nx1,nx2
-      if (my_x==0 .and. i==nx1) continue
-      if (my_x==ncpu_x-1 .and. i==nx2) continue
-
-      if (my_y==0 .and. j==ny1) continue
-      if (my_y==ncpu_y-1 .and. j==ny2) continue
+      if ( (my_x==0 .and. i==nx1)  .or. &
+           (my_x==ncpu_x-1 .and. i==nx2)  .or. &
+           (my_y==0 .and. j==ny1) .or. &
+           (my_y==ncpu_y-1 .and. j==ny2) ) then
+         lf(i,j,k)=f(i,j,k)
+         cycle
+      endif
 
       lf(i,j,k)=(f(i+1,j,k)-2*f(i,j,k)+f(i-1,j,k))/(delx*delx) + &
                 (f(i,j+1,k)-2*f(i,j,k)+f(i,j-1,k))/(dely*dely)
+
 
       ! add the DyDx(f) term:
 #ifdef COMPACT
@@ -1290,14 +1293,15 @@ else if (ndim==3) then
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      if (my_x==0 .and. i==nx1) continue
-      if (my_x==ncpu_x-1 .and. i==nx2) continue
-
-      if (my_y==0 .and. j==ny1) continue
-      if (my_y==ncpu_y-1 .and. j==ny2) continue
-
-      if (my_z==0 .and. k==nz1) continue
-      if (my_z==ncpu_z-1 .and. k==nz2) continue
+      if ( (my_x==0 .and. i==nx1)  .or. &
+           (my_x==ncpu_x-1 .and. i==nx2)  .or. &
+           (my_y==0 .and. j==ny1) .or. &
+           (my_y==ncpu_y-1 .and. j==ny2) .or.&
+           (my_z==0 .and. k==nz1) .or. &
+           (my_z==ncpu_z-1 .and. k==nz2) ) then
+         lf(i,j,k)=f(i,j,k)
+         cycle
+      endif
 
       
       lf(i,j,k)=alpha*f(i,j,k)+ &

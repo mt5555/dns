@@ -3,17 +3,63 @@ subroutine test
 use params
 
 
-! fft of fd operatrions:
-call test_fft_fd
 
-call test_transform
-call test_fft
-call test_poisson
-call test_divfree
-
+!call test_fft_fd
+!call test_transform
+!call test_fft
+!call test_poisson
+!call test_divfree
+call test_dirichlet
 
 end subroutine
 
+subroutine test_dirichlet
+use params
+implicit none
+external helmholtz_dirichlet
+
+real*8 b(nx,ny)
+real*8 psi(nx,ny)
+real*8 psi_exact(nx,ny)
+real*8 lpsi(nx,ny)
+real*8 work(nx,ny)
+real*8 :: zero=0,one=1
+real*8 :: tol=1e-6
+integer i,j,k,n
+b=0
+psi=0
+work=0
+lpsi=0
+
+! psi = x**2 + y**2    
+! laplacian = 4
+do j=ny1,ny2
+do i=nx1,nx2
+   psi_exact(i,j)=xcord(i)**2 + ycord(i)**2
+   b(i,j)=4
+enddo
+enddo
+
+psi=psi_exact
+! muck around with psi on the interior, to give CG something to iterate on:
+do j=ny1+1,ny2-1
+do i=nx1+1,nx2-1
+   psi(i,j)=0
+enddo
+enddo
+
+
+! copy b.c. from psi into 'b', and apply compact correction to b:
+call helmholtz_dirichlet_setup(b,psi)
+!call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
+print *,'helmholtz_dirichlet solver error: ',&
+maxval(abs(psi(  nx1:nx2,ny1:ny2)-psi_exact(nx1:nx2,ny1:ny2)     ))
+
+stop
+
+end subroutine
 
 
 subroutine test_fft_fd

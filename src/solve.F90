@@ -113,7 +113,7 @@ if (err<tol1) goto 200
    P=R + P*beta
    
    err=sqrt(alpha)
-   !write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' ||RHS||=',res_init,' residual: ',err
+   write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' ||RHS||=',res_init,' residual: ',err
 
 if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
 200 continue
@@ -160,7 +160,7 @@ real*8 res_init,tol1,w
 integer itqmr
 integer itermax
 
-itermax=1000
+itermax=2000
 w = a1 - a2*(pi2/(3*min(delx,dely,delz)))**2
 w=2.5*w  ! safety factor
 w = 1/w
@@ -176,11 +176,12 @@ endif
 call matvec(sol,R,a1,a2,h)
 if (precond) call helmholtz_periodic_inv(R,work,a1,a2)
 
-
 R=b-R
 sol = sol + w*R
 
 res_init = sqrt(ddot(b,b))
+
+
 if (tol>1) then
    itermax=tol
    tol1=1e-12
