@@ -1,0 +1,86 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb,latexsym,amsmath}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX                                         
+\else
+\pdfoutput=1 % we are running PDFLaTeX                                          
+\pdftrue
+\fi
+\ifpdf
+\usepackage[pdftex]{graphicx}
+\else
+\usepackage{graphicx}
+\fi
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps, .jpg}
+\fi
+
+
+
+\textwidth = 6.5 in
+\textheight = 9 in
+\oddsidemargin = 0.0 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.2 in
+\parindent = 0.0 in
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\polyf}{\mathcal{P}_d}
+\newcommand{\poly}{\mathcal{P}}
+\newcommand{\polyfe}{\mathcal{P}_{d+e}}
+
+\DeclareMathOperator{\Span}{span}
+
+
+\title{Integral Length Scale in the LANL DNS code}
+\author{Mark Taylor}
+
+\begin{document}
+\maketitle
+
+The normalization used for the 1D spectrum $E_{ij}$ in our DNS code
+is:
+\[
+\frac12 \int u^2 = \frac12 \sum_k u_k^2  = \sum_k E_{11}(k)
+\]
+so that
+\[
+E_{11}(k) =  \frac12 u_k^2
+\]
+With this normalization, Plancheral's equation becomes:
+\[
+\int f g = \sum_k f_k g_k
+\]
+
+The correlation function is:
+\[
+R(r) = \frac{\int u(x) u(x+r) \,dx}{\int 1 \,dx   } = 
+\int u(x) u(x+r) \,dx
+\]
+(since the area of our domain is 1).  Applying Plancheral,
+gives
+\[
+R(r) =  \sum_k u_k^2  e^{2 \pi i k  r}
+\]
+and thus
+\[
+\int_0^1 R(r) \,dr = \sum_k u_k^2   \int_0^1 e^{i k 2 \pi r} \,dr
+                   = u_0^2 = 2 E_{11}(0)
+\]
+So 
+\[
+L = \frac{\int_0^1 R(r) \,dr}{< u^2 > } = \frac{ 2 E_{11}(0) }{ < u^2 > }
+\]
+
+
+\end{document}
