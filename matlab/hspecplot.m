@@ -63,9 +63,9 @@ end
 k = [0:n_r-1];
 
 figure(20); % +, - and total helicity spectra
-loglog(abs(hspec_n),'r'); hold on;
-loglog(hspec_p,'b'); hold on;
-loglog(abs(hspec_p+hspec_n),'k'); hold on;
+loglog(k,abs(hspec_n),'r'); hold on;
+loglog(k,hspec_p,'b'); hold on;
+loglog(k,abs(hspec_p+hspec_n),'k'); hold on;
 %axis([1 100 1e-2 10]);
 grid
 legend('|H_-(k)|','H_+(k)','H(k)=H_+(k) + H_-(k)')
@@ -73,10 +73,10 @@ legend('|H_-(k)|','H_+(k)','H(k)=H_+(k) + H_-(k)')
 
 
 figure(21); % 4/3 normalized +, - and total helicity spectra
-loglog(abs(hspec_n).*k'.^(4/3),'r'); hold on; 
-loglog(hspec_p.*k'.^(4/3),'b');
-loglog(abs(hspec_p-hspec_n).*k'.^(4/3),'k-');hold on;
-%loglog(abs(hspec_p+hspec_n).*k'.^(4/3),'k.-');hold on;
+loglog(k,abs(hspec_n).*k'.^(4/3),'r'); hold on; 
+loglog(k,hspec_p.*k'.^(4/3),'b');
+loglog(k,abs(hspec_p-hspec_n).*k'.^(4/3),'k-');hold on;
+%loglog(k,abs(hspec_p+hspec_n).*k'.^(4/3),'k.-');hold on;
 %axis([1 100 1e-2 10]);hold on;
 grid on;
 title('4/3 compensated helicity spectra');
@@ -84,10 +84,10 @@ legend('|H_-(k)| k^{4/3}','H_+(k) k^{4/3}','H(k) k^{4/3}')
 %hold off
 
 figure(22); % 5/3 normalized +, - and total helicity spectra
-loglog(abs(hspec_n).*k'.^(5/3),'r');hold on;
-loglog(hspec_p.*k'.^(5/3),'b');hold on;
-loglog(abs(hspec_p-hspec_n).*k'.^(5/3),'k-');hold on;
-%loglog(abs(hspec_p+hspec_n).*k'.^(5/3),'k.-'); hold on;
+loglog(k,abs(hspec_n).*k'.^(5/3),'r');hold on;
+loglog(k,hspec_p.*k'.^(5/3),'b');hold on;
+loglog(k,abs(hspec_p-hspec_n).*k'.^(5/3),'k-');hold on;
+%loglog(k,abs(hspec_p+hspec_n).*k'.^(5/3),'k.-'); hold on;
 %axis([1 100 1e-2 10]);
 grid on;
 title('5/3 compensated helicity spectra');
@@ -116,16 +116,16 @@ end
 hspec_ave = hspec_ave/(j);
 
 figure(24)
-loglog(abs(hspec_ave),'x'); hold on;
+loglog(k,abs(hspec_ave),'x'); hold on;
 title('Average helicity spectrum')
 
 
 figure(25)
-loglog(abs(hspec_ave).*k'.^(4/3),'k');hold on;
+loglog(k,abs(hspec_ave).*k'.^(4/3),'k');hold on;
 title('Average 4/3 compensated helicity spectrum');
 
 figure(26)
-loglog(abs(hspec_ave).*k'.^(5/3),'b');hold on;
+loglog(k,abs(hspec_ave).*k'.^(5/3),'b');hold on;
 title('Average 5/3 compensated helicity spectrum');
 
 %end
