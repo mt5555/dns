@@ -169,6 +169,8 @@ integer :: intz1,intz2
 integer :: bx1,bx2
 integer :: by1,by2
 integer :: bz1,bz2
+integer :: offset_bdy=0   ! flag indicating boundary data should be placed   
+                          ! in ghost cell of bdy_x2 (or bdy_y2)
 
 
 

@@ -14,12 +14,13 @@ implicit none
 ! you can also use the routine set_biotsavart() to set psi_b
 ! based on the boundary values in an array PSI
 !
-real*8,private :: psi_b(max(1+g_ny,1+g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
+integer,parameter,private ::  bsize=max(1+g_nx,1+g_ny)
+real*8,private :: psi_b(bsize,2,2)   ! psi_b(k,1,1) = x1 boundary
                                               ! psi_b(k,1,2) = x2 boundary
                                               ! psi_b(k,2,1) = y1 boundary
                                               ! psi_b(k,2,2) = y2 boundary
                                               ! psi_b(k,2,2) = y2 boundary
-real*8 :: psi_b_temp(max(1+g_ny,1+g_nx),2,2)
+real*8 :: psi_b_temp(bsize,2,2)
 
 contains
 
@@ -270,28 +271,29 @@ interp=.false.
 if (g_bdy_x1==INFLOW0_ONESIDED) interp=.true.
 
 
+
 if (interp) then
 ! interpolate every 10'th point
 do j=by1,by2
 do i=bx1,bx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
-      do k=1,g_nx,10 
+      do k=1,o_nx,10 
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
-         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
+         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,o_ny)
       enddo
       last=k-10
-      do k=last+1,g_nx
+      do k=last+1,o_nx
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
-         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
+         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,o_ny)
       enddo
-      do k=11,g_ny,10 
+      do k=11,o_ny,10 
             psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
-            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
+            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,o_nx,k)
       enddo
       last=k-10
-      do k=last+1,g_ny
+      do k=last+1,o_ny
             psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
-            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
+            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,o_nx,k)
       enddo
    endif
 enddo
@@ -301,14 +303,15 @@ else
 do j=by1,by2
 do i=bx1,bx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
-      do k=1,g_nx
+      do k=1,o_nx
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
-         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,g_ny)
+         psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,o_ny)
       enddo
-      do k=2,g_ny 
-            psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
-            psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,g_nx,k)
+      do k=2,o_ny 
+         psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
+         psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,o_nx,k)
       enddo
+!      print *,i,j,w(i,j)
    endif
 enddo
 enddo
@@ -318,23 +321,25 @@ endif
 
 #ifdef USE_MPI
 psi_b_temp=psi_b
-k=max(1+g_ny,1+g_nx)*4
-call MPI_allreduce(psi_b_temp,psi_b,k,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call MPI_allreduce(psi_b_temp,psi_b,4*bsize,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
-if (interp) call intpsi(psi_b,max(1+g_ny,1+g_nx))
+!print *,'psib',psi_b(o_ny,1,1)
+
+
+if (interp) call intpsi(psi_b,bsize)
 
 
 ! add ubar correction
 ! only needs to be done on processer which owns boundary data
 ! but lets have everyone do it for now...
 dela = delx*dely/(4*pi)
-do k=1,g_nx
+do k=1,o_nx
    ! y2 boundary
    !psi_b(k,2,1) = psi_b(k,2,1)*dela - ubar*g_ycord(1)
-   psi_b(k,2,2) = psi_b(k,2,2)*dela - ubar*g_ycord(g_ny)
+   psi_b(k,2,2) = psi_b(k,2,2)*dela - ubar*g_ycord(o_ny)
 enddo
-do k=2,g_ny
+do k=2,o_ny
    ! x1,x2 boundary
    psi_b(k,1,1) = psi_b(k,1,1)*dela  - ubar*g_ycord(k)
    psi_b(k,1,2) = psi_b(k,1,2)*dela  - ubar*g_ycord(k)
@@ -342,11 +347,6 @@ enddo
 endif
 
 
-print *,'maxval psi_b',maxval(psi_b)
-print *,'sumval psi_b',sum(psi_b)
-psi_b uses g_*coords which have not been set in the
-ghost region
-stop
 
 
 ! set PSI boundary data:
@@ -357,23 +357,18 @@ if (REALBOUNDARY(bdy_x1)) then
       psi(bx1,j)= psi_b(L,1,1)
    enddo
 endif
-
-
 if (REALBOUNDARY(bdy_x2)) then
    do j=by1,by2
       l = j-by1+1 + nslaby*my_y
       psi(bx2,j)= psi_b(L,1,2)
    enddo
 endif
-
 if (REALBOUNDARY(bdy_y1)) then
    do i=bx1,bx2
       l = i-bx1+1 + nslabx*my_x
       psi(i,by1)= psi_b(L,2,1)
    enddo
 endif
-
-
 if (REALBOUNDARY(bdy_y2)) then
    do i=bx1,bx2
       l = i-bx1+1 + nslabx*my_x
@@ -381,8 +376,6 @@ if (REALBOUNDARY(bdy_y2)) then
    enddo
 endif
       
-
-
 call wallclock(tmx2)
 tims(14)=tims(14)+(tmx2-tmx1)
 
@@ -427,16 +420,16 @@ real*8 psi(n,2,2)
 integer i,k
 
 ! x1 and x2 boundary
-! psi(i,1,*) was set for i=1,g_nx,10
+! psi(i,1,*) was set for i=1,o_nx,10
 
 do k=1,2
-do i=1,g_ny,10
-   if (i+30>g_ny) exit
+do i=1,o_ny,10
+   if (i+30>o_ny) exit
    if (i==1) then  
       ! do the [y0,y1] piece
       call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+1,1,k),10,0)
    endif
-   if (i+40>g_ny) then  
+   if (i+40>o_ny) then  
       ! do the [y2,y3] piece, this is the final iteration
       call interpn(psi(i,1,k),psi(i+10,1,k),psi(i+20,1,k),psi(i+30,1,k),psi(i+21,1,k),10,2)
    endif
@@ -447,15 +440,15 @@ enddo
 
 
 ! y2 boundary
-! psi(i,2,2) was set for i=1,g_ny,10
+! psi(i,2,2) was set for i=1,o_ny,10
 k=2
-do i=1,g_nx,10
-   if (i+30>g_nx) exit
+do i=1,o_nx,10
+   if (i+30>o_nx) exit
    if (i==1) then  
       ! do the [y0,y1] piece
       call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+1,2,k),10,0)
    endif
-   if (i+40>g_nx) then  
+   if (i+40>o_nx) then  
       ! do the [y2,y3] piece, this is the final iteration
       call interpn(psi(i,2,k),psi(i+10,2,k),psi(i+20,2,k),psi(i+30,2,k),psi(i+21,2,k),10,2)
    endif
@@ -509,5 +502,28 @@ end module
 
       return
       end subroutine
+
+
+
+
+
+
+
+subroutine ghost_update_x_reshape(psi,n)
+use params
+use ghost
+implicit none
+integer :: n
+real*8 :: psi(nx,ny,nz,n)
+call ghost_update_x(psi,n)
+end
+subroutine ghost_update_y_reshape(psi,n)
+use params
+use ghost
+implicit none
+integer :: n
+real*8 :: psi(nx,ny,nz,n)
+call ghost_update_y(psi,n)
+end
 
 

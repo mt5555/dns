@@ -5,11 +5,11 @@ use params
 
 
 !call test_fft_fd
-call test_transform
+!call test_transform
 !call test_fft
 !call test_poisson
 !call test_divfree
-!call test_poisson_dirichlet
+call test_poisson_dirichlet
 !call test_poisson_ghost
 
 end subroutine
@@ -40,24 +40,25 @@ g_bdy_x1=INFLOW0_ONESIDED
 g_bdy_x2=INFLOW0_ONESIDED
 g_bdy_y1=INFLOW0_ONESIDED
 g_bdy_y2=INFLOW0_ONESIDED
+offset_bdy=1
 call init_grid()
 
 
 ! psi = x**2 + y**2    
 ! laplacian = 4
-do j=ny1,ny2
-do i=nx1,nx2
+do j=by1,by2
+do i=bx1,bx2
    !psi_exact(i,j)=xcord(i)**2 + ycord(j)**2
    !b(i,j)=4
 
    !psi_exact(i,j)=xcord(i)**3 + ycord(j)**3
    !b(i,j)=3*2*xcord(i) + 3*2*ycord(j)
 
-   !psi_exact(i,j)=sin(pi*xcord(i))*sin(pi*ycord(j))
-   !b(i,j)=-2*pi*pi*sin(pi*xcord(i))*sin(pi*ycord(j))
+   psi_exact(i,j)=100 + sin(pi*xcord(i))*sin(pi*ycord(j))
+   b(i,j)=-2*pi*pi*sin(pi*xcord(i))*sin(pi*ycord(j))
 
-   psi_exact(i,j)=cos(pi*xcord(i))*cos(pi*ycord(j))
-   b(i,j)=-2*pi*pi*cos(pi*xcord(i))*cos(pi*ycord(j))
+   !psi_exact(i,j)=cos(pi*xcord(i))*cos(pi*ycord(j))
+   !b(i,j)=-2*pi*pi*cos(pi*xcord(i))*cos(pi*ycord(j))
 enddo
 enddo
 
@@ -65,8 +66,8 @@ enddo
 
 psi=psi_exact
 ! muck around with psi on the interior, to give CG something to iterate on:
-do j=ny1+1,ny2-1
-do i=nx1+1,nx2-1
+do j=inty1,inty2
+do i=intx1,intx2
    psi(i,j)=0
 enddo
 enddo
@@ -80,14 +81,17 @@ call helmholtz_dirichlet_setup(b,psi,work,1)
 
 !call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
-
 psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one)
 
 
-
-
 print *,'helmholtz_dirichlet solver error: ',&
-maxval(abs(psi(  nx1:nx2,ny1:ny2)-psi_exact(nx1:nx2,ny1:ny2)     ))
+maxval(abs(psi(  bx1:bx2,by1:by2)-psi_exact(bx1:bx2,by1:by2)     ))
+do j=by1,by2
+do i=bx1,bx2
+!   print *,i,j,psi(i,j),psi_exact(i,j)
+enddo
+enddo
+
 
 #if 0
  jacobi results  COMPACT WORKING!

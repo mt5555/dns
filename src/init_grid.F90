@@ -108,13 +108,10 @@ by2=ny2
 bz1=nz1
 bz2=nz2
 
-#if 1
-if (g_nx==64) then
-! move boundary into ghost cell region:
-bx2=nx2+1; o_nx=g_nx+1
-by2=ny2+1; o_ny=g_ny+1
+if (offset_bdy==1) then
+   if (my_x==ncpu_x-1) bx2=nx2+1; o_nx=g_nx+1
+   if (my_y==ncpu_y-1) by2=ny2+1; o_ny=g_ny+1
 endif
-#endif
 
 
 bdy_x1=g_bdy_x1
@@ -193,7 +190,7 @@ call fft_get_mcord(g_kmcord,g_nz)
 imsine=0              
 imsign=0   
 imcord=0
-do i=nx1,nx2
+do i=bx1,bx2
    l = i-nx1+1 + nslabx*my_x
    xcord(i)=g_xcord(l)
    imcord(i)=g_imcord(l)
@@ -207,7 +204,7 @@ enddo
 jmcord=0
 jmsign=0
 jmsine=0
-do j=ny1,ny2
+do j=by1,by2
    l = j-ny1+1 + nslaby*my_y
    ycord(j)=g_ycord(l)
    jmsine(j)=l-1
@@ -220,7 +217,7 @@ enddo
 kmcord=0
 kmsign=0
 kmsine=0
-do k=nz1,nz2
+do k=bz1,bz2
    l = k-nz1+1 + nslabz*my_z
    zcord(k)=g_zcord(l)
    kmcord(k)=g_kmcord(l)

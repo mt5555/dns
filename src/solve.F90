@@ -250,7 +250,7 @@ real*8 psi0(nx,ny,nz)   ! initial guess, if needed
 integer :: runbs 
 
 !local
-real*8 :: one=1,zero=0,tol=1e-6
+real*8 :: one=1,zero=0,tol=1e-10
 integer,save :: btype=-1
 
 external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
@@ -295,21 +295,37 @@ else if (btype==1) then
    psi=psi0  ! initial guess
    b=-w  ! be sure to copy ghost cell data also!
    ! apply compact correction to b:
-
-   call helmholtz_dirichlet_setup(b,psi,work,1)
+   call helmholtz_dirichlet_setup(b,psi,work,0)
    call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
 
 else if (btype==2) then
    psi=0  ! initial guess
+
+#if 0
+   print *,'sumvalw ',sum(w(intx1:intx2,inty1:inty2,1))
+   print *,'sumvalw2 ',sum(w(bx1:bx2,by1:by2,1))
+#endif
+
    call bc_biotsavart(w,psi,runbs)    !update PSI on boundary using biot-savart law
+
 
    b=-w  ! be sure to copy ghost cell data also!
    ! apply compact correction to 'b', then set b.c. of b:
    call helmholtz_dirichlet_setup(b,psi,work,1)
 
+#if 0
+   print *,'sumvalb ',sum(b(intx1:intx2,inty1:inty2,1))
+   print *,'sumvalb2 ',sum(b(bx1:bx2,by1:by2,1))
+#endif
 
-   !psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
-   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+   psi=b; call helmholtz_dirichlet_inv(psi,work,zero,one) 
+   !call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
+#if 0
+   print *,'sumvalq ',sum(psi(intx1:intx2,inty1:inty2,1))
+   stop
+#endif
+
 
    !update PSI 1st row of ghost cells so that our 4th order differences
    !near the boundary look like 2nd order centered
@@ -346,9 +362,9 @@ integer :: i,j,k ,ierr
 real*8 :: sm
 
 ddot=0
-do k=intz1,intz2
-do j=inty1,inty2
-do i=intx1,intx2
+do k=bz1,bz2
+do j=by1,by2
+do i=bx1,bx2
    ddot=ddot+a(i,j,k)*b(i,j,k)
 enddo
 enddo

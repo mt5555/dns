@@ -1253,7 +1253,7 @@ end
 !
 ! Compute 3D sin transform along first dimension
 !
-! input data:   (for example, if n1=5)
+! input data:   (for example, if n1=5)  g_nx=o_nx=5
 !   1 2 3 4 5      x(1)=x(5)=0
 ! odd extension:
 !   1 2 3 4 5 -4 -3 -2  0 0      (fft does not include last periodic point)
@@ -1267,17 +1267,43 @@ end
 !                             of the sin(0x) mode.  But sin(0x) mode is always 0
 !                             and cos(4x) mode is zero since our data is odd)
 !
+! if offset_bdy, then the trailing 0 is missing:
+!  g_nx=5  o_nx=6    fft: 2*g_nx
+!
+!  input:            1 2 3 4 5 
+!  odd extension:    1 2 3 4 5 0 -5 -4 -3 -2  0 0 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
+use params
 use fft_interface
 implicit none
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: p(n1d,n2d,n3d)
-real*8 :: w(2*n1,n2)
+real*8 :: w(2*n1+2,n2)
 
 integer i,j,k
 if (n1==1) return
 
+if (1==offset_bdy) then
+do k=1,n3
+   do j=1,n2
+      ! make an odd extension
+      w(n1,j)=p(n1,j,k)
+      w(n1+1,j)=0
+      do i=1,n1-1
+         w(i,j)=p(i,j,k)               !  1 2 3 4 5
+         w(i+n1+1,j)=-p(n1-i+1,j,k)    !            * -5 -4 -3 -2
+      enddo
+   enddo
+   call fft1(w,2*n1,2*n1+2,n2,n2,1,1)
+   do j=1,n2
+      ! save only the sine modes:
+      do i=1,n1
+         p(i,j,k)=w(2*i,j)
+      enddo
+   enddo
+enddo
+else
 do k=1,n3
    do j=1,n2
       ! make an odd extension
@@ -1294,6 +1320,7 @@ do k=1,n3
       enddo
    enddo
 enddo
+endif
 end subroutine
 
 
@@ -1306,15 +1333,33 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine isinfft1(p,n1,n1d,n2,n2d,n3,n3d)
 use fft_interface
+use params
 implicit none
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: p(n1d,n2d,n3d)
-real*8 :: w(2*n1,n2)
+real*8 :: w(2*n1+2,n2)
 
 integer i,j,k
 if (n1==1) return
 
-
+if (1==offset_bdy) then
+do k=1,n3
+   do j=1,n2
+      ! unpack the sine modes into a sine/cosine array:
+      ! save only the sine modes:
+      do i=1,n1
+         w(2*i-1,j)=0
+         w(2*i,j)=p(i,j,k)
+      enddo
+   enddo
+   call ifft1(w,2*n1,2*n1+2,n2,n2,1,1)
+   do j=1,n2
+      do i=1,n1
+         p(i,j,k)=w(i,j)
+      enddo
+   enddo
+enddo
+else
 do k=1,n3
    do j=1,n2
       ! unpack the sine modes into a sine/cosine array:
@@ -1324,13 +1369,14 @@ do k=1,n3
          w(2*i,j)=p(i,j,k)
       enddo
    enddo
-   call ifft1(w,2*n1-2,2*n1,n2,n2,1,1)
+   call ifft1(w,2*n1-2,2*n1+2,n2,n2,1,1)
    do j=1,n2
       do i=1,n1
          p(i,j,k)=w(i,j)
       enddo
    enddo
 enddo
+endif
 end subroutine
 
 

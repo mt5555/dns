@@ -384,6 +384,11 @@ if (init_cond_subtype ==0) then
    delta=.2
    ubar=.089
    yscale=3
+
+   if (g_nx==64) then
+      print *,'using offset'
+      offset_bdy=1
+   endif
 endif
 
 if (init_cond_subtype ==1) then
@@ -452,6 +457,10 @@ enddo
 
 call bcw_impose(w)
 Q(:,:,:,3)=w
+
+
+
+
 
 
 
