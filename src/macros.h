@@ -3,6 +3,10 @@
 #define ASSERT(str,cond) if (.not. cond) call abort(str)
 #endif
 
+! this is the default:
+#define TRANSPOSE_X_SPLIT_Z
+! undef it to use TRANSPOSE_X_SPLIT_Y, which is usefull if nslabz=1
+
 
 
 #define DX_AND_DXX 2

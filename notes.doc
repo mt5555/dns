@@ -16,10 +16,22 @@ aliased:  mu=0
 1.5  unstable t=.63
 0.5  unstable t=.63
 
+
+aliased:  mu=.001    (damping time .0031s)
+cfl=4.0:  t=2 looks bad - unstable at t=0.98
+cfl=2.0:  t=6.9 unstable (ke going up)
+cfl=1.5:  goes bad around t=8.4
+cfl=1.4:  d/dt ke going bad, t=15
+cfl=1.3:  d/dt ke going bad, t=15
+cfl=1.25: IN dosadi
+cfl=1.2:  looks good.  rant to t=50, ke down from 5000 to 76
+cfl=1.0:  t=10.0  looks good, ran to t=60, ke down from 5000 to 36.
+
 aliased:  mu=.0001    (damping time .031s)
 cfl=4.0: unstable t=.438  
 cfl=2.0: looks good at t=1, blows up at t=5.3
-cfl=1.0: ?
+cfl=1.0: blows up at t=5.3
+
 
 aliased:  mu=.00001   (damping time: .31s)
 cfl=2.0:  unstable at t=?

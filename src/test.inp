@@ -7,13 +7,13 @@ periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
 100.0        ! final time
-1.40          ! adv cfl  (0 = disabled, use min_dt)
+1.20          ! adv cfl  (0 = disabled, use min_dt)
 1.30          ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
 .1            ! restart_dt  (0 = restart output disabled)
 .1            ! diag_dt
--5            ! screen_dt
+-1            ! screen_dt
 .1            ! output_dt  (0 = output disabled, except for custom output times)
 1             ! n_output_custom  number of custom output times  
 .111          ! custom output times, one per line

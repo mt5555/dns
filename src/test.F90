@@ -2,7 +2,7 @@
 subroutine test
 use params
 
-!call test_parallel
+call test_parallel
 call test_fft
 call test_poisson
 call test_divfree
@@ -164,7 +164,7 @@ do k=nz1,nz2
    rhs(i,j,k)=    -cf1*cf1*4*cos(cf1*ycord(j))    + rhs(i,j,k)
 
    if (nz2>1) then
-      cf1=4*2*pi 
+      cf1=2*2*pi 
       input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
       rhs(i,j,k)=    -cf1*cf1*5*cos(cf1*zcord(k))    + rhs(i,j,k)
 
@@ -302,7 +302,7 @@ enddo
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
-   cf1=4*2*pi 
+   cf1=3*2*pi 
    input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
    inputz(i,j,k)=     -cf1*5*sin(cf1*zcord(k))    + inputz(i,j,k)
    inputzz(i,j,k)=-cf1*cf1*5*cos(cf1*zcord(k))    + inputzz(i,j,k)

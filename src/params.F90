@@ -5,18 +5,25 @@
 !  module containing all global parameters like mesh data
 !
 ! To create a valid file:  
-! Set nx1,nx2,ny1,ny2,nz1,nz2   and nx,ny,nz
-! pick l,m,n, and then set:
+! pick ncpu_x,ncpu_y,ncpu_z	
+! Then l,m,n, and set:
 !
-! ncpu_x*l=(nz2-nz1+1)
-! ncpu_y*m=(nx2-nx1+1)
-! ncpu_z*n=(ny2-ny1+1)
+! #ifdef TRANSPOSE_X_SPLIT_Z
+!    ncpu_x*l=nslabz
+!    ncpu_y*m=nslabx
+!    ncpu_z*n=nslaby
 !
+! #ifdef TRANSPOSE_X_SPLIT_Y        (usefull if nslabz=1)
+!    ncpu_x*l=nslaby
+!    ncpu_y*m=nslabx
+!    ncpu_z*n=nslaby  <==>    n=l*ncpu_x/ncpu_z
+!
+! from nslab*, pick suitable values of nx1,nx2,ny1,ny2,nz1,nz2   and nx,ny,nz)
 !
 ! params_init() will set the global grid by:
-! g_nx=ncpu_x*(nx2-nx1+1) = l*nslabz*nslabx
-! g_ny=ncpu_y*(ny2-ny1+1) = m*nslabx*nslaby
-! g_nz=ncpu_z*(nz2-nz1+1) = n*nslaby*nslabz
+! g_nx=ncpu_x*nslabx
+! g_ny=ncpu_y*nslaby
+! g_nz=ncpu_z*nslabz
 !
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -105,7 +112,7 @@ integer :: error_code =0
 ! parallel decompositions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !integer :: ncpu_x=1,ncpu_y=1,ncpu_z=1
-integer :: nx_2d,ny_2d,nz_2d
+integer :: nx_2dy,ny_2dz,nz_2dx,ny_2dx
 integer :: io_pe
 integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
 integer :: initial_live_procs
@@ -127,9 +134,16 @@ integer :: comm_3d                 ! the MPI cartesian communcator
 !
 !
 ! for simplicity, we require:
-!    ncpu_x divides (nz2-nz1+1)   nz_2d=(nz2-nz1+1)/ncpu_x
-!    ncpu_y divides (nx2-nx1+1)   nx_2d=(nx2-nx1+1)/ncpu_y
-!    ncpu_z divides (ny2-ny1+1)   ny_2d=(ny2-ny1+1)/ncpu_z
+!
+! #ifdef TRANSPOSE_X_SPLIT_Z 
+!    ncpu_x divides (nz2-nz1+1)   nz_2dx=(nz2-nz1+1)/ncpu_x
+!    ncpu_y divides (nx2-nx1+1)   nx_2dy=(nx2-nx1+1)/ncpu_y
+!    ncpu_z divides (ny2-ny1+1)   ny_2dz=(ny2-ny1+1)/ncpu_z
+!
+! #ifdef TRANSPOSE_X_SPLIT_Y        (usefull if ncpu_z=1)
+!    ncpu_x divides (ny2-ny1+1)   ny_2dx=(ny2-ny1+1)/ncpu_x
+!    ncpu_y divides (nx2-nx1+1)   nx_2dy=(nx2-nx1+1)/ncpu_y
+!    ncpu_z divides (ny2-ny1+1)   ny_2dz=(ny2-ny1+1)/ncpu_z
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -146,9 +160,9 @@ real*8 :: one=1
 pi=4*atan(one)
 pi2_squared=4*pi*pi
 
-g_nx=(nx2-nx1+1)*ncpu_x
-g_ny=(ny2-ny1+1)*ncpu_y
-g_nz=(nz2-nz1+1)*ncpu_z
+g_nx=nslabx*ncpu_x
+g_ny=nslaby*ncpu_y
+g_nz=nslabz*ncpu_z
 g_nx2=g_nx+2
 g_ny2=g_ny+2
 g_nz2=g_nz+2
@@ -156,14 +170,25 @@ if (g_nz==1) g_nz2=1
 
 
 ! these values must divide with no remainder:
-nz_2d=(nz2-nz1+1)/ncpu_x
-nx_2d=(nx2-nx1+1)/ncpu_y
-ny_2d=(ny2-ny1+1)/ncpu_z
-if (0/=mod(nz2-nz1+1,ncpu_x)) then
+nz_2dx=nslabz/ncpu_x     ! TRANSPOSE_X_SPLIT_Z 
+ny_2dx=nslaby/ncpu_x     ! TRANSPOSE_X_SPLIT_Y  (usefull if nslabz=1)
+nx_2dy=nslabx/ncpu_y     ! TRANSPOSE_Y_SPLIT_X  (always used)
+ny_2dz=nslaby/ncpu_z     ! TRANSPOSE_Z_SPLIT_Y  (always used)
+
+
+#ifdef TRANSPOSE_X_SPLIT_Z
+if (0/=mod(nslabz,ncpu_x)) then
    fail=1
    call print_message("ncpu_x does not divide nz");
 endif
-if (0/=mod(nx2-nx1+1,ncpu_y)) then
+#else
+if (0/=mod(nslaby,ncpu_x)) then
+   fail=1
+   call print_message("ncpu_x does not divide ny");
+endif
+#endif
+
+if (0/=mod(nslabx,ncpu_y)) then
    fail=1
    call print_message("ncpu_y does not divide nx");
 endif
@@ -177,34 +202,34 @@ endif
 ! memory contraint: 2D decomposition should fit in a 3D decomposition array
 ! check if: (g_nz2)*nslabx*ny_2d <= nx*ny*nz)
 !
-if ((g_nx2)*nz_2d*real(nslaby,r8kind) > nx*nz*real(ny,r8kind) )  then
+if ((g_nx2)*nz_2dx*real(nslaby,r8kind) > nx*nz*real(ny,r8kind) )  then
    fail=1
    call print_message("insufficient storage.");
    write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
    call print_message(message)	
    write(message,'(a,f10.0)') "storage needed for 2D x-decomposition: ", &
-     (g_nx2)*nz_2d*real(nslaby,r8kind)
+     (g_nx2)*nz_2dx*real(nslaby,r8kind)
    call print_message(message)	
 
 endif
-if ( (g_ny2)*nx_2d*real(nslabz,r8kind) > nx*ny*real(nz,r8kind)) then
+if ( (g_ny2)*nx_2dy*real(nslabz,r8kind) > nx*ny*real(nz,r8kind)) then
    fail=1
    call print_message("insufficient storage.");
    write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
    call print_message(message)	
    write(message,'(a,f10.0)') "storage needed for 2D y-decomposition: ", &
-     (g_ny2)*nx_2d*real(nslabz,r8kind)
+     (g_ny2)*nx_2dy*real(nslabz,r8kind)
    call print_message(message)	
 
 endif
 
-if ( (g_nz2)*ny_2d*real(nslabx,r8kind) >  ny*nz*real(nx,r8kind)) then
+if ( (g_nz2)*ny_2dz*real(nslabx,r8kind) >  ny*nz*real(nx,r8kind)) then
    fail=1
    call print_message("insufficient storage.");
    write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
    call print_message(message)	
    write(message,'(a,f10.0)') "storage needed for 2D z-decomposition: ", &
-     (g_nz2)*ny_2d*real(nslabx,r8kind)
+     (g_nz2)*ny_2dz*real(nslabx,r8kind)
    call print_message(message)	
 endif
 

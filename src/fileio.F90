@@ -91,7 +91,7 @@ if (doit) then
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
    call print_message(message)	
-   call compute_div(Q,io_pe,divx,divi)
+   call compute_div(Q,divx,divi)
    write(message,'(a,3f12.5,a,e12.5)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3),' max div',divx
    call print_message(message)	
 
@@ -125,11 +125,33 @@ real*8 :: time
 integer i,j,k,n
 real*8 xnx,xny,xnz,xnv
 character*80 message
+character*20 tmp
 
-write(message,'(f9.4)') 1000.0000 + time
-message = runname(1:len_trim(runname)) // message(2:9) // ".data"
+n=max(mpidims(1),mpidims(2),mpidims(3))
+if (n<10) then
+   n=5
+else if (n<100) then
+   n=4
+else if (n<1000) then
+   n=3
+else if (n<10000) then
+   n=2
+else 
+   call abort("opps, we assumed no more than 10000 cpus along one direction!")
+endif
+write(tmp,'(i5)') 10000+my_x
+message="-" // tmp(n:5)
+write(tmp,'(i5)') 10000+my_y
+message=message(1:len_trim(message)) // "-" // tmp(n:5)
+write(tmp,'(i5)') 10000+my_z
+message=message(1:len_trim(message)) // "-" // tmp(n:5) // "-"
+write(tmp,'(f9.4)') 1000.0000 + time
+message=message(1:len_trim(message)) // tmp(2:9)
 
+message = runname(1:len_trim(runname)) // message(1:len_trim(message)) // ".data"
 open(unit=10,file=message,form='binary')
+
+
 
 write(10) time
 xnv=n_var
@@ -233,15 +255,12 @@ do i=1,3
 enddo
 
 
-
+if (my_pe==io_pe) then
 write(message,'(f9.4)') 1000.0000 + time
 message = runname(1:len_trim(runname)) // message(2:9) // ".vor"
-open(unit=10,file=message,form='binary')
+open(unit=11,file=message,form='binary')
 
-
-
-
-write(10) time
+write(11) time
 xnv=n_var
 n_var_start=1
 if (nz2==nz1) then
@@ -252,17 +271,18 @@ endif
 xnx=nslabx
 xny=nslaby
 xnz=nslabz
-write(10) xnx,xny,xnz,xnv
+write(11) xnx,xny,xnz,xnv
 do n=n_var_start,n_var
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   write(10) vor(i,j,k,n)	
+   write(11) vor(i,j,k,n)	
 enddo
 enddo
 enddo
 enddo
-close(10)
+close(11)
+endif
 
 end subroutine
 

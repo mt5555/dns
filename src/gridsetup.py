@@ -21,7 +21,7 @@ def fullfactor(n):
       sys.exit(1)
 
    if n<>1 and (facs[0]+facs[1]+facs[2])<2:
-      print "dimension: ",n[i],"must have at least 2 factors"
+      print "dimension: ",n,"must have at least 2 factors"
       sys.exit(1)
 	
    return facs

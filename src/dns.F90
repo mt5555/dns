@@ -9,6 +9,7 @@ use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 character*80 message
+integer ierr
 
 
 
@@ -18,6 +19,7 @@ write(message,'(a)') 'Initializing grid and b.c. and reading input file'
 call print_message(message)
 call init_grid      
 
+
 write(message,'(a)') 'Running some tests'
 call print_message(message)
 call test           ! optional testing  routines go here
@@ -25,9 +27,12 @@ call test           ! optional testing  routines go here
 write(message,'(a)') 'Initial data'
 call print_message(message)
 call init_data(Q)             ! set up initial data 
+call MPI_Barrier(comm_3d,ierr)
+
 write(message,'(a)') 'Initial data projection'
-call print_message(message)
 call init_data_projection(Q)  ! impose constrains on initial data
+call MPI_Barrier(comm_3d,ierr)
+
 
 write(message,'(a)') 'Time stepping...'
 call print_message(message)
@@ -54,7 +59,6 @@ end program DNS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine dns_solve(Q)
 use params
-use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 
@@ -66,7 +70,8 @@ real*8  :: ints(3)       ! ints(1) = ke
                          ! ints(2) = ke dissapation
                          ! ints(3) = ke dissapation from diffusion
 real*8 :: maxs(3)        ! maxs(1,2,3) = max U,V,W
-real*8 :: ints_buf(3)
+real*8 :: ke_old
+
 
 ints=0
 maxs=0
@@ -79,15 +84,14 @@ call rk4(time,Q,ints,maxs)
 call time_control(itime,time,Q,ints,maxs)  ! output initial data, choose delt
 
 do 
+   ke_old=ints(1)
    call rk4(time,Q,ints,maxs)
    itime=itime+1
 
-#ifdef USE_MPI
-   ints_buf=ints
-   call MPI_allreduce(ints_buf,ints,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   ints_buf=maxs
-   call MPI_allreduce(ints_buf,maxs,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
+   ! KE total dissapation 
+   ints(2)=(ints(1)-ke_old)/(1d-200+delt)
+
+
    if (error_code>0) then
       print *,"Error code = ",error_code
       print *,"Stoping at time=",time
@@ -113,6 +117,7 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine rk4(time,Q,ints,maxs)
 use params
+use mpi
 implicit none
 real*8 :: time,Q(nx,ny,nz,n_var),ints(3),maxs(3)
 
@@ -120,14 +125,9 @@ real*8 :: time,Q(nx,ny,nz,n_var),ints(3),maxs(3)
 real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
-real*8 :: ke_old,ke_diff
-integer i
-
-
-ke_old=ints(1)
-if (ke_old==0) then
-   call compute_ke(Q,io_pe,ke_old)
-endif
+real*8 :: ke_diff
+real*8 :: ints_buf(3)
+integer i,j,k,n
 
 
 Q_old=Q
@@ -154,16 +154,28 @@ Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,ke_diff)
 Q=Q+delt*rhs/6.0
 call divfree(Q,Q_tmp(1,1,1,1),Q_tmp(1,1,1,2),Q_tmp(1,1,1,3))
-call compute_ke(Q,io_pe,ints(1))
-do i=1,3
-   maxs(i)=maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,i))
-enddo
 
-! KE total dissapation 
-ints(2)=(ints(1)-ke_old)/(1d-200+delt)
+ints(1)=0
+maxs=0
+do n=1,3
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   ints(1)=ints(1)+.5*Q(i,j,k,n)**2
+   maxs(n)=max(maxs(n),Q(i,j,k,n))
+enddo
+enddo
+enddo
+enddo
 
 time = time + delt
 
+#ifdef USE_MPI
+   ints_buf=ints
+   call MPI_allreduce(ints_buf,ints,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   ints_buf=maxs
+   call MPI_allreduce(ints_buf,maxs,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
 
 
 end subroutine rk4  

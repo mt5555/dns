@@ -89,7 +89,9 @@ call print_message(message)
 
 
 #ifdef USE_MPI
+call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(cfl_adv,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(cfl_vis,1,MPI_REAL8,io_pe,comm_3d ,ierr)
@@ -100,7 +102,11 @@ call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_Barrier(comm_3d)
+
+if (.not. allocated(custom)) allocate(custom(ncustom))
+call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
+
 #endif
 
 
