@@ -16,8 +16,8 @@ F77FIXED=
 
 ifeq ($(UNAME),Linux)
    #VENDOR=LAHEY
-   #VENDOR=PGI
-   VENDOR=INTEL
+   VENDOR=PGI
+   #VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),certs)
@@ -35,10 +35,10 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DUSE_MPI -I/users/contrib/lam/include
       MPILIB =  -L/users/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
-   ifeq ($(HOST),node001m)
-      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.gcc/include
-      MPILIB =  -L/home/gmpi.gcc/lib  -lfmpich  -lmpich 
-# -L/usr/gm/lib/ -lgm -lpthread
+   ifeq ($(HOST),marx)
+      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
+      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
+#-lpthread
    endif
 
    ifeq ($(VENDOR),LAHEY)
@@ -51,7 +51,7 @@ ifeq ($(UNAME),Linux)
    endif
 
    ifeq ($(VENDOR),PGI)
-   #F90 = pgf90
+   F90 = pgf90
    CC=pgcc
    #FFLAGS = -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
    FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
@@ -60,7 +60,7 @@ ifeq ($(UNAME),Linux)
 
 
    ifeq ($(VENDOR),INTEL)
-   F90 = ifc 
+   F90 = ifc
    CC=gcc
    FFLAGS =  -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #FFLAGS =  -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
