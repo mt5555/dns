@@ -74,7 +74,8 @@ subroutine init_pdf_module()
 use params
 implicit none
 
-integer idel,i,numx,numy,numz
+integer idel,i
+integer :: numx=0,numy=0,numz=0
 
 delta_val=99999
 delta_val(1)=1
@@ -334,7 +335,6 @@ type(pdf_structure_function) :: str
 ! local variables
 real*8,allocatable :: pdfdata(:,:)
 integer :: bin,ierr,n,ndelta,ncalls
-
 
 
 #ifdef USE_MPI
@@ -664,56 +664,57 @@ end subroutine
 
 
 
-subroutine compute_all_pdfs(Q,scalars)
+subroutine compute_all_pdfs(Q,gradu,gradv,gradw,work,scalars,ns)
 !
 !
 use params
 use fft_interface
 use transpose
 implicit none
-real*8 :: scalars(13)
+integer :: ns
+real*8 :: scalars(ns)
 real*8 Q(nx,ny,nz,n_var)    
-real*8 Qt(nx,ny,nz,n_var)    
+real*8 work(nx,ny,nz)
 real*8 gradu(nx,ny,nz,n_var)    
 real*8 gradv(nx,ny,nz,n_var)    
 real*8 gradw(nx,ny,nz,n_var)    
 
 !local
-integer n1,n1d,n2,n2d,n3,n3d
+real*8 :: scalars2(ns)
+integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),sum(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
 real*8 dummy(1)
 
 do n=1,3
-   call transpose_to_x(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
-call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1))
+call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1))
 
 do n=1,3
-   call transpose_to_y(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
-call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2))
+call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2))
 
 do n=1,3
-   call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
-call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3))
+call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3))
 
 
 do n=1,3
-   call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,Qt,DX_ONLY,n)
-   call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,Qt,DX_ONLY,n)
-   call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,Qt,DX_ONLY,n)
+   call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,work,DX_ONLY,n)
+   call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,work,DX_ONLY,n)
+   call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,work,DX_ONLY,n)
 enddo
-Qt(:,:,:,1)=0
+work=0
 do n=1,3
-   Qt(:,:,:,1)=Qt(:,:,:,1)+gradu(:,:,:,n)**2
-   Qt(:,:,:,1)=Qt(:,:,:,1)+gradv(:,:,:,n)**2
-   Qt(:,:,:,1)=Qt(:,:,:,1)+gradw(:,:,:,n)**2
+   work=work+gradu(:,:,:,n)**2
+   work=work+gradv(:,:,:,n)**2
+   work=work+gradw(:,:,:,n)**2
 enddo
-Qt(:,:,:,1)=mu*Qt(:,:,:,1)
-call compute_pdf_epsilon(Qt)
-
+work=mu*work
+call compute_pdf_epsilon(work)
 
 
 Sww=0
@@ -769,6 +770,8 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
+
+
 Sww=Sww/g_nx/g_ny/g_nz
 ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux2/g_nx/g_ny/g_nz
@@ -784,6 +787,13 @@ scalars(10)=Sww
 do n=1,3
 scalars(10+n)=u2(n)
 enddo
+
+#ifdef USE_MPI
+   scalars2=scalars
+   call MPI_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+
 
 end subroutine
 

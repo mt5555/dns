@@ -9,7 +9,10 @@ use params
 use mpi
 use structf
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
+real*8,save :: Q(nx,ny,nz,n_var)
+real*8,save :: q1(nx,ny,nz,n_var)
+real*8,save :: work1(nx,ny,nz)
+real*8,save :: work2(nx,ny,nz)
 character(len=80) message
 integer ierr
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
@@ -35,12 +38,17 @@ write(message,'(a)') 'Initial data'
 call print_message(message)
 if (init_cond==0) call init_data_khblob(Q)
 if (init_cond==1) call init_data_kh(Q)
-if (init_cond==2) call init_data_lwisotropic(Q) 
+if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
 
 write(message,'(a)') 'Initial data projection'
 call print_message(message)
-call init_data_projection(Q)  ! impose constrains on initial data
+call init_data_projection(Q,work1)  ! impose constrains on initial data
+#ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
+#endif
+
+
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -54,9 +62,14 @@ tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
 call wallclock(tmx1)
-call dns_solve(Q)
+call dns_solve(Q,q1,work1,work2)
 call wallclock(tmx2)
 tims(2)=tmx2-tmx1
+
+
+
+
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -65,9 +78,9 @@ tims(2)=tmx2-tmx1
 tims_max=tims
 tims_ave=tims
 #ifdef USE_MPI
-!   call MPI_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-!   call MPI_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-!   tims_ave=tims_ave/initial_live_procs
+   call MPI_allreduce(tims,tims_max,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call MPI_allreduce(tims,tims_ave,ntimers,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   tims_ave=tims_ave/initial_live_procs
 #endif
 tims_max=tims_max/60
 tims_ave=tims_ave/60
@@ -116,19 +129,25 @@ end program DNS
 !  main time stepping loop
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine dns_solve(Q)
+subroutine dns_solve(Q,Qhat,work1,work2)
 use params
 use mpi
 
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Qhat(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 
 !local variables
-real*8 :: Qhat(nx,ny,nz,n_var)
-real*8 :: Qw2(nx,ny,nz,n_var)
+real*8,save :: q1(nx,ny,nz,n_var)
+real*8,save :: q2(nx,ny,nz,n_var)
+real*8,save :: q3(nx,ny,nz,n_var)
+
+
 real*8  :: time=0
 integer :: itime=0,ierr,n
-integer :: itime_final
+integer :: itime_final=2**30
 character(len=80) message
 real*8 :: time_old_old,time_old=0,delke_tot,delea_tot,dt
 real*8 :: ea_new=0,ea_old
@@ -147,13 +166,14 @@ if (time_final<0) then
    time_final=-time_final
 endif
 
+
+
 do 
    time_old_old=time_old
    time_old=time
    ea_old=ea_new
 
-   call rk4(time,Q,Qhat,Qw2)
-
+   call rk4(time,Q,Qhat,q1,q2,q3,work1,work2)
 #ifdef USE_MPI
    ints_buf=ints
    call MPI_allreduce(ints_buf,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
@@ -182,10 +202,10 @@ do
       itime_final=itime
    endif
 
-   call time_control(itime,time,Q)
+   if (itime>=itime_final) time_final=time
+   call time_control(itime,time,Q,q1,q2,q3,work1,work2)
    itime=itime+1
    if (time_final>0 .and. time >= time_final) exit
-   if (itime_final>0 .and. itime>=itime_final) exit
 
 enddo
 end subroutine

@@ -5,22 +5,24 @@
 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q_grid,Q,rhs)
+subroutine rk4(time,Q_grid,Q,Q_tmp,Q_old,rhs,work1,work2)
 use params
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: rhs(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,ny)
+real*8 :: work2(nx,ny,ny)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
+real*8 :: rhs(nx,ny,nz,n_var)
 
-call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old)
+call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old,work1,work2)
 end
 
 
 
-subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old)
+subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2)
 use params
 use structf
 implicit none
@@ -29,15 +31,15 @@ real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
 ! overlapped in memory:
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: rhsg(nx,ny,nz,n_var)
 
 
 ! local variables
-real*8 :: work(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-
 real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d
@@ -80,6 +82,10 @@ do n=1,3
 enddo
 
 
+
+
+
+
 ! stage 2
 call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2)
 
@@ -117,7 +123,6 @@ enddo
 ! stage 4
 call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2)
 
-
 do n=1,3
    do j=1,ny_2dz
    do i=1,nslabx
@@ -131,7 +136,6 @@ enddo
 !call z_ifft3d_str(Q,Q_grid,rhs,Q_tmp,work,work)
 
 time = time + delt
-
 
 ! compute KE, max U  
 ints_timeU=time
@@ -208,9 +212,9 @@ real*8 :: ke,gradu_diss,ke_diss,ensave,vorave,helave,maxvor
 real*8 :: f_diss=0,a_diss=0,normuf=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
-real*8 gradu(nx,ny,nz,n_var)
-real*8 gradv(nx,ny,nz,n_var)
-real*8 gradw(nx,ny,nz,n_var)
+real*8,save :: gradu(nx,ny,nz,n_var)
+real*8,save :: gradv(nx,ny,nz,n_var)
+real*8,save :: gradw(nx,ny,nz,n_var)
 #endif
 
 !

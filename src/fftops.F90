@@ -311,8 +311,7 @@ use fft_interface
 use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
-!real*8 work(nx,ny,nz) ! work array
-real*8 work(18,8,4)
+real*8 work(nx,ny,nz) ! work array
 integer n1,n1d,n2,n2d,n3,n3d
 
 call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)

@@ -6,7 +6,7 @@
 
 
 
-subroutine compute_div(Q,divmx,divi)
+subroutine compute_div(Q,p,work1,work2,divmx,divi)
 use params
 use mpi
 implicit none
@@ -52,32 +52,43 @@ end subroutine
 
 
 
-subroutine compute_spectrum(pin,spectrum,spectrum_x,spectrum_y,spectrum_z,iwave_max,pe)
+subroutine compute_spectrum(pin,p,work,spectrum,spectrum_x,spectrum_y,spectrum_z,iwave_max,pe)
+!
+!  INPUT:  iwave_max:  size of spectrum()
+!  OUTPUT: iwave_max:  number of coefficients returned in spectrum()
+!          spectrum()  spherical wave number spectrum
+!          spectrum_x  spectrum in x
+!          spectrum_y  spectrum in y
+!          spectrum_z  spectrum in z
+!
+!
 use params
 use mpi
 implicit none
 integer :: iwave_max,ierr
 integer :: pe             ! compute spectrum on this processor
 real*8 :: pin(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
+real*8 :: p(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)
 real*8 :: spectrum_x(0:g_nx/2)
 real*8 :: spectrum_y(0:g_ny/2)
 real*8 :: spectrum_z(0:g_nz/2)
 
 ! local variables
-real*8 :: p(nx,ny,nz)
 real*8 rwave
 integer :: iwave
 real*8 :: spectrum_in(0:iwave_max)
-real*8 :: work(nx,ny,nz)
 real*8 :: energy
 integer i,j,k
+
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
 if (nint(rwave)>iwave_max) then
    call abort("compute_spectrum: called with insufficient storege for spectrum()")
 endif
 iwave_max=nint(rwave)
+
 
 p=pin
 call fft3d(p,work)

@@ -1,8 +1,13 @@
 #include "macros.h"
-subroutine time_control(itime,time,Q)
+subroutine time_control(itime,time,Q,q1,q2,q3,work1,work2)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: q2(nx,ny,nz,n_var)
+real*8 :: q3(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 real*8 :: time
 integer :: itime
 
@@ -60,7 +65,11 @@ endif
 doit=check_time(itime,time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
-   call output_write(time,Q)
+   call output_write(time,Q(1,1,1,1),'u',work1,work2)
+   call output_write(time,Q(1,1,1,2),'v',work1,work2)
+   call output_write(time,Q(1,1,1,3),'w',work1,work2)
+   call vorticity(q1,Q,work1,work2)
+   call output_write(time,q1(1,1,1,3),'vor',work1,work2)
 endif
 
 
@@ -82,19 +91,15 @@ maxs_save(1:nints,nscalars)=maxs(1:nints)
 
 
 
-
 !
 ! diagnostic output
 !
 doit=check_time(itime,time,diag_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
-   call output_diags(time,Q,ints_save,maxs_save,nints,nscalars)
+   call output_diags(time,Q,q1,q2,q3,work1,work2,ints_save,maxs_save,nints,nscalars)
    nscalars=0
 endif
-
-
-
 
 
 
@@ -124,7 +129,7 @@ if (doit) then
    write(message,'(a,3f22.15)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
    call print_message(message)	
 
-   call compute_div(Q,divx,divi)
+   call compute_div(Q,q1,work1,work2,divx,divi)
    write(message,'(3(a,e12.5))') 'max(div)=',divx,'   max(vor)',maxs(5)
    call print_message(message)	
 
@@ -260,17 +265,23 @@ end subroutine
 
 
 
-subroutine output_diags(time,Q,ints_save,maxs_save,nv,nscalars)
+subroutine output_diags(time,Q,q1,q2,q3,work1,work2,ints_save,maxs_save,nv,nscalars)
 use params
 use structf
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: q2(nx,ny,nz,n_var)
+real*8 :: q3(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 real*8 :: time
 integer nv,nscalars
 real*8 :: ints_save(nv,nscalars)
 real*8 :: maxs_save(nv,nscalars)
 integer,parameter :: nints_e=13
 real*8 :: ints_e(nints_e)
+real*8 :: ints_e2(nints_e)
 
 ! local variables
 integer i,j,k,n
@@ -284,6 +295,7 @@ character(len=80) :: message
 character :: access
 CPOINTER fid
 
+
 ! append to output files, unless time=0 create a new file 
 access="a"
 if (time==0) access="w"
@@ -296,9 +308,10 @@ spectrum1=0
 
 do i=1,3
    iwave=iwave_max
-   call compute_spectrum(Q(:,:,:,i),spectrum1,spec_x,spec_y,spec_z,iwave,io_pe)
+   call compute_spectrum(Q(:,:,:,i),work1,work2,spectrum1,spec_x,spec_y,spec_z,iwave,io_pe)
    spectrum=spectrum+.5*spectrum1
 enddo
+
 write(message,'(a,f10.4)') " KE spectrum",time
 call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_x,g_nx/2,message)
@@ -330,17 +343,15 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_z,1+g_nz/2)
    call cclose(fid)
 endif
-
-
-
 deallocate(spectrum)
 deallocate(spectrum1)
+
 
 
 !
 ! output structure functions
 !
-call compute_all_pdfs(Q,ints_e)
+call compute_all_pdfs(Q,q1,q2,q3,work1,ints_e,nints_e)
 if (structf_init==1) then
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time
@@ -355,6 +366,8 @@ endif
 call outputSF(time,fid)
 if (my_pe==io_pe) call cclose(fid)
 endif
+
+
 
 
 if (my_pe==io_pe) then
@@ -390,28 +403,29 @@ end subroutine
 
 
 
-subroutine output_write(time,Q)
+
+
+subroutine output_write(time,p,ext,work,work2)
 use params
 use transpose
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: time
+real*8 :: p(nx,ny,nz)
+real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
+character(len=*) :: ext
 
 ! local variables
 integer i,j,k,n
 real*8 xnx,xny,xnz
-real*8 :: vor(nx,ny,nz,n_var)
-real*8 :: d1(nx,ny,nz),work(nx,ny,nz)
 character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
-call vorticity(vor,Q,d1,work)
 
 
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time
-   message = runname(1:len_trim(runname)) // message(2:10) // ".vor"
+   message = runname(1:len_trim(runname)) // message(2:10) // "." // ext
    !open(unit=11,file=message,form='binary')
    call copen(message,"w",fid,ierr)
    if (ierr/=0) then
@@ -432,7 +446,7 @@ if (my_pe==io_pe) then
    call cwrite8(fid,g_zcord(1),o_nz)
 endif
 
-call output1(vor(1,1,1,3),work,fid)
+call output1(p,work,work2,fid)
 if (my_pe==io_pe) call cclose(fid)
 
 end subroutine
@@ -466,6 +480,16 @@ real*8 :: small=1e-7
 check_time = .false.
 time_next=time_final
 
+! custom times always take precedence:
+do i=1,ncust
+   if (abs(time-cust(i))<small) then
+      check_time=.true.
+   else if (time<cust(i)) then
+      time_next=min(time_next,cust(i))
+      exit 
+   endif
+enddo
+
 if (dt==0) return
 
 
@@ -485,14 +509,6 @@ if (dt>0) then
    endif
    time_next = time-remainder+dt
 
-   do i=1,ncust
-      if (abs(time-cust(i))<small) then
-         check_time=.true.
-      else if (time<cust(i)) then
-         time_next=min(time_next,cust(i))
-         exit 
-      endif
-   enddo
 endif
 
 end function

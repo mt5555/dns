@@ -1,6 +1,6 @@
 1            ! input file type
 test64       ! runname
-iso12        ! initial condition:  KH-blob, KH-anal, iso12
+iso12        ! initial condition:  KH-blob, KH-anal, iso12, restart
 iso12        ! forcing:  none, iso12
 0            ! str_nx  compute structure functions every str_nx timesteps
 0            ! str_ny  0=disabled.  str_nx & str_y >= 2 
@@ -22,4 +22,4 @@ periodic     ! z bc
 .1          ! screen_dt
 0           ! output_dt  (0 = output disabled, except for custom output times)
 1           ! n_output_custom  number of custom output times  
-.50         ! custom output times, one per line
+.00         ! custom output times, one per line

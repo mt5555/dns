@@ -1,5 +1,5 @@
 #include "macros.h"
-subroutine init_data_lwisotropic(Q)
+subroutine init_data_lwisotropic(Q,PSI,work,work2)
 !
 ! low wave number, quasi isotropic initial condition
 !
@@ -10,6 +10,8 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: PSI(nx,ny,nz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+
+! local variables
 real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr
 integer,allocatable :: seed(:)
@@ -296,15 +298,16 @@ end subroutine
 
 
 
-subroutine init_data_projection(Q)
+subroutine init_data_projection(Q,d1)
 use params
 use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: d1(nx,ny,nz)
 
 ! local variables
 integer i
-real*8 :: d1(nx,ny,nz)
+
 
 call bc_preloop(Q)
 

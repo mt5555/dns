@@ -10,8 +10,9 @@
 subroutine init_grid
 use params
 use structf
-use mpi
+use transpose
 use fft_interface
+use mpi
 implicit none
 
 !local variables
@@ -20,9 +21,10 @@ integer i,j,k,l,ierr
 character(len=80) message
 integer input_file_type
 
-
 call params_init()
+call transpose_init()
 call fft_interface_init()
+
 
 if (my_pe==io_pe) then
    print *,'Enter input file type: '

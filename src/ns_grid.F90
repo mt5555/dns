@@ -4,20 +4,22 @@
 !  subroutine to take one Runge-Kutta 4th order time step
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q,rhs,Q_old)
+subroutine rk4(time,Q,rhs,Q_old,Q_tmp,q4,work1,work2)
 use params
 implicit none
 real*8 :: time
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
+real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
+real*8 :: q4(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 
 ! local variables
-real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: ints_buf(nints),vel
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
-
 
 
 
@@ -30,22 +32,22 @@ Q_old=Q
 
 
 ! stage 1
-call ns3D(rhs,Q,time,1)
+call ns3D(rhs,Q,time,1,work1,work2,q4)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,0)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,0)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
-call ns3D(rhs,Q_tmp,time+delt,0)
+call ns3D(rhs,Q_tmp,time+delt,0,work1,work2,q4)
 Q=Q+delt*rhs/6.0
 
 
@@ -54,19 +56,19 @@ Q=Q+delt*rhs/6.0
 #else
 
 ! stage 1
-call ns3D(rhs,Q,time,1)
+call ns3D(rhs,Q,time,1,work1,work2,q4)
 Q=Q+delt*rhs/3
 
 ! stage 2
 Q_tmp = rhs
-call ns3D(rhs,Q,time+delt/3,0)
+call ns3D(rhs,Q,time+delt/3,0,work1,work2,q4)
 rhs = -5*Q_tmp/9 + rhs
 Q=Q + 15*delt*rhs/16
 
 
 ! stage 3
 Q_tmp=rhs
-call ns3D(rhs,Q,time+3*delt/4,0)
+call ns3D(rhs,Q,time+3*delt/4,0,work1,work2,q4)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
 
@@ -104,7 +106,7 @@ end subroutine rk4
 
 
 
-subroutine ns3d(rhs,Q,time,compute_ints)
+subroutine ns3d(rhs,Q,time,compute_ints,d1,d2,work)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -132,10 +134,12 @@ integer compute_ints
 ! output
 real*8 rhs(nx,ny,nz,n_var)
 
-!local
+!work
 real*8 d1(nx,ny,nz)
 real*8 d2(nx,ny,nz)
 real*8 work(nx,ny,nz)
+
+!local
 real*8 dummy,tmx1,tmx2
 real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss
 integer n,i,j,k,numder

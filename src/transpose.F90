@@ -8,10 +8,32 @@ implicit none
 
 
 real*8,private :: tmx1,tmx2
-
-
+real*8,private,allocatable :: sendbuf(:),recbuf(:)
 
 contains
+
+subroutine transpose_init
+#ifdef USE_MPI
+integer max_size
+max_size=1
+if (ncpu_z>1) then
+   max_size=max(max_size,nslabx*nslabz*ny_2dz)
+endif
+if (ncpu_x>1) then
+   max_size=max(max_size,nslabx*nslabz*ny_2dx)
+endif
+if (ncpu_y>1) then
+   max_size=max(max_size,nslaby*nslabz*nx_2dy)
+endif
+
+allocate (sendbuf(max_size))
+allocate (recbuf(max_size))
+
+#endif
+
+end subroutine
+
+
 
 #undef PBLOCK
 #ifdef PBLOCK
@@ -185,8 +207,8 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc
 integer i,j,k,jj,l
 #ifdef USE_MPI
-real*8 sendbuf(nslabx*nslabz*ny_2dz)
-real*8 recbuf(nslabx*nslabz*ny_2dz)
+!real*8 sendbuf(nslabx*nslabz*ny_2dz)
+!real*8 recbuf(nslabx*nslabz*ny_2dz)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -306,8 +328,8 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc
 integer i,j,k,jj,l
 #ifdef USE_MPI
-real*8 sendbuf(nslabx*nslabz*ny_2dz)
-real*8 recbuf(nslabx*nslabz*ny_2dz)
+!real*8 sendbuf(nslabx*nslabz*ny_2dz)
+!real*8 recbuf(nslabx*nslabz*ny_2dz)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -446,8 +468,8 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc
 integer i,j,k,jj,l
 #ifdef USE_MPI
-real*8 sendbuf(nslabx*nslabz*ny_2dx)
-real*8 recbuf(nslabx*nslabz*ny_2dx)
+!real*8 sendbuf(nslabx*nslabz*ny_2dx)
+!real*8 recbuf(nslabx*nslabz*ny_2dx)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -557,8 +579,8 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc
 integer i,j,k,jj,l
 #ifdef USE_MPI
-real*8 sendbuf(nslabx*nslabz*ny_2dx)
-real*8 recbuf(nslabx*nslabz*ny_2dx)
+!real*8 sendbuf(nslabx*nslabz*ny_2dx)
+!real*8 recbuf(nslabx*nslabz*ny_2dx)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -690,8 +712,8 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc
 integer i,j,k,ii,l
 #ifdef USE_MPI
-real*8 sendbuf(nslaby*nslabz*nx_2dy)
-real*8 recbuf(nslaby*nslabz*nx_2dy)
+!real*8 sendbuf(nslaby*nslabz*nx_2dy)
+!real*8 recbuf(nslaby*nslabz*nx_2dy)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -798,8 +820,8 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc
 integer i,j,k,ii,l
 #ifdef USE_MPI
-real*8 sendbuf(nslaby*nslabz*nx_2dy)
-real*8 recbuf(nslaby*nslabz*nx_2dy)
+!real*8 sendbuf(nslaby*nslabz*nx_2dy)
+!real*8 recbuf(nslaby*nslabz*nx_2dy)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -897,14 +919,14 @@ end subroutine
 
 #ifdef TRANSPOSE_X_SPLIT_Y
 
-subroutine output1(p,pt,fid)
+subroutine output1(p,pt,buf,fid)
 use params
 use mpi
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
+real*8 :: buf(o_nx,ny_2dx)
 
 ! local vars
-real*8 buf(o_nx,ny_2dx)
 real*8 saved_edge(o_nx)
 integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
 CPOINTER fid

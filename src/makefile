@@ -33,8 +33,8 @@ ifeq ($(UNAME),Linux)
    #F90 = pgf90
    #CC=pgcc
    #FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   #FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_STKFFT
-   #LDFLAGS = -Lstk -lstk
+   ##FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_STKFFT
+   ##LDFLAGS = -Lstk -lstk
 
 
    #INTEL	
@@ -42,6 +42,7 @@ ifeq ($(UNAME),Linux)
    CC=gcc
    FFLAGS = -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
+
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
