@@ -26,7 +26,7 @@ ifeq ($(UNAME),Linux)
       #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
       #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
    endif
-   ifeq ($(HOST),l1.lanl.gov)
+   ifeq ($(HOST),ll-1.lanl.gov)
       VENDOR=PGI
       MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I$(HOME)/lampi/l1/include
       MPILIB =  -L$(HOME)/lampi/l1/lib -lmpi

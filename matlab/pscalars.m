@@ -93,7 +93,10 @@ cx2(3,:)=pints_e(7,np,:);
 cx3(1,:)=pints_e(8,np,:);
 cx3(2,:)=pints_e(9,np,:);
 cx3(3,:)=pints_e(10,np,:);
-% cx4                       % 11,12,13
+cx4(1,:)=pints_e(11,np,:);
+cx4(2,:)=pints_e(12,np,:);
+cx4(3,:)=pints_e(13,np,:);
+
 
 cxx2(1,:)=pints_e(14,np,:);
 cxx2(2,:)=pints_e(15,np,:);
@@ -140,6 +143,20 @@ n0x(2,n,:)=pints_e(i+2,np,:);   % y direction
 n0x(3,n,:)=pints_e(i+3,np,:);   % z direciton
 i=i+3;
 end
+
+c2cx2(1,:)=pints_e(i,np,:); i=i+1;
+c2cx2(2,:)=pints_e(21,np,:);i=i+1;
+c2cx2(3,:)=pints_e(22,np,:);i=i+1;
+
+
+
+
+
+
+
+
+
+
 
 %n0x_t=(n0x(1,1,:)+n0x(2,2,:)+n0x(3,3,:))/3;
 n0x_l=(n0x(1,2,:)+n0x(1,3,:)+n0x(2,1,:)+n0x(2,3,:)+n0x(3,1,:)+n0x(3,2,:))/6;

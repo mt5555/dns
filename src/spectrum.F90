@@ -1080,8 +1080,8 @@ spec_r_in=spec_helicity_rp
 call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
 call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
-spectrum_in=spec_kEk
-call MPI_reduce(spectrum_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spec_r_in=spec_kEk
+call MPI_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 
 do n=1,ndim
    spec_r_in=cospec_r(:,n)

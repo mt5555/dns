@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer,parameter :: nints_e=49,npints_e=44
+integer,parameter :: nints_e=49,npints_e=47
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
@@ -775,7 +775,7 @@ do i=nx1,nx2
       uxx3(n)=uxx3(n)+x2*grads2(i,j,k,n)
       uxx4(n)=uxx4(n)+x2*x2
 
-      su(n) = su(n) + gradu(i,j,k,n)*grads(i,j,k,n)*grads(i,j,k,n)
+      su(n) = su(n) + gradu(i,j,k,n)*x1
    enddo
 
 enddo
@@ -800,6 +800,7 @@ su=su/g_nx/g_ny/g_nz
 #endif
 
 
+u2ux2=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
@@ -807,12 +808,16 @@ do i=nx1,nx2
     u2=u2+xtmp
     u3=u3+xtmp*(Q(i,j,k,np)-u1tmp)
     u4=u4+xtmp*xtmp
+    do n=1,3
+       u2ux2(n) = u2ux2(n) + xtmp*grads(i,j,k,n)**2
+    enddo
 enddo
 enddo
 enddo
 u2=u2/g_nx/g_ny/g_nz; 
 u3=u3/g_nx/g_ny/g_nz; 
 u4=u4/g_nx/g_ny/g_nz; 
+u2ux2=u2ux2/g_nx/g_ny/g_nz; 
 
 
 
@@ -843,8 +848,6 @@ scalars(n+i)=su(n)         ! 21,22,23
 enddo
 i=i+3
 
-i=i+1
-scalars(i)=u1              ! 24
 i=i+1
 scalars(i)=u3              ! 25
 i=i+1
@@ -897,6 +900,10 @@ call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(i+3))
 i=i+3
 enddo
 
+do n=1,3
+   scalars(i)=u2ux2(n)        
+   i=i+1
+enddo
 
 
 if (i/=ns) then
