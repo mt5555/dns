@@ -143,7 +143,7 @@ extern  void    CleanUp( void )
 #include        <stdlib.h>
 #include        <time.h>
 
-int     sigURG=0;
+int     sig_received=0;
 
 
 /************************************************************************/
@@ -166,22 +166,25 @@ extern  void    ExceptionHandler( int nSignal )
 
 
         /*      Indicate that the signal has been caught        */
-        sigURG=1;
+        sig_received=1;
 
 
 }
 
-void  FORTRAN(set_sigurghandler)(void) {
+void  FORTRAN(set_sighandler)(void) {
 
         if( signal( SIGURG, ExceptionHandler ) == SIG_ERR ) {
+                fprintf( stderr, "** WARNING** Can't catch signal SIGURG" );
+        }
+        if( signal( SIGUSR1, ExceptionHandler ) == SIG_ERR ) {
                 fprintf( stderr, "** WARNING** Can't catch signal SIGURG" );
         }
 
 }
 
-void FORTRAN(caught_sigurg)(int *i) {
+void FORTRAN(caught_sig)(int *i) {
 
-*i=sigURG;
+*i=sig_received;
 
 }
 
