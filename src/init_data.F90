@@ -81,6 +81,7 @@ do n=1,3
 enddo
 call vorticity(Q,PSI,work,work2)
 
+
 ener1=0
 ener2=0
 ener1_target=1.0**(-5.0/3.0)

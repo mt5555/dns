@@ -2,7 +2,7 @@
 test         ! runname
 output       ! rundir
 iso12        ! initial condition:  KH-blob, KH-anal, iso12, restart
-iso12        ! forcing:  none, iso12
+none        ! forcing:  none, iso12
 0            ! str_nx  (ignored)
 0            ! str_ny  (ignored)
 0            ! str_nz  (ignored)

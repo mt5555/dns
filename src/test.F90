@@ -400,6 +400,19 @@ enddo
 enddo
 enddo
 
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+   cf1=3*2*pi 
+   input(i,j,k)=           6*sin(cf1*zcord(k))*sin(cf1*zcord(i))    + input(i,j,k)
+   inputz(i,j,k)=      cf1*6*cos(cf1*zcord(k))*sin(cf1*zcord(i))    + inputz(i,j,k)
+   inputzz(i,j,k)=-cf1*cf1*6*sin(cf1*zcord(k))*sin(cf1*zcord(i))    + inputzz(i,j,k)
+   inputx(i,j,k)=      cf1*6*sin(cf1*zcord(k))*cos(cf1*zcord(i))    + inputx(i,j,k)
+   inputxx(i,j,k)=-cf1*cf1*6*sin(cf1*zcord(k))*sin(cf1*zcord(i))    + inputxx(i,j,k)
+enddo
+enddo
+enddo
+
 
 
 
