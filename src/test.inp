@@ -8,7 +8,7 @@ kediff       ! viscosity type  (value, smallest, kediff, Re)
 0.0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
 0            ! compute_structure functions
-fft-sphere   ! derivative method  (fft, fft-dealias, 4th)
+fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc

@@ -207,9 +207,19 @@ if (doit_screen) then
       ! eta = (mu^3/epsilon)^.25
       ! epsilon = delke_tot
       eta = (mu**3 / epsilon)**.25
-      write(message,'(a,3f13.4)') 'mesh spacing(eta): ',&
+      write(message,'(a,3f13.4)') 'mesh spacing/eta: ',&
            delx/eta,dely/eta,delz/eta
       call print_message(message)	
+      if (dealias==1)  then
+         write(message,'(a,3f13.4)') '2/3 dealiasing kmax*eta: ',&
+           g_nmin*eta/3
+         call print_message(message)	
+      endif
+      if (dealias==2)  then
+         write(message,'(a,3f13.4)') 'spherical dealiasing kmax*eta: ',&
+           sqrt(2.)*g_nmin*eta/3
+         call print_message(message)	
+      endif
       
       !eddy turn over time
       ! 

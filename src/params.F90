@@ -443,7 +443,8 @@ if (g_nz==1) then
    ndim=2
 endif
 
-dealias_sphere_kmax2 = 2*(g_nmin/3)**2
+! spherical dealiasing:  sqrt(2) N/3
+dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
 
 
 ! these values must divide with no remainder:
@@ -581,6 +582,9 @@ logical function dealias_remove(im,jm,km)
 implicit none
 integer :: im,jm,km
 
+ASSERT("dealias_remove: im >= 0 failed",im>=0)
+ASSERT("dealias_remove: jm >= 0 failed",jm>=0)
+ASSERT("dealias_remove: km >= 0 failed",km>=0)
 if (dealias==1) then
    dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
 else if (dealias==2) then
