@@ -72,7 +72,7 @@ for t=times
       plot_posneg=0;
       check_isotropy=0;
       
-      [y45,y415,y43,eps]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
+      [y45,y415,y43,eps,h_eps]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
       
       
       mx45_iso_localeps(k)=max(y45);
