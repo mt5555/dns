@@ -612,7 +612,7 @@ else if (sdata=='sht') then
    init_cond=3
 else if (sdata=='vxpair') then
    init_cond=4
-else if (sdata=='sht-ns') then
+else if (sdata=='iso12e') then
    init_cond=5
 else 
    print *,'value = >>',sdata,'<<'
@@ -794,7 +794,7 @@ else if (sdata=='sht') then
    init_cond=3
 else if (sdata=='vxpair') then
    init_cond=4
-else if (sdata=='sht-ns') then
+else if (sdata=='iso12e') then
    init_cond=5
 else 
    print *,'value = >>',sdata,'<<'

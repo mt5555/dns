@@ -1463,22 +1463,8 @@ end subroutine
 
 
 
-
-
-
-end module
-
-
-
-
-
-
-
-
-
 subroutine transpose_from_z_3d(Qhat,q1)
 use params
-use transpose
 implicit none
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3)
 real*8 :: q1(nx,ny,nz,3)
@@ -1496,6 +1482,19 @@ do n=1,ndim
    call transpose_from_z(Qhat(1,1,1,n),q1(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 end subroutine transpose_from_z_3d
+
+
+
+
+
+end module
+
+
+
+
+
+
+
 
 
 

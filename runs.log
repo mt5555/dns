@@ -16,7 +16,7 @@ vx3072
 mu=2e-8.  a touch noisy in one snapshot that I saw, went away.  
 6144x3072    2 cpu milkyway:  338m per t=1.  
 
-if we use mu^3/4 rule, new grid:  10332x500.  So lets go with 12288x6144.
+if we use mu^3/4 rule, new grid:  10332x5000.  So lets go with 12288x6144.
 
 
 Benchmarks for 12288x6144:   RES size: 5.7GB
@@ -30,13 +30,15 @@ cpus
 8x8       11.44
 16x2      12.02
 
-128x1      4.89
+128x1      4.89    1.63h                 10.2d
 
-256x1     hangs after first time step.  try again?    
-128x2      3.40
-64x4      IN
+256x1      3.29
+128x2      3.40                           7.1d
+64x4       2.79/3.08                      5.9d
+32x8       3.03
 
 
+128x4    IN
 
 
 **********************************************************************************

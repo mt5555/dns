@@ -35,7 +35,7 @@ structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 
 timecontrol.o: macros.h params.o tracers.o transpose.o makefile 
 tracers.o: macros.h params.o mpi.o ghost.o makefile 
-transpose.o: macros.h params.o mpi.o transpose.o makefile 
+transpose.o: macros.h params.o mpi.o makefile 
 turb_diag.o: macros.h params.o structf.o makefile 
 util.o: macros.h mpi.o params.o makefile 
 fbelimb.o: makefile 

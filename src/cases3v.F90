@@ -22,9 +22,11 @@ real*8 :: work2(nx,ny,nz)
 
 ! local variables
 real*8 :: alpha,beta
-integer km,jm,im,i,j,k,n,wn,ierr
+integer km,jm,im,i,j,k,n,wn,ierr,nb
 integer,allocatable :: seed(:)
-real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac,theta
+integer,parameter :: NUMBANDS=100
+real*8 xw,enerb(NUMBANDS),enerb_target(NUMBANDS),ener,xfac,theta
+real*8 enerb_work(NUMBANDS)
 character(len=80) message
 CPOINTER :: null
 
@@ -96,10 +98,11 @@ enddo
 call vorticity(Q,PSI,work,work2)
 
 
-ener1=0
-ener2=0
-ener1_target=1.0**(-5.0/3.0)
-ener2_target=2.0**(-5.0/3.0)
+enerb=0
+do nb=1,NUMBANDS
+   enerb_target(nb)=real(nb)**(-5.0/3.0)
+   if (nb>2)  enerb_target(nb)=real(nb)**(-7.0/3.0)
+enddo
 
 do n=1,3
    call fft3d(Q(1,1,1,n),work) 
@@ -115,31 +118,24 @@ do n=1,3
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
-            if (xw>=.5 .and. xw<1.5) then
-               ener1=ener1+.5*xfac*Q(i,j,k,n)**2
-            else if (xw>=1.5 .and. xw<2.5) then
-               ener2=ener2+.5*xfac*Q(i,j,k,n)**2
-            else
-               Q(i,j,k,n)=0
-            endif
+
+            do nb=1,NUMBANDS
+               if (xw>=nb-.5 .and. xw<nb+.5) &
+                    enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
+            enddo
+            !remaining coefficients to 0:
+            nb=NUMBANDS+1
+            if (xw>=nb-.5) Q(i,j,k,n)=0
+
          enddo
       enddo
    enddo
 enddo
 
 #ifdef USE_MPI
-   ener=ener1
-   call MPI_allreduce(ener,ener1,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   ener=ener2
-   call MPI_allreduce(ener,ener2,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enerb_work=enerb
+   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
-
-if (ener1<=0) then
-   call abort("ener1 must be positive")
-endif
-if (ener2<=0) then
-   call abort("ener2 must be positive")
-endif
 
 
 do n=1,3
@@ -150,20 +146,19 @@ do n=1,3
          do i=nx1,nx2
             im=imcord(i)
             xw=sqrt(real(km**2+jm**2+im**2))
-
-            if (xw>=.5 .and. xw<1.5) then
-               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(ener1_target/(ener1))
-            else if (xw>=1.5 .and. xw<2.5) then
-               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(ener2_target/(ener2))
+            
+            do nb=1,NUMBANDS
+            if (xw>=nb-.5 .and. xw<nb+.5) then
+               Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
             endif
+            enddo
          enddo
       enddo
    enddo
 enddo
 
 ener=0
-ener1=0
-ener2=0
+enerb=0
 do n=1,3
    do k=nz1,nz2
       km=kmcord(k)
@@ -177,11 +172,12 @@ do n=1,3
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
-            if (xw>=.5 .and. xw<1.5) then
-               ener1=ener1+.5*xfac*Q(i,j,k,n)**2
-            else if (xw>=1.5 .and. xw<2.5) then
-               ener2=ener2+.5*xfac*Q(i,j,k,n)**2
+
+            do nb=1,NUMBANDS
+            if (xw>=nb-.5 .and. xw<nb+.5) then
+               enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
             endif
+            enddo
             ener=ener+.5*xfac*Q(i,j,k,n)**2
 
 
@@ -195,17 +191,16 @@ enddo
 #ifdef USE_MPI
    xfac=ener
    call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   xfac=ener1
-   call MPI_allreduce(xfac,ener1,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   xfac=ener2
-   call MPI_allreduce(xfac,ener2,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   enerb_work=enerb
+   call MPI_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 call print_message("Isotropic initial condition in wave numbers:");
-write(message,'(a,f8.4,a,f8.4)') "0.5 <= wn < 1.5   E=",ener1,"  E target=",ener1_target
-call print_message(message)
-write(message,'(a,f8.4,a,f8.4)') "1.5 <= wn < 2.5   E=",ener2,"  E target=",ener2_target
-call print_message(message)
+do nb=1,min(NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
+   write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
+        "  E target=",enerb_target(nb)
+   call print_message(message)
+enddo
 write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)
 

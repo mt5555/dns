@@ -59,6 +59,8 @@ if (ntot==0) return
 f_diss=0
 do wn=1,NUMBANDS
    ener_target(wn)=wn**(-5.0/3.0)
+   if (wn>2) ener_target(wn)=wn**(-7.0/3.0)
+
    ener(wn)=0
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
@@ -141,12 +143,12 @@ init_sforcing=1
             km=z_kmcord(k)
 
             xw=sqrt(real(km**2+jm**2+im**2))
-            if (xw>=.5 .and. xw<1.5) then
-               wnforcing(1)%n=wnforcing(1)%n+1
-            endif
-            if (xw>=1.5 .and. xw<2.5) then
-               wnforcing(2)%n=wnforcing(2)%n+1
-            endif
+            do n=1,NUMBANDS
+               if (xw>=n-.5 .and. xw<n+.5) then
+                  wnforcing(n)%n=wnforcing(n)%n+1
+               endif
+            enddo
+
          enddo
       enddo
    enddo
@@ -167,19 +169,15 @@ init_sforcing=1
             km=z_kmcord(k)
 
             xw=sqrt(real(km**2+jm**2+im**2))
-            if (xw>=.5 .and. xw<1.5) then
-               wnforcing(1)%n=wnforcing(1)%n+1
-               wnforcing(1)%index(wnforcing(1)%n,1)=i
-               wnforcing(1)%index(wnforcing(1)%n,2)=j
-               wnforcing(1)%index(wnforcing(1)%n,3)=k
+            do n=1,NUMBANDS
+            if (xw>=n-.5 .and. xw<n+.5) then
+               wnforcing(n)%n=wnforcing(n)%n+1
+               wnforcing(n)%index(wnforcing(n)%n,1)=i
+               wnforcing(n)%index(wnforcing(n)%n,2)=j
+               wnforcing(n)%index(wnforcing(n)%n,3)=k
             endif
-            
-            if (xw>=1.5 .and. xw<2.5) then
-               wnforcing(2)%n=wnforcing(2)%n+1
-               wnforcing(2)%index(wnforcing(2)%n,1)=i
-               wnforcing(2)%index(wnforcing(2)%n,2)=j
-               wnforcing(2)%index(wnforcing(2)%n,3)=k
-            endif
+            enddo
+
          enddo
       enddo
    enddo
