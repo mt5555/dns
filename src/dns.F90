@@ -181,11 +181,12 @@ ints=0
 maxs=0
 delt=0
 
+time=time_initial
 if (time_final<0) then
    ! flag denoting run abs(time_final) time steps, instead of specifing 
    ! a final time
    itime_final=-time_final
-   time_final=-time_final
+   time_final=1e99
 else
    time_final=time_final+time_initial
 endif
@@ -229,7 +230,7 @@ do
    if (itime>=itime_final) time_final=time
    call time_control(itime,time,Q,q1,q2,q3,work1,work2)
    itime=itime+1
-   if (time_final>0 .and. time >= time_final) exit
+   if (time >= time_final) exit
 
 enddo
 end subroutine
