@@ -1,3 +1,4 @@
+#if 0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! our wrapper for ECMWF FFT99.
@@ -13,12 +14,36 @@
 ! Size of the grid point data         p(1:n1,1:n2,1:n3)
 ! Size of fourier coefficients        p(1:n1+2,1:n2+2,1:n3+2)
 !
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
+FFT data representation:
+
+sum over m=1..n/2:
+
+   f = fhat(1)  +  2 fhat(2*m+1) cos(m*2pi*x) - 2*fhat(2m+2) sin(m*2pi*x)
+
+
+     if isign = +1, and m coefficient vectors are supplied
+     each containing the sequence:
+
+     a(0),b(0),a(1),b(1),...,a(n/2),b(n/2)  (n+2 values)
+
+     then the result consists of m data vectors each
+     containing the corresponding n+2 gridpoint values:
+
+     x(0), x(1), x(2),...,x(n-1),0,0.
+
+     note: the fact that the gridpoint values x(j) are real
+     implies that b(0)=b(n/2)=0.  for a call with isign=+1,
+     it is not actually necessary to supply these zeros.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#endif
+
+
 module fft_interface
 
 implicit none
 integer, parameter ::  num_fftsizes=3
+real*8 :: pi2,pi2_squared
 
 integer :: init=0
 type fftdata_d
@@ -35,36 +60,28 @@ private :: fftinit, getindex
 contains 
 
 
-#if 0
-output:  
-     if isign = +1, and m coefficient vectors are supplied
-     each containing the sequence:
-
-     a(0),b(0),a(1),b(1),...,a(n/2),b(n/2)  (n+2 values)
-
-     then the result consists of m data vectors each
-     containing the corresponding n+2 gridpoint values:
-
-     x(0), x(1), x(2),...,x(n-1),0,0.
-
-     note: the fact that the gridpoint values x(j) are real
-     implies that b(0)=b(n/2)=0.  for a call with isign=+1,
-     it is not actually necessary to supply these zeros.
-#endif
 
 
 subroutine fft_interface_init()
+
 integer i
+real*8  :: pi,one=1
+
 do i=1,num_fftsizes
    fftdata(i).size=0	
 enddo
+pi=4*atan(one)
+pi2=2*pi
+pi2_squared=4*pi*pi
 init=1
+
 end subroutine
 
 
 subroutine fftinit(n,index)
 integer n,index
 real*8,allocatable,target  :: trigdata(:)
+character*80 message
 
 if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initialize first!");
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
@@ -74,7 +91,8 @@ fftdata(index).size=n
 call set99(trigdata,fftdata(index).ifax,n)
 fftdata(index).trigs => trigdata
 
-
+write(message,'(a,i6)') 'Initializing FFT of size n=',n
+call print_message(message)
 end subroutine
 
 
@@ -95,11 +113,12 @@ do
    endif
 
    if (fftdata(i).size==0) then
-      call fftinit(n1,fftdata(i).size)      
+      call fftinit(n1,i)      
       exit
    endif
    if (n1==fftdata(i).size) exit
 enddo
+index=i
 end subroutine
 
 
@@ -119,7 +138,7 @@ real*8 w(min(fftblocks,n2)*(n1+1))
 integer n1,n1d,n2,n2d,n3,n3d
 character*80 message_str
 
-integer index,j,k,numffts
+integer index,jj,j,k,numffts
 call getindex(n1,index)
 
 j=0  ! j=number of fft's computed for each k
@@ -127,7 +146,11 @@ do k=1,n3
    j=0  ! j=number of fft's computed for each k
    do while (j<n2)
       numffts=min(fftblocks,n2-j)	
-      call fft991(p(1,1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,1)
+!      do jj=j+1,j+numffts
+!         p(2,jj,k)=0
+!         p(n1+2,jj,k)=0
+!      enddo
+      call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,numffts,1)
       j=j+numffts
    enddo
 enddo
@@ -147,17 +170,23 @@ real*8 p(n1d,n2d,n3d)
 real*8 w(min(fftblocks,n2)*(n1+1))
 integer n1,n1d,n2,n2d,n3,n3d
 
-integer index,j,k,numffts
+integer index,jj,j,k,numffts
 
 call getindex(n1,index)
 do k=1,n3
    j=0  ! j=number of fft's computed for each k
    do while (j<n2)
       numffts=min(fftblocks,n2-j)	
-      call fft991(p(1,1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,n2,-1)
+!      do jj=j+1,j+numffts
+!         p(n1+1,jj,k)=0
+!         p(n1+2,jj,k)=0
+!      enddo
+
+      call fft991(p(1,j+1,k),w,fftdata(index).trigs,fftdata(index).ifax,1,n1d,n1,n2,-1)
       j=j+numffts
    enddo
 enddo
+
 end subroutine
 
 
@@ -183,7 +212,6 @@ integer numder,n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,m
 real*8 temp
 
-
 call fft(px,n1,n1d,n2,n2d,n3,n3d)
 
 if (numder>=2) then
@@ -191,8 +219,8 @@ if (numder>=2) then
    do j=1,n2
    do m = 0, n1/2
       i = 2*m+1
-      pxx(i,j,k) = -m*m * px(i,j,k)
-      pxx(i+1,j,k) = -m*m * px(i+1,j,k)
+      pxx(i,j,k) = -m*m * pi2_squared * px(i,j,k)
+      pxx(i+1,j,k) = -m*m * pi2_squared * px(i+1,j,k)
    enddo
    enddo
    enddo
@@ -204,8 +232,8 @@ if (numder>=1) then
    do j=1,n2
    do m = 0, n1/2
       i = 2*m+1
-      temp =  m * px(i,j,k)
-      px(i,j,k) = -m * px(i+1,j,k)
+      temp =  pi2* m * px(i,j,k)
+      px(i,j,k) = -pi2 *m * px(i+1,j,k)
       px(i+1,j,k) = temp
    enddo
    enddo
@@ -235,11 +263,14 @@ real*8 xfac
       km=(k-1)/2
       do j=1,n2+2
          jm=(j-1)/2
-         do i=1,n2+2
+         do i=1,n1+2
             im=(i-1)/2
-            xfac= alpha + beta*(-im*im -km*km - jm*jm)      
+            xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
             if (xfac<>0) xfac = 1/xfac
             p(i,j,k)=p(i,j,k)*xfac
+!            if (abs(p(i,j,k))>1e-6) then
+!	       print *,im,jm,km,p(i,j,k)
+!            endif
          enddo
       enddo
    enddo

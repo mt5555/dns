@@ -8,50 +8,49 @@ ARCH = $(shell uname -m)
 ifeq ($(UNAME),Linux)
    F90 = lf95
    LDFLAGS = --staticlink
+   FDFLAGS = -O
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
 LINK=$(F90) $(FFLAGS) $(LDFLAGS)
 
-OBJS = util.o poisson.o init_model.o ns3d.o
 
-#independent modules (dont depend on any other modules):
-MODS1 = params.mod
-#modules which depend on MODS1, but not on each other
-MODS2 = fft_interface.mod
+
+#independent modules (dont use any other modules):
+OBJS1 = params.o util.o fft99.o
+#modules which use OBJS1
+OBJS2 = fft_interface.o
+#modules which use OBJS1,2
+INITS  = init_model.o init_mpi.o init_data.o init_grid.o
+OPS    = poisson.o derivatives.o test.o
+MODEL  = ns3d.o bc.o
+FILEIO = fileio.o
+OBJS3 = $(MODEL) $(INITS) $(OPS) $(FILEIO)
+
 
 
 #rules
-%.mod: %.F90
-	$(COMPILE) $< 
 %.o: %.F90
-	$(COMPILE) -c $< 
+	$(COMPILE)  $< 
 %.o: %.f
-	$(COMPILE) -c -o $@ $< 
+	$(COMPILE) -o $@ $< 
 
-
-dnslink = $(OBJS)
-dns: $(OBJS) $(MODS1) $(MODS2) 
-	$(LINK) $(OBJS)
+dnslink = $(OBJS1) $(OBJS2) $(OBJS3)
+dns:  $(dnslink) dns.o
+	$(LINK) -o dns dns.o $(dnslink)
 
 
 clean: 
-
-dns.o:         dns.F90 params.mod
-derivatives.o: derivataves.F90 params.mod
-init_model.o:  init_model.F90 params.mod fft_interface.mod
-ns3d.o:        ns3d.F90 params.mod
-poisson.o:     poisson.F90 params.mod fft_interface.mod
+	rm -f *.o *.mod dns  
 
 
 
 
-fft_interface.mod:  fft99_interface.F90 params.mod
-	$(COMPILE) fft99_interface.F90
-#fft_interface.mod:  compaq_fft_interface.F90 params.mod
+fft_interface.o:  fft99_interface.F90 params.o
+	$(COMPILE) -o fft_interface.o fft99_interface.F90
+#fft_interface.o:  compaq_fft_interface.F90 params.o
 #	$(COMPILE) compaq_fft_interface.F90
 
-ns3d.o:  ns3d.F90 params.mod
 
 
 

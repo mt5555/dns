@@ -6,5 +6,5 @@
 
 #ifdef NDEBUG
 #else
-#define ASSERT(str,cond) if (cond) call abort(str)
+#define ASSERT(str,cond) if (.not. cond) call abort(str)
 #endif
