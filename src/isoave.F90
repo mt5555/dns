@@ -13,8 +13,8 @@
 module isoave
 implicit none
 
-integer,parameter :: ndir=49
-integer,parameter :: ndelta_max=72
+integer,parameter :: ndir=73
+integer,parameter :: ndelta_max=73
 integer :: dir(3,ndir)
 integer :: ndelta
 integer :: delta_val(ndelta_max)   ! delta values (in terms of grid points)
@@ -137,13 +137,14 @@ end subroutine
 
 
 
-subroutine isoave1(Q,d1,work)
+subroutine isoave1(Q,d1,work,lx1,lx2,ly1,ly2,lz1,lz2)
 use params
 
 !input
 real*8 :: Q(nx,ny,nz,ndim)
 real*8 :: d1(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
+integer :: lx1,lx2,lz1,lz2,ly1,ly2
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
@@ -154,9 +155,6 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
 
 if (firstcall) then
    firstcall=.false.
-   if (ncpu_x*ncpu_y*ncpu_z>1) then
-      call abort("isoave: can only be called if running on 1 cpu")
-   endif
    call init
 endif
 
@@ -176,9 +174,9 @@ ke=0
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),d1,dummy,work,1,m)
-      do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
+      do k=lz1,lz2
+      do j=ly1,ly2
+      do i=lx1,lx2
          if (m==1) ke = ke + .5*Q(i,j,k,n)**2
          ke_diss=ke_diss + d1(i,j,k)*d1(i,j,k)
       enddo
@@ -186,8 +184,9 @@ do n=1,ndim
       enddo
    enddo
 enddo
-epsilon=mu*ke_diss/g_nx/g_ny/g_nz   
-ke=ke/g_nx/g_ny/g_nz
+n=(lz2-lz1+1)*(ly2-ly1+1)*(lx2-lx1+1)
+epsilon=mu*ke_diss/n
+ke=ke/n
 
 eta = (mu**3 / epsilon)**.25
 lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
@@ -212,8 +211,7 @@ print *,'R_l      ',R_lambda
 !$omp parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
 do idir=1,ndir
 
-   write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',&
-           dir(:,idir),')'
+   write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
 
       rhat = dir(:,idir)*delta_val(1)
       rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
@@ -244,9 +242,9 @@ do idir=1,ndir
       if (rvec(3)<0) rvec(3)=rvec(3)+nslabz
       
       
-      do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
+      do k=lz1,lz2
+      do j=ly1,ly2
+      do i=lx1,lx2
 
          i2 = i + rvec(1)
          do
@@ -392,6 +390,7 @@ real*8 :: rvec(3)
 
 
 
+delta_val=100000
 
 ! compute all deltas up to ndelta_max
 ! (but we only use deltas up to ndelta)
@@ -443,6 +442,9 @@ do i=9,16
    delta_val(j)=128*i
 enddo
 ! determine maximum value of delta to use for this grid
+if (j > ndelta_max) then
+   stop "isoave init: j > ndelta_max"
+endif
 do idel=1,ndelta_max
    if (delta_val(idel) >= g_nmin/2) exit
    ndelta=idel
@@ -522,7 +524,45 @@ dir(:,46)=(/2,-2,1/)
 dir(:,47)=(/1,2,-2/)
 dir(:,48)=(/2,1,-2/)
 dir(:,49)=(/2,2,-1/)
-if (ndir/=49) then
+
+
+! face 1,3 directions
+dir(:,50)=(/0,1,3/)
+dir(:,51)=(/0,3,1/)
+dir(:,52)=(/0,-1,3/)
+dir(:,53)=(/0,-3,1/)
+
+dir(:,54)=(/1,3,0/)
+dir(:,55)=(/1,0,3/)
+dir(:,56)=(/-1,3,0/)
+dir(:,57)=(/-1,0,3/)
+
+dir(:,58)=(/3,1,0/)
+dir(:,59)=(/3,0,1/)
+dir(:,60)=(/-3,1,0/)
+dir(:,61)=(/-3,0,1/)
+
+! body 1,1,3 directions
+dir(:,62)=(/1,1,3/)
+dir(:,63)=(/1,3,1/)
+dir(:,64)=(/3,1,1/)
+
+dir(:,65)=(/-1,1,3/)
+dir(:,66)=(/-1,3,1/)
+dir(:,67)=(/-3,1,1/)
+
+dir(:,68)=(/1,-1,3/)
+dir(:,69)=(/1,-3,1/)
+dir(:,70)=(/3,-1,1/)
+
+dir(:,71)=(/1,1,-3/)
+dir(:,72)=(/1,3,-1/)
+dir(:,73)=(/3,1,-1/)
+
+
+
+
+if (ndir/=73) then
    call abort("isoave: ndir /= 49")
 endif
 

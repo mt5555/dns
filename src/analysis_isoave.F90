@@ -35,20 +35,30 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac
+integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
+integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-! input file
-tstart=.75
-tstop=.75
+tstart=.00
+tstop=.00
 tinc=1.0
 icount=0
 
+nxdecomp=1
+nydecomp=1
+nzdecomp=1
+
 !call set_byteswap_input(1);
 
+
 ! these lines are modifed by some sed scripts for automatic running
-! of this code:
+! of this code by putting in new values of tstart, tstop, tinc,
+! nxdecomp,nydecomp,nzdecom, etc.
 !SEDbyteswap
 !SEDtstart
+!SEDdecomp
+
+
 
 call init_mpi
 call init_mpi_comm3d()
@@ -62,6 +72,10 @@ print *,runname
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Q=0
+
+if (ncpu_x*ncpu_y*ncpu_z>1) then
+   call halt("analysis_isoave can only be run serial")
+endif
 
 
 time=tstart
@@ -83,20 +97,41 @@ do
    call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
    time=time2
 
-  
-   call isoave1(Q,work1,work2)
 
 
-   write(sdata,'(f10.4)') 10000.0000 + time
-   fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
-   call copen(fname,"w",fid,ierr)
-   if (ierr/=0) then
-      write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
-      call abort(message)
-   endif
-   call writeisoave(fid,time)
-   call cclose(fid,ierr)
+   do i=0,nxdecomp-1
+   do j=0,nydecomp-1
+   do k=0,nzdecomp-1  
+      nxlen=nslabx/nxdecomp
+      nylen=nslaby/nydecomp
+      nzlen=nslabz/nzdecomp
+      lx1=nx1 + i*nxlen     
+      ly1=ny1 + j*nylen     
+      lz1=nz1 + k*nzlen     
 
+      lx2=lx1 + nxlen-1
+      ly2=ly1 + nylen-1
+      lz2=lz1 + nzlen-1
+
+      call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
+
+      write(sdata,'(f10.4)') 10000.0000 + time
+      fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
+      if (nxdecomp*nydecomp*nzdecomp>1) then
+         write(sdata,'(3i1)') nxdecomp,nydecomp,nzdecomp
+         fname=fname(1:len_trim(fname)) // sdata(1:3)
+      endif
+      print *,fname
+      call copen(fname,"w",fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
+         call abort(message)
+      endif
+      call writeisoave(fid,time)
+      call cclose(fid,ierr)
+   enddo
+   enddo
+   enddo
 
 
    time=time+tinc
