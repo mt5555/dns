@@ -1,0 +1,19 @@
+0            ! input file type
+test         ! runname
+value        ! viscosity type  (value, smallest, damping_time, Re)
+2e-4         ! viscosity coefficient.  
+fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+.1        ! final time
+1.50         ! adv cfl  (0 = disabled, use min_dt)
+.25           ! vis cfl  (0 = disabled, use min_dt)
+0             ! min_dt  
+1             ! max_dt 
+0.0          ! restart_dt  (0 = restart output disabled)
+-20          ! diag_dt
+-20          ! screen_dt
+0.0         ! output_dt  (0 = output disabled, except for custom output times)
+1           ! n_output_custom  number of custom output times  
+99.111      ! custom output times, one per line
