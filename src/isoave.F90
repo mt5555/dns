@@ -517,6 +517,8 @@ do idir=1,ndir
       else
          call abort("parallel computation of direction not supported")
       endif
+
+
    enddo
 
 
@@ -1680,7 +1682,7 @@ w2s2=w2s2/ntot
    dwork3=D_ltt
    call MPI_reduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    dwork2=D_lltt
-   call MPI_reduce(dwork3,D_lltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   call MPI_reduce(dwork2,D_lltt,ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
    dwork3=SP_ltt
