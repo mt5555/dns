@@ -13,10 +13,10 @@ periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
 11.5         ! time to run
-4.5          ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
+1.15          ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
 .25           ! vis cfl  (0 = disabled, use min_dt)
-0             ! min_dt  
-1             ! max_dt 
+4e-4             ! min_dt  
+4e-4             ! max_dt 
 0.0          ! restart_dt  (0 = restart output disabled)
 -10           ! diag_dt   
 -10           ! screen_dt

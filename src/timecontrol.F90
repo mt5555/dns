@@ -57,7 +57,7 @@ else
            mu/(dely**2) 
 endif
 
-if (grav>0) then
+if (equations==SHALLOW .and. grav>0) then
    umax=umax+fcor + sqrt(grav*H0)/min(delx,dely)   
 endif
 

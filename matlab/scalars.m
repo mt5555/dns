@@ -121,13 +121,13 @@ disp(sprintf('max vor_z = %e',max(vor_z)));
 figure(5)
 clf
 hold on
-plot(time,ke)
-plot(time_2,ke_diss_tot,'c')
-plot(time,ke_diss_f+ke_diss_d,'r.')
-plot(time,ke_diss_f,'k')
-plot(time,ke_diss_d,'k')
+plot(time,ke,'g')
+plot(time_2,ke_diss_tot,'r')
+plot(time,ke_diss_f+ke_diss_d,'k')
+plot(time,ke_diss_f,'b')
+plot(time,ke_diss_d,'b')
 plot(time,hel,'g')
-title('KE: blue,    d(KE)/dt: cyan,    hel: green');
+title('KE: green,    d(KE)/dt: black and red,    hel: green');
 hold off
 
 
@@ -136,7 +136,6 @@ R_l = lambda.*sqrt(2*ints(6,:))/mu;
 
 % Kolm. micro scale
 eta = (mu^3 ./ abs(ke_diss_d)).^(.25);
-
 
 
 % averge eta to a number
@@ -150,6 +149,19 @@ R_l = sum(R_l)/length(R_l);
 disp(sprintf('R_l (average over last half of data) = %f ',R_l));
 
 disp(sprintf('1/250 in units of eta:  %f',(1/250)/eta));
+disp(sprintf('1/500 in units of eta:  %f',(1/500)/eta));
+
+tturn=-2*ke./ke_diss_d;
+tturn = tturn(length(tturn)/2:length(tturn));
+tturn = sum(tturn)/length(tturn);
+disp(sprintf('eddy turnover time (averaged over last haf of data) = %f ',tturn));
+
+epsilon=-ke_diss_d;
+epsilon = epsilon(length(epsilon)/2:length(epsilon));
+epsilon = sum(epsilon)/length(epsilon);
+disp(sprintf('epsilon (averaged over last haf of data) = %f ',epsilon));
+
+
 
 
 

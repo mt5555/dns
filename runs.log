@@ -25,7 +25,7 @@ cpus
 4x1
 8x1
 16x1
-32x1  
+32x1      20.02
 
 64x1       9.84     3.28h                20.5d  
 32x2      10.77
@@ -140,7 +140,7 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 250G  .8e-3   500    178   1.14      1.23        3.39      hook 1e-4     good
 250H  5000h   500    668   7.16/1.42 1.42        2.95
 
-250I  .8e-3   500   (same as G, but with new diags)
+250I  .8e-3   500    180   1.13      1.27        3.23      same as G, with new diags
 250J  .8e-3   500   (same as G, but with 4th order)
 
 

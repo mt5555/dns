@@ -187,7 +187,10 @@ character :: access
 CPOINTER fid
 
 access="a"
-if (time==time_initial) access="w"
+if (time==time_initial) then
+   access="w"
+   call print_message("diag_output():  Creating NEW .scalars file");
+endif
 
 
 if (my_pe==io_pe) then
