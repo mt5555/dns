@@ -21,7 +21,21 @@
 !      helmholtz_periodic()       (it uses d/dxx from der()
 !
 !
-! Fourier methods:  doesn't matter
+! Fourier methods, NS_UVW or NS_PSIVOR:  
+!      direct solve:  DX4DX4 ignored, 
+!                     NS_UVW requiires HINV_DX4DX4 so div(grad)=Helmholtz_periodic_inv
+!                     NS_PSIVOR: both values of HINV_DX4DX4 will work
+!      iterative solve, no preconditioner:
+!              (only used for testing!)  HINV_DX4DX4 ignored
+!              NS_UVW requires DX4DX4 so that div(grad)=Helmholtz_periodic
+!              NS_PSIVOR: both values of DX4DX4 should work.   
+
+! Shallow Water:
+!      uses iterative solve with helmholtz_hform_periodic()
+!      which computes using calls to der() for first derivatives only
+!      so DX4DX4 doesn't matter.  
+!      Predonditioner uses helmholtz_periodic_inv(), but should work
+!      with either seting of HINV_DX4DX4.  
 !
 ! 4th order methods:   
 !   UVW form:  LAPLACE must be the same as div(grad)
