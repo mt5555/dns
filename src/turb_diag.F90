@@ -134,27 +134,27 @@ if (compute_struct==1) then
          call abort(message)
       endif
 
-      write(message,'(f10.4)') 10000.0000 + time
-      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".jpdf"
-      call copen(message,"w",fidj,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "output_model(): Error opening .jpdf file errno=",ierr
-         call abort(message)
-      endif
+!      write(message,'(f10.4)') 10000.0000 + time
+!      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".jpdf"
+!      call copen(message,"w",fidj,ierr)
+!      if (ierr/=0) then
+!         write(message,'(a,i5)') "output_model(): Error opening .jpdf file errno=",ierr
+!         call abort(message)
+!      endif
 
-      write(message,'(f10.4)') 10000.0000 + time
-      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".s2v2"
-      call copen(message,"w",fidS,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "output_model(): Error opening .s2v2 file errno=",ierr
-         call abort(message)
-      endif
+!      write(message,'(f10.4)') 10000.0000 + time
+!      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".s2v2"
+!      call copen(message,"w",fidS,ierr)
+!      if (ierr/=0) then
+!         write(message,'(a,i5)') "output_model(): Error opening .s2v2 file errno=",ierr
+!         call abort(message)
+!      endif
 
    endif
    call output_pdf(time,fid,fidj,fidS)
    if (my_pe==io_pe) call cclose(fid,ierr)
-   if (my_pe==io_pe) call cclose(fidj,ierr)
-   if (my_pe==io_pe) call cclose(fidS,ierr)
+!   if (my_pe==io_pe) call cclose(fidj,ierr)
+!   if (my_pe==io_pe) call cclose(fidS,ierr)
    endif
 #endif
 

@@ -137,7 +137,7 @@ use params
 implicit none
 
 integer idel,i
-integer :: nmax,max_delta
+integer :: nmax,max_delta,j
 ! we can compute them up to g_nx/2, but no reason to go that far.
 nmax=max(g_nx/3,g_ny/3,g_nz/3)
 
