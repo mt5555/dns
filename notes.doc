@@ -1,20 +1,15 @@
 TODO:
 
+0. segault at 64 128 128
+1. PDF for e
+2. memory estimate.  why off by a factor of 2?
+3. timers in compute_pdf
+4. random vorticity (not stream function)
+
 1. create new mpi communicator for sforcing routines
 2. use a mpi defined type for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
 6. divergence: go to Shashkov formula?  
-
-
-NOTES:
-
-(1) poisson solve:  inner most tranform_to_z/transform_from_z pair
-could be removed if we can compute the wave numbers of all
-the coefficients in the z-decomposition .  
-
-**********************************************************************************
-structure function:
- <  [ u(x+l)-u(x) ]^p  >   
 
 **********************************************************************************
 sizes
@@ -30,14 +25,11 @@ Linux box sizes:
  64^3     60M            5 arrays,3 coordinates=5*3*8*64^3 
  96^3    197M
 128^3    462M
-192^3     ?              5 arrays: 810M
 
 
 256^3   3.8Gb                  
-
-400^3   25Gb.                    128 cpus.  
-512^3:  51Gb                     226 cpus. 
-1024^3  410Gb                   1822 cpus.
+512^3:  31Gb             array size: 15Gb.  
+1024^3  410Gb               
 
 2048^4  3280Gb                 
 
