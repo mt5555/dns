@@ -19,11 +19,16 @@ subroutine bc_onesided(w)
 
 use params
 implicit none
-real*8 w(nx,ny)
+real*8 :: w(nx,ny)
 
 
 !local
 integer i,j
+integer :: bx1,bx2,by1,by2
+bx1=nx1
+bx2=nx2
+by1=ny1
+by2=ny2
 
 if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
    !           nx1-1     nx1   nx1+1   nx1+2    nx1+3
@@ -35,7 +40,7 @@ if (my_x==0 .and. bdy_x1==INFLOW0_ONESIDED) then
    !                    -6              6         
 
    do j=ny1,ny2
-      w(nx1-1,j)= 2*w(nx1,j)  - 2*w(nx1+2,j) +  w(nx1+3,j)
+      w(bx1-1,j)= 2*w(bx1,j)  - 2*w(bx1+2,j) +  w(bx1+3,j)
    enddo
 endif
 if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
@@ -43,20 +48,20 @@ if (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED) then
    ! stencil    1       -8      0       8       -1
    !                    -6              6         
    do j=ny1,ny2
-      w(nx2+1,j)= 2*w(nx2,j)  -2*w(nx2-2,j)  +  w(nx2-3,j)
+      w(bx2+1,j)= 2*w(bx2,j)  -2*w(bx2-2,j)  +  w(bx2-3,j)
    enddo
 endif
 
 
 if (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED) then
    do i=nx1,nx2
-      w(i,ny1-1)= 2*w(i,ny1)  - 2*w(i,ny1+2) +  w(i,ny1+3)
+      w(i,by1-1)= 2*w(i,by1)  - 2*w(i,by1+2) +  w(i,by1+3)
    enddo
 endif
 
 if (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED) then
    do i=nx1,nx2
-      w(i,ny2+1)=  2*w(i,ny2)  -2*w(i,ny2-2)  +  w(i,ny2-3)
+      w(i,by2+1)=  2*w(i,by2)  -2*w(i,by2-2)  +  w(i,by2-3)
    enddo
 endif
 
