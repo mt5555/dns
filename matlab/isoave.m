@@ -19,6 +19,8 @@ cdir=[cdir, 'b','b','b','b','b','b','b','b','b','b','b','b'];      % 12 (1,2,0) 
 cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,2) directions
 cdir=[cdir, 'm','m','m','m','m','m','m','m','m','m','m','m'];      % 12 (1,1,2) directions
 
+
+
 % get the weights:
 w=textread('../src/voronoi/isoave.weights','%f');
 size(w)
