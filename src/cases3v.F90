@@ -24,7 +24,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr,nb
 integer,allocatable :: seed(:)
-integer,parameter :: NUMBANDS=100 ! 2
+integer,parameter :: NUMBANDS=15
 real*8 xw,enerb(NUMBANDS),enerb_target(NUMBANDS),ener,xfac,theta
 real*8 enerb_work(NUMBANDS)
 character(len=80) message
