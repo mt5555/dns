@@ -70,7 +70,7 @@ ifeq ($(UNAME),OSF1)
 
    #FFLAGS = -recursive -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -recursive -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   FFLAGS = -recursive -fast  -DOSF1 $(MPI) -DUSE_CPQFFT  
+   FFLAGS = -fast  -DOSF1 $(MPI) -DUSE_CPQFFT  
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)

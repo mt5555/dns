@@ -162,9 +162,10 @@ real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 !local variables
-real*8,allocatable :: q1(:,:,:,:)
-real*8,allocatable :: q2(:,:,:,:)
-real*8,allocatable :: q3(:,:,:,:)
+real*8,save :: q1(nx,ny,nz,n_var)
+real*8,save :: q2(nx,ny,nz,n_var)
+real*8,save :: q3(nx,ny,nz,n_var)
+
 
 real*8  :: time=0
 integer :: itime=0,ierr,n
@@ -174,10 +175,6 @@ real*8 :: time_old=0
 real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
-
-allocate(q1(nx,ny,nz,n_var))
-allocate(q2(nx,ny,nz,n_var))
-allocate(q3(nx,ny,nz,n_var))
 
 ints=0
 maxs=0
