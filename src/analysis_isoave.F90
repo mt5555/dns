@@ -111,7 +111,7 @@ do
    time=time2
 
 
-   do i=0,nxdecomp-1
+   do i=1,nxdecomp-1
    do j=0,nydecomp-1
    do k=0,nzdecomp-1  
 

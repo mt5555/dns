@@ -470,10 +470,10 @@ do n=1,ndim
          do j=ny1,ny2
             do i=nx1,nx2
                
-               if (subcube(i,j,k)==0) exit
-               if (m==1) ke = ke + .5*Q(i,j,k,n)**2
-               ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
-
+               if (subcube(i,j,k)/=0) then
+                  if (m==1) ke = ke + .5*Q(i,j,k,n)**2
+                  ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
+               endif
                
             enddo
          enddo
