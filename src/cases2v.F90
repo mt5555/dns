@@ -316,7 +316,7 @@ if (init_cond_subtype ==6) then
    biotsavart_apply=50
    delta=.1
    biotsavart_ubar=.098
-   yscale=1.75
+   yscale=1.8
 endif
 
 
