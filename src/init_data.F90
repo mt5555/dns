@@ -36,6 +36,7 @@ subroutine init_data_lwisotropic(Q,PSI,work,work2)
 !
 use params
 use mpi
+use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: PSI(nx,ny,nz,n_var)
@@ -47,6 +48,7 @@ real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr
 integer,allocatable :: seed(:)
 real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
+CPOINTER :: null=0;
 character(len=80) message
 
 !
@@ -64,17 +66,12 @@ seed=seed+my_pe
 call random_seed(put=seed)
 deallocate(seed)
 
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   do n=1,3
-      call random_number(xw)
-      xw=2*xw-1
-      PSI(i,j,k,n)=xw
-   enddo
+do n=1,3
+   ! input from random number generator
+   ! this gives same I.C independent of cpus
+   call input1(PSI(1,1,1,n),Q,work,null,io_pe)  
 enddo
-enddo
-enddo
+
 
 
 alpha=0

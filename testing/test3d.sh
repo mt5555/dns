@@ -1,8 +1,8 @@
 #/bin/csh -f
 
 cd ../src
-set refin=../testing/restart3d.inp
-set makerefin=../testing/reference3d.inp
+set refrestart=../testing/restart3d.inp
+set refin=../testing/reference3d.inp
 set refout=../testing/reference3d.out
 set tmp=/tmp/temp.out
 
@@ -20,7 +20,7 @@ if ($1 == makeref) then
 
    ./gridsetup.py 1 1 1 32 32 32
    make ; rm -f $refout 
-   ./dns < $makerefin > $refout
+   ./dns < $refin > $refout
   cat $refout
   cd ../testing/3d
   mv reference3d0000.0000.u restart.u
@@ -34,11 +34,11 @@ if ($1 == 1) then
 ./gridsetup.py 1 1 1 32 32 32
 
 echo "without restart:"
-make >& /dev/null ;  rm -f $tmp ; ./dns < $makerefin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "with restart:"
-make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; ./dns < $refrestart > $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -47,7 +47,7 @@ endif
 
 if ($1 == g) then
 ./gridsetup.py 1 1 1 32 32 32
-make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid < $refin > $tmp 
+make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid < $refrestart > $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
@@ -56,27 +56,31 @@ endif
 if ($1 == 2) then
 
 ./gridsetup.py 1 1 1 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; ./dns < $refrestart > $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
 
 if ($1 == p) then
+#set in = $refrestart
+#echo USING RESTART
+set in = $refin
+echo NOT USING RESTART
 
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $in > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 2 1 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $in > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 2 1 1 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $in > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 2 1 2 32 32 32 2 3 4 4 3 2 
-make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns < $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns < $in > $tmp 
 ../testing/check.sh $tmp $refout
 
 

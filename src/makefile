@@ -22,7 +22,7 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
 
-   # Lahey
+   ## Lahey
    #F90 = lf95
    ##FFLAGS = -g -O -DLINUX $(MPI) -DUSE_STKFFT
    #FFLAGS = -g -O -DLINUX $(MPI) -DUSE_FFT99

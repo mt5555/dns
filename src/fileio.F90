@@ -18,7 +18,7 @@ character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,lambda
 logical,external :: check_time
-logical :: doit
+logical :: doit_output,doit_diag,doit_restart,doit_screen
 real*8 :: t0,t1,t2,ke0,ke1,ea0,ea1
 real*8 :: delea_tot=0,delke_tot=0
 
@@ -49,45 +49,17 @@ delt = min(delt,cfl_vis/mumax)              ! viscous CFL
 delt = max(delt,delt_min)
 delt = min(delt,delt_max)
 
-
-!
-!  restart dumps
-!
-doit=check_time(itime,time,restart_dt,0,0.0,time_next)
-time_target=min(time_target,time_next)
-if (doit) then
-   call multfile_io(time,Q)
-endif
+! compute CFL used for next time step.
+cfl_used_adv=umax*delt
+cfl_used_vis=mumax*delt
 
 
-
-
-!
-!  output dumps
-!
-doit=check_time(itime,time,output_dt,ncustom,custom,time_next)
-time_target=min(time_target,time_next)
-if (doit) then
-   write(message,'(f10.4)') 10000.0000 + time
-
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
-   call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
-   call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
-   call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
-
-   call vorticity(q1,Q,work1,work2)
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-   call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
-endif
 
 
 !
 ! accumulate scalers into an array, output during 
 ! diagnositc output
 !
-if (diag_dt>0) then
 if (nsize==0) then
    nsize=100
    ! scalar arrays need to be allocated
@@ -116,39 +88,28 @@ if (nscalars > nsize) then
 endif
 ints_save(1:nints,nscalars)=ints(1:nints)
 maxs_save(1:nints,nscalars)=maxs(1:nints)
-endif
 
 
 
-!
-! diagnostic output
-!
-doit=check_time(itime,time,diag_dt,0,0.0,time_next)
+
+doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
-if (doit) then
-   call output_diags(time,Q,q1,q2,q3,work1,work2,ints_save,maxs_save,nints,nscalars)
-   nscalars=0
-endif
-
-
-
-doit=check_time(itime,time,screen_dt,0,0.0,time_next)
+doit_output=check_time(itime,time,output_dt,ncustom,custom,time_next)
+time_target=min(time_target,time_next)
+doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next)
+time_target=min(time_target,time_next)
+doit_screen=check_time(itime,time,screen_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 ! also output first 5 timesteps, unless screen_dt==0
-if (itime<5 .and. screen_dt/=0) doit=.true.
+if (itime<5 .and. screen_dt/=0) doit_screen=.true.
 
-
-
-! compute CFL used for next time step.
-cfl_used_adv=umax*delt
-cfl_used_vis=mumax*delt
 
 
 !
 ! display screen output
 !
-if (doit) then
-
+if (doit_screen) then
+   call print_message("")
    write(message,'(a,f9.5,a,i5,a,f9.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
 
@@ -197,7 +158,7 @@ if (doit) then
 
 
 
-   write(message,'(a,f13.10,a,f13.4,a,f12.7))') 'Ea: ',&
+   write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'Ea: ',&
         ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
    call print_message(message)	
 
@@ -216,9 +177,47 @@ if (doit) then
      'd/dt(ke) vis=',-mu*ints(2),' f=',ints(3),' alpha=',ints(8),&
      ' total=',(-mu*ints(2)+ints(3)+ints(8))
    call print_message(message)	
+endif
 
-   
-   call print_message("")
+
+!
+!  restart dumps
+!
+if (doit_restart) then
+   call print_message("writing restart file...")
+   call multfile_io(time,Q)
+endif
+
+
+
+
+
+!
+!  output dumps
+!
+if (doit_output) then
+   call print_message("writing output files...")
+   write(message,'(f10.4)') 10000.0000 + time
+
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+   call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+   call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
+   call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
+
+   call vorticity(q1,Q,work1,work2)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+   call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+endif
+
+
+!
+! diagnostic output
+!
+if (doit_diag) then
+   call output_diags(time,Q,q1,q2,q3,work1,work2,ints_save,maxs_save,nints,nscalars)
+   nscalars=0
 endif
 
 
@@ -228,13 +227,8 @@ endif
 ! values used if the time step is not lowered for output control)
 delt = min(delt,time_target-time)
 
-
-
 call wallclock(tmx2)
 tims(3)=tims(3) + (tmx2-tmx1)
-
-
-
 
 end subroutine
 

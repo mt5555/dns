@@ -1026,12 +1026,18 @@ enddo
 
 end subroutine
 
-
-
+!
+!  parallel input from a single file
+!  if fid==NULL, then fill p with random numbers between -1.. 1
+!  This is used to get random I.C. that are independent of the
+!  parallel decomposition
+!
+!
 subroutine input1(p,pt,buf,fid,fpe)
 use params
 use mpi
 integer :: fpe         ! cpu to do all the file I/O
+
 CPOINTER fid
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
@@ -1040,12 +1046,17 @@ real*8 :: buf(o_nx,ny_2dx)
 ! local vars
 real*8 saved_edge(o_nx)
 integer destination_pe,ierr,tag,z_pe,y_pe,x_pe
+logical :: random=.false.
 
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
 integer i,j,k,l,extra_k,kuse,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d
+
+if (fid==0) then
+   random=.true.
+endif
 
 
 do z_pe=0,ncpu_z-1
@@ -1080,11 +1091,19 @@ do x_pe=0,ncpu_x-1
 
 
    if (my_pe==fpe) then
-      call cread8(fid,buf,o_nx*ny_2dx)
+      if (random) then
+         call random_number(buf)
+      else
+         call cread8(fid,buf,o_nx*ny_2dx)
+      endif
 
       if (o_ny==g_ny+1) then
       if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then    
-         call cread8(fid,saved_edge,o_nx)      ! read and discard periodic duplicate points
+         if (random) then
+            call random_number(saved_edge)
+         else
+            call cread8(fid,saved_edge,o_nx)      ! read and discard periodic duplicate points
+         endif
       endif
       endif
 
