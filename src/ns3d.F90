@@ -21,8 +21,7 @@ real*8 d2(nx,ny,nz)
 real*8 work(nx,ny,nz)
 real*8 vor(nx,ny,nz,3)     ! could be removed and data accumulated in rhs
 real*8 dummy
-real*8 :: alpha=0
-real*8 :: beta=1
+real*8,external :: norm_divergence 
 integer i,j,k
 
 
@@ -50,37 +49,21 @@ do i=1,3
 enddo
 
 
-
 ! build up the rhs
 ! rhs = mu*rhs + Q cross vor 
 ! vor = Q cross vor
 
-rhs(:,:,:,1)=mu*rhs(:,:,:,1) + Q(:,:,:,2)*vor(:,:,:,3) - Q(:,:,:,3)*vor(:,:,:,2)
-rhs(:,:,:,2)=mu*rhs(:,:,:,2) + Q(:,:,:,3)*vor(:,:,:,1) - Q(:,:,:,1)*vor(:,:,:,3)
-rhs(:,:,:,3)=mu*rhs(:,:,:,2) + Q(:,:,:,1)*vor(:,:,:,2) - Q(:,:,:,2)*vor(:,:,:,1)
+rhs(:,:,:,1)=mu*rhs(:,:,:,1) + ( Q(:,:,:,2)*vor(:,:,:,3) - Q(:,:,:,3)*vor(:,:,:,2))
+rhs(:,:,:,2)=mu*rhs(:,:,:,2) + ( Q(:,:,:,3)*vor(:,:,:,1) - Q(:,:,:,1)*vor(:,:,:,3))
+rhs(:,:,:,3)=mu*rhs(:,:,:,3) + ( Q(:,:,:,1)*vor(:,:,:,2) - Q(:,:,:,2)*vor(:,:,:,1))
 
 
-! compute d2 = div(q cross vor), or use the full rhs
-i=1
-call der(rhs(1,1,1,i),d1,dummy,work,DX_ONLY,i)
-d2 = d1
-i=2
-call der(rhs(1,1,1,i),d1,dummy,work,DX_ONLY,i)
-d2 = d2+d1
-i=3
-call der(rhs(1,1,1,i),d1,dummy,work,DX_ONLY,i)
-d2 = d2+d1
+! apply b.c. to rhs:
+call bc_rhs(rhs)
 
 
-
-! solve laplacian p = div(q cross vor).  d2 is overritten with p. 
-call poisson(d2,work,alpha,beta)
-
-! add grad p to the RHS  (p still stored in d2)
-do i=1,3
-   call der(d2,d1,dummy,work,DX_ONLY,i)
-   rhs(:,:,:,i) = rhs(:,:,:,i) + d1
-enddo
+! make rhs divergence free:
+call divfree(rhs,d2,d1,work)
 
 end
 

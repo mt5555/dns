@@ -92,7 +92,7 @@ call fft_filter(input)
 call ifft3d(input,work)
 
 
-call divfree(input)
+call divfree(input,p,work,d1)
 
 ! compute p = div(u)
 i=1

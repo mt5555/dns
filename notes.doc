@@ -12,61 +12,21 @@ periodic     ! z bc
 .8           ! cfl  (0 = disabled, use min_dt)
 0            ! min_dt  
 1            ! max_dt 
-.1           ! output_dt  (0 = output disabled, except for custom output times)
+
+.1            ! output_dt  (0 = output disabled, except for custom output times)
 5             ! n_output_custom  number of custom output times  
 .1,.2,.55,.88 ! custom output times (this line present even n_output_custom=0)
-
+.1            ! restart_dt  (0 = restart output disabled)
+.1            ! diag_dt
 
 =================================================================================
 
 
 
-
-
-
-Computational grid:
-
-Arrays are dimensioned as:
-
-u(-2:imaxd,-2:jmaxd,-2:kmaxd)
-
-The processor is expected to compute for 
-
-u(0:imax,0:jmax,0:kmax)
-
-The routine bc_loop() fills in the ghost cell region with
-data (either by message passing, or boundary conditions).
-
-
-
-*** Periodic Case, i-direction: ***
-
-Boundary/ghost cells are filled in via:
- 
-cpu with left boundary             cpu with right boundary 
-
-u(-1,:,:)                   <=          u(imax,:,:)
-u(-2,:,:)                   <=          u(imax-1,:,:)
-
-u(0,:,:)                    =>          u(imax+1,:,:)
-u(1,:,:)                    =>          u(imax+2,:,:)
-
-
-
-*** wall boundary case, j-direction: ***
-
-Momentum equations computed for:  u(:,1:jmax-1,:)
-Compact differencing is used on:  u(:,0:jmax,:), gives solution u(:,1:jmax-1,:)
-derivatives at the wall computed by hand.  
-
-du_tangent=0
-du_normal=one sided differences
-rho_tangent = prescribed via b.c.
-rho_normal = 0 (not needed because multiplied by u_tangent)
-
-u_rhs at boundary = 0
-rho_rhs at boundary:  computed 
-
+Notes:
+poisson solve:  inner most tranform_to_z/transform_from_z pair
+could be removed if we can compute the wave numbers of all
+the coefficients in the z-decomposition .  
 
 
 

@@ -8,7 +8,8 @@ end subroutine
 
 
 
-subroutine bc_loop
+
+subroutine bc_rhs
 use params
 implicit none
 

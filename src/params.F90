@@ -27,7 +27,7 @@ implicit none
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-real*8  :: mu=0   !viscosity
+real*8  :: mu=.0001   !viscosity
 real*8  :: pi,pi2_squared
 
 
@@ -73,15 +73,21 @@ integer,allocatable :: g_kmcord(:)
 ! time stepping
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: delt
-integer :: itime_max=1000   ! number of time steps
-integer :: itime_output=10  ! output every itime_output time steps
+real*8  :: cfl_adv = 1.4  ! 1.4=bad 
+real*8  :: cfl_vis = .1
+real*8  :: delt_min = 0
+real*8  :: delt_max = 1
+real*8  :: time_final = 1 
 
+real*8 :: output_dt = .1    ! netcdf output for plotting
+real*8 :: diag_dt = -1     ! diagnostics
+real*8 :: restart_dt = 1.0   ! restart 
 
 ! set non-zero to cause time stepping loop to exit
-! error_code = 1   advection CFL violated
-! error_code = 2   sound speed CFL violated
-! error_code = 3   diffusion CFL violated
-integer :: error_code 
+! error_code = 1   u > 1000
+! error_code = 2   
+! error_code = 3   
+integer :: error_code =0
 
 
 
@@ -91,7 +97,6 @@ integer :: error_code
 ! parallel decompositions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !integer :: ncpu_x=1,ncpu_y=1,ncpu_z=1
-integer :: ncpu_z
 integer :: nx_2d,ny_2d,nz_2d
 integer :: io_pe
 integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)

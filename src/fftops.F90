@@ -6,6 +6,8 @@
 !  numder = 1  compute p_x, return in px.   (pxx is not accessed)
 !  numder = 2  compute p_xx, return in pxx.  
 !
+!  Note: it is safe, but maybe bad Fortran, to have p=px or pxx.
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine der(p,px,pxx,pt,numder,index)
 use params
@@ -60,7 +62,7 @@ end subroutine
 
 
 
-subroutine divfree(u)
+subroutine divfree(u,p,work,work2)
 !
 ! make u divergence free
 !    solve:  div(u) = laplacian(p)
@@ -72,47 +74,60 @@ use params
 use fft_interface
 implicit none
 real*8 u(nx,ny,nz,3)
-real*8 d1(nx,ny,nz)
 real*8 work(nx,ny,nz)
+real*8 work2(nx,ny,nz)
 real*8 p(nx,ny,nz)
+
+!local variables
 real*8 :: dummy(1)
 real*8 :: alpha=0
 real*8 :: beta=1
-
 integer i,j,k
-real*8 divu(nx,ny,nz)
-real*8 px(nx,ny,nz)
-real*8 pxx(nx,ny,nz)
-real*8 lap(nx,ny,nz)
-real*8 lap2(nx,ny,nz)
 
-! compute p = div(u)
-i=1
-call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
-p = d1
-i=2
-call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
-p = p + d1
-i=3
-call der(u(1,1,1,i),d1,dummy,work,DX_ONLY,i)
-p = p + d1
-
-divu=p
+call divergence(p,u,work,work2)
 
 ! solve laplacian(p)=div(u)
 call poisson(p,work,alpha,beta)
 
-
 ! compute u=u-grad(p)
 do i=1,3
-   call der(p,d1,dummy,work,1,i)
-   u(:,:,:,i) = u(:,:,:,i) - d1
+   call der(p,work,dummy,work2,1,i)
+   u(:,:,:,i) = u(:,:,:,i) - work
 enddo
 
 
 end subroutine
 
 
+
+
+subroutine divergence(div,u,work1,work2)
+use params
+use fft_interface
+use transform
+implicit none
+real*8 u(nx,ny,nz,3)    ! input
+real*8 div(nx,ny,nz)    ! output
+real*8 work1(nx,ny,nz) ! wk array
+real*8 work2(nx,ny,nz) ! wk array
+
+! local variables
+integer i
+real*8 dummy
+
+i=1
+call der(u(1,1,1,i),div,dummy,work2,DX_ONLY,i)
+
+i=2
+call der(u(1,1,1,i),work1,dummy,work2,DX_ONLY,i)
+div = div+work1
+
+i=3
+call der(u(1,1,1,i),work1,dummy,work2,DX_ONLY,i)
+div = div+work1
+
+
+end subroutine
 
 
 
@@ -301,7 +316,10 @@ real*8 xfac
          jm=jmcord(j)
          do i=nx1,nx2
             im=imcord(i)
-            if ( (km == g_nz/2) .or.   (jm == g_ny/2) .or. (im == g_nx/2)) then
+
+            if ( ((km==g_nz/2) .and. (km>0)) .or. &
+                 ((jm==g_ny/2) .and. (jm>0)) .or. &
+                 ((im==g_nx/2) .and. (im>0)) )  then
                p(i,j,k)=0
             endif
          enddo

@@ -56,33 +56,22 @@ real*8 :: time
 !local variables
 integer itime
 
+call time_control(time,Q)  ! output initial data, choose delt
 
-! set delt based on CFL?
-delt = .001
-
-call out(0,time,Q)  ! output initial data
-
-do itime=1,itime_max
-
+do 
    call rk4(time,Q)
-
-   if (mod(itime,itime_output)==0 .or. itime==itime_max .or. error_code>0) then
-      write(*,'(a,4f12.5)') 'after rk4',time,maxval(Q(:,:,:,1)),&
-           maxval(Q(:,:,:,2)),maxval(Q(:,:,:,3))
-
-      write(*,'(a,f12.5)') "CFL_x",(maxval(abs(Q(:,:,:,1)))*delt)/delx
-      write(*,'(a,f12.5)') "CFL_y",(maxval(abs(Q(:,:,:,2)))*delt)/dely
-      write(*,'(a,f12.5)') "CFL_z",(maxval(abs(Q(:,:,:,3)))*delt)/delz
-
-      call out(itime,time,Q)
-   endif
+   call time_control(time,Q)
 
    if (error_code>0) then
       print *,"Error code = ",error_code
       print *,"Stoping at time=",time
+      time_final=time
+      call time_control(time,Q)
       exit
    endif
-end do
+   if (time >= time_final) exit
+enddo
+
 end subroutine
 
 
@@ -112,25 +101,22 @@ Q_old=Q
 call ns3D(rhs,Q_old,time)
 Q=Q+delt*rhs/6.0
 
+
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
-call bc_loop(Q_tmp)
 call ns3D(rhs,Q_tmp,time+delt/2.0)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
-call bc_loop(Q_tmp)
 call ns3D(rhs,Q_tmp,time+delt/2.0)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
-call bc_loop(Q_tmp)
 call ns3D(rhs,Q_tmp,time+delt)
 Q=Q+delt*rhs/6.0
 
-call bc_loop(Q)
 time = time + delt
 
 end subroutine rk4  
