@@ -181,7 +181,7 @@ real*8 :: ke_diss,vor,hel,maxvor
 
 
 real*8 tmp(g_nz2,nslabx,ny_2dz,n_var)
-real*8 tmp2(g_nz2,nslabx,ny_2dz,n_var)
+real*8 z_Qhat(g_nz2,nslabx,ny_2dz,n_var)
 
 
 
@@ -202,70 +202,31 @@ call wallclock(tmx1)
 
 ! compute vorticity-hat, store in RHS
 
-#undef DECOMP3
-#if DECOMP3
-do k=nz1,nz2
-   km=kmcord(k)
-   do j=ny1,ny2
-      jm=jmcord(j)
-      do i=nx1,nx2
-         im=imcord(i)
-         
-         ! u_x term
-         !ux = - im*Qhat(i+imsign(i),j,k,1)
-         vx = - im*Qhat(i+imsign(i),j,k,2)
-         wx = - im*Qhat(i+imsign(i),j,k,3)
-         
-         
-         uy = - jm*Qhat(i,j+jmsign(j),k,1)
-         !vy = - jm*Qhat(i,j+jmsign(j),k,2)
-         wy = - jm*Qhat(i,j+jmsign(j),k,3)
-         
-         
-         uz =  - km*Qhat(i,j,k+kmsign(k),1)
-         vz =  - km*Qhat(i,j,k+kmsign(k),2)
-         !wz =  - km*Qhat(i,j,k+kmsign(k),3)
-         
-         rhs(i,j,k,1) = pi2*(wy - vz)
-         rhs(i,j,k,2) = pi2*(uz - wx)
-         rhs(i,j,k,3) = pi2*(vx - uy)
-
-      enddo
-   enddo
-enddo
-! 3 forward&back z-transforms, 9 ffts.  
-do n=1,3
-   call ifft3d(rhs(1,1,1,n),p,n1,n1d,n2,n2d,n3,n3d)
-enddo
-
-
-#else
-
 
 do n=1,3
-   call transpose_to_z(Qhat(1,1,1,n),tmp(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_z(Qhat(1,1,1,n),z_Qhat(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 
-do k=1,g_nz
-   km=z_kmcord(k)
-   do j=1,ny_2dz
-      jm=z_jmcord(j)
-      do i=1,nslabx
-         im=z_imcord(i)
-
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+         
          ! u_x term
-         vx = - im*tmp(k,i+z_imsign(i),j,2)
-         wx = - im*tmp(k,i+z_imsign(i),j,3)
+         vx = - im*z_Qhat(k,i+z_imsign(i),j,2)
+         wx = - im*z_Qhat(k,i+z_imsign(i),j,3)
          
-         uy = - jm*tmp(k,i,j+z_jmsign(j),1)
-         wy = - jm*tmp(k,i,j+z_jmsign(j),3)
+         uy = - jm*z_Qhat(k,i,j+z_jmsign(j),1)
+         wy = - jm*z_Qhat(k,i,j+z_jmsign(j),3)
          
-         uz =  - km*tmp(k+z_kmsign(k),i,j,1)
-         vz =  - km*tmp(k+z_kmsign(k),i,j,2)
+         uz =  - km*z_Qhat(k+z_kmsign(k),i,j,1)
+         vz =  - km*z_Qhat(k+z_kmsign(k),i,j,2)
          
-         tmp2(k,i,j,1) = pi2*(wy - vz)
-         tmp2(k,i,j,2) = pi2*(uz - wx)
-         tmp2(k,i,j,3) = pi2*(vx - uy)
+         tmp(k,i,j,1) = pi2*(wy - vz)
+         tmp(k,i,j,2) = pi2*(uz - wx)
+         tmp(k,i,j,3) = pi2*(vx - uy)
 
          
       enddo
@@ -273,11 +234,8 @@ do k=1,g_nz
 enddo
 ! 3 forward&back z-transforms, 9 ffts.  
 do n=1,3
-   call z_ifft3d(tmp2(1,1,1,n),rhs(1,1,1,n),p)
+   call z_ifft3d(tmp(1,1,1,n),rhs(1,1,1,n),p)
 enddo
-
-#endif
-
 
 
 ! alternative:
@@ -329,7 +287,8 @@ maxvor=0
 ! back to spectral space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
-   call fft3d(rhs(1,1,1,n),p)
+   call z_fft3d(rhs(1,1,1,n),tmp(1,1,1,n),p)
+   call transpose_from_z(tmp(1,1,1,n),rhs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
 
 ke_diss = 0
@@ -351,9 +310,9 @@ ke_diss = 0
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
 
             xfac = 2*2*2*xfac*(g_nx*g_ny*g_nz)
-            if (kmcord(k)==0) xfac=xfac/2
-            if (jmcord(j)==0) xfac=xfac/2
-            if (imcord(i)==0) xfac=xfac/2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
 
             ke_diss = ke_diss + xfac*Qhat(i,j,k,1)**2 + &
                                 xfac*Qhat(i,j,k,2)**2 + &
@@ -362,6 +321,45 @@ ke_diss = 0
          enddo
       enddo
    enddo
+
+
+#if 0
+ke_diss=0
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+            xfac=-mu*(im*im + jm*jm + km*km)*pi2_squared
+            tmp(k,i,j,1)=tmp(k,i,j,1) + xfac*z_Qhat(k,i,j,1)
+            tmp(k,i,j,2)=tmp(k,i,j,2) + xfac*z_Qhat(k,i,j,2)
+            tmp(k,i,j,3)=tmp(k,i,j,3) + xfac*z_Qhat(k,i,j,3)
+
+! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
+!                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
+
+            xfac = 2*2*2*xfac*(g_nx*g_ny*g_nz)
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+
+            ke_diss = ke_diss + xfac*z_Qhat(k,i,j,1)**2 + &
+                                xfac*z_Qhat(k,i,j,2)**2 + &
+                                xfac*z_Qhat(k,i,j,3)**2 
+
+         
+
+      enddo
+   enddo
+enddo
+
+!call transpose_from_z(tmp(1,1,1,n),rhs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+#endif
+
+
+
 
 
 !  make rhs div-free

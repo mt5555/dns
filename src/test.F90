@@ -34,7 +34,7 @@ implicit none
 
 real*8 input(nx,ny,nz)
 real*8 output(nx,ny,nz)
-real*8 work(g_nz2,nx,ny)
+real*8 work(nx,ny,nz)
 real*8 mx,tx1,tx2,tmax,tave
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,n,ierr
@@ -75,27 +75,13 @@ write(message,*) 'transpose x round trip error:',mx
 call print_message(message)
 
 
-#if 0
-if (my_z==1) then
-   print *,'rank=',my_pe,'my coords  = ',my_x,my_y,my_z
-   print *,'maxval round trip=',maxval(abs(input-output))
-endif
-
-if (my_z==1) then
-   print *,'rank=',my_pe,'my coords  = ',my_x,my_y,my_z
-   do k=1,g_nz2
-      write(*,'(a,i5,3f10.4)') 'k,work ',k,work(k,1),work(k,1)-work(k-1,1)
-   enddo
-endif
-#endif
-
 
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  benchmark the transforms
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-n=50
+n=1
 
 call wallclock(tx1)
 do i=1,n
@@ -125,6 +111,8 @@ call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(output,work,n1,n1d,n2,n2d,n3,n3d)
 enddo
 call wallclock(tx2)
+
+
 
 tmax=tx2-tx1
 tave=tx2-tx1

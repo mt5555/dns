@@ -111,7 +111,7 @@ for i in range(3):
        if use_x_y:   # use this value when possible
           use_x_z=0  
           j=1
-          print 'Using TRANSPOSE_X_SPLIT_Y. '
+          #print 'Using TRANSPOSE_X_SPLIT_Y. '
 
        if use_x_z:
           use_x_y=0
@@ -135,7 +135,7 @@ for i in range(3):
 
 
 print sys.argv[1:]
-print "Total cpus:   ",ncpu[0]*ncpu[1]*ncpu[2]
+print "Total cpus:   ",ncpu[0]*ncpu[1]*ncpu[2],
 print "Grid per cpu: ",nslab[0],nslab[1],nslab[2]
 
 
@@ -158,11 +158,11 @@ fout.close()
 cmd = "diff /tmp/transpose.h transpose.h"
 (status,out) = commands.getstatusoutput(cmd) 
 if (status != 0):
-   print "Creating new transpose.h file"
+   print "Creating new transpose.h file.",
    cmd = "mv -f /tmp/transpose.h transpose.h"
    status = os.system(cmd)
 else:
-   print "transpose.h file unchanged"
+   print "transpose.h file unchanged.",
 
 
 
