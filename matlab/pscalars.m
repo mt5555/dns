@@ -10,7 +10,7 @@ readdata=0;
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0000:.01:1.24];
+times=[1.0000:.01:1.20];
 
 
 
@@ -49,7 +49,7 @@ end
 end
 
 % look at passive scalar number np
-for np=9:9
+for np=10:10
 
 time_e=squeeze(pints_e(1,np,:))';
 mu=squeeze(pints_e(2,np,:))';
@@ -67,8 +67,13 @@ cx3(3,:)=pints_e(10,np,:);
 cxx2(1,:)=pints_e(14,np,:);
 cxx2(2,:)=pints_e(15,np,:);
 cxx2(3,:)=pints_e(16,np,:);
-% cxx3                        17,18,19
-% cxx4                        20,21,22
+cxx3(1,:)=pints_e(17,np,:);
+cxx3(2,:)=pints_e(18,np,:);
+cxx3(3,:)=pints_e(19,np,:);
+cxx4(1,:)=pints_e(20,np,:);
+cxx4(2,:)=pints_e(21,np,:);
+cxx4(3,:)=pints_e(22,np,:);
+
 
 cu(1,:)=pints_e(23,np,:);
 cu(2,:)=pints_e(24,np,:);
