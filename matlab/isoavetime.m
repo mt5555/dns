@@ -18,8 +18,9 @@ ext='.isostr';
 %name='/ccs/scratch/taylorm/check256_0000.8000'
 
 %name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
+
 name='/ccs/scratch/taylorm/dns/iso12_512'
-nx=512; delx_over_eta=2.74; epsilon=3.89;
+nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
 %ext='.isostr001';
 
 
@@ -31,25 +32,32 @@ ndir_use=0;
 time_and_angle_ave=1;
 
 k=0
-times=[0:.1:3.7];
+times=[1:.1:3.7];
 
 
-xx1=(1:.5:(nx./2.5))*delx_over_eta;     % units of r/eta
-y45_ave=zeros([length(xx1),15]);
-y45_iso_ave=zeros([length(xx1),1]);
+
+xx=(1:.5:(nx./2.5)) / nx;
+xx_plot=(1:.5:(nx./2.5)) *delx_over_eta;   % units of r/eta
+
+y45_ave=zeros([length(xx),15]);
+if (time_and_angle_ave==1) 
+   y45_iso_ave=zeros([length(xx),1]);
+end
 
 
 for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10)];
-  disp(fname)
+  disp([fname,ext])
   k=k+1;
 
   if (time_and_angle_ave==1) 
     klaws=1;                            % compute 4/5 laws
     plot_posneg=0;
     check_isotropy=0;
-    [xx,y45,y415,y43,eps]=compisoave(fname,ext,ndir_use,klaws,plot_posneg,check_isotropy);
+    
+    [y45,y415,y43,eps]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
+
 
     mx45_iso_localeps(k)=max(y45);
     mx45_iso(k)=max(y45)*eps/epsilon;
@@ -58,29 +66,25 @@ for t=times
 
   end    
   
-  [nx,ndelta,ndir,r_val,ke,eps,mu,D_ll,D_lll] ...
+  [nx,ndelta,ndir,r_val,ke,eps_l,mu,D_ll,D_lll] ...
       = readisostr( [fname,ext] );
   
-  eta_l = (mu^3 / eps)^.25;
+  eta_l = (mu^3 / eps_l)^.25;
   delx_over_eta_l=(1/nx)/eta_l;
-  dir_use=2;
   
     for dir=1:15;
-      x=r_val(:,dir)*delx_over_eta_l; % units of r/eta
-      x_box = x/delx_over_eta_l/nx;     % in code units (box length)
-      y=-D_lll(:,dir)./(x_box*eps);
+      x=r_val(:,dir)/nx;         % box length
+      y=-D_lll(:,dir)./(x*eps_l);
       
-      y45 = spline(x,y,xx1);
+      y45 = spline(x,y,xx);
       
       mx45_localeps(k,dir)=max(y45);
       mx45(k,dir)=max(y45)*eps/epsilon;
       
       y45_ave(:,dir)=y45_ave(:,dir)+y45';
-      xx_ave=xx1;
     end
 end
-end
-end
+
 y45_ave=y45_ave/length(times);
 y45_iso_ave=y45_iso_ave/length(times);
 
@@ -88,24 +92,28 @@ y45_iso_ave=y45_iso_ave/length(times);
 
 figure(4); clf; hold on; 
 for i=2:2
-   plot(times,mx45_localeps(:,i));
+   plot(times/teddy,mx45_localeps(:,i));
 end
-plot(times,mx45_iso_localeps,'g')
+plot(times/teddy,mx45_iso_localeps,'g')
 ax=axis
-axis( [ax(1),ax(2),.5,1.5] );
+axis( [ax(1),ax(2),.5,1.0] );
 hold off;
 
 figure(5); clf
 for i=1:3
-  semilogx(xx_ave,y45_ave(:,i)); hold on
+  semilogx(xx_plot,y45_ave(:,i)); hold on
 end
-axis([1 1000 0 1.5])
+  semilogx(xx_plot,y45_iso_ave,'k'); hold on
+axis([1 1000 0 1.0])
+hold off;
+
 
 starttime=1;
 ln=find(times>=starttime);
 ln=ln(1);
 lnmax=length(times);
 
+dir_use=2;
 [mean(mx45(ln:lnmax,dir_use)),mean(mx45_iso(ln:lnmax))]
 [std(mx45(ln:lnmax,dir_use)),std(mx45_iso(ln:lnmax)) ]
 

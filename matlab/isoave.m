@@ -18,6 +18,7 @@ ext='.isostr';
 %name='/ccs/scratch/taylorm/check256_0000.8000'
 %name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
 name='/ccs/scratch/taylorm/dns/iso12_5120003.0000'
+nx=512; delx_over_eta=2.74; epsilon=3.89;
 %ext='.isostr001';
 
 
@@ -52,11 +53,13 @@ else
 end
 
 
+xx=(1:.5:(nx./2.5)) / nx;
+xx_plot=(1:.5:(nx./2.5)) *delx_over_eta;
+[y45,y415,y43,eps]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 
-[xx,y45,y415,y43,eps]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy);
-
+return
 figure(10); hold off;
-semilogx(xx,y45,'k'); hold on;
+semilogx(xx_plot,y45,'k'); hold on;
 axis([1,1000,0,1.5]);
 
 

@@ -1,4 +1,4 @@
-function [xx_out,y45,y415,y43,epsilon]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy)
+function [y45,y415,y43,epsilon]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
 
 
 l=findstr('/',name);
@@ -61,11 +61,13 @@ end
 
 
 
+%
+% xx is given in units of the box length
+% but r_val is given in units of delx.  convert to box length units
+%
 
-
-r_val=r_val*delx_over_eta;            % convert to units of r/eta:
-xx=(1:.5:(nx./2.5))*delx_over_eta;   % units of r/eta
-xx_box = xx/delx_over_eta/nx;         % in code units (box length)
+r_val=r_val/nx;
+xx_plot = xx*nx*delx_over_eta;        % units of r/eta
 
 lambda=sqrt(10*ke*mu/epsilon);       % single direction lambda
 R_lambda = lambda*sqrt(2*ke/3)/mu;
@@ -104,22 +106,23 @@ pave=yyave;
 nave=yyave;
 
 for i=1:ndir
-  x=r_val(:,i);
-  x_box = x/delx_over_eta/nx;  % in code units (box length)
-  y=-D_lll(:,i)./(x_box*epsilon);
+  x = r_val(:,i);                   % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  semilogx(x,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
-  %loglog(x,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
+  y=-D_lll(:,i)./(x*epsilon);
+
+  if (plot_points==1) 
+     semilogx(x_plot,y,['.',cdir(i)],'MarkerSize',msize);   hold on;
+  end     
   yy = spline(x,y,xx);
-  %plot(xx,yy,[cdir(i)],'LineWidth',.2);
   
   yyave=yyave+w(i)*yy;
   yyave_sq=yyave_sq + w(i)*yy.^2;
   
   % positive and negative parts:
-  y=-SP_lll(:,i)./(x_box*epsilon);
+  y=-SP_lll(:,i)./(x*epsilon);
   pave=pave+w(i)*spline(x,y,xx);
-  y=-SN_lll(:,i)./(x_box*epsilon);
+  y=-SN_lll(:,i)./(x*epsilon);
   nave=nave+w(i)*spline(x,y,xx);
 
   y  = D_ll(:,i); 
@@ -128,18 +131,17 @@ for i=1:ndir
 end
 yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
 max(yyave)
-plot(xx,yyave,'k','LineWidth',1.0);
+plot(xx_plot,yyave,'k','LineWidth',1.0); hold on;
 y45=yyave;
-xx_out=xx;
-%errorbar(xx,yyave,yyave_sq);
+
 title('D_{lll} / r\epsilon   (4/5 law) ');
 ylabel(pname);
 xlabel('r/\eta');
 x=1:xmax; plot(x,(4/5)*x./x,'k');
 if (plot_posneg)
   grid
-  plot(xx,pave)
-  plot(xx,nave)
+  plot(xx_plot,pave)
+  plot(xx_plot,nave)
 end
 
 
@@ -148,19 +150,22 @@ hold off;
 print('-dpsc',[bname,'_45.ps']);
 print -djpeg 45.jpg
 
+
+if (0) 
 figure(4)
+hold off; clf;
 %curve fit (xx,pave)  and (xx,nave)
 %  
 %  pave, nave have been divied by x
 %  compute: 6 mu (1/r) d/dr yyave1
 l=length(yyave1);
-df = ( yyave1(3:l)-yyave1(1:l-2)) ./ (xx_box(3:l)-xx_box(1:l-2));
-df = 6*mu*df./xx_box(3:l);
+df = ( yyave1(3:l)-yyave1(1:l-2)) ./ (xx(3:l)-xx(1:l-2));
+df = 6*mu*df./xx(3:l);
 
-xx=xx(3:l);
+x=xx_plot(3:l);
 pave=pave(3:l);
 nave=nave(3:l);
-semilogx(xx,pave+.5*df,'k',xx,nave+.5*df,'k',xx,pave,xx,nave);
+semilogx(x,pave+.5*df,'k',x,nave+.5*df,'k',x,pave,x,nave);
 grid;
 
 %Bm = lsqcurvefit('fun3',[0],xx,nave)
@@ -168,7 +173,7 @@ grid;
 %bm = fun3([Bm(1)],xx);
 %bp = fun3([Bp(1)],xx);
 %plot(xx,bm,xx,bp)
-
+end
 
 
 
@@ -181,36 +186,38 @@ yyave2=0*xx;
 pave=yyave1;
 nave=yyave1;
 for i=1:ndir
-  x=r_val(:,i);
-  x_box = x/delx_over_eta/nx;  % in code units (box length)
-  y1=-D1_ltt(:,i)./(x_box*epsilon);
-  y2=-D2_ltt(:,i)./(x_box*epsilon);
+  x = r_val(:,i);                       % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  semilogx(x,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
-  semilogx(x,y2,['.',cdir(i)],'MarkerSize',msize);
+  y1=-D1_ltt(:,i)./(x*epsilon);
+  y2=-D2_ltt(:,i)./(x*epsilon);
 
+  if (plot_points==1) 
+  semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on;
+  semilogx(x_plot,y2,['.',cdir(i)],'MarkerSize',msize);
+  end
+  
   yyave1=yyave1+w(i)*spline(x,y1,xx);
   yyave2=yyave2+w(i)*spline(x,y2,xx);
   
-  
-  y1=-SP1_ltt(:,i)./(x_box*epsilon);
+  y1=-SP1_ltt(:,i)./(x*epsilon);
   pave=pave++w(i)*spline(x,y1,xx);
-  y1=-SN1_ltt(:,i)./(x_box*epsilon);
+  y1=-SN1_ltt(:,i)./(x*epsilon);
   nave=nave++w(i)*spline(x,y1,xx);
   
 
 end
-semilogx(xx,yyave1,'r');
-semilogx(xx,yyave2,'r');
-semilogx(xx,.5*(yyave1+yyave2),'k','LineWidth',1.0);
+semilogx(xx_plot,yyave1,'r'); hold on;
+semilogx(xx_plot,yyave2,'r');
+semilogx(xx_plot,.5*(yyave1+yyave2),'k','LineWidth',1.0);
 title('D_{ltt} / r\epsilon  (4/15 law)');
 y415=.5*(yyave1+yyave2);
 ylabel(pname);
 xlabel('r/\eta');
 if (plot_posneg)
   grid
-  semilogx(xx,pave)
-  semilogx(xx,nave)
+  semilogx(xx_plot,pave)
+  semilogx(xx_plot,nave)
 end
 x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
@@ -228,25 +235,29 @@ yyave=0*xx;
 pave=yyave;
 nave=yyave;
 for i=1:ndir
-  x=r_val(:,i);
-  x_box = x/delx_over_eta/nx;  % in code units (box length)
-  y=-(D_lll(:,i) + D1_ltt(:,i) + D2_ltt(:,i))./(x_box*epsilon);
+  x = r_val(:,i);                       % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  semilogx(x,y,['.',cdir(i)],'MarkerSize',msize); hold on;
+  y=-(D_lll(:,i) + D1_ltt(:,i) + D2_ltt(:,i))./(x*epsilon);
+
+  if (plot_points==1) 
+    semilogx(x_plot,y,['.',cdir(i)],'MarkerSize',msize); hold on;
+  end      
   yyave=yyave+w(i)*spline(x,y,xx);
   
-  y=-(SP_lll(:,i) + SP1_ltt(:,i) + SP2_ltt(:,i))./(x_box*epsilon);
+  y=-(SP_lll(:,i) + SP1_ltt(:,i) + SP2_ltt(:,i))./(x*epsilon);
   pave=pave+w(i)*spline(x,y,xx);
-  y=-(SN_lll(:,i) + SN1_ltt(:,i) + SN2_ltt(:,i))./(x_box*epsilon);
+  y=-(SN_lll(:,i) + SN1_ltt(:,i) + SN2_ltt(:,i))./(x*epsilon);
   nave=nave+w(i)*spline(x,y,xx);
   
 end
+semilogx(xx_plot,yyave,'k','LineWidth',1.0); hold on;
 if (plot_posneg)
   grid
-  semilogx(xx,pave)
-  semilogx(xx,nave)
+  semilogx(xx_plot,pave)
+  semilogx(xx_plot,nave)
 end
-semilogx(xx,yyave,'k','LineWidth',1.0);
+
 y43=yyave1;
 title('4/3 law');
 ylabel(pname);
@@ -274,23 +285,23 @@ yyave1=0*xx;
 yyave2=0*xx;
 figure(1)
 for i=1:ndir
-  x=r_val(:,i);
-  x_box = x/delx_over_eta/nx;  % in code units (box length)
+  x = r_val(:,i);                       % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
 
   y  = D_ll(:,i); 
-  y1 = D1_tt(:,i).*x_box.^(-2/3);
-  y2 = D2_tt(:,i).*x_box.^(-2/3);
+  y1 = D1_tt(:,i).*x.^(-2/3);
+  y2 = D2_tt(:,i).*x.^(-2/3);
   
-  semilogx(x,y1,['.',cdir(i)],'MarkerSize',msize); hold on
-  semilogx(x,y2,['.',cdir(i)],'MarkerSize',msize);
+  semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on
+  semilogx(x_plot,y2,['.',cdir(i)],'MarkerSize',msize);
   
   yyave1=yyave1 + w(i)*spline(x,y1,xx); 
   yyave2=yyave2 + w(i)*spline(x,y2,xx); 
   yyave=yyave + w(i)*spline(x,y,xx);  
   
 end
-semilogx(xx,yyave1,'r');
-semilogx(xx,yyave2,'r');
+semilogx(xx_plot,yyave1,'r');
+semilogx(xx_plot,yyave2,'r');
 
 
 %
@@ -298,10 +309,10 @@ semilogx(xx,yyave2,'r');
 %
 f = yyave;
 l=length(f);
-df = ( f(3:l)-f(1:l-2)) ./ (xx_box(3:l)-xx_box(1:l-2));
-f2 = f(2:l-1) + .5*xx_box(2:l-1).*df;
-f2 = f2 .* xx_box(2:l-1).^(-2/3);
-semilogx(xx(2:l-1),f2,'g');
+df = ( f(3:l)-f(1:l-2)) ./ (xx(3:l)-xx(1:l-2));
+f2 = f(2:l-1) + .5*xx(2:l-1).*df;
+f2 = f2 .* xx(2:l-1).^(-2/3);
+semilogx(xx_plot(2:l-1),f2,'g');
 title('D_{tt} (points)       angle ave(red)       D_{ll} + .5 r (D_{ll})'' (green)');
 ylabel(pname);
 xlabel('r/\eta');
@@ -320,33 +331,33 @@ yyave1=0*xx;
 yyave2=0*xx;
 figure(2)
 for i=1:ndir
-  x=r_val(:,i);
-  x_box = x/delx_over_eta/nx;  % in code units (box length)
+  x = r_val(:,i);                       % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
 
   y  = -D_lll(:,i); 
-  y1 = -D1_ltt(:,i)./x_box;
-  y2 = -D2_ltt(:,i)./x_box;
+  y1 = -D1_ltt(:,i)./x;
+  y2 = -D2_ltt(:,i)./x;
   
-  semilogx(x,y1,['.',cdir(i)],'MarkerSize',msize); hold on
-  semilogx(x,y2,['.',cdir(i)],'MarkerSize',msize);
+  semilogx(x_plot,y1,['.',cdir(i)],'MarkerSize',msize); hold on
+  semilogx(x_plot,y2,['.',cdir(i)],'MarkerSize',msize);
   
   yyave1=yyave1 + w(i)*spline(x,y1,xx); 
   yyave2=yyave2 + w(i)*spline(x,y2,xx); 
   yyave=yyave + w(i)*spline(x,y,xx);  
   
 end
-semilogx(xx,yyave1,'r');
-semilogx(xx,yyave2,'r');
+semilogx(xx_plot,yyave1,'r');
+semilogx(xx_plot,yyave2,'r');
 
 
 %
 %  compute and plot: [ 1/6 d/dr r D_+lll ] /r
 %
-f = yyave.*xx_box/6;
+f = yyave.*xx/6;
 l=length(f);
-df = ( f(3:l)-f(1:l-2)) ./ (xx_box(3:l)-xx_box(1:l-2));
-df = df./xx_box(2:l-1);
-semilogx(xx(2:l-1),df,'g');
+df = ( f(3:l)-f(1:l-2)) ./ (xx(3:l)-xx(1:l-2));
+df = df./xx(2:l-1);
+semilogx(xx_plot(2:l-1),df,'g');
 title('D_{ltt} (points)       angle ave(red)         (r D_{lll})''/6 (green)');
 ylabel(pname);
 xlabel('r/\eta');
