@@ -314,7 +314,7 @@ real*8,allocatable,save :: rmodes2(:,:,:,:)
 real*8,allocatable,save :: cmodes(:,:,:,:,:)
 real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
 real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
-real*8 costta, tta, tta_sgn, theta, h_angle, phi 
+real*8 costta, tta, tta_sgn, theta, phi 
 real*8,save :: h_angle,cos_h_angle,sin_h_angle
 character(len=80) :: message
 
