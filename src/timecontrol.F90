@@ -58,7 +58,9 @@ else
 endif
 psmax=0
 if (npassive>0) then
-   psmax=mumax/minval(schmidt(np1:np2))
+   do n=np1,np2
+      if (schmidt(n)>0) psmax=max(mumax/schmidt(n),psmax)	
+   enddo
 endif
 
 
@@ -189,7 +191,7 @@ if (doit_screen) then
    call print_message(message)	
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3,a,f6.3)') &
-           'next timestep: delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis,&
+           'next delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis,&
             'cfl_passive_vis=',cfl_used_psvis
    call print_message(message)	
 

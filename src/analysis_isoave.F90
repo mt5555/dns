@@ -70,7 +70,7 @@ call init_model
 
 !cd
 header_type=1; scale=1;
-header_type=4; scale=1/(2*pi)   ! for Takeshi's data
+header_type=4; scale=1/(2*pi)    ! for Takeshi's data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
@@ -105,7 +105,7 @@ endif
 !SEDdecomp
 !SEDcompcj
 !SEDcompscalar
-
+!SEDheadertype
 
 
 
