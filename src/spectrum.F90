@@ -67,18 +67,15 @@ real*8 :: time
 integer :: iwave_max,i,n
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_k2(0:max(g_nx,g_ny,g_nz))
 
 iwave_max=max(g_nx,g_ny,g_nz)
 spec_r=0
 spec_diff=0
 spec_r2=0
 spec_d2=0
-spec_k2=0
 spec_x=0
 spec_y=0
 spec_z=0
-spec_kEk=0
 
 q1=Q
 
@@ -98,10 +95,9 @@ enddo
 
 do i=1,ndim
    call fft3d(q1(1,1,1,i),work1)
-   call compute_spectrum2(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,spec_k2,&
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
        spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,1)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
-   spec_kEk(:)=spec_kEk(:)+spec_k2
    ! for now, use the value computed in RHS
    ! spec_diff=spec_diff + spec_d2
 enddo
@@ -697,6 +693,11 @@ end subroutine
 
 
 
+
+
+
+
+
 subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,&
    spectrum_z,iwave_max,pe,skip_fft)
 !
@@ -725,47 +726,6 @@ real*8 :: spectrum_x(0:g_nx/2)
 real*8 :: spectrum_y(0:g_ny/2)
 real*8 :: spectrum_z(0:g_nz/2)
 
-! local
-real*8 :: spec_k(0:iwave_max)
-
-call compute_spectrum2(pin,p,work,spectrum,spec_d,spec_k,spectrum_x,&
-spectrum_y,spectrum_z,iwave_max,pe,skip_fft)
-
-end subroutine
-
-
-
-
-
-subroutine compute_spectrum2(pin,p,work,spectrum,spec_d,spec_k,spectrum_x,spectrum_y,&
-   spectrum_z,iwave_max,pe,skip_fft)
-!
-!  INPUT:  iwave_max:  size of spectrum()
-!  OUTPUT: iwave:      number of coefficients returned in spectrum()
-!          spectrum()  spherical wave number spectrum
-!          spec_d()    spherical wave number spectrum of diffusion term
-!          spectrum_x  spectrum in x
-!          spectrum_y  spectrum in y
-!          spectrum_z  spectrum in z
-!
-!  skip_fft=0    pin = grid point data - take FFT
-!  skip_fft=1    pin = FFT data, skip the FFT
-!
-use params
-use mpi
-implicit none
-integer :: iwave_max,ierr,skip_fft
-integer :: pe             ! compute spectrum on this processor
-real*8 :: pin(nx,ny,nz)
-real*8 :: work(nx,ny,nz)
-real*8 :: p(nx,ny,nz)
-real*8 :: spectrum(0:iwave_max)
-real*8 :: spec_d(0:iwave_max)
-real*8 :: spec_k(0:iwave_max)
-real*8 :: spectrum_x(0:g_nx/2)
-real*8 :: spectrum_y(0:g_ny/2)
-real*8 :: spectrum_z(0:g_nz/2)
-
 ! local variables
 real*8 rwave
 real*8 :: spectrum_in(0:iwave_max)
@@ -787,7 +747,6 @@ spec_d=0
 spectrum_x=0
 spectrum_y=0
 spectrum_z=0
-spec_k=0
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -813,10 +772,6 @@ do i=nx1,nx2
     endif
     spec_d(iwave)=spec_d(iwave)  -mu*xw*energy
 
-    ! compute k E(k)
-    xw=sqrt(rwave*pi2_squared)
-    spec_k(iwave)=spec_k(iwave)+xw*energy
-
 
 enddo
 enddo
@@ -835,8 +790,6 @@ call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,pe,comm_3d,i
 
 spectrum_in=spec_d
 call MPI_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
-spectrum_in=spec_k
-call MPI_reduce(spectrum_in,spec_k,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 
 #endif
 
@@ -851,7 +804,6 @@ iwave = (iwave/2)           ! max wave number in sphere.
 do i=iwave+2,iwave_max
    spectrum(iwave+1)=spectrum(iwave+1)+spectrum(i)
    spec_d(iwave+1)=spec_d(iwave+1)+spec_d(i)
-   spec_k(iwave+1)=spec_k(iwave+1)+spec_k(i)
 enddo
 iwave=iwave+1
 
@@ -1034,7 +986,7 @@ real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
 
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
-real*8 :: diss1,diss2,hetot,co_energy(3)
+real*8 :: diss1,diss2,hetot,co_energy(3),xw
 integer i,j,k,jm,km,im,iwave_max,n
 
 if (ndim<3) then
@@ -1060,6 +1012,8 @@ cospec_x=0
 cospec_y=0
 cospec_z=0
 cospec_r=0
+spec_kEk=0
+
 
 do j=ny1,ny2
    jm=jmcord(j)
@@ -1089,6 +1043,11 @@ do j=ny1,ny2
          if (km==0) energy=energy/2
          if (jm==0) energy=energy/2
          if (im==0) energy=energy/2
+
+         ! compute k E(k)
+         xw=sqrt(rwave*pi2_squared)
+         spec_kEk(iwave)=spec_kEk(iwave)+xw*energy* &
+            (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
 
          co_energy(1) = energy*p1(i,j,k,1)*p1(i,j,k,2)
          co_energy(2) = energy*p1(i,j,k,1)*p1(i,j,k,3)
@@ -1121,6 +1080,8 @@ spec_r_in=spec_helicity_rp
 call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
 call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+spectrum_in=spec_kEk
+call MPI_reduce(spectrum_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 
 do n=1,ndim
    spec_r_in=cospec_r(:,n)
@@ -1160,6 +1121,7 @@ do i=iwave+2,iwave_max
    spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
    cospec_r(iwave+1,1:ndim)=cospec_r(iwave+1,1:ndim)+cospec_r(i,1:ndim)
+   spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
 enddo
 iwave=iwave+1
 
