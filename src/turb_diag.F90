@@ -112,7 +112,7 @@ if (compute_struct==1) then
 
 
 
-
+#if 0
 
    call compute_all_pdfs(Q,q1,q2,q3,work1,work2)
    
@@ -150,7 +150,7 @@ if (compute_struct==1) then
    if (my_pe==io_pe) call cclose(fidj,ierr)
    if (my_pe==io_pe) call cclose(fidS,ierr)
    endif
-
+#endif
 
 endif
 
