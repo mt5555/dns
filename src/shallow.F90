@@ -19,7 +19,7 @@ real*8 :: work2(nx,ny)
 ! local variables
 real*8 :: ke,pe
 real*8 :: ints_buf(nints),vel,dtf,epfilt=.01
-#define USE_LEAPFROG
+#undef USE_LEAPFROG
 #ifdef USE_LEAPFROG
 real*8,save :: QS(nx,ny,n_var)
 real*8,save :: QM(nx,ny,n_var)

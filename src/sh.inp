@@ -5,7 +5,7 @@ sht          ! initial condition:  shallow water turbulence
 none         ! forcing:  none, iso12
 hyper        ! viscosity type  (hyper)
 5000         ! viscosity value (ke dissapation rate of 2h mode)  5000 
-.00         ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+4.00         ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky coefficient (0=disabled)
 0            ! compute_structure functions
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
@@ -13,7 +13,7 @@ periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
 11.5         ! time to run
-1.10         ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
+4.5          ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
@@ -25,3 +25,19 @@ periodic     ! z bc
 .009         ! custom output times, one per line
 
 
+
+subtype=5 good CFL test.
+g=400
+U=3
+
+100x100
+cfl 1.25 goes unstable at by t=.2
+cfl 1.15 stable.
+
+alpha=2 delx
+cfl 4.5:  stable to .43
+cfl 5.0:  CG iteration failure
+
+alpha=4 delx
+cfl 4.5   out of balance by t=.4
+cfl 6.0:  CG iteration failure
