@@ -20,10 +20,10 @@
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-name = 'skhel512a0009.2781';
-namedir = '/home/mt/data/skhel/';
-%namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
-%name = 'hel256_hpi2_all';
+%name = 'skhel512a0009.2781';
+%namedir = '/home/mt/data/skhel/';
+namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
+name = 'hel256_hpi2_all';
 mu = 2e-4;
 
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel128_h3pi8/';
@@ -38,9 +38,12 @@ mu = 2e-4;
 %name = 'hel256_h0_0000.8000';
 %mu = 2e-4;
 
+namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
+name = 'skhel512_hpi2';
+mu = 1e-4;
 
 % plot all the spectrum:
-movie=1;
+movie=0;
 
 
 spec_r_save=[];
@@ -127,11 +130,11 @@ disp(sprintf('Total helicity = %d',H))
 h = -2*mu*sum((hspec_p+hspec_n).*(k'*2*pi).^2);
 disp(sprintf('Helicity dissipation rate = %d',h));
 
-figure(23)
-plot(time,H,'o',time,h,'x');hold on;
-legend('Total Helicity','Mean dissipation rate')
-xlabel('time');
-ylabel(pname);
+%figure(23)
+%plot(time,H,'o',time,h,'x');hold on;
+%legend('Total Helicity','Mean dissipation rate')
+%xlabel('time');
+%ylabel(pname);
 [time,count]=fread(fid,1,'float64');
 end
 
@@ -144,17 +147,14 @@ xlabel('k')
 ylabel(pname);
 
 figure(25)
-loglog(k,abs(hspec_ave).*k'.^(4/3),'k');hold on;
-title('Average 4/3 compensated helicity spectrum');
+loglog(k,abs(hspec_ave).*k'.^(5/3),'k');hold on;
+loglog(k,abs(hspec_ave).*k'.^(4/3),'b--');hold on;
+set(gca,'fontsize',14);
+%title('Average compensated helicity spectrum');
+legend('H(k) k^{5/3}','H(k) k^{4/3}');	      
 xlabel('k')
-ylabel(pname);
+%ylabel(pname);
 
-
-figure(26)
-loglog(k,abs(hspec_ave).*k'.^(5/3),'b');hold on;
-title('Average 5/3 compensated helicity spectrum');
-xlabel('k')
-ylabel(pname);
 
 % compute MEAN helicity in time -- in Mark's units
 % multiply by 2*pi^2 to get Takeshi's units

@@ -27,18 +27,19 @@ tsave=[2.5];
 %name = 'hel128_hpi2_0000.0000';
 %namedir = '/home2/skurien/dns/src/';
 
-name = 'hel256_hpi2_all';
-namedir = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/';
+%name = 'hel256_hpi2_all';
+%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
 %name = 'skhel512a0000.0000';
 %namedir = '/home/mt/data/skhel/';
 
-mu = 2e-4;
+%mu = 2e-4;
 
 %name = 'Rot10000.0000';
 %namedir = '/home2/skurien/rotation/Rot1/';
 
 %name = 'sk128_v5e-4_alpha400000.0000';
 %namedir = '/home2/skurien/dns/src/sk128_alpha40/';
+
 
 %name = 'hel480_hpi2_0000.1000';
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel480_hpi2/';
@@ -52,13 +53,13 @@ mu = 2e-4;
 %name = '2Dhypo1e3_1024_0000.0000';
 %mu = 2e-4;
 
-%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_pi2/';
+%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
 %name = 'skhel512_hpi2';
 %mu = 1e-4;
 
-namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_pi2/';
+namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
 name = 'sc1024A';
-mu = 1e-4;
+mu = 3.5e-5;
 
 % plot all the spectrum:
 movie=0; % 1 to plot all the spectra
@@ -95,7 +96,7 @@ if (time >= 1.5)        %only average times greater than 1 eddy turnover
      j=j+1;                 %count j's for averaging only after t==1.
      spec_ave = spec_ave + spec_r;
 end
-
+j
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 
@@ -218,13 +219,13 @@ xlabel('k')
 % compensated mean spectra
 
 figure(6)
-loglog(k,spec_ave.*k'.^(5/3),'b'); hold on;
-loglog(k,spec_ave.*k'.^(4/3),'r');hold on;
-legend('5/3 comp','4/3 comp');
-     title('Compensated MEAN energy spectrum');
-ylabel(pname);
+loglog(k,spec_ave.*k'.^(5/3),'k'); hold on;
+loglog(k,spec_ave.*k'.^(4/3),'b--');hold on;
+set(gca,'fontsize',14);
+legend('E(k) k^{5/3}','E(k) k^{4/3}');
+    % title('Compensated MEAN energy spectrum');
+%ylabel(pname);
 xlabel('k');
-
 
 
 %compute mean energy

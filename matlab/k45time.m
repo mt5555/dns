@@ -21,18 +21,26 @@ ext='.isostr';
 %ext='.new.isostr';
 %times = [4.2:0.2:10.2];
 
-name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
-nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
-ext='.new.isostr';
-pname='sc1024A';
-times=[1:.1:2.5];
+%name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
+%nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
+%ext='.new.isostr';
+%pname='sc1024A';
+%times=[1:.1:2.5];
 
 %name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
 %ext='.new.isostr';
-%[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
-%nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
 
-%teddy=1;
+
+name = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a';
+ext='.new.isostr';
+pname = 'skhel512a'
+times = [2.0:0.2:3.8];
+nx=512
+
+[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
+nx=512; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
+
+teddy=1;
 %times=[0:1:30];
 
 ndir_use=0;
@@ -143,7 +151,7 @@ print('-dtiff', 'k45time.jpg')
 
 
 figure(9); clf
-scale = 1; %scale = 4/5 if need to normalize out the 4/5th
+scale = 4/5; %scale = 4/5 if need to normalize out the 4/5th
 for i=[1:1:73]
   %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',1.0); hold on
   semilogx(xx_plot,y45_ave(:,i)/scale,'g-','LineWidth',1.0); hold on

@@ -15,11 +15,17 @@ eta = 1/(nx*delx_over_eta);
 %times=[0:1:30];
 %nx = 256;
 
-name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
-pname = 'hel256\_hpi2\_';
+%name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
+%pname = 'hel256\_hpi2\_';
+%ext='.new.isostr';
+%times=[4.2:0.2:15.8];
+%nx = 256;
+
+name = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a';
+pname = 'skhel512a';
 ext='.new.isostr';
-times=[4.2:0.2:15.8];
-nx = 256;
+times=[2.0:0.2:3.8];
+nx = 512;
 
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 
@@ -182,9 +188,6 @@ hold off;
 title('timemean(H_{ltt}(dir)-H_{ltt}(avg))/H_{ltt}(avg) Measure of anisotropy ');
 ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
-
-
-
 
 
 
