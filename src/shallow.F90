@@ -274,8 +274,8 @@ if (alpha_value>0) then
 
    do n=1,2
       work=divtau(:,:,n)-grav*gradh(:,:,n)      
-      !call cg_shallow(divtau(1,1,n),work,1d0,-alpha_value**2,1d-5,Q(1,1,3))
-      call helmholtz_inv(divtau(1,1,n),work,1d0,-alpha_value**2)
+      call cg_shallow(divtau(1,1,n),work,1d0,-alpha_value**2,1d-5,Q(1,1,3))
+      !call helmholtz_inv(divtau(1,1,n),work,1d0,-alpha_value**2)
    enddo
 
    do j=ny1,ny2
