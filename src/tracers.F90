@@ -51,6 +51,8 @@ allocate(tracer_work(numt_max,ndim+1))
 allocate(tracer_old(numt_max,ndim))  
 allocate(tracer_tmp(numt_max,ndim))  
 
+tracer=-1d100
+
 end subroutine
 
 
@@ -74,6 +76,7 @@ call print_message(message)
 tracer_work=tracer
 deallocate(tracer)
 allocate(tracer(numt_max,ndim+1))  
+tracer=-1d100
 tracer(1:numt,:)=tracer_work(1:numt,:)
 
 deallocate(tracer_work)
@@ -297,6 +300,10 @@ call ghost_update_x(ugrid,2)
 call ghost_update_y(ugrid,2)
 
 
+! keep the last point, along y=0 boundary, from crossing over.
+! (velocity = x direction only, so this only happens from roundoff
+tracer_tmp(numt,2)=0
+
 
 ! interpolate psi to position in tracer_tmp
 do i=1,numt
@@ -359,8 +366,9 @@ enddo
 
 
 
+
 if (rk4stage==4) then
-   ! xcord set to 1d-100 to denote off processor.  
+   ! xcord set to -1d100 to denote off processor.  
    ! if any tracer has left *all* processors, abort:
    if (minval(tracer(1:numt,1))<g_xcord(1)) then
       call abort("tracer_advance(): point has left domain") 
@@ -371,7 +379,7 @@ if (rk4stage==4) then
    j=numt
    call insert(tracer(1,1),tracer(1,2),tracer(1,ndim+1))
    if (j/=numt) then
-      write(message,'(a,i5)') "tracers(): inserting points. numt=",numt
+      write(message,'(a,i5)') "tracers(): inserted points. numt=",numt
       call print_message(message)
    endif
 endif
@@ -437,9 +445,9 @@ end subroutine
             denom0,denom1,denom2,denom3,fact0,fact1,fact2,fact3
       real*8 :: cutoff
 
-      integer,save :: jctr=10
-      real*8 :: epsd=.1
-      cutoff=cos(pi)/30   
+      integer,save :: jctr=1
+      real*8 :: epsd=.01  ! .1**2
+      cutoff=cos(pi/30)
 
       n=numt-1
 

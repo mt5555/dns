@@ -285,7 +285,7 @@ endif
 
 
 if (init==1) then
-   i=500
+   i=100
    call allocate_tracers(i+1)
    delalf = pi/(2*i)
    do k=0,i
@@ -294,6 +294,7 @@ if (init==1) then
       tracer(k+1,2)=cos(hold)
       tracer(k+1,ndim+1)=k      ! "alf" particle label
    enddo
+   tracer(i+1,2)=0    ! put last point on boundary
 else
    call tracers_restart(io_pe)
 endif
