@@ -16,6 +16,9 @@ set command = ../src/dns
 if ($ncpus > 0) then
 #   set command = "mpirun.lam -np $ncpus ../src/dns"
    set command = "mpirun -np $ncpus ../src/dns"
+   if (`uname` == OSF1) then
+      set command = "prun -n $ncpus ../src/dns"
+   endif
    if (`hostname` == brain) then
         set command = "mpirun -np $ncpus -npn 2 ../src/dns"
 #       set command = "mpirun -np $ncpus -npn 1 ../src/dns"

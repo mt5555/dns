@@ -1234,13 +1234,13 @@ use params
 use mpi
 
 CPOINTER fid
-integer :: fpe           ! cpu to do the I/O
+integer :: fpe,im_max,jm_max,km_max           ! cpu to do the I/O
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
 real*8 :: buf(2+2*im_max,ny_2dx)
 
 ! local vars
-integer sending_pe,ierr,tag,z_pe,y_pe,x_pe,im_max,jm_max,km_max
+integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
 #ifdef USE_MPI
 integer request(2),statuses(MPI_STATUS_SIZE,2)
 #endif
