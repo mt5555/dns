@@ -281,6 +281,15 @@ if (init_cond_subtype ==4) then
    yscale=1.9
 endif
 
+if (init_cond_subtype ==5) then
+   ! same as type=3, but bs_apply=100
+   biotsavart_cutoff=5e-3
+   biotsavart_apply=100
+   delta=.1
+   biotsavart_ubar=.089
+   yscale=1.9
+endif
+
 
 
 
