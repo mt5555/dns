@@ -7,11 +7,23 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
+<<<<<<< psivor.m
+%range=0:.05:1.00;
+range=29:1.0:1000.0;
+%range=[.00];
+=======
 %range=0:1.0:1000.0;
 range=[59];
+>>>>>>> 1.20
 %name='../src/kh/khK';
+<<<<<<< psivor.m
+%name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
+name='../src/vxpair/vx6144b_';
+%name='../src/vx3072_';
+=======
 name='/ccs/taylorm/dns/src/vxpair/vx6144b_'
 %name='../src/temp';
+>>>>>>> 1.20
 
 
 usefig=1;
