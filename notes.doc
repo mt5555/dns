@@ -6,6 +6,10 @@ E&Liu KH problem.
        2e-4: looks good, a little too smoothed 
 
 
+
+1. change NS-alpha so forcing always appears as just 'f'
+   see nots about ints(3) and ints(9) in params.F90
+
 1. matlab code: 
        last have averages: 
           epsilson

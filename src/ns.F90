@@ -443,7 +443,7 @@ if (compute_ints==1) then
    ! note: dont noramlize quantities computed in spectral space,
    ! but normalize quantities computed in grid space by /g_nx/g_ny/g_nz
    ints(1)=gradu_diss
-   ints(2)=ke_diss   
+   ints(2)=ke_diss                     ! <u_x,u_x>
    ints(3)=f_diss    
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
@@ -451,7 +451,7 @@ if (compute_ints==1) then
    ints(7)=ensave/g_nx/g_ny/g_nz
    ints(8)=a_diss    
    ints(9)=normuf
-   ints(10)=ke_diss
+   ints(10)=-ke_diss                   ! <u,u_xx>
 
    maxs(5)=maxvor
 endif

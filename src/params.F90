@@ -95,16 +95,14 @@ integer :: forcing_type   ! 0 = none
 !integer,parameter :: ny1=1,ny2=16             ! upper and lower bounds of non-ghost data
 !integer,parameter :: nz1=1,nz2=16             ! upper and lower bounds of non-ghost data
 
-! NOTE: if these are parameters, then all automatic arrays
-! in subroutines will be allocated at run time.  This doubles
-! the amount of memory needed:
+! compiler has three choices, somewhat controllabe with options:
+!  static  (if all arrays are static, memory use is doubled)
+!  stack   Ideal, but some systems have limited stack sizes
+!  heap    malloc()'d and free()'d between subroutine calls.  
+!          Performance penalty? And causes problems with Elan
+!          on ASCI Q when using more than 500M per cpu.  
+! 
 integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
-
-! NOTE: if these are NOT parameters, then all automatic arrays
-! are placed on the stack, and thus dont take up memory between calls.
-! this halves the amount of memory needed.  
-! any performance penaulty?
-!integer           :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 
 integer :: ndim       ! 2 or 3 dimensions.  ndim = (g_nz==1 ? 2 : 3)
@@ -196,23 +194,31 @@ real*8 :: ints(nints),maxs(nints)
 !
 ! For NON-ALPHA-MODEL
 ! KE = ints(6)
-! KE dissapation:  -mu*ints(10) + ints(3) + ints(8)
+! KE dissapation:  mu*ints(10) + ints(3) + ints(8)
 !      ints(3) = < u,f >     
 !      ints(8) = 0
-!      ints(10) = < u, del u >  (or <u, del**4 u)
+!      ints(10) = < u, del u >  (or <u, -del**4 u)    
 !
 ! for ALPHA-MODEL
 !
-! KE dissapation:  -mu*ints(10) + ints(3) + ints(8)
+! KE dissapation:  mu*ints(10) + ints(3) + ints(8)
 !      ints(10) = < u_x,u_x >
 !      ints(3) = < u,f' >           Helmholz(f')=f
 !      ints(8) = < u,div(tau)' >
 !
 ! E-alpha = ints(6) + .5*alpha**2 ints(2)
-! E-alpha dissapation =   mu*ints(10) + ints(9) + mu*alpha**2ints(1)
+! E-alpha dissapation =   mu*ints(10) + ints(9) - mu*alpha**2ints(1)
 !      ints(9) = < u,f >
 !      ints(1)= < u_xx,u_xx>
 !  
+! Note: we are going to change the forcing so that it always appears
+! on the RHS as just f.  Then:
+!    KE dissapation term:              <u,f>
+!    E_alpha term:          <u,H f > = <u,f> + alpha**2 <uxx,f>
+!   so make ints(3) = <u,f>
+!           ints(9) = <uxx,f>
+!
+!
 ! These quantities are computed in the timestep
 ! routine, at the current time T:
 !
@@ -222,7 +228,7 @@ real*8 :: ints(nints),maxs(nints)
 ! These quantities computed as the RHS is computed
 ! and thus the data is at the prevous timestep  T-1:
 ! 
-! ints(1) = < u_xx,u_xx >
+! ints(1) = < u_xx,u_xx >   (or < u_xx, -del**4 u>)
 ! ints(2) = < u_x,u_x >   
 ! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
 !                    non-alpha-mode: F=f.  Alpha model F=f'
@@ -232,7 +238,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < u,f >  (alpha model only)
-! ints(10) = < u, del u >   diffusion (or hyper diffusion) term
+! ints(10) = < u, del u >   diffusion (or <u,-del**4 u>)
 ! maxs(5) = max vorticity
 !
 !
@@ -244,18 +250,19 @@ real*8 :: ints(nints),maxs(nints)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! for the shallow water model, we modify the above slightly:
-! ints(1) = < h u_xx,del**8 u >   
+! ints(1) = < h u_xx,-del**4 u >   
 ! ints(2) = < h u_x,u_x >   
 ! ints(5) = .5 < h u , u >                 KE
 ! ints(6) = .5 < h u , u >  + g H^2        KE+PE
-! ints(8) = < uH,div(tau)' >   (alpha model only)
-! ints(10) = < H u, del**8 u >   hyper diffusion term
+! ints(8) = < uH,div(tau)' >   (alpha model only. expensive to compute)  
+!                              
+! ints(10) = < H u, -del**4 u >   hyper diffusion term
 !
 ! E = ints(6)
 ! dE/dt = mu*ints(10)   + ints(8)
 !
 ! E_alpha = ints(6) + .5*alpha**2 ints(2)
-! E_alpha dissapation: mu*ints(10) + mu*alpha**2 * ints(1)
+! E_alpha dissapation: mu*ints(10) - mu*alpha**2 * ints(1)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

@@ -1,6 +1,6 @@
 
 range=.0:.25:75;
-name='../src/sht/rune_5000_'
+name='../src/sht/runa_5000_'
 
 
 mkpr=0;            % make ps and jpeg files

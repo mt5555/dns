@@ -69,12 +69,12 @@ do wn=1,NUMBANDS
       if (z_imcord(i)==0) xfac=xfac/2
       ener(wn)=ener(wn)+.5*xfac*(Qhat(k,i,j,1)**2+Qhat(k,i,j,2)**2+Qhat(k,i,j,3)**2)
    enddo
+enddo
 #ifdef USE_MPI
    temp=ener
    call MPI_allreduce(temp,ener,NUMBANDS,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
 !   call MPI_allreduce(temp,ener,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
-enddo
 
 
 do wn=1,NUMBANDS

@@ -189,7 +189,7 @@ do n=1,ndim
       rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,1)*d1(i,j,k) 
 
       ! Q,d1,d2 are in cache, so we can do these sums for free?
-      ke_diss=ke_diss - Q(i,j,k,n)*d2(i,j,k)
+      ke_diss=ke_diss + Q(i,j,k,n)*d2(i,j,k)
       ke_diss2=ke_diss2 + d1(i,j,k)**2
       gradu_diss=gradu_diss + d2(i,j,k)**2
       if (n==2) then  ! dv/dx, part of vor(3)
@@ -214,7 +214,7 @@ do n=1,ndim
 
       rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,2)*d1(i,j,k) 
 
-      ke_diss=ke_diss - Q(i,j,k,n)*d2(i,j,k)
+      ke_diss=ke_diss + Q(i,j,k,n)*d2(i,j,k)
       ke_diss2=ke_diss2  + d1(i,j,k)**2
       gradu_diss=gradu_diss + d2(i,j,k)**2
       if (n==1) then  ! du/dy part of vor(3)
@@ -240,7 +240,7 @@ do n=1,ndim
 
       rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,3)*d1(i,j,k) 
 
-      ke_diss=ke_diss - Q(i,j,k,n)*d2(i,j,k)
+      ke_diss=ke_diss + Q(i,j,k,n)*d2(i,j,k)
       ke_diss2=ke_diss2 + d1(i,j,k)**2
       gradu_diss=gradu_diss + d2(i,j,k)**2
       if (n==1) then  ! du/dz part of vor(2)
@@ -277,6 +277,7 @@ if (compute_ints==1) then
    ! ints(8) = < u,div(tau)' >   (alpha model only)
    ! ints(9)  = < u,f >  (alpha model only)
    ints(10)=ke_diss/g_nx/g_ny/g_nz     ! u dot laplacian u
+
 endif
 
 call wallclock(tmx2)

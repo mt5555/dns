@@ -310,8 +310,8 @@ enddo
 
 ! hyper viscosity and dealias:
 !
-! use gradu to store del**8 U to compute viscous KE dissapation
-! use gradv to store del**2 U to compute viscous KE dissapation (for alpha)
+! use gradu to store -del**4 U to compute viscous KE dissapation
+! use gradv to store del U to compute viscous KE dissapation (for alpha)
 gradu=0
 do j=ny1,ny2
    jm=abs(jmcord(j))
@@ -323,16 +323,18 @@ do j=ny1,ny2
          rhs(i,j,2)=0
          rhs(i,j,3)=0
       else
-!        xfac=-mu* (im*im + jm*jm )
-         xfac=((im*im + jm*jm )*pi2_squared)
+         ! laplacian  del U
+         xfac=-((im*im + jm*jm )*pi2_squared)
          gradv(i,j,1)=xfac*Qhat(i,j,1)
          gradv(i,j,2)=xfac*Qhat(i,j,2)
 
-         xfac=xfac**4
+         ! -del**4 
+         xfac=-(xfac**4)
          gradu(i,j,1)=xfac*Qhat(i,j,1)
          gradu(i,j,2)=xfac*Qhat(i,j,2)
 
-         xfac=-mu*xfac
+         ! - mu del**8
+         xfac=mu*xfac
          rhs(i,j,1)=rhs(i,j,1) + xfac*Qhat(i,j,1)
          rhs(i,j,2)=rhs(i,j,2) + xfac*Qhat(i,j,2)
       endif
@@ -349,11 +351,12 @@ if (compute_ints==1) then
    do i=nx1,nx2
       ke_diss = ke_diss + (Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &
                         + Q(i,j,3)*Q(i,j,2)*gradu(i,j,2)) 
-      gradu_diss = gradu_diss + (Q(i,j,3)*Q(i,j,1)*gradv(i,j,1) &
-                        + Q(i,j,3)*Q(i,j,2)*gradv(i,j,2)) 
+      gradu_diss = gradu_diss + (Q(i,j,3)*gradu(i,j,1)*gradv(i,j,1) &
+                        + Q(i,j,3)*gradu(i,j,2)*gradv(i,j,2)) 
    enddo
    enddo
 endif
+
 
 ! apply b.c. to rhs:
 call bc_rhs(rhs)

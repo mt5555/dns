@@ -16,7 +16,7 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 tmx1,tmx2,del,lambda,H,ke_diss
+real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
@@ -148,7 +148,7 @@ if (itime<5 .and. screen_dt/=0) doit_screen=.true.
 !
 if (doit_screen) then
    call print_message("")
-   write(message,'(a,f9.5,a,i5,a,f9.5,a,f6.0,l)') 'time=',time,'(',itime,')  next output=',time_target, &
+   write(message,'(a,f9.5,a,i6,a,f9.5,a,f6.0,l)') 'time=',time,'(',itime,')  next output=',time_target, &
       '  LSF minutes left: ',maxs(8),enable_lsf_timelimit
    call print_message(message)	
 
@@ -162,14 +162,15 @@ if (doit_screen) then
            '   max(vor)',maxs(5)
    call print_message(message)	
 
-   ke_diss = mu*ints(10)
+   ke_diss = mu*ints(10)  
    ! 
    ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
    ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
    !       < u    u  > = (1/3)  || u ||^2
    !
-   if (mu>0 .and. ndim>2) then
+   if (mu>0 .and. ndim>2 .and. ke_diss<0) then
       lambda=sqrt(  5*(2*ints(6))/ints(2)  )
+      epsilon=-ke_diss
       write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6))/mu, &
            '  R=',1/mu
       call print_message(message)	
@@ -178,14 +179,14 @@ if (doit_screen) then
       ! K. microscale
       ! eta = (mu^3/epsilon)^.25
       ! epsilon = delke_tot
-      eta = (mu**3 / (ke_diss))**.25
+      eta = (mu**3 / epsilon)**.25
       write(message,'(a,3f13.4)') 'mesh spacing(eta): ',&
            delx/eta,dely/eta,delz/eta
       call print_message(message)	
       
       !eddy turn over time
       ! 
-      ett=2*ke1/ke_diss
+      ett=2*ke1/epsilon
       write(message,'(a,3f13.4)') 'eddy turnover time: ',ett
       call print_message(message)	
    endif
@@ -199,9 +200,9 @@ if (doit_screen) then
    call print_message(message)	
 
    write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
-        -ke_diss-mu*alpha_value**2*ints(1),&
+        ke_diss-mu*alpha_value**2*ints(1),&
         ' f=',ints(9),'                      tot=',&
-        -ke_diss-mu*alpha_value**2*ints(1) + ints(9)
+        ke_diss-mu*alpha_value**2*ints(1) + ints(9)
    call print_message(message)	
    endif
 
@@ -214,8 +215,8 @@ if (doit_screen) then
    endif
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
-     'd/dt(ke) vis=',-ke_diss,' f=',ints(3),' alpha=',ints(8),&
-     ' total=',(-ke_diss+ints(3)+ints(8))
+     'd/dt(ke) vis=',ke_diss,' f=',ints(3),' alpha=',ints(8),&
+     ' total=',(ke_diss+ints(3)+ints(8))
    call print_message(message)	
 endif
 
