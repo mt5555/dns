@@ -5,11 +5,13 @@
 
 %ts=input('time=? ');
 
-range=0:.1:150.0 ;
+range=50:10:150.0 ;
 %name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='/data/vxpair/vx2048c';
-name='/ccs/taylorm/dns/src/vxpair/vx4096d';
+%name='/ccs/taylorm/dns/src/vxpair/vx4096d';
+name='/scratch2/taylorm/vx12288b/vx12288b';
+
 
 
 usefig=1;
@@ -51,7 +53,7 @@ for i=range
       vxline_y=[vxline_y , tracer(nt_ins+1:nt,2)];
     end
 
-    if (0)     
+    if (1)     
       figure(1); clf;
       plot(tracer(1:nt_ins,1),tracer(1:nt_ins,2))
       hold on;   

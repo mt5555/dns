@@ -1,7 +1,10 @@
 #/bin/csh -f
 
-cd ../src
+#cd ../src
 set refin=benchmark1.inp
+set benchdir=~/dns/benchmark
+set exe=`pwd`/dns
+echo $exe
 
 if ($#argv != 3) then
    echo " run a NxNxN simulation on 'ncpus' for ndelt timesteps "
@@ -12,19 +15,23 @@ endif
 
 
 set ncpus = $2
-set command = ../src/dns
+set command = $exe
 if ($ncpus > 0) then
-#   set command = "mpirun.lam -np $ncpus ../src/dns"
-   set command = "mpirun -np $ncpus ../src/dns"
+   #set command = "mpirun.lam -np $ncpus $exe"
+   set command = "mpirun -np $ncpus $exe"
    if (`uname` == OSF1) then
-      set command = "prun -n $ncpus ../src/dns"
+      #set command = "prun -n $ncpus $exe"
+
+      set command = "/users/taylorm/liblampi/bin/mpirun -np $ncpus $exe"
+      setenv MPI_VERSION lampi
+
    endif
    if (`hostname` == brain) then
-        set command = "mpirun -np $ncpus -npn 2 ../src/dns"
-#       set command = "mpirun -np $ncpus -npn 1 ../src/dns"
+        set command = "mpirun -np $ncpus -npn 2 $exe"
+        #set command = "mpirun -np $ncpus -npn 1 $exe"
    endif
    if (`hostname` == node001) then
-        set command = "/home/gmpi.pgi/bin/mpirun -np $ncpus  ../src/dns"
+        set command = "/home/gmpi.pgi/bin/mpirun -np $ncpus  $exe"
    endif
    echo $command
 else
@@ -34,7 +41,7 @@ endif
 
 ./gridsetup.py 1 1 $ncpus $1 $1 $1  2 2 0
 make dns
-cd ../benchmark
+cd $benchdir
 sed s/NDELT/$3/ step.inp.sed > benchmark.inp
 $command -i benchmark.inp
 
