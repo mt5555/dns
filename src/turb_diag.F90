@@ -208,3 +208,115 @@ end subroutine
 
 
 
+
+
+subroutine iso_stats(Q,PSI,work,work2)
+!
+! compute random isotropic grid data, take the FFT and then
+! compute stats for the coefficients.
+!
+use params
+use mpi
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: PSI(nx,ny,nz,n_var)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+! local variables
+real*8 :: alpha,beta
+integer km,jm,im,i,j,k,n,wn,ierr,nb
+integer,allocatable :: seed(:)
+integer,parameter :: NUMBANDS=100
+real*8 xw,enerb(NUMBANDS),enerb_target(NUMBANDS),ener,xfac,theta
+real*8 enerb_work(NUMBANDS)
+character(len=80) message
+
+integer :: trys,num_trys=100
+integer,parameter :: nbin=100
+real*8 :: bindel=.2e-5
+real*8 :: count(-nbin:nbin,-3:3,-3:3,-3:3)
+
+count=0
+
+!
+! 
+!   g_xcord(i)=(i-1)*delx	
+
+!random vorticity
+
+! set the seed - otherwise it will be the same for all CPUs,
+! producing a bad initial condition
+call random_seed(size=k)
+allocate(seed(k))
+call random_seed(get=seed)
+seed=seed+my_pe
+call random_seed(put=seed)
+deallocate(seed)
+
+if (initial_live_procs>1) then
+   call abort("iso stats requires only 1 cpu")
+endif
+
+do trys=1,num_trys
+
+do n=1,3
+do j=ny1,ny2
+do k=nz1,nz2
+   call gaussian(PSI(nx1,j,k,n),nx2-nx1+1)
+enddo
+enddo
+enddo
+
+alpha=0
+beta=1
+do n=1,3
+   call helmholtz_periodic_inv(PSI(1,1,1,n),work,alpha,beta)
+enddo
+call vorticity(Q,PSI,work,work2)
+
+
+enerb=0
+do n=1,3
+   call fft3d(Q(1,1,1,n),work) 
+   do k=nz1,nz2
+      km=kmcord(k)
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            xw=sqrt(real(km**2+jm**2+im**2))
+            if (xw<3.5) then
+               nb=nint(Q(i,j,k,n)/bindel)
+               if (nb>100) nb=100
+               if (nb<-100) nb=-100
+               count(nb,im,jm,km)=count(nb,im,jm,km)+1
+
+               xfac = (2*2*2)
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+               
+               nb=nint(xw)
+               enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
+            endif
+         enddo
+      enddo
+   enddo
+enddo
+
+print *,'try=',trys,num_trys
+do nb=1,3
+   print *,nb,enerb(nb)
+enddo
+
+enddo
+
+do i=-nbin,nbin
+   write(*,'(i10,3f10.5)') i,(count(i,1,1,1),n=1,3)
+enddo
+
+stop
+end subroutine
+

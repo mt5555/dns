@@ -628,6 +628,8 @@ if (sdata=='none') then
    forcing_type=0
 else if (sdata=='iso12') then
    forcing_type=1
+else if (sdata=='iso12w') then
+   forcing_type=2
 else 
    call abort("invalid forcing type specified on line 4 on input file")
 endif
@@ -810,6 +812,8 @@ if (sdata=='none') then
    forcing_type=0
 else if (sdata=='iso12') then
    forcing_type=1
+else if (sdata=='iso12w') then
+   forcing_type=2
 else 
    call abort("invalid forcing type specified on line 4 on input file")
 endif

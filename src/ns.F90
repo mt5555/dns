@@ -75,7 +75,7 @@ endif
 
 
 ! stage 1
-call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2)
+call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2,1)
 
 do n=1,3
    do j=1,ny_2dz
@@ -97,7 +97,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
 
 do n=1,3
    do j=1,ny_2dz
@@ -114,7 +114,7 @@ do n=1,3
 enddo
 
 ! stage 3
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
 
 
 do n=1,3
@@ -131,7 +131,8 @@ do n=1,3
 enddo
 
 ! stage 4
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2,4)
+
 
 do n=1,3
    do j=1,ny_2dz
@@ -170,7 +171,7 @@ end subroutine
 
 
 
-subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p)
+subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p,rkstage)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -194,7 +195,7 @@ implicit none
 
 ! input
 real*8 time
-integer compute_ints
+integer compute_ints,rkstage
 
 ! input, but data can be trashed if needed
 real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
@@ -417,6 +418,19 @@ endif
 ! and overwrite Q (used for work arrays)
 call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,f_diss,a_diss,normuf)
 #else
+
+!
+! temporary, until we get Pope's forcing?
+!
+! white in time - so pick a new random force at beginning of
+! each time step.  
+!
+
+if (forcing_type==2 .and. rkstage==4) then
+   call sforcing_random12(rhs,Q,f_diss,1)  ! compute new forcing function
+   call sforcing_random12(rhs,Q,f_diss,0)  ! apply it
+endif
+
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
 #endif
 

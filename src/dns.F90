@@ -30,6 +30,7 @@ call init_mpi_comm3d()
 
 call init_model()
 
+!call iso_stats(Q,Qhat,work1,work2)
 !write(message,'(a)') 'Running some tests'
 !call print_message(message)
 !call test           ! optional testing  routines go here

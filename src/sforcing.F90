@@ -19,6 +19,8 @@ real*8 :: tau
 contains
 
 
+
+
 subroutine sforce(rhs,Qhat,f_diss)
 !
 ! Add a forcing term to rhs, in spectral space.
@@ -29,8 +31,11 @@ real*8 :: Qhat(*)
 real*8 :: rhs(*)
 real*8 :: f_diss
 if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss)
+!if (forcing_type==2) call sforcing_random12(rhs,Qhat,f_diss,0)
 
 end subroutine
+
+
 
 
 subroutine gforce(Q,rhs,rhsz,q4,q4z,work,f_diss)
@@ -86,10 +91,22 @@ real*8 :: rhs(g_nz2,nslabx,ny_2dz,3)
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,xfac,f_diss,tauf
 real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)
-
+character(len=80) :: message
 
 if (0==init_sforcing) then
    call sforcing_init()
+   if (init_cond_subtype==1) then
+      tau=25
+   else if (init_cond_subtype==2) then
+      tau=1
+   else if (init_cond_subtype==3) then
+      tau=500
+   else
+      tau=5
+   endif
+   write(message,'(a,f8.2)') 'Forcing relaxation parameter tau=',tau
+   call print_message(message)
+
 endif
 if (ntot==0) return
 
@@ -160,6 +177,9 @@ end subroutine
 
    
 subroutine sforcing_init
+!
+! build data structure of modes with wave number 0<k<2.5
+!
 use params
 use mpi
 implicit none
@@ -170,17 +190,6 @@ character(len=80) :: message
 
 init_sforcing=1
 
-   if (init_cond_subtype==1) then
-      tau=25
-   else if (init_cond_subtype==2) then
-      tau=1
-   else if (init_cond_subtype==3) then
-      tau=500
-   else
-      tau=5
-   endif
-   write(message,'(a,f8.2)') 'Forcing relaxation parameter tau=',tau
-   call print_message(message)
 
    do n=1,NUMBANDS
       wnforcing(n)%n=0
@@ -254,6 +263,188 @@ if (ntot==0) call MPI_Comm_free(comm_sforcing,ierr)
 
 
 end subroutine
+
+
+
+
+
+
+
+
+subroutine sforcing_random12(rhs,Qhat,f_diss,new_f)
+!
+! Add a forcing term to rhs.
+! Random, isotropic, homogenious in first 2 wave nubmers
+!
+! if new_f=0, add previously computed forcing stored in rmodes() into RHS. 
+! if new_f=1, compute a new forcing ONLY, store in rmodes()
+!
+use params
+use mpi
+implicit none
+integer :: new_f
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+integer km,jm,im,i,j,k,n,wn,ierr
+real*8 xw,xfac,f_diss,tauf
+real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)
+
+real*8,save :: rmodes(0:2,0:2,0:2,3)       ! value at time tmod
+real*8,save :: rmodes_old(0:2,0:2,0:2,3)   ! value at time tmod_old
+real*8,save :: tmod,tmod_old
+real*8,save :: tscale=.01
+
+real*8 :: R(5*5*5,3,2),Rr,Ri
+real*8 :: psix_r(3),psix_i(3)
+real*8 :: psiy_r(3),psiy_i(3)
+real*8 :: psiz_r(3),psiz_i(3)
+
+if (0==init_sforcing) then
+   call sforcing_init()
+   rmodes=0
+   tmod=0
+
+
+   do wn=1,NUMBANDS
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      if (abs(z_imcord(i))>2 .or. abs(z_jmcord(j))>2 .or. abs(z_kmcord(k))>2)  then 
+           call abort("Index error in sforcing_random12")
+      endif
+   enddo
+   enddo
+endif
+
+if (ntot==0) return
+!
+! only CPUS which belong to "comm_sforcing" beyond this point!
+!
+
+!
+! rmodes is at time  tmod
+!
+
+
+
+!
+! Compute a new forcing function?  
+!
+if (new_f==1) then
+rmodes=0
+call gaussian(R,5*5*5*3*2)
+
+k=0
+do km=-2,2 
+do jm=-2,2
+do im=-2,2
+   k=k+1
+   !
+   ! Choose R gaussian, theta uniform from [0..1]
+   ! vorticty = (R1 + i R2)  exp(im*2pi*x) * exp(jm*2pi*y) * exp(km*2pi*z) 
+   !
+   ! convert from vorticity to stream function, then take curl:
+   ! remove 1 factor of 2*pi from laplacian and derivative, since they candel
+   xfac = (im**2 + jm**2 + km**2)
+   if (xfac>0) xfac=1/(-2*pi*xfac)
+   if (delt>0) xfac=xfac/sqrt(delt)
+   xfac=xfac/30
+   
+   do n=1,3
+      psix_r(n) = -im*R(k,n,2)*xfac
+      psix_i(n) =  im*R(k,n,1)*xfac
+      psiy_r(n) = -jm*R(k,n,2)*xfac
+      psiy_i(n) =  jm*R(k,n,1)*xfac
+      psiz_r(n) = -km*R(k,n,2)*xfac
+      psiz_i(n) =  km*R(k,n,1)*xfac
+   enddo
+
+   !
+   !   
+   ! convert to sine & cosine modes:
+   !
+   ! (R1 + i R2) (cosx + i sinx)  (cosy + i siny)  (cosz + i sinz)  
+   ! = (real parts only:)
+   !   R1  cosx cosy cosz                      R1 (1,1,1)
+   ! i R2  cosx cosy sinz  i                  -R2 (1,1,-1) sign(km) 
+   ! i R2  cosx siny cosz  i                  -R2 (1,-1,1) sign(jm)
+   !   R1  cosx siny sinz  i**2               -R1 (1,-1,-1) sign(km*jm)
+   ! i R2  sinx cosy cosz  i                  -R2 (-1,1,1) sign(im) 
+   !   R1  sinx cosy sinz  i**2               -R1 (-1,1,-1) sign(im*km)
+   !   R1  sinx siny cosz  i**2               -R1 (-1,-1,1) sign(im*jm)
+   ! i R2  sinx siny sinz  i**3                R2 (-1,-1,-1) sign(im*jm*km)
+   !  
+   ! 
+   ! vor(1) = w_y - v_z
+   ! vor(2) = u_z - w_x 
+   ! vor(3) = v_x - u_y
+
+   do n=1,3
+      if (n==1) then
+         Rr = psiy_r(3) - psiz_r(2)
+         Ri = psiy_i(3) - psiz_i(2)
+      else if (n==2) then
+         Rr = psiz_r(1) - psix_r(3)
+         Ri = psiz_i(1) - psix_i(3)
+      else if (n==3) then
+         Rr = psix_r(2) - psiy_r(1)
+         Ri = psix_i(2) - psiy_i(1)
+      endif
+
+      rmodes( im, jm, km,n) = rmodes( im, jm, km,n) + Rr 
+      rmodes( im, jm,-km,n) = rmodes( im, jm,-km,n) - Ri*sign(1,km) 
+      rmodes( im,-jm, km,n) = rmodes( im,-jm, km,n) - Ri*sign(1,jm) 
+      rmodes( im,-jm,-km,n) = rmodes( im,-jm,-km,n) - Rr*sign(1,jm*km) 
+      rmodes(-im, jm, km,n) = rmodes(-im, jm, km,n) - Ri*sign(1,im)
+      rmodes(-im, jm,-km,n) = rmodes(-im, jm,-km,n) - Rr*sign(1,im*km) 
+      rmodes(-im,-jm, km,n) = rmodes(-im,-jm, km,n) - Rr*sign(1,im*jm) 
+      rmodes(-im,-jm,-km,n) = rmodes(-im,-jm,-km,n) + Ri*sign(1,im*jm*km) 
+   enddo
+
+enddo
+enddo
+enddo
+return
+endif
+
+
+
+
+f_diss=0
+do wn=1,NUMBANDS
+
+   ener(wn)=0
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      rhs(i,j,k,1)=rhs(i,j,k,1) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)
+      rhs(i,j,k,2)=rhs(i,j,k,2) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)
+      rhs(i,j,k,3)=rhs(i,j,k,3) + rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)
+
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      f_diss = f_diss + xfac*( &
+         Qhat(k,i,j,1)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1) +&
+         Qhat(k,i,j,2)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2) +&
+         Qhat(k,i,j,3)*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3) )
+
+
+   enddo
+enddo
+
+
+end subroutine 
+   
+   
+
+
+
+
+
 
 
 

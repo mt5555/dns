@@ -53,33 +53,21 @@ do n=1,3
 enddo
 else if (rantype==1) then
    do n=1,3
-   do k=nz1,nz2,2
+   do k=nz1,nz2
       km=kmcord(k)
-      do j=ny1,ny2,2
+      do j=ny1,ny2
          jm=jmcord(j)
-         do i=nx1,nx2,2
+         do i=nx1,nx2
             im=imcord(i)
             xw=sqrt(real(km**2+jm**2+im**2))
-
             if (xw>=.5 .or. xw<2.5) then
-            xfac = (2*2*2)
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-
-            call random_number(theta)
-            theta=2*pi*theta
-            PSI(i  ,j  ,k  ,n)= cos(theta)*xfac    
-            PSI(i+1,j  ,k  ,n)=-sin(theta)*xfac    
-            PSI(i  ,j+1,k  ,n)=-sin(theta)*xfac    
-            PSI(i+1,j+1,k  ,n)=-cos(theta)*xfac
-            PSI(i  ,j  ,k+1,n)=-sin(theta)*xfac
-            PSI(i+1,j  ,k+1,n)=-cos(theta)*xfac
-            PSI(i  ,j+1,k+1,n)=-cos(theta)*xfac
-            PSI(i+1,j+1,k+1,n)= sin(theta)*xfac
-            
-
-
+               xfac = (2*2*2)
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+               
+               call gaussian(theta,1)
+               PSI(i,j,k,n)=theta/xfac
             endif
          enddo
       enddo
