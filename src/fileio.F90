@@ -229,6 +229,7 @@ integer :: iwave,iwave_max,ierr
 real*8 spec_x(0:g_nx/2)
 real*8 spec_y(0:g_ny/2)
 real*8 spec_z(0:g_nz/2)
+real*8 x
 real*8,allocatable  ::  spectrum(:),spectrum1(:)
 character*80 :: message
 CPOINTER fid
@@ -265,13 +266,13 @@ if (my_pe==io_pe) then
    endif
 
    call cwrite8(fid,time,1)
-   call cwrite8(fid,1+iwave,1)
+   x=1+iwave; call cwrite8(fid,x,1)
    call cwrite8(fid,spectrum,1+iwave)
-   call cwrite8(fid,1+g_nx/2,1)
+   x=1+g_nx/2; call cwrite8(fid,x,1)
    call cwrite8(fid,spec_x,1+g_nx/2)
-   call cwrite8(fid,1+g_ny/2,1)
+   x=1+g_ny/2; call cwrite8(fid,x,1)
    call cwrite8(fid,spec_y,1+g_ny/2)
-   call cwrite8(fid,1+g_nz/2,1)
+   x=1+g_nz/2; call cwrite8(fid,x,1)
    call cwrite8(fid,spec_z,1+g_nz/2)
    call cclose(fid)
 endif
