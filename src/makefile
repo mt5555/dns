@@ -23,13 +23,17 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
+<<<<<<< makefile
+   VENDOR=LAHEY
+=======
    ifeq ($(HOST),brain)
       MPI = -DNDEBUG -DUSE_MPI -I/usr/include
       MPILIB =  -L/usr/lib/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
    #VENDOR=LAHEY
+>>>>>>> 1.149
    #VENDOR=PGI
-   VENDOR=INTEL
+   #VENDOR=INTEL
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9560/bin/lf95
@@ -127,7 +131,7 @@ OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o spectrum.o ellipse.o
 
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
-OPS    = ghostops.o fftops.o test.o integrals.o timecontrol.o tracers.o 
+OPS    = ghostops.o fftops.o test.o integrals.o timecontrol.o tracers.o particles.o 
 FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
@@ -200,10 +204,15 @@ dnsslow:  $(MODEL_SPEC_SLOW)
 splitspec:  splitspec.o fileioc.o
 	$(LINK) -o splitspec splitspec.o fileioc.o
 
+conv:  conv.o $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o conv conv.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+
 analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis analysis.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+
 analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_rms analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+
 analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_isoave analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 

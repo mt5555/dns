@@ -4,6 +4,7 @@ analysis_rms.o: macros.h params.o mpi.o fft_interface.o sforcing.o makefile
 bc.o: macros.h params.o mpi.o ghost.o makefile 
 cases2v.o: macros.h params.o tracers.o bc.o ellipse.o makefile 
 cases3v.o: macros.h params.o mpi.o transpose.o makefile 
+conv.o: macros.h params.o transpose.o makefile 
 dns.o: macros.h params.o mpi.o tracers.o makefile 
 ellipse.o: macros.h params.o mpi.o makefile 
 fft99_interface.o: macros.h makefile 

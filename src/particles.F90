@@ -1,9 +1,9 @@
 #include "macros.h"
-module tracers
+module particles
 use params
 implicit none
 !
-!  Tracers module
+!  Particles module
 !
 !  all cpus have a copy of all particles.  But each particle "belongs"
 !  to one pe, and the value on all other pe's will be 0.  
@@ -202,6 +202,7 @@ if (my_pe==fpe) then
       enddo
       call cclose(fid,ierr)
 
+   endif
 endif
 
 #ifdef USE_MPI
@@ -220,15 +221,7 @@ endif
 end subroutine
 
 
-
-
-
-
-
-
-
-
-subroutine particle_advance(psi,ugrid,rk4stage,time)
+subroutine particle_advance(ugrid,rk4stage,time)
 !
 !  input:  psi  stream function
 !          rk4stage  = 1,2,3,4 to denote which rk4 stage
@@ -263,17 +256,19 @@ use params
 use mpi
 use ghost
 implicit none
-real*8 :: psi(nx,ny)
-real*8 :: ugrid(nx,ny,2)
+real*8 :: ugrid(nx,ny,nz,2)
 integer :: rk4stage
 real*8 :: time
 
 !local
 integer :: i,j,ii,jj,igrid,jgrid
-real*8 :: trhs(2*ndim),c1,c2
-real*8 :: Qint(4,2*ndim)
+integer :: k,kk,kgrid
+real*8 :: Ulocal(ndim),c1,c2
+real*8 :: Q2d(4,4,ndim)
+real*8 :: Q1d(4,ndim)
 real*8 :: xc,yc,tmx1,tmx2
-integer :: jc
+real*8 :: zc,tmx3
+integer :: jc,kc
 integer :: ierr
 
 if (nump==0) return
@@ -297,61 +292,72 @@ else if (rk4stage==4) then
 endif
 
 
-do j=inty1,inty2
-do i=intx1,intx2
-      
-      ugrid(i,j,1)=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
-           (psi(i,j+2)-psi(i,j-2))/12          )/dely
-      
-      ugrid(i,j,2)=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
-           (psi(i+2,j)-psi(i-2,j))/12          )/delx
-      
-enddo
-enddo
 
-call ghost_update_x(ugrid,2)
-call ghost_update_y(ugrid,2)
-
-
-
-
-! interpolate psi to position in particle_tmp
+! interpolate u to position in particle_tmp
 do i=1,nump
    ! find cpu which owns the grid point particle(i,:)
    if (xcord(intx1)<=particle_tmp(i,1) .and. particle_tmp(i,1)<xcord(intx2)+delx .and. &
-       ycord(inty1)<=particle_tmp(i,2) .and. particle_tmp(i,2)<ycord(inty2)+dely ) then
+       ycord(inty1)<=particle_tmp(i,2) .and. particle_tmp(i,2)<ycord(inty2)+dely .and. &
+       zcord(intz1)<=particle_tmp(i,3) .and. particle_tmp(i,3)<zcord(intz2)+delz ) then
 
-      ! find igrid,jgrid so that point is in box:
+      ! find igrid,jgrid,kgrid so that point is in box:
       ! igrid-1,igrid,igrid+1,igrid+2   and jgrid-1,jgrid,jgrid+1,jgrid+2
+      ! and kgrid-1,kgrid,kgrid+1,kgrid+2   
       igrid = intx1 + floor( (particle_tmp(i,1)-xcord(intx1))/delx )
       jgrid = inty1 + floor( (particle_tmp(i,2)-ycord(inty1))/dely )
+      kgrid = intz1 + floor( (particle_tmp(i,3)-zcord(intz1))/delz )
       ASSERT("advance_particles(): igrid interp error",igrid<=intx2)
       ASSERT("advance_particles(): jgrid interp error",jgrid<=inty2)
+      ASSERT("advance_particles(): kgrid interp error",kgrid<=intz2)
 
-
-      ! interpolate trhs
+      ! interpolate Ulocal
+      ! 3d --> 2d y-z planes --> 1d z-lines --> point
+      do kk=1,4
       do jj=1,4
          ! interpolate xcord(igrid-1:igrid+2) to xcord=particle(i,1)
+	 ! onto 2-d planes in y-z
          ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
          xc = 1 + (particle_tmp(i,1)-xcord(igrid))/delx
          jc = jgrid-2+jj
+         kc = kgrid-2+kk
+         !loop over velocity components
          do j=1,ndim
-            call interp4(ugrid(igrid-1,jc,j),ugrid(igrid,jc,j),&
-                ugrid(igrid+1,jc,j),ugrid(igrid+2,jc,j),&
-                xc,Qint(jj,j))
+            call interp4(ugrid(igrid-1,jc,kc,j),ugrid(igrid,jc,kc,j),&
+                ugrid(igrid+1,jc,kc,j),ugrid(igrid+2,jc,kc,j),&
+                xc,Q2d(jj,kk,j))
          enddo
       enddo
-      ! interpolate ycord(jgrid-1:jgrid+2) to ycord=particle(i,2)
-      ! data:  Qint(1:4,j)
-      yc = 1 + (particle_tmp(i,2)-ycord(jgrid))/dely
-      do j=1,ndim
-         call interp4(Qint(1,j),Qint(2,j),Qint(3,j),Qint(4,j),yc,trhs(j))
       enddo
 
+      do kk=1,4
+         ! interpolate ycord(jgrid-1:jgrid+2) to ycord=particle(j,1)
+	 ! onto lines in z
+         ! data  ugrid(igrid-1:igrid+2, jgrid-2+jj,:) 
+         yc = 1 + (particle_tmp(i,2)-ycord(jgrid))/dely
+         !loop over velocity components
+         do j=1,ndim
+         call interp4(Q2d(1,kk,j),Q2d(2,kk,j),Q2d(3,kk,j),Q2d(4,kk,j),yc,Q1d(kk,j))
+         enddo
+      enddo
+
+      ! interpolate zcord(kgrid-1:kgrid+2) to zcord=particle(k,2)
+      ! data:  Q1d(1:4,j)
+         zc = 1 + (particle_tmp(i,2)-zcord(kgrid))/delz
+         !loop over velocity components
+      do j=1,ndim
+         call interp4(Q1d(1,j),Q1d(2,j),Q1d(3,j),Q1d(4,j),zc,Ulocal(j))
+      enddo
+
+      !for inertial particles, change this step to use appropriate drag law
+      ! first ndim data are positions
+      ! next ndim data are velocities
+      !update velocity first
       ! advance
       do j=1,ndim
-         particle(i,j)=particle(i,j)+c1*trhs(j)
-         particle_tmp(i,j)=particle_old(i,j)+c2*trhs(j)
+         particle(i,j+ndim)=Ulocal(j)
+         particle_tmp(i,j+ndim)=Ulocal(j)
+         particle(i,j)=particle(i,j)+c1*particle(i,j+ndim)
+         particle_tmp(i,j)=particle_old(i,j)+c2*particle(i,j+ndim)
       enddo
    else
       ! point does not belong to my_pe, set position to -inf
