@@ -296,9 +296,9 @@ integer :: model_spec
 integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
 real*8 ener(numb_max),temp(numb_max),Qdel(3)
-real*8,allocatable :: rmodes(:,:,:,:)
-real*8,allocatable :: rmodes2(:,:,:,:)
-real*8,allocatable :: cmodes(:,:,:,:,:)
+real*8,allocatable,save :: rmodes(:,:,:,:)
+real*8,allocatable,save :: rmodes2(:,:,:,:)
+real*8,allocatable,save :: cmodes(:,:,:,:,:)
 real*8 RR(3),II(3)
 
 character(len=80) :: message
@@ -370,9 +370,11 @@ if (ntot==0) return
 !  
 tau_inv=sqrt(g_u2xave)/.5
 
-allocate(rmodes(-numb:numb,-numb:numb,-numb:numb,3))
-allocate(rmodes2(-numb:numb,-numb:numb,-numb:numb,3))
-allocate(cmodes(2,-numb:numb,-numb:numb,-numb:numb,3))
+if (.not. allocated(rmodes)) then
+   allocate(rmodes(-numb:numb,-numb:numb,-numb:numb,3))
+   allocate(rmodes2(-numb:numb,-numb:numb,-numb:numb,3))
+   allocate(cmodes(2,-numb:numb,-numb:numb,-numb:numb,3))
+endif
 
 
 f_diss=0

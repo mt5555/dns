@@ -107,8 +107,8 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: schmidt_table(5)
-integer :: n,k
+real*8 :: schmidt_table(5),xfac
+integer :: n,k,i,j,im,jm,km
 
 schmidt=0
 passive_type=0
@@ -142,6 +142,32 @@ enddo
 do n=np1,np2
    if (passive_type(n)==0) call passive_gaussian_init(Q,work1,work2,n)
    if (passive_type(n)==1) call passive_KE_init(Q,work1,work2,n)
+
+
+   ! filter
+   call fft3d(Q(1,1,1,n),work1)
+   call fft_filter_dealias(Q(1,1,1,n))
+   ! laplacian smoothing:
+   ! du/dt  =  laplacian(u)
+   !  u_k = ((1 - k**2))**p  u_k    p = number of timesteps
+   do k=nz1,nz2
+      km=abs(kmcord(k))
+      do j=ny1,ny2
+         jm=abs(jmcord(j))
+         do i=nx1,nx2
+            im=abs(imcord(i))
+            
+            xfac=(im*im+jm*jm+km*km)
+            xfac=xfac/(g_nx*g_nx + g_ny*g_ny + g_nz*g_nz)/4
+            xfac=(1-.25*xfac)**5
+
+            Q(i,j,k,n)=Q(i,j,k,n)*xfac
+         enddo
+      enddo
+   enddo
+   call ifft3d(Q(1,1,1,n),work1)
+
+
 enddo
 
 
@@ -268,15 +294,19 @@ do n=np1,np2
    call input1(Q(1,1,1,n),work1,work2,null,io_pe,.true.,-1)  
    call rescale_e(Q(1,1,1,n),work1,ener,enerb,enerb_target,NUMBANDS,1)
    ! convert to 0,1:
-   ! filter
-   call fft3d(Q(1,1,1,n),work1)
-   call fft_filter_dealias(Q(1,1,1,n))
-   call ifft3d(Q(1,1,1,n),work1)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (Q(i,j,k,n)<0) then
+         Q(i,j,k,n)=0
+      else
+         Q(i,j,k,n)=1
+      endif
+   enddo
+   enddo
+   enddo
 
-   ! laplacian smoothing
 enddo
-
-
 
 deallocate(enerb_target)
 deallocate(enerb)
