@@ -65,6 +65,7 @@ call MPI_Barrier(comm_3d,ierr)
 o_nx=g_nx+1
 o_ny=g_ny+1
 o_nz=g_nz+1
+if (g_nz==1) o_nz=1
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -60,9 +60,9 @@ delgam = delalf/km         !SO ALL PERIODS HAVE TOTAL CIRC=1
 xscale=2
 yscale=4
 
-do i=nx1,nx2
+k=1
 do j=ny1,ny2
-do k=nz1,nz2
+do i=nx1,nx2
   
    xval=xscale*(xcord(i)-.5)         ! x ranges from -1 .. 1
    if (ycord(j)<=.5) then
@@ -89,6 +89,14 @@ do k=nz1,nz2
 
    Q(i,j,k,1) = 5*uu*delgam/(pi2*xscale)
    Q(i,j,k,2) = 5*vv*delgam/(pi2*yscale)
+enddo
+enddo
+
+do k=nz1+1,nz2
+do i=nx1,nx2
+do j=ny1,ny2
+   Q(i,j,k,1)=Q(i,j,nz1,1)	
+   Q(i,j,k,2)=Q(i,j,nz1,2)	
 enddo
 enddo
 enddo

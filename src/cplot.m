@@ -1,36 +1,45 @@
 fidu=fopen('test-0-0-0-0000.0000.data');
-%fidvor=fopen('test0000.5000.vor','r');
-fidvor=fopen('test0020.0000.vor','r');
 
 %
 %########################################################################
 %#  plotting output file
 %########################################################################
-time=fread(fidvor,1,'float64')
 
-data=fread(fidvor,3,'float64');
-nx=data(1);
-ny=data(2);
-nz=data(3);
+%ts=input('time=? ');
 
-x=fread(fidvor,nx,'float64');
-y=fread(fidvor,ny,'float64');
-z=fread(fidvor,nz,'float64');
+range=0:50;
 
-q = fread(fidvor,nx*ny*nz,'float64');
-temp=fread(fidvor,1,'float64')
-fclose(fidvor);
-disp(sprintf('output file:\ntime=%f  dims=%i %i %i',time,nx,ny,nz))
-
-q = reshape(q,nx,ny,nz);
-
-vor = squeeze(q(:,:,1));
-figure(2)
-pcolor(x,y,vor')
-shading interp
-axis square
-
-
+for i=range
+  ts=i;
+  ts = sprintf('%9.5f',10000+ts);
+  ts=ts(2:10);
+  ts=['test',ts,'.vor'];
+  fidvor=fopen(ts,'r');
+  time=fread(fidvor,1,'float64')
+  data=fread(fidvor,3,'float64');
+  nx=data(1);
+  ny=data(2);
+  nz=data(3);
+  
+  x=fread(fidvor,nx,'float64');
+  y=fread(fidvor,ny,'float64');
+  z=fread(fidvor,nz,'float64');
+  
+  q = fread(fidvor,nx*ny*nz,'float64');
+  fclose(fidvor);
+  ts=sprintf('time=%f  %ix%ix%i',time,nx,ny,nz);
+  
+  q = reshape(q,nx,ny,nz);
+  
+  vor = squeeze(q(:,:,1));
+  figure(2)
+  pcolor(x,y,vor')
+  title(ts);
+  shading interp
+  axis square
+  
+end
+return
 
 
 
