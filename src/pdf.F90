@@ -4,7 +4,7 @@ module structf
 implicit none
 
 integer           :: structf_init=0
-integer,parameter :: delta_num_max=10
+integer,parameter :: delta_num_max=16
 integer           :: delta_val(delta_num_max)
 
 ! max range:  10 ... 10
@@ -48,19 +48,51 @@ subroutine init_pdf_module()
 ! Initialize this module.  Set the values of delta to use
 ! for structure fuctions  <u(x+delta)-u(x)>
 !
-! 1, 2, 4, 8 16 32 64 128 256 512 
+! 1, 2, 4, 8 16 32 64 128 256 512 1024 2048  4096 
 !
+use params
 implicit none
 
-integer idel,i
+integer idel,i,numx,numy,numz
+
+delta_val=99999
+delta_val(1)=1
+delta_val(2)=2
+delta_val(3)=3
+delta_val(4)=4
+delta_val(5)=6
+delta_val(6)=8
+delta_val(7)=11
+delta_val(8)=16
+delta_val(9)=23
+delta_val(10)=32
+delta_val(11)=64
+delta_val(12)=128
+delta_val(13)=256
+delta_val(14)=512
+delta_val(15)=1024
+delta_val(16)=2048
+ASSERT("delta_num_max to small. ",16==delta_num_max)
+
+
 do idel=1,delta_num_max
-   delta_val(idel)=2**(idel-1)
+   if (delta_val(idel) < g_nx/2) then
+      numx=idel
+   endif
+   if (delta_val(idel) < g_ny/2) then
+      numy=idel
+   endif
+   if (delta_val(idel) < g_nz/2) then
+      numz=idel
+   endif
 enddo
 
+
+
 do i=1,NUM_SF
-   call init_pdf(SF(i,1),100,.01d0,delta_num_max)
-   call init_pdf(SF(i,2),100,.01d0,delta_num_max)
-   call init_pdf(SF(i,3),100,.01d0,delta_num_max)
+   call init_pdf(SF(i,1),100,.01d0,numx)
+   call init_pdf(SF(i,2),100,.01d0,numy)
+   call init_pdf(SF(i,3),100,.01d0,numz)
 enddo
 call init_pdf(epsilon,100,.001d0,1)
 end subroutine
@@ -160,7 +192,7 @@ implicit none
 real*8 time
 CPOINTER fid
 
-integer i,ierr
+integer i,j,ierr
 character(len=80) message
 real*8 x
 
@@ -177,23 +209,27 @@ enddo
 if (my_pe==io_pe) then
    call cwrite8(fid,time,1)
    ! number of structure functions
-   x=3 ; call cwrite8(fid,x,1)
+   x=NUM_SF ; call cwrite8(fid,x,1)
    do i=1,NUM_SF
       call normalize_and_write_pdf(fid,SF(i,1),SF(i,1)%nbin)   
       call normalize_and_write_pdf(fid,SF(i,2),SF(i,2)%nbin)   
       call normalize_and_write_pdf(fid,SF(i,3),SF(i,3)%nbin)   
-      
-      ! reset PDF's
-      SF(i,1)%ncalls=0
-      SF(i,1)%pdf=0
-      SF(i,2)%ncalls=0
-      SF(i,2)%pdf=0
-      SF(i,3)%ncalls=0
-      SF(i,3)%pdf=0
-      
    enddo
+   ! number of plain pdf's
+   x=1 ; call cwrite8(fid,x,1)
+   call normalize_and_write_pdf(fid,epsilon,epsilon%nbin)   
 endif
 
+
+do i=1,NUM_SF
+do j=1,3
+   ! reset PDF's
+   SF(i,1)%ncalls=0
+   SF(i,1)%pdf=0
+enddo
+enddo
+epsilon%ncalls=0
+epsilon%pdf=0
 
 end subroutine
 
