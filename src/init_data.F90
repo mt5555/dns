@@ -359,7 +359,7 @@ end subroutine
 
 
 
-subroutine init_data_kh_psivor(Q,q1,work1,w)
+subroutine init_data_vxpair(Q,q1,work1,w)
 use params
 use ghost
 implicit none

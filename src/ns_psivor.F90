@@ -358,7 +358,7 @@ do i=intx1,intx2
          ke = ke + .5*(u**2 + v**2)
          vor=vor + w(i,j)
          ensave = ensave + w(i,j)**2
-         ens_diss=ens_diss + w(i,j)*(dxx+dyy)
+         ens_diss=ens_diss + w(i,j)*(mu_x*dxx+mu_y*dyy)
    endif
 
 enddo

@@ -39,14 +39,15 @@ Q=0
 if (restart==1) then
    !call set_byteswap_input(1);
    ! initialize some constants, if needed:
-   if (init_cond==3) call init_data_sht(Q,q1,work1,work2)
+   if (init_cond==3) call init_data_sht(Q,q1,work1,work2)    ! set grav, fcor
+   if (init_cond==4) call init_data_vxpair(Q,q1,work1,work2) ! set xscale, yscale... 
    call init_data_restart(Q,work1,work2)
 else
    if (init_cond==0) call init_data_khblob(Q,q1,work1,work2)
    if (init_cond==1) call init_data_kh(Q,q1,work1,work2)
    if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
    if (init_cond==3) call init_data_sht(Q,q1,work1,work2)
-   if (init_cond==4) call init_data_kh_psivor(Q,q1,work1,work2)
+   if (init_cond==4) call init_data_vxpair(Q,q1,work1,work2)
 endif
 
 if (equations==NS_UVW) then

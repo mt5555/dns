@@ -384,7 +384,7 @@ if (compute_ints==1) then
    !ints(7)
    ints(8)=a_diss/g_nx/g_ny         ! < Hu,div(tau)' >  
    ! ints(9)  = < u,f >  (alpha model only)
-   ints(10)=ke_diss/g_nx/g_ny     ! u dot laplacian u
+   ints(10)=mu*ke_diss/g_nx/g_ny     ! u dot laplacian u
 endif
 
 call wallclock(tmx2)

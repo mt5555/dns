@@ -316,7 +316,7 @@ if (compute_ints==1) then
    ints(7)=ints(2)  ! this is only true for periodic incompressible case
    ! ints(8) = < u,div(tau)' >   (alpha model only)
    ! ints(9)  = < u,f >  (alpha model only)
-   ints(10)=ke_diss/g_nx/g_ny/g_nz
+   ints(10)=mu*ke_diss/g_nx/g_ny/g_nz
 endif
 
 call wallclock(tmx2)

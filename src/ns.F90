@@ -451,7 +451,7 @@ if (compute_ints==1) then
    ints(7)=ensave/g_nx/g_ny/g_nz
    ints(8)=a_diss    
    ints(9)=normuf
-   ints(10)=-ke_diss                   ! <u,u_xx>
+   ints(10)=-mu*ke_diss                   ! <u,u_xx>
 
    maxs(5)=maxvor
 endif

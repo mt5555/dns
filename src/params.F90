@@ -225,7 +225,7 @@ real*8 :: ints(nints),maxs(nints)
 !
 ! For NON-ALPHA-MODEL
 ! KE = ints(6)
-! KE dissapation:  mu*ints(10) + ints(3) + ints(8)
+! KE dissapation:  ints(10) + ints(3) + ints(8)
 !      ints(3) = < u,f >     
 !      ints(8) = 0
 !      ints(10) = < u, del u >  (or <u, -del**4 u)    
@@ -238,7 +238,7 @@ real*8 :: ints(nints),maxs(nints)
 !      ints(8) = < u,div(tau)' >
 !
 ! E-alpha = ints(6) + .5*alpha**2 ints(2)
-! E-alpha dissapation =   mu*ints(10) + ints(9) - mu*alpha**2ints(1)
+! E-alpha dissapation =   ints(10) + ints(9) - mu*alpha**2ints(1)
 !      ints(9) = < u,f >
 !      ints(1)= < u_xx,u_xx>
 !  
@@ -264,12 +264,12 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
 !                    non-alpha-mode: F=f.  Alpha model F=f'
 ! ints(4) = integral of z-component of vorticity
-! ints(5) = helicity  (or: <w,w_xx> enstrophy diffusion)
+! ints(5) = helicity  (or: mu*<w,w_xx> enstrophy diffusion)
 ! ints(6) = .5 < u,u >
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < u,f >  (alpha model only)
-! ints(10) = < u, del u >   diffusion (or <u,-del**4 u>)
+! ints(10) = mu*< u, del u >   diffusion (or mu*<u,-del**4 u>)
 ! maxs(5) = max vorticity
 !
 !
@@ -287,13 +287,13 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(6) = .5 < h u , u >  + g H^2        KE+PE
 ! ints(8) = < uH,div(tau)' >   (alpha model only. expensive to compute)  
 !                              
-! ints(10) = < H u, -del**4 u >   hyper diffusion term
+! ints(10) = mu*< H u, -del**4 u >   hyper diffusion term
 !
 ! E = ints(6)
-! dE/dt = mu*ints(10)   + ints(8)
+! dE/dt = ints(10)   + ints(8)
 !
 ! E_alpha = ints(6) + .5*alpha**2 ints(2)
-! E_alpha dissapation: mu*ints(10) - mu*alpha**2 * ints(1)
+! E_alpha dissapation: ints(10) - mu*alpha**2 * ints(1)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

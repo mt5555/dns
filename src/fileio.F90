@@ -170,7 +170,7 @@ if (doit_screen) then
            '   max(vor)',maxs(5)
    call print_message(message)	
 
-   ke_diss = mu*ints(10)  
+   ke_diss = ints(10)  
    ! 
    ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
    ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
@@ -233,7 +233,7 @@ if (doit_screen) then
    endif
    if (equations==NS_PSIVOR) then
       !multiply by 2 because enstrophy is vor**2, not .5*vor**2
-      ens_diss = 2*mu*ints(5)  
+      ens_diss = 2*ints(5)  
       write(message,'(a,f15.7,a,f15.7)') &
            'total d/dt(w) vis=',delens_tot,'   mu <w,w_xx>= ',ens_diss
       call print_message(message)	
