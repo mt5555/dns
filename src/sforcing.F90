@@ -12,6 +12,7 @@ end type
 integer           :: numb1,numb
 integer,parameter :: numb_max=15
 integer,parameter :: numbs=3         ! max stochastic forcing bands
+real*8            :: FM(numbs)       ! stochastic forcing normalization
 type(wnforcing_d) :: wnforcing(numb_max)
 
 integer,private :: ntot=0
@@ -347,10 +348,16 @@ if (0==init_sforcing) then
    if (forcing_type==2) then
       numb1=1
       numb=2
+      FM(1) = 15   ! choose these so that mu <ux,ux> = .5
+      FM(2) = 15
+      FM(3) = 0
    endif
    if (forcing_type==4) then
       numb1=2
       numb=3
+      FM(1) = 0    ! choose these so that mu <ux,ux> = .5
+      FM(2) = 5
+      FM(3) = 5
    endif
 
    call sforcing_init()
@@ -436,7 +443,6 @@ real*8 :: rmodes(-numbs:numbs,-numbs:numbs,-numbs:numbs,3)
 integer km,jm,im,i,j,k,n,wn,ierr,k2,count,countmax
 real*8 xw,xfac,f_diss
 real*8 :: R(-numbs:numbs,-numbs:numbs,-numbs:numbs,3,2),Rr,Ri
-real*8,save :: FM(numbs)
 real*8 :: psix_r(3),psix_i(3)
 real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
@@ -513,9 +519,6 @@ do im=-numb,numb
       if (delt>0) xfac=xfac/sqrt(delt)
       ! normalize so that < R**2 >   = F1  in wave number 1
       ! normalize so that < R**2 >   = F2  in wave number 2
-      FM(1) = 15
-      FM(2) = 15
-      FM(3) = 15
       if (k2 <= 1.5**2) then
          xfac=xfac*sqrt(FM(1)/180)
       else if (k2 <= 2.5**2)  then
