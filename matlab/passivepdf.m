@@ -7,7 +7,7 @@
 clear all;
 
 
-fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.2000.spdf','r','l');
+fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.0100.spdf','r','l');
 %fid=fopen('../src/temp0000.0000.spdf','r','l');
 
 time=fread(fid,1,'float64');
@@ -24,7 +24,9 @@ for p=1:npmax
    c1=sum(pdf.*bins);
    c2=sum(pdf.*(bins-c1).^2);
    c4=sum(pdf.*(bins-c1).^4);
-%   c2=c2-c1.^2;
+
+%   c2=sum(pdf.*(bins).^2);
+%   c2=c2-c1.^2
    
    
    mx=max(bins - bins.*(pdf==0));
@@ -34,7 +36,7 @@ for p=1:npmax
    plot(bins,pdf)
    ax=axis;
    axis([-.1, 1.1, 0, .06]);
-   xlabel(sprintf('<c^2>=%.4f  K=%.4f ',mn,mx,c2,c4/c2/c2));
+   xlabel(sprintf('<c^2>=%.4f  K=%.4f ',c2,c4/c2/c2));
    set(gca,'YTickLabel','')    
    if (p==1) 
       title(sprintf('t=%.4f',time)); 
