@@ -146,7 +146,6 @@ do i=1,NUM_SF
 enddo
 
 if (my_pe==io_pe) then
-   call cwrite8(fid,time,1)
    ! number of structure functions
    x=3 ; call cwrite8(fid,x,1)
    do i=1,NUM_SF
