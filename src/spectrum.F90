@@ -1334,10 +1334,11 @@ do j=ny1,ny2
          cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
          
          !     cutoff for recalculating the spectra
-         delta = 0.1      !this value can be changed by hand
+!         delta = 0.1      !this value can be changed by hand
          
          !     omit modes where cos_tta is less than cutoff delta
-         if (cos_tta > delta) then
+	if (1) then 			!check if spectra are the same
+!         if (cos_tta > delta) then
             
             ! compute vorticity           
             ! sqrt(-1) * 2pi * (im,jm,km) cross (RR+sqrt(-1)II)

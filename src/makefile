@@ -20,6 +20,12 @@ ifeq ($(UNAME),Linux)
    #VENDOR=INTEL
    MPI = 
    MPILIB = 
+   ifeq ($(HOST),node001)
+      VENDOR=PGI
+      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
+      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm
+                 #-lpthread
+   endif
    ifeq ($(HOST),s854018)
       VENDOR=INTEL8
       #MPI = -DUSE_MPI -DMPI_UNDERSCORE
