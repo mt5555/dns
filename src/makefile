@@ -120,11 +120,11 @@ ifeq ($(UNAME),OSF1)
    # QSC
    HNAME = $(shell hostname | grep qsc)
    ifneq ($(HNAME),)
-      UDM = -I$(HOME)/udm/udm_Nov_19/include -DHAVE_UDM 
-      UDMLIB = -L$(HOME)/udm/udm_Nov_19/lib \
-         -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
-         -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
-        -lrt -free -lcxxstd -lcxx -lexc -lc
+#      UDM = -I$(HOME)/udm/udm_Nov_19/include -DHAVE_UDM 
+#      UDMLIB = -L$(HOME)/udm/udm_Nov_19/lib \
+#         -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
+#         -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
+#        -lrt -free -lcxxstd -lcxx -lexc -lc
       LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
    endif
 

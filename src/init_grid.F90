@@ -47,9 +47,9 @@ call print_message(message)
 ! are we also tracking passive scalars?
 !
 if (equations==NS_UVW) then
-   if (n_var>ndim) then
+   if (n_var>3) then
       ! prognostic variables > ndim are passive scalars:
-      npassive=n_var-ndim
+      npassive=n_var-3
    endif
 endif
 write(message,'(a,i6)') "Number of passive scalars: ",npassive

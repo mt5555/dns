@@ -164,8 +164,8 @@ do i=nx1,nx2
       maxs(n)=max(maxs(n),abs(Q_grid(i,j,k,n)))   ! max u,v,w
    enddo
    if (npassive>0) then
-      maxs(10)=max(maxs(10),Q_grid(i,j,k,ndim+1))
-      maxs(11)=max(maxs(11),-Q_grid(i,j,k,ndim+1))
+      maxs(10)=max(maxs(10),Q_grid(i,j,k,4))
+      maxs(11)=max(maxs(11),-Q_grid(i,j,k,4))
    endif
    vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz
    maxs(4)=max(maxs(4),vel)
@@ -261,7 +261,7 @@ call wallclock(tmx1)
 !                                     3 z-transforms
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do ns=ndim+1,n_var
+do ns=4,n_var
    ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,1)
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,1)  ! s_x
    do k=nz1,nz2
@@ -594,7 +594,7 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! dealias the RHS scalars, and add diffusion:
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do ns=ndim+1,n_var
+do ns=4,n_var
    ! FFT into p
    call z_fft3d_trashinput(rhsg(1,1,1,ns),p,work)
 

@@ -76,7 +76,7 @@ real*8 :: work2(nx,ny,nz)
 
 integer :: n
 
-do n=ndim+1,n_var
+do n=np1,np2
    Q(:,:,:,n)=100 !+ Q(:,:,:,1)**2 
 enddo
 
