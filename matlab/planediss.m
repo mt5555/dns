@@ -97,11 +97,12 @@ for type=type_list
 
 
    % patch of size 10eta_c
-   len=min(1,10*eta_c);
+   fac=5; facl='5 \eta_c';
+   len=min(1,fac*eta_c);
    xt=[1,1-len,1-len,1,1];
    yt=[0,0,len,len,0];
-   patch(xt,yt,'k');
-   text(1.05,yt(3)-.05,'20 \eta_c');
+   patch(xt,yt,'w');
+   text(1.05,yt(3)/2,facl);
 
    
    
@@ -111,11 +112,11 @@ for type=type_list
    axis equal
    axis([0,max(x),0,max(y)]);
    shading interp
-   len=min(1,10*eta_c);
+   len=min(1,fac*eta_c);
    xt=[1,1-len,1-len,1,1];
    yt=[0,0,len,len,0];
-   patch(xt,yt,'k');
-   text(1.05,yt(3)-.05,'10 \eta_c');
+   patch(xt,yt,'w');
+   text(1.05,yt(3)/2,facl);
 
    stitle=sprintf('time=%.2f  min=%f  max=%f',time,mn,mx)
    if (k==1) title(stitle); end;

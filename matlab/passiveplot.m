@@ -5,7 +5,7 @@
 %
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-time=1.01;
+time=1.10;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
 
@@ -81,6 +81,10 @@ for type=type_list
   
    fname=[name,times,ext]
    [x,y,z,s,time]=getfield(fname);
+   if (time<0) 
+     disp('error opening file ');
+     return;
+   end
    smax=max(max(s));
    [mx,slice1]=max(smax);
    smax=min(min(s));
@@ -98,15 +102,18 @@ for type=type_list
    shading interp
    caxis([0 1]) 
 
-   % black box of size 5 lambda_c
-   len=5*lambda_c;
-   xt=[1,1-len,1-len,1,1];
-   yt=[0,0,len,len,0];
-   patch(xt,yt,'k')
-   text(1.05,yt(3)-.05,'5 \lambda_c');
    
 
    if (lambda_c>0) 
+     % black box of size 5 lambda_c
+     fac=5; facl='5 \lambda_c';
+     len=fac*lambda_c;
+     xt=[1,1-len,1-len,1,1];
+     yt=[0,0,len,len,0];
+     text(1.05,yt(3)/2,facl);
+     %patch(xt,yt,'w')
+     line(xt,yt,'LineWidth',1.5,'Color','k');
+
      figure(2); 
      subplot(npassive/2,2,k)
      splot=squeeze(s(:,:,slice1));
@@ -115,7 +122,7 @@ for type=type_list
      stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
      if (k==1) title(stitle); end;
      axis equal
-     axis([0,5*lambda_c,0,5*lambda_c]);
+     axis([0,fac*lambda_c,0,fac*lambda_c]);
      shading interp
      caxis([0 1]) 
    end

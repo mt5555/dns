@@ -236,7 +236,7 @@ integer :: passive_type(n_var)  ! type of passive scalar:
                                 !     1 = KE-correlated i.c., regular equation
                                 !     2 = 0 i.c., Kurien's gage equation
 
-integer :: input_npassive                       ! npassive in input file
+integer :: input_npassive = 0                   ! npassive in input file
 real*8,allocatable :: input_schmidt(:)          ! data from input file
 integer,allocatable :: input_passive_type(:)    ! data from input file
 

@@ -136,8 +136,6 @@ real*8 :: xfac,mn,mx
 integer :: n,k,i,j,im,jm,km,init,count,iter,n1
 character(len=80) :: message
 
-schmidt=0
-passive_type=0
 
 if (my_pe==io_pe) then
    print *,"passive scalars:"

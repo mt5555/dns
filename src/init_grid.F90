@@ -595,11 +595,12 @@ call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(input_npassive,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 if (input_npassive>0) then
-if (!allocated(input_schmidt)) allocate(input_schmidt(input_npassive))
-if (!allocated(input_passive_type)) allocate(input_passive_type(input_npassive))
-call MPI_bcast(input_schmidt,input_npassive,MPI_REAL8,io_pe,comm_3d ,ierr)
-call MPI_bcast(input_passive_type,input_npassive,MPI_INTEGER,io_pe,comm_3d ,ierr)
+   if (.not. allocated(input_schmidt)) allocate(input_schmidt(input_npassive))
+   if (.not. allocated(input_passive_type)) allocate(input_passive_type(input_npassive))
+   call MPI_bcast(input_schmidt,input_npassive,MPI_REAL8,io_pe,comm_3d ,ierr)
+   call MPI_bcast(input_passive_type,input_npassive,MPI_INTEGER,io_pe,comm_3d ,ierr)
 endif
+
 call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(forcing_peak_waveno,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(g_bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
@@ -1836,8 +1837,10 @@ read(5,*) smagorinsky
 read(5,*) input_npassive
 allocate(input_schmidt(input_npassive))
 allocate(input_passive_type(input_npassive))
+print *,'npassive (from input file): ',input_npassive
 do i=1,input_npassive
    read(5,*) input_schmidt(i),input_passive_type(i)
+   print *,input_schmidt(i),input_passive_type(i)
 enddo
 
 
