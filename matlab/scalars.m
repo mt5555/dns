@@ -11,10 +11,11 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-fid=fopen('iso12_256_200.scalars','r','b'); 
-%fid=fopen('../src/impulse/kh10.scalars','r','l'); 
+%fid=fopen('iso12_256_200.scalars','r','b'); 
+fid=fopen('../src/impulse/kh0.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
 %fid=fopen('../src/kh/khK.scalars','r','l'); 
+%fid=fopen('/tmp/test0000.0000.scalars','r','l'); 
 
 
 

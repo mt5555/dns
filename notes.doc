@@ -1,3 +1,13 @@
+E&Liu KH problem.  
+       mu=0:  at t=1, E is down .25e-6.  dk/dt = -1.25e-6
+       mu=1.5e-6 at T=1  E is down 1.2e-4 and  dk/dt = -1.26e-4
+       1e-5:  noisy
+       1e-4:  a touch noisy
+       2e-4: looks good, a little too smoothed 
+                   
+                                   
+              
+
 1. update_ghost() routine, then start upgrading FD code
 2. streamfunction-vorticity 2d code  
 3. benchmark FD + transform with different decomposisitons
