@@ -268,14 +268,14 @@ if (alpha_value>0) then
    ! also return a_diss, the KE dissapation from div(tau) term
    do n=1,2
       !call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,1d-8)
-      call helmholtz_inv(div(1,1,n),work,1d0,-alpha_value**2)
+      call helmholtz_inv(divtau(1,1,n),work,1d0,-alpha_value**2)
    enddo
 
    do j=ny1,ny2
    do i=nx1,nx2
    do n=1,2
-      a_diss=a_diss+Q(i,j,3)*Q(i,j,n)*div(i,j,n)
-      rhs(i,j,n)=rhs(i,j,n)+div(i,j,n)
+      a_diss=a_diss+Q(i,j,3)*Q(i,j,n)*divtau(i,j,n)
+      rhs(i,j,n)=rhs(i,j,n)+divtau(i,j,n)
    enddo
    enddo
    enddo
@@ -343,6 +343,8 @@ enddo
 if (compute_ints==1) then
    call ifft3d(gradu(1,1,1),work)
    call ifft3d(gradu(1,1,2),work)
+   call ifft3d(gradv(1,1,1),work)
+   call ifft3d(gradv(1,1,2),work)
    do j=ny1,ny2
    do i=nx1,nx2
       ke_diss = ke_diss + (Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &

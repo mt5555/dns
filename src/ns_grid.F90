@@ -265,7 +265,8 @@ call bc_rhs(rhs)
 !call divfree_gridspace(rhs,work,d1,d2)
 
 if (compute_ints==1) then
-   !ints(2)=ke_diss/g_nx/g_ny/g_nz     ! u dot laplacian u
+   ints(1)=gradu_diss/g_nx/g_ny/g_nz
+
    ints(2)=ke_diss2/g_nx/g_ny/g_nz     ! gradu dot gradu
 
    !ints(3) = forcing terms
@@ -275,7 +276,7 @@ if (compute_ints==1) then
    ints(7)=ints(2)  ! this is only true for periodic incompressible case
    ! ints(8) = < u,div(tau)' >   (alpha model only)
    ! ints(9)  = < u,f >  (alpha model only)
-   ints(1)=gradu_diss/g_nx/g_ny/g_nz
+   ints(10)=ke_diss/g_nx/g_ny/g_nz     ! u dot laplacian u
 endif
 
 call wallclock(tmx2)

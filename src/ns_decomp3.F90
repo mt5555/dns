@@ -384,6 +384,7 @@ if (compute_ints==1) then
    ints(3)=f_diss
    ints(4)=vor
    ints(5)=hel
+   ints(10)=ke_diss
    maxs(5)=maxvor
 endif
 

@@ -5,6 +5,7 @@ E&Liu KH problem.
        1e-4:  a touch noisy
        2e-4: looks good, a little too smoothed 
 
+
 1. matlab code: 
        last have averages: 
           epsilson
@@ -12,7 +13,6 @@ E&Liu KH problem.
           h_eddy
        compute all momements, with std and error bars
 
-                   
 1. 4th order code using ghost cells:
          consctruct 4th order test case with dnsgrid
          write ns_ghost, testing agains above
@@ -30,7 +30,6 @@ E&Liu KH problem.
        plot R_lamba vs mu and h
 
 1. switch 3d test case to different dimensions
-4. 2D shallow water case
 
 
 check spectrum and rotated spectrum  (scalar)  ok for short times.

@@ -11,11 +11,9 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-%fid=fopen('iso12_256_200.scalars','r','b'); 
-%fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
-%fid=fopen('../src/kh/khN.scalars','r','l'); 
-%fid=fopen('../src/kh/khK.scalars','r','l'); 
-fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
+
+%fid=fopen('../src/sht/rung_500_0000.0000.scalars','r','l'); 
+fid=fopen('../src/sht/rune_5000_0000.0000.scalars','r','l'); 
 
 
 
@@ -95,9 +93,11 @@ ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 vor_z=ints(4,:);
 ke=ints(5,:);
 tote=ints(6,:);   %  
+
 pe=tote-ke;
-pe=pe+ke(1);
+pe=pe-pe(1)+ke(1);
 tote=ke+pe;
+
 
 % ints(7,:)   enstrophy
 % ints(8,:)   < u,div(tau)' >  (alpha model only)
@@ -114,19 +114,24 @@ time=maxs(7,:);
 
 Ea = ints(6,:) + .5*alpha^2 *ints(2,:); % at time
 
+
 time_2 = .5*(time(2:l)+time(1:l-1));
 ke_diss_tot=(tote(2:l)-tote(1:l-1))./(time(2:l)-time(1:l-1));
 Ea_diss_tot=(Ea(2:l)-Ea(1:l-1))./(time(2:l)-time(1:l-1));
 
 
+time=time*(2*pi*14);
+time_2=time_2*(2*pi*14);
+
+
 
 disp(sprintf('max vor_z = %e',max(vor_z)));
-
 figure(5)
 clf
 hold on
 plot(time,ke,'r')
 plot(time,pe,'g')
+plot(time,ke./pe,':k')
 plot(time,tote,'k')
 plot(time_2,ke_diss_tot,'c')
 plot(time,ke_diss_d,'r:')

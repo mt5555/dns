@@ -442,16 +442,18 @@ enddo
 if (compute_ints==1) then
    ! note: dont noramlize quantities computed in spectral space,
    ! but normalize quantities computed in grid space by /g_nx/g_ny/g_nz
+   ints(1)=gradu_diss
    ints(2)=ke_diss   
    ints(3)=f_diss    
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
    ints(6)=ke        
    ints(7)=ensave/g_nx/g_ny/g_nz
-   maxs(5)=maxvor
    ints(8)=a_diss    
    ints(9)=normuf
-   ints(1)=gradu_diss
+   ints(10)=ke_diss
+
+   maxs(5)=maxvor
 endif
 
 call wallclock(tmx2)

@@ -162,11 +162,7 @@ if (doit_screen) then
            '   max(vor)',maxs(5)
    call print_message(message)	
 
-   if (mu_hyper==1) then
-      ke_diss = mu*ints(10)
-   else
-      ke_diss = mu*ints(2)
-   endif
+   ke_diss = mu*ints(10)
    ! 
    ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
    ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2

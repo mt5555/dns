@@ -1,6 +1,6 @@
 
-range=.0:1.0:75;
-name='../src/sht/rung'
+range=.0:.25:75;
+name='../src/sht/rune_5000_'
 
 
 mkpr=0;            % make ps and jpeg files
@@ -64,6 +64,7 @@ for i=range
   %
   figure(1)
 
+  time=time*2*pi*14;
   subplot(2,1,1)
   ts=sprintf('vorticity  time=%.2f  max=%e',time,qmax)
   pcolor(x,y,vor)

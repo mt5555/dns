@@ -691,7 +691,8 @@ real*8 gradw(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: vor(3),sm(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3),S2
+real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3),S2sum
+real*8 :: S(3,3)
 real*8 dummy(1)
 real*8 :: tmx1,tmx2
 
@@ -728,7 +729,34 @@ enddo
 work=mu*work
 call compute_pdf_epsilon(work)
 
-S2=0
+
+#if 0
+! cj structure functions
+! 
+! note: fix S2 below.  it is wrong
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
+   vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
+   vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
+   v2(i,j,k)=vor(1)**2+vor(2)**2+vor(3)**2
+   S(m1,m2)=      
+enddo
+enddo
+enddo
+
+! compute integrals of:
+! <v2(x),v2(x+r)>
+! <S2(x),S2(x+r)>
+! <S2(x),v2(x+r)>
+!
+#endif
+
+
+
+! scalars
+S2sum=0
 Sww=0
 ux2=0
 ux3=0
@@ -747,9 +775,10 @@ do i=nx1,nx2
    vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
    vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
 
-   ! compute Sij*wj
+   ! compute Sw = Sij*wj
+   Sw=0
+   !wS=0
    do m1=1,3
-      sm(m1)=0
       do m2=1,3
          if (m1==1) uij=gradu(i,j,k,m2)
          if (m1==2) uij=gradv(i,j,k,m2)
@@ -757,12 +786,13 @@ do i=nx1,nx2
          if (m2==1) uji=gradu(i,j,k,m1)
          if (m2==2) uji=gradv(i,j,k,m1)
          if (m2==3) uji=gradw(i,j,k,m1)
-         sm(m1)=sm(m1)+.5*(uij+uji)*vor(m2)
-         S2=S2 + (.5*(uij+uji))**2
+         ! S(m1,m2) = .5*(uij_uji)
+         Sw(m1)=Sw(m1)+.5*(uij+uji)*vor(m2)
+         !wS(m2)=wS(m2)+.5*(uij+uji)*vor(m1)
       enddo
    enddo
    ! compute Sww = wi*(Sij*wj)
-   Sww=Sww+sm(1)*vor(1)+sm(2)*vor(2)+sm(3)*vor(3)
+   Sww=Sww+Sw(1)*vor(1)+Sw(2)*vor(2)+Sw(3)*vor(3)
 
    ! if we use gradu(i,j,k,1)**3, do we preserve the sign?  
    ! lets not put f90 to that test!
@@ -785,7 +815,7 @@ enddo
 enddo
 enddo
 
-S2=S2/g_nx/g_ny/g_nz
+S2sum=S2sum/g_nx/g_ny/g_nz
 Sww=Sww/g_nx/g_ny/g_nz
 ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux3/g_nx/g_ny/g_nz
@@ -802,7 +832,7 @@ scalars(10)=Sww
 do n=1,3
 scalars(10+n)=u2(n)
 enddo
-scalars(14)=S2
+scalars(14)=S2sum
 
 
 #ifdef USE_MPI

@@ -196,8 +196,6 @@ write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)
 
 
-call print_message('Initial data projection...')
-call init_data_projection(Q,work,work2,PSI)  ! impose constrains on initial data
 
 
 end subroutine
@@ -257,8 +255,6 @@ enddo
 enddo
 enddo
 
-call print_message('Initial data projection...')
-call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
    
 
 
@@ -338,8 +334,6 @@ enddo
 enddo
 enddo
 
-call print_message('Initial data projection')
-call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
 
 
 end subroutine
@@ -372,6 +366,8 @@ real*8 :: E_target,ke,pe
 real*8 :: E_k(0:max(nx,ny,nz))
 real*8 :: Len,U,R,F
 character(len=80) :: message
+
+equations = 1   ! shallow water equations, not the default NS equations
 
 k_0=14  
 m=25
@@ -562,7 +558,6 @@ enddo
 call divfree_gridspace(PSI,Q(1,1,1,3),work1,work2)
 Q(:,:,:,3)= H0 + Q(:,:,:,3)/grav
 
-if (dealias) call dealias_gridspace(Q,work1)
 
 
 
@@ -582,12 +577,6 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: d1(nx,ny,nz)
 real*8 :: d2(nx,ny,nz)
 real*8 :: d3(nx,ny,nz)
-
-! local variables
-integer i
-
-
-call bc_preloop(Q)
 
 ! will also dealias if dealias=1
 call divfree_gridspace(Q,d1,d2,d3)

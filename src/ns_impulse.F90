@@ -307,6 +307,7 @@ enddo
 
 
 if (compute_ints==1) then
+   ints(1)=gradu_diss/g_nx/g_ny/g_nz
    ints(2)=ke_diss2/g_nx/g_ny/g_nz
    !ints(3) = forcing terms
    ints(4)=vor/g_nx/g_ny/g_nz
@@ -315,7 +316,7 @@ if (compute_ints==1) then
    ints(7)=ints(2)  ! this is only true for periodic incompressible case
    ! ints(8) = < u,div(tau)' >   (alpha model only)
    ! ints(9)  = < u,f >  (alpha model only)
-   ints(1)=gradu_diss/g_nx/g_ny/g_nz
+   ints(10)=ke_diss/g_nx/g_ny/g_nz
 endif
 
 call wallclock(tmx2)

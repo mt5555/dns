@@ -36,16 +36,20 @@ implicit none
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-real*8  :: mu=0           !viscosity
-real*8  :: mu_hyper=0     !set to 1 to enable hyper viscosity
+real*8  :: mu=0               !viscosity
+real*8  :: mu_hyper=0         !set to 1 to enable hyper viscosity
 real*8  :: alpha_value=0      !for the alpha model  
 real*8  :: H0=0               ! for shallow water model
 integer,parameter :: r8kind=kind(mu)
 logical :: enable_lsf_timelimit = .true.
-logical :: dealias       
+integer :: equations=0             ! 0 = NS / NS-alpha
+                                   ! 1 = Shallow water / shallow water-alpha
 integer :: numerical_method=0      ! 0 = FFT
                                    ! 1 = 4th order F.D.
                                    ! 2 = MPDATA 
+logical :: dealias       
+
+
 character(len=80) :: runname
 character(len=80) :: rundir
 real*8  :: pi,pi2,pi2_squared
@@ -192,19 +196,20 @@ real*8 :: ints(nints),maxs(nints)
 !
 ! For NON-ALPHA-MODEL
 ! KE = ints(6)
-! KE dissapation:  -mu*ints(2) + ints(3) + ints(8)
-!      ints(2) = < u_x,u_x >
+! KE dissapation:  -mu*ints(10) + ints(3) + ints(8)
 !      ints(3) = < u,f >     
 !      ints(8) = 0
+!      ints(10) = < u, del u >  (or <u, del**4 u)
 !
 ! for ALPHA-MODEL
-! KE dissapation:  -mu*ints(2) + ints(3) + ints(8)
-!      ints(2) = < u_x,u_x >
+!
+! KE dissapation:  -mu*ints(10) + ints(3) + ints(8)
+!      ints(10) = < u_x,u_x >
 !      ints(3) = < u,f' >           Helmholz(f')=f
 !      ints(8) = < u,div(tau)' >
 !
 ! E-alpha = ints(6) + .5*alpha**2 ints(2)
-! E-alpha dissapation =   mu*ints(2) + ints(9) + mu*alpha**2ints(1)
+! E-alpha dissapation =   mu*ints(10) + ints(9) + mu*alpha**2ints(1)
 !      ints(9) = < u,f >
 !      ints(1)= < u_xx,u_xx>
 !  
@@ -227,7 +232,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < u,f >  (alpha model only)
-! ints(10) = 
+! ints(10) = < u, del u >   diffusion (or hyper diffusion) term
 ! maxs(5) = max vorticity
 !
 !
@@ -250,7 +255,7 @@ real*8 :: ints(nints),maxs(nints)
 ! dE/dt = mu*ints(10)   + ints(8)
 !
 ! E_alpha = ints(6) + .5*alpha**2 ints(2)
-! E_alpah dissapation: mu*ints(10) + mu*alpha**2 * ints(1)
+! E_alpha dissapation: mu*ints(10) + mu*alpha**2 * ints(1)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

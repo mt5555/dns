@@ -48,6 +48,19 @@ else
    if (init_cond==3) call init_data_sht(Q,q1,work1,work2)
 endif
 
+if (equations==0) then
+   ! NS
+   call print_message('Projecting initial data...')
+   call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
+else if (equations==1) then
+   ! shallow water
+   if (dealias)  then
+      call print_message('Dealiasing initial data...')
+      call dealias_gridspace(Q,work1)
+   endif
+endif
+
+
 #ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
 #endif

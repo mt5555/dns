@@ -11,12 +11,12 @@
 
 %fid=fopen('../src/impulse/kh4.spec','r','l');
 %fid=fopen('../src/kh/khK.spec','r','l');
-fid=fopen('/tmp/test0000.0000.spec','r','l');
+fid=fopen('../src/sht/rung_5000_0000.0000.spec','r','l');
 
 
 time=fread(fid,1,'float64');
 j=0;
-while (time>=0 & time<=.3)
+while (time>=0 & time<=9999.3)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
