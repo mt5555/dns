@@ -1,0 +1,90 @@
+Initializing grid and b.c. and reading input file                               
+Parallel decomposition: ncpus=     1 =   1 x  1 x  1                            
+ Reading input file from stdin...
+ Diffusion d/dt(log u_2delx) =  323.4170666192972  s^-1                         
+Global grid:    128 x   128 x     1                                             
+Local grid (with padding):    130 x   130 x     1                               
+Running some tests                                                              
+ transpose z round trip error: 0.000000000000000E+00                            
+ transpose y round trip error: 0.000000000000000E+00                            
+ transpose x round trip error: 0.000000000000000E+00                            
+Initializing FFT of size n=   128                                               
+x-direction d/dx error=.1925570814E-11                                          
+x-direction d2/dxx error=.5189235708E-09                                        
+y-direction d/dy error=.1804778549E-11                                          
+y-direction d2/dyy error=.6091340765E-09                                        
+z-direction d/dz error=.0000000000E+00                                          
+z-direction d2/dzz error=.1776528792E+04                                        
+cosine mode=   0   0   0 val=   5.3330000000                                    
+cosine mode=   0   5   0 val=   2.0000000000                                    
+  sine mode=   1   0   0 val=  -1.0000000000                                    
+cosine mode=   3   0   0 val=   1.5000000000                                    
+x-direction Forward-Backward 3D FFT: error=.8881784197E-14                      
+Laplace solver alpha=  1.00 beta=  0.50  error= 0.12490009E-12                  
+maxval of divergence = .18829E-12                                               
+Initial data                                                                    
+Time stepping...                                                                
+ 
+ 1E0   | *               KE spectrum
+       |    *           
+       |      ***       
+       |         ***    
+       |            *   
+       |     *       *  
+       |                
+       |   *            
+       |                
+       |                
+ 1E-10 |* *           **
+       +---------------+
+       k=0           k= 65
+time=  0.00000(    0)  next output= 0.10000                                     
+delt=0.0096731 cfl_adv= 1.500 cfl_vis= 0.158                                    
+max: (u,v,w)      1.211479631395962     0.120259032747895     0.000000000000000 
+max(div)= 0.22082E-12   <z-vor>=-0.36595E-09   <hel>= 0.00000E+00               
+ke:   0.3574915702 d/dt log(ke) tot:  0.00000 d/dt log(ke) diffusion: -0.69277  
+
+time=  0.00967(    1)  next output= 0.10000                                     
+delt=0.0096965 cfl_adv= 1.500 cfl_vis= 0.159                                    
+max: (u,v,w)      1.208558413644318     0.119689878391622     0.000000000000000 
+max(div)= 0.16698E-12   <z-vor>=-0.31997E-09   <hel>= 0.00000E+00               
+ke:   0.3552158556 d/dt log(ke) tot: -0.66231 d/dt log(ke) diffusion: -0.69721  
+
+time=  0.01937(    2)  next output= 0.10000                                     
+delt=0.0097274 cfl_adv= 1.500 cfl_vis= 0.159                                    
+max: (u,v,w)      1.204711426455888     0.119883728702443     0.000000000000000 
+max(div)= 0.16520E-12   <z-vor>=-0.21860E-09   <hel>= 0.00000E+00               
+ke:   0.3531287971 d/dt log(ke) tot: -0.60952 d/dt log(ke) diffusion: -0.63499  
+
+time=  0.02910(    3)  next output= 0.10000                                     
+delt=0.0097658 cfl_adv= 1.500 cfl_vis= 0.160                                    
+max: (u,v,w)      1.199984248058013     0.119962674991677     0.000000000000000 
+max(div)= 0.16875E-12   <z-vor>= 0.93057E-10   <hel>= 0.00000E+00               
+ke:   0.3511826742 d/dt log(ke) tot: -0.56969 d/dt log(ke) diffusion: -0.58954  
+
+time=  0.03886(    4)  next output= 0.10000                                     
+delt=0.0098116 cfl_adv= 1.500 cfl_vis= 0.161                                    
+max: (u,v,w)      1.194378807036229     0.120071167505335     0.000000000000000 
+max(div)= 0.16076E-12   <z-vor>=-0.16960E-09   <hel>= 0.00000E+00               
+ke:   0.3493472789 d/dt log(ke) tot: -0.53798 d/dt log(ke) diffusion: -0.55417  
+
+ 
+ 1E0   | *               KE spectrum
+       |    *           
+       |      **        
+       |        **      
+       |   * *    *     
+       |           *    
+       |                
+       |            *   
+       |                
+       |             *  
+ 1E-10 |* *           **
+       +---------------+
+       k=0           k= 65
+time=  0.10000(   11)  next output= 0.10000                                     
+delt=0.0000000 cfl_adv= 0.000 cfl_vis= 0.000                                    
+max: (u,v,w)      1.180825097487208     0.134696464721052     0.000000000000000 
+max(div)= 0.15010E-12   <z-vor>= 0.43406E-10   <hel>= 0.00000E+00               
+ke:   0.3396159444 d/dt log(ke) tot: -0.41690 d/dt log(ke) diffusion: -0.41828  
+

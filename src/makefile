@@ -5,11 +5,15 @@
 UNAME = $(shell uname)
 ARCH = $(shell uname -m)
 
+
 ifeq ($(UNAME),Linux)
    F90 = lf95
    LDFLAGS = --staticlink
-#   MPI = -DUSE_MPI -I/contrib/lam/include
-#   MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+   HOST = $(shell hostname)
+   ifeq ($(HOST),darkstar)
+      MPI = -DUSE_MPI -I/contrib/lam/include
+      MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+   endif
    FFLAGS = -O -DLINUX $(MPI)
 endif
 ifeq ($(UNAME),SunOS)
@@ -71,8 +75,8 @@ fft_interface.o:  fft99_interface.o
 #fft_interface.o:  compaq_fft_interface.o
 #	cp -f fft99_interface.o fft_interface.o
 
-user_params.h:  
-	echo "Run gridsetup.py to generage a user_params.h file!"
+params.h:  
+	echo "Run gridsetup.py to generage a params.h file!"
 	exit 1
 
 transpose.h:

@@ -1,11 +1,14 @@
-Notes:
+**********************************************************************************
+
 
 CFL:  
 
 dealiased, vis=0
 cfl_adv
 2.0 unstable - at t=2 KE diss osscillating
-1.5 IN  t=30 still looks good.  
+1.8 stable at t=7, but energy has trippled
+1.6 t=6, energy up 50%
+1.5 t=54 still looks good.  
 1.0 at t=36 KE still looks good,plot is ok
 
 

@@ -103,8 +103,8 @@ if (doit .or. itime<5) then
    if (mx>1) mx=1    ! round-off error if ke_viscous > ke_tot
    if (mx<-1) mx=-1  ! total ke is growing, but viscous term is negative
    
-   write(message,'(a,f10.2,a,f9.5,a,f9.5,a)') 'ke: ',ints(1),&
-     ' d/dt log(ke) total:',ints(2)/ints(1),&
+   write(message,'(a,f14.10,a,f9.5,a,f9.5,a)') 'ke: ',ints(1)/(nslabx*nslaby*nslabz),&
+     ' d/dt log(ke) tot:',ints(2)/ints(1),&
      ' d/dt log(ke) diffusion:',ints(3)/ints(1)
    call print_message(message)	
 
@@ -329,6 +329,7 @@ real*8 :: small=1e-7
 
 check_time = .false.
 time_next=time_final
+if (dt==0) return
 
 if (time>=time_final-small) check_time=.true.
 if (time==0) check_time=.true.

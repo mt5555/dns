@@ -186,7 +186,7 @@ do k=nz1,nz2
    input(i,j,k)=           4*cos(cf1*ycord(j))    + input(i,j,k)
    rhs(i,j,k)=    -cf1*cf1*4*cos(cf1*ycord(j))    + rhs(i,j,k)
 
-   if (nz2>1) then
+   if (nslabz>1) then
       cf1=2*2*pi 
       input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
       rhs(i,j,k)=    -cf1*cf1*5*cos(cf1*zcord(k))    + rhs(i,j,k)
@@ -417,11 +417,11 @@ do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
     if (abs(output(i,j,k)) > 1e-9) then	
-       if (mod(i,2)==0) then
-          write(message,'(a,i4,i4,i4,a,2f15.10)') '  sine mode=',(i-1)/2,(j-1)/2,(k-1)/2,&
+       if (mod(i-nx1,2)==1) then
+          write(message,'(a,i4,i4,i4,a,2f15.10)') '  sine mode=',imcord(i),jmcord(j),kmcord(k),&
                ' val=',output(i,j,k)
        else
-          write(message,'(a,i4,i4,i4,a,2f15.10)') 'cosine mode=',(i-1)/2,(j-1)/2,(k-1)/2,&
+          write(message,'(a,i4,i4,i4,a,2f15.10)') 'cosine mode=',imcord(i),jmcord(j),kmcord(k),&
                ' val=',output(i,j,k)
         endif
        call print_message(message)

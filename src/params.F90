@@ -59,7 +59,7 @@ integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
 
 
 ! mesh dimensions on a single processor
-#include "user_params.h"
+#include "params.h"
 !integer,parameter :: n_var=3                  ! number of prognostic variables
 !integer,parameter :: nx=18,ny=18,nz=18         ! dimension of grid & data
 !integer,parameter :: nx1=1,nx2=16              ! upper and lower bounds of non-ghost data

@@ -25,13 +25,13 @@ call fft_interface_init()
 call init_mpi_comm3d()
 
 if (my_pe==io_pe) then
+   print *,'Reading input file from stdin...'
    read(*,*) input_file_type
    if (input_file_type==0) then
       call read_type0()
    else
       call abort("bad input file")
    endif
-   !  u_t = mu * (2 pi k)^2
 endif
 
 write(message,*) 'Diffusion d/dt(log u_2delx) = ',&
