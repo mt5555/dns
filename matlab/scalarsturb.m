@@ -34,9 +34,10 @@ else
    %name = '/home/skurien/dns/src/sk128_alpha0';
    %times=0.5
 
+   name = '/home/skurien/dns/src/sk128_alpha15/sk128_alpha15';
+   times=[1,2,3]
 
-name = '/home/skurien/dns/src/sk128_alpha15/sk128_alpha15';
-times=[1,2,3]
+end
 
 nt=0;
 for t=times
@@ -90,9 +91,12 @@ for i=1:3
    vor4(i,:)=ints_e(i+21,:);    % < w^4 >
 end
 end
+% S4sum = ints_e(25,:)
+% S2w2  = ints_e(26,:)
+
 if (ns_e>=28) 
 for i=1:3
-   uxx2(i,:)=ints_e(i+25,:);    % < uxx^2 > 
+   uxx2(i,:)=ints_e(i+26,:);    % < uxx^2 > 
 end
 end
 

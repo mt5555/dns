@@ -44,9 +44,10 @@ end module
 !
 #ifdef OSF1
 module mpi
+#ifdef USE_LAMPI
+#include "mpifandio.h"
+#else
 #include "mpif.h"
-#if (defined USE_MPI_IO && defined USE_LAMPI)
-#include "mpiof.h"
 #endif
 end module
 #endif

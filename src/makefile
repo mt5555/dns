@@ -158,8 +158,7 @@ ifeq ($(UNAME),OSF1)
       # LAMPI
       # ~/lampi/build-alphaev68-dec-osf5.1/mpirun -dev quadrics -np N
       MPI =  -DUSE_MPI -DUSE_MPI_IO -DUSE_LAMPI \
-           -I/users/taylorm/lampi/build-alphaev68-dec-osf5.1/include \
-           -I/users/taylorm/lampi/build-alphaev68-dec-osf5.1/romio/include 
+           -I/users/taylorm/lampi/build-alphaev68-dec-osf5.1/include 
       MPILIB =  -L/users/taylorm/lampi/build-alphaev68-dec-osf5.1 \
              -lmpi  -lelan
    endif

@@ -3,18 +3,27 @@
 %#  plot passive scalar
 %########################################################################
 %
-
+figure(1);clf;
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-time=1.0984;
+time=1.20;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
 
-npassive=10;
-for np=1:npassive
-  ext=sprintf('%3i',np+100);
+schmidt_list=[.01 .05 .1 .5 1];
+type_list=0:1;
+npassive=length(schmidt_list)*length(type_list);
+
+k=0;
+for sch=schmidt_list
+for type=type_list
+
+  ext=sprintf('%3i',type+100);
   ext=ext(2:length(ext));
-  ext=['.s',ext];
+  ext2=sprintf('%8.3f',sch+1000);
+  ext2=ext2(2:length(ext2));
+
+  ext=['.t',ext,'.s',ext2];
   
   s=findstr(name,'/');
   s=s(length(s));
@@ -27,18 +36,19 @@ for np=1:npassive
    smax=min(min(s));
    [mn,slice2]=min(smax);
 
-
-   subplot(npassive/2,2,np)
+   k=k+1;
+   subplot(npassive/2,2,k)
    splot=squeeze(s(:,:,slice1));
    pcolor(x,y,splot')
-   caxis([0 1]); 
    
    stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,mx)
-   if (np==1) title(stitle); end;
+   if (k==1) title(stitle); end;
    axis equal
    axis([0,max(x),0,max(y)]);
    shading interp
+   caxis([0 1]) 
 end
-   orient tall
-   print('-djpeg','-r200',['p',times,'.jpg']); 
+end
+orient tall
+print('-djpeg','-r125',['p',times,'.jpg']); 
 

@@ -612,6 +612,8 @@ scalars(24)=S4sum
 scalars(25)=S2w2
 scalars(26:28)=uxx2
 
+print *,'uxx2: ',uxx2
+
 #ifdef USE_MPI
    scalars2=scalars
    call MPI_allreduce(scalars2,scalars,ns,MPI_REAL8,MPI_SUM,comm_3d,ierr)
