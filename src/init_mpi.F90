@@ -79,6 +79,8 @@ call mpi_cart_rank(comm_3d,mpicoords,my_pe,ierr2)
 write(message,'(a,i5,a,i3,a,i3,a,i3)') "Parallel decomposition: ncpus= ", &
    initial_live_procs," = ",ncpu_x," x",ncpu_y," x",ncpu_z
 call print_message(message)
+#else
+call print_message("Running single threaded")
 #endif
 end subroutine
 

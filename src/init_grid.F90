@@ -21,9 +21,6 @@ character*80 message
 call params_init()
 call fft_interface_init()
 
-write(message,'(a,i6,a,i6,a,i6)') "Grid: ",g_nx," x",g_ny," x",g_nz
-call print_message(message)
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! global grid data
@@ -68,6 +65,10 @@ do k=nz1,nz2
    kmcord(k)=g_kmcord(l)
 enddo
 
+write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
+call print_message(message)
+write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
+call print_message(message)
 
 
 

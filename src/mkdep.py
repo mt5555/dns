@@ -51,7 +51,9 @@ def parse(file):
     return deps
 
 
-
+if (len(sys.argv) <= 1):
+   print 'Run this script via "make dep"'
+   exit 
 
 for file in sys.argv[1:]:
     fileo=getdoto(file)
@@ -61,6 +63,7 @@ for file in sys.argv[1:]:
         print fileo + ":", 
         for i in range(0,len(deps)):
             print deps[i],
+        print "makefile",
         print ""
 
         
