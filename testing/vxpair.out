@@ -2,6 +2,8 @@ Running parallel.  NCPUS=    1 =   1 x  1 x  1
  Run name:         temp
  output directory: /tmp/
  Enter input file type: 
+ input_file_type=           3
+equations: ns_psivor           
  initial condition: vxpair              
  forcing: none                
  method: 4th                 
@@ -14,60 +16,70 @@ Diffusion d/dt(KE)/KE on mode k =   46.:   166.80
 NS-Alpha:  alpha, alpha/h :    0.00000000    0.0000                             
 Global grid:     65 x    65 x     1                                             
 Local grid (with padding):     69 x    69 x     1                               
+Number of passive scalars:      0                                               
 Initial data                                                                    
  disabling offset
 Time stepping...                                                                
 initial time:    0.0000                                                         
 final time:      0.2500                                                         
 max number timesteps: 1073741824                                                
+ PSI boundary: nskip=           5
+Interpolating rest of PSI boundary
+done with PSI boundary
 Initializing FFT99 of size n=   128                                             
 
 time=  0.00000(     0)  next output=  0.05000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1535549 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33801876469719     0.29317485959430     0.00000000000000    
+for next timestep: delt=0.1535576 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33801451336948     0.29316994641141     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.63754E-02   max(vor) 0.45208E+01                
-ke:  0.0118423779  enstropy:        0.1663         total d/dt(ke):   0.0000000  
+ke:  0.0118426026  enstropy:        0.1663         total d/dt(ke):   0.0000000  
 total d/dt(w) vis=      0.0000000   mu <w,w_xx>=      -0.0127509                
 writing output files at t=    0.0000                                            
+done with output
 
 time=  0.05000(     1)  next output=  0.10000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1535773 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33715390181266     0.29410630421216     0.00000000000000    
+for next timestep: delt=0.1535801 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33714965978736     0.29410127317380     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.63754E-02   max(vor) 0.45208E+01                
-ke:  0.0118423779  enstropy:        0.1663         total d/dt(ke):   0.0000000  
+ke:  0.0118426026  enstropy:        0.1663         total d/dt(ke):   0.0000000  
 total d/dt(w) vis=      0.0000000   mu <w,w_xx>=      -0.0127509                
 
 time=  0.10000(     2)  next output=  0.15000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1537032 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33608808990281     0.29502910957046     0.00000000000000    
+for next timestep: delt=0.1537060 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33608387710552     0.29502405789144     0.00000000000000    
 <z-vor>= 0.10190E+00   <hel>=-0.62978E-02   max(vor) 0.44842E+01                
-ke:  0.0118340120  enstropy:        0.1657         total d/dt(ke):  -0.0001673  
+ke:  0.0118342366  enstropy:        0.1657         total d/dt(ke):  -0.0001673  
 total d/dt(w) vis=     -0.0126685   mu <w,w_xx>=      -0.0125956                
 
 time=  0.15000(     3)  next output=  0.20000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1539429 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33483787130085     0.29592134554554     0.00000000000000    
+for next timestep: delt=0.1539457 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33483370685939     0.29591627635663     0.00000000000000    
 <z-vor>= 0.10189E+00   <hel>=-0.62234E-02   max(vor) 0.44370E+01                
-ke:  0.0118255998  enstropy:        0.1651         total d/dt(ke):  -0.0001682  
+ke:  0.0118258243  enstropy:        0.1651         total d/dt(ke):  -0.0001682  
 total d/dt(w) vis=     -0.0125087   mu <w,w_xx>=      -0.0124468                
+ PSI boundary: nskip=           5
+Interpolating rest of PSI boundary
+done with PSI boundary
 
 time=  0.20000(     4)  next output=  0.25000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1539008 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33342356942339     0.29670160388994     0.00000000000000    
+for next timestep: delt=0.1539042 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33341948126691     0.29669623459894     0.00000000000000    
 <z-vor>= 0.10188E+00   <hel>=-0.61520E-02   max(vor) 0.43808E+01                
-ke:  0.0118171414  enstropy:        0.1645         total d/dt(ke):  -0.0001692  
+ke:  0.0118173658  enstropy:        0.1645         total d/dt(ke):  -0.0001692  
 total d/dt(w) vis=     -0.0123560   mu <w,w_xx>=      -0.0123040                
 
 time=  0.25000(     5)  next output=  0.25000  LSF minutes left:    -1. 0       
-for next timestep: delt=0.1537383 cfl_adv= 1.500 cfl_vis= 0.140                 
-max: (u,v,w)      0.33186317793366     0.29749583741239     0.00000000000000    
+for next timestep: delt=0.1537418 cfl_adv= 1.500 cfl_vis= 0.140                 
+max: (u,v,w)      0.33185917179757     0.29749046337378     0.00000000000000    
 <z-vor>= 0.10188E+00   <hel>=-0.60834E-02   max(vor) 0.43167E+01                
-ke:  0.0118089303  enstropy:        0.1639         total d/dt(ke):  -0.0001642  
+ke:  0.0118091538  enstropy:        0.1639         total d/dt(ke):  -0.0001642  
 total d/dt(w) vis=     -0.0122103   mu <w,w_xx>=      -0.0121668                
 writing output files at t=    0.2500                                            
+done with output
 CPU times (min):   (avg/max)
 initialization:      0.00     0.00                                              
-dns_solve:           0.00     0.00                                              
+initial output:      0.00     0.00                                              
+dns_solve:           0.00     0.00  per timestep:    0.00031   0.00031          
    time_control            0.00     0.00                                        
    RHS                     0.00     0.00                                        
    ghost_update            0.00     0.00                                        
@@ -79,3 +91,4 @@ dns_solve:           0.00     0.00
    transpose_from_y        0.00     0.00                                        
    Biot-Savart             0.00     0.00                                        
    compute_psi             0.00     0.00                                        
+   tracer_advance          0.00     0.00                                        

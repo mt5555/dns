@@ -157,9 +157,9 @@ enddo
 call findbestcenter(w,center)
 
 
-!call findcenter_finegrid(w,center,center_finegrid)
-!print *,'grid max: ',mxw,center(1),center(2)
-!print *,'findgrid: ',mxw_finegrid,center_finegrid(1),center_finegrid(2)
+call findcenter_finegrid(w,center,center_finegrid)
+print *,'grid max: ',mxw,center(1),center(2)
+print *,'findgrid: ',mxw_finegrid,center_finegrid(1),center_finegrid(2)
 
 
 
