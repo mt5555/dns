@@ -264,6 +264,8 @@ call wallclock(tmx1)
 !  For passive scalars of type "2", we also add (pi-u**2) to the RHS
 !  pi will be added later, but u**2 has to be added here
 !
+!  pi = p +.5u**2, so we are really adding:   p - .5u**2 to the RHS.  
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do ns=np1,np2
    ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,1)

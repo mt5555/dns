@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0100:.01:1.19];
+times=[1.0100:.01:1.25];
 
 
 if (readdata)
