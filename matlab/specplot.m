@@ -5,22 +5,21 @@
 %
 
 
+name='cj1';
+namedir='/ccs/taylorm/dns/src/';
+filetype='l';
 
 
-%fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.spec','r','b');
-%fidt=fopen('/ccs/scratch/taylorm/dns/iso12_512.spect','r','b');
-
-%fid=fopen('../src/temp0000.0000.spec');
-%fidt=fopen('../src/temp0000.0000.spect');
-
-fid=fopen('/ccs/scratch/taylorm/dns/iso12_256.spec','r','l');
-fidt=fopen('/ccs/scratch/taylorm/dns/iso12_256.spect','r','l');
-
-
+fid=fopen([namedir,name,'.spec'],'r',filetype);
+fidt=fopen([namedir,name,'.spect'],'r',filetype);
 
 time=fread(fid,1,'float64');
-num_spect=fread(fidt,1,'float64');
-time_t=fread(fidt,1,'float64');
+num_spect=0;
+if (fidt>=0) 
+  num_spect=fread(fidt,1,'float64');
+  time_t=fread(fidt,1,'float64');
+end
+
 
 
 j=0;
@@ -128,6 +127,7 @@ while (time>=0 & time<=9999.3)
     hold off;
   end
 
+  if (num_spect>0)
   %
   % transfer spectrum
   %
@@ -147,20 +147,28 @@ while (time>=0 & time<=9999.3)
   semilogx(x,flux); 
   grid;
   title(sprintf('E Flux'));
-
-  if ( ( (time-floor(time))<.01) | (abs(time-.1)<.01) )
+  end
+  
+  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.1)<.01) )
+    disp('making ps files ...' )
     figure(1)
-    print ('-dpsc',sprintf('spec%.2f.ps',time))
-    figure(2)
-    print ('-dpsc',sprintf('transfer%.2f.ps',time))
-    pause
+    print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
+    if (num_spect>0) 
+      figure(2)
+      print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
+    end
+    disp('pause')
+%    pause
   end     
   
+
   
   time=fread(fid,1,'float64');
-  num_spec=fread(fidt,1,'float64');
-  time_t=fread(fidt,1,'float64')
+  if (fidt>=0) 
+    num_spec=fread(fidt,1,'float64');
+    time_t=fread(fidt,1,'float64')
+  end
 end
 
 fclose(fid);
-fclose(fidt);
+if (fidt>0) fclose(fidt); end;
