@@ -280,10 +280,15 @@ psi_b=0
 ! should we use interpolation to compute PSI?
 interp=(biotsavart_cutoff>0)
 
+nskip = .02/delx
+if (nskip<5) nskip=5
 
 
 if (interp) then
-   nskip=10
+   if (my_pe==io_pe) then
+      print *,'PSI boundary: nskip=',nskip
+   endif
+
    ! interpolate every nskip point
    do j=by1,by2
    if (mod(j,100)==0 .and. my_pe==io_pe) then
@@ -300,7 +305,7 @@ if (interp) then
          !psi_b(k,2,1) = psi_b(k,2,1) - w(i,j)*logterm(i,j,k,1)
          psi_b(k,2,2) = psi_b(k,2,2) - w(i,j)*logterm(i,j,k,o_ny)
       enddo
-      do k=11,o_ny,nskip
+      do k=nskip+1,o_ny,nskip
             psi_b(k,1,1) = psi_b(k,1,1) - w(i,j)*logterm(i,j,1,k)
             psi_b(k,1,2) = psi_b(k,1,2) - w(i,j)*logterm(i,j,o_nx,k)
       enddo
@@ -340,8 +345,11 @@ call MPI_allreduce(psi_b_temp,psi_b,4*bsize,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 
 !print *,'psib',psi_b(o_ny,1,1)
 
-
-if (interp) call intpsi(psi_b,nskip,bsize)
+if (interp) then
+   call print_message("Interpolating rest of PSI boundary")
+   call intpsi(psi_b,nskip,bsize)
+   call print_message("done with PSI boundary")
+endif
 
 
 ! add ubar correction
