@@ -368,9 +368,10 @@ integer i,j,k,l
 integer :: m
 integer :: n,im,jm,km,ixw
 real*8 :: k_0,xw,xfac ,alpha,beta,dummy
-real*8 :: E_target,ke
+real*8 :: E_target,ke,pe
 real*8 :: E_k(0:max(nx,ny,nz))
-real*8 :: Len,U,H,R,F
+real*8 :: Len,U,R,F
+character(len=80) :: message
 
 k_0=14  
 m=25
@@ -378,12 +379,13 @@ U=1.0        ! velocity scale  U normalized below so that KE=.5 U**2 = .5
 Len=1.0/k_0  ! length scale, determined by mode k_0 above
 
 
+
 ! set 
 ! R = Rossby number
 ! F = Froude number
 if (init_cond_subtype==0) then
-   R=.05  
-   F=.05  
+   R=.25
+   F=.20
 else if (init_cond_subtype==1) then
    R=.25
    F=.05
@@ -394,15 +396,17 @@ else
    call abort("init_data_swt(): init_cond_subtype set to unsupported value")
 endif
    
-H= 2/(U/F)**2           ! height scale, arbritrary, chosen so PE = 1
 
 ! set dimensionless constants used in code: f-plane and gravity:
-fcor=U/(R*Len)
-grav=(U/F)**2 / H
+H0 = 1.0
+fcor=U/(Len*R)
+grav=U**2/(H0*F**2)              
+
+write(message,'(a,2f6.2)') "R, F parameters: ",R,F
+call print_message(message)
+
 
 Q=0
-
-
 ! random vorticity
 call input1(PSI,work1,work2,null,io_pe,.true.)  
 
@@ -473,17 +477,19 @@ call ifft3d(PSI,work1)
 
 
 ! compute velocity = curl PSI
+Q=0
 call der(PSI,Q,dummy,work1,DX_ONLY,2)
 Q(:,:,:,1)=-Q(:,:,:,1)
 call der(PSI,Q(1,1,1,2),dummy,work1,DX_ONLY,1)
 
+if (dealias) call dealias_gridspace(Q,work1)
 
-! normalize so U=1
+
+! normalize so <u,u>=U**2
 ke = .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)**2) +  &
-     sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)**2)  
+     .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)**2)  
 ke=ke/g_nx/g_ny
-
-Q=Q/(sqrt(2*ke))
+Q=sqrt(.5*U**2) * Q/sqrt(ke)
 
 
 
@@ -521,10 +527,11 @@ do n=1,2
 enddo
 
 call divfree_gridspace(PSI,Q(1,1,1,3),work1,work2)
-Q(:,:,:,3)= H + Q(:,:,:,3)/grav
-
+Q(:,:,:,3)= H0 + Q(:,:,:,3)/grav
 
 if (dealias) call dealias_gridspace(Q,work1)
+
+
 
 end subroutine
 

@@ -17,6 +17,7 @@ real*8 :: work1(nx,ny)
 real*8 :: work2(nx,ny)
 
 ! local variables
+real*8 :: ke,pe
 real*8 :: ints_buf(nints),vel,dtf,epfilt=.01
 #undef USE_LEAPFROG
 #ifdef USE_LEAPFROG
@@ -41,7 +42,6 @@ if (firstcall) then
       call abort("Error: shallow water model cannot run in 3D")
    endif
 endif
-
 
 
 #ifndef USE_LEAPFROG
@@ -188,8 +188,8 @@ integer compute_ints
 real*8 rhs(nx,ny,n_var)
 
 !work
-real*8 work(nx,ny,n_var)
-real*8 work2(nx,ny,n_var)
+real*8 work(nx,ny)
+real*8 work2(nx,ny)
 
 !local
 real*8 :: gradu(nx,ny,2)
@@ -244,7 +244,7 @@ enddo
 ! advection and viscous terms
 do j=ny1,ny2
 do i=nx1,nx2
-   pe=pe+.5*grav*Q(i,j,3)**2
+   pe=pe+.5*grav*Q(i,j,3)**2 - .5*grav*H0**2
    do n=1,2
       ke = ke + .5*Q(i,j,3)*Q(i,j,n)**2
 
@@ -257,6 +257,9 @@ do i=nx1,nx2
    vor=vor + gradu(i,j,2)-gradv(i,j,1)
 enddo
 enddo
+
+
+
 
 if (alpha_value>0) then
    call alpha_model_forcing(rhs,Q,divtau,gradu,gradv,work,work2,a_diss)
@@ -285,7 +288,7 @@ do j=ny1,ny2
          gradu(i,j,1)=xfac*Qhat(i,j,1)
          gradu(i,j,2)=xfac*Qhat(i,j,2)
 
-         xfac=-mu_hyper*xfac
+         xfac=-mu*xfac
          rhs(i,j,1)=rhs(i,j,1) + xfac*Qhat(i,j,1)
          rhs(i,j,2)=rhs(i,j,2) + xfac*Qhat(i,j,2)
       endif
@@ -298,8 +301,8 @@ if (compute_ints==1) then
    call ifft3d(gradu(1,1,2),work)
    do j=ny1,ny2
    do i=nx1,nx2
-      ke_diss = ke_diss + Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &
-                        + Q(i,j,3)*Q(i,j,2)*gradu(i,j,2) 
+      ke_diss = ke_diss + (Q(i,j,3)*Q(i,j,1)*gradu(i,j,1) &
+                        + Q(i,j,3)*Q(i,j,2)*gradu(i,j,2)) 
    enddo
    enddo
 endif
@@ -321,7 +324,6 @@ if (compute_ints==1) then
    !ints(7)
    ints(8)=a_diss         ! < Hu,div(tau)' >  
    ! ints(9)  = < u,f >  (alpha model only)
-
 
 endif
 

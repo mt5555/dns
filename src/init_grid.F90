@@ -102,6 +102,25 @@ endif
 write(message,'(a,e10.4)') 'Diffusion coefficient mu=',mu
 call print_message(message)
 
+
+if (mu_hyper==1) then
+write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu
+call print_message(message)
+kmode=1
+xfac = 2* (2*pi*2*pi*kmode**2)**4
+diff_2h =  mu*xfac
+write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+call print_message(message)
+
+kmode = sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+if (ndim==2) kmode = sqrt( (g_nx**2 + g_ny**2 )/4.0)
+xfac = 2*(2*pi*2*pi*kmode**2)**4
+diff_2h =  mu*xfac
+write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+call print_message(message)
+
+else
+
 if (mu>0) then
 kmode=1
 xfac = 2*2*pi*2*pi*kmode**2
@@ -117,21 +136,6 @@ write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': '
 call print_message(message)
 endif
 
-if (mu_hyper>0) then
-write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu_hyper
-call print_message(message)
-kmode=1
-xfac = 2* (2*pi*2*pi*kmode**2)**4
-diff_2h =  mu_hyper*xfac
-write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
-call print_message(message)
-
-kmode = sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
-if (ndim==2) kmode = sqrt( (g_nx**2 + g_ny**2 )/4.0)
-xfac = 2*(2*pi*2*pi*kmode**2)**4
-diff_2h =  mu_hyper*xfac
-write(message,'(a,f5.0,a,f8.2)') 'Diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
-call print_message(message)
 endif
 
 
@@ -398,7 +402,7 @@ else if (sdata=='iso12') then
 else if (sdata=='sht') then
    init_cond=3
 else 
-   print *,'value = ',sdata
+   print *,'value = >>',sdata,'<<'
    call abort("invalid initial condtion specified on line 3 on input file")
 endif
 
@@ -436,7 +440,8 @@ else if (sdata=='hyper') then
       kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
    endif
    xfac = 2* (2*pi*kmode)**8
-   mu_hyper = rvalue/xfac
+   mu = rvalue/xfac
+   mu_hyper = 1
 else 
    call abort("non supported viscosity type")
 endif

@@ -90,11 +90,15 @@ end
 l=size(ints);
 l=l(2);
 
-ke_diss_d=-mu*ints(2,:);
+ke_diss_d=-mu*ints(10,:);
 ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 vor_z=ints(4,:);
-hel=ints(5,:);
-ke=ints(6,:);   %  ke 
+ke=ints(5,:);
+tote=ints(6,:);   %  
+pe=tote-ke;
+pe=pe+ke(1);
+tote=ke+pe;
+
 % ints(7,:)   enstrophy
 % ints(8,:)   < u,div(tau)' >  (alpha model only)
 % ints(9,:)   < u,f>           (alpha model only)
@@ -111,7 +115,7 @@ time=maxs(7,:);
 Ea = ints(6,:) + .5*alpha^2 *ints(2,:); % at time
 
 time_2 = .5*(time(2:l)+time(1:l-1));
-ke_diss_tot=(ke(2:l)-ke(1:l-1))./(time(2:l)-time(1:l-1));
+ke_diss_tot=(tote(2:l)-tote(1:l-1))./(time(2:l)-time(1:l-1));
 Ea_diss_tot=(Ea(2:l)-Ea(1:l-1))./(time(2:l)-time(1:l-1));
 
 
@@ -121,13 +125,12 @@ disp(sprintf('max vor_z = %e',max(vor_z)));
 figure(5)
 clf
 hold on
-plot(time,ke)
+plot(time,ke,'r')
+plot(time,pe,'g')
+plot(time,tote,'k')
 plot(time_2,ke_diss_tot,'c')
-plot(time,ke_diss_f+ke_diss_d,'r.')
-plot(time,ke_diss_f,'k')
-plot(time,ke_diss_d,'k')
-plot(time,hel,'g')
-title('KE: blue,    d(KE)/dt: cyan,    hel: green');
+plot(time,ke_diss_d,'r:')
+title('KE: red  PE:  green  E: black  d(KE)/dt: cyan');
 hold off
 
 

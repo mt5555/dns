@@ -48,8 +48,7 @@ else
 endif
 
 if (grav>0) then
-   H=sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))/g_nx/g_ny/g_nz
-   umax=umax+fcor + sqrt(grav*H)/min(delx,dely)   
+   umax=umax+fcor + sqrt(grav*H0)/min(delx,dely)   
 endif
 
 
@@ -161,15 +160,17 @@ if (doit_screen) then
            '   max(vor)',maxs(5)
    call print_message(message)	
 
-
-
-   ke_diss = mu*ints(2) + mu_hyper*ints(10)
+   if (mu_hyper==1) then
+      ke_diss = mu*ints(10)
+   else
+      ke_diss = mu*ints(2)
+   endif
    ! 
    ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
    ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
    !       < u    u  > = (1/3)  || u ||^2
    !
-   if (mu>0) then
+   if (mu>0 .and. ndim>2) then
       lambda=sqrt(  5*(2*ints(6))/ints(2)  )
       write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6))/mu, &
            '  R=',1/mu

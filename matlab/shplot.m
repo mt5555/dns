@@ -1,6 +1,6 @@
 
-range=.0:.1:75;
-name='/tmp/test'
+range=.0:1.0:75;
+name='../src/sht/rung'
 
 
 mkpr=0;            % make ps and jpeg files
