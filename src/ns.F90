@@ -9,23 +9,24 @@ use params
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
+real*8 :: rhs(nx,ny,nz,n_var)
 real*8,save :: Q(nx,ny,nz,n_var)
 
-call rk4reshape(time,Q_grid,Q)
+call rk4reshape(time,Q_grid,Q,rhs)
 end
 
 
 
-subroutine rk4reshape(time,Q_grid,Q)
+subroutine rk4reshape(time,Q_grid,Q,rhs)
 use params
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
 
 
 ! local variables
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
 
@@ -52,7 +53,7 @@ endif
 
 
 ! stage 1
-call ns3D(rhs,Q,Q_grid,time,1)
+call ns3D(rhs,rhs,Q,Q_grid,time,1)
 
 do n=1,3
    do j=1,ny_2dz
@@ -71,7 +72,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0)
 
 do n=1,3
    do j=1,ny_2dz
@@ -88,7 +89,7 @@ do n=1,3
 enddo
 
 ! stage 3
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0)
 
 
 do n=1,3
@@ -105,7 +106,7 @@ do n=1,3
 enddo
 
 ! stage 4
-call ns3D(rhs,Q_tmp,Q_grid,time+delt,0)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0)
 
 
 do n=1,3
@@ -152,7 +153,7 @@ end subroutine
 
 
 
-subroutine ns3d(rhs,Qhat,Q,time,compute_ints)
+subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -180,14 +181,13 @@ integer compute_ints
 real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
 real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 
-! output
+! output  (rhsg and rhs are overlapped in memory)
 real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)
-
+real*8 rhsg(nx,ny,nz,n_var)    
                                  
 
 !local
 real*8 p(g_nz2,nslabx,ny_2dz)    
-real*8 grid(nx,ny,nz,n_var)   
 real*8 xfac,tmx1,tmx2
 real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 integer n,i,j,k,im,km,jm
@@ -214,32 +214,41 @@ call wallclock(tmx1)
 
 
 ! compute vorticity-hat, store in RHS
+
+! 3 z-transforms, 9 ffts.  
+do n=1,3
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nslabx
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
+
+         if (n==1) then
+            wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
+            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
+            !rhs(k,i,j,1) = pi2*(wy - vz)
+            p(k,i,j) = pi2*(wy - vz)
+         endif
          
-         wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
-         vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
-         rhs(k,i,j,1) = pi2*(wy - vz)
+         if (n==2) then
+            wx = - im*Qhat(k,i+z_imsign(i),j,3)
+            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
+            !rhs(k,i,j,2) = pi2*(uz - wx)
+            p(k,i,j) = pi2*(uz - wx)
+         endif
          
-         wx = - im*Qhat(k,i+z_imsign(i),j,3)
-         uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
-         rhs(k,i,j,2) = pi2*(uz - wx)
-         
-         uy = - jm*Qhat(k,i,j+z_jmsign(j),1)
-         vx = - im*Qhat(k,i+z_imsign(i),j,2)
-         rhs(k,i,j,3) = pi2*(vx - uy)
+         if (n==3) then
+            uy = - jm*Qhat(k,i,j+z_jmsign(j),1)
+            vx = - im*Qhat(k,i+z_imsign(i),j,2)
+            !rhs(k,i,j,3) = pi2*(vx - uy)
+            p(k,i,j) = pi2*(vx - uy)
+         endif
 
       enddo
    enddo
 enddo
-
-! 3 z-transforms, 9 ffts.  
-do n=1,3
-   call z_ifft3d(rhs(1,1,1,n),grid(1,1,1,n))
+call z_ifft3d(p,rhsg(1,1,1,n))
 enddo
 ! alternative:
 ! compute from Q_grid: vx,wx  uy,wy      8 ffts, 0 z-transforms 
@@ -260,27 +269,28 @@ maxvor=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   vor = vor + grid(i,j,k,3)
+   vor = vor + rhsg(i,j,k,3)
    
-   hel = hel + Q(i,j,k,1)*grid(i,j,k,1) + & 
-        Q(i,j,k,2)*grid(i,j,k,2) + & 
-        Q(i,j,k,3)*grid(i,j,k,3)  
+   hel = hel + Q(i,j,k,1)*rhsg(i,j,k,1) + & 
+        Q(i,j,k,2)*rhsg(i,j,k,2) + & 
+        Q(i,j,k,3)*rhsg(i,j,k,3)  
    
-   maxvor = max(maxvor,abs(grid(i,j,k,1)))
-   maxvor = max(maxvor,abs(grid(i,j,k,2)))
-   maxvor = max(maxvor,abs(grid(i,j,k,3)))
+   maxvor = max(maxvor,abs(rhsg(i,j,k,1)))
+   maxvor = max(maxvor,abs(rhsg(i,j,k,2)))
+   maxvor = max(maxvor,abs(rhsg(i,j,k,3)))
    
    !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
    !  w*(wy-vz) - u*(vx-uy)
    !  u*(uz-wx) - v*(wy-vz)
-   uu = ( Q(i,j,k,2)*grid(i,j,k,3) - Q(i,j,k,3)*grid(i,j,k,2) )
-   vv = ( Q(i,j,k,3)*grid(i,j,k,1) - Q(i,j,k,1)*grid(i,j,k,3) )
-   ww = ( Q(i,j,k,1)*grid(i,j,k,2) - Q(i,j,k,2)*grid(i,j,k,1) )
+   uu = ( Q(i,j,k,2)*rhsg(i,j,k,3) - Q(i,j,k,3)*rhsg(i,j,k,2) )
+   vv = ( Q(i,j,k,3)*rhsg(i,j,k,1) - Q(i,j,k,1)*rhsg(i,j,k,3) )
+   ww = ( Q(i,j,k,1)*rhsg(i,j,k,2) - Q(i,j,k,2)*rhsg(i,j,k,1) )
    
-   grid(i,j,k,1) = uu
-   grid(i,j,k,2) = vv
-   grid(i,j,k,3) = ww
+   ! overwrite Q with the result
+   Q(i,j,k,1) = uu
+   Q(i,j,k,2) = vv
+   Q(i,j,k,3) = ww
 enddo
 enddo
 enddo
@@ -288,7 +298,7 @@ enddo
 ! back to spectral space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
-   call z_fft3d(grid(1,1,1,n),rhs(1,1,1,n))
+   call z_fft3d(Q(1,1,1,n),rhs(1,1,1,n))
 enddo
 
 

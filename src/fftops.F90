@@ -339,7 +339,8 @@ end
 
 subroutine z_fft3d(f,fout)
 !
-!  compute fft.  
+!  compute fft of f, return in fout.
+!  f,fout can overlap in memory
 !
 use params
 use fft_interface
@@ -370,7 +371,8 @@ end
 
 subroutine z_ifft3d(fin,f)
 !
-!  compute inverse fft 3d of f, return in f
+!  compute inverse fft 3d of fin, return in f
+!  fin and f can overlap in memory
 !
 use params
 use fft_interface
