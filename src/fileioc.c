@@ -28,7 +28,7 @@ void FORTRAN(copen) (char fname[80],char mode[1],FILE **fid,int *err ) {
     for (i=0; i<80; ++i) {
         if (cname[i]==' ') cname[i]=0;
     }
-
+    
     *fid=fopen(cname,cmode);
     *err=0;
     if (*fid==NULL) *err=errno;

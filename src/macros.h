@@ -1,4 +1,5 @@
 #ifdef NDEBUG
+#define ASSERT(str,cond) 
 #else
 #define ASSERT(str,cond) if (.not. cond) call abort(str)
 #endif

@@ -27,6 +27,7 @@ call test           ! optional testing  routines go here
 write(message,'(a)') 'Initial data'
 call print_message(message)
 !call init_data_test(Q)             ! set up initial data 
+!call init_data_khblob(Q)
 call init_data_kh(Q)             ! set up initial data 
 
 write(message,'(a)') 'Initial data projection'

@@ -54,11 +54,9 @@ integer,parameter :: n=500
 real*8 :: x(0:n),y(0:n)
 
 Q=0
-#undef NEWKH
-#ifdef  NEWKH
 
 k=1
-eps=30
+eps=200
 do j=ny1,ny2
 do i=nx1,nx2
    if (ycord(j)<=.5) then
@@ -71,7 +69,36 @@ enddo
 enddo
 
 
-#else
+do k=nz1+1,nz2
+do i=nx1,nx2
+do j=ny1,ny2
+   Q(i,j,k,1)=Q(i,j,nz1,1)	
+   Q(i,j,k,2)=Q(i,j,nz1,2)	
+enddo
+enddo
+enddo
+
+
+
+end subroutine
+
+
+
+subroutine init_data_khblob(Q)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+
+! local variables
+integer i,j,k,l
+real*8 delta,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
+real*8 xscale,yscale
+real*8 :: eps=.10
+integer :: km=1
+integer,parameter :: n=500
+real*8 :: x(0:n),y(0:n)
+
+Q=0
 
 delta = .05
 delsq = delta**2
@@ -116,7 +143,6 @@ do i=nx1,nx2
 enddo
 enddo
 
-#endif
 
 do k=nz1+1,nz2
 do i=nx1,nx2

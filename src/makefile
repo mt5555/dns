@@ -18,13 +18,13 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
 
-   #F90 = lf95
-   #FFLAGS = -O -DLINUX $(MPI)
-   #LDFLAGS = --staticlink  -Lstk -lstk
+   F90 = lf95
+   FFLAGS = -O -DLINUX $(MPI) -DUSE_STKFFT
+   LDFLAGS = --staticlink  -Lstk -lstk
 
-   F90 = pgf90
-   FFLAGS = -fast -DLINUX $(MPI) #-DUSE_STKFFT
-   LDFLAGS = -Lstk -lstk
+   #F90 = pgf90
+   #FFLAGS = -fast -DLINUX $(MPI)  -DUSE_STKFFT
+   #LDFLAGS = -Lstk -lstk
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95

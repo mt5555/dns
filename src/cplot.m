@@ -7,8 +7,9 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
-range=0:50;
+%range=0:50;
 %range = 1
+range=0:.5:2;
 
 for i=range
   ts=i;
@@ -27,6 +28,11 @@ for i=range
   z=fread(fidvor,nz,'float64');
   
   q = fread(fidvor,nx*ny*nz,'float64');
+  tmp = fread(fidvor,1,'float64');
+  tmp=size(tmp);
+  if (tmp(1)~=0) 
+    disp('Error reading input file...')
+  end
   fclose(fidvor);
   ts=sprintf('time=%f  %ix%ix%i',time,nx,ny,nz);
   
@@ -38,6 +44,7 @@ for i=range
   title(ts);
   shading interp
   axis square
+  pause
 end
 return
 

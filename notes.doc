@@ -41,20 +41,22 @@ quick & dirty 64x64x64 timings (1cpu)
 run to .1 
 CFL=1.5/.25
 
+Linux laptop PGI F90
+FFT99                      1.41  1.41
+STK+gcc                    1.65  1.64
+STK+PGCC                   1.58  1.58
+
+Linux laptop Lahey
+FFT99                      1.75  1.74 1.75
+STK+gcc                    1.73  1.73
+
+
 
 truchas (Compaq ES40):       .26  .29  .29
 linux desktop:               
 Autrey (Sun Ultra 60):       .93  .92  .92
 Nirvana (SGI O2)             .94  .95  .94
 
-
-battery:
-linux laptop (PGI F90/FFT99):     1.12  1.11
-linux laptop (PGI F90/STK):       1.27  1.28
-
-AC:
-linux laptop (PGI F90/FFT99):   
-linux laptop (PGI F90/STK):     
 
 
 

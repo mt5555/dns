@@ -334,8 +334,8 @@ if (my_pe==io_pe) then
    call cwrite8(fid,xny,1)
    call cwrite8(fid,xnz,1)
    call cwrite8(fid,g_xcord(1),o_nx)
-   call cwrite8(fid,g_ycord(1),o_nx)
-   call cwrite8(fid,g_zcord(1),o_nx)
+   call cwrite8(fid,g_ycord(1),o_ny)
+   call cwrite8(fid,g_zcord(1),o_nz)
 endif
 
 call output1(vor(1,1,1,3),work,fid)
