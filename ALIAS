@@ -1,0 +1,11 @@
+
+f = random phase, with energy E(k).  
+
+     E(k)     aliasing error in < f^10 >
+
+     k^-5/3   no measurable aliasing error 
+     k^-2/3   aliasing error < 1%
+     k^-1/3   aliasing errors about 5%
+
+
+

@@ -1276,6 +1276,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3)
 real*8 :: delu1,delu2,delu3
 real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
 real*8 :: u_t1_sq,u_t2_sq,u_l_sq,xp
+real*8 :: u_l_3,u_t1_3,u_t2_3
 integer :: p,idel,idir
 
 delu1=ur1-u1
@@ -1300,6 +1301,7 @@ H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 
 
 if (compute_fractional_power) then
+#if 0
 xp=fractional_power(2)
 u_l=abs(u_l)**xp            ! ** .1
 u_t1=abs(u_t1)**xp
@@ -1339,6 +1341,67 @@ do p=8,min(10,pmax)
    Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**(p-1)
    Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**(p-1)
 enddo
+#endif
+
+u_l=abs(u_l)**(-.2)
+u_t1=abs(u_t1)**(-.2)
+u_t2=abs(u_t2)**(-.2)
+
+u_l_sq=u_l*u_l              ! **.4
+u_t1_sq=u_t1*u_t1
+u_t2_sq=u_t2*u_t2
+
+Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq*u_l_sq   ! ** -.8
+Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq*u_t1_sq
+Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq*u_t2_sq
+
+Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq   ! ** -.6
+Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
+Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
+
+Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq    ! ** -.4
+Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq
+Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq
+
+Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l       ! ** -.2
+Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1
+Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2
+
+
+u_l=abs(u_l)
+u_t1=abs(u_t1)
+u_t2=abs(u_t2)
+
+u_l_sq=u_l**.25
+u_t1_sq=u_t1**.25
+u_t2_sq=u_t2**.25
+
+u_l_3=u_l_sq*u_l_sq                       ! .5
+u_t1_3=u_t1_sq*u_t1_sq
+u_t2_3=u_t2_sq*u_t2_sq
+
+Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l       ! ** 1
+Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1
+Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2
+
+Dl(idel,idir,7)  =  Dl(idel,idir,7) + u_l*u_l_sq       ! ** 1.25
+Dt(idel,idir,1,7)=Dt(idel,idir,1,7) + u_t1*u_t1_sq
+Dt(idel,idir,2,7)=Dt(idel,idir,2,7) + u_t2*u_t2_sq
+
+Dl(idel,idir,8)  =  Dl(idel,idir,8) + u_l*u_l_3       ! ** 1.50
+Dt(idel,idir,1,8)=Dt(idel,idir,1,8) + u_t1*u_t1_3
+Dt(idel,idir,2,8)=Dt(idel,idir,2,8) + u_t2*u_t2_3
+
+Dl(idel,idir,9)  =  Dl(idel,idir,9) + u_l*u_l_sq*u_l_3       ! ** 1.75
+Dt(idel,idir,1,9)=Dt(idel,idir,1,9) + u_t1*u_t1_sq*u_t1_3
+Dt(idel,idir,2,9)=Dt(idel,idir,2,9) + u_t2*u_t2_sq*u_t2_3
+
+
+Dl(idel,idir,10)  =  Dl(idel,idir,10) + u_l*u_l       ! ** 2
+Dt(idel,idir,1,10)=Dt(idel,idir,1,10) + u_t1*u_t1
+Dt(idel,idir,2,10)=Dt(idel,idir,2,10) + u_t2*u_t2
+
+
 
                           
 else
@@ -1539,8 +1602,6 @@ fractional_power(7)=.6
 fractional_power(8)=.7
 fractional_power(9)=.8
 fractional_power(10)=.9
-
-
 
 
 delta_val=100000

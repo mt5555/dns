@@ -15,9 +15,9 @@ F77FIXED=
 
 
 ifeq ($(UNAME),Linux)
-   #VENDOR=LAHEY
+   VENDOR=LAHEY
    #VENDOR=PGI
-   VENDOR=INTEL
+   #VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),sulaco)
@@ -288,6 +288,7 @@ analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 
 clean: 
 	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi dnsvor \
+                            cdns dnsibm conv analysis_rms     \
                             analysis_isoave analysis splitspec convert
 
 dep:
