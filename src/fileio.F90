@@ -492,3 +492,180 @@ end subroutine
 
 
 
+subroutine input_uvw(time,Q,Qhat,work1,work2)
+!
+! low wave number, quasi isotropic initial condition
+!
+use params
+use mpi
+use fft_interface
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Qhat(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+!local
+character(len=80) message
+character(len=80) fname
+character(len=80) base
+integer :: n
+real*8 :: time
+real*8 :: time_in
+
+
+if (time<0) then
+   base="restart"
+else
+   write(message,'(f10.4)') 10000.0000 + time
+   base=runname(1:len_trim(runname)) // message(2:10) 
+endif
+
+
+Q=0
+if (equations==NS_UVW) then
+
+if (udm_input) then
+   call udm_read_uvw(time,base,Q,work1,work2)
+else
+   if (r_spec) then
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".us"
+   call print_message("Input: ")
+   call print_message(fname)
+   call singlefile_io2(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vs"
+   call print_message(fname)
+   call singlefile_io2(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
+   if (n_var==3) then
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".ws"
+      call print_message(fname)
+      call singlefile_io2(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
+   endif
+   do n=1,ndim
+      call ifft3d(Q(1,1,1,n),work1)
+   enddo
+   else
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
+      call print_message("Input: ")
+      call print_message(fname)
+      call singlefile_io2(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
+      call print_message(fname)
+      call singlefile_io2(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
+      if (n_var==3) then
+         fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".w"
+         call print_message(fname)
+         call singlefile_io2(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
+      endif
+   endif
+endif
+
+else if (equations==SHALLOW) then
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
+   call print_message("Input: ")
+   call print_message(fname)
+   call singlefile_io(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
+   call print_message(fname)
+   call singlefile_io(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe)
+   if (n_var==3) then
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".h"
+      call print_message(fname)
+      call singlefile_io(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe)
+   endif
+else if (equations==NS_PSIVOR) then
+   call abort("restart error: check it is ok that we setup I.C. before reading data")
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vor"
+   call print_message("Input: ")
+   call print_message(fname)
+   call singlefile_io(time_in,Qhat(1,1,1,1),fname,work1,work2,1,io_pe)
+   !fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".psi"
+   !call singlefile_io(time_in,Qhat,fname,work1,work2,1,io_pe)
+endif
+
+
+time=time_in
+end subroutine
+
+
+
+
+subroutine output_uvw(time,Q,work1,work2,work3)
+use params
+use mpi
+use fft_interface
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: work3(nx,ny,nz)   ! only used if ndim==2
+
+!local
+character(len=80) message
+character(len=80) fname
+character(len=80) base
+integer :: n
+real*8 :: time
+
+
+write(message,'(f10.4)') 10000.0000 + time
+
+if (equations==NS_UVW .and. w_spec) then
+   
+   ! NS, primitive variables
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".us"
+   call singlefile_io2(time,Q(1,1,1,1),fname,work1,work2,0,io_pe,.true.)
+   
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vs"
+   call singlefile_io2(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,.true.)
+   if (n_var==3) then
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ws"
+      call singlefile_io2(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe,.true.)
+   endif
+   
+else if (equations==NS_UVW) then
+   if (udm_output) then
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
+      call udm_write_uvw(fname,time,Q,work1,work2)
+   else
+      ! NS, primitive variables
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+      if (n_var==3) then
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
+         call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
+      endif
+      if (ndim==2) then
+         call vorticity2d(work3,Q,work1,work2)
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+         call singlefile_io(time,work3,fname,work1,work2,0,io_pe)
+      endif
+   endif
+   
+else if (equations==SHALLOW) then
+   ! shallow water 2D
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+   call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+   call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+   if (n_var==3) then
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h"
+      call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
+   endif
+   if (ndim==2) then
+      call vorticity2d(work3,Q,work1,work2)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+      call singlefile_io(time,work3,fname,work1,work2,0,io_pe)
+   endif
+else if (equations==NS_PSIVOR) then
+   ! 2D NS psi-vor formulation
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
+   call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
+   call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+endif
+
+end subroutine

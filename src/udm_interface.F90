@@ -1,5 +1,5 @@
 #include "macros.h"
-subroutine udm_write_uvw(fname,time,Q,Qhat,work1,bufudm)
+subroutine udm_write_uvw(fname,time,Q,work1,bufudm)
 !
 ! 
 !
@@ -8,7 +8,6 @@ use mpi
 use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 bufudm(nx2-nx1+1, ny2-ny1+1, nz2-nz1+1)    
 real*8 :: time
@@ -219,7 +218,7 @@ end subroutine
 
 
 
-subroutine udm_read_uvw(Q,Qhat,work1,bufudm)
+subroutine udm_read_uvw(time,base,Q,work1,bufudm)
 !
 ! 
 !
@@ -228,7 +227,6 @@ use mpi
 use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 bufudm(nx2-nx1+1, ny2-ny1+1, nz2-nz1+1)
 
@@ -242,11 +240,13 @@ integer fidudm, dsidudm, infoid, ierr
 integer i, j, k, i1, j1, k1
 integer dimsudm 
 integer*8 sizesudm(3), gsizesudm(3), offsetsudm(3)
+real*8 :: time
 
 character(len=80) fnameudm
 character(len=80) attrname 
 character(len=80) dsnameudm
 character(len=80) dotudm
+character(len=80) base
 character*2 nochar 
 ! character*(5) dbgname 
 
@@ -260,7 +260,7 @@ Q=0
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)
    nochar(1:1) = char(0)
-   fnameudm = rundir(1:len_trim(rundir)) // 'restart.h5'//char(0)
+   fnameudm = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // 'h5'//char(0)
    call print_message("Restarting from UDM file:")
    call print_message(fnameudm)
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_READ, fidudm, ierr)
@@ -268,7 +268,7 @@ Q=0
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)
    
-   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,time_initial,ierr)
+   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_DOUBLE,time,ierr)
 
 !   attrname = 'nx'//char(0)
 !   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nxstored, ierr)

@@ -311,67 +311,16 @@ if (doit_output) then
    write(message,'(a,f10.4)') "writing output files at t=",time
    call print_message(message)
    call tracers_save(io_pe,time)
-
-   write(message,'(f10.4)') 10000.0000 + time
-
    if (equations==NS_UVW .and. w_spec) then
       call transpose_from_z_3d(Qhat,q1)
-
-      ! NS, primitive variables
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".us"
-      call singlefile_io2(time,q1(1,1,1,1),fname,work1,work2,0,io_pe,.true.)
-
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vs"
-      call singlefile_io2(time,q1(1,1,1,2),fname,work1,work2,0,io_pe,.true.)
-      if (n_var==3) then
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ws"
-         call singlefile_io2(time,q1(1,1,1,n_var),fname,work1,work2,0,io_pe,.true.)
-      endif
-
-   else if (equations==NS_UVW) then
-      if (udm_output) then
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
-         call udm_write_uvw(fname,time,Q,Qhat,work1,work2)
-      else
-         ! NS, primitive variables
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
-      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
-      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
-      if (n_var==3) then
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
-         call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
-      endif
-      if (ndim==2) then
-         call vorticity2d(q1,Q,work1,work2)
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-         call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
-      endif
-      endif
-
-   else if (equations==SHALLOW) then
-      ! shallow water 2D
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
-      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
-      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
-      if (n_var==3) then
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h"
-         call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
-      endif
-      if (ndim==2) then
-         call vorticity2d(q1,Q,work1,work2)
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-         call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
-      endif
+      ! convert to nx,ny,nz dimensions for output:
+      call output_uvw(time,q1,work1,work2,q2)
    else if (equations==NS_PSIVOR) then
       ! 2D NS psi-vor formulation
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".vor"
-      call singlefile_io(time,Qhat(1,1,1,1),fname,work1,work2,0,io_pe)
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
-      call singlefile_io(time,Qhat(1,1,1,2),fname,work1,work2,0,io_pe)
+      call output_uvw(time,Qhat,work1,work2,q1)
+   else
+      call output_uvw(time,Q,work1,work2,q1)
    endif
-
    call print_message("done with output")
 
 endif
