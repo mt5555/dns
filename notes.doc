@@ -12,8 +12,8 @@ E&Liu KH problem.
    see nots about ints(3) and ints(9) in params.F90
 
 1. 4th order code using ghost cells:
-         consctruct 4th order test case with dnsgrid
-         write ns_ghost, testing agains above
+        replace viscosity with 4th order formula
+        -1 16 -30 16 -1  / 12h**2
          
 2. streamfunction-vorticity 2d code  
 3. benchmark FD + transform with different decomposisitons

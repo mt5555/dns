@@ -3,8 +3,8 @@ sht          ! initial condition:  shallow water turbulence
 5            ! init condition subtype
 none         ! forcing:  none, iso12
 hyper        ! viscosity type  (hyper)
-5000          ! viscosity value (ke dissapation rate of 2h mode)  5000 
-8.0          ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+50           ! viscosity value (ke dissapation rate of 2h mode)  5000 
+0.0          ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 0            ! compute_structure functions
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)

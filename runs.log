@@ -209,8 +209,13 @@ mu=5e-5         same.  CFL=1.5 triggers assymetic rollup
 
 
 
-kkN  1024x1024  mu = 2.5e-5    CFL: 1.50/.25   looks good.
+khN  1024x1024  mu = 2.5e-5    CFL: 1.50/.25   looks good.
      4th order method.  
+
+kh0  1024x1024  mu = 2.5e-5    CFL: 1.50/.25  
+     4th order method with new second derivative
+
+
 
 
 khL  1024x1024  mu = 5.0e-5    CFL: 1.5/.25   Noise at t=.25

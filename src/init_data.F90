@@ -359,7 +359,7 @@ real*8 :: work2(nx,ny,nz)
 CPOINTER :: null
 integer i,j,k,l
 integer :: m
-integer :: n,im,jm,km,ixw
+integer :: n,im,jm,km,ixw,ierr
 real*8 :: k_0,xw,xfac ,alpha,beta,dummy
 real*8 :: E_target,ke,pe
 real*8 :: E_k(0:max(nx,ny,nz))
