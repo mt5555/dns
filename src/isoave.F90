@@ -79,7 +79,7 @@ real*8,allocatable  :: dwork3(:,:,:)
 
 
 ! also added to the file for completeness:
-real*8,private :: epsilon,mu,ke
+real*8,private :: epsilon,mu,ke,h_epsilon=0
 
 private init
 
@@ -244,6 +244,7 @@ x=g_nz; call cwrite8(fid,x,1)
 call cwrite8(fid,mu,1)
 call cwrite8(fid,ke,1)
 call cwrite8(fid,epsilon,1)
+if (h_epsilon>0) call cwrite8(fid,h_epsilon,1)
 
 
 end subroutine
@@ -291,11 +292,12 @@ real*8 :: Qs(nx,ny,nz,n_var)              ! shifted original data
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
-real*8 :: eta,lambda,r_lambda,ke_diss
-real*8 :: dummy(pmax),xtmp,ntot
+real*8 :: eta,lambda,r_lambda,ke_diss,h_diss
+real*8 :: dummy(pmax),xtmp,ntot,xfac,ux,uy,uz,vx,vy,vz,wx,wy,wz
 character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,nd
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,csig
+integer :: im,jm,km
 logical :: qt_uptodate
 
 if (firstcall) then
@@ -337,17 +339,71 @@ do n=1,ndim
 enddo
 
 
+Qs=Q
+do n=1,3
+   call fft3d(Qs(1,1,1,n),Qst)  ! use Qst as a work array
+enddo
+
+h_diss = 0
+do k=nz1,nz2
+   km=kmcord(k)
+   do j=ny1,ny2
+      jm=jmcord(j)
+      do i=nx1,nx2
+         im=imcord(i)
+         
+         xfac=-mu*(im*im + jm*jm + km*km)*pi2_squared
+         xfac = 2*2*2*xfac
+         if (kmcord(k)==0) xfac=xfac/2
+         if (jmcord(j)==0) xfac=xfac/2
+         if (imcord(i)==0) xfac=xfac/2
+
+         ! u_x term
+         !ux = - pi2*im*Qs(i+imsign(i),j,k,1)
+         vx = - pi2*im*Qs(i+imsign(i),j,k,2)
+         wx = - pi2*im*Qs(i+imsign(i),j,k,3)
+         
+         uy = - pi2*jm*Qs(i,j+jmsign(j),k,1)
+         !vy = - pi2*jm*Qs(i,j+jmsign(j),k,2)
+         wy = - pi2*jm*Qs(i,j+jmsign(j),k,3)
+         
+         uz =  - pi2*km*Qs(i,j,k+kmsign(k),1)
+         vz =  - pi2*km*Qs(i,j,k+kmsign(k),2)
+         !wz =  - pi2*km*Qs(i,j,k+kmsign(k),3)
+      
+         ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
+
+         ! compute 2*k^2 u^2 vor^2:
+         h_diss = h_diss + 2*xfac*(Qs(i,j,k,1)*(wy-vz) + &
+                                   Qs(i,j,k,2)*(uz-wx) + &
+                                   Qs(i,j,k,3)*(vx-uy)) 
+
+         ! ke_diss = ke_diss + xfac*(Qs(i,j,k,1)**2 + &
+         !                            Qs(i,j,k,2)**2 + &
+         !                            Qs(i,j,k,3)**2 )
+         
+      enddo
+   enddo
+enddo
+
+
+
+
+
 #ifdef USE_MPI
    xtmp=ke_diss
    call MPI_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ke
    call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   xtmp=h_diss
+   call MPI_allreduce(xtmp,h_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
 epsilon=mu*ke_diss/ntot
 if (epsilon==0) epsilon=1e-20
-
+h_epsilon=mu*h_diss/ntot
+if (h_epsilon==0) h_epsilon=1e-20
 ke=ke/ntot
 
 
