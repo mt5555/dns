@@ -415,8 +415,6 @@ do k=1,n3
          del = del/epsilon%pdf_bin_size
          bin = nint(del)
 
-         print *,bin,del
-         
          ! increase the size of our PDF function
          if (abs(bin)>epsilon%nbin) call resize_pdf(epsilon,abs(bin)+10) 
          if (bin>pdf_max_bin) bin=pdf_max_bin
