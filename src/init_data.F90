@@ -194,8 +194,9 @@ do n=np1,np2
       ! laplacian smoothing:
       ! du/dt  =  laplacian(u)
       !  u_k = ((1 - k**2))**p  u_k    p = number of timesteps
+      ! iterate until max and mn are within 5% of 0 and 1.  max iter=40
       iter=0
-      do while (mx>1.05 .or. mn<.05)
+      do while ((mx>1.05 .or. mn<-.05) .and. (count<40) )
          iter=iter+1
          do k=nz1,nz2
             km=abs(kmcord(k))
