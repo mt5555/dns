@@ -17,24 +17,36 @@ QB pre-science run.
          diagnostics:   every 25 timesteps?
 
 
-
-1024^3.  UDM 24GB. (1 rail)   t=9.63:   43MB/s.   
-1024^3.  UDM 24GB. (2 rail)   t=8.96
-
+UDM benchmarks:
 1024^3.  serial 24GB. (1 rail)   t=30.34
 
+1024^3.  UDM 24GB. (1 rail)   t=9.63:   43MB/s.   
+1024^3.  UDM 24GB. (1 rail)   t=13.67   
+1024^3.  UDM 24GB. (2 rail)   t=8.96
+1024^3.  UDM 24GB. (2 rail)   t=8.89   on QA
+
+16  stripe, pMPI:  140
+64  stripe, pMPI:   46
+128 stripe, pMPI:   39
 
 
 
-
-Now some benchmarks.
 2048^3
-2 1 1024:   
-2 1 1024 with rail option:
-
 1 1 1024
-1 1 1024 with rail option:
+1 1 1024 with rail option: UDM 192GB output: t=83.32:  39MB/s
+1 1 1024 with rail option: UDM 192GB INPUT:  IN
 
+
+
+dai
+hal 
+ggriter
+jnunjez
+
+
+32  stride          203  
+64  stripe, pMPI:   436
+128 stripe:         288
 
 
 

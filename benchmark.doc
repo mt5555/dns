@@ -62,6 +62,12 @@ iso12 run, 512^3 runs with delt=.0003, t=1=1 eddy turnover time
 on QB
 2048^3
       1x1x1024     7.22  (1 rail)
+                   3.45 (2 rails)  a little better than 3.63.  
+                   3.61 
+      2x1x1024
+
+
+1024^3                   
       1x1x512      1.00  (1 rail)  as expected
 
 
@@ -220,35 +226,37 @@ cvs tag:  'bench602'
 121M
 20 timesteps
 
-                      1cpu    2cpu    3cpu     4cpu       6        8    16  24
+                      1cpu    2cpu    3cpu     4cpu     6      8      16   24
 milkyway              .16     .080    .054
 autrey                .21     .17
-shankara.old  (2x2)   .28     .19               .093    .064     .050
-shankara 4ring        .27     .14               .059    .062     .047
-shankara-LAM(ethernet).27                                        .200
+shankara.old  (2x2)   .28     .19               .093  .064   .050
+shankara 4ring        .27     .14               .059  .062   .047
+shankara-LAM(ethernet).27                                    .200
 
 ./bench.sh 160 0 20
 544M
 
 milkyway              1.22    .42
 autrey                1.40
-shankara.old          1.76                      .62               .29
+shankara.old          1.76                      .62          .29
    running 4 cpus, 1 cpu per node:              .51  
 
 
 ./bench.sh 192 2  20
 980M
+
 ./bench.sh 240 4  20  
 1.9G
+shankara (16 cpus = 2x1x8)                     4.53           1.27     .737 .347
 
 ./bench.sh 256 8  20  (can run on 16 and 24 cpus?)
 2.3G                                                                        
 
 milkyway              6.91    3.33
-shankara.old                                                     1.61
-shankara 4ring                                                   1.53  
-shankara-LAM                                                     3.90
-shankara                                                                .750
+shankara.old                                                 1.61
+shankara 4ring                                               1.53  
+shankara-LAM                                                 3.90
+shankara                                                            .750
 ./bench.sh 288 8  20
 3.2G
 
