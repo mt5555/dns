@@ -500,6 +500,9 @@ Sww=Sww/g_nx/g_ny/g_nz
 ux2=ux2/g_nx/g_ny/g_nz
 ux3=ux3/g_nx/g_ny/g_nz
 ux4=ux4/g_nx/g_ny/g_nz
+vor2=vor2/g_nx/g_ny/g_nz
+vor3=vor3/g_nx/g_ny/g_nz
+vor4=vor4/g_nx/g_ny/g_nz
 u2=u2/g_nx/g_ny/g_nz
 
 ensave=ensave/g_nx/g_ny/g_nz
