@@ -73,6 +73,7 @@ maxs=0
 time=0
 itime=0
 
+
 delt=0
 call rk4(time,Q,ints,maxs)
 call time_control(itime,time,Q,ints,maxs)  ! output initial data, choose delt

@@ -21,6 +21,18 @@ end module
 #endif
 
 
+!
+! Linux	
+!
+#ifdef LINUX
+module mpi
+#include "mpif.h"
+integer MPI_REAL8 
+parameter (MPI_REAL8=MPI_DOUBLE_PRECISION)
+end module
+#endif
+
+
 
 
 

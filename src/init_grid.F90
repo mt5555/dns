@@ -81,9 +81,12 @@ if (my_pe==io_pe) then
       call abort("bad input file")
    endif
    !  u_t = mu * (2 pi k)^2
-   print *,'Diffusion damping time on smallest scale: ',&
-     1/(mu*pi*pi*(g_nx**2 + g_ny**2 + g_nz**2))
 endif
+
+write(message,*) 'Diffusion d/dt(log u_2delx) = ',&
+     (mu*pi*pi*(g_nx**2 + g_ny**2 + g_nz**2)),' s^-1'
+call print_message(message)
+
 
 #ifdef USE_MPI
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)

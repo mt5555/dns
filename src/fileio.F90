@@ -59,7 +59,6 @@ if (doit) then
 endif
 
 
-
 !
 ! diagnostic output
 !
@@ -68,7 +67,6 @@ time_target=min(time_target,time_next)
 if (doit) then
    call output_diags(time,Q)
 endif
-
 
 
 
@@ -93,7 +91,6 @@ if (doit) then
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
    call print_message(message)	
-
    call compute_div(Q,io_pe,divx,divi)
    write(message,'(a,3f12.5,a,e12.5)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3),' max div',divx
    call print_message(message)	
@@ -178,7 +175,7 @@ p=0
 do i=1,3
    p=p+.5*Q(:,:,:,i)*Q(:,:,:,i)  
 enddo
-call compute_spectrum(p,spectrum,iwave)
+call compute_spectrum(p,spectrum,iwave,io_pe)
 
 #if 0
 iwave=max(g_nx,g_ny,g_nz)/2

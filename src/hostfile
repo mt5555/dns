@@ -1,0 +1,11 @@
+#setenv LAMRSH "ssh -x"   does not seem to be needed?
+# to compile with lf95 support:   ./configure --prefix=/contrib/lam --with-fflags=--staticlink
+#lamboot -v hostfile  startup lame 
+#tping N              will ping all mpi hosts
+#mpitask              show status
+#lamclean -v          kill running mpi program
+#lamhalt              shut down lam
+
+darkstar
+
+

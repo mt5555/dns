@@ -8,7 +8,9 @@ ARCH = $(shell uname -m)
 ifeq ($(UNAME),Linux)
    F90 = lf95
    LDFLAGS = --staticlink
-   FFLAGS = -O -DLINUX
+   MPI = -DUSE_MPI -I/contrib/lam/include
+   MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+   FFLAGS = -O -DLINUX $(MPI)
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
