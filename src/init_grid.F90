@@ -356,8 +356,18 @@ if (my_pe==io_pe) then
    !   -ui  use UDM for input
    !   -uo  use UDM for output
    !
-   !   -s   restart and output file are 2/3 dealiased spectral coefficieints,
-   !        not the default grid point values
+   !   -s   same as -si and -so
+   !   -si  input is spectral coefficient file instead of grid point data
+   !   -so  output spectral coefficients instead of grid point data
+   !   -smax  <n>   output n spectral coefficients
+   !
+   !   -mio  use mpi-io with a stripe of 64 for grid point I/O
+   !
+   !   -cout <text>   type of data to output for the convert.F90 program
+   !                   "uvw", "vor", "vorm"
+   !
+   !   -isodir <n>    use at most n directions in isoave calculation
+   !   -isodel <n>    use seperation distances at most n grid points.
    !
    rundir="./"
    runname="temp"
@@ -393,11 +403,27 @@ if (my_pe==io_pe) then
                rundir(j+1:j+1)="/"
             endif
          endif
-      else if (message(1:2)=="-i") then
+      else if (message(1:2)=="-i" .and. len_trim(message)==2) then
          i=i+1
          if (i>iargc()) exit
          call getarg(i,inputfile)
          j=len_trim(inputfile)
+      else if (message(1:2)=="-isodir" .and. len_trim(message)==7) then
+         i=i+1
+         if (i>iargc()) exit
+         call getarg(i,carg)
+         j=len_trim(carg)
+         if (j>0) then
+            read(carg,'(i5)') user_specified_isodir
+         endif
+      else if (message(1:2)=="-isodel" .and. len_trim(message)==7) then
+         i=i+1
+         if (i>iargc()) exit
+         call getarg(i,carg)
+         j=len_trim(carg)
+         if (j>0) then
+            read(carg,'(i5)') user_specified_isodel
+         endif
       else if (message(1:4)=="-mio") then
          do_mpi_io=.true.
       else if (message(1:2)=="-r") then

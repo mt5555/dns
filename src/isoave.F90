@@ -1412,14 +1412,15 @@ if (j > ndelta_max) then
 endif
 
 max_delta = g_nmin/2
-
 ndir=ndir_max
-if (init_cond>=7 .and. init_cond <=9) then
-   print *,'SETTING ndir=49 to save computations'
-   print *,'SETTING max_delta = 100 to save computations'
-   ndir=49
-   max_delta = 100
+
+if (user_specified_isodel>0) then
+   max_delta=min(max_delta,user_specified_isodel)
 endif
+if (user_specified_isodir>0) then
+   ndir=min(user_specified_isodir,ndir_max)
+endif
+
 
 
 do idel=1,ndelta_max

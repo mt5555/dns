@@ -24,10 +24,10 @@ nx=512; delx_over_eta=2.74; epsilon=3.89;
 name='/ccs/scratch/taylorm/sk/check256_0000.8000'
 nx=256; delx_over_eta=1.0; epsilon=1.0;
 
-name='/ccs/scratch/taylorm/decay/decay2048-1024.0000.6491'
-nx=1024; delx_over_eta=2.73*2; epsilon=.04;
+%name='/ccs/scratch/taylorm/decay/decay2048-1024.0000.6491'
+%nx=1024; delx_over_eta=2.73*2; epsilon=.04;
 
-name='/ccs/scratch/taylorm/decay/decay20480000.5551.new'
+name='/ccs/scratch/taylorm/decay/decay20480000.6491'
 nx=2048; delx_over_eta=2.73*2; epsilon=.04;
 
 
@@ -62,8 +62,12 @@ end
 
 
 xx=(1:.5:(nx./2.5)) / nx;
-xx_plot=(1:.5:(nx./2.5)) *delx_over_eta;
+
+xx=(1:.5:100)/nx;
+
 [y45,y415,y43,eps]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
+xx_plot=xx*nx*delx_over_eta;
+
 
 return
 figure(10); hold off;

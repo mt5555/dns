@@ -64,11 +64,16 @@ logical :: do_mpi_io=.false.
 logical :: byteswap_input=.false.   ! byteswap all binary input files
 
 
+!
+! options used by various utility programs:
+!
                                     ! used by the 'convert' program:
 integer :: convert_opt=-1           ! 0   output uvw  
                                     !     usefull to convert to/from UDM
                                     ! 1   output vor1,2,3 
                                     ! 2   output vor magnitude 
+integer :: user_specified_isodir=-1   ! set number of directions and 
+integer :: user_specified_isodel=-1   ! number of seperations in isoave
 
 
 real*8  :: g_u2xave=0               ! <ux,ux> updated after each time step  
