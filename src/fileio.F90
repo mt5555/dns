@@ -108,9 +108,12 @@ if (doit) then
    write(message,'(3(a,e12.5))') 'max(div)=',divx,'   <z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
-   write(message,'(a,f13.10,a,f10.5,a,f10.5,a)') 'ke: ',ints(1),&
-     '  d/dt log(ke): tot=',delke_tot/ints(1),&
-     ' diffusion=',ints(3)/ints(1)
+   write(message,'(a,f13.10,a,f12.7)') 'ke: ',ints(1),&
+     '                              total d/dt(ke)/ke: ',delke_tot/ints(1)
+   call print_message(message)	
+   write(message,'(a,f12.7,a,f12.7,a,f12.7)') &
+     'd/dt(ke) from:  diffusion=',ints(3)/ints(1),' forcing=',ints(2)/ints(1),&
+     ' total=',(ints(2)+ints(3))/ints(1)
    call print_message(message)	
    call print_message("")
 endif

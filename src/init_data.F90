@@ -1,83 +1,17 @@
-
-
 subroutine init_data_lwisotropic(Q)
 !
 ! low wave number, quasi isotropic initial condition
 !
 use params
+use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: PSI(nx,ny,nz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-integer km,jm,im,i,j,k,n,wn
+integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
 character*80 message
-
-type wnforcing_d
-   real*8  :: wn
-   integer :: n
-   integer, allocatable :: index(:,:)
-end type
-type(wnforcing_d) :: wnforcing(2)
-
-Q=0
-
-do n=1,2
-   wnforcing(n)%wn=n
-   wnforcing(n)%n=0
-enddo
-
-! count the number of wavenumbers in each band.  
-do k=nz1,nz2
-   km=kmcord(k)
-   do j=ny1,ny2
-      jm=jmcord(j)
-      do i=nx1,nx2
-         im=imcord(i)
-         xw=sqrt(real(km**2+jm**2+im**2))
-         if (xw>=.5 .and. xw<1.5) then
-            wnforcing(1)%n=wnforcing(1)%n+1
-         endif
-         if (xw>=1.5 .and. xw<2.5) then
-            wnforcing(2)%n=wnforcing(2)%n+1
-         endif
-      enddo
-   enddo
-enddo
-
-! allocate storage
-do n=1,2
-   i=wnforcing(n)%n
-   allocate(wnforcing(n)%index(i,3))
-   wnforcing(n)%n=0  ! reset counter to use again below
-enddo
-
-! store all the indexes
-do k=nz1,nz2
-   km=kmcord(k)
-   do j=ny1,ny2
-      jm=jmcord(j)
-      do i=nx1,nx2
-         im=imcord(i)
-         xw=sqrt(real(km**2+jm**2+im**2))
-         if (xw>=.5 .and. xw<1.5) then
-            wnforcing(1)%n=wnforcing(1)%n+1
-            wnforcing(1)%index(wnforcing(1)%n,1)=i
-            wnforcing(1)%index(wnforcing(1)%n,2)=j
-            wnforcing(1)%index(wnforcing(1)%n,3)=k
-         endif
-
-         if (xw>=1.5 .and. xw<2.5) then
-            wnforcing(2)%n=wnforcing(2)%n+1
-            wnforcing(2)%index(wnforcing(2)%n,1)=i
-            wnforcing(2)%index(wnforcing(2)%n,2)=j
-            wnforcing(2)%index(wnforcing(2)%n,3)=k
-         endif
-      enddo
-   enddo
-enddo
-
 
 
 
@@ -107,14 +41,14 @@ do n=1,3
             im=imcord(i)
             xw=sqrt(real(km**2+jm**2+im**2))
 
-            xfac = .5 * (2*2*2)
+            xfac = (2*2*2)
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
             if (xw>=.5 .and. xw<1.5) then
-               ener1=ener1+xfac*Q(i,j,k,n)**2
+               ener1=ener1+.5*xfac*Q(i,j,k,n)**2
             else if (xw>=1.5 .and. xw<2.5) then
-               ener2=ener2+xfac*Q(i,j,k,n)**2
+               ener2=ener2+.5*xfac*Q(i,j,k,n)**2
             else
                Q(i,j,k,n)=0
             endif
@@ -122,6 +56,13 @@ do n=1,3
       enddo
    enddo
 enddo
+
+#ifdef USE_MPI
+   ener=ener1
+   call MPI_allreduce(ener,ener1,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   ener=ener2
+   call MPI_allreduce(ener,ener2,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
 
 
 
@@ -134,10 +75,6 @@ do n=1,3
             im=imcord(i)
             xw=sqrt(real(km**2+jm**2+im**2))
 
-            xfac = .5 * (2*2*2)
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
             if (xw>=.5 .and. xw<1.5) then
                Q(i,j,k,n)=Q(i,j,k,n)*sqrt(ener1_target/(ener1))
             else if (xw>=1.5 .and. xw<2.5) then
@@ -159,11 +96,19 @@ do n=1,3
       enddo
    enddo
 enddo
+ener=ener/g_nx/g_ny/g_nz
+#ifdef USE_MPI
+   xfac=ener
+   call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
 
-print *,'targets',ener1_target,ener2_target
-print *,'tot E=',ener/g_nx/g_ny/g_nz
-call output_diags(0.0,Q)
-
+call print_message("Isotropic initial condition in wave numbers:");
+write(message,'(a,f8.4,a,f8.4)') "0.5 <= wn < 1.5   E=",ener1,"  E target=",ener1_target
+call print_message(message)
+write(message,'(a,f8.4,a,f8.4)') "1.5 <= wn < 2.5   E=",ener2,"  E target=",ener2_target
+call print_message(message)
+write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
+call print_message(message)
 
 
 end subroutine

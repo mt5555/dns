@@ -31,9 +31,9 @@ call test           ! optional testing  routines go here
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 write(message,'(a)') 'Initial data'
 call print_message(message)
-!call init_data_lwisotropic(Q)             ! set up initial data 
-!call init_data_khblob(Q)
-call init_data_kh(Q)             ! set up initial data 
+if (init_cond==0) call init_data_khblob(Q)
+if (init_cond==1) call init_data_kh(Q)
+if (init_cond==2) call init_data_lwisotropic(Q) 
 
 write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data

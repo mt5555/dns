@@ -1,40 +1,56 @@
-subroutine sforcing12(rhs,Qhat)
+subroutine sforcing(rhs,Qhat,f_diss)
+!
+! Add a forcing term to rhs, in spectral space.
+!
+use params
+implicit none
+real*8 :: Qhat
+real*8 :: rhs
+real*8 :: f_diss
+if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss)
+
+end
+
+
+subroutine sforcing12(rhs,Qhat,f_diss)
 !
 ! Add a forcing term to rhs.
 ! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
 ! Force 3D wave numbers 2 back to the sphere E=2**(-5/3)
 !
 use params
+use mpi
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: PSI(nx,ny,nz,n_var)
-real*8 :: work(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-integer km,jm,im,i,j,k,n,wn
-real*8 xw
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var) 
+real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var) 
+integer km,jm,im,i,j,k,n,wn,ierr
+real*8 xw,tau,xfac,f_diss
 logical,save :: firstcall=.true.
 
 type wnforcing_d
    integer :: n
    integer, allocatable :: index(:,:)
 end type
-type(wnforcing_d) :: wnforcing(2)
+#define NUMBANDS 2
+type(wnforcing_d),save :: wnforcing(NUMBANDS)
+real*8 ener(NUMBANDS),ener_target(NUMBANDS),temp(NUMBANDS)
 
 
 if (firstcall) then
    firstcall=.false.
 
-   do n=1,2
+   do n=1,NUMBANDS
       wnforcing(n)%n=0
    enddo
    
-   ! count the number of wavenumbers in each band.  
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
+   ! count the number of wavenumbers in each band on this CPU.  
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+
             xw=sqrt(real(km**2+jm**2+im**2))
             if (xw>=.5 .and. xw<1.5) then
                wnforcing(1)%n=wnforcing(1)%n+1
@@ -47,19 +63,20 @@ if (firstcall) then
    enddo
    
    ! allocate storage
-   do n=1,2
+   do n=1,NUMBANDS
       i=wnforcing(n)%n
       allocate(wnforcing(n)%index(i,3))
       wnforcing(n)%n=0  ! reset counter to use again below
    enddo
    
    ! store all the indexes
-   do k=nz1,nz2
-      km=kmcord(k)
-      do j=ny1,ny2
-         jm=jmcord(j)
-         do i=nx1,nx2
-            im=imcord(i)
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+
             xw=sqrt(real(km**2+jm**2+im**2))
             if (xw>=.5 .and. xw<1.5) then
                wnforcing(1)%n=wnforcing(1)%n+1
@@ -80,30 +97,51 @@ if (firstcall) then
 endif
 
 
-do wn=1,2
-   ener_target=wn**(-5.0/3.0)
-   ener=0
+
+f_diss=0
+do wn=1,NUMBANDS
+   ener_target(wn)=wn**(-5.0/3.0)
+   ener(wn)=0
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
-      j=wnforcing(wn)%index(n,1)
-      k=wnforcing(wn)%index(n,1)
-      xfac=.5*8
-      if (kmcord(k)==0) xfac=xfac/2
-      if (jmcord(j)==0) xfac=xfac/2
-      if (imcord(i)==0) xfac=xfac/2
-      
-      ener=ener+xfac*(Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      ener(wn)=ener(wn)+.5*xfac*(Qhat(k,i,j,1)**2+Qhat(k,i,j,2)**2+Qhat(k,i,j,3)**2)
    enddo
-   ! Qf = Q*sqrt(ener_target/ener)
-   ! forcing = tau (Qf-Q) = tau * (sqrt(ener_target/ener)-1) Q
-   rhs(i,j,k,1) = rhs(i,j,k,1) + tau*(sqrt(ener_target/ener)-1)*Q(i,j,k,1)
-   rhs(i,j,k,2) = rhs(i,j,k,2) + tau*(sqrt(ener_target/ener)-1)*Q(i,j,k,2)
-   rhs(i,j,k,3) = rhs(i,j,k,3) + tau*(sqrt(ener_target/ener)-1)*Q(i,j,k,3)
-
-
-
+#ifdef USE_MPI
+   temp=ener
+   call MPI_allreduce(temp,ener,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
 enddo
 
+
+do wn=1,NUMBANDS
+   ! Qf = Q*sqrt(ener_target/ener)
+   ! forcing = tau (Qf-Q) = tau * (sqrt(ener_target/ener)-1) Q
+   tau=1.0*(sqrt(ener_target(wn)/ener(wn))-1)
+!   print *,'FORCING:',wn,ener(wn),ener_target(wn)
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      rhs(k,i,j,1) = rhs(k,i,j,1) + tau*Qhat(k,i,j,1)
+      rhs(k,i,j,2) = rhs(k,i,j,2) + tau*Qhat(k,i,j,2)
+      rhs(k,i,j,3) = rhs(k,i,j,3) + tau*Qhat(k,i,j,3)
+
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      f_diss = f_diss + xfac*tau*(Qhat(k,i,j,1)**2 + &
+           Qhat(k,i,j,2)**2 + &
+           Qhat(k,i,j,3)**2) 
+
+   enddo
+enddo
 end 
    
    

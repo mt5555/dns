@@ -28,6 +28,8 @@ if (my_pe==io_pe) then
    read(*,*) input_file_type
    if (input_file_type==0) then
       call read_type0()
+   else if (input_file_type==1) then
+      call read_type1()
    else
       call abort("bad input file")
    endif
@@ -229,4 +231,118 @@ do i=1,ncustom
    read(*,*) custom(i)
 enddo
 
+init_cond=1      ! KH analytic - default initial condition
+forcing_type=0   ! no forcing
+
 end subroutine
+
+
+
+
+
+
+
+
+subroutine read_type1
+use params
+implicit none
+
+!local variables
+character*80 message
+character*20 sdata
+real*8 rvalue
+integer i
+
+
+read(*,'(a)') message
+do i=1,80
+   if (message(i:i)==' ') then
+      runname=message(1:i-1)
+      exit
+   endif
+enddo
+
+
+read(*,'(a12)') sdata
+if (sdata=='KH-blob') then
+   init_cond=0
+else if (sdata=='KH-anal') then
+   init_cond=1
+else if (sdata=='iso12') then
+   init_cond=2
+else 
+   call abort("invalid initial condtion specified on line 3 on input file")
+endif
+
+
+read(*,'(a12)') sdata
+if (sdata=='none') then
+   forcing_type=0
+else if (sdata=='iso12') then
+   forcing_type=1
+else 
+   call abort("invalid forcing type specified on line 4 on input file")
+endif
+
+
+
+read(*,'(a12)') sdata
+read(*,*) rvalue
+if (sdata=='value') then
+   mu=rvalue
+else 
+   call abort("only viscosity type 'value' supported")
+endif
+
+read(*,'(a12)') sdata
+if (sdata=='fft') then
+   dealias=.false.
+else if (sdata=='fft-dealias') then
+   dealias=.true.
+else
+   call abort("only 'fft' derivative method supported")
+endif
+
+
+read(*,'(a12)') sdata
+if (sdata=='periodic') then
+else
+   call abort("only 'perodic' b.c. supported")
+endif
+
+read(*,'(a12)') sdata
+if (sdata=='periodic') then
+else
+   call abort("only 'perodic' b.c. supported")
+endif
+
+read(*,'(a12)') sdata
+if (sdata=='periodic') then
+else
+   call abort("only 'perodic' b.c. supported")
+endif
+
+read(*,*) time_final
+read(*,*) cfl_adv
+read(*,*) cfl_vis
+read(*,*) delt_min
+read(*,*) delt_max
+read(*,*) restart_dt
+read(*,*) diag_dt
+read(*,*) screen_dt
+read(*,*) output_dt
+read(*,*) ncustom
+allocate(custom(ncustom))
+do i=1,ncustom
+   read(*,*) custom(i)
+enddo
+
+end subroutine
+
+
+
+
+
+
+
+

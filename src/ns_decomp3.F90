@@ -30,6 +30,9 @@ if (firstcall) then
    if (.not. dealias) then
       call abort("Error: using ns3dspectral model, which must be run dealiased")
    endif
+   if (forcing_type==1) then
+      call abort("Error: SPEC_SLOW model cannot use forcing_type=1")
+   endif
 endif
 
 
@@ -177,7 +180,7 @@ real*8 xfac,tmx1,tmx2
 real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke_diss,vor,hel,maxvor
+real*8 :: ke_diss,vor,hel,maxvor,f_diss
 
 
 real*8 tmp(g_nz2,nslabx,ny_2dz,n_var)
@@ -315,6 +318,14 @@ ke_diss = 0
    enddo
 
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! add in forcing
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (forcing_type>0) call sforcing(rhs,Qhat,f_diss)
+
+
+
 !  make rhs div-free
    do k=nz1,nz2
       km=kmcord(k)
@@ -374,6 +385,7 @@ ke_diss = 0
 
 if (compute_ints==1) then
    ints_timeDU=time
+   ints(2)=f_diss
    ints(3)=ke_diss
    ints(4)=vor
    ints(5)=hel

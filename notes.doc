@@ -87,31 +87,22 @@ FFT timings.
 run to .1 
 CFL=1.5/.25
 
-Linux laptop PGI F90
-STK2+gcc                   1.47  1.48
-STK2+PGC                   1.45
-
-Linux laptop Lahey
-FFT99                      1.59  1.58
-STK2+gcc                   1.72  1.71
-
 autrey (linux) PGI F90 
-STK2+PGCC                  .75  .78  .76
-STK2+GCC                   .83  .83  .84
+STK2+PGCC                   .62  .62
 
+autrey (linux) INTEL
+STK2+PGCC                   .58  .58
 
-                                 (Timings too unreliable - have to be
-                                   done on 128cpus?)
-Nirvana SGIFFT                 1.80
-Nirvana SGIFFT 3d multiple     1.52  1.49
-Nirvana FFT99                  1.32 1.54 1.35  1.47   
-Nirvana STK                    1.37 1.37 1.37
+Nirvana SGIFFT             
+Nirvana SGIFFT 3d multiple 
+Nirvana FFT99              
+Nirvana STK                
 
 
 Truchas (Compaq ES40)
-FFT99   .34  .34  .34  
-STK2    .39  .39  .39
-CPQ     .42  .42  .42
+FFT99 
+STK2  
+CPQ   
 
 
 *****************************************************************

@@ -85,9 +85,9 @@ OPS    = fftops.o test.o integrals.o
 FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
-MODEL_GRID       = ns_grid.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_GRID       = ns_grid.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC_SLOW  = ns_decomp3.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
-MODEL_SPEC       = ns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SPEC       = ns.o sforcing.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 

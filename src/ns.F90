@@ -190,7 +190,7 @@ real*8 xfac,tmx1,tmx2
 real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke_diss,vor,hel,maxvor
+real*8 :: ke_diss,vor,hel,maxvor,f_diss
 
 
 
@@ -324,9 +324,9 @@ do j=1,ny_2dz
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
 
-            ke_diss = ke_diss + xfac*Qhat(k,i,j,1)**2 + &
-                                xfac*Qhat(k,i,j,2)**2 + &
-                                xfac*Qhat(k,i,j,3)**2 
+            ke_diss = ke_diss + xfac*(Qhat(k,i,j,1)**2 + &
+                                Qhat(k,i,j,2)**2 + &
+                                Qhat(k,i,j,3)**2) 
 
          
 
@@ -334,7 +334,10 @@ do j=1,ny_2dz
    enddo
 enddo
 
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! add in forcing
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (forcing_type>0) call sforcing(rhs,Qhat,f_diss)
 
 !  make rhs div-free
 do j=1,ny_2dz
@@ -391,7 +394,8 @@ enddo
 
 if (compute_ints==1) then
    ints_timeDU=time
-   ints(3)=ke_diss      ! computed in spectral space - dont have to normalize
+   ints(2)=f_diss    ! computed in spectral space - dont have to normalize
+   ints(3)=ke_diss   ! computed in spectral space - dont have to normalize
    ints(4)=vor/g_nx/g_ny/g_nz
    ints(5)=hel/g_nx/g_ny/g_nz
    maxs(5)=maxvor
