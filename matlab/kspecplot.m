@@ -21,8 +21,8 @@ if (count==0)
    disp('error reading kspec file')
 end
 time
-  n_r=fread(fid,1,'float64')
-kspec = fread(fid,n_r,'float64')
+n_r=fread(fid,1,'float64');
+kspec = fread(fid,n_r,'float64');
 
 if (time < 1)
      kspec_ave = 0*(kspec); % initialize kspec_ave
