@@ -53,7 +53,7 @@ write(message,'(a,f10.5,a)') 'initialization: ',tims(1),' s'
 call print_message(message)
 write(message,'(a,f10.5,a)') 'dns_solve:      ',tims(2),' s'
 call print_message(message)
-write(message,'(a,f10.5,a,f4.3,a)') 'time_control:   ',tims(3),' s (',tims(3)/tims(2),')'
+write(message,'(a,f10.5,a,f4.3,a)') '   time_control:   ',tims(3),' s (',tims(3)/tims(2),')'
 call print_message(message)
 
 call close_mpi
@@ -92,15 +92,13 @@ time=0
 itime=0
 
 delt=0
-call timestep(time,Q,ints,maxs)
-call time_control(itime,time,Q,ints,maxs)
+!call timestep(time,Q,ints,maxs)
+!call time_control(itime,time,Q,ints,maxs)
 
 
 do 
    ke_old=ints(1)
    call timestep(time,Q,ints,maxs)
-   itime=itime+1
-
 
    ! KE total dissapation 
    ints(2)=(ints(1)-ke_old)/(1d-200+delt)
@@ -113,6 +111,7 @@ do
    endif
 
    call time_control(itime,time,Q,ints,maxs)
+   itime=itime+1
    if (time >= time_final) exit
 enddo
 

@@ -41,7 +41,7 @@ time=  0.00000(    0)  next output= 0.10000
 delt=0.0096731 cfl_adv= 1.500 cfl_vis= 0.158                                    
 max: (u,v,w)      1.211479631395962     0.120259032747895     0.000000000000000 
 max(div)= 0.22082E-12   <z-vor>=-0.36595E-09   <hel>= 0.00000E+00               
-ke:   0.3574915702 d/dt log(ke) tot:  0.00000 d/dt log(ke) diffusion: -0.69277  
+ke:   0.3574915702 d/dt log(ke) tot:********* d/dt log(ke) diffusion: -0.69277  
 
 time=  0.00967(    1)  next output= 0.10000                                     
 delt=0.0096965 cfl_adv= 1.500 cfl_vis= 0.159                                    
@@ -88,6 +88,6 @@ max(div)= 0.15010E-12   <z-vor>= 0.43406E-10   <hel>= 0.00000E+00
 ke:   0.3396159444 d/dt log(ke) tot: -0.41690 d/dt log(ke) diffusion: -0.41828  
 
 CPU times:
-initialization:    2.74600 s                                                    
-dns_solve:         9.50400 s                                                    
-time_control:      0.06500 s (.007)                                             
+initialization:    2.85400 s                                                    
+dns_solve:         9.47100 s                                                    
+   time_control:      0.06500 s (.007)                                          
