@@ -555,26 +555,25 @@ else
    access="a"
 endif
 
-
-      if (my_pe==io_pe) then
-         write(message,'(f10.4)') 10000.0000 + time_file
-         message = rundir(1:len_trim(rundir)) &
-         // runname(1:len_trim(runname))&
-         // message(2:10) // ".hf_spec"
-         call copen(message,access,fid,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)')"output_hfree_spec(): Error opening file errno=",ierr
-            call abort(message)
-         endif
-         call cwrite8(fid,time,1)
-         x=1+iwave; call cwrite8(fid,x,1)
-         call cwrite8(fid,spec_helicity_rn,1+iwave)
-         call cwrite8(fid,spec_helicity_rp,1+iwave)
-         call cwrite8(fid,spec_E,1+iwave)
-         call cwrite8(fid,spec_kEk,1+iwave)
-         call cwrite8(fid,cos_tta_spec,1+iwave)
-         call cclose(fid,ierr)
-
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) &
+        // runname(1:len_trim(runname))&
+        // message(2:10) // ".hf_spec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)')"output_hfree_spec(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,time,1)
+   call cwrite8(fid,spec_helicity_rn,1+iwave)
+   call cwrite8(fid,spec_helicity_rp,1+iwave)
+   call cwrite8(fid,spec_E,1+iwave)
+   call cwrite8(fid,spec_kEk,1+iwave)
+   call cwrite8(fid,cos_tta_spec,1+iwave)
+   call cclose(fid,ierr)
+   
 endif
 end subroutine
 
