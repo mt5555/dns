@@ -335,6 +335,7 @@ do i=nx1,nx2
            16*w(i-1,j) - w(i-2,j)) / (12*delx*delx)
    endif
 
+
    if ((my_y==0 .and. bdy_y1==INFLOW0_ONESIDED .and. j<=ny1+2) .or. &
        (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED .and. j>=ny2-2)) then
       ! centered, 2nd order
@@ -348,20 +349,24 @@ do i=nx1,nx2
    endif
 
 
-
    rhs(i,j) = rhs(i,j) +  mu*(dxx+dyy) - u*dx - v*dy
-   maxvor=max(maxvor,abs(w(i,j)))
-   ke = ke + .5*(u**2 + v**2)
 
-   vor=vor + w(i,j)
-   ensave = ensave + w(i,j)**2
-   ens_diss=ens_diss + w(i,j)*(dxx+dyy)
+   if (compute_ints==1) then
+      if ((my_x==0 .and. bdy_x1==INFLOW0_ONESIDED .and. i==nx1) .or. &
+          (my_x==ncpu_x-1 .and. bdy_x2==INFLOW0_ONESIDED .and. i==nx2) .or. &
+          (my_y==0 .and. bdy_y1==INFLOW0_ONESIDED .and. j==ny1) .or. &
+          (my_y==ncpu_y-1 .and. bdy_y2==INFLOW0_ONESIDED .and. j==ny2)) then
+      else
+         maxvor=max(maxvor,abs(w(i,j)))
+         ke = ke + .5*(u**2 + v**2)
+         vor=vor + w(i,j)
+         ensave = ensave + w(i,j)**2
+         ens_diss=ens_diss + w(i,j)*(dxx+dyy)
+      endif
+   endif
+
 enddo
 enddo
-
-
-
-
 
 
 if (compute_ints==1) then
@@ -375,6 +380,8 @@ if (compute_ints==1) then
 
    maxs(5)=maxvor
 endif
+
+
 
 call wallclock(tmx2)
 tims(5)=tims(5)+(tmx2-tmx1)

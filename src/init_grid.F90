@@ -125,6 +125,7 @@ do i=nx1,nx2
    l = i-nx1+1 + nslabx*my_x
    xcord(i)=g_xcord(l)
    imcord(i)=g_imcord(l)
+   imsine(i)=l-1
    imsign(i)=sign(1,imcord(i))
    if (imcord(i)==0) imsign(i)=0
    if (imcord(i)==g_nx/2) imsign(i)=0
@@ -132,6 +133,7 @@ enddo
 do j=ny1,ny2
    l = j-ny1+1 + nslaby*my_y
    ycord(j)=g_ycord(l)
+   jmsine(j)=l-1
    jmcord(j)=g_jmcord(l)
    jmsign(j)=sign(1,jmcord(j))
    if (jmcord(j)==0) jmsign(j)=0
@@ -141,6 +143,7 @@ do k=nz1,nz2
    l = k-nz1+1 + nslabz*my_z
    zcord(k)=g_zcord(l)
    kmcord(k)=g_kmcord(l)
+   kmsine(k)=l-1
    kmsign(k)=sign(1,kmcord(k))
    if (kmcord(k)==0) kmsign(k)=0
    if (kmcord(k)==g_nz/2) kmsign(k)=0

@@ -1499,6 +1499,83 @@ end subroutine
 
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Compute 3D sin transform along first dimension
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
+use fft_interface
+implicit none
+integer n1,n1d,n2,n2d,n3,n3d
+real*8 :: p(n1d,n2d,n3d)
+real*8 :: w(2*n1+2,n2)
+
+integer i,j,k
+if (n1==1) return
+
+
+do k=1,n3
+   do j=1,n2
+      ! make an odd extension
+      p(n1+1,j,k)=0  ! put in the periodic point by hand to make next loop better:
+      do i=1,n1
+         w(i,j)=p(i,j,k)              !  1 2 3 4 
+         w(i+n1,j)=-p(n1+2-i,j,k)     !          5 4 3 2
+      enddo
+   enddo
+   call fft1(w,2*n1,2*n1+2,n2,n2,1,1)
+   do j=1,n2
+      ! save only the sine modes:
+      do i=1,n1
+         p(i,j,k)=w(2*i,j)
+      enddo
+   enddo
+enddo
+end subroutine
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Compute 3D sin transform along first dimension
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine isinfft1(p,n1,n1d,n2,n2d,n3,n3d)
+use fft_interface
+implicit none
+integer n1,n1d,n2,n2d,n3,n3d
+real*8 :: p(n1d,n2d,n3d)
+real*8 :: w(2*n1+2,n2)
+
+integer i,j,k
+if (n1==1) return
+
+
+do k=1,n3
+   do j=1,n2
+      ! unpack the sine modes into a sine/cosine array:
+      ! save only the sine modes:
+      do i=1,n1
+         w(2*i-1,j)=0
+         w(2*i,j)=p(i,j,k)
+      enddo
+   enddo
+   call ifft1(w,2*n1,2*n1+2,n2,n2,1,1)
+   do j=1,n2
+      do i=1,n1
+         p(i,j,k)=w(i,j)
+      enddo
+   enddo
+enddo
+end subroutine
+
+
+
+
+
+
 
 
 

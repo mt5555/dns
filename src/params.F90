@@ -142,6 +142,10 @@ integer :: imsign(nxd),jmsign(nyd),kmsign(nzd)  ! fft modes local
 integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
 integer,allocatable :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
 
+! sine modes, local 3D decomp:
+real*8 :: imsine(nxd)
+real*8 :: jmsine(nyd)
+real*8 :: kmsine(nzd)
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

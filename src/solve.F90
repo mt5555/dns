@@ -272,7 +272,7 @@ if (btype==-1) then
             bdy_y1==REFLECT_ODD .and. bdy_y2==INFLOW0_ONESIDED) then
       btype=2
    else
-      call abort("compute_psi(): boundery conditions not supported")
+      call abort("compute_psi(): specified boundery conditions not supported")
    endif
 endif
 
@@ -305,7 +305,9 @@ else if (btype==2) then
 
    ! copy b.c. from psi into 'b', and apply compact correction to b:
    call helmholtz_dirichlet_setup(b,psi,work,1)
-   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
+   call helmholtz_dirichlet_inv(b,work,zero,one)
+!   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
 
    !update PSI 1st row of ghost cells so that our 4th order differences
@@ -343,7 +345,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
 real*8 phi(nx,ny,nz)    
 real*8 lphi(nx,ny,nz)    
+real*8 xm,ym,zm,xfac
 
+if (beta==0) then
+   f=f/alpha
+   return
+endif
 
 !NOTE: we dont need phi, lphi.  when this code is debugged, replace by:
 ! save boundary data in single 1D array
@@ -368,10 +375,70 @@ call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
 f=f-lphi
 call zero_boundary(f)
 ! solve Helm(f) = b with 0 b.c.
+
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call sinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   ! mode imsine(i),jmsine(j),kmsine(k)
+   ! alpha*sin(x) + beta*[sin(x+h) - 2 sin(x) + sin(x-h)] / delx*delx + same in y,z
+   !
+   ! beta' = beta/delx**2
+   !
+   ! [ alpha + 2*beta'*cos(2pi k delx) - 2beta'  ]  sin(2pi k x)
+
+   xm = -2 + 2*cos(pi2*delx*imsine(i))
+   xm=xm/(delx*delx)
+   ym = -2 + 2*cos(pi2*dely*jmsine(j))
+   ym=ym/(dely*dely)
+   zm = -2 + 2*cos(pi2*delz*kmsine(k))
+   zm=zm/(delz*delz)
+   
+   xfac = alpha + beta*(xm+ym+zm)
+   f(i,j,k) = f(i,j,k) / xfac
+enddo
+enddo
+enddo
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call isinfft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
+
+
+!print *,maxval(abs(f(nx1:nx2,ny1:ny2,1)-lphi(nx1:nx2,ny1:ny2,1)))
+
+
 f=f+phi
-
-
 end subroutine
+
+
+
+
+
+
+
+
 
 
 

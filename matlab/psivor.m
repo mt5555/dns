@@ -17,22 +17,19 @@ name='../src/temp';
 
 mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
-mplot=1;           % set to nonzero to put 'mplot' plots per figure
 
-mplot=min(mplot,length(range));
 
 s=findstr(name,'/');
 s=s(length(s));
 shortname=name(s+1:length(name));
 
-kplot=1;
 for i=range
   ts=i;
   ts = sprintf('%9.5f',10000+ts);
   ts=ts(2:10);
 
-  ts=[name,ts,'.vor']
-  fidvor=fopen(ts,'r');
+  fname=[name,ts,'.vor']
+  fidvor=fopen(fname,'r');
   time=fread(fidvor,1,'float64')
   data=fread(fidvor,3,'float64');
   nx=data(1);
@@ -50,54 +47,51 @@ for i=range
     disp('Error reading input file...')
   end
   fclose(fidvor);
-  
   q = reshape(q,nx,ny,nz);
   qmax=max(max(max(q)));
+  vor = squeeze(q(:,:,1));
   disp(sprintf('max vor=                %f ',qmax));
 
-  %ts=sprintf('%s    time=%.2f  %ix%ix%i',shortname,time,nx,ny,nz);
-  ts=sprintf('%s    time=%.2f  max=%f',shortname,time,qmax)
+  
+  
+  fname=[name,ts,'.psi']
+  fidvor=fopen(fname,'r');
+  time=fread(fidvor,1,'float64')
+  data=fread(fidvor,3,'float64');
+  nx=data(1);
+  ny=data(2);
+  nz=data(3);
+  
+  x=fread(fidvor,nx,'float64');
+  y=fread(fidvor,ny,'float64');
+  z=fread(fidvor,nz,'float64');
+  
+  q = fread(fidvor,nx*ny*nz,'float64');
+  tmp = fread(fidvor,1,'float64');
+  tmp=size(tmp);
+  if (tmp(1)~=0) 
+    disp('Error reading input file...')
+  end
+  fclose(fidvor);
+  q = reshape(q,nx,ny,nz);
+  psi = squeeze(q(:,:,1));
 
   
-  if (nz>=4) 
-    %
-    %  3D field, plot 4 sections in a 2x2 subplot window
-    %
-    figure(1)
-    for i=1:4
-       subplot(2,2,i)
-       nzi=1 + (i-1)*nz/4;
-       nzi=floor(nzi);
-       vor = squeeze(q(:,:,nzi));
-       pcolor(x,y,vor')
-       if (i==1)
-         title(ts);
-       else
-         title(sprintf('nz=%i',nzi));
-       end
-       shading interp
-       axis square
-     end
-     figure(2)
-     clf;
-     q=shiftdim(q,2);
-     isosurface(z,x,y,q,50);
-     axis([0 1 0 1 0 1]);
-     view([30,30]);
- 
-  else
+  
+  
+  
+  
+  stitle=sprintf('%s    time=%.2f  max=%f',shortname,time,qmax)
+
+  
     %
     %  2D field.  options set above:
     %  mkcontour=0,1    use pcolor, or contour plot
-    %  mplot=N        plot in a subplot(n,1) window
     %
     figure(1)
-    if (kplot==1) clf; end;
-    vor = squeeze(q(:,:,1));
-    if (mplot>1) 
-      subplot(mplot,1,kplot)
-      kplot=mod(kplot,mplot)+1;
-    end
+    clf
+    subplot(2,1,1)
+
     if (mkcontour==0)
       pcolor(x,y,vor')
       shading interp
@@ -113,15 +107,26 @@ for i=range
       hold off
     end
     
-    title(ts);
+    title(stitle);
     axis square
-  end
+
+    
+    subplot(2,1,2)
+
+    if (mkcontour==0)
+      pcolor(x,y,psi')
+      shading interp
+    else
+      v=20;                             % use 10 contours
+      contour(x,y,psi',v)
+    end
+    axis square
+    
+    
+
   
-  if (kplot==1)
     if (mkpr) 
-      if (mplot>0)
-        orient tall
-      end
+      orient tall
       pname=[name,'.vor.ps'];
       disp('creating ps...')
       print('-depsc',pname);

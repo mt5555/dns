@@ -96,7 +96,7 @@ real*8 psi(nx,ny)
 integer i,j,k,l,ierr
 real*8 :: dela
 real*8,external :: logterm
-real*8 :: ubar=0
+real*8 :: ubar=.1
 real*8 :: eps=1e-8
 real*8 :: psi_b(max(g_ny,g_nx),2,2)   ! psi_b(k,1,1) = x1 boundary
                                       ! psi_b(k,1,2) = x2 boundary
@@ -185,6 +185,7 @@ endif
 
 
 
+
 return
 end subroutine
 
@@ -205,8 +206,11 @@ sumy = ycord(j) + g_ycord(l)
 
 denom1 = difx**2 + dify**2
 denom2 = difx**2 + sumy**2
-
-logterm = log(denom1/denom2)
+if (denom1==0) then
+   logterm=0
+else
+   logterm = log(denom1/denom2)
+endif
 end function 
 
 
