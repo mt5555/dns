@@ -16,6 +16,7 @@ if (restart==1) then
 
    ! set grav, fcor
    if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)   
+   if (init_cond==10) call init_3d_rot(Q,Qhat,work1,work2,0)   
 
    ! set xscale, yscale, offset grid 
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0)   
@@ -58,6 +59,7 @@ else
    if (init_cond==6) call init_data_zero(Q,Qhat,work1,work2)
    if (init_cond==7) call init_data_decay(Q,Qhat,work1,work2,1,0,0)
    if (init_cond==8) call init_data_decay(Q,Qhat,work1,work2,1,1,0)
+   if (init_cond==10) call init_3d_rot(Q,Qhat,work1,work2,1)
 
    if (npassive>0) then
       call init_passive_scalars(1,Q,Qhat,work1,work2)

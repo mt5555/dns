@@ -271,6 +271,75 @@ end subroutine
 
 
 
+
+
+subroutine init_3d_rot(Q,PSI,work1,work2,init)
+!
+!   init=0   setup paraemeters only
+!   init=1   setup paraemeters and compute initial condition
+!
+!
+use params
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: PSI(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+integer :: init,nb
+character(len=240) :: message
+integer,parameter :: NUMBANDS=100
+real*8  :: enerb_target(NUMBANDS),enerb(NUMBANDS),ener
+
+
+fcor=1
+zscale=1
+
+if (init_cond_subtype==0) then
+   fcor=1
+   zscale=1
+endif
+
+
+if (init==0) return
+
+
+! compute U using random vorticity
+call ranvor(Q,PSI,work1,work2,0)
+!
+!  rescale data to fit energy profile
+!
+enerb=0
+enerb_target=0
+if (init_cond_subtype==0) then
+do nb=1,NUMBANDS
+   enerb_target(nb)=.1*exp(-.5*(nb-forcing_peak_waveno)**2)/sqrt(2*pi)
+enddo
+endif
+
+! rescale E to fit enerb_target():
+call rescale_e(Q,work1,ener,enerb,enerb_target,NUMBANDS,3)
+
+
+call print_message("Isotropic initial condition in wave numbers:");
+do nb=1,min(NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
+   write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
+        "  E target=",enerb_target(nb)
+   call print_message(message)
+enddo
+write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
+call print_message(message)
+
+
+
+
+
+end subroutine
+
+
+
+
+
 subroutine init_data_sht(Q,PSI,work1,work2,init)
 !
 !   init=0   setup paraemeters only

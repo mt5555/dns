@@ -1426,6 +1426,8 @@ else if (sdata=='decay2048_e') then
    init_cond=8
 else if (sdata=='decay2048_s') then
    init_cond=9
+else if (sdata=='3d_rot') then
+   init_cond=10
 else 
    print *,'value = >>',sdata,'<<'
    call abort("invalid initial condtion specified on line 3 on input file")
@@ -1450,6 +1452,12 @@ else if (sdata=='balu') then
    forcing_type=5
 else if (sdata=='iso12_hel') then
    forcing_type=6
+else if (sdata=='iso_high_24') then
+   forcing_peak_waveno=24
+   forcing_type=7
+else if (sdata=='iso_high_16') then
+   forcing_peak_waveno=16
+   forcing_type=7
 else 
    call abort("invalid forcing type specified on line 4 on input file")
 endif

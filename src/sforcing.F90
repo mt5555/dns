@@ -55,6 +55,8 @@ if (forcing_type==5) call sforcing12(rhs,Qhat,f_diss,fxx_diss,2)
 ! determinisitic with E1=E2=.5, also impose helicity
 if (forcing_type==6) call sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,0)
 
+! determinisitic - high wavenumber
+if (forcing_type==7) call sforcing12(rhs,Qhat,f_diss,fxx_diss,3)
 
 
 
@@ -115,6 +117,7 @@ subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss,model_spec)
 ! model_spec==0    E(1)=E(2)=.5
 ! model_spec==1    Overholt & Pope
 ! model_spec==2    Balu
+! model_spec==3    high wave number for rotation case
 !
 use params
 use mpi
@@ -137,20 +140,27 @@ if (0==init_sforcing) then
          ener_target(wn)=.5
       enddo
    endif
-   if (model_spec==1) then
+   if (model_spec==1) then  ! like O&P
       numb=8
       call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
-   ! balu forcing
-   if (model_spec==2) then
+   if (model_spec==2) then     ! balu forcing
       numb1=10
       numb=10
       call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=.063
+      enddo
+   endif
+   if (model_spec==3) then     ! For the rotation case  
+      numb1=max(forcing_peak_waveno-8,1)
+      numb=forcing_peak_waveno+8
+      call sforcing_init()
+      do wn=numb1,numb
+         ener_target(wn)=.1*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
       enddo
    endif
    if (numb>numb_max) call abort("sforcing12: numb_max too small")
