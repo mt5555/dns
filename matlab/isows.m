@@ -1,21 +1,30 @@
+ext='.isostr';
+ext2='.isow2s2';
+
+
+
 name='/ccs/scratch/taylorm/dns/iso12_512'
-%name='/home/mt/iso12_512'
+times=[7.0:.1:7.0];
 nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0;
 S2norm=2.1217e+04;
 w2norm=4.2435e+04;
 
 
+%name='/ccs/scratch/taylorm/dns/sc512A'
+%times=[3.0:.1:3.0];
+%nx=512; delx_over_eta=.53; epsilon=4.07;  teddy=.895;
+%S2norm=2.2852e+03;
+%w2norm=4.5704e+03;
 
-ext='.new.isostr';
-ext2='.new.isow2s2';
 
 
 
 
 
-times=[7.0:.1:7.0];
-xx=(1:.5:(nx./2.5)) / nx;
-xx_plot=(1:.5:(nx./2.5)) *delx_over_eta;   % units of r/eta
+
+
+xx=[.1,(1:.5:(nx./2.5))] / nx;
+xx_plot=xx*nx*delx_over_eta;   % units of r/eta
 
 t=times(1);
 tstr=sprintf('%10.4f',t+10000);
@@ -116,8 +125,8 @@ title('D_{llll} and D_{lltt} ');
 ylabel(' ');
 xlabel('r/\eta');
 %x=1:xmax; semilogx(x,(4/15)*x./x,'k');
-ax=axis;  axis([1,xmax,ax(3),ax(4)]);
-axis([1,xmax,ax(3),ax(4)]);
+ax=axis; 
+axis([.1,xmax,ax(3),ax(4)]);
 hold off;
 
 %print('-dpsc',[name,ext,'_w2s2.ps']);
@@ -174,8 +183,9 @@ xlabel('r/\eta');
 x=1:xmax; plot(x,w2norm^2.*x./x,'k');
 x=1:xmax; plot(x,S2norm^2.*x./x,'k');
 x=1:xmax; plot(x,w2norm.*S2norm.*x./x,'k');
-ax=axis;  axis([1,xmax,ax(3),ax(4)]);
-axis([1,xmax,ax(3),ax(4)]);
+ax=axis;  
+axis([.1,xmax,ax(3),ax(4)]);
+%axis([0,5,ax(3),ax(4)]);
 hold off;
 
 %print('-dpsc',[name,ext,'_w2s2.ps']);

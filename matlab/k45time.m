@@ -1,3 +1,8 @@
+%
+%
+% 4/5 ths law: time and angle averaged 
+%
+%
 mu=0;
 ke=0;
 nx=1;

@@ -16,8 +16,9 @@ fid2=-1;
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
 %fid=endianopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r'); 
+fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
-fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+%fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
 
