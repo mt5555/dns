@@ -419,9 +419,9 @@ do i=1,numt
          enddo
       endif
    else
-      print *,'tracer has left the domain: '
-      write(*,'(2i5,2e14.5,f5.0)') my_pe,i,tracer(i,1),tracer(i,2),tracer(i,3)
-      call abort("tracer_advance(): point has left domain") 
+      ! print *,'tracer has left the domain: '
+      ! write(*,'(2i5,2e14.5,f5.0)') my_pe,i,tracer(i,1),tracer(i,2),tracer(i,3)
+      ! call abort("tracer_advance(): point has left domain") 
    endif
 enddo
 
