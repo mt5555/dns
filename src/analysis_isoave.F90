@@ -38,10 +38,10 @@ real*8 :: kr,ke,ck,xfac
 CPOINTER :: fid
 
 ! input file
-basename="/ccs/taylorm/dns/src/temp"
+basename="temp5"
 print *,basename
-tstart=1.5
-tstop=11.0
+tstart=1.75
+tstop=1.75
 tinc=1.0
 icount=0
 
@@ -77,7 +77,7 @@ do
    fname = basename(1:len_trim(basename)) // sdata(2:10) // ".w"
    print *,'filename: ',fname(1:len_trim(fname))
    call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
-
+   time=time2
 
   
    call isoave1(Q,work1,work2)
@@ -90,7 +90,7 @@ do
       write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
       call abort(message)
    endif
-   call writeisoave(fid)
+   call writeisoave(fid,time)
    call cclose(fid,ierr)
 
 

@@ -1,6 +1,8 @@
+%name='/scratch1/taylorm/iso12w512A0001.3847'
+%nx=512; delx_over_eta=5.8615; epsilon=.2849;
 
-%name='/scratch1/taylorm/iso_256A0040.000'
-%nx=256; delx_over_eta=1.73; epsilon=95.0;
+%name='/scratch1/taylorm/iso12_500A0001.7723'
+%nx=500; delx_over_eta=2.740; epsilon=3.5208;
 
 %name='/scratch1/taylorm/iso12_250A0022.000'
 %nx=250; delx_over_eta=.80; epsilon=3.9;
@@ -9,7 +11,7 @@
 %nx=256; delx_over_eta=.7; epsilon=3.0;
 
 name='../src/test0001.0000'
-nx=256; delx_over_eta=2.00; epsilon=4.31;
+nx=256; delx_over_eta=2.00; epsilon=4.3081;
 
 %name='../src/test0001.5000'
 %nx=256; delx_over_eta=3.46; epsilon=4.93;
@@ -41,7 +43,7 @@ ndelta=fread(fid,1,'float64');
 ndir  =fread(fid,1,'float64');
 nlon  =fread(fid,1,'float64');
 ntran =fread(fid,1,'float64');
-nscalers =fread(fid,1,'float64');
+nscalars =fread(fid,1,'float64');
 nnew2 =fread(fid,1,'float64');
 
 r_val=fread(fid,[ndelta,ndir],'float64');
@@ -87,17 +89,17 @@ xx=(1:1.0:(nx./2.5))*delx_over_eta;   % units of r/eta
 xx_box = xx/delx_over_eta/nx;         % in code units (box length)
 
 lambda=10*ke*mu/epsilon;       % single direction lambda
-R_lambda = lambda*sqrt(2*ke/3)/mu 
+R_lambda = lambda*sqrt(2*ke/3)/mu;
 
 
-disp(sprintf('KE: %f',ke));
+disp(sprintf('KE:      %f',ke));
 disp(sprintf('epsilon: %f',epsilon));
-disp(sprintf('mu: %f',mu));
-disp(sprintf('eta: %f',eta));
-disp(sprintf('delx/eta ',delx_over_eta));
-disp(sprintf('lambda:  ',lambda));
-disp(sprintf('R_l:  ',R_lambda));
-
+disp(sprintf('mu:      %f',mu));
+disp(sprintf('eta:     %f',eta));
+disp(sprintf('delx/eta %f',delx_over_eta));
+disp(sprintf('lambda:  %f',lambda));
+disp(sprintf('R_l:     %f',R_lambda));
+disp(' ')
 
 
 

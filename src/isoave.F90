@@ -53,18 +53,19 @@ real*8,allocatable  :: SN_lll(:,:)        ! D_lll(ndelta,ndir)
 real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
 ! also added to the file for completeness:
-real*8 :: time,epsilon,mu,ke
+real*8,private :: epsilon,mu,ke
 
 private init
 
 contains
 
 
-subroutine writeisoave(fid)
+subroutine writeisoave(fid,time)
 use params
 implicit none
 
 CPOINTER fid
+real*8 :: time
 !local
 integer :: i,idir
 real*8 :: x
@@ -172,7 +173,6 @@ SN_lll=0
 
 
 do n=1,ndim
-   ! compute u_x, u_xx
    do m=1,ndim
       call der(Q(1,1,1,n),d1,dummy,work,1,m)
       do k=nz1,nz2
@@ -198,7 +198,7 @@ print *,'epsilon: ',epsilon
 print *,'mu       ',mu
 print *
 print *,'eta      ',eta
-print *,'delx/eta ',(1/g_nmin)/eta
+print *,'delx/eta ',1/(g_nmin*eta)
 print *,'lambda   ',lambda
 print *,'R_l      ',R_lambda
 
