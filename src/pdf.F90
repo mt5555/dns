@@ -20,7 +20,7 @@ type pdf_structure_function
 !
 ! pdf%data(-bin:bin,delta_num,npdfs)
 !
-integer,allocatable :: pdf(:,:)
+integer*8,allocatable :: pdf(:,:)
 integer             :: nbin         ! number of bins
 integer             :: ncalls       ! number of instances PDF has been computed
                                ! (i.e. we may compute the PDF for 10 time steps
@@ -125,36 +125,79 @@ end subroutine
 
 
 
-subroutine outputSF()
+
+
+
+subroutine outputSF(time,fid)
 use params
 implicit none
-integer i
+real*8 time
+
+integer i,ierr
+character*80 message
+CPOINTER fid
+
 
 do i=1,NUM_SF
-   call mpisum_pdf(SF(i,1))
+   call mpisum_pdf(SF(i,1));  
    call mpisum_pdf(SF(i,2))
    call mpisum_pdf(SF(i,3))
 enddo
 
 if (my_pe==io_pe) then
-do i=1,NUM_SF
-   call output_pdf(SF(i,1))   
-   call output_pdf(SF(i,2))   
-   call output_pdf(SF(i,3))   
-
-   ! reset PDF's
-   SF(i,1)%ncalls=0
-   SF(i,1)%pdf=0
-   SF(i,2)%ncalls=0
-   SF(i,2)%pdf=0
-   SF(i,3)%ncalls=0
-   SF(i,3)%pdf=0
-
-enddo      
+   cwrite8(fid,time,1)
+   do i=1,NUM_SF
+      call normalize_and_write_pdf(fid,SF(i,1),SF(i,1)%nbin)   
+      call normalize_and_write_pdf(fid,SF(i,2),SF(i,2)%nbin)   
+      call normalize_and_write_pdf(fid,SF(i,3),SF(i,3)%nbin)   
+      
+      ! reset PDF's
+      SF(i,1)%ncalls=0
+      SF(i,1)%pdf=0
+      SF(i,2)%ncalls=0
+      SF(i,2)%pdf=0
+      SF(i,3)%ncalls=0
+      SF(i,3)%pdf=0
+      
+   enddo
 endif
 
 
 end subroutine
+
+
+
+
+
+
+subroutine normalize_and_write_pdf(fid,str,nbin)
+implicit none
+integer i,ierr,nbin
+CPOINTER :: fid
+type(pdf_structure_function) :: str
+real*8 x,pdfdata(nbin:nbin,delta_num)
+
+
+! the delta values
+x=delta_num; call cwrite8(fid,x,1)
+do i=1,delta_num
+   x=delta_val(i); call cwrite8(fid,x,1)
+enddo
+
+! PDF data
+call cwrite8(fid,pdf_bin_size,1)
+x=str%nbin; call cwrite8(fid,x,1)
+x=str%ncalls; call cwrite8(fid,x,1)
+pdfdata=str%pdf / (2*nbin+1)
+call cwrite8(fid,pdfdata,2*nbin+1)
+
+
+end subroutine
+
+
+
+
+
 
 
 
@@ -189,10 +232,10 @@ call resize_pdf(str,bin)
 
 if (my_pe == io_pe) then
    allocate(pdfdata(-bin:bin,delta_num))
-   call MPI_reduce(str%pdf,pdfdata,2*str%nbin+1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
+   call MPI_reduce(str%pdf,pdfdata,2*str%nbin+1,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
    str%pdf=pdfdata
 else
-   call MPI_reduce(str%pdf,0,2*str%nbin+1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
+   call MPI_reduce(str%pdf,0,2*str%nbin+1,MPI_REAL8,MPI_MAX,io_pe,comm_3d,ierr)
 endif
 
 #endif

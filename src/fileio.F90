@@ -218,6 +218,7 @@ end subroutine
 
 subroutine output_diags(time,Q)
 use params
+use structf
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: time
@@ -271,12 +272,27 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_y,1+g_ny/2)
    call cwrite8(fid,1+g_nz/2,1)
    call cwrite8(fid,spec_z,1+g_nz/2)
+   call cclose(fid)
 endif
 
 
 
 deallocate(spectrum)
 deallocate(spectrum1)
+
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time
+!   message = runname(1:len_trim(runname)) // message(2:10) // ".sf"
+   message = runname(1:len_trim(runname)) // ".sf"
+   call copen(message,"a",fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "outputSF(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+endif
+call outputSF(time,fid)
+if (my_pe==io_pe) call cclose(fid)
 
 end subroutine
 
