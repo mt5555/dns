@@ -226,7 +226,7 @@ integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 
 integer :: ndim       ! 2 or 3 dimensions.  ndim = (g_nz==1 ? 2 : 3)
 integer :: npassive = 0   ! number of passive scalars
-integer :: np1,np2        ! passive scalars Q(:,:,:,np1:np2)
+integer :: np1=1,np2=0    ! passive scalars Q(:,:,:,np1:np2)
 
 ! number of actual data points
 integer,parameter :: nslabx=nx2-nx1+1
