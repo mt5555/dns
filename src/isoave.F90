@@ -183,7 +183,6 @@ real*8 :: Q(nx,ny,nz,ndim)               ! original data
 real*8 :: Qt(g_nz2,nslabx,ny_2dz,ndim)   ! transpose
 real*8 :: Qs(nx,ny,nz,ndim)              ! shifted original data
 real*8 :: Qst(g_nz2,nslabx,ny_2dz,ndim)  ! transpose
-real*8 :: range(3,2)
 
 
 !local
@@ -244,6 +243,7 @@ enddo
    call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
+
 epsilon=mu*ke_diss/ntot
 if (epsilon==0) epsilon=1e-20
 
@@ -273,9 +273,7 @@ do n=1,3
 enddo   
    
 
-
-
-do idir=1,ndir
+do idir=6,ndir
 
    if (my_pe==io_pe) then
       write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
