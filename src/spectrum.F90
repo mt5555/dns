@@ -102,7 +102,7 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 #endif
 
 ! q1 already contains the FFT of Q, so set skip_fft (last arg) to 1:
-call compute_helicity_spectrum(Q,q1,work1,io_pe,1)
+call compute_helicity_spectrum(Q,q1,work1,io_pe,0)
 
 end subroutine
 
