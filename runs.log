@@ -8,8 +8,9 @@ w=0, cutoff=0, bito_savart init only
 2049x1025 autrey                     t=15: 508min     3.5d for t=150
 
 3072x1536 milkyway 2x1    t=.1  4.29      t=15  (607m)  vx3072_
-3072x1536 milkyway 2x1                     t=15  IN     vx3072_onesided_
-3072x1536 autrey   2x1    t=.1  6.67
+3072x1536 milkyway 2x1                    t=15 (1700m)  vx3072_onesided_
+3072x1536 autrey   2x1    t=.1  6.67      t=15 (1337m)  vx3072b
+
 
 
 milkyway:
@@ -49,6 +50,13 @@ init_cond_subtype==1
 3072x1536  
 mu=1e-7
 
+vx6144b_*
+   b.c.: w=0/onesided, PSI fixed
+   mu=2e-8
+   IN 2 cpus milkyway
+   t=15 estamated:  88h  3.67 days.  finished monday night?
+
+
 
 vx3072_*
    b.c.:  w=0, PSI fixed 
@@ -57,14 +65,13 @@ vx3072_*
 
 vx3072_onesided_*
    b.c.:  w=0/onesided,  PSI recomputed every 5 timesteps
-   2 cpus  t=15:  IN
+   2 cpus  t=15:  1700m
 
 
 vx3072b_
    b.c.:  w=0/onesided, PSI fixed 
-   2 cpus t=15  NEXT
+   1 cpus t=15  1337m (autrey)
 
-   IN (autrey)     vxpairb.out
 
 
 
