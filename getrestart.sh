@@ -58,14 +58,15 @@ if ($fpath == HPSS) then
 else
 
    #search $fpath for newest restart file
-   set resnamew = `\ls {$fpath}/{$name}\*.w | sort | tail -1`
+   set resnamew = `\ls {$fpath}/{$name}*.w | sort | tail -1`
    if ($resnamew =="") then
+      echo {$fpath}/{$name}
       echo "Error finding restart file.  Exit"
       exit 1
    else
       set nametime = `basename $resnamew .w`
-      set resnameu = `ls  {$fpath}/{$nametime}\*.u | sort | tail -1`
-      set resnamev = `ls  {$fpath}/{$nametime}\*.v | sort | tail -1`
+      set resnameu = `ls  {$fpath}/{$nametime}*.u | sort | tail -1`
+      set resnamev = `ls  {$fpath}/{$nametime}*.v | sort | tail -1`
       echo "Using restart files: " 
       echo $resnameu
       echo $resnamev

@@ -128,7 +128,7 @@ tims_ave=tims_ave/60
 call print_message('CPU times (min):   (avg/max)')
 write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
 call print_message(message)
-write(message,'(a,2f9.2,a)') 'initial I/O:    ',tims_ave(4),tims_max(4)
+write(message,'(a,2f9.2,a)') 'initial output: ',tims_ave(4),tims_max(4)
 call print_message(message)
 write(message,'(a,2f9.2,a,2f10.5)') 'dns_solve:      ',tims_ave(2),tims_max(2),&
 '  per timestep: ',tims_ave(2)/itime,tims_max(2)/itime

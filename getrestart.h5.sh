@@ -43,7 +43,7 @@ if ($fpath == HPSS) then
 else
 
    #search $fpath for newest restart file
-   set resnamew = `\ls {$fpath}/{$name}\*.w | sort | tail -1`
+   set resnamew = `\ls {$fpath}/{$name}*.w | sort | tail -1`
    if ($resnamew =="") then
       echo "Error finding restart file.  Exit"
       exit 1
