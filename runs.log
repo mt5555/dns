@@ -1,13 +1,14 @@
 email: Bonnie answer
        UDM team: qb1533  
+       ccn-8: vis next week?
 
 Meneauvau: check schedule, register
 
-.isostr and .smal.isostr for iso12_5120000.0000 check that they agree
-                     in matlab
-
-isoave.F90: plot up all of cj's functions, and see what they
-            look like.
+check these out:
+  iso12_5120007.000.new.isostr     (compare to original)
+  iso12_5120007.000.new.isow2s2   
+  plot new functions for cj
+  
 
 512^3:     can run analysis if we to a two array analysis. isoavep2()?
                                              time isoavep2 vs isoavep

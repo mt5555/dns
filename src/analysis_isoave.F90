@@ -279,8 +279,11 @@ real*8 :: vor(3),uij,uji,dummy
 do n=1,3
    call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,gradw,DX_ONLY,n)
    call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,gradw,DX_ONLY,n)
+enddo
+do n=1,3
    call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,Q(1,1,1,1),DX_ONLY,n)
 enddo
+
 ! 
 ! Q(:,:,:,1) = vor**2
 ! Q(:,:,:,2) = S**2
