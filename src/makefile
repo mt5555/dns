@@ -21,11 +21,12 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
    ifeq ($(HOST),shankara1)
-      #sca mpich compiled with __ postfix on fortan names - not callable
+      # sca cluster has mpich and lam installed as RPMs, but with 
+      #fortran wrappers using two underscores.  cant call these routines
       # with ifc compiler?
       #MPI = -DUSE_MPI -DUSE_MPICH -I/opt/scali/contrib/mpich/include
       #MPILIB = -L/opt/scali/contrib/mpich/lib -lfmpich -lmpich
-      MPI = -DUSE_MPI -I/opt/lam/include
+      MPI = -DUSE_MPI -I/usr/include
       MPILIB =  -L/opt/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
 
