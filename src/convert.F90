@@ -296,8 +296,7 @@ real*8 :: dx(1:2*ssize),dy(1:2*ssize),dz(1:2*ssize)
 real*8 :: dslice(2*ssize,2*ssize,1)
 real*8 :: mat(3,3,3)
 real*8,allocatable :: data(:,:,:)
-real*8,allocatable :: gradu(:,:,:)
-real*8,allocatable :: gradu2(:,:,:)
+real*8,allocatable :: gradu(:,:,:,:)
 integer :: i2,j2,k2,k
 
 call setup_subcubes(ssize)
@@ -305,11 +304,9 @@ write(message,'(a,i5)') 'number of subcubes: ',nsubcube
 call print_message(message)
 
 
-allocate(gradu(3,3,nsubcube))
-allocate(gradu2(3,3,nsubcube))
+allocate(gradu(3,3,nsubcube,2))
 allocate(data(ssize,ssize,ssize))
 gradu=0
-gradu2=0
 
 
 do i=1,3
@@ -330,15 +327,15 @@ do j=1,3
          do k2=1,ssize
          do j2=1,ssize
          do i2=1,ssize
-            gradu(i,j,sc)=gradu(i,j,sc)+data(i2,j2,k2)
-            gradu2(i,j,sc)=gradu2(i,j,sc)+data(i2,j2,k2)**2
+            gradu(i,j,sc,1)=gradu(i,j,sc,1)+data(i2,j2,k2)
+            gradu(i,j,sc,2)=gradu(i,j,sc,2)+data(i2,j2,k2)**2
          enddo
          enddo
          enddo
-         gradu(i,j,sc)=gradu(i,j,sc)/ssize/ssize/ssize
-         gradu2(i,j,sc)=gradu2(i,j,sc)/ssize/ssize/ssize
+         gradu(i,j,sc,:)=gradu(i,j,sc,:)/ssize/ssize/ssize
       endif
    enddo
+
 
 #if 0   
    write(sdata,'(f10.4)') 10000.0000 + time
@@ -360,30 +357,16 @@ enddo
 
 ! output the gradu matricies:
 if (io_pe==my_pe) then
+do ip=1,7
 write(sdata,'(f10.4)') 10000.0000 + time
-write(ext,'(2i1)') i,j
+write(ext,'(i1)') ip
 basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu'
+fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu' // ext(1)
 open(15,file=fname,form='formatted')
 do sc=1,nsubcube
    write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
    do i=1,3
-      write(15,'(3e18.10)') (gradu(i,j,sc),j=1,3)
-   enddo
-enddo
-close(15)
-
-
-
-write(sdata,'(f10.4)') 10000.0000 + time
-write(ext,'(2i1)') i,j
-basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu2'
-open(15,file=fname,form='formatted')
-do sc=1,nsubcube
-   write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
-   do i=1,3
-      write(15,'(3e18.10)') (gradu2(i,j,sc),j=1,3)
+      write(15,'(3e18.10)') (gradu(i,j,sc,ip),j=1,3)
    enddo
 enddo
 close(15)
@@ -392,7 +375,6 @@ endif
 
 deallocate(data)
 deallocate(gradu)
-deallocate(gradu2)
 
 return
 
