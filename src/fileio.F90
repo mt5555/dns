@@ -782,13 +782,26 @@ else if (equations==CNS) then
    endif
 endif
 
+if (ndim==3 .and. output_vorticity/=0) then
+   call print_message("outputting vorticity...")
+   call vorticity(q1,Q,work1,work2)
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor1"
+   call singlefile_io3(time,q1(1,1,1,1),fname,work1,work2,0,io_pe,.false.,header_type)
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor2"
+   call singlefile_io3(time,q1(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_type)
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor3"
+   call singlefile_io3(time,q1(1,1,1,3),fname,work1,work2,0,io_pe,.false.,header_type)
+
+endif
+
+
 end subroutine
 
 
 
 
 
-subroutine output_passive(basename,time,Q,work1,work2)
+subroutine output_passive(basename,time,Q,q1,work1,work2)
 use params
 use tracers
 use mpi
@@ -796,6 +809,7 @@ use fft_interface
 use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 character(len=*) :: basename
@@ -818,6 +832,49 @@ do n=np1,np2
         // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:len_trim(ext))
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,0,io_pe)
 enddo
+
+! Ray/tmix passive scalars: output plane dissipation
+! output plane dissipaiton:  (mu/schmidt) * c_x**2 + c_y**2
+if (passive_type(np1)<=1) then
+   do n=np1,np2
+      call print_message("outputting plane dissipation")
+      call der(Q(1,1,1,n),work1,q1(1,1,1,1),q1(1,1,1,2),DX_ONLY,1)  ! c_x
+      call der(Q(1,1,1,n),work2,q1(1,1,1,1),q1(1,1,1,2),DX_ONLY,2)  ! c_y
+      q1(:,:,:,1)=mu*(work1**2 + work2**2)/schmidt(n)
+
+      write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
+      write(ext2,'(i3)') 100+passive_type(n)
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+           // "-gradxy2" &
+           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:len_trim(ext))
+      call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
+   enddo
+endif
+
+
+! SK passive scalars: output u+grad(s)
+if (passive_type(np1)==2 .and. npassive==1) then
+   call print_message("outputting u+grad(s)")
+   do n=np1,np2
+      call der(Q(1,1,1,n),q1(1,1,1,1),work1,work2,DX_ONLY,1)  ! c_x
+      call der(Q(1,1,1,n),q1(1,1,1,2),work1,work2,DX_ONLY,2)  ! c_y
+      call der(Q(1,1,1,n),q1(1,1,1,3),work1,work2,DX_ONLY,3)  ! c_z
+
+      q1(:,:,:,1:3)=Q(:,:,:,1:3)+ q1(:,:,:,1:3)
+
+      write(ext,'(f8.3)') 1000 + schmidt(n) ! 000.000
+      write(ext2,'(i3)') 100+passive_type(n)
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+           // message(2:10) // '.gamma1'
+      call singlefile_io(time,q1(1,1,1,1),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+           // message(2:10) // '.gamma2'
+      call singlefile_io(time,q1(1,1,1,2),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+           // message(2:10) // '.gamma3'
+      call singlefile_io(time,q1(1,1,1,3),fname,work1,work2,0,io_pe)
+   enddo
+endif
 
 end subroutine
 

@@ -589,6 +589,7 @@ call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(model_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(output_vorticity,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
@@ -1921,6 +1922,7 @@ read(5,*) diag_dt
 read(5,*) model_dt
 read(5,*) screen_dt
 read(5,*) output_dt
+read(5,*) output_vorticity
 read(5,*) ncustom
 allocate(custom(ncustom))
 do i=1,ncustom

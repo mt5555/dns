@@ -313,7 +313,8 @@ real*8  :: time_final = 1
 real*8  :: time_initial = 0
 
 
-real*8 :: output_dt = 0    ! netcdf output for plotting
+real*8 :: output_dt = 0           ! output prognostic variables
+integer :: output_vorticity = 0   ! also output vorticity
 integer :: ncustom =0
 real*8, allocatable :: custom(:)
 real*8 :: diag_dt = 0       ! diagnostics

@@ -42,7 +42,7 @@ if (restart==1) then
    if (compute_passive_on_restart) then
       call init_passive_scalars(1,Q,Qhat,work1,work2)
       ! restart runs wont output data at t=0, for scalar output:
-      call output_passive(runname,time_initial,Q,work1,work2)	
+      call output_passive(runname,time_initial,Q,q1,work1,work2)	
    else
       call init_passive_scalars(0,Q,Qhat,work1,work2)
       call input_passive(runname,time_initial,Q,work1,work2)
