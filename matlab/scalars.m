@@ -5,6 +5,7 @@
 %
 %
 clear all;
+apply_fix=0;
 
 range=0:50;
 %range = 1
@@ -13,7 +14,9 @@ range=0:50;
 %fid=fopen('test32.scalars','r','l');
 %fid=fopen('n128.scalars','r','b');
 %fid=fopen('../src/test32.scalars','r','l');
-fid=fopen('iso12_256_200.scalars','r','ieee-be.l64');
+
+fid=fopen('iso12_256_200.scalars','r','b'); apply_fix=1;
+
 
 
 nscalars=0;
@@ -26,7 +29,7 @@ while (1)
   mu=fread(fid,1,'float64');
   alpha=fread(fid,1,'float64');
   
-  [nints,ns]
+  [nints,ns,nscalars]
   data1=fread(fid,[nints,ns],'float64');
   data2=fread(fid,[nints,ns],'float64');
 
@@ -38,7 +41,6 @@ while (1)
     maxs=[maxs,data2];
   end
   nscalars=nscalars+ns;
-  pause
 
   % now read the "expensive" integrals, which are not computed every time step
   ns_e = fread(fid,1,'float64');
@@ -56,6 +58,31 @@ end
 
 disp(sprintf('nints=%i  total scalars read=%i',nints,nscalars))
 fclose(fid);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  through away some bad data:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if (apply_fix) 
+  good=[1,103:2596,2699:6073,6176:9125];
+  maxs=maxs(:,good);
+  ints=ints(:,good);
+  nscalars=length(good);
+  
+  %good=[1:1082,2496:nscalars];
+  good=[2496:nscalars];
+  maxs=maxs(:,good);
+  ints=ints(:,good);
+  nscalars=length(good);
+  
+  s=size(ints_e);
+  good=24:s(2);
+  ints_e=ints_e(:,24:s(2));
+  nscalars_e=length(good)
+end
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
