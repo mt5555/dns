@@ -227,7 +227,9 @@ integer,parameter :: nx=nxd,ny=nyd,nz=nzd      ! dimension of grid & data
 integer :: ndim       ! 2 or 3 dimensions.  ndim = (g_nz==1 ? 2 : 3)
 integer :: npassive = 0   ! number of passive scalars
 integer :: np1=1,np2=0    ! passive scalars Q(:,:,:,np1:np2)
-real*8  :: schmidt(n_var)  ! schmidt number for passive scalars
+real*8  :: schmidt(n_var)       ! schmidt number for passive scalars
+integer :: passive_type(n_var)  ! type of passive scalar 0 = Gaussian -> 0,1
+                                ! type of passive scalar 1 = KE ->       0,1
 
 ! number of actual data points
 integer,parameter :: nslabx=nx2-nx1+1

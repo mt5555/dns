@@ -228,7 +228,9 @@ do wn=numb1,numb
    ! Qf = Q*sqrt(ener_target/ener)
    ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
    tauf=tau_inv*(sqrt(ener_target(wn)/ener(wn))-1)
-   if (delt*tauf>.5) tauf=delt/2
+
+   ! make sure relaxation is stable:
+   if (delt*tauf>.5) tauf=.5/delt
 
 !   if (io_pe==my_pe) &
 !   write(*,'(a,3i4,2f17.10,e17.10)') 'FORCING:',my_pe,wn,wnforcing(wn)%n,ener(wn),ener_target(wn),tauf
@@ -256,6 +258,207 @@ do wn=numb1,numb
                                 Qhat(k,i,j,3)**2) 
 
 
+
+   enddo
+   endif
+
+enddo
+end subroutine 
+   
+   
+
+
+
+
+
+
+
+
+subroutine sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,model_spec)
+!
+! Add a forcing term to rhs.
+! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
+! Force 3D wave numbers 2 back to the sphere E=2**(-5/3)
+!
+! and in addition, force to a prescribed angle to impose some helicity
+!
+! model_spec==0    E(1)=E(2)=.5
+! model_spec==1    Overholt & Pope
+!
+use params
+use mpi
+implicit none
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+integer :: model_spec
+integer km,jm,im,i,j,k,n,wn,ierr,kfmax
+real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
+real*8 ener(numb_max),temp(numb_max),Qdel(3)
+real*8,allocatable :: rmodes(:,:,:,:)
+real*8,allocatable :: rmodes2(:,:,:,:)
+real*8,allocatable :: cmodes(:,:,:,:,:)
+character(len=80) :: message
+
+
+if (0==init_sforcing) then
+   numb1=1
+   if (model_spec==0) then
+      numb=2   ! apply forcing in bands 1,2
+      call sforcing_init()
+      do wn=numb1,numb
+         ener_target(wn)=.5
+      enddo
+   endif
+   if (model_spec==1) then
+      numb=8
+      call sforcing_init()
+      do wn=numb1,numb
+         ener_target(wn)=(real(wn)/numb)**4
+      enddo
+   endif
+   if (numb>numb_max) call abort("sforcing12_helicity: numb_max too small")
+endif
+
+allocate(rmodes(3,-numb:numb,-numb:numb,-numb:numb))
+allocate(rmodes2(3,-numb:numb,-numb:numb,-numb:numb))
+allocate(cmodes(2,3,-numb:numb,-numb:numb,-numb:numb))
+
+
+if (g_u2xave==0) then
+   ! on first call, this will not have been computed, so lets
+   ! compute it here:  ints(2)
+   g_u2xave=0
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            
+            xw=(im*im + jm*jm + km*km)*pi2_squared
+            
+            xfac = 2*2*2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            
+            
+            g_u2xave = g_u2xave + xfac*xw*(Qhat(k,i,j,1)**2 + &
+                 Qhat(k,i,j,2)**2 + &
+                 Qhat(k,i,j,3)**2) 
+            
+         enddo
+      enddo
+   enddo
+#ifdef USE_MPI
+   xw=g_u2xave
+   call MPI_allreduce(xw,g_u2xave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+endif
+
+
+if (ntot==0) return
+! only CPUS which belong to "comm_sforcing" beyond this point!
+
+
+! relaxation coefficient (below) and kfmax (above) 
+! comes from Overhold and Pope 1998.    .5 = tau/tau_kolmogorov
+! tau = .5 tau_kolmogorov = .5 eta^2 / mu = .5 sqrt(mu/epsilon) = 
+!                                           .5/sqrt( <ux,ux> ) 
+!  
+tau_inv=sqrt(g_u2xave)/.5
+
+
+
+f_diss=0
+fxx_diss=0
+ener=0
+rmodes=0
+do wn=numb1,numb
+
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      ener(wn)=ener(wn)+.5*xfac*(Qhat(k,i,j,1)**2+Qhat(k,i,j,2)**2+Qhat(k,i,j,3)**2)
+
+      rmodes(1,z_imcord(i),z_jmcord(j),z_kmcord(k))=Qhat(k,i,j,1)
+      rmodes(2,z_imcord(i),z_jmcord(j),z_kmcord(k))=Qhat(k,i,j,2)
+      rmodes(3,z_imcord(i),z_jmcord(j),z_kmcord(k))=Qhat(k,i,j,3)
+   enddo
+enddo
+#ifdef USE_MPI
+   temp=ener
+   call MPI_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   rmodes2=rmodes
+   i=2*numb+1
+   i=i*i*i
+   call MPI_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+#endif
+
+
+! Qf = Q*sqrt(ener_target/ener)
+do wn=numb1,numb
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      rmodes(:,z_imcord(i),z_jmcord(j),z_kmcord(k))= &
+         sqrt(ener_target(wn)/ener(wn))*&
+         rmodes(:,z_imcord(i),z_jmcord(j),z_kmcord(k))
+   enddo
+enddo
+
+
+! convert to complex FFT coefficients
+call sincos_to_complex(rmodes,cmodes,numb)
+
+! apply helicity fix:
+
+! convert back:
+call complex_to_sincos(rmodes,cmodes,numb)
+
+
+
+do wn=numb1,numb
+   ! Qf = Q*sqrt(ener_target/ener)
+   ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
+
+   tauf=tau_inv
+   ! make sure tauf is not too large that forcing is unstable:
+   if (delt*tau_inv*(sqrt(ener_target(wn)/ener(wn))-1) > .5) then
+         tauf = .5/(delt*(sqrt(ener_target(wn)/ener(wn))-1))
+   endif
+
+
+   if (ener(wn)<ener_target(wn)) then ! only apply forcing if net input is positive
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+
+      Qdel(1)=tauf*(rmodes(1,z_imcord(i),z_jmcord(j),z_kmcord(k))-Qhat(k,i,j,1))
+      Qdel(2)=tauf*(rmodes(2,z_imcord(i),z_jmcord(j),z_kmcord(k))-Qhat(k,i,j,2))
+      Qdel(3)=tauf*(rmodes(3,z_imcord(i),z_jmcord(j),z_kmcord(k))-Qhat(k,i,j,3))
+
+
+      rhs(k,i,j,1) = rhs(k,i,j,1) + Qdel(1)
+      rhs(k,i,j,2) = rhs(k,i,j,2) + Qdel(2)
+      rhs(k,i,j,3) = rhs(k,i,j,3) + Qdel(3)
+
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      f_diss = f_diss + xfac*(Qdel(1)**2 + Qdel(2)**2 + Qdel(3)**2) 
+
+      xw=-(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
+      fxx_diss = fxx_diss + xfac*xw*(Qdel(1)**2 + Qdel(2)**2 + Qdel(3)**2) 
 
    enddo
    endif
@@ -607,26 +810,9 @@ do im=-numb,numb
       enddo
 
 
-      !
-      !   
-      ! convert to sine & cosine modes:
-      !
-      ! (R1 + i R2) (cosx + i sinx)  (cosy + i siny)  (cosz + i sinz)  
-      ! = (real parts only:)
-      !   R1  cosx cosy cosz                      R1 (1,1,1)
-      ! i R2  cosx cosy sinz  i                  -R2 (1,1,-1) sign(km) 
-      ! i R2  cosx siny cosz  i                  -R2 (1,-1,1) sign(jm)
-      !   R1  cosx siny sinz  i**2               -R1 (1,-1,-1) sign(km*jm)
-      ! i R2  sinx cosy cosz  i                  -R2 (-1,1,1) sign(im) 
-      !   R1  sinx cosy sinz  i**2               -R1 (-1,1,-1) sign(im*km)
-      !   R1  sinx siny cosz  i**2               -R1 (-1,-1,1) sign(im*jm)
-      ! i R2  sinx siny sinz  i**3                R2 (-1,-1,-1) sign(im*jm*km)
-      !  
-      ! 
       ! vor(1) = w_y - v_z
       ! vor(2) = u_z - w_x 
       ! vor(3) = v_x - u_y
-      
       do n=1,3
          if (n==1) then
             Rr = psiy_r(3) - psiz_r(2)
@@ -640,12 +826,11 @@ do im=-numb,numb
          endif
 
          
-       
-         
          i=abs(im)
          j=abs(jm)
          k=abs(km)
-         
+         ! code taken from complex_to_sincos().  Any bug fixes here,
+         ! be sure to apply to that function also.
          rmodes( i, j, k,n) = rmodes( i, j, k,n) + Rr 
          rmodes( i, j,-k,n) = rmodes( i, j,-k,n) - Ri*zerosign(km) 
          rmodes( i,-j, k,n) = rmodes( i,-j, k,n) - Ri*zerosign(jm) 
@@ -682,15 +867,85 @@ end function
 
 
 
+subroutine zdecomp_to_rmodes(p,rmodes,nmax)
+!
+! extract sine and cosine modes from p, store in rmodes
+!
+use params
+use mpi
+implicit none
+real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
+real*8 :: rmodes2(-nmax:nmax,-nmax:nmax,-nmax:nmax)
+real*8 :: p(g_nz2,nslabx,ny_2dz)
+integer :: nmax,i,j,k,ierr
 
-subroutine complex_to_sincos(p,cmodes,nmax)
+rmodes=0
+do j=1,ny_2dz
+do i=1,nslabx
+do k=1,g_nz
+   if (abs(z_imcord(i))<=nmax .and. abs(z_jmcord(j))<=nmax .and. &
+       abs(z_kmcord(k))<=nmax ) then
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k)) = p(k,i,j) 
+   endif
+enddo
+enddo
+enddo
+#ifdef USE_MPI
+i=2*nmax+1
+i=i*i*i
+rmodes2=rmodes
+call MPI_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
+#endif
+
+end subroutine
+
+
+
+
+subroutine rmodes_to_zdecomp(p,rmodes,nmax)
+!
+! extract sine and cosine modes from rmodes, store in p
+!
 use params
 implicit none
-real*8 :: p(nx,ny,nz),Rr,Ri
+real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
+real*8 :: p(g_nz2,nslabx,ny_2dz)
+integer :: nmax,i,j,k
+
+do j=1,ny_2dz
+do i=1,nslabx
+do k=1,g_nz
+   if (abs(z_imcord(i))<=nmax .and. abs(z_jmcord(j))<=nmax .and. &
+       abs(z_kmcord(k))<=nmax ) then
+       p(k,i,j) = rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k)) 
+   endif
+enddo
+enddo
+enddo
+
+
+
+end subroutine
+
+
+
+
+
+
+subroutine complex_to_sincos(rmodes,cmodes,nmax)
+!
+!  convert set of complex FFT coefficients to sine and cosines
+!
+use params
+implicit none
+real*8 :: Rr,Ri
 real*8 :: cmodes(2,-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 integer :: i,j,k,im,jm,km,nmax,imax,ip,jp,kp
 !
+! Note: this code also used in random12() above. 
+! Any bugfixes here, also apply to random12().
 !   
 ! convert to sine & cosine modes:
 !
@@ -732,24 +987,6 @@ enddo
 enddo
 enddo
 
-imax=2*nmax+2
-p=0
-do i=1,imax
-do j=1,imax
-do k=1,imax
-   im=z_imcord(i)
-   jm=z_jmcord(j)
-   km=z_kmcord(k)
-
-   ip=abs(im)
-   jp=abs(jm)
-   kp=abs(km)
-   if (ip<=nmax .and. jp<=nmax .and. kp<=nmax) then
-      p(k,i,j) = rmodes(im,jm,km)
-   endif
-enddo
-enddo
-enddo
 
 
 end subroutine
@@ -761,7 +998,10 @@ end subroutine
 
 
 
-subroutine sincos_to_complex(p,cmodes,nmax)
+subroutine sincos_to_complex(rmodes,cmodes,nmax)
+!
+!  convert set of sine and cosine FFT coefficients to complex coefficients
+!
 #if 0
    conversion to complex coefficients:
         a cos(lx) cos(my) cos(nz)
@@ -792,24 +1032,21 @@ subroutine sincos_to_complex(p,cmodes,nmax)
 #endif      
 use params
 implicit none
-real*8 :: p(nx,ny,nz),a,b
+real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: cmodes(2,-nmax:nmax,-nmax:nmax,-nmax:nmax)
+real*8 :: a,b
 integer :: i,j,k,im,jm,km,imax,nmax,sm,ip,jp,kp
 
 imax=2*nmax+2
 cmodes=0
 
-do i=1,imax
-do j=1,imax
-do k=1,imax
-   im=z_imcord(i)
-   jm=z_jmcord(j)
-   km=z_kmcord(k)
+do im=-nmax,nmax
+do jm=-nmax,nmax
+do km=-nmax,nmax
+
    ip=abs(im)
    jp=abs(jm)
    kp=abs(km)
-
-   if (ip<=nmax .and. jp<=nmax .and. kp<=nmax) then
 
 
    a=0; b=0
@@ -818,13 +1055,13 @@ do k=1,imax
    sm=0; if (im<0) sm=sm+1;  if (jm<0) sm=sm+1;  if (km<0) sm=sm+1
 
    if (sm==0) then
-      a=p(k,i,j)/8
+      a=rmodes(im,jm,km)/8
    else if (sm==1) then
-      b=-p(k,i,j)/8
+      b=-rmodes(im,jm,km)/8
    else if (sm==2) then
-      a=-p(k,i,j)/8
+      a=-rmodes(im,jm,km)/8
    else if (sm==3) then
-      b=p(k,i,j)/8
+      b=rmodes(im,jm,km)/8
    else
       call abort("this cant happen")
    endif
@@ -857,7 +1094,7 @@ do k=1,imax
 
    cmodes(1,-ip,-jp,-kp)=cmodes(1,-ip,-jp,-kp) + a*sign(1,im*jm*km)
    cmodes(2,-ip,-jp,-kp)=cmodes(2,-ip,-jp,-kp) + b*sign(1,im*jm*km)
-   endif
+
 enddo
 enddo
 enddo
