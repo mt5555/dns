@@ -70,7 +70,7 @@ CK_orig=1.613/(2*pi)^2;
 spec_r_save=[];
 spec_r_save_fac3=[];
 
-% note: endianopen() will notwork with .spec files
+% note: endianopen() will notwork with .spec and .hspec files
 %because first number is not necessaryly an integer 
 [namedir,name]
 fid=fopen([namedir,name,'.spec'],'r',endian);

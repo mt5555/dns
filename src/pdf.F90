@@ -22,6 +22,7 @@ real*8 :: pscale=.0025           ! bin size for scalar increment
 
 
 real*8 :: core_data(g_nx,n_var)      ! used to take x direction cores thru data
+real*8 :: core_ddata(g_nx,3,n_var)   ! used to take x direction cores of derivativs
 integer :: core_num                  ! number of cores taken
 
 integer           :: structf_init=0
@@ -444,6 +445,11 @@ if (core_num>0) then
       call cwrite8(fidcore,time,1)
       do n=1,core_num
          call cwrite8(fidcore,core_data(1,n),g_nx)
+      enddo
+      do n=1,core_num
+         do i=1,3
+            call cwrite8(fidcore,core_ddata(1,i,n),g_nx)
+         enddo
       enddo
    endif
    core_num=0
@@ -1055,11 +1061,11 @@ do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    call compute_cores(gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d,core_data(1,n),n)
 enddo
-
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
 if (compute_uvw_jpdfs) then
    call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
 endif
+
 
 call print_message("computing y direction pdfs...")
 do n=1,3
@@ -1069,6 +1075,7 @@ call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n
 if (compute_uvw_jpdfs) then
    call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
 endif
+
 
 call print_message("computing z direction pdfs...")
 do n=1,3
@@ -1086,15 +1093,29 @@ do n=1,3
    call der(Q(1,1,1,1),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
    gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
 
+   call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+   call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,1),1)
+
+
+
    ! v_x, v_y, v_z
    call der(Q(1,1,1,2),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
    gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
 
+   call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+   call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,2),2)
+
+
    ! w_x, w_y, w_z
    call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
    gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+
+   call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+   call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,3),3)
+
 enddo
-gradu=mu*gradu; gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
+gradu(:,:,:,1)=mu*gradu(:,:,:,1); 
+gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
 call compute_pdf_scalar(gradu,epsilon)
 
 if (compute_passive_pdfs) then
@@ -1104,6 +1125,12 @@ if (compute_passive_pdfs) then
 
       call transpose_to_x(Q(1,1,1,i),gradu,n1,n1d,n2,n2d,n3,n3d)
       call compute_cores(gradu,n1,n1d,n2,n2d,n3,n3d,core_data(1,i),i)
+
+      do n=1,3
+         call der(Q(1,1,1,i),gradu,dummy,gradu(1,1,1,2),DX_ONLY,n)
+         call transpose_to_x(gradu,gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+         call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,i),i)
+      enddo
    enddo
 endif
 call print_message("done with pdfs.")

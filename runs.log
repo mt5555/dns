@@ -1,4 +1,27 @@
 **********************************************************************************
+11/6/03
+
+tmix256D
+
+init_cond_subtype==3
+spectrum peaked at k=6 (instead of 10)
+Change KE corr. scalar from type 1 to 3:   ke_thresh = .5?
+
+Check with Ray:
+
+velocity:  now peaked at 6, not 10.  slope still k**2 for k<6
+scalars:
+Gaussian scalar:       same as before: double delta
+KE correlated scalar:  distribution chosen so that: c=1 peak 6x larger than
+                             c=0 peak.  
+
+
+need to change subtype and scalar type in new .inp file.
+
+
+
+
+**********************************************************************************
 10/24/03
 
 VXPAIR  Kras initial condition

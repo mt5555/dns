@@ -156,11 +156,15 @@ if (init_cond_subtype==0) then
       enerb_target(nb)=fac1*fac2*fac3
    enddo
 else if (init_cond_subtype==1) then
-   call livescu_spectrum(enerb_target,NUMBANDS)
+   ! slope: k**2, peak k=10
+   call livescu_spectrum(enerb_target,NUMBANDS,0,init_cond_subtype)
 else if (init_cond_subtype==2) then
    do nb=1,NUMBANDS
 	enerb_target(nb) = nb**(-5./3.)
    enddo
+else if (init_cond_subtype==3) then
+   ! slope: k**2, peak k=6
+   call livescu_spectrum(enerb_target,NUMBANDS,0,init_cond_subtype)
 else
    call abort("init_data_decay: bad init_cond_subtype")
 endif
@@ -611,19 +615,39 @@ end subroutine
 
 
 
-subroutine livescu_spectrum(enerb_target,numb)
+subroutine livescu_spectrum(enerb_target,numb,itype,init_cond_subtype)
+!
+! compute E(k)
+!   itype==0   velocity spectrum
+!   itype==1   scalar spectrum
+!
+!
 implicit none
-integer :: numb
+integer :: numb,itype,init_cond_subtype
 real*8 :: enerb_target(numb)
 
 real*8 :: p,p1,p2,ku,xnb,fac1,fac2,fac3
 integer ::  nb
 
-enerb_target=0
+! default values:
 p=2;
+ku=10
+
+if (init_cond_subtype==1) then
+   p=2;
+   ku=10
+endif
+if (init_cond_subtype==3) then
+   p=2;
+   ku=6
+endif
+
+
+
+enerb_target=0
 p1=(1+p)/2
 p2=p/2
-ku=10
+
 
 do nb=1,numb
    xnb = nb

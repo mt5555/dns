@@ -132,7 +132,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: xfac,mn,mx
+real*8 :: xfac,mn,mx,ke_percent
 integer :: n,k,i,j,im,jm,km,init,count,iter,n1
 character(len=80) :: message
 
@@ -164,8 +164,15 @@ do n=np1,np2
       Q(:,:,:,n)=Q(:,:,:,n1) 
    else
       if (passive_type(n)==0) call passive_gaussian_init(Q,work1,work2,n)
-      if (passive_type(n)==1) call passive_KE_init(Q,work1,work2,n)
+      if (passive_type(n)==1) then
+         ke_percent=.77
+         call passive_KE_init(Q,work1,work2,n,ke_percent)
+      endif
       if (passive_type(n)==2) Q(:,:,:,n)=0
+      if (passive_type(n)==3) then
+         ke_percent=.5
+         call passive_KE_init(Q,work1,work2,n,ke_percent)
+      endif
 
 
       call global_min(Q(1,1,1,n),mn)
@@ -232,7 +239,7 @@ end subroutine
 
 
 
-subroutine passive_KE_init(Q,work1,work2,np)
+subroutine passive_KE_init(Q,work1,work2,np,ke_percent)
 !
 ! low wave number, quasi isotropic initial condition
 !
@@ -244,7 +251,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
-real*8 :: ke2,ke,ke_thresh,check
+real*8 :: ke2,ke,ke_thresh,check,ke_percent
 integer :: i,j,k,n,ierr
 
 character(len=80) ::  message
@@ -270,9 +277,9 @@ ke=ke/g_nx/g_ny/g_nz
 #endif
 
 
-
-ke_thresh=.77*ke  ! .82 has too much 0, not enough 1 at 256^3
-                  ! .77 has a touch too much at 1, not enought at 0
+ 
+ke_thresh=ke_percent*ke  ! .82 has too much 0, not enough 1 at 256^3
+! .77 has a touch too much at 1, not enought at 0
 
 Q(:,:,:,np)=0
 check=0
@@ -346,7 +353,7 @@ NUMBANDS=.5 + sqrt(2.0)*g_nmin/3  ! round up
 allocate(enerb_target(NUMBANDS))
 allocate(enerb(NUMBANDS))
 
-call livescu_spectrum(enerb_target,NUMBANDS)
+call livescu_spectrum(enerb_target,NUMBANDS,1,init_cond_subtype)
 
 call input1(Q(1,1,1,np),work1,work2,null,io_pe,.true.,-1)  
 call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1)

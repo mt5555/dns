@@ -55,6 +55,8 @@ movie=0;
 spec_r_save=[];
 spec_r_save_fac3=[];
 
+% note: endianopen() will notwork with .spec and  .hspec files
+%because first number is not necessaryly an integer 
 pname = [strrep(name,'_','-'),'.hspec'];
 fid=fopen([namedir,name,'.hspec'],'r','l');
 
