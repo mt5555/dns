@@ -32,12 +32,12 @@ implicit none
 integer :: always_use_parallel_code = 0;
 integer :: use_serial
 
-real*8,save  :: Q(nx,ny,nz,n_var)
+real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: q1(:,:,:,:)
 real*8,allocatable  :: q2(:,:,:,:)
 real*8,allocatable  :: q3(:,:,:,:)
-real*8,save         :: work1(nx,ny,nz)
-real*8,save         :: work2(nx,ny,nz)
+real*8,allocatable   :: work1(:,:,:)
+real*8,allocatable   :: work2(:,:,:)
 real*8,allocatable  :: work3(:,:,:)
 real*8,allocatable  :: work4(:,:,:)
 
@@ -51,18 +51,6 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-if (ncpus==1) then
-   use_serial=1;
-else
-   use_serial=0;
-endif
-if (always_use_parallel_code==1) use_serial=0;
-if (use_serial==1) then
-   call print_message("using serial version of isoave code")
-else
-   call print_message("using parallel version of isoave code")
-endif
-
 
 
 
@@ -71,11 +59,11 @@ tstop=3.0
 tinc=.25
 icount=0
 
-nxdecomp=1
-nydecomp=1
-nzdecomp=1
+nxdecomp=2
+nydecomp=2
+nzdecomp=2
 
-!call set_byteswap_input(1);
+call set_byteswap_input(1);
 
 
 ! these lines are modifed by some sed scripts for automatic running
@@ -91,15 +79,35 @@ call init_mpi
 call init_mpi_comm3d()
 call init_model
 
+if (ncpus==1) then
+   use_serial=1;
+else
+   use_serial=0;
+endif
+if (always_use_parallel_code==1) use_serial=0;
+if (use_serial==1) then
+   call print_message("using serial version of isoave code")
+else
+   call print_message("using parallel version of isoave code")
+endif
+
+
 !call writepoints(); stop
 
+allocate(Q(nx,ny,nz,ndim))
+allocate(work1(nx,ny,nz))
+allocate(work2(nx,ny,nz))
+
+
+
+
 if (use_serial==0) then
-! parallel version requires extra data:
-allocate(q1(nx,ny,nz,ndim))
-allocate(q2(nx,ny,nz,ndim))
-allocate(q3(nx,ny,nz,ndim))
-allocate(work3(nx,ny,nz))
-allocate(work4(nx,ny,nz))
+   ! parallel version requires extra data:
+   allocate(q1(nx,ny,nz,ndim))
+   allocate(q2(nx,ny,nz,ndim))
+   allocate(q3(nx,ny,nz,ndim))
+   allocate(work3(nx,ny,nz))
+   allocate(work4(nx,ny,nz))
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

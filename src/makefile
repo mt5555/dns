@@ -106,6 +106,7 @@ ifeq ($(UNAME),OSF1)
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
    # shallow water model cannot use -automatic
+   #FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
    FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
    CC = cc $(LSFFLAGS)
 endif
