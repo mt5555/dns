@@ -162,6 +162,9 @@ endif
 end subroutine
 
 
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! three methods for divergence free projection.  All require 18 total FFTs
@@ -378,118 +381,6 @@ end subroutine
 
 
 
-subroutine helmholtz_dirichlet_inv(f,work,alpha,beta)
-!
-!  solve [alpha + beta*laplacian](p) = f
-!  input:  f 
-!  ouput:  f   will be overwritten with the solution p
-!  b.c. for f specified in f. 
-!
-use params
-use fft_interface
-use transpose
-implicit none
-real*8 f(nx,ny,nz)    ! input/output
-real*8 work(nx,ny,nz) ! work array
-real*8 :: alpha
-real*8 :: beta
-
-
-!local
-integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k
-real*8 phi(nx,ny,nz)    
-real*8 lphi(nx,ny,nz)    
-
-
-!NOTE: we dont need phi, lphi.  when this code is debugged, replace by:
-! save boundary data in single 1D array
-! set f = 0 on boundary
-! using boundary data alone: compute f = f - lphi 
-!      along points just inside boundary
-!
-! solve as before
-! restor boundary conditions in f from 1D array.
-
-
-
-
-! phi = f on boundary, zero inside
-phi=f
-call zero_boundary(phi)
-phi=f-phi
-call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
-
-
-! convert problem to zero b.c. problem
-f=f-lphi
-call zero_boundary(f)
-! solve Helm(f) = b with 0 b.c.
-f=f+phi
-
-
-end subroutine
-
-
-
-
-subroutine helmholtz_periodic_inv(f,work,alpha,beta)
-!
-!  solve [alpha + beta*laplacian](p) = f
-!  input:  f 
-!  ouput:  f   will be overwritten with the solution p
-!
-use params
-use fft_interface
-use transpose
-implicit none
-real*8 f(nx,ny,nz)    ! input/output
-real*8 work(nx,ny,nz) ! work array
-real*8 :: alpha
-real*8 :: beta
-
-
-!local
-integer n1,n1d,n2,n2d,n3,n3d
-integer i,j,k
-
-if (beta==0) then
-   f=f/alpha
-   return
-endif
-
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
-call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
-call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
-call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
-call fft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
-
-! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
-call fft_laplace_inverse(f,alpha,beta)
-
-call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
-
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
-
-
-
-end
 
 
 

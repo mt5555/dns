@@ -292,7 +292,7 @@ if (doit_output) then
       call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,0,io_pe)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".psi"
       q1=0
-!      call compute_psi(Q(1,1,1,3),q1,work1,work2)
+      call compute_psi(Q(1,1,1,3),q1,work1,work2,q1(1,1,1,2))
       call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
    endif
 endif
@@ -429,7 +429,8 @@ real*8 spec_x2(0:g_nx/2)
 real*8 spec_y2(0:g_ny/2)
 real*8 spec_z2(0:g_nz/2)
 real*8 :: x,divx,divi
-real*8,allocatable  ::  spectrum(:),spectrum1(:)
+real*8 ::  spectrum(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spectrum1(0:max(g_nx,g_ny,g_nz))
 character(len=80) :: message
 character :: access
 CPOINTER fid
@@ -440,8 +441,6 @@ access="a"
 if (time==0) access="w"
 
 iwave_max=max(g_nx,g_ny,g_nz)
-allocate(spectrum(0:iwave_max))
-allocate(spectrum1(0:iwave_max))
 spectrum=0
 spectrum1=0
 spec_x=0
@@ -450,9 +449,10 @@ spec_z=0
 
 q1=Q
 
+
 do i=1,ndim
    iwave=iwave_max
-   call compute_spectrum(q1(:,:,:,i),work1,work2,spectrum1,spec_x2,spec_y2,spec_z2,iwave,io_pe)
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spectrum1,spec_x2,spec_y2,spec_z2,iwave,io_pe)
    spectrum=spectrum+.5*spectrum1
    spec_x=spec_x + .5*spec_x2
    spec_y=spec_y + .5*spec_y2
@@ -464,6 +464,7 @@ call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_y,g_ny/2,message)
 !call plotASCII(spec_z,g_nz/2,message)
 
+
 ! for incompressible equations, print divergence as diagnostic:
 if (equations==NS_UVW) then
    call compute_div(Q,q1,work1,work2,divx,divi)
@@ -472,15 +473,15 @@ if (equations==NS_UVW) then
 endif
 
 
+
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time_initial
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
-      write(message,'(a,i5)') "restart_write(): Error opening file errno=",ierr
+      write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
       call abort(message)
    endif
-
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)
    call cwrite8(fid,spectrum,1+iwave)
@@ -492,8 +493,6 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_z,1+g_nz/2)
    call cclose(fid,ierr)
 endif
-deallocate(spectrum)
-deallocate(spectrum1)
 
 
 

@@ -1,6 +1,6 @@
 #include "macros.h"
 !
-! NOTE: before using an iterative solver, see the nots
+! NOTE: before using an iterative solver, see the notes
 ! at the top of fftops.F90 about how to set
 ! DX4DX4 and HINV_DX4DX4
 !
@@ -223,6 +223,216 @@ end subroutine
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+subroutine compute_psi(w,psi,b,work,psi0)
+!
+!  btype=0   all periodic  use periodic FFT solver 
+!  btype=1   all periodic,reflect, reflect-odd
+!                use ghost cell CG solver (no boundaries)
+!  btype=2   use biotsavart for boundary and dirichlet solver
+!
+use params
+use ghost
+implicit none
+real*8 w(nx,ny,nz)
+real*8 psi(nx,ny,nz)
+real*8 work(nx,ny,nz)
+real*8 b(nx,ny,nz)
+real*8 psi0(nx,ny,nz)   ! initial guess, if needed
+
+!local
+real*8 :: one=1,zero=0,tol=1e-6
+integer,save :: btype=-1
+
+external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
+integer i,j
+
+
+if (btype==-1) then
+   if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
+      ! periodic
+      btype=0
+   else if  ( &
+        ! not periodic, but can still do with all ghostcells:
+        ((bdy_x1==PERIODIC) .or. (bdy_x1==REFLECT) .or. (bdy_x1==REFLECT_ODD)) .and. &
+        ((bdy_x2==PERIODIC) .or. (bdy_x2==REFLECT) .or. (bdy_x2==REFLECT_ODD)) .and. &
+        ((bdy_y1==PERIODIC) .or. (bdy_y1==REFLECT) .or. (bdy_y1==REFLECT_ODD)) .and. &
+        ((bdy_y2==PERIODIC) .or. (bdy_y2==REFLECT) .or. (bdy_y2==REFLECT_ODD))  ) then
+        btype=1
+   else
+      btype=2
+   endif
+endif
+
+
+
+! if all b.c. periodic:
+if (btype==0) then
+   psi=-w
+   call helmholtz_periodic_inv(psi,work,zero,one)
+
+   !psi=0  ! initial guess
+   !b=-w
+   !call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic,.true.)
+
+else if (btype==1) then
+   ! this code can handle any compination of PERIODIC, REFLECT, REFLECT-ODD:
+
+   psi=psi0  ! initial guess
+   b=-w  ! be sure to copy ghost cell data also!
+   ! apply compact correction to b:
+
+   call helmholtz_dirichlet_setup(b,psi,work,0)
+   call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
+
+else
+   psi=0  ! initial guess
+   call bc_biotsavart(w,psi)    !update PSI on boundary using biot-savart law
+
+   b=-w  ! be sure to copy ghost cell data also!
+
+   ! copy b.c. from psi into 'b', and apply compact correction to b:
+   call helmholtz_dirichlet_setup(b,psi,work,1)
+   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
+
+
+   !update PSI 1st row of ghost cells so that our 4th order differences
+   !near the boundary look like 2nd order centered
+   call bc_onesided(psi)
+endif
+
+call ghost_update_x(psi,1)
+call ghost_update_y(psi,1)
+
+end subroutine
+
+
+
+
+subroutine helmholtz_dirichlet_inv(f,work,alpha,beta)
+!
+!  solve [alpha + beta*laplacian](p) = f
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
+!  b.c. for f specified in f. 
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+real*8 work(nx,ny,nz) ! work array
+real*8 :: alpha
+real*8 :: beta
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+real*8 phi(nx,ny,nz)    
+real*8 lphi(nx,ny,nz)    
+
+
+!NOTE: we dont need phi, lphi.  when this code is debugged, replace by:
+! save boundary data in single 1D array
+! set f = 0 on boundary
+! using boundary data alone: compute f = f - lphi 
+!      along points just inside boundary
+!
+! solve as before
+! restor boundary conditions in f from 1D array.
+
+
+
+
+! phi = f on boundary, zero inside
+phi=f
+call zero_boundary(phi)
+phi=f-phi
+call helmholtz_dirichlet(phi,lphi,alpha,beta,work)
+
+
+! convert problem to zero b.c. problem
+f=f-lphi
+call zero_boundary(f)
+! solve Helm(f) = b with 0 b.c.
+f=f+phi
+
+
+end subroutine
+
+
+
+
+subroutine helmholtz_periodic_inv(f,work,alpha,beta)
+!
+!  solve [alpha + beta*laplacian](p) = f
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+real*8 work(nx,ny,nz) ! work array
+real*8 :: alpha
+real*8 :: beta
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+if (beta==0) then
+   f=f/alpha
+   return
+endif
+
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
+
+! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
+call fft_laplace_inverse(f,alpha,beta)
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
+
+
+
+end
 
 
 

@@ -9,7 +9,7 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:50;
 %range = 1
-range=0:.25:.75;
+range=0:.05:1.00;
 %range=[.00];
 name='../src/impulse/kh24';
 %name='../src/kh/khK';
@@ -131,8 +131,8 @@ for i=range
       print('-djpeg','-r 96',pname);
     end
 
-    'pause'
-    pause
+    %'pause'
+    %pause
   end
 end
 return

@@ -155,7 +155,7 @@ do i=nx1,nx2
         (psi0(i+2,j)-psi0(i-2,j))/12          )/delx
 
    maxs(1)=max(maxs(1),abs(u))
-   maxs(2)=max(maxs(1),abs(v))
+   maxs(2)=max(maxs(2),abs(v))
    maxs(3)=0
    vel = abs(u)/delx + abs(v)/dely 
    maxs(4)=max(maxs(4),vel)
@@ -165,93 +165,8 @@ enddo
 enddo
 
 
-end subroutine
-
-
-
-
-subroutine compute_psi(w,psi,b,work,psi0)
-!
-!  btype=0   all periodic  use periodic FFT solver 
-!  btype=1   all periodic,reflect, reflect-odd
-!                use ghost cell CG solver (no boundaries)
-!  btype=2   use biotsavart for boundary and dirichlet solver
-!
-use params
-implicit none
-real*8 w(nx,ny)
-real*8 psi(nx,ny)
-real*8 work(nx,ny)
-real*8 b(nx,ny)
-real*8 psi0(nx,ny)   ! initial guess, if needed
-
-!local
-real*8 :: one=1,zero=0,tol=1e-6
-integer,save :: btype=-1
-
-external helmholtz_dirichlet,helmholtz_periodic,helmholtz_periodic_ghost
-integer i,j
-
-
-if (btype==-1) then
-   if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
-      ! periodic
-      btype=0
-   else if  ( &
-        ! not periodic, but can still do with all ghostcells:
-        ((bdy_x1==PERIODIC) .or. (bdy_x1==REFLECT) .or. (bdy_x1==REFLECT_ODD)) .and. &
-        ((bdy_x2==PERIODIC) .or. (bdy_x2==REFLECT) .or. (bdy_x2==REFLECT_ODD)) .and. &
-        ((bdy_y1==PERIODIC) .or. (bdy_y1==REFLECT) .or. (bdy_y1==REFLECT_ODD)) .and. &
-        ((bdy_y2==PERIODIC) .or. (bdy_y2==REFLECT) .or. (bdy_y2==REFLECT_ODD))  ) then
-        btype=1
-   else
-      btype=2
-   endif
-endif
-
-
-
-! if all b.c. periodic:
-if (btype==0) then
-   psi=-w
-   call helmholtz_periodic_inv(psi,work,zero,one)
-
-   !psi=0  ! initial guess
-   !b=-w
-   !call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic,.true.)
-
-else if (btype==1) then
-   ! this code can handle any compination of PERIODIC, REFLECT, REFLECT-ODD:
-
-   psi=psi0  ! initial guess
-   b=-w  ! be sure to copy ghost cell data also!
-   ! apply compact correction to b:
-
-   call helmholtz_dirichlet_setup(b,psi,work,0)
-   call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic_ghost,.false.)
-
-else
-   psi=0  ! initial guess
-   call bc_biotsavart(w,psi)    !update PSI on boundary using biot-savart law
-
-   b=-w  ! be sure to copy ghost cell data also!
-
-   ! copy b.c. from psi into 'b', and apply compact correction to b:
-   call helmholtz_dirichlet_setup(b,psi,work,1)
-   call cgsolver(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
-
-
-   !update PSI 1st row of ghost cells so that our 4th order differences
-   !near the boundary look like 2nd order centered
-   call bc_onesided(psi)
-endif
-
-call ghost_update_x_reshape(psi,1)
-call ghost_update_y_reshape(psi,1)
 
 end subroutine
-
-
 
 
 
@@ -580,7 +495,7 @@ real*8 rhs(nx,ny)
 
 !local
 real*8 dummy,tmx1,tmx2
-real*8 :: ke,ens_diss,vor,dx,dxx,dy,dyy,ensave,u,v
+real*8 :: ke,ens_diss,vor,dx,dxx,dy,dyy,ensave,u,v,maxvor
 integer n,i,j,k
 
 call wallclock(tmx1)
@@ -589,7 +504,7 @@ ke=0
 vor=0
 ensave=0
 ens_diss=0
-
+maxvor=0
 
 
 rhs=0
@@ -631,7 +546,7 @@ do i=nx1,nx2
 
 
    rhs(i,j) = rhs(i,j) +  mu*(dxx+dyy) - u*dx - v*dy
-   
+   maxvor=max(maxvor,abs(w(i,j)))
    ke = ke + .5*(u**2 + v**2)
 
    vor=vor + w(i,j)
@@ -653,6 +568,8 @@ if (compute_ints==1) then
    ints(7)=ensave /g_nx/g_ny
    ! ints(8) = < u,div(tau)' >   (alpha model only)
    ! ints(9)  = < u,f >  (alpha model only)
+
+   maxs(5)=maxvor
 endif
 
 call wallclock(tmx2)
