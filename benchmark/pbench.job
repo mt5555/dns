@@ -6,16 +6,34 @@
 #BSUB -W 0:15
 #BSUB -n 128 -R "span[ptile=128]"
 
-newcshrc
+module list
 
-set refin=benchmark256.inp
+set NCPU=128
+set NCPU_BOX=128
+set refin=$HOME/dns/benchmark/benchmark256.inp
+set SRC=$HOME/dns/src
 
-cd ../src
-./gridsetup.py 1 1 125 250 250 250
-make -j 4 dns
-cd ../benchmark
-mpirun -np 125 ../src/dns < $refin 
+cd $SRC
+# try to get lock file for 80 seconds.  (10 tries, 8sec timeout)
+lockfile -r 10 -! building_lockfile
+if ( $status ) then
 
+   ./gridsetup.py 1 1 $NCPU 256 256 256
+   make -j 4 dns
+
+   if (!(-d /scratch/mat)) then
+      mkdir /scratch/mat
+   endif
+   cp dns  /scratch/mat/dns
+   rm -f building_lockfile
+
+   cd /scratch/mat
+   
+   mpirun -np $NCPU_BOX ./dns < $refin 
+
+else
+  echo "could not get lock to build source code"
+endif
 
 
 # ssrun -workshop mpirun -np 128 ../src/dns < $refin 

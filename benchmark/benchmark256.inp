@@ -2,9 +2,12 @@
 benchmark256 ! runname
 iso12        ! init cond
 iso12        ! forcing
+2            ! struct_x
+2            ! struct_y
+10           ! struct_z
 kediff       ! viscosity type  (ke diffusion on smallest scale )
 200.0        ! viscosity coefficient.  
-0            ! alpha (for NS-alpha model)
+0.0            ! alpha (for NS-alpha model)
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc

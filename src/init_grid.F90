@@ -302,8 +302,10 @@ do i=1,80
       exit
    endif
 enddo
+print *,runname
 
 read(*,'(a12)') sdata
+print *,sdata
 if (sdata=='KH-blob') then
    init_cond=0
 else if (sdata=='KH-anal') then
@@ -317,6 +319,7 @@ endif
 
 
 read(*,'(a12)') sdata
+print *,sdata
 if (sdata=='none') then
    forcing_type=0
 else if (sdata=='iso12') then
