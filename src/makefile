@@ -126,6 +126,7 @@ ifeq ($(UNAME),OSF1)
 #         -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
 #        -lrt -free -lcxxstd -lcxx -lexc -lc
       LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
+
    endif
 
    # QB
@@ -147,6 +148,16 @@ ifeq ($(UNAME),OSF1)
       UDM =  
       UDMLIB = 
       LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
+   endif
+
+
+   ifeq ($(MPI_VERSION),lampi)
+      # LAMPI
+      MPI =  -DUSE_MPI -DUSE_MPI_IO -DUSE_LAMPI \
+           -I/users/taylorm/lampi/build-alphaev6-dec-osf5.1/include \
+           -I/users/taylorm/lampi/build-alphaev6-dec-osf5.1/romio/include 
+      MPILIB =  -L/users/taylorm/lampi/build-alphaev6-dec-osf5.1 \
+             -lmpi  -lelan
    endif
 
 

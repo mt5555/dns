@@ -2,7 +2,7 @@ analysis.o: macros.h params.o mpi.o fft_interface.o makefile
 analysis_isoave.o: macros.h params.o mpi.o isoave.o structf.o makefile 
 analysis_rms.o: macros.h params.o mpi.o fft_interface.o sforcing.o makefile 
 bc.o: macros.h params.o mpi.o ghost.o makefile 
-cases2v.o: macros.h params.o tracers.o bc.o ellipse.o makefile 
+cases2v.o: macros.h params.o tracers.o ellipse.o bc.o makefile 
 cases3v.o: macros.h params.o mpi.o transpose.o makefile 
 conv.o: macros.h params.o transpose.o makefile 
 convert.o: macros.h params.o mpi.o fft_interface.o makefile 
@@ -33,7 +33,7 @@ ns_impulse.o: macros.h params.o fft_interface.o makefile
 ns_psivor.o: macros.h params.o bc.o tracers.o ellipse.o fft_interface.o makefile 
 params.o: macros.h params.h makefile 
 particles.o: macros.h params.o mpi.o ghost.o makefile 
-psivor_diag.o: macros.h params.o ellipse.o makefile 
+psivor_diag.o: macros.h params.o ellipse.o tracers.o makefile 
 sforcing.o: macros.h params.o fft_interface.o mpi.o makefile 
 shallow.o: macros.h params.o fft_interface.o spectrum.o sforcing.o transpose.o makefile 
 shallow_diag.o: macros.h params.o spectrum.o makefile 
@@ -43,7 +43,7 @@ splitspec.o: macros.h makefile
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 
 timecontrol.o: macros.h params.o transpose.o makefile 
-tracers.o: macros.h params.o mpi.o ghost.o ellipse.o makefile 
+tracers.o: macros.h params.o ellipse.o mpi.o ghost.o makefile 
 transpose.o: macros.h params.o mpi.o makefile 
 turb_diag.o: macros.h params.o structf.o spectrum.o isoave.o sforcing.o fft_interface.o mpi.o transpose.o makefile 
 udm_interface.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
