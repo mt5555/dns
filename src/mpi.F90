@@ -32,7 +32,7 @@ module mpi
 integer MPI_REAL8 
 parameter (MPI_REAL8=MPI_DOUBLE_PRECISION)
 integer MPI_REAL4 
-parameter (MPI_REAL4=MPI_SINGLE_PRECISION)
+parameter (MPI_REAL4=MPI_REAL)
 #endif
 
 end module
