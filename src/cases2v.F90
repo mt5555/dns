@@ -11,8 +11,18 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+integer :: i,j,k
 
-Q=0
+do k=1,nz
+do j=1,ny
+do i=1,nx
+  Q(i,j,k,1)=1
+  Q(i,j,k,2)=0
+  Q(i,j,k,3)=0
+enddo
+enddo
+enddo
+
 
 end subroutine
 

@@ -21,18 +21,18 @@ integer ierr,i,j,k,n
 
 call init_mpi       
 call init_mpi_comm3d()
-call init_grid      
+call init_model      
 
-fname="test0001.0000.u"
+fname="temp0001.0000.u"
 call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,1,io_pe)
-fname="test0001.0000.v"
+fname="temp0001.0000.v"
 call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,1,io_pe)
-fname="test0001.0000.w"
+fname="temp0001.0000.w"
 call singlefile_io(time,Q(1,1,1,3),fname,work1,work2,1,io_pe)
 
 
 if (my_pe==io_pe) then
-fname="/tmp/iogrid"
+fname="iogrid"
 call copen(fname,"w",fid,ierr)
 call cwrite8(fid,o_nx,1)
 call cwrite8(fid,o_ny,1)
