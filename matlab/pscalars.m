@@ -60,8 +60,11 @@ for t=times
     for p=1:npmax
       [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
       vtot = sum(pdf);
-      Vpdata(p,nt) = sum(pdf.*(bins>=.20 & bins <=.80));
+      Vpdata(p,nt) = sum(pdf.*(bins>=.25 & bins <=.75));
       Vpdata(p,nt)=Vpdata(p,nt)/vtot;
+      c1pdf(p,nt)=sum(pdf.*bins);
+      c2pdf(p,nt)=sum(pdf.*(bins-c1pdf(p,nt)).^2);
+      c4pdf(p,nt)=sum(pdf.*(bins-c1pdf(p,nt)).^4);
     end
   else
     Vp=zeros([10,nt]);
@@ -160,6 +163,9 @@ if(schmidt(1)<=1)
 else
   eta_c=eta./sqrt(schmidt);
 end
+eta_m=(3*mean(cx2,1)).^(-.5);
+%eta_m=(3*c2./lambda_c.^2).^(-.5);
+
 
 
 
@@ -241,8 +247,8 @@ plot(time_e,lambda,time_e,lambda_c)
 title('\lambda,  \lambda_c')
 
 subplot(4,2,8)
-plot(time_e,eta,time_e,eta_c)
-title('\eta,   \eta_c')
+plot(time_e,eta,time_e,eta_c,time_e,eta_m)
+title('\eta,   \eta_c,    \eta_m')
 
 
 figure(1)
@@ -280,8 +286,8 @@ subplot(4,2,2)
 title(' ')
 
 subplot(4,2,3)
-%plot(time_e,0*eta)
-title(' ')
+plot(time_e,c4pdf(np,:)./(c2pdf(np,:).^2))
+title('Kurtosis ')
 
 subplot(4,2,4)
 %plot(time_e,0*lambda_c)
@@ -289,19 +295,19 @@ title(' ')
 
 
 subplot(4,2,5)
-plot(time_e,2*pi*n0.*lambda_c)
-title('2 \pi N0 \lambda,    2 \pi N0_c \lambda_c')
+plot(time_e,pi*n0.*lambda_c)
+title('\pi N_u \lambda,    \pi N_c \lambda_c')
 
 
 subplot(4,2,6)
-plot(time_e,2*pi*n0x_l.*eta_c',time_e,eta_c./lambda_x_c,time_e,...
-     2*pi*n0x_l.*lambda_x_c')
-title('2 \pi N_{\nabla}_c \eta_c, \eta_c / \lambda_{\nabla}_c,   2\pi N_{\nabla}_c \lambda_{\nabla}_c  ')
+plot(time_e,2*pi*n0x_l.*eta_c',time_e,2*eta_c./lambda_x_c,time_e,...
+     pi*n0x_l.*lambda_x_c')
+title('\pi N_{\nabla}_c 2 \eta_c, 2 \eta_c / \lambda_{\nabla}_c,   \pi N_{\nabla}_c \lambda_{\nabla}_c  ')
 
 
 subplot(4,2,7)
-plot(time_e,1-Vp)
-title('% pure fluid')
+plot(time_e,1-Vp,time_e,4*c2)
+title('% pure fluid, 4<c^2>')
 
 
 ym = (1 - eta_c./lambda_c).^3;
