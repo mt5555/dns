@@ -48,14 +48,18 @@ t=-20 (20 time steps)                   Nirv Bmtn  Q        4K timesteps
 LOW RES benchmarks, 6/2002
 cvs tag:  'bench602'
 
-./bench.sh 96 0 5
-5 timesteps
+./bench.sh 96 0 20
+20 timesteps
+
 using benchmark/step.inp.sed
 
                       1cpu    2cpu    4cpu
 milkyway             
-autrey
 
+autrey 
+  1.05/5
+  2.16/10
+  3.16/15
 
 
 

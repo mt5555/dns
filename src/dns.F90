@@ -15,7 +15,7 @@ real*8,save :: q1(nx,ny,nz,n_var)
 real*8,save :: work1(nx,ny,nz)
 real*8,save :: work2(nx,ny,nz)
 character(len=80) message
-integer ierr,i,j,k,n
+integer :: ierr,i,j,k,n,itime=0
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
 ! initialize global constants:
@@ -73,7 +73,7 @@ tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
 
-call dns_solve(Q,Qhat,q1,work1,work2)
+call dns_solve(Q,Qhat,q1,work1,work2,itime)
 
 
 
@@ -99,6 +99,8 @@ call print_message('CPU times (min):   (avg/max)')
 write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
 call print_message(message)
 write(message,'(a,2f9.2,a)') 'dns_solve:      ',tims_ave(2),tims_max(2)
+call print_message(message)
+write(message,'(a,2f9.2,a)') 'dns_solve per step:          ',tims_ave(2)/itime,tims_max(2)/itime
 call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   time_control       ',tims_ave(3),tims_max(3)
 call print_message(message)
@@ -162,7 +164,7 @@ end program DNS
 !  main time stepping loop
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine dns_solve(Q,Qhat,q1,work1,work2)
+subroutine dns_solve(Q,Qhat,q1,work1,work2,itime)
 use params
 use mpi
 use tracers
@@ -173,6 +175,7 @@ real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+integer :: itime
 
 !local variables
 real*8,save :: q2(nx,ny,nz,n_var)
@@ -180,7 +183,7 @@ real*8,save :: q3(nx,ny,nz,n_var)
 
 
 real*8  :: time=0
-integer :: itime=0,ierr,n
+integer :: ierr,n
 integer :: itime_final=2**30
 character(len=80) message
 real*8 :: time_old=0
@@ -190,7 +193,6 @@ real*8 :: ints_buf(nints)
 real*8 :: tmx1,tmx2
 integer,external :: lsf_time_remaining
 integer :: lsftime,i,time_needed
-
 
 
 delt=0
