@@ -78,7 +78,7 @@ for t=times
     
     for dir=1:73;
       x=r_val(:,dir)/nx;                % box length
-      y=-H_ltt(:,dir)./(x.^2*h_eps_l);
+      y=-H_ltt(:,dir)./(x.^2*abs(h_eps_l)/2);
       
       y215 = spline(x,y,xx);
       
@@ -98,72 +98,72 @@ y215_iso_ave=y215_iso_ave/length(times);
 if (0)
 
 % averging starting at t=0:
-save k45data_t0 teddy times mx45_localeps mx45_iso_localeps ...
-      y45_ave y45_iso_ave xx_plot
+save k215data_t0 teddy times mx215_localeps mx215_iso_localeps ...
+      y215_ave y215_iso_ave xx_plot
 
 % averging starting at t=1:
-save k45data_t1 teddy times mx45_localeps mx45_iso_localeps ...
-      y45_ave y45_iso_ave xx_plot
+save k215data_t1 teddy times mx215_localeps mx215_iso_localeps ...
+      y215_ave y215_iso_ave xx_plot
 
 % load data from t=0 (averaged wrong!) for isoave paper:
-load k45data_t0 
+load k215data_t0 
 
 % load data from t=1 (for time averaged) for isoave paper:
-load k45data_t1 
+load k215data_t1 
 end
 
 
 figure(4); clf; hold on; 
 for i=2:2
-%   plot(times/teddy,mx45_localeps(1:length(times),i),'k:','LineWidth',2.0);
-   plot(times/teddy,mx45_localeps(1:length(times),i),'g-','LineWidth',2.0);
+%   plot(times/teddy,mx215_localeps(1:length(times),i),'k:','LineWidth',2.0);
+   plot(times/teddy,mx215_localeps(1:length(times),i),'g-','LineWidth',2.0);
 end
-%plot(times/teddy,mx45_iso_localeps,'k-','LineWidth',2.0);
-plot(times/teddy,mx45_iso_localeps,'b-','LineWidth',2.0);
+%plot(times/teddy,mx215_iso_localeps,'k-','LineWidth',2.0);
+plot(times/teddy,mx215_iso_localeps,'b-','LineWidth',2.0);
 ax=axis;
 axis( [ax(1),ax(2),.5,1.0] );
-plot(times,(4/5)*times./times,'k');
+plot(times,(2/15)*times./times,'k');
 hold off;
 ylabel(' < (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
 xlabel('time','FontSize',16)
-print -dpsc k45time.ps
+print -dpsc k215time.ps
 
 
 figure(5); clf
 
-for i=[1,5,13]
-  %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,y45_ave(:,i),'g-','LineWidth',2.0); hold on
+for i=[1:1:31]
+  %semilogx(xx_plot,y215_ave(:,i),'k:','LineWidth',2.0); hold on
+  semilogx(xx_plot,-(y215_ave(:,i)),'r-','LineWidth',2.0); hold on
 end
-%semilogx(xx_plot,y45_iso_ave,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y45_iso_ave,'b','LineWidth',2.0); hold on
+%semilogx(xx_plot,y215_iso_ave,'k','LineWidth',2.0); hold on
+semilogx(xx_plot,y215_iso_ave,'b','LineWidth',2.0); hold on
 axis([1 1000 0 1.0])
-x=1:1000; plot(x,(4/5)*x./x,'k');
+x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
-%title('D_{lll} / r\epsilon   (4/5 law) ');
-ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
+title('H_{ltt} / r^2\h_{epsilon}   (2/15 law) ');
+ylabel('H_{ltt}/h_{epsilon}r^2','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 
-print -dpsc k45mean.ps
+print -dpsc k215mean.ps
 
 
 
-figure(5); clf
-offset=y45_iso_ave;
+figure(6); clf
+offset=y215_iso_ave;
 stdr=0*offset;
 
 for i=1:15
-  %semilogx(xx_plot,y45_ave(:,i)-offset,'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,y45_ave(:,i)-offset,'g-','LineWidth',2.0); hold on
-  stdr=stdr+(y45_ave(:,i)-offset).^2;
+  %semilogx(xx_plot,y215_ave(:,i)-offset,'k:','LineWidth',2.0); hold on
+  semilogx(xx_plot,-y215_ave(:,i)-offset,'k-','LineWidth',2.0); hold on
+  stdr=stdr+(y215_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
-%semilogx(xx_plot,y45_iso_ave-offset,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y45_iso_ave-offset,'b','LineWidth',2.0); hold on
+%semilogx(xx_plot,y215_iso_ave-offset,'k','LineWidth',2.0); hold on
+semilogx(xx_plot,y215_iso_ave-offset,'b','LineWidth',2.0); hold on
 axis([1 1000 -.2 .2])
-x=1:1000; plot(x,(4/5)*x./x,'k');
+x=1:1000; plot(x,(2/15)*x./x,'k');
 hold off;
-%title('D_{lll} / r\epsilon   (4/5 law) ');
+%title('H_{ltt} / r^2\h_{\epsilon}   (2/15 law) ');
 ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 
@@ -178,8 +178,8 @@ ln=ln(1);
 lnmax=length(times);
 
 dir_use=2;
-[mean(mx45(ln:lnmax,dir_use)),mean(mx45_iso(ln:lnmax))]
-[std(mx45(ln:lnmax,dir_use)),std(mx45_iso(ln:lnmax)) ]
+[mean(mx215(ln:lnmax,dir_use)),mean(mx215_iso(ln:lnmax))]
+[std(mx215(ln:lnmax,dir_use)),std(mx215_iso(ln:lnmax)) ]
 
 
 

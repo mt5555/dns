@@ -329,7 +329,7 @@ for i=1:ndir
   x = r_val(:,i);                       % units of box length
   x_plot=x*nx*delx_over_eta;            % units of r/eta
 
-  y=H_ltt(:,i)./(h_epsilon*(x.^2)/2); %divide by 2 because of TM definition
+  y=H_ltt(:,i)./(abs(h_epsilon)*(x.^2)/2); %divide by 2 because of TM definition
 
   semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',msize); hold on;
   yyave=yyave+w(i)*spline(x,y,xx);
@@ -350,8 +350,6 @@ print('-dpsc',[bname,'_215.ps']);
 print -djpeg 215.jpg
 end
 end
-
-
 
 
 
