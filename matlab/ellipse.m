@@ -9,7 +9,7 @@
 %name='../src/temp0000.0000.ellipse';
 %name='../src/vxpair/vx2048a0010.0000.ellipse';
 %name='/data/vxpair/vx2048a0050.0000.ellipse';
-name='/data/vxpair/vx2048b0000.0000.ellipse';
+name='/data/vxpair/vx2048c0000.0000.ellipse';
 fid=fopen(name,'r');
 
   

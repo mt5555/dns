@@ -12,10 +12,10 @@ range=50:5:150.00;
 %range=[.00];
 %name='../src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
-name='/ccs/taylorm/dns/src/vxpair/vx3072_';
+%name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='../src/temp';
 %name='/data/vxpair/vx2048a';
-%name='/data/vxpair/vx2048b';
+name='/data/vxpair/vx2048c';
 
 usefig=1;
 mkpr=1;            % make ps and jpeg files
