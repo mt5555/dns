@@ -31,7 +31,7 @@ cdir=[cdir, 'y','y','y','y','y','y','y','y','y','y','y','y'];      % 12 (1,1,3) 
 
 msize=4;   % marker size
 xmax=1000;  % maximum x axis
-xmax2=2000;  % x axis for iso check plots
+xmax2=1000;  % x axis for iso check plots
 iso_check_dir=2;  % direction to use for single direction iso_check
 
 
@@ -409,6 +409,7 @@ ylabel('Second order relation','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
 hold off;
+print -deps isocheck2.ps;
 
 
 
@@ -482,6 +483,7 @@ ylabel('Third order relation','FontSize',16);
 xlabel('r/\eta','FontSize',16);
 ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
 hold off;
+print -deps isocheck3.ps;
 
 end
 
