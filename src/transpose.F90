@@ -919,9 +919,11 @@ end subroutine
 
 #ifdef TRANSPOSE_X_SPLIT_Y
 
-subroutine output1(p,pt,buf,fid)
+subroutine output1(p,pt,buf,fid,fpe)
 use params
 use mpi
+CPOINTER fid
+integer :: fpe           ! cpu to do the I/O
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
 real*8 :: buf(o_nx,ny_2dx)
@@ -929,7 +931,6 @@ real*8 :: buf(o_nx,ny_2dx)
 ! local vars
 real*8 saved_edge(o_nx)
 integer sending_pe,ierr,tag,z_pe,y_pe,x_pe
-CPOINTER fid
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
@@ -979,12 +980,12 @@ do x_pe=0,ncpu_x-1
    if (sending_pe==my_pe) then
 
       buf(1:g_nx,:)=pt(1:g_nx,kuse,:)
-      if (my_pe == io_pe) then
+      if (my_pe == fpe) then
          ! dont send message to self
       else
 #ifdef USE_MPI
          tag=1
-         call MPI_ISend(buf,l,MPI_REAL8,io_pe,tag,comm_3d,request,ierr)
+         call MPI_ISend(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_ISend failure",ierr==0)
          call MPI_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)
@@ -992,7 +993,7 @@ do x_pe=0,ncpu_x-1
       endif
    endif
 
-   if (my_pe==io_pe) then
+   if (my_pe==fpe) then
       if (sending_pe==my_pe) then
          ! dont recieve message from self
       else
@@ -1024,9 +1025,14 @@ enddo
 enddo
 
 end subroutine
-subroutine input1(p,pt,buf,fid)
+
+
+
+subroutine input1(p,pt,buf,fid,fpe)
 use params
 use mpi
+integer :: fpe         ! cpu to do all the file I/O
+CPOINTER fid
 real*8 :: p(nx,ny,nz)
 real*8 :: pt(g_nx2,nslabz,ny_2dx)
 real*8 :: buf(o_nx,ny_2dx)
@@ -1034,7 +1040,7 @@ real*8 :: buf(o_nx,ny_2dx)
 ! local vars
 real*8 saved_edge(o_nx)
 integer destination_pe,ierr,tag,z_pe,y_pe,x_pe
-CPOINTER fid
+
 #ifdef USE_MPI
 integer request,statuses(MPI_STATUS_SIZE)
 #endif
@@ -1073,7 +1079,7 @@ do x_pe=0,ncpu_x-1
 #endif
 
 
-   if (my_pe==io_pe) then
+   if (my_pe==fpe) then
       call cread8(fid,buf,o_nx*ny_2dx)
 
       if (o_ny==g_ny+1) then
@@ -1084,7 +1090,7 @@ do x_pe=0,ncpu_x-1
 
    endif
 
-   if (my_pe==io_pe) then
+   if (my_pe==fpe) then
       if (destination_pe==my_pe) then
          ! dont send message to self
       else
@@ -1099,12 +1105,12 @@ do x_pe=0,ncpu_x-1
 
 
    if (destination_pe==my_pe) then
-      if (my_pe == io_pe) then
+      if (my_pe == fpe) then
          ! dont recieve message from self
       else
 #ifdef USE_MPI
          tag=1
-         call MPI_IRecv(buf,l,MPI_REAL8,io_pe,tag,comm_3d,request,ierr)
+         call MPI_IRecv(buf,l,MPI_REAL8,fpe,tag,comm_3d,request,ierr)
          ASSERT("output1: MPI_ISend failure",ierr==0)
          call MPI_waitall(1,request,statuses,ierr) 	
          ASSERT("output1: MPI_waitalll failure",ierr==0)

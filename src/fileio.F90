@@ -482,9 +482,9 @@ if (my_pe==fpe) then
 endif
 
 if (read==1) then
-   call input1(p,work,work2,fid)
+   call input1(p,work,work2,fid,fpe)
 else
-   call output1(p,work,work2,fid)
+   call output1(p,work,work2,fid,fpe)
 endif
 if (my_pe==fpe) call cclose(fid)
 

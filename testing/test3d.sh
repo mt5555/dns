@@ -75,7 +75,7 @@ make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp
 make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
-./gridsetup.py 2 1 2 32 32 32 2 2 0
+./gridsetup.py 2 1 2 32 32 32 2 3 4 4 3 2 
 make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 

@@ -4,18 +4,20 @@
 !  subroutine to take one Runge-Kutta 4th order time step
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q_grid,Q,rhs)
+subroutine rk4(time,Q_grid,Q,rhs,Q_tmp,Q_old,work1,work2)
 use params
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
+real*8 :: Q_tmp(nx,ny,nz,n_var)
+real*8 :: Q_old(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 
 ! local variables
-real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: ke_old,time_old,vel
-real*8 :: Q_old(nx,ny,nz,n_var)
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
 
@@ -42,7 +44,7 @@ endif
 
 
 ! stage 1
-call ns3D(rhs,Q,Q_grid,time,1)
+call ns3D(rhs,Q,Q_grid,time,1,work1)
 
 
 do n=1,3
@@ -61,7 +63,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1)
 
 
 do n=1,3
@@ -78,7 +80,7 @@ do n=1,3
 enddo
 
 ! stage 3
-call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
+call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1)
 
 do n=1,3
    do k=nz1,nz2
@@ -95,7 +97,7 @@ enddo
 
 
 ! stage 4
-call ns3D(rhs,Q_tmp,Q_grid,time+delt,0)
+call ns3D(rhs,Q_tmp,Q_grid,time+delt,0,work1)
 
 
 do n=1,3
@@ -144,7 +146,7 @@ end subroutine rk4
 
 
 
-subroutine ns3d(rhs,Qhat,Q,time,compute_ints)
+subroutine ns3d(rhs,Qhat,Q,time,compute_ints,p)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -173,18 +175,16 @@ integer compute_ints
 ! output
 real*8 rhs(nx,ny,nz,n_var)
 
+!work
+real*8 p(nx,ny,nz)
 
 !local
-real*8 p(nx,ny,nz)
 real*8 xfac,tmx1,tmx2
 real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke_diss,vor,hel,maxvor,f_diss
 
-
-real*8 tmp(g_nz2,nslabx,ny_2dz,n_var)
-real*8 tmp2(g_nz2,nslabx,ny_2dz,n_var)
 
 
 
