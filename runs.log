@@ -1,59 +1,12 @@
-email: Bonnie answer
-       UDM team: qb1533  
-       ccn-8: vis next week?
-
-Meneauvau: check schedule, register
-
-check these out:
-  check sc512A data is on HPSS.
-  plot new functions for cj using delx/eta=.5 data
-  
-
-512^3:     can run analysis if we to a two array analysis. isoavep2()?
-                                             time isoavep2 vs isoavep
-
-update UDM code.
-
-
-
-
-
-test1 32:  restart from reference (27 coeff), save 22 coeff.
-test2 32:  restart from test1
-test3 32:  restart from test1, value diffusion.   t=0:
-
-time=  0.00000(     0)  next output=*********  LSF minutes left:    -1. 0       
-for next timestep: delt=0.0069861 cfl_adv= 1.500 cfl_vis= 0.080                 
-max: (u,v,w)      3.07340785717600     3.69418112148746     3.43868098933755    
-<z-vor>=-0.10408E-14   <hel>=-0.29407E+01   max(vor) 0.66968E+02                
-R_lambda=    40.52374  R=   269.54178 lambda=     0.15005                       
-mesh spacing/eta:        2.6091       2.6091       2.6091                       
-2/3 dealiasing kmax*eta:        0.1278                                          
-eddy turnover time:        1.2137                                               
-ke:  1.5058723054  enstropy:      668.8337         total d/dt(ke):   0.0000000  
-d/dt(ke) vis=  -2.4813730 f=   0.0000000 alpha=   0.0000000 total=  -2.4813730  
-writing output files at t=    0.0000              
-
-
-test4 30:  restart from test1   same restart as test3?  yes
-test5 48:  restart from test1   same restart as test3?  yes
-
-
-reference tests: run makeref and test again.  (that will test 
-new output routines?)
-
-
 **********************************************************************************
 11/27/02
 
-shiyi forced run for Chris.  delx/eta=.5
+shiyi forced run for Chris.
 running on QSC
 
-sc512A   IN
-
-
-
-
+sc512A   DONE.
+R_l = 70 (I think)
+delx/eta = .5
 
 
 
@@ -64,6 +17,17 @@ QB pre-science run.
 .4020:  last non-rescaled run.
         rescale run started from this time.  
 .4027:  rescaled run, after 1 timestep 
+
+Ran ok to t= 2.43282
+Then there is a glitch between time step 10 and time step 15.
+
+2.4247        will have to restart from here.
+2.4328.[uvw]  ok. (but didn't save?)
+
+2.4328.scalars,spec,spect   bad. 
+2.4400.scalars-turb  bad
+
+restart from 2.4328.[uvw].  
 
 
 1. initial value: restart + rescale.  call daniel to talk about this
@@ -263,7 +227,9 @@ IN:
    at t=90 changed  FM = 18/(2pi)**2 
                     epsilon=  
    run to t=137, still running.  lost all *.isoave files up to t=181.
-   run 7*6 = 42.  Run to t=232.  
+   run 6 turnover times: 7*6 = 42.  Run to t=232.  
+   run 12 turnover times: 7*12 = 84.  Run to t=274.
+   
  
    
 
@@ -500,7 +466,7 @@ iso12_512 (ON O3K)   done
 
 
  
-iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2  
+iso12w512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2  
 
                Run to t=2.9:   R_l = 260
                                epsilon = -.0383  = 1.51/(2pi)**2   
@@ -518,7 +484,7 @@ iso12w_512A    mu=6e-4/(2pi)**2   FM=15/(2pi)**2
                  20                 .7484
                  15                 .7695
 
-iso12w_512B
+iso12w512B
    in QA
    same as  iso12w_512A, but with zero initial condition
    FM=5/(2pi)**2, mu=6e-4/(2pi)**2

@@ -1,55 +1,17 @@
+TODO:
+
+email: Bonnie answer
+       UDM team: qb1533  
+       ccn-8: vis next week?
+       Goeff: jobs?
+
 Angle averging:  153 calls to transpose_z()
      1 stage RK:   9 transpose_z().  = 36 transposes per timestep
      angle averaging:  4.25 timesteps.
-
-     check this with timeings?  512^3:  30min.  timestep: .2 min
-                         cost = 150 timesteps
-
-
-
-initial results were promising (Chen).  That data was 
-from just the coordinate directions, and from a single snapshot.
-Advent of bigger computers, more statisics were computed
-and it was determined that data from a single direction of
-a single snapshot does not provide 
-a statistically significant result.  The varience is quite
-large and one must average over many snapshots from several
-eddy turnover times
-
-Results computed with
-averaging over many snapshots did not look so good.
-
-
-TODO:
-iso12w512A  why non-isotropic?
-            check 2nd order isotropy for a single direction
-            check 2nd order isotropy for average of 3 direction
-            check time averages vs. angle averages
-            email Gotoh  
-
-<> = time average
-[] = angle average.  f(0) = [f(a)]
-
-measure of isotropy:
-L2_over_all_a:     sqrt [  ( <f(a)> - <[f(a)]> )^2   ]
-
-
-iso12w512B  different initial condition
-               see if same coordinate bias persists
-
-iso12_500A  check isotropic
-            check time averages vs. angle averages
-            
+     True cost: 150 timesteps.
+     time this again with **p replaced by multiplication?
 
 iso12_512 (O3K)  look at intermittency? 
-                 
-
-
-
-
-
-Goeff: jobs?
-
 
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  
@@ -60,7 +22,6 @@ Goeff: jobs?
         2000^3 on 512?
        
 1. save scalars every 10 timesteps instead of at diag_dt time?
-1. Test CJ functions
 2. construct convergence test for KH problem
        use E&Liu KH problem?  what value of mu?
        mu=0:  at t=1, E is down .25e-6.  dk/dt = -1.25e-6
@@ -80,6 +41,7 @@ check spectrum and parallel spectrum.  using testcase?
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  
 101. divergence: go to Shashkov formula?  
+
 
 **********************************************************************************
 memory use:
