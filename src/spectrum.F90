@@ -452,7 +452,7 @@ end subroutine
 
 
 
-subroutine output_helicity_spec(time)
+subroutine output_helicity_spec(time,time_file)
 use params
 implicit none
 real*8 :: time
@@ -478,7 +478,7 @@ endif
 
 
 if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time
+   write(message,'(f10.4)') 10000.0000 + time_file
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".hspec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then

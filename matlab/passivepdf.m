@@ -28,7 +28,7 @@ for p=1:npmax
    subplot(5,2,p) 
    plot(bins,pdf)
    ax=axis;
-   axis([-.5,1.5,ax(3),ax(4)]);
+   axis([-.5,1.5,ax(3),.3]);
    xlabel(sprintf('[%.3f,%.3f] <s^2>=%.5f',mn,mx,s2));
    %title(sprintf('passive scalar  t=%.4f',time)); 
    set(gca,'YTickLabel','')    
