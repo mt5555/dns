@@ -3,12 +3,13 @@
 
 128x128 can handle mu=.0002 to t=1.  What happens if we run longer?
 
-CFL=2.0   some problems at t=4:  noisy, but just two large blobs
+CFL=2.0   t=4 noisy, but just two large blobs
 CFL=1.9   t=4 looks good, t=10 is noisy
-CFL=1.8   t=4 looks good, t=10 looks good.  t=20 noisy
-
-    1.7   t=50 IN
-CFL=1.5   t=4 looks good, t=10 looks good.  two large blobs
+CFL=1.8   t=10 ok, t=20 noisy
+CFL=1.7   t=20 ok, t=30 noisy.
+CFL=1.65  goes bad at t=47! 
+CFL=1.6   t=4 ok, t=10 ok, t=30 ok, t=50 ok
+CFL=1.5   t=4 ok, t=10 ok, t=30 ok, t=50 ok
 CFL=1.0   t=4 looks good, t=10 looks good.  two large blobs
 
 

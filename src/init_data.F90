@@ -15,7 +15,7 @@ call fft3d(Q(1,1,1,n),work)
          do i=nx1,nx2
             im=imcord(i)
 
-            Q(i,j,k,n) = .001
+            Q(i,j,k,n) = 1
 
          enddo
       enddo
