@@ -587,7 +587,8 @@ end subroutine
 !
 !     inserts a points if the angle that two consecutive points make
 !     with the center of the spiral is bigger than a specified value
-!     (dble prec)
+!     (dble prec), or if adjacent points are further than sqrt(epsd) 
+!     away.
 !
       use params
       integer j,k,n,j1,j2,jm1,k1,nt
@@ -597,7 +598,7 @@ end subroutine
       real*8 :: cutoff,xsave,ysave,alfsave
 
       integer,save :: jctr=1
-      real*8 :: epsd=.01  ! .1**2
+      real*8 :: epsd=.025**2  ! .1**2
       cutoff=cos(pi/30)
 
       if (numt_insert<0) numt_insert=numt
