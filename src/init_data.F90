@@ -73,7 +73,7 @@ integer :: n
 
 Q=0
 time_initial=-1
-call input_uvw(time_initial,Q,Qhat,work1,work2)
+call input_uvw(time_initial,Q,Qhat,work1,work2,1)
 
 write(message,'(a,f10.4)') "restart time=",time_initial
 call print_message(message)

@@ -49,12 +49,18 @@ real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
-integer :: nxdecomp,nydecomp,nzdecomp,csig
+integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs
 logical :: read_uvw
 CPOINTER :: fid,fid1,fid2
 
 
+! header_type of input data:
+!    1              DNS code standard format
+!    2              no headers             
+!    3              Ensight headers
+!
+header_type=1               
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
@@ -165,7 +171,7 @@ do
       endif
       
       if (.not. read_uvw) then
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
 	 read_uvw=.true.
       endif
       
@@ -187,9 +193,9 @@ do
       if (.not. read_uvw) then	
       if (use_serial==1) then
          !      call dataio(time,Q,work1,work2,1)
-         call input_uvw(time,Q,dummy,work1,work2)
+         call input_uvw(time,Q,dummy,work1,work2,header_type)
       else
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
       endif
       read_uvw=.true.	
       endif
@@ -269,7 +275,7 @@ do
       
       if (.not. read_uvw) then
          call print_message("calling input_uvw")
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
 	 read_uvw=.true. ! dont set to .true.: we trash Q below:
       endif
       call print_message("calling compute_w2s2")

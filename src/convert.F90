@@ -83,7 +83,7 @@ icount=icount+1
    Q=0
 
    if (convert_opt==0) then  ! -cout uvw  
-      call input_uvw(time,Q,vor,work1,work2)
+      call input_uvw(time,Q,vor,work1,work2,1)
       ! just reoutput the variables:
       if (w_spec) then
          do n=1,3
@@ -95,7 +95,7 @@ icount=icount+1
    endif
 
    if (convert_opt==1) then  ! -cout vor
-      call input_uvw(time,Q,vor,work1,work2)
+      call input_uvw(time,Q,vor,work1,work2,1)
       ! outputing vorticity
       basename=runname(1:len_trim(runname)) // "-vor."
 
@@ -106,7 +106,7 @@ icount=icount+1
    endif
 
    if (convert_opt==2) then  ! -cout vorm
-      call input_uvw(time,Q,vor,work1,work2)
+      call input_uvw(time,Q,vor,work1,work2,1)
       call print_message("computing vorticity magnitude...")
       call vorticity(vor,Q,work1,work2)
       do k=nz1,nz2
@@ -130,7 +130,7 @@ icount=icount+1
    endif
    if (convert_opt==3) then  ! -cout norm2
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2)
+      call input_uvw(time,Q,vor,work1,work2,1)
       print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
@@ -175,7 +175,7 @@ icount=icount+1
    endif
    if (convert_opt==5) then  ! -cout norm
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2)
+      call input_uvw(time,Q,vor,work1,work2,1)
       print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))

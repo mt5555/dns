@@ -532,7 +532,7 @@ end subroutine
 
 
 
-subroutine input_uvw(time,Q,Qhat,work1,work2)
+subroutine input_uvw(time,Q,Qhat,work1,work2,header_type)
 !
 ! low wave number, quasi isotropic initial condition
 !
@@ -550,10 +550,9 @@ real*8 :: work2(nx,ny,nz)
 character(len=80) message
 character(len=80) fname
 character(len=80) base
-integer :: n
+integer :: n,header_type
 real*8 :: time
 real*8 :: time_in
-
 
 if (time<0) then
    base="restart"
@@ -570,6 +569,7 @@ if (udm_input) then
    call udm_read_uvw(time_in,base,Q,work1,work2)
 else
    if (r_spec) then
+      if (header_type /= 1) call abort("Error: spectral I/O requires header_type==1");
       fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".us"
       call print_message("Input: ")
       call print_message(fname)
@@ -589,19 +589,20 @@ else
       fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
       call print_message("Input: ")
       call print_message(fname)
-      call singlefile_io2(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
+      call singlefile_io3(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec,header_type)
       fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
       call print_message(fname)
-      call singlefile_io2(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
+      call singlefile_io3(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec,header_type)
       if (n_var==3) then
          fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".w"
          call print_message(fname)
-         call singlefile_io2(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec)
+         call singlefile_io3(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec,header_type)
       endif
    endif
 endif
 
 else if (equations==SHALLOW) then
+   if (header_type /= 1) call abort("Error: SHALLOW I/O requires header_type==1");
    fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
    call print_message("Input: ")
    call print_message(fname)
@@ -615,6 +616,7 @@ else if (equations==SHALLOW) then
       call singlefile_io(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe)
    endif
 else if (equations==NS_PSIVOR) then
+   if (header_type /= 1) call abort("Error: NS_PSIVOR I/O requires header_type==1");
    call tracers_restart(io_pe)
    fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vor"
    call print_message("Input: ")
