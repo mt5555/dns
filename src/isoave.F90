@@ -423,7 +423,7 @@ real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
-integer :: n1,n1d,n2,n2d,n3,n3d,ierr
+integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p
 
 if (firstcall) then
    firstcall=.false.

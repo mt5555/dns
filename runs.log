@@ -275,7 +275,7 @@ dnsghost 4x4x32     same
          1x1x1024   size per cpu:  (2052*2052*6)*8*3 *6 = 3.4Gb per cpu.  
          2x1x512    wont load                             2.2Gb per cpu
 dhsghost 4x1x256    5 timesteps:   2.09m per timestep     1.7Gb per cpu
-dhsghost 2x2x256    5 timesteps:   IN
+dhsghost 2x2x256    5 timesteps:   2.28m per timestep
 
 
 1536^3 
