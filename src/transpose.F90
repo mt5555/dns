@@ -75,11 +75,6 @@ endif
 nio=1
 nio=min(mpi_maxio,ncpu_z)
 
-if (udm_output) then
-   print *,'UDM temp. setting nio=2' 
-   nio=2
-endif	
-
 inc=ncpu_z/nio
 
 if (io_pe==my_pe) then

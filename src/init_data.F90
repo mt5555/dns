@@ -1,10 +1,11 @@
 #include "macros.h"
-subroutine init_data(Q,Qhat,work1,work2)
+subroutine init_data(Q,Qhat,q1,work1,work2)
 use params
 use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 if (restart==1) then
@@ -27,6 +28,21 @@ else
    if (init_cond==6) call init_data_zero(Q,Qhat,work1,work2)
    if (init_cond==7) call init_data_decay(Q,Qhat,work1,work2,1,0,0)
    if (init_cond==8) call init_data_decay(Q,Qhat,work1,work2,1,1,0)
+
+
+
+
+if (equations==NS_UVW) then
+   call print_message('Projecting initial data...')
+   call divfree_gridspace(Q,work1,work2,q1) 
+else if (equations==SHALLOW .or. equations==NS_PSIVOR) then
+   if (dealias>0)  then
+      call print_message('Dealiasing initial data...')
+      call dealias_gridspace(Q,work1)
+   endif
+endif
+
+
 endif
 end subroutine
 
