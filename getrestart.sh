@@ -58,7 +58,11 @@ if ($searchall == all) then
    endif
    set resnamels = `basename $resnamels`
    set resnamepsi = `basename $resnamepsi`
-   set resnamew=`echo "$resnamels\n$resnamepsi" | sort | tail -1`
+   rm -f tempsort
+   echo $resnamels > tempsort
+   echo $resnamepsi >> tempsort 
+   set resnamew=`sort tempsort | tail -1`
+   rm -f tempsort
    if ($resnamew == $resnamels ) then
       echo "using restart files in directory"
       #fpath already set

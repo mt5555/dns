@@ -594,16 +594,16 @@ end subroutine
 
 
 
-subroutine output_uvw(basename,time,Q,work1,work2,work3)
+subroutine output_uvw(basename,time,Q,q1,work1,work2)
 use params
 use mpi
 use fft_interface
 use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: work3(nx,ny,nz)   ! only used if ndim==2
 character(len=*) :: basename
 
 !local
@@ -644,9 +644,9 @@ else if (equations==NS_UVW) then
          call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
       endif
       if (ndim==2) then
-         call vorticity2d(work3,Q,work1,work2)
+         call vorticity2d(q1,Q,work1,work2)
          fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
-         call singlefile_io(time,work3,fname,work1,work2,0,io_pe)
+         call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
       endif
    endif
    
@@ -661,9 +661,9 @@ else if (equations==SHALLOW) then
       call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
    endif
    if (ndim==2) then
-      call vorticity2d(work3,Q,work1,work2)
+      call vorticity2d(q1,Q,work1,work2)
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
-      call singlefile_io(time,work3,fname,work1,work2,0,io_pe)
+      call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
    endif
 else if (equations==NS_PSIVOR) then
    ! 2D NS psi-vor formulation

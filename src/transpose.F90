@@ -51,9 +51,12 @@ subroutine mpi_io_init
 integer i,dest_pe3(3),key,color,ierr
 
 nio=1
-if (do_mpi_io) then
+if (do_mpi_io .or. udm_output ) then
    nio=min(mpi_maxio,ncpu_z)
 endif
+
+if (udm_output) nio=2
+
 inc=ncpu_z/nio
 
 if (io_pe==my_pe) then

@@ -17,7 +17,7 @@ character(len=80) fname
 !local
 character(len=80) message
 integer :: n,i,j,k
-
+logical :: sendpe,recpe
 
 integer len1, len2, fidudm, dsidudm, infoid, ierr
 integer attrdim, attrcnt
@@ -35,7 +35,7 @@ character*(2) dotudm
 
 ! character*(6) dbgname
 
-integer*8 fidmpi,infoin
+integer*8 fidmpi,infoin,dest_pe3(3),y_pe,x_pe,z_pe,ope,fpe,tag
 
 #ifdef HAVE_UDM
 

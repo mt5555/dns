@@ -102,8 +102,8 @@ ifeq ($(UNAME),OSF1)
       -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
       -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
      -lrt -free -lcxxstd -lcxx -lexc -lc
-   UDM=
-   UDMLIB= 
+   #UDM=
+   #UDMLIB= 
 
    LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
 
