@@ -533,6 +533,7 @@ subroutine singlefile_io(time,p,fname,work,work2,read,fpe)
 ! fpe       processor to do the file I/O
 !
 use params
+use mpi
 use transpose
 implicit none
 integer :: read  ! =1 for read, 0 for write
@@ -593,6 +594,10 @@ if (my_pe==fpe) then
       call cwrite8(fid,g_zcord(1),o_nz)
    endif
 endif
+
+#ifdef USE_MPI
+call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+#endif
 
 if (read==1) then
    call input1(p,work,work2,fid,fpe,.false.)

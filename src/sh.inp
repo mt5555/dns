@@ -1,6 +1,6 @@
 2            ! input file type
 sht          ! initial condition:  shallow water turbulence
-4            ! init condition subtype
+5            ! init condition subtype
 none         ! forcing:  none, iso12
 hyper        ! viscosity type  (hyper)
 50         ! viscosity value (ke dissapation rate of 2h mode)  5000 

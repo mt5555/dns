@@ -237,12 +237,14 @@ do
 
    if (maxs(8)>=0 .and. maxs(8)<30 .and. enable_lsf_timelimit) then
       write(message,'(a,f20.10)') "LSF timelimit approaching. Stoping at time=",time
+      call print_message("** ERROR ****************************************")
       call print_message(message)
       itime_final=itime
    endif
    
    if (maxval(maxs(1:3))> 1000) then
       write(message,'(a,f20.10)') "max U > 1000. Stoping at time=",time
+      call print_message("** ERROR ****************************************")
       call print_message(message)
       itime_final=itime
    endif

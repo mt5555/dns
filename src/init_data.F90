@@ -14,7 +14,6 @@ real*8 :: work2(nx,ny,nz)
 character(len=80) message
 character(len=80) fname
 
-
 call print_message("Restarting from file restart.[uvw]")
 fname = rundir(1:len_trim(rundir)) // "restart.u"
 call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
