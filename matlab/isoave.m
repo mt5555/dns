@@ -16,7 +16,6 @@ nx=256; delx_over_eta=2.00; epsilon=4.31;
 
 
 fid=fopen([name,'.isostr'],'r','l');
-eta = 1/(nx*delx_over_eta);
  
 cdir=[ 'k','k','k' ];  % x,y,zz
 cdir=[cdir, 'g','g','g','g','g','g'];  % face diagonals
@@ -42,7 +41,7 @@ ndelta=fread(fid,1,'float64');
 ndir  =fread(fid,1,'float64');
 nlon  =fread(fid,1,'float64');
 ntran =fread(fid,1,'float64');
-nnew1 =fread(fid,1,'float64');
+nscalers =fread(fid,1,'float64');
 nnew2 =fread(fid,1,'float64');
 
 r_val=fread(fid,[ndelta,ndir],'float64');
@@ -72,6 +71,36 @@ if (ntran>=4)
    SN1_ltt=fread(fid,[ndelta,ndir],'float64');
    SN2_ltt=fread(fid,[ndelta,ndir],'float64');
 end
+
+eta = 1/(nx*delx_over_eta);
+if (nscalars==7) then
+  time=fread(fid,1,'float64');
+  nx=fread(fid,1,'float64');
+  ny=fread(fid,1,'float64');
+  nz=fread(fid,1,'float64');
+  mu=fread(fid,1,'float64');
+  ke=fread(fid,1,'float64');
+  epsilon=fread(fid,1,'float64');
+  eta = (mu^3 / epsilon)^.25;
+  delx_over_eta=
+endif
+
+lambda=10*ke*mu/epsilon       ! single direction lambda
+R_lambda = lambda*sqrt(2*ke/3)/mu 
+
+
+print *,'KE:      ',ke
+print *,'epsilon: ',epsilon
+print *,'mu       ',mu
+print *
+print *,'eta      ',eta
+print *,'delx/eta ',(1/g_nmin)/eta
+print *,'lambda   ',lambda
+print *,'R_l      ',R_lambda
+
+
+
+
 
 % D_lll=SP_lll-SN_lll;
 % but to make SP and SN have the same sign as D, multipl
