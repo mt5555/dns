@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2001 University Corporation for Atmospheric Research 
  *       
- * $Id: fortran.c,v 1.1 2001-08-06 20:33:32 mt Exp $
+ * $Id: fortran.c,v 1.2 2001-08-17 22:25:44 mt Exp $
  */
 
 
@@ -19,7 +19,7 @@
 #elif defined (linux)
 #define _Fortran(A) A##_
 #elif defined (__alpha)
-#define _Fortran(A) A
+#define _Fortran(A) A##_
 #elif defined (__sgi)
 #define _Fortran(A) A##_
 #elif defined (_AIX)
