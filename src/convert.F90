@@ -357,19 +357,20 @@ enddo
 
 ! output the gradu matricies:
 if (io_pe==my_pe) then
-do ip=1,2
-write(sdata,'(f10.4)') 10000.0000 + time
-write(ext,'(i1)') ip
-basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu' // ext(1)
-open(15,file=fname,form='formatted')
-do sc=1,nsubcube
-   write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
-   do i=1,3
-      write(15,'(3e18.10)') (gradu(i,j,sc,ip),j=1,3)
+   do ip=1,2
+      write(sdata,'(f10.4)') 10000.0000 + time
+      write(ext,'(i1)') ip
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu' // ext(1)
+      open(15,file=fname,form='formatted')
+      do sc=1,nsubcube
+         write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
+         do i=1,3
+            write(15,'(3e18.10)') (gradu(i,j,sc,ip),j=1,3)
+         enddo
+      enddo
    enddo
-enddo
-close(15)
+   close(15)
 endif
 
 
