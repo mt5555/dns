@@ -1,6 +1,6 @@
 program 3D_setup
-use mod_mpi
-use mod_debug
+use mod-mpi
+use mod-debug
 
 integer :: me_global2
 integer :: live_procs
