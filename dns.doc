@@ -66,6 +66,31 @@ grid point model) See shallow.doc for some more documentation.
 Running the code
 1. setting the resolution
 
+    ./gridsetup L M N  NX NY NZ  gx1 gy1 gz1  gx2 gy2 gz2  n_var
+
+    L M N        = parallel decomposition.  
+    NX NY NZ     = global grid
+    gx1 gy1 gz1  = number of padding/ghost cells on right edge  (default = 2 2 0)
+    gx2 gy2 gz2  = number of ghost cells on left edge (default = 0 0 0) 
+    n_var        = number of variables   (default = 3)
+ 
+    Examples:  to run the spectral code at 256^3 on 128 cpus:
+    (doesn't need ghost cells, but needs a little extra storage for
+     FFT's, provided by default values of gx1,gy1,gz1)
+
+    ./gridsetup.py 1 1 128 256 256 256
+
+    To run a 4th order finite difference code (needs 2 ghost cells in 
+    every direction), with storage for (u,v,w):
+
+    ./gridsetup.py 8 8 4 256 256 256 2 2 2  2 2 2 
+
+    To run a 4th order finite difference code (needs 2 ghost cells in 
+    every direction), with storage for (u,v,w,rho,p):
+
+    ./gridsetup.py 8 8 4 256 256 256 2 2 2  2 2 2 5
+
+
 2. compiling
 
 3. the input file
