@@ -54,7 +54,7 @@ if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
    call compute_spec_shallow(time,Q,q1,work1,work2)
-   call output_spec(time,Q,q1,q2,q3,work1,work2)
+   call output_spec(time,time_initial)
    
    !set this flag so that for next timestep, we will compute and save
    !spectral transfer functions:

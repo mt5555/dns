@@ -36,6 +36,7 @@ program convert
 use params
 use mpi
 use fft_interface
+use spectrum
 implicit none
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: vor(:,:,:,:)
@@ -81,7 +82,7 @@ if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5) then
 else if (convert_opt == 4 .or. convert_opt==6) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
    allocate(Q(nx,ny,nz,1))
-else if (convert_opt == 7) then
+else if (convert_opt == 7 .or. convert_opt==8) then
    allocate(vor(nx,ny,nz,1)) ! only first component used
    allocate(Q(nx,ny,nz,n_var))
 else
@@ -254,6 +255,15 @@ icount=icount+1
       call input_uvw(time,Q,vor,work1,work2,1)
       call print_message("computing gradu ")
       call gradu_rotate_subcubes(time,Q,vor,work1,work2)
+   endif
+   if (convert_opt==9) then  ! -cout spec_window  
+      !call input_uvw(time,Q,vor,work1,work2,1) ! DNS default headers
+      call input_uvw(time,Q,vor,work1,work2,2) ! no headers
+      call print_message("computing spectrum ")
+
+      call compute_spec(time,Q,vor,work1,work2)
+      call output_spec(time,time)
+      call output_helicity_spec(time,time) 
    endif
 
 
@@ -469,12 +479,12 @@ do
    enddo
 
    do j=1,3
-      ! compute filename.  use runname+time+".sc#"
+      ! compute filename.  use runname+"-sc#_"+time+".uvw"
       write(sdata,'(f10.4)') 10000.0000 + time
-      write(ext,'(i5)') sc  ! 10000
+      write(ext,'(i5)') 10000+sc  ! 10000
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // '.' // &
-             extension(j:j) // '-' // ext(2:5)
+      fname = basename(1:len_trim(basename)) // "-sc" // ext(2:5) // &
+              "_" // sdata(2:10) // '.' // extension(j:j)
       call copen(fname,"w",fid,ierr)
       
       do k=1,2*ssize ! loop over all z-slices

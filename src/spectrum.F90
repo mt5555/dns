@@ -343,23 +343,17 @@ end subroutine
 
 
 
-subroutine output_spec(time,Q,q1,q2,q3,work1,work2)
+subroutine output_spec(time,time_file)
 use params
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: q1(nx,ny,nz,n_var)
-real*8 :: q2(nx,ny,nz,n_var)
-real*8 :: q3(nx,ny,nz,n_var)
-real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-real*8 :: time
+real*8 :: time,time_file
 
 ! local variables
 integer i,j,k,n
 integer :: ierr
 character,save :: access="0"
 
-real*8 :: x,divx,divi
+real*8 :: x
 character(len=80) :: message
 CPOINTER fid
 
@@ -382,17 +376,11 @@ call logplotascii(spec_r(0,1),iwave,message(1:25))
 
 
 
-! for incompressible equations, print divergence as diagnostic:
-if (equations==NS_UVW) then
-   call compute_div(Q,q1,work1,work2,divx,divi)
-   write(message,'(3(a,e12.5))') 'max(div)=',divx
-   call print_message(message)	
-endif
 
 
 
 if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time_initial
+   write(message,'(f10.4)') 10000.0000 + time_file
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
@@ -417,7 +405,7 @@ if (my_pe==io_pe) then
    call cclose(fid,ierr)
 
    if (npassive>0) then
-   write(message,'(f10.4)') 10000.0000 + time_initial
+   write(message,'(f10.4)') 10000.0000 + time_file
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".pspec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
@@ -469,7 +457,7 @@ integer i,j,k,n
 integer :: ierr
 character,save :: access="0"
 
-real*8 :: x,divx,divi
+real*8 :: x
 character(len=80) :: message
 CPOINTER fid
 

@@ -20,6 +20,7 @@ integer,parameter :: nints_e=28,npints_e=36
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
+real*8 :: divx,divi
 integer i,j,k,n,ierr,csig
 integer :: n1,n1d,n2,n2d,n3,n3d
 character(len=80) :: message
@@ -49,12 +50,21 @@ if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
    call compute_spec(time,Q,q1,work1,work2)
-   call output_spec(time,Q,q1,q2,q3,work1,work2)
+   call output_spec(time,time_initial)
    call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
 
    !set this flag so that for next timestep, we will compute and save
    !spectral transfer functions:
    compute_transfer=.true.
+
+   ! for incompressible equations, print divergence as diagnostic:
+   if (equations==NS_UVW) then
+      call compute_div(Q,q1,work1,work2,divx,divi)
+      write(message,'(3(a,e12.5))') 'max(div)=',divx
+      call print_message(message)	
+   endif
+
+
 endif
 endif
 

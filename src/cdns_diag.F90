@@ -34,7 +34,7 @@ if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
    call compute_spec(time,Q,q1,work1,work2)
-   call output_spec(time,Q,q1,q2,q3,work1,work2)
+   call output_spec(time,time_initial)
    call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
 
 endif
