@@ -631,7 +631,7 @@ vx6144b                mu=2e-8   a touch noisy, goes away
 
 milkyway runs
 VXPAIR case
-init_cond_subtype==1  
+init_cond_subtype==1    (subtype=3 goes unstable)
 (onesided/inflow for w, PSI fixed for all t )
 3072x1536  
 mu=1e-7
@@ -642,10 +642,12 @@ vx3072
 
 
 mu=2e-8.  a touch noisy in one snapshot that I saw, went away.  
+./gridsetup.py 24 1 1 6144 3072 1 2 2 0 2 2 0   2
 6144x3072    2 cpu milkyway:  338m per t=1.  
 
-6144x3072    24 cpu shankara: IN
-                              NEXT (without NDEBUG)
+
+6144x3072    shankara:  24x1: mu=4e8  3.74m for t=.05
+                         6x4          3.77  
 
 
 if we use mu^3/4 rule, new grid:  10332x5000.  So lets go with 12288x6144.
@@ -658,8 +660,9 @@ BlueMtn:
 
 Benchmarks for 12288x6144:   RES size: 5.7GB
 ./gridsetup.py 24 1 1 12288 6144 1 2 2 0 2 2 0   2
-Shakara  t=.05
-24x1      
+Shankara  t=.05
+24x1
+6x4      
 
 ASCI Q    t=.05    t=1 (extrapolated)   t=150
 cpus      
