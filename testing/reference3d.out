@@ -76,6 +76,14 @@ mesh spacing/eta:        2.6089       2.6089       2.6089
 eddy turnover time:        1.2136                                               
 ke:  1.5058723054  enstropy:      668.8337         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -2.4817025 f=   0.0000000 alpha=   0.0000000 total=  -2.4817025  
+writing output files at t=    0.0000                                            
+ Spectrum output data
+number of real coefficients:   22.  22.  22.
+ Spectrum output data
+number of real coefficients:   22.  22.  22.
+ Spectrum output data
+number of real coefficients:   22.  22.  22.
+done with output
  
  1E0   | *******              Energy t=    0.0000     
        |        ****         
@@ -174,9 +182,9 @@ wSw:     2.21614757
 CPU times (min):   (avg/max)
 initialization:      0.01     0.01                                              
 initial output:      0.00     0.00                                              
-dns_solve:           0.05     0.05  per timestep:    0.00535   0.00535          
+dns_solve:           0.05     0.05  per timestep:    0.00515   0.00515          
    time_control            0.00     0.00                                        
-   RHS                     0.04     0.04                                        
+   RHS                     0.03     0.03                                        
    transpose_to_z          0.00     0.00                                        
    transpose_from_z        0.00     0.00                                        
    transpose_to_x          0.00     0.00                                        

@@ -1,4 +1,4 @@
-Running single threaded
+Running parallel.  NCPUS=    1 =   1 x  1 x  1                                  
  Run name:         reference3ds
  output directory: ../testing/3df/
  reading input from file: ../testing/reference3d_f.inp                          
@@ -18,9 +18,32 @@ Diffusion d/dt(KE)/KE on mode k =   18.:   100.00
 NS-Alpha:  alpha, alpha/h :    0.00000000    0.0000                             
 Global grid:     32 x    32 x    32                                             
 Local grid (with padding):     34 x    34 x    34                               
+ checking passive:            3
 Number of passive scalars:      0                                               
 Initial data                                                                    
+computing random initial vorticity
+ solving for PSI n=           1                                                 
 Initializing FFT99 of size n=    32                                             
+ solving for PSI n=           2                                                 
+ solving for PSI n=           3                                                 
+computing curl PSI
+random initial condition complete
+Rescaling initial condition
+ FFT to spectral space n=           1                                           
+ computing E(k) n=           1                                                  
+ FFT to spectral space n=           2                                           
+ computing E(k) n=           2                                                  
+ FFT to spectral space n=           3                                           
+ computing E(k) n=           3                                                  
+ normalizing to E_target(k) n=           1                                      
+ normalizing to E_target(k) n=           2                                      
+ normalizing to E_target(k) n=           3                                      
+ re-computing E(k) n=           1                                               
+ re-computing E(k) n=           2                                               
+ re-computing E(k) n=           3                                               
+ FFT back to grid space, n=           1                                         
+ FFT back to grid space, n=           2                                         
+ FFT back to grid space, n=           3                                         
 Isotropic initial condition in wave numbers:
 wn=   1+/-.5   E=  0.1000E+01  E target=  0.1000E+01                            
 wn=   2+/-.5   E=  0.3150E+00  E target=  0.3150E+00                            
@@ -46,8 +69,8 @@ max number timesteps:         10
 
 time=  0.00000(     0)  next output=*********  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0069337 cfl_adv= 1.500 cfl_vis= 0.079                 
-max: (u,v,w)      3.00894213186094     3.63997881404068     3.34980024554774    
-<z-vor>= 0.15721E-15   <hel>=-0.29254E+01   max(vor) 0.69535E+02                
+max: (u,v,w)      3.00894213186094     3.63997881404067     3.34980024554774    
+<z-vor>= 0.13330E-15   <hel>=-0.29254E+01   max(vor) 0.69535E+02                
 R_lambda=    38.46652  R=   269.50599 lambda=     0.14218                       
 mesh spacing/eta:        2.6827       2.6827       2.6827                       
 spherical dealiasing kmax*eta:        1.1041                                    
@@ -79,14 +102,14 @@ done with output
  1E-10 |*                   *
        +---------------------+
       k=0                 k=  17
-max(div)= 0.94147E-13                                                           
+max(div)= 0.13323E-12                                                           
 skewness ux,vw,wz:    -0.02310095    0.02367890    0.00053120                   
 wSw:    -0.01221425                                                             
 
 time=  0.00693(     1)  next output=*********  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0069077 cfl_adv= 1.500 cfl_vis= 0.079                 
 max: (u,v,w)      3.08954805883713     3.69793090758536     3.42366096528982    
-<z-vor>= 0.15721E-15   <hel>=-0.29254E+01   max(vor) 0.69535E+02                
+<z-vor>= 0.13330E-15   <hel>=-0.29254E+01   max(vor) 0.69535E+02                
 R_lambda=    38.46652  R=   269.50599 lambda=     0.14218                       
 mesh spacing/eta:        2.6827       2.6827       2.6827                       
 spherical dealiasing kmax*eta:        1.1041                                    
@@ -97,7 +120,7 @@ d/dt(ke) vis=  -2.7743601 f=   8.9546866 alpha=   0.0000000 total=   6.1803265
 time=  0.01384(     2)  next output=*********  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0069432 cfl_adv= 1.500 cfl_vis= 0.079                 
 max: (u,v,w)      3.14789243094662     3.70799645713797     3.40239597570359    
-<z-vor>=-0.35074E-16   <hel>=-0.27419E+01   max(vor) 0.66990E+02                
+<z-vor>= 0.15867E-15   <hel>=-0.27419E+01   max(vor) 0.66990E+02                
 R_lambda=    40.83268  R=   269.50599 lambda=     0.14918                       
 mesh spacing/eta:        2.6343       2.6343       2.6343                       
 spherical dealiasing kmax*eta:        1.1244                                    
@@ -108,7 +131,7 @@ d/dt(ke) vis=  -2.5796103 f=   6.7435498 alpha=   0.0000000 total=   4.1639395
 time=  0.02078(     3)  next output=*********  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0070432 cfl_adv= 1.500 cfl_vis= 0.080                 
 max: (u,v,w)      3.22342039033534     3.62033619892531     3.34266650548582    
-<z-vor>= 0.81153E-16   <hel>=-0.26047E+01   max(vor) 0.67209E+02                
+<z-vor>= 0.26595E-15   <hel>=-0.26047E+01   max(vor) 0.67209E+02                
 R_lambda=    42.58628  R=   269.50599 lambda=     0.15445                       
 mesh spacing/eta:        2.5986       2.5986       2.5986                       
 spherical dealiasing kmax*eta:        1.1398                                    
@@ -119,7 +142,7 @@ d/dt(ke) vis=  -2.4424209 f=   4.8216970 alpha=   0.0000000 total=   2.3792760
 time=  0.02783(     4)  next output=*********  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0071160 cfl_adv= 1.500 cfl_vis= 0.081                 
 max: (u,v,w)      3.28322133131948     3.63001412428125     3.31479534693760    
-<z-vor>= 0.35074E-15   <hel>=-0.25055E+01   max(vor) 0.65231E+02                
+<z-vor>=-0.69375E-16   <hel>=-0.25055E+01   max(vor) 0.65231E+02                
 R_lambda=    43.82549  R=   269.50599 lambda=     0.15831                       
 mesh spacing/eta:        2.5717       2.5717       2.5717                       
 spherical dealiasing kmax*eta:        1.1517                                    
@@ -130,7 +153,7 @@ d/dt(ke) vis=  -2.3430106 f=   3.5185455 alpha=   0.0000000 total=   1.1755349
 time=  0.07261(    10)  next output=  0.07261  LSF minutes left:    -1. 0       
 for next timestep: delt=0.0077026 cfl_adv= 1.500 cfl_vis= 0.088                 
 max: (u,v,w)      3.33244222893660     3.18156394775615     3.32496746676003    
-<z-vor>= 0.97253E-16   <hel>=-0.22157E+01   max(vor) 0.63377E+02                
+<z-vor>= 0.12712E-15   <hel>=-0.22157E+01   max(vor) 0.63377E+02                
 R_lambda=    45.04710  R=   269.50599 lambda=     0.16337                       
 mesh spacing/eta:        2.5266       2.5266       2.5266                       
 spherical dealiasing kmax*eta:        1.1723                                    
@@ -154,18 +177,18 @@ d/dt(ke) vis=  -2.1830974 f=   1.3540805 alpha=   0.0000000 total=  -0.8290169
  1E-10 |*                   *
        +---------------------+
       k=0                 k=  17
-max(div)= 0.90594E-13                                                           
+max(div)= 0.14921E-12                                                           
 skewness ux,vw,wz:    -0.33438353   -0.48836360   -0.31621842                   
 wSw:     1.98962713                                                             
 CPU times (min):   (avg/max)
 initialization:      0.01     0.01                                              
 initial output:      0.00     0.00                                              
-dns_solve:           0.15     0.15  per timestep:    0.01533   0.01533          
-   time_control            0.01     0.01                                        
-   RHS                     0.10     0.10                                        
+dns_solve:           0.05     0.05  per timestep:    0.00523   0.00523          
+   time_control            0.00     0.00                                        
+   RHS                     0.03     0.03                                        
    transpose_to_z          0.00     0.00                                        
-   transpose_from_z        0.01     0.01                                        
-   transpose_to_x          0.01     0.01                                        
-   transpose_from_x        0.01     0.01                                        
-   transpose_to_y          0.01     0.01                                        
+   transpose_from_z        0.00     0.00                                        
+   transpose_to_x          0.00     0.00                                        
+   transpose_from_x        0.00     0.00                                        
+   transpose_to_y          0.00     0.00                                        
    transpose_from_y        0.01     0.01                                        
