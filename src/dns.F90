@@ -189,11 +189,15 @@ real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
 real*8 :: tmx1,tmx2
 integer,external :: lsf_time_remaining
-integer :: lsftime,i
+integer :: lsftime,i,time_needed
 
 
 
 delt=0
+! quit if we are within 'time_needed' min of being killed:
+time_needed = 5  
+! for 2000^3 on 512 cpus, we need 10min per timestep:
+if (g_nx>1500 .and. g_ny>1500 .and. g_nz>1500) time_needed=15
 
 time=time_initial
 if (time_final<0) then
@@ -236,7 +240,7 @@ do
    maxs(6)=time
    maxs(7)=time_old
 
-   if (maxs(8)>=0 .and. maxs(8)<15 .and. enable_lsf_timelimit==1) then
+   if (maxs(8)>=0 .and. maxs(8)<time_needed .and. enable_lsf_timelimit==1) then
       write(message,'(a,f20.10)') "LSF timelimit approaching. Stoping at time=",time
       call print_message("** OUT OF TIME ****************************************")
       call print_message(message)
