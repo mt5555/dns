@@ -1330,7 +1330,7 @@ do j=ny1,ny2
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
          
-         !     spectrum of angles
+         !     spectrum of angles         
          cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
          
          !     cutoff for recalculating the spectra
@@ -1340,10 +1340,14 @@ do j=ny1,ny2
          if (cos_tta > delta) then
             
             ! compute vorticity           
-            ! sqrt(-1) * (im,jm,km) cross (RR+sqrt(-1)II)
-            WR=0
-            WI=0  
-            
+            ! sqrt(-1) * 2pi * (im,jm,km) cross (RR+sqrt(-1)II)
+            WR(1) = pi2*(-jm*II(3)+km*II(2))  
+	    WR(2) = pi2*(im*II(3) - km*II(1))
+  	    WR(3) = pi2*(-im*II(2) + jm*II(1))
+            WI(1) = pi2*(-jm*RR(3) + km*RR(2))  
+	    WI(2) = pi2*(im*II(3) - km*RR(1))
+	    WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
+            	
             energy = 64
             if (km==0) energy=energy/2
             if (jm==0) energy=energy/2
@@ -1353,9 +1357,10 @@ do j=ny1,ny2
             xw=sqrt(rwave*pi2_squared)
             spec_E(iwave)=spec_E(iwave) + energy*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*energy*(sum(RR*RR)+ sum(II*II))
-            
-            energy = energy*(p1(i,j,k,1)*(wy-vz) + &
-                 p1(i,j,k,2)*(uz-wx) + p1(i,j,k,3)*(vx-uy)) 
+
+!	helicity(k) = k\cdot RR(k) cross II(k)            
+            energy = energy * pi2 * (im*(RR(2) - II(3)) + &
+                 jm*(II(3) - RR(1)) + km*(RR(1) - II(2))) 
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
@@ -1363,7 +1368,7 @@ do j=ny1,ny2
             
             hetot=hetot+energy
             diss1=diss1 -2*energy*iwave**2*pi2_squared
-            diss2=diss2 -2*energy*rwave*pi2_squared
+            diss2=diss2 -2*energy*rwave*pi2_squared  
          endif
       enddo
    enddo
