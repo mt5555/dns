@@ -26,6 +26,7 @@ real*8  :: r_val(ndelta_max,ndir)      ! actual distance for each delta value
 
 logical :: comp_sk_helical=.false.  ! compute SK's helical str function
 
+integer :: ntranspose               ! number of data transpose operations performed
 
 logical :: firstcall=.true.
 !
@@ -190,6 +191,7 @@ real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
+character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p
 
@@ -202,6 +204,7 @@ if (firstcall) then
 endif
 
 
+ntranspose=0
 
 
 Dl=0
@@ -265,6 +268,7 @@ endif
 
 
 do n=1,3
+   ntranspose=ntranspose+1
    call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo   
    
@@ -310,7 +314,7 @@ do idir=1,ndir
          ! no shifts - compute directly 
          call comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_shift)
       else if (dir_shift(2)==0) then
-         ! no need to shift, y-direction alread 0
+         ! no need to shift, y-direction already 0
          call comp_str_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(2),dir_shift(3))==0) then
          ! 
@@ -334,6 +338,7 @@ do idir=1,ndir
          enddo
          enddo
          do n=1,3
+            ntranspose=ntranspose+1
             call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
          call comp_str_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift)
@@ -362,6 +367,7 @@ do idir=1,ndir
          enddo
          enddo
          do n=1,3
+            ntranspose=ntranspose+1
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
          call comp_str_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift)
@@ -372,7 +378,8 @@ do idir=1,ndir
 
 
    call normalize_and_reduce(ntot)
-
+   write(message,'(a,i5)') 'isoavep: number of calls to transpose_*() ',ntranspose
+   call print_message(message)
 
 end subroutine
 
@@ -1020,6 +1027,11 @@ end subroutine
 
 
 subroutine accumulate_str(idir,idel,u1,u2,u3,ur1,ur2,ur3,rhat,rperp1,rperp2)
+!
+!  (u1,u2,u3)      velocity at the point x
+!  (ur1,ur2,ur3)   velocity at the point x+r
+!
+!
 real*8 :: u1,u2,u3,ur1,ur2,ur3   
 real*8 :: rhat(3),rperp1(3),rperp2(3)
 

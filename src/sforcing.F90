@@ -132,7 +132,7 @@ if (0==init_sforcing) then
       enddo
    endif
    if (model_spec==1) then
-      numb=9
+      numb=8
       call sforcing_init()
       do wn=1,numb
          ener_target(wn)=(real(wn)/numb)**4
