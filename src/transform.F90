@@ -31,7 +31,7 @@ integer i,j,k,jj,l
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
-integer dest_pe3(3)
+integer dest_pe3(3),tag
 #endif
       
 
@@ -86,10 +86,11 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       enddo
 
 !     send/rec buffer to (my_x,my_y,iproc)
-
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,my_z,comm_3d,request(1),ierr)
+      tag=my_z
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("MPI_IRecv failure 1",ierr==0)
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,iproc,comm_3d,request(2),ierr)
+      tag=iproc
+      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("MPI_ISend failure 1",ierr==0)
       call MPI_waitall(2,request,statuses,ierr) 	
       ASSERT("MPI_waitalll failure 1",ierr==0)
@@ -136,7 +137,7 @@ integer i,j,k,jj,l
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
-integer dest_pe3(3)
+integer dest_pe3(3),tag
 #endif
 
 !
@@ -193,9 +194,11 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       enddo
 
 !     send/rec
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,my_z,comm_3d,request(1),ierr)
+      tag=my_z
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,comm_3d,request(1),ierr)
       ASSERT("MPI_IRecv failure 1",ierr==0)
-      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,iproc,comm_3d,request(2),ierr)
+      tag=iproc
+      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("MPI_ISend failure 1",ierr==0)
       call MPI_waitall(2,request,statuses,ierr) 	
       ASSERT("MPI_waitalll failure 1",ierr==0)
