@@ -176,8 +176,6 @@ if(schmidt(1)<=1)
 else
   eta_c=eta./sqrt(schmidt);
 end
-eta_m=(3*mean(cx2,1)).^(-.5);
-%eta_m=(3*c2./lambda_c.^2).^(-.5);
 
 
 
@@ -235,8 +233,8 @@ title('G')
 
 subplot(4,2,4)
 if (schmidt(1)<=1) 
-  plot(time_e,Gc.*schmidt.^(-.5),time_e,(schmidt.^(-.5)).*lambda_c.^2 ./ (4*eta_c.^2))
-  title('G_c Sc^{-1/2},    \lambda_c^2 / (4 \eta_c^2 Sc^{1/2})')
+  plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
+  title('G_c Sc^{-1/2},    \lambda_c^2 / (4 \eta_c^2 )')
 else
   plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
   title('G_c ,    \lambda_c^2 / (4 \eta_c^2)')
@@ -260,8 +258,8 @@ plot(time_e,lambda,time_e,lambda_c)
 title('\lambda,  \lambda_c')
 
 subplot(4,2,8)
-plot(time_e,eta,time_e,eta_c,time_e,eta_m)
-title('\eta,   \eta_c,    \eta_m')
+plot(time_e,eta,time_e,eta_c)
+title('\eta,   \eta_c ')
 
 
 figure(1)
@@ -320,7 +318,7 @@ title('\pi N_{\nabla}_c 2 \eta_c, 2 \eta_c / \lambda_{\nabla}_c,   \pi N_{\nabla
 
 subplot(4,2,7)
 plot(time_e,1-Vp,time_e,4*c2)
-title('% pure fluid, 4<c^2>')
+title('m_{% pf}, 4<c^2>')
 
 
 ym = (1 - eta_c./lambda_c).^3;

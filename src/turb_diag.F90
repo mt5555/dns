@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer,parameter :: nints_e=43,npints_e=44
+integer,parameter :: nints_e=49,npints_e=44
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
@@ -471,12 +471,12 @@ real*8 gradw(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
-real*8 :: u1(3),u3(3),u4(3)
+real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji
+real*8 :: u1(3),u2(3),u3(3),u4(3),u1tmp(3)
 real*8 :: vor2(3),vor3(3),vor4(3)
 real*8 :: uxx2(3)
 real*8 :: dummy(1),S2sum,ensave,S4sum,S2,S4,S2w2
-real*8 :: tmx1,tmx2,xtmp,u1tmp(3)
+real*8 :: tmx1,tmx2,xtmp
 
 !
 ! compute derivatives
@@ -675,20 +675,19 @@ call transpose_to_z(Q(1,1,1,3),work,n1,n1d,n2,n2d,n3,n3d)
 call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1(3),scalars(40))
 
 
-
-ux1=0  ! it's a deriavitve, so we know mean=0
+i=40
+u1=0  ! it's a deriavitve, so we know mean=0
 do n=1,3
 ! zero crossing of dissipation: 
 call transpose_to_x(gradu(1,1,1,1),work,n1,n1d,n2,n2d,n3,n3d)
-call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(41))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1,scalars(i+1))
 call transpose_to_y(gradv(1,1,1,2),work,n1,n1d,n2,n2d,n3,n3d)
-call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(42))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1,scalars(i+2))
 call transpose_to_z(gradw(1,1,1,3),work,n1,n1d,n2,n2d,n3,n3d)
-call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(43))
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,u1,scalars(i+3))
 i=i+3
 enddo
-
-
+! i=49
 
 
 
@@ -725,7 +724,7 @@ real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: ux1,ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3),u1,u3,u4,u1tmp
-real*8 :: uxx2(3),uxx3(3),uxx4(3)
+real*8 :: uxx2(3),uxx3(3),uxx4(3),xtmp
 
 !
 !  gradu = ux,vy,wz,
