@@ -15,7 +15,7 @@ set refin=benchmark1.inp
 #make -j $NCPU dns
 
 #cd ../benchmark
-mpirun -np $NCPU ssrun -usertime ./dns < $refin 
+mpirun -np $NCPU ssrun -usertime ./dns -d /scratch/taylorm < $refin 
 #
 # to look at the results, run:  prof dns.usertime.f???????? > prof.out
 #

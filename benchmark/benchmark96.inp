@@ -1,14 +1,11 @@
-1            ! input file type
-benchmark1   ! runname
-             ! run dir
+2            ! input file type
 KH-anal      ! initial condition:  KH-blob, KH-anal, iso12
+0            ! subtype
 none         ! forcing:  none, iso12
-0            ! struct_nx
-0            ! struct_ny
-0            ! struct_nz
 value        ! viscosity type  (value, smallest, kediff, Re)
 2e-4         ! viscosity coefficient.  
 0            ! alpha
+0            ! comp str
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc

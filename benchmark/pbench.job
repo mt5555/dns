@@ -23,7 +23,7 @@ endif
 cp dns  /scratch/mat/dns
 
 cd /scratch/mat
-mpirun -np 32 ./dns < $refin 
+mpirun -np 32 ./dns -d /scratch/taylorm  < $refin 
 
 
 
