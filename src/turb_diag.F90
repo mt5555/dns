@@ -19,7 +19,7 @@ logical :: doit_model
 integer,parameter :: nints_e=14
 real*8 :: ints_e(nints_e)
 real*8 :: x
-integer i,j,k,n,ierr
+integer i,j,k,n,ierr,csig
 character(len=80) :: message
 CPOINTER fid,fidj,fidS
 
@@ -62,8 +62,9 @@ endif
 if (compute_struct==1) then
 
    ! angle averaged functions:
-   call isoavep(Q,q1,q2,q3)
-   if (my_pe==io_pe) then
+   call isoavep(Q,q1,q2,q3,csig)
+   ! if csig>0, isoavep did not complete - interrupted by SIGURG
+   if (my_pe==io_pe .and. csig==0) then
       write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".isostr"
       call copen(message,"w",fid,ierr)

@@ -174,7 +174,7 @@ end subroutine
 !       subcube code will still work)
 !
 !
-subroutine isoavep(Q,Qs,Qt,Qst)
+subroutine isoavep(Q,Qs,Qt,Qst,csig)
 use params
 use transpose
 
@@ -192,7 +192,7 @@ real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
 character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
-integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p
+integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,csig
 
 if (firstcall) then
    firstcall=.false.
@@ -274,6 +274,15 @@ enddo
    
 
 do idir=1,ndir
+
+
+!  check for SIGURG, telling us to stop because job will soon be killed
+   call caught_sig(csig); 
+#ifdef USE_MPI
+   i=csig;
+   call MPI_allreduce(i,csig,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+#endif
+   if (csig>0) exit;
 
    if (my_pe==io_pe) then
       write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'

@@ -192,7 +192,6 @@ subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p,rkstage)
 ! hel = u (w_y-v_z) + v (u_z - w_x)  + w (v_x - u_y)
 !
 use params
-use transpose
 use sforcing
 use spectrum
 implicit none
@@ -570,7 +569,6 @@ end
 
 subroutine ns_vorticity(rhsg,Qhat,work,p)
 use params
-use transpose
 implicit none
 real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
 real*8 rhsg(nx,ny,nz,n_var)    
@@ -627,7 +625,6 @@ end subroutine
 
 subroutine ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 use params
-use transpose
 implicit none
 real*8 Q(nx,ny,nz,n_var)
 real*8 gradu(nx,ny,nz,n_var)
@@ -675,7 +672,6 @@ subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p,a_diss
 !
 use params
 use sforcing
-use transpose
 implicit none
 real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
 real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)          ! Fourier data at time t

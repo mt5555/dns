@@ -48,7 +48,7 @@ real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2)
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
-integer :: nxdecomp,nydecomp,nzdecomp
+integer :: nxdecomp,nydecomp,nzdecomp,csig
 CPOINTER :: fid
 
 
@@ -157,7 +157,7 @@ do
       else
          if (nxdecomp*nydecomp*nzdecomp==1) then
             ! no subcubes:
-            call isoavep(Q,q1,q2,q3)
+            call isoavep(Q,q1,q2,q3,csig)
          else
             range(1,1)=dble(i)/nxdecomp
             range(1,2)=dble(i+1)/nxdecomp
