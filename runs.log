@@ -65,7 +65,8 @@ results.  Initial results looked great but were not symmetrical.
 Noise at around t=.20 (which was then dissapated) triggered the
 asymmetry.  The noise turned out to be caused by CFL.
 
-Two fixes:
+Two possible fixes: lower CFL fixes problem.  Higher viscosity
+does not fix problem.
 
 1. lower CFL:
 with mu=2.5e-5   CFL = 1.5:   noise triggers asymetric rollup
@@ -77,7 +78,8 @@ mu=5e-5         same.  CFL=1.5 triggers assymetic rollup
                        CFL=1.45 ok
 
 
-
+kkN  1024x1024  mu = 2.5e-5    CFL: 1.50/.25   IN
+     4th order method.  
 
 
 khL  1024x1024  mu = 5.0e-5    CFL: 1.5/.25   Noise at t=.25
