@@ -1,6 +1,7 @@
 TODO:
 
 1. tune fftblocksize in fft99_interface.F90  (number of ffts to do at once)
+1.1  FFT in blocks - faster if they are dimensioned:  x(lot,128)?  
 2. use a mpi communcator for the buffer->2d array copy in transpose.F90
 3. post more messages at once in tranpose.F90?  
 4. loops in ns3d.F90

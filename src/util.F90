@@ -32,5 +32,13 @@ endif
 end subroutine
 
 
-
+subroutine wallclock(tmx)
+use params
+implicit none
+integer count,count_rate,count_max
+real*8 tmx
+call system_clock(count,count_rate,count_max)
+!print *,count,count_rate,count_max
+tmx=real(count,r8kind)/real(count_rate,r8kind)
+end subroutine
 

@@ -2,7 +2,9 @@
 #if 0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! our wrapper for ECMWF FFT99.
+! our wrapper for ECMWF FFT99 and SGI FFT
+! (they both have the same output format)
+! 
 !
 ! provides public interfaces:
 !   fft_interface_init               call this before using any other routines

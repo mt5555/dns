@@ -6,13 +6,15 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 program DNS
 use params
+use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 character*80 message
 integer ierr
+real*8 tmx1,tmx2,temp(ntimers)
 
 
-
+call wallclock(tmx1)
 call init_mpi       
 call init_mpi_comm3d()
 call init_grid      
@@ -29,12 +31,31 @@ call init_data(Q)             ! set up initial data
 write(message,'(a)') 'Initial data projection'
 call init_data_projection(Q)  ! impose constrains on initial data
 
+call wallclock(tmx2)
+tims(1)=tmx2-tmx1
 
 write(message,'(a)') 'Time stepping...'
 call print_message(message)
-call dns_solve(Q)
 
-write(message,'(a)') 'Cleaning up...'
+call wallclock(tmx1)
+call dns_solve(Q)
+call wallclock(tmx2)
+tims(2)=tmx2-tmx1
+
+#ifdef USE_MPI
+   temp=tims
+   call MPI_allreduce(temp,tims,ntimers,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+
+
+call print_message('CPU times:')
+write(message,'(a,f10.5,a)') 'initialization: ',tims(1),' s'
+call print_message(message)
+write(message,'(a,f10.5,a)') 'dns_solve:      ',tims(2),' s'
+call print_message(message)
+write(message,'(a,f10.5,a,f4.3,a)') 'time_control:   ',tims(3),' s (',tims(3)/tims(2),')'
+call print_message(message)
+
 call close_mpi
 
 

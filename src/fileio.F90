@@ -10,10 +10,11 @@ integer :: itime
 integer i,j,k,n
 character*80 message
 real*8 remainder, time_target, umax,mumax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 divx,divi
+real*8 divx,divi,tmx1,tmx2
 logical,external :: check_time
 logical :: doit
 
+call wallclock(tmx1)
 time_target = time_final
 
 !
@@ -109,6 +110,9 @@ if (doit .or. itime<5) then
    call print_message("")
 endif
 
+call wallclock(tmx2)
+tims(3)=tmx2-tmx1
+
 end subroutine
 
 
@@ -172,6 +176,7 @@ enddo
 enddo
 enddo
 close(10)
+
 
 end subroutine
 

@@ -128,7 +128,15 @@ integer,parameter :: nints=5
 ! maxs(4) = vor
 ! maxs(5) =  helicty
 !
+
+integer,parameter :: ntimers=5
+real*8 :: tims(ntimers)=0
+!  tims(1)    time for initialization
+!  tims(2)    total runtime after initialization
+!  tims(3)    time spent in time_control()
+!  tims(4)    time spent in transpose
 !
+
 
 
 
