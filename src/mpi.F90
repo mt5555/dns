@@ -31,6 +31,8 @@ module mpi
 #ifndef MPI_HAS_REAL8
 integer MPI_REAL8 
 parameter (MPI_REAL8=MPI_DOUBLE_PRECISION)
+integer MPI_REAL4 
+parameter (MPI_REAL4=MPI_SINGLE_PRECISION)
 #endif
 
 end module

@@ -234,9 +234,10 @@ output_spec,header_type)
 !
 !
 ! header_type:    1   my default header
-!                 2   no headers
+!                 2   no headers      
 !                 3   ensight headers
-!
+!   
+! for header_type 2 & 3:  also disable output of the periodic extension data
 !
 use params
 use mpi
@@ -254,16 +255,33 @@ integer im_max,km_max,jm_max
 
 
 ! local variables
-integer i,j,k,n, header_type
+integer i,j,k,n, header_type, o_nx_save,o_ny_save,o_nz_save
 real*8 xnx,xny,xnz
 character(len=80) message
 integer n_var_start,ierr
+logical :: do_mpi_io_save
 CPOINTER fid
 
-if (do_mpi_io .and. header_type==1 .and. .not. output_spec ) then
-   call singlefile_mpi_io(time,p,fname,work,work2,io_read)
+if (do_mpi_io .and. .not. output_spec ) then
+   call singlefile_mpi_io(time,p,fname,work,work2,io_read,header_type)
    return
 endif
+
+! disable MPI_IO for the calls below:
+do_mpi_io_save=do_mpi_io
+do_mpi_io=.false.
+
+
+! disiable periodic extension for header_type<>1 (turn it back on
+! when we are done)
+o_nx_save=o_nx; o_ny_save=o_ny; o_nz_save=o_nz;
+
+if (header_type==2 .or. header_type==3) then
+!   o_nx=g_nx; 
+!   o_ny=g_ny;
+!   o_nz=g_nz;
+endif
+
 
 
 xnx=o_nx
@@ -340,6 +358,11 @@ else
 endif
 if (my_pe==fpe) call cclose(fid,ierr)
 
+
+o_nx=o_nx_save; o_ny=o_ny_save; o_nz=o_nz_save;
+do_mpi_io=do_mpi_io_save
+
+
 end subroutine
 
 
@@ -348,7 +371,7 @@ end subroutine
 
 
 
-subroutine singlefile_mpi_io(time,p,fname,work,work2,io_read)
+subroutine singlefile_mpi_io(time,p,fname,work,work2,io_read,header_type)
 !
 ! I/O routines where all data goes through a single PE and is
 ! written to a single file
@@ -367,7 +390,7 @@ use mpi
 use transpose
 implicit none
 integer :: io_read  ! =1 for read, 0 for write
-integer :: fpe
+integer :: fpe,header_type
 real*8 :: time
 real*8 :: p(nx,ny,nz)
 real*8 :: work2(nx,ny,nz),work(nx,ny,nz)
@@ -380,11 +403,9 @@ integer i,j,k,n
 real*8 xnx,xny,xnz
 character(len=80) message
 integer :: n_var_start,ierr,offset=0
-
-#ifdef USE_MPI_IO
-integer statuses(MPI_STATUS_SIZE)
 integer*8 infoin
-#endif
+
+
 
 CPOINTER fid
 
@@ -434,49 +455,30 @@ endif
 
 
 if (my_pe==fpe) then
-
-   if (io_read==1) then
-      call MPI_File_read(fid,time,1,MPI_REAL8,statuses,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "singlefile_io(): Error time reading file"
-         call print_message(message)
-         call print_message(fname)
-         call abort("")
-      endif
-      call MPI_File_read(fid,xnx,1,MPI_REAL8,statuses,ierr)
-      call MPI_File_read(fid,xny,1,MPI_REAL8,statuses,ierr)
-      call MPI_File_read(fid,xnz,1,MPI_REAL8,statuses,ierr)
-      if (int(xnx)/=o_nx) call abort("Error: mpi-io data file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abort("Error: mpi-io data file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abort("Error: mpi-io data file nz <> nz set in params.h");
-      call MPI_File_read(fid,g_xcord(1),o_nx,MPI_REAL8,statuses,ierr)
-      call MPI_File_read(fid,g_ycord(1),o_ny,MPI_REAL8,statuses,ierr)
-      call MPI_File_read(fid,g_zcord(1),o_nz,MPI_REAL8,statuses,ierr)
-   else
-      call MPI_File_write(fid,time,1,MPI_REAL8,statuses,ierr)
-      call MPI_File_write(fid,xnx,1,MPI_REAL8,statuses,ierr)
-      call MPI_File_write(fid,xny,1,MPI_REAL8,statuses,ierr)
-      call MPI_File_write(fid,xnz,1,MPI_REAL8,statuses,ierr)
-      call MPI_File_write(fid,g_xcord(1),o_nx,MPI_REAL8,statuses,ierr)
-      call MPI_File_write(fid,g_ycord(1),o_ny,MPI_REAL8,statuses,ierr)
-      call MPI_File_write(fid,g_zcord(1),o_nz,MPI_REAL8,statuses,ierr)
+   if (header_type==1) then
+      call header1_io(io_read,.false.,fid,time,xnx,xny,xnz)
+   endif
+   if (header_type==2) then
+      call header2_io(io_read,fid,time,xnx,xny,xnz)  
+   endif
+   if (header_type==3) then
+      call header3_io(io_read,fid,time,xnx,xny,xnz)
    endif
 endif
 
-!
-! If you add/remove any header data above, be sure to adjust this count:
-!
-offset=4 + o_nx + o_ny + o_nz
+if (header_type==1) then
+   offset=4 + o_nx + o_ny + o_nz
+endif
+if (header_type==2) then
+   offset=0
+endif
+if (header_type==3) then
+   offset=240/output_size  ! offset multiplied by output_size later 
+endif
 
 #ifdef USE_MPI
 call MPI_bcast(time,1,MPI_REAL8,fpe,comm_3d ,ierr)
 #endif
-
-! max wave number to read/write for spectral I/O
-im_max=xnx/2-1
-jm_max=xny/2-1
-km_max=xnz/2-1
-
 
 if (io_read==1) then
    call input1(p,work,work2,fid,fpe,.false.,offset)
@@ -710,7 +712,7 @@ end subroutine
 
 
 
-subroutine header1_io(io_read,output_spec,fid,xnx,xny,xnz)
+subroutine header1_io(io_read,output_spec,fid,time,xnx,xny,xnz)
 use params
 use mpi
 use transpose
@@ -721,20 +723,20 @@ real*8 :: time,xnx,xny,xnz
 logical :: output_spec
 
 ! local
-integer :: ierr
+integer :: ierr,	i
 character(len=80) message
 
 
 if (io_read==1) then
-   call cread8e(fid,time,1,ierr)
+   call mread8e(fid,time,1,ierr)
    if (ierr/=1) then
       write(message,'(a,i5)') "singlefile_io(): Error reading file"
       call print_message(message)
       call abort("")
    endif
-   call cread8(fid,xnx,1)
-   call cread8(fid,xny,1)
-   call cread8(fid,xnz,1)
+   call mread8(fid,xnx,1)
+   call mread8(fid,xny,1)
+   call mread8(fid,xnz,1)
    if (output_spec) then
       print *,'Spectrum input data'
       write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
@@ -753,15 +755,15 @@ if (io_read==1) then
       if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
       if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
       if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
-      call cread8(fid,g_xcord(1),o_nx)
-      call cread8(fid,g_ycord(1),o_ny)
-      call cread8(fid,g_zcord(1),o_nz)
+      call mread8(fid,g_xcord(1),o_nx)
+      call mread8(fid,g_ycord(1),o_ny)
+      call mread8(fid,g_zcord(1),o_nz)
    endif
 else
-   call cwrite8(fid,time,1)
-   call cwrite8(fid,xnx,1)
-   call cwrite8(fid,xny,1)
-   call cwrite8(fid,xnz,1)
+   call mwrite8(fid,time,1)
+   call mwrite8(fid,xnx,1)
+   call mwrite8(fid,xny,1)
+   call mwrite8(fid,xnz,1)
    if ( output_spec) then
       print *,'Spectrum output data'
       write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
@@ -774,9 +776,9 @@ else
          call abort("error in singlefile_io2")
       endif
    else
-      call cwrite8(fid,g_xcord(1),o_nx)
-      call cwrite8(fid,g_ycord(1),o_ny)
-      call cwrite8(fid,g_zcord(1),o_nz)
+      call mwrite8(fid,g_xcord(1),o_nx)
+      call mwrite8(fid,g_ycord(1),o_ny)
+      call mwrite8(fid,g_zcord(1),o_nz)
    endif
    
 endif
@@ -786,7 +788,7 @@ end subroutine header1_io
 
 
 
-subroutine header3_io(io_read,fid,xnx,xny,xnz)
+subroutine header3_io(io_read,fid,time,xnx,xny,xnz)
 !
 ! header is 3 lines of text, with each line exactly 80 characters
 !
@@ -809,21 +811,21 @@ xny=-1
 xnz=-1
 
 if (io_read==1) then
-   call cread8e(fid,message,10,ierr)
+   call mread1e(fid,message,80,ierr)
    if (ierr/=1) then
       write(message,'(a,i5)') "singlefile_io(): Error reading file"
       call print_message(message)
       call abort("")
    endif
-   call cread8e(fid,message,10,ierr)
-   call cread8e(fid,message,10,ierr)
+   call mread1e(fid,message,80,ierr)
+   call mread1e(fid,message,80,ierr)
 else
    message="turbulence" // char(0)
-   call ccwrite1(fid,message,80)
+   call mwrite1(fid,message,80)
    message="part" // char(0)
-   call ccwrite1(fid,message,80)
+   call mwrite1(fid,message,80)
    message="block" // char(0)
-   call ccwrite1(fid,message,80)
+   call mwrite1(fid,message,80)
 endif
 end subroutine header3_io
 
@@ -833,7 +835,7 @@ end subroutine header3_io
 
 
 
-subroutine header2_io(io_read,fid,xnx,xny,xnz)
+subroutine header2_io(io_read,fid,time,xnx,xny,xnz)
 use params
 use mpi
 use transpose

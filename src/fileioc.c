@@ -52,20 +52,20 @@ void FORTRAN(cclose) (FILE **fid,int *err) {
 /*
   Write 8 byte floats
 */
-void FORTRAN(ccwrite8) (FILE **fid,char *buf,int *len) {
+void FORTRAN(cwrite8) (FILE **fid,char *buf,int *len) {
     if (*len>0) fwrite(buf,8,*len,*fid);
 }
 /*
   Write 4 byte floats
 */
-void FORTRAN(ccwrite4) (FILE **fid,char *buf,int *len) {
+void FORTRAN(cwrite4) (FILE **fid,char *buf,int *len) {
     if (*len>0) fwrite(buf,4,*len,*fid);
 }
 
 /*
   Write 1 byte chars
 */
-void FORTRAN(ccwrite1) (FILE **fid,char *buf,int *len) {
+void FORTRAN(cwrite1) (FILE **fid,char *buf,int *len) {
     if (*len>0) fwrite(buf,1,*len,*fid);
 }
 
@@ -81,6 +81,20 @@ void byteswap8(char *buf,int len) {
         }
         for (j=0; j<8; ++j) {
             buf[8*i + j]=swap[j];
+        }
+    }
+}
+
+
+void byteswap4(char *buf,int len) {
+    int i,j;
+    char swap[4];
+    for (i=0; i<len; ++i) {
+        for (j=0; j<4; ++j) {
+            swap[j]=buf[4*i + 3-j];
+        }
+        for (j=0; j<4; ++j) {
+            buf[4*i + j]=swap[j];
         }
     }
 }
@@ -102,4 +116,20 @@ void FORTRAN(cread8e) (FILE **fid, char *buf,int *len,int *olen) {
     *olen=fread(buf,8,*len,*fid);
     if (byteswap_input) byteswap8(buf,*olen);
 }
+
+
+
+/*
+  Read 4 byte numbers , also return number of numbers read
+ */
+void FORTRAN(cread4e) (FILE **fid, char *buf,int *len,int *olen) {
+    *olen=fread(buf,4,*len,*fid);
+    if (byteswap_input) byteswap4(buf,*olen);
+}
+
+void FORTRAN(cread1e) (FILE **fid, char *buf,int *len,int *olen) {
+    *olen=fread(buf,1,*len,*fid);
+}
+
+
 

@@ -137,7 +137,7 @@ icount=icount+1
       enddo
       enddo
       call print_message("outputting norm squared as REAL*4...")
-      output_real4=.true.
+      output_size=4
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2"
@@ -146,7 +146,8 @@ icount=icount+1
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
    endif
    if (convert_opt==4) then  ! -cout 4uvw
-      ! 2048^3 needs 192GB storage.  can run on 128 cpus?
+      ! 2048^3 needs 192GB storage.  can run on 128 cpus.
+      !  can run on 64 cpus, if running 2 jobs per node.
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
 
@@ -154,16 +155,16 @@ icount=icount+1
          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i)
          call print_message("input file:")	
-	 call print_message(fname)
+	 call print_message(fname(1:len_trim(fname)))
          call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
          print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
 
 	 call print_message("outputting as REAL*4...")
-         output_real4=.true.
+         output_size=4
          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i) // "4"
-	 call print_message(fname)
-         call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
+	 call print_message(fname(1:len_trim(fname)))
+         call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
  	 if (ncpu_x==ncpu_y .and. ncpu_x==ncpu_z .and. ncpu_x>1) then
             ! do a multfile_io to get a bunch of subcubes in seperate files
             call multfile_io(time,Q,i)

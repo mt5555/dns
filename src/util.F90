@@ -1,26 +1,6 @@
 #include "macros.h"
 
 
-subroutine cwrite8(fid,buf,len)
-use params
-implicit none
-CPOINTER fid
-integer :: len
-real*8 :: buf(len)
-real*4, allocatable ::  buf4(:)
-
-if (output_real4) then
-   allocate(buf4(len))
-   buf4(1:len)=buf(1:len)
-   call ccwrite4(fid,buf4,len)
-   deallocate(buf4)
-else
-   call ccwrite8(fid,buf,len)
-endif
-end subroutine
-
-
-
 subroutine abort(message)
 use mpi
 use params

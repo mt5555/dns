@@ -68,13 +68,14 @@ else if (g_nx <= 1024) then
    mpi_maxio=8
    mpi_stripe="8"
 else
-   ! leave defaults io cpus=32, stipe=64
+   ! leave defaults io cpus=32, stripe=64
 endif
 
 
 
 nio=1
 nio=min(mpi_maxio,ncpu_z)
+if (ncpu_z*ncpu_x*ncpu_z>4) nio=min(mpi_maxio,(ncpu_x*ncpu_y*ncpu_z)/4)
 
 inc=ncpu_z/nio
 
@@ -1148,20 +1149,19 @@ do x_pe=0,ncpu_x-1
             buf(o_nx,:)=0
          endif
       endif
-      if (do_mpi_io) then
 #ifdef USE_MPI_IO
+      if (do_mpi_io) then
          zpos = z_pe*nslabz + k-1 
          ypos = y_pe*nslaby + x_pe*ny_2dx_actual
-         zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
+         zpos = output_size*(offset + zpos*o_nx*o_ny+ypos*o_nx)
          if (first_seek) then
             call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
             first_seek=.false.
          endif
-         call MPI_File_write(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
-#endif
-      else
-         call cwrite8(fid,buf,o_nx*ny_2dx_actual)
       endif
+#endif
+      call mwrite8(fid,buf,o_nx*ny_2dx_actual)
+
 
       if (o_ny>g_ny) then
          if (y_pe==0 .and. x_pe==0) then
@@ -1175,15 +1175,15 @@ do x_pe=0,ncpu_x-1
          if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then     ! append to the end, y-direction
             if (do_mpi_io) then
 #ifdef USE_MPI_IO
-               zpos = z_pe*nslabz + k -1
-               ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
-               zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
-!               call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
-               call MPI_File_write(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
+!              no longer needed - we are automatically at the right location
+!              zpos = z_pe*nslabz + k -1
+!              ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
+!              zpos = output_size*(offset + zpos*o_nx*o_ny+ypos*o_nx)
+!              call MPI_File_seek(fid,zpos,MPI_SEEK_SET,ierr)
+!              call MPI_File_write(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
 #endif
-            else
-               call cwrite8(fid,saved_edge,o_nx)
             endif
+            call mwrite8(fid,saved_edge,o_nx)
          endif
       endif
 
@@ -1332,7 +1332,7 @@ do x_pe=0,ncpu_x-1
 #endif
       endif
       
-      if (l>0) call cwrite8(fid,buf,l)
+      if (l>0) call mwrite8(fid,buf,l)
    endif
 enddo
 enddo
@@ -1429,7 +1429,7 @@ do x_pe=0,ncpu_x-1
       if (sending_pe==my_pe) then
          ! dont recieve message from self
          if (l>0) then
-            call cread8(fid,buf,l)
+            call mread8(fid,buf,l)
             pt(1:dealias_nx,k,1:jj)=buf(1:dealias_nx,1:jj)
          endif
       else
@@ -1440,7 +1440,7 @@ do x_pe=0,ncpu_x-1
          ASSERT("output1: MPI_waitalll failure",ierr==0)
 
          if (l>0) then
-            call cread8(fid,buf,l)
+            call mread8(fid,buf,l)
             call MPI_ISend(buf,l,MPI_REAL8,sending_pe,tag,comm_3d,request,ierr)
             ASSERT("output1: MPI_IRecv failure",ierr==0)
             call MPI_waitall(1,request,statuses,ierr) 	
@@ -1572,7 +1572,7 @@ do x_pe=0,ncpu_x-1
             call MPI_File_read(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
 #endif
          else
-            call cread8(fid,buf,o_nx*ny_2dx_actual)
+            call mread8(fid,buf,o_nx*ny_2dx_actual)
          endif
       endif
 
@@ -1591,7 +1591,7 @@ do x_pe=0,ncpu_x-1
                call MPI_File_read(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
 #endif
             else
-               call cread8(fid,saved_edge,o_nx)      
+               call mread8(fid,saved_edge,o_nx)      
             endif
          endif
       endif
@@ -1678,14 +1678,152 @@ end subroutine transpose_from_z_3d
 
 
 
+
+
+
 end module
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  use these routines for all read/writes that may be using MPI_IO,
+!  if MPI_IO support was compiled in
+!
+!  if do_mpi_io==.true:    use MPI calls  (open file with MPI-IO)
+!                .false.   use cread/cwrite calls  (open file with copen)
+!
+!  these routines will also automaticaly convert to single precision if
+!  output_size=4
+!  if input_size=4:  not yet coded.  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+subroutine mread8(fid,buf,len)
+use params
+use mpi
+implicit none
+CPOINTER fid
+integer :: len,ierr
+real*8 :: buf(len)
+call mread8e(fid,buf,len,ierr)
+end subroutine
+
+
+
+subroutine mread8e(fid,buf,len,ierr)
+use params
+use mpi
+implicit none
+CPOINTER fid
+integer :: len,ierr
+real*8 :: buf(len)
+real*4, allocatable ::  buf4(:)
+#ifdef USE_MPI_IO
+integer statuses(MPI_STATUS_SIZE)
+#endif
+
+if (do_mpi_io) then 
+#ifdef USE_MPI_IO
+   call MPI_File_read(fid,buf,len,MPI_REAL8,statuses,ierr)
+   if (ierr==0) ierr=len  ! return length read, if OK
+#else
+   call abort("MPI_IO support not compiled in")	
+#endif
+else
+   call cread8e(fid,buf,len,ierr)
+endif
+
+end subroutine
 
 
 
 
+subroutine mread1e(fid,buf,len,ierr)
+use params
+use mpi
+implicit none
+CPOINTER fid
+integer :: len,ierr
+real*8 :: buf(len)
+#ifdef USE_MPI_IO
+integer statuses(MPI_STATUS_SIZE)
+#endif
+
+if (do_mpi_io) then 
+#ifdef USE_MPI_IO
+   call MPI_File_read(fid,buf,len,MPI_BYTE,statuses,ierr)
+   if (ierr==0) ierr=len  ! return length read, if OK
+#else
+   call abort("MPI_IO support not compiled in")	
+#endif
+else
+   call cread1e(fid,buf,len,ierr)
+endif
+
+end subroutine
+
+
+
+subroutine mwrite8(fid,buf,len)
+use params
+use mpi
+implicit none
+CPOINTER fid
+integer :: len
+real*8 :: buf(len)
+real*4, allocatable ::  buf4(:)
+integer :: ierr
+#ifdef USE_MPI_IO
+integer statuses(MPI_STATUS_SIZE)
+#endif
+
+if (output_size==4) then
+   allocate(buf4(len))
+   buf4(1:len)=buf(1:len)
+endif
+
+if (do_mpi_io) then 
+#ifdef USE_MPI_IO
+   if (output_size==4) then
+      call MPI_File_write(fid,buf4,len,MPI_REAL4,statuses,ierr)
+   else
+      call MPI_File_write(fid,buf,len,MPI_REAL8,statuses,ierr)
+   endif
+#else
+   call abort("MPI_IO support not compiled in")	
+#endif
+else
+   if (output_size==4) then
+      call cwrite4(fid,buf4,len)
+   else
+      call cwrite8(fid,buf,len)
+   endif
+endif
+
+if (output_size==4) deallocate(buf4)
+end subroutine
 
 
 
 
+subroutine mwrite1(fid,buf,len)
+use params
+use mpi
+implicit none
+CPOINTER fid
+integer :: len
+real*8 :: buf(len)
+integer :: ierr
+#ifdef USE_MPI_IO
+integer statuses(MPI_STATUS_SIZE)
+#endif
+
+if (do_mpi_io) then 
+#ifdef USE_MPI_IO
+   call MPI_File_write(fid,buf,len,MPI_BYTE,statuses,ierr)
+#else
+   call abort("MPI_IO support not compiled in")	
+#endif
+else
+   call cwrite1(fid,buf,len)
+endif
+
+end subroutine

@@ -1,4 +1,4 @@
-3            ! input file type
+4            ! input file type
 ns_uvw       ! equations
 iso12         ! initial condition:  KH-blob, KH-anal, iso12
 4            ! init condition subtype
