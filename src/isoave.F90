@@ -354,8 +354,6 @@ SN_ltt=SN_ltt/ntot
 SN_lll=SN_lll/ntot
 
 #ifdef USE_MPI
-allocate(dwork2(ndelta,ndir))
-allocate(dwork3(ndelta,ndir,2))
    dwork2=D_ll
    call MPI_allreduce(dwork2,D_ll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    dwork3=D_tt
@@ -985,6 +983,8 @@ if (ndir/=73) then
    call abort("isoave: ndir /= 49")
 endif
 
+allocate(dwork2(ndelta,ndir))
+allocate(dwork3(ndelta,ndir,2))
 
 allocate(D_ll(ndelta,ndir))
 allocate(D_lll(ndelta,ndir))

@@ -40,7 +40,7 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-tstart=2.00
+tstart=2.25
 tstop=3.00
 tinc=.25
 icount=0
