@@ -365,6 +365,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < uxx,f > 
 ! ints(10) = mu*< u, del u >   diffusion (or mu*<u,-del**4 u>)
+! ints(11) = helicity dissipation
 ! maxs(5) = max vorticity
 !
 !

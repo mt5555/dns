@@ -224,6 +224,7 @@ real*8 uu,vv,ww,dummy
 integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
@@ -405,6 +406,7 @@ endif
 ke=0
 ux2ave=0
 ke_diss=0
+h_diss=0
 uxx2ave=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
@@ -428,23 +430,40 @@ do j=1,ny_2dz
             rhs(k,i,j,2)=rhs(k,i,j,2) - xw_viss*Qhat(k,i,j,2)
             rhs(k,i,j,3)=rhs(k,i,j,3) - xw_viss*Qhat(k,i,j,3)
 
+
+            if (compute_ints==1) then
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
 
-            xfac = 2*2*2
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-
-            u2=Qhat(k,i,j,1)*Qhat(k,i,j,1) + &
-               Qhat(k,i,j,2)*Qhat(k,i,j,2) + &
-               Qhat(k,i,j,3)*Qhat(k,i,j,3)
-
-            ke = ke + .5*xfac*u2
-            ux2ave = ux2ave + xfac*xw*u2
-            ke_diss = ke_diss + xfac*xw_viss*u2
-            uxx2ave = uxx2ave + xfac*xw*xw*u2
-         
+               xfac = 2*2*2
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+               
+               u2=Qhat(k,i,j,1)*Qhat(k,i,j,1) + &
+                    Qhat(k,i,j,2)*Qhat(k,i,j,2) + &
+                    Qhat(k,i,j,3)*Qhat(k,i,j,3)
+               
+               ke = ke + .5*xfac*u2
+               ux2ave = ux2ave + xfac*xw*u2
+               ke_diss = ke_diss + xfac*xw_viss*u2
+               uxx2ave = uxx2ave + xfac*xw*xw*u2
+               
+               ! u_x term
+               vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
+               wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)
+               uy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),1)
+               wy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),3)
+               uz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,1)
+               vz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,2)
+               ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
+               ! compute 2*k^2 u vor:
+               h_diss = h_diss + 2*xfac*mu*xw*&
+                    (Qhat(k,i,j,1)*(wy-vz) + &
+                     Qhat(k,i,j,2)*(uz-wx) + &
+                     Qhat(k,i,j,3)*(vx-uy)) 
+               
+         endif
 
       enddo
    enddo
@@ -641,7 +660,7 @@ if (compute_ints==1) then
    ints(8)=a_diss    
    ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-ke_diss                 ! <u,u_xx>
-
+   ints(11)=h_diss
    maxs(5)=maxvor
 endif
 

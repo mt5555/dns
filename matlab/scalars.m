@@ -115,6 +115,9 @@ fclose(fid);
 l=size(ints);
 l=l(2);
 
+if (ns>=11) 
+   h_diss=ints(11,:);   
+end
 ke_diss_d=ints(10,:);
 ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 vor_z=ints(4,:);
