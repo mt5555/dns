@@ -96,13 +96,14 @@ do k=nz1,nz2
     if (kmcord(k)==0) energy=energy/2
     if (jmcord(j)==0) energy=energy/2
     if (imcord(i)==0) energy=energy/2
-  
+
     energy=energy*p(i,j,k)**2
 
     spectrum(iwave)=spectrum(iwave)+energy
     spectrum_x(abs(imcord(i)))=spectrum_x(abs(imcord(i))) + energy
     spectrum_y(abs(jmcord(j)))=spectrum_y(abs(jmcord(j))) + energy
     spectrum_z(abs(kmcord(k)))=spectrum_z(abs(kmcord(k))) + energy
+
 enddo
 enddo
 enddo
@@ -118,7 +119,11 @@ spectrum_in=spectrum_z
 call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
 #endif
 
-iwave = min(g_nx,g_ny,g_nz)
+if (g_nz == 1)  then
+   iwave = min(g_nx,g_ny)
+else
+   iwave = min(g_nx,g_ny,g_nz)
+endif
 iwave = (iwave/2)           ! max wave number in sphere.
 
 ! for all waves outside sphere, sum into one wave number:
@@ -127,6 +132,9 @@ do i=iwave+2,iwave_max
 enddo
 iwave_max=iwave+1
 
-
+do i=1,10
+	print *,i,spectrum(i)
+enddo
 
 end subroutine
+

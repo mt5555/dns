@@ -51,7 +51,7 @@ tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
 call wallclock(tmx1)
-! call dns_solve(Q)
+call dns_solve(Q)
 call wallclock(tmx2)
 tims(2)=tmx2-tmx1
 
