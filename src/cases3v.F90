@@ -248,7 +248,7 @@ if (restype==0) then
    ep23=(2.76029)  **(2d0/3d0) 
    lenscale = .3155
    eta = 9.765e-4
-   mu_m=1.359e-4
+   mu_m=1.359e-4 *.7  !   *.89
 else
    call abort("init_data_decay: bad restype")
 endif
@@ -288,6 +288,7 @@ print *,'u1,1     ',epsilon/mu_m/15
 print *,'lambda   ',sqrt(10*ener*mu_m/epsilon)
 print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
 print *,'eta      ',(mu_m**3 / epsilon ) **.25 
+print *,'965*eta  ',965*(mu_m**3 / epsilon ) **.25 
 print *,'eddy time',2*ener/epsilon
 endif
 

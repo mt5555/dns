@@ -8,15 +8,15 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module ibm
-real*8 :: ints_buf(nints),vel
-integer :: i,j,k,n,ierr
-integer :: rks
 real*8 :: surf_pt,surf_pt_max,surf_loc(5000,3)
 real*8 :: rev_pt,rev_pt_max,rev_loc(5000,3,2)
 real*8 :: cx(10),cy(10),cz(10)
 real*8 :: jacobian(3,3),jacobinv(3,3)
 real*8 :: jac_mat(5000,3,3)
 real*8 :: jac_inv(5000,3,3)
+
+
+contains
 
 subroutine force(rhs,Q,p,time,compute_ints)
 !
@@ -229,7 +229,7 @@ do l=1,n_body
 
 enddo
 
-end
+end subroutine
 
 !	***************************************************************
 
@@ -290,7 +290,8 @@ end
         endif
  
         return
-        end
+        end subroutine
+
  
 !       ***************************************************************
  
@@ -352,4 +353,6 @@ end
  
         return
  
-        end
+        end subroutine
+
+end module
