@@ -1,13 +1,78 @@
-Outline of code:
+1. compile:
+      To setup for a 64x64x64 grid, on 4 cpu:
+      (parallel decomposition: 1x1x4, so 4 hyperslabs in the z-direction)
 
-dns.F90            main program.  RK4 time stepping loop.  
-macros.h           all #defines go in here
-params.F90         global parameters like mesh spacing
+      % cd dns/src
+      % ./gridsetup.py 1 1 4 64 64 64 
+      % make dns
 
-ns2d.F90           2D compressible Navier-Stokes time tendencies
-               
+On Linux, the makefile by default used the intel F90 compiler,
+but you can edit the file and switch this to Lahey or PGI. 
+For Compaq and SGI, it uses the vendor F90 compiler.
 
+
+
+2.  Running the code:
+
+        ./dns  output_name  < test.inp
+
+    Each snapshot is in a file named:
+
+        output_name0000.0000.u
+        output_name0000.0000.v
+        output_name0000.0000.w 
+
+
+    where 0000.0000 is the time of the snapshot.  So for t=0.25,
+    the filename would be:  output_name0000.2500.vor.
+
+    all other output files can be ignored.  They contain diagnostics
+    like energy, structure fuctions, spectrum, ...
+
+
+
+3.  The output routines we are interested in are in this block of code 
+    (line 285) in timecontrol.F90:
+
+
+
+   else if (equations==NS_UVW) then
+
+      ! NS, primitive variables
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"
+      call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".v"
+      call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+      if (n_var==3) then
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".w"
+         call singlefile_io(time,Q(1,1,1,n_var),fname,work1,work2,0,io_pe)
+      endif
+
+
+The data is just the 3 components of velcocity, stored in the
+array:
+
+Q(nx,ny,nz,3)
+
+The actual data (not including ghost cells and other padding) on
+each processor is:
+
+Q(nx1:nx2,ny1:ny2,nz1:nz2,3)
+
+All the dimensions (nx,ny,nz,nx1,nx2,...) are in the "params" F90
+module.  The dimensions are the same on all cpus, so every cpu has an
+identical size chunk of data.
+
+For the parallel decomposition, I'm just using the mpi "cartesian
+communicator", so every processor is labled by 3 coordinates,
+(my_x,my_y,my_z).  
  
+
+
+
+
+
+
 
 
 

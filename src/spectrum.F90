@@ -274,7 +274,7 @@ if (my_pe==io_pe) then
    sum_tot2=0
    sum_diss=0
    sum_f=0
-   write(*,'()') '    i      d(E_k)/dt      d(E_k)/dt      T      D      F'
+   write(*,'(a)') '    i      d(E_k)/dt      d(E_k)/dt      T      D      F'
    do i=0,iwave
       write(*,'(i4,5f12.4)') i,transfer_r(i),&
            spec_r(i)+spec_diff(i)+spec_f(i), &
