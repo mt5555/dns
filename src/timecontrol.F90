@@ -318,9 +318,9 @@ if (doit_output) then
       call output_uvw(runname,time,q1,work1,work2,q2)
    else if (equations==NS_PSIVOR) then
       ! 2D NS psi-vor formulation
-      call output_uvw(time,Qhat,work1,work2,q1)
+      call output_uvw(runname,time,Qhat,work1,work2,q1)
    else
-      call output_uvw(time,Q,work1,work2,q1)
+      call output_uvw(runname,time,Q,work1,work2,q1)
    endif
    call print_message("done with output")
 
