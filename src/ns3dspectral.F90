@@ -58,6 +58,7 @@ enddo
 ! stage 2
 call ns3D(rhs,Q_tmp,Q_grid,time+delt/2.0,0)
 
+
 do n=1,3
    do k=nz1,nz2
    do j=ny1,ny2
@@ -177,7 +178,6 @@ real*8 :: ke_diss,vor,hel,maxvor
 call wallclock(tmx1)
 
 
-
 ! compute vorticity-hat, store in RHS
 uz=0
 vz=0
@@ -230,9 +230,12 @@ wz=0
             rhs(i,j,k,1) = pi2*(wy - vz)
             rhs(i,j,k,2) = pi2*(uz - wx)
             rhs(i,j,k,3) = pi2*(vx - uy)
+
          enddo
       enddo
    enddo
+
+
 do n=1,3
    call ifft3d(rhs(1,1,1,n),p)
 enddo
@@ -254,9 +257,11 @@ maxvor=0
    do j=ny1,ny2
    do i=nx1,nx2
       vor = vor + rhs(i,j,k,3)
+
       hel = hel + Q(i,j,k,1)*rhs(i,j,k,1) + & 
                   Q(i,j,k,2)*rhs(i,j,k,2) + & 
                   Q(i,j,k,3)*rhs(i,j,k,3)  
+
       maxvor = max(maxvor,abs(rhs(i,j,k,1)))
       maxvor = max(maxvor,abs(rhs(i,j,k,2)))
       maxvor = max(maxvor,abs(rhs(i,j,k,3)))
@@ -273,16 +278,12 @@ maxvor=0
    enddo
 
 
-
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! back to spectral space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
    call fft3d(rhs(1,1,1,n),p)
 enddo
-
 
 ke_diss = 0
 
