@@ -129,6 +129,12 @@ iso12_256F        ran to t=50
     decay case
     alpha=infinity
     mu=.25e-4  
+iso12_256G        ran to t=5  
+    alpha=1.0
+    mu=.25e-4  
+iso12_256H      
+    alpha=.25
+    mu=.25e-4  
 
 
 

@@ -102,7 +102,6 @@ while (time>=0 & time<=9999.3)
     loglog53(n_y,spec_vy,time);
     hold off;
     %print -depsc spec.ps    
-    %pause
   else
     %spherical wave number
     subplot(3,1,1);
@@ -124,8 +123,7 @@ while (time>=0 & time<=9999.3)
     loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
     hold off;
     orient tall
-    print -depsc spec.ps    
-    pause
+    %print -depsc spec.ps    
 
   end
 
@@ -149,9 +147,9 @@ while (time>=0 & time<=9999.3)
   grid;
   title(sprintf('E Flux'));
 
-  'pause...'
+  print('-dpsc',sprintf('name%.2f.ps',time)) 
   pause
-
+  
   
   time=fread(fid,1,'float64');
   num_spec=fread(fidt,1,'float64');
