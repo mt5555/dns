@@ -437,8 +437,11 @@ yd(nd) = 0
 delsq = delta**2
 !   INITIALIZES VORTICITY ON THE GRID = VORTICITY INDUCED
 !     BY A BLOB AT (0,1)
-do i=intx1,intx2
 do j=inty1,inty2
+   if (mod(j,100)==0 .and. my_pe==io_pe) then
+      print *,'initial condition: ',inty2,j
+   endif
+do i=intx1,intx2
    wsum = 0
    psisum=0
    do k=0,nd

@@ -16,9 +16,7 @@ ifeq ($(UNAME),Linux)
    HOST = $(shell hostname)
    ifeq ($(HOST),darkstar)
       MPI = 
-      MPILIB =  
-      MPI = -DUSE_MPI -I/contrib/lam/include
-      MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
+      MPILIB = 
    else
       MPI = -DUSE_MPI -I/contrib/lam/include
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 

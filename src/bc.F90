@@ -276,6 +276,9 @@ interp=(biotsavart_cutoff>0)
 if (interp) then
 ! interpolate every 10'th point
 do j=by1,by2
+   if (mod(j,100)==0 .and. my_pe==io_pe) then
+      print *,'interp: ',by2,j
+   endif
 do i=bx1,bx2
    if (abs(w(i,j)).ge.biotsavart_cutoff) then
       do k=1,o_nx,10 

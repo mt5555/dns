@@ -54,9 +54,6 @@ real*8 :: one=1
 integer i,j,k,l,ierr
 character(len=80) message
 
-print *,'hi'
-
-
 
 if (numerical_method==FOURIER) then
 !
