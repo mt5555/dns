@@ -23,6 +23,11 @@ shankara:  (some of these timings were not using 2 cpu per node,
 16:    .161   (4.7 days to t=50)
 24     .109   3.2 days
 
+shankara-lam
+4:     1.51
+16:     .738
+
+
 delt=.0012
 time_per_timestep(m)*50/.0012/60 = time for run in hours
 

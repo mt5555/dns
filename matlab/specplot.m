@@ -48,8 +48,7 @@ tsave=[];
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
-name = 'eve10000.0000';
-name = 'eve20000.0100';
+name = '2D_4096_1e-4b0000.0000';
 namedir = '../../evelyn/';
 mu=1e-9;
 
@@ -410,11 +409,10 @@ while (time>=.0 & time<=1.6)
     end       
     disp('pause')
     pause
-  else     
-    %disp('pause')
-    %pause
   end
   end
+  disp('pause')
+  pause
 
   if (fidp>-1)   
     [L11c(1),L11,ke,ke_diss,c2];

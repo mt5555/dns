@@ -14,6 +14,10 @@ Angle averging:  153 calls to transpose_z()
      time this again with **p replaced by multiplication?
 
 
+0 BUG:  Energy, when computed in spectral space: the cos(N/2) mode
+        is weighted to heavily.  Not a problem for any dealiased case
+        since that mode will always be zero.  This effects many routines
+        throughout the code. 
 
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  
@@ -36,12 +40,6 @@ Angle averging:  153 calls to transpose_z()
        2e-4: looks good, a little too smoothed 
       compare with spectral, 4th, 4th+1st order grad, or 1st order div
 3. if run stops because u>1000, timings are incorrect
-5. make suite of runs for diffusion: 32^3, 64^3 128^3 256^3
-       plot R_lamba vs mu and h
-6. switch 3d test case to different dimensions
-
-check spectrum and rotated spectrum  (scalar)  ok for short times.
-check spectrum and parallel spectrum.  using testcase?
 
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  
