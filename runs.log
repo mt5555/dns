@@ -187,9 +187,10 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 250H  5000h   500    668   7.16/1.42 1.42        2.95
 
 250I  .8e-3   500    180   1.13      1.27        3.23      same as G, with new diags
-      continuing...  with time averages
-250J  .8e-3   500   (same as G, but with 4th order)
+      continuing...  with time averages.. done up to t=40
 
+250J  .8e-3   500   (same as G, but with 4th order) done up to t=14
+    
 
 
 500    .1e-3    5     455   2.38      1.44        2.00     hook 1e-2     kink
