@@ -176,7 +176,7 @@ title('S_u')
 
 subplot(4,2,2)
 plot(time_e,Suc)
-title('S_{u\theta}')
+title('S_{uc}')
 
 subplot(4,2,3)
 plot(time_e,G)
@@ -184,7 +184,7 @@ title('G')
 
 subplot(4,2,4)
 plot(time_e,Gc)
-title('G_\theta')
+title('G_c')
 
 
 
@@ -255,7 +255,7 @@ title('\lambda')
 
 subplot(4,2,2)
 plot(time_e,lambda_c)
-title('\lambda_\theta')
+title('\lambda_c')
 
 
 subplot(4,2,3)
@@ -264,7 +264,7 @@ title('\eta')
 
 subplot(4,2,4)
 plot(time_e,eta_c)
-title('\eta_{\theta}')
+title('\eta_c')
 
 subplot(4,2,5)
 plot(time_e,Vp)
@@ -272,7 +272,7 @@ title('%mix')
 
 subplot(4,2,6)
 plot(time_e,Vp2)
-title('%mix \lambda_{\theta} / \eta_{\theta}')
+title('%mix \lambda_c / \eta_c')
 
 
 orient tall

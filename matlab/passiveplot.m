@@ -101,7 +101,7 @@ for type=type_list
    xt=[1-len,1-len,1];
    yt=[0,len,len];
    line(xt,yt);
-   text(1.05,yt(3)-.05,'5 \lambda_{\theta}');
+   text(1.05,yt(3)-.05,'5 \lambda_c');
    
 
    if (lambda_c>0) 
