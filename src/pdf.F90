@@ -891,10 +891,10 @@ do k=1,n3
                   del2 = del2/str(n)%pdf_bin_size
                   bin1 = nint(del1)
                   bin2 = nint(del2)
-                  bin=max(bin1,bin2)
+                  bin=max(abs(bin1),abs(bin2))
 
                   ! increase the size of our PDF function
-                  if (abs(bin)>str(n)%nbin) call resize_jpdf(str(n),abs(bin)+10) 
+                  if (bin>str(n)%nbin) call resize_jpdf(str(n),abs(bin)+10) 
                   if (bin1>jpdf_max_bin) bin1=jpdf_max_bin
                   if (bin1<-jpdf_max_bin) bin1=-jpdf_max_bin
                   if (bin2>jpdf_max_bin) bin2=jpdf_max_bin

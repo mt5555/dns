@@ -5,7 +5,6 @@ joint pdfs: debug
 transfer spec: debug
 
 
-
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  
 
@@ -89,6 +88,8 @@ extrapolated:
 
 t=-1 (one timestep)
 2048^3        11.05m      32K timesteps: 245 days.    
+t=-5 (5 timesteps)
+2048^3        46.83m  = 9.37m per timestep.  
 
 
 t=-43  (.05)                         Nirv    BlueMtn       10eddy
