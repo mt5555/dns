@@ -509,8 +509,9 @@ do im=-numb,numb
    !  k=3  <R,R> = 1809
    !
    k2 = (im**2 + jm**2 + km**2)
-   if ((numb1-.5)**2 <=k2 .and.   k2 <= (numb+.5)**2) then
    ! ignore wave numbers outside of our forcing band 
+   if ((numb1-.5)**2 <=k2 .and.   k2 < (numb+.5)**2) then
+
       if (k2>0) then
          xfac=1/(-2*pi*k2)
       else
@@ -519,11 +520,11 @@ do im=-numb,numb
       if (delt>0) xfac=xfac/sqrt(delt)
       ! normalize so that < R**2 >   = F1  in wave number 1
       ! normalize so that < R**2 >   = F2  in wave number 2
-      if (k2 <= 1.5**2) then
+      if (k2 < 1.5**2) then
          xfac=xfac*sqrt(FM(1)/180)
-      else if (k2 <= 2.5**2)  then
+      else if (k2 < 2.5**2)  then
          xfac=xfac*sqrt(FM(2)/1090)
-      else if (k2 <= 3.5**2)  then
+      else if (k2 < 3.5**2)  then
          xfac=xfac*sqrt(FM(3)/1809)
       endif
       
