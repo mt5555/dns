@@ -177,7 +177,7 @@ void  FORTRAN(set_sighandler)(void) {
                 fprintf( stderr, "** WARNING** Can't catch signal SIGURG" );
         }
         if( signal( SIGUSR1, ExceptionHandler ) == SIG_ERR ) {
-                fprintf( stderr, "** WARNING** Can't catch signal SIGURG" );
+                fprintf( stderr, "** WARNING** Can't catch signal SIGUSR1" );
         }
 
 }

@@ -7,7 +7,7 @@
 
 %name='../src/temp';
 %name='../src/temp0000.0000.ellipse';
-name='/data/vxpair/vx2048a0000.0000.ellipse';
+name='/data/vxpair/vx2048a0010.0000.ellipse';
 fid=fopen(name,'r');
 
   
@@ -29,12 +29,13 @@ while(1)
      plot(x,y)
      %plot(x,y,'r.')
   end     
-  axis([0 4 0 2]);
+  axis([1 3 0 1.5]);
+  axis equal
   title(sprintf('time=%f',time))
   hold off;
   %    'pause' ;     pause
 end
-close(fid);
+fclose(fid);
 return
 
 

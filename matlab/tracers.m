@@ -8,7 +8,7 @@
 range=0.00:1.0:1000.0 ;
 name='../src/temp';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
-name='../src/vxpair/vx2048a';
+name='/data/vxpair/vx2048a';
 
 
 usefig=1;
