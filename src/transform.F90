@@ -30,6 +30,7 @@ integer i,j,k,jj,l
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
+integer dest_pe3(3)
       
 
 !

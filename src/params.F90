@@ -43,10 +43,10 @@ integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
 
 ! mesh dimensions on a single processor
 integer,parameter :: n_var=3                  ! number of prognostic variables
-integer,parameter :: nx=66,ny=67,nz=1         ! dimension of grid & data
-integer,parameter :: nx1=3,nx2=66              ! upper and lower bounds of non-ghost data
-integer,parameter :: ny1=4,ny2=67             ! upper and lower bounds of non-ghost data
-integer,parameter :: nz1=1,nz2=1              ! upper and lower bounds of non-ghost data
+integer,parameter :: nx=18,ny=18,nz=18         ! dimension of grid & data
+integer,parameter :: nx1=1,nx2=16              ! upper and lower bounds of non-ghost data
+integer,parameter :: ny1=1,ny2=16             ! upper and lower bounds of non-ghost data
+integer,parameter :: nz1=1,nz2=16              ! upper and lower bounds of non-ghost data
 
 ! number of actual data points
 integer,parameter :: nslabx=nx2-nx1+1
@@ -90,7 +90,7 @@ integer :: error_code
 integer :: mpidims(3)
 integer :: nx_2d,ny_2d,nz_2d
 integer :: ioproc
-integer :: my_pe,mpicoords(3)
+integer :: my_world_pe,my_pe,mpicoords(3)
 integer :: initial_live_procs
 integer :: comm_3d                 ! the MPI cartesian communcator
 

@@ -19,6 +19,14 @@ ifeq ($(UNAME),SunOS)
    LDFLAGS = 
    FFLAGS = -O -DMPI
 endif
+ifeq ($(UNAME),IRIX64)
+   F90 = f90
+   MPILIB = -lmpi 
+   MPIINC = -DMPI 
+   MPIF90 = /usr/local/src/mpich/include/mpif.f90
+   LDFLAGS = 
+   FFLAGS = -O -DMPI
+endif
 
 COMPILE=$(F90) -c $(FFLAGS)
 LINK=$(F90) $(FFLAGS) $(LDFLAGS)
