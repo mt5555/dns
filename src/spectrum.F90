@@ -89,14 +89,14 @@ q1=Q
 ! passive scalars:
 do n=np1,np2
    call compute_spectrum(q1(1,1,1,n),work1,work2,spec_r(0,n),spec_r2,&
-       spec_x(0,n),spec_y(0,n),spec_z(0,n),iwave_max,io_pe,0)
+       spec_x(0,n),spec_y(0,n),spec_z(0,n),iwave_max,0)
 enddo
 
 
 do i=1,ndim
    call fft3d(q1(1,1,1,i),work1)
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,1)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,1)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
    ! for now, use the value computed in RHS
    ! spec_diff=spec_diff + spec_d2
@@ -114,7 +114,7 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 
 ! q1 already contains the FFT of Q, so set skip_fft (last arg) to 1:
 if (ndim>=3) then
-   call compute_helicity_spectrum(Q,q1,work1,io_pe,1)
+   call compute_helicity_spectrum(Q,q1,work1,1)
 endif
 
 
@@ -164,7 +164,7 @@ q1(:,:,:,3)=(Q(:,:,:,3))
 !  PE part
 !
 call compute_spectrum(q1(1,1,1,3),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,io_pe,0)
+       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,0)
 spec_r(:,1)=spec_r(:,1)+.5*grav*spec_r2
 spec_r(0,1)=spec_r(0,1) - .5*grav*H0**2
 
@@ -174,7 +174,7 @@ spec_r(0,1)=spec_r(0,1) - .5*grav*H0**2
 !
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,0)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,0)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
 enddo
 spec_x=.5*spec_x
@@ -235,7 +235,7 @@ q1(:,:,:,3)=(Q(:,:,:,3))
 !  PE part
 !
 call compute_spectrum(q1(1,1,1,3),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,io_pe,0)
+       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,0)
 spec_r_new=spec_r_new+.5*grav*spec_r2
 spec_r_new(0)=spec_r_new(0) - .5*grav*H0**2
 
@@ -245,7 +245,7 @@ spec_r_new(0)=spec_r_new(0) - .5*grav*H0**2
 !
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,0)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,0)
    spec_r_new=spec_r_new+.5*spec_r2
 enddo
 
@@ -326,7 +326,7 @@ q1=Q
 ! compute spectrum in spec_r
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe,0)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,0)
    spec_r_new=spec_r_new+.5*spec_r2
    ! for now, use the value computed in RHS
    ! spec_diff_new=spec_diff_new + spec_d2  
@@ -699,7 +699,7 @@ end subroutine
 
 
 subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,&
-   spectrum_z,iwave_max,pe,skip_fft)
+   spectrum_z,iwave_max,skip_fft)
 !
 !  INPUT:  iwave_max:  size of spectrum()
 !  OUTPUT: iwave:      number of coefficients returned in spectrum()
@@ -716,7 +716,6 @@ use params
 use mpi
 implicit none
 integer :: iwave_max,ierr,skip_fft
-integer :: pe             ! compute spectrum on this processor
 real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
@@ -780,16 +779,16 @@ enddo
 
 #ifdef USE_MPI
 spectrum_in=spectrum
-call MPI_reduce(spectrum_in,spectrum,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spectrum_in,spectrum,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in(0:g_nx/2)=spectrum_x
-call MPI_reduce(spectrum_in,spectrum_x,1+(g_nx/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spectrum_in,spectrum_x,1+(g_nx/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in(0:g_ny/2)=spectrum_y
-call MPI_reduce(spectrum_in,spectrum_y,1+(g_ny/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spectrum_in,spectrum_y,1+(g_ny/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in(0:g_nz/2)=spectrum_z
-call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 spectrum_in=spec_d
-call MPI_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 #endif
 
@@ -823,12 +822,11 @@ end subroutine
 
 
 
-subroutine compute_spectrum_z_fft(p1,p2,pe,spec)
+subroutine compute_spectrum_z_fft(p1,p2,spec)
 use params
 use mpi
 implicit none
 integer :: ierr
-integer :: pe             ! compute spectrum on this processor
 real*8 :: p1(g_nz2,nslabx,ny_2dz)
 real*8 :: p2(g_nz2,nslabx,ny_2dz)
 real*8 :: spec(0:max(g_nx,g_ny,g_nz))
@@ -870,7 +868,7 @@ enddo
 
 #ifdef USE_MPI
 spec_r_in=spec
-call MPI_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
 if (g_nz == 1)  then
@@ -891,12 +889,11 @@ end subroutine
 
 
 
-subroutine compute_spectrum_fft(p1,p2,pe,spec)
+subroutine compute_spectrum_fft(p1,p2,spec)
 use params
 use mpi
 implicit none
 integer :: ierr
-integer :: pe             ! compute spectrum on this processor
 real*8 :: p1(nx,ny,nz)
 real*8 :: p2(nx,ny,nz)
 real*8 :: spec(0:max(g_nx,g_ny,g_nz))
@@ -938,7 +935,7 @@ enddo
 
 #ifdef USE_MPI
 spec_r_in=spec
-call MPI_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
 if (g_nz == 1)  then
@@ -961,7 +958,7 @@ end subroutine
 
 
 
-subroutine compute_helicity_spectrum(Q,p1,work,pe,skip_fft)
+subroutine compute_helicity_spectrum(Q,p1,work,skip_fft)
 !
 ! skip_fft=1:
 !       input: Q    p1, work are work arrays
@@ -973,7 +970,6 @@ use params
 use mpi
 implicit none
 integer :: ierr,skip_fft
-integer :: pe             ! compute spectrum on this processor
 real*8 :: Q(nx,ny,nz,*)
 real*8 :: p1(nx,ny,nz,*)
 real*8 :: work(nx,ny,nz)
@@ -1058,7 +1054,6 @@ do j=ny1,ny2
          cospec_z(abs(km),1:ndim)=cospec_z(abs(km),1:ndim)+co_energy(1:ndim)  ! vw
          cospec_r(iwave,1:ndim)=cospec_r(iwave,1:ndim)+co_energy(1:ndim)
 
-
          energy = energy*(p1(i,j,k,1)*(wy-vz) + &
                           p1(i,j,k,2)*(uz-wx) + &
                           p1(i,j,k,3)*(vx-uy)) 
@@ -1077,32 +1072,34 @@ enddo
 
 #ifdef USE_MPI
 spec_r_in=spec_helicity_rp
-call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
-call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_kEk
-call MPI_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 do n=1,ndim
    spec_r_in=cospec_r(:,n)
-   call MPI_reduce(spec_r_in,cospec_r(1,n),(1+iwave_max),MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+   call MPI_reduce(spec_r_in,cospec_r(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 enddo
 
 spec_x_in=cospec_x
-call MPI_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_y_in=cospec_y
-call MPI_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_z_in=cospec_z
-call MPI_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
 rwave=diss1
-call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 rwave=diss2
-call MPI_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 rwave=hetot
-call MPI_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
+call MPI_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
+
+
 if (my_pe==io_pe) then
    print *,'helicity: ',hetot
    print *,'helicity dissipation (spectrum): ',diss1*mu

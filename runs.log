@@ -2,19 +2,32 @@
 12/1/03
 cospec results:
 
-Random, uncorrelated initial data:
-  all 3 cospectrums are at the level of 1e-12
-  But E=flat, 1e-10, so something is wrong with initial condition.
+  cospec from sc1024A:  looks like -7/3?
+  cospec from decay2048:   IN
+
+  cospec from subcubes:  
+
 
 
 **********************************************************************************
 11/6/03
 
+tmix256D-noscalars  used to generate initial condtion
 tmix256D
+initial condition: t=.3000
+rescale:  restart run with tmix256D-rescale.inp
+          renamed rescaled output:  tmix256D000.3000.[uvw]
+
+
+
 
 init_cond_subtype==3
 spectrum peaked at k=6 (instead of 10)
-Change KE corr. scalar from type 1 to 3:   ke_thresh = .5?
+Change KE corr. scalar from type 1 to 3:   ke_thresh = .5?   debug.
+
+add to matlab:  Sk_{ln eps_c} = <psi^3>/<psi^2>^{3/2}
+                K_{ln eps_c}  = <psi^4>/<psi^2>^{2}
+
 
 Check with Ray:
 
@@ -23,7 +36,6 @@ scalars:
 Gaussian scalar:       same as before: double delta
 KE correlated scalar:  distribution chosen so that: c=1 peak 6x larger than
                              c=0 peak.  
-
 
 need to change subtype and scalar type in new .inp file.
 

@@ -264,11 +264,11 @@ icount=icount+1
    if (convert_opt==9) then  ! -cout spec_window  
       ! read input data, detrend, window, output spectrum and cospectrum
       !call input_uvw(time,Q,vor,work1,work2,1) ! DNS default headers
-!      call input_uvw(time,Q,vor,work1,work2,2) ! no headers
+      call input_uvw(time,Q,vor,work1,work2,2) ! no headers
       call print_message("computing spectrum ")
 
-      ! compute U using random vorticity:
-      call ranvor(Q,vor,work1,work2,1)
+      ! compute U using random vorticity: (for testing)
+      ! call ranvor(Q,vor,work1,work2,1)
 
       do n=1,3
          call detrend_data(Q(1,1,1,n),0)
@@ -538,7 +538,7 @@ enddo
 
 
 if (io_pe==my_pe) then
-   print *,'mean: ',meanp
+!   print *,'mean: ',meanp
    write(*,'(a,3f15.5)') 'grap*4         ',4*gradp(1:3)
 endif
 
@@ -574,8 +574,8 @@ call MPI_allreduce(gradp2,gradp,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 meanp=meanp/g_nx/g_ny/g_nz
 gradp=gradp/g_nx/g_ny/g_nz
 if (io_pe==my_pe) then
-   print *,'detrended mean :   ',meanp
-   write(*,'(a,3f15.5)') 'detrended 4*gradp:   ',4*gradp(1:3)
+!   print *,'detrended mean :   ',meanp
+!   write(*,'(a,3f15.5)') 'detrended 4*gradp:   ',4*gradp(1:3)
 endif
 #endif
 

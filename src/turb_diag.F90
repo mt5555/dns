@@ -16,7 +16,7 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer,parameter :: nints_e=49,npints_e=47
+integer,parameter :: nints_e=49,npints_e=51
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
@@ -733,9 +733,10 @@ integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: ux1,ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3),u1,u3,u4,u1tmp
 real*8 :: uxx2(3),uxx3(3),uxx4(3),xtmp,u2ux2(3)
+real*8 :: lnux1,lnux2,lnux3,lnux4,xln
 
 !
-!  gradu = ux,vy,wz,
+! gradu = ux,vy,wz,
 !
 ! grads = d/dx, d/dy and d/dz
 ! grads2 = d/dxx, d/dyy and d/dzz
@@ -755,7 +756,10 @@ su=0
 uxx2=0
 uxx3=0
 uxx4=0
-
+lnux1=0
+lnux2=0  
+lnux3=0
+lnux4=0
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -769,6 +773,13 @@ do i=nx1,nx2
       ux2(n)=ux2(n)+x1
       ux3(n)=ux3(n)+x1*grads(i,j,k,n)
       ux4(n)=ux4(n)+x1*x1
+
+      ! average over all three directions, so devide by 3 here:
+      xln=log(x1)
+      lnux1=lnux1 + xln/3
+      lnux2=lnux2 + xln*xln/3
+      lnux3=lnux3 + xln*xln*xln/3
+      lnux4=lnux4 + xln*xln*xln*xln/3
 
       x2=grads2(i,j,k,n)**2
       uxx2(n)=uxx2(n)+x2
@@ -791,6 +802,11 @@ uxx2=uxx2/g_nx/g_ny/g_nz
 uxx3=uxx3/g_nx/g_ny/g_nz
 uxx4=uxx4/g_nx/g_ny/g_nz
 su=su/g_nx/g_ny/g_nz
+
+lnux1=lnux1/g_nx/g_ny/g_nz
+lnux2=lnux2/g_nx/g_ny/g_nz
+lnux3=lnux3/g_nx/g_ny/g_nz
+lnux4=lnux4/g_nx/g_ny/g_nz
 
 
 #ifdef USE_MPI
@@ -854,16 +870,8 @@ i=i+1
 scalars(i)=u4              ! 26
 
 
-#ifdef USE_MPI
-   scalars2=scalars
-   call MPI_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-#endif
 
-!su=u2*uxx2/(ux2*ux2)   scalars(2)*scalars(12,13,14)/scalars(3,4,5)
-!print *,'G_theta=',su
-
-
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! zero crossing:  (mean is in pints_e(24,n))
 ! other values:
 ux1=.8; ux2=.9
@@ -883,11 +891,6 @@ call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(34))
 call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux2,scalars(35))
 i=35
 
-
-
-
-
-
 ux1=0  ! it's a deriavitve, so we know mean=0
 do n=1,3
 ! zero crossing of dissipation: 
@@ -899,17 +902,37 @@ call transpose_to_z(grads(1,1,1,n),work,n1,n1d,n2,n2d,n3,n3d)
 call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,ux1,scalars(i+3))
 i=i+3
 enddo
+! compute_zero_crossing does the MPI_allreduce for us, but we
+! have to do it again below.  To keep the second one from having any
+! effect, set all but one of the values to zero:
+if (io_pe /= my_pe) then
+   scalars(27:44)=0
+endif
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+! i = 44
 do n=1,3
-   scalars(i)=u2ux2(n)        
    i=i+1
+   scalars(i)=u2ux2(n)        
 enddo
+! i=47
+
+scalars(48)=lnux1
+scalars(49)=lnux2
+scalars(50)=lnux3
+scalars(51)=lnux4
 
 
 if (i/=ns) then
    call abort("compute_expensive_pscalars: Error: i/=ns")
 endif
 
+#ifdef USE_MPI
+   scalars2=scalars
+   call MPI_allreduce(scalars2,scalars,i,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+!su=u2*uxx2/(ux2*ux2)   scalars(2)*scalars(12,13,14)/scalars(3,4,5)
+!print *,'G_theta=',su
 
 
 end subroutine

@@ -17,8 +17,8 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
-name='tmix256C';
-namedir='/scratch2/taylorm/tmix256C/';
+name='tmix256D-noscalars0000.0000';
+namedir='/scratch2/taylorm/tmix256D-noscalars/';
 CK_orig=1.613; movie_plot=0; endian='l';
 mu=3e-4;
 
@@ -50,9 +50,9 @@ mu=3e-4;
 %namedir = '/scratch1/taylorm/decay2048/';
 %CK_orig=1.613/(2*pi)^2;
 
-name = 'decay2048-new.-sc0001_0000.7536';
-namedir = '/scratch1/taylorm/decay2048/';
-CK_orig=1.613/(2*pi)^2;
+%name = 'decay2048-new.-sc0001_0000.7536';
+%namedir = '/scratch1/taylorm/decay2048/';
+%CK_orig=1.613/(2*pi)^2;
 
 %name = 'skhel512a0000.0000';
 %namedir = '/home/mt/data/skhel/';
@@ -324,21 +324,24 @@ while (time>=.0 & time<=9999.3)
   % now read the cospectrum:
   if (fidco>-1) 
      disp('reading co-spectrum')
-     ncox=fread(fidco,1,'float64'); 
+     [ncox,count]=fread(fidco,1,'float64'); 
      ncoy=fread(fidco,1,'float64'); 
      ncoz=fread(fidco,1,'float64'); 
      ncor=fread(fidco,1,'float64'); 
      time_co=fread(fidco,1,'float64');
+     ncox=ncox+1;
+     ncoy=ncoy+1;
+     ncoz=ncoz+1;
      % uv, uw, vw:
      fread(fidco,ncox,'float64');   % 1D spectrum
      fread(fidco,ncox,'float64'); 
      fread(fidco,ncox,'float64'); 
-     fread(fidco,ncox,'float64'); 
-     fread(fidco,ncox,'float64'); 
-     fread(fidco,ncox,'float64'); 
-     fread(fidco,ncox,'float64'); 
-     fread(fidco,ncox,'float64'); 
-     fread(fidco,ncox,'float64'); 
+     fread(fidco,ncoy,'float64'); 
+     fread(fidco,ncoy,'float64'); 
+     fread(fidco,ncoy,'float64'); 
+     fread(fidco,ncoz,'float64'); 
+     fread(fidco,ncoz,'float64'); 
+     fread(fidco,ncoz,'float64'); 
      uv_r=fread(fidco,ncor,'float64');  % 3D spectrum
      uw_r=fread(fidco,ncor,'float64'); 
      vw_r=fread(fidco,ncor,'float64'); 

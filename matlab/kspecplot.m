@@ -1,5 +1,9 @@
 %read and compute mean k*E(k). Use to calculate relative helicity in conjunction%with hspecplot
 
+%namedir = '/scratch2/taylorm/sc1024A/';
+%name = 'sc1024A';
+%mu=.35e-4;
+
 namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
 name = 'skhel512_hpi2';
 mu = 1e-4;

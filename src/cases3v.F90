@@ -103,8 +103,9 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 !
 ! init_cond_subtype: 
 !     0               use 2048^3 parameters with kmax eta = 1
-!     1               use Livescu initial spectrum
+!     1               use Livescu initial spectrum, peaked at 10
 !     2               use Tzaki initial spectrum
+!     3               Livescu spectrum, peaked at 6
 !
 use params
 use mpi

@@ -82,8 +82,8 @@ for np=1:8;
 Vp25=Vpdata25(np,:);
 Vp20=Vpdata20(np,:);
 Vp15=Vpdata15(np,:);
-time_e=squeeze(pints_e(1,np,:))';
-mu=squeeze(pints_e(2,np,:))';
+time_e=squeeze(pints_e(1,np,:))';    % we added time and mu to fortran
+mu=squeeze(pints_e(2,np,:))';        % data array.  
 schmidt=squeeze(pints_e(3,np,:))';   % index=1 from fortran data file
 c2=squeeze(pints_e(4,np,:))';        % index=2 
 
@@ -135,8 +135,8 @@ n0_9(3,:)=pints_e(37,np,:);
 n0=mean(n0,1);
 n0_8=mean(n0_8,1);
 n0_9=mean(n0_9,1);
-
 i=37;
+
 for n=1:3
 n0x(1,n,:)=pints_e(i+1,np,:);   % x direction N0 for c,n
 n0x(2,n,:)=pints_e(i+2,np,:);   % y direction
@@ -144,11 +144,14 @@ n0x(3,n,:)=pints_e(i+3,np,:);   % z direciton
 i=i+3;
 end
 
-c2cx2(1,:)=pints_e(i,np,:); i=i+1;
-c2cx2(2,:)=pints_e(21,np,:);i=i+1;
-c2cx2(3,:)=pints_e(22,np,:);i=i+1;
+c2cx2(1,:)=pints_e(45+2,np,:);
+c2cx2(2,:)=pints_e(46+2,np,:);
+c2cx2(3,:)=pints_e(47+2,np,:);
 
-
+lncx1(:)=pints_e(48+2,np,:);
+lncx2(:)=pints_e(49+2,np,:);
+lncx3(:)=pints_e(50+2,np,:);
+lncx4(:)=pints_e(51+2,np,:);
 
 
 

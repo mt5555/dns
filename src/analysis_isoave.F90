@@ -224,16 +224,16 @@ do
    if (compute_hspec) then
       if (.not. read_uvw) then	
       if (use_serial==1) then
+         stop 'compute_hspec needs q1,q2 allocated'
          call input_uvw(time,Q,dummy,work1,work2,header_type)
          Q=Q*scale;
-         stop 'compute_hspec needs q1,q2 allocated'
       else
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
          Q=Q*scale;
       endif
       read_uvw=.true.	
       endif
-      call compute_helicity_spectrum(Q,q2,q1,io_pe,0)
+      call compute_helicity_spectrum(Q,q2,q1,0)
       call output_helicity_spec(time,time)
     endif
 
