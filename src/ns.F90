@@ -377,9 +377,9 @@ do j=1,ny_2dz
          rhs(k,i,j,3)=rhs(k,i,j,3) - ww 
 
          ! dealias           
-         if ( ((abs(km)> g_nz/3) .and. (km/=0)) .or. &
-              ((abs(jm)> g_ny/3) .and. (jm/=0)) .or. &
-              ((abs(im)> g_nx/3) .and. (im/=0)) )  then
+         if ( ((abs(km)> g_nz/3) ) .or. &
+              ((abs(jm)> g_ny/3) ) .or. &
+              ((abs(im)> g_nx/3) ) )  then
             rhs(k,i,j,1)=0
             rhs(k,i,j,2)=0
             rhs(k,i,j,3)=0
