@@ -3,6 +3,8 @@
 !  subroutine to compute the RHS of the Navier Stokes equations
 !  2D version
 !
+
+
 !  periodic in the j direction
 !  wall b.c. in the i direction
 !  
