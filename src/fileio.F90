@@ -20,7 +20,7 @@ real*8 divx,divi,tmx1,tmx2,del,delke_tot,lambda
 logical,external :: check_time
 logical :: doit
 
-real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:)
+real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
 
 call wallclock(tmx1)
@@ -85,14 +85,31 @@ endif
 ! accumulate scalers into an array, output during 
 ! diagnositc output
 !
+if (nsize==0) then
+   nsize=100
+   ! scalar arrays need to be allocated
+   allocate(ints_save(nints,nsize))
+   allocate(maxs_save(nints,nsize))
+endif
+
 nscalars=nscalars+1
 if (nscalars > nsize) then
+   ! scalar arrays need to be enlarged - increase size by 100
+   allocate(ints_copy(nints,nsize))  
+
+   ints_copy=ints_save
+   deallocate(ints_save)
+   allocate(ints_save(nints,nsize+100))
+   ints_save(1:nints,1:nsize)=ints_copy(1:nints,1:nsize)
+
+   ints_copy=ints_maxs
+   deallocate(ints_maxs)
+   allocate(ints_maxs(nints,nsize+100))
+   ints_maxs(1:nints,1:nsize)=ints_copy(1:nints,1:nsize)
+
+   deallocate(ints_copy)
+
    nsize=nscalars+100
-   ! scalar arrays need to be enlarged
-   if (allocated(ints_save)) deallocate(ints_save)
-   allocate(ints_save(nints,nsize))
-   if (allocated(maxs_save)) deallocate(maxs_save)
-   allocate(maxs_save(nints,nsize))
 endif
 ints_save(1:nints,nscalars)=ints(1:nints)
 maxs_save(1:nints,nscalars)=maxs(1:nints)
