@@ -7,7 +7,7 @@
 clear all;
 
 
-fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.0000.spdf','r','l');
+fid=fopen('/scratch2/taylorm/tmix256C/tmix256C0001.0500.spdf','r','l');
 %fid=fopen('../src/temp0000.0000.spdf','r','l');
 
 time1=fread(fid,1,'float64');
@@ -35,3 +35,6 @@ for p=1:npmax
    
 
 end
+
+orient tall
+print -dpsc ppdf.ps

@@ -796,7 +796,7 @@ character(len=80) message
 character(len=80) fname
 character(len=80) base,ext
 integer :: n
-real*8 :: time
+real*8 :: time,mn,mx
 
 if (npassive==0) return
 
@@ -808,9 +808,12 @@ do n=np1,np2
         // message(2:10) // '.s' // ext(2:3)
    call print_message(fname)	
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
-   write(message,'(a,i3,a,2f17.5)') 'passive scalar n=',n,' min/max: ',&
-     minval(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)),&	
-     maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,n))
+
+
+   call global_min(Q(1,1,1,n),mn)
+   call global_min(Q(1,1,1,n),mx)
+
+   write(message,'(a,i3,a,2f17.5)') 'passive scalar n=',n,' min/max: ',mn,mx
    call print_message(message)	
 enddo
 

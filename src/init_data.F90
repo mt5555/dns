@@ -132,8 +132,9 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: schmidt_table(5),xfac
+real*8 :: schmidt_table(5),xfac,mn,mx
 integer :: n,k,i,j,im,jm,km,init
+character(len=80) :: message
 
 schmidt=0
 passive_type=0
@@ -171,7 +172,14 @@ do n=np1,np2
    if (passive_type(n)==0) call passive_gaussian_init(Q,work1,work2,n)
    if (passive_type(n)==1) call passive_KE_init(Q,work1,work2,n)
 
+   call global_min(Q(1,1,1,n),mn)
+   call global_min(Q(1,1,1,n),mx)
+
+   write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
+   call print_message(message)	
    call print_message("smothing passive scalar...")
+
+   
    ! filter
    call fft3d(Q(1,1,1,n),work1)
    call fft_filter_dealias(Q(1,1,1,n))
@@ -186,7 +194,7 @@ do n=np1,np2
             im=abs(imcord(i))
             
             xfac=(im*im+jm*jm+km*km)
-            xfac=xfac/(g_nx*g_nx + g_ny*g_ny + g_nz*g_nz)/4
+            xfac=xfac/(.25*g_nx*g_nx + .25*g_ny*g_ny + .25*g_nz*g_nz)
             xfac=(1-.25*xfac)**5
 
             Q(i,j,k,n)=Q(i,j,k,n)*xfac
@@ -195,6 +203,11 @@ do n=np1,np2
    enddo
    call ifft3d(Q(1,1,1,n),work1)
 
+   call global_min(Q(1,1,1,n),mn)
+   call global_min(Q(1,1,1,n),mx)
+
+   write(message,'(a,2f17.5)') 'after smoothing: min/max: ',mn,mx
+   call print_message(message)	
 
 enddo
 

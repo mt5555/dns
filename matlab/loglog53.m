@@ -33,6 +33,14 @@ if (option==2)
    ax=[1,1e4,1e-5,100.0];
 end
 
+% used by passive scalars
+if (option==3) 
+   x_ck=1:500;
+   scalep = 0;
+   plaw=-5/3;
+   ax=[1,1e3,1e-12,1.0];
+end
+
 
 x=(1:n)-1;
 scale=x.^scalep;
