@@ -69,7 +69,7 @@ call init_model
 
 !cd
 header_type=1; scale=1;
-header_type=4; scale=1/(2*pi)    ! for Takeshi's data
+!header_type=4; scale=1/(2*pi)    ! for Takeshi's data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
@@ -78,9 +78,9 @@ compute_fractional_power=.false.
 compute_hspec=.false.
 read_uvw=.false.
 
-tstart=0
-tstop=30
-tinc=1.
+tstart=4.2
+tstop=4.8
+tinc=0.2
 icount=0
 
 nxdecomp=1
