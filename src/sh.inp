@@ -6,7 +6,6 @@ none         ! forcing:  none, iso12
 hyper        ! viscosity type  (hyper)
 5000         ! viscosity value (ke dissapation rate of 2h mode)  5000 
 .00         ! alpha (for NS-alpha model).  alpha>1 is in units of delx
-.00         ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 0            ! smagorinsky coefficient (0=disabled)
 0            ! compute_structure functions
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
@@ -21,7 +20,7 @@ periodic     ! z bc
 0.0          ! restart_dt  (0 = restart output disabled)
 -1           ! diag_dt   
 -1           ! screen_dt
--10          ! output_dt  (0 = output disabled, except for custom output times)
+1.0          ! output_dt  (0 = output disabled, except for custom output times)
 0            ! n_output_custom  number of custom output times  
 .009         ! custom output times, one per line
 
