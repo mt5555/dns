@@ -229,7 +229,11 @@ if (output_spec) then
    endif
 
    ! if some kind of spectral truncation:
-
+   if (g_nx==2048) then
+      xnx=384
+      xny=384
+      xnz=384
+   endif
 
 endif
 
