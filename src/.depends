@@ -19,7 +19,6 @@ ghostops.o: macros.h params.o fft_interface.o ghost.o transpose.o makefile
 ibm.o: macros.h params.o fft_interface.o makefile 
 init_data.o: macros.h params.o mpi.o fft_interface.o makefile 
 init_grid.o: macros.h params.o fft_interface.o transpose.o mpi.o makefile 
-init_model.o: params.o fft_interface.o makefile 
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
 isoave.o: macros.h params.o transpose.o mpi.o makefile 

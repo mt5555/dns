@@ -7,7 +7,7 @@ implicit none
 
 
 
-integer :: io_mpi(0:ncpu_z),nio,inc,comm_io
+integer :: io_nodes(0:ncpu_z),nio,inc,comm_io
 real*8,private :: tmx1,tmx2
 real*8,private,allocatable :: sendbuf(:),recbuf(:)
 
@@ -42,40 +42,40 @@ end subroutine
 
 
 subroutine mpi_io_init
-integer i,dest_pe3(3),key,color,ierr
-
 !
 ! set up all the I/O processors
 ! and create communicator, comm_io
 !
+integer i,dest_pe3(3),key,color,ierr
+
 nio=1
-if (use_mpi_io) then
+if (do_mpi_io) then
    nio=min(64,ncpu_z)
 endif
 inc=ncpu_z/nio
 
 if (io_pe==my_pe) then
-   print *,'number of mpi_io cpus: ',nio,use_mpi_io
+   print *,'number of mpi_io cpus: ',nio,do_mpi_io
 endif
 
 do i=0,ncpu_z-1
    dest_pe3(1)=0
    dest_pe3(2)=0
    dest_pe3(3)=inc*(i/inc)
-   call mpi_cart_rank(comm_3d,dest_pe3,io_mpi(i),ierr)
+   call mpi_cart_rank(comm_3d,dest_pe3,io_nodes(i),ierr)
 enddo
 
 call MPI_Barrier(comm_3d,ierr)
-print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_mpi(my_z)
+!print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_nodes(my_z)
 call MPI_Barrier(comm_3d,ierr)
-if (io_mpi(my_z)<0) call abort("error in MPI-IO decomposition")
+if (io_nodes(my_z)<0) call abort("error in MPI-IO decomposition")
 
 #ifdef USE_MPI_IO
 
 ! am i an io pe?
 key=0
 color=0
-if (io_mpi(my_z)==my_pe) color=1
+if (io_nodes(my_z)==my_pe) color=1
 key=0
 
 ! everyone with color=1 joins a new group, comm_sforcing
@@ -1040,7 +1040,7 @@ endif
 
 do z_pe=0,ncpu_z-1
 extra_k=0
-fpe=io_mpi(z_pe)
+fpe=io_nodes(z_pe)
 if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
@@ -1123,7 +1123,7 @@ do x_pe=0,ncpu_x-1
             buf(o_nx,:)=0
          endif
       endif
-      if (use_mpi_io) then
+      if (do_mpi_io) then
 #ifdef USE_MPI_IO
          zpos = z_pe*nslabz + k-1 
          ypos = y_pe*nslaby + x_pe*ny_2dx_actual
@@ -1148,7 +1148,7 @@ do x_pe=0,ncpu_x-1
             endif
          endif
          if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then     ! append to the end, y-direction
-            if (use_mpi_io) then
+            if (do_mpi_io) then
 #ifdef USE_MPI_IO
                zpos = z_pe*nslabz + k -1
                ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
@@ -1496,7 +1496,7 @@ endif
 
 do z_pe=0,ncpu_z-1
 extra_k=0
-fpe=io_mpi(z_pe)
+fpe=io_nodes(z_pe)
 if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
@@ -1536,7 +1536,7 @@ do x_pe=0,ncpu_x-1
       if (random) then
          call random_data(buf,o_nx*ny_2dx_actual)
       else
-         if (use_mpi_io) then
+         if (do_mpi_io) then
 #ifdef USE_MPI_IO
             zpos = z_pe*nslabz + k-1 
             ypos = y_pe*nslaby + x_pe*ny_2dx_actual
@@ -1558,7 +1558,7 @@ do x_pe=0,ncpu_x-1
          if (random) then
             call random_data(saved_edge,o_nx)
          else
-            if (use_mpi_io) then
+            if (do_mpi_io) then
 #ifdef USE_MPI_IO
                zpos = z_pe*nslabz + k -1
                ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual

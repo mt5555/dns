@@ -373,7 +373,7 @@ if (my_pe==io_pe) then
       else if (message(1:3)=="-uo") then
          udm_output=.true.
       else if (message(1:4)=="-mio") then
-         use_mpi_io=.true.
+         do_mpi_io=.true.
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit
@@ -441,7 +441,7 @@ call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(rw_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_bcast(use_mpi_io,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(do_mpi_io,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(udm_output,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(equations,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

@@ -93,7 +93,7 @@ ifeq ($(UNAME),OSF1)
    F90 = f90
    # defaults for asci Q: MPI paths loaded via modules
    MPI =  -DUSE_MPI -DUSE_MPI_IO 
-   MPILIB =  -lfmpi -lmpi -lelan
+   MPILIB =  -lfmpi -lmpio -lmpi  -lelan
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
@@ -102,6 +102,8 @@ ifeq ($(UNAME),OSF1)
       -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
       -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
      -lrt -free -lcxxstd -lcxx -lexc -lc
+   UDM=
+   UDMLIB= 
 
    LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
 
@@ -156,7 +158,7 @@ SHALLOW_DIAG =  shallow_diag.o
 
 # n_var>=3 models:  (u,v,w) or (u,v,h)
 # but they can still be run on 2D problems with nz=1
-MODEL_GRID       = ns_grid.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+ODEL_GRID       = ns_grid.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_IBMGRID    = ns_ibm.o  ibm.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_GHOST      = ns_ghost.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)

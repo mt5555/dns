@@ -204,7 +204,7 @@ character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 
-if (use_mpi_io ) then
+if (do_mpi_io ) then
    call singlefile_mpi_io(time,p,fname,work,work2,io_read,fpe)
    return
 endif
@@ -383,7 +383,7 @@ xny=o_ny
 xnz=o_nz
 
 
-if (io_mpi(my_z)==my_pe) then
+if (io_nodes(my_z)==my_pe) then
    call print_message("MPI-IO open...")
    if (io_read==1) then
       call MPI_File_open(comm_io,fname, &
@@ -458,7 +458,7 @@ if (io_read==1) then
 else
    call output1(p,work,work2,fid,fpe,offset)
 endif
-if (io_mpi(my_z)==my_pe) then
+if (io_nodes(my_z)==my_pe) then
    call MPI_File_close(fid,ierr)
 endif
 #endif
