@@ -9,11 +9,10 @@
 
 UNAME = $(shell uname)
 ARCH = $(shell uname -m)
-
+HOST = $(shell hostname)
 
 
 ifeq ($(UNAME),Linux)
-   HOST = $(shell hostname)
    MPI = 
    MPILIB = 
    ifeq ($(HOST),autrey)
