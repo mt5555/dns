@@ -214,7 +214,7 @@ real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,wsum,psisum,delalf,testmax
 real*8 :: delta,xlocation
 integer,parameter :: nd=200
 real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
-real*8 :: a0,a1,a2,a3,b0,b1,b2,b3,yalf,gamp
+real*8 :: a0,a1,a2,a3,b0,b1,b2,b3,yalf,gamp(0:nd)
 
 
 a0 =  -0.86887373086487
@@ -368,17 +368,17 @@ else if (initial_vor==1) then
       yd(k)  = cos(hold)
       yalf = -sin(hold)
       if (yd(k)<.3) then
-         gamp  = b1 + 2*b2*yd(k) + 3*b3*yd(k)*yd(k)
+         gamp(k)  = b1 + 2*b2*yd(k) + 3*b3*yd(k)*yd(k)
       else if (yd(k)<.7) then
-         gamp  = a1 + 2*a2*yd(k) + 3*a3*yd(k)*yd(k)
+         gamp(k)  = a1 + 2*a2*yd(k) + 3*a3*yd(k)*yd(k)
       else 
-         gamp  = -yd(k)/sqrt(1-yd(k)**2) 
+         gamp(k)  = -yd(k)/sqrt(1-yd(k)**2) 
       endif
-      wd(k)  = gamp*(-sin(hold))*delalf
+      wd(k)  = gamp(k)*yalf*delalf
    enddo
    if (io_pe==my_pe) then
       do k=1,nd
-         write(11,'(i4,2f20.7)') k,yd(k),wd(k)
+         write(11,'(i4,3f20.7)') k,yd(k),wd(k),gamp(k)
       enddo
       close(11)
       stop
