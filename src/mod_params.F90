@@ -6,6 +6,12 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module mod_params
 
+implicit none
+
+! global dimensions
+integer,parameter :: g_nx=16,g_ny=16,g_nz=16    ! dimension of grid & data
+integer,parameter :: g_maxn=max(g_nx,g_ny,g_nz) ! dimension of grid & data
+
 ! mesh dimensions on a single processor
 integer,parameter :: n_var=3                  ! number of prognostic variables
 integer,parameter :: nx=18,ny=18,nz=18         ! dimension of grid & data
@@ -37,9 +43,9 @@ real*8 :: ycord(ny)
 real*8 :: zcord(nz)
 
 real*8  :: delt
-integer :: itime_max,itime_output
-parameter itime_max=1000     ! number of time steps
-parameter itime_output=10    ! output every itime_output time steps
+integer, parameter :: itime_max=1000   ! number of time steps
+integer, parameter :: itime_output=10  ! output every itime_output time steps
+
 
 ! set non-zero to cause time stepping loop to exit
 ! error_code = 1   advection CFL violated
@@ -48,7 +54,7 @@ parameter itime_output=10    ! output every itime_output time steps
 integer :: error_code 
                       
 
-end module mod_params
+end ! module mod_params
 
 
 

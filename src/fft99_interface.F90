@@ -1,17 +1,22 @@
 module mod_fft_interface
 
-real*8 trigs(3*maxn/2+1,3)
-integer ifax(13,3)
-
-
-
-
-subroutine fftinit()
+use mod_params, only: g_maxn
 implicit none
-use params
+integer, parameter ::  num_fftsizes=3
+integer fftsizes(num_fftsizes)
+real*8  trigs(3*g_maxn/2+1,num_fftsizes)
+integer ifax(13,num_fftsizes)
 
-integer ndims(3)  ! number of fft initilizations
 
+private :: fftinit, getindex
+
+
+contains 
+
+
+
+subroutine fftinit(n,index)
+integer n,index
 
 #if 0
 output:  
@@ -28,68 +33,85 @@ output:
      note: the fact that the gridpoint values x(j) are real
      implies that b(0)=b(n/2)=0.  for a call with isign=+1,
      it is not actually necessary to supply these zeros.
-endif
+#endif
 
-! check that we have enough padding for FFT
-ASSERT(nx+2<=nxd)
-ASSERT(ny+2<=nyd)
-ASSERT(nz+2<=nzd)
+fftsizes(index)=n
+call set99(trigs(1,index),ifax(1,index),fftsizes(index))
+end subroutine
 
 
-i=i+1
-ndims(i)=nx
-if (ny<>nx) then
+
+
+subroutine getindex(n1,index)
+integer n1,index
+
+character*80 message_str
+integer i
+
+i=0
+do 
    i=i+1
-   ndims(i)=ny
-endif
-if (nz<>nx & nz<>ny) then
-   i=i+1
-   ndims(i)=nz
-endif
+   if (i>num_fftsizes) then
+      write(message_str,'(a,i10)') "fft_interface.F90:  Failed initializing an fft of size =",n1
+      call abort(message_str)
+   endif
 
-do j=1,i
-   call set99(trigs(1,j),ifax(1,j),ndims(j))
+   if (fftsizes(i)==0) then
+      call fftinit(n1,i)      
+      exit
+   endif
+   if (n1==fftsizes(i)) exit
 enddo
-end
+end subroutine
+
+
+
+
 
 
 subroutine ifft(p,n1,n1d,n2,n2d,n3,n3d)
-implicit none
 real*8 p(n1d,n2d,n3d)
 real*8 w(n2*(n1+1))
+integer n1,n1d,n2,n2d,n3,n3d
+character*80 message_str
 
-find i so that n1==ndims(i) 
-
-m = n2  ! number of tranforms in each z slab
+integer i,k
+call getindex(n1,i)
 do k=1,n3
-   fft991(p(1,1,k),w,trigs(1,i),ifax(1,i),1,n1d,n1,m,1)
-end
-end
+   call fft991(p(1,1,k),w,trigs(1,i),ifax(1,i),1,n1d,n1,n2,1)
+enddo
+end subroutine
+
 
 
 subroutine fft(p,n1,n1d,n2,n2d,n3,n3d)
-implicit none
 real*8 p(n1d,n2d,n3d)
 real*8 w(n2*(n1+1))
+integer n1,n1d,n2,n2d,n3,n3d
 
-find i so that n1==ndims(i) 
+integer i,k
 
-m = n2  ! number of tranforms in each z slab
+call getindex(n1,i)
 do k=1,n3
-   fft991(p(1,1,k),w,trigs(1,i),ifax(1,i),1,n1d,n1,m,-1)
-end
-end
+   call fft991(p(1,1,k),w,trigs(1,i),ifax(1,i),1,n1d,n1,n2,-1)
+enddo
+end subroutine
 
 
 
 
-fft_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d)
+subroutine fft_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d)
 !
 !  input is original given in px.  
 !  if numder=1   compute d/dx, return in px
 !  if numder=2   compute d2/dx2, return in pxx
 !
-implicit none
+real*8 px(n1d,n2d,n3d)
+real*8 pxx(n1d,n2d,n3d)
+integer numder,n1,n1d,n2,n2d,n3,n3d
+
+integer i,j,k,m
+
 
 call fft(px,n1,n1d,n2,n2d,n3,n3d)
 
@@ -119,7 +141,7 @@ if (numder>=1) then
    enddo
    call ifft(px,n1,n1d,n2,n2d,n3,n3d)
 endif
-end
+end subroutine
 
 
 
@@ -146,4 +168,4 @@ end
 
 
 
-end module mod_fft_interface
+end ! module mod_fft_interface
