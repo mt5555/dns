@@ -90,8 +90,8 @@ integer :: imcord(nx),jmcord(ny),kmcord(nz)  ! fft modes local
 integer :: imsign(nx),jmsign(ny),kmsign(nz)  ! fft modes local
 
 ! fft modes, local z-decompostion
-integer :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
-integer :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
+integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
+integer,allocatable :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -22,16 +22,25 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
 
+   # Lahey
    #F90 = lf95
    #FFLAGS = -O -DLINUX $(MPI) -DUSE_STKFFT
    #FFLAGS = -O -DLINUX $(MPI) -DUSE_FFT99
    #LDFLAGS = --staticlink  -Lstk -lstk
    #CC = gcc
 
+   # PGI
    F90 = pgf90
-   #FFLAGS = -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   FFLAGS = -g -fast -DLINUX $(MPI)  -DUSE_STKFFT
+   CC=pgcc
+   FFLAGS = -fast -DLINUX $(MPI)  -DUSE_FFT99 
    LDFLAGS = -Lstk -lstk
+
+
+   #INTEL	
+   #F90 = ifc 
+   #CC=pgcc
+   #FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_FFT99 
+   #LDFLAGS = -Lstk -lstk #-lPEPCF90
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
