@@ -161,10 +161,11 @@ if (use_serial==1) then
    !call convert_sk(Q,work1,work2);  stop;
 endif
 
-! run test, then exit
+! run hfree test:  
+! after code is debugged, remove this line and undefine TESTEXP in 
+! spectrum.F90
 call compute_hfree_spec(Q,q1,q2,q3)
 stop
-
 
 
 
