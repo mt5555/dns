@@ -121,6 +121,7 @@ call MPI_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call MPI_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call MPI_bcast(time_final,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(cfl_adv,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(cfl_vis,1,MPI_REAL8,io_pe,comm_3d ,ierr)
@@ -287,9 +288,14 @@ endif
 
 read(*,'(a12)') sdata
 if (sdata=='fft') then
+   numerical_method=0
    dealias=.false.
 else if (sdata=='fft-dealias') then
+   numerical_method=0
    dealias=.true.
+else if (sdata=='4th') then
+   numerical_method=1
+   dealias=.false.
 else
    call abort("only 'fft' derivative method supported")
 endif

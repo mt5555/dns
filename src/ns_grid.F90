@@ -22,6 +22,15 @@ integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
 
 
+if (firstcall) then
+   firstcall=.false.
+   if (alpha_value/=0) then
+      call abort("Error: dnsgrid cannot handle alpha>0.")
+   endif
+endif
+
+
+
 
 
 
@@ -245,7 +254,9 @@ call divfree(rhs,work)
 
 
 if (compute_ints==1) then
-   ints(2)=ke_diss2/g_nx/g_ny/g_nz
+   !ints(2)=ke_diss/g_nx/g_ny/g_nz     ! u dot laplacian u
+   ints(2)=ke_diss2/g_nx/g_ny/g_nz     ! gradu dot gradu
+
    !ints(3) = forcing terms
    ints(4)=vor/g_nx/g_ny/g_nz
    ints(5)=hel/g_nx/g_ny/g_nz

@@ -11,8 +11,8 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %range = 1
 range=0:.25:2;
 %range=[.750 ];
-%name='../src/impulse/kh15';
-name='../src/kh/khI';
+name='../src/impulse/kh18';
+%name='../src/kh/khI';
 mkpr=0;
 
 for i=range
@@ -73,14 +73,14 @@ for i=range
     vor = squeeze(q(:,:,1));
     figure(2)
     clf
-    pcolor(x,y,vor')
-    shading interp
+    %pcolor(x,y,vor')
+    %shading interp
     
-    %v=-60:5:60;
-    %hold on
-    %contour(x,y,vor',v)
-    %contour(x,y,vor',[0 0],'k')
-    %hold off
+    v=-60:5:60;
+    hold on
+    contour(x,y,vor',v)
+    contour(x,y,vor',[0 0],'k')
+    hold off
     
     title(ts);
     axis square

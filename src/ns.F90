@@ -56,6 +56,9 @@ if (firstcall) then
    if (.not. dealias) then
       call abort("Error: using ns3dspectral model, which must be run dealiased")
    endif
+   if (numerical_method/=0) then
+      call abort("Error: ns3dspectral model requires FFT method.")
+   endif
 #ifndef ALPHA_MODEL
    if (alpha_value/=0) then
       call abort("Error: alpha>0 but this is not the alpha model!")
@@ -597,6 +600,8 @@ real*8 :: D(3,3),dummy,xfac
 ! tophat filter code:
 integer :: i2,j2,k2,i1,j1,k1,ii,jj,kk
 real*8  :: wtot,w,r
+real*8  :: gfilt(0:1000)
+real*8 p2(g_nz2,nslabx,ny_2dz)    
 
 
 div=0
@@ -636,7 +641,8 @@ enddo
 ! RHS  = RHS + Helmholtz_Inverse(DIV)   (variable DIV contains: -div(tau)  )
 ! also return a_diss, the KE dissapation from div(tau) term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#define TOPHAT
+#undef TOPHAT
+#define ITER
 
 #ifdef TOPHAT
 
@@ -646,7 +652,18 @@ ifilt = nint(.5*(sqrt(24.0)*alpha_value)/min(delx,dely,delz))
 !
 ifilt=2*ifilt
 
-print *,'tophat ifilt=',ifilt
+!
+! gaussian filter.  C exp(-.25* (x/alpha)**2 )
+!
+! x/alpha = 4 is a good place to cutoff filter
+! ifilt = 4*alpha
+ifilt = nint(4*alpha_value/min(delx,dely,delz))
+ifilt=ifilt-1
+
+print *,'gaussian ifilt=',ifilt
+do i=0,ifilt
+   gfilt(i)=exp(-.25* (i**2)/(alpha_value/min(delx,dely,delz))**2)
+enddo
 
 
 gradu=0
@@ -667,9 +684,8 @@ do k=nz1,nz2
             if (i1<nx1) i1=i1+nslabx
             if (i1>nx2) i1=i1-nslabx
 
-            !r = sqrt(real( (jj-j)**2 +  (ii-i)**2 ))/ifilt
-            !w = exp(-2 * r**2)
-            w=1
+            w = gfilt(abs(jj-j))*gfilt(abs(ii-i))
+            !w=1
 
             wtot=wtot+w
             gradu(i,j,k,n)=gradu(i,j,k,n)+w*div(i1,j1,k,n)
@@ -710,6 +726,66 @@ enddo
 
 rhs=rhs+divs
 
+#elif (defined ITER)
+
+gradu=div
+divs=0
+p=0
+p2=0
+
+
+do n=1,3
+   call z_fft3d_trashinput(gradu(1,1,1,n),p,work) 
+   ! solve Helm(divs)=p     
+   ! using:  d/dt divs = p - Helm(divs)
+   !     largest eigenvalue:  alpha_value**2 * pi2 **2 * k**2
+   !     kmax = 2/3 1/2delx = 1/(3*delx)
+   !         
+   ! initial guess = p
+   divs(:,:,:,n)=p
+
+
+   i=0
+   do 
+      call helm(p2,divs(1,1,1,n))
+      w = (alpha_value*pi2/(3*min(delx,dely,delz)))**2
+      w = 1/(1.001*w)
+      if (i==0) wtot=maxval(abs(p-p2))
+      !if (i==0) wtot=maxval(abs(p))
+      divs(:,:,:,n) = divs(:,:,:,n) + w*(p -  p2)
+      i=i+1
+      if (mod(i,100)==0) print *,i,maxval(abs(p-p2))/wtot
+      !if (maxval(abs(p -  p2))<=.10*wtot) exit
+      if (i==40) exit
+   enddo
+   print *,i,maxval(abs(p-p2))/wtot
+
+enddo
+rhs=rhs+divs
+
+
+
+
+a_diss=0
+do n=1,3
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            
+            xfac=8
+            if (z_kmcord(k)==0) xfac=xfac/2
+            if (z_jmcord(j)==0) xfac=xfac/2
+            if (z_imcord(i)==0) xfac=xfac/2
+            a_diss = a_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
+
+         enddo
+      enddo
+   enddo
+enddo
+
 
 #else
 
@@ -744,6 +820,45 @@ end subroutine
 
 
 
+
+
+
+
+subroutine helm(out,in)
+use params
+implicit none
+
+real*8 out(g_nz2,nslabx,ny_2dz)
+real*8 in(g_nz2,nslabx,ny_2dz)
+
+!local
+integer i,j,k,m1,m2,im,jm,km,l,n
+real*8 :: xfac
+
+
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+         
+
+         ! dealias           
+         if ( ((abs(km)> g_nz/3) ) .or. &
+              ((abs(jm)> g_ny/3) ) .or. &
+              ((abs(im)> g_nx/3) ) )  then
+            out(k,i,j)=in(k,i,j)
+         else
+            ! compute laplacian inverse
+            xfac= -(im*im +km*km + jm*jm)*pi2_squared      
+            xfac=1 - alpha_value**2 *xfac
+            out(k,i,j) = xfac*in(k,i,j)
+         endif
+      enddo
+   enddo
+enddo
+end subroutine 
 
 
 

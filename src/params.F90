@@ -40,6 +40,9 @@ real*8  :: mu=0           !viscosity
 real*8  :: alpha_value=0      !for the alpha model  
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
+integer :: numerical_method=0      ! 0 = FFT
+                                   ! 1 = 4th order F.D.
+                                   ! 2 = MPDATA 
 character(len=80) :: runname
 character(len=80) :: rundir
 real*8  :: pi,pi2,pi2_squared
