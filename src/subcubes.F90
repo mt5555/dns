@@ -54,7 +54,7 @@ real*8 :: diff,ax,ay,az
 
 subcube_size=ssize*delx
 wsubcube_size=2*subcube_size   ! 2x larger
-diff = ssize*delx  ! non-overlapping
+diff = ssize*delx/2  ! overlap 50%
 
 
 if (allocated(subcube_cords)) deallocate(subcube_cords)
@@ -150,24 +150,24 @@ integer :: ierr
 
 do i=1,nsx
    xi=dx(i)
-   if (xi<0) xi=xi+1;
-   if (xi>1) xi=xi-1;
+   if (xi<g_xcord(1)) xi=xi+1;
+   if (xi>g_xcord(g_nx)) xi=xi-1;
    n1(i)=(xi-xcord(nx1))/delx
    n1(i)=n1(i)+nx1
    if (n1(i)<nx1 .or. n1(i)>nx2) n1(i)=0 !flag indicating not on this cpu
 enddo
 do j=1,nsy
    yi=dy(j)
-   if (yi<0) yi=yi+1;
-   if (yi>1) yi=yi-1;
+   if (yi<g_ycord(1)) yi=yi+1;
+   if (yi>g_ycord(g_ny)) yi=yi-1;
    n2(j)=(yi-ycord(ny1))/dely
    n2(j)=n2(j)+ny1
    if (n2(j)<ny1 .or. n2(j)>ny2) n2(j)=0 !flag indicating not on this cpu
 enddo
 do k=1,nsz
    zi=dz(k)
-   if (zi<0) zi=zi+1;
-   if (zi>1) zi=zi-1;
+   if (zi<g_zcord(1)) zi=zi+1;
+   if (zi>g_zcord(g_nz)) zi=zi-1;
    n3(k)=(zi-zcord(nz1))/delz
    n3(k)=n3(k)+nz1
    if (n3(k)<nz1 .or. n3(k)>nz2) n3(k)=0 !flag indicating not on this cpu

@@ -143,8 +143,8 @@ ifeq ($(UNAME),OSF1)
          MPILIB =  $(MPI_LD_FLAGS) -lmpi -lelan
       else
          # lampi
-         MPI =  -DUSE_MPI -DUSE_MPI_IO -I/users/taylorm/liblampi/include
-         MPILIB =  -L/users/taylorm/liblampi/lib -lmpi  -lelan
+         MPI =  -DUSE_MPI -DUSE_MPI_IO -I/users/taylorm/lampi/qsc/include
+         MPILIB =  -L/users/taylorm/lampi/qsc/lib -lmpi  -lelan
       endif	
    endif
 
