@@ -291,7 +291,7 @@ real*8 :: time
 integer :: iwave_max,i
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
-character(len=80) :: message
+character(len=100) :: message
 
 
 #ifdef SPEC_DIFF_CHECK
@@ -542,7 +542,7 @@ integer :: ierr
 character,save :: access="0"
 
 real*8 :: x
-character(len=80) :: message
+character(len=100) :: message
 CPOINTER fid
 
 
@@ -557,9 +557,7 @@ endif
 
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time_file
-   message = rundir(1:len_trim(rundir)) &
-        // runname(1:len_trim(runname))&
-        // message(2:10) // ".hf_spec"
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))// message(2:10) // ".hf_spec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)')"output_hfree_spec(): Error opening file errno=",ierr
@@ -1379,7 +1377,7 @@ do j=ny1,ny2
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
 
             !	helicity(k) = k\cdot RR(k) cross II(k)            
-            energy = xfac * pi2 * (im*(RR(2) - II(3)) + &
+           energy = xfac * pi2 * (im*(RR(2) - II(3)) + &
                  jm*(II(3) - RR(1)) + km*(RR(1) - II(2))) 
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
