@@ -17,6 +17,8 @@ real*8,save :: work2(nx,ny,nz)
 character(len=80) message
 integer :: ierr,i,j,k,n,itime=0
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
+integer,allocatable :: seed(:)
+
 
 ! initialize global constants:
 ints=0
@@ -47,6 +49,8 @@ call init_data(Q,Qhat,work1,work2)
 
 
 
+
+
 if (equations==NS_UVW) then
    call print_message('Projecting initial data...')
    call divfree_gridspace(Q,work1,work2,q1) 
@@ -61,6 +65,18 @@ endif
 #ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
 #endif
+
+
+
+! set the random seed - otherwise it will be the same for all CPUs,
+! producing a bad initial condition.  Also make it depend on initial time,
+! so we dont have the same seed every time we restart. 
+call random_seed(size=k)
+allocate(seed(k))
+call random_seed(get=seed)
+seed=seed+my_pe+1000*time_initial
+call random_seed(put=seed)
+deallocate(seed)
 
 
 

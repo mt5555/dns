@@ -23,15 +23,7 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
-<<<<<<< makefile
    VENDOR=LAHEY
-=======
-   ifeq ($(HOST),brain)
-      MPI = -DNDEBUG -DUSE_MPI -I/usr/include
-      MPILIB =  -L/usr/lib/lib -lpmpi -llamf77mpi -lmpi -llam 
-   endif
-   #VENDOR=LAHEY
->>>>>>> 1.149
    #VENDOR=PGI
    #VENDOR=INTEL
 
@@ -204,8 +196,8 @@ dnsslow:  $(MODEL_SPEC_SLOW)
 splitspec:  splitspec.o fileioc.o
 	$(LINK) -o splitspec splitspec.o fileioc.o
 
-conv:  conv.o $(OBJS1) $(OBJS2) $(OBJS3)
-	$(LINK) -o conv conv.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+conv:  conv.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+	$(LINK) -o conv conv.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 analysis:  analysis.o $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis analysis.o $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
