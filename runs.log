@@ -111,6 +111,8 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 250G  .8e-3   500    178   1.14      1.23        3.39      hook 1e-4     good
 250H  5000h   500    668   7.16/1.42 1.42        2.95
 
+250I  .8e-3   500   (same as G, but with new diags)
+
 
 
 500    .1e-3    5     455   2.38      1.44        2.00     hook 1e-2     kink
