@@ -44,6 +44,7 @@ else
    mumax = mu*(1/delx**2 + 1/dely**2)
 endif
 
+
 delt = cfl_adv/umax                         ! advective CFL
 delt = min(delt,cfl_vis/mumax)              ! viscous CFL
 delt = max(delt,delt_min)

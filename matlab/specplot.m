@@ -34,7 +34,7 @@ while (time>=0 & time<=555.5)
 
   figure(4);
   subplot(2,2,1);
-  loglog53(n_r,spec_r,time);
+  loglog53(n_r-1,spec_r,time);
   subplot(2,2,2);
   loglog53(n_x,spec_x,time);
   subplot(2,2,3);

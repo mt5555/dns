@@ -15,7 +15,7 @@ range=0:50;
 %fid=fopen('n128.scalars','r','b');
 %fid=fopen('../src/test32.scalars','r','l');
 %fid=fopen('iso12_256_200.scalars','r','b'); apply_fix=1;
-fid=fopen('../src/kh/khB.scalars','r','l'); 
+fid=fopen('../src/kh/khC.scalars','r','l'); 
 
 
 

@@ -9,13 +9,13 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:50;
 %range = 1
-range=0:1.0:2;
+range=0:.5:2;
 
 for i=range
   ts=i;
   ts = sprintf('%9.5f',10000+ts);
   ts=ts(2:10);
-  ts=['../src/kh/khB',ts,'.vor']
+  ts=['../src/kh/test',ts,'.vor']
   fidvor=fopen(ts,'r');
   time=fread(fidvor,1,'float64')
   data=fread(fidvor,3,'float64');
@@ -44,7 +44,7 @@ for i=range
   title(ts);
   shading interp
   axis square
-  print -dpsc vor.ps 
+  %print -dpsc vor.ps 
   'pause'
   pause
 end

@@ -5,14 +5,36 @@ KH runs.
 autrey
 src/kh
 
-1024x1024
-kh           mu = 2.5e-5    CFL: 1.5/.25   asym.  
 
+
+1024x1024
 khB          mu = 2e-4           1.5/.25   running at .25 limit
                                            better, but small glitch at t=.2
                                            ke disspation doesn't add up.  
 
-khC          mu = 2e-4           1.5/.10   IN MAHI
+khC          mu = 2e-4           1.5/.10   looks good up to t=1.0
+
+
+
+kh  1024x1024  mu = 2.5e-5    CFL: 1.5/.25   asymetric answer.  CFL, or resolution?
+                                             cfl_vis has no effect above .073
+khG 1024x1024  mu = 2.5e-5    CFL: .75/.25   IN
+
+
+khD 512x512    mu = 2.5e-5    CFL: 1.5/.15   looks great at 1.0
+                                             (cfl_vis has no effect above .03)
+
+khE 256x256    mu = 2.5e-5    CFL: 1.5/.15   secondary vortex forms t=.75
+khF 256x256    mu = 2.5e-5    CFL: .75/.15   same as above.
+
+
+VIS CFL test:
+128x128    mu=.003    1.5/.75                unstable at t=2
+128x128    mu=.003    1.5/.70                unstable
+128x128    mu=.003    1.5/.60                stable  
+128x128    mu=.003    1.5/.50                stable
+
+
 
 
 
