@@ -269,7 +269,7 @@ if (my_pe==io_pe) then
 
    call cclose(fid,ierr)
 
-
+#if 0
    sum_tot=0
    sum_tot2=0
    sum_diss=0
@@ -309,7 +309,8 @@ if (my_pe==io_pe) then
    
    write(message,'(a,f10.4)') " KE transfer spectrum",time
    call plotascii(spec_r,iwave,message(1:25),-ymax2,ymax2)
-   
+#endif   
+
 endif
 end subroutine
 
