@@ -15,8 +15,13 @@ fid2=-1;
 %fid=fopen('iso12_256_200.scalars','r','b'); 
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
-fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
+
+%fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
+%nx=256;
+
+fid=endianopen('/scratch2/taylorm/sk256/sk2560000.0000.scalars','r'); 
 nx=256;
+
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
@@ -109,10 +114,16 @@ time_2 = .5*(time(2:l)+time(1:l-1));
 ke_diss_tot=(ke(2:l)-ke(1:l-1))./(time(2:l)-time(1:l-1));
 Ea_diss_tot=(Ea(2:l)-Ea(1:l-1))./(time(2:l)-time(1:l-1));
 
-epsilon=-(  ke_diss_d-mu*alpha^2*ints(1,:) )
-lambda=sqrt( mu*(2*Ea/3) / (epsilon/15)  )
-R_l = lambda.*sqrt(2*Ea/3)/mu;
-R_large = 1 * sqrt(2*Ea) / mu;
+ke_v=ke + alpha^4*ints(1,:)/2 + 2*alpha^2*ints(2,:)/2;
+
+%Euse=ke; 
+%Euse=Ea;
+Euse=ke_v;
+
+epsilon=-(  ke_diss_d-mu*alpha^2*ints(1,:) );
+lambda=sqrt( mu*(2*Euse/3) / (epsilon/15)  );
+R_l = lambda.*sqrt(2*Euse/3)/mu;
+R_large = 1 * sqrt(2*Euse) / mu;
 eta = (mu^3 ./ abs(epsilon)).^(.25);
 
 
