@@ -90,7 +90,7 @@ if (io_pe==my_pe) then
    enddo
 
    write(message,'(f10.4)') 10000.0000 + time
-   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ellipse"
+   fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".ellipse2"
    call copen(fname,"w",fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
