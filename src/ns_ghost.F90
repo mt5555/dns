@@ -167,6 +167,7 @@ call wallclock(tmx1)
 
 ke=0
 f_diss=0
+fxx_diss=0
 ke_diss=0
 ke_diss2=0
 gradu_diss=0

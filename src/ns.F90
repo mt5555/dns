@@ -219,7 +219,7 @@ real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss
-real*8 :: f_diss=0,a_diss=0,fxx_diss
+real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
 real*8,save :: gradu(nx,ny,nz,n_var)
