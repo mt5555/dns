@@ -200,12 +200,12 @@ real*8 p(g_nz2,nslabx,ny_2dz)
 
 !local
 
-real*8 xfac,tmx1,tmx2
+real*8 xw,xfac,tmx1,tmx2
 real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke_diss,ensave,vorave,helave,maxvor
-real*8 :: f_diss=0,a_diss=0
+real*8 :: ke_diss2,ke_diss,ensave,vorave,helave,maxvor
+real*8 :: f_diss=0,a_diss=0,normuf=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
 real*8 gradu(nx,ny,nz,n_var)
@@ -326,6 +326,7 @@ enddo
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ke_diss=0
+ke_diss2=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nslabx
@@ -333,20 +334,24 @@ do j=1,ny_2dz
       do k=1,g_nz
          km=z_kmcord(k)
 
-            xfac=-mu*(im*im + jm*jm + km*km)*pi2_squared
-            rhs(k,i,j,1)=rhs(k,i,j,1) + xfac*Qhat(k,i,j,1)
-            rhs(k,i,j,2)=rhs(k,i,j,2) + xfac*Qhat(k,i,j,2)
-            rhs(k,i,j,3)=rhs(k,i,j,3) + xfac*Qhat(k,i,j,3)
+            xw=(im*im + jm*jm + km*km)*pi2_squared
+            rhs(k,i,j,1)=rhs(k,i,j,1) - mu*xw*Qhat(k,i,j,1)
+            rhs(k,i,j,2)=rhs(k,i,j,2) - mu*xw*Qhat(k,i,j,2)
+            rhs(k,i,j,3)=rhs(k,i,j,3) - mu*xw*Qhat(k,i,j,3)
 
 ! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
 
-            xfac = 2*2*2*xfac
+            xfac = 2*2*2
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
 
-            ke_diss = ke_diss + xfac*(Qhat(k,i,j,1)**2 + &
+            ke_diss = ke_diss + xfac*xw*(Qhat(k,i,j,1)**2 + &
+                                Qhat(k,i,j,2)**2 + &
+                                Qhat(k,i,j,3)**2) 
+
+            ke_diss2 = ke_diss2 + xfac*xw*xw*(Qhat(k,i,j,1)**2 + &
                                 Qhat(k,i,j,2)**2 + &
                                 Qhat(k,i,j,3)**2) 
 
@@ -364,7 +369,7 @@ enddo
 #ifdef ALPHA_MODEL
 ! For alpha model, we add Helmholtz inverse(f div(tau))
 ! and overwrite Q (used for work arrays)
-call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,f_diss,a_diss)
+call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,f_diss,a_diss,normuf)
 #else
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss)
 #endif
@@ -428,13 +433,15 @@ enddo
 
 if (compute_ints==1) then
    ints_timeDU=time
-   ints(2)=f_diss    ! computed in spectral space - dont have to normalize
-   ints(3)=ke_diss   ! computed in spectral space - dont have to normalize
+   ints(2)=ke_diss   ! computed in spectral space - dont have to normalize
+   ints(3)=f_diss    ! computed in spectral space - dont have to normalize
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
    ints(7)=ensave/g_nx/g_ny/g_nz
    maxs(5)=maxvor
-   ints(8)=a_diss   ! computed in spectral space - dont normalize
+   ints(8)=a_diss    ! computed in spectral space - dont normalize
+   ints(9)=normuf
+   ints(10)=ke_diss2
 endif
 
 call wallclock(tmx2)
@@ -531,7 +538,8 @@ enddo
 
 
 end subroutine
-
+!
+!  
 !
 !  tau = DD + DD' - D'D
 !  NS(u) = -  (1-a**2 Laplacian)^-1 a**2 div(tau) 
@@ -546,11 +554,16 @@ end subroutine
 ! x & y components of div on grid, then transform.  transform z, add then div
 ! 6 der() + 6 z_fft()               transposes: 6+12 x, 6+12y, 6z
 !
-subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p,f_diss,a_diss)
+subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p, &
+f_diss,a_diss,normuf)
 ! compute one entry of work=DD + DD' - D'D  
 ! transform work -> p
 ! compute d(p), apply helmholtz inverse, accumualte into rhs
-
+!
+! f_diss  KE dissapation from forcing used in RHS  
+! a_diss  KE dissapation from alpha term added to RHS 
+! normuf  || u dot f ||     
+!
 use params
 use sforcing
 use transpose
@@ -567,7 +580,7 @@ real*8 divs(g_nz2,nslabx,ny_2dz,n_var)
 real*8 gradu(nx,ny,nz,n_var)
 real*8 gradv(nx,ny,nz,n_var)
 real*8 gradw(nx,ny,nz,n_var)
-real*8 :: a_diss,f_diss
+real*8 :: a_diss,f_diss,normuf
 
 !local
 integer i,j,k,m1,m2,im,jm,km,l,n
@@ -597,9 +610,16 @@ do m1=1,3
    enddo
 
    ! compute div(Tau)  
+#if 0
+   ! I think this one is correct 
    call der(work,work,dummy,p,DX_ONLY,m1)
    div(nx1:nx2,ny1:ny2,nz1:nz2,m2) = div(nx1:nx2,ny1:ny2,nz1:nz2,m2) +&
                            alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)
+#else
+   call der(work,work,dummy,p,DX_ONLY,m2)
+   div(nx1:nx2,ny1:ny2,nz1:nz2,m1) = div(nx1:nx2,ny1:ny2,nz1:nz2,m1) +&
+                           alpha_value**2 * work(nx1:nx2,ny1:ny2,nz1:nz2)
+#endif
 
 
 enddo
@@ -623,13 +643,13 @@ do n=1,3
             xfac= -(im*im +km*km + jm*jm)*pi2_squared      
             xfac=1 - alpha_value**2 *xfac
             if (xfac/=0) xfac = 1/xfac
-            rhs(k,i,j,n) = rhs(k,i,j,n) + xfac*p(k,i,j)
+            rhs(k,i,j,n) = rhs(k,i,j,n) - xfac*p(k,i,j)
 
             xfac=8*xfac
             if (z_kmcord(k)==0) xfac=xfac/2
             if (z_jmcord(j)==0) xfac=xfac/2
             if (z_imcord(i)==0) xfac=xfac/2
-            a_diss = a_diss + xfac*Qhat(k,i,j,n)*p(k,i,j)
+            a_diss = a_diss - xfac*Qhat(k,i,j,n)*p(k,i,j)
 
          enddo
       enddo
@@ -642,9 +662,10 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 f_diss=0
 if (forcing_type>0) then
-divs=0
-call sforce(divs,Qhat,f_diss)
 
+! compute forcing, store in divs
+divs=0
+call sforce(divs,Qhat,normuf)
 
 do n=1,3
    do j=1,ny_2dz

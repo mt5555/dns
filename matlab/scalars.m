@@ -18,6 +18,8 @@ while (1)
   if (count~=1) break; end;
   nints=ni;
   ns=fread(fid,1,'float64');
+  mu=fread(fid,1,'float64');
+  alpha=fread(fid,1,'float64');
   
   data1=fread(fid,[nints,ns],'float64');
   data2=fread(fid,[nints,ns],'float64');
@@ -38,11 +40,12 @@ fclose(fid);
 
 
 ke=ints(1,:);
-ke_diss_f=ints(2,:);
-ke_diss_d=ints(3,:);
+ke_diss_d=-mu*ints(2,:);
+ke_diss_f=ints(3,:);
 vor=ints(4,:);
 hel=ints(5,:);
-ke_diss_tot=ints(6,:);
+ke_diss_tot=maxs(9,:);
+Ea_diss_tot=maxs(8,:);
 
 maxU=maxs(1,:);
 maxV=maxs(2,:);

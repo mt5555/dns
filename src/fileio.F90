@@ -114,7 +114,6 @@ cfl_used_vis=mumax*delt
 ! display screen output
 !
 if (doit) then
-   delke_tot=ints(6)
 
    write(message,'(a,f9.5,a,i5,a,f9.5)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
@@ -132,17 +131,34 @@ if (doit) then
    write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
-   write(message,'(3(a,e17.9))') 'ke + .5 alpha^2 <vor^2>',&
-      ints(1)+.5*alpha_value**2 * ints(7)
+   write(message,'(3(a,f12.5))') 'R_lambda=',2*ints(1)/(mu*sqrt(ints(2))),&
+        '  R=',1/mu
    call print_message(message)	
 
+   call print_message("")
    write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'ke: ',ints(1),'  enstropy: ',&
-        ints(7),'        total d/dt(ke): ',delke_tot
+        ints(7),'        total d/dt(ke): ',maxs(9)
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
-     'd/dt(ke) vis=',ints(3),' f=',ints(2),' alpha=',ints(8),&
-     ' total=',(ints(2)+ints(3)+ints(8))
+     'd/dt(ke) vis=',-mu*ints(2),' f=',ints(3),' alpha=',ints(8),&
+     ' total=',(-mu*ints(2)+ints(3)+ints(8))
    call print_message(message)	
+
+   if (alpha_value>0) then
+      call print_message("")
+      write(message,'(a,f13.10,a,f13.4,a,f12.7))') 'Ea: ',&
+           ints(1)+.5*alpha_value**2 * ints(2),&
+           '   |gradU|: ',ints(2),&    
+           '         total d/dt(Ea):',maxs(8)
+      call print_message(message)	
+      
+      write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
+           -mu*ints(2)-mu*alpha_value**2*ints(10),&
+           ' f=',ints(9),'                      tot=',&
+           -mu*ints(2)-mu*alpha_value**2*ints(10) + ints(9)
+      call print_message(message)	
+   endif
+   
    call print_message("")
 endif
 
@@ -351,6 +367,8 @@ if (my_pe==io_pe) then
    if (nscalars>0) then
       x=nv; call cwrite8(fid,x,1)
       x=nscalars; call cwrite8(fid,x,1)
+      call cwrite8(fid,mu,1)
+      call cwrite8(fid,alpha_value,1)
       call cwrite8(fid,ints_save,nv*nscalars);
       call cwrite8(fid,maxs_save,nv*nscalars);
    endif

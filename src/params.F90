@@ -155,35 +155,56 @@ integer :: error_code =0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer,parameter :: nints=8
+integer,parameter :: nints=10
 real*8 :: ints(nints)=0,maxs(nints)=0
 real*8 :: ints_timeU,ints_timeDU
 
 !
+! For NON-ALPHA-MODEL
+! KE dissapation:  -mu*ints(2) + ints(3) + ints(8)
+!      ints(2) = < u_x,u_x >
+!      ints(3) = < u,f >     
+!      ints(8) = 0
+!
+! for ALPHA-MODEL
+! KE dissapation:  -mu*ints(2) + ints(3) + ints(8)
+!      ints(2) = < u_x,u_x >
+!      ints(3) = < u,f' >           Helmholz(f')=f
+!      ints(8) = < u,div(tau)' >
+!
+! E-alpha = ints(6) + .5*alpha**2 ints(2)
+! E-alpha dissapation =   mu*ints(2) + ints(9) + mu*alpha**2ints(10)
+!      ints(9) = < u,f >
+!      ints(10)= < u_xx,u_xx>
+!  
 ! Quantities involving only Q are computed in the timestep
 ! routine, at the current time = ints_timeU:  
 !
-! ints(1) = ke
+! ints(1) = ke   (ints(6) has KE at beginning of time step)
 ! maxs(1,2,3) = max U,V,W
 ! maxs(4) = max (U/delx + V/dely + W/delz)  used for CFL
 !
 ! Quantities involving derivatives are computed when the RHS is computed
 ! and thus the data is at the prevous timestep = ints_timeDU
 ! 
-! ints(2) = ke dissapation from forcing
-! ints(3) = ke dissapation from diffusion
+! ints(2) = < u_x,u_x >
+! ints(3) = < u,f >    (for alpha model, <u,f'> )
 ! ints(4) = z-component of vorticity
 ! ints(5) = helicity
-! ints(6) = delke_tot = Actual d(KE)/dt computed from KE(t) and KE(t+1)
+! ints(6) = ke
 ! ints(7) = enstrophy (vorticity**2)
-! ints(8) = ke dissapation from alpha model term 
-!
+! ints(8) = < u,div(tau)' ||   (alpha model only)
+! ints(9)  = < u,f >  (alpha model only)
+! ints(10) = < u_xx,u_xx >
+!                           
 ! maxs(5) = max vorticity
 !
 ! for convience, we store the time data in maxs(6:7)
 ! maxs(6) = ints_timeU
 ! maxs(7) = ints_timeDU
-!
+! maxs(8) = delEa_tot = Actual d(E_alpha)/dt computed from E_alpha at 
+!                       timeDU and timeDU-delt.  
+! maxs(9) = delke_tot = Actual d(KE)/dt computed from KE at timeU and timeDU
 
 integer,parameter :: ntimers=12
 real*8 :: tims(ntimers)=0

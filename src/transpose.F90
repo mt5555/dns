@@ -255,9 +255,6 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dz +j -1
-         ASSERT("transpose_to_z jj failure 1",jj<=ny2)
-         ASSERT("transpose_to_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
          do i=nx1,nx2
 	    l=l+1
@@ -325,14 +322,12 @@ call wallclock(tmx1)
 
 ! If any of these fail, then pt was probably not computed
 ! via a call to transpose_to_z().
-#if 0
 ASSERT("transpose_from_z dimension failure 2",n1==g_nz)
 ASSERT("transpose_from_z dimension failure 3",n1d==g_nz2)
 ASSERT("transpose_from_z dimension failure 4",n2==nslabx)
 ASSERT("transpose_from_z dimension failure 5",n2d==nslabx)
 ASSERT("transpose_from_z dimension failure 6",n3==ny_2dz)
 ASSERT("transpose_from_z dimension failure 7",n3d==ny_2dz)
-#endif
 
 do iproc=0,mpidims(3)-1  ! loop over each slab
 
@@ -359,9 +354,6 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
 
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dz +j -1
-         ASSERT("transpose_from_z jj failure 1",jj<=ny2)
-         ASSERT("transpose_from_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
          do i=nx1,nx2
             l=l+1
@@ -527,9 +519,6 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
 
       l=0
       do j=1,ny_2dx  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dx +j -1
-         ASSERT("transpose_to_x2 jj failure 1",jj<=ny2)
-         ASSERT("transpose_to_x2 jj failure 2",jj>=ny1)
          do i=nx1,nx2
          do k=nz1,nz2
             l=l+1
@@ -616,9 +605,6 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
 
       l=0
       do j=1,ny_2dx  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dx +j -1
-         ASSERT("transpose_from_x2 jj failure 1",jj<=ny2)
-         ASSERT("transpose_from_x2 jj failure 2",jj>=ny1)
          do i=nx1,nx2
          do k=nz1,nz2
             l=l+1
@@ -777,9 +763,6 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
 
       l=0
       do i=1,nx_2dy  ! loop over points in a single slab
-         ii=nx1 + iproc*nx_2dy +i -1
-         ASSERT("transpose_to_y ii failure 1",ii<=nx2)
-         ASSERT("transpose_to_y ii failure 2",ii>=nx1)
          do j=ny1,ny2
          do k=nz1,nz2
             l=l+1
@@ -866,9 +849,6 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
 
       l=0
       do i=1,nx_2dy  ! loop over points in a single slab
-         ii=nx1 + iproc*nx_2dy +i -1
-         ASSERT("transpose_from_y ii failure 1",ii<=nx2)
-         ASSERT("transpose_from_y ii failure 2",ii>=nx1)
          do j=ny1,ny2
          do k=nz1,nz2
             l=l+1

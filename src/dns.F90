@@ -129,13 +129,13 @@ real*8  :: time=0
 integer :: itime=0,ierr,n
 integer :: itime_final
 character(len=80) message
-real*8 :: ke_old,time_old,delke_tot
+real*8 :: time_old,delke_tot,delea_tot,dt
+real*8 :: ea_new=0,ea_old
 real*8 :: ints_buf(nints)
 
+ints_timeU=0
 ints=0
 maxs=0
-time=0
-itime=0
 delt=0
 
 if (time_final<0) then
@@ -147,7 +147,8 @@ endif
 
 do 
    time_old=ints_timeU
-   ke_old=ints(1)
+   ints(6)=ints(1)
+   ea_old=ea_new
 
    call rk4(time,Q,Qhat,Qw2)
 
@@ -158,13 +159,19 @@ do
    call MPI_allreduce(ints_buf,maxs,nints,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
    ! KE total dissapation 
-   delke_tot=ints_timeU-time_old
-   if (delke_tot>0) delke_tot=(ints(1)-ke_old)/delke_tot
+   dt=ints_timeU-time_old
+   ea_new = ints(6) + .5*alpha_value**2 * ints(2) ! computed at time before rk4
+   if (dt>0) then
+      delke_tot=(ints(1)-ints(6))/dt
+      delea_tot=(ea_new-ea_old) /dt
+   endif
+
 
 !  storage of some extra quantities:
-   ints(6)=delke_tot
    maxs(6)=ints_timeU
    maxs(7)=ints_timeDU
+   maxs(8)=delea_tot
+   maxs(9)=delke_tot
    
    if (maxval(maxs(1:3))> 1000) then
       print *,"max U > 1000. Stoping at time=",time

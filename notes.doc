@@ -2,6 +2,8 @@ TODO:
 
 bmtn: job running: 1 stage RK, with MPI buffers increased
 and b47&b48
+1 stage RK, pblock=NULL   11.60
+1 stage RK, pblock=4      IN
 
 
 3D test case
