@@ -13,15 +13,12 @@ eta = 1/(nx*delx_over_eta);
 name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
 
 ext='.new.isostr';
-times=[4.2:0.2:4.8];
-
+times=[4.2:0.2:7.4];
+%times=[0:1:30];
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 
 nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
 teddy=1;
-
-%times = [0:1:30];
-
 
 
 
@@ -121,10 +118,10 @@ load k215data_t0
 load k215data_t1 
 end
 
-scale = 1  % scale = 2/15 if normalizing by prefactor as well
+scale = 1;  % scale = 2/15 if normalizing by prefactor as well
 
 figure(5); clf; hold on; 
-for i=1:1:73 %directions
+for i=1:1:1 %directions
 
 plot(times/teddy,mx215_localeps(1:length(times),i)/scale,'g-','LineWidth',1.0);hold on;
 plot(times/teddy,mn215_localeps(1:length(times),i)/scale, 'r-','LineWidth',1.0);hold on;
@@ -132,24 +129,27 @@ end
 plot(times/teddy,mx215_iso_localeps/scale,'b-','LineWidth',1.0);hold on;
 plot(times/teddy,mn215_iso_localeps/scale,'k-','LineWidth',1.0);hold on;
 ax=axis;
-axis( [ax(1),ax(2),0,1] );
-%plot(times,(2/15)*times./times,'k');
+%axis( [ax(1),ax(2),0,1] );
+plot(times,(2/15)*times./times,'m');
+title('Green - dir max; Red - dir first pt; Blue - avg max; Black - avg first pt; Magenta - 2/15')   
 hold off;
-ylabel('Normalized peak value for H\_ltt (single-dir and angle-avg)','FontSize',16);
+
 xlabel('time','FontSize',16)
+     grid on;
 print -dpsc k215time.ps
 
 
 figure(6); clf
-
+scale = 2/15; % scale = 2/15 to scale out
 for i=[1:1:73]
   %semilogx(xx_plot,y215_ave(:,i),'k:','LineWidth',2.0); hold on
-  semilogx(xx_plot,(y215_ave(:,i)),'r-','LineWidth',1.0); hold on
+  semilogx(xx_plot,(y215_ave(:,i))/scale,'r-','LineWidth',1.0); hold on
 end
 %semilogx(xx_plot,y215_iso_ave,'k','LineWidth',2.0); hold on
-semilogx(xx_plot,y215_iso_ave,'b','LineWidth',2.0); hold on
+semilogx(xx_plot,y215_iso_ave/scale,'b','LineWidth',2.0); hold on
+max(y215_iso_ave)
 %axis([1 1000 -0.05 0.15])
-x=1:100; plot(x,(2/15)*x./x,'k');
+x=1:1000; plot(x,(2/15)*x./x/scale,'k');
 hold off;
 title('H_{ltt} / r^2\h   (2/15 law) Ensemble averaged');
 ylabel('H_{ltt}/h r^2','FontSize',16);
@@ -165,7 +165,7 @@ stdr=0*offset;
 scale = 2/15; % scale = 2/15 if need to factor out the 4/5, 1 otherwise
 for i=[1:1:73]
   %semilogx(xx_plot,(y215_ave(:,i)-offset),'k:','LineWidth',1.0); hold on
-  semilogx(xx_plot,(-y215_ave(:,i)-offset)/scale,'k-','LineWidth',1.0); hold on
+  semilogx(xx_plot,(y215_ave(:,i)-offset)/scale,'k-','LineWidth',1.0); hold on
   stdr=stdr+(y215_ave(:,i)-offset).^2;
 end
 stdr=sqrt(stdr/15)./offset;
@@ -188,7 +188,7 @@ ln=find(times>=starttime);
 ln=ln(1);
 lnmax=length(times);
 
-dir_use=2;
+dir_use=3;
 [mean(mx215(ln:lnmax,dir_use)),mean(mx215_iso(ln:lnmax))]
 [std(mx215(ln:lnmax,dir_use)),std(mx215_iso(ln:lnmax)) ]
 

@@ -33,7 +33,7 @@ nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
 
 ext='.new.isostr';
 %times=[1:.1:7.0];
-times = [4.2:0.2:4.8];
+times = [4.2:0.2:7.4];
 
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
 %nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
@@ -154,7 +154,7 @@ print -dpsc k45time.ps
 
 
 figure(9); clf
-scale = 1; %scale = 4/5 if need to normalize out the 4/5th
+scale = 4/5; %scale = 4/5 if need to normalize out the 4/5th
 for i=[1:1:73]
   %semilogx(xx_plot,y45_ave(:,i),'k:','LineWidth',1.0); hold on
   semilogx(xx_plot,y45_ave(:,i)/scale,'g-','LineWidth',1.0); hold on
@@ -162,7 +162,7 @@ end
 %semilogx(xx_plot,y45_iso_ave/scale,'k','LineWidth',1.0); hold on
 semilogx(xx_plot,y45_iso_ave/scale,'b','LineWidth',1.0); hold on
 axis([1 1000 0 1.0])
-x=1:1000; plot(x,(4/5)*x./x,'k');
+x=1:1000; plot(x,(4/5)*x./x/scale,'k');
 hold off;
 %title('D_{lll} / r\epsilon   (4/5 law) ');
 ylabel('< (u(x+r)-u(x))^3 > / (\epsilon r)','FontSize',16);
