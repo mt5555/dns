@@ -21,7 +21,7 @@ ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
    LDFLAGS = 
-   FFLAGS = -g -O1 -cpp -DMPI  -DIRIX64
+   FFLAGS = -g -64 -O1 -macro_expand -DMPI  -DIRIX64
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)

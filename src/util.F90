@@ -2,14 +2,15 @@
 
 subroutine abort(message)
 use mpi
+use params
 implicit none
+integer ierr
 character*(*) message
 character*15 :: pre="ASSERT FAILURE "
-call print_message(pre // message)
+write(*,'(a)') pre // message
 #ifdef MPI
-   call MPI_abort()
+   call MPI_abort(comm_3d,1,ierr)
 #endif
-
 end subroutine
 
 

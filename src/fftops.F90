@@ -263,23 +263,11 @@ integer i,j,k,im,jm,km
 real*8 xfac
 
    do k=nz1,nz2
-      if (k==nz1+1) then 
-         km=(1+nz2-nz1)/2
-      else
-         km=(k-nz1)/2
-      endif
+      km=kmcord(k)
       do j=ny1,ny2
-         if (j==ny1+1) then
-            jm=(1+ny2-ny1)/2
-         else
-            jm=(j-ny1)/2
-         endif
+         jm=jmcord(j)
          do i=nx1,nx2
-            if (i==nx1+1) then
-               im=(1+nx2-nx1)/2
-            else
-               im=(i-nx1)/2
-            endif
+            im=imcord(i)
             xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
             if (xfac/=0) xfac = 1/xfac
             p(i,j,k)=p(i,j,k)*xfac
@@ -296,8 +284,6 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Filter out the highest cosine mode
-! This mode has been moved to index = 2, taking the place of
-! sin(0x) = 0 mode
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft_filter(p)
@@ -310,14 +296,14 @@ integer i,j,k,im,jm,km
 real*8 xfac
 
    do k=nz1,nz2
-!      km=(k-nz1)/2
+      km=kmcord(k)
       do j=ny1,ny2
-!         jm=(j-ny1)/2
+         jm=jmcord(j)
          do i=nx1,nx2
-!            im=(i-nx1)/2
-            if (k == nz1+1) p(i,j,k)=0
-            if (j == ny1+1) p(i,j,k)=0
-            if (i == nx1+1) p(i,j,k)=0
+            im=imcord(i)
+            if ( (km == g_nz/2) .or.   (jm == g_ny/2) .or. (im == g_nx/2)) then
+               p(i,j,k)=0
+            endif
          enddo
       enddo
    enddo

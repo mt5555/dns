@@ -17,10 +17,13 @@ use transform
 implicit none
 
 real*8 input(nx,ny,nz)
+real*8 output(nx,ny,nz)
 real*8 work(g_nz2,nx*ny)
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
 
+input=0
+output=0
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
@@ -31,13 +34,26 @@ enddo
 
 
 call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
+
+
+if (my_z==1) then
+   print *,'rank=',my_pe,'my coords  = ',my_x,my_y,my_z
+   print *,'maxval round trip=',maxval(abs(input-output))
+endif
 
 if (my_z==1) then
    print *,'rank=',my_pe,'my coords  = ',my_x,my_y,my_z
    do k=1,g_nz2
-      print *,work(k,1),work(k,1)-work(k-1,1)
+      write(*,'(a,i5,3f10.4)') 'k,work ',k,work(k,1),work(k,1)-work(k-1,1)
    enddo
 endif
+
+
+
+
+
+
 end subroutine
 
 
@@ -63,6 +79,7 @@ do j=ny1,ny2
 do k=nz1,nz2
 
 if (dim==1) input(i,j,k,dim)= xcord(i)*(xcord(i)-1)*ycord(j)*(ycord(j)-1)  
+!if (dim==1) input(i,j,k,dim)= sin(2*3*pi*xcord(i))*cos(2*4*pi*ycord(j))
 
 enddo
 enddo

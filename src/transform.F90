@@ -150,12 +150,14 @@ integer dest_pe3(3),tag
 
 ! If any of these fail, then pt was probably not computed
 ! via a call to transpose_to_z().
+#if 0
 ASSERT("transpose_from_z dimension failure 2",n1==g_nz)
 ASSERT("transpose_from_z dimension failure 3",n1d==g_nz2)
 ASSERT("transpose_from_z dimension failure 4",n2==nslabx)
 ASSERT("transpose_from_z dimension failure 5",n2d==nslabx)
 ASSERT("transpose_from_z dimension failure 6",n3==ny_2d)
 ASSERT("transpose_from_z dimension failure 7",n3d==ny_2d)
+#endif
 
 do iproc=0,mpidims(3)-1  ! loop over each slab
 
@@ -194,14 +196,17 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       enddo
 
 !     send/rec
+
+
       tag=my_z
-      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,comm_3d,request(1),ierr)
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_from_z: MPI_IRecv failure 1",ierr==0)
       tag=iproc
       call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(2),ierr)
       ASSERT("transpose_from_z: MPI_ISend failure 1",ierr==0)
       call MPI_waitall(2,request,statuses,ierr) 	
       ASSERT("transpose_from_z: MPI_waitalll failure 1",ierr==0)
+
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab

@@ -20,8 +20,8 @@ initial_live_procs=1
 
 #ifdef MPI
 
-mpidims(1)=1
-mpidims(2)=1
+mpidims(1)=2
+mpidims(2)=2
 mpidims(3)=2
 
 
@@ -62,7 +62,9 @@ end subroutine
 subroutine close_mpi
 use params
 use mpi
+integer ierr
 
+call MPI_Finalize(ierr)
 
 
 end subroutine

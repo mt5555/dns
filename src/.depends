@@ -9,7 +9,6 @@ init_model.o: params.o fft_interface.o
 init_mpi.o: macros.h params.o fft_interface.o mpi.o 
 ns3d.o: macros.h params.o 
 params.o: macros.h 
-temp.o: macros.h 
 test.o: macros.h params.o transform.o fft_interface.o 
 transform.o: macros.h params.o mpi.o 
 util.o: macros.h mpi.o params.o 

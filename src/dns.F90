@@ -10,8 +10,6 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 character*80 message
 
-write(message,'(a)') 'Initializing mpi '
-call print_message(message)
 call init_mpi       
 
 write(message,'(a)') 'Initializing model '
@@ -30,8 +28,9 @@ write(message,'(a)') 'Running some tests'
 call print_message(message)
 call test           ! optional testing  routines go here
 
-call dns_solve(Q)
+!call dns_solve(Q)
 
+write(message,'(a)') 'Cleaning up...'
 call close_mpi
 
 
