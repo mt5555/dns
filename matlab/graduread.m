@@ -10,8 +10,8 @@
 %dir='/ccs/scratch/taylorm/dns/decay/';
 %dir='/home/taylorm/furens/';
 dir='/scratch1/taylorm/decay2048/';
-%filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
-filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
+filename='decay2048-new.0000.7019';  fline=4; mu=3.4424e-6;
+%filename='decay2048-new.0000.7536';  fline=4; mu=3.4424e-6;
 
 
 
@@ -94,8 +94,8 @@ diag3=reshape(gradu(3,3,:,:,:),[nsubcube ,1]);
 diag1=[diag1;diag2;diag3];
 
 diag_std=std(diag1);
-small=1.2*diag_std;
-large=2.7*diag_std;
+small=1.20*diag_std;
+large=2.8*diag_std;
 
 
 
@@ -195,7 +195,7 @@ for i=1:nsubcube
         set(gca,'YTickLabel','')
         set(gca,'XTickLabel','')
         axis image
-        xlabel(sprintf('(%.2f,%.2f,%.2f)',coords(:,i)));
+        xlabel(sprintf('(%d,%d,%d)',round(12*coords(:,i))));
 
         if (count==m1*m2)
           count=0;
