@@ -1,3 +1,28 @@
+=================================================================================
+input file format for input file type=0:
+
+0            ! input file type
+value        ! viscosity type  (value, smallest, damping_time)
+.1           ! viscosity coefficient.  
+fft          ! derivative method  (fft, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+1.0          ! final time
+.8           ! cfl  (0 = disabled, use min_dt)
+0            ! min_dt  
+1            ! max_dt 
+.1           ! output_dt  (0 = output disabled, except for custom output times)
+5             ! n_output_custom  number of custom output times  
+.1,.2,.55,.88 ! custom output times (this line present even n_output_custom=0)
+
+
+=================================================================================
+
+
+
+
+
 
 Computational grid:
 
