@@ -38,8 +38,10 @@ vx2048d   vx2048d.inp  mu=4e-7   looks good
 vx4096a                mu=1e-7   done, looks good
 vx4096b                mu=7e-8   extremly small amount of noise at t=50
 
-vx6144a                mu=3e-8   IN milkyway 
-vx6144b                mu=2e-8   done milkyway
+                       mu=4e-8   save, conservative choice?
+vx6144a                mu=3e-8   looks good - but if you zoom in 
+                                 there is a microscopic amount of noise.
+vx6144b                mu=2e-8   a touch noisy, goes away
 
 
 
@@ -248,10 +250,10 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 
 512    1.35e-3  500   131    .37      1.22        3.14
 512c   1.35e-3  isow   72   .21       2.17         .30
-             IN  run 10 eddy turnover times to check isotropy
-                          with isow forcing
-
-
+             IN  run 10 eddy turnover times to check isotropy.  with isow forcing
+512d   same as 512c, but with F(1)=F(2)=5.  IN
+       code was changed on bluemtn, so this F scaling will be lost
+       next time we do a pulldns
 
    
 
