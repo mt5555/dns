@@ -11,7 +11,7 @@ integer :: io_nodes(0:ncpu_z),nio,inc,comm_io
 real*8,private :: tmx1,tmx2
 real*8,private,allocatable :: sendbuf(:),recbuf(:)
 
-integer           :: mpi_maxio=32
+integer           :: mpi_maxio=28
 character(len=4)  :: mpi_stripe="64"
 character(len=12) :: mpi_stride="8388608"
 contains

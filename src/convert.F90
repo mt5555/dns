@@ -110,6 +110,10 @@ icount=icount+1
    if (time > max(tstop,tstart)) exit
    if (time < min(tstop,tstart)) exit
 enddo
+if (io_pe==my_pe) then
+   print *,'convert.F90 finished t=',time
+   print *,tstart,tstop
+endif
 
 
 call close_mpi

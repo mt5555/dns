@@ -49,10 +49,13 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig
+logical :: compute_cj,compute_scalar, compute_uvw=.true. 
 CPOINTER :: fid
 
 
-
+compute_cj=.false.
+compute_scalar=.false.
+compute_uvw=.true.
 
 tstart=4.4223
 tstop=4.4223
@@ -128,75 +131,127 @@ time=tstart
 do
    icount=icount+1
 
-   if (use_serial==1) then
-!      call dataio(time,Q,work1,work2,1)
-      call input_uvw(time,Q,dummy,work1,work2)
-   else
-      call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
-   endif
 
-   do i=0,nxdecomp-1
-   do j=0,nydecomp-1
-   do k=0,nzdecomp-1  
-
-      if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
-         if (nxdecomp*nydecomp*nzdecomp>1) then
-            write(sdata,'(3i1)') i,j,k
-            fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
-         endif
-
-         print *,fname
-      endif
-
+   if (compute_uvw) then
       if (use_serial==1) then
-         nxlen=nslabx/nxdecomp
-         nylen=nslaby/nydecomp
-         nzlen=nslabz/nzdecomp
-         
-         lx1=nx1 + i*nxlen     
-         ly1=ny1 + j*nylen     
-         lz1=nz1 + k*nzlen     
-         
-         lx2=lx1 + nxlen-1
-         ly2=ly1 + nylen-1
-         lz2=lz1 + nzlen-1
-         
-         ! subcube version cannot run in parallel - it will abort
-         call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
+         !      call dataio(time,Q,work1,work2,1)
+         call input_uvw(time,Q,dummy,work1,work2)
       else
-         if (nxdecomp*nydecomp*nzdecomp==1) then
-            ! no subcubes:
-            call isoavep(Q,q1,q2,q3,3,csig)
-         else
-            range(1,1)=dble(i)/nxdecomp
-            range(1,2)=dble(i+1)/nxdecomp
-            range(2,1)=dble(j)/nxdecomp
-            range(2,2)=dble(j+1)/nxdecomp
-            range(3,1)=dble(k)/nxdecomp
-            range(3,2)=dble(k+1)/nxdecomp
-            call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
-         endif
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
       endif
       
+      do i=0,nxdecomp-1
+      do j=0,nydecomp-1
+      do k=0,nzdecomp-1  
+
+         if (my_pe==io_pe) then
+            write(sdata,'(f10.4)') 10000.0000 + time
+            fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
+            if (nxdecomp*nydecomp*nzdecomp>1) then
+               write(sdata,'(3i1)') i,j,k
+               fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
+            endif
+            
+            print *,fname
+         endif
+         
+         if (use_serial==1) then
+            nxlen=nslabx/nxdecomp
+            nylen=nslaby/nydecomp
+            nzlen=nslabz/nzdecomp
+            
+            lx1=nx1 + i*nxlen     
+            ly1=ny1 + j*nylen     
+            lz1=nz1 + k*nzlen     
+            
+            lx2=lx1 + nxlen-1
+            ly2=ly1 + nylen-1
+            lz2=lz1 + nzlen-1
+            
+            ! subcube version cannot run in parallel - it will abort
+            call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
+         else
+            if (nxdecomp*nydecomp*nzdecomp==1) then
+               ! no subcubes:
+               call isoavep(Q,q1,q2,q3,3,csig)
+            else
+               range(1,1)=dble(i)/nxdecomp
+               range(1,2)=dble(i+1)/nxdecomp
+               range(2,1)=dble(j)/nxdecomp
+               range(2,2)=dble(j+1)/nxdecomp
+               range(3,1)=dble(k)/nxdecomp
+               range(3,2)=dble(k+1)/nxdecomp
+               call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
+            endif
+         endif
+      
+         
+         
+         if (my_pe==io_pe) then
+            call copen(fname,"w",fid,ierr)
+            if (ierr/=0) then
+               write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
+               call abort(message)
+            endif
+            call writeisoave(fid,time)
+            call cclose(fid,ierr)
+         endif
+         
+      enddo
+      enddo
+      enddo
+
+   endif
 
 
+
+   if (compute_cj) then
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isow2s2"
+         print *,fname
+      endif
+      
+      if (.not. compute_uvw) then
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
+      endif
+      call compute_w2s2(Q,q1,q2,q3)
+      call isoavep(Q,q1,q2,q3,2,csig)
+      
       if (my_pe==io_pe) then
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
+            write(message,'(a,i5)') "output_model(): Error opening .isow2s2 file errno=",ierr
             call abort(message)
          endif
-         call writeisoave(fid,time)
+         call write_w2s2(fid,time)
          call cclose(fid,ierr)
       endif
+   endif
 
-   enddo
-   enddo
-   enddo
-
-
+   
+   if (compute_scalar) then
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.iso1"
+         print *,fname
+      endif
+      
+      call singlefile_io(time,Q(1,1,1,1),fname,q1(1,1,1,1),q1(1,1,1,2),1,io_pe)
+      
+      call isoavep(Q,q1,q2,q3,1,csig)
+      if (my_pe==io_pe) then
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .isow2s2 file errno=",ierr
+            call abort(message)
+         endif
+         call write_scalar(fid,time)
+         call cclose(fid,ierr)
+      endif
+   endif
+   
+   
    time=time+tinc
    if (time > max(tstop,tstart)) exit
    if (time < min(tstop,tstart)) exit
@@ -204,6 +259,60 @@ enddo
 
 call close_mpi
 end program anal
+
+
+
+
+
+subroutine compute_w2s2(Q,gradu,gradv,gradw)
+use params
+implicit none
+real*8  :: Q(nx,ny,nz,3)
+real*8  :: gradu(nx,ny,nz,3)
+real*8  :: gradv(nx,ny,nz,3)
+real*8  :: gradw(nx,ny,nz,3)
+
+!local
+integer :: i,j,k,n,m1,m2
+real*8 :: vor(3),uij,uji,dummy
+
+! compute vorticity and strain:  q1=gradu, q1=grad
+do n=1,3
+   call der(Q(1,1,1,1),gradu(1,1,1,n),dummy,gradw,DX_ONLY,n)
+   call der(Q(1,1,1,2),gradv(1,1,1,n),dummy,gradw,DX_ONLY,n)
+   call der(Q(1,1,1,3),gradw(1,1,1,n),dummy,Q(1,1,1,1),DX_ONLY,n)
+enddo
+! 
+! Q(:,:,:,1) = vor**2
+! Q(:,:,:,2) = S**2
+!
+Q=0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
+         vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
+         vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
+         Q(i,j,k,1)=vor(1)**2+vor(2)**2+vor(3)**2
+         
+         do m1=1,3
+            do m2=1,3
+               if (m1==1) uij=gradu(i,j,k,m2)
+               if (m1==2) uij=gradv(i,j,k,m2)
+               if (m1==3) uij=gradw(i,j,k,m2)
+               if (m2==1) uji=gradu(i,j,k,m1)
+               if (m2==2) uji=gradv(i,j,k,m1)
+               if (m2==3) uji=gradw(i,j,k,m1)
+               !S(m1,m2)= .5*(uij+uji)
+               Q(i,j,k,2) = Q(i,j,k,2) + ( .5*(uij+uji) ) **2     
+            enddo
+         enddo
+      enddo
+   enddo
+enddo
+end subroutine compute_w2s2
+
+
 
 
 

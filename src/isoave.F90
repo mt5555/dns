@@ -46,6 +46,7 @@ logical :: firstcall=.true.
 !
 !   
 !
+real*8  :: Dl_mean(2:pmax)
 real*8,allocatable  :: Dl(:,:,:)         ! longitudinal, p=2..10
 real*8,allocatable  :: Dt(:,:,:,:)       ! transverse, p=2..10
 real*8,allocatable  :: D_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
@@ -68,6 +69,7 @@ real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 !  w2s2(:,:,3)   <w2(x)*s2(x+r)>
 !
 real*8,allocatable :: w2s2(:,:,:)
+real*8 :: w2s2_mean(3)
 
 
 real*8,allocatable  :: dwork2(:,:)
@@ -82,6 +84,81 @@ real*8,private :: epsilon,mu,ke
 private init
 
 contains
+
+
+
+
+subroutine writeisoave_scalar(fid,time)
+use params
+implicit none
+
+CPOINTER fid
+real*8 :: time
+!local
+integer :: i,idir,p
+real*8 :: x
+
+if (my_pe/=io_pe) return
+
+call cwrite8(fid,time,1)
+x=ndelta; call cwrite8(fid,x,1)   
+x=ndir;   call cwrite8(fid,x,1)   
+x=pmax-2+1;      call cwrite8(fid,x,1)   ! number of str functions
+
+call cwrite8(fid,Dl_mean,pmax-2+1)
+
+! write out the r values
+do idir=1,ndir
+   call cwrite8(fid,r_val(1,idir),ndelta)
+enddo
+
+! longitudinal
+do p=2,pmax
+do idir=1,ndir
+   call cwrite8(fid,Dl(1,idir,p),ndelta)
+enddo
+enddo
+end subroutine
+
+
+
+
+subroutine writeisoave_w2s2(fid,time)
+use params
+implicit none
+
+CPOINTER fid
+real*8 :: time
+!local
+integer :: i,idir,p
+real*8 :: x
+
+if (my_pe/=io_pe) return
+
+call cwrite8(fid,time,1)
+x=ndelta; call cwrite8(fid,x,1)   
+x=ndir;   call cwrite8(fid,x,1)   
+x=3;      call cwrite8(fid,x,1)   ! number of correlations
+
+call cwrite8(fid,w2s2_mean,3)
+
+! write out the r values
+do idir=1,ndir
+   call cwrite8(fid,r_val(1,idir),ndelta)
+enddo
+
+! longitudinal
+do p=1,3
+do idir=1,ndir
+   call cwrite8(fid,w2s2(1,idir,p),ndelta)
+enddo
+enddo
+end subroutine
+
+
+
+
+
 
 
 subroutine writeisoave(fid,time)
@@ -285,6 +362,38 @@ if (my_pe==io_pe) then
    print *,'lambda   ',lambda
    print *,'R_l      ',R_lambda
 endif
+endif
+
+! compute the mean, r=0 values:
+if (stype==2) then
+   ! <w2,w2>
+   w2s2_mean=0
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      w2s2_mean(1)=w2s2_mean(1)+Q(i,j,k,1)**2
+      w2s2_mean(2)=w2s2_mean(2)+Q(i,j,k,2)**2
+      w2s2_mean(3)=w2s2_mean(3)+Q(i,j,k,1)*Q(i,j,k,2)
+   enddo
+   enddo
+   enddo
+   w2s2_mean=w2s2_mean/g_nx/g_ny/g_nz
+endif
+
+! compute the mean, r=0 values:
+if (stype==1) then
+   ! <w2,w2>
+   Dl_mean=0
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      do p=2,pmax
+         Dl_mean(p)=Dl_mean(p)+Q(i,j,k,1)**2
+      enddo
+   enddo
+   enddo
+   enddo
+   Dl_mean=Dl_mean/g_nx/g_ny/g_nz
 endif
 
 
@@ -1537,7 +1646,6 @@ w2s2=w2s2/ntot
       dwork2=w2s2(:,:,p)
       call MPI_reduce(dwork2,w2s2(1,1,p),ndelta*ndir,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
    enddo
-
 
 
 #endif

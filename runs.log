@@ -1,3 +1,23 @@
+iso12_512:  save data from final run
+
+isoave.F90: put in calls to save .isocj and .isosc
+            run cj analyis QSC on forced data.
+
+ 512^3:     can run analysis if we to a two array analysis.
+            isoavep2()
+
+time isoavep2 vs isoavep
+
+prepair 10min talk
+
+update UDM code.
+
+
+
+
+
+
+
 doit_model   only mod time
 doit_spec    force initial, since we cant do transfer on final
 
