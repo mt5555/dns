@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from string import *
-import os, commands, getopt, sys
+import os, commands, getopt, sys, exceptions
 ##############################################################################
 #
 #  ./cronsub.py [submit] 
@@ -30,6 +30,12 @@ import os, commands, getopt, sys
 #
 #
 #############################################################################
+class ContinueEx(exceptions.Exception):
+    def __init__(self,args=None):
+        self.args=args
+
+
+
 #testing mode, unless arg1= "submit"
 submit=0
 if (len(sys.argv)== 2):
@@ -109,7 +115,6 @@ for out in jobname_running:
 
 
 print ' '
-print ' ' 
 
 
 # get a list of all the .job files in ~/cronlsf:
@@ -123,6 +128,7 @@ vjobscript=split(out,"\n")
 
 for jobscript in vjobscript:
 
+    print ' ' 
     print 'script: ',jobscript
     try:
 
@@ -131,20 +137,19 @@ for jobscript in vjobscript:
         jobname="";
         jobcpus="";
         fid=open(jobscript)
-        line=rstrip(fid.readline())
+        line=fid.readline()
         while line:
-            out=split(line," ")
+            out=split(rstrip(line)," ")
             if (len(out)>=3) & (out[0]=="#BSUB"):
                 if (out[1]=="-J"):
                     jobname=out[2]
                 if (out[1]=="-n"):
                     jobcpus=out[2]
-
-            line=rstrip(fid.readline())
+            line=fid.readline()
 
 
         if len(jobname)==0:
-            raise NameError,"job does not have a BSUB -J option: "+jobname
+            ContinueEx,"job does not have a BSUB -J option: "+jobname
 
         # for idbsub, #BSUB -n 64 line is ignored, we have to add this
         # to the idbsub line
@@ -156,7 +161,7 @@ for jobscript in vjobscript:
         # check if it is in que
         i=jobname in jobname_running
         if i:
-            raise NameError,"job already running."
+            ContinueEx,"job already running."
 
         
         # check resub count in file jobname.resub
@@ -166,7 +171,7 @@ for jobscript in vjobscript:
         fid.close()
         fvalue=atoi(line)
         if (fvalue<=0):
-            raise NameError,"job counter reached 0"
+            ContinueEx,"job counter reached 0"
         fvalue=fvalue-1
         fid=open(jobresub,'w')
         fid.write(str(fvalue)+"\n")
