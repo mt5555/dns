@@ -248,12 +248,41 @@ where we have chosen to use a shell thickness of $\Delta k_z$.
 \frac{(k-1/2)^2}{L^2} < l^2 + m^2 + \frac{n^2}{L^2} < \frac{(k+1/2)^2}{L^2}
 \]  
 
-\section{Computing 2D Energy Spectra (in an anulus)}
+\section{Computing 2D Energy Spectra (in an annulus)}
+There are two different 2D spectra we need to compute. 
+\begin{eqnarray*}
+E_0(k_h) &=& E(k_h, k_z=0) \\
+E(k_h) &=& \frac{2}{N_z}\sum_{k_z=0}^{\pi N_z/L} E(k_h,k_z) 
+\end{eqnarray*}
+where $k_h = \sqrt{(k_x^2 + k_y^2)} = \sqrt{(2\pi l)^2 + (2\pi m)^2}$. The 2D shell (annulus) thickness is now
+determined by the horizontal wavenumber spacings. Therefore 
+\begin{eqnarray}
+E_0(k_h) = \sum_{l,m,n=0}  |  {\hat u_1}(l,m,n=0) |^2 +
+ |  {\hat u_2}(l,m,n=0) |^2 + 
+ |  L {\hat u_3}(l,m,n=0) |^2
+\end{eqnarray}
+where the sum is taken over all integers $(l,m,n=0)$ such that
+\[
+(\Delta k_x)^2 (k_h-1/2)^2 < (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_x)^2 (k_h+1/2)^2 
+\]
+where we have chosen to use a shell thickness of $\Delta k_x = \Delta
+k_y = 2\pi$. Scaling out the $2\pi$, we get
+\[
+(k_h-1/2)^2 < l^2 + m^2 < (k_h+1/2)^2.
+\]  
 
-
-
-
-
+The second spectrum is computed the same way as above except that now
+we $average$ over all $n$ for a given 2D shell:
+\begin{eqnarray}
+E(k_h) = \frac{2}{N_z}\sum_{n}  |  {\hat u_1}(l,m,n) |^2 +
+ |  {\hat u_2}(l,m,n) |^2 + 
+ |  L {\hat u_3}(l,m,n) |^2
+\end{eqnarray}
+where for each $n$ the contribution to the shell $k_h$ is 
+taken over all integers $(l,m)$ such that
+\[
+(k_h-1/2)^2 < l^2 + m^2 < (k_h+1/2)^2.
+\]  
 
 
 
