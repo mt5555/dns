@@ -57,12 +57,19 @@ endif
 !
 !  output dumps
 !
-doit=check_time(time,output_dt,0,0.0,time_next)
+doit=check_time(time,output_dt,ncustom,custom,time_next)
 time_target=min(time_target,time_next)
 if (doit) then
    call output_write(time,Q)
 endif
 
+!
+! diagnostic output
+!
+doit=check_time(time,diag_dt,0,0.0,time_next)
+time_target=min(time_target,time_next)
+if (doit) then
+endif
 
 
 
@@ -70,7 +77,7 @@ endif
 !
 ! restrict delt so we hit the next time_target
 !
-doit=check_time(time,diag_dt,0,0.0,time_next)
+doit=check_time(time,screen_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 
 delt = min(delt,time_target-time)
@@ -243,11 +250,11 @@ end subroutine
 
 
 
-logical function check_time(time,dt,ncustom,custom,time_next)
+logical function check_time(time,dt,ncust,cust,time_next)
 use params
 implicit none
-integer ncustom
-real*8 :: time,dt,custom(ncustom)
+integer ncust
+real*8 :: time,dt,cust(ncust)
 real*8 :: time_next  ! output
 
 !local variables
@@ -270,11 +277,11 @@ if (dt>0) then
    time_next = time-remainder+dt
    if (time>=time_final-small) check_time=.true.
 
-   do i=1,ncustom
-      if (abs(time-custom(i))<small) then
+   do i=1,ncust
+      if (abs(time-cust(i))<small) then
          check_time=.true.
-      else if (time<custom(i)) then
-         time_next=min(time_next,custom(i))
+      else if (time<cust(i)) then
+         time_next=min(time_next,cust(i))
          exit 
       endif
    enddo

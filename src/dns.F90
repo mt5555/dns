@@ -14,7 +14,7 @@ character*80 message
 
 call init_mpi       
 
-write(message,'(a)') 'Initializing grid and b.c.'
+write(message,'(a)') 'Initializing grid and b.c. and reading input file'
 call print_message(message)
 call init_grid      
 
@@ -61,6 +61,9 @@ call time_control(time,Q)  ! output initial data, choose delt
 do 
    call rk4(time,Q)
    call time_control(time,Q)
+#ifdef MPI
+   call MPI_REDUCE(error_code,MPI_MAX...)
+#endif
 
    if (error_code>0) then
       print *,"Error code = ",error_code

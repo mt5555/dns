@@ -27,9 +27,9 @@ implicit none
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-real*8  :: mu=.0001   !viscosity
+real*8  :: mu=0           !viscosity
 real*8  :: pi,pi2_squared
-
+integer,parameter :: r8kind=kind(mu)
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -73,15 +73,18 @@ integer,allocatable :: g_kmcord(:)
 ! time stepping
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: delt
-real*8  :: cfl_adv = 1.4  ! 1.4=bad 
-real*8  :: cfl_vis = .1
+real*8  :: cfl_adv = 1.2
+real*8  :: cfl_vis = 1.2
 real*8  :: delt_min = 0
 real*8  :: delt_max = 1
 real*8  :: time_final = 1 
 
-real*8 :: output_dt = .1    ! netcdf output for plotting
-real*8 :: diag_dt = -1     ! diagnostics
-real*8 :: restart_dt = 1.0   ! restart 
+real*8 :: output_dt = 0    ! netcdf output for plotting
+integer :: ncustom =0
+real*8, allocatable :: custom(:)
+real*8 :: diag_dt = 0       ! diagnostics
+real*8 :: screen_dt = 0     ! screen output
+real*8 :: restart_dt = 0    ! restart 
 
 ! set non-zero to cause time stepping loop to exit
 ! error_code = 1   u > 1000
@@ -169,34 +172,34 @@ endif
 ! memory contraint: 2D decomposition should fit in a 3D decomposition array
 ! check if: (g_nz2)*nslabx*ny_2d <= nx*ny*nz)
 !
-if ((g_nx2)*nz_2d*real(nslaby) > nx*nz*real(ny) )  then
+if ((g_nx2)*nz_2d*real(nslaby,r8kind) > nx*nz*real(ny,r8kind) )  then
    fail=1
    call print_message("insufficient storage.");
-   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz)
+   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
    call print_message(message)	
    write(message,'(a,f10.0)') "storage needed for 2D x-decomposition: ", &
-     (g_nx2)*nz_2d*real(nslaby)
+     (g_nx2)*nz_2d*real(nslaby,r8kind)
    call print_message(message)	
 
 endif
-if ( (g_ny2)*nx_2d*real(nslabz) > nx*ny*real(nz)) then
+if ( (g_ny2)*nx_2d*real(nslabz,r8kind) > nx*ny*real(nz,r8kind)) then
    fail=1
    call print_message("insufficient storage.");
-   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz)
+   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
    call print_message(message)	
    write(message,'(a,f10.0)') "storage needed for 2D y-decomposition: ", &
-     (g_ny2)*nx_2d*real(nslabz)
+     (g_ny2)*nx_2d*real(nslabz,r8kind)
    call print_message(message)	
 
 endif
 
-if ( (g_nz2)*ny_2d*real(nslabx) >  ny*nz*real(nx)) then
+if ( (g_nz2)*ny_2d*real(nslabx,r8kind) >  ny*nz*real(nx,r8kind)) then
    fail=1
    call print_message("insufficient storage.");
-   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz)
+   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
    call print_message(message)	
    write(message,'(a,f10.0)') "storage needed for 2D z-decomposition: ", &
-     (g_nz2)*ny_2d*real(nslabx)
+     (g_nz2)*ny_2d*real(nslabx,r8kind)
    call print_message(message)	
 endif
 

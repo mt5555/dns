@@ -16,6 +16,7 @@ implicit none
 real*8 :: one=1
 integer i,j,k,l
 character*80 message
+integer input_file_type
 
 
 call params_init()
@@ -71,7 +72,94 @@ write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",
 call print_message(message)
 
 
+if (my_pe==io_pe) then
+   read(*,*) input_file_type
+   if (input_file_type==0) then
+      call read0_type()
+   else
+      call abort("bad input file")
+   endif
+endif
+
+#ifdef MPI
+call MPI_BROADCAST
+mu
+time_final
+cfl_adv
+cfl_vis
+delt_min
+delt_max
+restart_dt
+diag_dt
+screen_dt
+output_dt
+ncustom
+custom(ncustom)
+
+#endif
 
 
+end subroutine
+
+
+
+subroutine read_type0
+use params
+implicit none
+
+!local variables
+
+character*80 message
+character*20 sdata
+real*8 rvalue
+integer i
+
+
+read(*,'(a12)') sdata
+read(*,*) rvalue
+if (sdata=='value') then
+   mu=rvalue
+else 
+   call abort("only viscosity type 'value' supported")
+endif
+
+read(*,'(a12)') sdata
+if (sdata=='fft') then
+else
+   call abort("only 'fft' derivative method supported")
+endif
+
+read(*,'(a12)') sdata
+if (sdata=='periodic') then
+else
+   call abort("only 'perodic' b.c. supported")
+endif
+
+read(*,'(a12)') sdata
+if (sdata=='periodic') then
+else
+   call abort("only 'perodic' b.c. supported")
+endif
+
+read(*,'(a12)') sdata
+if (sdata=='periodic') then
+else
+   call abort("only 'perodic' b.c. supported")
+endif
+
+read(*,*) time_final
+read(*,*) cfl_adv
+read(*,*) cfl_vis
+read(*,*) delt_min
+read(*,*) delt_max
+read(*,*) restart_dt
+read(*,*) diag_dt
+read(*,*) screen_dt
+read(*,*) output_dt
+read(*,*) ncustom
+allocate(custom(ncustom))
+do i=1,ncustom
+   read(*,*) custom(i)
+enddo
 
 end subroutine
