@@ -8,7 +8,9 @@ forcing in wave numbers 1&2, or 2&3,
 tuned so that epsilon=.5
 R_l and E are too low when compared to Gotoh's results.
 
-                                     
+G = ||f|| L^3 / mu^2  =  epsilon^.5/mu^2 
+
+                                    
   mu      epsilon   ke     R_l      241*eta         G  (L^3/T^.5 = 1e-6)
 1.35e-3     .09    .08      20
 1.35e-3     .27    .22      29
@@ -17,7 +19,7 @@ R_l and E are too low when compared to Gotoh's results.
 .75e-3      .5      .5      65         
 .25e-3      .5      .6     132                       11M
 
-1.35e-3/36  .55/36   ?     130         .32           96M  (Gotoh)
+1.35e-3/36  .55/36   ?     130         .32           83M  (Gotoh)
 
 
 
@@ -51,6 +53,13 @@ lambda/eta =   sqrt(10 KE mu /epsilon)   (mu^3/epsilon)^-.25
 7/1/02
 new isotropic runs
 
+Gotoh resolution criterion:  kmax * eta > 1/2pi
+works out to be:  delx/eta <= 3
+so lets run with delx/eta = 2?  
+
+
+       
+
 dealiasing:  fft-sphere 
 
 
@@ -59,16 +68,17 @@ iso12_256A  ran to t=11.
 
    iso12 forcing:  k1=.5   (forcing disabled if it removes energy)
                    k2=.5
-    mu=1.35e-3 
-
+    mu=1.35e-3:  delx/eta=1.0, R_l=60   epsilon=4   G=1M
 
 
 iso_256A  (Qsc)
    iso forcing.  k**4 in wave numbers up to 9
+   mu=1.35e-3 delx/eta=1.73  epsilon=95    G = 5M
+   R_l=30
 
 
 
-
+G = ||f|| L^3 / mu^2  =  epsilon^.5/mu^2  
 
 
 

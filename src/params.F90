@@ -49,7 +49,7 @@ integer :: dealias=0                ! 0 = none
 
 logical :: rw_spec=.false.          ! set to .true. to read/write dealiased spectral coefficieints 
                                     ! instead of grid point values 
-real*8  :: g_u2xave                 ! <ux,ux> updated after each time step  
+real*8  :: g_u2xave=0               ! <ux,ux> updated after each time step  
 
 ! parameter used by psi-vor model:
 ! before using xscale,yscale,zscale, we need to update all FFT

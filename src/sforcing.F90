@@ -135,9 +135,41 @@ if (0==init_sforcing) then
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
+endif
 
+if (g_u2xave==0) then
+   ! on first call, this will not have been computed, so lets
+   ! compute it here:  ints(2)
+   g_u2xave=0
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            
+            xw=(im*im + jm*jm + km*km)*pi2_squared
+            
+            xfac = 2*2*2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            
+            
+            g_u2xave = g_u2xave + xfac*xw*(Qhat(k,i,j,1)**2 + &
+                 Qhat(k,i,j,2)**2 + &
+                 Qhat(k,i,j,3)**2) 
+            
+         enddo
+      enddo
+   enddo
+#ifdef USE_MPI
+   xw=g_u2xave
+   call MPI_allreduce(xw,g_u2xave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
 
 endif
+
 
 if (ntot==0) return
 ! only CPUS which belong to "comm_sforcing" beyond this point!
@@ -154,9 +186,9 @@ tau_inv=sqrt(g_u2xave)/.5
 
 f_diss=0
 fxx_diss=0
+ener=0
 do wn=numb1,numb
 
-   ener(wn)=0
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
