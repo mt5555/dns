@@ -1,10 +1,16 @@
+module mod_fft_interface
+
+real*8 trigs(3*maxn/2+1,3)
+integer ifax(13,3)
+
+
+
+
 subroutine fftinit()
 implicit none
 use params
 
 integer ndims(3)  ! number of fft initilizations
-real*8 trigs(3*maxn/2+1,3)
-integer ifax(13,3)
 
 
 #if 0
@@ -140,11 +146,4 @@ end
 
 
 
-
-
-
-
-
-
-
-
+end module mod_fft_interface

@@ -28,7 +28,7 @@ n3d=nzd
 
 if (index==1) then
    px=p
-   fft_derivatives(px,pxx,n1,n1d,n2,n2d,n3,n3d)
+   fft_derivatives(px,pxx,n,n1,n1d,n2,n2d,n3,n3d)
 else if (index==2) then
    transpose12(p,pt,n1,n1d,n2,n2d,n3,n3d)
    ! 1st derivative returned in pt, 2nd derivative returned in px
@@ -50,5 +50,12 @@ ASSERT(n3==nz)
 ASSERT(n3d==nzd)
 
 end
+
+
+
+
+
+
+
 
 

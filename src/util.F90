@@ -1,7 +1,7 @@
 
 
 
-subroutine transpose12(p,pt,nx,nxd,ny,nyd,nz,nzd)
+subroutine transpose12(p,pt,nxd,nyd,nzd)
 implicit none
 real*8 p(nxd,nyd,nzd)
 real*8 pt(nyd,nxd,nzd)
@@ -25,7 +25,7 @@ end
 
 
 
-subroutine transpose13(p,pt,nx,nxd,ny,nyd,nz,nzd)
+subroutine transpose13(p,pt,nxd,nyd,nzd)
 implicit none
 real*8 p(nxd,nyd,nzd)
 real*8 pt(nzd,nyd,nxd)
@@ -47,5 +47,10 @@ nzd=nxd
 nxd=i
 
 end
+
+
+
+
+
 
 
