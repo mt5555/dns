@@ -98,6 +98,7 @@ FILEIO = fileio.o fileioc.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
 MODEL_GRID       = ns_grid.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_IMPULSE    = ns_impulse.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC       = ns.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_ALPHA      = ns_alpha.o dns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
@@ -121,6 +122,9 @@ dnsa:  $(MODEL_ALPHA)
 
 dnsgrid:  $(MODEL_GRID) 
 	$(LINK) -o dnsgrid $(MODEL_GRID) $(LDFLAGS) $(MPILIB)
+
+dnsimp:  $(MODEL_IMPULSE) 
+	$(LINK) -o dnsgrid $(MODEL_IMPULSE) $(LDFLAGS) $(MPILIB)
 
 dnsslow:  $(MODEL_SPEC_SLOW) 
 	$(LINK) -o dns $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)
