@@ -4,9 +4,9 @@
 %########################################################################
 %
 
-name = 'helicity_data/helicity_spc/check256_hq_cat30';
-namedir = '/home2/skurien/';
-mu = 6.0d-3;
+%name = 'helicity_data/helicity_spc/check256_hq_cat30';
+%namedir = '/home2/skurien/';
+%mu = 6.0d-3;
 
 %name = 'helicity_data/sc1024_data/sc1024A0002.0000';
 %mu = 0.35e-4;
@@ -17,9 +17,9 @@ mu = 6.0d-3;
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-%namedir = '/home2/skurien/helicity_data/helical_forced/';
-%name = 'hel256_hpi2/hel256_hpi2_cat';
-%mu = 2e-4;
+namedir = '/home2/skurien/helicity_data/helical_forced/';
+name = 'hel256_hpi2/hel256_hpi2_cat';
+mu = 2e-4;
 
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5e-4;
@@ -41,7 +41,7 @@ hspec_ave = hspec_n + hspec_p;
 
 [time,count]=fread(fid,1,'float64');
 j = 0;
-while (time >=.0 & time <=9999.3)
+while (time >=.0 & time <= 9999.3)
 j=j+1
 if (count==0) 
    disp('error reading hspec file')
@@ -52,28 +52,28 @@ time
 hspec_p = fread(fid,n_r,'float64');
 scaling = 1;                       %2pi for Takeshi data, 1 otherwise;
 
+hspec_n = hspec_n*scaling;
+hspec_p = hspec_p*scaling;
+
 if (j == 1) 
      hspec_ave = hspec_n + hspec_p;
 else
 hspec_ave = hspec_ave + hspec_n + hspec_p;
 end
 
-hspec_n = hspec_n*scaling;
-hspec_p = hspec_p*scaling;
-k = [1:n_r];
-%if (time == 5.0) then
-figure(20);
+k = [0:n_r-1];
+
+figure(20); % +, - and total helicity spectra
 loglog(abs(hspec_n),'r'); hold on;
 loglog(hspec_p,'b'); hold on;
 loglog(abs(hspec_p+hspec_n),'k'); hold on;
-%loglog(abs(hspec_p-hspec_n),'k.-'); hold on;
 %axis([1 100 1e-2 10]);
 grid
 legend('|H_-(k)|','H_+(k)','H(k)=H_+(k) + H_-(k)')
 %hold off
 
 
-figure(21);
+figure(21); % 4/3 normalized +, - and total helicity spectra
 loglog(abs(hspec_n).*k'.^(4/3),'r'); hold on; 
 loglog(hspec_p.*k'.^(4/3),'b');
 loglog(abs(hspec_p-hspec_n).*k'.^(4/3),'k-');hold on;
@@ -84,7 +84,7 @@ title('4/3 compensated helicity spectra');
 legend('|H_-(k)| k^{4/3}','H_+(k) k^{4/3}','H(k) k^{4/3}')
 %hold off
 
-figure(22); 
+figure(22); % 5/3 normalized +, - and total helicity spectra
 loglog(abs(hspec_n).*k'.^(5/3),'r');hold on;
 loglog(hspec_p.*k'.^(5/3),'b');hold on;
 loglog(abs(hspec_p-hspec_n).*k'.^(5/3),'k-');hold on;
@@ -97,32 +97,33 @@ legend('|H_-(k)| k^{5/3}','H_+(k) k^{5/3}','H(k) k^{5/3}')
 
 
 
-%compute total helicity
+%compute total helicity for snapshot
 H = sum(hspec_p+hspec_n);
 disp(sprintf('Total helicity = %d',H))
 
-%compute dissipation rate of helicity -- BUT THIS IS WRONG
-h = -2*mu*sum((hspec_p+hspec_n).*(k').^2);
+%compute dissipation rate of helicity -- BUT THIS IS WRONG?
+h = -2*mu*sum((hspec_p+hspec_n).*(k'*scaling).^2);
 disp(sprintf('Mean helicity dissipation rate = %d',h));
 
 figure(23)
 plot(time,H,'o',time,h,'x');hold on;
 legend('Total Helicity','Mean dissipation rate')
-[time,count]=fread(fid,1,'float64')
-%time,count
-%j = j+1
+[time,count]=fread(fid,1,'float64');
 end
 
-hspec_ave = hspec_ave/(j-3);
+hspec_ave = hspec_ave/(j);
 
 figure(24)
 loglog(abs(hspec_ave),'x'); hold on;
+title('Average helicity spectrum')
+
 
 figure(25)
 loglog(abs(hspec_ave).*k'.^(4/3),'k');hold on;
+title('Average 4/3 compensated helicity spectrum');
 
 figure(26)
 loglog(abs(hspec_ave).*k'.^(5/3),'b');hold on;
-
+title('Average 5/3 compensated helicity spectrum');
 
 %end

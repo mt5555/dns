@@ -12,7 +12,7 @@ eta = 1/(nx*delx_over_eta);
 name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
 pname = 'check256_hq_';
 ext = '.new.isostr';
-times=[0:1:30];
+times=[0:1:1];
 nx = 256;
 
 %name = '/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_';
