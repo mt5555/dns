@@ -63,12 +63,14 @@ so lets run with delx/eta = 2?
 dealiasing:  fft-sphere 
 
 
-iso12_250A  ran to t=10.   (continuing on bluemountain)
+iso12_250A  ran to t=10.  
 iso12_256A  ran to t=11.
 
-   iso12 forcing:  k1=.5   (forcing disabled if it removes energy)
+    iso12 forcing:  k1=.5   (forcing disabled if it removes energy)
                    k2=.5
     mu=1.35e-3:  delx/eta=1.0, R_l=60   epsilon=4   G=1M
+
+temp3_    iso12 forcing, k1=.5, k2=.5, mu=4e-4  IN shankara
 
 
 iso_256A  (Qsc)
