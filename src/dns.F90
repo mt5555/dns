@@ -29,6 +29,8 @@ write(message,'(a)') 'Initial data projection'
 call print_message(message)
 call init_data_projection(Q)  ! impose constrains on initial data
 
+write(message,'(a)') 'Time stepping...'
+call print_message(message)
 call dns_solve(Q)
 
 write(message,'(a)') 'Cleaning up...'
