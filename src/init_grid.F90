@@ -1,3 +1,4 @@
+#include "macros.h"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! initialization for fft grid
@@ -14,8 +15,19 @@ implicit none
 !local variables
 real*8 :: one=1
 integer i,j,k,l
+character*80 message
 
 
+call params_init()
+call fft_interface_init()
+
+write(message,'(a,i6,a,i6,a,i6)') "Grid: ",g_nx," x",g_ny," x",g_nz
+call print_message(message)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! global grid data
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 delx = one/g_nx
 dely = one/g_ny
 delz = one/g_nz
@@ -34,18 +46,24 @@ call fft_get_mcord(g_imcord,g_nx)
 call fft_get_mcord(g_jmcord,g_ny)
 call fft_get_mcord(g_kmcord,g_nz)
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! local grid data
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+call init_mpi_comm3d()
+
 do i=nx1,nx2
-   l = i-nx1+1 + nslabx*mpicoords(1)
+   l = i-nx1+1 + nslabx*my_x
    xcord(i)=g_xcord(l)
    imcord(i)=g_imcord(l)
 enddo
 do j=ny1,ny2
-   l = j-ny1+1 + nslaby*mpicoords(2)
+   l = j-ny1+1 + nslaby*my_y
    ycord(j)=g_ycord(l)
    jmcord(j)=g_jmcord(l)
 enddo
 do k=nz1,nz2
-   l = k-nz1+1 + nslabz*mpicoords(3)
+   l = k-nz1+1 + nslabz*my_z
    zcord(k)=g_zcord(l)
    kmcord(k)=g_kmcord(l)
 enddo

@@ -12,10 +12,6 @@ character*80 message
 
 call init_mpi       
 
-write(message,'(a)') 'Initializing model '
-call print_message(message)
-call init_model     
-
 write(message,'(a)') 'Initializing grid and b.c.'
 call print_message(message)
 call init_grid      

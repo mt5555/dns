@@ -8,7 +8,7 @@ integer ierr
 character*(*) message
 character*15 :: pre="ASSERT FAILURE "
 write(*,'(a)') pre // message
-#ifdef MPI
+#ifdef USE_MPI
    call MPI_abort(comm_3d,1,ierr)
 #endif
 end subroutine

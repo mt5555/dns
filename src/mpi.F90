@@ -1,4 +1,4 @@
-#ifdef MPI
+#ifdef USE_MPI
 
 
 
@@ -6,7 +6,7 @@
 ! SUN
 !
 #ifdef SUNOS
-  #include /usr/local/src/mpich/include/mpif.f90
+#include "/usr/local/src/mpich/include/mpif.f90"
 #endif
 
 

@@ -27,7 +27,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,jj,l
-#ifdef MPI
+#ifdef USE_MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
@@ -65,7 +65,7 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
          enddo
       enddo
    else
-#ifdef MPI
+#ifdef USE_MPI
       dest_pe3(1)=my_x
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
@@ -133,7 +133,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,jj,l
-#ifdef MPI
+#ifdef USE_MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
@@ -175,7 +175,7 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       enddo
    else
 
-#ifdef MPI
+#ifdef USE_MPI
       dest_pe3(1)=my_x
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
@@ -271,7 +271,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,kk,l
-#ifdef MPI
+#ifdef USE_MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
@@ -309,7 +309,7 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
          enddo
       enddo
    else
-#ifdef MPI
+#ifdef USE_MPI
       dest_pe3(1)=iproc
       dest_pe3(2)=my_y
       dest_pe3(3)=my_z
@@ -380,7 +380,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,kk,l
-#ifdef MPI
+#ifdef USE_MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
@@ -417,7 +417,7 @@ do iproc=0,mpidims(1)-1  ! loop over each slab
          enddo
       enddo
    else
-#ifdef MPI
+#ifdef USE_MPI
       dest_pe3(1)=iproc
       dest_pe3(2)=my_y
       dest_pe3(3)=my_z
@@ -513,7 +513,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,ii,l
-#ifdef MPI
+#ifdef USE_MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
@@ -549,7 +549,7 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
          enddo
       enddo
    else
-#ifdef MPI
+#ifdef USE_MPI
       dest_pe3(1)=my_x
       dest_pe3(2)=iproc
       dest_pe3(3)=my_z
@@ -619,7 +619,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,ii,l
-#ifdef MPI
+#ifdef USE_MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
@@ -659,7 +659,7 @@ do iproc=0,mpidims(2)-1  ! loop over each slab
          enddo
       enddo
    else
-#ifdef MPI
+#ifdef USE_MPI
       dest_pe3(1)=my_x
       dest_pe3(2)=iproc
       dest_pe3(3)=my_z

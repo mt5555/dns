@@ -13,15 +13,15 @@ endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
    MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
-   MPI = -DMPI -I/usr/local/src/mpich/include
+   MPI = -DUSE_MPI -I/usr/local/src/mpich/include
    LDFLAGS = 
-   FFLAGS = -O -DSUNOS $(MPI)
+   FFLAGS = -fast -DSUNOS $(MPI)
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
    LDFLAGS = 
-   FFLAGS = -g -64 -O1 -macro_expand -DMPI  -DIRIX64
+   FFLAGS = -g -64 -O1 -macro_expand -DUSE_MPI  -DIRIX64
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
@@ -34,7 +34,7 @@ OBJS1 = params.o util.o  fft99.o fft_interface.o mpi.o
 #modules/routines which use OBJS1
 OBJS2 = transform.o
 #modules/routines which use OBJS1,2
-INITS  = init_model.o init_mpi.o init_data.o init_grid.o 
+INITS  = init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o
 MODEL  = ns3d.o bc.o
 FILEIO = fileio.o
