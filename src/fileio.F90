@@ -429,7 +429,6 @@ write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
 call print_message(message)
 
 
-
 if (structf_init==1) then
 if (my_pe==io_pe) then
 !   write(message,'(f10.4)') 10000.0000 + time

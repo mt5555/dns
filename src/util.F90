@@ -137,6 +137,42 @@ end subroutine
 
 
 
+subroutine random_data(buf,n)
+implicit none
+integer n
+real*8 :: buf(n)
+!call random_number(buf)
+call gaussian(buf,n)
+end subroutine
 
 
+
+
+!.... Gaussian Random number generator ran1 from Numerical recipes
+subroutine gaussian(buf,n)
+implicit none
+      
+integer n
+real*8 :: buf(n)
+real*8 ::  fac,rsq,ran1(2)
+integer i,j1,j2
+
+! n=10:  i=1..5   j1max=9, j2max=10 
+! n=11:  i=1..6   j1max=11, j2max=12(ignored)
+ran1=2*ran1-1
+do i=1,(n+1)/2
+   j1=2*i-1
+   j2=j1+1
+   do 
+      call random_number(ran1)
+      ran1=2*ran1-1
+      rsq = ran1(1)**2 + ran1(2)**2
+      if (rsq<1 .and. rsq>0) exit
+   enddo
+   fac = Sqrt(-2.0 * Log(rsq)/rsq)
+   buf(j1) = ran1(1) * fac
+   if (j2<=n) buf(j2)= ran1(2) * fac
+enddo
+
+end subroutine
 

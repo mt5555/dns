@@ -1,15 +1,13 @@
 TODO:
 
+1. command line arguments parsing.  overwrite basename 
 1. python script: read input file, get newest restart off of PSI
-0. if restart, skip output of restart time.
-0. check CFL computation for viscous
 1. specplot: multiply by f^5/3
 1. check restart testcase on mahi (also little endian)
 2. plot R_lamba vs mu and viscosity
 0. uninitialized variable in sfocing.com - triggers mpi_allreduce problems
 1. check new structure functions.  
 2. make suite of runs for diffusion: 32^3, 64^3 128^3
-0. Bullets for Darryl
 1. switch 3d test case to different dimensions
 2.  4th order differences
 4. 2D shallow water case

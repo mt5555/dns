@@ -1092,7 +1092,7 @@ do x_pe=0,ncpu_x-1
 
    if (my_pe==fpe) then
       if (random) then
-         call random_number(buf)
+         call random_data(buf,o_nx*ny_2dx)
       else
          call cread8(fid,buf,o_nx*ny_2dx)
       endif
@@ -1100,7 +1100,7 @@ do x_pe=0,ncpu_x-1
       if (o_ny==g_ny+1) then
       if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then    
          if (random) then
-            call random_number(saved_edge)
+            call random_data(saved_edge,o_nx)
          else
             call cread8(fid,saved_edge,o_nx)      ! read and discard periodic duplicate points
          endif

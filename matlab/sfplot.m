@@ -8,7 +8,7 @@ clear all;
 
 
 mkps=1;  % print?
-dp=7;    % which seperation length index
+dp=1;    % which seperation length index
 
 range=0:50;
 %range = 1

@@ -390,6 +390,10 @@ type(pdf_structure_function) :: str(NUM_SF)
 real*8  :: del,delv(3)
 integer :: bin,idel,i,j,k,i2,nsf,ndelta
 
+
+integer pos,neg
+pos=0
+neg=0
 if (structf_init==0) then
    structf_init=1
    call init_pdf_module()
@@ -420,6 +424,11 @@ do k=1,n3
                      del = w(i2,j,k)-w(i,j,k)
                   endif
 
+                  if (n==ncomp .and. idel==1) then
+                     if (del>0) pos=pos+1
+                     if (del<0) neg=neg+1
+                  endif
+
                   delv(n)=del
                   del = del/str(n)%pdf_bin_size
                   bin = nint(del)
@@ -445,7 +454,7 @@ do k=1,n3
                   if (del>=0) then
                      del=del**one_third
                   else
-                     del=-(-del)**one_third
+                     del=-((-del)**one_third)
                   endif
                   del = del/str(nsf)%pdf_bin_size
                   bin=nint(del)
@@ -460,7 +469,9 @@ do k=1,n3
       enddo
    enddo
 enddo
-
+print *,'ncomp=',ncomp
+print *,'pos',pos
+print *,'neg',neg
 
 do n=1,NUM_SF
 str(n)%ncalls=str(n)%ncalls+1
@@ -694,6 +705,7 @@ real*8 :: vor(3),sm(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
 real*8 dummy(1)
 real*8 :: tmx1,tmx2
 
+
 call wallclock(tmx1)
 
 do n=1,3
@@ -726,12 +738,12 @@ enddo
 work=mu*work
 call compute_pdf_epsilon(work)
 
-
 Sww=0
 ux2=0
 ux3=0
 ux4=0
 u2=0
+
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -784,8 +796,8 @@ enddo
 
 Sww=Sww/g_nx/g_ny/g_nz
 ux2=ux2/g_nx/g_ny/g_nz
-ux3=ux2/g_nx/g_ny/g_nz
-ux4=ux2/g_nx/g_ny/g_nz
+ux3=ux3/g_nx/g_ny/g_nz
+ux4=ux4/g_nx/g_ny/g_nz
 u2=u2/g_nx/g_ny/g_nz
 
 ASSERT("compute_all_pdfs: ns too small ",ns>=13)

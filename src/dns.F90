@@ -51,7 +51,6 @@ call MPI_Barrier(comm_3d,ierr)
 
 
 
-
 #if 0
 ! transpose data, for testing
 print *,'Transposing input data'
