@@ -32,11 +32,12 @@ real*8 d1(nx,ny,nz)
 real*8 d2(nx,ny,nz)
 real*8 work(nx,ny,nz)
 real*8 dummy
-real*8 :: ke_diss,vor,hel
+real*8 :: ke_diss,ke_diss2,vor,hel
 integer n,i,j,k,numder
 
 
 ke_diss=0
+ke_diss2=0
 vor=0
 hel=0
 numder=DX_ONLY
@@ -50,44 +51,76 @@ do n=1,3
 
    ! compute u_x, u_xx
    call der(Q(1,1,1,n),d1,d2,work,numder,1)
-   rhs(:,:,:,n) = rhs(:,:,:,n) +  mu*d2 - Q(:,:,:,1)*d1 
 
-   ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
-   if (n==2) then  ! dv/dx, part of vor(3)
-      vor=vor + sum(d1(nx1:nx2,ny1:ny2,nz1:nz2))
-      hel=hel + sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)*d1(nx1:nx2,ny1:ny2,nz1:nz2))
-   endif
-   if (n==3) then  ! dw/dx, part of vor(2)
-      hel=hel - sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)*d1(nx1:nx2,ny1:ny2,nz1:nz2))
-   endif
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+
+      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,1)*d1(i,j,k) 
+
+      ! Q,d1,d2 are in cache, so we can do these sums for free?
+      ke_diss=ke_diss + mu*Q(i,j,k,n)*d2(i,j,k)
+      ke_diss2=ke_diss2 - mu*d1(i,j,k)**2
+      if (n==2) then  ! dv/dx, part of vor(3)
+         vor=vor + d1(i,j,k)
+         hel=hel + Q(i,j,k,3)*d1(i,j,k)
+      endif
+      if (n==3) then  ! dw/dx, part of vor(2)
+         hel=hel - Q(i,j,k,2)*d1(i,j,k)
+      endif
+   enddo
+   enddo
+   enddo
+
 
 
    ! compute u_y, u_yy
    call der(Q(1,1,1,n),d1,d2,work,numder,2)
-   rhs(:,:,:,n) = rhs(:,:,:,n) +  mu*d2 - Q(:,:,:,2)*d1 
 
-   ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
-   if (n==1) then  ! du/dy part of vor(3)
-      vor=vor - sum(d1(nx1:nx2,ny1:ny2,nz1:nz2))
-      hel=hel - sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)*d1(nx1:nx2,ny1:ny2,nz1:nz2))
-   endif
-   if (n==3) then  ! dw/dy part of vor(1)
-      hel=hel + sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)*d1(nx1:nx2,ny1:ny2,nz1:nz2))
-   endif
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+
+      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,2)*d1(i,j,k) 
+
+      ke_diss=ke_diss + mu*Q(i,j,k,n)*d2(i,j,k)
+      ke_diss2=ke_diss2 - mu*d1(i,j,k)**2
+      if (n==1) then  ! du/dy part of vor(3)
+         vor=vor - d1(i,j,k)
+         hel=hel - Q(i,j,k,3)*d1(i,j,k)
+      endif
+      if (n==3) then  ! dw/dy part of vor(1)
+         hel=hel + Q(i,j,k,1)*d1(i,j,k)
+      endif
+
+   enddo
+   enddo
+   enddo
 
 
 
    ! compute u_z, u_zz
    call der(Q(1,1,1,n),d1,d2,work,numder,3)
-   rhs(:,:,:,n) = rhs(:,:,:,n) +  mu*d2 - Q(:,:,:,3)*d1 
 
-   ke_diss=ke_diss + mu*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)*d2(nx1:nx2,ny1:ny2,nz1:nz2))
-   if (n==1) then  ! du/dz part of vor(2)
-      hel=hel + sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)*d1(nx1:nx2,ny1:ny2,nz1:nz2))
-   endif
-   if (n==2) then  ! dv/dz part of vor(1)
-      hel=hel - sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)*d1(nx1:nx2,ny1:ny2,nz1:nz2))
-   endif
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+
+      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,3)*d1(i,j,k) 
+
+      ke_diss=ke_diss + mu*Q(i,j,k,n)*d2(i,j,k)
+      ke_diss2=ke_diss2 - mu*d1(i,j,k)**2
+      if (n==1) then  ! du/dz part of vor(2)
+         hel=hel + Q(i,j,k,2)*d1(i,j,k)
+      endif
+      if (n==2) then  ! dv/dz part of vor(1)
+         hel=hel - Q(i,j,k,1)*d1(i,j,k)
+      endif
+
+   enddo
+   enddo
+   enddo
+
 
 
 enddo
@@ -99,7 +132,7 @@ call bc_rhs(rhs)
 
 if (compute_ints==1) then
    ints_timeDU=time
-   ints(3)=ke_diss
+   ints(3)=ke_diss2
    ints(4)=vor
    ints(5)=hel
 endif
