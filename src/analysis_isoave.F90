@@ -38,7 +38,7 @@ real*8 :: kr,ke,ck,xfac
 CPOINTER :: fid
 
 ! input file
-basename="temp4_"
+basename="/ccs/taylorm/dns/src/temp"
 print *,basename
 tstart=1.5
 tstop=11.0
@@ -80,7 +80,7 @@ do
 
 
   
-   call isoave1(Q)
+   call isoave1(Q,work1,work2)
 
 
    write(sdata,'(f10.4)') 10000.0000 + time

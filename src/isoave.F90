@@ -52,7 +52,8 @@ real*8,allocatable  :: SP_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable  :: SN_lll(:,:)        ! D_lll(ndelta,ndir)
 real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)    
 
-
+! also added to the file for completeness:
+real*8 :: time,epsilon,mu,ke
 
 private init
 
@@ -60,6 +61,7 @@ contains
 
 
 subroutine writeisoave(fid)
+use params
 implicit none
 
 CPOINTER fid
@@ -72,8 +74,9 @@ x=ndelta; call cwrite8(fid,x,1)
 x=ndir;   call cwrite8(fid,x,1)   
 x=4;      call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 x=4;      call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
-x=0;      call cwrite8(fid,x,1)   ! number of future type1
+x=7;      call cwrite8(fid,x,1)   ! number of scalars
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
+
 
 ! write out the r values
 do idir=1,ndir
@@ -115,6 +118,16 @@ do idir=1,ndir
    call cwrite8(fid,SN_ltt(1,idir,i),ndelta)
 enddo
 enddo
+
+call cwrite8(fid,time,1)
+x=g_nx; call cwrite8(fid,x,1)
+x=g_ny; call cwrite8(fid,x,1)
+x=g_nz; call cwrite8(fid,x,1)
+call cwrite8(fid,mu,1)
+call cwrite8(fid,ke,1)
+call cwrite8(fid,epsilon,1)
+
+
 end subroutine
 
 
@@ -123,16 +136,20 @@ end subroutine
 
 
 
-subroutine isoave1(Q)
+subroutine isoave1(Q,d1,work)
 use params
 
 !input
 real*8 :: Q(nx,ny,nz,ndim)
+real*8 :: d1(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
-integer :: idir,idel,i2,j2,k2,i,j,k,n
+real*8 :: eta,lambda,r_lambda,ke_diss
+real*8 :: dummy
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m
 
 if (firstcall) then
    firstcall=.false.
@@ -151,6 +168,44 @@ SP_ltt=0
 SP_lll=0
 SN_ltt=0
 SN_lll=0
+
+
+
+do n=1,ndim
+   ! compute u_x, u_xx
+   do m=1,ndim
+      call der(Q(1,1,1,n),d1,dummy,work,1,m)
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         if (m==1) ke = ke + .5*Q(i,j,k,n)**2
+         ke_diss=ke_diss + d1(i,j,k)*d1(i,j,k)
+      enddo
+      enddo
+      enddo
+   enddo
+enddo
+epsilon=mu*ke_diss/g_nx/g_ny/g_nz   
+ke=ke/g_nx/g_ny/g_nz
+
+eta = (mu**3 / epsilon)**.25
+lambda=10*ke*mu/epsilon       ! single direction lambda
+R_lambda = lambda*sqrt(2*ke/3)/mu 
+
+
+print *,'KE:      ',ke
+print *,'epsilon: ',epsilon
+print *,'mu       ',mu
+print *
+print *,'eta      ',eta
+print *,'delx/eta ',(1/g_nmin)/eta
+print *,'lambda   ',lambda
+print *,'R_l      ',R_lambda
+
+
+
+      
+
 
 
 !$XXX parallel do private(rhat,rperp1,rperp2,rvec,i2,j2,k2,n,delu,u_l,u_t1,u_t2)
