@@ -11,8 +11,8 @@ implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: work1(nx,ny,ny)
-real*8 :: work2(nx,ny,ny)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
