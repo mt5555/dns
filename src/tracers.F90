@@ -1,6 +1,8 @@
 #include "macros.h"
 module tracers
 use params
+use ellipse
+
 implicit none
 !
 !  Tracers module
@@ -112,6 +114,15 @@ write(message,'(a,i5)') 'total number of tracers: ',numt
 call print_message(message)
 write(message,'(a,i5)') 'number of insertable tracers: ',numt_insert
 call print_message(message)
+write(message,'(a,i5)') 'vxline_count: ',vxline_count
+call print_message(message)
+
+if (numt-numt_insert>0) then
+   if (numt-numt_insert /= vxline_count) then
+      call abort("Error: non-insert tracers <> vxline_count")
+   endif
+endif
+
 end subroutine
 
 
@@ -362,12 +373,18 @@ do i=1,numt
    igrid = 1 + floor( (tracer_tmp(i,1)-g_xcord(1))/delx )
    jgrid = 1 + floor( (tracer_tmp(i,2)-g_ycord(1))/dely )
 
-   if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
+   ! dont let point get into a cell along the boundary:
+   ! normally this would be okay, except sometimes in PSIVOR model
+   ! we put the boundary in the first row of ghost cells, and in
+   ! that case we dont know (u,v) at that boundary
+!   if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
+   if (2<=igrid .and. igrid+1<o_nx-1 .and. 2<=jgrid .and. jgrid+1<o_ny-2) then
       ! compute a new point in the center of the above cell:
       ! (do this to avoid problems with 2 cpus both claiming a point
       ! on the boundary of a cell)
       xc=.5*(g_xcord(igrid)+g_xcord(igrid+1))
       yc=.5*(g_ycord(jgrid)+g_ycord(jgrid+1))
+
 
       ! find cpu which owns the grid point (xc,yc)
       if (xcord(intx1)<xc .and. xc<xcord(intx2)+delx .and. &
@@ -410,7 +427,7 @@ do i=1,numt
             tracer_tmp(i,j)=tracer_old(i,j)+c2*trhs(j)
          enddo
          if (maxval(abs(Qint(:,1)))>10) call abort("qint to big")
-         
+
       else
          ! point does not belong to my_pe, set position to -inf
          do j=1,ndim

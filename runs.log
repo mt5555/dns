@@ -9,12 +9,16 @@ new run  testing voriticty interpolation along a line thru vorticity max
 
 Running in /ccs/taylorm/dns/src/vxpair: (MOVE LATER?)
 
-vx4096c   mu=7e-8  IN shankara
+
+vx4096c   mu=7e-8  ran to t=100
+          init_cond_subtype=1 (no PSI boundary update)
 
 
-Make a new run with BIOTSAVAR recomputed every 50 timesteps.
-Fix tracers leaving domain: dont crash
-vxline tracers: reset back to origin.  
+vx4096d   mu=7e-8   IN
+          init_cond_subtype=2 (PSI boundary update every 50 timesteps)
+                               w cutoff 5e-3
+
+          vxline tracers: reset every time they cross
 
 
 

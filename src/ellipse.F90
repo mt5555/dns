@@ -214,7 +214,6 @@ endif
 ! now interpolate to the set of points
 ! x=center_finegrid(1)
 ! y=g_ycord(1):.1:g_ycord(o_ny) 
-xi=center_finegrid(1)
 
 if (vxline_count==0) then
    ! was not initialized by initial condition - so do it now:
@@ -227,6 +226,7 @@ if (vxline_count==0) then
    enddo
 endif
 
+xi=center_finegrid(1)
 do i=1,vxline_count
    call interp_to_point(vxline_w(i),w,xi,vxline_y(i))
 enddo

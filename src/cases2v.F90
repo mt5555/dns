@@ -254,7 +254,7 @@ endif
 
 if (init_cond_subtype ==2) then
    biotsavart_cutoff=5e-3
-   biotsavart_apply=5
+   biotsavart_apply=50
    delta=.2
    biotsavart_ubar=.089
    yscale=2
@@ -280,13 +280,11 @@ call init_grid()   ! redo grid points since we changed scalings
 
 xlocation=xscale/2
 
-#if 0
 ! initialize the crossing and vxline points:
 vxline_count=9
 do i=1,9
    vxline_y(i)=.1*i
 enddo
-#endif
 
 if (init==0) return
 
