@@ -38,7 +38,7 @@ if (option==3)
    x_ck=1:500;
    scalep = 0;
    plaw=-5/3;
-   ax=[1,1e3,1e-12,1.0];
+   ax=[1,1e4,1e-6,1.0];
 end
 
 

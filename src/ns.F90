@@ -225,6 +225,7 @@ real*8 uu,vv,ww,dummy
 integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
+real*8 :: p_diss(n_var),pke(n_var)
 real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8 :: vor(3)
@@ -616,6 +617,8 @@ enddo
 ! passive scalars:
 ! dealias the RHS scalars, and add diffusion:
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+pke=0
+p_diss=0               
 do ns=np1,np2
    ! FFT into p
    call z_fft3d_trashinput(rhsg(1,1,1,ns),p,work)
@@ -633,11 +636,23 @@ do ns=np1,np2
                xw=(im*im + jm*jm + km*km)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
                rhs(k,i,j,ns)=p(k,i,j) - xw_viss*Qhat(k,i,j,ns)
+! dissipation only
+!               rhs(k,i,j,ns)=- xw_viss*Qhat(k,i,j,ns)
             endif
+#if 0
+            if (compute_ints==1) then
+               xfac = 2*2*2
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+               u2=Qhat(k,i,j,ns)*Qhat(k,i,j,ns)
+               pke(ns) = pke(ns) + .5*xfac*u2
+               p_diss(ns) = p_diss(ns) + xfac*xw_viss*u2
+         endif
+#endif
          enddo
       enddo
    enddo
-
 enddo
 
 
@@ -668,6 +683,9 @@ if (compute_ints==1) then
    ints(10)=-ke_diss                 ! <u,u_xx>
    ints(11)=h_diss
    maxs(5)=maxvor
+
+!   ints(6)=pke(4)
+!   ints(10)=-p_diss(4)
 endif
 
 call wallclock(tmx2)

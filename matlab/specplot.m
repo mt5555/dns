@@ -6,16 +6,10 @@
 clear
 movie=1;       % plot all the spectrum, pausing between each one
 movie_plot=0;  % create .ps out of all the spectra
+endian = 'b';  % default endian-ness of spec file
 CK_orig=1.0;
 decay_scale=0;
 tsave=[];
-
-% name of the file, without the ".spec" extension
-%name='cj20000.0000';
-%namedir='/ccs/taylorm/dns/src/';
-
-%name='temp0000.0000';
-%namedir='/ccs/taylorm/dns/src/';
 
 
 
@@ -23,16 +17,11 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
-
-%name='sk2560000.0000';
-%namedir='/scratch2/taylorm/sk256/';
-CK_orig=1.613;
-
 name='tmix256C';
-namedir='/scratch2/taylorm/tmix256C/';
+namedir='/scratch2/taylorm/tmix256C/archive/';
 CK_orig=1.613;
-movie_plot=1;
-
+movie_plot=0;
+endian='l';
 
 %name='decay2048'; namedir='/ccs/scratch/taylorm/decay/';
 %CK_orig=1.613; decay_scale=1;
@@ -40,11 +29,18 @@ movie_plot=1;
 %movie=0; tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 
 
+
+
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
-name = 'Rot10000.0000';
-namedir = '/ccs/wingate/Rotation/Rot1/';
+%name = 'Rot10000.0000';
+%namedir = '/ccs/wingate/Rotation/Rot1/';
+
+
+
+
+
 
 
 spec_r_save=[];
@@ -52,11 +48,9 @@ spec_r_save_fac3=[];
 
 % note: endianopen() will notwork with .spec files
 %because first number is not necessaryly an integer 
-fid=fopen([namedir,name,'.spec'],'r','b');
+fid=fopen([namedir,name,'.spec'],'r',endian);
 fidt=endianopen([namedir,name,'.spect'],'r');
 fidp=endianopen([namedir,name,'.pspec'],'r');  
-
-
 %fidt=-1;
 %fidp=-1;
 
@@ -276,7 +270,13 @@ while (time>=.0 & time<=9999.3)
         pspec_z=fread(fidp,np_z,'float64');
      end
 
-     
+     np=1;
+     c2=sum(pspec_r(:,np));     
+     x=(0:np_r-1)';
+     cx2=sum((x.^2).*pspec_r(:,np));     % 3<c,1*c,1>
+     cxx2=sum((x.^4).*pspec_r(:,np));    % 3<c,11*c,11> 
+     %[c2,cx2,cxx2]
+     c2*(cxx2/3)/(cx2*cx2/9)
   end
 
 
