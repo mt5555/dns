@@ -344,6 +344,9 @@ if (my_pe==io_pe) then
    !
    !   -r   use a restart file for the initial conditions
    !
+   !   -ui  use UDM restart file for initial condition
+   !   -uo  use UDM for the output file
+   !
    !   -s   restart and output file are 2/3 dealiased spectral coefficieints,
    !        not the default grid point values
    !
@@ -361,6 +364,10 @@ if (my_pe==io_pe) then
          enable_lsf_timelimit=1
       else if (message(1:2)=="-s") then
          rw_spec=.true.
+      else if (message(1:3)=="-ui") then
+         udm_input=.true.
+      else if (message(1:3)=="-uo") then
+         udm_output=.true.
       else if (message(1:2)=="-d") then
          i=i+1
          if (i>iargc()) exit

@@ -98,8 +98,6 @@ ifeq ($(UNAME),OSF1)
    #LSFLIB = -L/lsf/lib -lbat -llsf 
    #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
-   #UDM = -DHAVE_UDM -DUDM_OUTPUT -DUDM_RESTART
-   #UDM = -DHAVE_UDM -DUDM_OUTPUT
    UDM = -I../../udm/udm/include -DHAVE_UDM 
    UDMLIB = -L../../udm/udm/lib -ludm 
 

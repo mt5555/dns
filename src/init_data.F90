@@ -52,9 +52,9 @@ integer :: n
 Q=0
 if (equations==NS_UVW) then
 
-#ifdef UDM_RESTART
+if (udm_input) then
    call udm_read_uvw(Q,Qhat,work1,work2)
-#else
+else
    if (rw_spec) then
    call print_message("Restarting from file restart.[us,vs,ws]")
    fname = rundir(1:len_trim(rundir)) // "restart.us"
@@ -79,7 +79,7 @@ if (equations==NS_UVW) then
       call singlefile_io2(time_initial,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,rw_spec)
    endif
    endif
-#endif   
+endif
 
 else if (equations==SHALLOW) then
    call print_message("Restarting from file restart.[uvh]")

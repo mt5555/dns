@@ -1,12 +1,4 @@
-#ifndef HAVE_UDM
-
-! some compilers cannot handle an empty file:
-subroutine udm_dummy()
-end subroutine
-
-#else
 #include "macros.h"
-
 subroutine udm_write_uvw(fname,time,Q,Qhat,work1,work2)
 !
 ! 
@@ -44,6 +36,8 @@ character(len=80) attrname
 character*(2) dotudm 
 
 ! character*(6) dbgname
+
+#ifdef HAVE_UDM
 
 #include "UDMFCInterfaceF.h"
 
@@ -199,7 +193,9 @@ character*(2) dotudm
 
    call UDM_FILE_CLOSE(fidudm, ierr)
 
-
+#else
+   call abort("udm_write_uvw: Error: UDM support not compiled in")
+#endif
 end subroutine
 
 
@@ -237,6 +233,7 @@ character(len=80) dotudm
 character*2 nochar 
 ! character*(5) dbgname 
 
+#ifdef HAVE_UDM
 
 #include "UDMFCInterfaceF.h"
 
@@ -375,8 +372,9 @@ Q=0
    call UDM_FILE_CLOSE(fidudm, ierr)
 
 
+#else
+   call abort("udm_write_uvw: Error: UDM support not compiled in")
+#endif
 
 end subroutine
 
-
-#endif
