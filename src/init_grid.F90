@@ -22,7 +22,6 @@ integer input_file_type
 
 call params_init()
 call fft_interface_init()
-call init_mpi_comm3d()
 
 if (my_pe==io_pe) then
    print *,'Reading input file from stdin...'
@@ -53,10 +52,10 @@ call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call MPI_Barrier(comm_3d)
 
 if (.not. allocated(custom)) allocate(custom(ncustom))
 call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
+call MPI_Barrier(comm_3d,ierr)
 
 #endif
 

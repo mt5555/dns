@@ -99,11 +99,9 @@ if (doit .or. itime<5) then
    write(message,'(3(a,e12.5))') 'max(div)=',divx,'   <z-vor>=',ints(4),'   <hel>=',ints(5)
    call print_message(message)	
 
-   mx = ints(3)/(1d-100+ints(2))
-   if (mx>1) mx=1    ! round-off error if ke_viscous > ke_tot
-   if (mx<-1) mx=-1  ! total ke is growing, but viscous term is negative
+   mx=ints(1)/g_nx/g_ny/g_nz  ! dont mult all the ints together, overflow!
    
-   write(message,'(a,f14.10,a,f9.5,a,f9.5,a)') 'ke: ',ints(1)/(nslabx*nslaby*nslabz),&
+   write(message,'(a,f14.10,a,f9.5,a,f9.5,a)') 'ke: ',mx,&
      ' d/dt log(ke) tot:',ints(2)/ints(1),&
      ' d/dt log(ke) diffusion:',ints(3)/ints(1)
    call print_message(message)	

@@ -14,9 +14,7 @@ integer ierr
 
 
 call init_mpi       
-
-write(message,'(a)') 'Initializing grid and b.c. and reading input file'
-call print_message(message)
+call init_mpi_comm3d()
 call init_grid      
 
 
