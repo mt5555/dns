@@ -11,11 +11,11 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 range=0:1.0:1000.0;
 %range=[.00];
 %name='../src/kh/khK';
-name='../src/vxpair/vxpair0_';
+name='../src/vxpair/vxpair2_';
 
 
 usefig=1;
-mkpr=1;            % make ps and jpeg files
+mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
 
 
@@ -132,7 +132,7 @@ for i=range
     end
 
     'pause'
-    pause
+%    pause
   end
 end
 return

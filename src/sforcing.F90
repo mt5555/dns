@@ -120,6 +120,8 @@ init_sforcing=1
       tau=25
    else if (init_cond_subtype==2) then
       tau=1
+   else if (init_cond_subtype==3) then
+      tau=500
    else
       tau=5
    endif

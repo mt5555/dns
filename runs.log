@@ -11,6 +11,7 @@ t=1.5  NIRVANA timings              t=15
 2305x1025 on 5x5      9 min          90min
 2305x1025 on 1x25     in                         1e-7
 
+2049x1025 autrey                     508min
 
 
 
@@ -80,7 +81,14 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 tau=25  (subtype=1)
 250E   .1e-3   513   5.20      1.36        2.87 
 
-500B   .1e-3   IN
+500B   .1e-3   IN  (stopped)
+
+tau=500 (subtype=3)
+250F   .1e-3
+250D   .8e-3
+
+
+
 
 
 
