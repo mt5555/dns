@@ -37,3 +37,20 @@ A version of ns_grid.F90 that supports the impulse formulation
 of the equations.  No longer maintined, but may be revived for
 the NS-alpha model in U-V form.  
 
+5. shallow.F90  
+
+A 2D shallow water version of the model.  Supports alpha>=0 with the
+div(tau) form of the equations.  Fourier and doubly periodic only (but
+just because we use hyper viscosity.  Could be easily converted to
+grid point model) See shallow.doc for some more documentation.
+
+
+
+
+
+
+
+
+
+
+

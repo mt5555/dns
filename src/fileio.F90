@@ -220,7 +220,6 @@ if (doit_screen) then
    call print_message(message)	
 endif
 
-
 !
 !  restart dumps
 !

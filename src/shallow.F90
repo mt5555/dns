@@ -70,6 +70,7 @@ enddo
 call getrhs(rhs,Q_tmp,Q_grid,time+delt/2.0,0,work1,work2)
 Q=Q+delt*rhs/3.0
 
+
 ! stage 4
 Q_tmp = Q_old + delt*rhs
 Q_grid=Q_tmp
@@ -78,6 +79,7 @@ do n=1,3
 enddo
 call getrhs(rhs,Q_tmp,Q_grid,time+delt,0,work1,work2)
 Q=Q+delt*rhs/6.0
+
 
 
 Q_grid=Q
@@ -274,7 +276,13 @@ if (alpha_value>0) then
 
    do n=1,2
       work=divtau(:,:,n)-grav*gradh(:,:,n)      
-      call cg_shallow(divtau(1,1,n),work,1d0,-alpha_value**2,1d-5,Q(1,1,3))
+      !call fft3d(work,work2)
+      !call fft_filter_dealias(work)
+      !call ifft3d(work,work2)
+      divtau(:,:,n)=work  ! use RHS as our initial guess also
+
+      call cg_shallow(divtau(1,1,n),work,1d0,-alpha_value**2,1d-8,Q(1,1,3))
+      !call jacobi(divtau(1,1,n),work,1d0,-alpha_value**2,1d-6,Q(1,1,3))
       !call helmholtz_inv(divtau(1,1,n),work,1d0,-alpha_value**2)
    enddo
 

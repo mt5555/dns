@@ -210,6 +210,12 @@ if (time_final<0) then
 else
    time_final=time_final+time_initial
 endif
+write(message,'(a,f20.10)') "initial time: ",time_initial
+call print_message(message)
+write(message,'(a,f20.10)') "final time:   ",time_final
+call print_message(message)
+write(message,'(a,i10)') "max number timesteps: ",itime_final
+call print_message(message)
 
 
 
@@ -235,7 +241,7 @@ do
    maxs(6)=time
    maxs(7)=time_old
 
-   if (maxs(8)>=5 .and. maxs(8)<30 .and. enable_lsf_timelimit) then
+   if (maxs(8)>=0 .and. maxs(8)<30 .and. enable_lsf_timelimit) then
       write(message,'(a,f20.10)') "LSF timelimit approaching. Stoping at time=",time
       call print_message("** ERROR ****************************************")
       call print_message(message)

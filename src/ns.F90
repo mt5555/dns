@@ -734,7 +734,7 @@ gradu=div
 do n=1,3
    work=gradu(:,:,:,n)
 #ifdef JACOBI
-   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0)
+   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0,dummy)
 #else
    call cg(work,gradu(1,1,1,n),1d0,-alpha_value**2,.03d0)
 #endif

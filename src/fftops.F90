@@ -306,49 +306,6 @@ end subroutine
 
 
 
-subroutine helmholtz(f,lf,alpha,beta,h)
-!
-!  input: f
-!  output: lf
-!
-!  lf = [alpha + beta*laplacian](f)
-!
-use params
-use fft_interface
-use transpose
-implicit none
-real*8 f(nx,ny,nz)    ! input
-real*8 lf(nx,ny,nz)    ! output
-real*8 h(nx,ny,nz)    ! height field (used only for shallow water equations)
-real*8 :: alpha
-real*8 :: beta
-
-!local
-real*8 work(nx,ny,nz)    ! work array
-real*8 gradf(nx,ny,nz,2) ! work array
-real*8 fxx(nx,ny,nz)     ! work array
-real*8 dummy
-integer n
-
-if (equations==1) then
-   do n=1,2
-      call der(f,gradf(1,1,1,n),dummy,work,DX_ONLY,n)
-      gradf(:,:,:,n)=h*gradf(:,:,:,n)
-   enddo
-   call divergence(lf,gradf,fxx,work)
-   lf=alpha*f + beta*lf/h
-else
-   ! linear helmholtz operator
-   lf=alpha*f
-   do n=1,3
-      call der(f,gradf,fxx,work,DX_AND_DXX,n)
-      lf=lf+beta*fxx
-   enddo
-endif
-
-end subroutine
-
-
 
 
 
@@ -635,6 +592,9 @@ do k=nz1,nz2
          xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
          if (xfac/=0) xfac = 1/xfac
          p(i,j,k)=p(i,j,k)*xfac
+
+
+
       enddo
    enddo
 enddo

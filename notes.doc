@@ -6,6 +6,8 @@ E&Liu KH problem.
        2e-4: looks good, a little too smoothed 
 
 
+1. LSF time remaining - fix this for CPQ
+
 
 1. verify <s**2> = .5*vor**2    for iso/homogeneity
 
@@ -13,7 +15,7 @@ E&Liu KH problem.
    see nots about ints(3) and ints(9) in params.F90
 
 1. matlab code: 
-       last have averages: 
+       last half averages: 
           epsilson
           t_eddy
           h_eddy
@@ -86,7 +88,6 @@ extrapolated:
 1024^3  144Gb            24Gb per variable                             1b gridpoints
 2048^3  1152Gb           192Gb per variable      
 4096^3  9216Gb           1536Gb per variable      
-
 
 
 t=-43  (.05)                         Nirv    BlueMtn       10eddy

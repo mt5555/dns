@@ -89,7 +89,7 @@ if ($restart == 1) then
       echo "No restart.w file"
       exit 1
    endif
-   $MPIRUN ./dns -r -d . $name < $refin 
+   $MPIRUN ./dns -t -r -d . $name < $refin 
 else
    #cleanup:  
    \rm -f {$name}\*.sf
@@ -99,7 +99,7 @@ else
    \rm -f {$name}\*.v
    \rm -f {$name}\*.w
 
-   $MPIRUN  ./dns  -d . $name < $refin
+   $MPIRUN  ./dns -t -d . $name < $refin
 endif
 
 

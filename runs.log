@@ -1,4 +1,19 @@
 **********************************************************************************
+1/2/02
+
+summary of ISO12 250^3 runs.
+subtype=0:   tau (forcing relaxaction coefficient) = 5
+
+
+        mu     R_l   h/eta    turnover    epsilon   xyz-spec      R-spec
+250   .1e-3    347   4.04      1.53        1.04      hookup        N/A
+250B  .2e-3    241   2.41      1.49        1.05      hookup        N/A
+250C  .4e-3    167   1.44      1.44        1.07      hookup        N/A
+250D  .8e-3  
+
+500   .1e-3   
+
+**********************************************************************************
 12/12/01
 shallow water runs
 
