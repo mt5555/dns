@@ -7,6 +7,8 @@
 #BSUB -n 128 -R "span[ptile=128]"
 
 module list
+set HDIR=`pwd`
+set SRC=$HOME/dns/src
 
 set name = iso12_250_
 #set refin=$HOME/dns/prod/benchmark128.inp
@@ -31,8 +33,6 @@ set resub_file = $SRC/{$name}resub
 
 
 
-set HDIR=`pwd`
-set SRC=$HOME/dns/src
 
 # CPQ or BlueMountain?
 set OSTYPE = `uname`

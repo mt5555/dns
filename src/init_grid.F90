@@ -414,9 +414,14 @@ read(*,*) compute_struct
 read(*,'(a12)') sdata
 print *,'method: ',sdata
 if (sdata=='fft') then
+   numerical_method=0
    dealias=.false.
 else if (sdata=='fft-dealias') then
+   numerical_method=0
    dealias=.true.
+else if (sdata=='4th') then
+   numerical_method=1
+   dealias=.false.
 else
    print *,'value=',sdata
    call abort("only 'fft' derivative method supported")

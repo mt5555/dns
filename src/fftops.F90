@@ -25,6 +25,40 @@ real*8 px(nx,ny,nz)
 
 integer n1,n1d,n2,n2d,n3,n3d
 
+if (numerical_method==1) then
+
+if (index==1) then
+
+   call transpose_to_x(p,pt,n1,n1d,n2,n2d,n3,n3d)
+   call fourth_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,delx)
+   if (numder==2) then
+      call transpose_from_x(px,pxx,n1,n1d,n2,n2d,n3,n3d)
+   endif
+   call transpose_from_x(pt,px,n1,n1d,n2,n2d,n3,n3d)
+
+
+else if (index==2) then
+
+   call transpose_to_y(p,pt,n1,n1d,n2,n2d,n3,n3d)
+   ! 1st derivative returned in pt, 2nd derivative returned in px
+   call fourth_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,dely)
+   if (numder==2) then
+      call transpose_from_y(px,pxx,n1,n1d,n2,n2d,n3,n3d)
+   endif
+   call transpose_from_y(pt,px,n1,n1d,n2,n2d,n3,n3d)
+
+else if (index==3) then
+   call transpose_to_z(p,pt,n1,n1d,n2,n2d,n3,n3d)
+   call fourth_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d,delz)
+   if (numder==2) then
+      call transpose_from_z(px,pxx,n1,n1d,n2,n2d,n3,n3d)
+   endif
+   call transpose_from_z(pt,px,n1,n1d,n2,n2d,n3,n3d)
+
+endif
+
+
+else ! FFT method
 
 if (index==1) then
 
@@ -53,6 +87,8 @@ else if (index==3) then
       call transpose_from_z(px,pxx,n1,n1d,n2,n2d,n3,n3d)
    endif
    call transpose_from_z(pt,px,n1,n1d,n2,n2d,n3,n3d)
+
+endif
 
 endif
 
@@ -470,25 +506,116 @@ real*8 p(nx,ny,nz)
 real*8 alpha,beta
 
 integer i,j,k,im,jm,km
-real*8 xfac
+real*8 xfac,xm,ym,zm
 
-   do k=nz1,nz2
-      km=kmcord(k)
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2
-         jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2
-            im=imcord(i)
-            if (im==g_nx/2) im=0
-            xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
-            if (xfac/=0) xfac = 1/xfac
-            p(i,j,k)=p(i,j,k)*xfac
-         enddo
+if (numerical_method==1) then
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+
+         ! u(x+h)-u(x-h)  ->   2i sin(k*pi2*h)
+         ! applied twice: ->   -4 sin(k*pi2*h)^2
+         xm=2*sin(imcord(i)*pi2*delx)/(2*delx)
+         ym=2*sin(jmcord(j)*pi2*dely)/(2*dely)
+         zm=2*sin(kmcord(k)*pi2*delz)/(2*delz)
+         xfac= alpha + beta*(-xm*xm -ym*ym - zm*zm)
+         if (xfac/=0) xfac = 1/xfac
+         p(i,j,k)=p(i,j,k)*xfac
       enddo
    enddo
+enddo
+
+else
+
+do k=nz1,nz2
+   km=kmcord(k)
+   if (km==g_nz/2) km=0
+   do j=ny1,ny2
+      jm=jmcord(j)
+      if (jm==g_ny/2) jm=0
+      do i=nx1,nx2
+         im=imcord(i)
+         if (im==g_nx/2) im=0
+         xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
+         if (xfac/=0) xfac = 1/xfac
+         p(i,j,k)=p(i,j,k)*xfac
+      enddo
+   enddo
+enddo
+endif
+
 
 end subroutine
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  Compute 4th order derivates.
+!  This routine will be obsolete when we get the ghost cells working,
+!  and should be deleted
+!
+!  input: px 
+!  output:
+!     if numder=1   return d/dx along first direction in px
+!                   (and pxx is not accessed) 
+!     if numder=2   return d2/dx2 along first direction in pxx
+!
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fourth_derivatives(px,pxx,numder,n1,n1d,n2,n2d,n3,n3d,h)
+
+implicit none
+
+integer numder,n1,n1d,n2,n2d,n3,n3d
+real*8 :: px(n1d,n2d,n3d)
+real*8 :: pxx(n1d,n2d,n3d)
+real*8 :: work(n1d)
+real*8 :: h
+
+
+integer i,j,k,i0,i1,i2,i3
+
+do k=1,n3
+do j=1,n2
+   do i=1,n1
+      work(i)=px(i,j,k)
+   enddo
+
+   i0=n1-1
+   i1=n1
+   i2=2
+   i3=3
+   do i=1,n1
+!      px(i,j,k)= (2*(work(i2)-work(i1))/3 - (work(i3)-work(i0))/12 )/h
+      px(i,j,k)= (work(i2)-work(i1))/(2*h)
+      i0=i1
+      i1=i
+      i2=i3
+      i3=i3+1
+      if (i3>n1) i3=i3-n1
+   enddo
+   if (numder>=2) then
+      i0=n1-1
+      i1=n1
+      i2=2
+      i3=3
+      do i=1,n1
+         !pxx(i,j,k)= (2*(px(i2,j,k)-px(i1,j,k))/3 - (px(i3,j,k)-px(i0,j,k))/12 )/h
+         pxx(i,j,k)= (px(i2,j,k)-px(i1,j,k))/(2*h)
+         i0=i1
+         i1=i
+         i2=i3
+         i3=i3+1
+         if (i3>n1) i3=i3-n1
+      enddo
+   endif
+enddo
+enddo
+end subroutine
+
+
 
 
 

@@ -81,6 +81,7 @@ call ns3D(rhs,Q,time+3*delt/4,0,work1,work2,q4)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
 
+
 #endif
 
 
@@ -250,7 +251,7 @@ enddo
 ! apply b.c. to rhs:
 call bc_rhs(rhs)
 
-call divfree(rhs,work)
+call divfree_gridspace(rhs,work)
 
 
 if (compute_ints==1) then

@@ -84,10 +84,7 @@ khL  1024x1024  mu = 5.0e-5    CFL: 1.5/.25   Noise at t=.25
                                               at t=.15 
                                               cfl_vis has no effect above .15
                                              
-kkM  1024x1024  mu = 5.0e-5    CFL: 1.45/.25  IN
-
-
-
+kkM  1024x1024  mu = 5.0e-5    CFL: 1.45/.25  IN   looks ok so far...
 
 
 
