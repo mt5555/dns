@@ -108,7 +108,14 @@ real*8 :: time=0
 
 call print_message("Restart tracer data from file restart.tracer")
 call tracers_io(1,fpe,'restart.tracer')
+write(message,'(a,i5)') 'total number of tracers: ',numt
+call print_message(message)
+write(message,'(a,i5)') 'number of insertable tracers: ',numt_insert
+call print_message(message)
 end subroutine
+
+
+
 
 
 subroutine tracers_save(fpe,time)
@@ -232,6 +239,7 @@ endif
 #ifdef USE_MPI
 if (read==1) then
    call MPI_bcast(numt,1,MPI_INTEGER,fpe,comm_3d ,ierr)
+   call MPI_bcast(numt_insert,1,MPI_INTEGER,fpe,comm_3d ,ierr)
    if (my_pe/=fpe) then
       numt_in=numt
       call allocate_tracers(numt_in)      

@@ -7,7 +7,7 @@
 
 %name='../src/temp';
 %name='../src/temp0000.0000.ellipse';
-name='../src/vxpair/vx2048a0000.0000.ellipse';
+name='/data/vxpair/vx2048a0000.0000.ellipse';
 fid=fopen(name,'r');
 
   
@@ -32,8 +32,7 @@ while(1)
   axis([0 4 0 2]);
   title(sprintf('time=%f',time))
   hold off;
-    'pause'
-    pause
+  %    'pause' ;     pause
 end
 close(fid);
 return
