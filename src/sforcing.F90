@@ -902,8 +902,8 @@ if (0==init_sforcing) then
    init_sforcing=1
    allocate(fhat(g_nz2,nslabx,ny_2dz,3))
    if (forcing_type==8) then
-      numb1=16
-      numb=32    ! must be <= 512
+      numb1=max(forcing_peak_waveno-8,1)
+      numb=forcing_peak_waveno+8
       ener_target=0
       do wn=numb1,numb
          ener_target(wn)=exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
@@ -964,15 +964,26 @@ if (new_f==1) then
                wx= - im*rhs(k,i+z_imsign(i),j,3)
                wy= - jm*rhs(k,i,j+z_jmsign(j),3)
 
-               vor(1) = wy - vz
-               vor(2) = uz - wx 
-               vor(3) = vx - uy
+               if (ndim==3) then
+                  vor(1) = wy - vz
+                  vor(2) = uz - wx 
+                  vor(3) = vx - uy
+                  ! scale out various shell factors:
+                  vor=vor/sqrt(xfac*numk(wn)*3.0)
+                  ! undo curl scaling:
+                  vor = vor * sqrt(1.5)/ wn
+                  ! vorticity now scaled so that E(wn)=1
+               else
+                  vor(1) = uy
+                  vor(2) = -ux
+                  vor(3) = 0
+                  ! scale out various shell factors:
+                  vor=vor/sqrt(xfac*numk(wn)*2.0)
+                  ! undo curl scaling:
+                  vor = vor * sqrt(3.0)/ wn
+                  ! vorticity now scaled so that E(wn)=1
+               endif
 
-               ! scale out various shell factors:
-               vor=vor/sqrt(xfac*numk(wn)*3.0)
-               ! undo curl scaling:
-               vor = vor * sqrt(1.5)/ wn
-               ! vorticity now scaled so that E(wn)=1
 
                do n=1,3
                   vor(n)=vor(n)*sqrt(ener_target(wn)/delt)
