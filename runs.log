@@ -1,12 +1,26 @@
 **********************************************************************************
 10/3/2004
 
+New Monika VXPAIR case:
+
+init_subtype==6 (see cases2v.F90)
+delta=.1
+
+./gridsetup.py 4 1 1 4800 2880 1 2 2 0 2 2 0 2
+
+KIWI: 4 cpus  time(min) per timestep:  .468   timestep ~ .0011s
+      2 cpus                           .644
+
+
+**********************************************************************************
+10/3/2004
+
 Evelyn found a bug during restart, at 2048^2?  (or was it 4096^2)
 Checking 2048^2 on 4 cpus (kiwi)
 
-IN:  eve1   output: .01, .02
+eve1 (done)   output: .01, .02
 
-eve2 (next) restart from .01, run to .02
+eve2 (IN) restart from .01, run to .02
 
 
 
