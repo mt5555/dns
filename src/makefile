@@ -70,6 +70,11 @@ ifeq ($(UNAME),IRIX64)
    LSFLIB = -L /lsf/lib64 -lbat -llsf 
    LSFFLAGS = -I/usr/include -I/lsf/share/include -DUSE_LSFTIME
 
+   ifeq ($(HOST),guyot.acl.lanl.org)
+      LSFLIB = 
+      LSFFLAGS =	
+   endif
+
    # OPENMP flag: -mp 
    LDFLAGS =  -l scs $(LSFLIB)  #-Lstk -lstk
    # When SGI adds padding to data in params.h, MPI breaks:  
