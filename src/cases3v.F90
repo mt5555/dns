@@ -536,16 +536,17 @@ real*8 :: enerb_target(numb)
 real*8 :: p,p1,p2,ku,xnb,fac1,fac2,fac3
 integer ::  nb
 
-   p=2;
-   p1=(1+p)/2
-   p2=p/2
-   ku=10
+enerb_target=0
+p=2;
+p1=(1+p)/2
+p2=p/2
+ku=10
 
-   do nb=1,numb
-      xnb = nb
-      fac1=p2**p1 * xnb**p
-      fac2=ku**(p+1)
-      fac3=exp(-p2* (xnb/ku)**2)
-      enerb_target(nb)=fac1*fac3/fac2
-   enddo
-end subroutine
+do nb=1,numb
+   xnb = nb
+   fac1=p2**p1 * xnb**p
+   fac2=ku**(p+1)
+   fac3=exp(-p2* (xnb/ku)**2)
+   enerb_target(nb)=fac1*fac3/fac2
+enddo
+end subroutine livescu_spectrum

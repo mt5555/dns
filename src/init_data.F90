@@ -308,21 +308,20 @@ allocate(enerb(NUMBANDS))
 
 call livescu_spectrum(enerb_target,NUMBANDS)
 
-   call input1(Q(1,1,1,np),work1,work2,null,io_pe,.true.,-1)  
-   call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1)
-   ! convert to 0,1:
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      if (Q(i,j,k,np)<0) then
-         Q(i,j,k,np)=0
-      else
-         Q(i,j,k,np)=1
-      endif
-   enddo
-   enddo
-   enddo
-
+call input1(Q(1,1,1,np),work1,work2,null,io_pe,.true.,-1)  
+call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1)
+! convert to 0,1:
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   if (Q(i,j,k,np)<0) then
+      Q(i,j,k,np)=0
+   else
+      Q(i,j,k,np)=1
+   endif
+enddo
+enddo
+enddo
 
 deallocate(enerb_target)
 deallocate(enerb)

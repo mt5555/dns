@@ -57,7 +57,17 @@ endif
 endif
 
 
-if (.not.doit_model) return
+! do PDF's and scalars if doit_model=.true., OR if this is a restart
+! but we have computed new passive scalars.
+if ((compute_passive_on_restart .and. time==time_initial) .or. &
+    doit_model) then
+   ! do the rest of this suburoutine
+else
+   return
+endif
+
+
+
 
 !
 ! the "expensive" scalars
