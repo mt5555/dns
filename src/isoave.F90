@@ -56,6 +56,7 @@ real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable  :: dwork2(:,:)     
 real*8,allocatable  :: dwork3(:,:,:)   
 
+
 ! also added to the file for completeness:
 real*8,private :: epsilon,mu,ke
 
@@ -152,7 +153,7 @@ end subroutine
 !       subcube code will still work)
 !
 !
-subroutine isoavep(Q,Qs,Qt,Qst,range)
+subroutine isoavep(Q,Qs,Qt,Qst)
 use params
 use transpose
 
@@ -162,6 +163,7 @@ real*8 :: Qt(g_nz2,nslabx,ny_2dz,ndim)   ! transpose
 real*8 :: Qs(nx,ny,nz,ndim)              ! shifted original data
 real*8 :: Qst(g_nz2,nslabx,ny_2dz,ndim)  ! transpose
 real*8 :: range(3,2)
+
 
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
@@ -194,26 +196,19 @@ SN_lll=0
 
 ke_diss=0
 ke=0
-ntot=0
+ntot=g_nx*g_ny*g_nz
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
       do k=nz1,nz2
-         if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
-            do j=ny1,ny2
-               if (ycord(j)>=range(2,1) .and. ycord(j)<range(2,2)) then
-                  do i=nx1,nx2
-                     if (xcord(i)>=range(1,1) .and. xcord(i)<range(1,2)) then
-                        
-                        ntot=ntot+1
-                        if (m==1) ke = ke + .5*Q(i,j,k,n)**2
-                        ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
-                        
-                     endif
-                  enddo
-               endif
+         do j=ny1,ny2
+            do i=nx1,nx2
+               
+               if (m==1) ke = ke + .5*Q(i,j,k,n)**2
+               ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
+               
             enddo
-         endif
+         enddo
       enddo
    enddo
 enddo
@@ -224,8 +219,6 @@ enddo
    call MPI_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ke
    call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   i=ntot
-   call MPI_allreduce(i,ntot,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif
 
 epsilon=mu*ke_diss/ntot
@@ -251,7 +244,8 @@ endif
 
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo      
+enddo   
+   
 
 
 
@@ -292,10 +286,10 @@ do idir=1,ndir
 !     if (dir_shift(3)==0 .or. ncpu_z==1) then
       if (dir_shift(3)==0) then  
          ! no shifts - compute directly 
-         call comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_shift,range)
+         call comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_shift)
       else if (dir_shift(2)==0) then
          ! no need to shift, y-direction alread 0
-         call comp_str_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift,range)
+         call comp_str_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(2),dir_shift(3))==0) then
          ! 
          ! shift in y by (y/z)*z-index:
@@ -320,7 +314,7 @@ do idir=1,ndir
          do n=1,3
             call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift,range)
+         call comp_str_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift)
       else if (mod(dir_shift(3),dir_shift(2))==0) then
          ! 
          ! shift in z by (z/y)*y-index
@@ -348,7 +342,280 @@ do idir=1,ndir
          do n=1,3
             call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
          enddo
-         call comp_str_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift,range)
+         call comp_str_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift)
+      else
+         call abort("parallel computation of direction not supported")
+      endif
+   enddo
+
+
+D_ll=D_ll/ntot
+D_tt=D_tt/ntot
+D_ltt=D_ltt/ntot
+D_lll=D_lll/ntot
+
+SP_ltt=SP_ltt/ntot
+SP_lll=SP_lll/ntot
+SN_ltt=SN_ltt/ntot
+SN_lll=SN_lll/ntot
+
+#ifdef USE_MPI
+   dwork2=D_ll
+   call MPI_allreduce(dwork2,D_ll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork3=D_tt
+   call MPI_allreduce(dwork3,D_tt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork3=D_ltt
+   call MPI_allreduce(dwork3,D_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork2=D_lll
+   call MPI_allreduce(dwork2,D_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
+
+   dwork3=SP_ltt
+   call MPI_allreduce(dwork3,SP_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork2=SP_lll
+   call MPI_allreduce(dwork2,SP_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork3=SN_ltt
+   call MPI_allreduce(dwork3,SN_ltt,ndelta*ndir*2,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   dwork2=SN_lll
+   call MPI_allreduce(dwork2,SN_lll,ndelta*ndir,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+
+
+
+#endif
+
+end subroutine
+
+
+!
+! compute structure functions for many different directions
+! 
+!
+! parallel x-y hyperslab:  averages over whole cube only
+!       once this is debugged, put in flag so if running
+!       on 1 cpu, code will do no transposes (so that the
+!       subcube code will still work)
+!
+!
+subroutine isoavep_subcube(Q,Qs,Qt,Qst,range,subcube,subcube_t,subcube_s,subcube_st)
+use params
+use transpose
+
+!input
+real*8 :: Q(nx,ny,nz,ndim)               ! original data
+real*8 :: Qt(g_nz2,nslabx,ny_2dz,ndim)   ! transpose
+real*8 :: Qs(nx,ny,nz,ndim)              ! shifted original data
+real*8 :: Qst(g_nz2,nslabx,ny_2dz,ndim)  ! transpose
+real*8 :: range(3,2)
+
+real*8 :: subcube(nx,ny,nz)
+real*8 :: subcube_s(nx,ny,nz)
+real*8 :: subcube_t(g_nz2,nslabx,ny_2dz)
+real*8 :: subcube_st(g_nz2,nslabx,ny_2dz)
+
+!local
+real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
+real*8 :: u_l,u_t1,u_t2,rnorm
+real*8 :: eta,lambda,r_lambda,ke_diss
+real*8 :: dummy,xtmp
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,ntot
+integer :: n1,n1d,n2,n2d,n3,n3d,ierr
+
+if (firstcall) then
+   firstcall=.false.
+   if (ncpu_x*ncpu_y>1) then
+      call abort("isoave: requires x-y hyperslab parallel decomposition")
+   endif   
+   call init
+endif
+
+
+
+
+D_ll=0
+D_tt=0
+D_ltt=0
+D_lll=0
+SP_ltt=0
+SP_lll=0
+SN_ltt=0
+SN_lll=0
+
+subcube=0
+
+ke_diss=0
+ke=0
+ntot=0
+do k=nz1,nz2
+   if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
+      do j=ny1,ny2
+         if (ycord(j)>=range(2,1) .and. ycord(j)<range(2,2)) then
+            do i=nx1,nx2
+               if (xcord(i)>=range(1,1) .and. xcord(i)<range(1,2)) then
+                  subcube(i,j,k)=1
+                  ntot=ntot+1
+               endif
+            enddo
+         endif
+      enddo
+   endif
+enddo
+
+
+do n=1,ndim
+   do m=1,ndim
+      call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
+      do k=nz1,nz2
+         do j=ny1,ny2
+            do i=nx1,nx2
+               
+               if (subcube(i,j,k)==0) exit
+               if (m==1) ke = ke + .5*Q(i,j,k,n)**2
+               ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
+
+               
+            enddo
+         enddo
+      enddo
+   enddo
+enddo
+
+
+#ifdef USE_MPI
+   xtmp=ke_diss
+   call MPI_allreduce(xtmp,ke_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   xtmp=ke
+   call MPI_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   i=ntot
+   call MPI_allreduce(i,ntot,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+#endif
+
+epsilon=mu*ke_diss/ntot
+ke=ke/ntot
+
+
+
+eta = (mu**3 / epsilon)**.25
+lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
+R_lambda = lambda*sqrt(2*ke/3)/mu 
+
+if (my_pe==io_pe) then
+   print *,'KE:      ',ke
+   print *,'epsilon: ',epsilon
+   print *,'mu       ',mu
+   print *
+   print *,'eta      ',eta
+   print *,'delx/eta ',1/(g_nmin*eta)
+   print *,'lambda   ',lambda
+   print *,'R_l      ',R_lambda
+endif
+
+
+do n=1,3
+   call transpose_to_z(Q(1,1,1,n),Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo   
+call transpose_to_z(subcube,subcube_t,n1,n1d,n2,n2d,n3,n3d)
+   
+
+
+
+do idir=1,ndir
+
+   if (my_pe==io_pe) then
+      write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
+   endif
+
+      rhat = dir(:,idir)
+      rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+      call compute_perp(rhat,rperp1,rperp2)
+
+#if 0
+      ! check orthoginality
+      print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
+           sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
+           sqrt(rperp2(1)**2+rperp2(2)**2+rperp2(3)**2)
+      
+      print *,'ortho: ',&
+           rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3), &
+           rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3), &
+           rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
+      
+#endif
+
+      ! data is in x-y hyperslabs.  
+      ! z-direction=0
+      !    then compute in x-y hyperslab without any transpose.
+      ! z-direction/=0 and y-direction=0
+      !    tranpose to x-z plane, compute there
+      ! z-direction/=0 and y-direction/=0
+      !    shift so y direction becomes 0
+      !    tranpose to x-z plane, compute there
+      !
+      dir_shift=dir(:,idir)
+
+!     if (dir_shift(3)==0 .or. ncpu_z==1) then
+      if (dir_shift(3)==0) then  
+         ! no shifts - compute directly 
+         call comp_str_subcube_xy(Q,idir,rhat,rperp1,rperp2,dir_shift,subcube)
+      else if (dir_shift(2)==0) then
+         ! no need to shift, y-direction alread 0
+         call comp_str_subcube_xz(Qt,idir,rhat,rperp1,rperp2,dir_shift,subcube_t)
+      else if (mod(dir_shift(2),dir_shift(3))==0) then
+         ! 
+         ! shift in y by (y/z)*z-index:
+         ! 
+         do k=nz1,nz2
+         do j=ny1,ny2
+         do i=nx1,nx2
+            k_g = k-nz1+1 + nslabz*my_z  ! global z index
+            ishift=(dir_shift(2)/dir_shift(3))*(k_g-1)
+            j2=j+ishift
+            do
+               if (ny1<=j2 .and. j2<=ny2) exit
+               if (j2<ny1) j2=j2+nslaby
+               if (j2>ny2) j2=j2-nslaby
+            enddo
+            do n=1,3
+               Qs(i,j,k,n)=Q(i,j2,k,n)
+            enddo
+            subcube_s(i,j,k)=subcube(i,j2,k)
+         enddo
+         enddo
+         enddo
+         do n=1,3
+            call transpose_to_z(Qs(1,1,1,n),Qst(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+         enddo
+         call transpose_to_z(subcube_s,subcube_st,n1,n1d,n2,n2d,n3,n3d)
+         call comp_str_subcube_xz(Qst,idir,rhat,rperp1,rperp2,dir_shift,subcube_st)
+      else if (mod(dir_shift(3),dir_shift(2))==0) then
+         ! 
+         ! shift in z by (z/y)*y-index
+         !
+         ! shift  Qst = Qt-shifted
+         do j=1,ny_2dz
+         do i=1,nslabx
+         do k=1,g_nz
+            ! j_g = -1 + ny1 + j + my_z*ny_2dz     ! orig y index = [ny1,ny2]
+            ! j_g = j_g - ny1 +1                   ! convert so starts at 1
+            j_g = j + my_z*ny_2dz    
+            ishift=(dir_shift(3)/dir_shift(2))*(j_g-1)
+            k2=k+ishift
+            do
+               if (1<=k2 .and. k2<=g_nz) exit
+               if (k2<1) k2=k2+g_nz
+               if (k2>g_nz) k2=k2-g_nz
+            enddo
+            do n=1,3
+               Qst(k,i,j,n)=Qt(k2,i,j,n)
+            enddo
+            subcube_st(k,i,j)=subcube_t(k2,i,j)
+         enddo
+         enddo
+         enddo
+         do n=1,3
+            call transpose_from_z(Qst(1,1,1,n),Qs(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+         enddo
+         call transpose_from_z(subcube_st,subcube_s,n1,n1d,n2,n2d,n3,n3d)
+         call comp_str_subcube_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift,subcube_s)
       else
          call abort("parallel computation of direction not supported")
       endif
@@ -579,13 +846,12 @@ end subroutine
 
 
 
-subroutine comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_base,range)
+subroutine comp_str_xy(Q,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
 real*8 :: Q(nx,ny,nz,ndim)       
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
-real*8 :: range(3,2)
 
 !local
 real*8 :: rvec(3),delu(3)
@@ -605,11 +871,8 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       
       
       do k=nz1,nz2
-      if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
       do j=ny1,ny2
-      if (ycord(j)>=range(2,1) .and. ycord(j)<range(2,2)) then
       do i=nx1,nx2
-      if (xcord(i)>=range(1,1) .and. xcord(i)<range(1,2)) then
 
          i2 = i + rvec(1)
          do
@@ -650,11 +913,8 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
             SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
          endif
          
-      endif
       enddo
-      endif
       enddo
-      endif
       enddo
       endif
    enddo
@@ -669,13 +929,12 @@ end subroutine
 
 
 
-subroutine comp_str_xz(Q,idir,rhat,rperp1,rperp2,dir_base,range)
+subroutine comp_str_xz(Q,idir,rhat,rperp1,rperp2,dir_base)
 use params
 implicit none
 !input
 real*8 :: Q(g_nz2,nslabx,ny_2dz,ndim)  
 real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
-real*8 :: range(3,2)
 
 !local
 real*8 :: rvec(3),delu(3)
@@ -694,11 +953,8 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
       if (rvec(3)<0) rvec(3)=rvec(3)+g_nz
       
       do j=1,ny_2dz
-      if (z_jmcord(j)>=range(2,1) .and. z_jmcord(j)<range(2,2)) then
       do i=1,nslabx
-      if (z_imcord(i)>=range(1,1) .and. z_imcord(i)<range(1,2)) then
       do k=1,g_nz
-      if (z_kmcord(k)>=range(3,1) .and. z_kmcord(k)<range(3,2)) then
 
 
          i2 = i + rvec(1)
@@ -740,11 +996,175 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m
             SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
          endif
          
-      endif
+      enddo
+      enddo
       enddo
       endif
+   enddo
+
+end subroutine
+
+
+
+
+
+subroutine comp_str_subcube_xy(Q,idir,rhat,rperp1,rperp2,dir_base,subcube)
+use params
+implicit none
+!input
+real*8 :: Q(nx,ny,nz,ndim)       
+real*8 :: subcube(nx,ny,nz)
+real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
+
+!local
+real*8 :: rvec(3),delu(3)
+real*8 :: u_l,u_t1,u_t2
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+
+
+  do idel=1,ndelta
+
+      rvec = dir_base*delta_val(idel)
+      ! dont bother computing deltas above 50% domain size
+      if ( (rvec(1)**2+rvec(2)**2+rvec(3)**2) < g_nmin**2/4) then
+      
+      if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
+      if (rvec(2)<0) rvec(2)=rvec(2)+nslaby
+      rvec(3)=0  ! data required to be in xy slab
+      
+      
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+
+         if (subcube(i,j,k)==0) exit
+
+         i2 = i + rvec(1)
+         do
+            if (i2<nx1) call abort("isoave: i2<nx1")
+            if (i2<=nx2) exit
+            i2=i2-nslabx
+         enddo
+         j2 = j + rvec(2)
+         do
+            if (j2<ny1) call abort("isoave: j2<ny1")
+            if (j2<=ny2) exit
+            j2=j2-nslaby
+         enddo
+
+         do n=1,3
+            delu(n)=Q(i2,j2,k,n)-Q(i,j,k,n)
+         enddo
+         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
+         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
+         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
+         
+         
+         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
+         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
+         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
+         
+         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
+         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
+         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+
+         if (u_l>=0) then
+            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
+            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
+            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
+         else
+            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
+            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
+            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
+         endif
+         
+      enddo
+      enddo
       enddo
       endif
+   enddo
+
+end subroutine
+
+
+
+
+
+
+
+
+
+subroutine comp_str_subcube_xz(Q,idir,rhat,rperp1,rperp2,dir_base,subcube)
+use params
+implicit none
+!input
+real*8 :: Q(g_nz2,nslabx,ny_2dz,ndim)  
+real*8 :: rhat(3),rperp1(3),rperp2(3),dir_base(3)
+real*8 :: subcube(g_nz2,nslabx,ny_2dz)
+
+!local
+real*8 :: rvec(3),delu(3)
+real*8 :: u_l,u_t1,u_t2
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m
+
+
+  do idel=1,ndelta
+
+      rvec = dir_base*delta_val(idel)
+      ! dont bother computing deltas above 50% domain size
+      if ( (rvec(1)**2+rvec(2)**2+rvec(3)**2) < g_nmin**2/4) then
+      
+      if (rvec(1)<0) rvec(1)=rvec(1)+nslabx
+      rvec(2)=0  ! data required to be in xz slab
+      if (rvec(3)<0) rvec(3)=rvec(3)+g_nz
+      
+      do j=1,ny_2dz
+      do i=1,nslabx
+      do k=1,g_nz
+
+         if (subcube(k,i,j)==0) exit
+
+         i2 = i + rvec(1)
+         do
+            if (i2<1) call abort("isoave: i2<nx1")
+            if (i2<=nslabx) exit
+            i2=i2-nslabx
+         enddo
+
+         k2 = k + rvec(3)
+         do
+            if (k2<1) call abort("isoave: k2<nz1")
+            if (k2<=g_nz) exit
+            k2=k2-g_nz
+         enddo
+         do n=1,3
+            delu(n)=Q(k2,i2,j,n)-Q(k,i,j,n)
+         enddo
+
+         u_l  = delu(1)*rhat(1)+delu(2)*rhat(2)+delu(3)*rhat(3)
+         u_t1 = delu(1)*rperp1(1)+delu(2)*rperp1(2)+delu(3)*rperp1(3)
+         u_t2 = delu(1)*rperp2(1)+delu(2)*rperp2(2)+delu(3)*rperp2(3)
+         
+         D_ll(idel,idir)=D_ll(idel,idir) + u_l**2
+         D_tt(idel,idir,1)=D_tt(idel,idir,1) + u_t1**2
+         D_tt(idel,idir,2)=D_tt(idel,idir,2) + u_t2**2
+         
+         D_lll(idel,idir)=D_lll(idel,idir) + u_l**3
+         D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1**2
+         D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2**2
+
+         if (u_l>=0) then
+            SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l**3
+            SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1**2
+            SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2**2
+         else
+            SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l**3
+            SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1**2
+            SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2**2
+         endif
+         
+      enddo
+      enddo
       enddo
       endif
    enddo

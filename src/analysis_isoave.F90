@@ -26,10 +26,21 @@ use params
 use mpi
 use isoave
 implicit none
+
+! define this to use a 1 cpu version which uses much less memory
+! as the 1 cpu parallel version:
+#undef SERIAL_ONLY
+
 real*8,save  :: Q(nx,ny,nz,n_var)
 real*8,allocatable  :: q1(:,:,:,:)
 real*8,allocatable  :: q2(:,:,:,:)
 real*8,allocatable  :: q3(:,:,:,:)
+real*8,save         :: work1(nx,ny,nz)
+real*8,save         :: work2(nx,ny,nz)
+#ifndef SERIAL_ONLY
+real*8,save         :: work3(nx,ny,nz)
+real*8,save         :: work4(nx,ny,nz)
+#endif
 character(len=80) message,sdata
 character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
@@ -67,22 +78,12 @@ call init_model
 
 !call writepoints(); stop
 
-#if 0
-if (nxdecomp*nydecomp*nzdecomp>1) then
-   ! in this case, we only need 2 work areas.  we are running in
-   ! serial, so we have to save as much memory as possible
-   allocate(q1(nx,ny,nz,1))
-   allocate(q2(nx,ny,nz,1))
-else
-   allocate(q1(nx,ny,nz,ndim))
-   allocate(q2(nx,ny,nz,ndim))
-   allocate(q3(nx,ny,nz,ndim))
-endif
-#endif
 
+#ifndef SERIAL_ONLY
 allocate(q1(nx,ny,nz,ndim))
 allocate(q2(nx,ny,nz,ndim))
 allocate(q3(nx,ny,nz,ndim))
+#endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -113,9 +114,12 @@ do
    do i=0,nxdecomp-1
    do j=0,nydecomp-1
    do k=0,nzdecomp-1  
+
+#ifdef SERIAL_ONLY
       nxlen=nslabx/nxdecomp
       nylen=nslaby/nydecomp
       nzlen=nslabz/nzdecomp
+
       lx1=nx1 + i*nxlen     
       ly1=ny1 + j*nylen     
       lz1=nz1 + k*nzlen     
@@ -124,27 +128,24 @@ do
       ly2=ly1 + nylen-1
       lz2=lz1 + nzlen-1
 
+      ! subcube version cannot run in parallel - it will abort
+      call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
+#else
       if (nxdecomp*nydecomp*nzdecomp==1) then
          ! no subcubes:
          call isoavep(Q,q1,q2,q3)
-         ! debug version:
-         ! print *,'calling 1 cpu verison for debug'
-         ! call isoave1(Q,q1,q2,nx1,nx2,ny1,ny2,nz1,nz2)
       else
-         ! subcube version cannot run in parallel - it will abort
-         call isoave1(Q,q1,q2,lx1,lx2,ly1,ly2,lz1,lz2)
+         range(1,1)=dble(i)/nxdecomp
+         range(1,2)=dble(i+1)/nxdecomp
+         range(2,1)=dble(j)/nxdecomp
+         range(2,2)=dble(j+1)/nxdecomp
+         range(3,1)=dble(k)/nxdecomp
+         range(3,2)=dble(k+1)/nxdecomp
+         call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
       endif
-
-
-#if 0
-      range(1,1)=dble(i)/nxdecomp
-      range(1,2)=dble(i+1)/nxdecomp
-      range(2,1)=dble(j)/nxdecomp
-      range(2,2)=dble(j+1)/nxdecomp
-      range(3,1)=dble(k)/nxdecomp
-      range(3,2)=dble(k+1)/nxdecomp
-      call isoavep(Q,q1,q2,q3,range)
 #endif
+
+
 
       if (my_pe==io_pe) then
          write(sdata,'(f10.4)') 10000.0000 + time
