@@ -17,9 +17,10 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
-%name='tmix256C';
-%namedir='/scratch2/taylorm/tmix256C/archive/';
-%CK_orig=1.613; movie_plot=0; endian='l';
+name='tmix256C';
+namedir='/scratch2/taylorm/tmix256C/';
+CK_orig=1.613; movie_plot=0; endian='l';
+mu=3e-4;
 
 %name='decay2048-ave64.-new.0000.4026';
 %name='decay2048-ave32.-new.0000.4026';
@@ -49,47 +50,31 @@ tsave=[];
 %namedir = '/scratch1/taylorm/decay2048/';
 %CK_orig=1.613/(2*pi)^2;
 
-name = 'skhel512a0000.0000';
-namedir = '/home/mt/data/skhel/';
-CK_orig=1.613;
+%name = 'skhel512a0000.0000';
+%namedir = '/home/mt/data/skhel/';
+%CK_orig=1.613;
 
 
-<<<<<<< specplot.m
-<<<<<<< specplot.m
 %name = 'Rot10002.0000';
 %namedir = '/home2/skurien/rotation/Rot1/';
-name='all';
-namedir='/home/wingate/ccs/Rotation/Rot1/';
-=======
-name = 'Rot10000.0000';
-namedir = '/ccs/wingate/Rotation/Rot1/';
->>>>>>> 1.54
-=======
->>>>>>> 1.65
+%name='all';
+%namedir='/home/wingate/ccs/Rotation/Rot1/';
+%name = 'Rot10000.0000';
+%namedir = '/ccs/wingate/Rotation/Rot1/';
 
 
 spec_r_save=[];
 spec_r_save_fac3=[];
 
-<<<<<<< specplot.m
-%fid=endianopen([namedir,name,'.spec'],'r');
-%fidt=endianopen([namedir,name,'.spect'],'r');
-=======
 % note: endianopen() will notwork with .spec files
 %because first number is not necessaryly an integer 
 [namedir,name]
 fid=fopen([namedir,name,'.spec'],'r',endian);
 fidt=endianopen([namedir,name,'.spect'],'r');
->>>>>>> 1.54
 fidp=endianopen([namedir,name,'.pspec'],'r');  
-<<<<<<< specplot.m
-fid=fopen([namedir,name,'.spec'],'r','b');
-fidt=fopen([namedir,name,'.spect'],'r','l');
-
-
-=======
 fidco=endianopen([namedir,name,'.cospec'],'r');  
->>>>>>> 1.65
+
+
 %fidt=-1;
 %fidp=-1;
 
@@ -132,9 +117,9 @@ while (time>=.0 & time<=9999.3)
     CK=CK_orig*eps_orig^(2/3);
   end
   
-  ke=sum(spec_r')            % spec_r = .5u_k**2
-  ke_diss=mu*2*sum(knum.^2 * (2*pi)^2 .* spec_r')   
-  L11 = ((3*pi)/(4*ke)) * sum(spec_r'./(knum*2*pi))  
+  ke=sum(spec_r');            % spec_r = .5u_k**2
+  ke_diss=mu*2*sum(knum.^2 * (2*pi)^2 .* spec_r')  ; 
+  L11 = ((3*pi)/(4*ke)) * sum(spec_r(2:n_r)'./(knum(2:n_r)*2*pi));  
 
   knum2=knum;
   knum2(1)=.000001;
@@ -192,7 +177,7 @@ while (time>=.0 & time<=9999.3)
     loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
     loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
     loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
-    
+    hold off;
     % transverse spectraum
 
     subplot(2,1,2);
@@ -202,7 +187,7 @@ while (time>=.0 & time<=9999.3)
     loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
     loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
     loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
-   hold on;
+    hold off;
   end
   end
 
@@ -293,7 +278,9 @@ while (time>=.0 & time<=9999.3)
      for np=1:npassive 
         pspec_r(:,np)=fread(fidp,np_r,'float64');
         c2(np)=sum(pspec_r(:,np)); 
-        L11c(np) = ((3*pi)/(2*c2)) * sum(pspec_r(:,np)'./(knum*2*pi))  
+        % c2_diss = d/dt of .5<c^2>
+        c2_diss(np) = mu*2*sum(knum.^2 * (2*pi)^2 .* pspec_r(:,np)')  ; 
+        L11c(np) = ((3*pi)/(4*c2(np))) * sum(pspec_r(2:np_r,np)'./ (knum(2:np_r)*2*pi))  ;
      end
      ts=sprintf('passive scalars t=%f',time);
      loglog53(np_r,pspec_r,ts,1.0,3); 
@@ -386,6 +373,15 @@ while (time>=.0 & time<=9999.3)
     pause
   end
   end
+
+  if (fidp>-1)   
+    [L11c(1),L11,ke,ke_diss,c2];
+    ak(j)=ke_diss*L11/(2*ke^(1.5)/3);
+    ac_temp=(c2_diss./c2) .* ((L11c.^2 / ke_diss).^(1/3));
+    ac(j)=ac_temp(1);
+    time_a(j)=time;
+  end
+  
   
   time=fread(fid,1,'float64');
   time

@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[.75:.01:3.5];
+times=[.77:.01:3.5];
 
 
 if (readdata)
@@ -170,13 +170,13 @@ disp(sprintf('R_l = %f',R_l(1) ))
 disp(sprintf('lambda = %f',lambda(1) ))
 disp(sprintf('epsilon = %f',epsilon(1) ))
 
-epsilon_c=3*(mu./schmidt).*mean(cx2,1);
+epsilon_c=3*(mu./schmidt).*mean(cx2,1);  % = d/dt  .5<c^2>  
 lambda_c=sqrt(c2./mean(cx2,1));
 lambda_x_c=sqrt(mean(cx2,1)./mean(cxx2,1));
 
 % mean=.5, so zero crossing of .9 is a=.4
-lambda_c_9 = lambda_c.*exp(.16./(2*c2));
-lambda_c_8 = lambda_c.*exp(.09./(2*c2));
+lambda_c_9 = lambda_c.*exp( -(.4^2)./(2*c2));
+lambda_c_8 = lambda_c.*exp( -(.3^2)./(2*c2));
 
 
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
@@ -238,38 +238,34 @@ title('f,  g')
 
 
 subplot(4,2,3)
-plot(time_e,G)
-title('G')
+plot(time_e,G,time_e,Gc)
+title('G, G_c')
+
 
 subplot(4,2,4)
-if (schmidt(1)<=1) 
-  plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
-  title('G_c Sc^{-1/2},    \lambda_c^2 / (4 \eta_c^2 )')
-else
-  plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
-  title('G_c ,    \lambda_c^2 / (4 \eta_c^2)')
-end
-
-
-subplot(4,2,5)
 plot(time_e,r)
 title('r')
 ax=axis;
 axis([ax(1),ax(2),0,4]);
 
+
+subplot(4,2,5)
+plot(time_e,lambda,time_e,lambda_c)
+title('\lambda,  \lambda_c')
+
 subplot(4,2,6)
-plot(time_e,R_l)
-title('R_\lambda')
+plot(time_e,eta,time_e,eta_c)
+title('\eta,   \eta_c ')
 
 
 
 subplot(4,2,7)
-plot(time_e,lambda,time_e,lambda_c)
-title('\lambda,  \lambda_c')
+plot(time_e,R_l)
+title('R_\lambda')
 
 subplot(4,2,8)
-plot(time_e,eta,time_e,eta_c)
-title('\eta,   \eta_c ')
+plot(time_e,pi*n0,time_e,pi*n0_8,time_e,pi*n0_9)
+title(' ')
 
 
 figure(1)
@@ -303,33 +299,47 @@ title('<c^2>')
 
 
 subplot(4,2,2)
-%plot(time_e,0*gg)
-title(' ')
-
-subplot(4,2,3)
 plot(time_e,c4./c2.^2,time_e,mean(u4)./mean(u2).^2)
 title('Kurtosis (c,u)')
 
+subplot(4,2,3)
+plot(time_e,pi*mean(nu).*lambda,time_e,pi*n0.*lambda_c)
+title('\pi N_u \lambda,    \pi N_c \lambda_c ')
+
+
 subplot(4,2,4)
-%plot(time_e,0*lambda_c)
-title(' ')
-
-
-subplot(4,2,5)
-plot(time_e,pi*mean(nu).*lambda,time_e,pi*n0.*lambda_c,...
-     time_e,pi*n0_8.*lambda_c_8,time_e,pi*n0_9.*lambda_c_9)
-title('\pi N_u \lambda,    \pi N_c \lambda_c (.5,.8,.9)')
-
-
-subplot(4,2,6)
 plot(time_e,2*pi*n0x_l.*eta_c',time_e,2*eta_c./lambda_x_c,time_e,...
      pi*n0x_l.*lambda_x_c')
 title('\pi N_{\nabla}_c 2 \eta_c, 2 \eta_c / \lambda_{\nabla}_c,   \pi N_{\nabla}_c \lambda_{\nabla}_c  ')
 
 
+subplot(4,2,5)
+plot(time_e,pi*n0_8.*lambda_c_8,time_e,pi*n0_9.*lambda_c_9)
+title('\pi N_a \lambda_a (a=.8,.9)')
+ax=axis;
+axis([.75,1.2,ax(3),ax(4)]);
+
+
+
+subplot(4,2,6)
+if (schmidt(1)<=1) 
+  plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2),time_e,lambda_c.^2 ./ (3*eta_c.^2)   )
+  title('G_c,    \lambda_c^2 / (4 \eta_c^2 ),   \lambda_c^2 / (3 \eta_c^2 )')
+else
+  plot(time_e,Gc,time_e,lambda_c.^2 ./ (4*eta_c.^2))
+  title('G_c ,    \lambda_c^2 / (4 \eta_c^2)')
+end
+
+
 subplot(4,2,7)
-plot(time_e,1-Vp25,time_e,1-Vp20,time_e,1-Vp15,time_e,4*c2)
-title('m_{% pf}, 4<c^2>')
+plot(time_e,1-Vp25,time_e,1-Vp20,time_e,1-Vp15)
+hold on
+plot(time_e,4*c2,'k','LineWidth',2.0)
+hold off;
+title('m_{% pf} (.75, .8, .85) , 4<c^2>')
+ax=axis;
+axis([.75,1.2,ax(3),ax(4)]);
+
 
 
 ym = (1 - eta_c./lambda_c).^3;
