@@ -64,10 +64,7 @@ vx3072b_
    b.c.:  w=0/onesided, PSI fixed 
    2 cpus t=15  NEXT
 
-   IN (autrey)
-   code is setup. 
-   make dnsvor ; mpirun -np 2 dnsvor vx3072b_ < vxpair.inp > vxpairb.out
-
+   IN (autrey)     vxpairb.out
 
 
 
@@ -88,6 +85,9 @@ subtype=0:   tau (forcing relaxaction coefficient) = 5
 250C  .4e-3    5     167   1.44      1.44        1.07      hookup        N/A
 250D  .8e-3    5     114   .850      1.41        1.05      
 250G  .8e-3   500 IN
+250H  5000h   500 IN?
+
+
 
 500    .1e-3    5     455   2.38      1.44        2.00  
 500B   .1e-3  25 (stopped)

@@ -8,10 +8,10 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %ts=input('time=? ');
 
 %range=0:.05:1.00;
-range=0:1.0:1000.0;
+range=1:1.0:1000.0;
 %range=[.00];
 %name='../src/kh/khK';
-%name='../src/vxpair/vxpair2_';
+%name='../src/vxpair/vx3072b_';
 name='../src/temp';
 
 
