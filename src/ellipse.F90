@@ -34,10 +34,11 @@ real*8 :: dft(0:4,nelld)              ! modes of Rad
 ! interpolating the vorticity on line thru x=center_finegrid(1)
 !                                          y=0:.1:2
 !
-integer :: vxline_count        ! number of points on line thru vx center
-real*8  :: vxline_y(g_ny+20)      ! y-cord of 
-real*8  :: vxline_w(g_ny+20)      ! interpolated vorticity
-real*8  :: vxline_w2(g_ny+20)     ! work array for above
+integer :: vxline_count=0         ! number of points on line thru vx center
+integer,parameter :: vxline_count_max=20
+real*8  :: vxline_y(vxline_count_max)      ! y-cord of 
+real*8  :: vxline_w(vxline_count_max)      ! interpolated vorticity
+real*8  :: vxline_w2(vxline_count_max)     ! work array for above
 
 real*8 :: contour_eps = 5e-7    ! find contours to within this accuracy
 real*8 :: center_eps  = 1e-5    ! find center to within this accuracy
@@ -163,7 +164,7 @@ real*8 :: w(nx,ny)
 integer :: setmax
 
 !local
-integer :: nell,np,ierr
+integer :: nell,np,ierr,i
 real*8 :: tmx1,tmx2
 real*8  :: yi,xi
 
@@ -214,15 +215,22 @@ endif
 ! x=center_finegrid(1)
 ! y=g_ycord(1):.1:g_ycord(o_ny) 
 xi=center_finegrid(1)
-vxline_count=0
-yi=g_ycord(1)
-do 
-   if (yi>g_ycord(o_ny)) exit
-   vxline_count=vxline_count+1
-   vxline_y(vxline_count)=yi
-   call interp_to_point(vxline_w(vxline_count),w,xi,yi)
-   yi=yi+.1
+
+if (vxline_count==0) then
+   ! was not initialized by initial condition - so do it now:
+   yi=g_ycord(1)
+   do 
+      if (yi>g_ycord(o_ny)) exit
+      vxline_count=vxline_count+1
+      vxline_y(vxline_count)=yi
+      yi=yi+.1
+   enddo
+endif
+
+do i=1,vxline_count
+   call interp_to_point(vxline_w(i),w,xi,vxline_y(i))
 enddo
+
 #ifdef USE_MPI
    vxline_w2(1:vxline_count)=vxline_w(1:vxline_count)
    call MPI_allreduce(vxline_w2,vxline_w,vxline_count,MPI_REAL8,MPI_MAX,comm_3d,ierr)

@@ -197,6 +197,7 @@ subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 !
 use params
 use tracers
+use ellipse
 use bc
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
@@ -278,6 +279,15 @@ call init_grid()   ! redo grid points since we changed scalings
 
 
 xlocation=xscale/2
+
+#if 0
+! initialize the crossing and vxline points:
+vxline_count=9
+do i=1,9
+   vxline_y(i)=.1*i
+enddo
+#endif
+
 if (init==0) return
 
 
