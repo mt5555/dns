@@ -248,7 +248,7 @@ if (restype==0) then
    ep23=(2.76029)  **(2d0/3d0) 
    lenscale = .3155
    eta = 9.765e-4
-   mu_m=1.359e-4 *.7  !   *.89
+   mu_m=1.359e-4 ! *.7  !   *.89
 else
    call abort("init_data_decay: bad restype")
 endif

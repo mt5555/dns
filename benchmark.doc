@@ -220,7 +220,7 @@ cvs tag:  'bench602'
 121M
 20 timesteps
 
-                      1cpu    2cpu    3cpu     4cpu       6        8    16
+                      1cpu    2cpu    3cpu     4cpu       6        8    16  24
 milkyway              .16     .080    .054
 autrey                .21     .17
 shankara.old  (2x2)   .28     .19               .093    .064     .050
@@ -241,8 +241,8 @@ shankara.old          1.76                      .62               .29
 ./bench.sh 240 4  20  
 1.9G
 
-./bench.sh 256 8  20
-2.3G                                                                 
+./bench.sh 256 8  20  (can run on 16 and 24 cpus?)
+2.3G                                                                        
 
 milkyway              6.91    3.33
 shankara.old                                                     1.61
