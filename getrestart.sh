@@ -12,9 +12,10 @@
 # status=1  failed
 #
 set name = $1
-set path = $2
+set fpath = $2
 
-if ($path == HPSS) then
+
+if ($fpath == HPSS) then
 
    #search HPSS for newest restart file
    set resnameu = `psi ls dns/{$name}\*.u | sort | tail -1`
@@ -55,14 +56,14 @@ if ($path == HPSS) then
 
 else
 
-   #search $path for newest restart file
-   set resnameu = `\ls {$path}/{$name}\*.u | sort | tail -1`
+   #search $fpath for newest restart file
+   set resnameu = `\ls {$fpath}/{$name}\*.u | sort | tail -1`
    if ($resnameu =="") then
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      set resnamev = `ls  {$path}/{$name}\*.v | sort | tail -1`
-      set resnamew = `ls  {$path}/{$name}\*.w | sort | tail -1`
+      set resnamev = `ls  {$fpath}/{$name}\*.v | sort | tail -1`
+      set resnamew = `ls  {$fpath}/{$name}\*.w | sort | tail -1`
       echo "Using restart files: " 
       echo $resnameu
       echo $resnamev
