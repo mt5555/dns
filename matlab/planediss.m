@@ -29,6 +29,60 @@ for type=type_list
   s=s(length(s));
   shortname=name(s+1:length(name));
 
+  
+    % try to read the pscalars-turb file 
+  tstr=sprintf('%10.4f',t+10000);
+  fname=[name,times,'.pscalars-turb'];
+  disp(fname)
+  eta_c=0;
+  fid=endianopen(fname,'r')
+  if (fid>=0) 
+    [ns_e,count] = fread(fid,1,'float64');
+    [npassive,count] = fread(fid,1,'float64');
+    time_2 = fread(fid,1,'float64');
+    mu = fread(fid,1,'float64');
+    nt=nt+1;
+    pints_e=zeros([2+ns_e,npassive,1]); 
+    for np=1:npassive
+      data1 = fread(fid,[ns_e,1],'float64');
+      data1=[time;mu;data1];
+      pints_e(:,np,nt)= data1;
+    end
+    fclose(fid);
+    np=k; 
+    c1(:)=pints_e(26,np,:);
+    c2=squeeze(pints_e(4,np,:))';        % index=2 
+    c2=c2-c1.^2; 
+    cx2(1,:)=pints_e(5,np,:);
+    cx2(2,:)=pints_e(6,np,:);
+    cx2(3,:)=pints_e(7,np,:);
+    lambda_c=sqrt(c2./mean(cx2,1));
+
+    % try to read the scalars-turb file 
+    tstr=sprintf('%10.4f',t+10000);
+    fname=[name,times,'.scalars-turb'];
+    disp(fname)
+    fid=endianopen(fname,'r')
+    [ns_e,count] = fread(fid,1,'float64');
+    time_2 = fread(fid,1,'float64');
+    data1 = fread(fid,[ns_e,1],'float64');
+    data1=[time;data1];
+    ints_e= data1;
+    fclose(fid);
+    ux2=zeros([3,nt]);
+    for i=1:3
+      ux2(i,:)=ints_e(i+1,:);    % < u1,1 ^ 2 >
+    end
+    epsilon=15*mu.*mean(ux2,1);  
+    eta = mu.^3./epsilon;
+    eta_c= eta/sqrt(sch);
+  end
+
+
+  
+  
+  
+  
    fname=[name,times,ext]
    [x,y,z,s,time]=getfield(fname);
    smax=max(max(s));

@@ -114,7 +114,9 @@ disp(sprintf('epsilon = %f',epsilon(1) ))
 epsilon_c=3*(mu./schmidt).*mean(cx2,1);
 lambda_c=sqrt(c2./mean(cx2,1));
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
-eta_c=(mu./schmidt).^3 ./ epsilon_c;            %eta/sqrt(schmidt);
+%eta_c=(mu./schmidt).^3 ./ epsilon_c            
+eta_c=eta/sqrt(schmidt);
+
 
 
 
@@ -221,6 +223,58 @@ end
 
 
 pname=sprintf('pscalars%i',np);
+print('-djpeg','-r90',pname); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fid=fopen([name,'.spdf'],'r','l');
+time=fread(fid,1,'float64');
+npmax=fread(fid,1,'float64');         
+np=1;
+for p=1:npmax
+  [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
+  vtot = sum(pdf);
+  Vp(p) = sum(pdf.*(bins>=.02 & bins <=.98));
+  Vp(p)=Vp(p)/vtot;
+end
+  
+
+   
+figure(2); clf;
+subplot(5,2,1)
+plot(time_e,eta)
+title('\eta')
+
+subplot(5,2,2)
+plot(time_e,eta_c)
+title('\eta_{\theta}')
+
+subplot(5,2,3)
+plot(time_e,Vp)
+title('\%mix')
+
+Vp2 = Vp*lambda_c/eta_c
+subplot(5,2,4)
+plot(time_e,Vp2)
+title('%mix \lambda_{\theta} / \eta_{\theta}')
+
+
+orient tall
+pname=sprintf('pscalars%i_b',np);
 print('-djpeg','-r90',pname); 
 
 end
