@@ -1134,7 +1134,7 @@ real*8 :: alpha
 real*8 :: beta
 
 !local
-real*8 gradf(nx,ny,nz,2) ! work array
+real*8 gradf(nx,ny,nz) ! work array
 real*8 fxx(nx,ny,nz)     ! work array
 real*8 dummy
 integer n

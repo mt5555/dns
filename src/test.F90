@@ -1,4 +1,12 @@
 #include "macros.h"
+
+!
+! note: most test subroutines are ifdef'd out because they
+!       generate compilation errors (pgf90/linux) if the memeory
+!       is 256^3 per cpu.  other fortran compilers are ok, so there
+!       might be a pgf90 option to fix this
+!
+
 subroutine test
 use params
 
@@ -112,7 +120,7 @@ end subroutine
 
 
 
-
+#if 0
 
 
 subroutine test_poisson_ghost
@@ -830,3 +838,4 @@ end subroutine
 
 
 
+#endif

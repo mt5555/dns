@@ -38,7 +38,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(HOST),node001)
       VENDOR=PGI
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
-      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm #-lpthread
+      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
+      #-lpthread
    endif
    ifeq ($(HOST),pinkish.lanl.gov)
       MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
@@ -57,8 +58,7 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),PGI)
    F90 = pgf90
    CC=pgcc
-   #FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   FFLAGS =  -Mrecursive  -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
    #FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif 
