@@ -37,6 +37,9 @@ mu = 2e-4;
 %name = 'sk128_v5e-4_alpha400000.0000';
 %namedir = '/home2/skurien/dns/src/sk128_alpha40/';
 
+%name = 'hel480_hpi2_0000.1000';
+%namedir = '/home2/skurien/helicity_data/helical_forced/hel480_hpi2/';
+%mu = 2e-4;
 
 
 % plot all the spectrum:
@@ -44,9 +47,10 @@ movie=0; % 1 to plot all the spectra
 
 spec_r_save=[];
 spec_r_save_fac3=[];
+pname = [strrep(name,'_','-'),'.spec'];
 
 disp([namedir,name,'.spec']);
-fid=endianopen([namedir,name,'.spec'],'r');
+fid=fopen([namedir,name,'.spec'],'r','l');
 fidt=endianopen([namedir,name,'.spect'],'r');
 %fidt=-1;
 
@@ -63,14 +67,16 @@ end
 CK=CK_orig;
 j=0;
 while (time>=.0 & time<=9999.3)
-  j=j+1
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
-if (j==1)
-     spec_ave =  spec_r;  
-     else 
-spec_ave = spec_ave + spec_r;
+if (j==0)
+     spec_ave =  0*spec_r;  %initialize spec_ave
 end
+if (time>=1)        %only average times greater than 1 eddy turnover
+     j=j+1;                 %count j's for averaging only after t==1.
+     spec_ave = spec_ave + spec_r;
+end
+
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 
@@ -187,6 +193,7 @@ spec_ave = spec_ave/j;
 figure(5)
 loglog(k,spec_ave,'k'); hold on;
 title('Mean energy spectrum');
+ylabel(pname);
 xlabel('k')
 % compensated mean spectrum
 
@@ -194,7 +201,8 @@ figure(6)
 loglog(k,spec_ave.*k'.^(4/3),'b'); hold on;
 
      title('5/3 Compensated MEAN energy spectrum');
-
+ylabel(pname);
+xlabel('k');
 %compute mean energy
 E - sum(spec_ave);
 disp(sprintf('Mean energy = %d',E));
