@@ -959,6 +959,7 @@ if (new_f==1) then
                ! f=curl f
                ! compute gradient  dp/dx
                uy= - jm*rhs(k,i,j+z_jmsign(j),1)
+               ux= - im*rhs(k,i+z_imsign(i),j,1)
                uz= - km*rhs(k+z_kmsign(k),i,j,1)
                vx= - im*rhs(k,i+z_imsign(i),j,2)
                vz= - km*rhs(k+z_kmsign(k),i,j,2)
@@ -981,8 +982,7 @@ if (new_f==1) then
                   ! scale out various shell factors:
                   vor=vor/sqrt(xfac*numk(wn)*2.0)
                   ! undo gradient scaling: should be .5 wn**2
-                  ! but numerically 4 wn**2 works better.  why???
-                  vor = vor * 2 /  wn
+                  vor = vor * sqrt(2.) /  wn
                   ! vorticity now scaled so that E(wn)=1
                endif
 
