@@ -79,8 +79,8 @@ compute_fractional_power=.false.
 compute_hspec=.false.
 read_uvw=.false.
 
-tstart=4.2
-tstop=4.8
+tstart=9.2
+tstop=15.8
 tinc=0.2
 icount=0
 
