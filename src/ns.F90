@@ -406,6 +406,7 @@ if (compute_ints==1 .and. compute_transfer) then
       spec_diff=spec_diff+spec_tmp
       spec_f=spec_f+spec_tmp
    enddo
+   ! spec_f = (for now) spectrum of advection + diffusion termskmrswith all terms
 endif
 
 
@@ -437,6 +438,10 @@ if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! compute information for transfer spectrum
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! spec_f   = spectrum of advection + diffusion terms
+! spec_tmp = spectrum of advection + diffusion terms + forcing terms
+! so compute the difference and store in spec_f to get the spectrum
+! of just the forcing terms.  
 if (compute_ints==1 .and. compute_transfer) then
    spec_f=-spec_f
    do n=1,3

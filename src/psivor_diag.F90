@@ -2,7 +2,7 @@
 !
 !  diagnostics for psi-vor model
 !
-subroutine output_model(time,Q,Qhat,q1,q2,q3,work1,work2)
+subroutine output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use ellipse
 implicit none
@@ -14,7 +14,9 @@ real*8 :: q3(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
+logical :: doit_model
 
+if (.not.doit_model) return
 
 call comp_ellipse(Qhat(1,1,1,1),0)
 call ellipse_output(time)

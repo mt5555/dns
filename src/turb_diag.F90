@@ -1,7 +1,8 @@
 #include "macros.h"
-subroutine output_model(time,Q,Qhat,q1,q2,q3,work1,work2)
+subroutine output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use structf
+use spectrum
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(*)
@@ -11,6 +12,7 @@ real*8 :: q3(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
+logical :: doit_model
 
 ! local variables
 integer,parameter :: nints_e=14
@@ -19,6 +21,35 @@ real*8 :: x
 integer i,j,k,n,ierr
 character(len=80) :: message
 CPOINTER fid,fidj,fidS
+
+
+
+
+if (compute_transfer) then
+   compute_transfer=.false.
+   ! spec_r computed last time step
+   ! spec_diff, spec_f, spec_rhs were computed in RHS computation at the
+   ! beginning of this flag (becuase compute_transfer flag was set)
+   ! So they are all known at time_old. Now compute spec_r_new 
+   ! (used to compute edot_r)
+   call compute_Edotspec(time,Q,q1,work1,work2)
+   ! output all the spectrum:
+   call output_tran(time,Q,q1,q2,q3,work1,work2)
+endif
+
+if (.not.doit_model) return
+
+
+if ( g_bdy_x1==PERIODIC .and. &
+     g_bdy_y1==PERIODIC .and. &
+     g_bdy_z1==PERIODIC) then
+   call compute_spec(time,Q,q1,work1,work2)
+   call output_spec(time,Q,q1,q2,q3,work1,work2)
+   
+   !set this flag so that for next timestep, we will compute and save
+   !spectral transfer functions:
+   compute_transfer=.true.
+endif
 
 
 

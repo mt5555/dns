@@ -3,7 +3,6 @@ subroutine time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use tracers
 use transpose
-use spectrum
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)      
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -359,23 +358,7 @@ endif
 !
 ! diagnostic output
 !
-if (compute_transfer) then
-   compute_transfer=.false.
-   call compute_tran(time,Q,q1,work1,work2)
-   call output_tran(time,Q,q1,q2,q3,work1,work2)
-endif
 if (doit_diag) then
-   if ( g_bdy_x1==PERIODIC .and. &
-        g_bdy_y1==PERIODIC .and. &
-        g_bdy_z1==PERIODIC) then
-      call compute_spec(time,Q,q1,work1,work2)
-      call output_spec(time,Q,q1,q2,q3,work1,work2)
-
-!     set this flag so that for next timestep, we will compute and save
-!     spectral transfer functions:
-      compute_transfer=.true.
-   endif
-
    call output_scalars(time,ints_save,maxs_save,nints,nscalars)
    nscalars=0
 else if (diag_dt==0) then
@@ -387,10 +370,7 @@ endif
 !
 ! model specific output
 !
-if (doit_model) then
-   ! model specific output:
-   call output_model(time,Q,Qhat,q1,q2,q3,work1,work2)
-endif
+call output_model(doit_model,time,Q,Qhat,q1,q2,q3,work1,work2)
 
 
 

@@ -16,8 +16,8 @@ real*8,private ::  spec_x(0:g_nx/2,3)
 real*8,private ::  spec_y(0:g_ny/2,3)
 real*8,private ::  spec_z(0:g_nz/2,3)
 real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz))
-real*8,private ::  spec_r_old(0:max(g_nx,g_ny,g_nz))
-real*8,private ::  transfer_r(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  time_old=-1
 
 integer,private :: iwave=-1
@@ -26,6 +26,7 @@ integer,private :: iwave=-1
 
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
+real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
 real*8 ::  spec_rhs(0:max(g_nx,g_ny,g_nz))   ! transfer spec of u dot RHS
 
@@ -51,10 +52,17 @@ real*8 :: time
 !local
 integer :: iwave_max,i
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 
 iwave_max=max(g_nx,g_ny,g_nz)
 spec_r=0
+
+
+
+spec_diff=0
+
 spec_r2=0
+spec_d2=0
 spec_x=0
 spec_y=0
 spec_z=0
@@ -63,16 +71,22 @@ q1=Q
 
 
 do i=1,ndim
-   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_x(0,i),&
-       spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
    spec_r=spec_r+.5*spec_r2
+   ! for now, use the value computed in RHS
+   ! spec_diff=spec_diff + spec_d2
 enddo
 spec_x=.5*spec_x
 spec_y=.5*spec_y
 spec_z=.5*spec_z
 
-spec_r_old=spec_r
 time_old=time
+
+#undef SPEC_DIFF_CHECK
+#ifdef SPEC_DIFF_CHECK
+spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
+#endif
 
 end subroutine
 
@@ -81,7 +95,17 @@ end subroutine
 
 
 
-subroutine compute_tran(time,Q,q1,work1,work2)
+subroutine compute_Edotspec(time,Q,q1,work1,work2)
+!
+! This routine assumes compute_spec was called at the end
+! of the last time step.  so we have this data at time_old:
+! spec_r, spec_diff
+! This routine will save this data, and compute new values
+! of spec_r, spec_diff at the current time.  
+!
+! It will then compute the total KE rate of change spectrum, 
+! edot_r
+!
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
@@ -93,31 +117,58 @@ real*8 :: time
 !local
 integer :: iwave_max,i
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 character(len=80) :: message
 
+
+
+#ifdef SPEC_DIFF_CHECK
+!spec_diff_new:  spec_diff computed at t=0 call to compute_spec().
+!spec_diff:      computed in ns.F90 because flag was set
+!check that they are the same:
+print *,'**************************************'
+print *,'maxval spec_diff check: ',maxval(abs(spec_diff-spec_diff_new))
+print *,'norms: ',maxval(abs(spec_diff)),maxval(abs(spec_diff_new))
+print *,'**************************************'
+#endif
+
+
+
+
+
+!
+! save data computed with last call to compute_spec  (time_old)
+!
+
+
 iwave_max=max(g_nx,g_ny,g_nz)
-spec_r=0
+spec_r_new=0
+spec_diff_new=0
+
 spec_r2=0
+spec_d2=0
 spec_x=0
 spec_y=0
 spec_z=0
+
 
 q1=Q
 
 ! compute spectrum in spec_r
 do i=1,ndim
-   call fft3d(q1(1,1,1,i),work1)
-   call compute_spectrum_fft(q1(1,1,1,i),q1(1,1,1,i),io_pe,spec_r2,iwave_max)
-   spec_r=spec_r+.5*spec_r2
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,io_pe)
+   spec_r_new=spec_r_new+.5*spec_r2
+   ! for now, use the value computed in RHS
+   ! spec_diff_new=spec_diff_new + spec_d2  
 enddo
 
-! compute time rate of change in transfer_r()
-if (time-time_old > 0) then
 
+! compute time rate of change in edot_r()
+if (time-time_old > 0) then
    do i=0,iwave
-      transfer_r(i)=(spec_r(i)-spec_r_old(i) ) / (time-time_old)
+      edot_r(i)=(spec_r_new(i)-spec_r(i) ) / (time-time_old)
    enddo
-   
 endif
 
 end subroutine
@@ -242,7 +293,7 @@ else
    access="a"
 endif
 
-
+ASSERT("output_tran: transfer_comp_time<>time_old",transfer_comp_time==time_old)
 
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time_initial
@@ -252,24 +303,48 @@ if (my_pe==io_pe) then
       write(message,'(a,i5)') "transfer spec_write(): Error opening file errno=",ierr
       call abort(message)
    endif
-   x=4   ! number of spectrums in file for each time.  
-   call cwrite8(fid,x,1)
-   call cwrite8(fid,.5*(time+time_old),1)  ! time of total KE spec
-   x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,transfer_r,1+iwave)
 
-   spec_r = spec_rhs - (spec_diff+spec_f)
-   call cwrite8(fid,transfer_comp_time,1)  ! time of 
-   x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_r,1+iwave)
+   if (equations==NS_UVW) then
+      x=4   ! number of spectrums in file for each time.  
+      call cwrite8(fid,x,1)
+      
+      ! d/dt total KE spectrum
+      call cwrite8(fid,.5*(time+time_old),1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,edot_r,1+iwave)
+      
+      ! transfer function (only in NS case.  other cases spec_rhs is
+      ! not computed and this is garbage.
+      spec_r = spec_rhs - (spec_diff+spec_f)
+      call cwrite8(fid,transfer_comp_time,1)  
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_r,1+iwave)
+      
+      ! diffusion spectrum
+      call cwrite8(fid,transfer_comp_time,1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_diff,1+iwave)
+      
+      ! forcing spectrum
+      call cwrite8(fid,transfer_comp_time,1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_f,1+iwave)
+   endif
+   if (equations==SHALLOW) then
+      x=2   ! number of spectrums in file for each time.  
+      call cwrite8(fid,x,1)
+      
+      ! e-dot
+      call cwrite8(fid,.5*(time+time_old),1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,edot_r,1+iwave)
 
-   call cwrite8(fid,transfer_comp_time,1)  ! time of 
-   x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_diff,1+iwave)
+      ! diffusion spectrum
+      call cwrite8(fid,.5*(time+time_old),1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_diff,1+iwave)
+   endif
 
-   call cwrite8(fid,transfer_comp_time,1)  ! time of 
-   x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_f,1+iwave)
 
    call cclose(fid,ierr)
 
@@ -280,10 +355,10 @@ if (my_pe==io_pe) then
    sum_f=0
    write(*,'(a)') '    i      d(E_k)/dt      d(E_k)/dt      T      D      F'
    do i=0,min(iwave,20)
-      write(*,'(i4,5f12.4)') i,transfer_r(i),&
+      write(*,'(i4,5f12.4)') i,edot_r(i),&
            spec_r(i)+spec_diff(i)+spec_f(i), &
            spec_r(i),spec_diff(i),spec_f(i)
-      sum_tot=sum_tot+transfer_r(i)
+      sum_tot=sum_tot+edot_r(i)
       sum_tot2=sum_tot2+spec_rhs(i)
       sum_f=sum_f + spec_f(i)
       sum_diss=sum_diss + spec_diff(i)
@@ -292,8 +367,8 @@ if (my_pe==io_pe) then
    print *,'diss tot2: ',sum_tot2
    print *,'sum_f:     ',sum_f
    print *,'sum_diff:  ',sum_diss
-   print *,'min: ',minval(transfer_r(0:iwave)) 
-   print *,'max: ',maxval(transfer_r(0:iwave)) 
+   print *,'min: ',minval(edot_r(0:iwave)) 
+   print *,'max: ',maxval(edot_r(0:iwave)) 
    
 
    ymax=maxval(spec_r(0:iwave))
@@ -326,11 +401,12 @@ end subroutine
 
 
 
-subroutine compute_spectrum(pin,p,work,spectrum,spectrum_x,spectrum_y,spectrum_z,iwave_max,pe)
+subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,spectrum_z,iwave_max,pe)
 !
 !  INPUT:  iwave_max:  size of spectrum()
 !  OUTPUT: iwave:      number of coefficients returned in spectrum()
 !          spectrum()  spherical wave number spectrum
+!          spec_d()    spherical wave number spectrum of diffusion term
 !          spectrum_x  spectrum in x
 !          spectrum_y  spectrum in y
 !          spectrum_z  spectrum in z
@@ -345,6 +421,7 @@ real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
 real*8 :: spectrum(0:iwave_max)
+real*8 :: spec_d(0:iwave_max)
 real*8 :: spectrum_x(0:g_nx/2)
 real*8 :: spectrum_y(0:g_ny/2)
 real*8 :: spectrum_z(0:g_nz/2)
@@ -352,7 +429,7 @@ real*8 :: spectrum_z(0:g_nz/2)
 ! local variables
 real*8 rwave
 real*8 :: spectrum_in(0:iwave_max)
-real*8 :: energy
+real*8 :: energy,denergy,xfac,xw
 integer i,j,k
 
 
@@ -366,6 +443,7 @@ iwave_max=nint(rwave)
 p=pin
 call fft3d(p,work)
 spectrum=0
+spec_d=0
 spectrum_x=0
 spectrum_y=0
 spectrum_z=0
@@ -376,16 +454,24 @@ do i=nx1,nx2
     rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
     iwave = nint(sqrt(rwave))
 
-    energy = 8
-    if (kmcord(k)==0) energy=energy/2
-    if (jmcord(j)==0) energy=energy/2
-    if (imcord(i)==0) energy=energy/2
-    energy=energy*p(i,j,k)*p(i,j,k)
+    xfac = 8
+    if (kmcord(k)==0) xfac=xfac/2
+    if (jmcord(j)==0) xfac=xfac/2
+    if (imcord(i)==0) xfac=xfac/2
+    energy=xfac*p(i,j,k)*p(i,j,k)
 
     spectrum(iwave)=spectrum(iwave)+energy
     spectrum_x(abs(imcord(i)))=spectrum_x(abs(imcord(i))) + energy
     spectrum_y(abs(jmcord(j)))=spectrum_y(abs(jmcord(j))) + energy
     spectrum_z(abs(kmcord(k)))=spectrum_z(abs(kmcord(k))) + energy
+
+
+    xw=rwave*pi2_squared
+    if (mu_hyper==4) then
+       xw=xw**4  ! viscosity = (del**2)**mu_hyper
+    endif
+    denergy=-xfac*mu*xw*p(i,j,k)*p(i,j,k)
+    spec_d(iwave)=spec_d(iwave)+denergy
 
 enddo
 enddo
@@ -426,70 +512,6 @@ end subroutine
 
 
 
-
-subroutine compute_spectrum_fft(p1,p2,pe,spec_r,iwave_max)
-use params
-use mpi
-implicit none
-integer :: iwave_max,ierr
-integer :: pe             ! compute spectrum on this processor
-real*8 :: p1(nx,ny,nz)
-real*8 :: p2(nx,ny,nz)
-real*8 :: spec_r(0:iwave_max)
-
-! local variables
-real*8 rwave
-real*8 :: spec_r_in(0:iwave_max)
-real*8 :: energy
-integer i,j,k
-
-
-rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
-if (nint(rwave)>iwave_max) then
-   call abort("compute_spectrum: called with insufficient storege for spectrum()")
-endif
-iwave_max=nint(rwave)
-
-spec_r=0
-
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-    rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
-    iwave = nint(sqrt(rwave))
-
-    energy = 8
-    if (kmcord(k)==0) energy=energy/2
-    if (jmcord(j)==0) energy=energy/2
-    if (imcord(i)==0) energy=energy/2
-    energy=energy*p1(i,j,k)*p2(i,j,k)
-
-    spec_r(iwave)=spec_r(iwave)+energy
-
-enddo
-enddo
-enddo
-
-
-#ifdef USE_MPI
-spec_r_in=spec_r
-call MPI_reduce(spec_r_in,spec_r,1+iwave_max,MPI_REAL8,MPI_SUM,pe,comm_3d,ierr)
-#endif
-
-if (g_nz == 1)  then
-   iwave = min(g_nx,g_ny)
-else
-   iwave = min(g_nx,g_ny,g_nz)
-endif
-iwave = (iwave/2)           ! max wave number in sphere.
-
-! for all waves outside sphere, sum into one wave number:
-do i=iwave+2,iwave_max
-   spec_r(iwave+1)=spec_r(iwave+1)+spec_r(i)
-enddo
-iwave=iwave+1
-
-end subroutine
 
 
 
