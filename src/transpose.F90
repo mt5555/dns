@@ -11,7 +11,9 @@ integer :: io_nodes(0:ncpu_z),nio,inc,comm_io
 real*8,private :: tmx1,tmx2
 real*8,private,allocatable :: sendbuf(:),recbuf(:)
 
-
+integer           :: mpi_maxio=64
+character(len=4)  :: mpi_stripe="64"
+character(len=12) :: mpi_stride="8388608"
 contains
 
 subroutine transpose_init
@@ -50,7 +52,7 @@ integer i,dest_pe3(3),key,color,ierr
 
 nio=1
 if (do_mpi_io) then
-   nio=min(64,ncpu_z)
+   nio=min(mpi_maxio,ncpu_z)
 endif
 inc=ncpu_z/nio
 
@@ -58,23 +60,21 @@ if (io_pe==my_pe) then
    print *,'number of mpi_io cpus: ',nio,do_mpi_io
 endif
 
-#ifdef USE_MPI_IO
-do i=0,ncpu_z-1
-   dest_pe3(1)=0
-   dest_pe3(2)=0
-   dest_pe3(3)=inc*(i/inc)
-   call mpi_cart_rank(comm_3d,dest_pe3,io_nodes(i),ierr)
-enddo
-call MPI_Barrier(comm_3d,ierr)
+if (nio>1) then
+   do i=0,ncpu_z-1
+      dest_pe3(1)=0
+      dest_pe3(2)=0
+      dest_pe3(3)=inc*(i/inc)
+      call mpi_cart_rank(comm_3d,dest_pe3,io_nodes(i),ierr)
+   enddo
+   call MPI_Barrier(comm_3d,ierr)
 !print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_nodes(my_z)
-call MPI_Barrier(comm_3d,ierr)
-if (io_nodes(my_z)<0) call abort("error in MPI-IO decomposition")
-#else
+   call MPI_Barrier(comm_3d,ierr)
+   if (io_nodes(my_z)<0) call abort("error in MPI-IO decomposition")
+else
    io_nodes=0
-#endif
+endif
 
-
-#ifdef USE_MPI_IO
 
 ! am i an io pe?
 key=0
@@ -85,8 +85,6 @@ key=0
 ! everyone with color=1 joins a new group, comm_sforcing
 call MPI_Comm_split(comm_3d,color,key,comm_io,ierr);
 if (color==0) call MPI_Comm_free(comm_io,ierr)
-
-#endif
 
 
 end subroutine

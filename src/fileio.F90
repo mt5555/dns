@@ -398,7 +398,7 @@ xny=o_ny
 xnz=o_nz
 
 
-if (io_nodes(my_z)==my_pe) then
+if (io_nodes(my_z)==my_pe .or. fpe==my_pe) then
    call print_message("MPI-IO open...")
    if (io_read==1) then
       call MPI_File_open(comm_io,fname, &
@@ -406,8 +406,8 @@ if (io_nodes(my_z)==my_pe) then
            MPI_INFO_NULL, fid,ierr)
    else
       call MPI_Info_create(infoin,ierr)
-      call MPI_Info_set(infoin, "striping_factor", "64",ierr) 	
-      call MPI_Info_set(infoin, "striping_unit",  "8388608",ierr)
+      call MPI_Info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
+      call MPI_Info_set(infoin, "striping_unit", mpi_stride ,ierr)
       call MPI_File_open(comm_io,fname, &
            MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
            infoin, fid,ierr)
@@ -473,7 +473,8 @@ if (io_read==1) then
 else
    call output1(p,work,work2,fid,fpe,offset)
 endif
-if (io_nodes(my_z)==my_pe) then
+
+if (io_nodes(my_z)==my_pe .or. fpe==my_pe) then
    call MPI_File_close(fid,ierr)
 endif
 #endif
@@ -631,7 +632,7 @@ if (equations==NS_UVW .and. w_spec) then
 else if (equations==NS_UVW) then
    if (udm_output) then
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".h5"
-      call udm_write_uvw(fname,time,Q,work1,work2)
+      call udm_write_uvw(fname,time,Q,q1)
    else
       ! NS, primitive variables
       fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".u"
