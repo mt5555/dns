@@ -68,7 +68,7 @@ shankara              .28     .19               .093    .064     .050
 milkyway              1.22    .42
 autrey                1.40
 shankara              1.76                      .62               .29
-
+   running 4 cpus, 1 cpu per node:              .51  
 
 
 ./bench.sh 256 8  20
