@@ -13,8 +13,11 @@
 %fid=fopen('../src/kh/khK.spec','r','l');
 %fid=fopen('../src/sht/rung_5000_0000.0000.spec','r','l');
 
-fid=fopen('../src/temp0000.0000.spec');
-fidt=fopen('../src/temp0000.0000.spect');
+%fid=fopen('../src/temp0000.0000.spec');
+%fidt=fopen('../src/temp0000.0000.spect');
+
+fid=fopen('/ccs/taylorm/dns/src/temp0000.0000.spec');
+fidt=fopen('/ccs/taylorm/dns/src/temp0000.0000.spect');
 
 
 
@@ -120,8 +123,14 @@ while (time>=0 & time<=9999.3)
   semilogx(x,spec_transfer,'k',x,spec_diff,'r');
   title(sprintf('T_k (black)      D_k (red)        time = %f ',time));
   subplot(2,1,2)
-  semilogx(x,spec_transfer+spec_diff+spec_f,x,spec_tot,'o');
-  title(sprintf('E_k'));
+  %semilogx(x,spec_transfer+spec_diff+spec_f,x,spec_tot,'o');
+  flux=0*spec_transfer;
+  for i=1:length(spec_transfer)
+     flux(i)=-sum(spec_transfer(1:i)); 
+  end      
+  semilogx(x,flux); 
+  grid;
+  title(sprintf('E Flux'));
   
   'pause...'
   pause
