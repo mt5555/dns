@@ -259,7 +259,7 @@ do
          if (my_pe==io_pe) then
             write(sdata,'(f10.4)') 10000.0000 + time
             if (compute_fractional_power) then
-               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf2"
+               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf3"
             else
                fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
             endif
