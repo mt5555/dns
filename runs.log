@@ -108,7 +108,9 @@ new run  testing voriticty interpolation along a line thru vorticity max
 4096x2048 
 ./gridsetup.py 16 1 1 4096 2048 1 2 2 0 2 2 0   2
 
-Running in /ccs/taylorm/dns/src/vxpair: (MOVE LATER?)
+Running in /ccs/taylorm/dns/src/vxpair:
+moved to sulaco:/home/scratch/vxpair (7/16/03)
+
 
 
 vx4096c   mu=7e-8  ran to t=100

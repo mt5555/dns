@@ -651,7 +651,7 @@ p_diss=0
 do ns=np1,np2
    ! FFT from rhsg -> rhs  
    Q(:,:,:,1)=rhsg(:,:,:,ns)
-   call z_fft3d_trashinput(Q(1,1,1,ns),rhs(1,1,1,ns),work)
+   call z_fft3d_trashinput(Q,rhs(1,1,1,ns),work)
 
    ! de-alias, and store in RHS(:,:,:,ns)
    do j=1,ny_2dz

@@ -111,48 +111,28 @@ ifeq ($(UNAME),AIX)
 endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
-   #LSFLIB = -L/lsf/lib -lbat -llsf 
-   #LSFFLAGS = -I/usr/include -I/lsf/include -DUSE_LSFTIME
 
    #defaults for QA
-   MPI =  -DUSE_MPI -DUSE_MPI_IO 
-   MPILIB =  -lfmpi -lmpio -lmpi  -lelan
    UDM = 
    UDMLIB = 
-   LDFLAGS =  -lcxml 
+#      UDM = -I$(HOME)/udm/udm_Nov_19/include -DHAVE_UDM 
+#      UDMLIB = -L$(HOME)/udm/udm_Nov_19/lib \
+#         -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
+#         -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
+#        -lrt -free -lcxxstd -lcxx -lexc -lc
+   LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
 
    # check for MPI module loaded:
-   MPIMODULE = $(shell echo $$LD_LIBRARY_PATH | grep MPI)
+   MPIMODULE = $(shell echo $$MPI_LD_FLAGS | grep MPI)
    ifneq ($(MPIMODULE),)
-      MPI_VERSION=
+      # R12
+      MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS)
+      MPILIB =  $(MPI_LD_FLAGS) -lfmpi -lmpio -lmpi  -lelan
    else
-      MPI_VERSION=lampi
+      # lampi
+      MPI =  -DUSE_MPI -DUSE_MPI_IO -I/users/taylorm/liblampi/include
+      MPILIB =  -L/users/taylorm/liblampi/lib -lmpi  -lelan
    endif
-
-
-   # QSC
-   HNAME = $(shell hostname | grep qsc)
-   ifneq ($(HNAME),)
-#      UDM = -I$(HOME)/udm/udm_Nov_19/include -DHAVE_UDM 
-#      UDMLIB = -L$(HOME)/udm/udm_Nov_19/lib \
-#         -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
-#         -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
-#        -lrt -free -lcxxstd -lcxx -lexc -lc
-      LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
-
-   endif
-
-   # QB
-   HNAME = $(shell hostname | grep qb)
-   ifneq ($(HNAME),)
-#      UDM = -I$(HOME)/udm/udm_Nov_19/include -DHAVE_UDM 
-#      UDMLIB = -L$(HOME)/udm/udm_Nov_19/lib \
-#         -L/usr/projects/ups/v-02-03-02_gamma_io/ALPHA64_mpi/lib \
-#         -ludm -lhdf5 -lmpio -lmpi -lelan -lm \
-#        -lrt -free -lcxxstd -lcxx -lexc -lc
-      LDFLAGS =  -lcxml_ev5 $(LSFLIB) $(UDMLIB) 
-   endif
-
 
 
    ifeq ($(HOST),milkyway.lanl.gov)
@@ -163,20 +143,7 @@ ifeq ($(UNAME),OSF1)
       LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
    endif
 
-
-   ifeq ($(MPI_VERSION),lampi)
-      # LAMPI
-      # ~/lampi/build-alphaev68-dec-osf5.1/mpirun -dev quadrics -np N
-      MPI =  -DUSE_MPI -DUSE_MPI_IO -I/users/taylorm/liblampi/include
-      MPILIB =  -L/users/taylorm/liblampi/lib -lmpi  -lelan
-   endif
-
-
-   #flag for OPENMP:  -omp
-   #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
-   #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   # shallow water model cannot use -automatic
-   #FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_FFT99 $(UDM)
+   # note: shallow water model cannot use -automatic
    FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
    CC = cc $(LSFFLAGS)
 endif
