@@ -206,12 +206,11 @@ do k=1,nsz
             ! interpolate:
             
          else
-            ! 
-            if (n1==0 .or. n2==0 .or. n3==0) then
+            if (n1(i)==0 .or. n2(j)==0 .or. n3(k)==0) then
                data(i,j,k)=-9d200
             else
                ! we have this data, copy;
-               data(i,j,k)=field(n1,n2,n3)
+               data(i,j,k)=field(n1(i),n2(j),n3(k))
             endif
          endif
          
