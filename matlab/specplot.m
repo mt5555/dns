@@ -8,7 +8,7 @@ movie=1;       % plot all the spectrum, pausing between each one
 movie_plot=0;  % create .ps out of all the spectra
 endian = 'b';  % default endian-ness of spec file
 CK_orig=1.0;
-decay_scale=0;
+decay_scale=0;   % special scaling for 2048^3 decaying run
 tsave=[];
 
 
@@ -17,26 +17,23 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
-name='tmix256C';
-namedir='/scratch2/taylorm/tmix256C/archive/';
-CK_orig=1.613;
-movie_plot=0;
-endian='l';
+%name='tmix256C';
+%namedir='/scratch2/taylorm/tmix256C/archive/';
+%CK_orig=1.613; movie_plot=0; endian='l';
 
-%name='decay2048'; namedir='/ccs/scratch/taylorm/decay/';
-%CK_orig=1.613; decay_scale=1;
+%name='decay2048-ave64.-new.0000.4026';
+%name='decay2048-ave32.-new.0000.4026';
+%namedir='/home/taylorm/rider/';
+%movie_plot=0; CK_orig=1.613; decay_scale=1; endian='l';
+
+
+name='decay2048'; namedir='/ccs/scratch/taylorm/decay/';
+CK_orig=1.613; decay_scale=1; endian='l';
 % save spectrum at these times:
-%movie=0; tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
-
-
+movie_plot=1; movie=1; tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
-
-
-name = 'rot3d_sto0025.7584';
-namedir = '/home/taylorm/ccs/dns/src/rot3d/';
-
 
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';
@@ -58,7 +55,7 @@ fidp=endianopen([namedir,name,'.pspec'],'r');
 %fidt=-1;
 %fidp=-1;
 
-time=fread(fid,1,'float64');
+time=fread(fid,1,'float64')
 num_spect=0;
 if (fidt>=0) 
   num_spect=fread(fidt,1,'float64');
@@ -142,10 +139,9 @@ while (time>=.0 & time<=9999.3)
     subplot(1,1,1);
     stitle=sprintf('Spectrum t=%8.4f',time);
     loglog53(n_r-1,spec_r,stitle,CK); hold on;
-
-    spec_r=spec_r./fac3;
-    loglog53(n_r-1,spec_r,stitle,CK); hold on;
-
+    %spec_r=spec_r./fac3;
+    %loglog53(n_r-1,spec_r,stitle,CK); hold on;
+    hold off;
 
     
     % longitudinal spectraum

@@ -44,10 +44,10 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-character(len=3) :: extension="uvwX"
+character(len=4) :: extension="uvwX"
 
 ! input file
-tstart=.32
+tstart=.4026
 tstop=.32
 tinc=1.0
 
@@ -94,17 +94,19 @@ icount=icount+1
    Q=0
 
    if (convert_opt==0) then  ! -cout uvw  
-      call input_uvw(time,Q,vor,work1,work2,1)
+!      call input_uvw(time,Q,vor,work1,work2,1)  ! default headers
+      print *,'attempting to read headerless input data...'
+      call input_uvw(time,Q,vor,work1,work2,0)  ! no headers
       ! just reoutput the variables:
       if (w_spec) then
          do n=1,3
             call fft3d(Q(1,1,1,n),work1)
          enddo
       endif
-      !basename=runname(1:len_trim(runname)) // "-new."
-      !call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
-      basename=runname(1:len_trim(runname)) // "-raw."
-      call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
+      basename=runname(1:len_trim(runname)) // "-new."
+      call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
+      !basename=runname(1:len_trim(runname)) // "-raw."
+      !call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
    endif
 
    if (convert_opt==1) then  ! -cout vor

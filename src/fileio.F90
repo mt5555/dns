@@ -1055,7 +1055,8 @@ logical :: output_spec
 integer :: ierr
 character(len=80) message
 
-time=-1
+if (io_read==1) time=-1  ! we cannot read time, so set to bad value
+                         ! calling program must obtain time some other way
 xnx=-1
 xny=-1
 xnz=-1

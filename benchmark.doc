@@ -277,8 +277,9 @@ autrey                .21     .17
 shankara.old  (2x2)   .28     .19               .093  .064   .050
 shankara 4ring        .27     .14               .059  .062   .047
 shankara-LAM(ethernet).27                                    .200
+sixhitch              .29
 
-pinkish???            .25                                    .050 
+pinkish               .25                                    .050 
 pinkish-lampi                                                .037
 
 -xW vecorization. cant use on Athlon, doesn't help that much:

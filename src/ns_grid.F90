@@ -20,7 +20,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: vel
 integer i,j,k,n,ierr
 logical,save :: firstcall=.true.
-
+character(len=240) :: base
 
 if (firstcall) then
    firstcall=.false.
@@ -31,6 +31,35 @@ endif
 
 
 
+! define this if we are justing using ns_grid to get the pressure,
+! not for a run
+#define EXTRACT_PRESSURE
+
+#ifdef EXTRACT_PRESSURE
+
+! pressure w original u:
+call ns3D(rhs,Q,time,0,work1,work2,q4)
+call divfree_gridspace(rhs,q4,work1,work2)
+write(base,'(f10.4)') 10000.0000 + time
+base=runname(1:len_trim(runname)) // base(2:10) // ".p"
+print *,'output P  ',base
+call singlefile_io3(time,q4,base,work1,work2,0,io_pe,.false.,2)
+
+! make div(u)=0
+call divfree_gridspace(Q,q4,work1,work2)
+call ns3D(rhs,Q,time,0,work1,work2,q4)
+call divfree_gridspace(rhs,q4,work1,work2)
+
+write(base,'(f10.4)') 10000.0000 + time
+base=runname(1:len_trim(runname)) // base(2:10) // ".p0"
+print *,'output div(u)=0 P  ',base
+call singlefile_io3(time,q4,base,work1,work2,0,io_pe,.false.,2)
+
+base=runname(1:len_trim(runname)) // "-projected."
+call output_uvw(base,time,Q,q4,work1,work2,2)   ! no headers
+
+stop
+#endif
 
 
 
@@ -62,6 +91,8 @@ Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0,work1,work2,q4)
 Q=Q+delt*rhs/6.0
 call divfree_gridspace(Q,q4,work1,work2)
+
+
 
 
 

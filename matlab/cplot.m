@@ -9,9 +9,9 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:.1:100.00;
 %range=50:5.0:100.0;
-range=[24.00];
+range=[48.00];
 %name='../src/kh1024'; 
-name='../src/rot3d/rot3d_sto';
+name='/home/taylorm/ccs/dns/src/rot3d/rot3d_sto';
 
 mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
@@ -80,7 +80,7 @@ for i=range
      clf;
      %q=shiftdim(q,2);
      %isosurface(z,x,y,q,3.0);
-     isosurface(x,y,z,q,3.0);
+     isosurface(x,y,z,q,2.0);
      axis([0 1 0 1 0 1]);
      view([30,30]);
  
