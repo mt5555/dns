@@ -65,6 +65,8 @@ fid2=-1;
 fid=endianopen('/home2/skurien/rotation/Rot1/Rot10000.0000.scalars','r');
 nx = 128;
 
+fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
+nx=128;
 
 nscalars=0;
 nscalars_e=0;

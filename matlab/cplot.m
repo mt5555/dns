@@ -9,9 +9,9 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:.1:100.00;
 %range=50:5.0:100.0;
-range=[1.00];
+range=[24.00];
 %name='../src/kh1024'; 
-name='../src/kh/khK';
+name='../src/rot3d/rot3d_sto';
 
 mkpr=0;            % make ps and jpeg files
 mkcontour=1;       % use pcolor or contour
@@ -29,7 +29,7 @@ for i=range
   ts = sprintf('%9.5f',10000+ts);
   ts=ts(2:10);
 
-  ts=[name,ts,'.vor']
+  ts=[name,ts,'.u']
   fidvor=fopen(ts,'r');
   time=fread(fidvor,1,'float64')
   data=fread(fidvor,3,'float64');
@@ -61,7 +61,7 @@ for i=range
     %
     %  3D field, plot 4 sections in a 2x2 subplot window
     %
-    figure(1)
+    figure(4)
     for i=1:4
        subplot(2,2,i)
        nzi=1 + (i-1)*nz/4;
@@ -76,10 +76,11 @@ for i=range
        shading interp
        axis square
      end
-     figure(2)
+     figure(3)
      clf;
-     q=shiftdim(q,2);
-     isosurface(z,x,y,q,50);
+     %q=shiftdim(q,2);
+     %isosurface(z,x,y,q,3.0);
+     isosurface(x,y,z,q,3.0);
      axis([0 1 0 1 0 1]);
      view([30,30]);
  
