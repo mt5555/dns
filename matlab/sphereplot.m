@@ -1,4 +1,4 @@
-
+% sphereplot
 % points on a lighted sphere:
 
 ndir=73;
@@ -22,6 +22,10 @@ scale=1.01;
 plot3(scale*x,scale*y,scale*z,'k.','MarkerSize',12);
 hold off;
 axis equal
+text(0,-1.4,-1.1,'X')
+text(-1.5,0,-1.1,'Y')
+text(-1.3,1.2,.1,'Z')
+
 print -deps  angle.ps
 
 

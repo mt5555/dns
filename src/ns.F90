@@ -222,11 +222,11 @@ real*8 p(g_nz2,nslabx,ny_2dz)
 
 real*8 xw,xfac,tmx1,tmx2,xw_viss
 real*8 uu,vv,ww,dummy
-integer n,i,j,k,im,km,jm,ns
+integer n,i,j,k,im,km,jm,ns,numk
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
 real*8 :: p_diss(n_var),pke(n_var)
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper8_scale
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8 :: vor(3)
 #ifdef ALPHA_MODEL
@@ -410,6 +410,45 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (mu_hyper==8) then
+! compute ke in last spherical shell
+ke=0
+numk=0
+
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+         xw = jm*jm + im*im + km*km 
+         if (dealias_sphere_kmax2_1 < xw  .and xw <= dealias_sphere_kamx2) then
+            numk=numk+1
+            xfac = 2*2*2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            
+            u2=Qhat(k,i,j,1)*Qhat(k,i,j,1) + &
+                 Qhat(k,i,j,2)*Qhat(k,i,j,2) + &
+                 Qhat(k,i,j,3)*Qhat(k,i,j,3)
+            
+            ke = ke + .5*xfac*u2
+         endif
+      enddo
+   enddo
+enddo
+ke=ke/numk
+#ifdef USE_MPI
+xw = ke
+call MPI_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+hyper8_scale = 5.0*ke * dealias_sphere_kmax**(-8.5)/pi2_squared
+endif
+
+
+
+
 ke=0
 ux2ave=0
 ke_diss=0
@@ -424,7 +463,9 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper==4) then
+            if (mu_hyper==8) then
+               xw_viss=xw_viss + mu_hyper_value*hyper8_scale*xw**8
+            else if (mu_hyper==4) then
                xw_viss=xw_viss + mu_hyper_value*xw**4
             else if (mu_hyper==2) then
                xw_viss=xw_viss + mu_hyper_value*xw*xw

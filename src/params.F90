@@ -283,6 +283,8 @@ integer           :: g_nmin
 
 ! spherical dealias kmax
 integer           :: dealias_sphere_kmax2 
+integer           :: dealias_sphere_kmax2_1 
+real*8            :: dealias_sphere_kmax 
 
 integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
                              ! For periodic FFT case, o_nx=g_nx+1 because we do not
@@ -496,7 +498,16 @@ if (g_nz==1) then
 endif
 
 ! spherical dealiasing:  sqrt(2) N/3
+! band containing last shell:  
+!      dealias_sphere_kmax2_1 <= k**2 <= dealias_sphere_kmax2
+!  
 dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
+dealias_sphere_kmax = sqrt(dealias_sphere_kmax2)
+dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
+
+
+
+
 
 
 ! these values must divide with no remainder:
