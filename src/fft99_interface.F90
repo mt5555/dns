@@ -140,7 +140,10 @@ integer n1,n1d,n2,n2d,n3,n3d
 character*80 message_str
 
 integer index,jj,j,k,numffts
+
+if (n1==1) return
 call getindex(n1,index)
+
 
 j=0  ! j=number of fft's computed for each k
 do k=1,n3
@@ -172,6 +175,7 @@ real*8 p(n1d,n2d,n3d)
 real*8 :: w(min(fftblocks,n2)*(n1+1)) 
 
 integer index,jj,j,k,numffts
+if (n1==1) return
 call getindex(n1,index)
 
 do k=1,n3
