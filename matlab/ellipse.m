@@ -12,7 +12,7 @@
 %name='/data/vxpair/vx2048c0000.0000.ellipse';
 
 name='/ccs/taylorm/dns/src/vxpair/vx6144c';
-times=[0:.1:19];
+times=[0:.1:150];
 
 
 for t=times

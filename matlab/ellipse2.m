@@ -13,7 +13,8 @@ clear;
 %name='/data/vxpair/vx2048c0000.0000.ellipse';
 
 name='/ccs/taylorm/dns/src/vxpair/vx6144e';
-times=[17.28:.02:30.0];
+%times=[17.28:.02:115.0];
+times=[105.0:.02:105.0];
 
 %name='/ccs/taylorm/dns/src/vxpair/vx6144c';
 %times=[10.00:.1:30.0];
@@ -31,9 +32,6 @@ for t=times
   fname=[name,tstr(2:10),'.ellipse2'];
   fid=endianopen(fname,'r');
 
-
-  
-  
   if (fid>=0) 
      disp(fname)
 

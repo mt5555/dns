@@ -1,8 +1,25 @@
 TODO:
+      balu work
+
+      paper
+        push over compisoave_paper.m 
+        plots:  iso12w snapshot, iso12w timeseries, time+angle ave. mean.
+        make changes outlined in email
+        put all figures at end - hard copy only 
+
+      MIMIC test case, and benchmark on ES45 and T90?
+
+      update decay website, email charles
+
+      setup something in the secure. use MPI-IO
+ 
+      Monika: put in w thru cut output dataset
+              fix ellipse iteration 
+      
+      iso12_512 data:  look at intermittency? 
 
 email: Bonnie answer
        UDM team: qb1533  
-       ccn-8: vis next week?
        Goeff: jobs?
 
 Angle averging:  153 calls to transpose_z()
@@ -11,7 +28,7 @@ Angle averging:  153 calls to transpose_z()
      True cost: 150 timesteps.
      time this again with **p replaced by multiplication?
 
-iso12_512 (O3K)  look at intermittency? 
+
 
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  

@@ -20,9 +20,11 @@ fid2=-1;
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
-nx=2048;
-fid2=fopen('/ccs/scratch/taylorm/decay/decay1024.scalars','r','l'); 
+%fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+%nx=2048;
+
+fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
+nx=512;
 
 
 nscalars=0;
@@ -110,13 +112,13 @@ disp(sprintf('max vor_z = %e',max(vor_z)));
 figure(5)
 clf
 hold on
-plot(time,ke,'r')
-%plot(time_2,ke_diss_tot,'r')
-plot(time,ke_diss_f+ke_diss_d,'k')
+plot(time,ke,'k')
+plot(time_2,ke_diss_tot,'r')
+%plot(time,ke_diss_f+ke_diss_d,'k')
 %plot(time,ke_diss_f,'b')
 plot(time,ke_diss_d,'b')
 plot(time,hel,'g')
-title('KE: red,    d(KE)/dt: blue,    hel: green');
+title('KE: black,   \epsilon: blue  d(KE)/dt: red,    hel: green');
 hold off
 xlabel('time')
 

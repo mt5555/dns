@@ -30,7 +30,7 @@ if ( ( $ext == all ) || ( $ext == diag ) ) then
    psi store -d dns/$name $name*.spect
    if ( $ext == all ) then
       echo 'saving uvw'
-      psi save -d dns/$name $name*.h5 $name*.u  $name*.v   $name*.w
+      psi save -d dns/$name $name*00.h5 $name*00.u  $name*00.v   $name*00.w
    endif
 else
    echo 'saving .' $ext ' files'

@@ -101,7 +101,7 @@ if (klaws==1)
 %
 %  the 4/5 law
 %
-figure(1)
+figure(1); subplot(1,1,1);
 yyave=0*xx;
 yyave_sq=0*xx;
 yyave1=yyave;
@@ -154,6 +154,7 @@ end
 
 
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+ax=axis;  axis([1,xmax,0,1]);
 hold off;
 if (plot_points==1) 
 print('-dpsc',[bname,'_45.ps']);
@@ -189,7 +190,7 @@ end
 %
 %  the 4/15 law
 %
-figure(2)
+figure(2); subplot(1,1,1);
 yyave1=0*xx;
 yyave2=0*xx;
 pave=yyave1;
@@ -229,7 +230,8 @@ if (plot_posneg)
   semilogx(xx_plot,nave)
 end
 x=1:xmax; semilogx(x,(4/15)*x./x,'k');
-ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+%ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+ax=axis;  axis([1,xmax,0,.3]);
 hold off;
 if (plot_points==1) 
 print('-dpsc',[bname,'_415.ps']);
@@ -240,7 +242,7 @@ end
 %  the 4/3 law
 %
 yyave=0*xx;
-figure(3)
+figure(3); subplot(1,1,1);
 yyave=0*xx;
 pave=yyave;
 nave=yyave;
@@ -275,6 +277,7 @@ xlabel('r/\eta');
 x=1:xmax; semilogx(x,(4/3)*x./x,'k');
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+ax=axis;  axis([1,xmax,0,1]);
 hold off;
 if (plot_points==1) 
 print('-dpsc',[bname,'_43.ps']);
@@ -287,7 +290,7 @@ end
 %
 if (0)
 yyave=0*xx;
-figure(4)
+figure(4); subplot(1,1,1);
 yyave=0*xx;
 pave=yyave;
 nave=yyave;
@@ -334,7 +337,7 @@ if (check_isotropy)
 yyave=0*xx;
 yyave1=0*xx;
 yyave2=0*xx;
-figure(1)
+figure(1); subplot(1,1,1);
 for i=1:ndir
   x = r_val(:,i);                       % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -372,7 +375,7 @@ print('-dpsc',[bname,'_isocheck2.ps']);
 print -djpeg isocheck2.jpg
 
 
-figure(3)
+figure(3); subplot(1,1,1);
 semilogx(xx_plot,.5*(yyave1+yyave2),'r'); hold on;
 semilogx(xx_plot(2:l-1),f2,'g'); hold on ;
 
@@ -386,7 +389,7 @@ semilogx(xx_plot(2:l-1),f2,'g'); hold on ;
 yyave=0*xx;
 yyave1=0*xx;
 yyave2=0*xx;
-figure(2)
+figure(2); subplot(1,1,1);
 for i=1:ndir
   x = r_val(:,i);                       % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -423,7 +426,7 @@ print('-dpsc',[bname,'_isocheck3.ps']);
 print -djpeg isocheck3.jpg
 
 
-figure(3)
+figure(3); subplot(1,1,1);
 semilogx(xx_plot,.5*(yyave1+yyave2),'r');
 semilogx(xx_plot(2:l-1),df,'g'); 
 title('D_{tt} vs  D_{ll} + .5 r (D_{ll})   and   D_{ltt} vs. (r D_{lll})''/6 (green)');
@@ -452,7 +455,7 @@ ulave=0*xx;
 utave=0*xx;
 ultave=0*xx;
 
-figure(1); clf
+figure(1); ; subplot(1,1,1); clf
 for i=1:ndir
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -474,7 +477,7 @@ ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 %hold off;
 
 
-figure(1); 
+figure(1); ; subplot(1,1,1); 
 for i=1:ndir
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -497,7 +500,7 @@ ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 
 
 
-figure(1)
+figure(1)  ; subplot(1,1,1);
 for i=1:ndir
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta

@@ -17,8 +17,8 @@ ext='.isostr';
 
 %name='/ccs/scratch/taylorm/check256_0000.8000'
 %name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
-name='/ccs/scratch/taylorm/dns/iso12_5120007.0000'
-nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
+%name='/ccs/scratch/taylorm/dns/iso12_5120007.0000'
+%nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %ext='.isostr001';
 
 %name='/ccs/scratch/taylorm/sk/check256_0000.8000'
@@ -27,8 +27,8 @@ nx=512; delx_over_eta=2.75; epsilon=3.95;  %R_l=249
 %name='/ccs/scratch/taylorm/decay/decay2048-1024.0000.6491'
 %nx=1024; delx_over_eta=2.73*2; epsilon=.04;
 
-%name='/ccs/scratch/taylorm/decay/decay20480000.6491'
-%nx=2048; delx_over_eta=2.73*2; epsilon=.04;
+name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
+nx=2048; delx_over_eta=-1; epsilon=-1;
 
 
 ndir_use=0;

@@ -9,9 +9,9 @@ function  plot_epsilon(fid,time)
   str=sum(pdf.*bins.^p);
   mx=max(bins - bins.*(pdf==0));
   mn=min(bins - bins.*(pdf==0));        % min over non zero values
-  bar(bins,pdf)
-  ax=axis;
-  axis([0,5.0,ax(3),ax(4)]);
+  semilogy(bins,pdf)
+%  ax=axis;
+%  axis([0,5.0,ax(3),ax(4)]);
   text='[   \mu|\nabla U|^2   ]^{1/3}';
   text=[text,sprintf('          Time=%.2f',time)];
   title(text) 

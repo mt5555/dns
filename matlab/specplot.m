@@ -3,28 +3,32 @@
 %#  plot of DNS spectrum output file
 %########################################################################
 %
-
+CK_orig=1.0;
+decay_scale=0;
 
 % name of the file, without the ".spec" extension
 name='cj20000.0000';
 namedir='/ccs/taylorm/dns/src/';
 
 name='temp0000.0000';
-namedir='../src/';
+namedir='/ccs/taylorm/dns/src/';
 
-name='decay2048';
-namedir='/ccs/scratch/taylorm/decay/';
+
+%name='decay2048';
+%namedir='/ccs/scratch/taylorm/decay/';
+%CK_orig=1.613; decay_scale=1;
 
 
 % plot all the spectrum:
-movie=0;
+movie=1;
 
 
 % save spectrum at these times:
 tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 spec_r_save=[];
+spec_r_save_fac3=[];
 
-fid=endianopen([namedir,name,'.spec'],'r');
+fid=fopen([namedir,name,'.spec'],'r','l');
 fidt=endianopen([namedir,name,'.spect'],'r');
 fidt=-1;
 
@@ -36,68 +40,105 @@ if (fidt>=0)
 end
 
 
-
 j=0;
-while (time>=0 & time<=9999.3)
+while (time>=.0 & time<=9999.3)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
-  
-  if (max(spec_r)<.01) spec_r=spec_r*(2*pi)^2; end;    
+
+  knum=0:(n_r-1);
+  eta=0;
+  spec_scale=1; 
+
+  if (decay_scale) 
+    % convert to 2pi units:
+    mu=3.4424e-6*(2*pi)^2;
+    eps = mu*2*sum(knum.^2 * (2*pi)^2 .* spec_r')
+    eta = (mu^3 ./ eps).^(.25);
+    if (j==1) eps_orig=eps; end;
+    
+    spec_scale=(2*pi)^2*eps^(-2/3);
+    
+    % make spectrum dimensionless:
+    spec_r=spec_r *spec_scale;
+    CK=CK_orig;
+    
+    
+    % dimensional scaling:  (undo the above)
+    % and use CK from first spectrum
+    % spec_r=spec_r*eps^(2/3);
+    % CK=CK_orig*eps_orig^(2/3);
+  end
+
+  knum2=knum;
+  knum2(1)=.000001;
+  fac3=.5 + atan( 10*log10(knum2'*eta)+12.58 ) / pi;
+  fac3 = 1 + .522*fac3;
+
+
     
   n_x=fread(fid,1,'float64');
-  spec_ux=fread(fid,n_x,'float64');  
-  spec_vx=fread(fid,n_x,'float64');  
-  spec_wx=fread(fid,n_x,'float64');  
+  spec_ux=spec_scale*fread(fid,n_x,'float64');
+  spec_vx=spec_scale*fread(fid,n_x,'float64');  
+  spec_wx=spec_scale*fread(fid,n_x,'float64');  
   
   n_y=fread(fid,1,'float64');
-  spec_uy=fread(fid,n_y,'float64');
-  spec_vy=fread(fid,n_y,'float64');
-  spec_wy=fread(fid,n_y,'float64');
+  spec_uy=spec_scale*fread(fid,n_y,'float64');
+  spec_vy=spec_scale*fread(fid,n_y,'float64');
+  spec_wy=spec_scale*fread(fid,n_y,'float64');
   
   n_z=fread(fid,1,'float64');
-  spec_uz=fread(fid,n_z,'float64');
-  spec_vz=fread(fid,n_z,'float64');
-  spec_wz=fread(fid,n_z,'float64');  
+  spec_uz=spec_scale*fread(fid,n_z,'float64');
+  spec_vz=spec_scale*fread(fid,n_z,'float64');
+  spec_wz=spec_scale*fread(fid,n_z,'float64');  
 
   i=find( abs(time-tsave)<.0001);
   if (length(i)>=1) 
      tsave(i)
      spec_r_save=[spec_r_save, spec_r];
+     spec_r_save_fac3=[spec_r_save_fac3, spec_r./fac3];
   end 
 
   if (movie==1)  
   figure(1);clf;
   if (n_z==1) 
-    subplot(2,1,1);
-    loglog53(n_r,spec_r,time);
-    subplot(2,1,2);
-    loglog53(n_x,spec_ux,time);
-    hold on;
-    loglog53(n_y,spec_vy,time);
-    hold off;
+    %subplot(2,1,1);
+    subplot(1,1,1);
+    stitle=sprintf('Spectrum t=%8.4f',time);
+    loglog53(n_r,spec_r,stitle,1);
+%    subplot(2,1,2);
+%    loglog53(n_x,spec_ux,' ',1);
+%    hold on;
+%    loglog53(n_y,spec_vy,' ',1);
+%    hold off;
   else
     %spherical wave number
     figure(1)
     subplot(1,1,1);
-    loglog53(n_r-1,spec_r,time);
+    stitle=sprintf('Spectrum t=%8.4f',time);
+    loglog53(n_r-1,spec_r,stitle,CK); hold on;
+
+    spec_r=spec_r./fac3;
+    loglog53(n_r-1,spec_r,stitle,CK); hold off;
+
 
     
     % longitudinal spectraum
     figure(2)
     subplot(2,1,1);
-    loglog53(n_x,spec_ux,time);     hold on;
-    loglog53(n_y,spec_vy,time);     hold on;
-    loglog53(n_z,spec_wz,time,'longitudinal 1D spectrum');     hold off;
+    loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
+    loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
+    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold off;
     
     % transverse spectraum
+
     subplot(2,1,2);
-    loglog53(n_x,spec_uy,time);     hold on;
-    loglog53(n_x,spec_uz,time);     hold on;
-    loglog53(n_y,spec_vx,time);     hold on;
-    loglog53(n_y,spec_vz,time);     hold on;
-    loglog53(n_z,spec_wx,time);     hold on;
-    loglog53(n_z,spec_wy,time,'transverse 1D spectrum');     
+    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
+    loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
+    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
+    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
+    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
+    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
     hold off;
   end
   end
@@ -179,7 +220,7 @@ while (time>=0 & time<=9999.3)
 
 
   if (movie==1)  
-  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.4020)<.01) )
+  if ( ( (2*time-floor(2*time))<.01) | (abs(time-.45)<.01) )
     disp('making ps files ...' )
     figure(1)
     print ('-dpsc',sprintf('%s_%.2f.ps',name,time))
@@ -187,11 +228,13 @@ while (time>=0 & time<=9999.3)
       figure(2)
       print ('-dpsc',sprintf('%s_%.2f_t.ps',name,time))
     end
-%    disp('pause')
-%    pause
-  end     
+    disp('pause')
+    pause
+  else     
+    disp('pause')
+    pause
   end
-
+  end
   
   time=fread(fid,1,'float64');
   if (fidt>=0) 
@@ -203,9 +246,15 @@ end
 fclose(fid);
 if (fidt>0) fclose(fidt); end;
 
+return
+
+
 if (length(spec_r_save>1) )
 figure(1); clf;
-loglog53(n_r,spec_r_save,.43,'KE spectrum');
+loglog53(n_r,spec_r_save,'KE spectrum',CK);
 print -djpeg -r72 spec.jpg
+figure(2); clf;
+loglog53(n_r,spec_r_save_fac3,'KE / atan-pileup-factor',CK);
+print -djpeg -r72 speck3.jpg
 end
 

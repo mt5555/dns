@@ -1286,6 +1286,7 @@ subroutine accumulate_cj_str(idir,idel,u1,u2,ur1,ur2)
 !  (ur1,ur2)       w(x+r), s(x+r)
 !
 !
+implicit none
 real*8 :: u1,ur1,u2,ur2
 real*8 :: rhat(3),rperp1(3),rperp2(3)
 integer :: idir,idel

@@ -8,19 +8,18 @@ clear all;
 
 
 mkps=1;  % print?
-dp=6;    % which seperation length index
+dp=10;    % which seperation length index
 
 range=0:50;
 %range = 1
 %range=0:.5:2;
 
-%fid=fopen('test32.sf','r','l');
-fid=fopen('iso12_256_200.sf','r','b');
-%fid=fopen('../src/test32.sf','r','l');
+%fid=fopen('/ccs/scratch/taylorm/decay/decay20480002.7021.new.sf','r','l');
+fid=fopen('/ccs/scratch/taylorm/decay/decay20480000.6034.new.sf','r','l');
 
 
 times=[5.0 6.0 7.0 8.0 9.0 10.0];
-times=[999.0];
+times=[2.702113];
 components=['u','v','w'];
 var=['x','y','z'];
 
@@ -36,9 +35,12 @@ while (time1>=0 & time1<=5000)
     plotu=1;
     disp('plotting...')
   end
+  plotu=1; 
+  disp('plotting...')
 
   if (plotu) 
     axmax=0;
+    aymax=0;
     % LONGITUDINAL PDFS
     for j=1:3
       for i=1:3  
@@ -48,12 +50,13 @@ while (time1>=0 & time1<=5000)
         if (i==j)
           figure(j)
           subplot(4,1,1)
-          bar(bins1,pdf1(:,dp))
+          semilogy(bins1,pdf1(:,dp))
           title(sprintf('time=%f',time1));
           ylabel(['\Delta',sprintf('_{  %i%s} %s',delta1(dp),var(i),components(j))]);
           set(gca,'YTickLabel','')
           ax=axis;
-          axmax=max(axmax,ax(4));
+          aymax=max(aymax,ax(4));
+          axmax=max(axmax,max(abs(ax(1:2))));
         end
       end
     end
@@ -69,7 +72,7 @@ while (time1>=0 & time1<=5000)
         
         figure(i)
         subplot(4,1,j+1)
-        bar(bins1,pdf1(:,dp))
+        semilogy(bins1,pdf1(:,dp))
         text=['\Delta',sprintf('_{%i%s}',delta1(dp),var(i))]; 
         if (i==j)
           text=[text,sprintf('%s   ||',components(i)),text,'U||^2'];
@@ -81,8 +84,8 @@ while (time1>=0 & time1<=5000)
         
         set(gca,'YTickLabel','')
         ax=axis;
-        axmax=max(axmax,ax(4));
-        
+        aymax=max(aymax,ax(4));
+        axmax=max(axmax,max(abs(ax(1:2))));
       end
     end
     
@@ -91,7 +94,7 @@ while (time1>=0 & time1<=5000)
       for i=1:4
         figure(j);
         subplot(4,1,i);
-        axis([-4,4,0,axmax]); 
+        axis([-axmax,axmax,1e-12,aymax]); 
       end
     end
 

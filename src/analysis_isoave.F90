@@ -270,10 +270,11 @@ do
       if (.not. read_uvw) then
          call print_message("calling input_uvw")
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
-	 ! read_uvw=.true. ! dont set to .true.: we trash Q below:
+	 read_uvw=.true. ! dont set to .true.: we trash Q below:
       endif
       call print_message("calling compute_w2s2")
       call compute_w2s2(Q,q1,q2,q3)
+      read_uvw=.false.  ! call to compute_w2s2 has trashed data in Q 
       call print_message("calling isoavep")
       call isoavep(Q,q1,q1,q2,2,csig)
       

@@ -1,4 +1,15 @@
 **********************************************************************************
+12/16/02
+
+sc1024A started on QSC   RUNNING
+1024^3 iso12 forcing
+mu=.35e-4
+
+
+
+
+
+**********************************************************************************
 12/6/02
 
 VXPAIR
@@ -68,10 +79,8 @@ times0.dat
 1024^3 conversion: everything
 
 times5.dat 
-convert to h5:     5 per eddy turnover time
+convert to h5 vor:     5 per eddy turnover time
 2048^3 analysis:   run 5 per eddy turnover time?
-
-
 
 
 
