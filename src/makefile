@@ -194,6 +194,9 @@ OBJS3 = $(INITS) $(OPS) $(FILEIO)
 #diagnostics for 3d turbulence runs:
 TURB_DIAG = pdf.o turb_diag.o isoave.o
 
+#diagnostics for compressible DNS runs:
+CDNS_DIAG = pdf.o cdns_diag.F90
+
 #diagnostics for VXPAIR runs:
 PSIVOR_DIAG = psivor_diag.o  
 
@@ -206,6 +209,7 @@ SHALLOW_DIAG =  shallow_diag.o
 MODEL_GRID       = ns_grid.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_IBMGRID    = ns_ibm.o  ibm.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_GHOST      = ns_ghost.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_CDNS       = cns.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(CDNS_DIAG)
 MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
@@ -244,6 +248,9 @@ dnsgrid:  $(MODEL_GRID)
 
 dnsghost:  $(MODEL_GHOST) 
 	$(LINK) -o dnsghost $(MODEL_GHOST) $(LDFLAGS) $(MPILIB)
+
+cdns:  $(MODEL_CDNS) 
+	$(LINK) -o cdns $(MODEL_CDNS) $(LDFLAGS) $(MPILIB)
 
 dnsvor:  $(MODEL_PSIVOR) 
 	$(LINK) -o dnsvor $(MODEL_PSIVOR) $(LDFLAGS) $(MPILIB)
