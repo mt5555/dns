@@ -14,8 +14,8 @@ range=0:50;
 %fid=fopen('iso12_256_200.scalars','r','b'); 
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
-%fid=fopen('../src/kh/khK.scalars','r','l'); 
-fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
+fid=fopen('../src/kh/khQ0000.0000.scalars','r','l'); 
+%fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
 
 

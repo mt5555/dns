@@ -17,11 +17,11 @@ real*8 :: Q4(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
 
 ! never use work1,work2,rhs,q4
-call rk4reshape(time,Q,Q2(1,1,1,1),Q2(1,1,1,2),Q3(1,1,1,1),Q3(1,1,1,2))
+call rk4reshape(time,Q,Q2(1,1,1,1),Q2(1,1,1,2),Q3(1,1,1,1),Q3(1,1,1,2),work1)
 end subroutine
 
 
-subroutine rk4reshape(time,Q,rhs,w_old,w_tmp,psi)
+subroutine rk4reshape(time,Q,rhs,w_old,w_tmp,psi,work)
 use params
 implicit none
 real*8 :: time
@@ -30,6 +30,7 @@ real*8 :: w_tmp(nx,ny)
 real*8 :: w_old(nx,ny)
 real*8 :: psi(nx,ny)
 real*8 :: rhs(nx,ny)
+real*8 :: work(nx,ny)
 
 
 ! local variables
@@ -56,7 +57,7 @@ if (firstcall) then
 
    ! initial vorticity should have been set on the boundary, so
    ! we can compute PSI right now:
-   call compute_psi(Q(1,1,1),Q(1,1,2),rhs)
+   call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work)
    ! now use PSI to get u,v to impose inflow b.c. on vorticity:
    call bc_impose(Q(1,1,1),Q(1,1,2))
 endif
@@ -81,7 +82,7 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 ! stage 2
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,Q(1,1,2))  ! use PSI at starting time for (u,v) b.c.
-call compute_psi(w_tmp,psi,rhs)
+call compute_psi(w_tmp,psi,rhs,work)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
@@ -90,20 +91,20 @@ Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 ! stage 3
 w_tmp = w_old + delt*rhs/2.0
 call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs)
+call compute_psi(w_tmp,psi,rhs,work)
 call ns3D(rhs,w_tmp,psi,time+delt/2.0,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/3.0
 
 ! stage 4
 w_tmp = w_old + delt*rhs
 call bc_impose(w_tmp,Q(1,1,2))
-call compute_psi(w_tmp,psi,rhs)
+call compute_psi(w_tmp,psi,rhs,work)
 call ns3D(rhs,w_tmp,psi,time+delt,0)
 Q(:,:,1)=Q(:,:,1)+delt*rhs/6.0
 
 
 call bc_impose(Q(1,1,1),Q(1,1,2))
-call compute_psi(Q(1,1,1),Q(1,1,2),rhs)
+call compute_psi(Q(1,1,1),Q(1,1,2),rhs,work)
 time = time + delt
 
 
@@ -137,15 +138,16 @@ end subroutine
 
 
 
-subroutine compute_psi(w,psi,work)
+subroutine compute_psi(w,psi,b,work)
 use params
 implicit none
 real*8 w(nx,ny)
 real*8 psi(nx,ny)
 real*8 work(nx,ny)
+real*8 b(nx,ny)
 
 !local
-real*8 :: mone=-1,zero=0,tol=1e-10
+real*8 :: one=1,zero=0,tol=1e-8
 external helmholtz_dirichlet,helmholtz_periodic
 
 
@@ -153,17 +155,20 @@ external helmholtz_dirichlet,helmholtz_periodic
 
 ! if all b.c. periodic:
 if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC) then
-   psi=w
-   call helmholtz_periodic_inv(psi,work,zero,mone)
+   psi=-w
+   call helmholtz_periodic_inv(psi,work,zero,one)
 
    !psi=0  ! initial guess
-   !call cgsolver(psi,work,zero,mone,tol,work,helmholtz_periodic,.false.)
-   !call cgsolver(psi,work,zero,mone,tol,work,helmholtz_periodic,.true.)
+   !b=-w
+   !call cgsolver(psi,b,zero,one,tol,work,helmholtz_periodic,.true.)
 else
    psi=0  ! initial guess
-   !update PSI on boundary using bio-savar law
-   call bc_biotsavart(w,psi)
-   call cgsolver(psi,w,zero,mone,tol,work,helmholtz_dirichlet,.false.)
+   call bc_biotsavart(w,psi)    !update PSI on boundary using biot-savart law
+
+   b=-w
+   ! copy b.c. from psi into 'b', and apply compact correction to b:
+   call helmholtz_dirichlet_setup(b,psi)
+   call jacobi(psi,b,zero,one,tol,work,helmholtz_dirichlet,.false.)
 
    !update PSI 1st row of ghost cells so that we are 2nd order differences
    call bc_onesided(psi)
@@ -184,6 +189,16 @@ use params
 implicit none
 real*8 w(nx,ny)
 real*8 psi(nx,ny)
+
+#if 0
+   u=( 2*(psi(i,j+1)-psi(i,j-1))/3 -  &
+        (psi(i,j+2)-psi(i,j-2))/12          )/dely
+
+   v=-( 2*(psi(i+1,j)-psi(i-1,j))/3 -  &
+        (psi(i+2,j)-psi(i-2,j))/12          )/delx
+
+#endif
+
 
 
 end subroutine

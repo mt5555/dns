@@ -8,7 +8,7 @@ fftsgi_interface.o: macros.h makefile
 fftstk_interface.o: macros.h makefile 
 fileio.o: macros.h params.o structf.o mpi.o transpose.o makefile 
 ghost.o: macros.h params.o mpi.o makefile 
-init_data.o: macros.h params.o mpi.o transpose.o fft_interface.o makefile 
+init_data.o: macros.h params.o mpi.o transpose.o makefile 
 init_grid.o: macros.h params.o structf.o transpose.o fft_interface.o mpi.o makefile 
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
@@ -22,7 +22,7 @@ ns_psivor.o: macros.h params.o fft_interface.o ghost.o makefile
 params.o: macros.h transpose.h params.h makefile 
 sforcing.o: macros.h params.o mpi.o makefile 
 shallow.o: macros.h params.o fft_interface.o sforcing.o transpose.o makefile 
-solve.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
+solve.o: macros.h params.o mpi.o makefile 
 structf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 test.o: macros.h params.o transpose.o mpi.o fft_interface.o makefile 
 transpose.o: macros.h transpose.h params.o mpi.o makefile 

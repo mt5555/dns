@@ -1,5 +1,10 @@
 #include "macros.h"
-
+!
+! NOTE: before using an iterative solver, see the nots
+! at the top of fftops.F90 about how to set
+! DX4DX4 and HINV_DX4DX4
+!
+!
 subroutine cgsolver(sol,b,a1,a2,tol,h,matvec,precond)
 !
 ! CG for solving:
@@ -66,12 +71,16 @@ endif
 
 
 itermax=1000
-res_init=sqrt(ddot(sol,sol))          
+res_init=sqrt(ddot(b,b))          
 if (tol>1) then
    itermax=tol
    tol1=1e-12
 else
-   tol1=tol*res_init
+   if (res_init<1) then
+      tol1=tol
+   else
+      tol1=tol*res_init
+   endif
 endif
 err=1d99
 
@@ -83,6 +92,9 @@ if (precond) call helmholtz_periodic_inv(R,work,a1,a2)
 R=b-R
 P=R
 alpha=ddot(R,R)
+err=sqrt(alpha)
+if (err<tol1) goto 200
+
 
 100 continue
    itqmr = itqmr+1
@@ -101,11 +113,15 @@ alpha=ddot(R,R)
    P=R + P*beta
    
    err=sqrt(alpha)
+   !write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' ||RHS||=',res_init,' residual: ',err
+
 if (err.gt.tol1 .and. itqmr.lt.itermax) goto 100
+200 continue
 
 if (itqmr>25) then
-   write(*,'(a,i4,a,e11.6,a,e11.6)')  'CG iter=',itqmr,' || RHS ||',res_init,' residual: ',err
+   write(*,'(a,i4,a,e11.6,a,e11.6)')  'Final CG iter=',itqmr,' || RHS ||=',res_init,' residual: ',err
 endif
+
    
 if (itqmr>=itermax) then
    stop 'CG iteration failure'   
@@ -138,7 +154,7 @@ real*8 :: work(nx,ny,nz)
 real*8,external  :: ddot
 
 ! local
-integer i,j
+integer i,j,k
 real*8 err
 real*8 res_init,tol1,w
 integer itqmr
@@ -157,19 +173,23 @@ if (precond) then
 endif
 
 
-
 call matvec(sol,R,a1,a2,h)
 if (precond) call helmholtz_periodic_inv(R,work,a1,a2)
+
+
 R=b-R
 sol = sol + w*R
-
 
 res_init = sqrt(ddot(b,b))
 if (tol>1) then
    itermax=tol
    tol1=1e-12
 else
-   tol1=tol*res_init
+   if (res_init<1) then
+      tol1=tol
+   else
+      tol1=tol*res_init
+   endif
 endif
    
 
@@ -185,7 +205,7 @@ do
    sol = sol + w*R
    
    err=sqrt(ddot(R,R))
-   !write(*,444) itqmr,res_init,err
+   write(*,444) itqmr,res_init,err
    if (err <= tol1 .or. itqmr>=itermax) exit
 enddo
 

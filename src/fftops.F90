@@ -5,6 +5,56 @@
 ! used to try out 2nd order, but 2 delx scheme:
 #undef CENTER4H        
 
+! use DX applied twice for DXX in der()  
+! this effects diffusion operator and iterative solves
+! (because they call Helmholtz_periodic() which calls der())
+#undef DX4DX4
+!
+! use DX applied twice for DXX in HELMHOLTZ_INVERSE
+#define HINV_DX4DX4
+!
+! Notes on DX4DX4 settings.  These effect the routines used in
+! periodic cases only:
+!
+!      helmholtz_periodic_inv()
+!      der()
+!      helmholtz_periodic()       (it uses d/dxx from der()
+!
+!
+! Fourier methods:  doesn't matter
+!
+! 4th order methods:   
+!   UVW form:  LAPLACE must be the same as div(grad)
+!              (which is 2 successive calls to der() )
+!
+!              direct solve:  
+!                    HINV_DX4DX4 set
+!                    DX4DX4 doesn't matter
+!              iterative solve, no preconditioner:
+!                    DX4DX4       set
+!                    HINV_DX4DX4  doesn't matter (not used)
+!              iterative solve, with preconditioner:
+!                    both set
+!
+!
+!   PSI-VOR    direct solve: 
+!                    HINV_DX4DX4 both work, different answers
+!                    DX4DX4 doesn't matter 
+!              iterative solve, no preconditioner:
+!                    DX4DX4       both work
+!                    HINV_DX4DX4  doesn't matter
+!              iterative solve, with preconditioner:
+!                    both set, or both unset
+!   
+!   
+! For non-periodic cases, we are using:
+! helmholtz_dirichlet_inv()
+! helmholtz_dirichlet()
+! which are hard coded to use 3 point stencils for d/dxx
+!                
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  compute derivative along index index=1,2 or 3
@@ -142,6 +192,12 @@ external helmholtz_periodic,helmholtz_dirichlet
 if (bdy_x1==PERIODIC .and. bdy_y1==PERIODIC .and. bdy_z1==PERIODIC) then
    call divergence(p,u,work,work2)
    call helmholtz_periodic_inv(p,work,alpha,beta)
+
+   !work=p  ! RHS
+   !p=0  ! initial guess
+   !tol=1e-10
+   !call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic,.false.)
+
 else
    stop 'divfree_gridspace: only supports periodic case'
    call divergence(work,u,p,work2)
@@ -559,11 +615,13 @@ do k=nz1,nz2
          xm=2*sin(imcord(i)*pi2*delx)/(2*delx)
          ym=2*sin(jmcord(j)*pi2*dely)/(2*dely)
          zm=2*sin(kmcord(k)*pi2*delz)/(2*delz)
+         xfac=-(xm*xm + ym*ym  +zm*zm)
 #elif (defined CENTER4H) 
          xm=2*sin(imcord(i)*pi2*2*delx)/(4*delx)
          ym=2*sin(jmcord(j)*pi2*2*dely)/(4*dely)
          zm=2*sin(kmcord(k)*pi2*2*delz)/(4*delz)
-#else
+         xfac=-(xm*xm + ym*ym  +zm*zm)
+#elif (defined HINV_DX4DX4)
          xm=4*sin(imcord(i)*pi2*delx)/3
          ym=4*sin(jmcord(j)*pi2*dely)/3
          zm=4*sin(kmcord(k)*pi2*delz)/3
@@ -573,10 +631,28 @@ do k=nz1,nz2
          xm=xm/delx
          ym=ym/dely
          zm=zm/delz
+         xfac=-(xm*xm + ym*ym  +zm*zm)
+#else
+         ! -u(x+2h)+16(x+h)-30u(x)+16u(x-h)-u(x-2h)/(12*h*h)
+         ! u(x+h)+u(x-h)   ->  2 cos(k*pi2*h)
+         ! u(x+2h)+u(x-2h) ->  2 cos(k*pi2*2h)
+         xm=-30
+         ym=-30
+         zm=-30
+         xm=xm + 2*16*cos(imcord(i)*pi2*delx)
+         ym=ym + 2*16*cos(jmcord(j)*pi2*dely)
+         zm=zm + 2*16*cos(kmcord(k)*pi2*delz)
+         xm=xm - 2*cos(imcord(i)*pi2*2*delx)
+         ym=ym - 2*cos(jmcord(j)*pi2*2*dely)
+         zm=zm - 2*cos(kmcord(k)*pi2*2*delz)
+         xm=xm/(12*delx*delx)
+         ym=ym/(12*dely*dely)
+         zm=zm/(12*delz*delz)
+         xfac=xm+ym+zm
 #endif
-         xfac=xm*xm + ym*ym  +zm*zm
-         if (xfac<1e-12) xfac=0
-         xfac= alpha - beta*xfac
+
+         if (abs(xfac)<1e-12) xfac=0
+         xfac= alpha + beta*xfac
          if (xfac/=0) xfac = 1/xfac
          p(i,j,k)=p(i,j,k)*xfac
       enddo
@@ -680,8 +756,9 @@ do j=1,n2
          pxx(i,j,k)= (px(i2,j,k)-px(i1,j,k))/(2*h)
 #elif (defined CENTER4H)
          pxx(i,j,k)= (px(i3,j,k)-px(i0,j,k))/(4*h)
+#elif (defined DX4DX4)
+         pxx(i,j,k)= (2*(px(i2,j,k)-px(i1,j,k))/3 - (px(i3,j,k)-px(i0,j,k))/12 )/h
 #else
-!         pxx(i,j,k)= (2*(px(i2,j,k)-px(i1,j,k))/3 - (px(i3,j,k)-px(i0,j,k))/12 )/h
          pxx(i,j,k)= (-work(i0)+16*work(i1)-30*work(i)+16*work(i2)-work(i3) )&
                /(12*h*h)
 #endif
