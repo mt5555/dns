@@ -33,6 +33,37 @@ if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss)
 end subroutine
 
 
+subroutine gforce(Q,rhs,rhsz,q4,q4z,work,f_diss)
+!
+! store forcing term to rhs, in gird space
+!
+use params
+use fft_interface
+implicit none
+real*8 :: work(nx,ny,nz)
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q4(nx,ny,nz,n_var)
+real*8 :: rhs(nx,ny,nz,n_var)
+real*8 :: q4z(g_nz2,nslabx,ny_2dz,n_var) 
+real*8 :: rhsz(g_nz2,nslabx,ny_2dz,n_var) 
+real*8 :: f_diss
+integer :: n
+
+q4=Q
+do n=1,3
+   call z_fft3d_trashinput(q4(1,1,1,n),rhsz(1,1,1,n),work)
+enddo
+call sforce(q4z,rhsz,f_diss)
+do n=1,3
+   call z_ifft3d(q4z(1,1,1,n),rhs(1,1,1,n),work)
+enddo
+end subroutine
+
+
+
+
+
+
 subroutine sforcing12(rhs,Qhat,f_diss)
 !
 ! Add a forcing term to rhs.
@@ -106,6 +137,19 @@ enddo
 end subroutine 
    
    
+
+
+
+
+
+
+
+
+
+
+
+
+
    
 subroutine sforcing_init
 use params

@@ -44,25 +44,25 @@ Q_old=Q
 
 
 ! stage 1
-call ns3D(rhs,Q,time,1)
+call ns3D(rhs,Q,time,1,q4,work1)
 call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,0)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0,q4,work1)
 call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
-call ns3D(rhs,Q_tmp,time+delt/2.0,0)
+call ns3D(rhs,Q_tmp,time+delt/2.0,0,q4,work1)
 call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
-call ns3D(rhs,Q_tmp,time+delt,0)
+call ns3D(rhs,Q_tmp,time+delt,0,q4,work1)
 Q=Q+delt*rhs/6.0
 call divfree_ghost(Q,p,work1,Q_tmp)
 
@@ -73,13 +73,13 @@ call divfree_ghost(Q,p,work1,Q_tmp)
 #else
 
 ! stage 1
-call ns3D(rhs,Q,time,1)
+call ns3D(rhs,Q,time,1,q4,work1)
 call divfree_ghost(rhs,p,work1,Q_tmp)
 Q=Q+delt*rhs/3
 
 ! stage 2
 Q_tmp = rhs
-call ns3D(rhs,Q,time+delt/3,0)
+call ns3D(rhs,Q,time+delt/3,0,q4,work1)
 call divfree_ghost(rhs,p,work1,Q_tmp)
 rhs = -5*Q_tmp/9 + rhs
 Q=Q + 15*delt*rhs/16
@@ -87,7 +87,7 @@ Q=Q + 15*delt*rhs/16
 
 ! stage 3
 Q_tmp=rhs
-call ns3D(rhs,Q,time+3*delt/4,0)
+call ns3D(rhs,Q,time+3*delt/4,0,q4,work1)
 rhs = -153*Q_tmp/128 + rhs
 Q=Q+8*delt*rhs/15
 call divfree_ghost(Q,p,work1,Q_tmp)
@@ -126,7 +126,7 @@ end subroutine rk4
 
 
 
-subroutine ns3d(rhs,Q,time,compute_ints)
+subroutine ns3d(rhs,Q,time,compute_ints,q4,work)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -143,14 +143,16 @@ subroutine ns3d(rhs,Q,time,compute_ints)
 ! hel = u (w_y-v_z) + v (u_z - w_x)  + w (v_x - u_y)
 !
 use params
-use fft_interface
 use ghost
+use sforcing
 implicit none
 
 ! input
 real*8 Q(nx,ny,nz,n_var)
 real*8 time
 integer compute_ints
+real*8 q4(nx,ny,nz,n_var)
+real*8 work(nx,ny,nz)
 
 ! output
 real*8 rhs(nx,ny,nz,n_var)
@@ -158,12 +160,13 @@ real*8 rhs(nx,ny,nz,n_var)
 
 !local
 real*8 dummy,tmx1,tmx2
-real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss,d1,d2
+real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss,d1,d2,f_diss
 integer n,i,j,k
 
 call wallclock(tmx1)
 
 ke=0
+f_diss=0
 ke_diss=0
 ke_diss2=0
 gradu_diss=0
@@ -173,11 +176,13 @@ hel=0
 
 
 
-
-
-
-
 rhs=0
+if (forcing_type>0) then
+   ! very inefficient spectral forcing:  
+   call gforce(Q,rhs,rhs,q4,q4,work,f_diss)
+endif
+
+
 
 call ghost_update_x(Q,ndim)
 do n=1,ndim
@@ -278,7 +283,7 @@ if (compute_ints==1) then
 
    ints(2)=ke_diss2/g_nx/g_ny/g_nz     ! gradu dot gradu
 
-   !ints(3) = forcing terms
+   ints(3) = f_diss
    ints(4)=vor/g_nx/g_ny/g_nz
    ints(5)=hel/g_nx/g_ny/g_nz
    ints(6)=ke/g_nx/g_ny/g_nz

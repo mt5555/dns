@@ -20,13 +20,13 @@ integrals.o: macros.h params.o mpi.o makefile
 mpi.o: makefile 
 ns.o: macros.h params.o structf.o transpose.o sforcing.o makefile 
 ns_decomp3.o: macros.h params.o transpose.o makefile 
-ns_ghost.o: macros.h params.o fft_interface.o ghost.o transpose.o makefile 
+ns_ghost.o: macros.h params.o ghost.o sforcing.o fft_interface.o transpose.o makefile 
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
 ns_psivor.o: macros.h params.o bc.o tracers.o fft_interface.o makefile 
 params.o: macros.h params.h makefile 
 psivor_diag.o: macros.h params.o makefile 
-sforcing.o: macros.h params.o mpi.o makefile 
+sforcing.o: macros.h params.o fft_interface.o mpi.o makefile 
 shallow.o: macros.h params.o fft_interface.o sforcing.o transpose.o makefile 
 shallow_diag.o: macros.h params.o makefile 
 solve.o: macros.h params.o ghost.o bc.o mpi.o makefile 
