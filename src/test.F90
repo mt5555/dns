@@ -37,11 +37,6 @@ if (my_z==1) then
       print *,work(k,1),work(k,1)-work(k-1,1)
    enddo
 endif
-
-stop
-
-
-
 end subroutine
 
 

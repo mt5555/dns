@@ -8,22 +8,21 @@ ARCH = $(shell uname -m)
 ifeq ($(UNAME),Linux)
    F90 = lf95
    LDFLAGS = --staticlink
-   FFLAGS = -O
+   FFLAGS = -O -DLINUX
    MPIF90 = mpi.F90
 endif
 ifeq ($(UNAME),SunOS)
    F90 = f95
    MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
    MPIINC = -DMPI 
-   MPIF90 = /usr/local/src/mpich/include/mpif.f90
    LDFLAGS = 
-   FFLAGS = -O -DMPI
+   FFLAGS = -O -DMPI -DSUNOS
 endif
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPILIB = -lmpi 
    LDFLAGS = 
-   FFLAGS = -g -O1 -cpp -DMPI 
+   FFLAGS = -g -O1 -cpp -DMPI  -DIRIX64
 endif
 
 COMPILE=$(F90) -c $(FFLAGS)
@@ -67,8 +66,6 @@ dep:
 -include .depends
 
 
-#mpi.o: $(MPIF90)
-#	$(COMPILE) -o mpi.o $(MPIF90)
 fft_interface.o:  fft99_interface.F90 macros.h
 	$(COMPILE) -o fft_interface.o fft99_interface.F90
 #fft_interface.o:  compaq_fft_interface.F90 params.o

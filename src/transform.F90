@@ -27,10 +27,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,jj,l
+#ifdef MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3)
+#endif
       
 
 !
@@ -48,13 +50,8 @@ n3=ny_2d
 n3d=ny_2d
 
 
-dest_pe3(1)=my_x
-dest_pe3(2)=my_y
 
 do iproc=0,mpidims(3)-1  ! loop over each slab
-   dest_pe3(3)=iproc
-   call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-   ASSERT("MPI_cart_rank failure 1",ierr==0)
 
    if (iproc==my_z) then
       do j=1,ny_2d  ! loop over points in a single slab
@@ -69,6 +66,12 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
       enddo
    else
 #ifdef MPI
+      dest_pe3(1)=my_x
+      dest_pe3(2)=my_y
+      dest_pe3(3)=iproc
+      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
+      ASSERT("MPI_cart_rank failure 1",ierr==0)
+
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2d +j -1
@@ -129,8 +132,12 @@ integer n1,n1d,n2,n2d,n3,n3d
 !local variables
 integer iproc
 integer i,j,k,jj,l
+#ifdef MPI
 real*8 sendbuf(nslabx*nslabz*ny_2d)
 real*8 recbuf(nslabx*nslabz*ny_2d)
+integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
+integer dest_pe3(3)
+#endif
 
 !
 ! each cube is broken, along the y axis, into mpidims(3) slabs of
@@ -149,9 +156,9 @@ ASSERT("transpose_from_x dimension failure 5",n2d==nslabx)
 ASSERT("transpose_from_x dimension failure 6",n3==ny_2d)
 ASSERT("transpose_from_x dimension failure 7",n3d==ny_2d)
 
-
-
 do iproc=0,mpidims(3)-1  ! loop over each slab
+
+
    if (iproc==my_z) then
       do j=1,ny_2d  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2d +j -1
@@ -164,7 +171,14 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
          enddo
       enddo
    else
+
 #ifdef MPI
+      dest_pe3(1)=my_x
+      dest_pe3(2)=my_y
+      dest_pe3(3)=iproc
+      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
+      ASSERT("MPI_cart_rank failure 1",ierr==0)
+
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2d +j -1
@@ -178,8 +192,13 @@ do iproc=0,mpidims(3)-1  ! loop over each slab
          enddo
       enddo
 
-!     send buffer to (my_x,iproc,mproc_z)
-!     rec  buffer from (my_x,iproc,mproc_z)
+!     send/rec
+      call MPI_IRecv(recbuf,l,MPI_REAL8,dest_pe,my_z,comm_3d,request(1),ierr)
+      ASSERT("MPI_IRecv failure 1",ierr==0)
+      call MPI_ISend(sendbuf,l,MPI_REAL8,dest_pe,iproc,comm_3d,request(2),ierr)
+      ASSERT("MPI_ISend failure 1",ierr==0)
+      call MPI_waitall(2,request,statuses,ierr) 	
+      ASSERT("MPI_waitalll failure 1",ierr==0)
 
       l=0
       do j=1,ny_2d  ! loop over points in a single slab
