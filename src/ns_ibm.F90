@@ -61,8 +61,8 @@ if (firstcall) then
 
    if (my_pe==io_pe) then
       open(10,file='bnd')
-      read(10,*) surf_pt
-      do i=1,surf_pt
+      read(10,*) surf_pt_max
+      do i=1,surf_pt_max
          read(10,*) surf_loc(i,1),surf_loc(i,2),surf_loc(i,3),dummy
       enddo
       close(10)
@@ -70,8 +70,8 @@ if (firstcall) then
       open(10,file='rpr')
       open(11,file='jacob')
       open(12,file='jacin')
-      read(10,*) rev_pt
-      do i=1,rev_pt
+      read(10,*) rev_pt_max
+      do i=1,rev_pt_max
          read(10,*) rev_loc(i,1,1),rev_loc(i,2,1),rev_loc(i,3,1),dummy
          read(11,*) jacobian
          read(12,*) jacobinv
@@ -82,7 +82,7 @@ if (firstcall) then
             enddo
          enddo
       enddo
-      do i=1,rev_pt
+      do i=1,rev_pt_max
          read(10,*) rev_loc(i,1,2),rev_loc(i,2,2),rev_loc(i,3,2)
       enddo
       close(10)
