@@ -24,25 +24,22 @@ ext='.isostr';
 
 %name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
 
-%name='/ccs/scratch/taylorm/dns/iso12_512'
-%nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
-%ext='.isostr001';
-%times=[1:.1:7.0];
+name='/ccs/scratch/taylorm/dns/iso12/iso12_512'
+nx=512; delx_over_eta=2.74; epsilon=3.89;  teddy=1.0
+ext='.isostr';
+times=[1:.1:7.0];
 
 %name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A'
 %nx=2048; delx_over_eta=2.98; epsilon=3.74; teddy=1.024;
 %ext='.new.isostr';
 %times=[1:.1:2.0];
 
-name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
-ext='.new.isostr';
-
-[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext)
-
-nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
-teddy=1;
-
-times=[0:1:30];
+%name = '/home2/skurien/helicity_data/isostr_1/check256_hq_';
+%ext='.new.isostr';
+%[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext)
+%nx=256; delx_over_eta=avg_delx_over_eta; epsilon=avg_eps; h_epsilon=avg_heps;  
+%teddy=1;
+%times=[0:1:30];
 
 ndir_use=0;
 %ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')

@@ -332,7 +332,7 @@ restart from 2.4328.[uvw].  looks good.
 
 
 UDM benchmarks:
-1024^3.  serial 24GB. (1 rail)   t=30.34
+1024^3.  serial 24GB. (1 rail)   t=30.34    13 GB/s
 
 1024^3.  UDM 24GB. (1 rail)   t=9.63:   43MB/s.   
 1024^3.  UDM 24GB. (1 rail)   t=13.67   

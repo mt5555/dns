@@ -106,7 +106,7 @@ for type=type_list
 
    if (lambda_c>0) 
      % black box of size 5 lambda_c
-     fac=5; facl='5 \lambda_c';
+     fac=2*pi; facl='2 \pi \lambda_c';
      len=fac*lambda_c;
      xt=[1,1-len,1-len,1,1];
      yt=[0,0,len,len,0];

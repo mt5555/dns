@@ -1,8 +1,9 @@
 function [y45,y415,y43,epsilon,h_epsilon,y215]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
 %
 % compute angle average and plot a single snapshot
-% klaws==1   4/5ths and other laws
+% klaws==1   4/5ths  and other laws
 % klaws==2   4th order structure functions
+% klaws==3   2/15 law
 % 
 % check_isotropy==1    2nd and 3rd order isotropy checks
 %
@@ -129,7 +130,6 @@ for i=ndir_vec
   x = r_val(:,i);                   % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  %  y=-D_lll(:,i);                     %un-normalized sfn
   y=-D_lll(:,i)./(x*epsilon);
 
   if (plot_points==1) 
@@ -312,9 +312,8 @@ end
 %calculate angle-averaged scaling exponents for longitudinal and 
 %transverse str.fns
 
-ndir
-
-long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
+%ndir
+%long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
 
 end

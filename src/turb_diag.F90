@@ -16,11 +16,12 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer,parameter :: nints_e=28,npints_e=24	
+integer,parameter :: nints_e=28,npints_e=27	
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
-real*8 :: x
+real*8 :: x,zero_len
 integer i,j,k,n,ierr,csig
+integer :: n1,n1d,n2,n2d,n3,n3d
 character(len=80) :: message
 CPOINTER fid,fidj,fidS
 
@@ -82,6 +83,7 @@ endif
       do n=np1,np2
          call compute_expensive_pscalars(Q,n,q1,q2,q3,work1,&
               pints_e(1,n),npints_e)
+
       enddo
    endif
 
@@ -642,6 +644,7 @@ subroutine compute_expensive_pscalars(Q,np,grads,grads2,gradu,work,scalars,ns)
 use params
 use fft_interface
 use transpose
+use transpose
 implicit none
 integer :: ns,np
 real*8 :: scalars(ns)
@@ -746,10 +749,6 @@ i=i+3
 i=i+1
 scalars(i)=u1              ! 24
 
-if (i/=ns) then
-   call abort("compute_expensive_pscalars: Error: i/=ns")
-endif
-
 
 #ifdef USE_MPI
    scalars2=scalars
@@ -759,8 +758,107 @@ endif
 !su=u2*uxx2/(ux2*ux2)   scalars(2)*scalars(12,13,14)/scalars(3,4,5)
 !print *,'G_theta=',su
 
+
+
+! zero crossing:  (mean is in pints_e(24,n))
+call transpose_to_x(Q(1,1,1,np),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(i+1))
+call transpose_to_y(Q(1,1,1,np),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(i+2))
+call transpose_to_z(Q(1,1,1,np),work,n1,n1d,n2,n2d,n3,n3d)
+call compute_zero_crossing(work,n1,n1d,n2,n2d,n3,n3d,scalars(24),scalars(i+3))
+
+i=i+3
+if (i/=ns) then
+   call abort("compute_expensive_pscalars: Error: i/=ns")
+endif
+
+
+
 end subroutine
 
+
+
+
+
+
+
+subroutine compute_zero_crossing(s,n1,n1d,n2,n2d,n3,n3d,avedata,len)
+use mpi
+use params
+implicit none
+! input
+integer :: n1,n1d,n2,n2d,n3,n3d
+real*8 :: s(n1d,n2d,n3d)
+! output
+real*8 :: len
+!local
+integer i,j,k,n,count,count1,ierr
+real*8 :: avedata,ave2,avelen
+
+! compute zero crossing length in first direction 
+! (all on processor:)
+count=0
+avelen=0
+do k=1,n3
+do j=1,n2
+   call zero_crossing(s(1,j,k),n1,avedata,len,count1)
+   if (count1>0) then
+      count=count+1
+      avelen=avelen+len
+   endif
+enddo
+enddo
+#ifdef USE_MPI
+count1=count
+call MPI_allreduce(count1,count,1,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+ave2=avelen
+call MPI_allreduce(ave2,avelen,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+avelen=avelen/count
+
+
+end subroutine
+
+
+
+
+
+subroutine zero_crossing(data,n,ave,len,count)
+integer :: n,count,istart
+real*8 :: data(n),len,ave
+
+real*8 :: zero_location(n) ,y1,y2
+
+count=0
+! find first crossing:
+istart=1
+do i=istart,n
+   i1=i+1
+   if (i1>n) i1=1
+   y1=data(i)-ave
+   y2=data(i1)-ave
+   if ( (y1*y2<=0) .and. y2/=0 ) then
+      ! find the location of the zero between [ data(i),data(i+1) )
+      count=count+1
+      zero_location(count)=i +y1/(y1-y2)
+      print *,y1,y2,y1/(y1-y2)
+   endif
+enddo
+
+
+if (count>0) then
+   len=0
+   do i=1,count
+      if (i==count) then
+         len=len+(1+zero_location(1))-zero_location(i)
+      else
+         len=len+zero_location(i+1)-zero_location(i)
+      endif
+   enddo
+   len=len/count
+endif
+end subroutine
 
 
 

@@ -97,7 +97,7 @@ for type=type_list
 
 
    % patch of size 10eta_c
-   fac=5; facl='5 \eta_c';
+   fac=2*pi; facl='2 \pi \eta_c';
    len=min(1,fac*eta_c);
    xt=[1,1-len,1-len,1,1];
    yt=[0,0,len,len,0];

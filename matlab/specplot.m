@@ -27,16 +27,21 @@ tsave=[];
 %movie_plot=0; CK_orig=1.613; decay_scale=1; endian='l';
 
 
-name='decay2048'; namedir='/ccs/scratch/taylorm/decay/';
-CK_orig=1.613; decay_scale=1; endian='l';
-% save spectrum at these times:
-movie_plot=1; movie=1; tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
+%name='decay2048'; namedir='/ccs/scratch/taylorm/decay/';
+%CK_orig=1.613; decay_scale=1; endian='l';
+%% save spectrum at these times:
+%movie_plot=1; movie=1; tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
 
 %name = 'Rot10000.0000';
 %namedir = '/ccs/wingate/Rotation/Rot1/';
+
+name='alpha1'; namedir='/home/taylorm/';
+CK_orig=1.613; decay_scale=0; endian='l';
+% save spectrum at these times:
+movie_plot=0; movie=1; tsave=[2.5 5.0];
 
 
 

@@ -60,7 +60,7 @@ for t=times
     for p=1:npmax
       [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
       vtot = sum(pdf);
-      Vpdata(p,nt) = sum(pdf.*(bins>=.02 & bins <=.98));
+      Vpdata(p,nt) = sum(pdf.*(bins>=.15 & bins <=.85));
       Vpdata(p,nt)=Vpdata(p,nt)/vtot;
     end
   else
