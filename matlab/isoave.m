@@ -122,8 +122,8 @@ figure(1)
 yyave=0*xx;
 yyave_sq=0*xx;
 
-yyave1=yyave;
-yyave2=yyave;
+pave=yyave;
+nave=yyave;
 
 for i=1:ndir
   x=r_val(:,i);
@@ -139,9 +139,9 @@ for i=1:ndir
   
   % positive and negative parts:
   y=-SP_lll(:,i)./(x_box*epsilon);
-  yyave1=yyave1+w(i)*spline(x,y,xx);
+  pave=pave+w(i)*spline(x,y,xx);
   y=-SN_lll(:,i)./(x_box*epsilon);
-  yyave2=yyave2+w(i)*spline(x,y,xx);
+  nave=nave+w(i)*spline(x,y,xx);
   
 end
 yyave_sq=sqrt(yyave_sq)/sqrt(ndir);
@@ -152,8 +152,9 @@ title('D_{lll} / r\epsilon   (4/5 law)       blue: D-/D+');
 xlabel('r/\eta');
 x=1:xmax; semilogx(x,.8*x./x,'k');
 if (plot_posneg)
-  semilogx(xx,yyave1)
-  semilogx(xx,yyave2)
+  grid
+  semilogx(xx,pave)
+  semilogx(xx,nave)
 end
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
@@ -170,6 +171,8 @@ print -djpeg 45.jpg
 figure(2)
 yyave1=0*xx;
 yyave2=0*xx;
+pave=yyave1;
+nave=yyave1;
 for i=1:ndir
   x=r_val(:,i);
   x_box = x/delx_over_eta/nx;  % in code units (box length)
@@ -181,12 +184,25 @@ for i=1:ndir
 
   yyave1=yyave1+w(i)*spline(x,y1,xx);
   yyave2=yyave2+w(i)*spline(x,y2,xx);
+  
+  
+  y1=-SP1_ltt(:,i)./(x_box*epsilon);
+  pave=pave++w(i)*spline(x,y1,xx);
+  y1=-SN1_ltt(:,i)./(x_box*epsilon);
+  nave=nave++w(i)*spline(x,y1,xx);
+  
+
 end
 semilogx(xx,yyave1,'r');
 semilogx(xx,yyave2,'r');
 semilogx(xx,.5*(yyave1+yyave2),'k','LineWidth',1.0);
 title('D_{ltt} / r\epsilon  (4/15 law)');
 xlabel('r/\eta');
+if (plot_posneg)
+  grid
+  semilogx(xx,pave)
+  semilogx(xx,nave)
+end
 x=1:xmax; semilogx(x,(4/15)*x./x,'k');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
@@ -200,6 +216,8 @@ print -djpeg 415.jpg
 yyave=0*xx;
 figure(3)
 yyave=0*xx;
+pave=yyave;
+nave=yyave;
 for i=1:ndir
   x=r_val(:,i);
   x_box = x/delx_over_eta/nx;  % in code units (box length)
@@ -207,6 +225,17 @@ for i=1:ndir
 
   semilogx(x,y,['.',cdir(i)],'MarkerSize',msize); hold on;
   yyave=yyave+w(i)*spline(x,y,xx);
+  
+  y=-(SP_lll(:,i) + SP1_ltt(:,i) + SP2_ltt(:,i))./(x_box*epsilon);
+  pave=pave+w(i)*spline(x,y,xx);
+  y=-(SN_lll(:,i) + SN1_ltt(:,i) + SN2_ltt(:,i))./(x_box*epsilon);
+  nave=nave+w(i)*spline(x,y,xx);
+  
+end
+if (plot_posneg)
+  grid
+  semilogx(xx,pave)
+  semilogx(xx,nave)
 end
 semilogx(xx,yyave,'k','LineWidth',1.0);
 title('4/3 law');
