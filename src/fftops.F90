@@ -68,8 +68,11 @@ end subroutine
 ! (2) spectral space method, can dealias for free
 ! (3) same as (2) but with loops are fused.
 ! does either (2) or (3) have better performance? 
+!
+! Note: method (2) and (3) depend on FFT data structure, and are thus 
+!       in the fft_*_interface.F90 files.  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine divfree_gridspace(u,p,work,work2)
+subroutine divfree_gridspace(u,p)
 !
 ! make u divergence free
 !    solve:  div(u) = laplacian(p)
@@ -83,9 +86,8 @@ implicit none
 real*8 u(nx,ny,nz,3)
 real*8          :: p(nx,ny,nz)
 
-! not needed for non GRIDMETHOD
-real*8,optional :: work(nx,ny,nz)
-real*8,optional :: work2(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 real*8 :: dummy(1)
 real*8 :: alpha=0
 real*8 :: beta=1

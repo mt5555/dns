@@ -149,6 +149,7 @@ else:
    fout.write("#define TRANSPOSE_X_SPLIT_Y\n")
 fout.close()
 
+print sys.argv[1:-1]
 print "Grid per cpu: ",nslab[0],nslab[1],nslab[2]," Updating params.h"
 
 

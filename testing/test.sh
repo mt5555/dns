@@ -34,8 +34,12 @@ endif
 
 if ($1 == twod) then
 
+./gridsetup.py 1 1 1 128 128 1  
+make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp ; diff $tmp $refout
+
 ./gridsetup.py 1 1 1 128 128 1  0 0 0  2 2 0
 make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp ; diff $tmp $refout
+
 
 ./gridsetup.py 1 1 1 128 128 1  2 2 2  0 0 0 
 make >& /dev/null ;  rm -f $tmp ; ./dns < $refin > $tmp ; diff $tmp $refout

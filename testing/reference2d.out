@@ -8,19 +8,19 @@ Running some tests
  transpose y round trip error: 0.000000000000000E+00                            
  transpose x round trip error: 0.000000000000000E+00                            
 Initializing FFT of size n=   128                                               
-x-direction d/dx error=.1925570814E-11                                          
-x-direction d2/dxx error=.5189235708E-09                                        
-y-direction d/dy error=.1804778549E-11                                          
-y-direction d2/dyy error=.6091340765E-09                                        
+x-direction d/dx error=.1755040557E-11                                          
+x-direction d2/dxx error=.4188223102E-09                                        
+y-direction d/dy error=.2231104190E-11                                          
+y-direction d2/dyy error=.5823039828E-09                                        
 z-direction d/dz error=.0000000000E+00                                          
 z-direction d2/dzz error=.1776528792E+04                                        
-cosine mode=   0   0   0 val=   5.3330000000                                    
-cosine mode=   0   5   0 val=   2.0000000000                                    
-  sine mode=   1   0   0 val=  -1.0000000000                                    
-cosine mode=   3   0   0 val=   1.5000000000                                    
-x-direction Forward-Backward 3D FFT: error=.8881784197E-14                      
-Laplace solver alpha=  1.00 beta=  0.50  error= 0.12490009E-12                  
-maxval of divergence = .18829E-12                                               
+mode=   0   0   0 val=   5.3330000000                                           
+mode=   0   5   0 val=   2.0000000000                                           
+mode=   1   0   0 val=  -1.0000000000                                           
+mode=   3   0   0 val=   1.5000000000                                           
+x-direction Forward-Backward 3D FFT: error=.1065814104E-13                      
+Laplace solver alpha=  1.00 beta=  0.50  error= 0.13766766E-12                  
+maxval of divergence = .17558E-12                                               
 Initial data                                                                    
 Time stepping...                                                                
  
@@ -42,32 +42,32 @@ Time stepping...
        k=0                 k= 65
 time=  0.00000(    0)  next output= 0.10000                                     
 for next timestep: delt=0.0093826 cfl_adv= 1.500 cfl_vis= 0.307                 
-max: (u,v,w)      1.211479631395963     0.120259032747895     0.000000000000000 
-max(div)= 0.22082E-12   <z-vor>=-0.36595E-09   <hel>= 0.00000E+00               
+max: (u,v,w)      1.211479631395964     0.120259032747895     0.000000000000000 
+max(div)= 0.12135E-12   <z-vor>=-0.30562E-09   <hel>= 0.00000E+00               
 ke:  0.3574915702  d/dt log(ke): tot=   0.00000 diffusion=  -0.69277            
 
 time=  0.00938(    1)  next output= 0.10000                                     
 for next timestep: delt=0.0094089 cfl_adv= 1.500 cfl_vis= 0.308                 
-max: (u,v,w)      1.208660730994925     0.119682838875759     0.000000000000000 
-max(div)= 0.19451E-12   <z-vor>=-0.31997E-09   <hel>= 0.00000E+00               
+max: (u,v,w)      1.208660730994927     0.119682838875759     0.000000000000000 
+max(div)= 0.12679E-12   <z-vor>=-0.26110E-09   <hel>= 0.00000E+00               
 ke:  0.3552810846  d/dt log(ke): tot=  -0.66312 diffusion=  -0.69708            
 
 time=  0.01879(    2)  next output= 0.10000                                     
 for next timestep: delt=0.0094263 cfl_adv= 1.500 cfl_vis= 0.309                 
-max: (u,v,w)      1.204982838482986     0.119876838866532     0.000000000000000 
-max(div)= 0.17941E-12   <z-vor>=-0.66023E-11   <hel>= 0.00000E+00               
+max: (u,v,w)      1.204982838482988     0.119876838866531     0.000000000000000 
+max(div)= 0.11935E-12   <z-vor>= 0.14178E-10   <hel>= 0.00000E+00               
 ke:  0.3532487401  d/dt log(ke): tot=  -0.61147 diffusion=  -0.63646            
 
 time=  0.02822(    3)  next output= 0.10000                                     
 for next timestep: delt=0.0094389 cfl_adv= 1.500 cfl_vis= 0.309                 
-max: (u,v,w)      1.200436461567689     0.119957097753045     0.000000000000000 
-max(div)= 0.15454E-12   <z-vor>=-0.25741E-10   <hel>= 0.00000E+00               
+max: (u,v,w)      1.200436461567691     0.119957097753045     0.000000000000000 
+max(div)= 0.12491E-12   <z-vor>= 0.67418E-10   <hel>= 0.00000E+00               
 ke:  0.3513533653  d/dt log(ke): tot=  -0.57228 diffusion=  -0.59182            
 
 time=  0.03766(    4)  next output= 0.10000                                     
 for next timestep: delt=0.0094482 cfl_adv= 1.500 cfl_vis= 0.310                 
-max: (u,v,w)      1.195130256678173     0.120031906406107     0.000000000000000 
-max(div)= 0.17852E-12   <z-vor>=-0.41917E-10   <hel>= 0.00000E+00               
+max: (u,v,w)      1.195130256678176     0.120031906406107     0.000000000000000 
+max(div)= 0.15388E-12   <z-vor>=-0.27287E-10   <hel>= 0.00000E+00               
 ke:  0.3495682845  d/dt log(ke): tot=  -0.54101 diffusion=  -0.55696            
 
  
@@ -89,11 +89,11 @@ ke:  0.3495682845  d/dt log(ke): tot=  -0.54101 diffusion=  -0.55696
        k=0                 k= 65
 time=  0.10000(   11)  next output= 0.10000                                     
 for next timestep: delt=0.0094100 cfl_adv= 1.500 cfl_vis= 0.308                 
-max: (u,v,w)      1.180825009181239     0.134696457788859     0.000000000000000 
-max(div)= 0.15898E-12   <z-vor>= 0.42630E-10   <hel>= 0.00000E+00               
+max: (u,v,w)      1.180825009181242     0.134696457788860     0.000000000000000 
+max(div)= 0.12457E-12   <z-vor>= 0.59845E-10   <hel>= 0.00000E+00               
 ke:  0.3396159443  d/dt log(ke): tot=  -0.41946 diffusion=  -0.42346            
 
 CPU times:
-initialization:    2.77700 s                                                    
-dns_solve:         9.35300 s                                                    
-   time_control:      0.06400 s (.007)                                          
+initialization:    2.78000 s                                                    
+dns_solve:         9.86500 s                                                    
+   time_control:      0.06400 s (.006)                                          
