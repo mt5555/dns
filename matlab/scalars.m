@@ -54,10 +54,10 @@ fid2=-1;
 %nx=256;
 
 
-%fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_pi2/diag/skhel512_hpi2.scalars','r');
-%nx=512;
+fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_pi2/diag/skhel512_hpi2.scalars','r');
+nx=512;
 
-fid=endianopen('/nh/nest/u/taylorm/sc1024A.scalars','r');
+fid=endian('/nh/nest/u/taylorm/sc1024A.scalars','r');
 nx=1024;
 
 nscalars=0;
