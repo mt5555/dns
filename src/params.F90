@@ -128,7 +128,7 @@ integer :: forcing_type   ! 0 = none
 !   do k=bz1,bz2  
 !   do j=by1,by2
 !   do i=bx1,bx2
-
+!
 ! Code that deals with boundary conditions (other than periodic or reflections)
 ! should use these bounds and NOT nx1,nx2...
 !
@@ -136,7 +136,8 @@ integer :: forcing_type   ! 0 = none
 !   INTERIOR boundaries:   intx1=bx1=nx1    intx2=bx2=nx2
 !   PERIODIC boundaries:   intx1=bx1=nx1    intx2=bx2=nx2
 !   REFLECT boundaries:    intx1=bx1=nx1    intx2=bx2=nx2
-!   Real boundaries:       intx1=bx1=nx1    intx2+1=bx2=nx2+1
+!   Real boundaries at x2: intx1=bx1=nx1    intx2+1=bx2=nx2
+!   Real boundaries at x1: intx1-1=bx1=nx1  intx2=bx2=nx2
 !
 ! But for the psi-vor model, non-periodic, it needs a sine transform.
 ! Normally, on a 400x400 grid would need a len=399 transform.  

@@ -377,6 +377,7 @@ real*8 :: delta,xlocation
 integer,parameter :: nd=200
 real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
 
+offset_bdy=1
 
 if (init_cond_subtype ==0) then
 !  my standard test case:
@@ -385,9 +386,9 @@ if (init_cond_subtype ==0) then
    ubar=.089
    yscale=3
 
-   if (g_nx==64) then
-      print *,'using offset'
-      offset_bdy=1
+   if (g_nx==65) then
+      print *,'disabling offset'
+      offset_bdy=0
    endif
 endif
 
