@@ -244,7 +244,9 @@ enddo
 
 do idir=1,ndir
 
-   write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
+   if (my_pe==io_pe) then
+      write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
+   endif
 
       rhat = dir(:,idir)
       rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)

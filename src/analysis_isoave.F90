@@ -40,8 +40,8 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp
 CPOINTER :: fid
 
-tstart=1.75
-tstop=1.75
+tstart=3.25
+tstop=3.25
 tinc=1.0
 icount=0
 
@@ -64,8 +64,6 @@ nzdecomp=1
 call init_mpi
 call init_mpi_comm3d()
 call init_model
-
-print *,runname
 
 !call writepoints(); stop
 
