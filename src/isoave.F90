@@ -501,9 +501,10 @@ lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
 R_lambda = lambda*sqrt(2*ke/3)/mu 
 
 if (my_pe==io_pe) then
-   print *,range(1,:)
-   print *,range(2,:)
-   print *,range(3,:)
+   print *,'subcube range:'
+   print *,'x: ',range(1,:)
+   print *,'y: ',range(2,:)
+   print *,'z: ',range(3,:)
    print *,'ntot:    ',ntot
    print *,'KE:      ',ke
    print *,'epsilon: ',epsilon
