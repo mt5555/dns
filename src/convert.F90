@@ -717,10 +717,10 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 integer :: sc
-integer :: ssize,irot
+integer :: ssize,irot,il,jl
 real*8,allocatable :: dslice(:,:,:)
 real*8 :: mat(3,3,3),gradu(3,3)
-real*8 :: corner(3),x0(3),x1(3),x2(3),x3(3),e01(3),e02(3),e03(3)
+real*8 :: corner(3),x0(3),x1(3),x2(3),x3(3),e01(3),e02(3),e03(3),S12,c0(3)
 CPOINTER :: fid
 
 ! check to make sure we have 2 ghost cells in all directions:
@@ -767,22 +767,49 @@ do
    x2 = x0; x2(2)=x0(2) + 2*ssize*dely
    x3 = x0; x3(3)=x0(3) + 2*ssize*delz
 
+   ! compute center of cube:
+   c0(1)=x0(1) + ssize*delx
+   c0(2)=x0(2) + ssize*dely
+   c0(3)=x0(3) + ssize*delz
+
+
    ! compute rotation matrix from gradu(3,3):
    ! apply rotation to x0,x1,x2,x3
   
    ! find largest element of gradu()
+   S12=gradu(1,2)
+   do i=1,3
+   do j=1,3
+      if (abs(gradu(i,j))>abs(S12)) then
+         il=i
+         jl=j
+         S12=gradu(i,j)
+      endif
+   enddo
+   enddo
+
+
+
+   ! rotate, if needed
    if (il==1 .and. jl==2) then
       ! no rotation needed
    else if (il==1 .and. jl==3) then
-      ! swap 2 & 3 axis
+      ! swap 2 & 3
+      call rotcube(2,3,x0,x1,x2,x3,c0)
    else if (il==2 .and. jl==3) then
       ! swap 1 & 2, swap 3 & 2
+      call rotcube(1,2,x0,x1,x2,x3,c0)
+      call rotcube(2,3,x0,x1,x2,x3,c0)
    else if (il==2 .and. jl==1) then
       ! swap 1 & 2
+      call rotcube(1,2,x0,x1,x2,x3,c0)
    else if (il==3 .and. jl==1) then
       ! swap 1 & 2, swap 3 & 1
+      call rotcube(1,2,x0,x1,x2,x3,c0)
+      call rotcube(1,3,x0,x1,x2,x3,c0)
    else if (il==3 .and. jl==2) then
       ! swap 3 & 1
+      call rotcube(1,3,x0,x1,x2,x3,c0)
    else
       call abort("error: largest <gradu> element is on diagional")
    endif

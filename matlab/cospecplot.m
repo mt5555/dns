@@ -32,8 +32,8 @@ for i=1:sc;
   il=data(7); jl=data(8);  S=data(6); eps_l=data(5);
   data=fscanf(fid,'%f %f %f',[3,3]); 
   data=data';
-
   %[data(il,jl),S/2]
+
 end
 fclose(fid);
 cospec_ind=[0 1 2; -1 0 3; -2 -3 0; ];
@@ -41,10 +41,9 @@ cospec_ij = cospec_ind(il,jl);
 cospec_scale = S*eps_l^(1/3);
 %[il,jl,cospec_ij]
 
-tmp=il; il=jl; jl=tmp;
+% swap il, jl?
+% tmp=il; il=jl; jl=tmp;
 
-spec_r_save=[];
-spec_r_save_fac3=[];
 
 % note: endianopen() will notwork with .spec files
 %because first number is not necessaryly an integer 
@@ -111,12 +110,6 @@ while (time>=.0 & time<=9999.3)
   spec_vz=spec_scale*fread(fid,n_z,'float64');
   spec_wz=spec_scale*fread(fid,n_z,'float64');  
 
-  i=find( abs(time-tsave)<.0001);
-  if (length(i)>=1) 
-     tsave(i)
-     spec_r_save=[spec_r_save, spec_r];
-     spec_r_save_fac3=[spec_r_save_fac3, spec_r./fac3];
-  end 
 
   if (movie==1)  
     figure(1);clf;
@@ -142,7 +135,7 @@ while (time>=.0 & time<=9999.3)
       
       
       % longitudinal spectraum
-      figure(4)
+      figure(2)
       subplot(2,1,1);
       loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
       loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
@@ -220,8 +213,6 @@ while (time>=.0 & time<=9999.3)
       return;
     end
 
-%    cospec_1=-cospec_1;
-    
     if (sc_count==1) 
       mean_1=cospec_1;
       mean_2=cospec_2;
@@ -251,26 +242,30 @@ while (time>=.0 & time<=9999.3)
     axis([1 200 1e-9 1e-3]);
     hold off;
 
-    figure(4); clf;
+    figure(3)
+    orient tall;
+    pname=sprintf('cospec%i.ps',sc_count);
+    print ('-dpsc',pname);
     
-
+    
+    figure(4); clf;
     %   
-    mean_scale=sc_count *( (0:ncor-1).^(-7/3))';
+    mean_scale=sc_count;%  *( (0:ncor-1).^(-7/3))';
 
     subplot(2,1,1);
     loglog(0:ncor-1,mean_1./mean_scale,'r'); hold on;
     loglog(0:ncor-1,mean_2./mean_scale,'g');
     loglog(0:ncor-1,mean_3./mean_scale,'b');
     loglog(0:ncor-1,.01*(0:ncor-1).^-(7/3));
-    axis([1 128 1e-5 1e-1]);
+    axis([1 128 1e-9 1e-3]);
     hold off;
-    title(sprintf('-E12 (red),  E13 (green),  E23 (blue)'));
+    title(sprintf('E12 (red),  E13 (green),  E23 (blue)'));
     
     subplot(2,1,2);
     loglog(0:ncor-1,-mean_1./mean_scale,'r'); hold on;
     loglog(0:ncor-1,-mean_2./mean_scale,'g');
     loglog(0:ncor-1,-mean_3./mean_scale,'b');
-    axis([1 128 1e-5 1e-1]);
+    axis([1 128 1e-9 1e-3]);
     hold off;
     
   end
@@ -302,26 +297,12 @@ while (time>=.0 & time<=9999.3)
 end
 fclose(fid);
 fclose(fidco);
-
-%'pause'; pause
 end
-return
 
 
 
-if (length(spec_r_save>1) )
-  figure(1); clf;
-  loglog53(n_r,spec_r_save,'KE spectrum',CK,1);
-  print -djpeg -r72 spec.jpg
-  print -depsc -r600 spec.ps
-  figure(2); clf;
-  %loglog53(n_r,spec_r_save_fac3,'KE / bottleneck-factor',CK);
-  %print -djpeg -r72 speck3.jpg
-  
-  k2=0:n_r-1;
-  k2=k2.^2;
-  spec=diag(k2) * spec_r_save_fac3(1:n_r,:);
-  loglog53(n_r,spec,'Enstrophy spectrum',CK,2);
-  print -djpeg -r72 enstrophy.jpg
-end
+figure(4)
+orient tall
+print -dpsc cospecave.ps
+
 

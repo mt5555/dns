@@ -136,7 +136,7 @@ real*8 :: field(nx,ny,nz)
 real*8 :: x0(3),e01(3),e02(3),e03(3)
 
 
-real*8 :: xi(3)
+real*8 :: xi(3),err
 integer :: i,j,k,ii,jj,kk
 #ifdef USE_MPI
 real*8,allocatable :: data2(:,:,:)
@@ -148,6 +148,8 @@ integer :: ierr
 !   print *,dx(1),dy(1),dz(1)
 !   print *,dx(nsx),dy(nsy),dz(nsz)
 !endif
+
+#define CHECK_IERR
 
 
 do k=k1,k2
@@ -165,16 +167,35 @@ do k=k1,k2
              call interp3d(data(i,j,k-k1+1),field,xi)
          else
             ! no interpolation - just use closes gridpoint to xi
-            ii=(xi(1)-xcord(nx1))/delx;  ii=ii+nx1
-	    jj=(xi(2)-ycord(ny1))/dely;  jj=jj+ny1
-	    kk=(xi(3)-zcord(nz1))/delz;  kk=kk+nz1
+            ii=(xi(1)-xcord(nx1))/delx;  
+	    jj=(xi(2)-ycord(ny1))/dely;  
+	    kk=(xi(3)-zcord(nz1))/delz;  
+
+#ifdef CHECK_IERR
+            err= (ii-(xi(1)-xcord(nx1))/delx)**2
+            err = err + (jj-(xi(2)-ycord(ny1))/dely)**2  
+	    err = err + (kk-(xi(3)-zcord(nz1))/delz)**2  
+#endif
+
+            ii=ii+nx1
+            jj=jj+ny1
+            kk=kk+nz1
 
 	    if (kk>=nz1 .and. kk<=nz2 .and. &
                 ii>=nx1 .and. ii<=nx2 .and. &
                 jj>=ny1 .and. jj<=ny2) then
 	        ! interpolate 
 	        data(i,j,k-k1+1)=field(ii,jj,kk)
-            else	
+
+#ifdef CHECK_IERR
+                if (err>.001**2) then
+                   print *,'warning: interpolation error: '
+                   print *,'ii',ii,(xi(1)-xcord(nx1))/delx
+                   print *,'jj',jj,(xi(2)-ycord(ny1))/dely;  
+                   print *,'kk',kk,(xi(3)-zcord(nz1))/delz;  
+                endif
+#endif
+             else	
 	        data(i,j,k-k1+1)=-9d99
             endif
          endif
@@ -397,7 +418,42 @@ else
    field_interp=-9d100
 endif
 
-
 end subroutine interp3d
+
+
+subroutine rotcube(ir,jr,x0,x1,x2,x3,c0)
+!
+! Input:  4 points x0(), x1(), x2(), x3()
+!         coordinates of center: c0()
+!
+!  rotate (about center) by 90 degrees so as to swap the ir and jr axis
+! 
+!   
+integer :: ir,jr
+real*8 :: x0(3),x1(3),x2(3),x3(3),c0(3)
+
+real*8 :: xshift(3),tmp
+
+xshift=x0-c0
+tmp=xshift(ir); xshift(ir)=xshift(jr); xshift(jr)=-tmp
+x0=xshift+c0
+
+xshift=x1-c0
+tmp=xshift(ir); xshift(ir)=xshift(jr); xshift(jr)=-tmp
+x1=xshift+c0
+
+xshift=x2-c0
+tmp=xshift(ir); xshift(ir)=xshift(jr); xshift(jr)=-tmp
+x2=xshift+c0
+
+xshift=x3-c0
+tmp=xshift(ir); xshift(ir)=xshift(jr); xshift(jr)=-tmp
+x3=xshift+c0
+
+
+end subroutine
+
+
+
    
 end module 
