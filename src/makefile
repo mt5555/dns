@@ -24,28 +24,35 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG  -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
       MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
    endif
-   ## Lahey
-   ##F90 = /usr/local/lf9560/bin/lf95
-   #F90 = lf95
-   #FFLAGS = -g -O -DLINUX $(MPI) -DUSE_FFT99
-   ##FFLAGS =  -tpp -O -DLINUX $(MPI) -DUSE_FFT99
-   #LDFLAGS = --staticlink  #-Lstk -lstk
-   #CC = gcc
+   #VENDOR=LAHEY
+   #VENDOR=PGI
+   VENDOR=INTEL
 
-   ## PGI
+   ifeq ($(VENDOR),LAHEY)
+   #F90 = /usr/local/lf9560/bin/lf95
+   F90 = lf95
+   FFLAGS = -g  -DLINUX $(MPI) -DUSE_FFT99
+   #FFLAGS =  -tpp -O -DLINUX $(MPI) -DUSE_FFT99
+   LDFLAGS = --staticlink  #-Lstk -lstk
+   CC = gcc
+   endif
+
+   ifeq ($(VENDOR),PGI)
    #F90 = pgf90
-   #CC=pgcc
-   ##FFLAGS = -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   #FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
-   ##LDFLAGS = -Lstk -lstk
+   CC=pgcc
+   #FFLAGS = -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
+   #LDFLAGS = -Lstk -lstk
+   endif 
 
 
-   #INTEL	
+   ifeq ($(VENDOR),INTEL)
    F90 = ifc 
    CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS =  -auto -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
-
+   endif
 
 endif
 ifeq ($(UNAME),SunOS)

@@ -47,7 +47,7 @@
 
         output_name0000.0000.u
         output_name0000.0000.v
-        output_name0000.0000.w    (the height field)
+        output_name0000.0000.h    (the height field)
         output_name0000.0000.vor  (vorticity)
 
     where 0000.0000 is the time of the snapshot.  So for t=0.25,
@@ -58,6 +58,7 @@
 
     The energy spectrum for the entire run is also in one file:   
     output_name0000.0000.spec
+    output_name0000.0000.spect    (transfer function spectra)
 
 
 
@@ -67,8 +68,8 @@
         in the dns/matlab there are two scripts:
         
         shplot.m   makes contour plots of the vorticity and height filed
-
         shscalars.m  plots the energy and dissapaton rates
+        specplot.m   plots spectra
 
         At the top of each script, you need to edit the file name
        

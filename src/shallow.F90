@@ -219,7 +219,6 @@ integer im,jm
 real*8 XFAC,hx,hy,normS
 external helmholtz_hform_periodic
 
-
 call wallclock(tmx1)
 
 a_diss=0
@@ -229,6 +228,7 @@ normdx=0
 ke_diss=0
 smag_diss=0
 vor=0
+
 
 
 
@@ -255,7 +255,6 @@ do i=nx1,nx2
    rhs(i,j,2)= - fcor*Q(i,j,1)
 enddo
 enddo
-
 
 
 
@@ -523,7 +522,6 @@ do j=ny1,ny2
       endif
    enddo
 enddo
-
 
 
 
