@@ -11,7 +11,7 @@ n_call=fread(fid,1,'float64');
 bins=((-n_bin:n_bin)*bin_size)';
 pdf=fread(fid,[(2*n_bin+1),n_del],'float64');
 
-i=1;
+i=2; % always leave the first one 
 while (i<=n_del & n_call>0)
   x=sum(pdf(:,i));
   if abs(x)<1e-9

@@ -41,7 +41,7 @@ ifeq ($(UNAME),Linux)
    F90 = ifc 
    CC=gcc
    #FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_STKFFT
-   FFLAGS = -w95 -static -Vaxlib -O1 -tpp7 -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS = -w95 -static -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
 endif
 ifeq ($(UNAME),SunOS)

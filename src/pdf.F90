@@ -343,7 +343,7 @@ end subroutine
 
 
 
-subroutine compute_pdf(Q,n1,n1d,n2,n2d,n3,n3d,str)
+subroutine compute_pdf(u,v,w,n1,n1d,n2,n2d,n3,n3d,str)
 !
 ! compute a pdf_structure function along the first dimension of Q
 ! for all the values of delta given by delta_val(:)
@@ -351,7 +351,9 @@ subroutine compute_pdf(Q,n1,n1d,n2,n2d,n3,n3d,str)
 use params
 implicit none
 integer :: n1,n1d,n2,n2d,n3,n3d,n
-real*8 :: Q(n1d,n2d,n3d,3)
+real*8 :: u(n1d,n2d,n3d)
+real*8 :: v(n1d,n2d,n3d)
+real*8 :: w(n1d,n2d,n3d)
 type(pdf_structure_function) :: str(NUM_SF)
 
 ! local variables
@@ -371,6 +373,8 @@ do j=2,NUM_SF
 ASSERT("ndelta must be the same for all U structure functions",ndelta==str(j)%delta_num)
 enddo
 
+
+
 do k=1,n3
    do j=1,n2
       do idel=1,ndelta
@@ -380,12 +384,18 @@ do k=1,n3
                do n=1,3
                   i2 = i + delta_val(idel)
                   if (i2>n1) i2=i2-n1
-                  
-                  del = Q(i2,j,k,n)-Q(i,j,k,n)
+                  if (n==1) then
+                     del = u(i2,j,k)-u(i,j,k)
+                  else if (n==2) then
+                     del = v(i2,j,k)-v(i,j,k)
+                  else
+                     del = w(i2,j,k)-w(i,j,k)
+                  endif
+
                   delv(n)=del
                   del = del/str(n)%pdf_bin_size
                   bin = nint(del)
-                  
+
                   ! increase the size of our PDF function
                   if (abs(bin)>str(n)%nbin) call resize_pdf(str(n),abs(bin)+10) 
                   if (bin>pdf_max_bin) bin=pdf_max_bin
@@ -405,6 +415,7 @@ do k=1,n3
                   endif
                   del = del/str(nsf)%pdf_bin_size
                   bin=nint(del)
+
                   if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
                   if (bin>pdf_max_bin) bin=pdf_max_bin
                   if (bin<-pdf_max_bin) bin=-pdf_max_bin
@@ -541,7 +552,7 @@ if (compx) then
       call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
       call transpose_from_x(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    enddo
-   call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,1))
+   call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1))
    
 else ! compy, or default (compute no structure functions)
    do n=1,3
@@ -553,7 +564,7 @@ else ! compy, or default (compute no structure functions)
       call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
       call transpose_from_y(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    enddo
-   if (compy) call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,2))
+   if (compy) call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2))
 endif
 
 if (compz) then
@@ -593,10 +604,7 @@ if (compz) then
    enddo
    ! Qt = z transpose of (u,v,w)
    ! compute regular structure functions:
-   print *,'bug!'
-   w1=Qt
-   Qt(:,:,:,1)=w1(:,:,:,2)
-   call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,3))
+    call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3))
 
    ! add in epsilon component
    do n=1,3
