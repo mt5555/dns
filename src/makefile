@@ -73,6 +73,7 @@ endif
 ifeq ($(UNAME),OSF1)
    F90 = f90
    # defaults for asci Q: MPI paths loaded via modules
+   # to enable openMP  -omp ?? 
    MPI = -DUSE_MPI 
    MPILIB = -lfmpi -lmpi -lelan
    LSFLIB = -L/lsf/lib -lbat -llsf 
@@ -99,7 +100,7 @@ ifeq ($(UNAME),OSF1)
 
    #FFLAGS = -automatic -fast -DOSF1 $(MPI) -DUSE_FFT99
    #FFLAGS = -automatic -fast -DOSF1  $(MPI) -DUSE_STKFFT  
-   FFLAGS = -fast -automatic -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
+   FFLAGS = -omp -fast -automatic -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  
    CC = cc $(LSFFLAGS)
 endif
 
