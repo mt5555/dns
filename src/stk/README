@@ -1,0 +1,184 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++ stk::    spectral toolkit fast fourier transform code    ++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+[$Id: README,v 1.1 2001-08-06 20:33:30 mt Exp $]
+
+Copyright (C) 2001 University Corporation for Atmospheric Research
+
+Author:  Rodney James (rodney@ucar.edu)
+                   
+Notes
+-----
+
+This directory contains source code for general mixed radix
+real-to-real and complex-to-complex Fast Fourier Transforms.
+The algorithms used are intended to to maximize runtime and
+space efficiency on super-scalar RISC and EPIC microprocessors.
+
+The FFT code is object-based and written in ANSI C.  It can be 
+built and used on any system that has an an ANSI C or C++ compiler.  
+A Makefile is provided with support for several unix systems that 
+builds a static library (libstk.a) and a test code (t_fft). 
+The complex and real transforms are disjoint, and either can
+be compiled and used alone without the other.
+
+By default, the library uses 64-bit (C double) precision.  The
+precision can be changed by changing the typedef statement
+for real in the file real.h.  For compilers supporting 128-
+bit precision (long double) intrinsic math functions, the library will 
+fully support 128-bit precision transforms.
+
+A Fortran interface is provided in the file fortran.c.  An error
+handler fortranError for the Fortran callable functions is at the 
+top of this file, and can be modified as needed, if the default behavior
+of calling exit() after an error is not desired.
+
+Interface
+---------
+
+This section documents the C and Fortran interface for the stk Fourier 
+transform library.  The complex-complex and real-real functions are 
+grouped together; "cfft" refers to complex, "rfft" to real.  The
+Fortran interface uses integer data types to store pointers, where
+the notation "integer*4|8" below refers to either integer*4 for 
+32-bit addressing, or integer*8 for 64-bit addressing.  The C types 
+real and complex are defined in real.h, and are by default
+64-bit precision.  The user can change the precision by changing
+the typedef for each in real.h.  The precision for the Fortran
+interface is the same as the C interface, 64-bit by default.
+
+The transforms are performed in-place.  For a an even sequence of 
+length n, the real transform assumes spectral storage order:
+
+Re(k=0),Re(k=1),Im(k=1),...,Re(k=n-1),Im(k=n-1),Re(k=n/2)
+
+Real transforms of odd sequences omit the last element Re(k=n/2).
+
+
+initialization
+--------------
+
+Initializes the FFT object for sequence length n.  
+
+C interface:
+
+	#include <cfft.h>
+	cfft *cfftInit(int n)
+
+	#include <rfft.h>
+	rfft *rfftInit(int n)
+
+Fortran interface:
+
+	integer n
+	integer*4|8 cfft_object,rfft_object
+	call cfft_init(n,cfft_object)
+	call rfft_init(n,rfft_object)
+
+
+copy fft object
+---------------
+
+Copies an FFT object cfft_object or rfft_object.  This routine is useful when
+private objects are needed for multiple threads.
+
+C interface:
+
+	#include <cfft.h>
+	cfft *cfftCopy(cfft *cfft_object)
+
+	#include <rfft.h>
+	rfft *rfftCopy(rfft *rfft_object)
+
+Fortran interface:	
+
+	integer*4|8 cfft_object1,cfft_object2,rfft_object1,rfft_object2
+	call cfft_copy(cfft_object1,cfft_object2)
+	call rfft_copy(rfft_object1,rfft_object2)
+
+
+delete fft object
+-----------------
+
+Deletes or frees an allocated FFT object cfft_object or rfft_object.
+
+C interface:
+
+	#include <cfft.h>
+	void cfftDelete(cfft *cfft_object)
+
+	#include <rfft.h>
+	void rfftDelete(rfft *rfft_object)
+
+Fortran interface:
+
+	integer*4|8 cfft_object,rfft_object
+
+	call cfft_delete(cfft_object)
+	call rfft_delete(rfft_object)
+
+
+fourier analysis
+----------------
+
+Performs forward Fourier transform on a sequence or multiple
+sequences of complex data c or real data r.  For the multiple
+instance routines, jump refers to the number of elements between
+the beginning of each sequence, start is the first sequence to
+transform relative to the beginning, and lot is the number of
+sequences to transform.
+
+C interface:
+
+	#include <cfft.h>
+	void cfftAnalysis(complex *c,cfft *p)
+	void cfftAnalysisM(complex *c,cfft *p,int jump,int start,int lot)
+
+	#include <rfft.h>
+	void rfftAnalysis(real *a,rfft *p)
+	void rfftAnalysisM(real *a,rfft *p,int jump,int start,int lot)
+
+Fortran interface:
+
+	integer lot,jump,n
+	integer*4|8 ch,rfft_object
+	complex*16 c(n),cm(jump,lot)
+	real*8 r(n),rm(jump,lot)
+	
+	call cfft_analysis(c,cfft_object)
+	call rfft_analysis(r,rfft_object)
+	call cfft_analysis_m(cm,cfft_object,lot,jump)
+	call rfft_analysis_m(rm,rfft_object,lot,jump)
+
+fourier synthesis
+-----------------
+
+Performs backward Fourier transform on a sequence or multiple
+sequences of complex data c or real data r.  For the multiple
+instance routines, jump refers to the number of elements between
+the beginning of each sequence, start is the first sequence to
+transform relative to the beginning, and lot is the number of
+sequences to transform.
+
+C interface:
+
+	#include <cfft.h>
+	void cfftSynthesis(complex *c,cfft *p)
+	void cfftSynthesisM(complex *c,cfft *p,int jump,int start,int lot)
+
+	#include <rfft.h>
+	void rfftSynthesis(real *a,rfft *p)
+	void rfftSynthesisM(real *a,rfft *p,int jump,int start,int lot)
+
+Fortran interface:
+
+	integer lot,jump,n
+	integer*4|8 cfft_object,rfft_object
+	complex*16 c(n),cm(jump,lot)
+	real*8 r(n),rm(jump,lot)
+
+	call cfft_synthesis(c,cfft_object)
+	call rfft_synthesis(r,rfft_object)
+	call cfft_synthesis_m(c,cfft_object,lot,jump)
+	call rfft_synthesis_m(r,rfft_object,lot,jump)

@@ -120,6 +120,7 @@ end subroutine
 subroutine rk4(time,Q)
 use params
 use mpi
+use fft_interface
 implicit none
 real*8 :: time,Q(nx,ny,nz,n_var)
 

@@ -8,7 +8,7 @@ ARCH = $(shell uname -m)
 
 ifeq ($(UNAME),Linux)
    F90 = lf95
-   LDFLAGS = --staticlink
+   LDFLAGS = --staticlink -L stk -lstk
    HOST = $(shell hostname)
    ifeq ($(HOST),darkstar)
       MPI = -DUSE_MPI -I/contrib/lam/include
@@ -70,10 +70,10 @@ dep:
 
 -include .depends
 
-fft_interface.o:  fft99_interface.o
-	cp -f fft99_interface.o fft_interface.o
-#fft_interface.o:  compaq_fft_interface.o
+#fft_interface.o:  fft99_interface.o
 #	cp -f fft99_interface.o fft_interface.o
+fft_interface.o:  fft_james_interface.o
+	cp -f fft_james_interface.o fft_interface.o
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"

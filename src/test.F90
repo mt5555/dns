@@ -419,13 +419,8 @@ do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
     if (abs(output(i,j,k)) > 1e-9) then	
-       if (mod(i-nx1,2)==1) then
-          write(message,'(a,i4,i4,i4,a,2f15.10)') '  sine mode=',imcord(i),jmcord(j),kmcord(k),&
-               ' val=',output(i,j,k)
-       else
-          write(message,'(a,i4,i4,i4,a,2f15.10)') 'cosine mode=',imcord(i),jmcord(j),kmcord(k),&
-               ' val=',output(i,j,k)
-        endif
+       write(message,'(a,i4,i4,i4,a,2f15.10)') 'mode=',imcord(i),jmcord(j),kmcord(k),&
+            ' val=',output(i,j,k)
        call print_message(message)
     endif
 enddo

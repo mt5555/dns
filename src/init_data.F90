@@ -105,6 +105,7 @@ end subroutine
 
 subroutine init_data_projection(Q)
 use params
+use fft_interface
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 
@@ -117,7 +118,7 @@ real*8 :: d3(nx,ny,nz)
 call bc_preloop(Q)
 
 ! will also dealias if dealias=1
-call divfree(Q,d1,d2,d3)
+call divfree(Q,d1)
 
 
 end subroutine
