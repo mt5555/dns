@@ -12,7 +12,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 ! local variables
-integer,parameter :: nints_e=14
+integer,parameter :: nints_e=23
 real*8 :: ints_e(nints_e)
 real*8 :: x
 integer i,j,k,n,ierr

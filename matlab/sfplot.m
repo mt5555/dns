@@ -105,7 +105,7 @@ while (time1>=0 & time1<=5000)
     end
     
   else
-    % longitudinal
+    % 1st order 
     for j=1:3
       for i=1:3
         [n_del1,delta1,bin_size1,n_bin1,n_call1,bins1,pdf1]=read1pdf(fid);
@@ -115,7 +115,7 @@ while (time1>=0 & time1<=5000)
         end
       end
     end
-    % transverse 
+    % 3rd order
     for j=1:3
       for i=1:3
         [n_del1,delta1,bin_size1,n_bin1,n_call1,bins1,pdf1]=read1pdf(fid);
@@ -123,6 +123,16 @@ while (time1>=0 & time1<=5000)
     end
   end
   
+  % we've read 6 SF so far.  are there any more?
+ for i=[7:nSF]
+   for j=1:3
+     % these are the 4th order SF 
+     [n_del1,delta1,bin_size1,n_bin1,n_call1,bins1,pdf1]=read1pdf(fid);
+   end
+ end
+
+ 
+ 
   npdf=fread(fid,1,'float64');
   if (plotu)
     plot_epsilon(fid,time1);

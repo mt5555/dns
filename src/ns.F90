@@ -52,6 +52,9 @@ if (firstcall) then
       rhsg(:,:,:,1)=Q_grid(:,:,:,n)
       call z_fft3d_trashinput(rhsg,Q(1,1,1,n),rhsg(1,1,1,2)) ! use rhs as work array
    enddo
+   if (smagorinsky>0) then
+      call abort("Error: ns3dspectral model does not yet support Smagorinsky")
+   endif
 
    if (.not. dealias) then
       call abort("Error: using ns3dspectral model, which must be run dealiased")

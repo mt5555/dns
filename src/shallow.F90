@@ -19,7 +19,7 @@ real*8 :: work2(nx,ny)
 ! local variables
 real*8 :: ke,pe
 real*8 :: ints_buf(nints),vel,dtf,epfilt=.01
-#undef USE_LEAPFROG
+#define USE_LEAPFROG
 #ifdef USE_LEAPFROG
 real*8,save :: QS(nx,ny,n_var)
 real*8,save :: QM(nx,ny,n_var)
@@ -273,7 +273,6 @@ enddo
 
 ! smagorinsky terms
 if (smagorinsky>0) then
-   stop 'smagorinsky not yet debugged'
    !   S= |       u_x       .5(u_y + v_x)  |
    !      |   .5(u_y+v_x)      v_y         |
    !
@@ -290,8 +289,9 @@ if (smagorinsky>0) then
    enddo
    normS=sqrt(2*normS)  ! following Marcel Lesieur, Turbulence in Fluids
 
-   divtau=smagorinsky*2*normS*divtau
+   divtau=2*(smagorinsky**2)*normS*divtau
    call der(divtau(1,1,1),work,dummy,work2,DX_ONLY,1)
+   work=work*(delx**2)
    do j=ny1,ny2
    do i=nx1,nx2
       rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
@@ -300,6 +300,7 @@ if (smagorinsky>0) then
    enddo
 
    call der(divtau(1,1,2),work,dummy,work2,DX_ONLY,2)
+   work=work*(dely**2)
    do j=ny1,ny2
    do i=nx1,nx2
       rhs(i,j,1)=rhs(i,j,1)+work(i,j)      
@@ -316,8 +317,9 @@ if (smagorinsky>0) then
       divtau(i,j,2)=gradv(i,j,2)
    enddo
    enddo
-   divtau=smagorinsky*2*normS*divtau
+   divtau=2*(smagorinsky**2)*normS*divtau
    call der(divtau(1,1,1),work,dummy,work2,DX_ONLY,1)
+   work=work*(delx**2)
    do j=ny1,ny2
    do i=nx1,nx2
       rhs(i,j,2)=rhs(i,j,2)+work(i,j)      
@@ -326,6 +328,7 @@ if (smagorinsky>0) then
    enddo
 
    call der(divtau(1,1,2),work,dummy,work2,DX_ONLY,2)
+   work=work*(dely**2)
    do j=ny1,ny2
    do i=nx1,nx2
       rhs(i,j,2)=rhs(i,j,2)+work(i,j)      

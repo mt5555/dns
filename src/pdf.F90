@@ -24,7 +24,7 @@ integer :: countx=-1,county=-1,countz=-1
 
 
 integer           :: structf_init=0
-integer,parameter :: delta_num_max=16
+integer,parameter :: delta_num_max=32
 integer           :: delta_val(delta_num_max)
 
 ! max range:  10 ... 10
@@ -51,8 +51,28 @@ end type
 !  Our structure functions
 !  SF(NUM_SF,3) :  structure functions, in the x,y and z directions
 !  
+!  j=1..3
+!  i=1..3
+!  SF(i,j)     PDF of delta_j(u_i)     i'th component of u, j'th direction
 !
-integer,parameter :: NUM_SF=6
+!  3rd order:
+!  SF(i+3,j)   i==j:   delta_j(u_j) delta_j(u_i**2)                     
+!              i<>j:   delta_j(u_j) delta_j(u_1**2 + u_2**2 + u_3**2)   
+!
+! 4th order
+!  SF(i+6)    (i,j)
+!             (1,1)     delta_j(u_j**2) delta_j(u_2**2)                 
+!             (2,1)     delta_j(u_j**2) delta_j(u_3**2)                 
+!             (1,2)     delta_j(u_j**2) delta_j(u_1**2)           
+!             (2,2)     delta_j(u_j**2) delta_j(u_3**2)
+!             (1,3)     delta_j(u_j**2) delta_j(u_1**2)
+!             (2,3)     delta_j(u_j**2) delta_j(u_2**2)
+!              
+! Note: the PDF's are further normalized so that they all have the same
+! units.  3rd order SF are raised to the 1/3 power, 4th order SF
+! are raised to the 1/4 power before binning up the PDF.  
+!
+integer,parameter :: NUM_SF=8
 type(pdf_structure_function) ::  SF(NUM_SF,3),epsilon
 
 integer :: overflow=0    ! count the number of overflow messages
@@ -76,25 +96,14 @@ implicit none
 
 integer idel,i
 integer :: numx=0,numy=0,numz=0
+integer :: nmax
+! we can compute them up to g_nx/2, but no reason to go that far.
+nmax=max(g_nx/3,g_ny/3,g_nz/3)
 
 delta_val=99999
-delta_val(1)=1
-delta_val(2)=2
-delta_val(3)=3
-delta_val(4)=4
-delta_val(5)=6
-delta_val(6)=8
-delta_val(7)=11
-delta_val(8)=16
-delta_val(9)=23
-delta_val(10)=32
-delta_val(11)=64
-delta_val(12)=128
-delta_val(13)=256
-delta_val(14)=512
-delta_val(15)=1024
-delta_val(16)=2048
-ASSERT("delta_num_max to small. ",16==delta_num_max)
+do i=1,delta_num_max
+   delta_val(i)=1 +  (i-1)*real(nmax)/real(delta_num_max-1)
+enddo
 
 
 do idel=1,delta_num_max
@@ -367,6 +376,37 @@ end subroutine
 
 
 
+subroutine compute_S2v2structs(v2,S2,n1,n1d,n2,n2d,n3,n3d,v2v2,S2S2,S2v2)
+integer :: n1,n1d,n2,n2d,n3,n3d
+real*8 :: v2(n1d,n2d,n3d),S2(n1d,n2d,n3d)
+real*8 :: v2v2,S2S2,S2v2
+
+! local
+integer :: i,j,k,idel,ndelta,i2
+v2v2=0
+S2S2=0
+S2v2=0
+
+ndelta=delta_num_max
+
+do k=1,n3
+   do j=1,n2
+      do idel=1,ndelta
+         if (delta_val(idel) < n1/2) then
+            do i=1,n1
+               ! compute structure functions for U,V,W 
+               i2 = i + delta_val(idel)
+               if (i2>n1) i2=i2-n1
+               v2v2=v2v2 + v2(i,j,k)*v2(i2,j,k)
+               S2S2=S2S2 + S2(i,j,k)*S2(i2,j,k)
+               S2v2=S2v2 + S2(i,j,k)*v2(i2,j,k)
+            enddo
+         endif
+      enddo
+   enddo
+enddo
+
+end subroutine
 
 
 
@@ -456,6 +496,29 @@ do k=1,n3
                   if (bin<-pdf_max_bin) bin=-pdf_max_bin
                   str(nsf)%pdf(bin,idel)=str(nsf)%pdf(bin,idel)+1
                enddo
+
+
+               ! compute structure functions for U**2 V**2 and U**2  W**2
+               nsf=6
+               do n=1,3
+                  if (n==ncomp) then
+                     ! skip diagonal term
+                  else
+                     nsf=nsf+1
+                     ! (delv(ncomp)**2 delv(n)**2  ) ** 1/4
+                     del=sqrt(abs(delv(ncomp)*delv(n)))
+                     del = del/str(nsf)%pdf_bin_size
+                     bin=nint(del)
+                     
+                     if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
+                     if (bin>pdf_max_bin) bin=pdf_max_bin
+                     if (bin<-pdf_max_bin) bin=-pdf_max_bin
+                     str(nsf)%pdf(bin,idel)=str(nsf)%pdf(bin,idel)+1
+                  endif
+               enddo
+
+
+
             enddo
          endif
       enddo
@@ -691,9 +754,11 @@ real*8 gradw(nx,ny,nz,n_var)
 real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
-real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3),S2sum,ensave
-real*8 dummy(1)
+real*8 :: vor(3),Sw(3),wS(3),Sww,ux2(3),ux3(3),ux4(3),uij,uji,u2(3)
+real*8 :: dummy(1),S2sum,ensave
 real*8 :: tmx1,tmx2
+real*8 :: v2v2_str(3), S2S2_str(3), S2v2_str(3)
+
 
 
 call wallclock(tmx1)
@@ -804,7 +869,6 @@ u2=u2/g_nx/g_ny/g_nz
 
 ensave=ensave/g_nx/g_ny/g_nz
 
-#if 0
 
 ! cj structure functions
 ! 
@@ -834,31 +898,34 @@ enddo
 enddo
 enddo
 
+
 ! compute integrals of:
-! <v2(x),v2(x+r)>
-! <S2(x),S2(x+r)>
+! <v2(x),v2(x+r)>       work=v2
+! <S2(x),S2(x+r)>       work2=S2
 ! <S2(x),v2(x+r)>
 !
 ! overwrite gradu in the process
 ! v2 v2 structure functions:
 call transpose_to_x(work,gradu,n1,n1d,n2,n2d,n3,n3d)
-call transpose_to_x(work,gradv,n1,n1d,n2,n2d,n3,n3d)
-call compute_structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,v2S2_str,1)
+call transpose_to_x(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
+call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
+     v2v2_str(1),S2S2_str(1),S2v2_str(1))
+
 call transpose_to_y(work,gradu,n1,n1d,n2,n2d,n3,n3d)
-call transpose_to_y(work,gradv,n1,n1d,n2,n2d,n3,n3d)
-call compute_structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,v2S2_str,2)
+call transpose_to_y(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
+call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
+     v2v2_str(2),S2S2_str(2),S2v2_str(2))
+
 call transpose_to_z(work,gradu,n1,n1d,n2,n2d,n3,n3d)
-call transpose_to_z(work,gradv,n1,n1d,n2,n2d,n3,n3d)
-call compute_structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,v2S2_str,3)
+call transpose_to_z(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
+call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
+     v2v2_str(3),S2S2_str(3),S2v2_str(3))
 
 
 
 
-#endif
 
-
-
-ASSERT("compute_all_pdfs: ns too small ",ns>=14)
+ASSERT("compute_all_pdfs: ns too small ",ns>=23)
 do n=1,3
 scalars(n)=ux2(n)
 scalars(n+3)=ux3(n)
@@ -869,6 +936,18 @@ do n=1,3
 scalars(10+n)=u2(n)
 enddo
 scalars(14)=S2sum
+do n=1,3
+scalars(14+n)=v2v2_str(n)
+enddo
+do n=1,3
+scalars(17+n)=S2S2_str(n)
+enddo
+do n=1,3
+scalars(20+n)=S2v2_str(n)
+enddo
+
+
+
 
 
 #ifdef USE_MPI

@@ -6,20 +6,20 @@ none         ! forcing:  none, iso12
 hyper        ! viscosity type  (hyper)
 5000         ! viscosity value (ke dissapation rate of 2h mode)  5000 
 .00         ! alpha (for NS-alpha model).  alpha>1 is in units of delx
-0            ! smagorinsky coefficient (0=disabled)
+.0            ! smagorinsky coefficient (0=disabled)
 0            ! compute_structure functions
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
 11.5         ! time to run
-1.00          ! adv cfl  1.35 ok for RK4.   .30 ok for LEAPFROG?
+1.10         ! adv cfl  1.15 limit for RK4.   .40 limit for LEAPFROG
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
 0.0          ! restart_dt  (0 = restart output disabled)
--1           ! diag_dt   
--1           ! screen_dt
+-10           ! diag_dt   
+-10           ! screen_dt
 1.0          ! output_dt  (0 = output disabled, except for custom output times)
 0            ! n_output_custom  number of custom output times  
 .009         ! custom output times, one per line
