@@ -478,11 +478,17 @@ if (my_pe==io_pe) then
          udm_input=.true.
       else if (message(1:3)=="-uo") then
          udm_output=.true.
+      else if (message(1:5)=="-p4wd" .or. message(1:5)=="-p4pg") then
+         ! MPICH mpirun adds this "usefull" argument - we have to ignore it
+         ! read path:
+         i=i+1
+         if (i>iargc()) exit
+         !call getarg(i,carg)
       else if (message(1:1)/="-") then
          ! this must be the runname
          runname=message(1:len_trim(message))
       else
-         print *,'Invalid option:',message
+         print *,'Invalid option (IGNORED):',message
          print *,'./dns [-[t,r,b,s,ui,uo]]  [-i params.inp] [-d rundir] [runname] '
          print *,'-t  enable LSF time remaining check, if compiled in'
          print *,'-r  restart from rundir/restart.[uvw,h5] '
@@ -491,7 +497,6 @@ if (my_pe==io_pe) then
          print *,'-ui restart file is UDM'
          print *,'-ui output to UDM'
          print *,'-mio use MPI-IO'
-         call abort("invalid option")
       endif
    enddo
    print *,'Run name:         ',runname(1:len_trim(runname))
