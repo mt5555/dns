@@ -319,7 +319,7 @@ character(len=80) :: message
 
 !should have h_angle inputted by user eventually
 !h_angle = 0.0d0
-h_angle = pi/2.0d0
+h_angle = pi/4.0d0
 
 
 if (0==init_sforcing) then
@@ -493,7 +493,8 @@ do k=-numb,numb
 !        write(6,*)'IIdotk_ang = ',acos(IIdotk/mod_ii/sqrt(k2*1.0d0)),i,j,k
 
 !     Rotate II and RR into plane orthogonal to k
-!     Don't need to do this for Mark's isotropic forcing since incompressibility!      already ensures this. Comment out.
+!     Don't need to do this for Mark's isotropic forcing since incompressibility
+!      already ensures this. Comment out.
 
 !      mod_RRxk = sqrt((RR(2)*k - RR(3)*j)**2 + (RR(1)*k - RR(3)*i)**2 + (RR(1)*j - RR(2)*i)**2)
 !      RRxk_hat(1) = (RR(2)*k - RR(3)*j)/mod_RRxk
@@ -522,7 +523,7 @@ do k=-numb,numb
          IIp(3) = II(3)
          
          
-!         check angle between RR and IIp again
+!         check angle between RR and IIp 
 	 
 !         tta = acos(IIp(1)/mod_ii)
 !         write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
