@@ -17,6 +17,14 @@ call fft3d(Q(1,1,1,n),work)
          do i=nx1,nx2
             im=imcord(i)
             xw=sqrt(real(km**2+jm**2+im**2))
+            if (xw>0 .and. xw<=2.5) then
+               R=xw**(-5/3.0)
+               call random_number(theta)
+               theta=pi2*theta
+               !  a_lmn 
+
+
+            endif
             if (xw > .5 .and. xw <= 1.5) then
                Q(i,j,k,n) = 1e-3
             else if (xw <= 2.5) then
