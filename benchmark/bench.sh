@@ -38,6 +38,9 @@ if ($ncpus > 0) then
         set command = "mpirun -np $ncpus -npn 2 $exe"
         #set command = "mpirun -np $ncpus -npn 1 $exe"
    endif
+   if (`hostname` == sulaco) then
+        set command = "lampirun -np $ncpus $exe"
+   endif
    if (`hostname` == node001) then
         set command = "/home/gmpi.pgi/bin/mpirun -np $ncpus  $exe"
    endif

@@ -273,7 +273,10 @@ cvs tag:  'bench602'
 
                       1cpu    2cpu    3cpu     4cpu     6      8     
 milkyway              .16     .080    .054
-autrey                .21     .17
+sulaco/lam            .21     .17               .17  
+sulaco/lampi          .22    .17                .60
+
+
 shankara.old  (2x2)   .28     .19               .093  .064   .050
 shankara 4ring        .27     .14               .059  .062   .047
 shankara-LAM(ethernet).27                                    .200

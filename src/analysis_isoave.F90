@@ -28,9 +28,10 @@ use pdf
 use spectrum
 implicit none
 
-! 1 cpu version uses less memory then parallel version
-! but to test parallel version in serial, set this to 1.
-integer :: always_use_parallel_code = 0;
+! set this to 0 to use 1 cpu version.  
+! 1 cpu version uses significantly less memory then parallel version
+! but doesn't compute some scalars like helicity dissipation rate.
+integer :: always_use_parallel_code = 1;
 integer :: use_serial
 
 real*8,allocatable  :: Q(:,:,:,:)
