@@ -373,7 +373,7 @@ real*8 :: w(nx,ny,nz)
 integer :: i,j,k,l,use3d=0,n
 real*8 :: eps
 real*8 :: amp,vx,uy
-real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,sum,psisum,delalf,testmax
+real*8 :: delsq,hold,difx,dify,sumy,denom1,denom2,wsum,psisum,delalf,testmax
 real*8 :: delta,xlocation
 integer,parameter :: nd=200
 real*8 :: xd(0:nd),yd(0:nd),wd(0:nd)
@@ -429,13 +429,12 @@ wd(0) = wd(0)/2
 yd(nd) = 0
 
 
-testmax=0
 delsq = delta**2
 !   INITIALIZES VORTICITY ON THE GRID = VORTICITY INDUCED
 !     BY A BLOB AT (0,1)
 do i=nx1,nx2
 do j=ny1,ny2
-   sum = 0
+   wsum = 0
    psisum=0
    do k=0,nd
       difx = (xcord(i) - xd(k))
@@ -444,33 +443,32 @@ do j=ny1,ny2
 
       denom1 = difx**2 + dify**2 + delsq
       denom2 = difx**2 + sumy**2 + delsq
-      sum = sum + wd(k)*(1/denom1**2-1/denom2**2)
+      wsum = wsum + wd(k)*(1/denom1**2-1/denom2**2)
       !psisum = psisum - wd(k)*log(denom1/denom2)
    enddo
-   w(i,j,1) = delsq*sum/pi
+   w(i,j,1) = delsq*wsum/pi
    !Q(i,j,1,1)= (psisum  - ubar*ycord(j))/(4*pi)  scaling is wrong
-   testmax = max(testmax,w(i,j,1))
 enddo
 enddo
 
 ! set w=0 on the boundary
 do i=nx1,nx2
-   w(i,ny1,1) = 0
+   if REALBOUNDARY(bdy_y1) w(i,ny1,1) = 0
    if (bdy_y2==INFLOW0_ONESIDED) then
       if (xcord(i)<=.5) w(i,ny2,1) = 0
-   else
+   else if (bdy_y2==INFLOW0) then
       w(i,ny2,1)=0
    endif
 enddo
 
 do j=ny1,ny2
    if (bdy_x1==INFLOW0_ONESIDED) then
-   else
+      ! dont change values computed above
+   else if (bdy_x1==INFLOW0) then
       w(nx1,j,1)=0
    endif
-   w(nx2,j,1)=0
+   if REALBOUNDARY(bdy_x2) w(nx2,j,1)=0
 enddo
-
 
 
 Q(:,:,:,3)=w
