@@ -16,8 +16,8 @@ F77FIXED=
 
 ifeq ($(UNAME),Linux)
    #VENDOR=LAHEY
-   #VENDOR=PGI
-   VENDOR=INTEL
+   VENDOR=PGI
+   #VENDOR=INTEL
    MPI = 
    MPILIB = 
    ifeq ($(HOST),s854018)
@@ -37,9 +37,12 @@ ifeq ($(UNAME),Linux)
       MPI = -DUSE_MPI -DMPI_UNDERSCORE
       MPILIB =   -llamf77mpi -lmpi -llam 
    endif
-   ifeq ($(HOST),darkstar)
-      #MPI = -DUSE_MPI -DMPI_HAS_REAL8 -I$(HOME)/lampi/include
-      #MPILIB =  -Xlinker -rpath $(HOME)/lampi/lib -L$(HOME)/lampi/lib -lmpi
+   ifeq ($(HOST),reddish)
+      VENDOR=PGI
+      MPI = -I/usr/pgi/linux86-64/5.2/include -DUSE_MPI -DMPI_HAS_REAL8
+      MPILIB=  -L/usr/pgi/linux86-64/5.2/lib -lfmpich -lmpich 
+      #MPI = -I/usr/lib/mpi/mpi_pgi/include -DUSE_MPI -DMPI_HAS_REAL8 -Dmpi_wtime=pmpi_wtime
+      #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi 
    endif
    ifeq ($(HOST),brain)
       MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
