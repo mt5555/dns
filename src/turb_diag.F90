@@ -732,7 +732,7 @@ real*8 :: scalars2(ns)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: ux1,ux2(3),ux3(3),ux4(3),u2,x1,x2,su(3),u1,u3,u4,u1tmp
-real*8 :: uxx2(3),uxx3(3),uxx4(3),xtmp
+real*8 :: uxx2(3),uxx3(3),uxx4(3),xtmp,u2ux2(3)
 
 !
 !  gradu = ux,vy,wz,

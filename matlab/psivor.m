@@ -18,7 +18,8 @@ range=1:1:4;
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/taylorm/dns/src/vxpair/vx4500a';
 %name='/ccs/scratch/taylorm/kras/vx2560a/vx2560a';
-name='/ccs/scratch/taylorm/kras/vx2560c/vx2560c';
+%name='/ccs/scratch/taylorm/kras/vx2560c/vx2560c';
+name='/ccs/scratch/taylorm/kras/vx5120a/vx5120a';
 %name='/home/scratch/kras/vx1280a/vx1280a';
 
 
@@ -48,7 +49,7 @@ for i=range
   [x,y,z,psi,time]=getfield(fname);
   psi = squeeze(psi(:,:,1));
 
-  subsample=1;
+  subsample=4;
   if (subsample>1) 
     nx=length(x);
     ny=length(y);
