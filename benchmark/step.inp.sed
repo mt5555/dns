@@ -19,7 +19,7 @@ periodic     ! z bc
 1             ! max_dt 
 0.0          ! restart_dt  (0 = restart output disabled)
 0          ! diag_dt   
-0          ! screen_dt
+-10          ! screen_dt
 0           ! output_dt  (0 = output disabled, except for custom output times)
 0           ! n_output_custom  number of custom output times  
 0.00         ! custom output times, one per line
