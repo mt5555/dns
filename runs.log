@@ -97,8 +97,6 @@ iso12_500A    iso12 forcing:  k1=.5  (forcing disabled if it removes E)
                
         t=[0,1.13]:  mu=3e-4  R_l=140  delx/eta=1.2  epsilon=3.70 
         t=[1.13,4+]:  mu=1e-4  R_l=252  delx/eta=2.8  epsilon=3.80 
-         still running bluemountain
-
                 t=5.56   4/5 law max:   .7551
                 t=5.0                   .7338
                   4.57                  .717
@@ -123,11 +121,11 @@ iso12_256D
     F = 1, .128
     alpha=infinity
     mu=.25e-4  
-iso12_256E
+iso12_256E        ran to t=7
     F = 1, 4.5
     alpha=infinity
     mu=.25e-4  
-iso12_256F
+iso12_256F        ran to t=50  
     decay case
     alpha=infinity
     mu=.25e-4  
