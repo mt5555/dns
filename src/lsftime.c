@@ -173,8 +173,8 @@ extern  void    ExceptionHandler( int nSignal )
 
 void  FORTRAN(set_sigurghandler)(void) {
 
-        if( signal( SIGINT, ExceptionHandler ) == SIG_ERR ) {
-                fprintf( stderr, "** WARNING** Can't catch signal SIGINT" );
+        if( signal( SIGURG, ExceptionHandler ) == SIG_ERR ) {
+                fprintf( stderr, "** WARNING** Can't catch signal SIGURG" );
         }
 
 }

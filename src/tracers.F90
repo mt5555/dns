@@ -613,8 +613,8 @@ end subroutine
 
           numt=numt+1
           numt_insert=numt_insert+1
-          print *,'inserted points',numt,numt_insert
-          stop
+!          print *,'inserted points',numt,numt_insert
+!          stop
 
          alf(j1) = newalf
          x(j1)     = newx
