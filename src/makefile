@@ -20,7 +20,7 @@ ifeq ($(UNAME),Linux)
    VENDOR=INTEL
    MPI = 
    MPILIB = 
-   ifeq ($(HOST),certs)
+   ifeq ($(HOST),sulaco)
       MPI = -DUSE_MPI -I/contrib/lam/include
       MPILIB =  -L/contrib/lam/lib -lpmpi -llamf77mpi -lmpi -llam 
    endif
@@ -38,8 +38,7 @@ ifeq ($(UNAME),Linux)
    ifeq ($(HOST),node001)
       VENDOR=PGI
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
-      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm 
-                 #-lpthread
+      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm #-lpthread
    endif
    ifeq ($(HOST),pinkish.lanl.gov)
       MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
