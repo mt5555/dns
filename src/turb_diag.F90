@@ -758,6 +758,9 @@ i=i+3
 #endif
 
 
+su=u2*uxx2/(ux2*ux2)
+print *,'G_theta=',su
+
 end subroutine
 
 

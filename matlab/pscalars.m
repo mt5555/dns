@@ -124,7 +124,7 @@ disp(sprintf('epsilon_c = %f',epsilon_c(1) ))
 Su = mean(ux3,1)./mean(ux2,1).^1.5  ;
 Suc = -mean(cu,1)./(sqrt(mean(ux2,1)).*mean(cx2,1));
 G = (mean(u2,1) .* mean(uxx2,1))./mean(ux2).^2;
-Gc = (c2 .* mean(cxx2,1))./mean(cx2).^2;
+Gc = (c2 .* mean(cxx2,1))./(mean(cx2,1).^2);
 
 
 ff = Su.*sqrt(Rt)*7/3/sqrt(15);
