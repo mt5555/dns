@@ -1,7 +1,39 @@
+TODO:
+
+1. tune fftblocksize in fft99_interface.F90  (number of ffts to do at once)
+2. use a mpi communcator for the buffer->2d array copy in transpose.F90
+3. post more messages at once in tranpose.F90?  
+4. loops in ns3d.F90
+5. timers:  time initialization
+            everything after initialization
+            time spent in transpose operator
+            time spent in ns3d
+            time spent in output
+
+6. divergence: go to Shashkov formula?  
+
+
+
+
+
 **********************************************************************************
+384x384  vis=.0001 - very much smoother then the vis=0 case.
+CFL=1.25 looks bad at t=.5, but recovers
+CFL=1.1  looks good at t=.4,.5,.6,1.0
+CFL=1.0  looks good at t=.4,.5,.6...
+CFL=.9  looks good
 
 
-CFL:  
+384x384  vis=0
+CFL=1.1  looks great, t=.4 .. .9
+    1.2  looks great
+    1.3  looks bad at t=.5  has small patch of noise.  KE goes bad at t=.6	
+     
+
+
+
+
+CFL:  128x128
 
 dealiased, vis=0
 cfl_adv

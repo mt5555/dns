@@ -54,8 +54,9 @@ end type
 type(fftdata_d) :: fftdata(num_fftsizes)
 
 
-integer, parameter ::  fftblocks=100   ! do fft's in blocks of size fftblocks
-                                       ! set very large to disable
+integer, parameter ::  fftblocks=2000 ! do fft's in blocks of size fftblocks
+                                      ! set very large to disable blocking and do 
+                                      ! all fft's at once
 private :: fftinit, getindex
 contains 
 
@@ -210,8 +211,8 @@ end subroutine
 subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
-#ifdef SGIFFT
 real*8 :: scale
+#ifdef SGIFFT
 real*8 w(n1+2)
 #else
 real*8 :: w(min(fftblocks,n2)*(n1+1)) 

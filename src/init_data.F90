@@ -44,8 +44,6 @@ do k=nz1,nz2
    vv = 0
    do l=0,n
       ! COMPUTE VELO AT (XCORD(I),YCORD(J)) INDUCED BY BLOB AT (X(L),Y(L))
-!      x(l) = -1 + l*delalf            ! x ranges from -1 .. 1
-
       x(l) = -1 + l*delalf + xval       ! x ranges from xval-1 .. xval+1
       y(l) = eps*sin( km*pi*x(l) )
 

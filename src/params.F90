@@ -245,6 +245,7 @@ if ((g_nx2)*nz_2dx*real(nslaby,r8kind) > nx*nz*real(ny,r8kind) )  then
    write(message,'(a,f10.0)') "storage needed for 2D x-decomposition: ", &
      (g_nx2)*nz_2dx*real(nslaby,r8kind)
    call print_message(message)	
+   call print_message("You might also try #define TRANSPOSE_X_SPLIT_Y in transpose.h")
 
 endif
 #endif
@@ -259,6 +260,7 @@ if ((g_nx2)*ny_2dx*real(nslabz,r8kind) > nx*nz*real(ny,r8kind) )  then
    write(message,'(a,f10.0)') "storage needed for 2D x-decomposition: ", &
      (g_nx2)*ny_2dx*real(nslabz,r8kind)
    call print_message(message)	
+   call print_message("You might also try #define TRANSPOSE_X_SPLIT_Z in transpose.h")
 
 endif
 #endif
