@@ -123,8 +123,8 @@ dnsa:  $(MODEL_ALPHA)
 dnsgrid:  $(MODEL_GRID) 
 	$(LINK) -o dnsgrid $(MODEL_GRID) $(LDFLAGS) $(MPILIB)
 
-dnsimp:  $(MODEL_IMPULSE) 
-	$(LINK) -o dnsgrid $(MODEL_IMPULSE) $(LDFLAGS) $(MPILIB)
+dnsi:  $(MODEL_IMPULSE) 
+	$(LINK) -o dnsi $(MODEL_IMPULSE) $(LDFLAGS) $(MPILIB)
 
 dnsslow:  $(MODEL_SPEC_SLOW) 
 	$(LINK) -o dns $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)

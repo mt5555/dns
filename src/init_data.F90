@@ -213,11 +213,17 @@ real*8 :: Q(nx,ny,nz,n_var)
 ! local variables
 integer i,j,k,l
 real*8 :: eps
+real*8 :: amp
 
 Q=0
 
 k=nz1
 eps=200
+amp=.05
+
+! E & Liu case:
+eps=10*pi
+amp=.25
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -228,9 +234,9 @@ do i=nx1,nx2
       Q(i,j,k,1)=tanh(eps*(.75-ycord(j)))
    endif
    if (nslabz>16) then
-      Q(i,j,k,2)=.05*sin(2*pi*xcord(i))*cos(2*pi*zcord(k))
+      Q(i,j,k,2)=amp*sin(2*pi*xcord(i))*cos(2*pi*zcord(k))
    else
-      Q(i,j,k,2)=.05*sin(2*pi*xcord(i))
+      Q(i,j,k,2)=amp*sin(2*pi*xcord(i))
    endif
 enddo
 enddo

@@ -216,7 +216,9 @@ endif
 !  output dumps
 !
 if (doit_output) then
-   call print_message("writing output files...")
+   write(message,'(a,f10.4)') "writing output files at t=",time
+   call print_message(message)
+
    write(message,'(f10.4)') 10000.0000 + time
 
    fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".u"

@@ -266,6 +266,11 @@ real*8 :: beta
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
 
+if (beta==0) then
+   f=f/alpha
+   return
+endif
+
 
 call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
