@@ -9,36 +9,23 @@
 %
 % then, repeated for each passive scalar:
 %
-%   mu                          1
-%   schmidt                     2 
-%   s^2                         3
-%   s,i ^2     i=1,3            4-6
-%   s,i ^3     i=1,3            7-9
-%   s,i ^4     i=1,3            10-12
-%   s,ii ^2     i=1,3           13-15
-%   s,ii ^3     i=1,3           16-18
-%   s,ii ^4     i=1,3           19-21
-%   ui,i*s,i    i=1,3           22-24
+%   mu                          2  (matlab array starts at 2 since we add time)
+%   schmidt                     3 
+%   s^2                         4
+%   s,i ^2     i=1,3            5
+%   s,i ^3     i=1,3            8
+%   s,i ^4     i=1,3            11
+%   s,ii ^2     i=1,3           14
+%   s,ii ^3     i=1,3           17
+%   s,ii ^4     i=1,3           20
+%   ui,i*s,i    i=1,3           23
 %    
 %
 
 clear all;
 
-name = '/ccs/scratch/taylorm/decay/decay2048'
-times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357]
-times=[times,.24:.01:4.0];
-
-%name = '/ccs/scratch/taylorm/dns/iso12_512'
-%times=7;
-
-%name = '/ccs/scratch/taylorm/dns/sc512A'
-%times=3;
-
-%name = '/home/skurien/dns/src/sk128_alpha0';
-%times=0.5
-
-name = '/scratch2/taylorm/tmix256B/tmix256B'
-times=[0:.5:3]
+name = '/scratch2/taylorm/tmix256C/tmix256C'
+times=[1.0001];
 
 
 nt=0;
@@ -70,24 +57,25 @@ end
 % look at passive scalar number np
 np=1;
 
-mu=pints_e(1,np,:);
-schmidt=pints_e(2,np,:);
-time_e=pints_e(3,np,:);
-s2(1)=pints_e(4,np,:);
-s2(2)=pints_e(5,np,:);
-s2(3)=pints_e(6,np,:);
+time_e=pints_e(1,np,:);
+mu=pints_e(2,np,:);
+schmidt=pints_e(3,np,:);
+s2=pints_e(4,np,:);
 
-sx2(1)=pints_e(7,np,:);
-sx2(2)=pints_e(8,np,:);
-sx2(3)=pints_e(9,np,:);
+sx2(1)=pints_e(5,np,:);
+sx2(2)=pints_e(6,np,:);
+sx2(3)=pints_e(7,np,:);
+sx3(1)=pints_e(8,np,:);
+sx3(2)=pints_e(9,np,:);
+sx3(3)=pints_e(10,np,:);
 
-sxx2(1)=pints_e(13,np,:);
-sxx2(2)=pints_e(14,np,:);
-sxx2(3)=pints_e(15,np,:);
+sxx2(1)=pints_e(14,np,:);
+sxx2(2)=pints_e(15,np,:);
+sxx2(3)=pints_e(16,np,:);
 
-su(1)=pints_e(22,np,:);
-su(2)=pints_e(23,np,:);
-su(3)=pints_e(24,np,:);
+su(1)=pints_e(23,np,:);
+su(2)=pints_e(24,np,:);
+su(3)=pints_e(25,np,:);
 
 
 %
@@ -97,6 +85,7 @@ su(3)=pints_e(24,np,:);
 %       u2, ux2, ux3, uxx2
 %
 %
+return
 
 ke=.5*sum(u2,1);
 epsilon=15*mu*mean(ux2,1);                   % only uses ux^2, vy^2, wz^2
