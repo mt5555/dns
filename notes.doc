@@ -1,10 +1,12 @@
 TODO:
 
+1. switch 3d test case to different dimensions
+
+1. check new structure functions.  
+2. make suite of runs for diffusion: 32^3, 64^3 128^3
 0. Bullets for Darryl
-1. 3D forced test case
 2.  4th order differences
 4. 2D shallow water case
-5. remove all automatic arrays?
 
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  

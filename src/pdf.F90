@@ -370,21 +370,24 @@ end subroutine
 
 
 
-subroutine compute_pdf(u,v,w,n1,n1d,n2,n2d,n3,n3d,str)
+subroutine compute_pdf(u,v,w,n1,n1d,n2,n2d,n3,n3d,str,ncomp)
 !
 ! compute a pdf_structure function along the first dimension of Q
 ! for all the values of delta given by delta_val(:)
 !
+!
+! ncomp=1,2 or 3  we are computing them in the x,y or z direction
+!
 use params
 implicit none
-integer :: n1,n1d,n2,n2d,n3,n3d,n
+integer :: n1,n1d,n2,n2d,n3,n3d,n,ncomp
 real*8 :: u(n1d,n2d,n3d)
 real*8 :: v(n1d,n2d,n3d)
 real*8 :: w(n1d,n2d,n3d)
 type(pdf_structure_function) :: str(NUM_SF)
 
 ! local variables
-real*8  :: del,delv(3),delq
+real*8  :: del,delv(3)
 real*8  :: tmx1,tmx2
 integer :: bin,idel,i,j,k,i2,nsf,ndelta
 
@@ -429,11 +432,17 @@ do k=1,n3
                   str(n)%pdf(bin,idel)=str(n)%pdf(bin,idel)+1
                enddo
 
-               ! compute structure functions for U(U**2+V**2+W**2)
-               delq = delv(1)**2 + delv(2)**2 + delv(3)**2
+               ! compute structure functions for U U**2, U V**2 and U W**2
+               ! but U * U**2 was already computed above, so replace
+               ! this one with U (U**2 + V**2 + W**2)
                do n=1,3
                   nsf=n+3
-                  del=delv(n)*delq
+                  if (n==ncomp) then
+                     del=delv(n)*(delv(1)**2+delv(2)**2+delv(3)**2)
+                  else
+                     del=delv(ncomp)*delv(n)**2
+                  endif
+
                   if (del>=0) then
                      del=del**one_third
                   else
@@ -587,7 +596,7 @@ if (compx) then
       call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
       call transpose_from_x(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    enddo
-   call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1))
+   call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
    
 else ! compy, or default (compute no structure functions)
    do n=1,3
@@ -599,7 +608,7 @@ else ! compy, or default (compute no structure functions)
       call ifft1(Qt(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
       call transpose_from_y(Qt(1,1,1,n),f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    enddo
-   if (compy) call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2))
+   if (compy) call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
 endif
 
 if (compz) then
@@ -641,7 +650,7 @@ if (compz) then
    enddo
    ! Qt = z transpose of (u,v,w)
    ! compute regular structure functions:
-    call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3))
+    call compute_pdf(Qt(1,1,1,1),Qt(1,1,1,2),Qt(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
 
    ! add in epsilon component
    do n=1,3
@@ -689,17 +698,17 @@ real*8 dummy(1)
 do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
-call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1))
+call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
 
 do n=1,3
    call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
-call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2))
+call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
 
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
-call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3))
+call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
 
 
 do n=1,3
