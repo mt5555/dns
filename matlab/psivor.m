@@ -11,7 +11,8 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 range=0:1.0:1000.0;
 %range=[.00];
 %name='../src/kh/khK';
-name='../src/vxpair/vxpair2_';
+%name='../src/vxpair/vxpair2_';
+name='../src/temp';
 
 
 usefig=1;

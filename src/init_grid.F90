@@ -105,7 +105,9 @@ bz2=nz2
 if (offset_bdy==1) then
    if (my_x==ncpu_x-1) bx2=nx2+1; o_nx=g_nx+1
    if (my_y==ncpu_y-1) by2=ny2+1; o_ny=g_ny+1
-   if (my_z==ncpu_z-1 .and. g_nz>1) bz2=nz2+1; o_nz=g_nz+1
+   if (my_z==ncpu_z-1 .and. g_nz>1) then
+      bz2=nz2+1; o_nz=g_nz+1
+   endif
 endif
 
 

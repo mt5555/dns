@@ -19,7 +19,10 @@ t=1.5  NIRVANA timings              t=15
 2049x1025 autrey                     t=15: 508min     3.5d for t=150
 3072x1536 autrey 2 cpu:  
 
-3072x1536 milkyway    t=.1: 
+4096x2048 milkyway    t=.1: 19.68m
+                             8.19m (4 cpus 4x1)
+                            11.52m ( 2 cpus 2x1)
+                                   ( 4 cpus 2x2)
 
 
 

@@ -73,7 +73,7 @@ integer i,j,k,n,ierr
 integer,save :: ncall=0
 integer,save :: btype
 
-integer :: comp_psi0=1         ! initial psi on boundary with biot-savart
+integer :: comp_psi0 = 0       ! compute psi on boundary initially
 integer :: comp_psi_rk13=0     ! compute psi on boundary after RK stages 1..3?
 integer :: comp_psi_rk4=0      ! compute psi on boundary after RK stage 4?
 
@@ -81,6 +81,7 @@ ncall=ncall+1
 
 
 if (g_bdy_x1==INFLOW0_ONESIDED) then
+   comp_psi0=1
    comp_psi_rk4=0; if (mod(ncall,5)==0) comp_psi_rk4=1
 endif
 
@@ -100,13 +101,12 @@ if (ncall==1) then
       call abort("Error: dnsgrid cannot handle alpha>0.")
    endif
 
-   ! set w on boundary, and ghost update:
+   ! set boundary data
    call bcw_impose(Q(1,1,3))
    w_tmp=0
    psi0=0
-   call print_message("Initial Biot-Savart boundary computation...")
+   ! recompute PSI on boundary if comp_psi0==1
    call compute_psi(Q(1,1,3),psi0,rhs,work,w_tmp,comp_psi0)
-
 endif
 
 

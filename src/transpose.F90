@@ -972,9 +972,13 @@ ASSERT("output1 dimension failure 6",n3==ny_2dx)
 ASSERT("output1 dimension failure 7",n3d==ny_2dx)
 
 
+if (o_nz>g_nz .and. g_bdy_z1/=PERIODIC) then
+   call abort("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
+endif
+
 do z_pe=0,ncpu_z-1
 extra_k=0
-if (z_pe==ncpu_z-1 .and. g_bdy_z1==PERIODIC) extra_k=1
+if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
 do x_pe=0,ncpu_x-1
@@ -1042,17 +1046,27 @@ do x_pe=0,ncpu_x-1
 #endif
       endif
       
-      if (g_bdy_x1==PERIODIC) buf(o_nx,:)=buf(1,:)  ! append to the end, x-direction
+      if (o_nx>g_nx) then
+         if (g_bdy_x1==PERIODIC) then
+            buf(o_nx,:)=buf(1,:)  ! append to the end, x-direction
+         else
+            buf(o_nx,:)=0
+         endif
+      endif
       call cwrite8(fid,buf,o_nx*ny_2dx_actual)
 
-      if (g_bdy_y1==PERIODIC) then
-      if (y_pe==0 .and. x_pe==0) then
-         ! save this edge to append to the (y_pe=ncpu_y,x_pe-ncpu_x) edge
-         saved_edge=buf(:,1)
-      endif   
-      if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then     ! append to the end, y-direction
-         call cwrite8(fid,saved_edge,o_nx)
-      endif
+      if (o_ny>g_ny) then
+         if (y_pe==0 .and. x_pe==0) then
+            if (g_bdy_y1==PERIODIC) then
+               ! save this edge to append to the (y_pe=ncpu_y,x_pe-ncpu_x) edge
+               saved_edge=buf(:,1)
+            else
+               saved_edge=0
+            endif
+         endif
+         if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then     ! append to the end, y-direction
+            call cwrite8(fid,saved_edge,o_nx)
+         endif
       endif
 
    endif
@@ -1094,9 +1108,14 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer :: ny_2dx_actual 
 ny_2dx_actual = ny_2dx
 
+if (o_nz>g_nz .and. g_bdy_z1/=PERIODIC) then
+   call abort("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
+endif
+
+
 do z_pe=0,ncpu_z-1
 extra_k=0
-if (z_pe==ncpu_z-1 .and. g_bdy_z1==PERIODIC) extra_k=1
+if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
 do x_pe=0,ncpu_x-1
@@ -1138,12 +1157,13 @@ do x_pe=0,ncpu_x-1
          call cread8(fid,buf,o_nx*ny_2dx_actual)
       endif
 
-      if (g_bdy_y1==PERIODIC) then
+      if (o_ny>g_ny) then
       if (y_pe==ncpu_y-1 .and. x_pe==ncpu_x-1) then    
+         ! read and discard periodic duplicate points
          if (random) then
             call random_data(saved_edge,o_nx)
          else
-            call cread8(fid,saved_edge,o_nx)      ! read and discard periodic duplicate points
+            call cread8(fid,saved_edge,o_nx)      
          endif
       endif
       endif

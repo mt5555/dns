@@ -41,7 +41,7 @@ if (restart==1) then
    ! initialize some constants, if needed:
    if (init_cond==3) call init_data_sht(Q,q1,work1,work2,0)      ! set grav, fcor
    if (init_cond==4) call init_data_vxpair(Q,q1,work1,work2,0) ! set xscale, yscale... 
-   call init_data_restart(Q,work1,work2)
+   call init_data_restart(Q,q1,work1,work2)
 else
    if (init_cond==0) call init_data_khblob(Q,q1,work1,work2)
    if (init_cond==1) call init_data_kh(Q,q1,work1,work2)
@@ -64,29 +64,6 @@ endif
 #ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
 #endif
-
-
-
-
-#if 0
-! transpose data, for testing
-print *,'Transposing input data'
-q1=Q
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-!  (x,y,z)->(y,z,x)
-   Q(j,k,i,1)=q1(i,j,k,2)
-   Q(j,k,i,2)=q1(i,j,k,3)
-   Q(j,k,i,3)=q1(i,j,k,1)
-enddo
-enddo
-enddo
-#endif
-
-
-
-
 
 
 

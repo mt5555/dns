@@ -1,5 +1,5 @@
 #include "macros.h"
-subroutine init_data_restart(Q,work1,work2)
+subroutine init_data_restart(Q,Qhat,work1,work2)
 !
 ! low wave number, quasi isotropic initial condition
 !
@@ -7,6 +7,7 @@ use params
 use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
@@ -32,9 +33,11 @@ else if (equations==SHALLOW) then
    fname = rundir(1:len_trim(rundir)) // "restart.h"
    call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
 else if (equations==NS_PSIVOR) then
-   call print_message("Restarting from file restart.vor")
+   call print_message("Restarting from file restart.vor,psi")
    fname = rundir(1:len_trim(rundir)) // "restart.vor"
-   call singlefile_io(time_initial,Q(1,1,1,1),fname,work1,work2,1,io_pe)
+   call singlefile_io(time_initial,Q(1,1,1,3),fname,work1,work2,1,io_pe)
+   !fname = rundir(1:len_trim(rundir)) // "restart.psi"
+   !call singlefile_io(time_initial,Qhat,fname,work1,work2,1,io_pe)
 endif
 
 
@@ -358,9 +361,9 @@ end subroutine
 
 
 
-subroutine init_data_vxpair(Q,q1,work1,w,init)
+subroutine init_data_vxpair(Q,Qhat,work1,w,init)
 !
-!  init=0    setup parameters only
+!  init=0    restart run.  setup parameters and initialize PSI boundary
 !  init=1    setup parameters and compute initial conditoin
 !
 use params
@@ -368,7 +371,7 @@ use ghost
 use bc
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: w(nx,ny,nz)
 integer :: init
@@ -407,7 +410,7 @@ if (init_cond_subtype ==1) then
 ! scaled up to 720x400:   yscale=2
 !                         xscale=3.6   
 !
-   biotsavart_cutoff=1e-6
+   biotsavart_cutoff=5e-5
    if (g_bdy_x1==INFLOW0_ONESIDED) biotsavart_cutoff=.005
    delta=.2
    ubar=.089
@@ -421,12 +424,10 @@ call init_grid()   ! redo grid points since we changed scalings
 
 
 xlocation=xscale/2
-ubar = ubar  
 equations=NS_PSIVOR
 Q=0
 
 
-if (init==0) return
 
 ! INITIALIZES VORTEX SHEET (XS,YS,WS,NS)
 delalf = pi/(2*nd)
@@ -444,11 +445,11 @@ yd(nd) = 0
 delsq = delta**2
 !   INITIALIZES VORTICITY ON THE GRID = VORTICITY INDUCED
 !     BY A BLOB AT (0,1)
-do j=inty1,inty2
+do j=by1,by2
    if (mod(j,100)==0 .and. my_pe==io_pe) then
       print *,'initial condition: ',inty2,j
    endif
-do i=intx1,intx2
+do i=bx1,bx2
    wsum = 0
    psisum=0
    do k=0,nd
@@ -459,19 +460,32 @@ do i=intx1,intx2
       denom1 = difx**2 + dify**2 + delsq
       denom2 = difx**2 + sumy**2 + delsq
       wsum = wsum + wd(k)*(1/denom1**2-1/denom2**2)
-      !psisum = psisum - wd(k)*log(denom1/denom2)
+      psisum = psisum - wd(k)*log(denom1/denom2)
    enddo
    w(i,j,1) = delsq*wsum/pi
-   !Q(i,j,1,1)= (psisum  - ubar*ycord(j))/(4*pi)  scaling is wrong
+   Qhat(i,j,1,1)= psisum*delx*dely/(4*pi)  - ubar*ycord(j)
 enddo
 enddo
 
-call bcw_impose(w)
-Q(:,:,:,3)=w
 
+! We are generating an initial condition, so store w in Q(:,:,:,3)
+! otherwise, initial condition was read in, and is already in Q(:,:,:,3)
+if (init==1) Q(:,:,:,3)=w
 
+! do this even for restart case, because boundary conditions were not
+! saved in restart file if offset_bdy==1
+call bcw_impose(Q)
 
-
+! Set the values of PSI on the boundary coming from the initial condition,
+! if needed.  
+if (g_bdy_x1==INFLOW0_ONESIDED) then
+   ! psi on the boundary always computed from w in time stepping loop.
+else
+   ! psi on the boundary fixed for all time from the initial conditon:
+   call print_message("Setting PSI boundary values (fixed for all time)")
+   !call bc_biotsavart(w,Qhat,1)
+   call set_biotsavart(Qhat)
+endif
 
 
 
