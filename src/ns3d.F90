@@ -1,6 +1,6 @@
 #include "macros.h"
 
-subroutine ns3d(rhs,Q,time,compute_ints)
+subroutine ns3d(rhs,Qhat,Q,time,compute_ints)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -17,6 +17,7 @@ subroutine ns3d(rhs,Q,time,compute_ints)
 ! hel = u (w_y-v_z) + v (u_z - w_x)  + w (v_x - u_y)
 !
 use params
+use fft_interface
 implicit none
 
 ! input
@@ -130,6 +131,9 @@ enddo
 
 ! apply b.c. to rhs:
 call bc_rhs(rhs)
+
+call divfree(rhs,work)
+
 
 if (compute_ints==1) then
    ints_timeDU=time

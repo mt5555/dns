@@ -4,9 +4,10 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work(nx,ny,nz)
 integer km,jm,im,i,j,k,n
+real*8 xw
 
 Q=0
-do n=1,2
+do n=1,3
 call fft3d(Q(1,1,1,n),work)
 
    do k=nz1,nz2
@@ -15,9 +16,12 @@ call fft3d(Q(1,1,1,n),work)
          jm=jmcord(j)
          do i=nx1,nx2
             im=imcord(i)
-
-            Q(i,j,k,n) = 1e-3
-
+            xw=sqrt(real(km**2+jm**2+im**2))
+            if (xw > .5 .and. xw <= 1.5) then
+               Q(i,j,k,n) = 1e-3
+            else if (xw <= 2.5) then
+               Q(i,j,k,n) = 1e-3
+            endif
          enddo
       enddo
    enddo
@@ -39,7 +43,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 
 ! local variables
 integer i,j,k,l
-real*8 delta,pi2,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
+real*8 delta,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
 real*8 xscale,yscale
 real*8 :: eps=.10
 integer :: km=1
@@ -50,7 +54,6 @@ Q=0
 
 
 delta = .05
-pi2 = 2*pi
 delsq = delta**2
 
 ! Initialize vortex sheet

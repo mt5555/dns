@@ -36,7 +36,7 @@ implicit none
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0           !viscosity
-real*8  :: pi,pi2_squared
+real*8  :: pi,pi2,pi2_squared
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
 character*80 :: runname
@@ -136,6 +136,8 @@ real*8 :: delke_tot        ! d KE /dt from most recent time step
 ! ints(4) = vor 
 ! ints(5) = helicity
 !
+! maxs(5) = max vorticity
+!
 !
 
 integer,parameter :: ntimers=5
@@ -203,6 +205,7 @@ integer :: fail=0
 
 real*8 :: one=1
 pi=4*atan(one)
+pi2=2*pi
 pi2_squared=4*pi*pi
 
 g_nx=nslabx*ncpu_x

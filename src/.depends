@@ -7,14 +7,18 @@ fftops.o: macros.h params.o fft_interface.o transpose.o makefile
 fileio.o: macros.h params.o transpose.o makefile 
 init_data.o: params.o fft_interface.o makefile 
 init_grid.o: macros.h params.o mpi.o fft_interface.o makefile 
+init_model.o: params.o fft_interface.o makefile 
 init_mpi.o: macros.h params.o mpi.o makefile 
 integrals.o: macros.h params.o mpi.o makefile 
 mpi.o: makefile 
-ns3d.o: macros.h params.o makefile 
+ns3d.o: macros.h params.o fft_interface.o makefile 
+ns3dspectral.o: macros.h params.o makefile 
 params.o: macros.h transpose.h params.h makefile 
+temp.o: macros.h params.o fft_interface.o transpose.o makefile 
 test.o: macros.h params.o transpose.o fft_interface.o makefile 
 transpose.o: macros.h transpose.h params.o mpi.o makefile 
 util.o: macros.h mpi.o params.o makefile 
 fbelimb.o: makefile 
 fft99.o: makefile 
+initshear.o: makefile 
 ludecb.o: makefile 

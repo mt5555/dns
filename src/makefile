@@ -8,7 +8,8 @@ ARCH = $(shell uname -m)
 
 ifeq ($(UNAME),Linux)
    F90 = lf95
-   LDFLAGS = --staticlink -L stk -lstk
+   #LDFLAGS = --staticlink -L stk -lstk
+   LDFLAGS = --staticlink 
    HOST = $(shell hostname)
    ifeq ($(HOST),darkstar)
       MPI = -DUSE_MPI -I/contrib/lam/include
@@ -44,9 +45,11 @@ OBJS2 = transpose.o
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o 
 OPS    = fftops.o test.o integrals.o
-MODEL  = ns3d.o bc.o
 FILEIO = fileio.o
-OBJS3 = $(MODEL) $(INITS) $(OPS) $(FILEIO)
+OBJS3 = $(INITS) $(OPS) $(FILEIO)
+
+MODEL_GRID  = ns3d.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SPEC  = ns3dspectral.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 
@@ -58,9 +61,11 @@ OBJS3 = $(MODEL) $(INITS) $(OPS) $(FILEIO)
 %.o: %.f
 	$(COMPILE) -o $@ $< 
 
-dnslink = $(OBJS1) $(OBJS2) $(OBJS3)
-dns:  $(dnslink) dns.o 
-	$(LINK) -o dns dns.o $(dnslink) $(LDFLAGS) $(MPILIB)
+dns:  $(MODEL_SPEC) dns.o 
+	$(LINK) -o dns dns.o $(MODEL_SPEC) $(LDFLAGS) $(MPILIB)
+
+dnsgrid:  $(MODEL_GRID) dns.o 
+	$(LINK) -o dns dns.o $(MODEL_GRID) $(LDFLAGS) $(MPILIB)
 
 
 clean: 
