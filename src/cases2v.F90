@@ -372,16 +372,20 @@ else if (initial_vor==1) then
       else if (yd(k)<.7) then
          gamp(k)  = a1 + 2*a2*yd(k) + 3*a3*yd(k)*yd(k)
       else 
-         gamp(k)  = -yd(k)/sqrt(1-yd(k)**2) 
+         if (k==0) then
+            gamp(k)=0  ! yd=1, yalf=0
+         else
+            gamp(k)  = -yd(k)/sqrt(1-yd(k)**2) 
+         endif
       endif
       wd(k)  = gamp(k)*yalf*delalf
    enddo
-   if (io_pe==my_pe) then
-      do k=1,nd
-         write(11,'(i4,3f20.7)') k,yd(k),wd(k),gamp(k)
-      enddo
-      close(11)
-      stop
+!   if (io_pe==my_pe) then
+!      do k=1,nd
+!         write(11,'(i4,3f20.7)') k,yd(k),wd(k),gamp(k)
+!      enddo
+!      close(11)
+!      stop
    endif
    wd(nd) = wd(nd)/2
    wd(0) = wd(0)/2
