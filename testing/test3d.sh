@@ -92,6 +92,11 @@ if ($1 == 2) then
 make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
+./gridsetup.py 1 1 1 32 32 32 2 3 4 4 3 2 
+make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  -i $refin > $tmp 
+../testing/check.sh $tmp $refout
+
+
 endif
 
 
