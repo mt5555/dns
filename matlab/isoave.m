@@ -17,7 +17,7 @@ ext='.isostr';
 
 %name='/ccs/scratch/taylorm/check256_0000.8000'
 %name='/ccs/scratch/taylorm/dns/iso12_5120002.7000'
-name='/home/taylorm/iso12_5120003.0000'
+name='/ccs/scratch/taylorm/dns/iso12_5120003.0000'
 %ext='.isostr001';
 
 
@@ -59,6 +59,8 @@ figure(10); hold off;
 semilogx(xx,y45,'k'); hold on;
 axis([1,1000,0,1.5]);
 
+
+
 return
 
 
@@ -80,8 +82,6 @@ end
   plot(xx,yysum,'r');  
 
 hold off;
-
-
 
 
 

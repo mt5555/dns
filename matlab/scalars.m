@@ -14,8 +14,10 @@ range=0:50;
 %fid=fopen('iso12_256_200.scalars','r','b'); 
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
-fid=fopen('../src/kh/khQ0000.0000.scalars','r','l'); 
+fid=fopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r','b'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
+
+
 
 
 
@@ -126,6 +128,7 @@ disp(sprintf('R_l (average over last half of data) = %f ',R_l));
 
 disp(sprintf('1/250 in units of eta:  %f',(1/250)/eta));
 disp(sprintf('1/500 in units of eta:  %f',(1/500)/eta));
+disp(sprintf('1/512 in units of eta:  %f',(1/512)/eta));
 
 tturn=-2*ke./ke_diss_d;
 tturn = tturn(length(tturn)/2:length(tturn));
