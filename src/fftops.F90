@@ -1189,6 +1189,7 @@ integer n
 
 do n=1,2
    call der(f,gradf(1,1,1,n),dummy,work,DX_ONLY,n)
+!   gradf(:,:,:,n)=H0*gradf(:,:,:,n)
    gradf(:,:,:,n)=h*gradf(:,:,:,n)
 enddo
 call divergence(lf,gradf,fxx,work)
