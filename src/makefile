@@ -130,7 +130,7 @@ MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o sforcing.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SHALLOW    = shallow.o dns.o   $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)
+MODEL_SHALLOW    = shallow.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)
 
 # n_var>=2 models  (u,v) and (w,psi)
 MODEL_PSIVOR     = ns_psivor.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(PSIVOR_DIAG)
