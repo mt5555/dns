@@ -7,18 +7,14 @@ src/kh
 
 
 
-1024x1024
-khB          mu = 2e-4           1.5/.25   running at .25 limit
-                                           better, but small glitch at t=.2
-                                           ke disspation doesn't add up.  
-
-khC          mu = 2e-4           1.5/.10   looks good up to t=1.0
-
 
 
 kh  1024x1024  mu = 2.5e-5    CFL: 1.5/.25   asymetric answer.  CFL, or resolution?
                                              cfl_vis has no effect above .073
-khG 1024x1024  mu = 2.5e-5    CFL: .75/.25   IN
+
+khH 1024x1024  mu = 2.5e-5    CFL: 1.25/.25  submit next
+
+khG 1024x1024  mu = 2.5e-5    CFL: .75/.25   looks great at t=1
 
 
 khD 512x512    mu = 2.5e-5    CFL: 1.5/.15   looks great at 1.0

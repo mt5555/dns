@@ -59,6 +59,7 @@ q1=Q
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
+!  (x,y,z)->(y,z,x)
    Q(j,k,i,1)=q1(i,j,k,2)
    Q(j,k,i,2)=q1(i,j,k,3)
    Q(j,k,i,3)=q1(i,j,k,1)

@@ -37,14 +37,19 @@ for i=range
   ts=sprintf('time=%f  %ix%ix%i',time,nx,ny,nz);
   
   q = reshape(q,nx,ny,nz);
+  qmax=max(max(max(q)));
+  disp(sprintf('max vor=                %f ',qmax));
+
+%  vor = squeeze(q(:,:,1));
+  vor = squeeze(q(:,1,:));
+
   
-  vor = squeeze(q(:,:,1));
   figure(2)
   pcolor(x,y,vor')
   title(ts);
   shading interp
   axis square
-  %print -dpsc vor.ps 
+  print -dpsc vor.ps 
   'pause'
   pause
 end

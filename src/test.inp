@@ -7,13 +7,13 @@ iso12        ! forcing:  none, iso12
 0            ! str_ny  (ignored)
 0            ! str_nz  (ignored)
 kediff       ! viscosity type  (value, smallest, kediff, Re)
-200.0         ! viscosity coefficient.  (300)
+300.0        ! viscosity coefficient.  (300)
 0.0           ! alpha (for NS-alpha model)
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-.5           ! time to run
+100.5           ! time to run
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  

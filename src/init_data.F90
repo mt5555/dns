@@ -216,7 +216,6 @@ real*8 xscale,yscale
 real*8 :: eps=.10
 integer :: km=1
 integer,parameter :: n=500
-real*8 :: x(0:n),y(0:n)
 
 Q=0
 
