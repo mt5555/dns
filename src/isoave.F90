@@ -407,6 +407,8 @@ real*8 :: Qs(nx,ny,nz,ndim)              ! shifted original data
 real*8 :: Qst(g_nz2,nslabx,ny_2dz,ndim)  ! transpose
 real*8 :: range(3,2)
 
+! logical variable 1=included in subcube, 0=not included
+! these have to be real*8 so we can use our tranpose() operators
 real*8 :: subcube(nx,ny,nz)
 real*8 :: subcube_s(nx,ny,nz)
 real*8 :: subcube_t(g_nz2,nslabx,ny_2dz)
