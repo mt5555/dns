@@ -727,8 +727,6 @@ uxx4=uxx4/g_nx/g_ny/g_nz
 su=su/g_nx/g_ny/g_nz
 
 
-ASSERT("compute_expensive_pscalars: ns too small ",ns>=24)
-
 ! we will sum over all pe's below, so do this for non-sums:
 scalars(1)=0
 if (my_pe==io_pe) scalars(1)=schmidt(np)
@@ -755,8 +753,13 @@ scalars(n+i)=su(n)         ! 21,22,23
 enddo
 i=i+3
 
-scalars(i)=u1              ! 24
 i=i+1
+scalars(i)=u1              ! 24
+
+if (i/=ns) then
+   call abort("compute_expensive_pscalars: Error: i/=ns")
+endif
+
 
 #ifdef USE_MPI
    scalars2=scalars
