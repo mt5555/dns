@@ -191,9 +191,19 @@ if (doit_screen) then
 
    ke_diss = ints(10)  
    ! 
+   ! epsilon = mu* || grad(u) ||^2
    ! using lambda**2 = <u1 u1>/<u1,1 u1,1>
-   ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
-   !       < u    u  > = (1/3)  || u ||^2
+   ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2   =   (1/15)*epsilon/mu
+   !       < u1,u1  > =  (1/3)  || u ||^2         = (2/3) KE
+   !
+   ! lambda**2 = (2/3) KE / (1/15)epsilon/mu  = 10 KE mu / epsilon
+   ! R_lambda = lambda*sqrt(2 KE)/mu 
+   !    
+   !
+   ! Goto:
+   !   epsilon = 2 mu * <ux,ux> 
+   !   lambda**2 = 5 KE / (epsilon / (2*mu)) = 10 KE mu / epsilon
+   !   R_lambda = sqrt(<u1,u1>) lambda/mu = sqrt(2/3 KE) lambda/mu
    !
    if (mu>0 .and. ndim>2 .and. ke_diss<0) then
       lambda=sqrt(  5*(2*ints(6))/ints(2)  )
