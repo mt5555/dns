@@ -306,7 +306,7 @@ character(len=80) :: message
 
 !should have h_angle inputted by user eventually
 !h_angle = 0.0d0
- h_angle = pi/4.0d0
+ h_angle = pi/2.0d0
 
 fix = 1
 
