@@ -285,12 +285,15 @@ analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_isoave analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
+analysis_sk: analysis_sk.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o analysis_sk analysis_sk.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 
 clean: 
 	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi dnsvor \
                             cdns dnsibm conv analysis_rms     \
-                            analysis_isoave analysis splitspec convert
+                            analysis_isoave analysis analysis_sk splitspec \
+			convert	
 
 dep:
 	./mkdep.py *.F90 *.f  > .depends
