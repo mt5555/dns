@@ -11,7 +11,8 @@ if (restart==1) then
 #ifdef BYTESWAP_INPUT
    call set_byteswap_input(1);
 #endif
-   !call set_byteswap_input(1);
+   if (byteswap_input) call set_byteswap_input(1);
+
    ! initialize some constants, if needed on restart runs:
    if (init_cond==3) call init_data_sht(Q,Qhat,work1,work2,0)      ! set grav, fcor
    if (init_cond==4) call init_data_vxpair(Q,Qhat,work1,work2,0) ! set xscale, yscale... 
@@ -57,6 +58,8 @@ if (equations==NS_UVW) then
 
 if (udm_input) then
    call udm_read_uvw(Q,Qhat,work1,work2)
+else if (udm_input_old) then
+   call udm_read_uvw_old(Q,Qhat,work1,work2)
 else
    if (rw_spec) then
    call print_message("Restarting from file restart.[us,vs,ws]")

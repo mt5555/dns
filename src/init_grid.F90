@@ -344,6 +344,10 @@ if (my_pe==io_pe) then
    !
    !   -r   use a restart file for the initial conditions
    !
+   !   -b   enable bytewsap_input
+   !
+   !
+   !   -u1  read older, 1st generation UDM input files
    !   -ui  use UDM for input
    !   -uo  use UDM for output
    !
@@ -366,6 +370,8 @@ if (my_pe==io_pe) then
          rw_spec=.true.
       else if (message(1:3)=="-ui") then
          udm_input=.true.
+      else if (message(1:3)=="-u1") then
+         udm_input_old=.true.
       else if (message(1:3)=="-uo") then
          udm_output=.true.
       else if (message(1:2)=="-d") then
@@ -388,7 +394,13 @@ if (my_pe==io_pe) then
          runname=message(1:len_trim(message))
       else
          print *,'Invalid options.'  
-         print *,'./dns  [-i] [-r] [-d rundir] [runname] < params.inp'
+         print *,'./dns [-[t,r,b,s,ui,uo]]  [-i params.inp] [-d rundir] [runname] '
+         print *,'-t  enable LSF time remaining check, if compiled in'
+         print *,'-r  restart from rundir/restart.[uvw,h5] '
+         print *,'-s  output spectral coefficients instead of grid data'
+         print *,'-u1 restart file is 1st generation UDM'
+         print *,'-ui restart file is UDM'
+         print *,'-ui output to UDM'
       endif
    enddo
    print *,'Run name:         ',runname(1:len_trim(runname))
