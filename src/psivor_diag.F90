@@ -26,7 +26,6 @@ if (init_cond_subtype<100) then
    call ellipse_output(time)
 endif
 
-
 end subroutine
 
 
