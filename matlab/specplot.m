@@ -38,7 +38,7 @@ while (time>=0 & time<=5000)
 %  loglog53(n_r,spec_r,time)
   
   
-  figure(2);
+  figure(4);
   subplot(2,2,1);
   loglog53(n_r,spec_r,time);
   subplot(2,2,2);
@@ -47,7 +47,6 @@ while (time>=0 & time<=5000)
   loglog53(n_y,spec_y,time);
   subplot(2,2,4);
   loglog53(n_z,spec_z,time);
-  figure(2)
   %M(j)=getframe(gcf);
   
   time=fread(fid,1,'float64');

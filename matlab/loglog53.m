@@ -10,5 +10,5 @@ axis([1,100,1e-5,1]);
 title(sprintf('Spectrum t=              %8.4f',time));
 hold off
 
-end
+
 
