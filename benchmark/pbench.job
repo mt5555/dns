@@ -4,37 +4,27 @@
 #XXXX -q large-dq
 #BSUB -J dns
 #BSUB -W 0:15
-#BSUB -n 128 -R "span[ptile=128]"
+#BSUB -n 32 -R "span[ptile=32]"
 
 module list
 
-set NCPU=128
-set NCPU_BOX=128
 
 set refin=$HOME/dns/benchmark/benchmark128.inp
 set SRC=$HOME/dns/src
 
 cd $SRC
-# try to get lock file for 80 seconds.  (10 tries, 8sec timeout)
-lockfile -r 10 -! building_lockfile
-if ( $status ) then
 
-   ./gridsetup.py 1 1 $NCPU 128 128 128
-   make -j 4 dns
-
-   if (!(-d /scratch/mat)) then
-      mkdir /scratch/mat
-   endif
-   cp dns  /scratch/mat/dns
-   rm -f building_lockfile
-
-   cd /scratch/mat
-   
-   mpirun -np $NCPU_BOX ./dns < $refin 
-
-else
-  echo "could not get lock to build source code"
+./gridsetup.py 1 1 32 128 128 128
+make -j 4 dns
+    
+if (!(-d /scratch/mat)) then
+   mkdir /scratch/mat
 endif
+cp dns  /scratch/mat/dns
+
+cd /scratch/mat
+mpirun -np 32 ./dns < $refin 
+
 
 
 # ssrun -workshop mpirun -np 128 ../src/dns < $refin 
