@@ -131,9 +131,11 @@ disp(sprintf('epsilon = %f',epsilon(1) ))
 epsilon_c=3*(mu./schmidt).*mean(cx2,1);
 lambda_c=sqrt(c2./mean(cx2,1));
 %lambda_c=sqrt(  3*(mu./schmidt).*c2./epsilon_c  );
+% eta_c = Bachelor scale
+% lambda_c = taylor microscale
+eta_c=(mu./schmidt).^3 ./ epsilon_c;            %eta/sqrt(schmidt);
 %eta_c=(mu./schmidt).^3 ./ epsilon_c            
-eta_c=eta./sqrt(schmidt);
-
+%eta_c=eta./sqrt(schmidt);
 
 
 

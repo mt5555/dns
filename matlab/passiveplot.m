@@ -97,10 +97,12 @@ for type=type_list
    axis([0,max(x),0,max(y)]);
    shading interp
    caxis([0 1]) 
+
+   % black box of size 5 lambda_c
    len=5*lambda_c;
-   xt=[1-len,1-len,1];
-   yt=[0,len,len];
-   line(xt,yt);
+   xt=[1,1-len,1-len,1,1];
+   yt=[0,0,len,len,0];
+   patch(xt,yt,'k')
    text(1.05,yt(3)-.05,'5 \lambda_c');
    
 
