@@ -1,6 +1,7 @@
 #include "macros.h"
 module spectrum
 use params
+use sforcing
 implicit none
 
 #if 0
@@ -36,7 +37,9 @@ integer,private :: iwave=-1
 
 
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
+real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes 
 real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
+real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II 
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -444,14 +447,6 @@ end subroutine
 
 
 
-
-
-
-
-
-
-
-
 subroutine output_helicity_spec(time,time_file)
 use params
 implicit none
@@ -536,7 +531,52 @@ endif
 end subroutine
 
 
+subroutine output_hfree_spec(time,time_file)
+use params
+implicit none
+real*8 :: time,time_file
 
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=80) :: message
+CPOINTER fid
+
+
+
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+
+      if (my_pe==io_pe) then
+         write(message,'(f10.4)') 10000.0000 + time_file
+         message = rundir(1:len_trim(rundir)) &
+         // runname(1:len_trim(runname))&
+         // message(2:10) // ".hf_spec"
+         call copen(message,access,fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)')"output_hfree_spec(): Error opening file errno=",ierr
+            call abort(message)
+         endif
+         call cwrite8(fid,time,1)
+         x=1+iwave; call cwrite8(fid,x,1)
+         call cwrite8(fid,spec_helicity_rn,1+iwave)
+         call cwrite8(fid,spec_helicity_rp,1+iwave)
+         call cwrite8(fid,spec_E,1+iwave)
+         call cwrite8(fid,spec_kEk,1+iwave)
+         call cwrite8(fid,cos_tta_spec,1+iwave)
+         call cclose(fid,ierr)
+
+endif
+end subroutine
 
 
 
@@ -581,20 +621,22 @@ endif
 
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time_initial
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spect"
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+      // message(2:10) // ".spect"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
-      write(message,'(a,i5)') "transfer spec_write(): Error opening file errno=",ierr
+      write(message,'(a,i5)') &
+      "transfer spec_write(): Error opening file errno=",ierr
       call abort(message)
-   endif
-
-   if (equations==NS_UVW .or. equations==CNS) then
-      x=4   ! number of spectrums in file for each time.  
-      call cwrite8(fid,x,1)
+      endif
       
-      ! d/dt total KE spectrum
-      call cwrite8(fid,.5*(time+time_old),1) 
-      x=1+iwave; call cwrite8(fid,x,1)
+      if (equations==NS_UVW .or. equations==CNS) then
+         x=4                    ! number of spectrums in file for each time.  
+         call cwrite8(fid,x,1)
+         
+                                ! d/dt total KE spectrum
+         call cwrite8(fid,.5*(time+time_old),1) 
+         x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,edot_r,1+iwave)
       
       ! transfer function (only in NS case.  other cases spec_rhs is
@@ -604,7 +646,7 @@ if (my_pe==io_pe) then
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_r2,1+iwave)
       
-      ! diffusion spectrum
+                                ! diffusion spectrum
       call cwrite8(fid,transfer_comp_time,1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_diff,1+iwave)
@@ -613,8 +655,8 @@ if (my_pe==io_pe) then
       call cwrite8(fid,transfer_comp_time,1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_f,1+iwave)
-   endif
-   if (equations==SHALLOW) then
+      endif
+      if (equations==SHALLOW) then
       x=3   ! number of spectrums in file for each time.  
       call cwrite8(fid,x,1)
       
@@ -1130,10 +1172,203 @@ if (my_pe==io_pe) then
    print *,'total helicity: ',heltot
 endif
    
+end subroutine
+
+
+
+
+subroutine compute_hfree_spec(Q,p1,work,skip_fft)
+! skip_fft=0:
+!      input: p1 (which should be Qhat).  Q is not used.  
+!
+!
+use params
+use mpi
+implicit none
+integer :: ierr,skip_fft
+real*8 :: Q(nx,ny,nz,*)
+real*8 :: p1(nx,ny,nz,*)
+real*8 :: work(nx,ny,nz)
+
+
+
+! local variables
+real*8 rwave
+real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_x_in(0:g_nx/2,n_var)   
+real*8 ::  spec_y_in(0:g_ny/2,n_var)
+real*8 ::  spec_z_in(0:g_nz/2,n_var)
+real*8 :: cmodes(2,nx,ny,nz,3)
+real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
+real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii,&
+      cos_tta, delta
+integer i,j,k,jm,km,im,iwave_max,n
+
+      if (ndim<3) then
+         call abort("compute_helicity_specturm: can only be used in 3D")
+      endif
+      
+      if (skip_fft==0) then
+         p1(:,:,:,1:3)=Q(:,:,:,1:3)
+         do n=1,3
+         call fft3d(p1(1,1,1,n),work)
+      enddo
+      endif
+      
+      rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+      iwave_max=nint(rwave)
+      
+      do n = 1,3
+         call sincos_to_complex(p1(1,1,1,n),cmodes(1,1,1,1,n),g_nmax)
+      enddo
+      
+
+      hetot=0
+      diss1=0
+      diss2=0
+      spec_helicity_rp=0
+      spec_helicity_rn=0
+      cos_tta_spec = 0
+
+      do j=ny1,ny2
+         jm=jmcord(j)
+         do i=nx1,nx2
+            im=imcord(i)
+            do k=nz1,nz2
+               km=kmcord(k)
+               
+               rwave = im**2 + jm**2 + km**2
+               iwave = nint(sqrt(rwave))
+               
+!     compute angle between Re and Im parts of u(k)
+               RR = cmodes(1,i,j,k,:)
+               II = cmodes(2,i,j,k,:)
+               
+               mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
+               mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+               
+               cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
+               (mod_rr*mod_ii)
+               
+!     spectrum of angles
+               cos_tta_spec(iwave) = cos_tta_spec(iwave) + cos_tta
+               
+!     cutoff for recalculating the spectra
+               delta = 0.1      !this value can be changed by hand
+               
+!     omit modes where cos_tta is less than cutoff delta
+               if (cos_tta > delta) then
+            
+!     ux = - pi2*im*p1(i+imsign(i),j,k,1)
+                  vx = - pi2*im*p1(i+imsign(i),j,k,2)
+                  wx = - pi2*im*p1(i+imsign(i),j,k,3)
+                  
+                  uy = - pi2*jm*p1(i,j+jmsign(j),k,1)
+!     vy = - pi2*jm*p1(i,j+jmsign(j),k,2)
+                  wy = - pi2*jm*p1(i,j+jmsign(j),k,3)
+                  
+                  uz =  - pi2*km*p1(i,j,k+kmsign(k),1)
+                  vz =  - pi2*km*p1(i,j,k+kmsign(k),2)
+!     wz =  - pi2*km*p1(i,j,k+kmsign(k),3)
+                  
+!     vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
+
+                  energy = 8
+                  if (km==0) energy=energy/2
+                  if (jm==0) energy=energy/2
+                  if (im==0) energy=energy/2
+                  
+!     compute E(k) and kE(k)
+                  xw=sqrt(rwave*pi2_squared)
+                  spec_E(iwave)=spec_E(iwave) + 	energy* &
+                  (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
+                  spec_kEk(iwave)=spec_kEk(iwave) + xw*energy* &
+                  (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
+                  
+                  energy = energy*(p1(i,j,k,1)*(wy-vz) + &
+                  p1(i,j,k,2)*(uz-wx) + p1(i,j,k,3)*(vx-uy)) 
+                  if (energy>0) spec_helicity_rp(iwave)= & 
+                  spec_helicity_rp(iwave)+energy
+                  if (energy<0) spec_helicity_rn(iwave)= &
+                  spec_helicity_rn(iwave) + energy
+                  
+                  hetot=hetot+energy
+                  diss1=diss1 -2*energy*iwave**2*pi2_squared
+                  diss2=diss2 -2*energy*rwave*pi2_squared
+               endif
+            enddo
+         enddo
+      enddo
+
+
+#ifdef USE_MPI
+spec_r_in=spec_helicity_rp
+call MPI_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=spec_helicity_rn
+call MPI_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=spec_E
+call MPI_reduce(spec_r_in,spec_E,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=spec_kEk
+call MPI_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in = cos_tta_spec
+call MPI_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+do n=1,ndim
+   spec_r_in=cospec_r(:,n)
+   call MPI_reduce(spec_r_in,cospec_r(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+enddo
+
+spec_x_in=cospec_x
+call MPI_reduce(spec_x_in,cospec_x,(1+g_nx/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_y_in=cospec_y
+call MPI_reduce(spec_y_in,cospec_y,(1+g_ny/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_z_in=cospec_z
+call MPI_reduce(spec_z_in,cospec_z,(1+g_nz/2)*ndim,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+
+rwave=diss1
+call MPI_reduce(rwave,diss1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+rwave=diss2
+call MPI_reduce(rwave,diss2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+rwave=hetot
+call MPI_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+#endif
+
+
+if (my_pe==io_pe) then
+   print *,'helicity: ',hetot
+   print *,'helicity dissipation (spectrum): ',diss1*mu
+   print *,'helicity dissipation (exact):    ',diss2*mu
+endif
+
+if (g_nz == 1)  then
+   iwave = min(g_nx,g_ny)
+else
+   iwave = min(g_nx,g_ny,g_nz)
+endif
+iwave = (iwave/2)           ! max wave number in sphere.
+
+! for all waves outside sphere, sum into one wave number:
+do i=iwave+2,iwave_max
+   spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
+   spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
+   spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
+   spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
+   cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i)   
+enddo
+iwave=iwave+1
+
+if (my_pe==io_pe) then
+   heltot=0
+   do i=0,iwave
+      heltot=heltot+spec_helicity_rp(i)+spec_helicity_rn(i)
+   enddo
+   print *,'total helicity: ',heltot
+endif
+   
 
 
 end subroutine
-
 
 
 end module
