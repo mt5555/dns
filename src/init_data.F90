@@ -211,16 +211,14 @@ real*8 :: Q(nx,ny,nz,n_var)
 
 ! local variables
 integer i,j,k,l
-real*8 delta,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
-real*8 xscale,yscale
-real*8 :: eps=.10
-integer :: km=1
-integer,parameter :: n=500
+real*8 :: eps
 
 Q=0
 
 k=nz1
 eps=200
+
+do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
    if (ycord(j)<=.5) then
@@ -228,10 +226,16 @@ do i=nx1,nx2
    else
       Q(i,j,k,1)=tanh(eps*(.75-ycord(j)))
    endif
-   Q(i,j,k,2)=.05*sin(2*pi*xcord(i))
+   if (nslabz>16) then
+      Q(i,j,k,2)=.05*sin(2*pi*xcord(i))*cos(2*pi*zcord(k))
+   else
+      Q(i,j,k,2)=.05*sin(2*pi*xcord(i))
+   endif
+enddo
 enddo
 enddo
 
+#if 0
 
 do k=nz1+1,nz2
 do i=nx1,nx2
@@ -241,7 +245,10 @@ do j=ny1,ny2
 enddo
 enddo
 enddo
+#endif
 
+
+   
 
 
 end subroutine

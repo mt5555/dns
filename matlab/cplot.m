@@ -9,7 +9,7 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:50;
 %range = 1
-range=0:.5:2;
+range=0:.25:2;
 
 for i=range
   ts=i;
@@ -40,16 +40,41 @@ for i=range
   qmax=max(max(max(q)));
   disp(sprintf('max vor=                %f ',qmax));
 
-%  vor = squeeze(q(:,:,1));
-  vor = squeeze(q(:,1,:));
-
   
-  figure(2)
-  pcolor(x,y,vor')
-  title(ts);
-  shading interp
-  axis square
-  print -dpsc vor.ps 
+  if (nz>=4) 
+    figure(2)
+    for i=1:4
+       subplot(2,2,i)
+       nzi=1 + (i-1)*nz/4;
+       nzi=floor(nzi);
+       vor = squeeze(q(:,:,nzi));
+       pcolor(x,y,vor')
+       if (i==1)
+         title(ts);
+       else
+         title(sprintf('nz=%i',nzi));
+       end
+       shading interp
+       axis square
+     end
+     figure(1)
+     clf;
+     q=shiftdim(q,2);
+     isosurface(z,x,y,q,50);
+     axis([0 1 0 1 0 1]);
+     view([30,30]);
+ 
+  else
+    vor = squeeze(q(:,:,1));
+    figure(2)
+    pcolor(x,y,vor')
+    title(ts);
+    shading interp
+    axis square
+    %print -dpsc vor.ps 
+  end
+  
+  
   'pause'
   pause
 end

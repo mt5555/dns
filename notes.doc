@@ -1,6 +1,6 @@
 TODO:
 
-0. python script: read input file, get newest restart off of PSI
+1. python script: read input file, get newest restart off of PSI
 0. if restart, skip output of restart time.
 0. check CFL computation for viscous
 1. specplot: multiply by f^5/3
