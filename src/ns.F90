@@ -198,19 +198,11 @@ real*8 work(nx,ny,nz)
 !local
 real*8 p(g_nz2,nslabx,ny_2dz)    
 real*8 xfac,tmx1,tmx2
-real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
+real*8 uu,vv,ww
 integer n,i,j,k,im,km,jm
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke_diss,vor,hel,maxvor,f_diss
-
-
-
-
-
-
-
-call wallclock(tmx1)
-
+real*8 :: ke_diss,vorave,helave,maxvor,f_diss
+real*8 :: vor(3)
 
 !
 ! NOTE: for Fourier Coefficients with mode  im=g_nx/2, this is the
@@ -220,97 +212,85 @@ call wallclock(tmx1)
 ! this mode will be removed no matter what we do with it, and so
 ! we just dont wory about the case when im=g_nx/2.
 !
+call wallclock(tmx1)
 
 
-! compute vorticity-hat, store in RHS
-! z_ifft3d:  transpose:  1z,2x,2y  FFT: 1x,1y,1z
-! call it three times:  transpose:  3z,6x,6y
-!                       FFT: 9
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! compute  ds/da(grid) from shat:    1 call to z_ifft3d
+! cost: 1 call z_ifft3d:             FFT: 1x,1y,1z  transpose: 1z,2x,2y
+! compute  ds/da(grid) from s-grid:  FFT: 2a        transpose: 2a
 !
-do n=1,3
-do j=1,ny_2dz
-   jm=z_jmcord(j)
-   do i=1,nslabx
-      im=z_imcord(i)
-      do k=1,g_nz
-         km=z_kmcord(k)
-
-         if (n==1) then
-            wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
-            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
-            !rhs(k,i,j,1) = pi2*(wy - vz)
-            p(k,i,j) = pi2*(wy - vz)
-         endif
-         
-         if (n==2) then
-            wx = - im*Qhat(k,i+z_imsign(i),j,3)
-            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
-            !rhs(k,i,j,2) = pi2*(uz - wx)
-            p(k,i,j) = pi2*(uz - wx)
-         endif
-         
-         if (n==3) then
-            uy = - jm*Qhat(k,i,j+z_jmsign(j),1)
-            vx = - im*Qhat(k,i+z_imsign(i),j,2)
-            !rhs(k,i,j,3) = pi2*(vx - uy)
-            p(k,i,j) = pi2*(vx - uy)
-         endif
-
-      enddo
-   enddo
-enddo
-call z_ifft3d(p,rhsg(1,1,1,n),work)
-enddo
-! alternative:
-! d/dx or d/dy of one variable: 2 fft, 2 transpose
-!
-! compute from Q_grid: vx,wx  uy,wy      8 fft, transpose: 4x, 4y
-!
+! ns_vorticity1:  compute vorticity-hat, transform into rhsg.
+!                 3 calls to z_ifft3d:  FFT: 3x,3y,3z  transpose: 3z,6x,6y
+! 
+! ns_vorticity2:  Q_grid: vx,wx,uy,wy:  FFT: 4x,4y  tranpose: 4x,4y
+!                 Q_hat: uz,vz          FFT: 2x,2y,2z  tranpose 2z,4x,4y
+! total:                                FFT: 6x,6y,2z  tranpose: 2z,8x,8y
 !               
-! compute from Qhat: uz,vz: 2 calls to z_ifft3d:
-!                                      2z,4x,4y  + 6 FFT              
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!  total:  14 fft, 2z, 8x,8y
-!
-! for alpha model, we need all 9 terms.
+! for alpha model, we need all 9 terms: ux,uy,uz,vx,vy,vz,wx,wy,wz
 ! From Qhat: 9 calls to z_ifft3d: 9Z,18x,18y,27FFT
-! From Qgrid: x: 6fft, 6x
-!             y: 6fft, 6y
-!             z: 6fft, 6z   
+! From Qgrid: x: 6fft, 6x,  y: 6fft, 6y,   z: 6fft, 6z   
 !
 ! z-der from Qhat:      3z,6x,6y,9FFT
 ! x,yder from Qgrid:       6x,6y,12FFT 
+!
+
+#ifdef ALPHA_MODEL
+   call ns_alpha_voriticity(gradu,gradv,gradw,Qhat,Q,work,p)
+#else
+   call ns_vorticity(rhsg,Qhat,work,p)
+   ! call ns_voriticyt2(not_written)
+#endif
+
+
 
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Grid space computations
+! Grid space computations.  
+! 
+! form u x vor, overwrite into Q, ifft into rhs 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-vor=0
-hel=0
+vorave=0
+helave=0
 maxvor=0
 
 ! rhs = u x vor
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   vor = vor + rhsg(i,j,k,3)
+#ifdef ALPHA_MODEL
+   ! rhsg = gradu
+   vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
+   vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
+   vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
+#else
+   vor(1)=rhsg(i,j,k,1)
+   vor(2)=rhsg(i,j,k,2)
+   vor(3)=rhsg(i,j,k,3)
+#endif
+
+   vorave = vorave + vor(3)
    
-   hel = hel + Q(i,j,k,1)*rhsg(i,j,k,1) + & 
-        Q(i,j,k,2)*rhsg(i,j,k,2) + & 
-        Q(i,j,k,3)*rhsg(i,j,k,3)  
+   helave = helave + Q(i,j,k,1)*vor(1) + & 
+        Q(i,j,k,2)*vor(2) + & 
+        Q(i,j,k,3)*vor(3)  
    
-   maxvor = max(maxvor,abs(rhsg(i,j,k,1)))
-   maxvor = max(maxvor,abs(rhsg(i,j,k,2)))
-   maxvor = max(maxvor,abs(rhsg(i,j,k,3)))
+   maxvor = max(maxvor,abs(vor(1)))
+   maxvor = max(maxvor,abs(vor(2)))
+   maxvor = max(maxvor,abs(vor(3)))
    
    !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
    !  w*(wy-vz) - u*(vx-uy)
    !  u*(uz-wx) - v*(wy-vz)
-   uu = ( Q(i,j,k,2)*rhsg(i,j,k,3) - Q(i,j,k,3)*rhsg(i,j,k,2) )
-   vv = ( Q(i,j,k,3)*rhsg(i,j,k,1) - Q(i,j,k,1)*rhsg(i,j,k,3) )
-   ww = ( Q(i,j,k,1)*rhsg(i,j,k,2) - Q(i,j,k,2)*rhsg(i,j,k,1) )
+   uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
+   vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
+   ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
    
    ! overwrite Q with the result
    Q(i,j,k,1) = uu
@@ -325,6 +305,20 @@ enddo
 do n=1,3
    call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
 enddo
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! add in alpha model forcing term to the rhs
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! compute one entry of work=DD + DD' - D'D  
+! transform work -> p
+! compute d(p), apply helmholtz inverse, accumualte into rhs
+#ifdef ALPHA_MODEL
+call alpha_model_rhs(rhs,gradu,gradv,gradw,work,p)
+#endif
+
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
@@ -422,8 +416,8 @@ if (compute_ints==1) then
    ints_timeDU=time
    ints(2)=f_diss    ! computed in spectral space - dont have to normalize
    ints(3)=ke_diss   ! computed in spectral space - dont have to normalize
-   ints(4)=vor/g_nx/g_ny/g_nz
-   ints(5)=hel/g_nx/g_ny/g_nz
+   ints(4)=vorave/g_nx/g_ny/g_nz
+   ints(5)=helave/g_nx/g_ny/g_nz
    maxs(5)=maxvor
 endif
 
@@ -441,3 +435,53 @@ end
 
 
 
+subroutine ns_vorticity(rhsg,Qhat,work,p)
+use params
+use transpose
+implicit none
+real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 rhsg(nx,ny,nz,n_var)    
+real*8 work(nx,ny,nz)
+real*8 p(g_nz2,nslabx,ny_2dz)    
+
+!local
+integer n,i,j,k,im,km,jm
+real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
+
+
+
+do n=1,3
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         if (n==1) then
+            wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
+            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
+            !rhs(k,i,j,1) = pi2*(wy - vz)
+            p(k,i,j) = pi2*(wy - vz)
+         endif
+         
+         if (n==2) then
+            wx = - im*Qhat(k,i+z_imsign(i),j,3)
+            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
+            !rhs(k,i,j,2) = pi2*(uz - wx)
+            p(k,i,j) = pi2*(uz - wx)
+         endif
+         
+         if (n==3) then
+            uy = - jm*Qhat(k,i,j+z_jmsign(j),1)
+            vx = - im*Qhat(k,i+z_imsign(i),j,2)
+            !rhs(k,i,j,3) = pi2*(vx - uy)
+            p(k,i,j) = pi2*(vx - uy)
+         endif
+
+      enddo
+   enddo
+enddo
+call z_ifft3d(p,rhsg(1,1,1,n),work)
+enddo
+end subroutine
