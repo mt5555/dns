@@ -65,16 +65,18 @@ shankara              .28     .19               .093    .064     .050
 ./bench.sh 160 0 20
 544M
 
-shankara              1.76                      .62               .29
 milkyway              1.22    .42
+autrey                1.40
+shankara              1.76                      .62               .29
 
 
 
 ./bench.sh 256 8  20
 2.3G                                                                 
 
-shankara                                                       crash2!
-milkyway              6.91    IN
+milkyway              6.91    3.33
+shankara                                                       CRASH2
+
 
 
 

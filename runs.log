@@ -3,7 +3,7 @@
 KH with thin sheet for Chris Brislawn
 
 CFL = 1.45   
-mu=5e-5
+mu=5e-5  (value)
 KH-anal
 subtype=0
 fft-sphere

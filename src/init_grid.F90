@@ -382,7 +382,7 @@ if (my_pe==io_pe) then
       print *,'reading input from file: ',inputfile	
    endif	
    print *,'Enter input file type: '
-   read(*,*) input_file_type
+   read(5,*) input_file_type
    print *,'input_file_type=',input_file_type	
 
    if (input_file_type==0) then
@@ -527,7 +527,7 @@ real*8 rvalue
 integer i
 
 
-read(*,'(a)') message
+read(5,'(a)') message
 do i=1,80
    if (message(i:i)==' ') then
       runname=message(1:i-1)
@@ -536,15 +536,15 @@ do i=1,80
 enddo
 
 
-read(*,'(a12)') sdata
-read(*,*) rvalue
+read(5,'(a12)') sdata
+read(5,*) rvalue
 if (sdata=='value') then
    mu=rvalue
 else 
    call abort("only viscosity type 'value' supported for input format=0")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 if (sdata=='fft') then
    numerical_method=FOURIER
    dealias=0
@@ -562,37 +562,37 @@ else
 endif
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 if (sdata=='periodic') then
 else
    call abort("only 'perodic' b.c. supported")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 if (sdata=='periodic') then
 else
    call abort("only 'perodic' b.c. supported")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 if (sdata=='periodic') then
 else
    call abort("only 'perodic' b.c. supported")
 endif
 
-read(*,*) time_final
-read(*,*) cfl_adv
-read(*,*) cfl_vis
-read(*,*) delt_min
-read(*,*) delt_max
-read(*,*) restart_dt
-read(*,*) diag_dt
-read(*,*) screen_dt
-read(*,*) output_dt
-read(*,*) ncustom
+read(5,*) time_final
+read(5,*) cfl_adv
+read(5,*) cfl_vis
+read(5,*) delt_min
+read(5,*) delt_max
+read(5,*) restart_dt
+read(5,*) diag_dt
+read(5,*) screen_dt
+read(5,*) output_dt
+read(5,*) ncustom
 allocate(custom(ncustom))
 do i=1,ncustom
-   read(*,*) custom(i)
+   read(5,*) custom(i)
 enddo
 
 init_cond=1           ! KH analytic - default initial condition
@@ -622,7 +622,7 @@ real*8 rvalue,xfac,kmode
 integer i
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'initial condition: ',sdata
 if (sdata=='KH-blob') then
    init_cond=0
@@ -641,10 +641,10 @@ else
    call abort("invalid initial condtion specified on line 3 on input file")
 endif
 
-read(*,*) init_cond_subtype
+read(5,*) init_cond_subtype
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'forcing: ',sdata
 if (sdata=='none') then
    forcing_type=0
@@ -657,8 +657,8 @@ else
 endif
 
 
-read(*,'(a12)') sdata
-read(*,*) rvalue
+read(5,'(a12)') sdata
+read(5,*) rvalue
 if (sdata=='value') then
    mu=rvalue
 else if (sdata=='kediff') then
@@ -683,11 +683,11 @@ else
    call abort("non supported viscosity type")
 endif
 
-read(*,*) alpha_value
-read(*,*) compute_struct
+read(5,*) alpha_value
+read(5,*) compute_struct
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'method: ',sdata
 if (sdata=='fft') then
    numerical_method=FOURIER
@@ -707,7 +707,7 @@ else
 endif
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'b.c. x-direction: ',sdata
 if (sdata=='periodic') then
    g_bdy_x1=PERIODIC
@@ -722,7 +722,7 @@ else
    call abort("x boundary condition not supported")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'b.c. y-direction: ',sdata
 if (sdata=='periodic') then
    g_bdy_y1=PERIODIC
@@ -740,7 +740,7 @@ else
    call abort("y boundary condition not supported")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'b.c. z-direction: ',sdata
 if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
@@ -749,19 +749,19 @@ else
    call abort("only 'perodic' b.c. supported in z-direction")
 endif
 
-read(*,*) time_final
-read(*,*) cfl_adv
-read(*,*) cfl_vis
-read(*,*) delt_min
-read(*,*) delt_max
-read(*,*) restart_dt
-read(*,*) diag_dt
-read(*,*) screen_dt
-read(*,*) output_dt
-read(*,*) ncustom
+read(5,*) time_final
+read(5,*) cfl_adv
+read(5,*) cfl_vis
+read(5,*) delt_min
+read(5,*) delt_max
+read(5,*) restart_dt
+read(5,*) diag_dt
+read(5,*) screen_dt
+read(5,*) output_dt
+read(5,*) ncustom
 allocate(custom(ncustom))
 do i=1,ncustom
-   read(*,*) custom(i)
+   read(5,*) custom(i)
 enddo
 
 
@@ -794,7 +794,7 @@ character(len=20) sdata
 real*8 rvalue,xfac,kmode
 integer i
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 write(*,'(a,a)') 'equations: ',sdata(1:1)
 if (sdata=='ns_uvw') then
    equations=NS_UVW
@@ -807,7 +807,7 @@ else
    call abort("invalid equations specified")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'initial condition: ',sdata
 if (sdata=='KH-blob') then
    init_cond=0
@@ -826,10 +826,10 @@ else
    call abort("invalid initial condtion specified on line 3 on input file")
 endif
 
-read(*,*) init_cond_subtype
+read(5,*) init_cond_subtype
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'forcing: ',sdata
 if (sdata=='none') then
    forcing_type=0
@@ -842,8 +842,8 @@ else
 endif
 
 
-read(*,'(a12)') sdata
-read(*,*) rvalue
+read(5,'(a12)') sdata
+read(5,*) rvalue
 if (sdata=='value') then
    mu=rvalue
 else if (sdata=='kediff') then
@@ -868,12 +868,12 @@ else
    call abort("non supported viscosity type")
 endif
 
-read(*,*) alpha_value
-read(*,*) smagorinsky
-read(*,*) compute_struct
+read(5,*) alpha_value
+read(5,*) smagorinsky
+read(5,*) compute_struct
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'method: ',sdata
 if (sdata=='fft') then
    numerical_method=FOURIER
@@ -893,7 +893,7 @@ else
 endif
 
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'b.c. x-direction: ',sdata
 if (sdata=='periodic') then
    g_bdy_x1=PERIODIC
@@ -908,7 +908,7 @@ else
    call abort("x boundary condition not supported")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'b.c. y-direction: ',sdata
 if (sdata=='periodic') then
    g_bdy_y1=PERIODIC
@@ -926,7 +926,7 @@ else
    call abort("y boundary condition not supported")
 endif
 
-read(*,'(a12)') sdata
+read(5,'(a12)') sdata
 print *,'b.c. z-direction: ',sdata
 if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
@@ -935,19 +935,19 @@ else
    call abort("only 'perodic' b.c. supported in z-direction")
 endif
 
-read(*,*) time_final
-read(*,*) cfl_adv
-read(*,*) cfl_vis
-read(*,*) delt_min
-read(*,*) delt_max
-read(*,*) restart_dt
-read(*,*) diag_dt
-read(*,*) screen_dt
-read(*,*) output_dt
-read(*,*) ncustom
+read(5,*) time_final
+read(5,*) cfl_adv
+read(5,*) cfl_vis
+read(5,*) delt_min
+read(5,*) delt_max
+read(5,*) restart_dt
+read(5,*) diag_dt
+read(5,*) screen_dt
+read(5,*) output_dt
+read(5,*) ncustom
 allocate(custom(ncustom))
 do i=1,ncustom
-   read(*,*) custom(i)
+   read(5,*) custom(i)
 enddo
 
 
