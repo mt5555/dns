@@ -1,4 +1,19 @@
 **********************************************************************************
+5/10/03
+
+subcube averaging for Bill:
+
+1. pull .4026.u  .v and .w runs off of HPSS
+2. convert to brick of doubles   (add header_type arg to output_uvw)
+3. run extract_average.c on data        
+4. convert back to my format
+5. read in, project out, the output u,v,w and p
+
+
+
+
+
+**********************************************************************************
 3/7/02
 
 Balu benchmarks:
@@ -288,6 +303,8 @@ convert to h5 vor:     5 per eddy turnover time
 .4020:  last non-rescaled run.
         rescale run started from this time.  
 .4027:  rescaled run, after 1 timestep 
+        (5/10/2003: i seemed to have archived .4020 and .4026.  
+         so I hope rescaled run is .4026.)
 
 Ran ok to t= 2.43282
 Then there is a glitch between time step 10 and time step 15.

@@ -1,7 +1,17 @@
 #include "macros.h"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! Read in a sequence of data files and perform analysis on them
+! Read in a sequence of data files and convert them
+!
+! type of conversion controled by -cout argument:
+!
+!  -cout uvw      (can be used with -si/-so  spectral input/output)
+!                  and -smax spectral coefficient truncation to 
+!                  perform downsampling or upsampling)
+!  -cout vor
+!  -cout vorm
+!  -cout norm2
+!
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:

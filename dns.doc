@@ -170,6 +170,13 @@ Running the code
 
 
 4. running the code and command line options
+   
+    ./dns [options] -i <input_file>  <run_name>
+
+   options:   
+       -r           restart from files restart.[uvw]
+      
+
 
 5. restart files.
    To read a restart file on a machine
