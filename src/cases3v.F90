@@ -102,8 +102,8 @@ endif
 
 if (init_cond_subtype==1) then
 ! Balu 2D initial condition, with low waver number hypo viscosity
-do nb=8,12
-   enerb_target(nb)=1.0
+do nb=1,12
+   enerb_target(nb)=.063
 enddo
 endif
 

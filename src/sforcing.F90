@@ -147,7 +147,7 @@ if (0==init_sforcing) then
       numb=10
       call sforcing_init()
       do wn=numb1,numb
-         ener_target(wn)=1.0
+         ener_target(wn)=.063
       enddo
    endif
    if (numb>numb_max) call abort("sforcing12: numb_max too small")
