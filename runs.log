@@ -644,6 +644,10 @@ vx3072
 mu=2e-8.  a touch noisy in one snapshot that I saw, went away.  
 6144x3072    2 cpu milkyway:  338m per t=1.  
 
+6144x3072    24 cpu shankara: IN
+                              NEXT (without NDEBUG)
+
+
 if we use mu^3/4 rule, new grid:  10332x5000.  So lets go with 12288x6144.
 
 12000x6000  t=.05
@@ -653,7 +657,7 @@ BlueMtn:
 30x4:      10.31
 
 Benchmarks for 12288x6144:   RES size: 5.7GB
-./gridsetup.py 24 1 1 12288 6144 1 2 2 0 2 2 0
+./gridsetup.py 24 1 1 12288 6144 1 2 2 0 2 2 0   2
 Shakara  t=.05
 24x1      
 

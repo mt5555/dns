@@ -45,8 +45,8 @@ contains
 subroutine compute_spec(time,Q,q1,work1,work2)
 use params
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz,n_var)   ! (u,v,w)
+real*8 :: q1(nx,ny,nz,n_var) 
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
@@ -106,8 +106,8 @@ end subroutine
 subroutine compute_spec_shallow(time,Q,q1,work1,work2)
 use params
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz,3)   ! (u,v,h)
+real*8 :: q1(nx,ny,nz,3)  ! (u,v,h)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
@@ -177,8 +177,8 @@ end subroutine
 subroutine compute_Edotspec_shallow(time,Q,q1,work1,work2)
 use params
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz,3)   ! (u,v,h)
+real*8 :: q1(nx,ny,nz,3)  ! work array
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
@@ -260,7 +260,7 @@ subroutine compute_Edotspec(time,Q,q1,work1,work2)
 !
 use params
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz,n_var)   ! 
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
