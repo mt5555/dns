@@ -128,15 +128,10 @@ if (0==init_sforcing) then
       enddo
    endif
    if (model_spec==1) then
-      numb=10 ! apply forcing in 5 bands
+      numb=9
       call sforcing_init()
       do wn=1,numb
-         kfmax=6
-         if (wn>=kfmax) then
-            ener_target(wn)=0
-         else
-            ener_target(wn)=real(wn)**(-5./3.)*tanh( (kfmax-wn) / (.3*kfmax) )
-         endif
+         ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
 
@@ -446,7 +441,7 @@ real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
 
 rmodes=0
-call gaussian(R,5*5*5*3*2)
+call gaussian(R,((2*numbs+1)**3) *3*2)
 
 
 do km=-numb,numb 

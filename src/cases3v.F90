@@ -229,6 +229,9 @@ real*8 :: Len,U,R,F
 character(len=80) :: message
 
 k_0=14  
+if (equations==NS_UVW) then
+   k_0=100
+endif
 m=25
 U=1.0        ! velocity scale  U normalized below so that KE=.5 U**2 = .5
 Len=1.0/(2*pi*k_0)  ! length scale, determined by mode k_0 above
@@ -430,7 +433,7 @@ do n=1,2
 
 enddo
 
-if (n_var==3) then
+if (n_var>=3) then
    call divfree_gridspace(PSI,Q(1,1,1,n_var),work1,work2)
    Q(:,:,:,n_var)= H0 + Q(:,:,:,n_var)/grav
 else

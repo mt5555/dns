@@ -27,6 +27,7 @@ ns_ibm.o: macros.h params.o fft_interface.o makefile
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
 ns_psivor.o: macros.h params.o bc.o tracers.o ellipse.o fft_interface.o makefile 
 params.o: macros.h params.h makefile 
+particles.o: macros.h params.o mpi.o ghost.o makefile 
 psivor_diag.o: macros.h params.o ellipse.o makefile 
 sforcing.o: macros.h params.o fft_interface.o mpi.o makefile 
 shallow.o: macros.h params.o fft_interface.o sforcing.o transpose.o makefile 

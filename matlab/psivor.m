@@ -5,16 +5,17 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 %#  plotting output file
 %########################################################################
 
+
 %ts=input('time=? ');
 
-range=50:5:150.00;
+%range=50:5:150.00;
 %range=29:1.0:1000.0;
-%range=[.00];
+range=[0:2.5:5];
 %name='../src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
 %name='../src/vxpair/vx4096a';
-name='../src/vxpair/vx6144a';
+%name='../src/vxpair/vx6144a';
 %name='/data/vxpair/vx2048a';
 %name='/data/vxpair/vx2048c';
 %name='/data/vxpair/vx2048d';
@@ -58,7 +59,7 @@ for i=range
   disp(sprintf('max vor=                %f ',qmax));
 
     
-  
+
   fname=[name,ts,'.psi']
   fidvor=fopen(fname,'r');
   time=fread(fidvor,1,'float64')

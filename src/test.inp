@@ -3,8 +3,8 @@ ns_uvw       ! equations
 iso12        ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
 iso12w        ! forcing:  none, iso12
-kediff       ! viscosity type  (value, smallest, kediff, Re)
-1000.0        ! viscosity coefficient.  (300)
+value        ! viscosity type  (value, smallest, kediff, Re)
+1.35e-3       ! viscosity coefficient.  (300)
 0.0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
 0            ! compute_structure functions
@@ -20,7 +20,7 @@ periodic     ! z bc
 0.0          ! restart_dt  (0 = restart output disabled)
 -10          ! diag_dt   
 -10          ! screen_dt
-1.0           ! output_dt  (0 = output disabled, except for custom out times)
+5.0           ! output_dt  (0 = output disabled, except for custom out times)
 1           ! n_output_custom  number of custom output times  
 00.00       ! custom output times, one per line
 

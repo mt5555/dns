@@ -7,16 +7,14 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %ts=input('time=? ');
 
-%range=0:.05:1.00;
-range=50:5.0:100.0;
+range=0:.1:100.00;
+%range=50:5.0:100.0;
 %range=[.00];
-name='../src/impulse/kh24';
-%name='../src/kh/khK';
-name='/data/vxpair/vx2048a';
-%name='../src/temp';
+%name='../src/kh1024'; 
+name='../src/turb2d'; 
 
 mkpr=0;            % make ps and jpeg files
-mkcontour=1;       % use pcolor or contour
+mkcontour=0;       % use pcolor or contour
 mplot=1;           % set to nonzero to put 'mplot' plots per figure
 
 mplot=min(mplot,length(range));
@@ -100,6 +98,7 @@ for i=range
     end
     if (mkcontour==0)
       pcolor(x,y,vor')
+     caxis([-300,300])
       shading interp
     else
       if (qmax>15) 

@@ -424,7 +424,7 @@ call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,a_diss)
 if (forcing_type==2 .and. rkstage==1) then
    ! compute new forcing function
    ! white in time, computed at beginning of each RK4 stage
-   if (rkstage==1) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
+   call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
 endif
 
 ! apply forcing:

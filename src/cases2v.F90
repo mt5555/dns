@@ -14,10 +14,12 @@ real*8 :: work2(nx,ny,nz)
 
 ! local variables
 integer :: i,j,k,l,use3d=0
+integer :: kinit(50)
 real*8 :: eps
 real*8 :: amp
 
 Q=0
+
 
 if (init_cond_subtype==0) then
    call print_message("Using thin shear layer initial condition")
@@ -33,6 +35,10 @@ else if (init_cond_subtype==3) then
    call print_message("Using 3d shear layer initial condition")
    eps=200
    amp=.05
+else if (init_cond_subtype==4) then
+   call print_message("Using 5 mode thin shear layer initial condition")
+   eps=100
+   amp=.10
 endif
 
 ! thickness = 1/eps
@@ -70,13 +76,13 @@ real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 ! local variables
-integer i,j,k,l
+integer i,j,k,l,i2
 real*8 delta,delsq,delalf,delgam,yval,xval,dify,difx,uu,vv,denom
 real*8 xsc,ysc
 real*8 :: eps=.10
 integer :: km=1
 integer,parameter :: n=500
-real*8 :: x(0:n),y(0:n)
+real*8 :: x(0:n),y(0:n),xtmp
 
 Q=0
 
@@ -109,6 +115,12 @@ do i=nx1,nx2
       ! COMPUTE VELO AT (XCORD(I),YCORD(J)) INDUCED BY BLOB AT (X(L),Y(L))
       x(l) = -1 + l*delalf + xval       ! x ranges from xval-1 .. xval+1
       y(l) = eps*sin( km*pi*x(l) )
+      if (init_cond_subtype==1) then
+         y(l)=0
+         do i2=1,11,10
+            y(l) = y(l) + (eps/i2)*sin( i2*pi*x(l) )
+         enddo
+      endif
 
       difx =  xval - x(l) 
       dify =  yval - y(l) 
