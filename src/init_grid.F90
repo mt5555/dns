@@ -344,8 +344,8 @@ if (my_pe==io_pe) then
    !
    !   -r   use a restart file for the initial conditions
    !
-   !   -ui  use UDM restart file for initial condition
-   !   -uo  use UDM for the output file
+   !   -ui  use UDM for input
+   !   -uo  use UDM for output
    !
    !   -s   restart and output file are 2/3 dealiased spectral coefficieints,
    !        not the default grid point values
