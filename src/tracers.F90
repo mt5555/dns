@@ -502,6 +502,9 @@ do k=numt_insert+1,numt
            time_new*(center(1)-told(k,1))/(tnew(k,1)-told(k,1))  +  &
            time_old*(tnew(k,1)-center(1))/(tnew(k,1)-told(k,1))
 
+      ! reset crossing point y-position back to vxline_y():
+      tnew(k,1) = center(1)
+      tnew(k,2) = vxline_y(k-numt_insert)
 
    endif
 enddo

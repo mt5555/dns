@@ -362,8 +362,8 @@ endif
 
 
 if (init==1) then
-   numt_insert=500             ! 500 particles with insertion
-   n=numt_insert+10            ! 10 extra particles with no insertion between them
+   numt_insert=500              ! 500 particles with insertion
+   n=numt_insert+vxline_count   ! 10 extra particles with no insertion between them
    call allocate_tracers(n)
    delalf = pi/(2*(numt_insert-1))
    do k=1,numt_insert
@@ -377,9 +377,9 @@ if (init==1) then
    ! add some points in the non-insert region:
    delalf = pi/(2*(n-(numt_insert+1)))
    do k=numt_insert+1,n
-      hold=(k-(numt_insert+1))*delalf
+      ! hold=(k-(numt_insert+1))*delalf
       tracer(k,1)=xlocation
-      tracer(k,2)=cos(hold)
+      tracer(k,2)=vxline_y(k-numt_insert)
       tracer(k,ndim+1)=k   ! "alf" particle lable 
    enddo
 endif
