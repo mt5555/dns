@@ -411,39 +411,9 @@ endif
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (mu_hyper==8) then
-! compute ke in last spherical shell
-ke=0
-numk=0
-
-do j=1,ny_2dz
-   jm=z_jmcord(j)
-   do i=1,nslabx
-      im=z_imcord(i)
-      do k=1,g_nz
-         km=z_kmcord(k)
-         xw = jm*jm + im*im + km*km 
-         if (dealias_sphere_kmax2_1 < xw  .and xw <= dealias_sphere_kamx2) then
-            numk=numk+1
-            xfac = 2*2*2
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-            
-            u2=Qhat(k,i,j,1)*Qhat(k,i,j,1) + &
-                 Qhat(k,i,j,2)*Qhat(k,i,j,2) + &
-                 Qhat(k,i,j,3)*Qhat(k,i,j,3)
-            
-            ke = ke + .5*xfac*u2
-         endif
-      enddo
-   enddo
-enddo
-ke=ke/numk
-#ifdef USE_MPI
-xw = ke
-call MPI_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
-hyper8_scale = 5.0*ke * dealias_sphere_kmax**(-8.5)/pi2_squared
+   call ke_shell_z(Qhat,ke,numk,dealias_sphere_kmax2_1,dealias_sphere_kmax2)
+   ke=ke/numk
+   hyper8_scale = 5.0*ke * dealias_sphere_kmax**(-8.5)/pi2_squared
 endif
 
 

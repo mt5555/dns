@@ -1582,3 +1582,48 @@ call MPI_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 end subroutine
 
 
+subroutine ke_shell_z(Qhat,ke,numk,kstart2,kstop2)
+!
+! compute the KE in shell   kstart2 < k**2 <= kstop2
+! for z-decomposition data
+!
+use params
+use mpi
+implicit none
+real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+integer :: numk,kstart2,kstop2
+real*8 :: ke,xw,u2,xfac,ierr
+integer :: im,jm,km,i,j,k,n
+
+
+   ke=0
+   numk=0
+   
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            xw = jm*jm + im*im + km*km 
+            if (dealias_sphere_kmax2_1 < xw  .and. xw <= dealias_sphere_kmax2) then
+               numk=numk+1
+               xfac = 2*2*2
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+               
+               u2=0
+               do n=1,ndim
+                  u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               enddo
+               ke = ke + .5*xfac*u2
+            endif
+         enddo
+      enddo
+   enddo
+#ifdef USE_MPI
+   xw = ke
+   call MPI_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+end subroutine

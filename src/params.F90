@@ -502,7 +502,7 @@ endif
 !      dealias_sphere_kmax2_1 <= k**2 <= dealias_sphere_kmax2
 !  
 dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
-dealias_sphere_kmax = sqrt(dealias_sphere_kmax2)
+dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
 dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
 
 
