@@ -48,8 +48,8 @@ real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr
 integer,allocatable :: seed(:)
 real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
-CPOINTER :: null=0;
 character(len=80) message
+CPOINTER :: null
 
 !
 ! 
@@ -69,7 +69,7 @@ deallocate(seed)
 do n=1,3
    ! input from random number generator
    ! this gives same I.C independent of cpus
-   call input1(PSI(1,1,1,n),Q,work,null,io_pe,.true.)  
+   call input1(PSI(1,1,1,n),work2,work,null,io_pe,.true.)  
 enddo
 
 
@@ -196,6 +196,8 @@ write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)
 
 
+call print_message('Initial data projection...')
+call init_data_projection(Q,work,work2,PSI)  ! impose constrains on initial data
 
 
 end subroutine
@@ -205,10 +207,13 @@ end subroutine
 
 
 
-subroutine init_data_kh(Q)
+subroutine init_data_kh(Q,q1,work1,work2)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 
 ! local variables
 integer :: i,j,k,l,use3d=0
@@ -252,6 +257,8 @@ enddo
 enddo
 enddo
 
+call print_message('Initial data projection...')
+call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
    
 
 
@@ -259,10 +266,13 @@ end subroutine
 
 
 
-subroutine init_data_khblob(Q)
+subroutine init_data_khblob(Q,q1,work1,work2)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 
 ! local variables
 integer i,j,k,l
@@ -328,7 +338,190 @@ enddo
 enddo
 enddo
 
+call print_message('Initial data projection')
+call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
 
+
+end subroutine
+
+
+
+
+
+
+
+
+
+
+subroutine init_data_sht(Q,PSI,work1,work2)
+use params
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: PSI(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+! local variables
+CPOINTER :: null
+integer i,j,k,l
+integer :: m
+integer :: n,im,jm,km,ixw
+real*8 :: k_0,xw,xfac ,alpha,beta,dummy
+real*8 :: E_target,ke
+real*8 :: E_k(0:max(nx,ny,nz))
+real*8 :: Len,U,H,R,F
+
+k_0=14  
+m=25
+U=1.0        ! velocity scale  U normalized below so that KE=.5 U**2 = .5
+Len=1.0/k_0  ! length scale, determined by mode k_0 above
+H=.005       ! height scale, arbritrary, chosen so KE+PE = 1
+
+! set 
+! R = Rossby number
+! F = Froude number
+if (init_cond_subtype==0) then
+   R=.05  
+   F=.05  
+else if (init_cond_subtype==1) then
+   R=.25
+   F=.05
+else
+   call abort("init_data_swt(): init_cond_subtype set to unsupported value")
+endif
+   
+
+
+! set dimensionless constants used in code: f-plane and gravity:
+fcor=U/(R*Len)
+grav=(U/F)**2 / H
+
+Q=0
+
+
+! random vorticity
+call input1(PSI,work1,work2,null,io_pe,.true.)  
+
+! invert to get PSI
+alpha=0
+beta=1
+call helmholtz_inv(PSI,work1,alpha,beta)
+
+! initialize amplitude to satisfy:  E(k)/.5k^2
+! E(k) = k^(m/2) / (k + k_0)^m
+!
+!
+
+
+n=1
+call fft3d(PSI,work1) 
+E_k=0
+do k=nz1,nz2
+   km=kmcord(k)
+   do j=ny1,ny2
+      jm=jmcord(j)
+      do i=nx1,nx2
+         im=imcord(i)
+         xw=sqrt(real(km**2+jm**2+im**2))
+         ixw = nint(xw)
+         
+         xfac = (2*2*2)
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+
+         E_k(ixw)=E_k(ixw)+.5*pi2_squared*xw*xw*xfac*PSI(i,j,k,n)**2
+      enddo
+   enddo
+enddo
+
+
+do k=nz1,nz2
+   km=kmcord(k)
+   do j=ny1,ny2
+      jm=jmcord(j)
+      do i=nx1,nx2
+         im=imcord(i)
+         xw=sqrt(real(km**2+jm**2+im**2))
+         ixw = nint(xw)
+         
+         xfac = (2*2*2)
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+
+         if (xw>0) then
+            E_target=(xw**(m/2.0) / (xw+k_0)**m) 
+
+            PSI(i,j,k,n)=PSI(i,j,k,n)/sqrt(E_k(ixw))
+            PSI(i,j,k,n)=PSI(i,j,k,n)*sqrt(E_target)
+         else
+            PSI(i,j,k,n)=0
+         endif
+      enddo
+   enddo
+enddo
+
+
+call ifft3d(PSI,work1) 
+
+
+
+
+! compute velocity = curl PSI
+call der(PSI,Q,dummy,work1,DX_ONLY,2)
+Q(:,:,:,1)=-Q(:,:,:,1)
+call der(PSI,Q(1,1,1,2),dummy,work1,DX_ONLY,1)
+
+
+! normalize so U=1
+ke = .5*sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)**2) +  &
+     sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)**2)  
+ke=ke/g_nx/g_ny
+
+Q=Q/(sqrt(2*ke))
+
+
+
+if (dealias) call dealias_gridspace(Q,work1)
+
+! compute a balenced hight field:
+! div( u grad u + f cross u  + g grad h ) = 0
+! 
+! PSI = u grad u + f cross u 
+PSI=0
+PSI(:,:,:,1)= fcor*Q(:,:,:,2)
+PSI(:,:,:,2)=-fcor*Q(:,:,:,1)
+
+! advection and viscous terms
+k=1
+do n=1,2
+
+   ! compute u_x
+   call der(Q(1,1,1,n),work1,dummy,work2,DX_ONLY,1)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      PSI(i,j,k,n) = PSI(i,j,k,n) - Q(i,j,k,1)*work1(i,j,k) 
+   enddo
+   enddo
+
+
+   ! compute u_y
+   call der(Q(1,1,1,n),work1,dummy,work2,DX_ONLY,2)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      PSI(i,j,k,n) = PSI(i,j,k,n) - Q(i,j,k,2)*work1(i,j,k) 
+   enddo
+   enddo
+
+enddo
+
+call divfree_gridspace(PSI,Q(1,1,1,3),work1,work2)
+Q(:,:,:,3)= H + Q(:,:,:,3)/grav
+
+
+if (dealias) call dealias_gridspace(Q,work1)
 
 end subroutine
 

@@ -16,7 +16,7 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
-real*8 tmx1,tmx2,del,lambda
+real*8 tmx1,tmx2,del,lambda,H
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
@@ -45,6 +45,11 @@ if (ndim==3) then
    mumax = mu*(1/delx**2 + 1/dely**2 + 1/delz**2)
 else
    mumax = mu*(1/delx**2 + 1/dely**2)
+endif
+
+if (grav>0) then
+   H=sum(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))/g_nx/g_ny/g_nz
+   umax=fcor + sqrt(grav*H)/min(delx,dely)   
 endif
 
 
@@ -150,7 +155,7 @@ if (doit_screen) then
    write(message,'(a,f9.7,a,f6.3,a,f6.3)') 'for next timestep: delt=',delt,' cfl_adv=',cfl_used_adv,' cfl_vis=',cfl_used_vis
    call print_message(message)	
 
-   write(message,'(a,3f22.15)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
+   write(message,'(a,3f21.14)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
    call print_message(message)	
 
    write(message,'(3(a,e12.5))') '<z-vor>=',ints(4),'   <hel>=',ints(5),&
@@ -187,13 +192,14 @@ if (doit_screen) then
       call print_message(message)	
    endif
    
-
-
+   !
+   ! alpha model information
+   !
+   if (alpha_value>0) then
    write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'Ea: ',&
         ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
    call print_message(message)	
 
-   if (alpha_value>0) then
    write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
         -mu*ints(2)-mu*alpha_value**2*ints(1),&
         ' f=',ints(9),'                      tot=',&
@@ -201,8 +207,13 @@ if (doit_screen) then
    call print_message(message)	
    endif
 
+   if (ke1>99) then
+   write(message,'(a,f13.8,a,f13.4,a,f12.7)') 'ke: ',ke1,'  enstropy: ',&
+        ints(7),'         total d/dt(ke):',delke_tot
+   else
    write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'ke: ',ke1,'  enstropy: ',&
         ints(7),'         total d/dt(ke):',delke_tot
+   endif
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
      'd/dt(ke) vis=',-mu*ints(2),' f=',ints(3),' alpha=',ints(8),&
@@ -405,7 +416,6 @@ do i=1,ndim
    spec_y=spec_y + .5*spec_y2
    spec_z=spec_z + .5*spec_z2
 enddo
-
 write(message,'(a,f10.4)') " KE spectrum",time
 call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_x,g_nx/2,message)

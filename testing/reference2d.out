@@ -10,18 +10,18 @@ Global grid:    128 x   128 x     1
 Local grid (with padding):    130 x   130 x     1                               
 Initial data                                                                    
 Using thin shear layer initial condition
-Initial data projection                                                         
+Initial data projection...
 Initializing FFT99 of size n=   128                                             
+Initial data projection                                                         
 Time stepping...                                                                
 
 time=  0.00000(    0)  next output=  0.10000                                    
 for next timestep: delt=0.0105711 cfl_adv= 1.500 cfl_vis= 0.346                 
-max: (u,v,w)      1.058561716503954     0.050000000745058     0.000000000000000 
-<z-vor>= 0.59976E-14   <hel>= 0.00000E+00   max(vor) 0.13476E+03                
+max: (u,v,w)      1.05856171650395     0.05000000074506     0.00000000000000    
+<z-vor>= 0.54179E-14   <hel>= 0.00000E+00   max(vor) 0.13476E+03                
 R_lambda=   103.48780  R=  1000.00000                                           
 mesh spacing(eta):        1.1369       1.1369     145.5171                      
 eddy turnover time:        2.1856                                               
-Ea:  0.4900072007   |gradU|:      448.3907         total d/dt(Ea):   0.0000000  
 ke:  0.4900072007  enstropy:      448.3907         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -0.4483907 f=   0.0000000 alpha=   0.0000000 total=  -0.4483907  
  
@@ -45,56 +45,51 @@ max(div)= 0.00000E+00
 
 time=  0.01057(    1)  next output=  0.10000                                    
 for next timestep: delt=0.0109783 cfl_adv= 1.500 cfl_vis= 0.360                 
-max: (u,v,w)      1.017379610056682     0.050144361723534     0.000000000000000 
-<z-vor>= 0.59976E-14   <hel>= 0.00000E+00   max(vor) 0.13476E+03                
+max: (u,v,w)      1.01737961005668     0.05014436172353     0.00000000000000    
+<z-vor>= 0.54179E-14   <hel>= 0.00000E+00   max(vor) 0.13476E+03                
 R_lambda=   103.48780  R=  1000.00000                                           
 mesh spacing(eta):        1.1369       1.1369     145.5171                      
 eddy turnover time:        2.1856                                               
-Ea:  0.4900072007   |gradU|:      448.3907         total d/dt(Ea):   0.0000000  
 ke:  0.4900072007  enstropy:      448.3907         total d/dt(ke):   0.0000000  
 d/dt(ke) vis=  -0.4483907 f=   0.0000000 alpha=   0.0000000 total=  -0.4483907  
 
 time=  0.02155(    2)  next output=  0.10000                                    
 for next timestep: delt=0.0109955 cfl_adv= 1.500 cfl_vis= 0.360                 
-max: (u,v,w)      1.015472354871907     0.050600211173455     0.000000000000000 
-<z-vor>= 0.85129E-14   <hel>= 0.00000E+00   max(vor) 0.11244E+03                
+max: (u,v,w)      1.01547235487191     0.05060021117346     0.00000000000000    
+<z-vor>= 0.18465E-14   <hel>= 0.00000E+00   max(vor) 0.11244E+03                
 R_lambda=   117.54380  R=  1000.00000                                           
 mesh spacing(eta):        1.0622       1.0622     135.9652                      
 eddy turnover time:        2.8435                                               
-Ea:  0.4858922699   |gradU|:      341.7516         total d/dt(Ea):  -0.3892612  
 ke:  0.4858922699  enstropy:      341.7516         total d/dt(ke):  -0.3892612  
 d/dt(ke) vis=  -0.3417516 f=   0.0000000 alpha=   0.0000000 total=  -0.3417516  
 
 time=  0.03254(    3)  next output=  0.10000                                    
 for next timestep: delt=0.0109775 cfl_adv= 1.500 cfl_vis= 0.360                 
-max: (u,v,w)      1.016871237406071     0.051307017981092     0.000000000000000 
-<z-vor>= 0.13132E-14   <hel>= 0.00000E+00   max(vor) 0.96457E+02                
+max: (u,v,w)      1.01687123740607     0.05130701798109     0.00000000000000    
+<z-vor>=-0.10921E-14   <hel>= 0.00000E+00   max(vor) 0.96457E+02                
 R_lambda=   128.78001  R=  1000.00000                                           
 mesh spacing(eta):        1.0113       1.0113     129.4447                      
 eddy turnover time:        3.4371                                               
-Ea:  0.4825050414   |gradU|:      280.7610         total d/dt(Ea):  -0.3085389  
 ke:  0.4825050414  enstropy:      280.7610         total d/dt(ke):  -0.3085389  
 d/dt(ke) vis=  -0.2807610 f=   0.0000000 alpha=   0.0000000 total=  -0.2807610  
 
 time=  0.04352(    4)  next output=  0.10000                                    
 for next timestep: delt=0.0109414 cfl_adv= 1.500 cfl_vis= 0.359                 
-max: (u,v,w)      1.019948386793338     0.052270710527400     0.000000000000000 
-<z-vor>=-0.44187E-14   <hel>= 0.00000E+00   max(vor) 0.85050E+02                
+max: (u,v,w)      1.01994838679334     0.05227071052740     0.00000000000000    
+<z-vor>=-0.28404E-14   <hel>= 0.00000E+00   max(vor) 0.85050E+02                
 R_lambda=   137.64235  R=  1000.00000                                           
 mesh spacing(eta):        0.9753       0.9753     124.8359                      
 eddy turnover time:        3.9499                                               
-Ea:  0.4796408799   |gradU|:      242.8612         total d/dt(Ea):  -0.2604858  
 ke:  0.4796408799  enstropy:      242.8612         total d/dt(ke):  -0.2604858  
 d/dt(ke) vis=  -0.2428612 f=   0.0000000 alpha=   0.0000000 total=  -0.2428612  
 
 time=  0.10000(   10)  next output=  0.10000                                    
 for next timestep: delt=0.0107184 cfl_adv= 1.500 cfl_vis= 0.351                 
-max: (u,v,w)      1.040505254060680     0.060370237600165     0.000000000000000 
-<z-vor>= 0.14822E-13   <hel>= 0.00000E+00   max(vor) 0.54737E+02                
+max: (u,v,w)      1.04050525406068     0.06037023760016     0.00000000000000    
+<z-vor>= 0.16565E-13   <hel>= 0.00000E+00   max(vor) 0.54737E+02                
 R_lambda=   168.83380  R=  1000.00000                                           
 mesh spacing(eta):        0.8693       0.8693     111.2656                      
 eddy turnover time:        6.0989                                               
-Ea:  0.4673755812   |gradU|:      153.2651         total d/dt(Ea):  -0.1572731  
 ke:  0.4673755812  enstropy:      153.2651         total d/dt(ke):  -0.1572731  
 d/dt(ke) vis=  -0.1532651 f=   0.0000000 alpha=   0.0000000 total=  -0.1532651  
  
@@ -114,16 +109,17 @@ d/dt(ke) vis=  -0.1532651 f=   0.0000000 alpha=   0.0000000 total=  -0.1532651
  1E-10 |*                 ***
        +---------------------+
       k=0                 k=  65
-max(div)= 0.67724E-13                                                           
+max(div)= 0.64973E-13                                                           
 CPU times (min):   (avg/max)
 initialization:      0.00     0.00                                              
-dns_solve:           0.03     0.03                                              
+dns_solve:           0.08     0.08                                              
    time_control            0.00     0.00                                        
-   RHS                     0.02     0.02                                        
+   RHS                     0.05     0.05                                        
    compute_pdf             0.00     0.00                                        
+   ghost_update            0.00     0.00                                        
    transpose_to_z          0.00     0.00                                        
    transpose_from_z        0.00     0.00                                        
    transpose_to_x          0.00     0.00                                        
-   transpose_from_x        0.00     0.00                                        
+   transpose_from_x        0.01     0.01                                        
    transpose_to_y          0.00     0.00                                        
    transpose_from_y        0.00     0.00                                        

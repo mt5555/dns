@@ -161,17 +161,30 @@ do n=1,3
 enddo
 
 if (dealias) then
-   do i=1,3
-      call fft3d(u(1,1,1,i),work)
-      call fft_filter_dealias(u(1,1,1,i))
-      call ifft3d(u(1,1,1,i),work)
-   enddo
+   call dealias_gridspace(u,work)
 endif
 
 end subroutine
 
 
 
+
+
+subroutine dealias_gridspace(u,work)
+use params
+use fft_interface
+implicit none
+real*8 :: u(nx,ny,nz,3)
+real*8 :: work(nx,ny,nz)
+integer :: i
+
+do i=1,3
+   call fft3d(u(1,1,1,i),work)
+   call fft_filter_dealias(u(1,1,1,i))
+   call ifft3d(u(1,1,1,i),work)
+enddo
+
+end subroutine
 
 
 

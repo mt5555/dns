@@ -31,40 +31,69 @@ if (firstcall) then
       call abort("Error: shallow water model cannot run in 3D")
    endif
    if (alpha_value/=0) then
-      call abort("Error: dnsgrid cannot handle alpha>0.")
+      call abort("Error: shallow cannot yet handle alpha>0.")
    endif
 endif
 
 
 
-
-
+#define USE_RK4
+#ifdef USE_RK4
 
 Q_old=Q
 
 
 ! stage 1
 call ns3D(rhs,Q,time,1,work1,work2,q4)
-call divfree_gridspace(rhs,q4,work1,work2)
+if (dealias) call dealias_gridspace(rhs,work1)
 Q=Q+delt*rhs/6.0
 
 ! stage 2
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
-call divfree_gridspace(rhs,q4,work1,work2)
+if (dealias) call dealias_gridspace(rhs,work1)
 Q=Q+delt*rhs/3.0
 
 ! stage 3
 Q_tmp = Q_old + delt*rhs/2.0
 call ns3D(rhs,Q_tmp,time+delt/2.0,0,work1,work2,q4)
-call divfree_gridspace(rhs,q4,work1,work2)
+if (dealias) call dealias_gridspace(rhs,work1)
 Q=Q+delt*rhs/3.0
 
 ! stage 4
 Q_tmp = Q_old + delt*rhs
 call ns3D(rhs,Q_tmp,time+delt,0,work1,work2,q4)
 Q=Q+delt*rhs/6.0
-call divfree_gridspace(Q,q4,work1,work2)
+if (dealias) call dealias_gridspace(Q,work1)
+
+
+
+
+#else
+
+! stage 1
+call ns3D(rhs,Q,time,1,work1,work2,q4)
+if (dealias) call dealias_gridspace(rhs,work1)
+Q=Q+delt*rhs/3
+
+! stage 2
+Q_tmp = rhs
+call ns3D(rhs,Q,time+delt/3,0,work1,work2,q4)
+if (dealias) call dealias_gridspace(rhs,work1)
+rhs = -5*Q_tmp/9 + rhs
+Q=Q + 15*delt*rhs/16
+
+
+! stage 3
+Q_tmp=rhs
+call ns3D(rhs,Q,time+3*delt/4,0,work1,work2,q4)
+rhs = -153*Q_tmp/128 + rhs
+Q=Q+8*delt*rhs/15
+if (dealias) call dealias_gridspace(Q,work1)
+
+
+#endif
+
 
 
 time = time + delt
@@ -120,16 +149,17 @@ real*8 rhs(nx,ny,n_var)
 !work
 real*8 d1(nx,ny)
 real*8 d2(nx,ny)
-real*8 work(nx,ny)
+real*8 work(nx,ny,n_var)
 
 !local
 real*8 dummy,tmx1,tmx2
-real*8 :: ke,ke_diss,ke_diss2,vor,hel,gradu_diss
+real*8 :: pe,ke,ke_diss,ke_diss2,vor,hel,gradu_diss
 integer n,i,j,k,numder
 
 call wallclock(tmx1)
 
 ke=0
+pe=0
 ke_diss=0
 ke_diss2=0
 gradu_diss=0
@@ -138,65 +168,83 @@ hel=0
 numder=DX_ONLY
 if (mu>0) numder=DX_AND_DXX   ! only compute 2nd derivatives if mu>0
 
-k=1
+
+
+! compute divergence ( h u)
 do j=ny1,ny2
 do i=nx1,nx2
-   rhs(i,j,k,1)=-fcor*Q(i,j,k,2)
-   rhs(i,j,k,2)= fcor*Q(i,j,k,1)
+   rhs(i,j,1)=Q(i,j,1)*Q(i,j,3)
+   rhs(i,j,2)=Q(i,j,2)*Q(i,j,3)
+enddo
+enddo
+call divergence(d1,rhs,d2,work)
+do j=ny1,ny2
+do i=nx1,nx2
+   rhs(i,j,3)=-d1(i,j)
 enddo
 enddo
 
 
-! compute viscous terms (in rhs) and vorticity
-do n=1,ndim
+
+! coriolis force 
+do j=ny1,ny2
+do i=nx1,nx2
+   rhs(i,j,1)= fcor*Q(i,j,2)
+   rhs(i,j,2)=-fcor*Q(i,j,1)
+enddo
+enddo
+
+
+
+
+! advection and viscous terms
+do n=1,2
 
 
    ! compute u_x, u_xx
-   call der(Q(1,1,1,n),d1,d2,work,numder,1)
+   call der(Q(1,1,n),d1,d2,work,numder,1)
 
    do j=ny1,ny2
    do i=nx1,nx2
-      ke = ke + .5*Q(i,j,k,3)*Q(i,j,k,n)**2
+      ke = ke + .5*Q(i,j,3)*Q(i,j,n)**2
 
-      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,1)*d1(i,j,k) 
+      rhs(i,j,n) = rhs(i,j,n) +  mu*d2(i,j) - Q(i,j,1)*d1(i,j) 
 
       ! Q,d1,d2 are in cache, so we can do these sums for free?
-      ke_diss=ke_diss - Q(i,j,k,3)*Q(i,j,k,n)*d2(i,j,k)
-      !ke_diss2=ke_diss2 + d1(i,j,k)**2
-      gradu_diss=gradu_diss + d2(i,j,k)**2
+      ke_diss=ke_diss - Q(i,j,3)*Q(i,j,n)*d2(i,j)
+      !ke_diss2=ke_diss2 + d1(i,j)**2
+      gradu_diss=gradu_diss + d2(i,j)**2
       if (n==2) then  ! dv/dx, part of vor(3)
-         vor=vor + d1(i,j,k)
-         hel=hel + Q(i,j,k,3)*d1(i,j,k)
+         vor=vor + d1(i,j)
+         hel=hel + Q(i,j,3)*d1(i,j)
       endif
       if (n==3) then  ! dw/dx, part of vor(2)
-         hel=hel - Q(i,j,k,2)*d1(i,j,k)
+         hel=hel - Q(i,j,2)*d1(i,j)
       endif
-   enddo
    enddo
    enddo
 
 
 
    ! compute u_y, u_yy
-   call der(Q(1,1,1,n),d1,d2,work,numder,2)
+   call der(Q(1,1,n),d1,d2,work,numder,2)
 
    do j=ny1,ny2
    do i=nx1,nx2
 
-      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,2)*d1(i,j,k) 
+      rhs(i,j,n) = rhs(i,j,n) +  mu*d2(i,j) - Q(i,j,2)*d1(i,j) 
 
-      ke_diss=ke_diss - Q(i,j,k,3)*Q(i,j,k,n)*d2(i,j,k)
-      !ke_diss2=ke_diss2  + d1(i,j,k)**2
-      gradu_diss=gradu_diss + d2(i,j,k)**2
+      ke_diss=ke_diss - Q(i,j,3)*Q(i,j,n)*d2(i,j)
+      !ke_diss2=ke_diss2  + d1(i,j)**2
+      gradu_diss=gradu_diss + d2(i,j)**2
       if (n==1) then  ! du/dy part of vor(3)
-         vor=vor - d1(i,j,k)
-         hel=hel - Q(i,j,k,3)*d1(i,j,k)
+         vor=vor - d1(i,j)
+         hel=hel - Q(i,j,3)*d1(i,j)
       endif
       if (n==3) then  ! dw/dy part of vor(1)
-         hel=hel + Q(i,j,k,1)*d1(i,j,k)
+         hel=hel + Q(i,j,1)*d1(i,j)
       endif
 
-   enddo
    enddo
    enddo
 
@@ -204,23 +252,44 @@ do n=1,ndim
 enddo
 
 
+! g grad (h+h_s)
+do j=ny1,ny2
+do i=nx1,nx2
+   d2(i,j)=Q(i,j,3) ! + h_s(i,j)
+   pe=pe+.5*grav*Q(i,j,3)**2
+enddo
+enddo
+do n=1,2
+   call der(d2,d1,dummy,work,DX_ONLY,n)
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhs(i,j,n)=rhs(i,j,n)-grav*d1(i,j)
+   enddo
+   enddo
+enddo
+
+
 
 ! apply b.c. to rhs:
 call bc_rhs(rhs)
-!call divfree_gridspace(rhs,work,d1,d2)
+
 
 if (compute_ints==1) then
    ints(2)=ke_diss/g_nx/g_ny     ! u dot laplacian u
    !ints(2)=ke_diss2/g_nx/g_ny     ! gradu dot gradu
 
    !ints(3) = forcing terms
+
    ints(4)=vor/g_nx/g_ny
    ints(5)=hel/g_nx/g_ny
-   ints(6)=ke/g_nx/g_ny
+   ints(6)=(ke+pe)/g_nx/g_ny
+   ints(10)=ke/g_nx/g_ny
+
    ints(7)=ints(2)  ! this is only true for periodic incompressible case
    ! ints(8) = < u,div(tau)' >   (alpha model only)
    ! ints(9)  = < u,f >  (alpha model only)
    ints(1)=gradu_diss/g_nx/g_ny
+
 endif
 
 call wallclock(tmx2)

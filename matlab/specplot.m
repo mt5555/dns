@@ -10,13 +10,13 @@
 %fid=fopen('iso12_256_200.spec','r','b');
 
 %fid=fopen('../src/impulse/kh4.spec','r','l');
-fid=fopen('../src/kh/khK.spec','r','l');
-
+%fid=fopen('../src/kh/khK.spec','r','l');
+fid=fopen('/tmp/test0000.0000.spec','r','l');
 
 
 time=fread(fid,1,'float64');
 j=0;
-while (time>=0 & time<=.75)
+while (time>=0 & time<=.0001)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
@@ -29,9 +29,11 @@ while (time>=0 & time<=.75)
 
   if (n_z==1) 
     figure(4);
-    subplot(2,1,1);
+    subplot(3,1,1);
+    loglog53(n_r,spec_r,time);
+    subplot(3,1,2);
     loglog53(n_x,spec_x,time);
-    subplot(2,1,2);
+    subplot(3,1,3);
     loglog53(n_y,spec_y,time);
     %print -depsc spec.ps    
     %pause

@@ -373,6 +373,8 @@ else if (sdata=='KH-anal') then
    init_cond=1
 else if (sdata=='iso12') then
    init_cond=2
+else if (sdata=='sht') then
+   init_cond=3
 else 
    print *,'value = ',sdata
    call abort("invalid initial condtion specified on line 3 on input file")
@@ -397,12 +399,24 @@ read(*,*) rvalue
 if (sdata=='value') then
    mu=rvalue
 else if (sdata=='kediff') then
-   kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+   if (ndim==2) then
+      kmode=sqrt( (g_nx**2 + g_ny**2 )/4.0)
+   else
+      kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+   endif
    xfac = 2*2*pi*2*pi*kmode**2
    ! diff_2h =  mu*xfac
    mu = rvalue/xfac
+else if (sdata=='hyper') then
+   if (ndim==2) then
+      kmode=sqrt( (g_nx**2 + g_ny**2 )/4.0)
+   else
+      kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+   endif
+   xfac = 2* (2*pi*kmode)**8
+   mu = rvalue/xfac
 else 
-   call abort("only viscosity type 'value' supported")
+   call abort("non supported viscosity type")
 endif
 
 read(*,*) alpha_value

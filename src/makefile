@@ -14,7 +14,7 @@ ARCH = $(shell uname -m)
 
 ifeq ($(UNAME),Linux)
    HOST = $(shell hostname)
-   ifeq ($(HOST),darkstar)
+   ifeq ($(HOST),darkstarXX)
       MPI = 
       MPILIB =  
    else
@@ -102,6 +102,7 @@ MODEL_IMPULSE    = ns_impulse.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_SPEC       = ns.o  dns.o bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 MODEL_ALPHA      = ns_alpha.o dns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
+MODEL_SHALLOW    = shallow.o dns.o  bc.o $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 #rules
@@ -126,8 +127,12 @@ dnsgrid:  $(MODEL_GRID)
 dnsi:  $(MODEL_IMPULSE) 
 	$(LINK) -o dnsi $(MODEL_IMPULSE) $(LDFLAGS) $(MPILIB)
 
+dnss:  $(MODEL_SHALLOW) 
+	$(LINK) -o dnss $(MODEL_SHALLOW) $(LDFLAGS) $(MPILIB)
+
 dnsslow:  $(MODEL_SPEC_SLOW) 
 	$(LINK) -o dns $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)
+
 
 
 clean: 

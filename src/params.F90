@@ -47,6 +47,8 @@ character(len=80) :: runname
 character(len=80) :: rundir
 real*8  :: pi,pi2,pi2_squared
 
+real*8  :: grav=0  
+real*8  :: fcor=0  
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -232,8 +234,8 @@ real*8 :: ints(nints),maxs(nints)
 !
 ! for the shallow water model, we modify the above slightly:
 ! ints(2) = < h u , u_xx > 
-! ints(6) = .5 < h u , u >         
-! ints(10) = g*H^2
+! ints(6) = .5 < h u , u >  + g H^2        
+! ints(10) = .5 < h u , u >
 !
 integer,parameter :: ntimers=13
 real*8 :: tims(ntimers)=0

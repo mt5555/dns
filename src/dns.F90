@@ -41,14 +41,12 @@ if (restart==1) then
    !if (init_cond==?) call initialize forcing if needed...
    call init_data_restart(Q,work1,work2)
 else
-   if (init_cond==0) call init_data_khblob(Q)
-   if (init_cond==1) call init_data_kh(Q)
+   if (init_cond==0) call init_data_khblob(Q,q1,work1,work2)
+   if (init_cond==1) call init_data_kh(Q,q1,work1,work2)
    if (init_cond==2) call init_data_lwisotropic(Q,q1,work1,work2)
+   if (init_cond==3) call init_data_sht(Q,q1,work1,work2)
 endif
 
-write(message,'(a)') 'Initial data projection'
-call print_message(message)
-call init_data_projection(Q,work1,work2,q1)  ! impose constrains on initial data
 #ifdef USE_MPI
 call MPI_Barrier(comm_3d,ierr)
 #endif
