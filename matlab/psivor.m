@@ -13,8 +13,9 @@ range=50:5:150.00;
 %name='../src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx3072_';
-%name='../src/temp';
+name='../src/vxpair/vx4096a';
 %name='/data/vxpair/vx2048a';
+%name='/data/vxpair/vx2048c';
 name='/data/vxpair/vx2048d';
 
 usefig=1;
