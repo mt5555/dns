@@ -2,8 +2,7 @@
 4/24/02
 vxpair runs on autry
 
-6144x3072:  mu=1e-7 ok.  
-            mu=2e-8 a touch noisy, goes away.
+6144x3072:  mu=2e-8 a touch noisy, goes away.
             mu=4e-8 ok?
             using delx goes like eta goes like mu^3/4 rule:  
               (4e-8)^(3/4)*6144 = mu^(3/4) * N
@@ -11,13 +10,13 @@ vxpair runs on autry
 
             mu = 1e-8:  N = 17400.  
 
-Formula:     mu ~ N^{-4/3}        mu ~ N^-2            good values
+Formula:     mu ~ N^{-4/3}        mu ~ N^-2            good values  bad value
 16384x8192   mu = 1.1e-8         5.6e-9
 12288x6144   mu = 1.6e-8         1e-8
-6144x3072(ref)mu = 4.0e-8        4e-8                       4e-8?
-4096x2048    mu = 6.9e-8         9e-8                       1e-7
+6144x3072(ref)mu = 4.0e-8        4e-8                       4e-8       2e-8 
+4096x2048    mu = 6.9e-8         9e-8                       1e-7       7e-8
 3072x1536    mu = 1.0e-7         1.6e-7 
-2048x1024    mu = 1.7e-7         3.6e-7                     4e-7
+2048x1024    mu = 1.7e-7         3.6e-7                     4e-7       2e-7
 
 Results:
 6144x3072    mu=1e-7 ok.    2e-8: a touch noisy, goes away
@@ -36,9 +35,11 @@ vx2048c   vx2048c.inp  mu=2e-7   small amount of noise on leading edge at t=50
 vx2048d   vx2048d.inp  mu=4e-7   looks good
 
 
-vx4096a                mu=1e-7   IN milkyway         
+vx4096a                mu=1e-7   done, looks good
 vx4096b                mu=7e-8   extremly small amount of noise at t=50
 
+vx6144a                mu=3e-8   IN milkyway 
+vx6144b                mu=2e-8   done milkyway
 
 
 
