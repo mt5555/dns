@@ -19,6 +19,7 @@
 #define NS_UVW  0
 #define SHALLOW 1
 #define NS_PSIVOR 2
+#define CNS       3
 
 ! numerical methods
 #define FOURIER        0

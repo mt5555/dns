@@ -642,6 +642,28 @@ else if (equations==NS_PSIVOR) then
    call singlefile_io(time_in,Qhat(1,1,1,1),fname,work1,work2,1,io_pe)
    !fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".psi"
    !call singlefile_io(time_in,Qhat,fname,work1,work2,1,io_pe)
+
+else if (equations==CNS) then
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
+   call print_message("Input: ")
+   call print_message(fname)
+   call singlefile_io3(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec,header_type)
+   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
+   call print_message(fname)
+   call singlefile_io3(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec,header_type)
+   if (ndim==3) then
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".w"
+      call print_message(fname)
+      call singlefile_io3(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec,header_type)
+   endif
+   if (n_var-ndim==2) then
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".p"
+      n=ndim+1
+      call singlefile_io3(time_in,Q(1,1,1,n),fname,work1,work2,1,io_pe,r_spec,header_type)
+      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".rho"
+      n=ndim+2
+      call singlefile_io3(time_in,Q(1,1,1,n),fname,work1,work2,1,io_pe,r_spec,header_type)
+   endif  
 endif
 
 !this is the only header that can read the time from the input file:
@@ -734,6 +756,30 @@ else if (equations==NS_PSIVOR) then
    call singlefile_io(time,Q(1,1,1,1),fname,work1,work2,0,io_pe)
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".psi"
    call singlefile_io(time,Q(1,1,1,2),fname,work1,work2,0,io_pe)
+else if (equations==CNS) then
+   ! NS, primitive variables
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".u"
+   call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,0,io_pe,.false.,header_type)
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".v"
+   call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_type)
+   if (ndim==3) then
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".w"
+      call singlefile_io3(time,Q(1,1,1,ndim),fname,work1,work2,0,io_pe,.false.,header_type)
+   endif
+   if (ndim==2) then
+      call vorticity2d(q1,Q,work1,work2)
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
+      call singlefile_io3(time,q1,fname,work1,work2,0,io_pe,.false.,header_type)
+   endif
+   if (n_var-ndim==2) then
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".p"
+      n=ndim+1
+      call singlefile_io3(time,Q(1,1,1,n),fname,work1,work2,0,io_pe,.false.,header_type)
+      fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".rho"
+      n=ndim+2
+      call singlefile_io3(time,Q(1,1,1,n),fname,work1,work2,0,io_pe,.false.,header_type)
+      
+   endif
 endif
 
 end subroutine

@@ -546,7 +546,7 @@ if (my_pe==io_pe) then
       call abort(message)
    endif
 
-   if (equations==NS_UVW) then
+   if (equations==NS_UVW .or. equations==CNS) then
       x=4   ! number of spectrums in file for each time.  
       call cwrite8(fid,x,1)
       

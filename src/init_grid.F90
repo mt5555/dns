@@ -45,6 +45,12 @@ call print_message(message)
 
 !
 ! are we also tracking passive scalars?
+! in NS_UVW model, if n_var > 3, all extra variables are passive
+! scalars.
+!
+! To add passive scalars to the CNS model, we need to update
+! cns.F90 to advect them, and here assign all extra variables
+! if n_var>5 to be passive scalars
 !
 if (equations==NS_UVW) then
    ! NS_UVW requires u,v,w (n_var>=3) even for 2d problems
@@ -1391,6 +1397,8 @@ else if (sdata=='ns_psivor') then
    equations=NS_PSIVOR
 else if (sdata=='shallow') then
    equations=SHALLOW
+else if (sdata(1:3)=='cns') then
+   equations=CNS
 else 
    print *,'value = >>',sdata,'<<'
    call abort("invalid equations specified")

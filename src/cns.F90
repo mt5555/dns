@@ -25,14 +25,16 @@ logical,save :: firstcall=.true.
 if (firstcall) then
    firstcall=.false.
    if (alpha_value/=0) then
-      call abort("Error: dnsghost cannot handle alpha>0.")
+      call abort("Error: cdns cannot handle alpha>0.")
    endif
    if (numerical_method /= FOURTH_ORDER) then
-      call abort("Error: dnsghost requires 4th order derivatives")
+      call abort("Error: cdns requires 4th order derivatives")
+   endif
+   if (equations/=CNS) then
+      call print_message("Error: cdns model can only runs equations==CNS")
+      call abort("initial conditions are probably incorrect.")
    endif
 endif
-
-
 
 
 
@@ -380,7 +382,7 @@ else if ( (.not.REALBOUNDARY(g_bdy_x1)) .and. &
    tol=1e-8
    call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic_ghost,.false.)
 else
-   stop 'divfree_ghost: only supports periodic case'
+   stop 'cdns: only supports periodic case'
 endif
 
 
