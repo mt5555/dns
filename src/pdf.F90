@@ -25,7 +25,7 @@ integer :: countx=-1,county=-1,countz=-1
 
 
 integer           :: structf_init=0
-integer,parameter :: delta_num_max=32
+integer,parameter :: delta_num_max=100
 integer           :: delta_val(delta_num_max)
 integer :: numx=0,numy=0,numz=0          ! actual number of delta's in each direction
                                          ! allowed by the grid
@@ -119,14 +119,6 @@ integer,parameter :: NUM_JPDF=3
 type(jpdf_structure_function) ::  jpdf_v(NUM_JPDF,3)
 
 
-!
-! some strain/vorticity structure functions
-! saved as structure functions, not PDF's
-!
-real*8 :: v2v2_str(delta_num_max,3)
-real*8 :: S2S2_str(delta_num_max,3)
-real*8 :: S2v2_str(delta_num_max,3)
-
 
 contains
 
@@ -145,24 +137,80 @@ use params
 implicit none
 
 integer idel,i
-integer :: nmax
+integer :: nmax,max_delta
 ! we can compute them up to g_nx/2, but no reason to go that far.
 nmax=max(g_nx/3,g_ny/3,g_nz/3)
 
-delta_val=99999
-do i=1,delta_num_max
-   delta_val(i)=1 +  (i-1)*real(nmax)/real(delta_num_max-1)
+
+delta_val=100000
+
+! compute all deltas up to ndelta_max
+! (but we only use deltas up to ndelta)
+! 1..16
+do i=1,16
+   delta_val(i)=i
+enddo
+j=16
+
+! 18..32  (start with 2*9)
+do i=9,16
+   j=j+1
+   delta_val(j)=2*i
 enddo
 
+! 36..64  (start with 4*9)
+do i=9,16
+   j=j+1
+   delta_val(j)=4*i
+enddo
+
+! 72..128 (start with 8*9)
+do i=9,16
+   j=j+1
+   delta_val(j)=8*i
+enddo
+
+! 144..256  (start with 16*9)
+do i=9,16
+   j=j+1
+   delta_val(j)=16*i
+enddo
+
+! 288..512  (start with 32*9)
+do i=9,16
+   j=j+1
+   delta_val(j)=32*i
+enddo
+
+! 576..1024  (start with 64*9)
+do i=9,16
+   j=j+1
+   delta_val(j)=64*i
+enddo
+
+! 1152..2048
+do i=9,16
+   j=j+1
+   delta_val(j)=128*i
+enddo
+! determine maximum value of delta to use for this grid
+if (j > delta_num_max) then
+   call abort("structf init: j > delta_num_max")
+endif
+
+max_delta = g_nmin/2
+if (user_specified_isodel>0) then
+   max_delta=min(max_delta,user_specified_isodel)
+endif
 
 do idel=1,delta_num_max
-   if (delta_val(idel) < g_nx/2) then
+   if (delta_val(idel) < max_delta) then
       numx=idel
    endif
-   if (delta_val(idel) < g_ny/2) then
+   if (delta_val(idel) < max_delta) then
       numy=idel
    endif
-   if (delta_val(idel) < g_nz/2) then
+   if (delta_val(idel) < max_delta) then
       numz=idel
    endif
 enddo
@@ -424,22 +472,6 @@ if (my_pe==io_pe) then
    enddo
 #endif
 
-   ! some strain/vorticity structure functions (not stored as pdf's)
-   numm=max(numx,numy,numz) 
-   call cwrite8(fidS,time,1)       ! time
-   x=3; call cwrite8(fidS,x,1)     ! number of structure functions
-   x=numm; call cwrite8(fidS,x,1)  ! number of delta's
-
-   ! number of structure functions
-   do i=1,3
-      call cwrite8(fidS,v2v2_str(1,i),numm)
-   enddo
-   do i=1,3
-      call cwrite8(fidS,S2S2_str(1,i),numm)
-   enddo
-   do i=1,3
-      call cwrite8(fidS,S2v2_str(1,i),numm)
-   enddo
 endif
 
 
@@ -675,42 +707,6 @@ end subroutine
 
 
 
-
-
-
-
-
-subroutine compute_S2v2structs(v2,S2,n1,n1d,n2,n2d,n3,n3d,v2v2,S2S2,S2v2)
-integer :: n1,n1d,n2,n2d,n3,n3d
-real*8 :: v2(n1d,n2d,n3d),S2(n1d,n2d,n3d)
-real*8 :: v2v2(delta_num_max),S2S2(delta_num_max),S2v2(delta_num_max)
-
-! local
-integer :: i,j,k,idel,ndelta,i2
-v2v2=0
-S2S2=0
-S2v2=0
-
-ndelta=delta_num_max
-
-do k=1,n3
-   do j=1,n2
-      do idel=1,ndelta
-         if (delta_val(idel) < n1/2) then
-            do i=1,n1
-               ! compute structure functions for U,V,W 
-               i2 = i + delta_val(idel)
-               if (i2>n1) i2=i2-n1
-               v2v2(idel)=v2v2(idel) + v2(i,j,k)*v2(i2,j,k)
-               S2S2(idel)=S2S2(idel) + S2(i,j,k)*S2(i2,j,k)
-               S2v2(idel)=S2v2(idel) + S2(i,j,k)*v2(i2,j,k)
-            enddo
-         endif
-      enddo
-   enddo
-enddo
-
-end subroutine
 
 
 
@@ -1144,7 +1140,7 @@ real*8 gradw(nx,ny,nz,n_var)
 integer n1,n1d,n2,n2d,n3,n3d,ierr
 integer i,j,k,n,m1,m2
 real*8 :: vor(3),uij,uji
-real*8 :: dummy(1),S2sum,ensave
+real*8 :: dummy(1),ensave
 real*8 :: tmx1,tmx2
 
 
@@ -1189,60 +1185,6 @@ enddo
 work=mu*work
 call compute_pdf_epsilon(work)
 
-
-
-
-
-! cj structure functions
-! 
-! work = vor**2
-! work2 = S**2
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
-   vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
-   vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
-   work(i,j,k)=vor(1)**2+vor(2)**2+vor(3)**2
-
-   do m1=1,3
-   do m2=1,3
-      if (m1==1) uij=gradu(i,j,k,m2)
-      if (m1==2) uij=gradv(i,j,k,m2)
-      if (m1==3) uij=gradw(i,j,k,m2)
-      if (m2==1) uji=gradu(i,j,k,m1)
-      if (m2==2) uji=gradv(i,j,k,m1)
-      if (m2==3) uji=gradw(i,j,k,m1)
-      !S(m1,m2)= .5*(uij+uji)
-      work2(i,j,k) =   work2(i,j,k) + ( .5*(uij+uji) ) **2     
-   enddo
-   enddo
-enddo
-enddo
-enddo
-
-
-! compute integrals of:
-! <v2(x),v2(x+r)>       work=v2
-! <S2(x),S2(x+r)>       work2=S2
-! <S2(x),v2(x+r)>
-!
-! overwrite gradu in the process
-! v2 v2 structure functions:
-call transpose_to_x(work,gradu,n1,n1d,n2,n2d,n3,n3d)
-call transpose_to_x(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
-call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
-     v2v2_str(1,1),S2S2_str(1,1),S2v2_str(1,1))
-
-call transpose_to_y(work,gradu,n1,n1d,n2,n2d,n3,n3d)
-call transpose_to_y(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
-call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
-     v2v2_str(1,2),S2S2_str(1,2),S2v2_str(1,2))
-
-call transpose_to_z(work,gradu,n1,n1d,n2,n2d,n3,n3d)
-call transpose_to_z(work2,gradv,n1,n1d,n2,n2d,n3,n3d)
-call compute_S2v2structs(gradu,gradv,n1,n1d,n2,n2d,n3,n3d,&
-     v2v2_str(1,3),S2S2_str(1,3),S2v2_str(1,3))
 
 
 

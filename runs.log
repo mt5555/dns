@@ -1,4 +1,39 @@
 **********************************************************************************
+12/6/02
+
+VXPAIR
+
+
+vx6144c.inp
+mu=4e-8
+./gridsetup.py 24 1 1 6144 3072 1 2 2 0 2 2 0   2
+
+timings:
+6144x3072    2 cpu milkyway:  338m per t=1.  
+                                                              t=1
+6144x3072    shankara:  24x1: mu=4e8  3.74m for t=.05         75m    
+                         6x4          3.77  
+                        12x1    test?
+                         8x1    test?
+
+24x1 IN 
+
+
+Run with new ellipse code (uses monika's algorithm) and
+fixed .cross output.  (order output has bad .cross data and I've
+deleted all the files.  also, which ellipse contour algorithm
+was beeing used for the older data?)
+
+
+Running in /ccs/taylorm/dns/src/vxpair
+(move later?)
+
+
+
+
+
+
+**********************************************************************************
 11/27/02
 
 shiyi forced run for Chris.
@@ -13,6 +48,12 @@ delx/eta = .5
 **********************************************************************************
 10/31/02
 QB pre-science run.
+ 
+convert to h5:     5 per eddy turnover time
+2048^3 analysis:   run 5 per eddy turnover time?
+1024^3 conversion: everything
+
+
 
 .4020:  last non-rescaled run.
         rescale run started from this time.  
@@ -27,7 +68,9 @@ Then there is a glitch between time step 10 and time step 15.
 2.4328.scalars,spec,spect   bad. 
 2.4400.scalars-turb  bad
 
-restart from 2.4328.[uvw].  
+restart from 2.4328.[uvw].  looks good.
+
+ 
 
 
 1. initial value: restart + rescale.  call daniel to talk about this
@@ -646,9 +689,6 @@ mu=2e-8.  a touch noisy in one snapshot that I saw, went away.
 6144x3072    2 cpu milkyway:  338m per t=1.  
 
 
-6144x3072    shankara:  24x1: mu=4e8  3.74m for t=.05
-                         6x4          3.77  
-
 
 if we use mu^3/4 rule, new grid:  10332x5000.  So lets go with 12288x6144.
 
@@ -661,12 +701,18 @@ BlueMtn:
 Benchmarks for 12288x6144:   RES size: 5.7GB
 ./gridsetup.py 24 1 1 12288 6144 1 2 2 0 2 2 0   2
 Shankara  t=.05
-24x1
-6x4      
+24x1       43m
+6x4        40.6m
+
+8x2        59m  (how many nodes?)
+6x2        54m  (12 nodes too)
+12x1       55m   (12 nodes too) 
+12x1       85m   (6 nodes)
+
 
 ASCI Q    t=.05    t=1 (extrapolated)   t=150
 cpus      
-2x1       39.05 
+2x1       39.05                           81 d
 4x1
 8x1
 16x1
@@ -676,7 +722,7 @@ cpus
 32x2      10.77
 16x4       9.58
 8x8       11.44
-16x2      12.02
+16x2      12.02?
 
 128x1      4.89    1.63h                 10.2d
 

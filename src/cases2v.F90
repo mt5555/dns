@@ -314,7 +314,7 @@ do i=bx1,bx2
       psisum = psisum - wd(k)*log(denom1/denom2)
    enddo
    w(i,j,1) = delsq*wsum/pi
-   Qhat(i,j,1,2)= psisum*delx*dely/(4*pi)  - biotsavart_ubar*ycord(j)
+   Qhat(i,j,nz1,2)= psisum*delx*dely/(4*pi)  - biotsavart_ubar*ycord(j)
 enddo
 enddo
 call comp_ellipse_reshape(w,1)  ! use initial w to set max vorticity for ellipse contours

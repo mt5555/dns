@@ -16,7 +16,7 @@ name='decay2048';
 namedir='/ccs/scratch/taylorm/decay/';
 
 % save spectrum at these times:
-tsave=[0 .41 .80  1.2 1.6 2.0 2.44 2.45 2.6 ];
+tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 ];
 spec_r_save=[];
 
 fid=endianopen([namedir,name,'.spec'],'r');

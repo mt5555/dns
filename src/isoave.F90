@@ -17,7 +17,7 @@ implicit none
 
 
 integer,parameter :: ndir_max=73
-integer,parameter :: ndelta_max=73
+integer,parameter :: ndelta_max=100
 integer,parameter :: pmax=10       ! has to be 6 or greater
 integer :: dir(3,ndir_max)
 integer :: ndelta,ndir
@@ -1443,7 +1443,7 @@ do i=9,16
 enddo
 ! determine maximum value of delta to use for this grid
 if (j > ndelta_max) then
-   stop "isoave init: j > ndelta_max"
+   call abort("isoave init: j > ndelta_max")
 endif
 
 max_delta = g_nmin/2

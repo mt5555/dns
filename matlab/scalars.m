@@ -16,9 +16,9 @@ fid2=-1;
 %fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
 %fid=fopen('../src/kh/khN.scalars','r','l'); 
 %fid=endianopen('/ccs/scratch/taylorm/dns/iso12_512.scalars','r'); 
-fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
+%fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
-%fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
+fid=fopen('/ccs/scratch/taylorm/decay/decay2048.scalars','r','l'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
 
@@ -118,10 +118,19 @@ plot(time,hel,'g')
 title('KE: red,    d(KE)/dt: blue,    hel: green');
 hold off
 xlabel('time')
+
+figure(6)
+clf
+semilogy(time,ke,'r'); hold on
+%plot(time_2,-ke_diss_tot,'b.')
+plot(time,-ke_diss_d,'b')
+title('KE: red,    d(KE)/dt: blue');
+hold off
+xlabel('time')
 print -dpsc ke.ps
 print -djpeg -r72 ke.jpg
 
-figure(6)
+figure(7)
 plot(time,sqrt(ens),'r')
 title('average vorticity magnitude')
 xlabel('time')

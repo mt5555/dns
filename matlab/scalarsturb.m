@@ -20,13 +20,13 @@ clear all;
 
 name = '/ccs/scratch/taylorm/decay/decay2048'
 times=[0,.0167,.0283,.0524,.0650,.0776, .2131  .2207 .2357]
-times=[times,.24:.01:2.80];
+times=[times,.24:.01:3.10];
 
 %name = '/ccs/scratch/taylorm/dns/iso12_512'
 %times=7;
 
-name = '/ccs/scratch/taylorm/dns/sc512A'
-times=3;
+%name = '/ccs/scratch/taylorm/dns/sc512A'
+%times=3;
 
 
 nt=0;
