@@ -5,8 +5,8 @@ use mpi
 use params
 implicit none
 integer ierr
-character*(*) message
-character*15 :: pre="ASSERT FAILURE "
+character(len=*) message
+character(len=15) :: pre="ASSERT FAILURE "
 write(*,'(a)') pre // message
 
 #ifdef IBM
@@ -25,7 +25,7 @@ end subroutine
 subroutine print_message(message)
 use params
 implicit none
-character*(*) message
+character(len=*) message
 if (my_pe==io_pe) then
    write(*,'(a)') message
 endif
@@ -62,7 +62,7 @@ use params
 implicit none
 integer :: n
 real*8  ::  spectrum(0:n)
-character*(*) :: title
+character(len=*) :: title
 
 
 ! local variables

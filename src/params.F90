@@ -39,7 +39,7 @@ implicit none
 real*8  :: mu=0           !viscosity
 integer,parameter :: r8kind=kind(mu)
 logical :: dealias       
-character*80 :: runname
+character(len=80) :: runname
 real*8  :: pi,pi2,pi2_squared
 
 
@@ -249,7 +249,7 @@ integer :: comm_3d                 ! the MPI cartesian communcator
 contains
 
 subroutine params_init
-character*80 message
+character(len=80) message
 integer :: fail=0
 
 g_nx=nslabx*ncpu_x

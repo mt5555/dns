@@ -8,7 +8,7 @@ integer :: itime
 
 ! local variables
 integer i,j,k,n
-character*80 message
+character(len=80) message
 real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 divx,divi,tmx1,tmx2,del,delke_tot
 logical,external :: check_time
@@ -171,8 +171,8 @@ real*8 :: time
 ! local variables
 integer i,j,k,n
 real*8 xnx,xny,xnz,xnv
-character*80 message
-character*20 tmp
+character(len=80) message
+character(len=20) tmp
 CPOINTER :: fid
 integer ierr
 
@@ -256,7 +256,7 @@ real*8 spec_y(0:g_ny/2)
 real*8 spec_z(0:g_nz/2)
 real*8 x
 real*8,allocatable  ::  spectrum(:),spectrum1(:)
-character*80 :: message
+character(len=80) :: message
 character :: access
 CPOINTER fid
 
@@ -371,7 +371,7 @@ integer i,j,k,n
 real*8 xnx,xny,xnz
 real*8 :: vor(nx,ny,nz,n_var)
 real*8 :: d1(nx,ny,nz),work(nx,ny,nz)
-character*80 message
+character(len=80) message
 integer n_var_start,ierr
 CPOINTER fid
 

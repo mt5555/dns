@@ -7,7 +7,7 @@ use mpi
 
 implicit none
 integer ierr1,ierr2,ierr3,rank
-character*80 message
+character(len=80) message
 
 my_pe=0
 mpicoords=0
@@ -54,7 +54,7 @@ use mpi
 implicit none
 logical isperiodic(3),reorder
 integer ierr1,ierr2,ierr3,rank
-character*80 message
+character(len=80) message
 
 
 #ifdef USE_MPI

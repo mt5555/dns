@@ -10,7 +10,7 @@ use mpi
 use structf
 implicit none
 real*8,allocatable :: Q(:,:,:,:)
-character*80 message
+character(len=80) message
 integer ierr
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 
@@ -127,7 +127,7 @@ real*8 :: Qw2(nx,ny,nz,n_var)
 real*8  :: time=0
 integer :: itime=0,ierr,n
 integer :: itime_final
-character*80 message
+character(len=80) message
 real*8 :: ke_old,time_old,delke_tot
 real*8 :: ints_buf(nints)
 

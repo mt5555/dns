@@ -12,7 +12,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: alpha,beta
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
-character*80 message
+character(len=80) message
 
 !random vorticity
 do k=nz1,nz2

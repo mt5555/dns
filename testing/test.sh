@@ -26,6 +26,10 @@ endif
 
 if ($1 == 3p) then
 
+  ./gridsetup.py 2 2 1 128 128 8  
+  make >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dns < $refin > $tmp 
+  ../testing/check.sh $tmp $refout
+
   ./gridsetup.py 1 1 2 128 128 8  
   make >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dns < $refin > $tmp 
   ../testing/check.sh $tmp $refout

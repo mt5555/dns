@@ -109,7 +109,7 @@ end subroutine
 
 subroutine fftinit(n,index)
 integer n,index
-character*80 message
+character(len=80) message
 
 if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initialize first!")
 if (n>1000000) call abort("fft99_interface.F90: n>1 million")
@@ -131,7 +131,7 @@ end subroutine
 subroutine getindex(n1,index)
 integer n1,index
 
-character*80 message_str
+character(len=80) message_str
 integer i,k
 
 
@@ -167,7 +167,7 @@ real*8 p(n1d,n2d,n3d)
 real*8 w(n2*(n1+1))
 
 real*8 :: scale=1
-character*80 message_str
+character(len=80) message_str
 
 integer index,j,k
 if (n1==1) return

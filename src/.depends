@@ -24,7 +24,3 @@ temp.o: macros.h params.o fft_interface.o transpose.o makefile
 test.o: macros.h params.o mpi.o transpose.o fft_interface.o makefile 
 transpose.o: macros.h transpose.h params.o mpi.o makefile 
 util.o: macros.h mpi.o params.o makefile 
-fbelimb.o: makefile 
-fft99.o: makefile 
-initshear.o: makefile 
-ludecb.o: makefile 

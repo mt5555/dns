@@ -38,7 +38,7 @@ real*8 work(nx,ny,nz)
 real*8 mx,tx1,tx2,tmax,tave
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,n,ierr
-character*80 message
+character(len=80) message
 
 input=0
 output=0
@@ -148,7 +148,7 @@ real*8 input(nx,ny,nz,3)
 real*8 p(nx,ny,nz)
 real*8 d1(nx,ny,nz)
 real*8 dummy
-character*80 message
+character(len=80) message
 
 integer i,j,k,dim
 
@@ -216,7 +216,7 @@ real*8 input(nx,ny,nz)
 integer i,j,k
 real*8 cf1,alpha,beta
 real*8 error,tmp
-character*80 message
+character(len=80) message
 
 alpha=1
 beta=.5
@@ -331,7 +331,7 @@ real*8 inputzz(nx,ny,nz)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 cf1,error
 integer i,j,k
-character*80 message
+character(len=80) message
 
 
 input = 0
@@ -484,7 +484,7 @@ subroutine print_modes(output)
 use params
 implicit none
 real*8 :: output(nx,ny,nz),wn
-character*80 message
+character(len=80) message
 integer :: i,j,k,count=0
 
 do i=nx1,nx2

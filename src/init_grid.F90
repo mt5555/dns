@@ -16,7 +16,7 @@ implicit none
 !local variables
 real*8 :: one=1,xfac,diff_2h,kmode
 integer i,j,k,l,ierr
-character*80 message
+character(len=80) message
 integer input_file_type
 
 
@@ -193,8 +193,8 @@ use params
 implicit none
 
 !local variables
-character*80 message
-character*20 sdata
+character(len=80) message
+character(len=20) sdata
 real*8 rvalue
 integer i
 
@@ -276,8 +276,8 @@ use params
 implicit none
 
 !local variables
-character*80 message
-character*20 sdata
+character(len=80) message
+character(len=20) sdata
 real*8 rvalue,xfac,kmode
 integer i
 

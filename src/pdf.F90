@@ -151,7 +151,7 @@ real*8 time
 CPOINTER fid
 
 integer i,ierr
-character*80 message
+character(len=80) message
 real*8 x
 
 if (structf_init==0) then
