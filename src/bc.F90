@@ -267,8 +267,9 @@ if (runbs==1) then
 ! init to zero on boundary
 psi_b=0
 
-interp=.false.
-if (g_bdy_x1==INFLOW0_ONESIDED) interp=.true.
+
+! should we use interpolation to compute PSI?
+interp=(biotsavart_cutoff>0)
 
 
 

@@ -402,7 +402,7 @@ if (init_cond_subtype ==1) then
 ! scaled up to 720x400:   yscale=2
 !                         xscale=3.6   
 !
-   biotsavart_cutoff=0
+   biotsavart_cutoff=1e-6
    if (g_bdy_x1==INFLOW0_ONESIDED) biotsavart_cutoff=.005
    delta=.2
    ubar=.089
