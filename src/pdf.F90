@@ -8,7 +8,7 @@ integer,parameter :: delta_num_max=16
 integer           :: delta_val(delta_num_max)
 
 ! max range:  10 ... 10
-integer,parameter :: pdf_max_bin=1000
+integer,parameter :: pdf_max_bin=2000
 
 
 
@@ -155,6 +155,7 @@ if (bin>pdf_max_bin) then
    overflow=overflow+1
    if (overflow<10) print *,"Warning pdf bin overflow on pe=",my_pe
    if (overflow==10) print *,"disabling bin overflow messages"
+   bin=pdf_max_bin
 endif
 
 
@@ -366,8 +367,9 @@ endif
 call wallclock(tmx1)
 
 ndelta=str(1)%delta_num
-ASSERT("ndelta must be the same for all U structure functions",ndelta==str(2)%delta_num)
-ASSERT("ndelta must be the same for all U structure functions",ndelta==str(3)%delta_num)
+do j=2,NUM_SF
+ASSERT("ndelta must be the same for all U structure functions",ndelta==str(j)%delta_num)
+enddo
 
 do k=1,n3
    do j=1,n2
@@ -502,6 +504,8 @@ real*8 fin(g_nz2,nslabx,ny_2dz,n_var)  ! input
 real*8 f(nx,ny,nz,n_var)               ! output
 real*8 w1(nx,ny,nz,n_var)
 real*8 Qt(nx,ny,nz,n_var)    
+
+! overlapped in memory:
 real*8 work(nx,ny,nz)
 real*8 works(g_nz2,nslabx,ny_2dz)
 
@@ -514,14 +518,14 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,n
 real*8 dummy(1)
 
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
 
 do n=1,3
-   n1=g_nz
-   n1d=g_nz2   	
-   n2=nslabx
-   n2d=nslabx
-   n3=ny_2dz
-   n3d=ny_2dz
    works=fin(:,:,:,n)
    call ifft1(works,n1,n1d,n2,n2d,n3,n3d)
    call transpose_from_z(works,f(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
@@ -552,8 +556,6 @@ else ! compy, or default (compute no structure functions)
    if (compy) call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,2))
 endif
 
-
-
 if (compz) then
 
    !
@@ -570,20 +572,19 @@ if (compz) then
          work=work+w1(:,:,:,1)**2
 
          ! compute y derivative
-         call der(f(1,1,1,n),w1,dummy,1,2)
+         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),1,2)
          work=work+w1(:,:,:,1)**2
 
       else
          ! Qt = y transpoe of (u,v,w), computed above
          call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
-         call transpose_from_x(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
+         call transpose_from_y(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
          work=work+w1(:,:,:,1)**2
 
          ! compute x derivative
-         call der(f(1,1,1,n),w1,dummy,1,1)
+         call der(f(1,1,1,n),w1,dummy,w1(1,1,1,2),1,1)
          work=work+w1(:,:,:,1)**2
       endif
-
    enddo
 
    ! do the Z component
@@ -592,19 +593,21 @@ if (compz) then
    enddo
    ! Qt = z transpose of (u,v,w)
    ! compute regular structure functions:
+   print *,'bug!'
+   w1=Qt
+   Qt(:,:,:,1)=w1(:,:,:,2)
    call compute_pdf(Qt,n1,n1d,n2,n2d,n3,n3d,SF(1,3))
 
    ! add in epsilon component
    do n=1,3
       call fft_derivatives(Qt(1,1,1,n),dummy,1,n1,n1d,n2,n2d,n3,n3d)
-      call transpose_from_x(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
+      call transpose_from_z(Qt(1,1,1,n),w1,n1,n1d,n2,n2d,n3,n3d)
       work=work+w1(:,:,:,1)**2
    enddo
    work=mu*work
    call compute_pdf_epsilon(work)
 
 endif
-
 
 end subroutine
 

@@ -27,11 +27,11 @@ implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
 ! overlapped in memory:
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: rhsg(nx,ny,nz,n_var)
-real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
 
 
 ! local variables
@@ -130,7 +130,6 @@ do n=1,3
    !call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 call z_ifft3d_str(Q,Q_grid,rhs,Q_tmp,work,work,(countx==0),(county==1),(countz==0))
-
 
 time = time + delt
 

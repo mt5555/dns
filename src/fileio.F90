@@ -130,11 +130,11 @@ if (doit) then
    call print_message(message)	
 
    write(message,'(a,f13.10,a,f12.7)') 'ke: ',ints(1),&
-     '                              total d/dt(ke)/ke: ',delke_tot/ints(1)
+     '                                 total d/dt(ke): ',delke_tot
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7)') &
-     'd/dt(ke) from:  diffusion=',ints(3)/ints(1),' forcing=',ints(2)/ints(1),&
-     ' total=',(ints(2)+ints(3))/ints(1)
+     'd/dt(ke) from:  diffusion=',ints(3),' forcing=',ints(2),&
+     ' total=',(ints(2)+ints(3))
    call print_message(message)	
    call print_message("")
 endif

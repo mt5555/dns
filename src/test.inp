@@ -2,9 +2,9 @@
 test         ! runname
 iso12        ! initial condition:  KH-blob, KH-anal, iso12
 iso12        ! forcing:  none, iso12
-2            ! str_nx  compute structure functions every str_nx timesteps
-2            ! str_ny  0=disabled.  str_nx & str_y >= 2 
-10           ! str_nz  Set large.  requires 1 extra z-transpoze to compute.
+0            ! str_nx  compute structure functions every str_nx timesteps
+0            ! str_ny  0=disabled.  str_nx & str_y >= 2 
+1           ! str_nz  Set large.  requires 1 extra z-transpoze to compute.
 kediff       ! viscosity type  (value, smallest, kediff, Re)
 300.0        ! viscosity coefficient.  
 fft-dealias  ! derivative method  (fft, fft-dealias, 4th)

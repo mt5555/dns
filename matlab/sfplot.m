@@ -34,14 +34,16 @@ while (time>=0 & time<=5000)
       p=1;
       % structure function to the p'th power
       str=sum(pdf(:,dp).*bins.^p);
+
       
       mx=max(bins - bins.*(pdf(:,dp)==0));
-      mn=min(bins - bins.*(pdf(:,dp)==0)); % min over non zero values
+      mn=min(bins - bins.*(pdf(:,dp)==0)); % min over non zero values      
+
       bar(bins,pdf(:,dp))
       ax=axis;
       %axis([-1,1,ax(3),ax(4)]);
-      axis([-1.5,1.5,0,.05]);
-      ylabel(sprintf('                  %s(%s)-%s(%s+%i)',components(j),var(i),components(j),var(i),delta(dp)));
+      axis([-1.5,1.5,0,.08]);
+      ylabel(['\Delta',sprintf('_{%i%s} %s',delta(dp),var(i),components(j))]);
       xlabel(sprintf('min=              %.4f  max=%.4f  ncalls=%i str(%i)=%.5f',mn,mx,n_call,p,str));
       if (i==1) title(sprintf('Time=    %.4f',time)); end;
     end
@@ -72,6 +74,9 @@ while (time>=0 & time<=5000)
       %axis([-1,1,ax(3),ax(4)]);
       axis([-1.5,1.5,0,.05]);
       ylabel(sprintf('                  %s  DEL(%s)  p=%i',components(j),var(i),delta(dp)));
+      text=['\Delta',sprintf('_{%i%s}',delta(dp),var(i))]; 
+      text=[text,sprintf('              %s (',components(j)),text,'U^2 + ',text,'V^2 + ',text,'W^2)'];
+      ylabel(text);
       xlabel(sprintf('min=              %.4f  max=%.4f  ncalls=%i str(%i)=%.5f',mn,mx,n_call,p,str));
       if (i==1) title(sprintf('Time=    %.4f',time)); end;
     end
@@ -85,6 +90,18 @@ while (time>=0 & time<=5000)
   % read in number of plain pdf's
   npdf=fread(fid,1,'float64');
   [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
+  figure(3)
+  p=1;
+  str=sum(pdf.*bins.^p);
+  mx=max(bins - bins.*(pdf==0));
+  mn=min(bins - bins.*(pdf==0));        % min over non zero values
+  bar(bins,pdf)
+  ax=axis;
+  %axis([-1,1,ax(3),ax(4)]);
+  axis([0,25.0,0,.01]);
+  xlabel(sprintf('min=                  %.4f  max=%.4f  ncalls=%i str(%i)=%.5f',mn,mx,n_call,p,str));
+  title(sprintf('Time=                  %.4f',time)); 
+  
   disp('done...')
   pause  
   

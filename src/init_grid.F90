@@ -261,6 +261,9 @@ enddo
 
 init_cond=1      ! KH analytic - default initial condition
 forcing_type=0   ! no forcing
+struct_nx=0
+struct_ny=0
+struct_nz=0
 
 end subroutine
 
