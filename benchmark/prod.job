@@ -12,11 +12,12 @@ module list
 set NCPU = 128
 
 set SRC=$HOME/dns/src
-set name = iso12_512_
+set name = iso12_256_
 #set refin=$HOME/dns/prod/benchmark128.inp
 set refin=$HOME/dns/prod/prod256.inp
 
 # number of times to resubmit:
+set restart = 1
 set resub = 20
 set resub_file = $SRC/{$name}resub
 
@@ -29,50 +30,67 @@ make -j 4 dns
 if (!(-d /scratch/taylorm)) then
    mkdir /scratch/taylorm
 endif
-cp dns  /scratch/taylorm/dns
+\cp -f dns  /scratch/taylorm/dns
 
 cd /scratch/taylorm
 
 if ($restart == 1) then
 
    # check for resub limit
-   set out = `$SRC/lsfcheck $resub_file $resub`
+   set out = `$SRC/lsfcheck.py $resub_file $resub`
+   echo 'resublimit = ' $resub 
+   echo 'resub value in file: '
+   cat $resub_file
    if ($out != SMALLER) then
-      echo 'resubmit limit reached.  limit=' $resub 'value in file:'
-      cat $resub_file
+      echo 'resubmit limit reached.  Exit.'
       exit 1
    endif
 
    #search HPSS for newest restart file
-   set resname = `psi ls -t dns/{$name}\*.u | sort | tail -1`
-   if ($resname =="") then
+   set resnameu = `psi ls -t dns/{$name}\*.u | sort | tail -1`
+   if ($resnameu =="") then
       echo "Error finding restart file.  Exit"
       exit 1
    else
-      echo "Using restart file: " $resname
+      set resnamev = `psi ls -t dns/{$name}\*.v | sort | tail -1`
+      set resnamew = `psi ls -t dns/{$name}\*.w | sort | tail -1`
+      echo "Using restart files: " 
+      echo $resnameu
+      echo $resnamev
+      echo $resnamew
    endif
 
+# NOTE: EOF MUST START IN COLUMN 1, AS BELOW:
    psi <<EOF
-   cd dns
-   get {$name}.u
-   get {$name}.v
-   get {$name}.w
-   EOF
-   mv -f {$name}.u  restart.u
-   mv -f {$name}.v  restart.v
-   mv -f {$name}.w  restart.w
+get $resnameu
+get $resnamev
+get $resnamew
+EOF
 
+   set resnameu = `basename $resnameu`
+   set resnamev = `basename $resnamev`
+   set resnamew = `basename $resnamew`
+
+   \mv -f $resnameu  restart.u
+   \mv -f $resnamev  restart.v
+   \mv -f $resnamew  restart.w
+   if !(-e restart.w) then
+      echo "No restart.w file"
+      exit 1
+   endif
    mpirun -np $NCPU ./dns -r -d . $name < $refin 
 else
-   mpirun -np $NCPU ./dns  -d . $name < $refin 
+   echo 'Initial run.  writing a 0 to ' $resub_file 
+   echo '0' > $resub_file
+   #mpirun -np $NCPU ./dns  -d . $name < $refin 
 endif
 
 
 
 
 #remove empty files before saving to HPSS:
+echo 'removing size 0 files'
 find . -size 0 -exec rm -f {} \; -print
-
 
 psi <<EOF
 cd dns

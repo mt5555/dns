@@ -9,6 +9,7 @@ import os, commands, getopt, sys
 # replaces it with M+1
 #
 # output:     FILE_ERROR        error accessing file
+#             VALUE_ERROR       error converting strings to values
 #             SMALLER           M < N
 #             LARGER            M > N
 #             EQUAL             M==N
@@ -33,7 +34,8 @@ try:
    fvalue=fvalue+1
    fid.close()
    fid=open(file,'w')
-   fid.write(str(fvalue))
+   fid.write(str(fvalue)+"\n")
+   fid.close()	
 
    if (fvalue<target):
       print 'SMALLER'
@@ -49,6 +51,9 @@ except IOError,e:
    print 'FILE_ERROR'
    sys.exit(1)
 
+except ValueError,e:
+   print 'VALUE_ERROR'
+   sys.exit
 
 
 
