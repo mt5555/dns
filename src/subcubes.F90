@@ -130,7 +130,8 @@ real*8 :: rmatrix(3,3,3)
 real*8 :: xi,yi,zi
 integer :: n1,n2,n3,i,j,k
 #ifdef USE_MPI
-real*8,allocatable :: data2(nsx,nsy,nsz)
+real*8,allocatable :: data2(:,:,:)
+integer :: ierr
 #endif
 
 if (io_pe==my_pe) then

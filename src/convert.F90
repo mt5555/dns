@@ -354,9 +354,9 @@ basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
 fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu'
 open(15,file=fname,form='formatted')
 do sc=1,nsubcube
-   write(15,'(3ef12.8,i5)') subcube_corner(1:3,sc),ssize
+   write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
    do i=1,3
-      write(15,'(3e20.10)') (gradu(i,j,sc),j=1,3)
+      write(15,'(3e18.10)') (gradu(i,j,sc),j=1,3)
    enddo
 enddo
 close(15)
@@ -369,9 +369,9 @@ basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
 fname = basename(1:len_trim(basename)) // sdata(2:10) // '.gradu2'
 open(15,file=fname,form='formatted')
 do sc=1,nsubcube
-   write(15,'(3ef12.8,i5)') subcube_corner(1:3,sc),ssize
+   write(15,'(3f12.8,i5)') subcube_corner(1:3,sc),ssize
    do i=1,3
-      write(15,'(3e20.10)') (gradu2(i,j,sc),j=1,3)
+      write(15,'(3e18.10)') (gradu2(i,j,sc),j=1,3)
    enddo
 enddo
 close(15)
