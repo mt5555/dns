@@ -1,4 +1,22 @@
 **********************************************************************************
+8/7/01  More 128x128 runs.  
+
+128x128 can handle mu=.0002 to t=1.  What happens if we run longer?
+
+CFL=2.0   some problems at t=4:  noisy, but just two large blobs
+CFL=1.9   t=4 looks good, t=10 is noisy
+CFL=1.8   t=4 looks good, t=10 looks good.  t=20 noisy
+
+    1.7   t=50 IN
+CFL=1.5   t=4 looks good, t=10 looks good.  two large blobs
+CFL=1.0   t=4 looks good, t=10 looks good.  two large blobs
+
+
+
+
+
+
+**********************************************************************************
 9/29/01  CFL and viscosity test
 
 128x128 Kelvin Helmholz initial condition.
@@ -22,8 +40,9 @@ CFL rk4
 2.5   vorticity looks bad
 2.2   vorticity looks bad
 2.1   vorticity looks good
-2.0   vorticity looks good - same as 256sx256 result
+2.0   vorticity looks good - same as 256x256 result
       running past t=1? 
+
 CFL rk3  (1.5 rk3 = same cost as 2.0 rk4)
 2.0   bad
 1.5   bad

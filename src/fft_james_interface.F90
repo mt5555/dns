@@ -48,7 +48,7 @@ real*8 :: pi2,pi2_squared
 
 integer :: init=0
 type fftdata_d
-   integer :: trigs
+   real*8 :: ptrigs   ! used as a C pointer.  make sure at least 64bit
    integer :: size
 end type
 type(fftdata_d) :: fftdata(num_fftsizes)
@@ -99,11 +99,10 @@ if (n>1000000) call abort("fft_james_interface.F90: n>1 million")
 
 fftdata(index)%size=n
 
-
 write(message,'(a,i6)') 'Initializing FFT of size n=',n
 call print_message(message)
 
-call rfft_init(n,fftdata(index)%trigs)
+call rfft_init(n,fftdata(index)%ptrigs)
 
 end subroutine
 
@@ -121,7 +120,7 @@ i=0
 do 
    i=i+1
    if (i>num_fftsizes) then
-      write(message_str,'(a,i10)') "fft_interface.F90:  Failed initializing an fft of size =",n1
+      write(message_str,'(a,i10)') "fft_james_interface.F90:  Failed initializing an fft of size =",n1
       call abort(message_str)
    endif
 
@@ -154,7 +153,7 @@ ASSERT("ifft1: dimension too small ",n1<=n1d);
 call getindex(n1,index)
 
 do k=1,n3
-   call rfft_synthesis_m(p(1,1,k),fftdata(index)%trigs,n2,n1d)
+   call rfft_synthesis_m(p(1,1,k),fftdata(index)%ptrigs,n2,n1d)
 enddo
 
 end subroutine
@@ -181,7 +180,7 @@ scale=n1
 scale=1/scale
 
 do k=1,n3
-   call rfft_analysis_m(p(1,1,k),fftdata(index)%trigs,n2,n1d)
+   call rfft_analysis_m(p(1,1,k),fftdata(index)%ptrigs,n2,n1d)
    do j=1,n2   
    do i=1,n1
       p(i,j,k)=p(i,j,k)*scale

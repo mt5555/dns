@@ -1,6 +1,6 @@
 fidu=fopen('test-0-0-0-0000.0000.data');
 %fidvor=fopen('test0000.5000.vor','r');
-fidvor=fopen('test0005.0000.vor','r');
+fidvor=fopen('test0020.0000.vor','r');
 
 %
 %########################################################################
