@@ -40,7 +40,7 @@ integer :: equations=NS_UVW        ! NS_UVW    = NS / NS-alpha
                                    ! SHALLOW   = Shallow water / shallow water-alpha
                                    ! NS_PSIVOR = NS Streamfunction-Vorticity
 integer :: numerical_method=FOURIER ! FOURIER
-                                    ! FORTH_ORDER
+                                    ! FOURTH_ORDER
                                     ! others?
 logical :: dealias=.false.       
 

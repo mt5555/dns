@@ -494,7 +494,7 @@ else if (sdata=='fft-dealias') then
    numerical_method=FOURIER
    dealias=.true.
 else if (sdata=='4th') then
-   numerical_method=FORTH_ORDER
+   numerical_method=FOURTH_ORDER
    dealias=.false.
 else
    call abort("only 'fft' derivative method supported")
@@ -633,7 +633,7 @@ else if (sdata=='fft-dealias') then
    numerical_method=FOURIER
    dealias=.true.
 else if (sdata=='4th') then
-   numerical_method=FORTH_ORDER
+   numerical_method=FOURTH_ORDER
    dealias=.false.
 else
    print *,'value=',sdata
@@ -816,7 +816,7 @@ else if (sdata=='fft-dealias') then
    numerical_method=FOURIER
    dealias=.true.
 else if (sdata=='4th') then
-   numerical_method=FORTH_ORDER
+   numerical_method=FOURTH_ORDER
    dealias=.false.
 else
    print *,'value=',sdata

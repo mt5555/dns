@@ -31,7 +31,7 @@ if ($1 == makeref) then
 endif
 
 if ($1 == 1) then
-./gridsetup.py 1 1 1 32 32 32  2 2 2 2 2 2
+./gridsetup.py 1 1 1 32 32 32  2 2 2  2 2 2
 
 echo "***********************************************************"
 echo "without restart:"
@@ -45,7 +45,7 @@ make dnsghost >& /dev/null ;  rm -f $tmp ; ./dnsghost -r -d $rundir ghost3d  < $
 
 echo "***********************************************************"
 echo "dnsgrid with restart:"
-./gridsetup.py 1 1 1 32 32 32
+./gridsetup.py 1 1 1 32 32 32 2 2 2 2 2 2
 make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid -r -d $rundir ghost3d < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
@@ -57,7 +57,7 @@ endif
 
 if ($1 == 2) then
 
-./gridsetup.py 1 1 1 32 32 32 2 2 0
+./gridsetup.py 1 1 1 32 32 32   3 3 3 4 4 4
 make dnsghost>& /dev/null ;  rm -f $tmp ; ./dnsghost -r -d $rundir ghost3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
@@ -76,22 +76,22 @@ else
 endif
 
 echo "***********************************************************"
-./gridsetup.py 1 1 2 32 32 32 2 2 0
+./gridsetup.py 1 1 2 32 32 32 2 2 2 2 2 2
 make dnsghost>& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsghost $opt -d $rundir ghost3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
-./gridsetup.py 1 2 1 32 32 32 2 2 0
+./gridsetup.py 1 2 1 32 32 32 2 2 2 2 2 2
 make dnsghost>& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsghost $opt -d $rundir ghost3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
-./gridsetup.py 2 1 1 32 32 32 2 2 0
+./gridsetup.py 2 1 1 32 32 32 2 2 2 2 2 2
 make dnsghost>& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsghost $opt -d $rundir ghost3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
-./gridsetup.py 2 1 2 32 32 32 2 3 4 4 3 2 
+./gridsetup.py 2 1 2 32 32 32  2 3 4  4 3 2 
 make dnsghost>& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dnsghost $opt -d $rundir ghost3d  < $refin > $tmp 
 ../testing/check.sh $tmp $refout
 

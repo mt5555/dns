@@ -25,7 +25,10 @@ logical,save :: firstcall=.true.
 if (firstcall) then
    firstcall=.false.
    if (alpha_value/=0) then
-      call abort("Error: dnsgrid cannot handle alpha>0.")
+      call abort("Error: dnsghost cannot handle alpha>0.")
+   endif
+   if (numerical_method /= FOURTH_ORDER) then
+      call abort("Error: dnsghost requires 4th order derivatives")
    endif
 endif
 
@@ -353,7 +356,8 @@ if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC ) then
 
-   call helmholtz_periodic_inv(p,work,alpha,beta)
+   !call dirichlet_periodic_inv(p,work,alpha,beta)
+   call fourth_periodic_inv(p,work,alpha,beta)
    !work=p  ! RHS
    !p=0  ! initial guess
    !tol=1e-10
@@ -400,3 +404,104 @@ enddo
 
 
 end subroutine
+
+
+
+
+
+subroutine fourth_periodic_inv(f,work,alpha,beta)
+!
+!  solve [alpha + beta*laplacian](p) = f
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+!real*8 work(nx,ny,nz) ! work array
+real*8 work(g_nz2,nslabx,ny_2dz)
+real*8 :: alpha
+real*8 :: beta
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+real*8 :: xfac
+real*8,save,allocatable :: sinx(:)
+real*8,save,allocatable :: siny(:)
+real*8,save,allocatable :: sinz(:)
+logical,save :: firstcall=.true.
+
+if (beta==0) then
+   f=f/alpha
+   return
+endif
+
+if (firstcall) then
+   firstcall=.false.
+
+   allocate(sinx(nslabx))
+   allocate(siny(ny_2dz))
+   allocate(sinz(g_nz))
+
+   do i=1,nslabx
+      sinx(i)=4*sin(z_imcord(i)*pi2*delx)/(3*delx) -&
+           sin(z_imcord(i)*pi2*2*delx)/(6*delx)
+      sinx(i)=-sinx(i)**2
+   enddo
+   
+   do j=1,ny_2dz
+      siny(j)=4*sin(z_jmcord(j)*pi2*dely)/(3*dely) - &
+           sin(z_jmcord(j)*pi2*2*dely)/(6*dely)
+      siny(j)=-siny(j)**2
+   enddo
+   
+   do k=1,g_nz
+      sinz(k)=4*sin(z_kmcord(k)*pi2*delz)/(3*delz) - &
+           sin(z_kmcord(k)*pi2*2*delz)/(6*delz)
+      sinz(k)=-sinz(k)**2
+   enddo
+endif
+
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)  ! x,y,z -> y,x,z
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d) 
+
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)  
+call fft1(work,n1,n1d,n2,n2d,n3,n3d)
+
+do j=1,ny_2dz
+   do i=1,nslabx
+      do k=1,g_nz
+         xfac=(sinx(i) + siny(j) + sinz(k))
+         if (abs(xfac)<1e-12) xfac=0
+         xfac= alpha + beta*xfac
+         if (xfac/=0) xfac = 1/xfac
+         work(k,i,j)=work(k,i,j)*xfac
+      enddo
+   enddo
+enddo
+
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)       
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)       
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)         ! y,x,z -> x,y,z
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d) 
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
+
+
+
+end

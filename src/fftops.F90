@@ -105,7 +105,7 @@ if (g_bdy_z1/=PERIODIC ) then
    call abort('der() can only handle periodic boundaries')
 endif
 
-if (numerical_method==FORTH_ORDER) then
+if (numerical_method==FOURTH_ORDER) then
 
 if (index==1) then
 
@@ -621,7 +621,7 @@ real*8 alpha,beta
 integer i,j,k,im,jm,km
 real*8 xfac,xm,ym,zm
 
-if (numerical_method==FORTH_ORDER) then
+if (numerical_method==FOURTH_ORDER) then
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2

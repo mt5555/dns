@@ -23,7 +23,7 @@
 
 ! numerical methods
 #define FOURIER        0
-#define FORTH_ORDER    1
+#define FOURTH_ORDER    1
 
 ! types of boundary conditions
 ! these boundaries are not 'real', and are just handled by the
