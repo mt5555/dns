@@ -1,3 +1,10 @@
+dEk/dt = T(k)  - mu*k**2*E(k)   copute T(k) in ns.F90
+look at <  >t data
+look at grid point data.  why is f=0???
+
+March 18: dryrun
+March 24 Sunday, review.
+
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  
 

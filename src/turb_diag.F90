@@ -17,11 +17,15 @@ real*8 :: ints_e(nints_e)
 real*8 :: x
 integer i,j,k,n,ierr
 character(len=80) :: message
-character :: access
+character,save :: access="0"
 CPOINTER fid
 
-access="a"
-if (time==time_initial) access="w"
+! append to output files, unless this is first call.
+if (access=="0") then
+   access="w"
+else
+   access="a"
+endif
 
 
 

@@ -104,12 +104,15 @@ real*8 :: x,divx,divi
 real*8 ::  spectrum(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spectrum1(0:max(g_nx,g_ny,g_nz))
 character(len=80) :: message
-character :: access
+character,save :: access="0"
 CPOINTER fid
 
-! append to output files, unless time=0 create a new file 
-access="a"
-if (time==time_initial) access="w"
+! append to output files, unless this is first call.
+if (access=="0") then
+   access="w"
+else
+   access="a"
+endif
 
 iwave_max=max(g_nx,g_ny,g_nz)
 spectrum=0
@@ -183,13 +186,14 @@ real*8 :: maxs_save(nv,nscalars)
 real*8 :: x
 integer i,j,k,n,ierr
 character(len=80) :: message
-character :: access
+character,save :: access="0"
 CPOINTER fid
 
-access="a"
-if (time==time_initial) then
+! append to output files, unless this is first call.
+if (access=="0") then
    access="w"
-   call print_message("diag_output():  Creating NEW .scalars file");
+else
+   access="a"
 endif
 
 
