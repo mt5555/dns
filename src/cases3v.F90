@@ -383,7 +383,7 @@ call der(PSI,Q,dummy,work1,DX_ONLY,2)
 call der(PSI,Q(1,1,1,2),dummy,work1,DX_ONLY,1)
 Q(:,:,:,2)=-Q(:,:,:,2)
 
-if (dealias) call dealias_gridspace(Q,work1)
+if (dealias>0) call dealias_gridspace(Q,work1)
 
 
 
