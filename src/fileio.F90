@@ -444,7 +444,7 @@ endif
 offset=4 + o_nx + o_ny + o_nz
 
 #ifdef USE_MPI
-call MPI_bcast(time,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call MPI_bcast(time,1,MPI_REAL8,fpe,comm_3d ,ierr)
 #endif
 
 ! max wave number to read/write for spectral I/O
@@ -458,7 +458,7 @@ if (io_read==1) then
 else
    call output1(p,work,work2,fid,fpe,offset)
 endif
-if (my_pe==fpe) then
+if (io_mpi(my_z)==my_pe) then
    call MPI_File_close(fid,ierr)
 endif
 #endif

@@ -7,10 +7,10 @@ implicit none
 
 
 
+integer :: io_mpi(0:ncpu_z),nio,inc,comm_io
 real*8,private :: tmx1,tmx2
 real*8,private,allocatable :: sendbuf(:),recbuf(:)
 
-integer :: io_mpi(0:ncpu_z),nio,inc,comm_io
 
 contains
 
@@ -61,13 +61,14 @@ endif
 do i=0,ncpu_z-1
    dest_pe3(1)=0
    dest_pe3(2)=0
-   dest_pe3(3)=i/inc
+   dest_pe3(3)=inc*(i/inc)
    call mpi_cart_rank(comm_3d,dest_pe3,io_mpi(i),ierr)
 enddo
 
 call MPI_Barrier(comm_3d,ierr)
 print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_mpi(my_z)
 call MPI_Barrier(comm_3d,ierr)
+if (io_mpi(my_z)<0) call abort("error in MPI-IO decomposition")
 
 #ifdef USE_MPI_IO
 

@@ -112,7 +112,7 @@ else
    echo NOT USING RESTART
 endif
 if (`uname` == OSF1) then
-   set opt = "$opt -b"
+   set opt = "$opt -b -mio "
 endif
 echo command line options:  $opt
 

@@ -340,7 +340,7 @@ else
 endif
 
 
-
+#if 0
 if (init==1) then
 
 fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".h5"
@@ -357,7 +357,7 @@ call close_mpi
 stop
 
 endif
-
+#endif
 
 
 
