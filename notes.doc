@@ -1,43 +1,47 @@
-E&Liu KH problem.  
+1. put in CJ functions
+
+2. 4th order code using ghost cells:
+        add 3d test case (nsgrid vs nsghost)
+        benchmark parallel decompostions
+
+3. psi-vor code:
+        boundary condition routines (inflow, onesided, biot-savar)
+             x-1 x0 x1 x2 
+        vorticity:  inflow:  
+                  x0 chosen so dx at x2 uses 2nd order centered
+                 x-1 chosen so dx at x1 uses 2nd order centered with x-1=0
+                    outflow:       
+                  x0 chosen so dx at x2 uses 2nd order centered
+                 x-1 chosen so dx at x1 uses 2nd order one sided
+
+         d/dx at x2:   
+(-1/12 2/3 0 -2/3  1/12)(x0,x1,x2,x3,x4) = (-x1 +x3)/2
+-1/12 x0 = (-2/3 -1/2)x1 + (2/3+1/2)x3  + (-1/12)x4
+
+x0 = -12* [ (-2/3 -1/2)x1 + (2/3+1/2)x3  + (-1/12)x4  ]
+x0 =  [ 14 x1 -14 x3 + x4  ]
+
+         d/dx at x1:   (-1/12   2/3   0   -2/3     1/12)(x-1,x0,x1,x2,x3)
+
+                
+
+
+1. change NS-alpha so forcing always appears as just 'f'
+   see nots about ints(3) and ints(9) in params.F90
+1. LSF time remaining - fix this for CPQ
+2. construct convergence test for KH problem
+       use E&Liu KH problem?  what value of mu?
        mu=0:  at t=1, E is down .25e-6.  dk/dt = -1.25e-6
        mu=1.5e-6 at T=1  E is down 1.2e-4 and  dk/dt = -1.26e-4
        1e-5:  noisy
        1e-4:  a touch noisy
        2e-4: looks good, a little too smoothed 
-
-
-1. LSF time remaining - fix this for CPQ
-
-1. change NS-alpha so forcing always appears as just 'f'
-   see nots about ints(3) and ints(9) in params.F90
-
-1. 4th order code using ghost cells:
-
-        khO  dnsgrid using new dxx on autry (done)
-        compare agains khN
-        run khP, with dnsghost, compare with khO    only to .75
-        run khQ, with dnsvor, compare with khO      RESUB-IN
-
-        benchmark parallel decompostions
-
-2. psi-vor code:
-        boundary condition routines (inflow, onesided, biot-savar)
-
-
-
-
-3. benchmark FD + transform with different decomposisitons
-4. construct convergence test for KH 1024 problem
       compare with spectral, 4th, 4th+1st order grad, or 1st order div
-
-
-1. if run stops because u>1000, timings are incorrect
-1. check restart testcase on mahi or CPQ (also little endian)
-2. make suite of runs for diffusion: 32^3, 64^3 128^3 256^3
+3. if run stops because u>1000, timings are incorrect
+4. check restart testcase on mahi or CPQ (also little endian)
+5. make suite of runs for diffusion: 32^3, 64^3 128^3 256^3
        plot R_lamba vs mu and h
-
-1. switch 3d test case to different dimensions
-
+6. switch 3d test case to different dimensions
 
 check spectrum and rotated spectrum  (scalar)  ok for short times.
 check spectrum and parallel spectrum.  using testcase?

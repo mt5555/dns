@@ -13,7 +13,7 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 range=[.75];
 name='../src/impulse/kh24';
 %name='../src/kh/khK';
-name='../src/kh/khN';  %nopq
+name='../src/kh/khQ';  %nopq
 %name='/tmp/test';
 
 mkpr=1;            % make ps and jpeg files
