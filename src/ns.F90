@@ -137,15 +137,12 @@ enddo
 
 time = time + delt
 
-! compute KE, max U  
-ints_timeU=time
-ints(1)=0
+! compute max U  
 maxs(1:4)=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
    do n=1,3
-      ints(1)=ints(1)+.5*Q_grid(i,j,k,n)**2  ! KE
       maxs(n)=max(maxs(n),abs(Q_grid(i,j,k,n)))   ! max u,v,w
    enddo
    vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz
@@ -153,7 +150,6 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-ints(1)=ints(1)/g_nx/g_ny/g_nz
 
 end subroutine 
 
@@ -443,7 +439,6 @@ enddo
 if (compute_ints==1) then
    ! note: dont noramlize quantities computed in spectral space,
    ! but normalize quantities computed in grid space by /g_nx/g_ny/g_nz
-   ints_timeDU=time
    ints(2)=ke_diss   
    ints(3)=f_diss    
    ints(4)=vorave/g_nx/g_ny/g_nz
@@ -453,7 +448,7 @@ if (compute_ints==1) then
    maxs(5)=maxvor
    ints(8)=a_diss    
    ints(9)=normuf
-   ints(10)=gradu_diss
+   ints(1)=gradu_diss
 endif
 
 call wallclock(tmx2)

@@ -11,7 +11,7 @@ range=0:50;
 %range=0:.5:2;
 
 %fid=fopen('test32.sf','r','l');
-fid=fopen('n128.sf','r','b');
+fid=fopen('iso12_256_200.sf','r','b');
 %fid=fopen('../src/test32.sf','r','l');
 
 

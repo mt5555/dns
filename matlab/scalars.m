@@ -14,8 +14,8 @@ range=0:50;
 %fid=fopen('test32.scalars','r','l');
 %fid=fopen('n128.scalars','r','b');
 %fid=fopen('../src/test32.scalars','r','l');
-
-fid=fopen('iso12_256_200.scalars','r','b'); apply_fix=1;
+%fid=fopen('iso12_256_200.scalars','r','b'); apply_fix=1;
+fid=fopen('../src/kh/khB.scalars','r','l'); 
 
 
 
@@ -53,7 +53,6 @@ while (1)
     ints_e= [ints_e,data1];
   end
   nscalars_e=nscalars_e+1;
-  
 end
 
 disp(sprintf('nints=%i  total scalars read=%i',nints,nscalars))
@@ -78,7 +77,7 @@ if (apply_fix)
   s=size(ints_e);
   good=24:s(2);
   ints_e=ints_e(:,24:s(2));
-  nscalars_e=length(good)
+  nscalars_e=length(good);
 end
 
 
@@ -88,27 +87,32 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  the scalars computed every time step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+l=size(ints);
+l=l(2);
 
-ke=ints(1,:);   % ke at time timeU
 ke_diss_d=-mu*ints(2,:);
 ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 vor_z=ints(4,:);
 hel=ints(5,:);
-% ints(6,:)   ke at time timeDU
+ke=ints(6,:);   %  ke 
 % ints(7,:)   enstrophy
 % ints(8,:)   < u,div(tau)' >  (alpha model only)
 % ints(9,:)   < u,f>           (alpha model only)
-% ints(10,:)  < u_xx,u_xx> >   (used for E_alpha dissapation term)
+% ints(1,:)  < u_xx,u_xx> >   (used for E_alpha dissapation term)
 
-maxU=maxs(1,:);
-maxV=maxs(2,:);
-maxW=maxs(3,:);
-%  maxs(4,:)  % max used for CFL
+maxU=maxs(1,:);  % at time_after
+maxV=maxs(2,:);  % at time_after
+maxW=maxs(3,:);  % at time_after
+%  maxs(4,:)     % max used for CFL, at time_after
 maxvor=maxs(5,:);
-timeU=maxs(6,:);
-timeDU=maxs(7,:);
-Ea_diss_tot=maxs(8,:);
-ke_diss_tot=maxs(9,:);
+time_after=maxs(6,:);
+time=maxs(7,:);
+
+Ea = ints(6,:) + .5*alpha^2 *ints(2,:); % at time
+
+time_2 = .5*(time(2:l)+time(1:l-1));
+ke_diss_tot=(ke(2:l)-ke(1:l-1))./(time(2:l)-time(1:l-1));
+Ea_diss_tot=(Ea(2:l)-Ea(1:l-1))./(time(2:l)-time(1:l-1));
 
 
 
@@ -117,18 +121,18 @@ disp(sprintf('max vor_z = %e',max(vor_z)));
 figure(5)
 clf
 hold on
-plot(timeU,ke)
-plot(timeDU(2:nscalars),ke_diss_tot(2:nscalars),'r')
-plot(timeDU,ke_diss_f+ke_diss_d,'k')
-plot(timeDU,ke_diss_f,'k')
-plot(timeDU,ke_diss_d,'k')
-plot(timeDU,hel,'g')
+plot(time,ke)
+plot(time_2,ke_diss_tot,'r')
+plot(time,ke_diss_f+ke_diss_d,'k')
+plot(time,ke_diss_f,'k')
+plot(time,ke_diss_d,'k')
+plot(time,hel,'g')
 title('KE: blue,    d(KE)/dt: black & red,    hel: green');
 hold off
 
 
-lambda=sqrt(  5*(2*ints(1,:))./ints(2,:)  );
-R_l = lambda.*sqrt(2*ints(1,:))/mu;
+lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
+R_l = lambda.*sqrt(2*ints(6,:))/mu;
 
 print -depsc scalars.ps
 

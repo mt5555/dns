@@ -163,7 +163,6 @@ integer :: error_code =0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 integer,parameter :: nints=10
 real*8 :: ints(nints),maxs(nints)
-real*8 :: ints_timeU,ints_timeDU
 
 !
 ! For NON-ALPHA-MODEL
@@ -179,20 +178,20 @@ real*8 :: ints_timeU,ints_timeDU
 !      ints(8) = < u,div(tau)' >
 !
 ! E-alpha = ints(6) + .5*alpha**2 ints(2)
-! E-alpha dissapation =   mu*ints(2) + ints(9) + mu*alpha**2ints(10)
+! E-alpha dissapation =   mu*ints(2) + ints(9) + mu*alpha**2ints(1)
 !      ints(9) = < u,f >
-!      ints(10)= < u_xx,u_xx>
+!      ints(1)= < u_xx,u_xx>
 !  
 ! Quantities involving only Q are computed in the timestep
-! routine, at the current time = ints_timeU:  
+! routine, at the current time T
 !
-! ints(1) = ke   (ints(6) has KE at beginning of time step)
 ! maxs(1,2,3) = max U,V,W
 ! maxs(4) = max (U/delx + V/dely + W/delz)  used for CFL
 !
 ! Quantities involving derivatives are computed when the RHS is computed
-! and thus the data is at the prevous timestep = ints_timeDU
+! and thus the data is at the prevous timestep  T-1
 ! 
+! ints(1) = < u_xx,u_xx >
 ! ints(2) = < u_x,u_x >
 ! ints(3) = < u,F >  Where F=forcing term which appears on RHS.
 !                    non-alpha-mode: F=f.  Alpha model F=f'
@@ -202,17 +201,15 @@ real*8 :: ints_timeU,ints_timeDU
 ! ints(7) = enstrophy (vorticity**2)
 ! ints(8) = < u,div(tau)' >   (alpha model only)
 ! ints(9)  = < u,f >  (alpha model only)
-! ints(10) = < u_xx,u_xx >
 !                           
 ! maxs(5) = max vorticity
 !
 ! for convience, we store the time data in maxs(6:7)
-! maxs(6) = ints_timeU
-! maxs(7) = ints_timeDU
-! maxs(8) = delEa_tot = Actual d(E_alpha)/dt computed from E_alpha at 
-!                       timeDU and timeDU-delt.  
-! maxs(9) = delke_tot = Actual d(KE)/dt computed from KE at timeU and timeDU
-
+! maxs(6) = time (at end of time step)  T
+! maxs(7) = time at begining of time step T-1
+! maxs(8) = 
+! maxs(9) = 
+!
 integer,parameter :: ntimers=12
 real*8 :: tims(ntimers)=0
 !  tims(1)    time for initialization

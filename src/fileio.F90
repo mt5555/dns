@@ -19,6 +19,8 @@ real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 tmx1,tmx2,del,delke_tot,lambda
 logical,external :: check_time
 logical :: doit
+real*8 :: t0,t1,t2,ke0,ke1,ea0,ea1
+real*8 :: delea_tot=0,delke_tot=0
 
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
@@ -165,27 +167,50 @@ if (doit) then
    ! and   <u1,1 u1,1> = (1/15) || grad(u) ||^2
    !       < u    u  > = (1/3)  || u ||^2
    !
-   lambda=sqrt(  5*(2*ints(1))/ints(2)  )
-   write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(1))/mu, &
+   lambda=sqrt(  5*(2*ints(6))/ints(2)  )
+   write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ints(6))/mu, &
         '  R=',1/mu
    call print_message(message)	
 
+
+   !
+   ! KE total dissapation 
+   ! t0,t1,t2  three time levels
+   !
+   ke1=ints_save(6,nscalars)
+   ea1 = ints_save(6,nscalars) + .5*alpha_value**2 * ints_save(2,nscalars)
+   t2=maxs_save(6,nscalars)         ! current time level
+
+   if (nscalars>2) then
+      t0=maxs_save(6,nscalars-2)       ! previous previous time level 
+      t1=maxs_save(6,nscalars-1)       ! previous time level (most quantities known at this time
+      ke0=ints_save(6,nscalars-1)
+      ea0 = ints_save(6,nscalars-1) + .5*alpha_value**2 * ints_save(2,nscalars-1)
+   else
+      t0=0
+      t1=0
+   endif
+   if (t1-t0>0) then
+      delke_tot=(ke1-ke0)/(t1-t0)
+      delea_tot=(ea1-ea0)/(t1-t0)
+   endif
+
+
+
    write(message,'(a,f13.10,a,f13.4,a,f12.7))') 'Ea: ',&
-        ints(1)+.5*alpha_value**2 * ints(2),&
-        '   |gradU|: ',ints(2),&    
-        '         total d/dt(Ea):',maxs(8)
+        ea1,'   |gradU|: ',ints(2),'         total d/dt(Ea):',delea_tot
    call print_message(message)	
 
    if (alpha_value>0) then
    write(message,'(3(a,f12.7))') 'd/dt(Ea) vis=',&
-        -mu*ints(2)-mu*alpha_value**2*ints(10),&
+        -mu*ints(2)-mu*alpha_value**2*ints(1),&
         ' f=',ints(9),'                      tot=',&
-        -mu*ints(2)-mu*alpha_value**2*ints(10) + ints(9)
+        -mu*ints(2)-mu*alpha_value**2*ints(1) + ints(9)
    call print_message(message)	
    endif
 
-   write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'ke: ',ints(1),'  enstropy: ',&
-        ints(7),'        total d/dt(ke): ',maxs(9)
+   write(message,'(a,f13.10,a,f13.4,a,f12.7)') 'ke: ',ke1,'  enstropy: ',&
+        ints(7),'        total d/dt(ke): ',delke_tot
    call print_message(message)	
    write(message,'(a,f12.7,a,f12.7,a,f12.7,a,f12.7)') &
      'd/dt(ke) vis=',-mu*ints(2),' f=',ints(3),' alpha=',ints(8),&
@@ -359,14 +384,10 @@ call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_y,g_ny/2,message)
 !call plotASCII(spec_z,g_nz/2,message)
 
-<<<<<<< fileio.F90
 
-=======
 call compute_div(Q,q1,work1,work2,divx,divi)
 write(message,'(3(a,e12.5))') 'max(div)=',divx
 call print_message(message)	
-
->>>>>>> 1.50
 
 
 
@@ -432,8 +453,6 @@ if (my_pe==io_pe) then
    call cwrite8(fid,alpha_value,1)
    call cwrite8(fid,ints_save,nv*nscalars);
    call cwrite8(fid,maxs_save,nv*nscalars);
-
-   print *,'timeU: ',maxs_save(6,:)
 
    x=nints_e; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
