@@ -19,18 +19,18 @@ tsave=[];
 %namedir='/ccs/scratch/taylorm/dns/sc1024A/';
 %CK_orig=1.613;
 
-<<<<<<< specplot.m
-name='tmix256D';
-namedir='/home/taylorm/data/dns/tmix/tmix256D/';
-CK_orig=1.613; movie_plot=1; endian='l';
-movie_times=.3:.1:1;
-mu=1.75e-4;
-=======
+
+%name='tmix256D';
+%namedir='/home/taylorm/data/dns/tmix/tmix256D/';
+%CK_orig=1.613; movie_plot=1; endian='l';
+%movie_times=.3:.1:1;
+%mu=1.75e-4;
+
 %name='tmix256D-noscalars0000.0000';
 %namedir='/scratch2/taylorm/tmix256D-noscalars/';
 %CK_orig=1.613; movie_plot=0; endian='l';
 %mu=3e-4;
->>>>>>> 1.72
+
 
 %name='decay2048-ave64.-new.0000.4026';
 %name='decay2048-ave32.-new.0000.4026';

@@ -8,7 +8,7 @@ delta=.1
 viscosity = 1e-7
 
 
-./gridsetup.py 4 1 1 4800 2880 1 2 2 0 2 2 0 2
+./gridsetup.py NCPU 1 1 4800 2880 1 2 2 0 2 2 0 2
 
 KIWI: 4 cpus  time(min) per timestep:  .468   timestep ~ .0011s
       2 cpus                           .644
@@ -23,6 +23,13 @@ shankara:  (some of these timings were not using 2 cpu per node,
 
 delt=.0012
 time_per_timestep(m)*50/.0012/60 = time for run in hours
+
+
+
+vx4800a   delta=.1, viscosity=1e-7 init_subtype=6
+IN (shankara)
+
+
 
 
 **********************************************************************************
