@@ -1,5 +1,11 @@
+dnss: model
+! test case subtype=5:  rk4 with cfl=1.35 goes bad after 18 timesteps.
+! use this test case to find new cfl limits for rk4 and leapfrog?
+
+test smagorinsky
+
+
 1. put in CJ functions
-3. check Energy for 250^3 runs
 
 2. ns_ghost:  4th order code using ghost cells:
         benchmark parallel decompostions
