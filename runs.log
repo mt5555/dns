@@ -33,8 +33,8 @@ estimage: 6 arrays * 3 dim * N^2 * 8 bytes = 144 N^2
  24      3.58278 
  32      2.74846 
  64      1.37784 
-128    0.70440    redo IN
-256    0.37697    redo IN
+128    0.683
+256    0.373   
 
 
 
@@ -97,8 +97,11 @@ vx4096d   mu=7e-8   IN
 vx12288a   PSI boundary recomputed every 50 timesteps
 vx12288b   PSI boundary recomputed every 100 timesteps
 
-          vx12288a     vx12288b           redo w/o ellipse:
-64x4:  
+time to 0.1.  4.99min = 5.2days
+
+          90 timesteps          90 timesteps             no PSI-recompute
+          1 PSI-recompute        no PSI-recompute        no ellipse
+64x4:       5.58m                   5.86                   4.99
 32x4:
 16x4:
 

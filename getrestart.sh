@@ -31,8 +31,10 @@ set ext = w
 if ($#argv >= 3 ) then
    if ($3 == uvw ) then
       set ext = w
-   else
+   else if ($3 == h5) then
       set ext = h5
+   else if ($3 == vor) then
+      set ext = vor
    endif
 endif
 
@@ -93,11 +95,18 @@ endif
          echo $resnameu
          echo $resnamev
       endif
+      if ( $ext == "vor" ) then
+         set resnamet = `psi ls  dns/{$name}/{$nametime}\*.tracer | sort | tail -1`
+         echo $resnamet
+      endif
       echo $resnamew
    endif
    if ( $ext == "w" ) then
       set resnameu2 = `basename $resnameu`
       set resnamev2 = `basename $resnamev`
+   endif
+   if ( $ext == "vor" ) then
+      set resnamet2 = `basename $resnamet`
    endif
    set resnamew2 = `basename $resnamew`
 
@@ -124,13 +133,28 @@ endif
          $PSIMV $resnamew $resnamew.bak
          exit 1
       endif
-   else
+   else  if ( $ext == "h5" ) then
       if !(-e $resnamew2) then
          $PSIGET $resnamew
       endif
       \ln -s $resnamew2  restart.{$ext}
       if !(-e restart.{$ext}) then
          echo "No restart.{$ext} file"
+         $PSIMV $resnamew $resnamew.bak
+         exit 1
+      endif
+   else
+      if !(-e $resnamet2) then
+         $PSIGET $resnamet
+      endif
+      if !(-e $resnamew2) then
+         $PSIGET $resnamew
+      endif
+      \ln -s $resnamet2  restart.tracer
+      \ln -s $resnamew2  restart.{$ext}
+      if !(-e restart.tracer) then
+         echo "No restart.tracer file"
+         $PSIMV $resnamet $resnamet.bak
          $PSIMV $resnamew $resnamew.bak
          exit 1
       endif
@@ -170,7 +194,7 @@ else
          mv $resnamew $resnamew.bak
          exit 1
       endif
-   else
+   else if ( $ext == "h5" ) then
       \ln -s $resnamew  restart.{$ext}
       if !(-e restart.{$ext}) then
          echo "No restart.{$ext} file"
@@ -179,6 +203,17 @@ else
          mv $resnamew $resnamew.bak
          exit 1
        endif
+   else
+      \ln -s $resnamet  restart.tracer
+      \ln -s $resnamew  restart.{$ext}
+      if !(-e restart.{$ext}) then
+         echo "No restart.{$ext} file"
+         # move them out of the way in case this time is corrupt:
+         # then next run will pick up earlier backup:
+         mv $resnamet $resnamet.bak
+         mv $resnamew $resnamew.bak
+         exit 1
+      endif
    endif
 endif
 
