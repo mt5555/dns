@@ -309,12 +309,11 @@ if (plot_points==1)
 end
 
 
-
-
 %calculate angle-averaged scaling exponents for longitudinal and 
 %transverse str.fns
 
 ndir
+
 long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
 
