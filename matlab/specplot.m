@@ -18,7 +18,7 @@ range=0:50;
 %range = 1
 %range=0:.5:2;
 
-fid=fopen('test.spec','r');
+fid=fopen('../src/test.spec','r');
 
 
 time=fread(fid,1,'float64');

@@ -36,6 +36,7 @@ integer,parameter :: NUM_SF=6
 type(pdf_structure_function) ::  SF(NUM_SF,3),epsilon
 
 integer :: overflow=0    ! count the number of overflow messages
+real*8  :: one_third = (1d0/3d0)
 
 contains
 
@@ -358,7 +359,6 @@ type(pdf_structure_function) :: str(NUM_SF)
 
 ! local variables
 real*8  :: del,delv(3),delq
-real*8  :: one_third = (1d0/3d0)
 real*8  :: tmx1,tmx2
 integer :: bin,idel,i,j,k,i2,nsf,ndelta
 
@@ -451,8 +451,6 @@ real*8 :: ux(nx,ny,nz)
 
 ! local variables
 real*8  :: del
-real*8  :: one_third = (1d0/3d0)
-real*8  :: two_third = (2d0/3d0)
 real*8  :: tmx1,tmx2
 integer :: bin,idel,i,j,k,i2,nsf
 
@@ -468,7 +466,7 @@ do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
          ! compute structure functions for U,V,W 
-         del=ux(i,j,k)
+         del=ux(i,j,k)**one_third
          del = del/epsilon%pdf_bin_size
          bin = nint(del)
 
