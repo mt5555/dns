@@ -26,7 +26,7 @@ ifeq ($(UNAME),Linux)
    ##F90 = /usr/local/lf9560/bin/lf95
    #F90 = lf95
    #FFLAGS = -g -O -DLINUX $(MPI) -DUSE_FFT99
-   ##FFLAGS =  -O -DLINUX $(MPI) -DUSE_FFT99
+   ##FFLAGS =  -tpp -O -DLINUX $(MPI) -DUSE_FFT99
    #LDFLAGS = --staticlink  #-Lstk -lstk
    #CC = gcc
 

@@ -265,8 +265,7 @@ if (btype==-1) then
    if (g_bdy_x1==PERIODIC .and. g_bdy_y1==PERIODIC) then
       ! periodic
       btype=0
-   else if  ( &
-        ! not periodic, but can still do with all ghostcells:
+   else if  ( &  ! not periodic, but can still do with all ghostcells:
         ((g_bdy_x1==PERIODIC) .or. (g_bdy_x1==REFLECT) .or. (g_bdy_x1==REFLECT_ODD)) .and. &
         ((g_bdy_x2==PERIODIC) .or. (g_bdy_x2==REFLECT) .or. (g_bdy_x2==REFLECT_ODD)) .and. &
         ((g_bdy_y1==PERIODIC) .or. (g_bdy_y1==REFLECT) .or. (g_bdy_y1==REFLECT_ODD)) .and. &
