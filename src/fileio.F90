@@ -118,7 +118,6 @@ endif
 
 
 
-
 !
 ! diagnostic output
 !
@@ -360,11 +359,14 @@ call plotASCII(spectrum,iwave,message(1:25))
 !call plotASCII(spec_y,g_ny/2,message)
 !call plotASCII(spec_z,g_nz/2,message)
 
+<<<<<<< fileio.F90
+
+=======
 call compute_div(Q,q1,work1,work2,divx,divi)
 write(message,'(3(a,e12.5))') 'max(div)=',divx
 call print_message(message)	
 
-
+>>>>>>> 1.50
 
 
 
@@ -430,6 +432,8 @@ if (my_pe==io_pe) then
    call cwrite8(fid,alpha_value,1)
    call cwrite8(fid,ints_save,nv*nscalars);
    call cwrite8(fid,maxs_save,nv*nscalars);
+
+   print *,'timeU: ',maxs_save(6,:)
 
    x=nints_e; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
