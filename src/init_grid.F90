@@ -415,7 +415,7 @@ if (my_pe==io_pe) then
          call getarg(i,carg)
          j=len_trim(carg)
          if (j>0) then
-            read(carg,'(i3)') spec_max
+            read(carg,'(i5)') spec_max
          endif
       else if (message(1:2)=="-t") then
          enable_lsf_timelimit=1

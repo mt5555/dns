@@ -11,13 +11,13 @@ cd dns
 mkdir $name
 cd $name
 save $name*.scalars-turb
-save $name*.spec
-save $name*.spect
 save $name*.isostr
 save $name*.sf
 save $name*.s2v2
 save $name*.jpdf
 store $name*.scalars
+store $name*.spec
+store $name*.spect
 save $name*.h5 $name*.u $name*.v $name*.w
 EOF
 

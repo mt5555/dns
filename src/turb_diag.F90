@@ -38,6 +38,8 @@ if (compute_transfer) then
    call output_tran(time,Q,q1,q2,q3,work1,work2)
 endif
 
+
+
 if (.not.doit_model) return
 
 

@@ -46,7 +46,7 @@ character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
-real*8 :: kr,ke,ck,xfac,range(3,2)
+real*8 :: kr,ke,ck,xfac,range(3,2),dummy
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig
 CPOINTER :: fid
@@ -70,7 +70,6 @@ nzdecomp=1
 ! these lines are modifed by some sed scripts for automatic running
 ! of this code by putting in new values of tstart, tstop, tinc,
 ! nxdecomp,nydecomp,nzdecom, etc.
-!SEDbyteswap
 !SEDtstart
 !SEDdecomp
 
@@ -130,9 +129,10 @@ do
    icount=icount+1
 
    if (use_serial==1) then
-      call dataio(time,Q,work1,work2,1)
+!      call dataio(time,Q,work1,work2,1)
+      call input_uvw(time,Q,dummy,work1,work2)
    else
-      call dataio(time,Q,q1,q2,1)
+      call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2))	
    endif
 
    do i=0,nxdecomp-1
@@ -141,7 +141,7 @@ do
 
       if (my_pe==io_pe) then
          write(sdata,'(f10.4)') 10000.0000 + time
-         fname = runname(1:len_trim(runname)) // sdata(2:10) // ".isostr"
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
          if (nxdecomp*nydecomp*nzdecomp>1) then
             write(sdata,'(3i1)') i,j,k
             fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)

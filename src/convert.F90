@@ -38,6 +38,14 @@ real*8 :: kr,ke,ck,xfac,dummy
 tstart=.32
 tstop=.32
 tinc=1.0
+
+! these lines are modifed by some sed scripts for automatic running
+! of this code by putting in new values of tstart, tstop, tinc,
+! nxdecomp,nydecomp,nzdecom, etc.
+!SEDtstart
+!SEDdecomp
+
+
 icount=0
 call init_mpi       
 call init_mpi_comm3d()
@@ -54,10 +62,10 @@ do
 icount=icount+1
 
    call input_uvw(time,Q,vor,work1,work2)
-   print *,'max U: ',&
-        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
-        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
-        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
+!   print *,'max U: ',&
+!        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
+!        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
+!        maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
 
    if (convert_opt==0) then  ! -cout uvw  
       ! just reoutput the variables:
