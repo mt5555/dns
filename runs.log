@@ -32,8 +32,9 @@ cpus
 
 128x1      4.89
 
-256x1      
-128x2
+256x1     hangs after first time step.  try again?    
+128x2      3.40
+64x4      IN
 
 
 
