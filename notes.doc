@@ -1,8 +1,7 @@
 0 BUG:  25x1x1 decomp calling output1 on 250x250x250 grid
       but 1x1x25 works fine.  
 
-2. ns_ghost:  4th order code using ghost cells:
-        make a 3d test case
+2. ns_ghost: 
         benchmark parallel decompostions
        
 0. homog. tests:
