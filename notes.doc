@@ -1,3 +1,27 @@
+Assume z-cord decomposition
+  if z-cord of rvec is 0, then do nothing: we can compute on each cpu. 
+  shift each x,y slab so that z-cord of rvec becomes 0.
+
+  rvec=(x,y,z)  
+  k:  0..nk-1
+  
+  shift in y direction by:   shift = y*floor(k/z)
+  ushift(i,j,k)=ushift(i,j+shift,k)  /module y
+  call transpose_to_z
+  compute functions with rvec=(x,0,z)
+  sum over all CPUs.
+
+  
+
+real*8 p(nx,ny,nz)
+real*8 pt(g_nz2,nslabx,ny_2dz)
+so if nslabx = whole domain, pt will be the entire x,z data.
+
+
+
+
+
+
 initial results were promising (Chen).  That data was 
 from just the coordinate directions, and from a single snapshot.
 Advent of bigger computers, more statisics were computed
