@@ -140,7 +140,7 @@ hold off
 
 
 lambda=sqrt(  5*(2*ints(6,:))./ints(2,:)  );
-R_l = lambda.*sqrt(2*ints(6,:))/mu;
+R_l = lambda.*sqrt(2*ints(6,:)/3)/mu;
 
 % Kolm. micro scale
 eta = (mu^3 ./ abs(ke_diss_d)).^(.25);
