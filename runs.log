@@ -1,4 +1,15 @@
 **********************************************************************************
+10/8/01 
+64^3 decaying turbulense
+tag: temp1  output: temp1.out in temp1 directory
+
+
+tag: temp2  output: temp2.out in src directory
+
+
+
+
+**********************************************************************************
 8/22/01 KH 384x384x384 parallel benchmark runs on SGI 128cpus.
 
 pbench.job
