@@ -6,7 +6,7 @@
 figure(1);clf;
 clear
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-time=1.05;
+time=1.10;
 times=sprintf('%.5f',time+10000);
 times=times(2:length(times)-1);
 
@@ -88,6 +88,9 @@ for type=type_list
 
    splot=squeeze(s(:,:,slice1));
 
+   fac=2*pi; facl='2 \pi \eta_c';
+   len=min(1,fac*eta_c);
+
    figure(2)
    subplot(npassive/2,2,k)
    pcolor(x,y,log(splot'));  caxis([log(.01) log(13)]) ;
@@ -97,12 +100,11 @@ for type=type_list
 
 
    % patch of size 10eta_c
-   fac=2*pi; facl='2 \pi \eta_c';
-   len=min(1,fac*eta_c);
    xt=[1,1-len,1-len,1,1];
    yt=[0,0,len,len,0];
    patch(xt,yt,'w');
    text(1.05,yt(3)/2,facl);
+
    
    figure(4)
    subplot(npassive/2,2,k)
@@ -112,15 +114,14 @@ for type=type_list
    shading interp
    
 
-   
-   
+   len=min(1,fac*eta_c);
+if (0)   
    figure(1)
    subplot(npassive/2,2,k)
    pcolor(x,y,splot');   caxis([0 13]) ;
    axis equal
    axis([0,max(x),0,max(y)]);
    shading interp
-   len=min(1,fac*eta_c);
    xt=[1,1-len,1-len,1,1];
    yt=[0,0,len,len,0];
    patch(xt,yt,'w');
@@ -129,23 +130,24 @@ for type=type_list
    stitle=sprintf('time=%.2f  min=%f  max=%f',time,mn,mx)
    if (k==1) title(stitle); end;
 
+
    figure(3)
    subplot(npassive/2,2,k)
    pcolor(x,y,splot');   caxis([0 13]) ;
    axis equal
    axis([0,len,0,len]);
    shading interp
-      
+end      
    
 
 end
 end
-figure(1)
-orient tall
-print('-djpeg','-r125',['pdiss',times,'.jpg']); 
-figure(3)
-orient tall
-print('-djpeg','-r125',['pdiss_z',times,'.jpg']); 
+%figure(1)
+%orient tall
+%print('-djpeg','-r125',['pdiss',times,'.jpg']); 
+%figure(3)
+%orient tall
+%print('-djpeg','-r125',['pdiss_z',times,'.jpg']); 
 
 figure(2)
 orient tall

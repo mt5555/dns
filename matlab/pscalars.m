@@ -16,7 +16,7 @@ end
 
 
 name = '/scratch2/taylorm/tmix256C/tmix256C'
-times=[1.0100:.01:1.25];
+times=[1.0100:.01:1.30];
 
 
 if (readdata)
@@ -70,7 +70,7 @@ end
 end
 
 % look at passive scalar number np
-for np=1:1;
+for np=1:10;
 
 Vp=Vpdata(np,:);
 time_e=squeeze(pints_e(1,np,:))';
