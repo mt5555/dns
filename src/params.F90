@@ -75,7 +75,6 @@ integer,parameter :: nslabz=nz2-nz1+1
 real*8 :: xcord(nx),delx
 real*8 :: ycord(ny),dely
 real*8 :: zcord(nz),delz
-real*8 :: deldiag                 ! sqrt(delx**2 + dely**2 + delz**2)
 real*8,allocatable :: g_xcord(:)  
 real*8,allocatable :: g_ycord(:)  
 real*8,allocatable :: g_zcord(:)  

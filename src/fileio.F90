@@ -9,7 +9,7 @@ integer :: itime
 ! local variables
 integer i,j,k,n
 character*80 message
-real*8 remainder, time_target, umax,time_next,cfl_used_adv,cfl_used_vis,mx
+real*8 remainder, time_target,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
 real*8 divx,divi,tmx1,tmx2,del
 logical,external :: check_time
 logical :: doit
@@ -26,11 +26,16 @@ time_target = time_final
 !  
 !
 
-umax=maxs(4)
-if (umax> 1000) error_code=1
+if (g_nz>1) then
+   umax=maxs(1)/delx+maxs(2)/dely+maxs(3)/delz
+   mumax = mu*(1/delx**2 + 1/dely**2 + 1/delz**2)
+else
+   umax=maxs(1)/delx+maxs(2)/dely
+   mumax = mu*(1/delx**2 + 1/dely**2)
+endif
 
-delt = cfl_adv*deldiag/umax                  ! advective CFL
-delt = min(delt,cfl_vis*deldiag**2/mu)       ! viscous CFL
+delt = cfl_adv/umax                         ! advective CFL
+delt = min(delt,cfl_vis/mumax)              ! viscous CFL
 delt = max(delt,delt_min)
 delt = min(delt,delt_max)
 
@@ -73,18 +78,17 @@ endif
 
 
 
-!
-! restrict delt so we hit the next time_target
-!
+
 doit=check_time(itime,time,screen_dt,0,0.0,time_next)
 time_target=min(time_target,time_next)
 ! also output first 5 timesteps, unless screen_dt==0
 if (itime<5 .and. screen_dt/=0) doit=.true.
 
-delt = min(delt,time_target-time)
+
+
 ! compute CFL used for next time step.
-cfl_used_adv=umax*delt/deldiag
-cfl_used_vis=mu*delt/deldiag
+cfl_used_adv=umax*delt
+cfl_used_vis=mumax*delt
 
 
 !
@@ -107,7 +111,7 @@ if (doit) then
 
    mx=ints(1)/g_nx/g_ny/g_nz  ! dont mult all the ints together, overflow!
    
-   write(message,'(a,f14.10,a,f9.5,a,f9.5,a)') 'ke: ',mx,&
+   write(message,'(a,f13.10,a,f10.5,a,f10.5,a)') 'ke: ',mx,&
      ' d/dt log(ke) tot:',ints(2)/ints(1),&
      ' d/dt log(ke) diffusion:',ints(3)/ints(1)
    call print_message(message)	
@@ -115,8 +119,20 @@ if (doit) then
    call print_message("")
 endif
 
+
+!
+! restrict delt so we hit the next time_target
+! (do this here so the courant numbers printed above represent the
+! values used if the time step is not lowered for output control)
+delt = min(delt,time_target-time)
+
+
+
 call wallclock(tmx2)
 tims(3)=tmx2-tmx1
+
+
+
 
 end subroutine
 

@@ -93,8 +93,8 @@ delt=0
 do 
    call rk4(time,Q)
 
-   if (error_code>0) then
-      print *,"Error code = ",error_code
+   if (maxs(4)> 1000) then
+      print *,"max U > 1000"
       print *,"Stoping at time=",time
       time_final=time
    endif

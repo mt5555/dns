@@ -15,26 +15,26 @@ TODO:
 
 
 **********************************************************************************
-analytic CFL:  norm(G)<2.4
+analytic CFL:  for RK4, norm(G)<2.4
 
 dealiased:  k=KMAX*(2/3) = N/3 = 1/(3delx)
 
 
-advection:  G = i 2pi U kx delt  
+advection:  G = i 2pi  (u,v,w)dot(kx,ky,kz) delt  
+            |G| <= 2pi/3 delt ( U/dx + V/dy + W/dz)
 
-use diagonal distance:  U = sqrt(U^2 + V^2 + W^2)
-                      del = sqrt(delx^2 + dely^2 + delz^2)
+    (U/dx+V/dy+W/dz) delt <= 2.4 3 / 2pi = 1.15
 
-            G = i 2pi/3  U delt/del                            
-U delt/del < 2.4 * 3/2pi = 1.15
+1.30: seems stable 500 time steps
 
 
 diffusion: G = mu 4 pi^2 (kx^2 +ky^2 + kz^2)  delt
-use del = diagonal distance: del^2  = delx^2 + dely^2 + delz^2
-(kx^2 +ky^2 + kz^2) =  del^2/9
+             = mu (4/9) pi^2 (delx^-2 + dely^-2 + delz^-2)
 
-      mu delt/delx^2 < 2.4 * 9/(4*pi*pi) = .55
-                                           
+      mu delt/(delx^2+dely^2+delz^2)  < 2.4 (9/4) / pi^2  = .55
+
+.70: unstable
+.60: seems stable.  lets go with .55
 
 
 
