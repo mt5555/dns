@@ -314,8 +314,13 @@ enddo
 #ifdef ALPHA_MODEL
    call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
-   call ns_vorticity(rhsg,Qhat,work,p)
-   ! call ns_voriticyt2(not_written)
+   if (ncpu_z==1) then
+      call ns_vorticity(rhsg,Qhat,work,p)
+      ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)
+   else
+      call ns_vorticity(rhsg,Qhat,work,p)
+   endif
+
 #endif
 
 

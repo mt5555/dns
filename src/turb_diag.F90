@@ -86,6 +86,17 @@ endif
    endif
 
 
+   ! output (mu/schmidt) * c_x**2 + c_y**2
+   do n=np1,np2
+      call der(Q(1,1,1,n),work1,q2,q3,DX_ONLY,1)  ! c_x
+      call der(Q(1,1,1,n),work2,q2,q3,DX_ONLY,2)  ! c_y
+      q1(:,:,:,n)=mu*(work1**2 + work2**2)/schmidt(n)
+   enddo
+   message=runname(1:len_trim(runname)) // "-gradxy2"
+   call output_passive(message,time,q1,work1,work2)
+
+
+
    if (minval(ints_e(1:3))>0) then
       write(message,'(a,3f14.8)') 'skewness ux,vw,wz: ',&
            (ints_e(n+3)/ints_e(n)**1.5,n=1,3)
@@ -198,6 +209,9 @@ endif
 
 ! time averaged dissapation and forcing:
 !call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
+
+
+
 
 end subroutine
 
