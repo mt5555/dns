@@ -1,0 +1,6 @@
+#
+# edit isoave_weights.f90 and set the correct file name
+# then source this script  
+#
+ifc isoave_weights.f90 stripackd.f90
+./a.out
