@@ -137,8 +137,21 @@ print -dpsc ke.ps
 print -djpeg -r72 ke.jpg
 
 figure(7)
-plot(time,sqrt(ens),'r')
-title('average vorticity magnitude')
+plot(time,maxvor,'r'); hold on;
+plot(.4188,2500,'o')
+plot(.4328,2500,'o')
+plot(.4603,2500,'o')
+plot(.4894,2500,'o')
+plot(.5551,2500,'o')
+plot(.6034,2500,'o')
+plot(.8149,2500,'o')
+plot(time,50000*ke,'k');
+hold off;
+axis([0,1,0,5000]);
+title('maximum vorticity component')
+
+
+
 xlabel('time')
 print -djpeg -r72 vor.jpg
 
