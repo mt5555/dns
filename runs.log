@@ -1,4 +1,13 @@
 **********************************************************************************
+12/1/03
+cospec results:
+
+Random, uncorrelated initial data:
+  all 3 cospectrums are at the level of 1e-12
+  But E=flat, 1e-10, so something is wrong with initial condition.
+
+
+**********************************************************************************
 11/6/03
 
 tmix256D

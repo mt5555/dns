@@ -167,9 +167,9 @@ do k=k1,k2
              call interp3d(data(i,j,k-k1+1),field,xi)
          else
             ! no interpolation - just use closes gridpoint to xi
-            ii=(xi(1)-xcord(nx1))/delx;  
-	    jj=(xi(2)-ycord(ny1))/dely;  
-	    kk=(xi(3)-zcord(nz1))/delz;  
+            ii=nint((xi(1)-xcord(nx1))/delx);  
+	    jj=nint((xi(2)-ycord(ny1))/dely);  
+	    kk=nint((xi(3)-zcord(nz1))/delz);  
 
 #ifdef CHECK_IERR
             err= (ii-(xi(1)-xcord(nx1))/delx)**2
@@ -190,9 +190,9 @@ do k=k1,k2
 #ifdef CHECK_IERR
                 if (err>.001**2) then
                    print *,'warning: interpolation error: '
-                   print *,'ii',ii,(xi(1)-xcord(nx1))/delx
-                   print *,'jj',jj,(xi(2)-ycord(ny1))/dely;  
-                   print *,'kk',kk,(xi(3)-zcord(nz1))/delz;  
+                   print *,'ii',ii-nx1,(xi(1)-xcord(nx1))/delx
+                   print *,'jj',jj-ny1,(xi(2)-ycord(ny1))/dely;  
+                   print *,'kk',kk-nz1,(xi(3)-zcord(nz1))/delz;  
                 endif
 #endif
              else	

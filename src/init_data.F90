@@ -384,6 +384,11 @@ end subroutine
 
 
 subroutine ranvor(Q,PSI,work,work2,rantype)
+!
+!  rantype==0    reproducable with different parallel decompositions, slow
+!  rantype==1    fast, not reproducable
+!
+!
 use params
 use transpose
 implicit none
