@@ -282,6 +282,7 @@ epsilon=mu_m*ens
 !epsilon=2.76029
 
 
+print *,'stats computed from target spectrum and target viscosity:'
 print *,'epsilon: ',epsilon
 print *,'energy:  ',ener
 print *,'u1       ',sqrt(2*ener/3)
@@ -301,7 +302,7 @@ enerb_target=enerb_target / (2*pi*2*pi)
 ! since it will be truncated by sqrt(2)*g_nmin/3 during initial
 ! projection & dealias step
 !
-NUMBANDS=g_nmin/2 -1 
+NUMBANDS=.5 + sqrt(2.0)*g_nmin/3  ! round up
 
 
 
@@ -471,6 +472,32 @@ do nb=1,min(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
 enddo
 write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
 call print_message(message)
+
+
+if (my_pe==io_pe) then 
+! compute some stats:
+enerb=enerb*2*pi*2*pi   ! convert back to L=2pi units
+ener=0
+ens=0
+do nb=1,NUMBANDS
+   ener=ener+enerb(nb)
+   ens=ens+2 * nb**2 * enerb(nb)
+enddo
+mu_m=mu*2*pi*2*pi      ! use our viscosity
+epsilon=mu_m*ens
+!epsilon=2.76029
+
+print *,'stats computed from initial condition and our viscosity:'
+print *,'epsilon: ',epsilon
+print *,'energy:  ',ener
+print *,'u1       ',sqrt(2*ener/3)
+print *,'u1,1     ',epsilon/mu_m/15
+print *,'lambda   ',sqrt(10*ener*mu_m/epsilon)
+print *,'R_l      ',sqrt(10*ener*mu_m/epsilon) * sqrt(2*ener/3)/mu_m
+print *,'eta      ',(mu_m**3 / epsilon ) **.25
+print *,'eddy time',2*ener/epsilon
+endif
+
 
 
 
