@@ -10,7 +10,7 @@ character(len=*) message
 character(len=15) :: pre="ABORT"
 write(*,'(a)') pre // message
 
-#ifdef IBM
+#ifdef AIX
 call flush_(6)
 #else
 call flush(6)

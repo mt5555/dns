@@ -52,6 +52,16 @@ end module
 #endif
 
 
+!
+! AIX
+!
+#ifdef AIX
+module mpi
+#include "mpif.h"
+end module
+#endif
+
+
 
 
 #else

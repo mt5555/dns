@@ -357,6 +357,12 @@ do i=nx1,nx2
    maxvor = max(maxvor,abs(vor(1)))
    maxvor = max(maxvor,abs(vor(2)))
    maxvor = max(maxvor,abs(vor(3)))
+
+
+   ! add any rotation to vorticity before computing u cross vor
+   if (fcor/=0) then
+      vor(1)=vor(1) + fcor
+   endif
    
    !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
@@ -365,6 +371,7 @@ do i=nx1,nx2
    uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
    vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
    ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
+
    
    ! overwrite Q with the result
    Q(i,j,k,1) = uu

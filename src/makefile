@@ -104,8 +104,7 @@ endif
 ifeq ($(UNAME),AIX)
    F90 = mpxlf95
    F77FIXED = -qfixed
-   MPI = -DUSE_MPI
-   FFLAGS = -WF,"-DAIX,-Dabort=punt,$(MPI),-DUSE_FFT99"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
+   FFLAGS = -WF,"-DAIX,-Dabort=punt,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
    CC = cc -DAIX
 endif
 ifeq ($(UNAME),OSF1)
