@@ -13,8 +13,7 @@ integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,ener1,ener2,ener1_target,ener2_target,ener,xfac
 character*80 message
 
-
-
+!random vorticity
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
@@ -63,7 +62,6 @@ enddo
    ener=ener2
    call MPI_allreduce(ener,ener2,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
-
 
 
 do n=1,3
@@ -119,6 +117,10 @@ enddo
 #ifdef USE_MPI
    xfac=ener
    call MPI_allreduce(xfac,ener,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   xfac=ener1
+   call MPI_allreduce(xfac,ener1,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   xfac=ener2
+   call MPI_allreduce(xfac,ener2,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 call print_message("Isotropic initial condition in wave numbers:");

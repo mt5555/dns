@@ -77,6 +77,9 @@ call MPI_bcast(diag_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call MPI_bcast(ncustom,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call MPI_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+
 
 if (.not. allocated(custom)) allocate(custom(ncustom))
 call MPI_bcast(custom,ncustom,MPI_REAL8,io_pe,comm_3d,ierr)
@@ -284,7 +287,6 @@ do i=1,80
       exit
    endif
 enddo
-
 
 read(*,'(a12)') sdata
 if (sdata=='KH-blob') then

@@ -1,20 +1,21 @@
 #! /bin/csh 
-#BSUB -o nb1.o -e bench.e
+#BSUB -o bench.o -e bench.e
 #BSUB -q small-d
+#XXXX -q large-dq
 #BSUB -J dns
 #BSUB -W 0:15
 #BSUB -n 128 -R "span[ptile=128]"
 
-set NCPU=128 
 newcshrc
 
-set refin=benchmark_sgi.inp
+set refin=benchmark256.inp
 
 cd ../src
-./gridsetup.py 1 1 128 256 256 256
+./gridsetup.py 1 1 64 256 256 256
 make -j 4 dns
 cd ../benchmark
-mpirun -np 128 ../src/dns < $refin 
+mpirun -np 64 ../src/dns < $refin 
+
 
 
 # ssrun -workshop mpirun -np 128 ../src/dns < $refin 
