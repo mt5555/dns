@@ -29,6 +29,7 @@ integer           :: delta_val(delta_num_max)
 
 ! max range:  10 ... 10
 integer,parameter :: pdf_max_bin=2000
+integer,parameter :: jpdf_max_bin=200
 
 
 
@@ -36,7 +37,7 @@ integer,parameter :: pdf_max_bin=2000
 
 type pdf_structure_function
 !
-! pdf%data(-bin:bin,delta_num,npdfs)
+! pdf%data(-bin:bin,delta_num)
 !
 !SGI f90 does not allow allocatable arrays in a struct
 real*8,pointer      :: pdf(:,:)
@@ -46,7 +47,22 @@ real*8              :: pdf_bin_size ! size of bin
 integer             :: ncalls       ! number of instances PDF has been computed
                                ! (i.e. we may compute the PDF for 10 time steps
 end type
+
+type jpdf_structure_function
+!
+! JOINT PDF's
+! pdf%data(-bin:bin,-bin:bin,delta_num)
+!
+!SGI f90 does not allow allocatable arrays in a struct
+real*8,pointer      :: pdf(:,:,:)
+integer             :: delta_num    ! number of different values of delta
+integer             :: nbin         ! number of bins
+real*8              :: pdf_bin_size ! size of bin
+integer             :: ncalls       ! number of instances PDF has been computed
+                               ! (i.e. we may compute the PDF for 10 time steps
+end type
  
+
 !
 !  Our structure functions
 !  SF(NUM_SF,3) :  structure functions, in the x,y and z directions
@@ -76,7 +92,28 @@ integer,parameter :: NUM_SF=8
 type(pdf_structure_function) ::  SF(NUM_SF,3),epsilon
 
 integer :: overflow=0    ! count the number of overflow messages
+integer :: joverflow=0    ! count the number of overflow messages
 real*8  :: one_third = (1d0/3d0)
+
+
+!
+!  joint PDF's 
+!
+!  long-long:
+!     delx(u) dely(v)           jpdf_v_lonlon(1)
+!     delx(u) delz(w)           jpdf_v_lonlon(2)
+!     dely(v) delz(w)           jpdf_v_lonlon(3)
+!
+!  tran-tran?  probably not?
+!     dely(u) delx(v)
+!     dely(u) delx(w)
+!     delx(v) delx(w)
+
+!     delz(u) delz(v)
+!     delz(u) dely(w)
+!     delz(v) dely(w)
+
+type(jpdf_structure_function) ::  jpdf_v_lonlon(3)
 
 contains
 
@@ -126,7 +163,14 @@ do i=1,NUM_SF
    call init_pdf(SF(i,3),100,.01d0,numz)
 enddo
 call init_pdf(epsilon,100,.01d0,1)
+
+
+call init_jpdf(jpdf_v_lonlon(1),100,.1d0, min(numx,numy))
+call init_jpdf(jpdf_v_lonlon(2),100,.1d0, min(numx,numz))
+call init_jpdf(jpdf_v_lonlon(3),100,.1d0, min(numy,numz))
+
 end subroutine
+
 
 
 
@@ -149,6 +193,32 @@ str%ncalls=0
 str%delta_num=ndelta
 
 end subroutine
+
+
+
+
+
+
+
+subroutine init_jpdf(str,bin,binsize,ndelta)
+!
+! call this to initialize a JOINT pdf_structure_function
+!
+implicit none
+type(jpdf_structure_function) :: str
+integer :: bin,ndelta
+real*8 binsize
+
+str%nbin=bin
+str%pdf_bin_size=binsize
+allocate(str%pdf(-bin:bin,-bin:bin,ndelta))
+str%pdf=0
+str%ncalls=0
+str%delta_num=ndelta
+
+end subroutine
+
+
 
 
 
@@ -216,7 +286,70 @@ end subroutine
 
 
 
-subroutine outputSF(time,fid)
+
+subroutine resize_jpdf(str,bin)
+!
+! resize a jpdf_structure_function so it can hold value = bin
+! bin should be out of the range:   -str%nbin : str%nbin
+! 
+! if bin is inside that range, we abort.  (cant shrink str)
+! if bin is one of the end points of that range, we do nothing
+! if bin is outside the range:
+!      if abs(bin) > pdf_max_bin:  print warning, set bin to end point
+!      else: resize str to contain bin.  
+!      
+!
+use params
+implicit none
+type(jpdf_structure_function) :: str
+integer :: bin
+
+!local vars
+real*8, allocatable :: pdfdata(:,:,:)
+integer n,ndelta
+
+ndelta=str%delta_num
+
+n=str%nbin
+if (bin<n) call abort("resize_pdf: attempting to shrink pdf");
+if (bin==n) return;
+
+
+if (bin>jpdf_max_bin) then
+   joverflow=joverflow+1
+   if (joverflow<10) print *,"Warning jpdf bin overflow on pe=",my_pe
+   if (joverflow==10) print *,"disabling bin overflow messages"
+   bin=pdf_max_bin
+endif
+
+
+
+! make a copy of data
+allocate(pdfdata(-n:n,-n:n,ndelta))
+pdfdata=str%pdf
+
+! create a larger structure function
+deallocate(str%pdf)
+allocate(str%pdf(-bin:bin,-bin:bin,ndelta))
+
+! copy data into new, larger structure function
+str%pdf=0
+str%pdf(-n:n,-n:n,:)=pdfdata(-n:n,-n:n,:)
+str%nbin=bin
+
+! delete the copy of original data
+deallocate(pdfdata)
+
+end subroutine
+
+
+
+
+
+
+
+
+subroutine output_pdf(time,fid)
 use params
 implicit none
 real*8 time
@@ -227,7 +360,7 @@ character(len=80) message
 real*8 x
 
 if (structf_init==0) then
-   call abort("Error: outputSF() called, but structf module not initialized")
+   call abort("Error: output_pdf() called, but structf module not initialized")
 endif
 
 ! reset structure function counters
@@ -242,6 +375,10 @@ do i=1,NUM_SF
 enddo
 enddo
 call mpisum_pdf(epsilon)
+
+do j=1,3
+   call mpisum_jpdf(jpdf_v_lonlon(j))
+enddo
 
 
 
@@ -372,6 +509,64 @@ endif
 #endif
 
 end subroutine
+
+
+
+
+
+
+
+
+
+
+
+subroutine mpisum_jpdf(str)
+!
+! sum PDF's over all CPUs into one PDF on cpu = io_pe
+!
+use params
+use mpi
+implicit none
+type(jpdf_structure_function) :: str
+
+
+! local variables
+real*8,allocatable :: pdfdata(:,:,:)
+integer :: bin,ierr,n,ndelta,ncalls
+
+
+#ifdef USE_MPI
+! find maximum value of bin  MPI max
+call MPI_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+call MPI_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+str%ncalls=ncalls  ! in case io_pe has ncalls=0
+
+! resize all str's to size bin
+call resize_jpdf(str,bin)
+
+!
+! MPI sum into pdfdata
+!
+ndelta=str%delta_num
+n=(2*bin+1)*(2*bin+1)*ndelta
+if (my_pe == io_pe) then
+   allocate(pdfdata(-bin:bin,-bin:bin,ndelta))
+   call MPI_reduce(str%pdf,pdfdata,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   str%pdf=pdfdata
+   deallocate(pdfdata)
+else
+   call MPI_reduce(str%pdf,0,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+endif
+
+#endif
+
+end subroutine
+
+
+
+
+
+
 
 
 

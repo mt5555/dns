@@ -53,11 +53,11 @@ if (compute_struct==1) then
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".sf"
       call copen(message,access,fid,ierr)
       if (ierr/=0) then
-         write(message,'(a,i5)') "outputSF(): Error opening file errno=",ierr
+         write(message,'(a,i5)') "output_pdf(): Error opening file errno=",ierr
          call abort(message)
       endif
    endif
-   call outputSF(time,fid)
+   call output_pdf(time,fid)
    if (my_pe==io_pe) call cclose(fid,ierr)
    endif
 
