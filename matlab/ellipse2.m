@@ -12,15 +12,18 @@
 %name='/data/vxpair/vx2048c0000.0000.ellipse';
 
 name='/ccs/taylorm/dns/src/vxpair/vx6144c';
-times=[0:.1:.5];
+times=[0:.1:30.0];
 
 
+emode=[];
+timev=[];
+k=0;
 for t=times
   tstr=sprintf('%10.4f',t+10000);
   fname=[name,tstr(2:10),'.ellipse2'];
-  disp(fname)
   fid=endianopen(fname,'r');
   if (fid>=0) 
+     disp(fname)
 
      [nell,count]=fread(fid,1,'float64');
      if (count~=1) break; end;
@@ -38,6 +41,8 @@ for t=times
 
      disp('nell      Rmin          Rmax        m=1/m0       m=2/m0');
 
+     k=k+1;
+     timev=[timev,time];
      for i=1:nell
         center=fread(fid,2,'float64');
         plot(center(1),center(2),'.'); hold on; 
@@ -58,12 +63,14 @@ for t=times
         dft(4)=sum(rad.*cos2c*sq2);
         dft(5)=sum(rad.*sin2c*sq2);
 
-
         disp(sprintf('%i      %f     %f      %f     %f ',i,min(rad),max(rad),...
              sqrt(dft(2)^2+dft(3)^2)/dft(1),...
              sqrt(dft(4)^2+dft(5)^2)/dft(1)))
 
-      
+        if (length(emode)==0) 
+           emode=zeros([nell,1]);
+        end
+        emode(i,k)=sqrt(dft(4)^2+dft(5)^2);
      end     
      axis([1 3 0 1.5]);
      axis equal
@@ -73,6 +80,14 @@ for t=times
      fclose(fid);
   end
 end
+
+      
+ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
+figure(2)
+for i=1:nell
+  semilogy(timev,emode(i,:),[ccol(i),'.-']); hold on;
+end
+hold off;
 
 return
 
