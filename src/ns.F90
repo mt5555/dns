@@ -64,7 +64,14 @@ if (firstcall) then
       call print_message("Error: ns3dspectral model can only runs equations==NS_UVW")
       call abort("initial conditions are probably incorrect.")
    endif
-#ifndef ALPHA_MODEL
+#ifdef ALPHA_MODEL
+   if (Lz/=1) then
+      call abort("Error: alpha model with aspect ratio not implemented!")
+   endif
+   if (fcor/=0) then
+      call abort("Error: alpha model with rotation not implemented!")
+   endif
+#else
    if (alpha_value/=0) then
       call abort("Error: alpha>0 but this is not the alpha model!")
    endif
@@ -342,7 +349,7 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Grid space computations.  
 ! 
-! form u x vor, overwrite into Q, ifft into rhs 
+! form u x (vor+f), overwrite into Q, ifft into rhs 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 vorave=0
 ensave=0
@@ -385,9 +392,9 @@ do i=nx1,nx2
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
    !  w*(wy-vz) - u*(vx-uy)
    !  u*(uz-wx) - v*(wy-vz)
-   uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
-   vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
-   ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
+   uu = ( Q(i,j,k,2)*vor(3) - Lz*Q(i,j,k,3)*vor(2) )
+   vv = ( Lz*Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
+   ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )/Lz
 
    
    ! overwrite Q with the result
@@ -773,15 +780,15 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
          if (n==1) then
-            wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
-            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
+            wy = - jm*Qhat(k,i,j+z_jmsign(j),3)*Lz
+            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)/Lz
             !rhs(k,i,j,1) = pi2*(wy - vz)
             p(k,i,j) = pi2*(wy - vz)
          endif
          
          if (n==2) then
-            wx = - im*Qhat(k,i+z_imsign(i),j,3)
-            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
+            wx = - im*Qhat(k,i+z_imsign(i),j,3)*Lz
+            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)/Lz
             !rhs(k,i,j,2) = pi2*(uz - wx)
             p(k,i,j) = pi2*(uz - wx)
          endif
