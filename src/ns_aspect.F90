@@ -163,11 +163,14 @@ do i=nx1,nx2
       maxs(11)=max(maxs(11),-Q_grid(i,j,k,np1))
    endif
    ! used for CFL
+   ! physical coodinats   w'/delz'   =   w' / (Lz/Nz) = w / (1/Nz) = w / delz
    vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz
    maxs(4)=max(maxs(4),vel)
 enddo
 enddo
 enddo
+! convert z-max to physical units
+maxs(3)=maxs(3)*Lz
 
 end subroutine 
 
