@@ -442,8 +442,14 @@ do j=1,ny_2dz
 
 
             if (compute_ints==1) then
-! < u (uxx + uyy + uzz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat) >
-!                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
+! < u (uxx + uyy + uzz/Lz/Lz) > = < u-hat * (uxx-hat + uyy-hat + uzz-hat/Lz/Lz) >
+!                         = < u-hat*u-hat*( im**2 + jm**2 + (km/Lz)**2) >
+!                         = < u-hat*u-hat*xw>
+!
+! < Lz w (Lz wxx + Lz wyy + Lz wzz/Lz/Lz) > 
+! Lz**2  < w (wxx + wyy + wzz/Lz/Lz) > 
+!        = Lz**2 < u-hat*u-hat*( im**2 + jm**2 + (km/Lz)**2) >
+!        = Lz**2 < u-hat*u-hat*xw >
 
                xfac = 2*2*2
                if (km==0) xfac=xfac/2
@@ -452,7 +458,7 @@ do j=1,ny_2dz
                
                u2=Qhat(k,i,j,1)*Qhat(k,i,j,1) + &
                     Qhat(k,i,j,2)*Qhat(k,i,j,2) + &
-                    Qhat(k,i,j,3)*Qhat(k,i,j,3)
+                    Lz*Lz*Qhat(k,i,j,3)*Qhat(k,i,j,3)
                
                ke = ke + .5*xfac*u2
                ux2ave = ux2ave + xfac*xw*u2
@@ -469,9 +475,9 @@ do j=1,ny_2dz
                ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
                ! compute 2*k^2 u vor:
                h_diss = h_diss + 2*xfac*mu*xw*&
-                    (Qhat(k,i,j,1)*(wy-vz) + &
-                     Qhat(k,i,j,2)*(uz-wx) + &
-                     Qhat(k,i,j,3)*(vx-uy)) 
+                    (Qhat(k,i,j,1)*(Lz*wy-vz/Lz) + &
+                     Qhat(k,i,j,2)*(uz/Lz-Lz*wx) + &
+                     Lz*Qhat(k,i,j,3)*(vx-uy)) 
                
          endif
 
@@ -613,17 +619,6 @@ do ns=np1,np2
                rhs(k,i,j,ns)=rhs(k,i,j,ns) - xw_viss*Qhat(k,i,j,ns)
                if (passive_type(ns)==2) rhs(k,i,j,ns)=rhs(k,i,j,ns)+p(k,i,j)
             endif
-#if 0
-            if (compute_ints==1) then
-               xfac = 2*2*2
-               if (km==0) xfac=xfac/2
-               if (jm==0) xfac=xfac/2
-               if (im==0) xfac=xfac/2
-               u2=Qhat(k,i,j,ns)*Qhat(k,i,j,ns)
-               pke(ns) = pke(ns) + .5*xfac*u2
-               p_diss(ns) = p_diss(ns) + xfac*xw_viss*u2
-         endif
-#endif
          enddo
       enddo
    enddo
@@ -652,7 +647,6 @@ if (compute_ints==1) then
    ints(5)=helave/g_nx/g_ny/g_nz
    ints(6)=ke        
    ints(7)=ensave/g_nx/g_ny/g_nz
-   ints(8)=a_diss    
    ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-ke_diss                 ! <u,u_xx>
    ints(11)=h_diss

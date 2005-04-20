@@ -143,13 +143,13 @@ primted variables:
                 \dfrac{1}{L^2}\dfrac{\partial^2 u_3}{\partial z^2} \right)
 \end{pmatrix}
 \]
-Defining $\omega$ by  
+Defining $\omega'$ by  
 \begin{equation}
 \label{E:vor}
 \omega = \curlp \up = 
 \begin{pmatrix}
 L \dfrac{\partial u_3}{\partial y} - \dfrac{1}{L} \dfrac{\partial u_2}{\partial z}  \\[5mm]
-\dfrac{1}{L} \dfrac{\partial u_1}{\partial z} -  \dfrac{\partial u_3}{\partial x}  \\[5mm]
+\dfrac{1}{L} \dfrac{\partial u_1}{\partial z} -  L \dfrac{\partial u_3}{\partial x}  \\[5mm]
 \dfrac{\partial u_2}{\partial x} - \dfrac{\partial u_1}{\partial y}
 \end{pmatrix}  
 \end{equation}
@@ -160,9 +160,9 @@ the vorticity term works out to
                 u_2 \\
                 L u_3 \\
 \end{pmatrix} = 
-\begin{pmatrix} L u_3 w_2 - u_2 w_3 \\
-                u_1 w_3 - L u_3 w_1 \\
-                u_2 w_1 - u_1 w_2 \\
+\begin{pmatrix}  L  u_3 \omega_2' -  u_2 \omega_3'   \\
+                   u_1 \omega_3' -   L u_3 \omega_1'   \\
+                u_2 \omega_1' - u_1 \omega_2'   \\
 \end{pmatrix}  
 + 
 \begin{pmatrix} -f u_2 \\
@@ -170,16 +170,18 @@ the vorticity term works out to
                 0  \\
 \end{pmatrix}  
 \]
-Thus the final equations, after scaling the $z$ component by $L$:
+
+Thus the final equations, after scaling the $z$ component by $L$
+and substituting in for $\omega$:
 \[
 \begin{pmatrix} u_1 \\
                 u_2 \\
                 u_3 \\
 \end{pmatrix}_t
   + 
-\begin{pmatrix} L u_3 w_2 - u_2 w_3 \\
-                u_1 w_3 - L u_3 w_1 \\
-                \dfrac{1}{L} (u_2 w_1 - u_1 w_2) \\
+\begin{pmatrix}  L  u_3 \omega_2' -  u_2 \omega_3'   \\
+                   u_1 \omega_3' -   L u_3 \omega_1'   \\
+              \dfrac{1}{L} \left(  u_2 \omega_1' - u_1 \omega_2' \right)  \\
 \end{pmatrix}  
 + 
 \begin{pmatrix} -f u_2 \\
@@ -198,6 +200,9 @@ Thus the final equations, after scaling the $z$ component by $L$:
                 \dfrac{1}{L^2}\dfrac{\partial^2 u_3}{\partial z^2}
 \end{pmatrix}
 \]
+
+
+
 \newpage
 Thus the only changes needed for our parallel DNS code are:
 \begin{enumerate}
@@ -211,6 +216,40 @@ contains L.
 \item modify Laplacian (scale $z$ derivative terms by $1/L^2$).
 \item modify vorticity term $\w \times \uv$ as shown above.
 \end{enumerate}
+
+\section{Computing Scalars}
+Integrals per unit volume are approximated by the sum
+\[
+<f,g> = \frac{1}{L} \iiint  f g  \, dx' \, dy' \, dz' =   \iiint  f g \, dx \, dy \, dz
+=\frac{1}{N_x N_y N_z} \sum  f  g
+\]
+We also have that 
+\[
+\frac{1}{N_x N_y N_z} \sum  f  g = \sum \hat{f} \hat{g}
+\]
+so integrals can be computed in Fourier or grid space. 
+
+All other scalars (kinetic energy, helicity, various dissipation
+terms) are computed in physical coordinates.  So for example
+\[
+k = <\up,\up> = <u_1,u_1> + <u_2,u_2> + L^2 <u_3,u_3>
+\]
+and the helicity 
+\[
+  h  = w_1' u_1  + w_2' u_2 + L w_3' u_3
+\]
+As in example, using integer wave numbers $(l,m,n)$ (defined in the
+next section), we have
+\[
+< \omega' , \Delta \up> = \sum (2 \pi)^2 (l^2 + m^2 + (n/L)^2) 
+\begin{pmatrix} \hat{u}_1 \\
+                \hat{u}_2 \\
+                L \hat{u}_3  \\
+\end{pmatrix}  
+ \cdot \omega'
+\]
+
+
 
 
 
