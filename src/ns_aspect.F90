@@ -51,28 +51,22 @@ logical,save :: firstcall=.true.
 if (firstcall) then
    firstcall=.false.
    if (smagorinsky>0) then
-      call abort("Error: ns3dspectral model does not yet support Smagorinsky")
+      call abort("Error: NS_SCALE model does not yet support Smagorinsky")
    endif
 
    if (dealias==0) then
-      call abort("Error: using ns3dspectral model, which must be run dealiased")
+      call abort("Error: using NS_SCALE model, which must be run dealiased")
    endif
    if (numerical_method/=FOURIER) then
-      call abort("Error: ns3dspectral model requires FFT method.")
+      call abort("Error: NS_SCALE model requires FFT method.")
    endif
    if (equations/=NS_UVW) then
-      call print_message("Error: ns3dspectral model can only runs equations==NS_UVW")
+      call print_message("Error: NS_SCALE model can only runs equations==NS_UVW")
       call abort("initial conditions are probably incorrect.")
    endif
-   if (Lz/=1) then
-      call abort("Error: NS model with aspect ratio not implemented - uss NS_SCALE!")
-   endif
-#ifdef ALPHA_MODEL
-#else
    if (alpha_value/=0) then
       call abort("Error: alpha>0 but this is not the alpha model!")
    endif
-#endif  
 
    do n=1,n_var
       rhsg(:,:,:,1)=Q_grid(:,:,:,n)
@@ -234,11 +228,6 @@ real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3)
-#ifdef ALPHA_MODEL
-real*8,save :: gradu(nx,ny,nz,n_var)
-real*8,save :: gradv(nx,ny,nz,n_var)
-real*8,save :: gradw(nx,ny,nz,n_var)
-#endif
 
 !
 ! NOTE: for Fourier Coefficients with mode  im=g_nx/2, this is the
@@ -317,18 +306,6 @@ enddo
 ! total:                                FFT: 6x,6y,2z  tranpose: 2z,8x,8y
 !               
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-! for alpha model, we need all 9 terms: ux,uy,uz,vx,vy,vz,wx,wy,wz
-! From Qhat: 9 calls to z_ifft3d: 9Z,18x,18y,27FFT
-! From Qgrid: x: 6fft, 6x,  y: 6fft, 6y,   z: 6fft, 6z   
-!
-! z-der from Qhat:      3z,6x,6y,9FFT
-! x,yder from Qgrid:       6x,6y,12FFT 
-!
-
-#ifdef ALPHA_MODEL
-   call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
-#else
    if (ncpu_z==1) then
       call ns_vorticity(rhsg,Qhat,work,p)
       ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
@@ -336,7 +313,6 @@ enddo
       call ns_vorticity(rhsg,Qhat,work,p)
    endif
 
-#endif
 
 
 
@@ -357,16 +333,9 @@ maxvor=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-#ifdef ALPHA_MODEL
-   ! rhsg = gradu
-   vor(1)=gradw(i,j,k,2)-gradv(i,j,k,3)
-   vor(2)=gradu(i,j,k,3)-gradw(i,j,k,1)
-   vor(3)=gradv(i,j,k,1)-gradu(i,j,k,2)
-#else
    vor(1)=rhsg(i,j,k,1)
    vor(2)=rhsg(i,j,k,2)
    vor(3)=rhsg(i,j,k,3)
-#endif
 
    vorave = vorave + vor(3)
    ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
@@ -389,9 +358,9 @@ do i=nx1,nx2
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
    !  w*(wy-vz) - u*(vx-uy)
    !  u*(uz-wx) - v*(wy-vz)
-   uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
-   vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
-   ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
+   uu = ( Q(i,j,k,2)*vor(3) - Lz*Q(i,j,k,3)*vor(2) )
+   vv = ( Lz*Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
+   ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )/Lz
 
    
    ! overwrite Q with the result
@@ -458,7 +427,7 @@ do j=1,ny_2dz
       do k=1,g_nz
          km=z_kmcord(k)
 
-            xw=(im*im + jm*jm + km*km)*pi2_squared
+            xw=(im*im + jm*jm + km*km/(Lz*Lz))*pi2_squared
             xw_viss=mu*xw
             if (mu_hyper>=2) then
                xw_viss=xw_viss + mu_hyper_value*hyper_scale*xw**mu_hyper
@@ -527,11 +496,6 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in forcing to rhs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#ifdef ALPHA_MODEL
-! For alpha model, we add Helmholtz inverse(div(tau))
-! and overwrite Q (used for work arrays)
-call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,a_diss)
-#endif
 
 if (rkstage==1) then
    f_diss_ave=0
@@ -551,28 +515,6 @@ if (forcing_type>0) then
    f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
 endif
 
-#if 0
-rhs=0
-if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
-do j=1,ny_2dz
-   jm=z_jmcord(j)
-   do i=1,nslabx
-      im=z_imcord(i)
-      do k=1,g_nz
-         km=z_kmcord(k)
-
-         ! compute the divergence
-         p(k,i,j)= - im*rhs(k,i+z_imsign(i),j,1) &
-              - jm*rhs(k,i,j+z_jmsign(j),2) &
-              - km*rhs(k+z_kmsign(k),i,j,3)
-
-      enddo
-   enddo
-enddo
-call z_ifft3d(p,rhsg,work)
-print *,'maxval div: ',maxval(abs(rhsg(nx1:nx2,ny1:ny2,nz1:nz2,1)))
-stop
-#endif
 
 
 
@@ -638,18 +580,6 @@ do j=1,ny_2dz
             rhs(k,i,j,2)=0
             rhs(k,i,j,3)=0
          endif
-
-#if 0
-         if (forcing_type==5) then
-         ! balu forcing: keep mode=10 fixed.
-         ! in 2D: modes (0,10) and (6,8)
-         if (90.25 <= im**2+jm**2 + km**2 .and. im**2+jm**2+km**2<110.25) then
-            rhs(k,i,j,1)=0
-            rhs(k,i,j,2)=0
-            rhs(k,i,j,3)=0
-         endif
-         endif
-#endif
 
       enddo
    enddo
@@ -777,15 +707,15 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
          if (n==1) then
-            wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
-            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
+            wy = - jm*Qhat(k,i,j+z_jmsign(j),3)*Lz
+            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)/Lz
             !rhs(k,i,j,1) = pi2*(wy - vz)
             p(k,i,j) = pi2*(wy - vz)
          endif
          
          if (n==2) then
-            wx = - im*Qhat(k,i+z_imsign(i),j,3)
-            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
+            wx = - im*Qhat(k,i+z_imsign(i),j,3)*Lz
+            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)/Lz
             !rhs(k,i,j,2) = pi2*(uz - wx)
             p(k,i,j) = pi2*(uz - wx)
          endif
@@ -810,350 +740,4 @@ end subroutine
 
 
 
-subroutine ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
-use params
-implicit none
-real*8 Q(nx,ny,nz,n_var)
-real*8 gradu(nx,ny,nz,n_var)
-real*8 gradv(nx,ny,nz,n_var)
-real*8 gradw(nx,ny,nz,n_var)
-real*8 work(nx,ny,nz)
 
-!local
-integer nd
-real*8 dummy(1)
-
-
-do nd=1,3
-call der(Q(1,1,1,1),gradu(1,1,1,nd),dummy,work,DX_ONLY,nd)
-call der(Q(1,1,1,2),gradv(1,1,1,nd),dummy,work,DX_ONLY,nd)
-call der(Q(1,1,1,3),gradw(1,1,1,nd),dummy,work,DX_ONLY,nd)
-enddo
-
-
-end subroutine
-!
-!  
-!
-!  tau = DD + DD' - D'D
-!  NS(u) = -  (1-a**2 Laplacian)^-1 a**2 div(tau) 
-!
-!
-! 3 ways to do this:
-! div on grid, inverse in spectral
-!          9 der() + 3 z_fft()      transposes: 6+6 x, 6+6 y, 6+3z
-! div & inverse in spectral
-!         9 z_fft()                 tranposes: 18x,18y,9z
-!
-! x & y components of div on grid, then transform.  transform z, add then div
-! 6 der() + 6 z_fft()               transposes: 6+12 x, 6+12y, 6z
-!
-subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p,a_diss)
-! compute one entry of work=DD + DD' - D'D  
-! transform work -> p
-! compute d(p), apply helmholtz inverse, accumualte into rhs
-!
-! f_diss  KE dissapation from forcing used in RHS  
-! a_diss  KE dissapation from alpha term added to RHS 
-! normuf  || u dot f ||     
-!
-use params
-use sforcing
-implicit none
-real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)          ! Fourier data at time t
-real*8 p(g_nz2,nslabx,ny_2dz)    
-real*8 work(nx,ny,nz)
-
-! overlapped in memory:
-real*8 div(nx,ny,nz,n_var)
-real*8 divs(g_nz2,nslabx,ny_2dz,n_var)
-
-real*8 gradu(nx,ny,nz,n_var)
-real*8 gradv(nx,ny,nz,n_var)
-real*8 gradw(nx,ny,nz,n_var)
-real*8 :: a_diss,f_diss,normuf
-
-!local
-integer i,j,k,m1,m2,im,jm,km,l,n
-integer nd,ifilt,n1,n1d,n2,n2d,n3,n3d
-real*8 :: D(3,3),dummy,xfac
-
-! tophat filter code:
-integer :: i2,j2,k2,i1,j1,k1,ii,jj,kk
-real*8  :: wtot,w,r
-real*8  :: gfilt(0:1000)
-real*8 p2(g_nz2,nslabx,ny_2dz)    
-external helmholtz_periodic
-
-
-
-div=0
-do m2=1,3
-do m1=1,3
-
-   ! compute Tau(m1,m2)   Tau = DD + DD'  - D'D
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      do nd=1,3
-         D(1,nd) = gradu(i,j,k,nd)
-         D(2,nd) = gradv(i,j,k,nd)
-         D(3,nd) = gradw(i,j,k,nd)
-      enddo
-      work(i,j,k)=0
-      do L=1,3
-#ifdef LERAY_MODEL
-         work(i,j,k)=work(i,j,k) + D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L)
-#else
-         work(i,j,k)=work(i,j,k) + D(m1,L)*D(L,m2)+ D(m1,L)*D(m2,L) - D(L,m1)*D(L,m2)
-#endif
-      enddo
-   enddo
-   enddo
-   enddo
-
-   ! compute div(Tau)  
-   call der(work,work,dummy,p,DX_ONLY,m2)
-   div(nx1:nx2,ny1:ny2,nz1:nz2,m1) = div(nx1:nx2,ny1:ny2,nz1:nz2,m1) -&
-        work(nx1:nx2,ny1:ny2,nz1:nz2)
-
-
-enddo
-enddo
-if (infinite_alpha==0) div=alpha_value**2 * div
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Apply Helmholtz inverse to div(tau), accumulate into RHS.
-!
-! RHS  = RHS + Helmholtz_Inverse(DIV)   (variable DIV contains: -div(tau)  )
-! also return a_diss, the KE dissapation from div(tau) term
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#undef TOPHAT
-#undef ITER
-
-#ifdef TOPHAT
-
-! tophat filter:
-ifilt = nint(.5*(sqrt(24.0)*alpha_value)/min(delx,dely,delz))
-!           ^^^^ take an extra factor of 2?
-!
-ifilt=2*ifilt
-
-!
-! gaussian filter.  C exp(-.25* (x/alpha)**2 )
-!
-! x/alpha = 4 is a good place to cutoff filter
-! ifilt = 4*alpha
-ifilt = nint(4*alpha_value/min(delx,dely,delz))
-ifilt=ifilt-1
-
-print *,'gaussian ifilt=',ifilt
-do i=0,ifilt
-   gfilt(i)=exp(-.25* (i**2)/(alpha_value/min(delx,dely,delz))**2)
-enddo
-
-
-gradu=0
-do n=1,3
-do k=nz1,nz2
-   do j=ny1,ny2
-      do i=nx1,nx2
-
-
-         wtot=0
-         do jj=j-ifilt,j+ifilt
-         do ii=i-ifilt,i+ifilt
-            j1=jj
-            if (j1<ny1) j1=j1+nslaby
-            if (j1>ny2) j1=j1-nslaby
-
-            i1=ii
-            if (i1<nx1) i1=i1+nslabx
-            if (i1>nx2) i1=i1-nslabx
-
-            w = gfilt(abs(jj-j))*gfilt(abs(ii-i))
-            !w=1
-
-            wtot=wtot+w
-            gradu(i,j,k,n)=gradu(i,j,k,n)+w*div(i1,j1,k,n)
-
-         enddo
-         enddo
-         gradu(i,j,k,n)=gradu(i,j,k,n)/wtot
-
-      enddo
-   enddo
-enddo
-enddo
-do n=1,3
-   call z_fft3d_trashinput(gradu(1,1,1,n),divs(1,1,1,n),p) 
-enddo
-
-
-a_diss=0
-do n=1,3
-   do j=1,ny_2dz
-      jm=z_jmcord(j)
-      do i=1,nslabx
-         im=z_imcord(i)
-         do k=1,g_nz
-            km=z_kmcord(k)
-            
-            xfac=8
-            if (z_kmcord(k)==0) xfac=xfac/2
-            if (z_jmcord(j)==0) xfac=xfac/2
-            if (z_imcord(i)==0) xfac=xfac/2
-            a_diss = a_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
-
-         enddo
-      enddo
-   enddo
-enddo
-rhs=rhs+divs
-
-#elif (defined ITER)
-
-! trash gradu and gradv (using them as work arrays below)
-#define JACOBI
-gradu=div
-do n=1,3
-   work=gradu(:,:,:,n)
-#ifdef JACOBI
-   call jacobi(work,gradu(1,1,1,n),1d0,-alpha_value**2,.15d0,gradv,&
-     helmholtz_periodic,.false.)
-#else
-   call cgsolver(work,gradu(1,1,1,n),1d0,-alpha_value**2,.03d0,gradv,&
-     helmholtz_periodic,.false.)
-#endif
-   call z_fft3d_trashinput(work,divs(1,1,1,n),p) 
-enddo
-rhs=rhs+divs
-
-a_diss=0
-do n=1,3
-   do j=1,ny_2dz
-      jm=z_jmcord(j)
-      do i=1,nslabx
-         im=z_imcord(i)
-         do k=1,g_nz
-            km=z_kmcord(k)
-            
-            xfac=8
-            if (z_kmcord(k)==0) xfac=xfac/2
-            if (z_jmcord(j)==0) xfac=xfac/2
-            if (z_imcord(i)==0) xfac=xfac/2
-            a_diss = a_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
-
-         enddo
-      enddo
-   enddo
-enddo
-
-
-#else
-
-gradu=div
-do n=1,3
-   call z_fft3d_trashinput(gradu(1,1,1,n),divs(1,1,1,n),work) 
-enddo
-call helminv(rhs,divs,Qhat,a_diss)
-
-#endif
-
-
-
-end subroutine
-
-
-
-
-
-
-
-
-
-
-
-subroutine helm(out,in)
-use params
-implicit none
-
-real*8 out(g_nz2,nslabx,ny_2dz)
-real*8 in(g_nz2,nslabx,ny_2dz)
-
-!local
-integer i,j,k,m1,m2,im,jm,km,l,n
-real*8 :: xfac
-
-
-do j=1,ny_2dz
-   jm=z_jmcord(j)
-   do i=1,nslabx
-      im=z_imcord(i)
-      do k=1,g_nz
-         km=z_kmcord(k)
-         
-
-         ! dealias           
-         if ( ((abs(km)> g_nz/3) ) .or. &
-              ((abs(jm)> g_ny/3) ) .or. &
-              ((abs(im)> g_nx/3) ) )  then
-            out(k,i,j)=in(k,i,j)
-            stop 'fix this with new dealias function'
-         else
-            ! compute laplacian inverse
-            xfac= -(im*im +km*km + jm*jm)*pi2_squared      
-            xfac=1 - alpha_value**2 *xfac
-            out(k,i,j) = xfac*in(k,i,j)
-         endif
-      enddo
-   enddo
-enddo
-end subroutine 
-
-
-
-
-subroutine helminv(rhs,divs,Qhat,a_diss)
-use params
-implicit none
-
-real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)    
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)    
-real*8 divs(g_nz2,nslabx,ny_2dz,n_var)    
-real*8 a_diss
-
-!local
-integer i,j,k,m1,m2,im,jm,km,l,n
-real*8 :: xfac
-
-a_diss=0
-do n=1,3
-   do j=1,ny_2dz
-      jm=z_jmcord(j)
-      do i=1,nslabx
-         im=z_imcord(i)
-         do k=1,g_nz
-            km=z_kmcord(k)
-            
-            ! compute laplacian inverse
-            xfac= (im*im +km*km + jm*jm)*pi2_squared      
-            if (infinite_alpha==0) then
-               xfac=1 + alpha_value**2 *xfac
-            endif
-            if (xfac/=0) xfac = 1/xfac
-            rhs(k,i,j,n) = rhs(k,i,j,n) + xfac*divs(k,i,j,n)
-
-            xfac=8*xfac
-            if (z_kmcord(k)==0) xfac=xfac/2
-            if (z_jmcord(j)==0) xfac=xfac/2
-            if (z_imcord(i)==0) xfac=xfac/2
-            a_diss = a_diss + xfac*Qhat(k,i,j,n)*divs(k,i,j,n)
-
-         enddo
-      enddo
-   enddo
-enddo
-end subroutine
