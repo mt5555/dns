@@ -10,11 +10,9 @@ none        ! hyper vis
 0.0         ! hyper vis value
 none        ! hypo vis
 0.0         ! hypo vis value
-
-            ! fcor  rotation
-            ! Z sscaling  (aspect ratio)
-            ! Bous. parameter 
-
+0.0          ! fcor  rotation
+1.0         ! Z sscaling  (aspect ratio)
+0.0            ! Bous. parameter 
 0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
 1             ! max number of schmidt numbers for passive scalars
