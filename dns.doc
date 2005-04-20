@@ -93,18 +93,28 @@ Running the code
 
 2. compiling
 
-3. the input file
+3. the input file.  
 
-   line 1.  input file type.  0-5
+   line 1.  input file type.  0-7
+
    Each input file type has its own routine to read in the parameters
-   in init_grid.F90.  number 5 is the newest input file format and the others
-   should be considered obsolete.
+   in init_grid.F90.  number 7 is the newest input file format, documented
+   here.  The others should be considered obsolete.
 
    line 2   equations. valid values:    ns_uvw
                                         ns_psivor
                                         shallow
 
-   line 3  initial condition
+   line 3  header_user   User seletec snapshot file header type
+                         The header can include:
+                         1: time, x, y and z coordinate data
+                         2: no headers, no periodic extension
+                         3: ensight headers, no periodic extension
+                         4: 4 byte header, FORTRAN style (for input only) 
+                         5: time, Lz, x, y and z coordinate data
+
+
+   line 4  initial condition
              KH-blob    initial velocity computed from a specified
                         vortex sheet
              KH-anal    analytic KH problem from E & Lui
@@ -132,10 +142,10 @@ Running the code
                                               
 
 
-   line 4   initial condition subtype
+   line 5   initial condition subtype
             see initital condition subroutines in cases2v.F90, cases3v.F90
 
-   line 5    forcing:
+   line 6    forcing:
               none
               iso12     Relax to E(1)=E(2)=.5
               iso12_hel Relax E as iso12, also induce helicity
@@ -144,7 +154,7 @@ Running the code
               iso23w    stochastic, white in time, wave numbers 2,3
               balu      Relax to E(10)=1 
 
-   line 6    viscosity type.  
+   line 7    viscosity type.  
                value:      data on line 7 is actual value
                smallest:   use smallest grid will support (not coded?)
                kediff      data on line 7 is KE dissipation rate of smallest 
@@ -153,48 +163,59 @@ Running the code
                hyper       data on line 7 is ??? (check code)
 
 
-   line 7    viscosity data, see line 6.
+   line 8    viscosity data, see line 6.
 
-   line 8    hyper viscosity:   none, 
-   line 9    hyper viscosity value
-   line 10   hypo viscosity:  none,   
-   line 11   hypo viscosity value
+   line 9    hyper viscosity type:   none, 
+   line 10    hyper viscosity value
+   line 11   hypo viscosity type:  none,   
+   line 12   hypo viscosity value
 
-   line 12    alpha    alpha=0:      dont use alpha model
+   line 13   fcor, the rotation speed about z-axis      
+   line 14   Lz    aspect ratio in z direction
+   line 15   bous  A boussenesque parameter
+
+   line 16    alpha    alpha=0:      dont use alpha model
                       0<alpha<=1    value of alpha
                       alpha>1       value of alpha in units of delx
                       allpha=9999   run with alpha=infinity (not coded?)
 
-   line 13    smagorinsky   0:      dont use
+   line 17    smagorinsky   0:      dont use
 
-   line 14    compute angle averaged structure functions?   value: 0 or 1
-   line 15    compute velocity and passive scalar PDFs?     value: 0 or 1
+   line 18    number of scalars 
+   line 19+   schmidt number,  scalar_type    (one line for each scalar)
 
-   line 16    numerical method:  fft, fft-dealias, fft-sphere, 4th
-   line 17    x boundary condition:   (model dependent)  
-   line 18    y boundary condition:   
-   line 19    z boundary condition:   
+(line numbers now assume 0 scalars)
+   line 19    compute angle averaged structure functions?   value: 0 or 1
+   line 20    compute velocity and passive scalar PDFs?     value: 0 or 1
 
-   line 20    amount of time to run
-   line 21    advective CFL number  suggested value:  1.5
-   line 21    viscous CFL number.   suggested value:  .25
-   line 22    min dt
-   line 23    max dt
+   line 21    numerical method:  fft, fft-dealias, fft-sphere, 4th
+   line 22    x boundary condition:   (model dependent)  
+   line 23    y boundary condition:   
+   line 24    z boundary condition:   
+
+   line 25    amount of time to run
+   line 26    advective CFL number  suggested value:  1.5
+   line 27    viscous CFL number.   suggested value:  .25
+   line 28    min dt
+   line 29    max dt
           
-   line 24    restart_dt   (ignored)
+   line 30    restart_dt   (ignored)
 
-   line 25    diag_dt      save scalar data (collected every timestep) to .scalar file
+   line 31    diag_dt      save scalar data (collected every timestep) to .scalar file
                            when mod(time,diag_dt)==0.  Can also be used in 
                            output_model() in addition to model_dt.
                             
-   line 26    model_dt     compute and output model specific data (output_model()):
+   line 32    model_dt     compute and output model specific data (output_model()):
                                 spectrum, scalars_turb, PDFs, structure functions... 
 
-   line 27    screen_dt    output diagnostic info to stdou
-   line 28    output_dt    output data files (can be used for restart)
-   line 29    n_output_custom   Number of custom output times to follow (0 is okay)
+   line 33    screen_dt    output diagnostic info to stdou
+   line 34    output_dt    output data files (can be used for restart)
+   line 35    output_vorticity?    
+   line 36    n_output_custom   Number of custom output times to follow (0 is okay)
                                 1 per line
-   line 30+                 custom output times.  
+   line 37+                 custom output times.  
+
+
 
 
 

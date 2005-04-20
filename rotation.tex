@@ -35,6 +35,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+\newcommand{\khat}{\hat{\mathbf k}}
 \newcommand{\uv}{\mathbf u}
 \newcommand{\up}{\mathbf u'}
 \newcommand{\w}{\mathbf w}
@@ -67,7 +68,7 @@ We would like to solve the NS equations in the box pictured in
 Fig.~\ref{F:box}.  To write the equations in this domain, we use
 primes:
 \[
-\frac{ \partial  \up }{\partial t}  + (\curlp \up) \times \up + \gradp \pi' = \nu \Delta' \up
+\frac{ \partial  \up }{\partial t}  + (\curlp \up + f \khat) \times \up + \gradp \pi' = \nu \Delta' \up
 \]
 \[
 \gradp \cdot \up = 0
@@ -124,7 +125,7 @@ primted variables:
                 u_2 \\
                 L u_3 \\
 \end{pmatrix}_t
-  + (\curlp \up) \times 
+  + (\curlp \up + f \khat) \times 
 \begin{pmatrix} u_1 \\
                 u_2 \\
                 L u_3 \\
@@ -154,7 +155,7 @@ L \dfrac{\partial u_3}{\partial y} - \dfrac{1}{L} \dfrac{\partial u_2}{\partial 
 \end{equation}
 the vorticity term works out to 
 \[
-(\curlp \up) \times 
+(\curlp \up + f\khat) \times 
 \begin{pmatrix} u_1 \\
                 u_2 \\
                 L u_3 \\
@@ -162,6 +163,11 @@ the vorticity term works out to
 \begin{pmatrix} L u_3 w_2 - u_2 w_3 \\
                 u_1 w_3 - L u_3 w_1 \\
                 u_2 w_1 - u_1 w_2 \\
+\end{pmatrix}  
++ 
+\begin{pmatrix} -f u_2 \\
+                f u_1 \\
+                0  \\
 \end{pmatrix}  
 \]
 Thus the final equations, after scaling the $z$ component by $L$:
@@ -174,6 +180,11 @@ Thus the final equations, after scaling the $z$ component by $L$:
 \begin{pmatrix} L u_3 w_2 - u_2 w_3 \\
                 u_1 w_3 - L u_3 w_1 \\
                 \dfrac{1}{L} (u_2 w_1 - u_1 w_2) \\
+\end{pmatrix}  
++ 
+\begin{pmatrix} -f u_2 \\
+                f u_1 \\
+                0  \\
 \end{pmatrix}  
 + \grad \pi = \nu 
 \begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 

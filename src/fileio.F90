@@ -253,6 +253,7 @@ output_spec,header_type)
 !                 2   no headers, no periodic extension      
 !                 3   ensight headers, no periodic extension
 !                 4   4 byte header  (fortran record?), no periodic extension
+!                 5   same as 1, but also include Lz scale parameter
 !   
 ! for header_type 2-4:  also disable output of the periodic extension data
 !
@@ -343,6 +344,7 @@ if (my_pe==fpe) then
    if (header_type==2) call header2_io(io_read,fid,time,xnx,xny,xnz)
    if (header_type==3) call header3_io(io_read,fid,time,xnx,xny,xnz)
    if (header_type==4) call header4_io(io_read,fid,time,xnx,xny,xnz)
+   if (header_type==5) call header5_io(io_read,output_spec,fid,time,xnx,xny,xnz)
 endif
 
 #ifdef USE_MPI
@@ -485,6 +487,9 @@ if (my_pe==fpe) then
    if (header_type==3) then
       call header3_io(io_read,fid,time,xnx,xny,xnz)
    endif
+   if (header_type==5) then
+      call header5_io(io_read,.false.,fid,time,xnx,xny,xnz)
+   endif
 endif
 
 if (header_type==1) then
@@ -511,6 +516,9 @@ if (header_type==4) then
       ! need to change this code and input1(), output1()
       call abort("Error: MPI-IO can not handle header_type==4 with real*8 data") 
    endif
+endif
+if (header_type==5) then
+   offset=5 + o_nx + o_ny + o_nz
 endif
 
 #ifdef USE_MPI
@@ -680,9 +688,9 @@ else if (equations==CNS) then
    endif  
 endif
 
-!this is the only header that can read the time from the input file:
+!these header types can read the time from the input file:
 ! for other headers, dont change 'time'
-if (header_type==1) then
+if (header_type==1 .or. header_type==5) then
    time=time_in
 endif
 end subroutine
@@ -1009,7 +1017,6 @@ if (io_read==1) then
       call mread8(fid,g_xcord(1),o_nx)
       call mread8(fid,g_ycord(1),o_ny)
       call mread8(fid,g_zcord(1),o_nz)
-      g_zcord=g_zcord/scale_z
    endif
 else
    call mwrite8(fid,time,1)
@@ -1029,12 +1036,94 @@ else
    else
       call mwrite8(fid,g_xcord(1),o_nx)
       call mwrite8(fid,g_ycord(1),o_ny)
-      temp=g_zcord*scale_z
       call mwrite8(fid,temp(1),o_nz)
    endif
    
 endif
 end subroutine header1_io
+
+
+
+subroutine header5_io(io_read,output_spec,fid,time,xnx,xny,xnz)
+use params
+use mpi
+use transpose
+implicit none
+CPOINTER fid
+integer :: io_read  ! =1 for read, 0 for write
+real*8 :: time,xnx,xny,xnz
+logical :: output_spec
+
+! local
+integer :: ierr,	i
+character(len=80) message
+real*8 :: temp(g_nz+1)
+
+
+if (io_read==1) then
+   call mread8e(fid,time,1,ierr)
+   if (ierr/=1) then
+      write(message,'(a,i5)') "header5_io(): Error reading file"
+      call print_message(message)
+      call abort("")
+   endif
+   call mread8(fid,Lz,1)
+   ! run sanity check on Lz
+   if (Lz < .001  .or. Lz > 20 ) then
+      print *,'Error fileio.F90: input file aspect ratio out of range?'
+      print *,'Lz = ',Lz
+      call abort("abort...")
+   endif
+
+   call mread8(fid,xnx,1)
+   call mread8(fid,xny,1)
+   call mread8(fid,xnz,1)
+   if (output_spec) then
+      print *,'Spectrum input data'
+      write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
+      if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
+         ! we can only upsample low-res data.
+         ! to run with high-res data, output a trucated form.  
+         call print_message("Error: spectral input requires downsampling to lower resolution")
+         call print_message("Input routines can only upsample.") 
+         call print_message("Output routines can only downsample.") 
+         call print_message("Run code at higher resolution, calling Output to downsample")
+         call abort("error in header5_io")
+      endif
+   else
+      print *,'grid input data'
+      write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
+      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+      call mread8(fid,g_xcord(1),o_nx)
+      call mread8(fid,g_ycord(1),o_ny)
+      call mread8(fid,g_zcord(1),o_nz)
+   endif
+else
+   call mwrite8(fid,time,1)
+   call mwrite8(fid,Lz,1)
+   call mwrite8(fid,xnx,1)
+   call mwrite8(fid,xny,1)
+   call mwrite8(fid,xnz,1)
+   if ( output_spec) then
+      print *,'Spectrum output data'
+      write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
+      if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
+         ! we can only downsample to lower res data on output.
+         call print_message("Error: spectral output requires zero padding") 
+         call print_message("Output routines can only downsample.") 
+         call print_message("Input routines can input this data directly")
+         call abort("error in header5_io")
+      endif
+   else
+      call mwrite8(fid,g_xcord(1),o_nx)
+      call mwrite8(fid,g_ycord(1),o_ny)
+      call mwrite8(fid,temp(1),o_nz)
+   endif
+   
+endif
+end subroutine header5_io
 
 
 

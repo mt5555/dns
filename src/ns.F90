@@ -454,7 +454,7 @@ do j=1,ny_2dz
       do k=1,g_nz
          km=z_kmcord(k)
 
-            xw=(im*im + jm*jm + km*km)*pi2_squared
+            xw=(im*im + jm*jm + km*km/(Lz*Lz))*pi2_squared
             xw_viss=mu*xw
             if (mu_hyper>=2) then
                xw_viss=xw_viss + mu_hyper_value*hyper_scale*xw**mu_hyper

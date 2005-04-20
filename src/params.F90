@@ -89,15 +89,16 @@ real*8  :: g_u2xave=0               ! <ux,ux> updated after each time step
 ! [0..1] x [0..1] to [0..xscale] x [0..yscale]
 real*8 :: xscale=1
 real*8 :: yscale=1
+real*8 :: zscale=1
 
 
 ! scale_z is used by the DNS model.  The code is solving
-! the equations in the physical domain [0..1]x[0..1]x[0..scale_z], but
+! the equations in the physical domain [0..1]x[0..1]x[0..Lz], but
 ! the computational domain remains [0..1]x[0..1]x[0..1]
 ! The equations are mapped to the computational domain
 ! Input data is assumed to be in the physical domain.  
 ! Output of data: data is converted to physical domain and then output.
-real*8 :: scale_z=1
+real*8 :: Lz=1
 
 
 ! local boundary conditions
@@ -128,6 +129,7 @@ real*8  :: pi,pi2,pi2_squared
 
 real*8  :: grav=0  
 real*8  :: fcor=0                ! rotation in z-axis 
+real*8  :: bous                  ! bousenesque paramter
 integer :: diag_struct=0         ! compute structure funtions on the fly
 integer :: diag_pdfs=0           ! compute pdfs on the fly
 
@@ -157,6 +159,7 @@ integer :: forcing_type   ! 0 = none
                           !     can only be used by the z-decomp model!
 integer :: forcing_peak_waveno = 0
 
+integer :: header_user=1    ! I/O header type from input file
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

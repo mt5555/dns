@@ -35,7 +35,7 @@ if (restart==1) then
       call init_data_decay(Q,Qhat,work1,work2,2,0,0)
       ! output rescaled data, but with different name:
       fname=runname(1:len_trim(runname)) // '-rescale'
-      call output_uvw(fname,time_initial,Q,Qhat,work1,work2,1)		  
+      call output_uvw(fname,time_initial,Q,Qhat,work1,work2,header_user)		  
    endif
 
    if (npassive>0) then
@@ -85,7 +85,7 @@ end subroutine
 
 subroutine init_data_restart(Q,Qhat,work1,work2)
 !
-! low wave number, quasi isotropic initial condition
+!
 !
 use params
 implicit none
@@ -101,7 +101,7 @@ integer :: n
 
 Q=0
 time_initial=-1
-call input_uvw(time_initial,Q,Qhat,work1,work2,1)
+call input_uvw(time_initial,Q,Qhat,work1,work2,header_user)
 
 
 write(message,'(a,f10.4)') "restart time=",time_initial

@@ -109,7 +109,7 @@ do
    Q=0
 
    if (convert_opt==0) then  ! -cout uvw  
-      call input_uvw(time,Q,vor,work1,work2,1)  ! default headers
+      call input_uvw(time,Q,vor,work1,work2,header_user)  ! default headers
 !      print *,'attempting to read headerless input data...'
 !      call input_uvw(time,Q,vor,work1,work2,2)  ! no headers
       ! just reoutput the variables:
@@ -125,24 +125,24 @@ do
          ! dont clobber input file!
          basename=runname(1:len_trim(runname)) // "-new."
       endif
-      call output_uvw(basename,time,Q,vor,work1,work2,1)  ! default headers
+      call output_uvw(basename,time,Q,vor,work1,work2,header_user)  ! default headers
 !      basename=runname(1:len_trim(runname)) // "-raw."
 !      call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
    endif
 
    if (convert_opt==1) then  ! -cout vor
-      call input_uvw(time,Q,vor,work1,work2,1)
+      call input_uvw(time,Q,vor,work1,work2,header_user)
       ! outputing vorticity
       basename=runname(1:len_trim(runname)) // "-vor."
 
       call print_message("computing vorticity...")
       call vorticity(vor,Q,work1,work2)
       call print_message("output vorticity...")
-      call output_uvw(basename,time,vor,Q,work1,work2,1)
+      call output_uvw(basename,time,vor,Q,work1,work2,header_user)
    endif
 
    if (convert_opt==2) then  ! -cout vorm
-      call input_uvw(time,Q,vor,work1,work2,1)
+      call input_uvw(time,Q,vor,work1,work2,header_user)
       call print_message("computing vorticity magnitude...")
       call vorticity(vor,Q,work1,work2)
       do k=nz1,nz2
@@ -165,7 +165,7 @@ do
    endif
    if (convert_opt==3) then  ! -cout norm2
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2,1)
+      call input_uvw(time,Q,vor,work1,work2,header_user)
       print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
@@ -210,7 +210,7 @@ do
    endif
    if (convert_opt==5) then  ! -cout norm
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2,1)
+      call input_uvw(time,Q,vor,work1,work2,header_user)
       print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
                             maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
@@ -259,7 +259,7 @@ do
    endif
    if (convert_opt==7) then  ! -cout gradu
       ! compute <gradu> for all subcubes, output in asci file
-      call input_uvw(time,Q,vor,work1,work2,1)
+      call input_uvw(time,Q,vor,work1,work2,header_user)
       call print_message("computing gradu ")
       call gradu_stats(time,Q,vor,work1,work2)
    endif
@@ -267,13 +267,13 @@ do
       ! read asci file for list of subcubes to extractg
       ! rotate (if necessary) to align gradient with x axis
       ! output raw brick-of-floats for each rotated subcube
-      call input_uvw(time,Q,vor,work1,work2,1)
+      call input_uvw(time,Q,vor,work1,work2,header_user)
       call print_message("extracting subcubes ")
       call gradu_rotate_subcubes(time,Q,vor,work1,work2)
    endif
    if (convert_opt==9) then  ! -cout spec_window  
       ! read input data, detrend, window, output spectrum and cospectrum
-      !call input_uvw(time,Q,vor,work1,work2,1) ! DNS default headers
+      !call input_uvw(time,Q,vor,work1,work2,header_user) ! DNS default headers
       call input_uvw(time,Q,vor,work1,work2,2) ! no headers
       call print_message("computing spectrum ")
 
