@@ -1582,7 +1582,7 @@ call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 end subroutine
 
 
-subroutine ke_shell_z(Qhat,ke,numk,kstart2,kstop2)
+subroutine ke_shell_z(Qhat,ke,hscale,numk)
 !
 ! compute the KE in shell   kstart2 < k**2 <= kstop2
 ! for z-decomposition data
@@ -1594,6 +1594,27 @@ real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
 integer :: numk,kstart2,kstop2
 real*8 :: ke,xw,u2,xfac,ierr
 integer :: im,jm,km,i,j,k,n
+
+! units of E = m**2/s**2
+! units of E(k) = m**3/s**2
+! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
+! scaling:  E(kmax)/(kmax**2)(4-.75)
+
+! du/dt = (sqrt(E(kmax))  [1/ (kmax**8 kmax**alpha) ] k**8  u  
+! m/s**2  =  m**1.5/s  kmax**-alpha  m/s
+!  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
+
+if (dealias==1) then
+   kstart2=dealias_23_kmax2_1
+   kstop2=dealias_23_kmax2
+else if (dealias==2) then
+   kstart2=dealias_sphere_kmax2_1
+   kstop2=dealias_sphere_kmax2)
+else
+   call abort('ke_shell_z():  Error: bad dealiasing type')
+endif
+
+
 
    ke=0
    numk=0
@@ -1625,6 +1646,7 @@ integer :: im,jm,km,i,j,k,n
    xw = ke
    call mpi_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
+   hscale = sqrt(ke) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
 end subroutine
 
 

@@ -424,25 +424,9 @@ endif
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (mu_hyper>=2) then
-   ! units of E = m**2/s**2
-   ! units of E(k) = m**3/s**2
-   ! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
-   ! scaling:  E(kmax)/(kmax**2)(4-.75)
-
-   ! du/dt = (sqrt(E(kmax))  [1/ (kmax**8 kmax**alpha) ] k**8  u  
-   ! m/s**2  =  m**1.5/s  kmax**-alpha  m/s
-   !  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
-   if (dealias==1) then
-      call ke_shell_z(Qhat,ke,numk,dealias_23_kmax2_1,dealias_23_kmax2)
-      hyper_scale = sqrt(ke) * (pi2_squared*dealias_23_kmax2)**(-(mu_hyper-.75))
-   else if (dealias==2) then
-      call ke_shell_z(Qhat,ke,numk,dealias_sphere_kmax2_1,dealias_sphere_kmax2)
-      hyper_scale = sqrt(ke) * (pi2_squared*dealias_sphere_kmax2)**(-(mu_hyper-.75))
-   else
-      stop 'error - hyperviscosity not tuned for no dealiasing case'
-   endif
+   ! compute hyper viscosity scaling based on energy in last shell:
+   call ke_shell_z(Qhat,ke,hyper_scale,numk)
 endif
-
 
 
 

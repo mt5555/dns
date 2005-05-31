@@ -13,7 +13,7 @@ none        ! hypo vis
 .0            ! smagorinsky
 0            ! compute_structure functions
 0            ! compute pdf functions
-fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
