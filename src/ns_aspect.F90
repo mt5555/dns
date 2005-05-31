@@ -309,12 +309,12 @@ enddo
 ! total:                                FFT: 6x,6y,2z  tranpose: 2z,8x,8y
 !               
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   if (ncpu_z==1) then
-      call ns_vorticity(rhsg,Qhat,work,p)
-      ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
-   else
-      call ns_vorticity(rhsg,Qhat,work,p)
-   endif
+if (ncpu_z==1) then
+   call ns_vorticity(rhsg,Qhat,work,p)
+   ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
+else
+   call ns_vorticity(rhsg,Qhat,work,p)
+endif
 
 
 
