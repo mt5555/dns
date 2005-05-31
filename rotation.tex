@@ -89,15 +89,15 @@ We now introduce a change of variables, into the {\em non-primed} coordiante
 system.  In the non-primed coordinate system, the domain because a 
 unit cube:
 \[
-x = x', \qquad y=y', \qquad  z = \frac{z'}{L}
+x = x', \qquad y=y', \qquad  z = \frac{z'}{h}
 \]
 and
 \[
-u_1 = u_1', \qquad u_2 = u_2', \qquad  L u_3 = u_3'
+u_1 = u_1', \qquad u_2 = u_2', \qquad  h u_3 = u_3'
 \]
 And we also have:
 \[
-\frac{\partial}{\partial z'} = \frac{1}{L} \frac{\partial}{\partial z}
+\frac{\partial}{\partial z'} = \frac{1}{h} \frac{\partial}{\partial z}
 \]
 We first write $\gradp \cdot \up$ in the non-primed coordinate system:
 \[
@@ -105,7 +105,7 @@ We first write $\gradp \cdot \up$ in the non-primed coordinate system:
 \qquad
 \frac{\partial u_2' }{\partial y'} = \frac{\partial u_2 }{\partial y}
 \qquad
-\frac{\partial u_3' }{\partial z'} = \frac{1}{L} \frac{\partial L u_3 }{\partial z}
+\frac{\partial u_3' }{\partial z'} = \frac{1}{h} \frac{\partial h u_3 }{\partial z}
 = \frac{\partial u_3 }{\partial z}
 \]
 So we have that
@@ -123,24 +123,24 @@ primted variables:
 \[
 \begin{pmatrix} u_1 \\
                 u_2 \\
-                L u_3 \\
+                h u_3 \\
 \end{pmatrix}_t
   + (\curlp \up + f \khat) \times 
 \begin{pmatrix} u_1 \\
                 u_2 \\
-                L u_3 \\
+                h u_3 \\
 \end{pmatrix}
 + \grad \pi = \nu 
 \begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 
                 \dfrac{\partial^2 u_1}{\partial y^2} + 
-                \dfrac{1}{L^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]
+                \dfrac{1}{h^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]
                 \dfrac{\partial^2 u_2}{\partial x^2} + 
                 \dfrac{\partial^2 u_2}{\partial y^2} + 
-                \dfrac{1}{L^2}\dfrac{\partial^2 u_2}{\partial z^2}   \\[5mm]
-                L \left( 
+                \dfrac{1}{h^2}\dfrac{\partial^2 u_2}{\partial z^2}   \\[5mm]
+                h \left( 
                 \dfrac{\partial^2 u_3}{\partial x^2} + 
                 \dfrac{\partial^2 u_3}{\partial y^2} + 
-                \dfrac{1}{L^2}\dfrac{\partial^2 u_3}{\partial z^2} \right)
+                \dfrac{1}{h^2}\dfrac{\partial^2 u_3}{\partial z^2} \right)
 \end{pmatrix}
 \]
 Defining $\omega'$ by  
@@ -148,8 +148,8 @@ Defining $\omega'$ by
 \label{E:vor}
 \omega = \curlp \up = 
 \begin{pmatrix}
-L \dfrac{\partial u_3}{\partial y} - \dfrac{1}{L} \dfrac{\partial u_2}{\partial z}  \\[5mm]
-\dfrac{1}{L} \dfrac{\partial u_1}{\partial z} -  L \dfrac{\partial u_3}{\partial x}  \\[5mm]
+h \dfrac{\partial u_3}{\partial y} - \dfrac{1}{h} \dfrac{\partial u_2}{\partial z}  \\[5mm]
+\dfrac{1}{h} \dfrac{\partial u_1}{\partial z} -  h \dfrac{\partial u_3}{\partial x}  \\[5mm]
 \dfrac{\partial u_2}{\partial x} - \dfrac{\partial u_1}{\partial y}
 \end{pmatrix}  
 \end{equation}
@@ -158,10 +158,10 @@ the vorticity term works out to
 (\curlp \up + f\khat) \times 
 \begin{pmatrix} u_1 \\
                 u_2 \\
-                L u_3 \\
+                h u_3 \\
 \end{pmatrix} = 
-\begin{pmatrix}  L  u_3 \omega_2' -  u_2 \omega_3'   \\
-                   u_1 \omega_3' -   L u_3 \omega_1'   \\
+\begin{pmatrix}  h  u_3 \omega_2' -  u_2 \omega_3'   \\
+                   u_1 \omega_3' -   h u_3 \omega_1'   \\
                 u_2 \omega_1' - u_1 \omega_2'   \\
 \end{pmatrix}  
 + 
@@ -171,7 +171,7 @@ the vorticity term works out to
 \end{pmatrix}  
 \]
 
-Thus the final equations, after scaling the $z$ component by $L$
+Thus the final equations, after scaling the $z$ component by $h$
 and substituting in for $\omega$:
 \[
 \begin{pmatrix} u_1 \\
@@ -179,9 +179,9 @@ and substituting in for $\omega$:
                 u_3 \\
 \end{pmatrix}_t
   + 
-\begin{pmatrix}  L  u_3 \omega_2' -  u_2 \omega_3'   \\
-                   u_1 \omega_3' -   L u_3 \omega_1'   \\
-              \dfrac{1}{L} \left(  u_2 \omega_1' - u_1 \omega_2' \right)  \\
+\begin{pmatrix}  h  u_3 \omega_2' -  u_2 \omega_3'   \\
+                   u_1 \omega_3' -   h u_3 \omega_1'   \\
+              \dfrac{1}{h} \left(  u_2 \omega_1' - u_1 \omega_2' \right)  \\
 \end{pmatrix}  
 + 
 \begin{pmatrix} -f u_2 \\
@@ -191,13 +191,13 @@ and substituting in for $\omega$:
 + \grad \pi = \nu 
 \begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 
                 \dfrac{\partial^2 u_1}{\partial y^2} + 
-                \dfrac{1}{L^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]
+                \dfrac{1}{h^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]
                 \dfrac{\partial^2 u_2}{\partial x^2} + 
                 \dfrac{\partial^2 u_2}{\partial y^2} + 
-                \dfrac{1}{L^2}\dfrac{\partial^2 u_2}{\partial z^2}   \\[5mm]
+                \dfrac{1}{h^2}\dfrac{\partial^2 u_2}{\partial z^2}   \\[5mm]
                 \dfrac{\partial^2 u_3}{\partial x^2} + 
                 \dfrac{\partial^2 u_3}{\partial y^2} + 
-                \dfrac{1}{L^2}\dfrac{\partial^2 u_3}{\partial z^2}
+                \dfrac{1}{h^2}\dfrac{\partial^2 u_3}{\partial z^2}
 \end{pmatrix}
 \]
 
@@ -210,17 +210,51 @@ Thus the only changes needed for our parallel DNS code are:
 needs to be scaled to the non-primed coordinate system $\uv$.
 \item Our output files will contain velocity will be in the non-primed 
 $\uv$ coordinate system.  Need to scaled appropriately  to be analysed
-by other codes.  Need to add a new output file header type that
-contains L.  
+by other codes.  We have added a new output file header type that
+contains h.  
 \item modify computation of vorticity to match Eq.~\ref{E:vor}.
-\item modify Laplacian (scale $z$ derivative terms by $1/L^2$).
+\item modify Laplacian (scale $z$ derivative terms by $1/h^2$).
 \item modify vorticity term $\w \times \uv$ as shown above.
 \end{enumerate}
+
+\section{Hyper Viscosity}
+Consider our scaled hyper viscosity term
+\[
+\frac{ \partial  \up }{\partial t} = 
+\sqrt{E(k_\textrm{max})} \,  k_\textrm{max}^{-2\eta + 1.5}  \Delta^\eta \up
+\]
+We first verify that the units are correct.  The units of
+energy are $m^2/s^2$, so the units of the energy in a single
+spherical shell $E(k)$ is $m^3/s^2$.  Thus we have
+\[
+\frac{m}{s^2} = \frac{m^{1.5}}{s} \,\frac{1}{m^{-2\eta+1.5}}  
+                          \,\frac{1}{m^{2\eta}}
+                           \, \frac{m}{s}
+\]
+In the frequency domain, 
+\[
+\frac{ \partial  u_3 }{\partial t} = 
+\sqrt{E(k_\textrm{max})} \,  k_\textrm{max}^{-2\eta + 1.5}  
+( (2\pi l)^2 + (2\pi m)^2 + (2\pi n/h)^2)^\eta u_3
+\]
+
+\section{Resolution Condition}
+Leslie suggests that
+\[
+ \max{ k_h } << \min{k_z}
+\]
+which works out to
+\[
+   \frac{\sqrt{2}}{3} N_x <<  2 \pi /h
+\]
+
+
+
 
 \section{Computing Scalars}
 Integrals per unit volume are approximated by the sum
 \[
-<f,g> = \frac{1}{L} \iiint  f g  \, dx' \, dy' \, dz' =   \iiint  f g \, dx \, dy \, dz
+<f,g> = \frac{1}{h} \iiint  f g  \, dx' \, dy' \, dz' =   \iiint  f g \, dx \, dy \, dz
 =\frac{1}{N_x N_y N_z} \sum  f  g
 \]
 We also have that 
@@ -232,19 +266,19 @@ so integrals can be computed in Fourier or grid space.
 All other scalars (kinetic energy, helicity, various dissipation
 terms) are computed in physical coordinates.  So for example
 \[
-k = <\up,\up> = <u_1,u_1> + <u_2,u_2> + L^2 <u_3,u_3>
+k = <\up,\up> = <u_1,u_1> + <u_2,u_2> + h^2 <u_3,u_3>
 \]
 and the helicity 
 \[
-  h  = w_1' u_1  + w_2' u_2 + L w_3' u_3
+  h  = w_1' u_1  + w_2' u_2 + h w_3' u_3
 \]
 As in example, using integer wave numbers $(l,m,n)$ (defined in the
 next section), we have
 \[
-< \omega' , \Delta \up> = \sum (2 \pi)^2 (l^2 + m^2 + (n/L)^2) 
+< \omega' , \Delta \up> = \sum (2 \pi)^2 (l^2 + m^2 + (n/h)^2) 
 \begin{pmatrix} \hat{u}_1 \\
                 \hat{u}_2 \\
-                L \hat{u}_3  \\
+                h \hat{u}_3  \\
 \end{pmatrix}  
  \cdot \omega'
 \]
@@ -254,26 +288,26 @@ next section), we have
 
 
 \section{Computing 3D Energy Spectra (in a spherical shell)}
-We would like to discretize our domain so that the 
+If we choose to discretize our domain so that the 
 maximum wave number (in the primed coordinate system) is
-the same in all diretions.  Equivalently
+the same in all diretions, then
 \[
 \Delta x' = \Delta y' = \Delta z'
 \]
 Or
 \[
-N_x  = N_y = N_z/L
+N_x  = N_y = N_z/h
 \]
 where $N_x$ is the number of grid points in the $x$ direction.
 The highest wave number is given by:
 \[
-k_x = \pi N_x, \qquad k_y = \pi N_y, \qquad k_z = \pi N_z/L 
+k_x = \pi N_x, \qquad k_y = \pi N_y, \qquad k_z = \pi N_z/h 
 \]
 (Note that $\pi$ appears in the wave numbers since our domain is
 of length 1 in the $x$ and $y$ diretions.)  The wave number spacing
 is given by
 \[
-\Delta k_x = 2 \pi, \qquad  \Delta k_y = 2 \pi, \qquad  \Delta k_z = 2 \pi / L 
+\Delta k_x = 2 \pi, \qquad  \Delta k_y = 2 \pi, \qquad  \Delta k_z = 2 \pi / h 
 \]
 In our DNS code, we index our arrays of Fourier coefficients
 with integers $(l,m,n)$, with $l=0 \dots N_x/2$, 
@@ -292,44 +326,48 @@ The total energy is
 \[
 E  = \sum_{l,m,n}  |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
- |  L {\hat u_3}(l,m,n) |^2
+ |  h {\hat u_3}(l,m,n) |^2
 \]
 
 The standard energy spectrum is now, for integers $k$:
 \[
 E(k)  = \sum_{l,m,n}  |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
- |  L {\hat u_3}(l,m,n) |^2
+ |  h {\hat u_3}(l,m,n) |^2
 \]
 where the sum is taken over all integers $(l,m,n)$ such that
 \[
-(\Delta k_z)^2 (k-1/2)^2 < (\Delta k_x l)^2 + (\Delta k_y m)^2 + (\Delta k_z n)^2 <  (\Delta k_z)^2 (k+1/2)^2 
+(\Delta k_z)^2 (k-1/2)^2 \le (\Delta k_x l)^2 + (\Delta k_y m)^2 + (\Delta k_z n)^2 <  (\Delta k_z)^2 (k+1/2)^2 
 \]
 where we have chosen to use a shell thickness of $\Delta k_z$.
  Scaling out the $2\pi$, we get
 \[
-\frac{(k-1/2)^2}{L^2} < l^2 + m^2 + \frac{n^2}{L^2} < \frac{(k+1/2)^2}{L^2}
+\frac{(k-1/2)^2}{h^2} \le l^2 + m^2 + \frac{n^2}{h^2} < \frac{(k+1/2)^2}{h^2}
 \]  
 
 
 
 
 \section{Computing 2D Energy Spectra (in an annulus)}
-There are two different 2D spectra we need to compute. 
-\begin{eqnarray}
-E_0(k_h) &=& E(k_h, k_z=0) 
-\label{E:SPECa} \\
-E(k_h) &=& \sum_{k_z=0}^{\pi N_z/L} E(k_h,k_z) 
-\label{E:SPECb}
-\end{eqnarray}
-where $k_h = \sqrt{(k_x^2 + k_y^2)} = \sqrt{(2\pi l)^2 + (2\pi m)^2}$. 
-Eq.~\ref{E:SPECa} represents the energy spectrum of the 2D field
+We also compute a 2D spectra $E(k_h,k_z)$ by summing squares of Fourier
+coefficients over annular regions in 
+$x$ and $y$ of radius $k_h$.  
+where 
+\[
+k_h = \sqrt{(k_x^2 + k_y^2)} = \sqrt{(2\pi l)^2 + (2\pi m)^2}. 
+\]
+From this quantity, we can get $E(k_h,0)$, which 
+represents the energy spectrum of the 2D field
 obtained by averaging the original 3D field  in the direction of rotation,
-and then summing the energy within spherical shells (an annulus for 2D fields).  
-Eq.~\ref{E:SPECb} represents
-the energy spectrum of the full 3D field, but instead of 
-summing the energy within spherical shells in wave number space, the sum is
-taken over the annular region between concentric cylinders
+and then summing the energy within spherical shells (an annulus for 2D fields).
+We are also interested in 
+\begin{equation}
+E(k_h) = \sum_{k_z=0}^{\pi N_z/h} E(k_h,k_z) 
+\label{E:SPECb}
+\end{equation}
+which represents 
+the energy spectrum of the full 3D field, but summed over
+the annular region between concentric cylinders
 (whose axis are in the $z$ direction).  As with the spherical
 shell spectrum, Eq.~\ref{E:SPECb} has the property that
 it partitions the energy into a set of discrete wave numbers, so
@@ -344,32 +382,19 @@ determined by the horizontal wavenumber spacings. In our code,
 we use an integer index $k$ defined by $k_h = k \Delta k_x$ and
 define
 \begin{eqnarray*}
-E_0(k) = \sum_{l,m}  |  {\hat u_1}(l,m,n=0) |^2 +
- |  {\hat u_2}(l,m,n=0) |^2 + 
- |  L {\hat u_3}(l,m,n=0) |^2
+E(k,n) = \sum_{l,m}  |  {\hat u_1}(l,m,n) |^2 +
+ |  {\hat u_2}(l,m,n) |^2 + 
+ |  h {\hat u_3}(l,m,n) |^2
 \end{eqnarray*}
-where the sum is taken over all integers $(l,m)$ such that $n=0$ and
+where the sum is taken over fixed $n$ and all integers $(l,m)$ such that 
 \[
-(\Delta k_x)^2 (k-1/2)^2 < (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_x)^2 (k+1/2)^2 
+(\Delta k_x)^2 (k-1/2)^2 \le (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_x)^2 (k+1/2)^2 
 \]
 and with $k_x=k \Delta k_x$ for integers $k$.  
 we have chosen to use a shell thickness of $\Delta k_x = \Delta
 k_y = 2\pi$. Scaling out the $2\pi$, we get
 \[
-(k-1/2)^2 < l^2 + m^2 < (k+1/2)^2.
-\]  
-
-The second spectrum is computed the same way as above except that now
-we sum over all wave numbers $n$ for a given 2D shell:
-\begin{eqnarray}
-E(k) = \sum_{n=0}^{N_z/2} \sum_{l,m} |  {\hat u_1}(l,m,n) |^2 +
- |  {\hat u_2}(l,m,n) |^2 + 
- |  L {\hat u_3}(l,m,n) |^2
-\end{eqnarray}
-where for each $n$ the contribution to the shell $k_h$ is 
-taken over all integers $(l,m)$ such that
-\[
-(k-1/2)^2 < l^2 + m^2 < (k+1/2)^2.
+(k-1/2)^2 \le l^2 + m^2 < (k+1/2)^2.
 \]  
 
 

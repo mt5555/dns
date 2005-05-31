@@ -345,7 +345,7 @@ do i=nx1,nx2
    
    helave = helave + Q(i,j,k,1)*vor(1) + & 
         Q(i,j,k,2)*vor(2) + & 
-        Q(i,j,k,3)*vor(3)  
+        Lz*Q(i,j,k,3)*vor(3)  
    
    maxvor = max(maxvor,abs(vor(1)))
    maxvor = max(maxvor,abs(vor(2)))
