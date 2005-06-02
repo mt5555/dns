@@ -68,10 +68,15 @@ We would like to solve the NS equations in the box pictured in
 Fig.~\ref{F:box}.  To write the equations in this domain, we use
 primes:
 \[
-\frac{ \partial  \up }{\partial t}  + (\curlp \up + f \khat) \times \up + \gradp \pi' = \nu \Delta' \up
+\frac{ \partial  \up }{\partial t}  + (\curlp \up + f \khat) \times \up + 
+\gradp \pi' + N \theta' \khat = \nu \Delta' \up
 \]
 \[
 \gradp \cdot \up = 0
+\]
+\[
+\frac{ \partial  \theta' }{\partial t}  + \up \cdot \grad' \theta' - 
+N \up \cdot \khat = \kappa \Delta' \theta'
 \]
 with
 \[
@@ -85,15 +90,20 @@ with
            \left(\frac{\partial^2}{\partial y'}\right)^2 +
            \left(\frac{\partial^2}{\partial z'}\right)^2 
 \]
+The Schmidt number is $\nu / \kappa$.  
+
 We now introduce a change of variables, into the {\em non-primed} coordiante
 system.  In the non-primed coordinate system, the domain because a 
 unit cube:
 \[
-x = x', \qquad y=y', \qquad  z = \frac{z'}{h}
+x = x', \qquad y=y', \qquad  z = \frac{z'}{h},
+\]
+\[
+u_1 = u_1', \qquad u_2 = u_2', \qquad  h u_3 = u_3'
 \]
 and
 \[
-u_1 = u_1', \qquad u_2 = u_2', \qquad  h u_3 = u_3'
+h \theta = \theta'
 \]
 And we also have:
 \[
@@ -130,7 +140,12 @@ primted variables:
                 u_2 \\
                 h u_3 \\
 \end{pmatrix}
-+ \grad \pi = \nu 
++ \grad \pi +
+\begin{pmatrix} 0 \\
+                0 \\
+                h N \theta \\
+\end{pmatrix}
+= \nu 
 \begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 
                 \dfrac{\partial^2 u_1}{\partial y^2} + 
                 \dfrac{1}{h^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]
@@ -143,6 +158,15 @@ primted variables:
                 \dfrac{1}{h^2}\dfrac{\partial^2 u_3}{\partial z^2} \right)
 \end{pmatrix}
 \]
+\[
+h \frac{ \partial  \theta }{\partial t}  + h \uv \cdot \grad \theta - 
+N h u_3  = h \kappa \left(
+                \dfrac{\partial^2 \theta}{\partial x^2} + 
+                \dfrac{\partial^2 \theta}{\partial y^2} + 
+                \dfrac{1}{h^2}\dfrac{\partial^2 \theta}{\partial z^2}
+\right)
+\]
+
 Defining $\omega'$ by  
 \begin{equation}
 \label{E:vor}
@@ -186,7 +210,7 @@ and substituting in for $\omega$:
 + 
 \begin{pmatrix} -f u_2 \\
                 f u_1 \\
-                0  \\
+                N \theta  \\
 \end{pmatrix}  
 + \grad \pi = \nu 
 \begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 
@@ -200,10 +224,17 @@ and substituting in for $\omega$:
                 \dfrac{1}{h^2}\dfrac{\partial^2 u_3}{\partial z^2}
 \end{pmatrix}
 \]
+\[
+\frac{ \partial  \theta }{\partial t}  + \uv \cdot \grad \theta - 
+N u_3  = \kappa \left(
+                \dfrac{\partial^2 \theta}{\partial x^2} + 
+                \dfrac{\partial^2 \theta}{\partial y^2} + 
+                \dfrac{1}{h^2}\dfrac{\partial^2 \theta}{\partial z^2}
+\right)
+\]
 
 
 
-\newpage
 Thus the only changes needed for our parallel DNS code are:
 \begin{enumerate}
 \item initial velocity given in the $\up$ coordinate system 
@@ -239,15 +270,16 @@ In the frequency domain,
 \]
 
 \section{Resolution Condition}
-Leslie suggests that
+
+The assumptions made in the hydrostatic equations implicitly assume
+(acording to Leslie) that 
 \[
  \max{ k_h } << \min{k_z}
 \]
 which works out to
 \[
-   \frac{\sqrt{2}}{3} N_x <<  2 \pi /h
+   \frac{\sqrt{2}}{3} N_x <<  2 \pi /h.
 \]
-
 
 
 
