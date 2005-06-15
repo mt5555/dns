@@ -1,0 +1,164 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb,latexsym,amsmath,bm}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX                                         
+\else
+\pdfoutput=1 % we are running PDFLaTeX                                          
+\pdftrue
+\fi
+\ifpdf
+\usepackage[pdftex]{graphicx}
+\else
+\usepackage{graphicx}
+\fi
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps, .jpg}
+\fi
+
+
+
+\textwidth = 6.5 in
+\textheight = 9 in
+\oddsidemargin = 0.0 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.2 in
+\parindent = 0.0 in
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\khat}{\hat{\mathbf k}}
+\newcommand{\uv}{\mathbf u}
+\newcommand{\up}{\mathbf u'}
+\newcommand{\w}{\mathbf w}
+\newcommand{\grad}{\nabla}
+\newcommand{\curlp}{\gradp \times}
+\newcommand{\curl}{\grad \times}
+\newcommand{\gradp}{\nabla'}
+\newcommand{\bk}{\bm{\kappa}}
+\newcommand{\kp}{\kappa}
+
+\DeclareMathOperator{\Span}{span}
+
+\title{Transfer function in the Boussinesq equations}
+\author{Susan Kurien}
+\begin{document}
+\section{Preliminaries}
+We would like to compute the energy transfer as a function of
+wavenumber in the Boussinesq equations which are given by:
+\begin{eqnarray}
+\frac{\partial}{\partial t}{u}_j + u_i \partial_i u_j + f\epsilon_{j3k}u_k +
+\frac{1}{\rho_0}\partial_j p + \delta_{j3}\frac{\tilde\rho}{\rho_0}g\hat{\bm{x}_3} &=&
+\nu \partial_i^2 u_j\label{momentum}\\ \frac{\partial}{\partial t}\tilde\rho+u_i \partial_i \tilde\rho  -
+bu_3 &=& \gamma \partial_i^2 \tilde \rho \label{density}\\ \partial_i u_i &=& 0,
+\label{bous}
+\end{eqnarray}
+in a cartesian coordinate system with unit vectors ($\hat{\bm{x}_1},
+\hat{\bm{x}_2}, \hat{\bm{x}_3}$); where $\bm{u}$ is the velocity, $u_3$ is
+its (vertical) component along $\hat{\bm{x}_3}$, $p$ is the pressure, $f=2\Omega$ is the
+Coriolis parameter, $\Omega$ is the constant background rotation rate,
+$\nu = \mu/\rho_0$ is the viscosity and $\gamma$ is the mass
+diffusivity coefficient.  The total density is $\rho(\bm{x}) = \rho_0
+- bx_3 + \tilde\rho(\bm{x})$, where $\rho_0$ is the constant
+background, $b$ is also constant and larger than zero for stable
+stratification, and $\tilde \rho$ is the density fluctuation such that
+$\tilde \rho \ll bw \ll \rho_0$.
+
+Let us derive the energy spectral distribution dynamics first directly
+from the fourier representation of the momentum-density equations and
+then from the physical space correlation function equations.
+
+\section{Fourier transform of the momentum-density equations}
+
+Let us denote the fourier transform operator by
+$\cal{F}_{\bk}$ (using Pope's notation). The fourier transform of a function is denoted by the tilde above the corresponding variable. Term by term the fourier transform of Eq. \ref{momentum} is:
+\begin{eqnarray} 
+{\cal F}_{\bk}\{\partial_t u_j\} &=& \frac{d}{dt} \tilde u_j(\bm{\kappa},t) =
+\frac{d}{dt}\sum_{\bm{k}} e^{i\bm{\kappa\cdot x}} u_j(\bm{x},t)\\
+{\cal F}_{\bk}\{u_i \partial_i u_j\} &=& \tilde G_j(\bm{\kappa})\\
+{\cal F}_{\bk}\{f\epsilon_{j3k}~u_k \} &=& f\epsilon_{j3k}\tilde u_k(\bm{\kappa})\\
+{\cal F}_{\bk}\{\frac{1}{\rho_0}\partial_j p\} &=& \frac{-i}{\rho_0} \kappa_j \tilde p \\
+{\cal F}_{\bk}\{\frac{\tilde\rho}{\rho_0}g \hat{\bm{x}_3}\}&=& \frac{g\hat{\bm{x_3}}}{\rho_0}\tilde{\tilde \rho}\\
+{\cal F}_{\bk}\{\nu \partial_i^2 u_j\}& =& -\nu\kappa^2 \tilde u_j
+\end{eqnarray}
+Hence the fourier representation of the momentum equation is:
+\begin{eqnarray}
+\frac{d}{dt} \tilde u_j(\bm{\kappa},t) + \tilde G_j(\bm{\kappa}) + f\epsilon_{j3k}\tilde u_k(\bm{\kappa}) - \frac{i}{\rho_0} \kappa_j \tilde p +  \delta_{j3}\frac{g\hat{\bm{x}_3}}{\rho_0}\tilde{\tilde \rho} =  -\nu\kappa^2 \tilde u_j
+\label{momentum-f}
+\end{eqnarray}
+Similarly, the density equation and the incompressibility may be written as:
+\begin{eqnarray}
+\frac{d}{dt} \tilde {\tilde \rho} + \tilde J(\bm{\kappa}) - b \tilde u_3 = \gamma \kappa^2 \tilde {\tilde \rho}\label{density-f}\\
+\kappa_i \cdot \tilde u_i \label{incomp-f} = 0
+\end{eqnarray}
+where ${\cal F}_{\bm{\kappa}}\{u_i \partial_i \tilde\rho\} = \tilde J(\bm{\kappa})$, the $\tilde \tilde$ on the $\rho$ denotes fourier transform of the density fluctuations.
+
+Note that $\tilde G_j(\bm{\kappa})$ and $\tilde J(\bm{\kappa})$ are the fourier
+transforms of the non-linear terms and may be simplified to diadic
+interactions (see eg. Pope chapter 6 for $\tilde G_j$) but we won't do that here since we
+can directly compute the fourier transforms of the entire term.
+
+Next, lets write down the projection operator for the pressure.
+Left-multiply Eq. (\ref{momentum-f}) by $\kp_j$ and using Eq. (\ref{incomp-f}):
+\begin{eqnarray}
+\kp_j\tilde G_j(\bk) &-& f \tilde \omega_3 - \frac{i}{\rho_0} \kp^2 \tilde p +  
+\frac{g\hat{\bm{x}_3}}{\rho_0}\kp_3\tilde{\tilde \rho} = 0\nonumber\\
+\mbox{that~is,}~~\tilde p &=& -i\frac{\rho_0}{\kp^2}
+\Big(\kp_j\tilde G_j(\bk) - f \tilde \omega_3 
++  \frac{g\hat{\bm{x}_3}}{\rho_0}\kp_3\tilde{\tilde \rho}\Big) 
+\label{k-momentum-f}
+\end{eqnarray}
+where $\tilde\omega_3=\epsilon_{3jk}\kp_j \tilde u_k(\bk)$ is the
+vertical component of the fourier transform of the vorticity. Note the contribution to the pressure from rotation and stratification. Substitute (\ref{k-momentum-f}) back into (\ref{momentum-f}) (keep track of dummy indices!!)..
+\begin{eqnarray}
+\frac{d}{dt} \tilde u_j(\bm{\kappa},t)  + (\delta_{ij}-\frac{\kappa_j \kp_i}{\kp^2}) \tilde G_i + (\delta_{j3} - \frac{\kp_j \kp_3}{\kp^2})\frac{g\hat{\bm{x}_3}}{\rho_0}\tilde{\tilde \rho} =  -\nu\kappa^2 \tilde u_j
+\label{momentum-f-elimp}
+\end{eqnarray}
+THUS: when pressure is eliminated using incompressibility, the rotation terms disappear from the momentum equation.
+\subsection{Energy spectrum evolution}
+The energy in wavenumber $\bk$ is given by:
+\begin{equation}
+E(\bk) = \tilde{{u}_j}(\bk) \tilde{{u}_j}^*(\bk) = \tilde{{u}_j}(\bk) \tilde{{u}_j}(-\bk)= |\tilde{\bm{u}}(\bk)|^2 
+\end{equation}
+So, left-multiply Eq. (\ref{momentum-f-elimp}) by
+$\tilde{u_j}^*(\bk)$ and add it to the equation for $\tilde{u_j}^*$
+left-multiplied by $\tilde{u_j}$ (the $\bk$ argument is implicit everywhere from now on):
+\begin{equation}
+\frac{d}{dt} \tilde u_j \tilde{{u}_j}^* + 
+\tilde{u_j}^* \tilde G_j + \tilde{u_j} \tilde G_j^*+ \tilde{u_3}^*\frac{g\hat{\bm{x}_3}}{\rho_0}\tilde{\tilde \rho}  + \tilde u_3 \frac{g\hat{\bm{x}_3}}{\rho_0}
+\tilde{\tilde \rho}^*  = -\nu \kp^2 \tilde u_j \tilde u_j^*
+\label{ke}
+\end{equation}
+The potential energy in wavenumber $\bk$ is obtained by multiplying
+(\ref{density-f}) by $\frac{g \hat{\bm x}_3}{b \rho_0} \tilde{\tilde\rho}^*$ and adding to the equation for 
+$\frac{g \hat{\bm x}_3}{b \rho_0}\tilde{\tilde\rho}^*$ multiplied by $\tilde{\tilde\rho}$:
+\begin{eqnarray}
+\frac{d}{dt}( \frac{g \hat{\bm x}_3}{b \rho_0} \tilde{\tilde \rho} \tilde{\tilde \rho}^*)  + 
+\frac{g \hat{\bm x}_3}{\rho_0} \tilde{\tilde \rho}^* \tilde J(\bm{\kappa}) + \frac{g \hat{\bm x}_3}{\rho_0} \tilde{\tilde \rho} \tilde J^*(\bm{\kappa}) 
+- \frac{g \hat{\bm x}_3}{\rho_0} \tilde u_3 \tilde{\tilde \rho}^* - \frac{g \hat{\bm x}_3}{\rho_0} \tilde u_3^* \tilde{\tilde \rho} = \gamma \frac{g \hat{\bm x}_3}{b\rho_0} \kappa^2 (\tilde u_3^* \tilde {\tilde \rho} + \tilde u_3 \tilde {\tilde \rho}^*)
+\label{pe}
+\end{eqnarray}
+ 
+The total energy evolution is given by the sum of Eqs.~\ref{ke} and \ref{pe}. The transfer terms are:
+\begin{itemize}
+\item Kinetic-to-kinetic term: $T_K(\bk)=\tilde{u_j}^* \tilde G_j + \tilde{u_j} \tilde G_j^*$
+
+\item Potential-to-potential term: $T_P(\bk)=\frac{g }{\rho_0} (\tilde{\tilde \rho}^* \tilde J +  \tilde{\tilde \rho} \tilde J^*)$
+
+\item Exchange term: $T_E(\bk)=\frac{g}{\rho_0}(\tilde{u_3}^*\tilde{\tilde \rho}  + \tilde u_3 \tilde{\tilde \rho}^*)$
+\end{itemize}again, $\tilde G_j(\bk) = {\cal F}_{\bk}\{u_i \partial_i u_j\}$, $\tilde J(\bk) = {\cal F}_{\bm{\kappa}}\{u_i \partial_i \tilde\rho\}$.
+This should be enough for our calculations.
+
+\section{The connection to physical space (correlation function) representation}
+
+watch this space.
+
+\end{document}
