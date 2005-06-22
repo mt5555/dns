@@ -20,10 +20,13 @@ integer,parameter :: ndelta_max=100
 integer,parameter :: pmax=10       ! has to be 6 or greater
 
 !
-!  if this is .false., we compute velocity structure functions to the power p, p=2..pmax
-!  if this is .true., we compute using fractional powers from the array below:
+!  str_type=0    standard structure functions (including helical)
+!  str_type=1    fractional structure functions power < 1
+!  str_type=2    fractional structure functions power > 1
+!  str_type=3    fractional structure functions power (see subroutine)
+!  str_type=4    anisotropic structure functions
 !
-logical           :: compute_fractional_power = .false.
+integer :: str_type = 0
 
 
 real*8 :: fractional_power(2:pmax) 
@@ -1287,195 +1290,192 @@ u_l  = delu1*rhat(1)+delu2*rhat(2)+delu3*rhat(3)
 u_t1 = delu1*rperp1(1)+delu2*rperp1(2)+delu3*rperp1(3)
 u_t2 = delu1*rperp2(1)+delu2*rperp2(2)+delu3*rperp2(3)
 
-u_t1_sq = u_t1*u_t1
-u_t2_sq = u_t2*u_t2
-u_l_sq  = u_l*u_l
 
-! HELICAL structure function
-ux_t1 = u1*rperp1(1)+u2*rperp1(2)+u3*rperp1(3)
-ux_t2 = u1*rperp2(1)+u2*rperp2(2)+u3*rperp2(3)
-ur_t1 = ur1*rperp1(1)+ur2*rperp1(2)+ur3*rperp1(3)
-ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
-H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
-H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
+if (str_type==0 ) then
+   u_t1_sq = u_t1*u_t1
+   u_t2_sq = u_t2*u_t2
+   u_l_sq  = u_l*u_l
 
-
-if (compute_fractional_power) then
-#if 0
-xp=fractional_power(2)
-u_l=abs(u_l)**xp            ! ** .1
-u_t1=abs(u_t1)**xp
-u_t2=abs(u_t2)**xp
-
-u_l_sq=u_l*u_l              ! **.2
-u_t1_sq=u_t1*u_t1
-u_t2_sq=u_t2*u_t2
-
-Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l       ! ** .1
-Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1
-Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2
-
-Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l_sq    ! ** .2
-Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1_sq
-Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2_sq
-
-Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l*u_l_sq   ! ** .3
-Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1*u_t1_sq
-Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2*u_t2_sq
-
-Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l_sq*u_l_sq   ! ** .4
-Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1_sq*u_t1_sq
-Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2_sq*u_t2_sq
-
-Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l*u_l_sq*u_l_sq    ! ** .5
-Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1*u_t1_sq*u_t1_sq
-Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2*u_t2_sq*u_t2_sq
-
-Dl(idel,idir,7)  =  Dl(idel,idir,7) + u_l_sq*u_l_sq*u_l_sq   ! ** .6
-Dt(idel,idir,1,7)=Dt(idel,idir,1,7) + u_t1_sq*u_t1_sq*u_t1_sq
-Dt(idel,idir,2,7)=Dt(idel,idir,2,7) + u_t2_sq*u_t2_sq*u_t2_sq
-
-! .1**7, .1**8, .1**9
-do p=8,min(10,pmax)   
-   Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**(p-1)             
-   Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**(p-1)
-   Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**(p-1)
-enddo
-#endif
-
-#if 0
-u_l=abs(u_l)
-u_t1=abs(u_t1)
-u_t2=abs(u_t2)
-
-u_l_sq=u_l**.25
-u_t1_sq=u_t1**.25
-u_t2_sq=u_t2**.25
-
-u_l_3=u_l_sq*u_l_sq                       ! .5
-u_t1_3=u_t1_sq*u_t1_sq
-u_t2_3=u_t2_sq*u_t2_sq
-
-Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l       ! ** 1
-Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1
-Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2
-
-Dl(idel,idir,7)  =  Dl(idel,idir,7) + u_l*u_l_sq       ! ** 1.25
-Dt(idel,idir,1,7)=Dt(idel,idir,1,7) + u_t1*u_t1_sq
-Dt(idel,idir,2,7)=Dt(idel,idir,2,7) + u_t2*u_t2_sq
-
-Dl(idel,idir,8)  =  Dl(idel,idir,8) + u_l*u_l_3       ! ** 1.50
-Dt(idel,idir,1,8)=Dt(idel,idir,1,8) + u_t1*u_t1_3
-Dt(idel,idir,2,8)=Dt(idel,idir,2,8) + u_t2*u_t2_3
-
-Dl(idel,idir,9)  =  Dl(idel,idir,9) + u_l*u_l_sq*u_l_3       ! ** 1.75
-Dt(idel,idir,1,9)=Dt(idel,idir,1,9) + u_t1*u_t1_sq*u_t1_3
-Dt(idel,idir,2,9)=Dt(idel,idir,2,9) + u_t2*u_t2_sq*u_t2_3
+   ! HELICAL structure function
+   ux_t1 = u1*rperp1(1)+u2*rperp1(2)+u3*rperp1(3)
+   ux_t2 = u1*rperp2(1)+u2*rperp2(2)+u3*rperp2(3)
+   ur_t1 = ur1*rperp1(1)+ur2*rperp1(2)+ur3*rperp1(3)
+   ur_t2 = ur1*rperp2(1)+ur2*rperp2(2)+ur3*rperp2(3)
+   H_ltt(idel,idir)=H_ltt(idel,idir) - u_l*(ux_t1*ur_t2-ux_t2*ur_t1)
+   H_tt(idel,idir)=H_tt(idel,idir) - (ux_t1*ur_t2-ux_t2*ur_t1)
 
 
-Dl(idel,idir,10)  =  Dl(idel,idir,10) + u_l*u_l       ! ** 2
-Dt(idel,idir,1,10)=Dt(idel,idir,1,10) + u_t1*u_t1
-Dt(idel,idir,2,10)=Dt(idel,idir,2,10) + u_t2*u_t2
+   Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq
+   Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq
+   Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq
+   
+   Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq
+   Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
+   Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
+   
+   Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq*u_l_sq
+   Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq*u_t1_sq
+   Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq*u_t2_sq
+   
+   Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l*u_l_sq*u_l_sq
+   Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1*u_t1_sq*u_t1_sq
+   Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2*u_t2_sq*u_t2_sq
+   
+   Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l_sq*u_l_sq*u_l_sq
+   Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1_sq*u_t1_sq*u_t1_sq
+   Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2_sq*u_t2_sq*u_t2_sq
+   
+   ! this loop is very expensive.  
+   do p=7,min(10,pmax)
+      Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
+      Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
+      Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
+   enddo
 
+   D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1_sq
+   D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2_sq
+   D_lltt(idel,idir)=D_lltt(idel,idir) + u_l_sq * .5*(u_t1_sq + u_t2_sq)
+   
+   
+   if (u_l>=0) then
+      SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l*u_l_sq
+      SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1_sq
+      SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2_sq
+   else
+      SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l*u_l_sq
+      SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1_sq
+      SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2_sq
+   endif
+   
+endif
 
-u_l=(u_l)**(-.2)
-u_t1=(u_t1)**(-.2)
-u_t2=(u_t2)**(-.2)
-
-u_l_sq=u_l*u_l              ! **.4
-u_t1_sq=u_t1*u_t1
-u_t2_sq=u_t2*u_t2
-
-Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq*u_l_sq   ! ** -.8
-Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq*u_t1_sq
-Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq*u_t2_sq
-
-Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq   ! ** -.6
-Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
-Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
-
-Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq    ! ** -.4
-Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq
-Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq
-
-Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l       ! ** -.2
-Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1
-Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2
-#endif
-
-
-! 2.45 2.55 2.65 2.75 2.85 2.95 3.05 3.15 3.25 
-u_l=abs(u_l)
-
-u_l_sq=u_l**.1
-u_l_3=u_l**.2
-
-u_l=u_l**2.85
-
-Dl(idel,idir,6)  =  Dl(idel,idir,6)  + u_l                       ! 2.85
-Dl(idel,idir,7)  =  Dl(idel,idir,7)  + u_l*u_l_sq                ! 2.95
-Dl(idel,idir, 8) =  Dl(idel,idir, 8) + u_l*u_l_3                ! 3.05
-Dl(idel,idir, 8) =  Dl(idel,idir, 9) + u_l*u_l_sq*u_l_3         ! 3.15
-Dl(idel,idir,10) =  Dl(idel,idir,10) + u_l*u_l_3*u_l_3          ! 3.25
-
-
-u_l_sq=1/u_l_sq   ! -.1
-u_l_3=1/u_l_3     ! -.2
-
-Dl(idel,idir,5)  =  Dl(idel,idir,5)  + u_l*u_l_sq                    ! 2.75
-Dl(idel,idir,4)  =  Dl(idel,idir,4)  + u_l*u_l_3                     ! 2.65
-Dl(idel,idir,3)  =  Dl(idel,idir,3)  + u_l*u_l_sq*u_l_3              ! 2.55
-Dl(idel,idir,2)  =  Dl(idel,idir,2)  + u_l*u_l_3*u_l_3               ! 2.45
-
-
-
-
-
-else
-
-Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq
-Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq
-Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq
-
-Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq
-Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
-Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
-
-Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq*u_l_sq
-Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq*u_t1_sq
-Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq*u_t2_sq
-
-Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l*u_l_sq*u_l_sq
-Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1*u_t1_sq*u_t1_sq
-Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2*u_t2_sq*u_t2_sq
-
-Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l_sq*u_l_sq*u_l_sq
-Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1_sq*u_t1_sq*u_t1_sq
-Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2_sq*u_t2_sq*u_t2_sq
-
-! this loop is very expensive.  
-do p=7,min(10,pmax)
-   Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**p
-   Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**p
-   Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**p
-enddo
+if (str_type==1) then
+   xp=fractional_power(2)
+   u_l=abs(u_l)**xp            ! ** .1
+   u_t1=abs(u_t1)**xp
+   u_t2=abs(u_t2)**xp
+   
+   u_l_sq=u_l*u_l              ! **.2
+   u_t1_sq=u_t1*u_t1
+   u_t2_sq=u_t2*u_t2
+   
+   Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l       ! ** .1
+   Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1
+   Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2
+   
+   Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l_sq    ! ** .2
+   Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1_sq
+   Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2_sq
+   
+   Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l*u_l_sq   ! ** .3
+   Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1*u_t1_sq
+   Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2*u_t2_sq
+   
+   Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l_sq*u_l_sq   ! ** .4
+   Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1_sq*u_t1_sq
+   Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2_sq*u_t2_sq
+   
+   Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l*u_l_sq*u_l_sq    ! ** .5
+   Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1*u_t1_sq*u_t1_sq
+   Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2*u_t2_sq*u_t2_sq
+   
+   Dl(idel,idir,7)  =  Dl(idel,idir,7) + u_l_sq*u_l_sq*u_l_sq   ! ** .6
+   Dt(idel,idir,1,7)=Dt(idel,idir,1,7) + u_t1_sq*u_t1_sq*u_t1_sq
+   Dt(idel,idir,2,7)=Dt(idel,idir,2,7) + u_t2_sq*u_t2_sq*u_t2_sq
+   
+   ! .1**7, .1**8, .1**9
+   do p=8,min(10,pmax)   
+      Dl(idel,idir,p)=Dl(idel,idir,p) + u_l**(p-1)             
+      Dt(idel,idir,1,p)=Dt(idel,idir,1,p) + u_t1**(p-1)
+      Dt(idel,idir,2,p)=Dt(idel,idir,2,p) + u_t2**(p-1)
+   enddo
+endif
+if (str_type==2) then
+   u_l=abs(u_l)
+   u_t1=abs(u_t1)
+   u_t2=abs(u_t2)
+   
+   u_l_sq=u_l**.25
+   u_t1_sq=u_t1**.25
+   u_t2_sq=u_t2**.25
+   
+   u_l_3=u_l_sq*u_l_sq                       ! .5
+   u_t1_3=u_t1_sq*u_t1_sq
+   u_t2_3=u_t2_sq*u_t2_sq
+   
+   Dl(idel,idir,6)  =  Dl(idel,idir,6) + u_l       ! ** 1
+   Dt(idel,idir,1,6)=Dt(idel,idir,1,6) + u_t1
+   Dt(idel,idir,2,6)=Dt(idel,idir,2,6) + u_t2
+   
+   Dl(idel,idir,7)  =  Dl(idel,idir,7) + u_l*u_l_sq       ! ** 1.25
+   Dt(idel,idir,1,7)=Dt(idel,idir,1,7) + u_t1*u_t1_sq
+   Dt(idel,idir,2,7)=Dt(idel,idir,2,7) + u_t2*u_t2_sq
+   
+   Dl(idel,idir,8)  =  Dl(idel,idir,8) + u_l*u_l_3       ! ** 1.50
+   Dt(idel,idir,1,8)=Dt(idel,idir,1,8) + u_t1*u_t1_3
+   Dt(idel,idir,2,8)=Dt(idel,idir,2,8) + u_t2*u_t2_3
+   
+   Dl(idel,idir,9)  =  Dl(idel,idir,9) + u_l*u_l_sq*u_l_3       ! ** 1.75
+   Dt(idel,idir,1,9)=Dt(idel,idir,1,9) + u_t1*u_t1_sq*u_t1_3
+   Dt(idel,idir,2,9)=Dt(idel,idir,2,9) + u_t2*u_t2_sq*u_t2_3
+   
+   
+   Dl(idel,idir,10)  =  Dl(idel,idir,10) + u_l*u_l       ! ** 2
+   Dt(idel,idir,1,10)=Dt(idel,idir,1,10) + u_t1*u_t1
+   Dt(idel,idir,2,10)=Dt(idel,idir,2,10) + u_t2*u_t2
+   
+   
+   u_l=(u_l)**(-.2)
+   u_t1=(u_t1)**(-.2)
+   u_t2=(u_t2)**(-.2)
+   
+   u_l_sq=u_l*u_l              ! **.4
+   u_t1_sq=u_t1*u_t1
+   u_t2_sq=u_t2*u_t2
+   
+   Dl(idel,idir,2)  =  Dl(idel,idir,2) + u_l_sq*u_l_sq   ! ** -.8
+   Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq*u_t1_sq
+   Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq*u_t2_sq
+   
+   Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq   ! ** -.6
+   Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
+   Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
+   
+   Dl(idel,idir,4)  =  Dl(idel,idir,4) + u_l_sq    ! ** -.4
+   Dt(idel,idir,1,4)=Dt(idel,idir,1,4) + u_t1_sq
+   Dt(idel,idir,2,4)=Dt(idel,idir,2,4) + u_t2_sq
+   
+   Dl(idel,idir,5)  =  Dl(idel,idir,5) + u_l       ! ** -.2
+   Dt(idel,idir,1,5)=Dt(idel,idir,1,5) + u_t1
+   Dt(idel,idir,2,5)=Dt(idel,idir,2,5) + u_t2
+endif
+if (str_type==3) then
+   ! 2.45 2.55 2.65 2.75 2.85 2.95 3.05 3.15 3.25 
+   u_l=abs(u_l)
+   
+   u_l_sq=u_l**.1
+   u_l_3=u_l**.2
+   
+   u_l=u_l**2.85
+   
+   Dl(idel,idir,6)  =  Dl(idel,idir,6)  + u_l                       ! 2.85
+   Dl(idel,idir,7)  =  Dl(idel,idir,7)  + u_l*u_l_sq                ! 2.95
+   Dl(idel,idir, 8) =  Dl(idel,idir, 8) + u_l*u_l_3                ! 3.05
+   Dl(idel,idir, 9) =  Dl(idel,idir, 9) + u_l*u_l_sq*u_l_3         ! 3.15
+   Dl(idel,idir,10) =  Dl(idel,idir,10) + u_l*u_l_3*u_l_3          ! 3.25
+   
+   
+   u_l_sq=1/u_l_sq   ! -.1
+   u_l_3=1/u_l_3     ! -.2
+   
+   Dl(idel,idir,5)  =  Dl(idel,idir,5)  + u_l*u_l_sq                    ! 2.75
+   Dl(idel,idir,4)  =  Dl(idel,idir,4)  + u_l*u_l_3                     ! 2.65
+   Dl(idel,idir,3)  =  Dl(idel,idir,3)  + u_l*u_l_sq*u_l_3              ! 2.55
+   Dl(idel,idir,2)  =  Dl(idel,idir,2)  + u_l*u_l_3*u_l_3               ! 2.45
+   
 endif
 
 
-D_ltt(idel,idir,1)=D_ltt(idel,idir,1) + u_l*u_t1_sq
-D_ltt(idel,idir,2)=D_ltt(idel,idir,2) + u_l*u_t2_sq
-D_lltt(idel,idir)=D_lltt(idel,idir) + u_l_sq * .5*(u_t1_sq + u_t2_sq)
-
-
-if (u_l>=0) then
-   SP_lll(idel,idir)  =SP_lll(idel,idir) + u_l*u_l_sq
-   SP_ltt(idel,idir,1)=SP_ltt(idel,idir,1) + u_l*u_t1_sq
-   SP_ltt(idel,idir,2)=SP_ltt(idel,idir,2) + u_l*u_t2_sq
-else
-   SN_lll(idel,idir)  =SN_lll(idel,idir) - u_l*u_l_sq
-   SN_ltt(idel,idir,1)=SN_ltt(idel,idir,1) - u_l*u_t1_sq
-   SN_ltt(idel,idir,2)=SN_ltt(idel,idir,2) - u_l*u_t2_sq
-endif
 end subroutine 
 
 

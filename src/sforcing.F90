@@ -882,7 +882,7 @@ if (0==init_sforcing) then
       numb=forcing_peak_waveno+8
       ener_target=0
       do wn=numb1,numb
-         ener_target(wn)=exp(-.5*pi_squared*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
+         ener_target(wn)=exp(-.5*pi*pi*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
       enddo
 
       ! compute number of coefficients in each band

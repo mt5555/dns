@@ -1590,9 +1590,9 @@ subroutine ke_shell_z(Qhat,ke,hscale,numk,nvar2)
 use params
 use mpi
 implicit none
+integer :: numk,kstart2,kstop2,nvar2
 real*8 Qhat(g_nz2,nslabx,ny_2dz,nvar2)           ! Fourier data at time t
-integer :: numk,kstart2,kstop2
-real*8 :: ke,xw,u2,xfac,ierr
+real*8 :: ke,xw,u2,xfac,ierr,hscale
 integer :: im,jm,km,i,j,k,n
 
 ! units of E = m**2/s**2
@@ -1609,7 +1609,7 @@ if (dealias==1) then
    kstop2=dealias_23_kmax2
 else if (dealias==2) then
    kstart2=dealias_sphere_kmax2_1
-   kstop2=dealias_sphere_kmax2)
+   kstop2=dealias_sphere_kmax2
 else
    call abort('ke_shell_z():  Error: bad dealiasing type')
 endif

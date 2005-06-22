@@ -44,7 +44,7 @@ real*8,allocatable   :: work2(:,:,:)
 real*8,allocatable  :: work3(:,:,:)
 real*8,allocatable  :: work4(:,:,:)
 
-character(len=80) message,sdata
+character(len=80) message,sdata,idata
 character(len=280) basename,fname,tname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
@@ -77,7 +77,7 @@ compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
-compute_fractional_power=.false.   
+str_type=0
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.true.		!extracting helicity-free modes
@@ -279,10 +279,11 @@ do
                
                if (my_pe==io_pe) then
                   write(sdata,'(f10.4)') 10000.0000 + time
-                  if (compute_fractional_power) then
-                     fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostrf2"
-                  else
+                  write(idata,'(i1)') str_type
+                  if (str_type==0) then
                      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
+                  else
+                     fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostr" // idata(1:1)
                   endif
                   if (nxdecomp*nydecomp*nzdecomp>1) then
                      write(sdata,'(3i1)') i,j,k
