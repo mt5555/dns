@@ -1475,6 +1475,32 @@ if (str_type==3) then
    
 endif
 
+% the five components m = -2, 1, 0, 1, 2 of the j=2 spherical harmonic projection of the mixed structure function $S_{ij}$, $i\neq j$
+
+if (str_type==4) then
+   slt = (u_l*u_t1 + u_l*u_t2)/2
+   stt = u_t1*u_t2
+   
+   !the polar angle is t and the azimuthal angle  is p
+   y2_2 = 2*rhat(1)*rhat(2)              !sint*sint*sin2p
+   y22 = rhat(1)**2 - rhat(2)**2         !sint*sint*cos2p
+   y2_1 = rhat(1)*rhat(3)                !sint*cost*cosp
+   y21 = rhat(2)*rhat(3)                 !sint*cost*sinp
+   y20 = (3*rhat(3)**2 - 1)              ! 3*cost*cost - 1
+
+   Dl(idel,idir,1) = Dl(idel,idir,1) + y2_2*(slt) 
+   Dl(idel,idir,2) = Dl(idel,idir,2) +  y22*(slt)
+   Dl(idel,idir,3) = Dl(idel,idir,3) + y2_1*(slt)
+   Dl(idel,idir,4) = Dl(idel,idir,4) + y21*(slt)
+   Dl(idel,idir,5) = Dl(idel,idir,5) + y20*(slt)
+
+   Dl(idel,idir,6) = Dl(idel,idir,6) + y2_2*(stt)
+   Dl(idel,idir,7) = Dl(idel,idir,7) + y22*(stt)
+   Dl(idel,idir,8) = Dl(idel,idir,8) + y2_1*(stt)
+   Dl(idel,idir,9) = Dl(idel,idir,9) + y21*(stt)
+   Dl(idel,idir,10) = Dl(idel,idir,10) + y20*(stt)
+
+endif
 
 end subroutine 
 
