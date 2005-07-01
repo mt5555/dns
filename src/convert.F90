@@ -109,7 +109,7 @@ do
    Q=0
 
    if (convert_opt==0) then  ! -cout uvw  
-      call input_uvw(time,Q,vor,work1,work2,header_user)  ! default headers
+      call input_uvw(time,Q,vor,work1,work2,header_user)  ! user specified
 !      print *,'attempting to read headerless input data...'
 !      call input_uvw(time,Q,vor,work1,work2,2)  ! no headers
       ! just reoutput the variables:
@@ -125,9 +125,15 @@ do
          ! dont clobber input file!
          basename=runname(1:len_trim(runname)) // "-new."
       endif
-      call output_uvw(basename,time,Q,vor,work1,work2,header_user)  ! default headers
-!      basename=runname(1:len_trim(runname)) // "-raw."
-!      call output_uvw(basename,time,Q,vor,work1,work2,2)   ! no headers
+      if (w_spec ) then
+         !user specified headers (same as input file)
+         call output_uvw(basename,time,Q,vor,work1,work2,header_user)  
+      else	
+         ! default grid space output:  no headers
+         call output_uvw(basename,time,Q,vor,work1,work2,2) 
+         ! use this to preserve header type of input file
+         ! call output_uvw(basename,time,Q,vor,work1,work2,header_user) 
+      endif
    endif
 
    if (convert_opt==1) then  ! -cout vor

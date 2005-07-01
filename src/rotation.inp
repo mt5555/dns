@@ -1,19 +1,25 @@
-5            ! input file type
+7            ! input file type
+1             ! file I/O header type   1-5
 ns_uvw       ! equations
 3d_rot         ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
-iso_high_24    ! forcing:  none, iso, iso12, iso12w, iso23w
+iso_high_16   ! forcing:  none, iso, iso12, iso12w, iso23w
 value        ! viscosity type  (value, smallest, kediff, Re)
-1e-4        ! viscosity coefficient.  (300)
-none        ! hyper vis
-0.0         ! hyper vis value
+0e-4        ! viscosity coefficient.  (300)
+hyper4      ! hyper vis
+1.0         ! hyper vis value
 none        ! hypo vis
 0.0         ! hypo vis value
+0.0          ! fcor  rotation
+1.0         ! Z sscaling  (aspect ratio)
+0.0            ! Bous. parameter 
 0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
+1             ! max number of schmidt numbers for passive scalars
+1.0, 2        ! passive scalar 1:  schmidt number, type
 0            ! compute_structure functions
 0            ! compute pdf functions
-fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
@@ -27,6 +33,7 @@ periodic     ! z bc
 0            ! model_dt   
 -10          ! screen_dt
 0.0           ! output_dt  (0 = output disabled, except for custom out times)
+0             ! also output the vorticity 
 0           ! n_output_custom  number of custom output times  
 00.00       ! custom output times, one per line
 

@@ -287,19 +287,6 @@ integer,parameter :: NUMBANDS=100
 real*8  :: enerb_target(NUMBANDS),enerb(NUMBANDS),ener
 
 
-fcor=1
-zscale=1
-
-if (init_cond_subtype==0) then
-   Omega=48
-   fcor=2*Omega
-   zscale=1
-endif
-
-if (io_pe==my_pe) then
-   print *,'Omega = ',Omega
-endif
-
 if (init==0) return
 
 

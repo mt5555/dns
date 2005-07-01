@@ -1,7 +1,23 @@
-**********************************************************************************
+*******************************************************************************
+6/30/2005
+rotation case (modeled after lesli smith's run)
+
+new input file: 
+initial cond:  3d_rot   subtype=0
+forcing:  iso_high_16 
+Lz   = 1/8
+fcor =
+Bous = 0
+
+hyper4 = del**4 = laplacian**2
+coefficient = 1   (auto scaled)
+
+
+*******************************************************************************
 10/3/2004
 
-New Monika VXPAIR case:
+New Monika VXPAIR case:fcor, Z scale and Bous paramemter are in input file
+
 
 init_subtype==6 (see cases2v.F90)
 delta=.1

@@ -96,8 +96,9 @@ real*8 :: zscale=1
 ! the equations in the physical domain [0..1]x[0..1]x[0..Lz], but
 ! the computational domain remains [0..1]x[0..1]x[0..1]
 ! The equations are mapped to the computational domain
-! Input data is assumed to be in the physical domain.  
-! Output of data: data is converted to physical domain and then output.
+! File I/O:  
+!    Input data is assumed to be in the physical domain.  
+!    Output of data: data is converted to physical domain and then output.
 real*8 :: Lz=1
 
 

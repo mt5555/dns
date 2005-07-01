@@ -334,6 +334,8 @@ if (my_pe==fpe) then
    else
       call copen(fname,"w",fid,ierr)
    endif
+
+
    if (ierr/=0) then
       write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
       call print_message(message)
