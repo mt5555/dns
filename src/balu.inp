@@ -17,16 +17,16 @@ fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-.1          ! time to run
+10.0          ! time to run
 1.50         ! adv cfl  (0 = disabled, use min_dt)
 .25           ! vis cfl  (0 = disabled, use min_dt)
 0             ! min_dt  
 1             ! max_dt 
-1.0          ! restart_dt  (0 = restart output disabled)
+0.0          ! restart_dt  (0 = restart output disabled)
 1.0          ! diag_dt   
 .1           ! model_dt  
 -10          ! screen_dt
-2.0          ! output_dt  (0 = output disabled, except for custom out times)
+10.0          ! output_dt  (0 = output disabled, except for custom out times)
 0           ! n_output_custom  number of custom output times  
 00.00       ! custom output times, one per line
 
