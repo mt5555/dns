@@ -1281,6 +1281,8 @@ real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
 real*8 :: u_t1_sq,u_t2_sq,u_l_sq,xp
 real*8 :: u_l_3,u_t1_3,u_t2_3
 integer :: p,idel,idir
+real*8 :: y2_2, y22, y2_1, y21, y20, slt, stt
+
 
 delu1=ur1-u1
 delu2=ur2-u2
@@ -1475,7 +1477,7 @@ if (str_type==3) then
    
 endif
 
-% the five components m = -2, 1, 0, 1, 2 of the j=2 spherical harmonic projection of the mixed structure function $S_{ij}$, $i\neq j$
+! the five components m = -2, 1, 0, 1, 2 of the j=2 spherical harmonic projection of the mixed structure function $S_{ij}$, $i\neq j$
 
 if (str_type==4) then
    slt = (u_l*u_t1 + u_l*u_t2)/2
