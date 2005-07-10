@@ -877,7 +877,7 @@ real*8,save :: ener_target(512)
 if (0==init_sforcing) then
    init_sforcing=1
    allocate(fhat(g_nz2,nslabx,ny_2dz,3))
-``````   if (forcing_type==8) then
+   if (forcing_type==8) then
       numb1=max(forcing_peak_waveno-8,1)
       numb=forcing_peak_waveno+8
       ener_target=0
