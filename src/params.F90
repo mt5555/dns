@@ -355,7 +355,7 @@ integer :: error_code =0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer,parameter :: nints=11
+integer,parameter :: nints=12
 real*8 :: ints(nints),maxs(nints)
 
 !
@@ -394,6 +394,7 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(9)  = < uxx,f > 
 ! ints(10) = mu*< u, del u >   diffusion (or mu*<u,-del**4 u>)
 ! ints(11) = helicity dissipation
+! ints(12) = enstrophy dissipation
 ! maxs(5) = max vorticity
 !
 !

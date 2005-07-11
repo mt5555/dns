@@ -230,7 +230,7 @@ integer n,i,j,k,im,km,jm,ns,numk
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
 real*8 :: p_diss(n_var),pke(n_var)
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale,ens_diss
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3)
@@ -434,6 +434,7 @@ ke=0
 ux2ave=0
 ke_diss=0
 h_diss=0
+ens_diss=0
 uxx2ave=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
@@ -487,6 +488,9 @@ do j=1,ny_2dz
                     (Qhat(k,i,j,1)*(wy-vz) + &
                      Qhat(k,i,j,2)*(uz-wx) + &
                      Qhat(k,i,j,3)*(vx-uy)) 
+               ! compute 2*k^2 vor vor:  
+               ens_diss = ens_diss + 2*xfac*mu*xw*&
+                    ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                
          endif
 
@@ -710,6 +714,7 @@ if (compute_ints==1) then
    ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-ke_diss                 ! <u,u_xx>
    ints(11)=h_diss
+   ints(12)=ens_diss
    maxs(5)=maxvor
 
 !   ints(6)=pke(4)
