@@ -61,9 +61,9 @@ mu=2e-4;
 %name = 'skhel512_hpi2';
 %mu = 1e-4;
 
-%namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
-%name = 'sc1024A';
-%mu = 3.5e-5;
+namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
+name = 'sc1024A';
+mu = 3.5e-5;
 
 % plot all the spectrum:
 movie=0; % 1 to plot all the spectra
@@ -257,8 +257,11 @@ xlabel('k')
 
 % compensated mean spectra
 figure(7)
-semilogx(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
-semilogx(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+%semilogx(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
+%semilogx(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+loglog(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
+loglog(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]); hold on;
+
 set(gca,'fontsize',16);
 legend('E(k) k^{5/3}','E(k) k^{4/3}');
     % title('Compensated MEAN energy spectrum');

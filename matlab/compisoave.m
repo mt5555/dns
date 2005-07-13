@@ -35,6 +35,7 @@ xmax=1000;  % maximum x axis
 xmax2=1000;  % x axis for iso check plots
 iso_check_dir=2;  % direction to use for single direction iso_check
 
+sphere_harm = 2
 
 [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
@@ -42,6 +43,12 @@ iso_check_dir=2;  % direction to use for single direction iso_check
     h_epsilon] ...
 = readisostr( [name,ext] );
 
+if sphere_harm ~= 0
+  [Dlnorm, Dtnorm] = spher_harm_weight(Dl,Dt,sphere_harm);
+  Dl = Dlnorm; 
+  Dt = Dtnorm;
+ 
+end
 
 eta = (mu^3 / epsilon)^.25;
 delx_over_eta=(1/nx)/eta;
