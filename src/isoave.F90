@@ -26,7 +26,7 @@ integer,parameter :: pmax=10       ! has to be 6 or greater
 !  str_type=3    fractional structure functions power (see subroutine)
 !  str_type=4    anisotropic structure functions
 !
-integer :: str_type = 0
+integer :: str_type = 4
 
 
 real*8 :: fractional_power(2:pmax) 
@@ -1477,7 +1477,8 @@ if (str_type==3) then
    
 endif
 
-! the five components m = -2, 1, 0, 1, 2 of the j=2 spherical harmonic projection of the mixed structure function $S_{ij}$, $i\neq j$
+! the five components m = -2, 1, 0, 1, 2 of the j=2 spherical harmonic
+!projection of the mixed structure function $S_{ij}$, $i\neq j$
 
 if (str_type==4) then
    slt = (u_l*u_t1 + u_l*u_t2)/2
@@ -1490,25 +1491,25 @@ if (str_type==4) then
    y21 = rhat(2)*rhat(3)                 !sint*cost*sinp
    y20 = (3*rhat(3)**2 - 1)              ! 3*cost*cost - 1
 
-   ! note: Dl() Dt() arras are indexed 2:pmax - they start at 2
+   ! note: Dl() Dt() arrays are indexed 2:pmax - they start at 2
    Dl(idel,idir,2) = Dl(idel,idir,2) + y2_2*(slt) 
    Dl(idel,idir,3) = Dl(idel,idir,3) +  y22*(slt)
    Dl(idel,idir,4) = Dl(idel,idir,4) + y2_1*(slt)
    Dl(idel,idir,5) = Dl(idel,idir,5) + y21*(slt)
    Dl(idel,idir,6) = Dl(idel,idir,6) + y20*(slt)
+   Dl(idel,idir,7) = Dl(idel,idir,7) + slt	!for matlab
+
 
    Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + y2_2*(stt)
    Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + y22*(stt)
    Dt(idel,idir,1,4) = Dt(idel,idir,1,4) + y2_1*(stt)
    Dt(idel,idir,1,5) = Dt(idel,idir,1,5) + y21*(stt)
    Dt(idel,idir,1,6) = Dt(idel,idir,1,6) + y20*(stt)
-
+   Dt(idel,idir,1,7) = Dt(idel,idir,7) + stt	!for matlab
+	
 endif
 
 end subroutine 
-
-
-
 
 
 subroutine accumulate_cj_str(idir,idel,u1,u2,ur1,ur2)

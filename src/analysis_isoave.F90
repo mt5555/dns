@@ -75,8 +75,8 @@ compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
-str_type=0
-compute_hspec=.true.
+str_type=4
+compute_hspec=.false.
 read_uvw=.false.
 
 tstart=9.8
