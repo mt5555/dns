@@ -1505,7 +1505,7 @@ if (str_type==4) then
    Dt(idel,idir,1,4) = Dt(idel,idir,1,4) + y2_1*(stt)
    Dt(idel,idir,1,5) = Dt(idel,idir,1,5) + y21*(stt)
    Dt(idel,idir,1,6) = Dt(idel,idir,1,6) + y20*(stt)
-   Dt(idel,idir,1,7) = Dt(idel,idir,7) + stt	!for matlab
+   Dt(idel,idir,1,7) = Dt(idel,idir,1,7) + stt	!for matlab
 	
 endif
 

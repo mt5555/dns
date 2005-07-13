@@ -20,11 +20,10 @@ ifeq ($(UNAME),Linux)
    #VENDOR=INTEL
    MPI = 
    MPILIB = 
-   ifeq ($(HOST),node001)
-      VENDOR=PGI
-      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/home/gmpi.pgi/include
-      MPILIB =  -L/home/gmpi.pgi/lib  -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm
-                 #-lpthread
+   ifeq ($(HOST),mauve.lanl.gov)
+      VENDOR=INTEL8
+      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 
+      MPILIB =  -lmpi
    endif
    ifeq ($(HOST),s854018)
       VENDOR=INTEL8
@@ -95,7 +94,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),INTEL8)
    F90 = ifort
    CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -auto -w90  -Vaxlib  -O1   -DLINUX $(MPI)  -DUSE_FFT99 
    #FFLAGS =  -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif
