@@ -25,6 +25,14 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 
       MPILIB =  -lmpi
    endif
+	ifeq ($(HOST),cnlsrocks)
+      VENDOR=PGI
+      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/local/pkg/mpich-gm/mpich-gm-pgi/mpich-gm-1.2.6.14/include
+      MPILIB =  -L/usr/local/pkg/mpich-gm/mpich-gm-pgi/mpich-gm-1.2.6.14/lib -lfmpich  -lmpich  -L/usr/gm/lib/ -lgm
+                 #-lpthread
+   endif
+
+
    ifeq ($(HOST),s854018)
       VENDOR=INTEL8
       #MPI = -DUSE_MPI -DMPI_UNDERSCORE
