@@ -22,7 +22,8 @@ if ($#argv == 0 ) then
    exit
 endif
 
-set MPIRUN = "mpirun -x LD_LIBRARY_PATH -wd $PWD "
+#set MPIRUN = "mpirun -x LD_LIBRARY_PATH -wd $PWD "
+set MPIRUN = "mpirun"
 
 if ($1 == makeref) then
 
@@ -37,18 +38,22 @@ endif
 
 if ($1 == 3p) then
 
-  ./gridsetup.py 2 2 1 128 128 8  
-  make >& /dev/null ;  rm -f $tmp ; $MPIRUN -np 4 ./dns < $refin > $tmp 
-  ../testing/check.sh $tmp $refout
 
   ./gridsetup.py 1 1 2 128 128 8  
-  make >& /dev/null ;  rm -f $tmp ; $MPIRUN -np 2 ./dns < $refin > $tmp 
+  echo "compiling..."
+  make >& /dev/null   
+  echo "done compiling. status=" $status
+  rm -f $tmp ; $MPIRUN -np 2 ./dns < $refin > $tmp 
   ../testing/check.sh $tmp $refout
 
   ./gridsetup.py 1 1 4 128 128 8  3 2 1  5 4 3
   make >& /dev/null ;  rm -f $tmp ; $MPIRUN -np 4 ./dns < $refin > $tmp 
   ../testing/check.sh $tmp $refout
 
+  ./gridsetup.py 2 2 1 128 128 8  
+  make >& /dev/null ;  
+  rm -f $tmp ; $MPIRUN -np 4 ./dns < $refin > $tmp 
+  ../testing/check.sh $tmp $refout
 
 
 endif

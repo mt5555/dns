@@ -6,13 +6,15 @@ set refout=../testing/reference3d.out
 set rundir=../testing/3d
 set tmp=/tmp/temp.out
 
+set EXE =  ./dns
+set EXEG = ./dnsgrid
 set MPIRUN  = "mpirun -np"
-if (`uname` == OSF1) then
-   set MPIRUN =  "prun -n"
-   if (`hostname` == milkyway.lanl.gov ) then
-      set MPIRUN  = "mpirun -np"
-   endif
+#   set MPIRUN =  "prun -n"
+if (`hostname` == mauve.lanl.gov ) then
+   set EXE = "mpirun -np 1 ./dns"
+   set EXEG = "mpirun -np 1 ./dnsgrid"
 endif
+
 
 
 if ($#argv == 0 ) then
@@ -54,24 +56,24 @@ if ($1 == 1) then
 
 echo "***********************************************************"
 echo "without restart:"
-make >& /dev/null ;  rm -f $tmp ; ./dns -d $rundir reference3d  -i $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $EXE -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 echo "dnsgrid without restart:"
 ./gridsetup.py 1 1 1 32 32 32
-make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid  -d $rundir reference3d -i $refin > $tmp 
+make dnsgrid >& /dev/null ;  rm -f $tmp ; $EXEG  -d $rundir reference3d -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 
 echo "***********************************************************"
 echo "with restart:"
-make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  -i $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $EXE -r -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 echo "with spectral restart:"
-make >& /dev/null ;  rm -f $tmp ; ./dns -s -r -d $rundir reference3d  -i $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $EXE -s -r -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -79,7 +81,7 @@ make >& /dev/null ;  rm -f $tmp ; ./dns -s -r -d $rundir reference3d  -i $refin 
 echo "***********************************************************"
 echo "dnsgrid with restart:"
 ./gridsetup.py 1 1 1 32 32 32
-make dnsgrid >& /dev/null ;  rm -f $tmp ; ./dnsgrid -r -d $rundir reference3d -i $refin > $tmp 
+make dnsgrid >& /dev/null ;  rm -f $tmp ; $EXEG -r -d $rundir reference3d -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -93,11 +95,11 @@ endif
 if ($1 == 2) then
 
 ./gridsetup.py 1 1 1 32 32 32 2 2 0
-make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  -i $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $EXE -r -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 1 1 32 32 32 2 3 4 4 3 2 
-make >& /dev/null ;  rm -f $tmp ; ./dns -r -d $rundir reference3d  -i $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $EXE -r -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -113,13 +115,13 @@ if ($1 == s) then
 echo "***********************************************************"
 echo "with 3 passive scalars"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make >& /dev/null ;  rm -f $tmp ; ./dns  -d $rundir reference3d  -i $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $EXE  -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 echo "with 3 passive scalars and restart"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make >& /dev/null ;  rm -f $tmp ; ./dns -r  -d $rundir reference3d  -i $refin > $tmp 
+make >& /dev/null ;  rm -f $tmp ; $EXE -r  -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
