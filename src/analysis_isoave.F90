@@ -74,13 +74,13 @@ header_type=1; scale=1;
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
-compute_uvw=.false.
-str_type=4
+compute_uvw=.true.	!computes structure functions
+str_type=4		!used to flag anisotropic structure functions
 compute_hspec=.false.
 read_uvw=.false.
 
-tstart=9.8
-tstop=9.8
+tstart=5.0
+tstop=5.0
 tinc=0.2
 icount=0
 

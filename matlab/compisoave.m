@@ -556,12 +556,6 @@ print -deps isocheck3.ps;
 
 end
 
-
-
-
-
-
-
 if (klaws==2) 
 
 %
@@ -646,5 +640,21 @@ end
 
 end
 
+if (klaws==4)
+%
+% analysis of mixed structure functions
+%
+for i=1:ndir
+  x = r_val(:,i);                   % units of box length
+  x_plot=x*nx*delx_over_eta;  % units of r/eta
 
+  yl = Dl(:,i,7); 
+  yt = Dt(:,i,7);
 
+  figure(10)
+  loglog(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on;
+  loglog(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on;
+
+end
+
+end

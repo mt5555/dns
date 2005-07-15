@@ -18,9 +18,12 @@ ext='.isostr';
 %name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0005.8000.new'
 %nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
 
-name='/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a0009.0000.new'
-nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=186
+%name='/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a0009.0000.new'
+%nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 
+%anisotropic structure functions have suffix .isostr4
+name='/auto/nest/u/skurien/dns/src/skhel512a0005.0000.isostr4'
+%nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 
 ndir_use=73;
 
@@ -33,29 +36,34 @@ disp('5 = 2nd and 3rd order isotropy check, x,y,z directions only');
 disp('6 = Scaling laws for total structure function (for paper)');
 disp('7 = plot 4th order functions');
 disp('8 = plot helical structure functions');
+disp('9 = Mixed (anisotropic) structure functions');
+
 in=input('Enter choice: ');
 
 
 plot_posneg=0;
 if (in==4)
-   klaws=0;
-   check_isotropy=1;
+  klaws=0;
+  check_isotropy=1;
 elseif (in==5)
-   ndir_use=3;
-   klaws=0;
-   check_isotropy=1;
+  ndir_use=3;
+  klaws=0;
+  check_isotropy=1;
 elseif (in==7)
    klaws=2;
    check_isotropy=0;
 elseif (in==8)
    klaws=3;
    check_isotropy=0;
+elseif (in==9)
+   klaws=4;
+   check_isotropy=0;
 else
    klaws=1;
    check_isotropy=0;
-   if (in==2) 
+if (in==2) 
      plot_posneg=1;
-   end
+     end
 end
 
 xx=(1:.5:(nx./2.5)) / nx;
