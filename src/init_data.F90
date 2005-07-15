@@ -67,7 +67,11 @@ else
 
    if (equations==NS_UVW) then
       call print_message('Projecting and dealiasing initial data...')
-      call divfree_gridspace(Q,work1,work2,q1) 
+      if (Lz==1) then
+         call divfree_gridspace(Q,work1,work2,q1) 
+      else
+         call divfree_gridspace_aspect(Q,work1,work2,q1) 
+      endif
    else if (dealias>0)  then
       call print_message('Dealiasing initial data...')
       call dealias_gridspace(Q,work1)

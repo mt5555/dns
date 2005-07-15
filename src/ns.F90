@@ -65,7 +65,7 @@ if (firstcall) then
       call abort("initial conditions are probably incorrect.")
    endif
    if (Lz/=1) then
-      call abort("Error: NS model with aspect ratio not implemented - uss NS_SCALE!")
+      call abort("Error: NS model with aspect ratio not implemented - use NS_SCALE!")
    endif
 #ifdef ALPHA_MODEL
 #else

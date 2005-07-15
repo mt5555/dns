@@ -124,10 +124,11 @@ So we have that
 \]
 And thus the divergence free condition is the 
 same in both coordinate systems.  The term $\gradp \pi'$ is the
-unique gradient which maintains $\gradp \cdot \up = 0$, so in the
-non-primed coordiante systems we can write this term as 
-$\grad \pi$, where now it is the unique gradient which maintains 
-$\grad \cdot \uv = 0$.
+unique gradient which maintains $\gradp \cdot \up = 0$.  This
+term must be expressible as a gradient in physical coordinates,
+so we can drop the prime, but will must still write the term as
+$\gradp \pi$, where now it is the unique (physical coordinate) 
+gradient which maintains  $\grad \cdot \uv = 0$.
 We now start substituting the non-primed variables with the
 primted variables:
 \[
@@ -140,7 +141,7 @@ primted variables:
                 u_2 \\
                 h u_3 \\
 \end{pmatrix}
-+ \grad \pi +
++ \gradp \pi +
 \begin{pmatrix} 0 \\
                 0 \\
                 h N \theta \\
@@ -212,7 +213,7 @@ and substituting in for $\omega$:
                 f u_1 \\
                 N \theta  \\
 \end{pmatrix}  
-+ \grad \pi = \nu 
++ \gradp \pi = \nu 
 \begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 
                 \dfrac{\partial^2 u_1}{\partial y^2} + 
                 \dfrac{1}{h^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]

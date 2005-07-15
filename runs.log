@@ -2,16 +2,25 @@
 6/30/2005
 rotation case (modeled after lesli smith's run)
 
+256x256x32
+R0 = (epsilon_f k_f )**(1/3) / (.5*fcor)
+ 
+2 Omega = fcor
+
 new input file: 
 initial cond:  3d_rot   subtype=0
 forcing:  iso_high_16 
 Lz   = 1/8
-fcor =
+fcor = .1
 Bous = 0
 
 hyper4 = del**4 = laplacian**2
 coefficient = 1   (auto scaled)
 
+Run, compute epsilon_f, R0
+
+
+make dnsz
 
 *******************************************************************************
 10/3/2004

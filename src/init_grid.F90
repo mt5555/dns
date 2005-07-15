@@ -697,18 +697,18 @@ endif
 if (mu_hyper>1) then
 write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu_hyper_value
 call print_message(message)
-kmode=1
-xfac = 2* (2*pi*2*pi*kmode**2)**mu_hyper
-diff_2h =  mu_hyper_value*xfac
-write(message,'(a,f5.0,a,f8.2)') 'Hyper diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
-call print_message(message)
+!kmode=1
+!xfac = 2* (2*pi*2*pi*kmode**2)**mu_hyper
+!diff_2h =  mu_hyper_value*xfac
+!write(message,'(a,f5.0,a,f8.2)') 'Hyper diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+!call print_message(message)
 
-kmode = sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
-if (ndim==2) kmode = sqrt( (g_nx**2 + g_ny**2 )/4.0)
-xfac = 2*(2*pi*2*pi*kmode**2)**mu_hyper
-diff_2h =  mu_hyper_value*xfac
-write(message,'(a,f5.0,a,f8.2)') 'Hyper diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
-call print_message(message)
+!kmode = sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+!if (ndim==2) kmode = sqrt( (g_nx**2 + g_ny**2 )/4.0)
+!xfac = 2*(2*pi*2*pi*kmode**2)**mu_hyper
+!diff_2h =  mu_hyper_value*xfac
+!write(message,'(a,f5.0,a,f8.2)') 'Hyper diffusion d/dt(KE)/KE on mode k = ',kmode,': ',diff_2h
+!call print_message(message)
 
 endif
 
@@ -1538,6 +1538,9 @@ else if (sdata=='iso_high_16') then
 else if (sdata=='sto_high_24') then
    forcing_peak_waveno=24
    forcing_type=8
+else if (sdata=='sto_high_16') then
+   forcing_peak_waveno=16
+   forcing_type=8
 else if (sdata=='sto_high_10') then
    forcing_peak_waveno=10
    forcing_type=8
@@ -2068,6 +2071,9 @@ else if (sdata=='iso_high_16') then
    forcing_type=7
 else if (sdata=='sto_high_24') then
    forcing_peak_waveno=24
+   forcing_type=8
+else if (sdata=='sto_high_16') then
+   forcing_peak_waveno=16
    forcing_type=8
 else if (sdata=='sto_high_10') then
    forcing_peak_waveno=10

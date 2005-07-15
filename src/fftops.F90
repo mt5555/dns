@@ -167,7 +167,6 @@ else if (index==3) then
       call transpose_from_z(px,pxx,n1,n1d,n2,n2d,n3,n3d)
    endif
    call transpose_from_z(pt,px,n1,n1d,n2,n2d,n3,n3d)
-
 endif
 
 endif
@@ -210,6 +209,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: dummy(1),tol
 real*8 :: alpha=0
 real*8 :: beta=1
+real*8 :: one=1
 integer i,j,k,n
 external helmholtz_periodic,helmholtz_dirichlet
 
@@ -220,7 +220,7 @@ if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
    call divergence(p,u,work,work2)
-   call helmholtz_periodic_inv(p,work,alpha,beta)
+   call helmholtz_periodic_inv(p,work,alpha,beta,one)
 
    !work=p  ! RHS
    !p=0  ! initial guess
@@ -237,6 +237,73 @@ endif
 ! compute u=u-grad(p)
 do n=1,3
    call der(p,work,dummy,work2,1,n)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      u(i,j,k,n)=u(i,j,k,n)-work(i,j,k)
+   enddo
+   enddo
+   enddo
+enddo
+
+if (dealias>0) then
+   call dealias_gridspace(u,work)
+endif
+
+end subroutine
+
+
+
+subroutine divfree_gridspace_aspect(u,p,work,work2)
+!
+! make u divergence free
+!    solve:  div(u) = laplacian(p)
+!    then:   unew = u - grad(p)
+!     
+!    But in are Lz scaled coordinate system (see rotation.tex)
+!
+use params
+use fft_interface
+implicit none
+real*8 :: u(nx,ny,nz,3)
+real*8 :: p(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+!local
+real*8 :: dummy(1),tol
+real*8 :: alpha=0
+real*8 :: beta=1
+integer i,j,k,n
+external helmholtz_periodic,helmholtz_dirichlet
+
+
+! solve laplacian(p)=div(u)
+
+if ( g_bdy_x1==PERIODIC .and. &
+     g_bdy_y1==PERIODIC .and. &
+     g_bdy_z1==PERIODIC) then
+   call divergence(p,u,work,work2)  ! invarient 
+   call helmholtz_periodic_inv_scale(p,work,alpha,beta,Lz)
+
+   !work=p  ! RHS
+   !p=0  ! initial guess
+   !tol=1e-10
+   !call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic,.false.)
+else
+   ! might try divfree_ghost
+   stop 'divfree_gridspace: only supports periodic/reflection case'
+endif
+
+
+
+
+! compute u=u-grad(p)
+do n=1,3
+   call der(p,work,dummy,work2,1,n)
+   ! one factor of Lz from the d/dz term, one factor
+   ! from the fact that we scaled W by Lz:
+   if (n==3) work=work/Lz/Lz
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
@@ -610,18 +677,19 @@ end
 ! highest mode tweaked so that laplacian = div grad
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft_laplace_inverse(p,alpha,beta)
+subroutine fft_laplace_inverse(p,alpha,beta,dzscale)
 use params
 use fft_interface ! for pi2_squared
 implicit none
 real*8 p(nx,ny,nz)
-real*8 alpha,beta
+real*8 alpha,beta,dzscale
 
 !local
 integer i,j,k,im,jm,km
 real*8 xfac,xm,ym,zm
 
 if (numerical_method==FOURTH_ORDER) then
+if (dzscale/=1) call abort("dzscale must be 1 for FD methods")
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
@@ -689,7 +757,7 @@ do k=nz1,nz2
       do i=nx1,nx2
          im=imcord(i)
          if (im==g_nx/2) im=0
-         xfac= alpha + beta*(-im*im -km*km - jm*jm)*pi2_squared      
+         xfac= alpha + beta*(-im*im -km*km/(dzscale*dzscale) - jm*jm)*pi2_squared      
          if (xfac/=0) xfac = 1/xfac
          p(i,j,k)=p(i,j,k)*xfac
 
@@ -1202,7 +1270,6 @@ end subroutine
 
 
 
-
 subroutine helmholtz_periodic_inv(f,work,alpha,beta)
 !
 !  solve [alpha + beta*laplacian](p) = f
@@ -1217,6 +1284,29 @@ real*8 f(nx,ny,nz)    ! input/output
 real*8 work(nx,ny,nz) ! work array
 real*8 :: alpha
 real*8 :: beta
+real*8 :: dzscale
+real*8 :: one=1
+call helmholtz_periodic_inv_scale(f,work,alpha,beta,one)
+end subroutine
+
+
+
+
+subroutine helmholtz_periodic_inv_scale(f,work,alpha,beta,dzscale)
+!
+!  solve [alpha + beta*laplacian](p) = f
+!  input:  f 
+!  ouput:  f   will be overwritten with the solution p
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 f(nx,ny,nz)    ! input/output
+real*8 work(nx,ny,nz) ! work array
+real*8 :: alpha
+real*8 :: beta
+real*8 :: dzscale
 
 
 !local
@@ -1243,7 +1333,7 @@ call fft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
 
 ! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
-call fft_laplace_inverse(f,alpha,beta)
+call fft_laplace_inverse(f,alpha,beta,dzscale)
 
 call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)

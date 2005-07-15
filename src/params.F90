@@ -92,7 +92,7 @@ real*8 :: yscale=1
 real*8 :: zscale=1
 
 
-! scale_z is used by the DNS model.  The code is solving
+! Lz is used by the DNS model.  The code is solving
 ! the equations in the physical domain [0..1]x[0..1]x[0..Lz], but
 ! the computational domain remains [0..1]x[0..1]x[0..1]
 ! The equations are mapped to the computational domain

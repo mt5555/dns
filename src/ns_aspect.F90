@@ -353,14 +353,13 @@ do i=nx1,nx2
 
 
    ! add any rotation to vorticity before computing u cross vor
-   if (fcor/=0) then
-      vor(3)=vor(3) + fcor
-   endif
+   vor(3)=vor(3) + fcor
+
    
-   !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
-   !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
-   !  w*(wy-vz) - u*(vx-uy)
-   !  u*(uz-wx) - v*(wy-vz)
+   !  physical velocity=(u,v,Lz*w)
+   !  physical vorticity:  vor(1,2,3)
+   !  compute (physical) vorticity x velocity
+   !  scale Z component by Lz
    uu = ( Q(i,j,k,2)*vor(3) - Lz*Q(i,j,k,3)*vor(2) )
    vv = ( Lz*Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
    ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )/Lz
@@ -455,16 +454,16 @@ do j=1,ny_2dz
                
                ! u_x term
                vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
-               wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)
+               wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)*Lz
                uy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),1)
-               wy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),3)
-               uz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,1)
-               vz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,2)
+               wy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),3)*Lz
+               uz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,1)/Lz
+               vz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,2)/Lz
                ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
                ! compute 2*k^2 u vor:
                h_diss = h_diss + 2*xfac*mu*xw*&
-                    (Qhat(k,i,j,1)*(Lz*wy-vz/Lz) + &
-                     Qhat(k,i,j,2)*(uz/Lz-Lz*wx) + &
+                    (Qhat(k,i,j,1)*(wy-vz) + &
+                     Qhat(k,i,j,2)*(uz-wx) + &
                      Lz*Qhat(k,i,j,3)*(vx-uy)) 
                
          endif
@@ -528,8 +527,22 @@ if (compute_ints==1 .and. compute_transfer) then
    enddo
 endif
 
+#undef TESTGRIDSPACE
+#ifdef TESTGRIDSPACE
+print *,'grid space dealiasing'
+! fft to grid space:
+do n=1,3
+   call z_ifft3d(rhs(1,1,1,n),Q(1,1,1,n),work)
+enddo
+call divfree_gridspace_aspect(Q,p,work,rhs)
+! back to spectral space:  
+do n=1,3
+   call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
+enddo
 
 
+
+#else
 !  make rhs div-free
 do j=1,ny_2dz
    jm=z_jmcord(j)
@@ -541,10 +554,10 @@ do j=1,ny_2dz
          ! compute the divergence
          p(k,i,j)= - im*rhs(k,i+z_imsign(i),j,1) &
               - jm*rhs(k,i,j+z_jmsign(j),2) &
-              - km*rhs(k+z_kmsign(k),i,j,3)
+              - km*rhs(k+z_kmsign(k),i,j,3)    ! *(Lz/Lz)    
 
          ! compute laplacian inverse
-         xfac= (im*im +km*km + jm*jm)
+         xfac= (im*im +km*km/(Lz*Lz) + jm*jm)
          if (xfac/=0) xfac = -1/xfac
          p(k,i,j)=xfac*p(k,i,j)
          
@@ -562,11 +575,11 @@ do j=1,ny_2dz
          ! compute gradient  dp/dx
          uu= - im*p(k,i+z_imsign(i),j) 
          vv= - jm*p(k,i,j+z_jmsign(j))
-         ww= - km*p(k+z_kmsign(k),i,j)
+         ww= - km*p(k+z_kmsign(k),i,j)/Lz
          
          rhs(k,i,j,1)=rhs(k,i,j,1) - uu 
          rhs(k,i,j,2)=rhs(k,i,j,2) - vv 
-         rhs(k,i,j,3)=rhs(k,i,j,3) - ww 
+         rhs(k,i,j,3)=rhs(k,i,j,3) - ww/Lz 
 
          ! dealias           
          if ( dealias_remove(abs(im),abs(jm),abs(km))) then
@@ -578,6 +591,8 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
+#endif
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! passive scalars:
