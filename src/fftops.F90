@@ -1683,7 +1683,7 @@ implicit none
 integer :: kstart2,kstop2,nvar2
 real*8 Qhat(g_nz2,nslabx,ny_2dz,nvar2)           ! Fourier data at time t
 real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,hscale(3)
-integer :: im,jm,km,i,j,k,n,km_use,jm_use,im_use
+integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start
 
 ! units of E = m**2/s**2
 ! units of E(k) = m**3/s**2
@@ -1697,12 +1697,12 @@ integer :: im,jm,km,i,j,k,n,km_use,jm_use,im_use
 if (dealias==1) then
    ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
    ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
-   km_use = g_nz/3
-   if (km_use >= g_nz/3) km_use=km_use-1
-   jm_use = g_ny/3
-   if (jm_use >= g_ny/3.0) jm_use=jm_use-1
-   im_use = g_nx/3.0
-   if (im_use >= g_nx/3) im_use=im_use-1
+   km_start = g_nz/3
+   if (km_start >= g_nz/3) km_start=km_start-1
+   jm_start = g_ny/3
+   if (jm_start >= g_ny/3.0) jm_start=jm_start-1
+   im_start = g_nx/3.0
+   if (im_start >= g_nx/3) im_start=im_start-1
 
 else if (dealias==2) then
    kstart2=dealias_sphere_kmax2_1
@@ -1727,9 +1727,9 @@ endif
             if (im==0) xfac=xfac/2
 
             if (dealias==1) then
-               if (abs(im)==im_use) ke(1)=ke(1) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
-               if (abs(jm)==jm_use) ke(2)=ke(2) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
-               if (abs(km)==km_use) ke(3)=ke(3) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
             endif
             if (dealias==2) then
                xw = jm*jm + im*im + km*km 
@@ -1750,9 +1750,9 @@ endif
    call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 if (dealias==1) then
-   hscale(1) = sqrt(ke(1)) * (pi2_squared*im_use)**(-(mu_hyper-.75))
-   hscale(2) = sqrt(ke(2)) * (pi2_squared*jm_use)**(-(mu_hyper-.75))
-   hscale(3) = sqrt(ke(3)) * (pi2_squared*km_use)**(-(mu_hyper-.75))
+   hscale(1) = sqrt(ke(1)) * (pi2_squared*im_start)**(-(mu_hyper-.75))
+   hscale(2) = sqrt(ke(2)) * (pi2_squared*jm_start)**(-(mu_hyper-.75))
+   hscale(3) = sqrt(ke(3)) * (pi2_squared*km_start)**(-(mu_hyper-.75))
 endif
 if (dealias==2) then
    hscale(1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
