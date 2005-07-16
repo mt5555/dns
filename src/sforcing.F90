@@ -883,8 +883,9 @@ if (0==init_sforcing) then
       ener_target=0
       do wn=numb1,numb
          ! Smith & Waleffe:  esp( -.5 (k-k0)**2 )  /  sqrt(2pi)
-         ! my wave numbers have an extra 2pi:
-         ener_target(wn)=exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
+         ! my wave numbers have an extra 2pi.
+         ! This is normalized so that <f,f>=1.0
+         ener_target(wn)=exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
       enddo
 
       ! compute number of coefficients in each band

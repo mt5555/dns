@@ -53,7 +53,9 @@ time_target=time_final
 ! with fcor:
 !   CFL = delt*(umax/delx + f/pi)   delt <= CFL/(umax/delx + f/pi)
 !
-! viscous CFL =  delt*mu/delx^2  delt <= CFL*delx^2/mu
+! viscous CFL =  mu (u_xx + u_yy + u_zz) = 
+!                mu ( delx**-2  + dely**-2 + delz**-2)
+! delt*mu/del^2  delt <= CFL*del^2/mu
 !  
 !
 

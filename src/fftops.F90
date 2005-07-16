@@ -1726,19 +1726,19 @@ endif
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
 
+            u2=0
+            do n=1,nvar2
+               u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
+            enddo
+
             if (dealias==1) then
-               if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
-               if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
-               if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*u2
+               if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*u2
+               if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
             endif
             if (dealias==2) then
                xw = jm*jm + im*im + km*km 
                if (kstart2 < xw  .and. xw <= kstop2) then
-                  
-                  u2=0
-                  do n=1,nvar2
-                     u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
-                  enddo
                   ke(1) = ke(1) + .5*xfac*u2
                endif
             endif
