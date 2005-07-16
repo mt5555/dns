@@ -1672,7 +1672,7 @@ call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 end subroutine
 
 
-subroutine ke_shell_z(Qhat,ke,hscale,numk,nvar2)
+subroutine ke_shell_z(Qhat,hscale,nvar2)
 !
 ! compute the KE in shell   kstart2 < k**2 <= kstop2
 ! for z-decomposition data
@@ -1680,10 +1680,10 @@ subroutine ke_shell_z(Qhat,ke,hscale,numk,nvar2)
 use params
 use mpi
 implicit none
-integer :: numk,kstart2,kstop2,nvar2
+integer :: kstart2,kstop2,nvar2
 real*8 Qhat(g_nz2,nslabx,ny_2dz,nvar2)           ! Fourier data at time t
-real*8 :: ke,xw,u2,xfac,ierr,hscale
-integer :: im,jm,km,i,j,k,n
+real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,hscale(3)
+integer :: im,jm,km,i,j,k,n,km_use,jm_use,im_use
 
 ! units of E = m**2/s**2
 ! units of E(k) = m**3/s**2
@@ -1695,8 +1695,15 @@ integer :: im,jm,km,i,j,k,n
 !  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
 
 if (dealias==1) then
-   kstart2=dealias_23_kmax2_1
-   kstop2=dealias_23_kmax2
+   ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
+   ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
+   km_use = g_nz/3
+   if (km_use >= g_nz/3) km_use=km_use-1
+   jm_use = g_ny/3
+   if (jm_use >= g_ny/3.0) jm_use=jm_use-1
+   im_use = g_nx/3.0
+   if (im_use >= g_nx/3) im_use=im_use-1
+
 else if (dealias==2) then
    kstart2=dealias_sphere_kmax2_1
    kstop2=dealias_sphere_kmax2
@@ -1707,7 +1714,6 @@ endif
 
 
    ke=0
-   numk=0
    
    do j=1,ny_2dz
       jm=z_jmcord(j)
@@ -1715,28 +1721,45 @@ endif
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
-            xw = jm*jm + im*im + km*km 
-            if (kstart2 < xw  .and. xw <= kstop2) then
-               numk=numk+1
-               xfac = 2*2*2
-               if (km==0) xfac=xfac/2
-               if (jm==0) xfac=xfac/2
-               if (im==0) xfac=xfac/2
-               
-               u2=0
-               do n=1,nvar2
-                  u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
-               enddo
-               ke = ke + .5*xfac*u2
+            xfac = 2*2*2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+
+            if (dealias==1) then
+               if (abs(im)==im_use) ke(1)=ke(1) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               if (abs(jm)==jm_use) ke(2)=ke(2) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               if (abs(km)==km_use) ke(3)=ke(3) + .5*xfac*Qhat(k,i,j,n)*Qhat(k,i,j,n)
+            endif
+            if (dealias==2) then
+               xw = jm*jm + im*im + km*km 
+               if (kstart2 < xw  .and. xw <= kstop2) then
+                  
+                  u2=0
+                  do n=1,nvar2
+                     u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
+                  enddo
+                  ke(1) = ke(1) + .5*xfac*u2
+               endif
             endif
          enddo
       enddo
    enddo
 #ifdef USE_MPI
-   xw = ke
-   call mpi_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   ke2 = ke
+   call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
-   hscale = sqrt(ke) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
+if (dealias==1) then
+   hscale(1) = sqrt(ke(1)) * (pi2_squared*im_use)**(-(mu_hyper-.75))
+   hscale(2) = sqrt(ke(2)) * (pi2_squared*jm_use)**(-(mu_hyper-.75))
+   hscale(3) = sqrt(ke(3)) * (pi2_squared*km_use)**(-(mu_hyper-.75))
+endif
+if (dealias==2) then
+   hscale(1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
+   hscale(2)=hscale(1)
+   hscale(3)=hscale(1)
+endif
+
 end subroutine
 
 
