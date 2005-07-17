@@ -802,7 +802,7 @@ real*8 :: spectrum_z(0:g_nz/2)
 
 ! local variables
 real*8 rwave
-real*8 :: spectrum_in(0:iwave_max)
+real*8 :: spectrum_in(max(g_nx,g_ny,g_nz))
 real*8 :: energy,denergy,xfac,xw
 integer i,j,k
 
@@ -864,6 +864,7 @@ call mpi_reduce(spectrum_in,spectrum_z,1+(g_nz/2),MPI_REAL8,MPI_SUM,io_pe,comm_3
 
 spectrum_in=spec_d
 call mpi_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
 
 #endif
 
@@ -1079,7 +1080,7 @@ real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
 
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
-real*8 :: diss1,diss2,hetot,co_energy(3),xw
+real*8 :: diss1,diss2,hetot,co_energy(3),xw,xfac
 integer i,j,k,jm,km,im,iwave_max,n
 
 if (ndim<3) then
@@ -1131,32 +1132,34 @@ do j=ny1,ny2
          !vy = - pi2*jm*p1(i,j+jmsign(j),k,2)
          wy = - pi2*jm*p1(i,j+jmsign(j),k,3)
          
-         uz =  - pi2*km*p1(i,j,k+kmsign(k),1)
-         vz =  - pi2*km*p1(i,j,k+kmsign(k),2)
-         !wz =  - pi2*km*p1(i,j,k+kmsign(k),3)
+         uz =  - pi2*km*p1(i,j,k+kmsign(k),1)/Lz
+         vz =  - pi2*km*p1(i,j,k+kmsign(k),2)/Lz
+         !wz =  - pi2*km*p1(i,j,k+kmsign(k),3)/Lz
       
          ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
 
-         energy = 8
-         if (km==0) energy=energy/2
-         if (jm==0) energy=energy/2
-         if (im==0) energy=energy/2
+         xfac = 8
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
 
          ! compute k E(k)
          xw=sqrt(rwave*pi2_squared)
-         spec_kEk(iwave)=spec_kEk(iwave)+xw*energy* &
+         spec_kEk(iwave)=spec_kEk(iwave)+xw*xfac* &
             (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
 
-         co_energy(1) = energy*p1(i,j,k,1)*p1(i,j,k,2)
-         co_energy(2) = energy*p1(i,j,k,1)*p1(i,j,k,3)
-         co_energy(3) = energy*p1(i,j,k,2)*p1(i,j,k,3)
+         co_energy(1) = xfac*p1(i,j,k,1)*p1(i,j,k,2)
+         co_energy(2) = xfac*p1(i,j,k,1)*p1(i,j,k,3)
+         co_energy(3) = xfac*p1(i,j,k,2)*p1(i,j,k,3)
 
          cospec_x(abs(im),1:ndim)=cospec_x(abs(im),1:ndim)+co_energy(1:ndim)  ! uv
          cospec_y(abs(jm),1:ndim)=cospec_y(abs(jm),1:ndim)+co_energy(1:ndim)  ! uw
          cospec_z(abs(km),1:ndim)=cospec_z(abs(km),1:ndim)+co_energy(1:ndim)  ! vw
          cospec_r(iwave,1:ndim)=cospec_r(iwave,1:ndim)+co_energy(1:ndim)
 
-         energy = energy*(p1(i,j,k,1)*(wy-vz) + &
+! NOTE:  Input to this routine is already in PHYSICAL UNITS
+! so the z-component has already been scaled by Lz in aspect ration case.
+         energy = xfac*(p1(i,j,k,1)*(wy-vz) + &
                           p1(i,j,k,2)*(uz-wx) + &
                           p1(i,j,k,3)*(vx-uy)) 
          if (energy>0) spec_helicity_rp(iwave)=spec_helicity_rp(iwave)+energy
@@ -1203,6 +1206,7 @@ call mpi_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
 if (my_pe==io_pe) then
+   print *,'helicity data from compute_helicity_spec()'
    print *,'helicity: ',hetot
    print *,'helicity dissipation (spectrum): ',diss1*mu
    print *,'helicity dissipation (exact):    ',diss2*mu
