@@ -2078,6 +2078,9 @@ else if (sdata=='sto_high_16') then
 else if (sdata=='sto_high_10') then
    forcing_peak_waveno=10
    forcing_type=8
+else if (sdata=='sto_high_4') then
+   forcing_peak_waveno=4
+   forcing_type=8
 else 
    call abort("invalid forcing type specified on line 4 on input file")
 endif

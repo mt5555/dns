@@ -32,6 +32,7 @@ implicit none
 real*8  :: mu=0               !viscosity
 integer :: mu_hyper=1         !viscosity = (del**2)**mu_hyper
 real*8  :: mu_hyper_value=0   ! hyper viscosity value
+real*8  :: max_hyper(3)       ! some diagnostics
 integer :: mu_hypo =0         !large wave number dissipation = (del**-2)**mu_hyper
 real*8  :: mu_hypo_value=0    !viscosity value 
 real*8  :: alpha_value=0      !for the alpha model  

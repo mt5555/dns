@@ -207,6 +207,12 @@ if (doit_screen) then
            ' cfl_vis=',cfl_used_vis,' cfl_passive_vis=',cfl_used_psvis
    call print_message(message)	
 
+   if (mu_hyper_value>0 .and. mu_hyper>=2 .and. dealias==1) then
+      write(message,'(a,3e12.4)') 'hyper-vis (tensor) cfl: ',&
+           max_hyper
+      call print_message(message)
+   endif
+
    write(message,'(a,3f21.14)') 'max: (u,v,w) ',maxs(1),maxs(2),maxs(3)
    call print_message(message)	
 
@@ -323,6 +329,7 @@ if (doit_screen) then
            'total d/dt(w) vis=',delens_tot,'   mu <w,w_xx>= ',ens_diss
       call print_message(message)	
    endif
+
 endif
 
 !

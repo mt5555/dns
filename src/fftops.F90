@@ -1682,7 +1682,7 @@ use mpi
 implicit none
 integer :: kstart2,kstop2,nvar2
 real*8 Qhat(g_nz2,nslabx,ny_2dz,nvar2)           ! Fourier data at time t
-real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,hscale(3)
+real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,hscale(3),xw2,cfl
 integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start
 
 ! units of E = m**2/s**2
@@ -1753,7 +1753,46 @@ if (dealias==1) then
    hscale(1) = sqrt(ke(1)) * (pi2_squared*im_start)**(-(mu_hyper-.75))
    hscale(2) = sqrt(ke(2)) * (pi2_squared*jm_start)**(-(mu_hyper-.75))
    hscale(3) = sqrt(ke(3)) * (pi2_squared*km_start)**(-(mu_hyper-.75))
+
+   im=g_nx/3
+   jm=g_ny/3
+   km=g_nz/3
+
+!
+!  make sure that hyper viscosity does not exceed a CFL condition 
+!  d(u_k)/dt = x u_k      delt*x < cfl   x < cfl/delt
+!
+   cfl= 1      
+   if (delt>0) then
+      cfl = cfl/(3*delt)  ! divide by 3 and apply speretaly to each term:
+   endif
+
+   xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
+   max_hyper(1)= xw2
+   if (xw2>cfl) then
+      hscale(1)=(cfl/xw2)*hscale(1)
+      xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
+      max_hyper(1)= xw2*delt
+   endif
+   
+   xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
+   max_hyper(2)= xw2
+   if (xw2>cfl) then
+      hscale(2)=(cfl/xw2)*hscale(2)
+      xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
+      max_hyper(2)= xw2*delt
+   endif
+   
+   xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+   max_hyper(3)= xw2
+   if (xw2>cfl) then
+      hscale(3)=(cfl/xw2)*hscale(3)
+      xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+      max_hyper(3)= xw2*delt
+   endif
 endif
+
+
 if (dealias==2) then
    hscale(1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
    hscale(2)=hscale(1)
