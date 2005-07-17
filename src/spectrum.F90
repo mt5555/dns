@@ -41,6 +41,7 @@ real*8,private ::  spec_z(0:g_nz/2,n_var)
 real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz,n_var)
 real*8,private ::  time_old=-1
 
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
@@ -149,6 +150,57 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 if (ndim>=3) then
    call compute_helicity_spectrum(Q,q1,work1,1,wscale)
 endif
+
+
+end subroutine
+
+
+
+subroutine compute_spec_2d(time,Q,q1,work1,work2,wscale)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)   ! (u,v,w)
+real*8 :: q1(nx,ny,nz,n_var) 
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: time,wscale
+
+!local
+integer :: iwave_max,i,n
+real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz)) need to s
+
+iwave_max=max(g_nx,g_ny)
+spec_r_2d=0
+
+do i=1,n_var
+   if (i==3) then
+      q1(:,:,:,i)=wscale*Q(:,:,:,i)
+   else
+      q1(:,:,:,i)=Q(:,:,:,i)
+   endif
+enddo
+
+
+! passive scalars:
+do n=np1,np2
+   ! for scalars, we also need to scale these by wscale, both
+   ! here and in compute_spec() above
+   call abort("not yet coded: spectrum, Lz<1, scalars")
+   call compute_spectrum_2d(q1(1,1,1,n),work1,work2,spec_r_2d(0,0,n),?,&
+       ,iwave_max,0)
+enddo
+
+
+do i=1,ndim
+   call fft3d(q1(1,1,1,i),work1)
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r,?,&
+       iwave_max,1)
+   spec_r_2d(:,:,1)=spec_r_2d(:,:,1)+.5*spec_r
+enddo
+
+!time_old=time
+
 
 
 end subroutine
@@ -885,6 +937,103 @@ endif
 do i=iwave+2,iwave_max
    spectrum(iwave+1)=spectrum(iwave+1)+spectrum(i)
    spec_d(iwave+1)=spec_d(iwave+1)+spec_d(i)
+enddo
+iwave=iwave+1
+
+
+
+end subroutine
+
+
+
+
+
+
+
+
+subroutine compute_spectrum_2d(pin,p,work,spectrum,spec_d,&
+   iwave_max,skip_fft)
+!
+!  INPUT:  iwave_max:  size of spectrum()
+!  OUTPUT: iwave:      number of coefficients returned in spectrum()
+!          spectrum()  spherical wave number spectrum
+!          spec_d()    spherical wave number spectrum of diffusion term
+!
+!
+!  skip_fft=0    pin = grid point data - take FFT
+!  skip_fft=1    pin = FFT data, skip the FFT
+!
+use params
+use mpi
+implicit none
+integer :: iwave_max,ierr,skip_fft
+real*8 :: pin(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
+real*8 :: p(nx,ny,nz)
+real*8 :: spectrum(0:iwave_max,g_nz/2)
+real*8 :: spec_d(0:iwave_max,g_nz/2)
+
+
+! local variables
+real*8 rwave
+real*8 :: spectrum_in(0:iwave_max,g_nz/2)
+real*8 :: energy,denergy,xfac,xw
+integer ::  i,j,k,n
+
+
+rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 )
+if (nint(rwave)>iwave_max) then
+   call abort("compute_spectrum_2d: called with insufficient storege for spectrum()")
+endif
+iwave_max=nint(rwave)
+
+
+p=pin
+if (skip_fft==0) call fft3d(p,work)
+spectrum=0
+spec_d=0
+
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+    rwave = imcord(i)**2 + jmcord(j)**2 
+    iwave = nint(sqrt(rwave))
+
+    xfac = 8
+    if (kmcord(k)==0) xfac=xfac/2
+    if (jmcord(j)==0) xfac=xfac/2
+    if (imcord(i)==0) xfac=xfac/2
+    energy=xfac*p(i,j,k)*p(i,j,k)
+
+    spectrum(iwave,k)=spectrum(iwave,k)+energy
+
+    xw = (imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2)*pi2_squared
+    spec_d(iwave,k)=spec_d(iwave,k)  -mu*xw*energy
+
+
+enddo
+enddo
+enddo
+
+
+#ifdef USE_MPI
+spectrum_in=spectrum
+n=(1+iwave_max)*g_nz/2
+call mpi_reduce(spectrum_in,spectrum,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spectrum_in=spec_d
+n=(1+iwave_max)*g_nz/2
+call mpi_reduce(spectrum_in,spec_d,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+
+#endif
+
+iwave = min(g_nx/2,g_ny/2)
+! for all waves outside sphere, sum into one wave number:
+do i=iwave+2,iwave_max
+   spectrum(iwave+1,:)=spectrum(iwave+1,:)+spectrum(i,:)
+   spec_d(iwave+1,:)=spec_d(iwave+1,:)+spec_d(i,:)
 enddo
 iwave=iwave+1
 
