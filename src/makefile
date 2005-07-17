@@ -209,6 +209,9 @@ OBJS3 = $(INITS) $(OPS) $(FILEIO)
 #diagnostics for 3d turbulence runs:
 TURB_DIAG = pdf.o turb_diag.o isoave.o subcubes.o
 
+#diagnostics for 3d aspect ratio runs:
+ASPECT_DIAG = aspect_diag.o isoave.o subcubes.o
+
 #diagnostics for compressible DNS runs:
 CDNS_DIAG = pdf.o cdns_diag.F90
 
@@ -228,7 +231,7 @@ MODEL_CDNS       = cns.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(CDNS_DIAG)
 MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SPEC_SCALE = ns_aspect.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC_SCALE = ns_aspect.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(ASPECT_DIAG)
 MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_LERAY      = ns_leray.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SHALLOW    = shallow.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)

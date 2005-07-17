@@ -260,7 +260,10 @@ subroutine divfree_gridspace_aspect(u,p,work,work2)
 !    solve:  div(u) = laplacian(p)
 !    then:   unew = u - grad(p)
 !     
-!    But in are Lz scaled coordinate system (see rotation.tex)
+!  Note: for Lz<>1, this routine assumes scaling domain by Lz and 
+!  also assumes change of variables given in rotation.tex (w scaled by Lz)
+!
+
 !
 use params
 use fft_interface
@@ -1676,6 +1679,9 @@ subroutine ke_shell_z(Qhat,hscale,nvar2)
 !
 ! compute the KE in shell   kstart2 < k**2 <= kstop2
 ! for z-decomposition data
+!
+!  Note: for Lz<>1, this routine assumes scaling domain by Lz and 
+!  also assumes change of variables given in rotation.tex (w scaled by Lz)
 !
 use params
 use mpi

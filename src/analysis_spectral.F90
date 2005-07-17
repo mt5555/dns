@@ -242,7 +242,7 @@ do
          endif
          read_uvw=.true.	
       endif
-      call compute_helicity_spectrum(Q,q2,q1,0)
+      call compute_helicity_spectrum(Q,q2,q1,0,Lz)
       call output_helicity_spec(time,time)
    endif
    

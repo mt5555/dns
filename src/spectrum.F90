@@ -9,6 +9,28 @@ implicit none
 module to compute spherical and other 1D spectrums and
 transfer function spectrums
 
+Spectrum routines know about Lz for setting aspect ration.
+Spherical shells are stored in integer wave number k,
+and are of thickness of thickness 2*pi/Lz
+
+Max wave number:   2*pi*(g_nz/2)
+Number of shells:  .5*g_nz*Lz
+However, we only allocate space for .5*g_nz shells, so this code will
+print an error message if Lz>1
+
+Note:  Spectrum does now know about any variable scaling that
+might be used.  For example, in ns_aspect, when Lz<>1, we
+also scale the z-component of velocity by Lz.  w should be
+scaled back to physical coordinates before calling these
+routines.
+
+This scaling is specified as an argument to:
+   call compute_spec(time,Q,q1,work1,work2,wscale)
+   call compute_helicity_spectrum(Q,q1,work1,1,wscale)
+
+
+
+
 #endif
 
 logical :: compute_transfer=.false.
@@ -59,14 +81,14 @@ contains
 
 
 
-subroutine compute_spec(time,Q,q1,work1,work2)
+subroutine compute_spec(time,Q,q1,work1,work2,wscale)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)   ! (u,v,w)
 real*8 :: q1(nx,ny,nz,n_var) 
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: time
+real*8 :: time,wscale
 
 !local
 integer :: iwave_max,i,n
@@ -82,7 +104,13 @@ spec_x=0
 spec_y=0
 spec_z=0
 
-q1=Q
+do i=1,n_var
+   if (i==3) then
+      q1(:,:,:,i)=wscale*Q(:,:,:,i)
+   else
+      q1(:,:,:,i)=Q(:,:,:,i)
+   endif
+enddo
 
 
 !
@@ -119,7 +147,7 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 
 ! q1 already contains the FFT of Q, so set skip_fft (last arg) to 1:
 if (ndim>=3) then
-   call compute_helicity_spectrum(Q,q1,work1,1)
+   call compute_helicity_spectrum(Q,q1,work1,1,wscale)
 endif
 
 
@@ -779,7 +807,7 @@ real*8 :: energy,denergy,xfac,xw
 integer i,j,k
 
 
-rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 if (nint(rwave)>iwave_max) then
    call abort("compute_spectrum: called with insufficient storege for spectrum()")
 endif
@@ -797,8 +825,8 @@ spectrum_z=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-    rwave = imcord(i)**2 + jmcord(j)**2 + kmcord(k)**2
-    iwave = nint(sqrt(rwave))
+    rwave = imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2
+    iwave = nint(Lz*sqrt(rwave))
 
     xfac = 8
     if (kmcord(k)==0) xfac=xfac/2
@@ -839,12 +867,18 @@ call mpi_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,i
 
 #endif
 
+! compute maximum wave number of complete spherical shell
+! max wave number in shell integer k = (Lz*im, Lz*jm, km)
+!
+! (k/Lz) = im < g_nx/2          k < Lz*g_nx/2
+! k = km < g_nz/2      
+!
+! 
 if (g_nz == 1)  then
-   iwave = min(g_nx,g_ny)
+   iwave = min(g_nx/2,g_ny/2)
 else
-   iwave = min(g_nx,g_ny,g_nz)
+   iwave = floor(min(Lz*g_nx/2,Lz*g_ny/2,g_nz/2.))
 endif
-iwave = (iwave/2)           ! max wave number in sphere.
 
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
@@ -885,8 +919,11 @@ real*8 :: energy
 integer i,j,k,jm,km,im,iwave_max
 
 
-rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 iwave_max=nint(rwave)
+if (iwave_max>max(g_nx,g_ny,g_nz)) then
+   call abort("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
+endif
 
 spec=0
 
@@ -897,8 +934,8 @@ do j=1,ny_2dz
       do k=1,g_nz
          km=z_kmcord(k)
 
-         rwave = im**2 + jm**2 + km**2
-         iwave = nint(sqrt(rwave))
+         rwave = im**2 + jm**2 + (km/Lz)**2
+         iwave = nint(Lz*sqrt(rwave))
          
          energy = 8
          if (km==0) energy=energy/2
@@ -918,12 +955,19 @@ spec_r_in=spec
 call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
+! compute maximum wave number of complete spherical shell
+! max wave number in shell integer k = (Lz*im, Lz*jm, km)
+!
+! (k/Lz) = im < g_nx/2          k < Lz*g_nx/2
+! k = km < g_nz/2      
+!
+! 
 if (g_nz == 1)  then
-   iwave = min(g_nx,g_ny)
+   iwave = min(g_nx/2,g_ny/2)
 else
-   iwave = min(g_nx,g_ny,g_nz)
+   iwave = floor(min(Lz*g_nx/2,Lz*g_ny/2,g_nz/2.))
 endif
-iwave = (iwave/2)           ! max wave number in sphere.
+
 
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
@@ -952,8 +996,13 @@ real*8 :: energy
 integer i,j,k,jm,km,im,iwave_max
 
 
+if (Lz/=1) call abort("Error: compute_spetrum_fft cant handle Lz<>1")
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
 iwave_max=nint(rwave)
+if (iwave_max>max(g_nx,g_ny,g_nz)) then
+   call abort("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
+endif
+
 
 spec=0
 
@@ -1005,7 +1054,7 @@ end subroutine
 
 
 
-subroutine compute_helicity_spectrum(Q,p1,work,skip_fft)
+subroutine compute_helicity_spectrum(Q,p1,work,skip_fft,wscale)
 !
 ! skip_fft=1:
 !       input: Q    p1, work are work arrays
@@ -1020,6 +1069,7 @@ integer :: ierr,skip_fft
 real*8 :: Q(nx,ny,nz,*)
 real*8 :: p1(nx,ny,nz,*)
 real*8 :: work(nx,ny,nz)
+real*8 :: wscale
 
 ! local variables
 real*8 rwave
@@ -1037,14 +1087,19 @@ if (ndim<3) then
 endif
 
 if (skip_fft==0) then
-p1(:,:,:,1:3)=Q(:,:,:,1:3)
+p1(:,:,:,1:2)=Q(:,:,:,1:2)
+p1(:,:,:,3)=wscale*Q(:,:,:,3)
 do n=1,3
    call fft3d(p1(1,1,1,n),work)
 enddo
 endif
 
-rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
+rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 iwave_max=nint(rwave)
+if (iwave_max > max(g_nx,g_ny,g_nz)) then
+   call abort("compute_helicity_spec(): called with insufficient storege for spectrum()")
+endif
+
 
 hetot=0
 diss1=0
@@ -1065,8 +1120,8 @@ do j=ny1,ny2
       do k=nz1,nz2
          km=kmcord(k)
 
-         rwave = im**2 + jm**2 + km**2
-         iwave = nint(sqrt(rwave))
+         rwave = im**2 + jm**2 + (km/Lz)**2
+         iwave = nint(Lz*sqrt(rwave))
          
          !ux = - pi2*im*p1(i+imsign(i),j,k,1)
          vx = - pi2*im*p1(i+imsign(i),j,k,2)
@@ -1153,12 +1208,22 @@ if (my_pe==io_pe) then
    print *,'helicity dissipation (exact):    ',diss2*mu
 endif
 
+! compute maximum wave number of complete spherical shell
+! max wave number in shell integer k = (Lz*im, Lz*jm, km)
+!
+! (k/Lz) = im < g_nx/2          k < Lz*g_nx/2
+! k = km < g_nz/2      
+!
+! 
 if (g_nz == 1)  then
-   iwave = min(g_nx,g_ny)
+   iwave = min(g_nx/2,g_ny/2)
 else
-   iwave = min(g_nx,g_ny,g_nz)
+   iwave = floor(min(Lz*g_nx/2,Lz*g_ny/2,g_nz/2.0))
 endif
-iwave = (iwave/2)           ! max wave number in sphere.
+
+
+
+
 
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
@@ -1211,8 +1276,10 @@ integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ind
 
 complex*16 tmp
 
+if (Lz/=1) call abort("Error: compute_hfree_spec cant handle Lz<>1")
+
 if (ndim<3) then
-   call abort("compute_helicity_specturm: can only be used in 3D")
+   call abort("compute_hfree_spec: can only be used in 3D")
 endif
 
 #undef TESTEXP
