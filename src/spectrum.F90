@@ -167,8 +167,7 @@ real*8 :: time,wscale
 
 !local
 integer :: iwave_max,i,n
-real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz)) need to s
+real*8 ::  spec_r(0:max(g_nx,g_ny),g_nz/2)
 
 iwave_max=max(g_nx,g_ny)
 spec_r_2d=0
@@ -187,15 +186,14 @@ do n=np1,np2
    ! for scalars, we also need to scale these by wscale, both
    ! here and in compute_spec() above
    call abort("not yet coded: spectrum, Lz<1, scalars")
-   call compute_spectrum_2d(q1(1,1,1,n),work1,work2,spec_r_2d(0,0,n),?,&
-       ,iwave_max,0)
+   call compute_spectrum_2d(q1(1,1,1,n),work1,work2,spec_r_2d(0,0,n),&
+       iwave_max,0)
 enddo
 
 
 do i=1,ndim
    call fft3d(q1(1,1,1,i),work1)
-   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r,?,&
-       iwave_max,1)
+   call compute_spectrum_2d(q1(1,1,1,i),work1,work2,spec_r,iwave_max,1)
    spec_r_2d(:,:,1)=spec_r_2d(:,:,1)+.5*spec_r
 enddo
 
@@ -951,13 +949,11 @@ end subroutine
 
 
 
-subroutine compute_spectrum_2d(pin,p,work,spectrum,spec_d,&
-   iwave_max,skip_fft)
+subroutine compute_spectrum_2d(pin,p,work,spectrum,iwave_max,skip_fft)
 !
 !  INPUT:  iwave_max:  size of spectrum()
 !  OUTPUT: iwave:      number of coefficients returned in spectrum()
 !          spectrum()  spherical wave number spectrum
-!          spec_d()    spherical wave number spectrum of diffusion term
 !
 !
 !  skip_fft=0    pin = grid point data - take FFT
@@ -970,8 +966,7 @@ integer :: iwave_max,ierr,skip_fft
 real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
-real*8 :: spectrum(0:iwave_max,g_nz/2)
-real*8 :: spec_d(0:iwave_max,g_nz/2)
+real*8 :: spectrum(0:iwave_max,g_nz/2,n_var)
 
 
 ! local variables
@@ -991,7 +986,6 @@ iwave_max=nint(rwave)
 p=pin
 if (skip_fft==0) call fft3d(p,work)
 spectrum=0
-spec_d=0
 
 
 do k=nz1,nz2
@@ -1008,9 +1002,6 @@ do i=nx1,nx2
 
     spectrum(iwave,k)=spectrum(iwave,k)+energy
 
-    xw = (imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2)*pi2_squared
-    spec_d(iwave,k)=spec_d(iwave,k)  -mu*xw*energy
-
 
 enddo
 enddo
@@ -1019,14 +1010,8 @@ enddo
 
 #ifdef USE_MPI
 spectrum_in=spectrum
-n=(1+iwave_max)*g_nz/2
+n=(1+iwave_max)*(1+g_nz/2)
 call mpi_reduce(spectrum_in,spectrum,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-
-spectrum_in=spec_d
-n=(1+iwave_max)*g_nz/2
-call mpi_reduce(spectrum_in,spec_d,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-
-
 #endif
 
 iwave = min(g_nx/2,g_ny/2)
