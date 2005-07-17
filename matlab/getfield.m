@@ -6,7 +6,7 @@ fidvor=fopen(fname,'r');
     x=0;
     y=0;
     z=0;
-    q=0;
+    q=zeros([2 2 2]);
     time=-1;
     return; 
   end;

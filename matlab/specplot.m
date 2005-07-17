@@ -26,10 +26,10 @@ tsave=[];
 %movie_times=.3:.1:1;
 %mu=1.75e-4;
 
-%name='tmix256D-noscalars0000.0000';
-%namedir='/scratch2/taylorm/tmix256D-noscalars/';
-%CK_orig=1.613; movie_plot=0; endian='l';
-%mu=3e-4;
+name='temp0000.0000';
+namedir='../';
+CK_orig=1.613; movie_plot=0; endian='l';
+mu=1e-4;
 
 
 %name='decay2048-ave64.-new.0000.4026';
@@ -47,13 +47,6 @@ tsave=[];
 
 %name = 'sk128_alpha15/sk128_alpha150000.0000';
 %namedir = '/home/skurien/dns/src/';
-
-name = '2D_4096_1e-4b0000.0000';
-namedir = '../../evelyn/';
-mu=1e-9;
-
-%name = 'Rot10000.0000';
-%namedir = '/ccs/wingate/Rotation/Rot1/';
 
 
 %name='alpha1'; namedir='/home/taylorm/';
@@ -108,7 +101,7 @@ end
 
 CK=CK_orig;
 j=0;
-while (time>=.0 & time<=1.6)
+while (time>=.0 & time<=1000.6)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');

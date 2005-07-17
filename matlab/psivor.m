@@ -7,10 +7,10 @@
 
 %ts=input('time=? ');
 
-range=50:10:50;
+%range=50:10:50;
 %range=50:5:150.00;
 %range=29:1.0:1000.0;
-%range=[125:10:200];
+range=.1;
 %name='../src/vxpair/vx6144b_';
 %name='/ccs/taylorm/dns/src/vxpair/vx4096d';
 %name='/ccs/scratch/taylorm/vxpair/vx6144e';
@@ -21,13 +21,14 @@ range=50:10:50;
 %name='/ccs/scratch/taylorm/kras/vx2560c/vx2560c';
 %name='/ccs/scratch/taylorm/kras/vx5120a/vx5120a';
 %name='/data/vxpair/vx4800a/vx4800a'
-name='/data/vxpair/vx2400a/vx2400a'
+%name='/data/vxpair/vx2400a/vx2400a'
 %name='/home/scratch/kras/vx1280a/vx1280a';
+name='../temp'
 
 
 usefig=1;
 mkpr=1;            % make ps and jpeg files
-mkcontour=1;       % use pcolor or contour
+mkcontour=0;       % use pcolor or contour
 
 
 s=findstr(name,'/');
@@ -52,7 +53,7 @@ for i=range
 
 
   % whole plot, but subsample data:
-   subsample=1;
+   subsample=0;
    skip=4;   x1=1; x2=nx; y1=1; y2=ny;
 
   % zoom in:  
@@ -64,12 +65,12 @@ for i=range
   rangey=y1:skip:y2; 
 
 
+
   [x,y,z,vor,time]=getfield(fname);
   qmax=max(max(max(vor)));
   vor = squeeze(vor(:,:,1));
   if (subsample==1) vor=vor(rangex,rangey); end;
   disp(sprintf('max vor=                %f ',qmax));
-    
 
   fname=[name,ts,'.psi']
   [x,y,z,psi,time]=getfield(fname);

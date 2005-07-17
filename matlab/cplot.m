@@ -9,12 +9,12 @@ fidu=fopen('test-0-0-0-0000.0000.data');
 
 %range=0:.1:100.00;
 %range=50:5.0:100.0;
-range=[48.00];
+range=[.1];
 %name='../src/kh1024'; 
-name='/home/taylorm/ccs/dns/src/rot3d/rot3d_sto';
+name='../temp'
 
 mkpr=0;            % make ps and jpeg files
-mkcontour=1;       % use pcolor or contour
+mkcontour=0;       % use pcolor or contour
 mplot=1;           % set to nonzero to put 'mplot' plots per figure
 
 mplot=min(mplot,length(range));
@@ -29,7 +29,7 @@ for i=range
   ts = sprintf('%9.5f',10000+ts);
   ts=ts(2:10);
 
-  ts=[name,ts,'.u']
+  ts=[name,ts,'.vor']
   fidvor=fopen(ts,'r');
   time=fread(fidvor,1,'float64')
   data=fread(fidvor,3,'float64');
