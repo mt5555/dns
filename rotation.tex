@@ -373,10 +373,11 @@ where the sum is taken over all integers $(l,m,n)$ such that
 (\Delta k_z)^2 (k-1/2)^2 \le (\Delta k_x l)^2 + (\Delta k_y m)^2 + (\Delta k_z n)^2 <  (\Delta k_z)^2 (k+1/2)^2 
 \]
 where we have chosen to use a shell thickness of $\Delta k_z$.
- Scaling out the $2\pi$, we get
+Scaling out the $2\pi$, we get
 \[
-\frac{(k-1/2)^2}{h^2} \le l^2 + m^2 + \frac{n^2}{h^2} < \frac{(k+1/2)^2}{h^2}
+(k-1/2)^2 \le  h^2 l^2 + h^2 m^2 + n^2 < (k+1/2)^2
 \]  
+
 
 
 
@@ -415,19 +416,19 @@ determined by the horizontal wavenumber spacings. In our code,
 we use an integer index $k$ defined by $k_h = k \Delta k_x$ and
 define
 \begin{eqnarray*}
-E(k,n) = \sum_{l,m}  |  {\hat u_1}(l,m,n) |^2 +
+E(k,j) = \sum_{l,m}  |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
  |  h {\hat u_3}(l,m,n) |^2
 \end{eqnarray*}
 where the sum is taken over fixed $n$ and all integers $(l,m)$ such that 
 \[
-(\Delta k_x)^2 (k-1/2)^2 \le (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_x)^2 (k+1/2)^2 
+(\Delta k_h)^2 (j-1/2)^2 \le (\Delta k_x l)^2 + (\Delta k_y m)^2  <  (\Delta k_h)^2 (j+1/2)^2 
 \]
 and with $k_x=k \Delta k_x$ for integers $k$.  
-we have chosen to use a shell thickness of $\Delta k_x = \Delta
+we have chosen to use a shell thickness of $\Delta k_h =\Delta k_x = \Delta
 k_y = 2\pi$. Scaling out the $2\pi$, we get
 \[
-(k-1/2)^2 \le l^2 + m^2 < (k+1/2)^2.
+(j-1/2)^2 \le  l^2 +  m^2 < (j+1/2)^2.
 \]  
 
 
