@@ -16,8 +16,8 @@ F77FIXED=
 
 ifeq ($(UNAME),Linux)
    #VENDOR=LAHEY
-   VENDOR=PGI
-   #VENDOR=INTEL
+   #VENDOR=PGI
+   VENDOR=INTEL8
    MPI = 
    MPILIB = 
    ifeq ($(HOST),mauve.lanl.gov)
@@ -31,20 +31,6 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/usr/local/pkg/mpich-gm/mpich-gm-pgi/mpich-gm-1.2.6.14/lib -lfmpich  -lmpich  -L/opt/gm/lib/ -lgm
                  #-lpthread
    endif
-
-
-   ifeq ($(HOST),s854018)
-      VENDOR=INTEL8
-      #MPI = -DUSE_MPI -DMPI_UNDERSCORE
-      #MPILIB =   -llamf77mpi -lmpi -llam -lpthread
-   endif
-   ifeq ($(HOST),kiwi1)
-      VENDOR=INTEL8
-      MPI = -DUSE_MPI  -I/usr/include/lam  -DMPI_UNDERSCORE
-      MPILIB =   -L/usr/lib/lam/lib -llamf77mpi -lmpi -llam 
-      #MPI = -DUSE_MPI -DUSE_MPI_IO -DMPI_HAS_REAL8 -I$(HOME)/lampi/sulaco/include
-      #MPILIB =  -Xlinker -rpath $(HOME)/lampi/sulaco/lib -L$(HOME)/lampi/sulaco/lib -lmpi
-   endif
    ifeq ($(HOST),dosadi)
       VENDOR=INTEL8
       MPI = -DUSE_MPI -DMPI_UNDERSCORE
@@ -56,16 +42,6 @@ ifeq ($(UNAME),Linux)
       MPILIB=  -L/usr/pgi/linux86-64/5.2/lib -lfmpich -lmpich 
       #MPI = -I/usr/lib/mpi/mpi_pgi/include -DUSE_MPI -DMPI_HAS_REAL8 -Dmpi_wtime=pmpi_wtime
       #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi 
-   endif
-   ifeq ($(HOST),brain)
-      VENDOR=INTEL
-      MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/opt/scali/include
-      MPILIB =  -L/opt/scali/lib -lfmpi -lmpi
-   endif
-   ifeq ($(HOST),shankara12)
-      VENDOR=INTEL
-      MPI = -DUSE_MPI -I/users/contrib/lam/include
-      MPILIB =   -L/users/contrib/lam/lib -llamf77mpi -lmpi -llam -lpthread
    endif
    ifeq ($(HOST),pinkish.lanl.gov)
       #MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include

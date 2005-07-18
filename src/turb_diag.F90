@@ -21,6 +21,7 @@ real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
 real*8 :: divx,divi
+real*8 :: one=1
 integer i,j,k,n,ierr,csig
 integer :: n1,n1d,n2,n2d,n3,n3d
 character(len=80) :: message
@@ -49,7 +50,7 @@ if (doit_model .or. time==time_initial) then
 if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
-   call compute_spec(time,Q,q1,work1,work2)
+   call compute_spec(time,Q,q1,work1,work2,one)
    call output_spec(time,time_initial)
    call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
 

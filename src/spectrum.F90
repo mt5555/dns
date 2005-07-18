@@ -41,7 +41,7 @@ real*8,private ::  spec_z(0:g_nz/2,n_var)
 real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
-real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz,n_var)
+real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  time_old=-1
 
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
@@ -167,7 +167,7 @@ real*8 :: time,wscale
 
 !local
 integer :: iwave_max,i,n
-real*8 ::  spec_r(0:max(g_nx,g_ny),g_nz/2)
+real*8 ::  spec_r(0:max(g_nx,g_ny),0:g_nz/2)
 
 iwave_max=max(g_nx,g_ny)
 spec_r_2d=0
@@ -966,15 +966,14 @@ integer :: iwave_max,ierr,skip_fft
 real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
-real*8 :: spectrum(0:iwave_max,g_nz/2,n_var)
+real*8 :: spectrum(0:iwave_max,g_nz/2)
 
 
 ! local variables
 real*8 rwave
 real*8 :: spectrum_in(0:iwave_max,g_nz/2)
 real*8 :: energy,denergy,xfac,xw
-integer ::  i,j,k,n
-
+integer ::  i,j,k,n,km
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 )
 if (nint(rwave)>iwave_max) then
@@ -991,17 +990,21 @@ spectrum=0
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-    rwave = imcord(i)**2 + jmcord(j)**2 
-    iwave = nint(sqrt(rwave))
 
-    xfac = 8
-    if (kmcord(k)==0) xfac=xfac/2
-    if (jmcord(j)==0) xfac=xfac/2
-    if (imcord(i)==0) xfac=xfac/2
-    energy=xfac*p(i,j,k)*p(i,j,k)
-
-    spectrum(iwave,k)=spectrum(iwave,k)+energy
-
+   !jm=z_jmcord(j)
+   !im=z_imcord(i)
+   km=abs(z_kmcord(k))
+   
+   rwave = imcord(i)**2 + jmcord(j)**2 
+   iwave = nint(sqrt(rwave))
+   
+   xfac = 8
+   if (kmcord(k)==0) xfac=xfac/2
+   if (jmcord(j)==0) xfac=xfac/2
+   if (imcord(i)==0) xfac=xfac/2
+   energy=xfac*p(i,j,k)*p(i,j,k)
+   
+   spectrum(iwave,km)=spectrum(iwave,km)+energy
 
 enddo
 enddo
@@ -1018,7 +1021,6 @@ iwave = min(g_nx/2,g_ny/2)
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
    spectrum(iwave+1,:)=spectrum(iwave+1,:)+spectrum(i,:)
-   spec_d(iwave+1,:)=spec_d(iwave+1,:)+spec_d(i,:)
 enddo
 iwave=iwave+1
 
