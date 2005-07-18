@@ -53,6 +53,7 @@ if ( g_bdy_x1==PERIODIC .and. &
    call compute_spec_2d(time,Q,q1,work1,work2,Lz)
    call output_spec(time,time_initial)
    call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
+   call output_2d_spec(time,time_initial)  
 
    !set this flag so that for next timestep, we will compute and save
    !spectral transfer functions:

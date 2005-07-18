@@ -41,7 +41,7 @@ real*8,private ::  spec_z(0:g_nz/2,n_var)
 real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
-real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
+real*8,private ::  spec_r_2d(0:max(g_nx/2,g_ny/2),0:g_nz/2,n_var)
 real*8,private ::  time_old=-1
 
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
@@ -56,6 +56,7 @@ real*8,private ::  cospec_z(0:g_nz/2,n_var)
 
 
 integer,private :: iwave=-1
+integer,private :: iwave_2d=-1
 integer,private :: nbin=100
 
 
@@ -167,9 +168,9 @@ real*8 :: time,wscale
 
 !local
 integer :: iwave_max,i,n
-real*8 ::  spec_r(0:max(g_nx,g_ny),0:g_nz/2)
+real*8 ::  spec_r(0:max(g_nx/2,g_ny/2),0:g_nz/2)
 
-iwave_max=max(g_nx,g_ny)
+iwave_max=max(g_nx/2,g_ny/2)
 spec_r_2d=0
 
 do i=1,n_var
@@ -611,6 +612,63 @@ endif
 end subroutine
 
 
+
+
+subroutine output_2d_spec(time,time_file)
+use params
+implicit none
+real*8 :: time,time_file
+
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=80) :: message
+CPOINTER fid
+
+! no spectrum was computed
+call print_message("Warning: output_2d_spec() called, but no 2d spectra was computed")
+if (iwave_2d<0) return
+
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec2d"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "output_2d_spec(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave_2d; call cwrite8(fid,x,1)  
+   x=1+g_nz/2; call cwrite8(fid,x,1)
+   do k=0,g_nz/2
+      call cwrite8(fid,spec_r_2d(0,k,1),1+iwave_2d)
+   enddo
+   call cclose(fid,ierr)
+
+   if (npassive>0) then
+      call abort("Error: ouput of 2d spectrum for scalers not coded")
+      ! add spectrum of scalars
+   endif
+
+endif
+end subroutine
+
+
+
+
+
 subroutine output_hfree_spec(time,time_file)
 use params
 implicit none
@@ -966,12 +1024,12 @@ integer :: iwave_max,ierr,skip_fft
 real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
-real*8 :: spectrum(0:iwave_max,g_nz/2)
+real*8 :: spectrum(max(g_nx/2,g_ny/2),g_nz/2)
 
 
 ! local variables
 real*8 rwave
-real*8 :: spectrum_in(0:iwave_max,g_nz/2)
+real*8 :: spectrum_in(max(g_nx/2,g_ny/2),g_nz/2)
 real*8 :: energy,denergy,xfac,xw
 integer ::  i,j,k,n,km
 
@@ -996,7 +1054,7 @@ do i=nx1,nx2
    km=abs(z_kmcord(k))
    
    rwave = imcord(i)**2 + jmcord(j)**2 
-   iwave = nint(sqrt(rwave))
+   iwave_2d = nint(sqrt(rwave))
    
    xfac = 8
    if (kmcord(k)==0) xfac=xfac/2
@@ -1004,7 +1062,7 @@ do i=nx1,nx2
    if (imcord(i)==0) xfac=xfac/2
    energy=xfac*p(i,j,k)*p(i,j,k)
    
-   spectrum(iwave,km)=spectrum(iwave,km)+energy
+   spectrum(iwave_2d,km)=spectrum(iwave_2d,km)+energy
 
 enddo
 enddo
@@ -1013,16 +1071,16 @@ enddo
 
 #ifdef USE_MPI
 spectrum_in=spectrum
-n=(1+iwave_max)*(1+g_nz/2)
+n=(1+max(g_nx/2,g_ny/2))*(1+g_nz/2)
 call mpi_reduce(spectrum_in,spectrum,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
-iwave = min(g_nx/2,g_ny/2)
+iwave_2d = min(g_nx/2,g_ny/2)
 ! for all waves outside sphere, sum into one wave number:
-do i=iwave+2,iwave_max
-   spectrum(iwave+1,:)=spectrum(iwave+1,:)+spectrum(i,:)
+do i=iwave_2d+2,iwave_max
+   spectrum(iwave_2d+1,:)=spectrum(iwave_2d+1,:)+spectrum(i,:)
 enddo
-iwave=iwave+1
+iwave_2d=iwave_2d+1
 
 
 
