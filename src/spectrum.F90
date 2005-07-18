@@ -41,7 +41,7 @@ real*8,private ::  spec_z(0:g_nz/2,n_var)
 real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
-real*8,private ::  spec_r_2d(0:max(g_nx/2,g_ny/2),0:g_nz/2,n_var)
+real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  time_old=-1
 
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
@@ -151,8 +151,6 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 if (ndim>=3) then
    call compute_helicity_spectrum(Q,q1,work1,1,wscale)
 endif
-
-
 end subroutine
 
 
@@ -168,9 +166,9 @@ real*8 :: time,wscale
 
 !local
 integer :: iwave_max,i,n
-real*8 ::  spec_r(0:max(g_nx/2,g_ny/2),0:g_nz/2)
+real*8 ::  spec_r(0:max(g_nx,g_ny),0:g_nz/2)
 
-iwave_max=max(g_nx/2,g_ny/2)
+iwave_max=max(g_nx,g_ny)
 spec_r_2d=0
 
 do i=1,n_var
@@ -628,9 +626,11 @@ real*8 :: x
 character(len=80) :: message
 CPOINTER fid
 
-! no spectrum was computed
-call print_message("Warning: output_2d_spec() called, but no 2d spectra was computed")
-if (iwave_2d<0) return
+if (iwave_2d<0) then
+   ! no spectrum was computed
+   call print_message("Warning: output_2d_spec() called, but no 2d spectra was computed")
+   return
+endif
 
 
 ! append to output files, unless this is first call.
@@ -1024,12 +1024,12 @@ integer :: iwave_max,ierr,skip_fft
 real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
-real*8 :: spectrum(max(g_nx/2,g_ny/2),g_nz/2)
+real*8 :: spectrum(max(g_nx,g_ny),g_nz/2)
 
 
 ! local variables
 real*8 rwave
-real*8 :: spectrum_in(max(g_nx/2,g_ny/2),g_nz/2)
+real*8 :: spectrum_in(max(g_nx,g_ny),g_nz/2)
 real*8 :: energy,denergy,xfac,xw
 integer ::  i,j,k,n,km
 
@@ -1071,7 +1071,7 @@ enddo
 
 #ifdef USE_MPI
 spectrum_in=spectrum
-n=(1+max(g_nx/2,g_ny/2))*(1+g_nz/2)
+n=(1+max(g_nx,g_ny))*(1+g_nz/2)
 call mpi_reduce(spectrum_in,spectrum,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
