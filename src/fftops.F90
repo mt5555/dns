@@ -1704,11 +1704,11 @@ if (dealias==1) then
    ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
    ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
    km_start = g_nz/3
-   if (km_start >= g_nz/3) km_start=km_start-1
+   if (km_start >= g_nz/3) km_start=km_start-2
    jm_start = g_ny/3
-   if (jm_start >= g_ny/3.0) jm_start=jm_start-1
+   if (jm_start >= g_ny/3.0) jm_start=jm_start-2
    im_start = g_nx/3.0
-   if (im_start >= g_nx/3) im_start=im_start-1
+   if (im_start >= g_nx/3) im_start=im_start-2
 
 else if (dealias==2) then
    kstart2=dealias_sphere_kmax2_1
@@ -1775,6 +1775,7 @@ if (dealias==1) then
 
    xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
    max_hyper(1)= xw2
+   print *,'x: hyper viscosity CFL: ',xw2*delt
    if (xw2>cfl) then
       hscale(1)=(cfl/xw2)*hscale(1)
       xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
@@ -1783,6 +1784,7 @@ if (dealias==1) then
    
    xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
    max_hyper(2)= xw2
+   print *,'y: hyper viscosity CFL: ',xw2*delt
    if (xw2>cfl) then
       hscale(2)=(cfl/xw2)*hscale(2)
       xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
@@ -1791,6 +1793,7 @@ if (dealias==1) then
    
    xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
    max_hyper(3)= xw2
+   print *,'z: hyper viscosity CFL: ',xw2*delt
    if (xw2>cfl) then
       hscale(3)=(cfl/xw2)*hscale(3)
       xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper

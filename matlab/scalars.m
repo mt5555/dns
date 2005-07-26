@@ -26,11 +26,11 @@ fid2=-1;
 %fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
 %fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
-fid=fopen('/home/mataylo/codes/dnsdata/decay/decay2048.scalars','r','l'); 
-nx=2048;
+%fid=fopen('/home/mataylo/codes/dnsdata/decay/decay2048.scalars','r','l'); 
+%nx=2048;
 
-%fid=endianopen('/ccs/taylorm/dns/src/temp0000.0000.scalars','r');
-%nx=512;
+fid=endianopen('../src/temp0000.0000.scalars','r');
+nx=512;
 
 %fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
 %nx=1024;
@@ -50,8 +50,8 @@ nx=2048;
 %fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
 %nx=128;
 
-fid=endianopen('/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_all.scalars','r');
-nx=256;
+%fid=endianopen('/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_all.scalars','r');
+%nx=256;
 
 
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
@@ -210,30 +210,29 @@ figure(5)
 clf
 hold on
 plot(time,ke,'k')
-plot(time,ke_diss_f+ke_diss_d,'k')
 plot(time_2,ke_diss_tot,'r')
-plot(time,ke_diss_f,'b')
-plot(time,ke_diss_d,'b')
 plot(time,hel,'g')
-title('KE: black,   \epsilon: blue  d(KE)/dt: red,    hel: green');
+title('KE: black,   d(KE)/dt: red,    hel: green');
 hold off
 xlabel('time')
 
+
+% look at dissipations seperatly
 figure(6)
 clf
-semilogy(time,ke,'r'); hold on
-%plot(time_2,-ke_diss_tot,'b.')
-plot(time,-ke_diss_d,'b')
-title('KE: red,    d(KE)/dt: blue');
+hold on
+plot(time_2,ke_diss_tot,'k')
+plot(time,ke_diss_f+ke_diss_d,'b')
+plot(time,ke_diss_f,'r')
+plot(time,ke_diss_d,'g')
+plot(time_2,ke_diss_d_ave2,'g')
+
+title('F: red  D: green  F+D: blue   d(KE)/dt: black');
 hold off
 xlabel('time')
-print -dpsc ke.ps
-print -djpeg -r72 ke.jpg
-%fout=fopen('ke.out','wt');
-%for i=1:length(time)
-%n   fprintf(fout,'%.14f, %.14f, %.14f\n',time(i),ke(i),-ke_diss_d(i));
-%end
-%fclose(fout)
+
+
+
 
 
 figure(7)
@@ -249,21 +248,8 @@ plot(time,50000*ke,'k');
 hold off;
 %axis([0,1,0,5000]);
 title('maximum vorticity component')
-xlabel('time')
+xlabel('time');
 print -djpeg -r72 vor.jpg
-
-
-% compute dissipation error:
-% average time to mid point values:
-figure(8)
-clf
-hold on
-plot(time_2,ke_diss_tot,'r')
-plot(time,ke_diss_d,'b')
-%plot(time_2,ke_diss_d_ave2,'k')
-title('\epsilon: blue  d(KE)/dt: red');
-hold off
-xlabel('time')
 
 
 

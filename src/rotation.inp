@@ -3,11 +3,11 @@
 ns_uvw       ! equations
 zero         ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
-sto_high_16   ! forcing:  none, iso, iso12, iso12w, iso23w
+sto_high_4   ! forcing:  none, iso, iso12, iso12w, iso23w
 value        ! viscosity type  (value, smallest, kediff, Re)
 0e-4        ! viscosity coefficient.  (300)
 hyper4      ! hyper vis
-1.0         ! hyper vis value
+.01         ! hyper vis value
 none        ! hypo vis
 0.0         ! hypo vis value
 0.1          ! fcor  rotation

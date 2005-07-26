@@ -1398,13 +1398,14 @@ rwave=hetot
 call mpi_reduce(rwave,hetot,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
-
+#if 0
 if (my_pe==io_pe) then
    print *,'helicity data from compute_helicity_spec()'
    print *,'helicity: ',hetot
    print *,'helicity dissipation (spectrum): ',diss1*mu
    print *,'helicity dissipation (exact):    ',diss2*mu
 endif
+#endif
 
 ! compute maximum wave number of complete spherical shell
 ! max wave number in shell integer k = (Lz*im, Lz*jm, km)
