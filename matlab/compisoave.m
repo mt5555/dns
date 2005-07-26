@@ -44,10 +44,9 @@ sphere_harm = 2
 = readisostr( [name,ext] );
 
 if sphere_harm ~= 0
-  [Dlnorm, Dtnorm] = spher_harm_weight(Dl,Dt,sphere_harm);
-  Dl = Dlnorm; 
-  Dt = Dtnorm;
- 
+
+  [Dlnorm, Dtnorm] = spher_harm_weight(Dl(:,:,6),Dt(:,:,6),sphere_harm);
+
 end
 
 eta = (mu^3 / epsilon)^.25;
@@ -65,7 +64,7 @@ else
   if (equalw) 
     % put this in to use equally weighted:
     w=ones([1,ndir])/ndir;
-    disp(sprintf('Using equall weights for spherical integration'))
+    disp(sprintf('Using equal weights for spherical integration'))
   else
     % get the weights:
     wname=sprintf('../src/voronoi/isoave.weights%i',ndir);
@@ -644,17 +643,9 @@ if (klaws==4)
 %
 % analysis of mixed structure functions
 %
-for i=1:ndir
-  x = r_val(:,i);                   % units of box length
-  x_plot=x*nx*delx_over_eta;  % units of r/eta
 
-  yl = Dl(:,i,7); 
-  yt = Dt(:,i,7);
+    aniso_sfn(Dl,Dt,Dlnorm,Dtnorm,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
-  figure(10)
-  loglog(x_plot,yl,['.',cdir(i)],'MarkerSize',msize);   hold on;
-  loglog(x_plot,yt,['.',cdir(i)],'MarkerSize',msize);   hold on;
 
-end
 
 end

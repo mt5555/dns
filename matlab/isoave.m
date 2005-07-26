@@ -3,8 +3,8 @@ ke=0;
 nx=1;
 delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
-ext='.isostr';
-
+%ext='.isostr';
+ext='.isostr4';
 
 %name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
 %nx=2048; delx_over_eta=-1; epsilon=-1;
@@ -22,8 +22,8 @@ ext='.isostr';
 %nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 
 %anisotropic structure functions have suffix .isostr4
-name='/auto/nest/u/skurien/dns/src/skhel512a0005.0000.isostr4'
-%nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+name='/auto/nest/u/skurien/dns/src/skhel512a0005.0000'
+nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 
 ndir_use=73;
 
@@ -91,7 +91,8 @@ yysum=0*y45;
 for i=0:1
 for j=0:1
 for k=0:1
-  ext=sprintf('.isostr%i%i%i',i,j,k);
+   ext = sprintf('.isostr%i%i%i',i,j,k);
+
   [xx,y45,y415,y43,epsl]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy);
   yysum=yysum+y45*epsl/eps/8;
   figure(10);
