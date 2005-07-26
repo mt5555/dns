@@ -292,7 +292,6 @@ do
       itime_final=itime
    endif
 
-
    if (itime>=itime_final) time_final=time
    call time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
 

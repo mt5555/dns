@@ -1024,12 +1024,12 @@ integer :: iwave_max,ierr,skip_fft
 real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
-real*8 :: spectrum(max(g_nx,g_ny),g_nz/2)
+real*8 :: spectrum(0:max(g_nx,g_ny),0:g_nz/2)
 
 
 ! local variables
 real*8 rwave
-real*8 :: spectrum_in(max(g_nx,g_ny),g_nz/2)
+real*8 :: spectrum_in(0:max(g_nx,g_ny),0:g_nz/2)
 real*8 :: energy,denergy,xfac,xw
 integer ::  i,j,k,n,km
 

@@ -1704,11 +1704,11 @@ if (dealias==1) then
    ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
    ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
    km_start = g_nz/3
-   if (km_start >= g_nz/3) km_start=km_start-2
+   if (km_start >= g_nz/3) km_start=km_start-1
    jm_start = g_ny/3
-   if (jm_start >= g_ny/3.0) jm_start=jm_start-2
+   if (jm_start >= g_ny/3.0) jm_start=jm_start-1
    im_start = g_nx/3.0
-   if (im_start >= g_nx/3) im_start=im_start-2
+   if (im_start >= g_nx/3) im_start=im_start-1
 
 else if (dealias==2) then
    kstart2=dealias_sphere_kmax2_1
@@ -1734,7 +1734,11 @@ endif
 
             u2=0
             do n=1,nvar2
-               u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               if (n==3) then
+                  u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)*(Lz*Lz)
+               else
+                  u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
+               endif
             enddo
 
             if (dealias==1) then
@@ -1756,9 +1760,9 @@ endif
    call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 if (dealias==1) then
-   hscale(1) = sqrt(ke(1)) * (pi2_squared*im_start)**(-(mu_hyper-.75))
-   hscale(2) = sqrt(ke(2)) * (pi2_squared*jm_start)**(-(mu_hyper-.75))
-   hscale(3) = sqrt(ke(3)) * (pi2_squared*km_start)**(-(mu_hyper-.75))
+   hscale(1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
+   hscale(2) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
+   hscale(3) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
 
    im=g_nx/3
    jm=g_ny/3
@@ -1768,6 +1772,11 @@ if (dealias==1) then
 !  make sure that hyper viscosity does not exceed a CFL condition 
 !  d(u_k)/dt = x u_k      delt*x < cfl   x < cfl/delt
 !
+!   physical units:   du'/dt = mu k'**mu_hyper u'
+!   code units:       du/dt  = mu (k/Lz) **mu_hyper u
+!
+!   mu (kmax/Lz)**mu_hyper < cfl/delt
+!
    cfl= 1      
    if (delt>0) then
       cfl = cfl/(3*delt)  ! divide by 3 and apply speretaly to each term:
@@ -1775,8 +1784,8 @@ if (dealias==1) then
 
    xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
    max_hyper(1)= xw2
-   print *,'x: hyper viscosity CFL: ',xw2*delt
    if (xw2>cfl) then
+      print *,'x: warning: hyper viscosity CFL: ',xw2*delt
       hscale(1)=(cfl/xw2)*hscale(1)
       xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
       max_hyper(1)= xw2*delt
@@ -1784,8 +1793,8 @@ if (dealias==1) then
    
    xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
    max_hyper(2)= xw2
-   print *,'y: hyper viscosity CFL: ',xw2*delt
    if (xw2>cfl) then
+      print *,'y: warning: hyper viscosity CFL: ',xw2*delt
       hscale(2)=(cfl/xw2)*hscale(2)
       xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
       max_hyper(2)= xw2*delt
@@ -1793,8 +1802,8 @@ if (dealias==1) then
    
    xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
    max_hyper(3)= xw2
-   print *,'z: hyper viscosity CFL: ',xw2*delt
    if (xw2>cfl) then
+      print *,'z: warning: hyper viscosity CFL: ',xw2*delt
       hscale(3)=(cfl/xw2)*hscale(3)
       xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
       max_hyper(3)= xw2*delt

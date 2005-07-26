@@ -66,7 +66,6 @@ if ( g_bdy_x1==PERIODIC .and. &
 !   compute_transfer=.true.
 
 
-
    ! for incompressible equations, print divergence as diagnostic:
    if (equations==NS_UVW) then
       call compute_div(Q,q1,work1,work2,divx,divi)
