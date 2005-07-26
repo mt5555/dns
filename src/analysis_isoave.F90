@@ -44,7 +44,7 @@ real*8,allocatable  :: work3(:,:,:)
 real*8,allocatable  :: work4(:,:,:)
 
 character(len=80) message,sdata,idata
-character(len=280) basename,fname,tname
+character(len=280) basename,fname,tname,fname_ux
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
@@ -264,11 +264,12 @@ do
             else
                fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostr" // idata(1:1)
             endif
+            fname_ux = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".ux"
             if (nxdecomp*nydecomp*nzdecomp>1) then
                write(sdata,'(3i1)') i,j,k
                fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
+               fname_ux=fname_ux(1:len_trim(fname)) // "_" // sdata(1:3)
             endif
-            
             print *,fname
          endif
          
@@ -312,6 +313,15 @@ do
             endif
             call writeisoave(fid,time)
             call cclose(fid,ierr)
+
+            call copen(fname_ux,"w",fid,ierr)
+            if (ierr/=0) then
+               write(message,'(a,i5)') "output_model(): Error opening .ux file errno=",ierr
+               call abort(message)
+            endif
+            call write_ux(fid,time)
+            call cclose(fid,ierr)
+
          endif
          
       enddo

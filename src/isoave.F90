@@ -81,6 +81,8 @@ real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable :: w2s2(:,:,:)
 real*8 :: w2s2_mean(3)
 
+real*8 :: u_stress(3,3)    ! stress tensor
+real*8 :: u_stress2(3,3)    ! copy of stress tensor
 
 real*8,allocatable  :: dwork2(:,:)
 real*8,allocatable  :: dwork3(:,:,:)
@@ -95,6 +97,25 @@ private init
 
 contains
 
+
+
+
+subroutine write_ux(fid,time)
+use params
+implicit none
+
+CPOINTER fid
+real*8 :: time
+!local
+integer :: i,idir,p
+real*8 :: x
+
+if (my_pe/=io_pe) return
+
+call cwrite8(fid,time,1)
+call cwrite8(fid,u_stress,9)
+
+end subroutine
 
 
 
@@ -333,6 +354,7 @@ call zero_str
 if (stype==3) then
 ke_diss=0
 ke=0
+u_stress=0
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
@@ -342,7 +364,7 @@ do n=1,ndim
                
                if (m==1) ke = ke + .5*Q(i,j,k,n)**2
                ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
-               
+               u_stress(n,m) = u_stress(n,m)+ Qs(i,j,k,1)
             enddo
          enddo
       enddo
@@ -408,6 +430,8 @@ enddo
    call mpi_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=h_diss
    call mpi_allreduce(xtmp,h_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   u_stress2=u_stress
+   call mpi_allreduce(u_stress2,u_stress,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -416,7 +440,7 @@ if (epsilon==0) epsilon=1e-20
 h_epsilon=mu*h_diss
 if (h_epsilon==0) h_epsilon=1e-20
 ke=ke/ntot
-
+u_stress=u_stress/ntot
 
 
 eta = (mu**3 / epsilon)**.25
@@ -673,6 +697,8 @@ subcube=0
 
 ke_diss=0
 ke=0
+u_stress=0
+
 ntot=0
 do k=nz1,nz2
    if (zcord(k)>=range(3,1) .and. zcord(k)<range(3,2)) then
@@ -700,6 +726,7 @@ do n=1,ndim
                if (subcube(i,j,k)/=0) then
                   if (m==1) ke = ke + .5*Q(i,j,k,n)**2
                   ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
+                  u_stress(n,m) = u_stress(n,m)+ Qs(i,j,k,1)
                endif
                
             enddo
@@ -716,10 +743,13 @@ enddo
    call mpi_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ntot
    call mpi_allreduce(xtmp,ntot,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   u_stress2=u_stress
+   call mpi_allreduce(u_stress2,u_stress,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 epsilon=mu*ke_diss/ntot
 ke=ke/ntot
+u_stress=u_stress/ntot
 
 
 
@@ -882,6 +912,7 @@ call zero_str
 
 ke_diss=0
 ke=0
+u_stress=0
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),d1,dummy,work,1,m)
@@ -890,6 +921,7 @@ do n=1,ndim
       do i=lx1,lx2
          if (m==1) ke = ke + .5*Q(i,j,k,n)**2
          ke_diss=ke_diss + d1(i,j,k)*d1(i,j,k)
+         u_stress(n,m) = u_stress(n,m)+ d1(i,j,k)
       enddo
       enddo
       enddo
@@ -898,6 +930,7 @@ enddo
 ntot=real(lz2-lz1+1)*(ly2-ly1+1)*(lx2-lx1+1)
 epsilon=mu*ke_diss/ntot
 ke=ke/ntot
+u_stress=u_stress/ntot
 
 eta = (mu**3 / epsilon)**.25
 lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
