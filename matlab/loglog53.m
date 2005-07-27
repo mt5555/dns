@@ -1,5 +1,12 @@
 function loglog53(n,spec,stitle,CK,option)
-
+%
+%
+%  plot spectrum  EP(k)  = scale1 * E(k) * k^(scalep)
+%  
+%  if length(x_ck)>1, plot a slope line:    CK* x_ck.^plaw;
+%
+%  option is used to specify sets of (scalep,scale1,x_ck)
+%
 
 ccol=[ 'b','g','r','c','m','y', 'b','g','r','c','m','y' ];  
 x=(1:n)-1;
@@ -12,7 +19,7 @@ if (option==0)
   x_ck=1:500;
   % x_ck=-1;  % disable scale line
    scalep = 0;
-   %scalep = 5/3;
+   %scalep = 5/3;   % scale out for a 5/3 slope
    
    plaw=-5/3;
    %plaw=-3 
@@ -60,6 +67,13 @@ if (option==5)
    ax=[1,1e4,1e-7,1.0];
    x=1.25*x;    % rescale x axis so peak match KCM plot
    scale1=3;    % rescale E to match KCM plot 
+end
+% used by aspect ratio 2D spectrum
+if (option==6) 
+   x_ck=10:100;      % dont plot 5/3 line
+   scalep = 0;
+   plaw=-3;
+   ax=[1,1e2,1e-6,1e-1];
 end
 
 

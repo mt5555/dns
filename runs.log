@@ -1,9 +1,9 @@
 *******************************************************************************
 6/30/2005
-rotation case (modeled after lesli smith's run)
+rotation case (modeled after leslie smith's run)
 
-256x256x32
-R0 = (epsilon_f k_f )**(1/3) / (.5*fcor)
+256x256x32    R0=.88, .48,  .16
+R0 = (epsilon_f k_f )**(1/3) / (.5*fcor)         
  
 2 Omega = fcor
 
@@ -11,19 +11,25 @@ new input file:
 initial cond:  3d_rot   subtype=0
 forcing:  iso_high_16 
 Lz   = 1/8
-fcor = .1
+fcor = choosen to achieve R0 given above
 Bous = 0
 
 hyper4 = del**4 = laplacian**2
 coefficient = 1   (auto scaled)
 
-Run, compute epsilon_f, R0
-
-
-make dnsz
 
 My first run:  (dosadi) 
-16x256x256  done
+k_f = 4
+fcor=15
+mu_hyper=1.0
+128x128x16           (hyper viscosity scaling CFL 3-4 )
+128x128x32           (hyper viscosity scaling CFL .4 )
+
+epsilon_f = .61
+epsilon = .41
+R0 = (.61 * 4 )**(1/3) / (.5*.1) = 27
+
+
 
 *******************************************************************************
 10/3/2004

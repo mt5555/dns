@@ -1,5 +1,7 @@
 
 name = 'temp0000.0000'
+epsilon=.41;
+CK=1.5*epsilon^(2/3);
 namedir = '../src/';
 
 fid=endianopen([namedir,name,'.spec2d'],'r');
@@ -24,8 +26,16 @@ while (1)
   for kz=1:numkz
     spec2d(kz,:) = fread(fid,numkh,'float64') ;
   end
+
+  loglog53(numkh,spec2d(1,:)','',2.0,6)
+
+  hold on;
+  spec = sum(spec2d,1);
+  scale =  (spec2d(1,5)/spec(1,5))
+  spec = spec*scale;
+  loglog53(numkh,spec','nz*E0(kh) and E(kh)',2.0,6)
+
   
-  loglog(spec2d(1,:))
   pause
 end
 

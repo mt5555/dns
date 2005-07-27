@@ -454,13 +454,15 @@ else
    access="a"
 endif
 
-
-write(message,'(a,f10.4)') " Energy t=",time
-call logplotascii(spec_r(0,1),iwave,message(1:25))
-!call logplotascii(spec_x,g_nx/2,message)
-!call logplotascii(spec_y,g_ny/2,message)
-!call logplotascii(spec_z,g_nz/2,message)
-
+! If we are also computing 2d spectrum, dont bother to plot
+! 3D spectrum 
+if (iwave_2d <= iwave ) then
+   write(message,'(a,f10.4)') " Energy Spectrum t=",time
+   call logplotascii(spec_r(0,1),iwave,message(1:25))
+   !call logplotascii(spec_x,g_nx/2,message)
+   !call logplotascii(spec_y,g_ny/2,message)
+   !call logplotascii(spec_z,g_nz/2,message)
+endif
 
 
 
@@ -631,6 +633,9 @@ if (iwave_2d<0) then
    call print_message("Warning: output_2d_spec() called, but no 2d spectra was computed")
    return
 endif
+
+write(message,'(a,f10.4)') " 2D Spectrum t=",time
+call logplotascii(spec_r_2d(0,:,1),iwave_2d,message(1:25))
 
 
 ! append to output files, unless this is first call.
