@@ -506,8 +506,12 @@ endif
 ! apply forcing:
 if (forcing_type>0) then
    call sforce(rhs,Qhat,f_diss,fxx_diss)
-   ! average over all 4 stages
-   f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
+   ! average over all 4 stages   1/6 + 2/6 + 2/6 + 1/6
+   if (rkstage==2 .or. rkstage==3) then
+      f_diss_ave=f_diss_ave+f_diss/3
+   else
+      f_diss_ave=f_diss_ave+f_diss/6
+   endif
 endif
 
 
