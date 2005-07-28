@@ -12,53 +12,20 @@ range=0:50;
 %range=0:.5:2;
 fid2=-1;
 
-%fid=fopen('iso12_256_200.scalars','r','b'); 
-%fid=fopen('../src/impulse/kh230000.0000.scalars','r','l'); 
-%fid=fopen('../src/kh/khN.scalars','r','l'); 
-
-%fid=endianopen('/ccs/scratch/taylorm/dns/iso12/iso12_256.scalars','r'); 
-%nx=256;
-
-%fid=endianopen('/scratch2/taylorm/sk256/sk2560000.0000.scalars','r'); 
-%nx=256;
-
-%fid=endianopen('/ccs/scratch/taylorm/dns/sc512A.scalars','r'); 
-%fid2=endianopen('/ccs/scratch/taylorm/dns/iso12_512b.scalars','r'); 
-%fid=fopen('../src/sht/rung0000.0000.scalars','r','l'); 
 
 %fid=fopen('/home/mataylo/codes/dnsdata/decay/decay2048.scalars','r','l'); 
 %nx=2048;
-
-fid=endianopen('../src/temp0000.0000.scalars','r');
-nx=512;
-
-%fid=endianopen('/ccs/scratch/taylorm/dns/sc1024A/sc1024A.scalars','r');
-%nx=1024;
-
-%fid=fopen('../src/sk128_alpha25/sk128_alpha250000.0000.scalars','r');
-%nx=128;
-
-%fid=endianopen('/scratch2/taylorm/tmix256D-noscalars/tmix256D-noscalars0000.0000.scalars','r');
-%nx=256;
-
-%fid=endianopen('/home2/skurien/dns/src/sk128_alpha00/v5e-4/sk128_alpha000000.0000.scalars','r');
-%nx = 128;
-
-%fid=endianopen('/home2/skurien/dns/src/sk128_alpha40/sk128_v5e-4_alpha400000.0000.scalars','r');
-%nx = 128;
-
-%fid=endianopen('/home/taylorm/ccs/dns/src/rot3d/rot3d_sto0000.0000.scalars','r');
-%nx=128;
-
-%fid=endianopen('/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_all.scalars','r');
-%nx=256;
-
 
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
 %fid=endianopen('/nh/nest/u/taylorm/sc1024A.scalars','r');
 %nx=1024;
+
+fid=endianopen('/home/mt/codes/dns_data/rotb0000.0000.scalars','r');
+nx=512;
+
+
 
 nscalars=0;
 nscalars_e=0;
