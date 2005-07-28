@@ -647,6 +647,11 @@ call mpi_bcast(g_bdy_z1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(g_bdy_z2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(diag_struct,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(diag_pdfs,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+
+call mpi_bcast(fcor,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call mpi_bcast(Lz,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call mpi_bcast(bous,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+
 call mpi_bcast(alpha_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(smagorinsky,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 
@@ -730,7 +735,18 @@ if (mu_hypo>0) then
    call print_message(message)
 endif
 
-
+if (fcor/=0) then
+   write(message,'(a,e10.4)') 'fcor = ',fcor
+   call print_message(message)
+endif
+if (Lz/=1) then
+   write(message,'(a,e10.4)') 'aspect ratio Lz = ',Lz
+   call print_message(message)
+endif
+if (bous/=0) then
+   write(message,'(a,e10.4)') 'Boussenesque parameter bous = ',bous
+   call print_message(message)
+endif
 
 end subroutine
 
@@ -2077,6 +2093,9 @@ else if (sdata=='sto_high_16') then
    forcing_type=8
 else if (sdata=='sto_high_10') then
    forcing_peak_waveno=10
+   forcing_type=8
+else if (sdata=='sto_high_8') then
+   forcing_peak_waveno=8
    forcing_type=8
 else if (sdata=='sto_high_4') then
    forcing_peak_waveno=4
