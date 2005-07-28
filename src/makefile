@@ -31,10 +31,10 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/usr/local/pkg/mpich-gm/mpich-gm-pgi/mpich-gm-1.2.6.14/lib -lfmpich  -lmpich  -L/opt/gm/lib/ -lgm
                  #-lpthread
    endif
-   ifeq ($(HOST),dosadi)
+   ifeq ($(HOST),s873487)
       VENDOR=INTEL8
-      MPI = -DUSE_MPI -DMPI_UNDERSCORE
-      MPILIB =   -llamf77mpi -lmpi -llam 
+      MPI = -DUSE_MPI -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
+      MPILIB =   -llamf77mpi -lmpi -llam -lutil
    endif
    ifeq ($(HOST),reddish)
       VENDOR=PGI
@@ -42,12 +42,6 @@ ifeq ($(UNAME),Linux)
       MPILIB=  -L/usr/pgi/linux86-64/5.2/lib -lfmpich -lmpich 
       #MPI = -I/usr/lib/mpi/mpi_pgi/include -DUSE_MPI -DMPI_HAS_REAL8 -Dmpi_wtime=pmpi_wtime
       #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi 
-   endif
-   ifeq ($(HOST),pinkish.lanl.gov)
-      #MPI =  -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI -I/usr/mpich-gm.icc/include
-      #MPILIB =-L/usr/mpich-gm.icc/lib  -lfmpich  -lmpich  -L/usr/ib -lgm -lpthread
-      MPI =  -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_LAMPI -I/home/taylorm/lampi/pinkish/include
-      MPILIB = -L /home/taylorm/lampi/pinkish/lib -lmpi
    endif
 
 

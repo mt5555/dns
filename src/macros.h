@@ -21,6 +21,14 @@
 #define mpi_wtime mpi_wtime_
 #endif
 
+!
+! lam mpi has MPI_REAL8, but reduction operatores can only handle
+! MPI_DOULBE_PRECISION 
+! 
+#ifdef MPI_REAL8_LAM
+#define MPI_REAL8 MPI_DOUBLE_PRECISION
+#endif
+
 
 #ifdef NDEBUG
 #define ASSERT(str,cond) 
