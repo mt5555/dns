@@ -870,12 +870,9 @@ real*8 xfac,f_diss,fsum,fxx_diss,vor(3),ux,uy,uz,wx,wy,wz,vx,vy,vz,xw
 real*8,save,allocatable :: fhat(:,:,:,:)
 
 
-real*8 ener(512),ener2(512),ener_test(512)
+real*8 ener(512),ener2(512),ener_test(512),ffnorm
 integer,save :: numk(512),numk2(512)
 real*8,save :: ener_target(512)
-
-
-
 
 if (0==init_sforcing) then
    init_sforcing=1
@@ -887,8 +884,8 @@ if (0==init_sforcing) then
       do wn=numb1,numb
          ! Smith & Waleffe:  esp( -.5 (k-k0)**2 )  /  sqrt(2pi)
          ! my wave numbers have an extra 2pi.
-         ! This is normalized so that <f,f>=1.0
-         ener_target(wn)=exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
+         ! This is normalized so that <f,f>=  ffval
+         ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
       enddo
 
       ! compute number of coefficients in each band

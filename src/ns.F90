@@ -401,6 +401,12 @@ do n=1,3
 enddo
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! From this point on, Q() may be used as a work array
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=0
    do n=1,3
@@ -512,23 +518,32 @@ endif
 call alpha_model_forcing(rhs,Qhat,Q,Q,gradu,gradv,gradw,work,p,a_diss)
 #endif
 
-if (rkstage==1) then
-   f_diss_ave=0
-   ! compute new forcing function for stochastic,
-   ! white in time forcing.  computed at beginning of each RK4 stage
-   if (forcing_type==2 .or. forcing_type==4) then
-      call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
-   else if (forcing_type==8) then
-      ! trashes Q - used as work array
-      call stochastic_highwaveno(Q,Qhat,f_diss,fxx_diss,1)  
-   endif
-endif
 ! apply forcing:
 if (forcing_type>0) then
+   
+   if (rkstage==1) then
+      ! initialize stochastic forcings during rkstage==1:
+      f_diss_ave=0
+      
+      !   may trash Q (used as a work array)
+      !   call sforce_rkstage1_init(Q,Qhat,f_diss,fxx_diss,1)
+      
+      ! compute new forcing function for stochastic,
+      ! white in time forcing.  computed at beginning of each RK4 stage
+      if (forcing_type==2 .or. forcing_type==4) then
+         call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
+      else if (forcing_type==8) then
+         ! trashes Q - used as work array
+         call stochastic_highwaveno(Q,Qhat,f_diss,fxx_diss,1)  
+      endif
+   endif
+   
    call sforce(rhs,Qhat,f_diss,fxx_diss)
    ! average over all 4 stages
    f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
 endif
+
+
 
 #if 0
 rhs=0

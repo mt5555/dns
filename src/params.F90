@@ -158,6 +158,7 @@ integer :: forcing_type   ! 0 = none
                           ! 1 = relax back to E(1)=1, E(2)=2**(-5/3)
                           !     can only be used by the z-decomp model!
 integer :: forcing_peak_waveno = 0
+real*8  :: ffval = 1    !  normalize some forcings so <f,f> = ffval
 
 integer :: header_user=1    ! I/O header type from input file
 
