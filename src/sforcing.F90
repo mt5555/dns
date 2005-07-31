@@ -61,6 +61,9 @@ if (forcing_type==7) call sforcing12(rhs,Qhat,f_diss,fxx_diss,3)
 ! stochastic high wavenumber forcing
 if (forcing_type==8) call stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,0)
 
+if (Lz/=1 .and. forcing_type/=8) then
+   call abort("Error: only forcing_type==8 has been coded for Lz<>1")
+endif
 
 
 end subroutine
@@ -896,7 +899,7 @@ if (0==init_sforcing) then
             im=z_imcord(i)
             do k=1,g_nz
                km=z_kmcord(k)
-               wn=sqrt(real(im*im+jm*jm+km*km))
+               wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
                if (wn<=numb .and. wn>=1) numk(wn)=numk(wn)+1
             enddo
          enddo
@@ -926,7 +929,7 @@ if (new_f==1) then
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
-            wn2=im*im+jm*jm+km*km
+            wn2=im*im+jm*jm+km*km/Lz/Lz
             wn=sqrt(real(wn2))
             if (numb1 <= wn .and. wn <= numb .and. delt>0) then
                
@@ -939,9 +942,9 @@ if (new_f==1) then
                ! compute gradient  dp/dx
                uy= - jm*rhs(k,i,j+z_jmsign(j),1)
                ux= - im*rhs(k,i+z_imsign(i),j,1)
-               uz= - km*rhs(k+z_kmsign(k),i,j,1)
+               uz= - km*rhs(k+z_kmsign(k),i,j,1)/Lz
                vx= - im*rhs(k,i+z_imsign(i),j,2)
-               vz= - km*rhs(k+z_kmsign(k),i,j,2)
+               vz= - km*rhs(k+z_kmsign(k),i,j,2)/Lz
                wx= - im*rhs(k,i+z_imsign(i),j,3)
                wy= - jm*rhs(k,i,j+z_jmsign(j),3)
 
@@ -1026,7 +1029,7 @@ do j=1,ny_2dz
          fsum= Qhat(k,i,j,n)*fhat(k,i,j,n)
          
          f_diss = f_diss + xfac*fsum
-         xw=-(im*im + jm*jm + km*km)*pi2_squared
+         xw=-(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
          fxx_diss = fxx_diss + xfac*xw*fsum
       enddo
    enddo
