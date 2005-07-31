@@ -22,8 +22,8 @@ fid2=-1;
 %fid=endianopen('/nh/nest/u/taylorm/sc1024A.scalars','r');
 %nx=1024;
 
-fid=endianopen('/home/mt/codes/dns_data/rotb0000.0000.scalars','r');
-nx=512;
+fid=endianopen('/home/mt/codes/dns_data/rotB0000.0000.scalars','r');
+nx=128;
 
 
 

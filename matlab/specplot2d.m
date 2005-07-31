@@ -1,10 +1,10 @@
 
-name = 'temp0000.0000'
+name = 'rotB0000.0000'
 epsilon=.41;
 CK=1.5*epsilon^(2/3);
-namedir = '../src/';
+namedir = '/home/mt/codes/dns_data/';
 
-fid=endianopen([namedir,name,'.spec2d'],'r');
+fid=fopen([namedir,name,'.spec2d'],'r');
 if (fid<0) 
   'Error opening file',[namedir,name]
   return
@@ -27,13 +27,13 @@ while (1)
     spec2d(kz,:) = fread(fid,numkh,'float64') ;
   end
 
+ 
+  figure(1)
   loglog53(numkh,spec2d(1,:)','',2.0,6)
 
   hold on;
-  spec = sum(spec2d,1);
-  scale =  (spec2d(1,5)/spec(1,5))
-  spec = spec*scale;
-  loglog53(numkh,spec','nz*E0(kh) and E(kh)',2.0,6)
+  spec = sum(spec2d,1)/numkz;
+  loglog53(numkh,spec','E0(kh) and E(kh)',2.0,6)
 
   
   pause
