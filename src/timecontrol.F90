@@ -64,7 +64,7 @@ umax=maxs(4)+fcor/pi
 if (ndim==3) then
    mumax = mu/(delx**2) + &
            mu/(dely**2) + &
-           mu/(delz**2) 
+           mu/((Lz*delz)**2) 
 else
    mumax = mu/(delx**2) + &
            mu/(dely**2) 

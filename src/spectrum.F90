@@ -24,10 +24,6 @@ also scale the z-component of velocity by Lz.  w should be
 scaled back to physical coordinates before calling these
 routines.
 
-This scaling is specified as an argument to:
-   call compute_spec(time,Q,q1,work1,work2,wscale)
-   call compute_helicity_spectrum(Q,q1,work1,1,wscale)
-
 
 
 
@@ -83,14 +79,14 @@ contains
 
 
 
-subroutine compute_spec(time,Q,q1,work1,work2,wscale)
+subroutine compute_spec(time,Q,q1,work1,work2)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)   ! (u,v,w)
 real*8 :: q1(nx,ny,nz,n_var) 
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: time,wscale
+real*8 :: time
 
 !local
 integer :: iwave_max,i,n
@@ -107,11 +103,7 @@ spec_y=0
 spec_z=0
 
 do i=1,n_var
-   if (i==3) then
-      q1(:,:,:,i)=wscale*Q(:,:,:,i)
-   else
-      q1(:,:,:,i)=Q(:,:,:,i)
-   endif
+   q1(:,:,:,i)=Q(:,:,:,i)
 enddo
 
 
@@ -149,20 +141,20 @@ spec_diff_new=spec_diff  ! make a copy of spec_diff for check below
 
 ! q1 already contains the FFT of Q, so set skip_fft (last arg) to 1:
 if (ndim>=3) then
-   call compute_helicity_spectrum(Q,q1,work1,1,wscale)
+   call compute_helicity_spectrum(Q,q1,work1,1)
 endif
 end subroutine
 
 
 
-subroutine compute_spec_2d(time,Q,q1,work1,work2,wscale)
+subroutine compute_spec_2d(time,Q,q1,work1,work2)
 use params
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)   ! (u,v,w)
 real*8 :: q1(nx,ny,nz,n_var) 
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: time,wscale
+real*8 :: time
 
 !local
 integer :: iwave_max,i,n
@@ -172,19 +164,12 @@ iwave_max=max(g_nx,g_ny)
 spec_r_2d=0
 
 do i=1,n_var
-   if (i==3) then
-      q1(:,:,:,i)=wscale*Q(:,:,:,i)
-   else
-      q1(:,:,:,i)=Q(:,:,:,i)
-   endif
+   q1(:,:,:,i)=Q(:,:,:,i)
 enddo
 
 
 ! passive scalars:
 do n=np1,np2
-   ! for scalars, we also need to scale these by wscale, both
-   ! here and in compute_spec() above
-   call abort("not yet coded: spectrum, Lz<1, scalars")
    call compute_spectrum_2d(q1(1,1,1,n),work1,work2,spec_r_2d(0,0,n),&
        iwave_max,0)
 enddo
@@ -1213,8 +1198,8 @@ do j=ny1,ny2
       do k=nz1,nz2
          km=kmcord(k)
 
-         rwave = im**2 + jm**2 + km**2
-         iwave = nint(sqrt(rwave))
+         rwave = im**2 + jm**2 + (km/Lz)**2
+         iwave = nint(Lz*sqrt(rwave))
          
          energy = 8
          if (km==0) energy=energy/2
@@ -1254,7 +1239,7 @@ end subroutine
 
 
 
-subroutine compute_helicity_spectrum(Q,p1,work,skip_fft,wscale)
+subroutine compute_helicity_spectrum(Q,p1,work,skip_fft)
 !
 ! skip_fft=1:
 !       input: Q    p1, work are work arrays
@@ -1269,7 +1254,6 @@ integer :: ierr,skip_fft
 real*8 :: Q(nx,ny,nz,*)
 real*8 :: p1(nx,ny,nz,*)
 real*8 :: work(nx,ny,nz)
-real*8 :: wscale
 
 ! local variables
 real*8 rwave
@@ -1287,8 +1271,7 @@ if (ndim<3) then
 endif
 
 if (skip_fft==0) then
-p1(:,:,:,1:2)=Q(:,:,:,1:2)
-p1(:,:,:,3)=wscale*Q(:,:,:,3)
+p1(:,:,:,1:3)=Q(:,:,:,1:3)
 do n=1,3
    call fft3d(p1(1,1,1,n),work)
 enddo
@@ -1620,8 +1603,8 @@ do j=ny1,ny2
       do k=nz1,nz2
          km=kmcord_exp(k)
          
-         rwave = im**2 + jm**2 + km**2
-         iwave = nint(sqrt(rwave))
+         rwave = im**2 + jm**2 + (km/Lz)**2
+         iwave = nint(Lz*sqrt(rwave))
 
          !     compute angle between Re and Im parts of u(k)
          RR = cmodes_r(i,j,k,:)
@@ -1658,11 +1641,11 @@ do j=ny1,ny2
             
             ! compute vorticity           
             ! sqrt(-1) * 2pi * (im,jm,km) cross (RR+sqrt(-1)II)
-            WR(1) = pi2*(-jm*II(3)+km*II(2))  
-	    WR(2) = pi2*(im*II(3) - km*II(1))
+            WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
+	    WR(2) = pi2*(im*II(3) - km*II(1)/Lz)
   	    WR(3) = pi2*(-im*II(2) + jm*II(1))
-            WI(1) = pi2*(-jm*RR(3) + km*RR(2))  
-	    WI(2) = pi2*(im*II(3) - km*RR(1))
+            WI(1) = pi2*(-jm*RR(3) + km*RR(2)/Lz)  
+	    WI(2) = pi2*(im*II(3) - km*RR(1)/Lz)
 	    WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
             	
             xfac = 64
@@ -1677,7 +1660,9 @@ do j=ny1,ny2
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
 
             !	helicity(k) = k\cdot RR(k) cross II(k)            
-           energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + jm*(II(1)*RR(3) - RR(1)*II(3)) + km*(RR(1)*II(2) - II(1)*RR(2)))
+           energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
+                   jm*(II(1)*RR(3) - RR(1)*II(3)) + &
+                   (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &

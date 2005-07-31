@@ -86,7 +86,7 @@ deallocate(seed)
 !  Solve the equations
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call wallclock(tmx2)
-write(message,'(a)') 'Time stepping...'
+write(message,'(a)') 'Time stepping...(calling dns_solve)'
 call print_message(message)
 ! set all counters to zero (so they dont include initialization)
 tims=0

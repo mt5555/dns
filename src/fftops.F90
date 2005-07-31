@@ -237,6 +237,7 @@ endif
 ! compute u=u-grad(p)
 do n=1,3
    call der(p,work,dummy,work2,1,n)
+   if (n==3) work=work/Lz
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
@@ -253,74 +254,6 @@ endif
 end subroutine
 
 
-
-subroutine divfree_gridspace_aspect(u,p,work,work2)
-!
-! make u divergence free
-!    solve:  div(u) = laplacian(p)
-!    then:   unew = u - grad(p)
-!     
-!  Note: for Lz<>1, this routine assumes scaling domain by Lz and 
-!  also assumes change of variables given in rotation.tex (w scaled by Lz)
-!
-
-!
-use params
-use fft_interface
-implicit none
-real*8 :: u(nx,ny,nz,3)
-real*8 :: p(nx,ny,nz)
-real*8 :: work(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-
-!local
-real*8 :: dummy(1),tol
-real*8 :: alpha=0
-real*8 :: beta=1
-integer i,j,k,n
-external helmholtz_periodic,helmholtz_dirichlet
-
-
-! solve laplacian(p)=div(u)
-
-if ( g_bdy_x1==PERIODIC .and. &
-     g_bdy_y1==PERIODIC .and. &
-     g_bdy_z1==PERIODIC) then
-   call divergence(p,u,work,work2)  ! invarient 
-   call helmholtz_periodic_inv_scale(p,work,alpha,beta,Lz)
-
-   !work=p  ! RHS
-   !p=0  ! initial guess
-   !tol=1e-10
-   !call cgsolver(p,work,alpha,beta,tol,work2,helmholtz_periodic,.false.)
-else
-   ! might try divfree_ghost
-   stop 'divfree_gridspace: only supports periodic/reflection case'
-endif
-
-
-
-
-! compute u=u-grad(p)
-do n=1,3
-   call der(p,work,dummy,work2,1,n)
-   ! one factor of Lz from the d/dz term, one factor
-   ! from the fact that we scaled W by Lz:
-   if (n==3) work=work/Lz/Lz
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      u(i,j,k,n)=u(i,j,k,n)-work(i,j,k)
-   enddo
-   enddo
-   enddo
-enddo
-
-if (dealias>0) then
-   call dealias_gridspace(u,work)
-endif
-
-end subroutine
 
 
 
@@ -405,8 +338,8 @@ do n=1,ndim
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      if (n==2) vor(i,j,k,1) = vor(i,j,k,1) -d1(i,j,k)
-      if (n==1) vor(i,j,k,2) = vor(i,j,k,2) +d1(i,j,k)
+      if (n==2) vor(i,j,k,1) = vor(i,j,k,1) -d1(i,j,k)/Lz
+      if (n==1) vor(i,j,k,2) = vor(i,j,k,2) +d1(i,j,k)/Lz
    enddo
    enddo
    enddo
@@ -495,7 +428,7 @@ call der(u(1,1,1,n),work1,dummy,work2,DX_ONLY,n)
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   div(i,j,k) = div(i,j,k)+work1(i,j,k)
+   div(i,j,k) = div(i,j,k)+work1(i,j,k)/Lz
 enddo
 enddo
 enddo
@@ -680,19 +613,19 @@ end
 ! highest mode tweaked so that laplacian = div grad
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft_laplace_inverse(p,alpha,beta,dzscale)
+subroutine fft_laplace_inverse(p,alpha,beta)
 use params
 use fft_interface ! for pi2_squared
 implicit none
 real*8 p(nx,ny,nz)
-real*8 alpha,beta,dzscale
+real*8 alpha,beta
 
 !local
 integer i,j,k,im,jm,km
 real*8 xfac,xm,ym,zm
 
 if (numerical_method==FOURTH_ORDER) then
-if (dzscale/=1) call abort("dzscale must be 1 for FD methods")
+if (Lz/=1) call abort("dzscale must be 1 for FD methods")
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
@@ -760,11 +693,9 @@ do k=nz1,nz2
       do i=nx1,nx2
          im=imcord(i)
          if (im==g_nx/2) im=0
-         xfac= alpha + beta*(-im*im -km*km/(dzscale*dzscale) - jm*jm)*pi2_squared      
+         xfac= alpha + beta*(-im*im -km*km/(Lz*Lz) - jm*jm)*pi2_squared      
          if (xfac/=0) xfac = 1/xfac
          p(i,j,k)=p(i,j,k)*xfac
-
-
 
       enddo
    enddo
@@ -933,255 +864,6 @@ end subroutine
 
 
 
-#if 0
-example code, cant handle non fft methods 
-
-subroutine divfree(u,p)
-!
-! make u divergence free
-!    solve:  div(u) = laplacian(p)
-!    then:   unew = u - grad(p)
-!    
-! 
-!
-use params
-use fft_interface
-implicit none
-real*8 u(nx,ny,nz,3)
-real*8 p(nx,ny,nz)
-
-!local variables
-integer i,j,k
-integer im,jm,km,i2,j2,k2
-real*8 :: uu,vv,ww,xfac
-
-do i=1,3
-   call fft3d(u(1,1,1,i),p)
-enddo
-
-   do k=nz1,nz2
-      km=(kmcord(k))
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2
-         jm=(jmcord(j))
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2
-            im=(imcord(i))
-            if (im==g_nx/2) im=0
-
-            ! compute the divergence
-            p(i,j,k)= - im*u(i+imsign(i),j,k,1) &
-                      - jm*u(i,j+jmsign(j),k,2) &
-                      - km*u(i,j,k+kmsign(k),3)
-
-
-            ! compute laplacian inverse
-            xfac= (im*im +km*km + jm*jm)
-            if (xfac/=0) xfac = -1/xfac
-            p(i,j,k)=xfac*p(i,j,k)
-
-
-         enddo
-      enddo
-   enddo
-
-   do k=nz1,nz2
-      km=kmcord(k)
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2
-         jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2
-            im=imcord(i)
-            if (im==g_nx/2) im=0
-
-            ! compute gradient  dp/dx
-            uu= - im*p(i+imsign(i),j,k)  ! cosine mode
-            vv= - jm*p(i,j+jmsign(j),k)
-            ww= - km*p(i,j,k+kmsign(k))
-
-            u(i,j,k,1)=u(i,j,k,1) - uu
-            u(i,j,k,2)=u(i,j,k,2) - vv
-            u(i,j,k,3)=u(i,j,k,3) - ww
-
-         enddo
-      enddo
-   enddo
-
-do i=1,3
-   if (dealias) call fft_filter_dealias(u(1,1,1,i))
-   call ifft3d(u(1,1,1,i),p)
-enddo
-end subroutine
-#endif
-
-
-
-
-
-#if 0
-example code, cant handle non fft methods 
-subroutine divfree_loopfused(u,p)
-!
-! make u divergence free
-!    solve:  div(u) = laplacian(p)
-!    then:   unew = u - grad(p)
-!
-!  u  input/output 
-!  p is used as a work array    
-! 
-!
-use params
-implicit none
-real*8 u(nx,ny,nz,3)
-real*8 p(nx,ny,nz)
-
-!local variables
-integer i,j,k
-integer im,jm,km,i0,i1,j0,j1,k0,k1,n
-real*8 :: xfac
-integer ii,jj,kk
-
-real*8 pi0j0k0
-real*8 pi1j0k0
-real*8 pi0j1k0
-real*8 pi1j1k0
-real*8 pi0j0k1
-real*8 pi1j0k1
-real*8 pi0j1k1
-real*8 pi1j1k1 
-
-do i=1,3
-   call fft3d(u(1,1,1,i),p)
-enddo
-
-p=0
-   do k=nz1,nz2,2
-      km=kmcord(k)
-      if (km==g_nz/2) km=0
-      do j=ny1,ny2,2
-         jm=jmcord(j)
-         if (jm==g_ny/2) jm=0
-         do i=nx1,nx2,2
-            im=imcord(i)
-            if (im==g_nx/2) im=0
-
-            ! compute the divergence
-            ! compute laplacian inverse
-            xfac= (im*im +km*km + jm*jm)
-            if (xfac/=0) xfac = -1/xfac
-
-            i0=i
-            i1=i+1
-            j0=j
-            j1=j+1
-            k0=k
-            k1=k+1
-            if (g_nz==1) k1=k ! ignore k, we are doing a 2d problem.  km=0
-
-            !                  u_x                  v_y               w_z
-            pi0j0k0 = (-im*u(i1,j0,k0,1)  -  jm*u(i0,j1,k0,2) - km*u(i0,j0,k1,3))*xfac
-            pi1j0k0 = ( im*u(i0,j0,k0,1)  -  jm*u(i1,j1,k0,2) - km*u(i1,j0,k1,3))*xfac
-            pi0j1k0 = (-im*u(i1,j1,k0,1)  +  jm*u(i0,j0,k0,2) - km*u(i0,j1,k1,3))*xfac
-            pi1j1k0 = ( im*u(i0,j1,k0,1)  +  jm*u(i1,j0,k0,2) - km*u(i1,j1,k1,3))*xfac
-
-            if (ndim==3) then
-            pi0j0k1 = (-im*u(i1,j0,k1,1)  -  jm*u(i0,j1,k1,2) + km*u(i0,j0,k0,3))*xfac
-            pi1j0k1 = ( im*u(i0,j0,k1,1)  -  jm*u(i1,j1,k1,2) + km*u(i1,j0,k0,3))*xfac
-            pi0j1k1 = (-im*u(i1,j1,k1,1)  +  jm*u(i0,j0,k1,2) + km*u(i0,j1,k0,3))*xfac
-            pi1j1k1 = ( im*u(i0,j1,k1,1)  +  jm*u(i1,j0,k1,2) + km*u(i1,j1,k0,3))*xfac
-            endif
-
-            ! u = u - px
-            u(i0,j0,k0,1) = u(i0,j0,k0,1) + im*pi1j0k0
-            u(i1,j0,k0,1) = u(i1,j0,k0,1) - im*pi0j0k0
-            u(i0,j1,k0,1) = u(i0,j1,k0,1) + im*pi1j1k0
-            u(i1,j1,k0,1) = u(i1,j1,k0,1) - im*pi0j1k0
-            if (ndim==3) then
-            u(i0,j0,k1,1) = u(i0,j0,k1,1) + im*pi1j0k1
-            u(i1,j0,k1,1) = u(i1,j0,k1,1) - im*pi0j0k1
-            u(i0,j1,k1,1) = u(i0,j1,k1,1) + im*pi1j1k1
-            u(i1,j1,k1,1) = u(i1,j1,k1,1) - im*pi0j1k1
-            endif
-
-            ! v = v - py
-            u(i0,j0,k0,2) = u(i0,j0,k0,2) + jm*pi0j1k0
-            u(i1,j0,k0,2) = u(i1,j0,k0,2) + jm*pi1j1k0
-            u(i0,j1,k0,2) = u(i0,j1,k0,2) - jm*pi0j0k0
-            u(i1,j1,k0,2) = u(i1,j1,k0,2) - jm*pi1j0k0
-            if (ndim==3) then
-            u(i0,j0,k1,2) = u(i0,j0,k1,2) + jm*pi0j1k1
-            u(i1,j0,k1,2) = u(i1,j0,k1,2) + jm*pi1j1k1
-            u(i0,j1,k1,2) = u(i0,j1,k1,2) - jm*pi0j0k1
-            u(i1,j1,k1,2) = u(i1,j1,k1,2) - jm*pi1j0k1
-            endif
-
-
-            ! v = v - pz
-            if (ndim==3) then
-            u(i0,j0,k0,3) = u(i0,j0,k0,3) + km*pi0j0k1
-            u(i1,j0,k0,3) = u(i1,j0,k0,3) + km*pi1j0k1
-            u(i0,j1,k0,3) = u(i0,j1,k0,3) + km*pi0j1k1
-            u(i1,j1,k0,3) = u(i1,j1,k0,3) + km*pi1j1k1
-            u(i0,j0,k1,3) = u(i0,j0,k1,3) - km*pi0j0k0
-            u(i1,j0,k1,3) = u(i1,j0,k1,3) - km*pi1j0k0
-            u(i0,j1,k1,3) = u(i0,j1,k1,3) - km*pi0j1k0
-            u(i1,j1,k1,3) = u(i1,j1,k1,3) - km*pi1j1k0
-            endif
-
-            if (dealias_remove(abs(im),abs(jm),abs(km)) then
-               do n=1,3
-                  u(i0,j0,k0,n) = 0
-                  u(i1,j0,k0,n) = 0
-                  u(i0,j1,k0,n) = 0
-                  u(i1,j1,k0,n) = 0
-                  u(i0,j0,k1,n) = 0
-                  u(i1,j0,k1,n) = 0
-                  u(i0,j1,k1,n) = 0
-                  u(i1,j1,k1,n) = 0     
-               enddo
-            endif            
-
-            ! dont forget the last cosine mode, stored in 2nd array position.
-            ! it has its mode number set to zero for the above computations
-            if (im==0) then
-               do n=1,3
-                  u(i1,j0,k0,n) = 0
-                  u(i1,j1,k0,n) = 0
-                  u(i1,j0,k1,n) = 0
-                  u(i1,j1,k1,n) = 0
-               enddo
-            endif
-            if (jm==0) then
-               do n=1,3
-                  u(i0,j1,k0,n) = 0
-                  u(i1,j1,k0,n) = 0
-                  u(i0,j1,k1,n) = 0
-                  u(i1,j1,k1,n) = 0
-               enddo	
-            endif
-            if (km==0 .and. ndim==3) then
-               do n=1,3
-                  u(i0,j0,k1,n) = 0
-                  u(i1,j0,k1,n) = 0
-                  u(i0,j1,k1,n) = 0
-                  u(i1,j1,k1,n) = 0
-               enddo
-            endif
-            endif
-
-         enddo
-      enddo
-   enddo
-
-
-do n=1,3
-   call ifft3d(u(1,1,1,n),p)
-enddo
-end subroutine
-#endif
-
-
 
 
 
@@ -1215,6 +897,7 @@ lf=alpha*f
 if (beta==0) return
 do n=1,3
    call der(f,gradf,fxx,work,DX_AND_DXX,n)
+   if (n==3) fxx=fxx/Lz/Lz
    lf=lf+beta*fxx
 enddo
 
@@ -1273,29 +956,8 @@ end subroutine
 
 
 
+
 subroutine helmholtz_periodic_inv(f,work,alpha,beta)
-!
-!  solve [alpha + beta*laplacian](p) = f
-!  input:  f 
-!  ouput:  f   will be overwritten with the solution p
-!
-use params
-use fft_interface
-use transpose
-implicit none
-real*8 f(nx,ny,nz)    ! input/output
-real*8 work(nx,ny,nz) ! work array
-real*8 :: alpha
-real*8 :: beta
-real*8 :: dzscale
-real*8 :: one=1
-call helmholtz_periodic_inv_scale(f,work,alpha,beta,one)
-end subroutine
-
-
-
-
-subroutine helmholtz_periodic_inv_scale(f,work,alpha,beta,dzscale)
 !
 !  solve [alpha + beta*laplacian](p) = f
 !  input:  f 
@@ -1336,7 +998,7 @@ call fft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)  
 
 ! solve [alpha + beta*Laplacian] p = f.  f overwritten with output  p
-call fft_laplace_inverse(f,alpha,beta,dzscale)
+call fft_laplace_inverse(f,alpha,beta)
 
 call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)       
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
@@ -1353,69 +1015,6 @@ call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d )
 
 
 end
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-! sin fft from NUMERICAL REC.  does not work, maybe becasue
-! my fft is not the same as their rfft?
-! subroutine sinfft1(p,n1,n1d,n2,n2d,n3,n3d)
-!
-!  p(1:n1)  p(1)=0  p(n1+1)=0  (but data at p(n1+1),p(n1+2) does not have to be set)
-!
-use params
-use fft_interface
-implicit none
-integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: p(n1d,n2d,n3d)
-real*8 :: Y(n1+2)
-
-real*8 :: theta,wr,wi,wpr,wpi,y1,y2,wtemp,sum
-
-integer i,j,k
-if (n1==1) return
-
-do k=1,n3
-   do j=1,n2
-      y(1:n1)=p(1:n1,j,k)
-      theta=pi/n1
-      wr=1
-      wi=0
-      wpr=-2*sin(theta/2)**2
-      wpi=sin(theta)
-      Y(1)=0
-      do i=1,n1/2
-         WTEMP=WR
-         WR=WR*WPR-WI*WPI+WR
-         WI=WI*WPR+WTEMP*WPI+WI
-         Y1=WI*(Y(i+1)+Y(N1-i+1))
-         Y2=0.5*(Y(i+1)-Y(N1-i+1))
-         Y(i+1)=Y1+Y2
-         Y(N1-i+1)=Y1-Y2
-      enddo
-      call fft1(Y,n1,n1+2,1,1,1,1)
-      SUM=0.0
-      Y(1)=0.5*Y(1)
-      Y(2)=0.0
-      DO i=1,N1-1,2
-         SUM=SUM+Y(i)
-         Y(i)=Y(i+1)
-         Y(i+1)=SUM
-      enddo
-      p(1:n1,j,k)=y(1:n1)
-   enddo
-enddo
-end subroutine
-
-#endif
 
 
 
@@ -1680,8 +1279,8 @@ subroutine ke_shell_z(Qhat,hscale,nvar2)
 ! compute the KE in shell   kstart2 < k**2 <= kstop2
 ! for z-decomposition data
 !
-!  Note: for Lz<>1, this routine assumes scaling domain by Lz and 
-!  also assumes change of variables given in rotation.tex (w scaled by Lz)
+!  Note: for Lz<>1, this routine assumes scaling domain by Lz 
+!  
 !
 use params
 use mpi
@@ -1734,11 +1333,7 @@ endif
 
             u2=0
             do n=1,nvar2
-               if (n==3) then
-                  u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)*(Lz*Lz)
-               else
-                  u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
-               endif
+               u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
             enddo
 
             if (dealias==1) then
@@ -1772,7 +1367,7 @@ if (dealias==1) then
 !  make sure that hyper viscosity does not exceed a CFL condition 
 !  d(u_k)/dt = x u_k      delt*x < cfl   x < cfl/delt
 !
-!   physical units:   du'/dt = mu k'**mu_hyper u'
+!   physical units:   du/dt = mu k'**mu_hyper u
 !   code units:       du/dt  = mu (k/Lz) **mu_hyper u
 !
 !   mu (kmax/Lz)**mu_hyper < cfl/delt

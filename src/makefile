@@ -33,8 +33,8 @@ ifeq ($(UNAME),Linux)
    endif
    ifeq ($(HOST),s873487)
       VENDOR=INTEL8
-      MPI = -DUSE_MPI -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
-      MPILIB =   -llamf77mpi -lmpi -llam -lutil
+      #MPI = -DUSE_MPI -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
+      #MPILIB =   -llamf77mpi -lmpi -llam -lutil
    endif
    ifeq ($(HOST),reddish)
       VENDOR=PGI
@@ -201,7 +201,7 @@ MODEL_CDNS       = cns.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(CDNS_DIAG)
 MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SPEC_SCALE = ns_aspect.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(ASPECT_DIAG)
+MODEL_SPEC_SCALE = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(ASPECT_DIAG)
 MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_LERAY      = ns_leray.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SHALLOW    = shallow.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)

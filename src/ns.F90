@@ -64,10 +64,10 @@ if (firstcall) then
       call print_message("Error: ns3dspectral model can only runs equations==NS_UVW")
       call abort("initial conditions are probably incorrect.")
    endif
-   if (Lz/=1) then
-      call abort("Error: NS model with aspect ratio not implemented - use NS_SCALE!")
-   endif
 #ifdef ALPHA_MODEL
+   if (Lz/=1) then
+      call abort("Error: NS alpha model with aspect ratio not implemented")
+   endif
 #else
    if (alpha_value/=0) then
       call abort("Error: alpha>0 but this is not the alpha model!")
@@ -79,7 +79,6 @@ if (firstcall) then
       call z_fft3d_trashinput(rhsg,Q(1,1,1,n),rhsg(1,1,1,2)) ! use rhs as work array
    enddo
 endif
-
 
 ! stage 1
 call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2,1)
@@ -122,7 +121,6 @@ enddo
 ! stage 3
 call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
 
-
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nslabx
@@ -140,7 +138,6 @@ enddo
 call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2,4)
 
 
-
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nslabx
@@ -153,7 +150,6 @@ do n=1,n_var
 enddo
 
 time = time + delt
-
 
 ! compute max U  
 maxs(1:4)=0
@@ -169,7 +165,8 @@ do i=nx1,nx2
       maxs(11)=max(maxs(11),-Q_grid(i,j,k,np1))
    endif
    ! used for CFL
-   vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz
+   ! physical coodinats   w/delz'   =   w / (Lz/Nz) = w / (Lz*delz)
+   vel = abs(Q_grid(i,j,k,1))/delx + abs(Q_grid(i,j,k,2))/dely + abs(Q_grid(i,j,k,3))/delz/Lz
    maxs(4)=max(maxs(4),vel)
 enddo
 enddo
@@ -284,6 +281,7 @@ do ns=np1,np2
    enddo
    do n=2,ndim
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,n)  ! s_y and s_z
+   if (n==3) work=work/Lz
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
@@ -335,11 +333,7 @@ enddo
    else
       call ns_vorticity(rhsg,Qhat,work,p)
    endif
-
 #endif
-
-
-
 
 
 
@@ -381,9 +375,7 @@ do i=nx1,nx2
 
 
    ! add any rotation to vorticity before computing u cross vor
-   if (fcor/=0) then
-      vor(3)=vor(3) + fcor
-   endif
+   vor(3)=vor(3) + fcor
    
    !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
@@ -409,9 +401,6 @@ do n=1,3
 enddo
 
 
-
-
-
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=0
    do n=1,3
@@ -425,9 +414,8 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (mu_hyper>=2) then
    ! compute hyper viscosity scaling based on energy in last shell:
-   call ke_shell_z(Qhat,ke,hyper_scale,ndim)
+   call ke_shell_z(Qhat,hyper_scale,ndim)
 endif
-
 
 
 ke=0
@@ -443,10 +431,13 @@ do j=1,ny_2dz
       do k=1,g_nz
          km=z_kmcord(k)
 
-            xw=(im*im + jm*jm + km*km)*pi2_squared
+            xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
             if (mu_hyper>=2) then
-               xw_viss=xw_viss + mu_hyper_value*hyper_scale(1)*xw**mu_hyper
+               xw2=hyper_scale(1)*(im*im*pi2_squared)**mu_hyper
+               xw2=xw2+hyper_scale(2)*(jm*jm*pi2_squared)**mu_hyper
+               xw2=xw2+hyper_scale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+               xw_viss=xw_viss + mu_hyper_value*xw2
             endif
             if (mu_hypo==1 .and. xw>0) then
                xw_viss=xw_viss + mu_hypo_value/xw
@@ -480,8 +471,8 @@ do j=1,ny_2dz
                wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)
                uy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),1)
                wy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),3)
-               uz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,1)
-               vz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,2)
+               uz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,1)/Lz
+               vz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,2)/Lz
                ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
                ! compute 2*k^2 u vor:
                h_diss = h_diss + 2*xfac*mu*xw*&
@@ -552,7 +543,7 @@ do j=1,ny_2dz
          ! compute the divergence
          p(k,i,j)= - im*rhs(k,i+z_imsign(i),j,1) &
               - jm*rhs(k,i,j+z_jmsign(j),2) &
-              - km*rhs(k+z_kmsign(k),i,j,3)
+              - km*rhs(k+z_kmsign(k),i,j,3)/Lz
 
       enddo
    enddo
@@ -580,6 +571,19 @@ if (compute_ints==1 .and. compute_transfer) then
    enddo
 endif
 
+#undef TESTGRIDSPACE
+#ifdef TESTGRIDSPACE
+print *,'grid space dealiasing'
+! fft to grid space:
+do n=1,3
+   call z_ifft3d(rhs(1,1,1,n),Q(1,1,1,n),work)
+enddo
+call divfree_gridspace_aspect(Q,p,work,rhs)
+! back to spectral space:  
+do n=1,3
+   call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
+enddo
+#else
 
 
 !  make rhs div-free
@@ -593,10 +597,10 @@ do j=1,ny_2dz
          ! compute the divergence
          p(k,i,j)= - im*rhs(k,i+z_imsign(i),j,1) &
               - jm*rhs(k,i,j+z_jmsign(j),2) &
-              - km*rhs(k+z_kmsign(k),i,j,3)
+              - km*rhs(k+z_kmsign(k),i,j,3)/Lz
 
          ! compute laplacian inverse
-         xfac= (im*im +km*km + jm*jm)
+         xfac= (im*im +km*km/Lz/Lz + jm*jm)
          if (xfac/=0) xfac = -1/xfac
          p(k,i,j)=xfac*p(k,i,j)
          
@@ -614,7 +618,7 @@ do j=1,ny_2dz
          ! compute gradient  dp/dx
          uu= - im*p(k,i+z_imsign(i),j) 
          vv= - jm*p(k,i,j+z_jmsign(j))
-         ww= - km*p(k+z_kmsign(k),i,j)
+         ww= - km*p(k+z_kmsign(k),i,j)/Lz
          
          rhs(k,i,j,1)=rhs(k,i,j,1) - uu 
          rhs(k,i,j,2)=rhs(k,i,j,2) - vv 
@@ -642,6 +646,7 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
+#endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! passive scalars:
@@ -666,7 +671,7 @@ do ns=np1,np2
             if ( dealias_remove(abs(im),abs(jm),abs(km))) then
                rhs(k,i,j,ns)=0
             else
-               xw=(im*im + jm*jm + km*km)*pi2_squared
+               xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
                rhs(k,i,j,ns)=rhs(k,i,j,ns) - xw_viss*Qhat(k,i,j,ns)
                if (passive_type(ns)==2) rhs(k,i,j,ns)=rhs(k,i,j,ns)+p(k,i,j)
@@ -767,14 +772,14 @@ do j=1,ny_2dz
 
          if (n==1) then
             wy = - jm*Qhat(k,i,j+z_jmsign(j),3)
-            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)
+            vz =  - km*Qhat(k+z_kmsign(k),i,j,2)/Lz
             !rhs(k,i,j,1) = pi2*(wy - vz)
             p(k,i,j) = pi2*(wy - vz)
          endif
          
          if (n==2) then
             wx = - im*Qhat(k,i+z_imsign(i),j,3)
-            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)
+            uz =  - km*Qhat(k+z_kmsign(k),i,j,1)/Lz
             !rhs(k,i,j,2) = pi2*(uz - wx)
             p(k,i,j) = pi2*(uz - wx)
          endif
