@@ -3,12 +3,13 @@
 rotation case (modeled after leslie smith's run)
 
 256x256x32    R0=.88, .48,  .16
-R0 = (epsilon_f k_f )**(1/3) / (.5*fcor)         
+R0 = (epsilon_f * (2pi k_f)**2 )**(1/3) / (.5*fcor)         
+
  
 2 Omega = fcor
 
 new input file: 
-initial cond:  3d_rot   subtype=0
+initial cond:  none   subtype=0
 forcing:  iso_high_16 
 Lz   = 1/8
 fcor = choosen to achieve R0 given above
@@ -18,18 +19,38 @@ hyper4 = del**4 = laplacian**2
 coefficient = 1   (auto scaled)
 
 
-My first run:  (dosadi) 
-k_f = 4
-fcor=15
-mu_hyper=1.0
-128x128x16           (hyper viscosity scaling CFL 3-4 )
-128x128x32           (hyper viscosity scaling CFL .4 )
+My first runs:  (dosadi) not saved.  used for debugging and tuning:
 
-epsilon_f = .61
+128x128x32   
+k_f = 8 fcor=15 mu_hyper=.01, .1, 1.0, 10.0
+epsilon_f ~= .5
 epsilon = .41
-R0 = (.61 * 4 )**(1/3) / (.5*.1) = 27
+
+Everything looks good: but no inverse cascade with fcor=15
+had to go up to fcor=150 to get an inverse cascase.
 
 
+New runs:
+
+rotA  128x128x32   
+   k_f=16  fcor=15  mu_hyper=1.0  mu=0
+   epsilon_f   .52
+   epsilon_ke  .52
+   R0 = 2.32
+   No inverse cascade.  
+
+rotB  128x128x32   
+   k_f=16  fcor=40  mu_hyper=1.0  mu=0
+   epsilon_f   .52 ?
+   epsilon_ke  .52 ?
+   R0 =  .87 ?
+
+
+
+
+
+
+Grashof number:  ||f|| L^(1.5) / nu^2
 
 *******************************************************************************
 10/3/2004

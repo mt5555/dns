@@ -37,12 +37,11 @@
 
 \newcommand{\khat}{\hat{\mathbf k}}
 \newcommand{\uv}{\mathbf u}
-\newcommand{\up}{\mathbf u'}
+%\newcommand{\omegav}{\mathbf \omega}
+\newcommand{\omegav}{\mathbf w}
 \newcommand{\w}{\mathbf w}
 \newcommand{\grad}{\nabla}
-\newcommand{\curlp}{\gradp \times}
 \newcommand{\curl}{\grad \times}
-\newcommand{\gradp}{\nabla'}
 
 \DeclareMathOperator{\Span}{span}
 
@@ -65,155 +64,86 @@
 
 
 We would like to solve the NS equations in the box pictured in
-Fig.~\ref{F:box}.  To write the equations in this domain, we use
-primes:
+Fig.~\ref{F:box}.  The equations are
 \[
-\frac{ \partial  \up }{\partial t}  + (\curlp \up + f \khat) \times \up + 
-\gradp \pi' + N \theta' \khat = \nu \Delta' \up
+\frac{ \partial  \uv }{\partial t}  + (\curl \uv + f \khat) \times \uv + 
+\grad \pi + N \theta \khat = \nu \Delta \uv
 \]
 \[
-\gradp \cdot \up = 0
+\grad \cdot \uv = 0
 \]
 \[
-\frac{ \partial  \theta' }{\partial t}  + \up \cdot \grad' \theta' - 
-N \up \cdot \khat = \kappa \Delta' \theta'
-\]
-with
-\[
-\gradp = 
-\begin{pmatrix} \dfrac{\partial}{\partial x'} \\[5mm]
-                \dfrac{\partial}{\partial y'} \\[5mm]
-                \dfrac{\partial}{\partial z'} 
-\end{pmatrix}
- \qquad
-\Delta'  = \left(\frac{\partial}{\partial x'}\right)^2 + 
-           \left(\frac{\partial^2}{\partial y'}\right)^2 +
-           \left(\frac{\partial^2}{\partial z'}\right)^2 
+\frac{ \partial  \theta }{\partial t}  + \uv \cdot \grad \theta - 
+N \uv \cdot \khat = \kappa \Delta \theta
 \]
 The Schmidt number is $\nu / \kappa$.  
 
-We now introduce a change of variables, into the {\em non-primed} coordiante
+We refer to the coordinate system in the box in Fig.~\ref{F:box} as
+the primted coordinate system, and we now introduce a 
+change of variables, into the {\em non-primed} coordinate
 system.  In the non-primed coordinate system, the domain because a 
 unit cube:
 \[
 x = x', \qquad y=y', \qquad  z = \frac{z'}{h},
 \]
-\[
-u_1 = u_1', \qquad u_2 = u_2', \qquad  h u_3 = u_3'
-\]
-and
-\[
-h \theta = \theta'
-\]
-And we also have:
+The only change to our code is that:
 \[
 \frac{\partial}{\partial z'} = \frac{1}{h} \frac{\partial}{\partial z}
 \]
-We first write $\gradp \cdot \up$ in the non-primed coordinate system:
+And thus 
 \[
-\frac{\partial u_1' }{\partial x'} = \frac{\partial u_1 }{\partial x}
-\qquad
-\frac{\partial u_2' }{\partial y'} = \frac{\partial u_2 }{\partial y}
-\qquad
-\frac{\partial u_3' }{\partial z'} = \frac{1}{h} \frac{\partial h u_3 }{\partial z}
-= \frac{\partial u_3 }{\partial z}
-\]
-So we have that
-\[
-\gradp \cdot \up = \grad \cdot \uv
-\]
-And thus the divergence free condition is the 
-same in both coordinate systems.  The term $\gradp \pi'$ is the
-unique gradient which maintains $\gradp \cdot \up = 0$.  This
-term must be expressible as a gradient in physical coordinates,
-so we can drop the prime, but will must still write the term as
-$\gradp \pi$, where now it is the unique (physical coordinate) 
-gradient which maintains  $\grad \cdot \uv = 0$.
-We now start substituting the non-primed variables with the
-primted variables:
-\[
-\begin{pmatrix} u_1 \\
-                u_2 \\
-                h u_3 \\
-\end{pmatrix}_t
-  + (\curlp \up + f \khat) \times 
-\begin{pmatrix} u_1 \\
-                u_2 \\
-                h u_3 \\
+\grad = 
+\begin{pmatrix} \dfrac{\partial}{\partial x} \\[5mm]
+                \dfrac{\partial}{\partial y} \\[5mm]
+                \dfrac{1}{h} \dfrac{\partial}{\partial z} 
 \end{pmatrix}
-+ \gradp \pi +
-\begin{pmatrix} 0 \\
-                0 \\
-                h N \theta \\
-\end{pmatrix}
-= \nu 
-\begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 
-                \dfrac{\partial^2 u_1}{\partial y^2} + 
-                \dfrac{1}{h^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]
-                \dfrac{\partial^2 u_2}{\partial x^2} + 
-                \dfrac{\partial^2 u_2}{\partial y^2} + 
-                \dfrac{1}{h^2}\dfrac{\partial^2 u_2}{\partial z^2}   \\[5mm]
-                h \left( 
-                \dfrac{\partial^2 u_3}{\partial x^2} + 
-                \dfrac{\partial^2 u_3}{\partial y^2} + 
-                \dfrac{1}{h^2}\dfrac{\partial^2 u_3}{\partial z^2} \right)
-\end{pmatrix}
+ \qquad
+\Delta  = \left(\frac{\partial}{\partial x}\right)^2 + 
+           \left(\frac{\partial}{\partial y}\right)^2 +
+           \left(\frac{1}{h}\frac{\partial}{\partial z}\right)^2 
 \]
+and
 \[
-h \frac{ \partial  \theta }{\partial t}  + h \uv \cdot \grad \theta - 
-N h u_3  = h \kappa \left(
-                \dfrac{\partial^2 \theta}{\partial x^2} + 
-                \dfrac{\partial^2 \theta}{\partial y^2} + 
-                \dfrac{1}{h^2}\dfrac{\partial^2 \theta}{\partial z^2}
-\right)
+\grad \cdot \uv = \frac{\partial u_1 }{\partial x} + 
+\frac{\partial u_2 }{\partial y} + 
+\frac{1}{h} \frac{\partial u_3 }{\partial z}
 \]
-
-Defining $\omega'$ by  
+and  vorticity $\omegav$ is given by
 \begin{equation}
 \label{E:vor}
-\omega = \curlp \up = 
+\omegav = \curl \uv = 
 \begin{pmatrix}
-h \dfrac{\partial u_3}{\partial y} - \dfrac{1}{h} \dfrac{\partial u_2}{\partial z}  \\[5mm]
-\dfrac{1}{h} \dfrac{\partial u_1}{\partial z} -  h \dfrac{\partial u_3}{\partial x}  \\[5mm]
+\dfrac{\partial u_3}{\partial y} - \dfrac{1}{h} \dfrac{\partial u_2}{\partial z}  \\[5mm]
+\dfrac{1}{h} \dfrac{\partial u_1}{\partial z} -  \dfrac{\partial u_3}{\partial x}  \\[5mm]
 \dfrac{\partial u_2}{\partial x} - \dfrac{\partial u_1}{\partial y}
 \end{pmatrix}  
 \end{equation}
-the vorticity term works out to 
-\[
-(\curlp \up + f\khat) \times 
-\begin{pmatrix} u_1 \\
-                u_2 \\
-                h u_3 \\
-\end{pmatrix} = 
-\begin{pmatrix}  h  u_3 \omega_2' -  u_2 \omega_3'   \\
-                   u_1 \omega_3' -   h u_3 \omega_1'   \\
-                u_2 \omega_1' - u_1 \omega_2'   \\
-\end{pmatrix}  
-+ 
-\begin{pmatrix} -f u_2 \\
-                f u_1 \\
-                0  \\
-\end{pmatrix}  
-\]
 
-Thus the final equations, after scaling the $z$ component by $h$
-and substituting in for $\omega$:
+
+The divergence free condition on $\uv$ is solved by the choice
+of $\pi$.  This involves, 
+for some vector field ${\mathbf v}$, 
+solving an equation of the form 
+\[
+\Delta \pi = \grad \cdot {\mathbf v}
+\] 
+The remaining equations we write in component form:
 \[
 \begin{pmatrix} u_1 \\
                 u_2 \\
                 u_3 \\
 \end{pmatrix}_t
-  + 
-\begin{pmatrix}  h  u_3 \omega_2' -  u_2 \omega_3'   \\
-                   u_1 \omega_3' -   h u_3 \omega_1'   \\
-              \dfrac{1}{h} \left(  u_2 \omega_1' - u_1 \omega_2' \right)  \\
-\end{pmatrix}  
-+ 
-\begin{pmatrix} -f u_2 \\
-                f u_1 \\
-                N \theta  \\
-\end{pmatrix}  
-+ \gradp \pi = \nu 
+  + (\omegav + f \khat) \times 
+\begin{pmatrix} u_1 \\
+                u_2 \\
+                u_3 \\
+\end{pmatrix}
++ \grad \pi +
+\begin{pmatrix} 0 \\
+                0 \\
+                N \theta \\
+\end{pmatrix}
+= \nu 
 \begin{pmatrix} \dfrac{\partial^2 u_1}{\partial x^2} + 
                 \dfrac{\partial^2 u_1}{\partial y^2} + 
                 \dfrac{1}{h^2}\dfrac{\partial^2 u_1}{\partial z^2}   \\[5mm]
@@ -236,24 +166,15 @@ N u_3  = \kappa \left(
 
 
 
-Thus the only changes needed for our parallel DNS code are:
-\begin{enumerate}
-\item initial velocity given in the $\up$ coordinate system 
-needs to be scaled to the non-primed coordinate system $\uv$.
-\item Our output files will contain velocity will be in the non-primed 
-$\uv$ coordinate system.  Need to scaled appropriately  to be analysed
-by other codes.  We have added a new output file header type that
-contains h.  
-\item modify computation of vorticity to match Eq.~\ref{E:vor}.
-\item modify Laplacian (scale $z$ derivative terms by $1/h^2$).
-\item modify vorticity term $\w \times \uv$ as shown above.
-\end{enumerate}
+Thus the only changes needed for our parallel DNS code are is that
+all derivatives in $z$ need to be scaled by $h$.
+
 
 \section{Hyper Viscosity}
 Consider our scaled hyper viscosity term
 \[
-\frac{ \partial  \up }{\partial t} = 
-\sqrt{E(k_\textrm{max})} \,  k_\textrm{max}^{-2\eta + 1.5}  \Delta^\eta \up
+\frac{ \partial  \uv }{\partial t} = 
+\sqrt{E(k_\textrm{max})} \,  k_\textrm{max}^{-2\eta + 1.5}  \Delta^\eta \uv
 \]
 We first verify that the units are correct.  The units of
 energy are $m^2/s^2$, so the units of the energy in a single
@@ -277,9 +198,9 @@ The assumptions made in the hydrostatic equations implicitly assume
 \[
  \max{ k_h } << \min{k_z}
 \]
-which works out to
+which works out to (assuming 2/3 dealiasing)
 \[
-   \frac{\sqrt{2}}{3} N_x <<  2 \pi /h.
+   \frac{N_x}{3} <<  \frac{1}{h}
 \]
 
 
@@ -299,21 +220,17 @@ so integrals can be computed in Fourier or grid space.
 All other scalars (kinetic energy, helicity, various dissipation
 terms) are computed in physical coordinates.  So for example
 \[
-k = <\up,\up> = <u_1,u_1> + <u_2,u_2> + h^2 <u_3,u_3>
+k = <\uv,\uv> = <u_1,u_1> + <u_2,u_2> +  <u_3,u_3>
 \]
 and the helicity 
 \[
-  h  = w_1' u_1  + w_2' u_2 + h w_3' u_3
+  h  = w_1 u_1  + w_2 u_2 + w_3 u_3
 \]
 As in example, using integer wave numbers $(l,m,n)$ (defined in the
 next section), we have
 \[
-< \omega' , \Delta \up> = \sum (2 \pi)^2 (l^2 + m^2 + (n/h)^2) 
-\begin{pmatrix} \hat{u}_1 \\
-                \hat{u}_2 \\
-                h \hat{u}_3  \\
-\end{pmatrix}  
- \cdot \omega'
+< \omegav , \Delta \uv> = \sum (2 \pi)^2 (l^2 + m^2 + (n/h)^2) 
+\, \uv \cdot \omegav
 \]
 
 
@@ -359,14 +276,14 @@ The total energy is
 \[
 E  = \sum_{l,m,n}  |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
- |  h {\hat u_3}(l,m,n) |^2
+ |  {\hat u_3}(l,m,n) |^2
 \]
 
 The standard energy spectrum is now, for integers $k$:
 \[
 E(k)  = \sum_{l,m,n}  |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
- |  h {\hat u_3}(l,m,n) |^2
+ |  {\hat u_3}(l,m,n) |^2
 \]
 where the sum is taken over all integers $(l,m,n)$ such that
 \[
@@ -375,7 +292,7 @@ where the sum is taken over all integers $(l,m,n)$ such that
 where we have chosen to use a shell thickness of $\Delta k_z$.
 Scaling out the $2\pi$, we get
 \[
-(k-1/2)^2 \le  h^2 l^2 + h^2 m^2 + n^2 < (k+1/2)^2
+(k-1/2)^2 \le  h^2 \left( l^2 + m^2 + (n/h)^2 \right) < (k+1/2)^2
 \]  
 
 
@@ -418,7 +335,7 @@ define
 \begin{eqnarray*}
 E(k,j) = \sum_{l,m}  |  {\hat u_1}(l,m,n) |^2 +
  |  {\hat u_2}(l,m,n) |^2 + 
- |  h {\hat u_3}(l,m,n) |^2
+ |  {\hat u_3}(l,m,n) |^2
 \end{eqnarray*}
 where the sum is taken over fixed $n$ and all integers $(l,m)$ such that 
 \[
