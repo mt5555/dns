@@ -41,11 +41,11 @@ rotA  128x128x32
 
 rotB  128x128x32   
    k_f=16  fcor=40  mu_hyper=1.0  mu=0
-   epsilon_f   .52 ?
-   epsilon_ke  .52 ?
-   R0 =  .87 ?
-
-
+   eddy turnover time: .72  
+   epsilon_f   .52
+   epsilon_ke  .51
+   R0 =  .87 
+   KE:  .1 -> .22  in time=10
 
 
 

@@ -885,6 +885,8 @@ if (0==init_sforcing) then
          ! Smith & Waleffe:  esp( -.5 (k-k0)**2 )  /  sqrt(2pi)
          ! my wave numbers have an extra 2pi.
          ! This is normalized so that <f,f>=  ffval
+         ! units of f:  m/s**2
+         ! units of ffval =  m**2 / s**4
          ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
       enddo
 
