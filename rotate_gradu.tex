@@ -1,0 +1,105 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb,latexsym,amsmath,bm}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX
+\else
+\pdfoutput=1 % we are running PDFLaTeX
+\pdftrue
+\fi
+\ifpdf
+\usepackage[pdftex]{graphicx}
+\else
+\usepackage{graphicx}
+\fi
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps, .jpg}
+\fi
+
+
+
+\textwidth = 6.5 in
+\textheight = 9 in
+\oddsidemargin = 0.0 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.2 in
+\parindent = 0.0 in
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\khat}{\hat{\mathbf k}}
+\newcommand{\uv}{\mathbf u}
+\newcommand{\up}{\mathbf u'}
+\newcommand{\w}{\mathbf w}
+\newcommand{\grad}{\nabla}
+\newcommand{\curlp}{\gradp \times}
+\newcommand{\curl}{\grad \times}
+\newcommand{\gradp}{\nabla'}
+
+\DeclareMathOperator{\Span}{span}
+
+\title{Rotation matrix for transforming the strain tensor}
+
+\begin{document}
+%\maketitle
+\section*{Shear tensor}
+There are 9 components of the shear (strain rate) $S_{ij} = \grad {\bm u} =
+\partial_j u_i$. We can compute all these components in the
+grid-coordinate system ($\bm{{\hat x}}_1,\bm{{\hat x}}_2, \bm{{\hat
+x}}_3$). We would like to be able to say what these components are in
+a coordinate system whose $x_1$-axis is along $\bm{{\hat r}}$, one of
+the 73 directions we compute in our angle averaging procedure.
+
+\section*{New coordinate system}
+Let $\bm{{\hat r}}$, $\bm{{\hat t}}_1$
+and $\bm{{\hat t}}_2$ (which are determined by the existing code in the grid-coordinate system) form our new coordinate system.
+The axis of the new system $\bm{{\hat x}}_1',\bm{{\hat x}}_2',
+\bm{{\hat x}}_3'$ are obviously 
+given in the transformed coordinate system as $\bm{{\hat x}}_1' =
+\left(\begin{array}{c} 1 \\ 0 \\0
+\end{array}\right)$, $\bm{{\hat x}}_2' = \left(\begin{array}{c} 0 \\ 1
+\\0 \end{array}\right)$ and $\bm{{\hat x}}_3' = \left(\begin{array}{c}
+0 \\ 0 \\1 \end{array}\right)$.
+
+The transformation between the two coordinate systems is governed by
+the rotation matrix ${\bf A}$ which can be written in terms of the
+known components of the new coordinate system. That is, we have 
+
+$$\bm{{\hat x}}_1' = \left(\begin{array}{c} 1 \\ 0 \\0\end{array}\right) = {\bf A}\left(\begin{array}{c} \bm{{\hat r}}\cdot \bm{{\hat x}}_1 \\ \bm{{\hat r}}\cdot \bm{{\hat x}}_2 \\\bm{{\hat r}}\cdot \bm{{\hat x}}_3\end{array}\right);~~
+\bm{{\hat x}}_2' = \left(\begin{array}{c} 0 \\ 1 \\0\end{array}\right) = {\bf A}\left(\begin{array}{c}\bm{{\hat t}}_1\cdot \bm{{\hat x}}_1 \\ \bm{{\hat t}}_1 \cdot\bm{{\hat x}}_2 \\\bm{{\hat t}}_1 \cdot \bm{{\hat x}}_3 \end{array}\right);~~
+\bm{{\hat x}}_3' = \left(\begin{array}{c} 0 \\ 0 \\1 \end{array}\right)= {\bf A}\left(\begin{array}{c}\bm{{\hat t}}_2\cdot \bm{{\hat x}}_1 \\ \bm{{\hat t}}_2 \cdot\bm{{\hat x}}_2 \\\bm{{\hat t}}_2 \cdot \bm{{\hat x}}_3 \end{array}\right)$$
+
+
+This gives the rotation matrix 
+
+$${\bf A} = \left(\begin{array}{ccc}  
+\bm{{\hat r}}\cdot \bm{{\hat x}}_1 & \bm{{\hat r}}\cdot \bm{{\hat x}}_2 &\bm{{\hat r}}\cdot \bm{{\hat x}}_3 \\
+\bm{{\hat t}}_1\cdot \bm{{\hat x}}_1 & \bm{{\hat t}}_1 \cdot\bm{{\hat x}}_2 & \bm{{\hat t}}_1 \cdot \bm{{\hat x}}_3 \\
+\bm{{\hat t}}_2\cdot \bm{{\hat x}}_1 & \bm{{\hat t}}_2 \cdot\bm{{\hat x}}_2 & \bm{{\hat t}}_2 \cdot \bm{{\hat x}}_3 
+\end{array} 
+\right)$$
+
+(check {${\bf A A}^{T} = {\bf I}$)
+
+
+So, the strain tensor in the new coordinate system is  given by 
+${\bf S}' = {\bf A S A}^{T}$, or, component-wise
+$S_{ij}' = A_{ik} S_{kl} A_{jl}$.
+
+We cycle through the 73 different $\bm{{\hat r}}$ in this way to find the one 
+which give the largest off-diagonal
+contribution to $\grad \bm{u}$ (either $S_{12}$ or $S_{13}$, and
+compute the mixed structure function $\langle \Delta u_1 (r) \Delta u_2 (r)\rangle$ and 
+$\langle \Delta u_1 (r) \Delta u_3 (r)\rangle$ for that direction of $\bm{{\hat r}}$.
+
+Redundancies....
+
+\end{document}

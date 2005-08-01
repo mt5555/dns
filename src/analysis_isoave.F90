@@ -74,7 +74,7 @@ header_type=1; scale=1;
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
-compute_uvw=.true.	!computes structure functions
+compute_uvw=.true.	!computes structure functions (long, trans, mixed)
 str_type=4		!used to flag anisotropic structure functions
 compute_hspec=.false.
 read_uvw=.false.

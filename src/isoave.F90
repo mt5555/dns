@@ -28,7 +28,6 @@ integer,parameter :: pmax=10       ! has to be 6 or greater
 !
 integer :: str_type = 4
 
-
 real*8 :: fractional_power(2:pmax) 
 integer :: dir(3,ndir_max)
 integer :: ndelta,ndir
