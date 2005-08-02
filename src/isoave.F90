@@ -789,7 +789,7 @@ call transpose_to_z(subcube,subcube_t,n1,n1d,n2,n2d,n3,n3d)
 
 
 if (use_max_shear_direction) then 
-   call max_sheer_coordinate_system(u_shear,rhat,rperp1,rperp2)
+   call max_shear_coordinate_system(u_shear,rhat,rperp1,rperp2)
 endif
 
 
@@ -964,7 +964,7 @@ print *,'R_l      ',R_lambda
 
 
 if (use_max_shear_direction) then 
-   call max_sheer_coordinate_system(u_shear,rhat,rperp1,rperp2)
+   call max_shear_coordinate_system(u_shear,rhat,rperp1,rperp2)
 endif
 
 
