@@ -2044,4 +2044,31 @@ SN_lll=0
 w2s2=0
 end subroutine
 
+
+
+subroutine max_shear_coordinate_system(u_shear,rmax,t1,t2)
+real*8 :: u_shear(3,3)
+real*8 :: rmax(3),t1(3),t2(3)
+
+! local variables
+integer :: idir
+real*8 :: rhat(3),rperp1(3),rperp2(3) 
+
+do idir=1,ndir_max
+   rhat = dir(:,idir)
+   rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+   call compute_perp(rhat,rperp1,rperp2)
+
+   ! compute S_1,2  S_1,3  in the (rhat,rperp1,rperp2 coordinate system)
+
+   ! find the (rhat,rperp1,rperp2) which maximizes S_12^2 + S_13^2
+   ! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0
+enddo
+end subroutine
+
+
+
 end module 
+
+
+
