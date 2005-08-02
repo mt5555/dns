@@ -327,7 +327,7 @@ real*8 :: Qs(nx,ny,nz,n_var)              ! shifted original data
 !local
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: u_l,u_t1,u_t2,rnorm
-real*8 :: eta,lambda,r_lambda,ke_diss,h_diss
+real*8 :: eta,lambda,r_lambda,ke_diss,h_diss,xvec(3),xmin
 real*8 :: dummy(pmax),xtmp,ntot,xfac,ux,uy,uz,vx,vy,vz,wx,wy,wz
 character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,nd
@@ -532,9 +532,16 @@ do idir=1,ndir
    endif
 
    if (my_pe==io_pe) then
-      write(*,'(a,i3,a,i3,a,3i3,a,a,3i3,a)') 'direction: ',idir,'/',ndir,&
-           '  (',dir(:,idir),')' ,&
-           '  t2=(',dir(:,idir),')'
+      xvec=rperp2;
+      xmin=99;
+      do i=1,3
+         if (xvec(i)/=0 .and. abs(xvec(i))< xmin ) then
+            xmin=abs(xvec(i))
+         endif
+      enddo
+      xvec=xvec/xmin
+      write(*,'(a,i3,a,i3,a,3i3,a,a,3f6.2,a,a,f7.2)') 'direction: ',idir,'/',ndir,&
+           '  (',dir(:,idir),')' ,'  t2=(',xvec,')',' <t2,t2>=',sum(xvec*xvec)
    endif
 
 #if 0
@@ -805,8 +812,7 @@ do idir=1,ndir
 
    if (my_pe==io_pe) then
       write(*,'(a,i3,a,i3,a,3i3,a,a,3i3,a)') 'direction: ',idir,'/',ndir,&
-           '  (',dir(:,idir),')' ,&
-           '  t2=(',dir(:,idir),')'
+           '  (',dir(:,idir),')' 
    endif
 
 
@@ -987,8 +993,7 @@ do idir=1,ndir
 
    if (my_pe==io_pe) then
       write(*,'(a,i3,a,i3,a,3i3,a,a,3i3,a)') 'direction: ',idir,'/',ndir,&
-           '  (',dir(:,idir),')' ,&
-           '  t2=(',dir(:,idir),')'
+           '  (',dir(:,idir),')' 
    endif
 
 

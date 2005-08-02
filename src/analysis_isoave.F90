@@ -79,7 +79,7 @@ str_type=4		!used to flag anisotropic structure functions
 compute_hspec=.false.
 read_uvw=.false.
 
-tstart=5.0
+tstart=0.0
 tstop=5.0
 tinc=0.2
 icount=0
