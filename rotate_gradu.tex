@@ -96,10 +96,82 @@ $S_{ij}' = A_{ik} S_{kl} A_{jl}$.
 
 We cycle through the 73 different $\bm{{\hat r}}$ in this way to find the one 
 which give the largest off-diagonal
-contribution to $\grad \bm{u}$ (either $S_{12}$ or $S_{13}$, and
-compute the mixed structure function $\langle \Delta u_1 (r) \Delta u_2 (r)\rangle$ and 
-$\langle \Delta u_1 (r) \Delta u_3 (r)\rangle$ for that direction of $\bm{{\hat r}}$.
+contribution to $S_{1j}'$.  That is, we find the 
+direction with the largest value of $S_{12}'^2 + S_{13}'^2$.  
 
-Redundancies....
+We then construct the {\em tilde} coordinate system which consists
+of $\bm{{\hat r}}$ and new tangent vectors $( \bm{{\tilde t}}_1, 
+\bm{{\tilde t}}_2 )$ given by a rotation of $( \bm{{\hat t}}_1, \bm{{\hat t}}_2 )$
+about the $\bm{{\hat r}}$ axis.  The rotation is chosen so that the 
+tangental derivative of $u_1'$ is entirly in the $\bm{{\tilde t}}_1$
+direction.  The strain tensor in this coordinate system
+is given by ${\bf \tilde S}$, and the velocity vector by 
+$( \tilde u_1, \tilde u_2, \tilde u_3)$. 
+
+The tilde-tanget vectors are given by 
+\[
+\bm{{\tilde t}}_1 = \frac{S_{12}'  \bm{{\hat t}}_1 +  S_{13}'  \bm{{\hat t}}_2 }
+                         {\sqrt{ S_{12}'^2 +  S_{13}'^2 } } 
+\qquad
+\bm{{\tilde t}}_2 = \bm{{\hat r}} \times \bm{{\tilde t}}_1
+\]
+so that
+\[
+\tilde S_{12} = 
+\begin{pmatrix}  S_{11}' \\
+                 S_{12}' \\
+                 S_{13}' 
+\end{pmatrix}
+\cdot \bm{{\tilde t}}_1 = 
+ \sqrt{ S_{12}'^2 + S_{13}'^2 }
+\]
+and 
+\[
+\tilde S_{13} = 
+\begin{pmatrix}  S_{11}' \\
+                 S_{12}' \\
+                 S_{13}' 
+\end{pmatrix}
+\cdot \bm{{\tilde t}}_2 =  0
+\]
+
+
+We then compute the mixed structure function $\langle \Delta \tilde u_1 (r) 
+\Delta \tilde u_2 (r)\rangle$ and 
+$\langle \Delta \tilde u_1 (r) \Delta \tilde u_3 (r)\rangle$ for that direction of $\bm{{\hat r}}$.
+
+\section*{Redundancies...}
+
+In the above procedure, we looked for the direction $ \bm{{\hat r}}$
+which gave the maximum value of $S_{12}'^2 + S_{13}'^2$.  
+Is this sufficient, or should we also consider the other
+components $S_{21}'^2 + S_{23}'^2$ and 
+$S_{31}'^2 + S_{32}'^2$?
+
+In isoave.F90, we construct the set of vectors $\bm{{\hat r}}$ 
+by taking all directions expressible as a vector with integer
+coefficients of norm less than $\sqrt{11}$. Call this set
+of directions $V$.
+
+Assume the vector $ \bm{{\hat r}} \in V $ is the one which maximizes
+$S_{21}'^2 + S_{23}'^2$.  This is the gradient of $u_2'$, which
+is the velocity in the $\bm{{\hat t}}_1$ direction.
+Thus if $\bm{{\hat t}}_1 \in V$, this term is redundent since 
+it will be equivilent to the gradient 
+of $u_1'$ associated with the vector $ \bm{{\hat t}}_1 \in V$.
+
+In isoave.F90, from each $\bm{{\hat r}}$ we construct its associated
+$\bm{{\hat t}}_1$ by permuation of indicies of $\bm{{\hat r}}$ and
+so $\bm{{\hat t}}_1$ is in a direction given by integer coefficients
+with norm less than $\sqrt{11}$. Thus $\bm{{\hat t}}_1 \in V$, and it is 
+redundant to maximize
+both $S_{12}'^2 + S_{13}'^2$ and $S_{21}'^2 + S_{23}'^2$.
+
+However, $\bm{{\hat t}}_2 = \bm{{\hat r}} \times \bm{{\hat t}}_1$,
+and it is not clear if $\bm{{\hat t}}_2 \in V$. 
+We could do a simple exaustive search, or come up with a clever
+proof to show this. 
+
+
 
 \end{document}
