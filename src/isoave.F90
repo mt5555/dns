@@ -503,7 +503,7 @@ endif
 
 
 if (use_max_shear_direction) then 
-   call max_sheer_coordinate_system(u_shear,rhat,rperp1,rperp2)
+   call max_shear_coordinate_system(u_shear,rhat,rperp1,rperp2)
 endif
 
    
