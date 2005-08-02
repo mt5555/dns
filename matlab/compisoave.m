@@ -49,6 +49,7 @@ if sphere_harm ~= 0
 
 end
 
+
 eta = (mu^3 / epsilon)^.25;
 delx_over_eta=(1/nx)/eta;
 

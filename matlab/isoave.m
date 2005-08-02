@@ -3,16 +3,16 @@ ke=0;
 nx=1;
 delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
-%ext='.isostr';
-ext='.isostr4';
+ext='.isostr';
+
 
 %name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
 %nx=2048; delx_over_eta=-1; epsilon=-1;
 
-%name='/ccs/scratch/taylorm/dns/sc1024A/sc1024A0002.0000.new'
+%name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-%name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
+%name='/home/mataylo/codes/dns_data/sc1024A/sc1024A0002.0000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
 %name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0005.8000.new'
@@ -21,9 +21,12 @@ ext='.isostr4';
 %name='/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a0009.0000.new'
 %nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 
-%anisotropic structure functions have suffix .isostr4
+anisotropic structure functions have suffix .isostr4
 name='/auto/nest/u/skurien/dns/src/skhel512a0005.0000'
 nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+ext='.isostr4';
+
+
 
 ndir_use=73;
 

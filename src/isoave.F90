@@ -87,8 +87,9 @@ real*8,allocatable  :: dwork2(:,:)
 real*8,allocatable  :: dwork3(:,:,:)
 
 
-iinteger :: use_max_shear_direction=.false.
-
+logical  :: use_max_shear_direction=.false.
+integer :: idir_max
+real*8  :: t1(3),t2(3)
 
 ! also added to the file for completeness:
 real*8,private :: epsilon,mu,ke,h_epsilon=0
@@ -331,7 +332,7 @@ real*8 :: dummy(pmax),xtmp,ntot,xfac,ux,uy,uz,vx,vy,vz,wx,wy,wz
 character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,nd
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,csig
-integer :: im,jm,km,idir_max
+integer :: im,jm,km
 logical :: qt_uptodate
 
 if (firstcall) then
@@ -521,9 +522,6 @@ do idir=1,ndir
 #endif
    if (csig>0) exit;
 
-   if (my_pe==io_pe) then
-      write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
-   endif
       
    rhat = dir(:,idir)
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
@@ -533,6 +531,11 @@ do idir=1,ndir
       call compute_perp(rhat,rperp1,rperp2)
    endif
 
+   if (my_pe==io_pe) then
+      write(*,'(a,i3,a,i3,a,3i3,a,a,3i3,a)') 'direction: ',idir,'/',ndir,&
+           '  (',dir(:,idir),')' ,&
+           '  t2=(',dir(:,idir),')'
+   endif
 
 #if 0
       ! check orthoginality
@@ -691,7 +694,7 @@ real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
-integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,idir_max
+integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p
 
 if (firstcall) then
    firstcall=.false.
@@ -801,8 +804,11 @@ endif
 do idir=1,ndir
 
    if (my_pe==io_pe) then
-      write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
+      write(*,'(a,i3,a,i3,a,3i3,a,a,3i3,a)') 'direction: ',idir,'/',ndir,&
+           '  (',dir(:,idir),')' ,&
+           '  t2=(',dir(:,idir),')'
    endif
+
 
    rhat = dir(:,idir)
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
@@ -919,7 +925,7 @@ integer :: lx1,lx2,lz1,lz2,ly1,ly2
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,ntot
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p,idir_max
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 if (firstcall) then
    if (ncpu_x*ncpu_y*ncpu_z>1) then
@@ -979,7 +985,12 @@ endif
 
 do idir=1,ndir
 
-   write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
+   if (my_pe==io_pe) then
+      write(*,'(a,i3,a,i3,a,3i3,a,a,3i3,a)') 'direction: ',idir,'/',ndir,&
+           '  (',dir(:,idir),')' ,&
+           '  t2=(',dir(:,idir),')'
+   endif
+
 
    rhat = dir(:,idir)
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
