@@ -80,13 +80,14 @@ real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable :: w2s2(:,:,:)
 real*8 :: w2s2_mean(3)
 
-real*8 :: u_stress(3,3)    ! stress tensor
-real*8 :: u_stress2(3,3)    ! copy of stress tensor
+real*8 :: u_shear(3,3)    ! stress tensor
+real*8 :: u_shear2(3,3)    ! copy of stress tensor
 
 real*8,allocatable  :: dwork2(:,:)
 real*8,allocatable  :: dwork3(:,:,:)
 
 
+iinteger :: use_max_shear_direction=.false.
 
 
 ! also added to the file for completeness:
@@ -112,7 +113,7 @@ real*8 :: x
 if (my_pe/=io_pe) return
 
 call cwrite8(fid,time,1)
-call cwrite8(fid,u_stress,9)
+call cwrite8(fid,u_shear,9)
 
 end subroutine
 
@@ -353,7 +354,7 @@ call zero_str
 if (stype==3) then
 ke_diss=0
 ke=0
-u_stress=0
+u_shear=0
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),Qs(1,1,1,1),dummy,Qs(1,1,1,2),1,m)
@@ -363,7 +364,7 @@ do n=1,ndim
                
                if (m==1) ke = ke + .5*Q(i,j,k,n)**2
                ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
-               u_stress(n,m) = u_stress(n,m)+ Qs(i,j,k,1)
+               u_shear(n,m) = u_shear(n,m)+ Qs(i,j,k,1)
             enddo
          enddo
       enddo
@@ -429,8 +430,8 @@ enddo
    call mpi_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=h_diss
    call mpi_allreduce(xtmp,h_diss,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   u_stress2=u_stress
-   call mpi_allreduce(u_stress2,u_stress,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   u_shear2=u_shear
+   call mpi_allreduce(u_shear2,u_shear,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -439,7 +440,7 @@ if (epsilon==0) epsilon=1e-20
 h_epsilon=mu*h_diss
 if (h_epsilon==0) h_epsilon=1e-20
 ke=ke/ntot
-u_stress=u_stress/ntot
+u_shear=u_shear/ntot
 
 
 eta = (mu**3 / epsilon)**.25
@@ -500,6 +501,11 @@ if (stype==1) then
 #endif
 endif
 
+
+if (use_max_shear_direction) then 
+   call max_sheer_coordinate_system(u_shear,rhat,rperp1,rperp2)
+endif
+
    
 qt_uptodate=.false.
 do idir=1,ndir
@@ -516,10 +522,12 @@ do idir=1,ndir
    if (my_pe==io_pe) then
       write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
    endif
-
+      
+   if (.not. use_max_shear_direction) then
       rhat = dir(:,idir)
       rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
       call compute_perp(rhat,rperp1,rperp2)
+   endif
 
 #if 0
       ! check orthoginality
@@ -696,7 +704,7 @@ subcube=0
 
 ke_diss=0
 ke=0
-u_stress=0
+u_shear=0
 
 ntot=0
 do k=nz1,nz2
@@ -725,7 +733,7 @@ do n=1,ndim
                if (subcube(i,j,k)/=0) then
                   if (m==1) ke = ke + .5*Q(i,j,k,n)**2
                   ke_diss=ke_diss + Qs(i,j,k,1)*Qs(i,j,k,1)
-                  u_stress(n,m) = u_stress(n,m)+ Qs(i,j,k,1)
+                  u_shear(n,m) = u_shear(n,m)+ Qs(i,j,k,1)
                endif
                
             enddo
@@ -742,13 +750,13 @@ enddo
    call mpi_allreduce(xtmp,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    xtmp=ntot
    call mpi_allreduce(xtmp,ntot,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-   u_stress2=u_stress
-   call mpi_allreduce(u_stress2,u_stress,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   u_shear2=u_shear
+   call mpi_allreduce(u_shear2,u_shear,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 epsilon=mu*ke_diss/ntot
 ke=ke/ntot
-u_stress=u_stress/ntot
+u_shear=u_shear/ntot
 
 
 
@@ -780,6 +788,10 @@ call transpose_to_z(subcube,subcube_t,n1,n1d,n2,n2d,n3,n3d)
    
 
 
+if (use_max_shear_direction) then 
+   call max_sheer_coordinate_system(u_shear,rhat,rperp1,rperp2)
+endif
+
 
 do idir=1,ndir
 
@@ -787,10 +799,11 @@ do idir=1,ndir
       write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
    endif
 
+   if (.not. use_max_shear_direction) then
       rhat = dir(:,idir)
       rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
       call compute_perp(rhat,rperp1,rperp2)
-
+   endif
 
       ! data is in x-y hyperslabs.  
       ! z-direction=0
@@ -911,7 +924,7 @@ call zero_str
 
 ke_diss=0
 ke=0
-u_stress=0
+u_shear=0
 do n=1,ndim
    do m=1,ndim
       call der(Q(1,1,1,n),d1,dummy,work,1,m)
@@ -920,7 +933,7 @@ do n=1,ndim
       do i=lx1,lx2
          if (m==1) ke = ke + .5*Q(i,j,k,n)**2
          ke_diss=ke_diss + d1(i,j,k)*d1(i,j,k)
-         u_stress(n,m) = u_stress(n,m)+ d1(i,j,k)
+         u_shear(n,m) = u_shear(n,m)+ d1(i,j,k)
       enddo
       enddo
       enddo
@@ -929,7 +942,7 @@ enddo
 ntot=real(lz2-lz1+1)*(ly2-ly1+1)*(lx2-lx1+1)
 epsilon=mu*ke_diss/ntot
 ke=ke/ntot
-u_stress=u_stress/ntot
+u_shear=u_shear/ntot
 
 eta = (mu**3 / epsilon)**.25
 lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
@@ -950,14 +963,20 @@ print *,'R_l      ',R_lambda
       
 
 
+if (use_max_shear_direction) then 
+   call max_sheer_coordinate_system(u_shear,rhat,rperp1,rperp2)
+endif
+
 
 do idir=1,ndir
 
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
 
+   if (.not. use_max_shear_direction) then
       rhat = dir(:,idir)*delta_val(1)
       rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
       call compute_perp(rhat,rperp1,rperp2)
+   endif
 
 #if 0
       ! check orthoginality
@@ -1751,6 +1770,8 @@ endif
 
 max_delta = g_nmin/2
 ndir=ndir_max
+if (use_max_shear_direction) ndir=1
+
 
 if (user_specified_isodel>0) then
    max_delta=min(max_delta,user_specified_isodel)
