@@ -1963,7 +1963,44 @@ end subroutine
 
 
 subroutine compute_perp(r,rp1,rp2)
+
 real*8 r(3),rp1(3),rp2(3)
+integer :: numzero,i,j,k,imax,ii
+
+numzero=0
+do i=1,3
+   if (r(i)==0) numzero=numzero+1
+enddo
+
+if (numzero==2) then
+   if (r(3)==0) then
+       i=1  ! either 1 or 2 is non zero
+       j=2
+       k=3  ! this one is zero 
+   else
+       i=2  ! this one is zero
+       j=3 
+       k=1  ! this one is zero   
+   endif
+else if (numzero < 2 ) then
+   ! two non zero entries.  set largest to k
+   imax=maxval(abs(r))
+   do ii=1,3
+      if (imax==abs(r(ii))) then
+         k=ii
+         i=ii+1; i=mod(i-1,3)+1
+         j=ii+2; j=mod(j-1,3)+1
+      endif
+   enddo
+
+else
+   call abort("compute_perp(): this is not possible")
+endif
+
+rp1(i)=-r(j)
+rp1(j)=r(i)
+rp1(k)=0
+
 
 if (r(3)==0) then ! either r(1) or r(2) <> 0
    rp1(1)=-r(2)
