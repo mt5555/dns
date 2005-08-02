@@ -112,6 +112,8 @@ real*8 :: x
 
 if (my_pe/=io_pe) return
 
+x=idir_max
+call cwrite8(fid,x,1)
 call cwrite8(fid,time,1)
 call cwrite8(fid,u_shear,9)
 
