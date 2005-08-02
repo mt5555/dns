@@ -554,8 +554,11 @@ do idir=1,ndir
            rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3), &
            rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3), &
            rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
-      
 #endif
+      xmin=abs(rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3))+ &
+           abs(rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3)) + &
+           abs(rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3))
+      if (xmin>1e-15) call abort("isaove.F90: orthogonality error")
 
       ! data is in x-y hyperslabs.  
       ! z-direction=0
@@ -656,7 +659,7 @@ do idir=1,ndir
          call abort("parallel computation of direction not supported")
       endif
 
-
+100 continue
    enddo
 
 
@@ -1964,9 +1967,10 @@ end subroutine
 
 subroutine compute_perp(r,rp1,rp2)
 
-real*8 r(3),rp1(3),rp2(3)
-integer :: numzero,i,j,k,imax,ii
+real*8 r(3),rp1(3),rp2(3),rmax
+integer :: numzero,i,j,k,ii
 
+#if 0
 numzero=0
 do i=1,3
    if (r(i)==0) numzero=numzero+1
@@ -1984,9 +1988,9 @@ if (numzero==2) then
    endif
 else if (numzero < 2 ) then
    ! two non zero entries.  set largest to k
-   imax=maxval(abs(r))
+   rmax=-1e99
    do ii=1,3
-      if (imax==abs(r(ii))) then
+      if ( abs(r(ii))>rmax ) then
          k=ii
          i=ii+1; i=mod(i-1,3)+1
          j=ii+2; j=mod(j-1,3)+1
@@ -1996,23 +2000,26 @@ else if (numzero < 2 ) then
 else
    call abort("compute_perp(): this is not possible")
 endif
-
 rp1(i)=-r(j)
 rp1(j)=r(i)
 rp1(k)=0
+#endif
 
-
+#if 1
 if (r(3)==0) then ! either r(1) or r(2) <> 0
    rp1(1)=-r(2)
    rp1(2)=r(1)
    rp1(3)=0
-   rp1 = rp1/ sqrt(rp1(1)**2+rp1(2)**2)
 else 
    rp1(1)=0
    rp1(2)=-r(3)
    rp1(3)=r(2)
-   rp1 = rp1/ sqrt(rp1(2)**2+rp1(3)**2)
 endif
+#endif
+
+
+
+rp1 = rp1/ sqrt(rp1(1)**2+rp1(2)**2+rp1(3)**2)
 
 
 ! take cross product for remaining vector:
