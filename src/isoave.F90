@@ -329,7 +329,7 @@ real*8 :: dummy(pmax),xtmp,ntot,xfac,ux,uy,uz,vx,vy,vz,wx,wy,wz
 character(len=80) :: message
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g,nd
 integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,csig
-integer :: im,jm,km
+integer :: im,jm,km,idir_max
 logical :: qt_uptodate
 
 if (firstcall) then
@@ -501,9 +501,9 @@ if (stype==1) then
 #endif
 endif
 
-
+idir_max=-1
 if (use_max_shear_direction) then 
-   call max_shear_coordinate_system(u_shear,rhat,rperp1,rperp2)
+   call max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 endif
 
    
@@ -523,11 +523,14 @@ do idir=1,ndir
       write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
    endif
       
-   if (.not. use_max_shear_direction) then
-      rhat = dir(:,idir)
-      rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+   rhat = dir(:,idir)
+   rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+   if (idir==idir_max) then
+      rperp1=t1; rperp2=t2
+   else
       call compute_perp(rhat,rperp1,rperp2)
    endif
+
 
 #if 0
       ! check orthoginality
@@ -686,7 +689,7 @@ real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3),dir_shift(3)
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,xtmp,ntot
 integer :: idir,idel,i2,j2,k2,i,j,k,n,m,ishift,k_g,j_g
-integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p
+integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p,idir_max
 
 if (firstcall) then
    firstcall=.false.
@@ -787,9 +790,9 @@ enddo
 call transpose_to_z(subcube,subcube_t,n1,n1d,n2,n2d,n3,n3d)
    
 
-
+idir_max=-1
 if (use_max_shear_direction) then 
-   call max_shear_coordinate_system(u_shear,rhat,rperp1,rperp2)
+   call max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 endif
 
 
@@ -799,11 +802,15 @@ do idir=1,ndir
       write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
    endif
 
-   if (.not. use_max_shear_direction) then
-      rhat = dir(:,idir)
-      rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+   rhat = dir(:,idir)
+   rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+   if (idir==idir_max) then
+      rperp1=t1; rperp2=t2
+   else
       call compute_perp(rhat,rperp1,rperp2)
    endif
+
+
 
       ! data is in x-y hyperslabs.  
       ! z-direction=0
@@ -910,7 +917,7 @@ integer :: lx1,lx2,lz1,lz2,ly1,ly2
 real*8 :: rhat(3),rvec(3),rperp1(3),rperp2(3),delu(3)
 real*8 :: eta,lambda,r_lambda,ke_diss
 real*8 :: dummy,ntot
-integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
+integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p,idir_max
 
 if (firstcall) then
    if (ncpu_x*ncpu_y*ncpu_z>1) then
@@ -962,9 +969,9 @@ print *,'R_l      ',R_lambda
 
       
 
-
+idir_max=-1
 if (use_max_shear_direction) then 
-   call max_shear_coordinate_system(u_shear,rhat,rperp1,rperp2)
+   call max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 endif
 
 
@@ -972,11 +979,14 @@ do idir=1,ndir
 
    write(*,'(a,i3,a,i3,a,3i3,a)') 'direction: ',idir,'/',ndir,'  (',dir(:,idir),')'
 
-   if (.not. use_max_shear_direction) then
-      rhat = dir(:,idir)*delta_val(1)
-      rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+   rhat = dir(:,idir)
+   rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+   if (idir==idir_max) then
+      rperp1=t1; rperp2=t2
+   else
       call compute_perp(rhat,rperp1,rperp2)
    endif
+
 
 #if 0
       ! check orthoginality
@@ -1770,7 +1780,6 @@ endif
 
 max_delta = g_nmin/2
 ndir=ndir_max
-if (use_max_shear_direction) ndir=1
 
 
 if (user_specified_isodel>0) then
@@ -2046,9 +2055,10 @@ end subroutine
 
 
 
-subroutine max_shear_coordinate_system(u_shear,rmax,t1,t2)
+subroutine max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 real*8 :: u_shear(3,3)
-real*8 :: rmax(3),t1(3),t2(3)
+real*8 :: t1(3),t2(3)
+integer :: idir_max
 
 ! local variables
 integer :: idir
