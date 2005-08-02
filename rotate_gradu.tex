@@ -146,31 +146,43 @@ In the above procedure, we looked for the direction $ \bm{{\hat r}}$
 which gave the maximum value of $S_{12}'^2 + S_{13}'^2$.  
 Is this sufficient, or should we also consider the other
 components $S_{21}'^2 + S_{23}'^2$ and 
-$S_{31}'^2 + S_{32}'^2$?
+$S_{31}'^2 + S_{32}'^2$?  
 
 In isoave.F90, we construct the set of vectors $\bm{{\hat r}}$ 
 by taking all directions expressible as a vector with integer
 coefficients of norm less than $\sqrt{11}$. Call this set
-of directions $V$.
-
-Assume the vector $ \bm{{\hat r}} \in V $ is the one which maximizes
-$S_{21}'^2 + S_{23}'^2$.  This is the gradient of $u_2'$, which
-is the velocity in the $\bm{{\hat t}}_1$ direction.
-Thus if $\bm{{\hat t}}_1 \in V$, this term is redundent since 
-it will be equivilent to the gradient 
-of $u_1'$ associated with the vector $ \bm{{\hat t}}_1 \in V$.
+of directions $V$.   If we consider all the components mentioned
+above, this amounts to maximizing $S_{12}'^2 + S_{13}'^2$ over
+all directions in $V$ as well as all directions given by
+all of the $\bm{{\hat t}}_1$ and $\bm{{\hat t}}_2$ vectors.
 
 In isoave.F90, from each $\bm{{\hat r}}$ we construct its associated
-$\bm{{\hat t}}_1$ by permuation of indicies of $\bm{{\hat r}}$ and
-so $\bm{{\hat t}}_1$ is in a direction given by integer coefficients
-with norm less than $\sqrt{11}$. Thus $\bm{{\hat t}}_1 \in V$, and it is 
-redundant to maximize
+$\bm{{\hat t}}_1$ by permuation of indicies of $\bm{{\hat r}}$.
+This means that $\bm{{\hat t}}_1$ is in a direction given by integer coefficients
+with norm less than $\sqrt{11}$, and so $\bm{{\hat t}}_1 \in V$.  
+Thus it is redundant to maximize
 both $S_{12}'^2 + S_{13}'^2$ and $S_{21}'^2 + S_{23}'^2$.
 
-However, $\bm{{\hat t}}_2 = \bm{{\hat r}} \times \bm{{\hat t}}_1$,
-and it is not clear if $\bm{{\hat t}}_2 \in V$. 
-We could do a simple exaustive search, or come up with a clever
-proof to show this. 
+However, $\bm{{\hat t}}_2 = \bm{{\hat r}} \times \bm{{\hat t}}_1$.
+Most of these vectors are also in $V$, but there are XXX of them 
+which are not in $V$.  Thus it is not redundent to maximize over
+both $S_{12}'^2 + S_{13}'^2$ and $S_{31}'^2 + S_{32}'^2$.
+However, to compute the needed structure functions associated with
+a direction which had a maximum value of $S_{31}'^2 + S_{32}'^2$, we
+would need to compute increments in the $\bm{{\hat t}}_2$ direction.
+This direction is not in $V$, and our code isoave.F90 can only 
+compute increments in directions in $V$.  Computing increments in
+other directions would be very expensive, requring much more communication
+and interpolation to non-grid point locations.
+
+In summary, we are thus capable of computing the mean shear in
+the 73 directions in $V$, as well as a few extra directions given by the
+$\bm{{\hat t}}_2$ vectors.   But we are only capable of computing
+structure functions for increments in directions in $V$, and thus
+we limit our seach to maximizing $S_{31}'^2 + S_{32}'^2$ over
+all directions in $V$.  
+
+
 
 
 
