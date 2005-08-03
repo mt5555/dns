@@ -53,21 +53,30 @@ time_target=time_final
 ! with fcor:
 !   CFL = delt*(umax/delx + f/pi)   delt <= CFL/(umax/delx + f/pi)
 !
-! viscous CFL =  mu (u_xx + u_yy + u_zz) = 
-!                mu ( delx**-2  + dely**-2 + delz**-2)
-! delt*mu/del^2  delt <= CFL*del^2/mu
 !  
 !
-
+! RK4 stability limit (conservative):     du/dt = -lambda u
+!               dt < 2.74 / lambda
+!
+! Viscosity:  lambda = mu (2*pi)^2 (kx^2 + ky^2 + kz^2) 
+!     assume 2/3 dealiasing   kx_max = Nx/3  = 1/(3 delx)         
+!             =  mu*(2*pi)^2 ( delx**-2 + dely**-2 + delz**-2 ) / 3**2
+!              dt < (2.74/(.333*2*pi)^2) / (  mu ( delx**-2 + dely**-2 + delz**-2 ) )
+!              dt < .62  / (  mu ( delx**-2 + dely**-2 + delz**-2 ) )
+!     assume spherical dealaising:  kx_max = sqrt(2)/3*Nx = .47/delx
+!              dt < (2.74/(.47*2*pi)^2) / (  mu ( delx**-2 + dely**-2 + delz**-2 ) )
+!              dt < .31  / (  mu ( delx**-2 + dely**-2 + delz**-2 ) )
+!             
+!
 umax=maxs(4)+fcor/pi
 
 if (ndim==3) then
-   mumax = mu/(delx**2) + &
-           mu/(dely**2) + &
-           mu/((Lz*delz)**2) 
+   mumax = mu*(delx**-2) + &
+           mu*(dely**-2) + &
+           mu*((Lz*delz)**-2) 
 else
-   mumax = mu/(delx**2) + &
-           mu/(dely**2) 
+   mumax = mu*(delx**-2) + &
+           mu*(dely**-2) 
 endif
 psmax=0
 if (npassive>0) then
