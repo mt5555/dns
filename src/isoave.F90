@@ -2124,9 +2124,10 @@ real*8 :: testmax, maxval, norm
 
 ! local variables
 integer :: idir
-real*8 :: rhat(3),rperp1(3),rperp2(3) 
+real*8 :: rhat(3),rperp1(3),rperp2(3) ,err
 
-do idir=1,ndir_max
+maxval=0
+do idir=1,ndir
    rhat = dir(:,idir)
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
    call compute_perp(rhat,rperp1,rperp2)
@@ -2139,11 +2140,31 @@ do idir=1,ndir_max
       enddo
 
    ! compute S_1,2  S_1,3  in the (rhat,rperp1,rperp2 coordinate system)
-
+!
+!               grad(u_1)
+!   u_shear =   grad(u_2)       (where grad(p)= row vector)
+!               grad(u_3)
+!
+!               rhat
+!         A =   rperp1          (where rhat,t1,t2 are row vectors
+!               rperp2           expressed in original grid coordinate system)
+!
+!         A A' = I
+!  u1 = A' u2              u1 = components of u in grid-coords
+!  A u1 = u2               u2 = components of u in (rhat,rperp1,rperp2) directions
+! 
+!  d(u2)/dx  = A d(u1)/dx
+! so  grad(u2) = A grad(u1)
+! <grad(u2),rhat> = derivative of u2 coordinates in rhat direction
+!                 = (A grad(u1) ) A'
+!
+! Therefor, S' = A S A'
+!
       do i = 1,3
          do j = 1,3
             do k = 1,3
                do l = 1,3
+                  !           A u_shear A'  
                   Sp(i,j) = A(i,k)*u_shear(k,l)*A(j,l)
                enddo
             enddo
@@ -2167,17 +2188,50 @@ enddo
 rhat = dir(:,idir_max)
 rhat = rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
 
-norm = 1/sqrt(Sp(1,2)**2 + Sp(1,3)**2)
+if (testmax==0) then
+   ! in case we run this on a zero initial condition - dont crash
+   ! and leave t1,t2 as original
+else
 
-t1t = (Sp(1,2)*t1 + Sp(1,3)*t2)/norm
+   norm = 1/sqrt(Sp(1,2)**2 + Sp(1,3)**2)
+   
+   t1t = (Sp(1,2)*t1 + Sp(1,3)*t2)/norm
+   
+   t2t(1) = rhat(2)*t1(3) - t1(2)*rhat(3)
+   t2t(2) = -rhat(1)*t1(3) + rhat(2)*t1(1)
+   t2t(3) = rhat(1)*t1(2) - t1(1)*rhat(2)
 
-t2t(1) = rhat(2)*t1(3) - t1(2)*rhat(3)
-t2t(2) = -rhat(1)*t1(3) + rhat(2)*t1(1))
-t2t(3) = rhat(1)*t1(2) - t1(1)*rhat(2)
+   t1 = t1t
+   t2 = t2t
 
-t1 = t1t
-t2 = t2t
+#if 1
+   ! test that grad_u dot t1 = maxval
+   !           grad_u dot t2 = 0
+   ! rotation matrix
+   A(1,:) = rhat
+   A(2,:) = t1
+   A(3,:) = t2
+   ! compute S_1,2  S_1,3  in the (rhat,rperp1,rperp2 coordinate system)
+   i=1
+   do j = 1,3
+      do k = 1,3
+         do l = 1,3
+            Sp(i,j) = A(i,k)*u_shear(k,l)*A(j,l)
+         enddo
+      enddo
+   enddo
 
+   err = sum(Sp(1,:)*t1) - maxval
+   if (abs(err)>1e-14 ) then
+      print *,'Error <Sp,t1> /= maxval:  ',sum(Sp(1,:)*t1),maxval
+   endif
+
+   err = sum(Sp(1,:)*t2)
+   if (abs(err)>1e-14 ) then
+      print *,'Error <Sp,t2> should be 0:  ',sum(Sp(1,:)*t2)
+   endif
+#endif
+endif
 end subroutine
 
 

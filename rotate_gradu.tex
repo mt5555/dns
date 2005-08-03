@@ -77,17 +77,19 @@ $$\bm{{\hat x}}_1' = \left(\begin{array}{c} 1 \\ 0 \\0\end{array}\right) = {\bf 
 \bm{{\hat x}}_2' = \left(\begin{array}{c} 0 \\ 1 \\0\end{array}\right) = {\bf A}\left(\begin{array}{c}\bm{{\hat t}}_1\cdot \bm{{\hat x}}_1 \\ \bm{{\hat t}}_1 \cdot\bm{{\hat x}}_2 \\\bm{{\hat t}}_1 \cdot \bm{{\hat x}}_3 \end{array}\right);~~
 \bm{{\hat x}}_3' = \left(\begin{array}{c} 0 \\ 0 \\1 \end{array}\right)= {\bf A}\left(\begin{array}{c}\bm{{\hat t}}_2\cdot \bm{{\hat x}}_1 \\ \bm{{\hat t}}_2 \cdot\bm{{\hat x}}_2 \\\bm{{\hat t}}_2 \cdot \bm{{\hat x}}_3 \end{array}\right)$$
 
-
-This gives the rotation matrix 
-
-$${\bf A} = \left(\begin{array}{ccc}  
+From these relations we can immediately write down 
+${\bf A}^{-1}$.  Assuming
+that ${\bf A A}^{T} = {\bf I}$ (check this!) then 
+${\bf A} = {\bf A}^{-T}}$ and thus
+$$
+{\bf A} =  \left(\begin{array}{ccc}  
 \bm{{\hat r}}\cdot \bm{{\hat x}}_1 & \bm{{\hat r}}\cdot \bm{{\hat x}}_2 &\bm{{\hat r}}\cdot \bm{{\hat x}}_3 \\
 \bm{{\hat t}}_1\cdot \bm{{\hat x}}_1 & \bm{{\hat t}}_1 \cdot\bm{{\hat x}}_2 & \bm{{\hat t}}_1 \cdot \bm{{\hat x}}_3 \\
 \bm{{\hat t}}_2\cdot \bm{{\hat x}}_1 & \bm{{\hat t}}_2 \cdot\bm{{\hat x}}_2 & \bm{{\hat t}}_2 \cdot \bm{{\hat x}}_3 
 \end{array} 
 \right)$$
 
-(check {${\bf A A}^{T} = {\bf I}$)
+
 
 
 So, the strain tensor in the new coordinate system is  given by 
