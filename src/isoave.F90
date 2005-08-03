@@ -113,8 +113,6 @@ real*8 :: x
 
 if (my_pe/=io_pe) return
 
-x=idir_max
-call cwrite8(fid,x,1)
 call cwrite8(fid,time,1)
 call cwrite8(fid,u_shear,9)
 
@@ -511,7 +509,7 @@ endif
 
    
 qt_uptodate=.false.
-do idir=1,ndir
+Do idir=1,ndir
 
 
 !  check for SIGURG, telling us to stop because job will soon be killed
@@ -2118,9 +2116,11 @@ end subroutine
 
 
 subroutine max_shear_coordinate_system(u_shear,idir_max,t1,t2)
-real*8 :: u_shear(3,3)
-real*8 :: t1(3),t2(3)
-integer :: idir_max
+real*8 :: u_shear(3,3),Sp(3,3),St(3,3)
+real*8 :: A(3,3)
+real*8 :: t1(3),t2(3),t1t(3),t2t(3)
+integer :: idir_max,i,j,k,l
+real*8 :: testmax, maxval, norm
 
 ! local variables
 integer :: idir
@@ -2131,13 +2131,54 @@ do idir=1,ndir_max
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
    call compute_perp(rhat,rperp1,rperp2)
 
+   ! rotation matrix
+      do j = 1,3
+         A(1,j) = rhat(j)
+         A(2,j) = rperp1(j)
+         A(3,j) = rperp2(j)
+      enddo
+
    ! compute S_1,2  S_1,3  in the (rhat,rperp1,rperp2 coordinate system)
 
-   ! find the (rhat,rperp1,rperp2) which maximizes S_12^2 + S_13^2
-   ! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0
-enddo
-end subroutine
+      do i = 1,3
+         do j = 1,3
+            do k = 1,3
+               do l = 1,3
+                  Sp(i,j) = A(i,k)*u_shear(k,l)*A(j,l)
+               enddo
+            enddo
+         enddo
+      enddo
 
+   ! find the (rhat,rperp1,rperp2) which maximizes S_12^2 + S_13^2
+     
+      testmax = Sp(1,2)**2 + Sp(1,3)**2
+      if (testmax .gt. maxval) then
+         maxval = testmax
+         idir_max = idir
+         t1 = rperp1
+         t2 = rperp2
+      endif
+enddo
+
+! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0, (see notes rotate_gradu.tex) 
+! return the new t1 and t2 as expressed in the ORIGINAL coordinate system
+
+rhat = dir(:,idir_max)
+rhat = rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
+
+norm = 1/sqrt(Sp(1,2)**2 + Sp(1,3)**2)
+
+t1t = (Sp(1,2)*t1 + Sp(1,3)*t2)/norm
+
+t2t(1) = rhat(2)*t1(3) - t1(2)*rhat(3)
+t2t(2) = -rhat(1)*t1(3) + rhat(2)*t1(1))
+t2t(3) = rhat(1)*t1(2) - t1(1)*rhat(2)
+
+t1 = t1t
+t2 = t2t
+
+end subroutine
 
 
 end module 
