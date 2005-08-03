@@ -73,14 +73,15 @@ The transformation between the two coordinate systems is governed by
 the rotation matrix ${\bf A}$ which can be written in terms of the
 known components of the new coordinate system. That is, we have 
 
-$$\bm{{\hat x}}_1' = \left(\begin{array}{c} 1 \\ 0 \\0\end{array}\right) = {\bf A}\left(\begin{array}{c} \bm{{\hat r}}\cdot \bm{{\hat x}}_1 \\ \bm{{\hat r}}\cdot \bm{{\hat x}}_2 \\\bm{{\hat r}}\cdot \bm{{\hat x}}_3\end{array}\right);~~
+$$
+\bm{{\hat x}}_1' = \left(\begin{array}{c} 1 \\ 0 \\0\end{array}\right) = {\bf A}\left(\begin{array}{c} \bm{{\hat r}}\cdot \bm{{\hat x}}_1 \\ \bm{{\hat r}}\cdot \bm{{\hat x}}_2 \\\bm{{\hat r}}\cdot \bm{{\hat x}}_3\end{array}\right);~~
 \bm{{\hat x}}_2' = \left(\begin{array}{c} 0 \\ 1 \\0\end{array}\right) = {\bf A}\left(\begin{array}{c}\bm{{\hat t}}_1\cdot \bm{{\hat x}}_1 \\ \bm{{\hat t}}_1 \cdot\bm{{\hat x}}_2 \\\bm{{\hat t}}_1 \cdot \bm{{\hat x}}_3 \end{array}\right);~~
-\bm{{\hat x}}_3' = \left(\begin{array}{c} 0 \\ 0 \\1 \end{array}\right)= {\bf A}\left(\begin{array}{c}\bm{{\hat t}}_2\cdot \bm{{\hat x}}_1 \\ \bm{{\hat t}}_2 \cdot\bm{{\hat x}}_2 \\\bm{{\hat t}}_2 \cdot \bm{{\hat x}}_3 \end{array}\right)$$
+\bm{{\hat x}}_3' = \left(\begin{array}{c} 0 \\ 0 \\1 \end{array}\right)= {\bf A}\left(\begin{array}{c}\bm{{\hat t}}_2\cdot \bm{{\hat x}}_1 \\ \bm{{\hat t}}_2 \cdot\bm{{\hat x}}_2 \\\bm{{\hat t}}_2 \cdot \bm{{\hat x}}_3 \end{array}\right)
+$$
 
 From these relations we can immediately write down 
-${\bf A}^{-1}$.  Assuming
-that ${\bf A A}^{T} = {\bf I}$ (check this!) then 
-${\bf A} = {\bf A}^{-T}}$ and thus
+${\bf A}^{-1}$.  Since the vectors are ortho-normal, 
+${\bf A A}^{T} = {\bf I}$, so ${\bf A} = {\bf A}^{-T}$ and thus
 $$
 {\bf A} =  \left(\begin{array}{ccc}  
 \bm{{\hat r}}\cdot \bm{{\hat x}}_1 & \bm{{\hat r}}\cdot \bm{{\hat x}}_2 &\bm{{\hat r}}\cdot \bm{{\hat x}}_3 \\
@@ -90,10 +91,8 @@ $$
 \right)$$
 
 
-
-
-So, the strain tensor in the new coordinate system is  given by 
-${\bf S}' = {\bf A S A}^{T}$, or, component-wise
+So the strain tensor in the new coordinate system is  given by 
+${\bf S}' = {\bf A S A}^{T}$, or component-wise
 $S_{ij}' = A_{ik} S_{kl} A_{jl}$.
 
 We cycle through the 73 different $\bm{{\hat r}}$ in this way to find the one 
