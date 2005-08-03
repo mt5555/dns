@@ -87,7 +87,7 @@ real*8,allocatable  :: dwork2(:,:)
 real*8,allocatable  :: dwork3(:,:,:)
 
 
-logical  :: use_max_shear_direction=.false.
+logical  :: use_max_shear_direction=.false.   ! requires str_type==4
 integer :: idir_max
 real*8  :: t1(3),t2(3)
 
@@ -1724,6 +1724,9 @@ use params
 integer :: i,j,idel,idir,max_delta
 real*8 :: rvec(3)
 
+if (str_type/=4 .and. use_max_shear_direction) then
+   call abort("Error: isoave.F90 init():  use_max_shear_direction requires str_type==4")
+endif
 
 ! fractional powers
 if (pmax<10) then
