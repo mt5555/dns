@@ -87,7 +87,7 @@ real*8,allocatable  :: dwork2(:,:)
 real*8,allocatable  :: dwork3(:,:,:)
 
 
-logical  :: use_max_shear_direction=.false.   ! requires str_type==4
+logical  :: use_max_shear_direction=.true.   ! requires str_type==4
 integer :: idir_max
 real*8  :: t1(3),t2(3)
 
@@ -110,11 +110,12 @@ real*8 :: time
 !local
 integer :: i,idir,p
 real*8 :: x
-
+                                                               
 if (my_pe/=io_pe) return
 
 call cwrite8(fid,time,1)
 call cwrite8(fid,u_shear,9)
+call cwrite8(fid,idir_max,1)
 
 end subroutine
 
@@ -405,7 +406,7 @@ do k=nz1,nz2
          vz =  - pi2*km*Qs(i,j,k+kmsign(k),2)
          !wz =  - pi2*km*Qs(i,j,k+kmsign(k),3)
       
-         ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
+         ! vorticity: ( (wy - vz), (uz - wx), (vx - uy) )
 
          ! compute 2*k^2 u vor:
          h_diss = h_diss + 2*xfac*(Qs(i,j,k,1)*(wy-vz) + &
@@ -1561,31 +1562,31 @@ endif
 !projection of the mixed structure function $S_{ij}$, $i\neq j$
 
 if (str_type==4) then
-   slt = (u_l*u_t1 + u_l*u_t2)/2
+   slt = u_l*u_t1
    stt = u_t1*u_t2
    
    !the polar angle is t and the azimuthal angle  is p
-   y2_2 = 2*rhat(1)*rhat(2)              !sint*sint*sin2p
-   y22 = rhat(1)**2 - rhat(2)**2         !sint*sint*cos2p
-   y2_1 = rhat(1)*rhat(3)                !sint*cost*cosp
-   y21 = rhat(2)*rhat(3)                 !sint*cost*sinp
-   y20 = (3*rhat(3)**2 - 1)              ! 3*cost*cost - 1
+!   y2_2 = 2*rhat(1)*rhat(2)              !sint*sint*sin2p
+!   y22 = rhat(1)**2 - rhat(2)**2         !sint*sint*cos2p
+!   y2_1 = rhat(1)*rhat(3)                !sint*cost*cosp
+!   y21 = rhat(2)*rhat(3)                 !sint*cost*sinp
+!   y20 = (3*rhat(3)**2 - 1)              ! 3*cost*cost - 1
 
    ! note: Dl() Dt() arrays are indexed 2:pmax - they start at 2
-   Dl(idel,idir,2) = Dl(idel,idir,2) + y2_2*(slt) 
-   Dl(idel,idir,3) = Dl(idel,idir,3) +  y22*(slt)
-   Dl(idel,idir,4) = Dl(idel,idir,4) + y2_1*(slt)
-   Dl(idel,idir,5) = Dl(idel,idir,5) + y21*(slt)
-   Dl(idel,idir,6) = Dl(idel,idir,6) + y20*(slt)
-   Dl(idel,idir,7) = Dl(idel,idir,7) + slt	!for matlab
+!   Dl(idel,idir,2) = Dl(idel,idir,2) + y2_2*(slt) 
+!   Dl(idel,idir,3) = Dl(idel,idir,3) +  y22*(slt)
+!   Dl(idel,idir,4) = Dl(idel,idir,4) + y2_1*(slt)
+!   Dl(idel,idir,5) = Dl(idel,idir,5) + y21*(slt)
+!   Dl(idel,idir,6) = Dl(idel,idir,6) + y20*(slt)
+   Dl(idel,idir,2) = Dl(idel,idir,7) + slt	!for matlab
 
 
-   Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + y2_2*(stt)
-   Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + y22*(stt)
-   Dt(idel,idir,1,4) = Dt(idel,idir,1,4) + y2_1*(stt)
-   Dt(idel,idir,1,5) = Dt(idel,idir,1,5) + y21*(stt)
-   Dt(idel,idir,1,6) = Dt(idel,idir,1,6) + y20*(stt)
-   Dt(idel,idir,1,7) = Dt(idel,idir,1,7) + stt	!for matlab
+!   Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + y2_2*(stt)
+!   Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + y22*(stt)
+!   Dt(idel,idir,1,4) = Dt(idel,idir,1,4) + y2_1*(stt)
+!   Dt(idel,idir,1,5) = Dt(idel,idir,1,5) + y21*(stt)
+!   Dt(idel,idir,1,6) = Dt(idel,idir,1,6) + y20*(stt)
+   Dt(idel,idir,1,2) = Dt(idel,idir,1,7) + stt	!for matlab
 	
 endif
 
