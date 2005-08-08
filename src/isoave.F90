@@ -115,7 +115,8 @@ if (my_pe/=io_pe) return
 
 call cwrite8(fid,time,1)
 call cwrite8(fid,u_shear,9)
-call cwrite8(fid,idir_max,1)
+x=idir_max
+call cwrite8(fid,x,1)
 
 end subroutine
 
