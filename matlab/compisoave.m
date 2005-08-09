@@ -645,6 +645,7 @@ if (klaws==4)
 % analysis of mixed structure functions
 %
 
+[ux, dir_max] = read_ux(( [name,'.ux'] )
     aniso_sfn(Dl,Dt,Dlnorm,Dtnorm,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
 

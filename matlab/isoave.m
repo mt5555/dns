@@ -21,11 +21,10 @@ ext='.isostr';
 %name='/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512a0009.0000.new'
 %nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 
-anisotropic structure functions have suffix .isostr4
+%anisotropic structure functions have suffix .isostr4
 name='/auto/nest/u/skurien/dns/src/skhel512a0005.0000'
 nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 ext='.isostr4';
-
 
 
 ndir_use=73;
