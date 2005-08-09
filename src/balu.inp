@@ -34,14 +34,9 @@ periodic     ! z bc
 
 Notes:
 2d problem use for alpha model studies
-16 cpus, 512x512 grid:   
-  % ./gridsetup.py 16 1 1 512 512 1
-  % make dns    # much faster, but requires alpha=0
-  % make dnsa   # alpha model
-  % ./dnsa -i balu.inp
-
-
-
+16 cpus, 512x512 grid:   ./gridsetup.py 16 1 1 512 512 1
+make dnsa
+./dnsa -i balu.inp
 
 1024^2 results.
 dns 16x1x1        t=.1:    .034    84 timesteps  umax=.9
