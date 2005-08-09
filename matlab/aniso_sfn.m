@@ -1,4 +1,4 @@
-function[]=aniso_sfn(Dl,Dt,Dlnorm,Dtnorm,ndelta,ndir,r_val,nx,delx_over_eta,xx)
+function[]=aniso_sfn(Dl,Dt,Dlnorm,Dtnorm,ndelta,ndir,dir_max,r_val,nx,delx_over_eta,xx)
 % this function is called from isoave.m
 
 cdir = ['k','b','g','r','m']; %colors, one for each m-comp.
@@ -65,11 +65,8 @@ figure(11)
 set(gca,'fontsize',16)
 title('Stt, matlab')
 legend('-2','2','-1','1','0')
-figure(11)
 
-%fortran calculated
-%yl = Dl(:,dir,j);
-%yt = Dt(:,dir,j);
+
 
 %  figure(12)
 %    loglog(x_plot,abs(yl),['.',cdir(j)],'MarkerSize',msize);   hold on;
@@ -89,3 +86,9 @@ figure(10)
  
 figure(11)
 loglog(xx_plot,abs(yttave),['.-','c'],'MarkerSize',msize)
+
+figure(11)
+     xs = r_val(:,dir_max)
+     yl = Dl(:,dir_max,j)
+     yt = Dt(:,dir,j)
+     loglog(x_plot, abs(yl));hold on;

@@ -7,4 +7,4 @@ fname
 ux = fread(fid,9,'float64');
 ux = reshape(ux,3,3);
 ux = ux'
-     dir_max = round(fread(fid,9,'float64'))
+     dir_max = (fread(fid,9,'float64'))
