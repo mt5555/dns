@@ -2185,6 +2185,7 @@ do idir=1,ndir
          t1 = rperp1
          t2 = rperp2
       endif
+	write(6,*)'Idir_max= ',idir_max
 enddo
 
 ! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0, (see notes rotate_gradu.tex) 
