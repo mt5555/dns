@@ -3,7 +3,7 @@ ke=0;
 nx=1;
 delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
-ext='.new.isostr';
+ext='.isostr';
 
 
 %name='/ccs/scratch/taylorm/decay/decay20480000.6034.new'
@@ -24,7 +24,7 @@ ext='.new.isostr';
 %anisotropic structure functions have suffix .isostr4
 name='/auto/nest/u/skurien/dns/src/skhel512a0005.0000'
 nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
-ext='.isostr4';
+ext='.new.isostr4';
 
 
 ndir_use=73;

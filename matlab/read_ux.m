@@ -1,10 +1,11 @@
 function[ux,dir_max] = read_ux(fname)
 
-fid=endianopen(fname,'r')
+fid=fopen(fname,'r')
 
 fname
 
+time = fread(fid,1,'float64')
 ux = fread(fid,9,'float64');
 ux = reshape(ux,3,3);
 ux = ux'
-     dir_max = (fread(fid,9,'float64'))
+     dir_max = round(fread(fid,1,'float64'))

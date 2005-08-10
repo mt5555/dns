@@ -1,5 +1,5 @@
 function[]=aniso_sfn(Dl,Dt,Dlnorm,Dtnorm,ndelta,ndir,dir_max,r_val,nx,delx_over_eta,xx)
-% this function is called from isoave.m
+% this function is called from isoave.m. It computes the mixed structure function in the j=2 speherical harmonic basis. It also computes the mixed structure function in the special direction in which the shear is maximum.
 
 cdir = ['k','b','g','r','m']; %colors, one for each m-comp.
 
@@ -90,5 +90,5 @@ loglog(xx_plot,abs(yttave),['.-','c'],'MarkerSize',msize)
 figure(11)
      xs = r_val(:,dir_max)
      yl = Dl(:,dir_max,j)
-     yt = Dt(:,dir,j)
+     yt = Dt(:,dir_max,j)
      loglog(x_plot, abs(yl));hold on;

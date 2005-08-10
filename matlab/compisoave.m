@@ -45,7 +45,7 @@ sphere_harm = 2
 
 if sphere_harm ~= 0
 
-  [Dlnorm, Dtnorm] = spher_harm_weight(Dl(:,:,6),Dt(:,:,6),sphere_harm);
+  [Dlnorm, Dtnorm] = sphere_harm_weight(Dl(:,:,6),Dt(:,:,6),sphere_harm);
 
 end
 
