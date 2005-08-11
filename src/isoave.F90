@@ -2121,6 +2121,8 @@ end subroutine
 
 
 subroutine max_shear_coordinate_system(u_shear,idir_max,t1,t2)
+use params
+
 real*8 :: u_shear(3,3),Sp(3,3),St(3,3)
 real*8 :: A(3,3)
 real*8 :: t1(3),t2(3),t1t(3),t2t(3)
