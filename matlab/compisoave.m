@@ -45,7 +45,7 @@ sphere_harm = 2
 
 if sphere_harm ~= 0
 
-  [Dlnorm, Dtnorm] = sphere_harm_weight(Dl(:,:,6),Dt(:,:,6),sphere_harm);
+  [Dlt1_wt, Dlt2_wt] = sphere_harm_weight(Dl(:,:,1),Dl(:,:,2),sphere_harm);
 
 end
 
@@ -646,8 +646,10 @@ if (klaws==4)
 %
 
 [ux, dir_max] = read_ux( [name,'.ux'] )
-    aniso_sfn(Dl,Dt,Dlnorm,Dtnorm,ndelta,ndir,dir_max,r_val,nx,delx_over_eta,xx)
-
+     aniso_sfn(Dl,Dt,Dlt1_wt,Dlt2_wt,ndelta,ndir,dir_max,r_val,nx,delx_over_eta,xx)
+     size(Dl)
+     size(Dlt1_wt)
+     size(Dlt2_wt)
 
 
 end

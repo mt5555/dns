@@ -110,9 +110,8 @@ dir(71,:)=[1,1,-3];
 dir(72,:)=[1,3,-1];
 dir(73,:)=[3,1,-1];
 
-  ndir = length(dir);
+ndir = length(dir);
 ndir_vec=1:ndir;
-%ndir_vec=[1,2,3, 4:3:ndir];
 
 for i=ndir_vec
 r = sqrt(sum(dir(i,:).^2));   % length of directional vector
