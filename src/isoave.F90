@@ -544,7 +544,7 @@ Do idir=1,ndir
            '  (',dir(:,idir),')' ,'  t2=(',xvec,')',' <t2,t2>=',sum(xvec*xvec)
    endif
 
-#if 0
+#if 1
       ! check orthoginality
       print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
            sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
@@ -2208,7 +2208,7 @@ else
    t1t = (Sp(1,2)*t1 + Sp(1,3)*t2)/norm
    
    t2t(1) = rhat(2)*t1(3) - t1(2)*rhat(3)
-   t2t(2) = -rhat(1)*t1(3) + rhat(2)*t1(1)
+   t2t(2) = -rhat(1)*t1(3) + rhat(3)*t1(1)
    t2t(3) = rhat(1)*t1(2) - t1(1)*rhat(2)
 
    t1 = t1t
