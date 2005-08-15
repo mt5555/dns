@@ -2189,8 +2189,10 @@ do idir=1,ndir
          Spmax = Sp
       endif
 enddo
+if (my_pe == io_pe) then
 write(6,*)'Idir_max= ',idir_max	
-write(7,*)'Spmax= ',Spmax
+write(6,*)'Spmax= ',Spmax
+endif
 
 ! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0, (see notes rotate_gradu.tex) 
 ! return the new t1 and t2 as expressed in the ORIGINAL coordinate system
@@ -2205,7 +2207,7 @@ else
 
    norm = 1/sqrt(Spmax(1,2)**2 + Spmax(1,3)**2)
    
-   t1t = (Spmax(1,2)*t1 + Spmax(1,3)*t2)/norm
+   t1t = (Spmax(1,2)*t1 + Spmax(1,3)*t2)*norm
    
    t2t(1) = rhat(2)*t1(3) - t1(2)*rhat(3)
    t2t(2) = -rhat(1)*t1(3) + rhat(3)*t1(1)
