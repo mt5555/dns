@@ -1363,7 +1363,7 @@ real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
 real*8 :: u_t1_sq,u_t2_sq,u_l_sq,xp
 real*8 :: u_l_3,u_t1_3,u_t2_3
 integer :: p,idel,idir
-real*8 :: y2_2, y22, y2_1, y21, y20, slt, stt
+real*8 :: y2_2, y22, y2_1, y21, y20, slt1, slt2, stt
 
 
 delu1=ur1-u1
@@ -1559,12 +1559,12 @@ if (str_type==3) then
    
 endif
 
-! the five components m = -2, 1, 0, 1, 2 of the j=2 spherical harmonic
-!projection of the mixed structure function $S_{ij}$, $i\neq j$
+! the mixed structure function $S_{ij}$, $i\neq j$
 
 if (str_type==4) then
-   slt = u_l*u_t1
-   stt = u_t1*u_t2
+   slt1 = u_l*u_t1
+  slt2 = u_1*u_t2	 
+  stt = u_t1*u_t2
    
    !the polar angle is t and the azimuthal angle  is p
 !   y2_2 = 2*rhat(1)*rhat(2)              !sint*sint*sin2p
@@ -1579,15 +1579,15 @@ if (str_type==4) then
 !   Dl(idel,idir,4) = Dl(idel,idir,4) + y2_1*(slt)
 !   Dl(idel,idir,5) = Dl(idel,idir,5) + y21*(slt)
 !   Dl(idel,idir,6) = Dl(idel,idir,6) + y20*(slt)
-   Dl(idel,idir,2) = Dl(idel,idir,7) + slt	!for matlab
-
+   Dl(idel,idir,2) = Dl(idel,idir,2) + slt1	!for matlab
+   Dl(idel,idir,3) = Dl(idel,idir,3) + slt2	
 
 !   Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + y2_2*(stt)
 !   Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + y22*(stt)
 !   Dt(idel,idir,1,4) = Dt(idel,idir,1,4) + y2_1*(stt)
 !   Dt(idel,idir,1,5) = Dt(idel,idir,1,5) + y21*(stt)
 !   Dt(idel,idir,1,6) = Dt(idel,idir,1,6) + y20*(stt)
-   Dt(idel,idir,1,2) = Dt(idel,idir,1,7) + stt	!for matlab
+   Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + stt	!for matlab
 	
 endif
 
