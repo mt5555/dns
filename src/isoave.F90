@@ -1563,7 +1563,7 @@ endif
 
 if (str_type==4) then
    slt1 = u_l*u_t1
-  slt2 = u_1*u_t2	 
+  slt2 = u_l*u_t2	 
   stt = u_t1*u_t2
    
    !the polar angle is t and the azimuthal angle  is p
@@ -2123,7 +2123,7 @@ end subroutine
 subroutine max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 use params
 
-real*8 :: u_shear(3,3),Sp(3,3),St(3,3)
+real*8 :: u_shear(3,3),Sp(3,3),St(3,3),Spmax(3,3)
 real*8 :: A(3,3)
 real*8 :: t1(3),t2(3),t1t(3),t2t(3)
 integer :: idir_max,i,j,k,l
@@ -2186,11 +2186,10 @@ do idir=1,ndir
          idir_max = idir
          t1 = rperp1
          t2 = rperp2
-      endif
-      if (my_pe == io_pe) then
-	   write(6,*)'Idir_max= ',idir_max
+         Spmax = Sp
       endif
 enddo
+write(6,*)'Idir_max= ',idir_max	
 
 ! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0, (see notes rotate_gradu.tex) 
 ! return the new t1 and t2 as expressed in the ORIGINAL coordinate system
@@ -2203,9 +2202,9 @@ if (testmax==0) then
    ! and leave t1,t2 as original
 else
 
-   norm = 1/sqrt(Sp(1,2)**2 + Sp(1,3)**2)
+   norm = 1/sqrt(Spmax(1,2)**2 + Spmax(1,3)**2)
    
-   t1t = (Sp(1,2)*t1 + Sp(1,3)*t2)/norm
+   t1t = (Spmax(1,2)*t1 + Spmax(1,3)*t2)/norm
    
    t2t(1) = rhat(2)*t1(3) - t1(2)*rhat(3)
    t2t(2) = -rhat(1)*t1(3) + rhat(3)*t1(1)
