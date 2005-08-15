@@ -2190,6 +2190,7 @@ do idir=1,ndir
       endif
 enddo
 write(6,*)'Idir_max= ',idir_max	
+write(7,*)'Spmax= ',Spmax
 
 ! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0, (see notes rotate_gradu.tex) 
 ! return the new t1 and t2 as expressed in the ORIGINAL coordinate system
