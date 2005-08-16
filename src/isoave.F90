@@ -444,7 +444,9 @@ h_epsilon=mu*h_diss
 if (h_epsilon==0) h_epsilon=1e-20
 ke=ke/ntot
 u_shear=u_shear/ntot
-
+if (my_pe==io_pe) then
+   write(6,*)'u_shear = ', u_shear
+endif
 
 eta = (mu**3 / epsilon)**.25
 lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
@@ -775,8 +777,6 @@ enddo
 epsilon=mu*ke_diss/ntot
 ke=ke/ntot
 u_shear=u_shear/ntot
-
-
 
 eta = (mu**3 / epsilon)**.25
 lambda=sqrt(10*ke*mu/epsilon)       ! single direction lambda
@@ -1563,15 +1563,15 @@ endif
 
 if (str_type==4) then
    slt1 = u_l*u_t1
-  slt2 = u_l*u_t2	 
-  stt = u_t1*u_t2
+   slt2 = u_l*u_t2	 
+   stt = u_t1*u_t2
    
    !the polar angle is t and the azimuthal angle  is p
-!   y2_2 = 2*rhat(1)*rhat(2)              !sint*sint*sin2p
-!   y22 = rhat(1)**2 - rhat(2)**2         !sint*sint*cos2p
-!   y2_1 = rhat(1)*rhat(3)                !sint*cost*cosp
-!   y21 = rhat(2)*rhat(3)                 !sint*cost*sinp
-!   y20 = (3*rhat(3)**2 - 1)              ! 3*cost*cost - 1
+   !   y2_2 = 2*rhat(1)*rhat(2)              !sint*sint*sin2p
+   !   y22 = rhat(1)**2 - rhat(2)**2         !sint*sint*cos2p
+   !   y2_1 = rhat(1)*rhat(3)                !sint*cost*cosp
+   !   y21 = rhat(2)*rhat(3)                 !sint*cost*sinp
+   !   y20 = (3*rhat(3)**2 - 1)              ! 3*cost*cost - 1
 
    ! note: Dl() Dt() arrays are indexed 2:pmax - they start at 2
 !   Dl(idel,idir,2) = Dl(idel,idir,2) + y2_2*(slt) 
@@ -2206,12 +2206,14 @@ if (testmax==0) then
 else
 
    norm = 1/sqrt(Spmax(1,2)**2 + Spmax(1,3)**2)
+!   norm = 1/sqrt(u_shear(1,2)**2 + u_shear(1,3)**2
    
    t1t = (Spmax(1,2)*t1 + Spmax(1,3)*t2)*norm
-   
-   t2t(1) = rhat(2)*t1(3) - t1(2)*rhat(3)
-   t2t(2) = -rhat(1)*t1(3) + rhat(3)*t1(1)
-   t2t(3) = rhat(1)*t1(2) - t1(1)*rhat(2)
+!   tlt = (u_shear(1,2)*t1 + u_shear(1,3)*t2)*norm
+  
+   t2t(1) = rhat(2)*t1t(3) - t1t(2)*rhat(3)
+   t2t(2) = -rhat(1)*t1t(3) + rhat(3)*t1t(1)
+   t2t(3) = rhat(1)*t1t(2) - t1t(1)*rhat(2)
 
    t1 = t1t
    t2 = t2t
