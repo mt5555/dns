@@ -645,11 +645,10 @@ if (klaws==4)
 % analysis of mixed structure functions
 %
 
-[ux, dir_max] = read_ux( [name,'.ux'] )
+[ux, dir_max] = read_ux( [name,'.ux'] );
      aniso_sfn(Dl,Dt,Dlt1_wt,Dlt2_wt,ndelta,ndir,dir_max,r_val,nx,delx_over_eta,xx)
-     size(Dl)
-     size(Dlt1_wt)
-     size(Dlt2_wt)
-
+     
+     format short g; disp(ux);
+     format
 
 end

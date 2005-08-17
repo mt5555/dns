@@ -141,7 +141,7 @@ We then compute the mixed structure function $\langle \Delta \tilde u_1 (r)
 \Delta \tilde u_2 (r)\rangle$ and 
 $\langle \Delta \tilde u_1 (r) \Delta \tilde u_3 (r)\rangle$ for that direction of $\bm{{\hat r}}$.
 
-\section*{Redundancies...}
+\section*{Redundancies}
 
 In the above procedure, we looked for the direction $ \bm{{\hat r}}$
 which gave the maximum value of $S_{12}'^2 + S_{13}'^2$.  
@@ -184,7 +184,62 @@ we limit our search to maximizing $S_{31}'^2 + S_{32}'^2$ over
 all directions in $V$.  
 
 
+\section*{Kurien's confusion}
+
+The above definition of $\bm{{\tilde t}}_1$ is confusing to me because
+it is seems to be a definition which mixes two coordinate systems. On
+the one hand, $S'_{1j}$ is the $j$-component (in the coordinate system
+where $\hat{\bm{ r}} \rightarrow 1$-component, $\hat{\bm{t}}_1
+\rightarrow 2$-component and $\hat{\bm{ t}}_2 \rightarrow
+3$-component) of the gradient of the velocity along $\hat{\bm{
+r}}$. In general $S'_{1j}$ is a three component vector expressed in
+the ($\hat{\bm{ r}}$, $\hat{\bm{t}_1}$, $\hat{\bm{t}_2}$) coordinate
+system. On the other hand $\hat{\bm{t}}_1$ and $\hat{\bm{t}}_2$ are
+expressed (in the code) in the grid-coordinate system.
+
+We must first find what the $vector$ $S'_{1j}$ looks like in the
+grid-coordinate system. So it seems to me, that we should first
+express the vector $S'_{1j}$ in the grid-coordinate system. Denote
+this representation by (superscript $g$ for $grid$)
+
+$$S^g_{1j}  =  A_{kj} S'_{1k}$$
+
+NOTE that $S^g_{1j} \neq S_{1j}$(!), the latter is the $j$-component
+of the shear in the velocity along the grid-coordinate axis
+$\bm{x}_1$.  
+
+Now, we can proceed with defining the tilde transverse coordinates as before but now using the $S^g_{1j}$ components.
+ 
+The tilde-tangent vectors are given by 
+\[
+\bm{{\tilde t}}_1 = \frac{S^g_{12}  \bm{{\hat t}}_1 +  S^g_{13}  \bm{{\hat t}}_2 }
+                         {\sqrt{ (S^g_{12})^2 +  (S^g_{13})^2 }}
+\qquad
+\bm{{\tilde t}}_2 = \bm{{\hat r}} \times \bm{{\tilde t}}_1
+\]
+so that
+\[
+\tilde S_{12} = 
+\begin{pmatrix}  S^g_{11} \\
+                 S^g_{12} \\
+                 S^g_{13} 
+\end{pmatrix}
+\cdot \bm{{\tilde t}}_1 = 
+ \sqrt{ S_{12}'^2 + S_{13}'^2 } =  \sqrt{ (S^g_{12})^2 + (S^g_{13})^2 }
+\]
+and 
+\[
+\tilde S_{13} = 
+\begin{pmatrix}  S^g_{11} \\
+                 S^g_{12} \\
+                 S^g_{13} 
+\end{pmatrix}
+\cdot \bm{{\tilde t}}_2 =  0
+\]
 
 
+We then compute the mixed structure function $\langle \Delta \tilde u_1 (r) 
+\Delta \tilde u_2 (r)\rangle$ and 
+$\langle \Delta \tilde u_1 (r) \Delta \tilde u_3 (r)\rangle$ for that direction of $\bm{{\hat r}}$.
 
 \end{document}

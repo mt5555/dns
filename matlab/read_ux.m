@@ -7,5 +7,6 @@ fname
 time = fread(fid,1,'float64')
 ux = fread(fid,9,'float64');
 ux = reshape(ux,3,3);
-ux = ux'
+format short g
+ux = ux';
      dir_max = round(fread(fid,1,'float64'))

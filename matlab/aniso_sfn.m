@@ -86,13 +86,13 @@ figure(15)
      x_plot=xs*nx*delx_over_eta;
      ylt1 = Dl(:,dir,1);
      ylt2 = Dl(:,dir,2);
-%     if (dir==dir_max)
-%     dir
-     loglog(x_plot, (ylt1),['.-','r'],'MarkerSize',msize);hold on;
-%else
-    loglog(x_plot, (ylt2),['.-','b'],'MarkerSize',msize);hold on;
+     if (dir==dir_max)
+     dir
+     loglog(x_plot, abs(ylt1),['.-','r'],'MarkerSize',msize);hold on;
+else
+    loglog(x_plot, abs(ylt1),['.-','b'],'MarkerSize',msize);hold on;
     end
-%end
+end
 
 
 figure(16)
@@ -101,11 +101,10 @@ figure(16)
      x_plot=xs*nx*delx_over_eta;
      ylt1 = Dl(:,dir,1);
      ylt2 = Dl(:,dir,2);
-%     if (dir==dir_max)
-%     dir
-     loglog(x_plot, -(ylt1),['.-','r'],'MarkerSize',msize);hold on;
-%else
-    loglog(x_plot, -(ylt2),['.-','b'],'MarkerSize',msize);hold on;
+     if (dir==dir_max)
+     dir
+     loglog(x_plot, abs(ylt1),['.-','r'],'MarkerSize',msize);hold on;
+    loglog(x_plot, abs(ylt2),['.-','b'],'MarkerSize',msize);hold on;
     end
-%end
+end
 
