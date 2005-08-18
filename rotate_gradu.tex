@@ -253,8 +253,39 @@ Comment by Mark:
 = \hat r^T  S \cdot {\tilde t}_1 
 = A_{1k} S_{kj} \cdot {\tilde t}_1 
 \end{equation}
-which suggests that you should define $S^g$ so that
-\begin{equation}S^g_{1j}  =  A_{kj} S_{1k}\end{equation}
+Now take
+\[
+   {\tilde t}_1  = \alpha {\hat t}_1 + \beta {\hat t}_1
+\]
+\[
+   {\tilde t}_2  = \beta {\hat t}_1 - \alpha {\hat t}_1
+\]
+so that
+\begin{equation}
+A_{1k} S_{kj} \cdot {\tilde t}_1  = 
+\alpha A_{1k} S_{kj} \cdot {\hat t}_1  + 
+\beta A_{1k} S_{kj} \cdot {\hat t}_2
+\end{equation}
+\begin{equation}
+ = \alpha S'_{12}  + \beta S'_{13} 
+\end{equation}
+Similarly,
+\[
+{\tilde S}_{13} = A_{1k} S_{kj} \cdot {\tilde t}_2  = 
+\beta S'_{12}  - \alpha S'_{13} 
+\]
+Thus, to summerize, 
+\[
+{\tilde S}_{12} = \alpha S'_{12}  + \beta S'_{13} 
+\]
+\[
+{\tilde S}_{13} = \beta S'_{12}  - \alpha S'_{13} 
+\]
+and thus we want to take
+\[
+  \alpha = S'_{12}  \qquad \beta = S'_{13}
+\]
+
 
 Response by Susan:
    I think there is a mistake in going from (9) to (10). I agree completely with (9). But according to (9), shouldn't 
