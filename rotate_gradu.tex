@@ -44,6 +44,8 @@
 \newcommand{\curl}{\grad \times}
 \newcommand{\gradp}{\nabla'}
 
+\newcommand{\commentout}[1]
+
 \DeclareMathOperator{\Span}{span}
 
 \title{Rotation matrix for transforming the strain tensor}
@@ -186,7 +188,7 @@ we limit our search to maximizing $S_{31}'^2 + S_{32}'^2$ over
 all directions in $V$.  
 
 
-\section*{Kurien's confusion}
+\section*{Kurien's approach}
 
 The above definition of $\bm{{\tilde t}}_1$ is confusing to me because
 it is seems to be a definition which mixes two coordinate systems. On
@@ -210,14 +212,6 @@ NOTE that $S^g_{1j} \neq S_{1j}$(!), the latter is the $j$-component
 of the shear in the velocity along the grid-coordinate axis
 $\bm{x}_1$.  
 
-BUT, there is the following relationship between $S^g$ and $S'$:
-\begin{eqnarray}
-S^g_{1}\cdot \hat{\bm {r}} = S'_{11}\\
-S^g_{1}\cdot \hat{\bm {t}}_1 = S'_{12}\\
-S^g_{1}\cdot \hat{\bm {t}}_1 = S'_{13}
-\end{eqnarray}
-
-
 Now, we can proceed with defining the tilde transverse coordinates as before but now using the $S^g_{1j}$ components.
  
 The tilde-tangent vectors are given by 
@@ -227,6 +221,14 @@ The tilde-tangent vectors are given by
 \qquad
 \bm{{\tilde t}}_2 = \bm{{\hat r}} \times \bm{{\tilde t}}_1
 \end{equation}
+
+BUT, there is the following relationship between $S^g$ and $S'$:
+\begin{eqnarray}
+S^g_{1}\cdot \hat{\bm {r}} = S'_{11}\\
+S^g_{1}\cdot \hat{\bm {t}}_1 = S'_{12}\\
+S^g_{1}\cdot \hat{\bm {t}}_2 = S'_{13}
+\end{eqnarray}
+
 so that
 \begin{equation}
 \tilde S_{12} = 
@@ -237,7 +239,7 @@ so that
 \cdot \bm{{\tilde t}}_1 = 
  \sqrt{ S_{12}'^2 + S_{13}'^2 } 
 \end{equation}
-which is equivalent to (3) because of (6)-(8), and 
+which is equivalent to (3) because of (7)-(9), and 
 \begin{equation}
 \tilde S_{13} = 
 \begin{pmatrix}  S^g_{1j}r_j \\
@@ -248,11 +250,14 @@ which is equivalent to (3) because of (6)-(8), and
 \end{equation}
 
 
+
 We then compute the mixed structure function $\langle \Delta \tilde u_1 (r) 
 \Delta \tilde u_2 (r)\rangle$ and 
 $\langle \Delta \tilde u_1 (r) \Delta \tilde u_3 (r)\rangle$ for that direction of $\bm{{\hat r}}$.
 
+So both approaches are consistent, I just had to be careful with the relationship between them.
 
+\commentout{
 Comment by Mark:
   I think there is a mistake in your formula for $\tilde S_{12}$.
 
@@ -306,4 +311,5 @@ orthogonal). That is,
 &=& \delta_{jq} A_{1p} S_{pq} \quad \mbox{(orthogonality $\Rightarrow A_{kj}A_{kq} == \delta_{jq}$)} \\ 
 &=& A_{1p} S_{pj} \quad \mbox{(Taylor definition from Eq (9) (==Eq (11)))} 
 \end{eqnarray}
+}
 \end{document}
