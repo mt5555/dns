@@ -210,31 +210,39 @@ NOTE that $S^g_{1j} \neq S_{1j}$(!), the latter is the $j$-component
 of the shear in the velocity along the grid-coordinate axis
 $\bm{x}_1$.  
 
+BUT, there is the following relationship between $S^g$ and $S'$:
+\begin{eqnarray}
+S^g_{1}\cdot \hat{\bm {r}} = S'_{11}\\
+S^g_{1}\cdot \hat{\bm {t}}_1 = S'_{12}\\
+S^g_{1}\cdot \hat{\bm {t}}_1 = S'_{13}
+\end{eqnarray}
+
+
 Now, we can proceed with defining the tilde transverse coordinates as before but now using the $S^g_{1j}$ components.
  
 The tilde-tangent vectors are given by 
 \begin{equation}
-\bm{{\tilde t}}_1 = \frac{S^g_{12}  \bm{{\hat t}}_1 +  S^g_{13}  \bm{{\hat t}}_2 }
-                         {\sqrt{ (S^g_{12})^2 +  (S^g_{13})^2 }}
+\bm{{\tilde t}}_1 = \frac{(S^g_{1}\cdot \hat{\bm{t}}_1) \bm{{\hat t}}_1 +  (S^g_{1}\cdot\hat{\bm{t}}_2) \bm{{\hat t}}_2 }
+                         {\sqrt{ (S^g_{1}\cdot \hat{\bm{t}}_1)^2 +  (S^g_{1}\cdot\hat{\bm{t}}_2)^2 }}
 \qquad
 \bm{{\tilde t}}_2 = \bm{{\hat r}} \times \bm{{\tilde t}}_1
 \end{equation}
 so that
 \begin{equation}
 \tilde S_{12} = 
-\begin{pmatrix}  S^g_{11} \\
-                 S^g_{12} \\
-                 S^g_{13} 
+\begin{pmatrix}  S^g_{1j}r_j \\
+                 S^g_{1j}(t_1)_j  \\
+                 S^g_{1j}(t_2)_j 
 \end{pmatrix}
 \cdot \bm{{\tilde t}}_1 = 
- \sqrt{ S_{12}'^2 + S_{13}'^2 } =  \sqrt{ (S^g_{12})^2 + (S^g_{13})^2 }
+ \sqrt{ S_{12}'^2 + S_{13}'^2 } 
 \end{equation}
-and 
+which is equivalent to (3) because of (6)-(8), and 
 \begin{equation}
 \tilde S_{13} = 
-\begin{pmatrix}  S^g_{11} \\
-                 S^g_{12} \\
-                 S^g_{13} 
+\begin{pmatrix}  S^g_{1j}r_j \\
+                 S^g_{1j}(t_1)_j  \\
+                 S^g_{1j}(t_2)_j 
 \end{pmatrix}
 \cdot \bm{{\tilde t}}_2 =  0
 \end{equation}
