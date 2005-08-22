@@ -2147,6 +2147,8 @@ do idir=1,ndir
          A(2,j) = rperp1(j)
          A(3,j) = rperp2(j)
       enddo
+write(6,*)'Rotation matrix = ",A
+
 !the strain matrix is the symmetric part of the shear matrix
 	u_strain = (u_shear + transpose(u_shear))/2
 
