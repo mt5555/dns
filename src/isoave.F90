@@ -2184,7 +2184,7 @@ do idir=1,ndir
 
    ! find the (rhat,rperp1,rperp2) which maximizes S_12^2 + S_13^2
      
-      testmax = Sp(1,2)**2 + Sp(1,3)**2
+      testmax = sqrt(Sp(1,2)**2 + Sp(1,3)**2)
       if (testmax .gt. maxval) then
         maxval = testmax
          idir_max = idir
@@ -2212,7 +2212,7 @@ if (testmax==0) then
    ! and leave t1,t2 as original
 else
 
-   norm = 1/sqrt(maxval)
+   norm = 1/(maxval)
    
    t1t = (Spmax(1,2)*t1 + Spmax(1,3)*t2)*norm
   
@@ -2227,14 +2227,14 @@ else
    ! test that grad_u dot t1 = maxval
    !           grad_u dot t2 = 0
 
-   err = (abs(sum(Spmax(1,:)*t1)) - sqrt(maxval))/sqrt(maxval)
+   err = (abs(sum(Spmax(1,:)*t1)) - (maxval))/(maxval)
    if (abs(err)>1e-30 ) then
-      print *,'Error <Spmax,t1> /= maxval:  ',abs(sum(Spmax(1,:)*t1)),sqrt(maxval)
+      print *,'Error <Spmax,t1> /= maxval:  ',abs(sum(Spmax(1,:)*t1)),maxval, abs(err)
    endif
 
-   err = abs(sum(Spmax(1,:)*t2))/sqrt(maxval)
+   err = abs(sum(Spmax(1,:)*t2))/maxval
    if (abs(err)>1e-30 ) then
-      print *,'Error <Spmax,t2> should be 0:  ',abs(sum(Spmax(1,:)*t2))
+      print *,'Error <Spmax,t2> should be 0:  ',abs(sum(Spmax(1,:)*t2)), abs(err)
    endif
 #endif
 endif
