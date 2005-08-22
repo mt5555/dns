@@ -491,8 +491,8 @@ if (stype==1) then
    ! <w2,w2>
    Dl_mean=0
    do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
+   do j=ny1,ny2   
+      do i=nx1,nx2
       do p=2,pmax
          Dl_mean(p)=Dl_mean(p)+Q(i,j,k,1)**2
       enddo
@@ -548,6 +548,7 @@ Do idir=1,ndir
 
 #if 1
       ! check orthoginality
+   if(my_pe==io_pe) then
       print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
            sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &
            sqrt(rperp2(1)**2+rperp2(2)**2+rperp2(3)**2)
@@ -556,6 +557,7 @@ Do idir=1,ndir
            rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3), &
            rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3), &
            rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3)
+   endif
 #endif
       xmin=abs(rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3))+ &
            abs(rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3)) + &
@@ -2123,7 +2125,7 @@ end subroutine
 subroutine max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 use params
 
-real*8 :: u_shear(3,3),Sp(3,3),St(3,3),Spmax(3,3)
+real*8 :: u_shear(3,3),u_strain(3,3),Sp(3,3),St(3,3),Spmax(3,3)
 real*8 :: A(3,3)
 real*8 :: t1(3),t2(3),t1t(3),t2t(3)
 integer :: idir_max,i,j,k,l
@@ -2133,7 +2135,7 @@ real*8 :: testmax, maxval, norm
 integer :: idir
 real*8 :: rhat(3),rperp1(3),rperp2(3) ,err
 
-maxval=0
+maxval=0.0d0
 do idir=1,ndir
    rhat = dir(:,idir)
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
@@ -2145,6 +2147,8 @@ do idir=1,ndir
          A(2,j) = rperp1(j)
          A(3,j) = rperp2(j)
       enddo
+!the strain matrix is the symmetric part of the shear matrix
+	u_strain = (u_shear + transpose(u_shear))/2
 
    ! compute S_1,2  S_1,3  in the (rhat,rperp1,rperp2 coordinate system)
 !
@@ -2172,7 +2176,7 @@ do idir=1,ndir
             do k = 1,3
                do l = 1,3
                   !           A u_shear A'  
-                  Sp(i,j) = A(i,k)*u_shear(k,l)*A(j,l)
+                  Sp(i,j) = A(i,k)*u_strain(k,l)*A(j,l)
                enddo
             enddo
          enddo
@@ -2182,7 +2186,7 @@ do idir=1,ndir
      
       testmax = Sp(1,2)**2 + Sp(1,3)**2
       if (testmax .gt. maxval) then
-         maxval = testmax
+        maxval = testmax
          idir_max = idir
          t1 = rperp1
          t2 = rperp2
@@ -2190,9 +2194,12 @@ do idir=1,ndir
       endif
 enddo
 if (my_pe == io_pe) then
+write(6,*)'u_strain = ',u_strain
 write(6,*)'Idir_max= ',idir_max	
-write(6,*)'Spmax= ',Spmax
+write(6,*)'Rotated max strain = ',Spmax
 endif
+
+
 
 ! rotate so that in the (rmax,t1,t2) coordinate system, S_13=0, (see notes rotate_gradu.tex) 
 ! return the new t1 and t2 as expressed in the ORIGINAL coordinate system
@@ -2205,11 +2212,9 @@ if (testmax==0) then
    ! and leave t1,t2 as original
 else
 
-   norm = 1/sqrt(Spmax(1,2)**2 + Spmax(1,3)**2)
-!   norm = 1/sqrt(u_shear(1,2)**2 + u_shear(1,3)**2
+   norm = 1/sqrt(maxval)
    
    t1t = (Spmax(1,2)*t1 + Spmax(1,3)*t2)*norm
-!   tlt = (u_shear(1,2)*t1 + u_shear(1,3)*t2)*norm
   
    t2t(1) = rhat(2)*t1t(3) - t1t(2)*rhat(3)
    t2t(2) = -rhat(1)*t1t(3) + rhat(3)*t1t(1)
@@ -2221,28 +2226,15 @@ else
 #if 1
    ! test that grad_u dot t1 = maxval
    !           grad_u dot t2 = 0
-   ! rotation matrix
-   A(1,:) = rhat
-   A(2,:) = t1
-   A(3,:) = t2
-   ! compute S_1,2  S_1,3  in the (rhat,rperp1,rperp2 coordinate system)
-   i=1
-   do j = 1,3
-      do k = 1,3
-         do l = 1,3
-            Sp(i,j) = A(i,k)*u_shear(k,l)*A(j,l)
-         enddo
-      enddo
-   enddo
 
-   err = sum(Sp(1,:)*t1) - maxval
-   if (abs(err)>1e-14 ) then
-      print *,'Error <Sp,t1> /= maxval:  ',sum(Sp(1,:)*t1),maxval
+   err = (abs(sum(Spmax(1,:)*t1)) - sqrt(maxval))/sqrt(maxval)
+   if (abs(err)>1e-30 ) then
+      print *,'Error <Spmax,t1> /= maxval:  ',abs(sum(Spmax(1,:)*t1)),sqrt(maxval)
    endif
 
-   err = sum(Sp(1,:)*t2)
-   if (abs(err)>1e-14 ) then
-      print *,'Error <Sp,t2> should be 0:  ',sum(Sp(1,:)*t2)
+   err = abs(sum(Spmax(1,:)*t2))/sqrt(maxval)
+   if (abs(err)>1e-30 ) then
+      print *,'Error <Spmax,t2> should be 0:  ',abs(sum(Spmax(1,:)*t2))
    endif
 #endif
 endif
