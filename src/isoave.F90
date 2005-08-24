@@ -2126,7 +2126,7 @@ subroutine max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 use params
 
 real*8 :: u_shear(3,3),u_strain(3,3),Sp(3,3),St(3,3),Spmax(3,3)
-real*8 :: A(3,3)
+real*8 :: A(3,3),As(3,3)
 real*8 :: t1(3),t2(3),t1t(3),t2t(3)
 integer :: idir_max,i,j,k,l
 real*8 :: testmax, maxval, norm
@@ -2137,6 +2137,7 @@ real*8 :: rhat(3),rperp1(3),rperp2(3) ,err
 
 maxval=0.0d0
 do idir=1,ndir
+	
    rhat = dir(:,idir)
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
    call compute_perp(rhat,rperp1,rperp2)
@@ -2147,7 +2148,6 @@ do idir=1,ndir
          A(2,j) = rperp1(j)
          A(3,j) = rperp2(j)
       enddo
-write(6,*)'Rotation matrix = ",A
 
 !the strain matrix is the symmetric part of the shear matrix
 	u_strain = (u_shear + transpose(u_shear))/2
@@ -2173,12 +2173,14 @@ write(6,*)'Rotation matrix = ",A
 !
 ! Therefor, S' = A S A'
 !
+
+Sp(:,:) = 0.0d0
       do i = 1,3
          do j = 1,3
             do k = 1,3
                do l = 1,3
                   !           A u_shear A'  
-                  Sp(i,j) = A(i,k)*u_strain(k,l)*A(j,l)
+                  Sp(i,j) = Sp(i,j) + A(i,k)*u_strain(k,l)*A(j,l)
                enddo
             enddo
          enddo
@@ -2187,18 +2189,26 @@ write(6,*)'Rotation matrix = ",A
    ! find the (rhat,rperp1,rperp2) which maximizes S_12^2 + S_13^2
      
       testmax = sqrt(Sp(1,2)**2 + Sp(1,3)**2)
+      if (my_pe==io_pe) then
+         write(6,*)'dir, testmax: ',idir,testmax
+      endif
       if (testmax .gt. maxval) then
-        maxval = testmax
+         maxval = testmax
          idir_max = idir
          t1 = rperp1
          t2 = rperp2
          Spmax = Sp
+	 As = A
       endif
 enddo
-if (my_pe == io_pe) then
-write(6,*)'u_strain = ',u_strain
+if (my_pe==io_pe) then
+write(6,*)'u_strain = '
+write(6,*)u_strain
+write(6,*)'Rotation matrix = '
+write(6,*)As
 write(6,*)'Idir_max= ',idir_max	
-write(6,*)'Rotated max strain = ',Spmax
+write(6,*)'Rotated max strain = '
+write(6,*)Spmax
 endif
 
 
@@ -2229,14 +2239,18 @@ else
    ! test that grad_u dot t1 = maxval
    !           grad_u dot t2 = 0
 
-   err = (abs(sum(Spmax(1,:)*t1)) - (maxval))/(maxval)
-   if (abs(err)>1e-30 ) then
-      print *,'Error <Spmax,t1> /= maxval:  ',abs(sum(Spmax(1,:)*t1)),maxval, abs(err)
+   err = (sum(Spmax(1,:)*t1) - maxval)/maxval
+   if(my_pe==io_pe) then
+      if (abs(err)>1e-30 ) then
+         print *,'Error <Spmax,t1> /= maxval:  ',sum(Spmax(1,:)*t1),maxval, abs(err)
+      endif
    endif
-
-   err = abs(sum(Spmax(1,:)*t2))/maxval
-   if (abs(err)>1e-30 ) then
-      print *,'Error <Spmax,t2> should be 0:  ',abs(sum(Spmax(1,:)*t2)), abs(err)
+   
+   if(my_pe==io_pe) then
+      err = sum(Spmax(1,:)*t2)/maxval
+      if (abs(err)>1e-30 ) then
+         print *,'Error <Spmax,t2> should be 0:  ',sum(Spmax(1,:)*t2), abs(err)
+      endif
    endif
 #endif
 endif
