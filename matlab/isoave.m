@@ -26,6 +26,17 @@ name='/auto/nest/u/skurien/dns/src/skhel512a0005.0000'
 nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 ext='.isostr4';
 
+%%anisotropic structure functions have suffix .isostr4
+%name='/auto/nest/u/skurien/dns/src/skhel512a0006.0000'
+%nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+%ext='.isostr4';
+
+%anisotropic structure functions have suffix .isostr4
+%name='/auto/nest/u/skurien/dns/src/skhel512a0009.0000'
+%nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+%ext='.isostr4';
+
+
 
 ndir_use=73;
 

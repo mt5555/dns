@@ -34,34 +34,39 @@ if (abs(1-sum(w))>1e-7)
   return;
 end
 
+
 msize=8;   % marker size
-  ylt1ave=0*xx;       %avg over m after angle average
+
+ylt1ave=0*xx;       %avg over m after angle average
 ylt2ave=0*xx;         %avg over m after angle average
+
 for j=1:5              % sphere-harm comps m=-2...2
-  ylt1_d=0*xx;
-  ylt2_d=0*xx;
-  for dir=1:ndir         % directions
+
+ylt1_d=0*xx;
+ylt2_d=0*xx;
+for dir=1:ndir         % directions
      x = r_val(:,dir);      % units of box length
      x_plot=x*nx*delx_over_eta;  % units of r/eta
      xx_plot = xx*nx*delx_over_eta;
 
-%matlab calculated
      ylt1 = Dlt1_wt(:,dir,j);
      ylt2 = Dlt2_wt(:,dir,j);
 
      ylt1_d = ylt1_d + w(dir)*spline(x,ylt1,xx);
      ylt2_d = ylt2_d + w(dir)*spline(x,ylt2,xx);
-  end
+end
+
 ylt1ave = ylt1ave + ylt1_d;
 ylt2ave= ylt2ave + ylt2_d;
 
-  figure(10)
-  loglog(xx_plot,abs(ylt1_d),['.',cdir(j)],'MarkerSize',msize);   hold on;
+figure(10)
+loglog(xx_plot,abs(ylt1_d),['.',cdir(j)],'MarkerSize',msize);   hold on;
 set(gca,'fontsize',16)
 title('Slt1, matlab')
-  legend('-2','2','-1','1','0')
+legend('-2','2','-1','1','0')
+
 figure(11)
-  loglog(xx_plot,abs(ylt2_d),['.',cdir(j)],'MarkerSize',msize);   hold on;
+loglog(xx_plot,abs(ylt2_d),['.',cdir(j)],'MarkerSize',msize);   hold on;
 set(gca,'fontsize',16)
 title('Slt2, matlab')
 legend('-2','2','-1','1','0')
@@ -72,8 +77,8 @@ ylt1ave = ylt1ave/5;
 ylt2ave= ylt2ave/5;
 
 figure(10)
- loglog(xx_plot,abs(ylt1ave),['.-','c'],'MarkerSize',msize);  
- legend('-2','2','-1','1','0','avg')
+loglog(xx_plot,abs(ylt1ave),['.-','c'],'MarkerSize',msize);  
+legend('-2','2','-1','1','0','avg')
 figure(11)
 loglog(xx_plot,abs(ylt2ave),['.-','c'],'MarkerSize',msize)
 legend('-2','2','-1','1','0','avg')
@@ -96,15 +101,11 @@ end
 
 
 figure(16)
-   for dir = 1:ndir
-     xs = r_val(:,dir);
+     xs = r_val(:,dir_max);
      x_plot=xs*nx*delx_over_eta;
-     ylt1 = Dl(:,dir,1);
-     ylt2 = Dl(:,dir,2);
-     if (dir==dir_max)
-     dir
+     ylt1 = Dl(:,dir_max,1);
+     ylt2 = Dl(:,dir_max,2);
      loglog(x_plot, abs(ylt1),['.-','r'],'MarkerSize',msize);hold on;
     loglog(x_plot, abs(ylt2),['.-','b'],'MarkerSize',msize);hold on;
-    end
 end
 

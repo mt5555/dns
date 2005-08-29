@@ -1,4 +1,4 @@
-function [y45,y415,y43,epsilon,h_epsilon,y215,ytt]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
+function [y45,y415,y43,epsilon,h_epsilon,y215,ytt,Dlt1_wt,Dlt2_wt]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
 %
 % compute angle average and plot a single snapshot
 % klaws==1   4/5ths  and other laws
