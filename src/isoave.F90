@@ -722,7 +722,7 @@ u_shear=0
 u_shear(1,1)=-2
 u_shear(2,2)=1
 u_shear(3,3)=1
-u_shear(3,1)=1
+u_shear(1,2)=1
 call max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 stop
 
