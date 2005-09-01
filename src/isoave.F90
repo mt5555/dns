@@ -2149,89 +2149,38 @@ do idir=1,ndir
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
    call compute_perp(rhat,rperp1,rperp2)
 
-   ! rotation matrix
-      do j = 1,3
-         A(1,j) = rhat(j)
-         A(2,j) = rperp1(j)
-         A(3,j) = rperp2(j)
-      enddo
+   u_strain = (u_shear + transpose(u_shear))/2
 
-!the strain matrix is the symmetric part of the shear matrix
-	u_strain = (u_shear + transpose(u_shear))/2
-
-   ! compute S_1,2  S_1,3  in the (rhat,rperp1,rperp2 coordinate system)
-!
-!               grad(u_1)
-!   u_shear =   grad(u_2)       (where grad(p)= row vector)
-!               grad(u_3)
-!
-!               rhat
-!         A =   rperp1          (where rhat,t1,t2 are row vectors
-!               rperp2           expressed in original grid coordinate system)
-!
-!         A A' = I
-!  u1 = A' u2              u1 = components of u in grid-coords
-!  A u1 = u2               u2 = components of u in (rhat,rperp1,rperp2) directions
-! 
-!  d(u2)/dx  = A d(u1)/dx
-! so  grad(u2) = A grad(u1)
-! <grad(u2),rhat> = derivative of u2 coordinates in rhat direction
-!                 = (A grad(u1) ) A'
-!
-! Therefor, S' = A S A'
-!
-
-Sp(:,:) = 0.0d0
-      do i = 1,3
-         do j = 1,3
-            do k = 1,3
-               do l = 1,3
-                  !           A u_shear A'  
-                  Sp(i,j) = Sp(i,j) + A(i,k)*u_strain(k,l)*A(j,l)
-               enddo
-            enddo
-         enddo
-      enddo
-
-!     Alternative way to comptue sp12, sp13:
-      sp12=0   ! sp12 = r u_shear rperp1
-      do i=1,3
-         tmp(i) = sum(u_strain(i,:)*rperp1)
-      enddo
-      sp12 = sum(tmp*rhat)
-
-      sp13=0   ! sp13 = r u_shear rperp2
-      do i=1,3
-         tmp(i) = sum(u_strain(i,:)*rperp2)
-      enddo
-      sp13 = sum(tmp*rhat)
-
-
-
-
+   sp12=0   ! sp12 = r u_shear rperp1
+   do i=1,3
+      tmp(i) = sum(u_strain(i,:)*rperp1)
+   enddo
+   sp12 = sum(tmp*rhat)
+   
+   sp13=0   ! sp13 = r u_shear rperp2
+   do i=1,3
+      tmp(i) = sum(u_strain(i,:)*rperp2)
+   enddo
+   sp13 = sum(tmp*rhat)
+   
+   
    ! find the (rhat,rperp1,rperp2) which maximizes S_12^2 + S_13^2
-     
-      testmax = sqrt(Sp(1,2)**2 + Sp(1,3)**2)
-      if (my_pe==io_pe) then
-         write(6,*)'dir, testmax: ',idir,testmax
-      endif
-      if (testmax .gt. maxval) then
-         maxval = testmax
-         idir_max = idir
-         t1 = rperp1
-         t2 = rperp2
-         Spmax = Sp
-	 As = A
-      endif
+   testmax = sqrt(Sp(1,2)**2 + Sp(1,3)**2)
+   
+   if (my_pe==io_pe) then
+      write(6,*)'dir, testmax: ',idir,testmax
+   endif
+   if (testmax .gt. maxval) then
+      maxval = testmax
+      idir_max = idir
+      t1 = rperp1
+      t2 = rperp2
+   endif
 enddo
 if (my_pe==io_pe) then
 write(6,*)'u_strain = '
 write(6,*)u_strain
-write(6,*)'Rotation matrix = '
-write(6,*)As
 write(6,*)'Idir_max= ',idir_max	
-write(6,*)'Rotated max strain = '
-write(6,*)Spmax
 endif
 
 
@@ -2258,11 +2207,24 @@ else
    t1 = t1t
    t2 = t2t
 
-#if 1
-   ! test that grad_u dot t1 = maxval
-   !           grad_u dot t2 = 0
 
-   err = (sum(Spmax(1,:)*t1) - maxval)/maxval
+#if 1
+   ! recompute sp12, sp13, using new t1,t2.  
+   ! make sure sp12=maxval, sp13=0
+
+   sp12=0   ! sp12 = r u_shear rperp1
+   do i=1,3
+      tmp(i) = sum(u_strain(i,:)*t1)
+   enddo
+   sp12 = sum(tmp*rhat)
+   sp13=0   ! sp12 = r u_shear rperp1
+   do i=1,3
+      tmp(i) = sum(u_strain(i,:)*t2)
+   enddo
+   sp13 = sum(tmp*rhat)
+   
+
+   err = (sp12-maxval)/maxval
    if(my_pe==io_pe) then
       if (abs(err)>1e-30 ) then
          print *,'Error <Spmax,t1> /= maxval:  ',sum(Spmax(1,:)*t1),maxval, abs(err)
@@ -2270,7 +2232,7 @@ else
    endif
    
    if(my_pe==io_pe) then
-      err = sum(Spmax(1,:)*t2)/maxval
+      err = sp13/maxval
       if (abs(err)>1e-30 ) then
          print *,'Error <Spmax,t2> should be 0:  ',sum(Spmax(1,:)*t2), abs(err)
       endif
