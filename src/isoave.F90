@@ -719,10 +719,11 @@ if (firstcall) then
 endif
 
 u_shear=0
-u_shear(1,1)=-2
-u_shear(2,2)=1
-u_shear(3,3)=1
+u_shear(1,1)=-1
+u_shear(2,2)=2
+u_shear(3,3)=-1
 u_shear(1,2)=1
+u_shear(1,3)=.5
 call max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 stop
 
@@ -2135,11 +2136,11 @@ real*8 :: u_shear(3,3),u_strain(3,3),Sp(3,3),St(3,3),Spmax(3,3)
 real*8 :: A(3,3),As(3,3)
 real*8 :: t1(3),t2(3),t1t(3),t2t(3)
 integer :: idir_max,i,j,k,l
-real*8 :: testmax, maxval, norm
+real*8 :: testmax, maxval, norm, sp12,sp13
 
 ! local variables
 integer :: idir
-real*8 :: rhat(3),rperp1(3),rperp2(3) ,err
+real*8 :: rhat(3),rperp1(3),rperp2(3) ,err,tmp(3)
 
 maxval=0.0d0
 do idir=1,ndir
@@ -2191,6 +2192,22 @@ Sp(:,:) = 0.0d0
             enddo
          enddo
       enddo
+
+!     Alternative way to comptue sp12, sp13:
+      sp12=0   ! sp12 = r u_shear rperp1
+      do i=1,3
+         tmp(i) = sum(u_strain(i,:)*rperp1)
+      enddo
+      sp12 = sum(tmp*rhat)
+
+      sp13=0   ! sp13 = r u_shear rperp2
+      do i=1,3
+         tmp(i) = sum(u_strain(i,:)*rperp2)
+      enddo
+      sp13 = sum(tmp*rhat)
+
+
+
 
    ! find the (rhat,rperp1,rperp2) which maximizes S_12^2 + S_13^2
      
