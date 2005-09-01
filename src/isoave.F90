@@ -718,6 +718,7 @@ if (firstcall) then
    call init
 endif
 
+#if 0
 u_shear=0
 u_shear(1,1)=-1
 u_shear(2,2)=2
@@ -726,6 +727,8 @@ u_shear(1,2)=1
 u_shear(1,3)=.5
 call max_shear_coordinate_system(u_shear,idir_max,t1,t2)
 stop
+#endif
+
 
 call zero_str
 
