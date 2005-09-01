@@ -139,7 +139,7 @@ and
 \end{pmatrix}
 \cdot \bm{{\tilde t}}_2 =  0
 \end{equation}
-
+THE ABOVE TWO EQUATIONS (3-4) ARE WRONG. SEE KURIEN SECTION.
 
 We then compute the mixed structure function $\langle \Delta \tilde u_1 (r) 
 \Delta \tilde u_2 (r)\rangle$ and 
@@ -222,31 +222,21 @@ The tilde-tangent vectors are given by
 \bm{{\tilde t}}_2 = \bm{{\hat r}} \times \bm{{\tilde t}}_1
 \end{equation}
 
-BUT, there is the following relationship between $S^g$ and $S'$:
+The following is the relationship between $S_1^g$ and $S_1'$:
 \begin{eqnarray}
 S^g_{1}\cdot \hat{\bm {r}} = S'_{11}\\
 S^g_{1}\cdot \hat{\bm {t}}_1 = S'_{12}\\
 S^g_{1}\cdot \hat{\bm {t}}_2 = S'_{13}
 \end{eqnarray}
 
-so that
+Therefore in the tilde coordinate system we have 
 \begin{equation}
-\tilde S_{12} = 
-\begin{pmatrix}  S^g_{1j}r_j \\
-                 S^g_{1j}(t_1)_j  \\
-                 S^g_{1j}(t_2)_j 
-\end{pmatrix}
-\cdot \bm{{\tilde t}}_1 = 
+\tilde S_{12} =  S^g_{1} \cdot \bm{{\tilde t}}_1 = 
  \sqrt{ S_{12}'^2 + S_{13}'^2 } 
 \end{equation}
-which is equivalent to (3) because of (7)-(9), and 
+and 
 \begin{equation}
-\tilde S_{13} = 
-\begin{pmatrix}  S^g_{1j}r_j \\
-                 S^g_{1j}(t_1)_j  \\
-                 S^g_{1j}(t_2)_j 
-\end{pmatrix}
-\cdot \bm{{\tilde t}}_2 =  0
+\tilde S_{13} = S^g_{1}\cdot \bm{{\tilde t}}_2 =  0
 \end{equation}
 
 
@@ -255,7 +245,49 @@ We then compute the mixed structure function $\langle \Delta \tilde u_1 (r)
 \Delta \tilde u_2 (r)\rangle$ and 
 $\langle \Delta \tilde u_1 (r) \Delta \tilde u_3 (r)\rangle$ for that direction of $\bm{{\hat r}}$.
 
-So both approaches are consistent, I just had to be careful with the relationship between them.
+\section*{Implementation in the code}
+Since we are only looking for maximization of $S_{12}$ in the
+maximal shear direction, all we need to compute is the following:
+
+For a given direction $\hat{\bm{r}}$
+\begin{equation}
+{S}_{12}' = \nabla (\hat {\bm{r}} \cdot \bm{u}) \cdot \hat{\bm{t}}_1
+= \hat {\bm{r}}^T  S \cdot \hat{\bm{t}}_1 
+= A_{1k} S_{kj} \cdot \hat{\bm{ t}}_1 
+\end{equation}
+and 
+\begin{equation}
+{S}_{13}' = \nabla (\hat {\bm{r}} \cdot \bm{u}) \cdot \hat{\bm{t}}_2
+= \hat {\bm{r}}^T  S \cdot \hat{\bm{t}}_2 
+= A_{1k} S_{kj} \cdot \hat{\bm{ t}}_2 
+\end{equation}
+
+Cycle through the 73 directions to find the one for which ${S}_{12}'^2
++ {S}_{13}'^2$ is maximum. Then for this shear tensor in this maximal
+strain directions, denoted by
+${\bf S}_{max}'$, find the orientation of the tranverse directions (see
+definition in previous section) which orient all the strain in the
+$(1,2)$ component of the strain,
+
+\begin{equation}
+\bm{{\tilde t}}_1 = \frac{S_{max}'_{12} \bm{{\hat t}}_1 +  S_{max}'_{13} \bm{{\hat t}}_2 }
+                         {\sqrt{S_{max}'_{12}^2 +  S_{max}'_{13}^2 }}
+\qquad
+\bm{{\tilde t}}_2 = \bm{{\hat r}} \times \bm{{\tilde t}}_1
+\end{equation}
+
+such that (this is the check for correctness):
+\begin{equation}
+{\tilde S}_{12} = \nabla (\hat{\bm{r}} \cdot \bm{u}) \cdot \tilde{\bm{t}}_1
+= \sqrt{S_{max}'_{12}^2 +  S_{max}'_{13}^2 }
+\end{equation}
+and
+\begin{equation}
+{\tilde S}_{13} = \nabla (\hat{\bm{r}} \cdot \bm{u}) \cdot \tilde{\bm{t}}_2
+= 0
+\end{equation}
+
+Return the maximum direction index, $\bm{{\tilde t}}_1$ and $\bm{{\tilde t}}_2$.
 
 \commentout{
 Comment by Mark:

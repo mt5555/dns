@@ -112,17 +112,16 @@ dir(73,:)=[3,1,-1];
 
 ndir = length(dir);
 ndir_vec=1:ndir;
-
 for i=ndir_vec
 r = sqrt(sum(dir(i,:).^2));   % length of directional vector
 rhat(1) = dir(i,1)/r;
 rhat(2) = dir(i,2)/r;
 rhat(3) = dir(i,3)/r;
 
-% the polar angle is t and the azimuthal angle  is p
 %j=1
-y1_1 =                          %sint*sinp
-y11 = 
+  y1_1 = rhat(1)
+  y11 = rhat(2)
+  y10 = rhat(3)
 
 %j=2
   y2_2 = 2*rhat(1)*rhat(2);              %sint*sint*sin2p
@@ -131,12 +130,17 @@ y11 =
   y21 = rhat(2)*rhat(3);                 %sint*cost*sinp
   y20 = (3*rhat(3)^2 - 1);              %3*cost*cost - 1 
 
-if (sphere_harm == 1)
-% for j=1
-%
-% the three components m = -1, 0, 1, j=1 spherical harmonic
-% projection of the mixed structure function $S_{ij}$, $i\neq j$
   
+if (sphere_harm == 1)
+Dlnorm(:,i,1)=Dl(:,i)*y1_1;
+Dlnorm(:,i,2)=Dl(:,i)*y11;
+Dlnorm(:,i,3)=Dl(:,i)*y10;
+
+Dtnorm(:,i,1)=Dt(:,i)*y1_1;
+Dtnorm(:,i,2)=Dt(:,i)*y11;
+Dtnorm(:,i,3)=Dt(:,i)*y1_0;
+
+end
 
 if (sphere_harm == 2) 
 % for j=2
@@ -151,18 +155,18 @@ if (sphere_harm == 2)
   y21 = rhat(2)*rhat(3);                 %sint*cost*sinp
   y20 = (3*rhat(3)^2 - 1);              %3*cost*cost - 1 
   
-Dlnorm(:,i,1)=Dl(:,i)*y2_2;
-Dlnorm(:,i,2)=Dl(:,i)*y22;
-Dlnorm(:,i,3)=Dl(:,i)*y2_1;
-Dlnorm(:,i,4)=Dl(:,i)*y21;
-Dlnorm(:,i,5)=Dl(:,i)*y20;
+Dlnorm(:,i,4)=Dl(:,i)*y2_2;
+Dlnorm(:,i,5)=Dl(:,i)*y22;
+Dlnorm(:,i,6)=Dl(:,i)*y2_1;
+Dlnorm(:,i,7)=Dl(:,i)*y21;
+Dlnorm(:,i,8)=Dl(:,i)*y20;
 
 
-Dtnorm(:,i,1)=Dt(:,i)*y2_2;
-Dtnorm(:,i,2)=Dt(:,i)*y22;
-Dtnorm(:,i,3)=Dt(:,i)*y2_1;
-Dtnorm(:,i,4)=Dt(:,i)*y21;
-Dtnorm(:,i,5)=Dt(:,i)*y20;
+Dtnorm(:,i,4)=Dt(:,i)*y2_2;
+Dtnorm(:,i,5)=Dt(:,i)*y22;
+Dtnorm(:,i,6)=Dt(:,i)*y2_1;
+Dtnorm(:,i,7)=Dt(:,i)*y21;
+Dtnorm(:,i,8)=Dt(:,i)*y20;
 
 
 
