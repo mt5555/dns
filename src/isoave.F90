@@ -2143,13 +2143,13 @@ integer :: idir
 real*8 :: rhat(3),rperp1(3),rperp2(3) ,err,tmp(3)
 
 maxval=0.0d0
+u_strain = (u_shear + transpose(u_shear))/2
+
 do idir=1,ndir
 	
    rhat = dir(:,idir)
    rhat=rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
    call compute_perp(rhat,rperp1,rperp2)
-
-   u_strain = (u_shear + transpose(u_shear))/2
 
    sp12=0   ! sp12 = r u_shear rperp1
    do i=1,3
