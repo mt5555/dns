@@ -718,7 +718,13 @@ if (firstcall) then
    call init
 endif
 
-
+u_shear=0
+u_shear(1,1)=-2
+u_shear(2,2)=1
+u_shear(3,3)=1
+u_shear(3,1)=1
+call max_shear_coordinate_system(u_shear,idir_max,t1,t2)
+stop
 
 call zero_str
 
@@ -2219,7 +2225,7 @@ endif
 rhat = dir(:,idir_max)
 rhat = rhat/sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2)
 
-if (testmax==0) then
+if (maxval==0) then
    ! in case we run this on a zero initial condition - dont crash
    ! and leave t1,t2 as original
 else
