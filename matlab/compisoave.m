@@ -35,7 +35,7 @@ xmax=1000;  % maximum x axis
 xmax2=1000;  % x axis for iso check plots
 iso_check_dir=2;  % direction to use for single direction iso_check
 
-sphere_harm = 2
+sphere_harm = 1
 
 [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...

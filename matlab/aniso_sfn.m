@@ -40,7 +40,7 @@ msize=8;   % marker size
 ylt1ave=0*xx;       %avg over m after angle average
 ylt2ave=0*xx;         %avg over m after angle average
 
-for j=1:5              % sphere-harm comps m=-2...2
+for j=1:3              % sphere-harm comps m=-1..1
 
 ylt1_d=0*xx;
 ylt2_d=0*xx;
@@ -85,7 +85,8 @@ legend('-2','2','-1','1','0','avg')
 
 
 
-figure(15)
+     if(0)
+ figure(15)
    for dir = 1:ndir
      xs = r_val(:,dir);
      x_plot=xs*nx*delx_over_eta;
@@ -97,6 +98,7 @@ figure(15)
 else
     loglog(x_plot, abs(ylt1),['.-','b'],'MarkerSize',msize);hold on;
     end
+end
 end
 
 

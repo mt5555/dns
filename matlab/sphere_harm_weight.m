@@ -119,9 +119,9 @@ rhat(2) = dir(i,2)/r;
 rhat(3) = dir(i,3)/r;
 
 %j=1
-  y1_1 = rhat(1)
-  y11 = rhat(2)
-  y10 = rhat(3)
+y1_1 = rhat(1);
+y11 = rhat(2);
+y10 = rhat(3);
 
 %j=2
   y2_2 = 2*rhat(1)*rhat(2);              %sint*sint*sin2p
@@ -131,18 +131,18 @@ rhat(3) = dir(i,3)/r;
   y20 = (3*rhat(3)^2 - 1);              %3*cost*cost - 1 
 
   
-if (sphere_harm == 1)
+%if (sphere_harm == 1)
 Dlnorm(:,i,1)=Dl(:,i)*y1_1;
 Dlnorm(:,i,2)=Dl(:,i)*y11;
 Dlnorm(:,i,3)=Dl(:,i)*y10;
 
 Dtnorm(:,i,1)=Dt(:,i)*y1_1;
 Dtnorm(:,i,2)=Dt(:,i)*y11;
-Dtnorm(:,i,3)=Dt(:,i)*y1_0;
+Dtnorm(:,i,3)=Dt(:,i)*y10;
 
-end
+%end
 
-if (sphere_harm == 2) 
+%if (sphere_harm == 2) 
 % for j=2
 %
 % the five components m = -2, 1, 0, 1, 2 of the j=2 spherical harmonic
@@ -170,6 +170,6 @@ Dtnorm(:,i,8)=Dt(:,i)*y20;
 
 
 
-end
+%end
 
 end
