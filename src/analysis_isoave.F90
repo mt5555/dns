@@ -81,10 +81,11 @@ read_uvw=.false.
 !use_max_shear_direction=.true. !use to compute shear tensor with maximum S_1,2
 
 tstart=7.0
-tstop=7.0
+tstop=.8.8
 tinc=0.2
 icount=0
 
+!number of divisions per axis, for subcube calculations
 nxdecomp=2
 nydecomp=2
 nzdecomp=2
