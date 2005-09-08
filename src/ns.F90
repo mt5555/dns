@@ -500,8 +500,8 @@ do j=1,ny_2dz
                     (Qhat(k,i,j,1)*(wy-vz) + &
                      Qhat(k,i,j,2)*(uz-wx) + &
                      Qhat(k,i,j,3)*(vx-uy)) 
-               ! compute 2*k^2 vor vor:  
-               ens_diss = ens_diss + 2*xfac*mu*xw*&
+               ! compute (1-alpha^2 k^2)^2  2*k^2 vor vor:   
+               ens_diss = ens_diss + 2*xfac*(mu*xw* (1-xw*alpha**2)**2)*  &
                     ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                
          endif
