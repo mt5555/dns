@@ -292,12 +292,11 @@ do ns=np1,np2
    enddo
    enddo
 
-   if (passive_type(ns)==4)
+   if (passive_type(ns)==4) then
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
       rhsg(i,j,k,ns)=rhsg(i,j,k,ns) - bous*Q(i,j,k,3)
-   enddo
    enddo
    enddo
    enddo
@@ -402,7 +401,7 @@ do i=nx1,nx2
    Q(i,j,k,2) = vv
    Q(i,j,k,3) = ww
 
-   if (passive_type(ns)==4)
+   if (passive_type(ns)==4) then
       Q(i,j,k,3)=Q(i,j,k,3)+bous*Q(i,j,k,np1)
    endif
 
