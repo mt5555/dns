@@ -2,7 +2,7 @@ clear
 name = 'r160000.0000'
 epsilon=.41;
 CK=1.5*epsilon^(2/3);
-namedir = '/home/wingate/data1/Rotation/r16/';
+namedir = '/home/mataylo/';
 
 fid=fopen([namedir,name,'.spec2d'],'r');
 if (fid<0) 
