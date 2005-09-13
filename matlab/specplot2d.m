@@ -1,8 +1,7 @@
-
-name = 'rotB0000.0000'
+name = 'r160000.0000'
 epsilon=.41;
 CK=1.5*epsilon^(2/3);
-namedir = '/home/mt/codes/dns_data/';
+namedir = '/home/mataylo/';
 
 fid=fopen([namedir,name,'.spec2d'],'r');
 if (fid<0) 
@@ -20,6 +19,7 @@ while (1)
   if (time<0 | time>1000) break; end;
   numkh=fread(fid,1,'float64');
   numkz=fread(fid,1,'float64');
+  spec2d=zeros([numkz,numkh]);  
 
   disp(sprintf('time=%f  kz=%f  kh=%f',time,numkz,numkh));
 
