@@ -1,7 +1,8 @@
+clear
 name = 'r160000.0000'
 epsilon=.41;
 CK=1.5*epsilon^(2/3);
-namedir = '/home/mataylo/';
+namedir = '/home/wingate/data1/Rotation/r16/';
 
 fid=fopen([namedir,name,'.spec2d'],'r');
 if (fid<0) 
@@ -32,6 +33,11 @@ while (1)
     end
     spec2d(kz,:) = s
   end
+%  for kz=1:numkz
+%    for kh = 1,numkh
+%      spec2d(kz,kh) = fread(fid,numkh+1,'float64') ;
+%    end
+%  end
 
  
   figure(1)

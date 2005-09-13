@@ -15,9 +15,9 @@ F77FIXED=
 
 
 ifeq ($(UNAME),Linux)
-   #VENDOR=LAHEY
+   VENDOR=LAHEY
    #VENDOR=PGI
-   VENDOR=INTEL8
+   #VENDOR=INTEL8
    MPI = 
    MPILIB = 
    ifeq ($(HOST),mauve.lanl.gov)
@@ -278,6 +278,9 @@ analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 
 analysis_sk: analysis_sk.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_sk analysis_sk.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+
+analysis_spec2d: analysis_spec2d.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o analysis_spec2d analysis_spec2d.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 
 clean: 

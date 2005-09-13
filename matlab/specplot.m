@@ -72,8 +72,8 @@ mu=1e-4;
 %namedir = '/home2/skurien/rotation/Rot1/';
 %name='all';
 %namedir='/home/wingate/ccs/Rotation/Rot1/';
-%name = 'Rot10000.0000';
-%namedir = '/ccs/wingate/Rotation/Rot1/';
+name = 'r160000.0000';
+namedir = '/home/wingate/data1/Rotation/r16/';
 
 
 spec_r_save=[];
