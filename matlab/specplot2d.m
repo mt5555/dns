@@ -24,7 +24,13 @@ while (1)
   disp(sprintf('time=%f  kz=%f  kh=%f',time,numkz,numkh));
 
   for kz=1:numkz
-    spec2d(kz,:) = fread(fid,numkh,'float64') ;
+    [s,count] = fread(fid,numkh,'float64') ;
+    if (count~=numkh)
+      disp('Error: error reading file')
+      count
+      size(s)
+    end
+    spec2d(kz,:) = s
   end
 
  
