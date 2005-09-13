@@ -31,7 +31,7 @@ while (1)
       count
       size(s)
     end
-    spec2d(kz,:) = s
+    spec2d(kz,:) = s';
   end
 %  for kz=1:numkz
 %    for kh = 1,numkh
