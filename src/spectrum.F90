@@ -1636,7 +1636,7 @@ do j=ny1,ny2
 !         delta = 0.1      !this value can be changed by hand
          
          !     omit modes where cos_tta is less than cutoff delta
-	if (1) then 			!check if spectra are the same
+	if (.true.) then 			!check if spectra are the same
 !         if (cos_tta > delta) then
             
             ! compute vorticity           
