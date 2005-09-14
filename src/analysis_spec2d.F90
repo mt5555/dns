@@ -75,7 +75,7 @@ if(i3dspec == 1) then
       do 
          call cread8e(fspec2d,time,1,ierr)
          print *,'read first number  time=',time,' ierr=',ierr
-         if (ierr /= 0) exit
+         if (ierr /= 1) exit
          call cread8e(fspec2d,nkh,1,ierr)
          call cread8e(fspec2d,nkz,1,ierr)
          write(6,*) "time = ",time, "nkh = ",nkh, "nkz = ",nkz
