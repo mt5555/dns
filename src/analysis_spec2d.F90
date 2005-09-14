@@ -79,8 +79,9 @@ if(i3dspec == 1) then
          call cread8e(fspec2d,nkh,1,ierr)
          call cread8e(fspec2d,nkz,1,ierr)
          write(6,*) "time = ",time, "nkh = ",nkh, "nkz = ",nkz
+         call cread8e(fspec2d,spec2d,nkh*nkz,ierr)
       enddo
-      call cread8e(fspec2d,spec2d,nkh*nkz,ierr)
+
    endif
 endif ! if(i3dspec == 1) then
 
