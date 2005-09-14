@@ -71,9 +71,10 @@ call init_model
 if(i3dspec == 1) then
    if (my_pe==io_pe)  then
       call copen("/scratch/wingate/r16/r160003.5000.spec2d","r",fspec2d,ierr)
+      print *,'opened the file ierr=',ierr
       do 
-         print *,'opened the file! '
          call cread8e(fspec2d,time,1,ierr)
+         print *,'read first number  time=',time,' ierr=',ierr
          if (ierr /= 0) exit
          call cread8e(fspec2d,nkh,1,ierr)
          call cread8e(fspec2d,nkz,1,ierr)
