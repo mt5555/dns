@@ -61,7 +61,8 @@ call init_mpi_comm3d()
 call init_model
 
 ! byte swap the input data:
-call set_byteswap_input(1);
+!call set_byteswap_input(1);
+!call set_byteswap_input(0);
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -70,7 +71,7 @@ call set_byteswap_input(1);
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if(i3dspec == 1) then
    if (my_pe==io_pe)  then
-      call copen("/home/wingate/data1/Rotation/r16/r160000.0000.spec2d","r",fspec2d,ierr)
+      call copen("/scratch/wingate/r16/r160003.5000.spec2d","r",fspec2d,ierr)
       do 
          print *,'opened the file! '
          call cread8e(fspec2d,time,1,ierr)
@@ -80,9 +81,8 @@ if(i3dspec == 1) then
          write(6,*) "time = ",time, "nkh = ",nkh, "nkz = ",nkz
       enddo
       call cread8e(fspec2d,spec2d,nkh*nkz,ierr)
-      if (ierr/=1) exit  ! error reading file
+      if (ierr/=0) exit  ! error reading file
    endif
-endif
 !
 !  error on reading the time if non zero stop. HEaders for every time too
 !
