@@ -1,5 +1,5 @@
 clear
-name = 'all'
+name = 'r160000.0000'
 epsilon=.41;
 CK=1.5*epsilon^(2/3);
 namedir = '/home/mataylo/';
@@ -12,13 +12,6 @@ if (fid<0)
   return
 end
 
-  if (asciprint == 1)
-    fidd=fopen([namedir,name,'.gnu'],'a');
-    if (fidd<0) 
-      'Error opening file',[namedir,name,'.gnu']
-      return
-    end
-  end
 
 time=0;
 while (1)
@@ -45,11 +38,6 @@ while (1)
     end
     spec2d(kz,:) = s';
   end
-%  for kz=1:numkz
-%    for kh = 1,numkh
-%      spec2d(kz,kh) = fread(fid,numkh+1,'float64') ;
-%    end
-%  end
 
  
   figure(1)
@@ -59,14 +47,37 @@ while (1)
   spec = sum(spec2d,1)/numkz;
   loglog53(numkh,spec','E0(kh) and E(kh)',2.0,6)
 
-  if (asciprint == 1) 
+  if (asciprint == 1)
+    tstamp=10000+time;
+    tstamp=sprintf('%.4f',tstamp);
+    tstamp=tstamp(2:10);
+    aname=sprintf('%s%s-%s.gnu',namedir,name,tstamp);
+    fidd=fopen(aname,'w');
+    if (fidd<0) 
+      'Error opening file',aname
+      return
+    end
     for k=1:numkh
       fprintf(fidd,'%25.15e  %25.15e \n',k,spec2d(1,k));
     end 
     fprintf(fidd,'\n');
+    fclose(fidd);
+  
+    aname=sprintf('%s%s-%s.ignu',namedir,name,tstamp);
+    fidd=fopen(aname,'w');
+    if (fidd<0) 
+      'Error opening file',aname
+      return
+    end
+    for k=1:numkh
+      fprintf(fidd,'%25.15e  %25.15e \n',k,spec(k));
+    end 
+    fprintf(fidd,'\n');
+    fclose(fidd);
+  
   end
   
   pause
 end
-fclose(fidd);
+
 
