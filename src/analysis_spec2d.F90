@@ -69,19 +69,20 @@ call set_byteswap_input(1);
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if(i3dspec == 1) then
-   call copen("/home/wingate/data1/Rotation/r16/r160000.0000.spec2d","r",fspec2d,ierr)
-   do 
-      if (my_pe==io_pe)  then
+   if (my_pe==io_pe)  then
+      call copen("/home/wingate/data1/Rotation/r16/r160000.0000.spec2d","r",fspec2d,ierr)
+      do 
          print *,'opened the file! '
          call cread8e(fspec2d,time,1,ierr)
+         if (ierr /= 0) exit
          call cread8e(fspec2d,nkh,1,ierr)
          call cread8e(fspec2d,nkz,1,ierr)
          write(6,*) "time = ",time, "nkh = ",nkh, "nkz = ",nkz
-      endif
+      enddo
       call cread8e(fspec2d,spec2d,nkh*nkz,ierr)
       if (ierr/=1) exit  ! error reading file
-   enddo
-   
+   endif
+endif
 !
 !  error on reading the time if non zero stop. HEaders for every time too
 !

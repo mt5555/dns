@@ -42,7 +42,7 @@ void FORTRAN(copen) (char fname[80],char mode[1],FILE **fid,int *err ) {
     *err=0;
     if (*fid==NULL) {
        *err=errno;
-       perror("parallel_open():");
+       perror("copen():");
        printf("Error in copen mode=%i fname=%s\n",cmode,fname);
     }
 
