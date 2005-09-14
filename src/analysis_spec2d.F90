@@ -62,7 +62,6 @@ call init_model
 
 ! byte swap the input data:
 !call set_byteswap_input(1);
-!call set_byteswap_input(0);
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -81,11 +80,7 @@ if(i3dspec == 1) then
          write(6,*) "time = ",time, "nkh = ",nkh, "nkz = ",nkz
       enddo
       call cread8e(fspec2d,spec2d,nkh*nkz,ierr)
-      if (ierr/=0) exit  ! error reading file
    endif
-!
-!  error on reading the time if non zero stop. HEaders for every time too
-!
 endif ! if(i3dspec == 1) then
 
 
