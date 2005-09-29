@@ -347,7 +347,29 @@ k_y = 2\pi$. Scaling out the $2\pi$, we get
 \[
 (j-1/2)^2 \le  l^2 +  m^2 < (j+1/2)^2.
 \]  
+\section{Comparing with Smith \& Waleffe (SM)}
 
+\subsection*{Wave numbers}
+Wave numbers are dimensional and should be computed $k_f = 2 \pi
+k_f^m$, where the superscript $m$ stands for Mark. 
 
+\subsection*{Rossby Number}
+SM computes this Rossby number,
+\begin{equation}
+  Ro = \frac{(k_f^2 \epsilon_f)^{1/3}}{\text{fcor}/2},
+\end{equation}
+where each number in the equation is computed as,
+\begin{description}
+   \item[1)] $k_f = 2 \pi k_f^m$
+   \item[2)] \epsilon_f is computed as an average through the run using
+     scalars.m. It can also be found for each time in the output file
+     if one looks at the d/dt line and hunts for the f parameter (for
+     the forcing).
+  \item[3)] fcor is an input to the code.
+\end{description}
+
+\subsection*{Time Scale}
+To be consistent with SM multiply the time in the output file by the
+time scale from SM, $t_{sm} = \frac{1}{(\epsilon_f k_f)^{1/3}}$
 
 \end{document}
