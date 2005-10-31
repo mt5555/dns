@@ -1021,7 +1021,7 @@ do idir=1,ndir
    endif
 
 
-#if 0
+#if 1
       ! check orthoginality
       print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
            sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &

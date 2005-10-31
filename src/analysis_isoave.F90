@@ -492,7 +492,6 @@ end subroutine
 
 
 
-
 subroutine convert_sk(Q,work1,work2)
 use params
 implicit none

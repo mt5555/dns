@@ -1906,4 +1906,35 @@ enddo
 enddo
 end subroutine
 
+subroutine compute_shear_cospectrum(Q,p1,work,skip_fft)
+!
+! skip_fft=1:
+!       input: Q    p1, work are work arrays
+! skip_fft=0:
+!      input: p1 (which should be Qhat).  Q is not used.  
+!
+!
+use params
+use mpi
+implicit none
+integer :: ierr,skip_fft
+real*8 :: Q(nx,ny,nz,*)
+real*8 :: p1(nx,ny,nz,*)
+real*8 :: work(nx,ny,nz)
+
+! local variables
+real*8 rwave
+real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_x_in(0:g_nx/2,n_var)   
+real*8 ::  spec_y_in(0:g_ny/2,n_var)
+real*8 ::  spec_z_in(0:g_nz/2,n_var)
+
+real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
+real*8 :: diss1,diss2,hetot,co_energy(3),xw,xfac
+integer i,j,k,jm,km,im,iwave_max,n
+
+
+
+end subroutine
+
 end module
