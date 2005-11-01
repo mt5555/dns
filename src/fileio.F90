@@ -849,7 +849,7 @@ character(len=80) message
 character(len=80) fname
 character(len=80) base,ext,ext2
 integer :: n
-real*8 :: time
+real*8 :: time,dummy
 
 if (npassive==0) return
 write(message,'(f10.4)') 10000.0000 + time
@@ -906,6 +906,29 @@ if (passive_type(np1)==2 .and. npassive==1) then
       call singlefile_io(time,q1(1,1,1,ndim),fname,work1,work2,0,io_pe)
       endif
    enddo
+endif
+
+if (passive_type(np1)==4 .and. npassive==1) then
+   ! compute PV in q1(:,:,:,1)
+   call vorticity(q1,Q,work1,work2)  ! q1 = vorticity
+
+   ! now compute    ( curl(u) + f-khat )  dot grad(theta) 
+   ! q1(:,:,:,1) = vor1*theta_x + vor2*theta_y + (vor3+f)*theta_z
+
+   ! overwrite q1(:,:,:,1) with x-component of vorticity times d(theta)/dx
+   call der(Q(1,1,1,np1),work1,dummy,work2,DX_ONLY,1)  ! work1 = theta_x
+   q1(:,:,:,1)=q1(:,:,:,1)*work1                       
+
+   call der(Q(1,1,1,np1),work1,dummy,work2,DX_ONLY,2)  ! work1 = theta_y
+   q1(:,:,:,1)=q1(:,:,:,1) + q1(:,:,:,2)*work1   
+
+   call der(Q(1,1,1,np1),work1,dummy,work2,DX_ONLY,3)  ! work1 = theta_z
+   q1(:,:,:,1)=q1(:,:,:,1) + (q1(:,:,:,3)+fcor)*work1   
+
+   ! output into a file suffixed with ".pv"   
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
+        // message(2:10) // '.pv' 
+   call singlefile_io(time,q1,fname,work1,work2,0,io_pe)
 endif
 
 end subroutine
