@@ -1299,7 +1299,7 @@ integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start
 ! m/s**2  =  m**1.5/s  kmax**-alpha  m/s
 !  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
 
-if (dealias==1) then
+if (dealias==1 .or. dealias==0) then
    ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
    ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
    km_start = g_nz/3

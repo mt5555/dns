@@ -173,6 +173,9 @@ do n=np1,np2
          ke_percent=.5
          call passive_KE_init(Q,work1,work2,n,ke_percent)
       endif
+      if (passive_type(n)==4) then
+         Q(:,:,:,n)=0
+      endif
 
 
       call global_min(Q(1,1,1,n),mn)
