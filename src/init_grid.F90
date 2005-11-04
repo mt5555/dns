@@ -52,24 +52,26 @@ call print_message(message)
 ! cns.F90 to advect them, and here assign all extra variables
 ! if n_var>5 to be passive scalars
 !
+
+
 if (equations==NS_UVW) then
    ! NS_UVW requires u,v,w (n_var>=3) even for 2d problems
-   if (n_var>3) then
-      ! prognostic variables > 3 are passive scalars:
-      npassive=n_var-3
+   ! prognostic variables > 3 are passive scalars:
+   npassive=max(0,n_var-3)
       
-      if (npassive>input_npassive) then
-            print *,'WARNING: input file gives data for ',input_npassive,' passive scalars'
-            print *,'but dimensions are setup for ',npassive,' passive scalars'
-      endif
-      if (npassive<input_npassive) then
-         if (io_pe==my_pe) then
-            print *,'WARNING: input file gives data for ',input_npassive,' passive scalars'
-            print *,'but dimensions are setup for ',npassive,' passive scalars'
-         endif
-      endif
-      npassive=min(npassive,input_npassive)
+   if (npassive>input_npassive) then
+      print *,'WARNING: input file gives data for ',input_npassive,' passive scalars'
+      print *,'but dimensions are setup for ',npassive,' passive scalars'
    endif
+   if (npassive<input_npassive) then
+      if (io_pe==my_pe) then
+         print *,'ERROR: input file gives data for ',input_npassive,' passive scalars'
+         print *,'but dimensions are setup for ',npassive,' passive scalars'
+         call abort('stopping...')
+      endif
+   endif
+   npassive=min(npassive,input_npassive)
+
    if (npassive>0) then
       np1=4
       np2=np1+npassive-1
