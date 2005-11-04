@@ -184,10 +184,11 @@ do n=np1,np2
       write(message,'(a,2f17.5)') 'initial passive scalar min/max: ',mn,mx
       call print_message(message)	
 
+      ! skip smoothing step ?
+      if (passive_type(n)==2 .or. passive_type(n)==4) exit  
 
-      if (passive_type(n)==2) exit  ! skip smoothing step
+
       call print_message("smothing passive scalar...")
-      
       ! filter
       call fft3d(Q(1,1,1,n),work1)
       call fft_filter_dealias(Q(1,1,1,n))
