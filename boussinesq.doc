@@ -1,0 +1,9 @@
+These are notes for running the boussinesq equations.
+
+To begin use gridsetup
+
+./gridsetup.py 1 1 1 32 128 128 128 2 2 2 0 0 0 4
+
+make dnsz (so we have all the aspect ratio stuff in the code).
+
+
