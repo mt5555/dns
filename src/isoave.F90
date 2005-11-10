@@ -298,6 +298,9 @@ end subroutine
 !       subcube code will still work)
 !
 !
+!  stype=4   assume Q is (u,v,w) and 1 scalar q.  compute standard velocity
+!                structure functions and mixed velocity q structure functions
+!
 !  stype=3   assume Q is (u,v,w) data.  compute standard velocity
 !                                    structure functions
 !
@@ -344,9 +347,13 @@ if (firstcall) then
 endif
 
 nd=3  ! number of variables stored in Q.
-if (stype==3) nd=3
+if (stype==4) nd=4
 if (stype==2) nd=2
 if (stype==1) nd=1
+
+if (nd > n_var) then
+   call abort("n_var insufficint for chosen stype/nd structure functions")
+endif
 
 ntranspose=0
 ntot=real(g_nx)*g_ny*g_nz
@@ -1139,10 +1146,15 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
          else if (stype==1) then
             call accumulate_scalar_str(idir,idel, &
               Q(i,j,k,1),Q(i2,j2,k,1))
-         else
+         else if (stype==3)
             call accumulate_str(idir,idel, &
               Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),&
               Q(i2,j2,k,1),Q(i2,j2,k,2),Q(i2,j2,k,3), &
+              rhat,rperp1,rperp2)
+         else if (stype==4)
+            call accumulate_str_uq(idir,idel, &
+              Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),Q(i,j,k,4),&
+              Q(i2,j2,k,1),Q(i2,j2,k,2),Q(i2,j2,k,3),Q(i2,j2,k,4), &
               rhat,rperp1,rperp2)
          endif
 
@@ -1212,10 +1224,15 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
          else if (stype==1) then
             call accumulate_scalar_str(idir,idel, &
               Q(k,i,j,1),Q(k2,i2,j,1))
-         else
+         else if (stype==3)
             call accumulate_str(idir,idel, &
               Q(k,i,j,1),Q(k,i,j,2),Q(k,i,j,3),&
               Q(k2,i2,j,1),Q(k2,i2,j,2),Q(k2,i2,j,3), &
+         else if (stype==4)
+            call accumulate_str_uq(idir,idel, &
+              Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),Q(i,j,k,4),&
+              Q(i2,j2,k,1),Q(i2,j2,k,2),Q(i2,j2,k,3),Q(i2,j2,k,4), &
+              rhat,rperp1,rperp2)
               rhat,rperp1,rperp2)
          endif
 
@@ -1593,8 +1610,6 @@ if (str_type==4) then
 !   Dl(idel,idir,6) = Dl(idel,idir,6) + y20*(slt)
    Dl(idel,idir,2) = Dl(idel,idir,2) + slt1	!for matlab
    Dl(idel,idir,3) = Dl(idel,idir,3) + slt2	
-!  Beth's third order correlation of q and velocity
-!   Dl(idel,idir,4) = Dl(idel,idir,4) + q*qr*u_l
 
 !   Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + y2_2*(stt)
 !   Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + y22*(stt)
@@ -1604,6 +1619,46 @@ if (str_type==4) then
    Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + stt	!for matlab
 	
 endif
+
+end subroutine 
+
+
+
+
+subroutine accumulate_str_uq(idir,idel,u1,u2,u3,q1,ur1,ur2,ur3,qr,rhat,rperp1,rperp2)
+!
+!  (u1,u2,u3)      velocity at the point x
+!  (ur1,ur2,ur3)   velocity at the point x+r
+!      q           scalar at the point x
+!      qr          scalar at the point x+r
+!
+!
+real*8 :: u1,u2,u3,ur1,ur2,ur3,q,qr   
+real*8 :: rhat(3),rperp1(3),rperp2(3)
+
+real*8 :: delu1,delu2,delu3
+real*8 :: u_l,u_t1,u_t2,ux_t1,ux_t2,ur_t1,ur_t2
+real*8 :: u_t1_sq,u_t2_sq,u_l_sq,xp
+real*8 :: u_l_3,u_t1_3,u_t2_3
+integer :: p,idel,idir
+real*8 :: y2_2, y22, y2_1, y21, y20, slt1, slt2, stt
+
+! compute the velocit increments:
+delu1=ur1-u1
+delu2=ur2-u2
+delu3=ur3-u3
+
+! compute longitudinal and transverse components
+u_l  = delu1*rhat(1)+delu2*rhat(2)+delu3*rhat(3)
+u_t1 = delu1*rperp1(1)+delu2*rperp1(2)+delu3*rperp1(3)
+u_t2 = delu1*rperp2(1)+delu2*rperp2(2)+delu3*rperp2(3)
+
+! note: Dl() Dt() arrays are indexed 2:pmax - they start at 2
+
+!  Beth's third order correlation of q and velocity
+!   Dl(idel,idir,4) = Dl(idel,idir,4) + q*qr*u_l
+Dl(idel,idir,2) = Dl(idel,idir,2) + q*qr*u_l
+	
 
 end subroutine 
 
