@@ -1593,6 +1593,8 @@ if (str_type==4) then
 !   Dl(idel,idir,6) = Dl(idel,idir,6) + y20*(slt)
    Dl(idel,idir,2) = Dl(idel,idir,2) + slt1	!for matlab
    Dl(idel,idir,3) = Dl(idel,idir,3) + slt2	
+!  Beth's third order correlation of q and velocity
+!   Dl(idel,idir,4) = Dl(idel,idir,4) + q*qr*u_l
 
 !   Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + y2_2*(stt)
 !   Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + y22*(stt)

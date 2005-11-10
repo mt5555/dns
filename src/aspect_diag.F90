@@ -82,10 +82,30 @@ endif
 
 
 
-
+!
+! the "expensive" scalars
+!
+! call compute_expensive_scalars(  )
+! output these to a file...
 
 
 end subroutine
+
+
+
+
+subroutine compute_expensive_scalars
+end subrutine
+
+
+
+
+subroutine compute_pv_dissipation()
+end subroutine
+
+
+
+
 
 
 
