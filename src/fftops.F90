@@ -351,6 +351,128 @@ enddo
 end subroutine
 
 
+subroutine potential_vorticity(littleq,vor,u,d1,work,pv_type)
+use params
+use fft_interface
+use transpose
+implicit none
+!
+! For the moment we've stored theta in u(:,:,:,4)
+!
+!
+
+real*8 u(nx,ny,nz,3)    ! input
+real*8 vor(nx,ny,nz,3)  ! used for pv
+real*8 d1(nx,ny,nz) 
+real*8 work(nx,ny,nz) 
+real*8 pv(nx,ny,nz)          ! output
+integer pv_type
+!bw  pv_type
+!bw  full    = 1   q = omega_a dot grad theta + fcor d theta/dz -bous omega_3
+!bw  i         2   q = omega dot grad theta
+!bw  ii        3   q = omega_3 - fcor/bous d theta / dz
+!bw  iii       4   q = d theta / d z
+!bw  iv        5   q = omega_3
+!bw  v         6   q = bous omega_3 + omega_i diff_i theta
+!bw  vi        7   q = fcor d theta / d z + omega_i diff_i theta
+
+! local variables
+integer i,j,k,n
+real*8 dummy(1)
+
+if (n_var<3) call abort("potential vorticity() requires n_var>2")
+!
+!   First compute the vorticity - while we do need the absolute
+!   vorticity we'll add in coriolis  later (so we can computep different
+!   types of pv)
+!
+vor=0
+do n=1,ndim
+
+   ! compute u_x, u_xx
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,1)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (n==3) vor(i,j,k,2) = vor(i,j,k,2) - d1(i,j,k)
+      if (n==2) vor(i,j,k,3) = vor(i,j,k,3) + d1(i,j,k)
+   enddo
+   enddo
+   enddo
+
+   ! compute u_y, u_yy
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,2)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (n==3) vor(i,j,k,1) = vor(i,j,k,1) + d1(i,j,k)
+      if (n==1) vor(i,j,k,3) = vor(i,j,k,3) -d1(i,j,k)
+   enddo
+   enddo
+   enddo
+
+   if (ndim==3) then
+   ! compute u_z, u_zz
+   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      if (n==2) vor(i,j,k,1) = vor(i,j,k,1) -d1(i,j,k)/Lz
+      if (n==1) vor(i,j,k,2) = vor(i,j,k,2) +d1(i,j,k)/Lz
+   enddo
+   enddo
+   enddo
+   endif
+
+enddo
+
+!
+! Next, dot this into the gradiant of the density.
+!
+littleq = 0
+!compute theta_x
+call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   littleq = littleq + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+enddo
+enddo
+enddo
+
+! compute theta_y
+call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   littleq = littleq + d1(i,j,k)*vor(i,j,k,2)
+enddo 
+enddo
+enddo
+
+! compute theta_z -- do not forget to add in coriolis here
+call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   littleq = littleq + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
+enddo
+enddo
+enddo
+
+! add in the last term
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   littleq = littleq - bous*vor(i,j,k,3)
+enddo
+enddo
+enddo
+
+end subroutine
+
+
 
 subroutine vorticity2d(vor,u,d1,work)
 use params

@@ -95,7 +95,7 @@ end subroutine
 
 
 subroutine compute_expensive_scalars
-end subrutine
+end subroutine
 
 
 

@@ -647,10 +647,10 @@ if (my_pe==io_pe) then
    enddo
    call cclose(fid,ierr)
 
-   if (npassive>0) then
-      call abort("Error: ouput of 2d spectrum for scalers not coded")
-      ! add spectrum of scalars
-   endif
+!   if (npassive>0) then
+!      call abort("Error: ouput of 2d spectrum for scalers not coded")
+!      ! add spectrum of scalars
+!   endif
 
 endif
 end subroutine
