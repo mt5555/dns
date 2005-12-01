@@ -381,94 +381,269 @@ integer i,j,k,n
 real*8 dummy(1)
 
 if (n_var<3) call abort("potential vorticity() requires n_var>2")
-!
-!   First compute the vorticity - while we do need the absolute
-!   vorticity we'll add in coriolis  later (so we can computep different
-!   types of pv)
-!
-vor=0
-do n=1,ndim
 
+!bw
+!bw   We need to compute the vorticity.
+!bw   First compute the vorticity - while we do need the absolute
+!bw   vorticity we'll add in coriolis  later (so we can computep different
+!bw   types of pv)
+!bw
+vor=0
+!bw
+!bw   Here I compute the vorticity but there's no reason why I cannot
+!bw   just call the function. I just didn't know if a function call
+!bw   was any better or worse regarding efficiency than computing it
+!bw   in this subroutine.
+!
+
+do n=1,ndim
+   
    ! compute u_x, u_xx
    call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,1)
    do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      if (n==3) vor(i,j,k,2) = vor(i,j,k,2) - d1(i,j,k)
-      if (n==2) vor(i,j,k,3) = vor(i,j,k,3) + d1(i,j,k)
+      do j=ny1,ny2
+         do i=nx1,nx2
+            if (n==3) vor(i,j,k,2) = vor(i,j,k,2) - d1(i,j,k)
+            if (n==2) vor(i,j,k,3) = vor(i,j,k,3) + d1(i,j,k)
+         enddo
+      enddo
    enddo
-   enddo
-   enddo
-
+   
    ! compute u_y, u_yy
    call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,2)
    do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      if (n==3) vor(i,j,k,1) = vor(i,j,k,1) + d1(i,j,k)
-      if (n==1) vor(i,j,k,3) = vor(i,j,k,3) -d1(i,j,k)
+      do j=ny1,ny2
+         do i=nx1,nx2
+            if (n==3) vor(i,j,k,1) = vor(i,j,k,1) + d1(i,j,k)
+            if (n==1) vor(i,j,k,3) = vor(i,j,k,3) -d1(i,j,k)
+         enddo
+      enddo
    enddo
-   enddo
-   enddo
-
+   
    if (ndim==3) then
-   ! compute u_z, u_zz
-   call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,3)
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      if (n==2) vor(i,j,k,1) = vor(i,j,k,1) -d1(i,j,k)/Lz
-      if (n==1) vor(i,j,k,2) = vor(i,j,k,2) +d1(i,j,k)/Lz
-   enddo
-   enddo
-   enddo
+      ! compute u_z, u_zz
+      call der(u(1,1,1,n),d1,dummy,work,DX_ONLY,3)
+      do k=nz1,nz2
+         do j=ny1,ny2
+            do i=nx1,nx2
+               if (n==2) vor(i,j,k,1) = vor(i,j,k,1) -d1(i,j,k)/Lz
+               if (n==1) vor(i,j,k,2) = vor(i,j,k,2) +d1(i,j,k)/Lz
+            enddo
+         enddo
+      enddo
    endif
-
+   
 enddo
-
+   
+if(pv_type == 1) then
+   !bw
+   !bw Next, dot this into the gradiant of the density.
+   !bw
+   !bw Assume the density, (\tilde(rho)) is in u(:,:,:,4).
+   !bw
+   pv = 0
+   !compute theta_x
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_y
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,2)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_z -- do not forget to add in coriolis here
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
+         enddo
+      enddo
+   enddo
+   
+   ! add in the last term
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) - bous*vor(i,j,k,3)
+         enddo
+      enddo
+   enddo
+   
+elseif (pv_type == 2) then
 !
-! Next, dot this into the gradiant of the density.
+! pv = omega dot grad theta
 !
-littleq = 0
-!compute theta_x
-call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   pv = 0
+   !compute theta_x
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_y
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,2)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_z -- do not forget to add in coriolis here
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*vor(i,j,k,3)
+         enddo
+      enddo
+   enddo
+   
+elseif (pv_type == 3) then
+   !bw
+   !bw pv = -bous * omega_3 +  fcor theta / d z
+   !bw
+   pv = 0
+   ! compute theta_z -- do not forget to add in coriolis here
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) -bous*vor(i,j,k,3) &
+                           +fcor*d1(i,j,k)/Lz
+         enddo
+      enddo
+   enddo
 
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   littleq = littleq + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
-enddo
-enddo
-enddo
+elseif (pv_type == 4) then
+   !bw
+   !bw pv = fcor * d theta / d z
+   !bw
+   pv = 0
+   ! compute theta_z -- do not forget to add in coriolis here
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + fcor *d1(i,j,k)/Lz
+         enddo
+      enddo
+   enddo
+elseif (pv_type == 5) then
+   !bw
+   !bw pv = -bous * omega_3
+   !bw
+   pv = 0
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) -bous * vor(i,j,k,3)
+         enddo
+      enddo
+   enddo
 
-! compute theta_y
-call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   littleq = littleq + d1(i,j,k)*vor(i,j,k,2)
-enddo 
-enddo
-enddo
+elseif (pv_type == 6) then
+!
+! pv = omega dot grad theta - bous * omega_3
+!
+   pv = 0
+   !compute theta_x
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_y
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,2)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_z -- do not forget to add in coriolis here
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*vor(i,j,k,3)
+         enddo
+      enddo
+   enddo
+ 
+   ! add on the last term
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) - bous*vor(i,j,k,3)
+         enddo
+      enddo
+   enddo
 
-! compute theta_z -- do not forget to add in coriolis here
-call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   littleq = littleq + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
-enddo
-enddo
-enddo
+elseif (pv_type == 7) then
+!
+! pv = omega dot grad theta + fcor  d theta / d z
+!
+   pv = 0
+   !compute theta_x
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_y
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,2)
+         enddo
+      enddo
+   enddo
+   
+   ! compute theta_z -- do not forget to add in coriolis here
+   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
+         enddo
+      enddo
+   enddo
 
-! add in the last term
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   littleq = littleq - bous*vor(i,j,k,3)
-enddo
-enddo
-enddo
+endif
+
 
 end subroutine
 
