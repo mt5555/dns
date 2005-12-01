@@ -80,7 +80,7 @@ compute_hspec=.false.
 read_uvw=.false.
 !use_max_shear_direction=.true. !use to compute shear tensor with maximum S_1,2
 
-tstart=7.0
+tstart=7.6
 tstop=8.8
 tinc=0.2
 icount=0
