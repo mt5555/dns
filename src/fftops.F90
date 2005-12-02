@@ -351,7 +351,7 @@ enddo
 end subroutine
 
 
-subroutine potential_vorticity(littleq,vor,u,d1,work,pv_type)
+subroutine potential_vorticity(pv,vor,u,d1,work,pv_type)
 use params
 use fft_interface
 use transpose
@@ -361,7 +361,7 @@ implicit none
 !
 !
 
-real*8 u(nx,ny,nz,3)    ! input
+real*8 u(nx,ny,nz,n_var)    ! input
 real*8 vor(nx,ny,nz,3)  ! used for pv
 real*8 d1(nx,ny,nz) 
 real*8 work(nx,ny,nz) 
@@ -448,7 +448,7 @@ if(pv_type == 1) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)
          enddo
       enddo
    enddo
@@ -468,7 +468,7 @@ if(pv_type == 1) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
          enddo
       enddo
    enddo
@@ -477,7 +477,7 @@ if(pv_type == 1) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) - bous*vor(i,j,k,3)
+            pv(i,j,k) = pv(i,j,k) - bous*vor(i,j,k,3)
          enddo
       enddo
    enddo
@@ -489,11 +489,11 @@ elseif (pv_type == 2) then
    pv = 0
    !compute theta_x
    call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
-   
+
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)*vor(i,j,k,1)
          enddo
       enddo
    enddo
@@ -503,7 +503,7 @@ elseif (pv_type == 2) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,2)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)*vor(i,j,k,2)
          enddo
       enddo
    enddo
@@ -513,7 +513,7 @@ elseif (pv_type == 2) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*vor(i,j,k,3)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)/Lz*vor(i,j,k,3)
          enddo
       enddo
    enddo
@@ -528,7 +528,7 @@ elseif (pv_type == 3) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) -bous*vor(i,j,k,3) &
+            pv(i,j,k) = pv(i,j,k) -bous*vor(i,j,k,3) &
                            +fcor*d1(i,j,k)/Lz
          enddo
       enddo
@@ -544,7 +544,7 @@ elseif (pv_type == 4) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + fcor *d1(i,j,k)/Lz
+            pv(i,j,k) = pv(i,j,k) + fcor *d1(i,j,k)/Lz
          enddo
       enddo
    enddo
@@ -556,7 +556,7 @@ elseif (pv_type == 5) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) -bous * vor(i,j,k,3)
+            pv(i,j,k) = pv(i,j,k) -bous * vor(i,j,k,3)
          enddo
       enddo
    enddo
@@ -572,7 +572,7 @@ elseif (pv_type == 6) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)*vor(i,j,k,1)
          enddo
       enddo
    enddo
@@ -582,7 +582,7 @@ elseif (pv_type == 6) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,2)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)*vor(i,j,k,2)
          enddo
       enddo
    enddo
@@ -592,7 +592,7 @@ elseif (pv_type == 6) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*vor(i,j,k,3)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)/Lz*vor(i,j,k,3)
          enddo
       enddo
    enddo
@@ -601,7 +601,7 @@ elseif (pv_type == 6) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) - bous*vor(i,j,k,3)
+            pv(i,j,k) = pv(i,j,k) - bous*vor(i,j,k,3)
          enddo
       enddo
    enddo
@@ -617,7 +617,7 @@ elseif (pv_type == 7) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,1)(nx,ny,nz)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)*vor(i,j,k,1)
          enddo
       enddo
    enddo
@@ -627,7 +627,7 @@ elseif (pv_type == 7) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)*vor(i,j,k,2)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)*vor(i,j,k,2)
          enddo
       enddo
    enddo
@@ -637,7 +637,7 @@ elseif (pv_type == 7) then
    do k=nz1,nz2
       do j=ny1,ny2
          do i=nx1,nx2
-            pv(nx,ny,nz) = pv(nx,ny,nz) + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
+            pv(i,j,k) = pv(i,j,k) + d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
          enddo
       enddo
    enddo
