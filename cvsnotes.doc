@@ -1,0 +1,54 @@
+=================================================================
+Initial Setup
+=================================================================
+Put this in your .login:
+setenv CVS_RSH ssh
+
+Put this in your .ssh/config:
+
+Host dosadi
+Hostname solano.homeip.net
+HostKeyAlias dosadi
+User your-user-name-on-dosadi
+
+
+
+
+Now check that you can login to the CVS server by running:
+
+ssh dosadi
+
+=================================================================
+Initial checkout of CVS repository (only done once)
+=================================================================
+cvs -d username@dosadi:/home/mt/cvsroot checkout dns
+
+
+
+=================================================================
+CVS commands
+=================================================================
+1. Get the latest version.  Any changes other people have committed will
+be merged into your current checkout.
+
+% cvs update
+
+
+2. Commit changes you've made back to the repository:
+
+% cvs commit
+
+
+3. Get information about one of your checked out file:
+
+% cvs status filename
+
+
+
+
+  
+
+
+
+
+
