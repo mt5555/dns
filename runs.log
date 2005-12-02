@@ -2,6 +2,11 @@
 6/30/2005
 rotation case (modeled after leslie smith's run)
 
+to add passive scalar:
+./gridsetup.py 1 1 32 128 128 128 2 2 2 0 0 0 4
+
+
+
 256x256x32    R0=.88, .48,  .16
 R0 = (epsilon_f * (2pi k_f)**2 )**(1/3) / (.5*fcor)         
 
