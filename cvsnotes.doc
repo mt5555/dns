@@ -24,11 +24,16 @@ Initial checkout of CVS repository (only done once)
 =================================================================
 cvs -d username@dosadi:/home/mt/cvsroot checkout dns
 
+this will create a directory dns containing the source code
+
 
 
 =================================================================
 CVS commands
 =================================================================
+these commands are run from within the dns directory, or a subdirectory
+of dns:
+
 1. Get the latest version.  Any changes other people have committed will
 be merged into your current checkout.
 
