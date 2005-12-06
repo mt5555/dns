@@ -460,6 +460,9 @@ do j=1,ny_2dz
                xw2=xw2+hyper_scale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
                xw_viss=xw_viss + mu_hyper_value*xw2
             endif
+            if (mu_hyper==0) then
+               xw_viss=xw_viss + mu_hyper_value
+            endif
             if (mu_hypo==1 .and. xw>0) then
                xw_viss=xw_viss + mu_hypo_value/xw
             endif

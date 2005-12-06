@@ -701,7 +701,7 @@ call print_message(message)
 endif
 
 
-if (mu_hyper>1) then
+if (mu_hyper_value>0) then
 write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu_hyper_value
 call print_message(message)
 !kmode=1
@@ -2143,6 +2143,9 @@ read(5,'(a12)') sdata
 read(5,*) rvalue
 if (sdata=='none') then
    ! do nothing
+else if (sdata=='hyper0') then
+   mu_hyper=0
+   mu_hyper_value = rvalue
 else if (sdata=='hyper4') then
    mu_hyper=2
    mu_hyper_value = rvalue
