@@ -511,7 +511,7 @@ do j=1,ny_2dz
 !               ens_diss = ens_diss + 2*xfac*(mu*xw* (1+xw*alpha**2)**2)*  &
 !                    ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                else
-                  ens_diss = ens_diss + 2*xfac*mu*xw_viss)*  &
+                  ens_diss = ens_diss + 2*xfac*mu*xw_viss*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                endif
                
