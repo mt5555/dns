@@ -1231,8 +1231,8 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
               rhat,rperp1,rperp2)
          else if (stype==4) then
             call accumulate_str_uq(idir,idel, &
-              Q(i,j,k,1),Q(i,j,k,2),Q(i,j,k,3),Q(i,j,k,4),&
-              Q(i2,j2,k,1),Q(i2,j2,k,2),Q(i2,j2,k,3),Q(i2,j2,k,4), &
+              Q(k,i,j,1),Q(k,i,j,2),Q(k,i,j,3),Q(k,i,j,4),&
+              Q(k2,i2,j,1),Q(k2,i2,j,2),Q(k2,i2,j,3),Q(k2,i2,j,4), &
               rhat,rperp1,rperp2)
          endif
 
@@ -1633,7 +1633,7 @@ subroutine accumulate_str_uq(idir,idel,u1,u2,u3,q1,ur1,ur2,ur3,qr,rhat,rperp1,rp
 !      qr          scalar at the point x+r
 !
 !
-real*8 :: u1,u2,u3,ur1,ur2,ur3,q,qr,q1   
+real*8 :: u1,u2,u3,ur1,ur2,ur3,qr,q1   
 real*8 :: rhat(3),rperp1(3),rperp2(3)
 
 real*8 :: delu1,delu2,delu3
@@ -1656,8 +1656,8 @@ u_t2 = delu1*rperp2(1)+delu2*rperp2(2)+delu3*rperp2(3)
 ! note: Dl() Dt() arrays are indexed 2:pmax - they start at 2
 
 !  Beth's third order correlation of q and velocity
-!   Dl(idel,idir,4) = Dl(idel,idir,4) + q*qr*u_l
-Dl(idel,idir,2) = Dl(idel,idir,2) + q*qr*u_l
+!   Dl(idel,idir,4) = Dl(idel,idir,4) + q1*qr*u_l
+Dl(idel,idir,2) = Dl(idel,idir,2) + q1*qr*u_l
 	
 
 end subroutine 
