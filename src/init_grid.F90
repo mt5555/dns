@@ -2099,6 +2099,9 @@ else if (sdata=='sto_high_10') then
 else if (sdata=='sto_high_8') then
    forcing_peak_waveno=8
    forcing_type=8
+else if (sdata=='sto_high_3') then
+   forcing_peak_waveno=3
+   forcing_type=8
 else if (sdata=='sto_high_4') then
    forcing_peak_waveno=4
    forcing_type=8
