@@ -62,7 +62,7 @@ real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
-real*8 ::  cosph_ipdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) for each k
+real*8 ::  cosphi_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) for each k
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -705,6 +705,10 @@ if (my_pe==io_pe) then
       tmp_pdf=costta_pdf(i,:)
       call cwrite8(fid,tmp_pdf,nbin)
    enddo
+   do i=1,1+iwave
+      tmp_pdf=cosphi_pdf(i,:)
+      call cwrite8(fid,tmp_pdf,nbin)
+   enddo   
    call cclose(fid,ierr)
    
 endif
@@ -1456,7 +1460,7 @@ real*8 ::  spec_z_in(0:g_nz/2,n_var)
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
 real*8 :: WR(3),WI(3)
-real*8 :: cos_tta, delta,rp,ip,e1,e2,xfac,maxct,minct,maxcos,mincos
+real*8 :: cos_tta,cos_phi,delta,rp,ip,e1,e2,xfac,maxct,minct,maxcos,mincos
 integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ind
 
 complex*16 tmp
@@ -1632,12 +1636,12 @@ do j=ny1,ny2
          
          !     omit modes where cos_tta is less than cutoff delta 
 	 !         (we are looking for 'non-helical' modes)
-	if (.true.) then 	!check if unaltered spectra are the same
+         if (.true.) then 	!check if unaltered spectra are the same
 
 
 !        if (abs(cos_tta) > delta) then
-
-	            
+            
+            
             ! compute vorticity           
             ! sqrt(-1) * 2pi * (im,jm,km) cross (RR-sqrt(-1)II)
             WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
@@ -1646,7 +1650,7 @@ do j=ny1,ny2
             WI(1) = pi2*(-jm*RR(3) + km*RR(2)/Lz)  
 	    WI(2) = pi2*(im*RR(3) - km*RR(1)/Lz)
 	    WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
-            	
+            
             xfac = 64
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
@@ -1657,32 +1661,32 @@ do j=ny1,ny2
             e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
-
+            
             !	helicity(k) = k\cdot RR(k) cross II(k)            
-           energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
-                   jm*(II(1)*RR(3) - RR(1)*II(3)) + &
-                   (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
+            energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
+                 jm*(II(1)*RR(3) - RR(1)*II(3)) + &
+                 (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
                  spec_helicity_rn(iwave) + energy
-		 
+            
             cos_phi = energy/(2*pi2*iwave*e2) 
-
-! 	histogram of cosine of angle between u and w (relative helicity)
+            
+            ! 	histogram of cosine of angle between u and w (relative helicity)
 	ind = nint(a + b*abs(cos_phi))	
 	cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
 
 !       relative helicity spectrum
-        cos_phi_spec(iwave) = cos_phi_spec(iwave) + abs(cos_phi)
+!        cos_phi_spec(iwave) = cos_phi_spec(iwave) + abs(cos_phi)
                 
 ! 	histogram of cosine of angle between RR and II 
 	ind = nint(a + b*abs(cos_tta))	
 	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
 
-!       spectrum of angles         
+        !       spectrum of angles         
         cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
-
+        
 	count(iwave) = count(iwave)+1
 	
             hetot=hetot+energy
@@ -1714,6 +1718,12 @@ do n = 1,nbin
    spec_r_in = costta_pdf(:,n)
    call mpi_reduce(spec_r_in,costta_pdf(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 enddo
+
+do n = 1,nbin
+   spec_r_in = cosphi_pdf(:,n)
+   call mpi_reduce(spec_r_in,cosphi_pdf(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+enddo
+
 
 do n=1,ndim
    spec_r_in=cospec_r(:,n)
@@ -1769,6 +1779,8 @@ do i=iwave+2,iwave_max
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
    cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i) 
    costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
+   cosphi_pdf(iwave+1,:) = cosphi_pdf(iwave+1,:) + cosphi_pdf(i,:)
+
 enddo
 
 
