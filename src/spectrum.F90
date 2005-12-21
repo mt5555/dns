@@ -62,7 +62,7 @@ real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
-real*8 ::  cosphi_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) for each k
+real*8 ::  cosph_ipdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) for each k
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -1617,39 +1617,25 @@ do j=ny1,ny2
          
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
-	if (abs(cos_tta) > maxcos) then
-	maxcos = abs(cos_tta)
-	endif
- 	if (abs(cos_tta) < mincos) then
-	mincos= abs(cos_tta)
-	endif
 
 	
 !	if (im>0) then
 !	if (jm>0) then	
 !	if (km>0) then	
-! 	histogram of cosine of angle (between 0 and 1)
-	ind = nint(a + b*abs(cos_tta))	
-	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
 
-!     spectrum of angles         
-        cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
-
-	count(iwave) = count(iwave)+1
-	
 !	endif
 !	endif
 !	endif		         
 
          !     cutoff for recalculating the spectra
-         delta = 0.99      !this value can be changed by hand
+!         delta = 0.99      !this value can be changed by hand
          
          !     omit modes where cos_tta is less than cutoff delta 
 	 !         (we are looking for 'non-helical' modes)
-!	if (.true.) then 	!check if unaltered spectra are the same
+	if (.true.) then 	!check if unaltered spectra are the same
 
 
-        if (abs(cos_tta) > delta) then
+!        if (abs(cos_tta) > delta) then
 
 	            
             ! compute vorticity           
@@ -1680,8 +1666,25 @@ do j=ny1,ny2
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
                  spec_helicity_rn(iwave) + energy
+		 
+            cos_phi = energy/(2*pi2*iwave*e2) 
 
-            
+! 	histogram of cosine of angle between u and w (relative helicity)
+	ind = nint(a + b*abs(cos_phi))	
+	cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
+
+!       relative helicity spectrum
+        cos_phi_spec(iwave) = cos_phi_spec(iwave) + abs(cos_phi)
+                
+! 	histogram of cosine of angle between RR and II 
+	ind = nint(a + b*abs(cos_tta))	
+	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
+
+!       spectrum of angles         
+        cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
+
+	count(iwave) = count(iwave)+1
+	
             hetot=hetot+energy
             diss1=diss1 -2*energy*iwave**2*pi2_squared
             diss2=diss2 -2*energy*rwave*pi2_squared  
