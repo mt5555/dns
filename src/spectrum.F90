@@ -62,6 +62,7 @@ real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
+real*8 ::  cosphi_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) for each k
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -1644,7 +1645,7 @@ do j=ny1,ny2
          delta = 0.99      !this value can be changed by hand
          
          !     omit modes where cos_tta is less than cutoff delta 
-!         (we are looking for 'non-helical' modes)
+	 !         (we are looking for 'non-helical' modes)
 !	if (.true.) then 	!check if unaltered spectra are the same
 
 
@@ -1652,12 +1653,12 @@ do j=ny1,ny2
 
 	            
             ! compute vorticity           
-            ! sqrt(-1) * 2pi * (im,jm,km) cross (RR+sqrt(-1)II)
+            ! sqrt(-1) * 2pi * (im,jm,km) cross (RR-sqrt(-1)II)
             WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
 	    WR(2) = pi2*(im*II(3) - km*II(1)/Lz)
   	    WR(3) = pi2*(-im*II(2) + jm*II(1))
             WI(1) = pi2*(-jm*RR(3) + km*RR(2)/Lz)  
-	    WI(2) = pi2*(im*II(3) - km*RR(1)/Lz)
+	    WI(2) = pi2*(im*RR(3) - km*RR(1)/Lz)
 	    WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
             	
             xfac = 64
