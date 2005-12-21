@@ -1236,9 +1236,6 @@ end subroutine
 
 
 
-
-
-
 subroutine compute_helicity_spectrum(Q,p1,work,skip_fft)
 !
 ! skip_fft=1:
@@ -1458,10 +1455,11 @@ real*8 ::  spec_z_in(0:g_nz/2,n_var)
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
 real*8 :: WR(3),WI(3)
-real*8 :: cos_tta, delta,rp,ip,e1,e2,xfac,maxct,minct
+real*8 :: cos_tta, delta,rp,ip,e1,e2,xfac,maxct,minct,maxcos,mincos
 integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ind
 
 complex*16 tmp
+
 
 if (Lz/=1) call abort("Error: compute_hfree_spec cant handle Lz<>1")
 
@@ -1590,6 +1588,9 @@ enddo
 enddo
 enddo
 
+maxcos=0
+mincos=2
+
 ! bin index = a + b*cos_tta; calculate a and b
 minct = 0
 maxct = 1
@@ -1615,6 +1616,13 @@ do j=ny1,ny2
          
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
+	if (abs(cos_tta) > maxcos) then
+	maxcos = abs(cos_tta)
+	endif
+ 	if (abs(cos_tta) < mincos) then
+	mincos= abs(cos_tta)
+	endif
+
 	
 !	if (im>0) then
 !	if (jm>0) then	
@@ -1633,12 +1641,16 @@ do j=ny1,ny2
 !	endif		         
 
          !     cutoff for recalculating the spectra
-!         delta = 0.1      !this value can be changed by hand
+         delta = 0.99      !this value can be changed by hand
          
-         !     omit modes where cos_tta is less than cutoff delta
-	if (.true.) then 			!check if spectra are the same
-!         if (cos_tta > delta) then
-            
+         !     omit modes where cos_tta is less than cutoff delta 
+!         (we are looking for 'non-helical' modes)
+!	if (.true.) then 	!check if unaltered spectra are the same
+
+
+        if (abs(cos_tta) > delta) then
+
+	            
             ! compute vorticity           
             ! sqrt(-1) * 2pi * (im,jm,km) cross (RR+sqrt(-1)II)
             WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
@@ -1676,6 +1688,8 @@ do j=ny1,ny2
       enddo
    enddo
 enddo
+
+!write(6,*)'maxcos, mincos',abs(maxcos),abs(mincos)
 
 
 #ifdef USE_MPI

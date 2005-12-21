@@ -82,8 +82,8 @@ compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.true.		!extracting helicity-free modes
 
-tstart=4.2
-tstop=4.2
+tstart=7.0
+tstop=7.0
 tinc=0.2
 icount=0
 
@@ -242,7 +242,7 @@ do
          endif
          read_uvw=.true.	
       endif
-      call compute_helicity_spectrum(Q,q2,q1,0,Lz)
+      call compute_helicity_spectrum(Q,q2,q1,0)
       call output_helicity_spec(time,time)
    endif
    
