@@ -1621,85 +1621,78 @@ do j=ny1,ny2
          
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
-
-	
-!	if (im>0) then
-!	if (jm>0) then	
-!	if (km>0) then	
-
-!	endif
-!	endif
-!	endif		         
-
+         
+         
+         ! compute vorticity           
+         ! sqrt(-1) * 2pi * (im,jm,km) cross (RR-sqrt(-1)II)
+         WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
+         WR(2) = pi2*(im*II(3) - km*II(1)/Lz)
+         WR(3) = pi2*(-im*II(2) + jm*II(1))
+         WI(1) = pi2*(-jm*RR(3) + km*RR(2)/Lz)  
+         WI(2) = pi2*(im*RR(3) - km*RR(1)/Lz)
+         WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
             
-            ! compute vorticity           
-            ! sqrt(-1) * 2pi * (im,jm,km) cross (RR-sqrt(-1)II)
-            WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
-	    WR(2) = pi2*(im*II(3) - km*II(1)/Lz)
-  	    WR(3) = pi2*(-im*II(2) + jm*II(1))
-            WI(1) = pi2*(-jm*RR(3) + km*RR(2)/Lz)  
-	    WI(2) = pi2*(im*RR(3) - km*RR(1)/Lz)
-	    WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
+         xfac = 64
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+         
+         !     compute E(k) and kE(k)
+         xw=sqrt(rwave*pi2_squared)
+         e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
+         
+         
+         !	helicity(k) = k\cdot RR(k) cross II(k)            
+         energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
+              jm*(II(1)*RR(3) - RR(1)*II(3)) + &
+              (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
+         
+         
+         cos_phi = energy/(2*pi2*iwave*e2) 
+         
+         ! 	histogram of cosine of angle between u and w (relative helicity)
+         ind = nint(a + b*abs(cos_phi))	
+         cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
+         
+         !       relative helicity spectrum
+         !        cos_phi_spec(iwave) = cos_phi_spec(iwave) + abs(cos_phi)
+         
+         ! 	histogram of cosine of angle between RR and II 
+         ind = nint(a + b*abs(cos_tta))	
+         costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
+         
+         !       spectrum of angles         
+         cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
+         
+         count(iwave) = count(iwave)+1
+         
+         !     cutoff for recalculating the spectra
+         delta = 0.5      !this value can be changed by hand
+         
+         !     omit modes where cos_tta is less than cutoff delta 
+         !         (we are looking for 'non-helical' modes)
+         
+         !	if (abs(cos_tta) > delta) then
+         
+         if (abs(cos_phi) < delta) then
             
-            xfac = 64
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
+            ! store E(k) and kE(k)
+            spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
+            spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
             
-            !     compute E(k) and kE(k)
-            xw=sqrt(rwave*pi2_squared)
-            e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
-            
-            
-            !	helicity(k) = k\cdot RR(k) cross II(k)            
-            energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
-                 jm*(II(1)*RR(3) - RR(1)*II(3)) + &
-                 (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
+            ! store helicity(k)
+            if (energy>0) spec_helicity_rp(iwave)= & 
+                 spec_helicity_rp(iwave)+energy
+            if (energy<0) spec_helicity_rn(iwave)= &
+                 spec_helicity_rn(iwave) + energy
             
             
-            cos_phi = energy/(2*pi2*iwave*e2) 
-            
-            ! 	histogram of cosine of angle between u and w (relative helicity)
-	ind = nint(a + b*abs(cos_phi))	
-	cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
-        
-        !       relative helicity spectrum
-        !        cos_phi_spec(iwave) = cos_phi_spec(iwave) + abs(cos_phi)
-        
-        ! 	histogram of cosine of angle between RR and II 
-	ind = nint(a + b*abs(cos_tta))	
-	costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
-        
-        !       spectrum of angles         
-        cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
-        
-	count(iwave) = count(iwave)+1
-        
-        !     cutoff for recalculating the spectra
-        delta = 0.96      !this value can be changed by hand
-        
-        !     omit modes where cos_tta is less than cutoff delta 
-        !         (we are looking for 'non-helical' modes)
-        
-        if (abs(cos_phi) < delta) then
-           
-           ! store E(k) and kE(k)
-           spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
-           spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
-           
-           ! store helicity(k)
-           if (energy>0) spec_helicity_rp(iwave)= & 
-                spec_helicity_rp(iwave)+energy
-           if (energy<0) spec_helicity_rn(iwave)= &
-                spec_helicity_rn(iwave) + energy
-           
-           
-           hetot=hetot+energy
-           diss1=diss1 -2*energy*iwave**2*pi2_squared
-           diss2=diss2 -2*energy*rwave*pi2_squared  
-        endif
-     enddo
-  enddo
+            hetot=hetot+energy
+            diss1=diss1 -2*energy*iwave**2*pi2_squared
+            diss2=diss2 -2*energy*rwave*pi2_squared  
+         endif
+      enddo
+   enddo
 enddo
 
 !write(6,*)'maxcos, mincos',abs(maxcos),abs(mincos)
