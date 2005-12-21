@@ -1676,7 +1676,7 @@ do j=ny1,ny2
 	count(iwave) = count(iwave)+1
         
         !     cutoff for recalculating the spectra
-        delta = 0.98      !this value can be changed by hand
+        delta = 0.96      !this value can be changed by hand
         
         !     omit modes where cos_tta is less than cutoff delta 
         !         (we are looking for 'non-helical' modes)
