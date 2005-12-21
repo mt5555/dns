@@ -4,6 +4,8 @@
 ! compute structure functions for many different directions
 ! in the periodic cube.
 !
+! also computes helical modes, distribution of helicity angle,  
+! and spectra without helical modes
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -17,7 +19,7 @@
 !             temp0000.5000.[uvw]
 !             temp0001.0000.[uvw]
 !
-!  to compile and run:   make analysis_isoave ; analysis_isoave
+!  to compile and run:   make analysis_sk ; analysis_sk
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 program anal
