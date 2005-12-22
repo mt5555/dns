@@ -1647,8 +1647,8 @@ do j=ny1,ny2
               jm*(II(1)*RR(3) - RR(1)*II(3)) + &
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          
-         ! relative helicity in current wavenumber
-         cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+ sum(II*II))) 
+         ! relative helicity in current wavenumber (H(k)/2kE(k))
+         cos_phi = energy/(2*xw*xfac*(sum(RR*RR)+ sum(II*II))) 
          
          ! 	histogram of cosine of angle between u and w (relative helicity)
          ind = nint(a + b*abs(cos_phi))	
@@ -1667,7 +1667,7 @@ do j=ny1,ny2
          count(iwave) = count(iwave)+1
          
          !     cutoff for recalculating the spectra
-         delta = 0.98      !this value can be changed by hand
+         delta = 0.96      !this value can be changed by hand
          
          !     omit modes where cos_tta is less than cutoff delta 
          !         (we are looking for 'non-helical' modes)
