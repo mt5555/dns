@@ -12,16 +12,17 @@ ext='.isostr4';
 ndir = 73;
 
 %subcubes
-nxdecomp=2;
-nydecomp=2;
-nxdecomp=2;
+nxdecomp=1;
+nydecomp=1;
+nzdecomp=1;
 
 %name='/auto/nest/u/skurien/dns/src/skhel512a'
 name='/nh/u/skurien/projects/shear/skhel512a'
 nx=512; delx_over_eta=2.5; epsilon=2.72;teddy = 1.05; %Rl=250
 
-cdir = ['k','b','g','r','m','y','c','k']; %colors, one for each m-comp.
-times=[7];
+cdir = ['k','b','g','r','m','c','k--','b--','r--','m--','c--','k.-','b.-','r.-']; %colors, one for each m-comp.
+col = 0;
+times=[5:0.2:7.2];
 
 ndir_use = 0;
 
@@ -77,15 +78,24 @@ end
 ylt1_time = zeros(5,length(xx));  %time average for each m after angle-average
 ylt2_time = zeros(5,length(xx));  %time average for each m after angle-average
 
-ylt1_s = 0*x;  %time average of Y_00 after angle-average
-ylt2_s = 0*x;  %time average of Y_00 after angle-average
+
+%ylt1_s = 0*x;  %time average of Y_00 after angle-average
+%ylt2_s = 0*x;  %time average of Y_00 after angle-average
+
+ylt1_ds_time = 0*xx;
+  ylt2_ds_time = 0*xx;
+  ylt_ds_time = 0*xx; 
+
 
 for t=times
+col = col+1
 
   for subz = 0:(nxdecomp-1)
   for suby = 0:(nydecomp-1)
   for subx = 0:(nzdecomp-1)
 
+    index = subx + 2*suby + 4*subz + 1;  % index of subcube
+    
     if (nxdecomp*nydecomp*nzdecomp>1) 
       ext_sub = sprintf('_%d%d%d',subx,suby,subz)
     else
@@ -104,6 +114,8 @@ for t=times
 
 [ux,dir_max] = read_ux([fname,'.ux',ext_sub]);
 
+figure(100)
+plot(index,dir_max,'ro'); hold on;
 %
 % xx is given in units of the box length
 % but r_val is given in units of delx.  convert to box length units
@@ -138,7 +150,11 @@ for j=1:(2*spharm+1)              % sphere-harm comps -2j-1 ... 2j+1
 
   ylt1_s=0*xx;  
   ylt2_s=0*xx;
-    
+  
+  ylt1_ds = 0*xx;
+  ylt2_ds = 0*xx;
+  ylt_ds = 0*xx;  
+  
   for dir=1:ndir         % directions
      x = r_val(:,dir);      % units of box length
      x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -154,58 +170,122 @@ for j=1:(2*spharm+1)              % sphere-harm comps -2j-1 ... 2j+1
   
 
 %raw sfn in special direction, un-weighted by spherical harmonic 
-  if (dir==dir_max)
 
+%plot str_fns in 73 directions 
+ylt1_d = Dl(:,dir,1);
+ylt2_d = Dl(:,dir,2);
+
+ylt1_ds = ylt1_ds + w(dir)*spline(x,ylt1_d,xx);
+ylt2_ds = ylt2_ds + w(dir)*spline(x,ylt2_d,xx);
+ylt_ds = ylt_ds + w(dir)*spline(x,(ylt1_d+ylt2_d),xx);
+
+
+%figure(99)
+%semilogx(x_plot, ylt1_d, cdir(col),'MarkerSize',msize);hold on;
+%figure(98)
+%semilogx(x_plot, ylt2_d, cdir(col),'MarkerSize',msize);hold on;
+
+
+%  if (dir==dir_max)
+
+  if (dir==47)
      ylt1_d = Dl(:,dir,1);
      ylt2_d = Dl(:,dir,2);
-     ind = subx + 2*suby + 4*subz + 1  %index of subcube
+
        figure(1)
-       loglog(x, abs(ylt1_d),['+',cdir(ind)],'MarkerSize',msize);hold on;
-       loglog(x, abs(ylt2_d),['--',cdir(ind)],'MarkerSize',msize);hold on;
+%       subplot(2,1,1)
+       loglog(x_plot, abs(ylt2_d./ylt1_d),cdir(col),'MarkerSize',msize);hold on;
+       title('Ratio D_{LT3}/D_{LT2}')
+       figure(2)
+       loglog(x_plot,abs(ylt1_d),cdir(col),'Markersize',msize);hold on;
+       title('|D_{LT2}|')
+       figure(3)
+       loglog(x_plot,abs(ylt2_d),cdir(col),'Markersize',msize);hold on;
+        title('|D_{LT3}|')
+       loglog(x_plot,abs(ylt1_d+ylt2_d),cdir(index),'Markersize',msize);hold on;
+       title('|D_{LT}|= |D_{LT2}+D_{LT3}|')
+       
+       
+%       loglog(x, (ylt2_d),['--',cdir(index)],'MarkerSize',msize);hold on;
+%       title(sprintf('++ +ve S_{LT1}; -- +veS_{LT2}; In special directions'))
+%       subplot(2,1,2)
+%       loglog(x, -(ylt1_d),['+',cdir(index)],'MarkerSize',msize);hold on;
+%       loglog(x, -(ylt2_d),['--',cdir(index)],'MarkerSize',msize);hold on;
+%       title(sprintf('++ -ve S_{LT1}; -- -ve S_{LT2}; In special directions'))
   end
        
   end
 
+ylt1_ds_time = ylt1_ds_time + ylt1_ds;
+ylt2_ds_time = ylt2_ds_time + ylt2_ds;
+ylt_ds_time = ylt_ds_time + ylt_ds;
+
+  
 % angle-averaged sfn weighted by mixed spherical harmonic Y_1m, time accumulate 
 ylt1_time(j,:) = ylt1_time(j,:) + ylt1_s;
 ylt2_time(j,:) = ylt2_time(j,:) + ylt2_s;
  
+if (0)
+  
+figure(20+index)
+subplot(2,1,1)
+loglog(xx_plot,(ylt1_time(j,:)),['.-',cdir(j)],'MarkerSize',msize);hold on;
+legend('m=-1','1','0')
+title(sprintf('Time average +ve S_{LT1} projected on j=1, subcube= %d',index))
+%figure(40+ind)
+subplot(2,1,2)
+loglog(xx_plot,-(ylt1_time(j,:)),['.-',cdir(j)],'MarkerSize',msize);hold on;
+legend('m=-1','1','0')
+title(sprintf('Time average -ve S_{LT1} projected on j=1, subcube= %d',index))
+
+
+figure(40+index)
+subplot(2,1,1)
+loglog(xx_plot,(ylt2_time(j,:)),['.-',cdir(j)],'MarkerSize',msize);hold on;
+legend('m=-1','1','0')
+title(sprintf('Time average +ve S_{LT2} projected on j=1, subcube= %d',index))
+%figure(43+ind)
+subplot(2,1,2)
+loglog(xx_plot,-(ylt2_time(j,:)),['.-',cdir(j)],'MarkerSize',msize);hold on;
+legend('m=-1','1','0')
+title(sprintf('Time average -ve S_{LT2} projected on j=1, subcube= %d',index))
+
+
+figure(50+index)
+subplot(2,1,1)
+loglog(xx_plot,(ylt1_time(j,:)+ ylt2_time(j,:))/2,['.-',cdir(j)],'MarkerSize',msize);hold on; 
+legend('m=-1','1','0')
+title(sprintf('Average +veS_{LT1} and S_{LT2} projected on j=1, scube = %d', index))
+subplot(2,1,2)
+loglog(xx_plot,-(ylt1_time(j,:)+ ylt2_time(j,:))/2,['.-',cdir(j)],'MarkerSize',msize);hold on; 
+legend('m=-1','1','0')
+title(sprintf('Average -ve S_{LT1} and S_{LT2} projected on j=1, scube = %d', index))
+
+end
+
 end
 
 
-end
-end
-end
+end  %matches for subx
+end  %matches for suby
+end  %matches for subz
+
+
 
 end  %matches for t=times
 
-figure(1)
-%legend('S_{LT1},1', 'S_{LT2},1','S_{LT1},2', 'S_{LT2},2','S_{LT1},3', 'S_{LT2},3','S_{LT1},4', 'S_{LT2},4', 'S_{LT1},5', 'S_{LT2},5','S_{LT1},6', 'S_{LT2},6','S_{LT1},7', 'S_{LT2},7','S_{LT1},8', 'S_{LT2},8');
- title(sprintf('Time = %d; subcubes mixed sfn in special directions',t));
 
-%time average
+%time average OF LAST SUBCUBE
+ylt1_ds_time = ylt1_ds_time/length(times);
+ylt2_ds_time = ylt2_ds_time/length(times);
+ylt_ds_time = ylt_ds_time/length(times);
+
+figure(95)
+semilogx(xx_plot,abs(ylt1_ds_time),'r-');hold on;
+semilogx(xx_plot,abs(ylt2_ds_time),'b-');hold on;
+semilogx(xx_plot,abs(ylt_ds_time),'m-');hold on;
+
+
 ylt1_time(:,:) = ylt1_time(:,:)/length(times);
 ylt2_time(:,:) = ylt2_time(:,:)/length(times);
 
-
-for j=1:(2*spharm+1)
-
-j
-cdir(j)
-
-figure(22)
-loglog(xx_plot,abs(ylt1_time(j,:)),['.-',cdir(j)],'MarkerSize',msize);hold on;
-legend('m=-1','1','0')
-title('Time average S_{LT1} projected on j=1')
-
-figure(23)
-loglog(xx_plot,abs(ylt2_time(j,:)),['.-',cdir(j)],'MarkerSize',msize);hold on;
-legend('m=-1','1','0')
-title('Time average S_{LT2} projected on j=1')
-
-figure(24)
-loglog(xx_plot,abs(ylt1_time(j,:)+ ylt2_time(j,:))/2,['.-',cdir(j)],'MarkerSize',msize);hold on; 
-legend('m=-1','1','0')
-title('Average of S_{LT1} and S_{LT2} projected on j=1')
-
-end

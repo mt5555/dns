@@ -5,10 +5,13 @@
 % make sure viscosity is in Marks units. All the .hf_free files 
 %(even those from Takeshi's data) are in Marks units already
 
+namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
+name = 'skhel512a_del0.1_0007.0000.new';
+mu = 1e-4;
 
-namedir ='/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
-name = 'hel256_hpi2_0009.0000';
-mu = 2e-4;
+%namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
+%name = 'hel256_hpi2_0004.2000_nb1000';
+%mu = 2e-4;
 
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
 %name = 'hel256_h0';
@@ -58,14 +61,20 @@ hspec_p = fread(fid,n_r,'float64');
 espec = fread(fid,n_r,'float64');
 kekspec = fread(fid,n_r,'float64');
 costta_spec = fread(fid,n_r,'float64');
-nbin = fread(fid,1,'int');
+nbin = fread(fid,1,'float64'); %nbin is an integer stored as a float
+%nbin=100;
 costta_pdf = zeros(n_r,nbin);
+cosphi_pdf = zeros(n_r,nbin); %the relative helicity pdf
 for i = 1:n_r
 costta_pdf(i,:) = (fread(fid,nbin,'float64'))';
 end
+for i = 1:n_r
+cosphi_pdf(i,:) = (fread(fid,nbin,'float64'))';
+end
+
 
 % bin values for pdfs of cos_tta
-minct = -1
+minct = 0
 maxct = 1
 ibin = (maxct - minct)/nbin
 for i = 1:nbin
@@ -155,7 +164,7 @@ figure(25)
 semilogx(k,abs(hspec_ave).*k'.^(5/3),'k','linewidth',[2]);hold on;
 semilogx(k,abs(hspec_ave).*k'.^(4/3),'b-.','linewidth',[2]);hold on;
 set(gca,'fontsize',16);
-%title('Average compensated helicity spectrum');
+title('Average compensated helicity spectra');
 legend('H(k) k^{5/3}','H(k) k^{4/3}');
 set(gca,'fontsize',18);	      
 xlabel('k')
@@ -174,9 +183,27 @@ title('energy spectrum');
 
 figure(28)
 for i = 1:n_r
-plot(binvals, costta_pdf(i,:),'r')
+semilogy(binvals, costta_pdf(i,:),'x');
 hold on;
+%pause
 end
+
+figure(35)
+for i = 1:n_r
+semilogy(binvals, cosphi_pdf(i,:),'x');
+hold on;
+%pause
+end
+
+
+figure(29)
+semilogx(k,0.5*espec.*k'.^(5/3),'k','linewidth',[2]);hold on;
+semilogx(k,0.5*espec.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+set(gca,'fontsize',16);
+title('Average compensated energy spectra');
+legend('E(k) k^{5/3}','E(k) k^{4/3}');
+set(gca,'fontsize',18);	      
+xlabel('k')
 
 
 % compute MEAN helicity in time -- in Mark's units
@@ -193,5 +220,28 @@ disp(sprintf('Mean helicity dissipation rate = %d',h));
 % compute MEAN energy in time -- in Mark's units
 E= sum(espec);
 disp(sprintf('Mean energy = %d',E))
+
+%compute MEAN energy dissipation in time -- in Mark's units
+e = mu*sum(espec.*(k'*2*pi).^2);
+disp(sprintf('Mean energy dissipation rate = %d',e));
+
+%figure(30)
+%semilogx(k,((0.5*espec - 0.2*(e*abs(h^(-1/3)).*(2*pi*k').^(-4/3))))./(1.8*e^(2/3).*(2*pi*k').^(-5/3)),'k-.','linewidth',[2]);hold on;
+%semilogx(k,((0.5*espec - 1.8*(e*(2/3)).*(2*pi*k').^(-5/3)))./(0.2*e*abs(h^(-1/3)).*(2*pi*k').^(-4/3)),'b-.','linewidth',[2]);hold on;
+%set(gca,'fontsize',14);
+%title('');
+%%legend('E(k)-0.4*\epsilon^{2/3}* k^{-5/3}');
+%set(gca,'fontsize',14);	      
+%xlabel('k')
+
+%figure(31)
+%semilogx(k,0.5*espec.*(e)^(-2/3).*(2*pi*k)'.^(5/3),'k','linewidth',[2]);hold on;
+%semilogx(k,0.5*espec.*(e^(-1))*abs(h^(1/3)).*(2*pi*k)'.^(4/3),'b-.','linewidth',[2]);hold on;
+%set(gca,'fontsize',16);
+%title('Average compensated energy spectra');
+%legend('E(k) k^{5/3}','E(k) k^{4/3}');
+%set(gca,'fontsize',18);	      
+%xlabel('k')
+
 
 %end
