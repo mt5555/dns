@@ -6,8 +6,12 @@
 %(even those from Takeshi's data) are in Marks units already
 
 namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
-name = 'skhel512a_del0.1_0007.0000.new';
+name = 'skhel512a0007.0000.e22';
 mu = 1e-4;
+
+%namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
+%name = 'skhel512a_del0.1_0007.0000.new.';
+%mu = 1e-4;
 
 %namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
 %name = 'hel256_hpi2_0004.2000_nb1000';
@@ -46,7 +50,7 @@ hspec_p = [];
 hspec_ave = hspec_n + hspec_p;
 espec = [];
 kekspec = [];
-
+e22 = [];
 
 [time,count]=fread(fid,1,'float64');
 j = 0;
@@ -55,8 +59,8 @@ if (count==0)
    disp('error reading hf_spec file')
 end
 time
-  n_r=fread(fid,1,'float64')
-  hspec_n=fread(fid,n_r,'float64');
+n_r=fread(fid,1,'float64')
+hspec_n=fread(fid,n_r,'float64');
 hspec_p = fread(fid,n_r,'float64');
 espec = fread(fid,n_r,'float64');
 kekspec = fread(fid,n_r,'float64');
@@ -179,8 +183,9 @@ title('helicity angle spectrum');
 
 figure(27)
 loglog(k,0.5*espec,'r');hold on;
+loglog(k,0.5*e22,'b');hold on;
 grid on;
-title('energy spectrum');
+title('mean energy spectrum');
 
 figure(28)
 for i = 1:n_r
@@ -205,6 +210,16 @@ title('Average compensated energy spectra');
 legend('E(k) k^{5/3}','E(k) k^{4/3}');
 set(gca,'fontsize',18);	      
 xlabel('k')
+
+figure(32)
+semilogx(k,0.5*e22.*k'.^(5/3),'k','linewidth',[2]);hold on;
+semilogx(k,0.5*e22.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+set(gca,'fontsize',16);
+title('Average compensated energy spectra');
+legend('E(k) k^{5/3}','E(k) k^{4/3}');
+set(gca,'fontsize',18);	      
+xlabel('k')
+
 
 
 % compute MEAN helicity in time -- in Mark's units
