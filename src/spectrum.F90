@@ -59,6 +59,7 @@ integer,private :: nbin=100
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes 
 real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
+real*8 ::  E22(0:max(g_nx,g_ny,g_nz))  ! E_22 component of spec tensor
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
@@ -698,6 +699,7 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_helicity_rp,1+iwave)
    call cwrite8(fid,spec_E,1+iwave)
    call cwrite8(fid,spec_kEk,1+iwave)
+   call cwrite8(fid,E22,1+iwave)
    call cwrite8(fid,cos_tta_spec,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
@@ -1621,8 +1623,7 @@ do j=ny1,ny2
          
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
-         
-         
+	 
          ! compute vorticity           
          ! sqrt(-1) * 2pi * (im,jm,km) cross (RR-sqrt(-1)II)
          WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
@@ -1641,14 +1642,19 @@ do j=ny1,ny2
          xw=sqrt(rwave*pi2_squared)
          e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
          
+         ! E_22 component of energy tensor with 1 || k
+	 E22(iwave) = E22(iwave) + 0.5*xfac*(mod_rr**2 + &
+              ((RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/(mod_rr))**2)               
          
          !	helicity(k) = k\cdot RR(k) cross II(k)            
          energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
               jm*(II(1)*RR(3) - RR(1)*II(3)) + &
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          
-         ! relative helicity in current wavenumber (H(k)/2kE(k))
-         cos_phi = energy/(2*xw*xfac*(sum(RR*RR)+ sum(II*II))) 
+         ! relative helicity in current wavenumber
+         cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+ sum(II*II))) 
+
+
          
          ! 	histogram of cosine of angle between u and w (relative helicity)
          ind = nint(a + b*abs(cos_phi))	
@@ -1667,7 +1673,7 @@ do j=ny1,ny2
          count(iwave) = count(iwave)+1
          
          !     cutoff for recalculating the spectra
-         delta = 0.96      !this value can be changed by hand
+         delta = 0.98      !this value can be changed by hand
          
          !     omit modes where cos_tta is less than cutoff delta 
          !         (we are looking for 'non-helical' modes)
@@ -1707,6 +1713,8 @@ spec_r_in=spec_E
 call mpi_reduce(spec_r_in,spec_E,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_kEk
 call mpi_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=E22
+call mpi_reduce(spec_r_in,E22,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in = cos_tta_spec
 call mpi_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in = count
@@ -1775,6 +1783,7 @@ do i=iwave+2,iwave_max
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
    spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
+   E22(iwave+1)=E22(iwave+1)+E22(i)
    cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i) 
    costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
    cosphi_pdf(iwave+1,:) = cosphi_pdf(iwave+1,:) + cosphi_pdf(i,:)
