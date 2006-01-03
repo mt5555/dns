@@ -60,6 +60,7 @@ time
 hspec_p = fread(fid,n_r,'float64');
 espec = fread(fid,n_r,'float64');
 kekspec = fread(fid,n_r,'float64');
+e22 = fread(fid,n_r,'float64');
 costta_spec = fread(fid,n_r,'float64');
 nbin = fread(fid,1,'float64'); %nbin is an integer stored as a float
 %nbin=100;
