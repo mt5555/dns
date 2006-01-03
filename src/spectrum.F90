@@ -1643,8 +1643,10 @@ do j=ny1,ny2
          e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
          
          ! E_22 component of energy tensor with 1 || k
-	 E22(iwave) = E22(iwave) + 0.5*xfac*(mod_rr**2 + &
-              ((RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/(mod_rr))**2)               
+	 E22(iwave)=E22(iwave)+0.5*xfac*(sum(RR*RR)+(sum(II*RR)/(mod_rr))**2)
+
+         ! E_33 component of energy tensor
+                       
          
          !	helicity(k) = k\cdot RR(k) cross II(k)            
          energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
@@ -1673,15 +1675,15 @@ do j=ny1,ny2
          count(iwave) = count(iwave)+1
          
          !     cutoff for recalculating the spectra
-         delta = 0.98      !this value can be changed by hand
+         delta = 1      !this value can be changed by hand
          
          !     omit modes where cos_tta is less than cutoff delta 
          !         (we are looking for 'non-helical' modes)
          
          !	if (abs(cos_tta) > delta) then
          
-         if (abs(cos_phi) < delta) then
-            
+         !if (abs(cos_phi) <= delta) then
+         if (.true.) then
             ! store E(k) and kE(k)
             spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
