@@ -1,4 +1,3 @@
-
 #include "macros.h"
 !
 !  compute structure functions for a range of deltas, and

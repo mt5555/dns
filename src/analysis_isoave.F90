@@ -69,8 +69,9 @@ call init_model
 !
 
 !cd
-header_type=1; scale=1;
+!header_type=1; scale=1;
 !header_type=4; scale=1/(2*pi)    ! for Takeshi's data
+header_type=2                     ! Livescu shear data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
@@ -86,9 +87,9 @@ tinc=0.2
 icount=0
 
 !number of divisions per axis, for subcube calculations
-nxdecomp=2
-nydecomp=2
-nzdecomp=2
+nxdecomp=1
+nydecomp=1
+nzdecomp=1
 
 
 
