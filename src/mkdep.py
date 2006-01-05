@@ -31,8 +31,10 @@ def parse(file):
         tmp=split(line)
         if (len(tmp)>=2):
             keyword=tmp[0]
-            use= -1 <> find(keyword,"use")
-            inc= -1 <> find(keyword,"include")
+            #use= -1 <> find(keyword,"use")
+            #inc= -1 <> find(keyword,"include")
+            use = (keyword == "use")
+            inc = (keyword == "#include")
             if (use or inc):
                 name=tmp[1]
                 name=strip(name)
@@ -40,6 +42,9 @@ def parse(file):
                     name=name[1:]
                 if name[-1]=='"' :
                     name=name[:-1]
+
+                #print tmp[0],tmp[1],name
+
                 # dont include system directories:
                 if (name[0:4] <>"/usr") and (name[0:4] <> "/opt") and \
                 (name[0:4] <> "mpif") and \
