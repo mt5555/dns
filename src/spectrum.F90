@@ -59,14 +59,15 @@ integer,private :: nbin=100
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes 
 real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
-real*8 ::  E22(0:max(g_nx,g_ny,g_nz))  ! E_22 component of spec tensor
 real*8 ::  E33(0:max(g_nx,g_ny,g_nz))  ! E_33 component of spec tensor
-real*8 ::  II2(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
-real*8 ::  RR2(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
+real*8 ::  II2sq(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
+real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
+real*8 ::  I2I3(0:max(g_nx,g_ny,g_nz))  ! I_2*I_3
+real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
-real*8 ::  cosphi_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) for each k
+real*8 ::  cosphi_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) (rel hel) for each k
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -704,8 +705,8 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_kEk,1+iwave)
 !   call cwrite8(fid,E22,1+iwave)
    call cwrite8(fid,E33,1+iwave)
-   call cwrite8(fid,II2,1+iwave)
-   call cwrite8(fid,RR2,1+iwave)
+   call cwrite8(fid,II2sq,1+iwave)
+   call cwrite8(fid,RRsq,1+iwave)
    call cwrite8(fid,cos_tta_spec,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
@@ -1649,19 +1650,29 @@ do j=ny1,ny2
          xw=sqrt(rwave*pi2_squared)
          e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
          
-         ! E_22 component of energy tensor with 1 || k (= sum of the square of RR and the 
-         ! square of the component of II along RR
-!	 E22(iwave)=E22(iwave)+0.5*xfac*(sum(RR*RR)+(sum(II*RR)/(mod_rr))**2)
+         ! In coordinate system with x_1 || k, x_2 || RR and x_3 ||(k \cross RR):
 
-         ! E_33 component of energy tensor (= square of the component of II orthogonal to RR)
-         E33(iwave)=E33(iwave)+ 0.5*xfac*(sum(II*II) - ((sum(II*RR)/(mod_rr))**2))
+         ! E_22 component of energy tensor (= sum of the square of RR and the 
+         ! square of the component of II along RR
+         !	 E22(iwave)=E22(iwave)+0.5*xfac*(sum(RR*RR)+(sum(II*RR)/(mod_rr))**2)
+
+         ! E_33 component of energy tensor (= I_3^2 = square of component of II orthogonal to RR)
+         E33(iwave)=E33(iwave)+ 0.5*xfac*(mod_ii**2 - (sum(II*RR)/(mod_rr))**2)
          
          ! I_2^2 (square of the component of II along RR) (presents zero contribution to helicity?)
-         II2(iwave) = II2(iwave) + 0.5*xfac*(sum(II*RR)/(mod_rr))**2
+         II2sq(iwave) = II2sq(iwave) + 0.5*xfac*(sum(II*RR)/(mod_rr))**2
 
          ! RR^2 (square of RR) 
-         RR2(iwave) = RR2(iwave)+0.5*xfac*sum(RR*RR)
+         RRsq(iwave) = RRsq(iwave)+0.5*xfac*sum(RR*RR)
 
+         ! I_2*I_3 (the part of the energy tensor that doesn't contribute to either 
+         ! energy or helicity
+         I2I3 = I2I3(iwave) + 0.5*xfac*((sum(II*RR)/(mod_rr))*&
+              sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
+
+         ! R_2*I_3 = RR*I_3 (the part of the energy tensor that contributes to the helicity
+         R2I3(iwave) = R2I3(iwave) + 0.5*xfac*(mod_rr*sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
+         
 
          !	helicity(k) = k\cdot RR(k) cross II(k)            
          energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
@@ -1730,14 +1741,12 @@ spec_r_in=spec_E
 call mpi_reduce(spec_r_in,spec_E,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_kEk
 call mpi_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-spec_r_in=E22
-call mpi_reduce(spec_r_in,E22,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=E33
 call mpi_reduce(spec_r_in,E33,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-spec_r_in=II2
-call mpi_reduce(spec_r_in,II2,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-spec_r_in=RR2
-call mpi_reduce(spec_r_in,RR2,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=II2sq
+call mpi_reduce(spec_r_in,II2sq,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=RRsq
+call mpi_reduce(spec_r_in,RRsq,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in = cos_tta_spec
 call mpi_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in = count
@@ -1806,10 +1815,9 @@ do i=iwave+2,iwave_max
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
    spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
-   E22(iwave+1)=E22(iwave+1)+E22(i)
    E33(iwave+1)=E33(iwave+1)+E33(i)
-   II2(iwave+1)=II2(iwave+1)+II2(i)
-   RR2(iwave+1)=RR2(iwave+1)+ RR2(i)   
+   II2sq(iwave+1)=II2sq(iwave+1)+II2sq(i)
+   RRsq(iwave+1)=RRsq(iwave+1)+ RRsq(i)   
    cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i) 
    costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
    cosphi_pdf(iwave+1,:) = cosphi_pdf(iwave+1,:) + cosphi_pdf(i,:)
