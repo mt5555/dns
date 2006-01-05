@@ -1688,8 +1688,8 @@ do j=ny1,ny2
          
          ! 	histogram of cosine of angle between u and w (relative helicity)
          ind = nint(a + b*abs(cos_phi))	
-         ASSERT("Error: spectrum.F90: ind is not <= nbin",ind<=nbin)
-         ASSERT("Error: spectrum.F90: ind is not >= 1",ind>=1)
+         if (ind>nbin) call abort("Error: spectrum.F90: ind>nbin")
+         if (ind<1) call abort("Error: spectrum.F90: ind<1")
          cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
          
          !       relative helicity spectrum
@@ -1697,8 +1697,8 @@ do j=ny1,ny2
          
          ! 	histogram of cosine of angle between RR and II 
          ind = nint(a + b*abs(cos_tta))	
-         ASSERT("Error: spectrum.F90: ind is not <= nbin",ind<=nbin)
-         ASSERT("Error: spectrum.F90: ind is not >= 1",ind>=1)
+         if (ind>nbin) call abort("Error: spectrum.F90: ind>nbin")
+         if (ind<1) call abort("Error: spectrum.F90: ind<1")
          costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
          
          !       spectrum of angles         
