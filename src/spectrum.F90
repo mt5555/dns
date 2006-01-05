@@ -1688,6 +1688,9 @@ do j=ny1,ny2
          
          ! 	histogram of cosine of angle between u and w (relative helicity)
          ind = nint(a + b*abs(cos_phi))	
+         ASSERT("spectrum.F90: ind to big",ind<=nbin)
+         ASSERT("spectrum.F90: ind to small",ind>=1)
+
          cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
          
          !       relative helicity spectrum
