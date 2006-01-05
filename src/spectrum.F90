@@ -707,6 +707,8 @@ if (my_pe==io_pe) then
    call cwrite8(fid,E33,1+iwave)
    call cwrite8(fid,II2sq,1+iwave)
    call cwrite8(fid,RRsq,1+iwave)
+   call cwrite8(fid,I2I3,1+iwave)
+   call cwrite8(fid,R2I3,1+iwave)
    call cwrite8(fid,cos_tta_spec,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
