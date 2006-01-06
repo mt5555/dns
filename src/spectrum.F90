@@ -1682,14 +1682,19 @@ do j=ny1,ny2
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          
          ! relative helicity in current wavenumber
-         cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+ sum(II*II))) 
-
-
+         cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+sum(II*II)))
          
-         ! 	histogram of cosine of angle between u and w (relative helicity)
+         !  histogram of cosine of angle between u and w (relativehelicity)
          ind = nint(a + b*abs(cos_phi))	
-         if (ind>nbin) call abort("Error: spectrum.F90: ind>nbin")
-         if (ind<1) call abort("Error: spectrum.F90: ind<1")
+         if (ind>nbin) then 
+	    call abort("Error: spectrum.F90: ind>nbin")
+            write(6,*)"a,b,cos(phi),ind = ",a,b,cos_phi,ind
+         endif
+         if (ind<1) then 
+            call abort("Error: spectrum.F90: ind<1")
+            write(6,*)"a,b,cos(phi),ind = ",a,b,cos_phi,ind
+         endif
+            
          cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
          
          !       relative helicity spectrum
@@ -1697,8 +1702,15 @@ do j=ny1,ny2
          
          ! 	histogram of cosine of angle between RR and II 
          ind = nint(a + b*abs(cos_tta))	
-         if (ind>nbin) call abort("Error: spectrum.F90: ind>nbin")
-         if (ind<1) call abort("Error: spectrum.F90: ind<1")
+         if (ind>nbin) then 
+            call abort("Error: spectrum.F90: ind>nbin")
+            write(6,*)"a,b,cos(tta),ind = ",a,b,cos_tta,ind
+         endif
+         if (ind<1) then
+            call abort("Error: spectrum.F90: ind<1")
+            write(6,*)"a,b,cos(tta),ind = ",a,b,cos_tta,ind
+         endif
+
          costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
          
          !       spectrum of angles         
