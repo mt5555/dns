@@ -1682,18 +1682,19 @@ do j=ny1,ny2
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          
          ! relative helicity in current wavenumber
+         if (iwave ~= 0)
          cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+sum(II*II)))
          
          !  histogram of cosine of angle between u and w (relativehelicity)
          ind = nint(a + b*abs(cos_phi))	
          if (ind>nbin) then 
 	    write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
-            call abort("Error: spectrum.F90: ind>nbin")
+!            call abort("Error: spectrum.F90: ind>nbin")
             
          endif
          if (ind<1) then 
             write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
-            call abort("Error: spectrum.F90: ind<1")
+!            call abort("Error: spectrum.F90: ind<1")
   
          endif
             
