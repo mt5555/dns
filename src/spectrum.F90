@@ -1655,10 +1655,6 @@ do j=ny1,ny2
          
          ! In coordinate system with x_1 || k, x_2 || RR and x_3 ||(k \cross RR):
 
-         ! E_22 component of energy tensor (= sum of the square of RR and the 
-         ! square of the component of II along RR
-         !	 E22(iwave)=E22(iwave)+0.5*xfac*(sum(RR*RR)+(sum(II*RR)/(mod_rr))**2)
-
          ! E_33 component of energy tensor (= I_3^2 = square of component of II orthogonal to RR)
          E33(iwave)=E33(iwave)+ 0.5*xfac*(mod_ii**2 - (sum(II*RR)/(mod_rr))**2)
          
@@ -1684,7 +1680,7 @@ do j=ny1,ny2
          
          ! relative helicity in current wavenumber
          if (iwave > 0) then
-         cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+sum(II*II)))
+         cos_phi = energy/(2*xw*xfac*(sum(RR*RR)+sum(II*II)))
          endif
          !  histogram of cosine of angle between u and w (relativehelicity)
          ind = nint(a + b*abs(cos_phi))	
