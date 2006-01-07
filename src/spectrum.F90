@@ -1682,7 +1682,7 @@ do j=ny1,ny2
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          
          ! relative helicity in current wavenumber
-         if (iwave ~= 0)
+         if (iwave > 0)
          cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+sum(II*II)))
          
          !  histogram of cosine of angle between u and w (relativehelicity)
