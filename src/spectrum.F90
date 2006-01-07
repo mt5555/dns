@@ -1631,10 +1631,10 @@ do j=ny1,ny2
          mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
          mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
          
-         if (iwave > 0)
+         if (iwave > 0) then
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
-	 
+	 endif
          ! compute vorticity           
          ! sqrt(-1) * 2pi * (im,jm,km) cross (RR-sqrt(-1)II)
          WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
@@ -1683,9 +1683,9 @@ do j=ny1,ny2
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          
          ! relative helicity in current wavenumber
-         if (iwave > 0)
+         if (iwave > 0) then
          cos_phi = energy/(2*pi2*iwave*0.5*xfac*(sum(RR*RR)+sum(II*II)))
-         
+         endif
          !  histogram of cosine of angle between u and w (relativehelicity)
          ind = nint(a + b*abs(cos_phi))	
          if (ind>nbin) then 
