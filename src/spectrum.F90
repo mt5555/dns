@@ -1631,6 +1631,7 @@ do j=ny1,ny2
          mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
          mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
          
+         if (iwave > 0)
          cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
               (mod_rr*mod_ii)
 	 
@@ -1707,12 +1708,12 @@ do j=ny1,ny2
          ind = nint(a + b*abs(cos_tta))	
          if (ind>nbin) then 
             write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
-            call abort("Error: spectrum.F90: ind>nbin")
+!            call abort("Error: spectrum.F90: ind>nbin")
             
          endif
          if (ind<1) then
             write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
-            call abort("Error: spectrum.F90: ind<1")            
+ !           call abort("Error: spectrum.F90: ind<1")            
          endif
 
          costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
