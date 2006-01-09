@@ -64,6 +64,7 @@ real*8 ::  II2sq(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
 real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
 real*8 ::  I2I3(0:max(g_nx,g_ny,g_nz))  ! I_2*I_3
 real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
+real*8 ::  par(0:max(g_nx,g_ny,g_nz))   ! abs(R\cross I)/(R^2+I^2)
 real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
@@ -1672,6 +1673,11 @@ do j=ny1,ny2
          ! R_2*I_3 = RR*I_3 (the part of the energy tensor that contributes to the helicity
          R2I3(iwave) = R2I3(iwave) + 0.5*xfac*(mod_rr*sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
          
+         !par = abs(RR\cross II)/(RR^2+II^2)
+         par = sqrt((RR(2)*II(3) - II(2)*RR(3))**2 + &
+              (II(1)*RR(3) - RR(1)*II(3))**2 + &
+              (RR(1)*II(2) - II(1)*RR(2)))/(mod_rr**2 + mod_ii**2)
+
 
          !	helicity(k) = k\cdot RR(k) cross II(k)            
          energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
