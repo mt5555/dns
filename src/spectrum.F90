@@ -704,21 +704,21 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_helicity_rp,1+iwave)
    call cwrite8(fid,spec_E,1+iwave)
    call cwrite8(fid,spec_kEk,1+iwave)
-!   call cwrite8(fid,E22,1+iwave)
    call cwrite8(fid,E33,1+iwave)
    call cwrite8(fid,II2sq,1+iwave)
    call cwrite8(fid,RRsq,1+iwave)
    call cwrite8(fid,I2I3,1+iwave)
    call cwrite8(fid,R2I3,1+iwave)
+   call cwrite8(fid,par,1+iwave)
    call cwrite8(fid,cos_tta_spec,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
    do i=1,1+iwave
-      tmp_pdf=costta_pdf(i,:)
+      tmp_pdf=costta_pdf(i-1,:)
       call cwrite8(fid,tmp_pdf,nbin)
    enddo
    do i=1,1+iwave
-      tmp_pdf=cosphi_pdf(i,:)
+      tmp_pdf=cosphi_pdf(i-1,:)
       call cwrite8(fid,tmp_pdf,nbin)
    enddo   
    call cclose(fid,ierr)
@@ -1633,9 +1633,33 @@ do j=ny1,ny2
          mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
          
          if (iwave > 0) then
-         cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
-              (mod_rr*mod_ii)
-	 endif
+            cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
+                 (mod_rr*mod_ii)
+            
+            ! histogram of cosine of angle between RR and II 
+            ind = nint(a + b*abs(cos_tta))	
+            
+            if (ind>nbin) then 
+               write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
+               call abort("Error: spectrum.F90: ind>nbin")
+               
+            endif
+            if (ind<1) then
+               write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
+               call abort("Error: spectrum.F90: ind<1")            
+            endif
+
+            costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
+            
+            ! spectrum of angles         
+            cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
+            count(iwave) = count(iwave)+1
+            
+            
+         endif
+         
+         
+#if 0
          ! compute vorticity           
          ! sqrt(-1) * 2pi * (im,jm,km) cross (RR-sqrt(-1)II)
          WR(1) = pi2*(-jm*II(3)+km*II(2)/Lz)  
@@ -1644,7 +1668,7 @@ do j=ny1,ny2
          WI(1) = pi2*(-jm*RR(3) + km*RR(2)/Lz)  
          WI(2) = pi2*(im*RR(3) - km*RR(1)/Lz)
          WI(3) = pi2*(-im*RR(2) + jm*RR(1))	
-            
+#endif            
          xfac = 64
          if (km==0) xfac=xfac/2
          if (jm==0) xfac=xfac/2
@@ -1665,65 +1689,52 @@ do j=ny1,ny2
          ! RR^2 (square of RR) 
          RRsq(iwave) = RRsq(iwave)+0.5*xfac*sum(RR*RR)
 
-         ! I_2*I_3 (the part of the energy tensor that doesn't contribute to either 
-         ! energy or helicity
-         I2I3 = I2I3(iwave) + 0.5*xfac*((sum(II*RR)/(mod_rr))*&
+         ! I_2*I_3 (the part of the energy tensor that doesn't contribute to 
+         !either energy or helicity
+         I2I3(iwave) = I2I3(iwave) + 0.5*xfac*((sum(II*RR)/(mod_rr))*&
               sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
 
          ! R_2*I_3 = RR*I_3 (the part of the energy tensor that contributes to the helicity
          R2I3(iwave) = R2I3(iwave) + 0.5*xfac*(mod_rr*sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
          
          !par = abs(RR\cross II)/(RR^2+II^2)
-         par = sqrt((RR(2)*II(3) - II(2)*RR(3))**2 + &
+         if (iwave > 0) then
+         par(iwave) = par(iwave) + sqrt((RR(2)*II(3) - II(2)*RR(3))**2 + &
               (II(1)*RR(3) - RR(1)*II(3))**2 + &
-              (RR(1)*II(2) - II(1)*RR(2)))/(mod_rr**2 + mod_ii**2)
-
+              (RR(1)*II(2) - II(1)*RR(2))**2)/(mod_rr**2 + mod_ii**2)
+         endif
 
          !	helicity(k) = k\cdot RR(k) cross II(k)            
          energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
               jm*(II(1)*RR(3) - RR(1)*II(3)) + &
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          
-         ! relative helicity in current wavenumber
+         ! relative helicity and its distribution in current wavenumber
          if (iwave > 0) then
-         cos_phi = energy/(2*xw*xfac*(sum(RR*RR)+sum(II*II)))
-         endif
-         !  histogram of cosine of angle between u and w (relativehelicity)
-         ind = nint(a + b*abs(cos_phi))	
-         if (ind>nbin) then 
-	    write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
-!            call abort("Error: spectrum.F90: ind>nbin")
+            cos_phi = energy/(xw*xfac*(sum(RR*RR)+sum(II*II)))
+            
+            !  histogram of cosine of angle between u and w (relativehelicity)
+            ind = nint(a + b*abs(cos_phi))	   
+            
+            if (ind>nbin) then 
+               write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
+               call abort("Error: spectrum.F90: ind>nbin")
+               
+            endif
+            if (ind<1) then 
+               write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
+               call abort("Error: spectrum.F90: ind<1")
+               
+            endif
+            
+            cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
             
          endif
-         if (ind<1) then 
-            write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
-!            call abort("Error: spectrum.F90: ind<1")
-  
-         endif
-            
-         cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
+
          
          !       relative helicity spectrum
          !        cos_phi_spec(iwave) = cos_phi_spec(iwave) + abs(cos_phi)
          
-         ! 	histogram of cosine of angle between RR and II 
-         ind = nint(a + b*abs(cos_tta))	
-         if (ind>nbin) then 
-            write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
-!            call abort("Error: spectrum.F90: ind>nbin")
-            
-         endif
-         if (ind<1) then
-            write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
- !           call abort("Error: spectrum.F90: ind<1")            
-         endif
-
-         costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
-         
-         !       spectrum of angles         
-         cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
-         
-         count(iwave) = count(iwave)+1
          
          !     cutoff for recalculating the spectra
          delta = 1      !this value can be changed by hand
@@ -1772,6 +1783,13 @@ spec_r_in=II2sq
 call mpi_reduce(spec_r_in,II2sq,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=RRsq
 call mpi_reduce(spec_r_in,RRsq,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=I2I3
+call mpi_reduce(spec_r_in,I2I3,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=R2I3
+call mpi_reduce(spec_r_in,R2I3,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=par
+call mpi_reduce(spec_r_in,par,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
 spec_r_in = cos_tta_spec
 call mpi_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in = count
@@ -1814,10 +1832,7 @@ rwave=e2
 call mpi_reduce(rwave,e2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
-!average costta values over sphere
-do i = 1,iwave+1
-cos_tta_spec(i) = cos_tta_spec(i)/count(i)
-enddo
+
 
 if (my_pe==io_pe) then
    print *,'KE: (from sin/cos modes)',e1
@@ -1842,11 +1857,25 @@ do i=iwave+2,iwave_max
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
    E33(iwave+1)=E33(iwave+1)+E33(i)
    II2sq(iwave+1)=II2sq(iwave+1)+II2sq(i)
-   RRsq(iwave+1)=RRsq(iwave+1)+ RRsq(i)   
+   RRsq(iwave+1)=RRsq(iwave+1)+ RRsq(i)
+   I2I3(iwave+1)=I2I3(iwave+1)+I2I3(i)
+   R2I3(iwave+1)=R2I3(iwave+1)+R2I3(i)
+   par(iwave+1)=par(iwave+1)+par(i)		   
    cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i) 
    costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
    cosphi_pdf(iwave+1,:) = cosphi_pdf(iwave+1,:) + cosphi_pdf(i,:)
 
+enddo
+
+!average costta values over sphere (exclude iwave=0)
+do i = 1,iwave
+cos_tta_spec(i) = cos_tta_spec(i)/count(i)
+enddo
+
+!compute pdfs from histograms (exclude iwave = 0)
+do i = 1,iwave
+cosphi_pdf(i,:) = cosphi_pdf(i,:)/sum(cosphi_pdf(i,:))
+costta_pdf(i,:) = costta_pdf(i,:)/sum(costta_pdf(i,:))
 enddo
 
 iwave=iwave+1
