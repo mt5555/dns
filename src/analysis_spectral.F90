@@ -80,12 +80,12 @@ compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
 str_type=0
-compute_hspec=.true.
+compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.true.		!extracting helicity-free modes
 
 tstart=7.0
-tstop=7.0
+tstop=8.8
 tinc=0.2
 icount=0
 
