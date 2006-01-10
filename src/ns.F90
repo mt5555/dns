@@ -401,7 +401,7 @@ do i=nx1,nx2
    Q(i,j,k,2) = vv
    Q(i,j,k,3) = ww
 
-   if (passive_type(ns)==4) then
+   if (passive_type(np1)==4) then
       Q(i,j,k,3)=Q(i,j,k,3)+bous*Q(i,j,k,np1)
    endif
 
