@@ -65,7 +65,10 @@ real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
 real*8 ::  I2I3(0:max(g_nx,g_ny,g_nz))  ! I_2*I_3
 real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
 real*8 ::  par(0:max(g_nx,g_ny,g_nz))   ! abs(R\cross I)/(R^2+I^2)
-real*8 ::  cos_tta_spec(0:max(g_nx,g_ny,g_nz)) !spec of cos_tta betn RR and II
+real*8 ::  cos_tta_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of cos_tta betn RR and II
+real*8 ::  cos_tta_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of cos_tta
+real*8 ::  cos_phi_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of rel hel
+real*8 ::  cos_phi_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of rel hel
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
 real*8 ::  cosphi_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) (rel hel) for each k
@@ -710,7 +713,10 @@ if (my_pe==io_pe) then
    call cwrite8(fid,I2I3,1+iwave)
    call cwrite8(fid,R2I3,1+iwave)
    call cwrite8(fid,par,1+iwave)
-   call cwrite8(fid,cos_tta_spec,1+iwave)
+   call cwrite8(fid,cos_tta_spec_n,1+iwave)
+   call cwrite8(fid,cos_tta_spec_p,1+iwave)
+   call cwrite8(fid,cos_phi_spec_n,1+iwave)
+   call cwrite8(fid,cos_phi_spec_p,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
    do i=1,1+iwave
@@ -1466,7 +1472,8 @@ real*8 :: p1(nx,ny,nz,3)
 ! local variables
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
-real*8 :: count(0:max(g_nx,g_ny,g_nz))
+real*8 :: countn(0:max(g_nx,g_ny,g_nz)), countp(0:max(g_nx,g_ny,g_nz))
+real*8 :: pcountn(0:max(g_nx,g_ny,g_nz)), pcountp(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
@@ -1589,7 +1596,25 @@ diss1=0
 diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
-cos_tta_spec = 0
+spec_E = 0
+spec_kEk=0
+E33 = 0
+II2sq = 0
+RRsq = 0
+I2I3  = 0
+R2I3 = 0
+par = 0
+cos_tta_spec_n = 0
+cos_tta_spec_p = 0
+cos_phi_spec_n = 0
+cos_phi_spec_p = 0
+costta_pdf = 0
+cosphi_pdf = 0
+countp = 0
+countn = 0
+pcountp = 0
+pcountn = 0
+
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -1610,7 +1635,7 @@ maxcos=0
 mincos=2
 
 ! bin index = a + b*cos_tta; calculate a and b
-minct = 0
+minct = -1
 maxct = 1
 a = (nbin*minct - maxct)/(minct - maxct)
 b = (1 - nbin)/(minct - maxct)
@@ -1637,7 +1662,8 @@ do j=ny1,ny2
                  (mod_rr*mod_ii)
             
             ! histogram of cosine of angle between RR and II 
-            ind = nint(a + b*abs(cos_tta))	
+!            ind = nint(a + b*abs(cos_tta))	
+            ind = nint(a + b*(cos_tta))
             
             if (ind>nbin) then 
                write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
@@ -1649,15 +1675,20 @@ do j=ny1,ny2
                call abort("Error: spectrum.F90: ind<1")            
             endif
 
-            costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1        
+            costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1.0        
             
             ! spectrum of angles         
-            cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
-            count(iwave) = count(iwave)+1
-            
-            
-         endif
-         
+!            cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
+            if (cos_tta >= 0) then
+               cos_tta_spec_p(iwave) = cos_tta_spec_p(iwave) + (cos_tta)
+               countp(iwave) = countp(iwave)+1	
+            else 
+               cos_tta_spec_n(iwave) = cos_tta_spec_n(iwave) + (cos_tta)
+               countn(iwave) = countn(iwave)+1
+
+            endif
+           endif
+           
          
 #if 0
          ! compute vorticity           
@@ -1690,7 +1721,7 @@ do j=ny1,ny2
          RRsq(iwave) = RRsq(iwave)+0.5*xfac*sum(RR*RR)
 
          ! I_2*I_3 (the part of the energy tensor that doesn't contribute to 
-         !either energy or helicity
+         ! either energy or helicity
          I2I3(iwave) = I2I3(iwave) + 0.5*xfac*((sum(II*RR)/(mod_rr))*&
               sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
 
@@ -1728,6 +1759,16 @@ do j=ny1,ny2
             endif
             
             cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
+            
+            !spectrum of relative helicity
+            if (cos_phi >= 0) then
+               cos_phi_spec_p(iwave) = cos_phi_spec_p(iwave) + (cos_phi)
+               pcountp(iwave) = pcountp(iwave)+1	
+            else 
+               cos_phi_spec_n(iwave) = cos_phi_spec_n(iwave) + (cos_phi)
+               pcountn(iwave) = pcountn(iwave)+1
+
+            endif
             
          endif
 
@@ -1790,10 +1831,29 @@ call mpi_reduce(spec_r_in,R2I3,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=par
 call mpi_reduce(spec_r_in,par,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
-spec_r_in = cos_tta_spec
-call mpi_reduce(spec_r_in,cos_tta_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-spec_r_in = count
-call mpi_reduce(spec_r_in,count,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in = cos_tta_spec_n
+call mpi_reduce(spec_r_in,cos_tta_spec_n,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = cos_tta_spec_p
+call mpi_reduce(spec_r_in,cos_tta_spec_p,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = countn
+call mpi_reduce(spec_r_in,countn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = countp
+call mpi_reduce(spec_r_in,countp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = cos_phi_spec_n
+call mpi_reduce(spec_r_in,cos_phi_spec_n,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = cos_phi_spec_p
+call mpi_reduce(spec_r_in,cos_phi_spec_p,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = pcountn
+call mpi_reduce(spec_r_in,pcountn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = pcountp
+call mpi_reduce(spec_r_in,pcountp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 do n = 1,nbin
    spec_r_in = costta_pdf(:,n)
@@ -1861,21 +1921,31 @@ do i=iwave+2,iwave_max
    I2I3(iwave+1)=I2I3(iwave+1)+I2I3(i)
    R2I3(iwave+1)=R2I3(iwave+1)+R2I3(i)
    par(iwave+1)=par(iwave+1)+par(i)		   
-   cos_tta_spec(iwave+1) = cos_tta_spec(iwave+1) + cos_tta_spec(i) 
+   cos_tta_spec_n(iwave+1) = cos_tta_spec_n(iwave+1) + cos_tta_spec_n(i)
+   cos_tta_spec_p(iwave+1) = cos_tta_spec_p(iwave+1) + cos_tta_spec_p(i)
+   cos_phi_spec_n(iwave+1) = cos_phi_spec_n(iwave+1) + cos_phi_spec_n(i)
+   cos_phi_spec_p(iwave+1) = cos_phi_spec_p(iwave+1) + cos_phi_spec_p(i)
    costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
    cosphi_pdf(iwave+1,:) = cosphi_pdf(iwave+1,:) + cosphi_pdf(i,:)
 
 enddo
 
-!average costta values over sphere (exclude iwave=0)
-do i = 1,iwave
-cos_tta_spec(i) = cos_tta_spec(i)/count(i)
+!average costta and cosphi values over sphere (exclude iwave=0)
+do i = 1,iwave+1
+cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
+cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
+cos_phi_spec_n(i) = cos_phi_spec_n(i)/pcountn(i)
+cos_phi_spec_p(i) = cos_phi_spec_p(i)/pcountp(i)
+
+
 enddo
 
 !compute pdfs from histograms (exclude iwave = 0)
-do i = 1,iwave
-cosphi_pdf(i,:) = cosphi_pdf(i,:)/sum(cosphi_pdf(i,:))
-costta_pdf(i,:) = costta_pdf(i,:)/sum(costta_pdf(i,:))
+do i = 1,iwave+1
+if (sum(cosphi_pdf(i,:)) > 0.0) cosphi_pdf(i,:) = cosphi_pdf(i,:)/sum(cosphi_pdf(i,:))
+
+if (sum(costta_pdf(i,:)) > 0.0) costta_pdf(i,:) = costta_pdf(i,:)/sum(costta_pdf(i,:))
+
 enddo
 
 iwave=iwave+1

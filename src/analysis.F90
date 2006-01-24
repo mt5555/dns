@@ -51,13 +51,13 @@ integer ni,ns,nb
 ! input file
 basename="r16"
 if (my_pe==io_pe) print *,basename
-tstart=10.5
-tstop=10.5
+tstart=0.0
+tstop=0.0
 tinc=.1
 ireaduvh = 0 ! =0 Do not read in the u,v,h fields
 icentroid=0 ! Compute the KE centroid? 0 = no, 1 = yes
 icount=0  ! A counter for averaging to compute time averages
-ictof = 0 ! If 1 then flip endian sign
+ictof = 1 ! If 1 then flip endian sign
 ivorsave=0 ! If 1 then compute an averaged vorticity
 ntrunc = 0 ! If not zero find Q with wave numbers ntrunc and above
 iscalars = 0 ! If not zero read in scalars (for energy as a function&
