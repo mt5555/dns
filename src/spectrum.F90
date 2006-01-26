@@ -53,7 +53,7 @@ real*8,private ::  cospec_z(0:g_nz/2,n_var)
 
 integer,private :: iwave=-1
 integer,private :: iwave_2d=-1
-integer,private :: nbin=100
+integer,private :: nbin=200
 
 
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
@@ -67,11 +67,11 @@ real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3
 real*8 ::  par(0:max(g_nx,g_ny,g_nz))   ! abs(R\cross I)/(R^2+I^2)
 real*8 ::  cos_tta_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of cos_tta betn RR and II
 real*8 ::  cos_tta_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of cos_tta
-real*8 ::  cos_phi_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of rel hel
-real*8 ::  cos_phi_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of rel hel
+real*8 ::  rhel_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of rel hel
+real*8 ::  rhel_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of rel hel
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
-real*8 ::  cosphi_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of cos(phi) (rel hel) for each k
+real*8 ::  rhel_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of rel hel for each k
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -715,8 +715,8 @@ if (my_pe==io_pe) then
    call cwrite8(fid,par,1+iwave)
    call cwrite8(fid,cos_tta_spec_n,1+iwave)
    call cwrite8(fid,cos_tta_spec_p,1+iwave)
-   call cwrite8(fid,cos_phi_spec_n,1+iwave)
-   call cwrite8(fid,cos_phi_spec_p,1+iwave)
+   call cwrite8(fid,rhel_spec_n,1+iwave)
+   call cwrite8(fid,rhel_spec_p,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
    do i=1,1+iwave
@@ -724,7 +724,7 @@ if (my_pe==io_pe) then
       call cwrite8(fid,tmp_pdf,nbin)
    enddo
    do i=1,1+iwave
-      tmp_pdf=cosphi_pdf(i-1,:)
+      tmp_pdf=rhel_pdf(i-1,:)
       call cwrite8(fid,tmp_pdf,nbin)
    enddo   
    call cclose(fid,ierr)
@@ -1480,8 +1480,8 @@ real*8 ::  spec_z_in(0:g_nz/2,n_var)
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
 real*8 :: WR(3),WI(3)
-real*8 :: cos_tta,cos_phi,delta,rp,ip,e1,e2,xfac,maxct,minct,maxcos,mincos
-integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ind
+real*8 :: cos_tta,rhel,delta,rp,ip,e1,e2,xfac,maxct,minct,rhmin,rhmax
+integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ra,rb,ind
 
 complex*16 tmp
 
@@ -1606,10 +1606,10 @@ R2I3 = 0
 par = 0
 cos_tta_spec_n = 0
 cos_tta_spec_p = 0
-cos_phi_spec_n = 0
-cos_phi_spec_p = 0
+rhel_spec_n = 0
+rhel_spec_p = 0
 costta_pdf = 0
-cosphi_pdf = 0
+rhel_pdf = 0
 countp = 0
 countn = 0
 pcountp = 0
@@ -1631,14 +1631,19 @@ enddo
 enddo
 enddo
 
-maxcos=0
-mincos=2
 
-! bin index = a + b*cos_tta; calculate a and b
+! for cos_tta pdf, bin index = a + b*cos_tta; calculate a and b
 minct = -1
 maxct = 1
 a = (nbin*minct - maxct)/(minct - maxct)
 b = (1 - nbin)/(minct - maxct)
+
+! for rhel pdf, bin index = ra + rb*rhel; calculate ra and rb
+rhmin = -1 
+rhmax = 1
+ra = (nbin*rhmin - rhmax)/(rhmin - rhmax)
+rb = (1-nbin)/(rhmin - rhmax)
+
 
 do j=ny1,ny2
    jm=jmcord_exp(j)
@@ -1742,39 +1747,39 @@ do j=ny1,ny2
          
          ! relative helicity and its distribution in current wavenumber
          if (iwave > 0) then
-            cos_phi = energy/(xw*xfac*(sum(RR*RR)+sum(II*II)))
+            rhel = energy/(xw*xfac*(sum(RR*RR)+sum(II*II)))
+!            write(6,*)"rhel = ",rhel
+!            if (rhel < rhmin) rhmin = rhel
+!            if (rhel > rhmax) rhmax = rhel
             
-            !  histogram of cosine of angle between u and w (relativehelicity)
-            ind = nint(a + b*abs(cos_phi))	   
+            !  histogram of relative helicity in each shell
+            ind = nint(ra + rb*(rhel))	   
+	
             
             if (ind>nbin) then 
-               write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
+               write(6,*)"iwave,rhel,ind = ",iwave,rhel,ind
                call abort("Error: spectrum.F90: ind>nbin")
                
             endif
             if (ind<1) then 
-               write(6,*)"iwave,cos(phi),ind = ",iwave,cos_phi,ind
+               write(6,*)"iwave,rhel,ind = ",iwave,rhel,ind
                call abort("Error: spectrum.F90: ind<1")
                
             endif
             
-            cosphi_pdf(iwave,ind) = cosphi_pdf(iwave,ind) + 1        
+            rhel_pdf(iwave,ind) = rhel_pdf(iwave,ind) + 1        
             
             !spectrum of relative helicity
-            if (cos_phi >= 0) then
-               cos_phi_spec_p(iwave) = cos_phi_spec_p(iwave) + (cos_phi)
+            if (rhel >= 0) then
+               rhel_spec_p(iwave) = rhel_spec_p(iwave) + rhel
                pcountp(iwave) = pcountp(iwave)+1	
             else 
-               cos_phi_spec_n(iwave) = cos_phi_spec_n(iwave) + (cos_phi)
+               rhel_spec_n(iwave) = rhel_spec_n(iwave) + rhel
                pcountn(iwave) = pcountn(iwave)+1
 
             endif
             
          endif
-
-         
-         !       relative helicity spectrum
-         !        cos_phi_spec(iwave) = cos_phi_spec(iwave) + abs(cos_phi)
          
          
          !     cutoff for recalculating the spectra
@@ -1785,7 +1790,7 @@ do j=ny1,ny2
          
          !	if (abs(cos_tta) > delta) then
          
-         !if (abs(cos_phi) <= delta) then
+         !if (abs(rhel) <= delta) then
          if (.true.) then
             ! store E(k) and kE(k)
             spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
@@ -1806,7 +1811,7 @@ do j=ny1,ny2
    enddo
 enddo
 
-!write(6,*)'maxcos, mincos',abs(maxcos),abs(mincos)
+write(6,*)'rhmax, rhmin',rhmax,rhmin
 
 
 #ifdef USE_MPI
@@ -1843,11 +1848,11 @@ call mpi_reduce(spec_r_in,countn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ier
 spec_r_in = countp
 call mpi_reduce(spec_r_in,countp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
-spec_r_in = cos_phi_spec_n
-call mpi_reduce(spec_r_in,cos_phi_spec_n,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in = rhel_spec_n
+call mpi_reduce(spec_r_in,rhel_spec_n,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
-spec_r_in = cos_phi_spec_p
-call mpi_reduce(spec_r_in,cos_phi_spec_p,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in = rhel_spec_p
+call mpi_reduce(spec_r_in,rhel_spec_p,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 spec_r_in = pcountn
 call mpi_reduce(spec_r_in,pcountn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
@@ -1861,8 +1866,8 @@ do n = 1,nbin
 enddo
 
 do n = 1,nbin
-   spec_r_in = cosphi_pdf(:,n)
-   call mpi_reduce(spec_r_in,cosphi_pdf(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+   spec_r_in = rhel_pdf(:,n)
+   call mpi_reduce(spec_r_in,rhel_pdf(0,n),(1+iwave_max),MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 enddo
 
 
@@ -1923,26 +1928,26 @@ do i=iwave+2,iwave_max
    par(iwave+1)=par(iwave+1)+par(i)		   
    cos_tta_spec_n(iwave+1) = cos_tta_spec_n(iwave+1) + cos_tta_spec_n(i)
    cos_tta_spec_p(iwave+1) = cos_tta_spec_p(iwave+1) + cos_tta_spec_p(i)
-   cos_phi_spec_n(iwave+1) = cos_phi_spec_n(iwave+1) + cos_phi_spec_n(i)
-   cos_phi_spec_p(iwave+1) = cos_phi_spec_p(iwave+1) + cos_phi_spec_p(i)
+   rhel_spec_n(iwave+1) = rhel_spec_n(iwave+1) + rhel_spec_n(i)
+   rhel_spec_p(iwave+1) = rhel_spec_p(iwave+1) + rhel_spec_p(i)
    costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
-   cosphi_pdf(iwave+1,:) = cosphi_pdf(iwave+1,:) + cosphi_pdf(i,:)
+   rhel_pdf(iwave+1,:) = rhel_pdf(iwave+1,:) + rhel_pdf(i,:)
 
 enddo
 
-!average costta and cosphi values over sphere (exclude iwave=0)
+!average costta and rhel values over sphere (exclude iwave=0)
 do i = 1,iwave+1
 cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
 cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
-cos_phi_spec_n(i) = cos_phi_spec_n(i)/pcountn(i)
-cos_phi_spec_p(i) = cos_phi_spec_p(i)/pcountp(i)
+rhel_spec_n(i) = rhel_spec_n(i)/pcountn(i)
+rhel_spec_p(i) = rhel_spec_p(i)/pcountp(i)
 
 
 enddo
 
 !compute pdfs from histograms (exclude iwave = 0)
 do i = 1,iwave+1
-if (sum(cosphi_pdf(i,:)) > 0.0) cosphi_pdf(i,:) = cosphi_pdf(i,:)/sum(cosphi_pdf(i,:))
+if (sum(rhel_pdf(i,:)) > 0.0) rhel_pdf(i,:) = rhel_pdf(i,:)/sum(rhel_pdf(i,:))
 
 if (sum(costta_pdf(i,:)) > 0.0) costta_pdf(i,:) = costta_pdf(i,:)/sum(costta_pdf(i,:))
 
