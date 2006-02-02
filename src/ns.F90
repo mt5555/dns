@@ -506,10 +506,12 @@ do j=1,ny_2dz
                ! compute (1-alpha^2 k^2)^2  2*k^2 vor vor:   
                if (alpha_value>0) then
                   ! incorrect if using hyperviscosity
-                  ens_diss = ens_diss + 2*xfac*(mu*xw* (1+xw*alpha_value**2)**2)*  &
+                  if (infinite_alpha==1) then
+                     ens_diss=0
+                  else
+                     ens_diss = ens_diss + 2*xfac*(mu*xw* (1+xw*alpha_value**2)**2)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
-!               ens_diss = ens_diss + 2*xfac*(mu*xw* (1+xw*alpha**2)**2)*  &
-!                    ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
+                  endif
                else
                   ens_diss = ens_diss + 2*xfac*mu*xw_viss*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
