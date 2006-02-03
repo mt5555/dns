@@ -154,8 +154,8 @@ if (0==init_sforcing) then
       enddo
    endif
    if (model_spec==2) then     ! balu forcing
-      numb1=dealias_sphere_kmax2_1 
-      numb=dealias_sphere_kmax2_1 
+      numb1=dealias_23_kmax-1
+      numb=dealias_23_kmax
       call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=wn**(-5./3.)
