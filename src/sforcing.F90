@@ -154,11 +154,11 @@ if (0==init_sforcing) then
       enddo
    endif
    if (model_spec==2) then     ! balu forcing
-      numb1=10
-      numb=10
+      numb1=dealias_sphere_kmax2_1 
+      numb=dealias_sphere_kmax2_1 
       call sforcing_init()
       do wn=numb1,numb
-         ener_target(wn)=.063
+         ener_target(wn)=wn**(-5./3.)
       enddo
    endif
    if (model_spec==3) then     ! For the rotation case  

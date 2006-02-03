@@ -507,7 +507,8 @@ do j=1,ny_2dz
                if (alpha_value>0) then
                   ! incorrect if using hyperviscosity
                   if (infinite_alpha==1) then
-                     ens_diss=0
+                     ens_diss=ens_diss + 2*xfac*(mu*xw*(xw)**2)*  &
+                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                   else
                      ens_diss = ens_diss + 2*xfac*(mu*xw* (1+xw*alpha_value**2)**2)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
