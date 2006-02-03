@@ -8,14 +8,15 @@ value        ! viscosity type  (value, smallest, kediff, Re)
 0e-4          ! viscosity coefficient.  (300)
 hyper0      ! hyper viscosity power: none, hyper4, hyper8
 1.0          ! coefficient  suggested value: 2000.  
-hypo2         ! hypo viscsoity: none, hypo2 
+none         ! hypo viscsoity: none, hypo2 
 00.000         ! hypo viscsosity coefficient  Balu:  315.0
 0              ! fcor
 1              ! Z scaling
 0              ! bouss. parameter
 0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
-0            ! compute_structure functions
+0             ! number of passive scalars
+0           ! compute_structure functions
 0            ! compute PDF's
 fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
