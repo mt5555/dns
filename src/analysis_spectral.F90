@@ -284,19 +284,6 @@ do
       call output_hfree_spec(time,time)
    endif
    
-
-
-   ! compute u_x, u_xx
-   call der(Q(1,1,1,n),d1,d2,work,numder,1)
-
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      ke = ke + .5*Q(i,j,k,n)**2
-
-      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,1)*d1(i,j,k) 
-
-
    
    if (compute_uvw) then
       if (.not. read_uvw) then	
