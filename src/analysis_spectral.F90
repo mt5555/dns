@@ -140,6 +140,7 @@ else
    allocate(q1(nx,ny,nz,ndim))
    allocate(q2(nx,ny,nz,ndim))
    allocate(work1(nx,ny,nz))
+   allocate(work2(nx,ny,nz))
    if (nxdecomp*nydecomp*nzdecomp>1) then
       allocate(q3(nx,ny,nz,ndim))
       allocate(work1(nx,ny,nz))
@@ -261,23 +262,27 @@ do
       endif
 
 #if 0
-      do n=1,ndim
-         ! compute u_x, u_y and u_z
-         call der(Q(1,1,1,n),q1(1,1,1,1),dummy,work1,DX_ONLY,1)
-         call der(Q(1,1,1,n),q1(1,1,1,2),dummy,work1,DX_ONLY,2)
-         call der(Q(1,1,1,n),q1(1,1,1,3),dummy,work1,DX_ONLY,3)
-         
-         do k=nz1,nz2
-         do j=ny1,ny2
-         do i=nx1,nx2
-              Q(i,j,k,n)  = n'th component of velocity at i,j,k
-              q1(i,j,k,1) = d/dx of Q(i,j,k,n)
-              q1(i,j,k,2) = d/dy of Q(i,j,k,n)
-              q1(i,j,k,3) = d/dz of Q(i,j,k,n)
-         enddo
-         enddo
-         enddo
-      enddo
+      q1=0
+      ! compute v_x - u_y
+      call der(Q(1,1,1,2),work1,dummy,work2,DX_ONLY,1)
+      q1(:,:,:,3) = work1
+      call der(Q(1,1,1,1),work1,dummy,work2,DX_ONLY,2)
+      q1(:,:,:,3) = q1(:,:,:,3)-work1
+
+      ! compute u_z - w_x
+      call der(Q(1,1,1,1),work1,dummy,work2,DX_ONLY,3)
+      q1(:,:,:,2) = work1
+      call der(Q(1,1,1,3),work1,dummy,work2,DX_ONLY,1)
+      q1(:,:,:,2) = q1(:,:,:,2)-work1
+
+      ! compute w_y - v_z
+      call der(Q(1,1,1,3),work1,dummy,work2,DX_ONLY,2)
+      q1(:,:,:,1) = work1
+      call der(Q(1,1,1,2),work1,dummy,work2,DX_ONLY,3)
+      q1(:,:,:,1) = q1(:,:,:,1)-work1
+
+      ! now the vorcity is stored in q1, velocity in Q
+
 #endif
 
       call compute_hfree_spec(Q,q1,q2,q3)
