@@ -69,9 +69,10 @@ real*8 ::  cos_tta_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of cos_tta betn RR an
 real*8 ::  cos_tta_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of cos_tta
 real*8 ::  rhel_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of rel hel
 real*8 ::  rhel_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of rel hel
-real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),100) !pdfs of cos(tta) for each k
-real*8 ::  tmp_pdf(100)                          !pdfs of cos(tta) for each k
-real*8 ::  rhel_pdf(0:max(g_nx,g_ny,g_nz),100)!pdfs of rel hel for each k
+real*8 ::  rhel_rms_spec(0:max(g_nx,g_ny,g_nz)) ! spec of rms of rel hel
+real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),200) !pdfs of cos(tta) for each k
+real*8 ::  tmp_pdf(200)                          !pdfs of cos(tta) for each k
+real*8 ::  rhel_pdf(0:max(g_nx,g_ny,g_nz),200)!pdfs of rel hel for each k
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -717,6 +718,7 @@ if (my_pe==io_pe) then
    call cwrite8(fid,cos_tta_spec_p,1+iwave)
    call cwrite8(fid,rhel_spec_n,1+iwave)
    call cwrite8(fid,rhel_spec_p,1+iwave)
+   call cwrite8(fid,rhel_rms_spec,1+iwave)
    x=nbin
    call cwrite8(fid,x,1)
    do i=1,1+iwave
@@ -1473,7 +1475,7 @@ real*8 :: p1(nx,ny,nz,3)
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: countn(0:max(g_nx,g_ny,g_nz)), countp(0:max(g_nx,g_ny,g_nz))
-real*8 :: pcountn(0:max(g_nx,g_ny,g_nz)), pcountp(0:max(g_nx,g_ny,g_nz))
+real*8 :: pcountn(0:max(g_nx,g_ny,g_nz)), pcountp(0:max(g_nx,g_ny,g_nz)),rcount(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
@@ -1614,7 +1616,7 @@ countp = 0
 countn = 0
 pcountp = 0
 pcountn = 0
-
+rcount = 0
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -1778,6 +1780,9 @@ do j=ny1,ny2
                pcountn(iwave) = pcountn(iwave)+1
 
             endif
+	   !spectrum of variance of relative helicity
+            rhel_rms_spec(iwave) = rhel_rms_spec(iwave) + rhel**2	            
+            rcount(iwave) = rcount(iwave) + 1
             
          endif
          
@@ -1811,7 +1816,7 @@ do j=ny1,ny2
    enddo
 enddo
 
-write(6,*)'rhmax, rhmin',rhmax,rhmin
+
 
 
 #ifdef USE_MPI
@@ -1854,11 +1859,19 @@ call mpi_reduce(spec_r_in,rhel_spec_n,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3
 spec_r_in = rhel_spec_p
 call mpi_reduce(spec_r_in,rhel_spec_p,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
+spec_r_in = rhel_rms_spec
+call mpi_reduce(spec_r_in,rhel_rms_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+
 spec_r_in = pcountn
 call mpi_reduce(spec_r_in,pcountn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 spec_r_in = pcountp
 call mpi_reduce(spec_r_in,pcountp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+spec_r_in = rcount
+call mpi_reduce(spec_r_in,rcount,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
 
 do n = 1,nbin
    spec_r_in = costta_pdf(:,n)
@@ -1930,6 +1943,7 @@ do i=iwave+2,iwave_max
    cos_tta_spec_p(iwave+1) = cos_tta_spec_p(iwave+1) + cos_tta_spec_p(i)
    rhel_spec_n(iwave+1) = rhel_spec_n(iwave+1) + rhel_spec_n(i)
    rhel_spec_p(iwave+1) = rhel_spec_p(iwave+1) + rhel_spec_p(i)
+   rhel_rms_spec(iwave+1) = rhel_rms_spec(iwave+1) + rhel_rms_spec(i)
    costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
    rhel_pdf(iwave+1,:) = rhel_pdf(iwave+1,:) + rhel_pdf(i,:)
 
@@ -1941,7 +1955,7 @@ cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
 cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
 rhel_spec_n(i) = rhel_spec_n(i)/pcountn(i)
 rhel_spec_p(i) = rhel_spec_p(i)/pcountp(i)
-
+rhel_rms_spec(i) = sqrt(rhel_rms_spec(i)/rcount(i))
 
 enddo
 
