@@ -281,7 +281,35 @@ do
       call der(Q(1,1,1,2),work1,dummy,work2,DX_ONLY,3)
       q1(:,:,:,1) = q1(:,:,:,1)-work1
 
-      ! now the vorcity is stored in q1, velocity in Q
+      ! the vorcity is stored in q1, velocity in Q
+      ! compute work1 = enstrophy
+      ! compute work2 = helicity
+      work1=0
+      work2=0
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         work1(i,j,k)=work1(i,j,k) + q1(i,j,k,1)**2 +  &
+                                     q1(i,j,k,2)**2 +  &
+                                     q1(i,j,k,3)**2  
+         work2(i,j,k)=work2(i,j,k) + q1(i,j,k,1)*Q(i,j,k,1) + &
+                                     q1(i,j,k,2)*Q(i,j,k,2) + &
+                                     q1(i,j,k,3)*Q(i,j,k,3) 
+      enddo
+      enddo
+      enddo
+
+      ! now compute u - helicity * vorticity / enstophy
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         q2(i,j,k,1) = Q(i,j,k,1) - work2(i,j,k)*q1(i,j,k,1)/work1(i,j,k)
+         q2(i,j,k,2) = Q(i,j,k,2) - work2(i,j,k)*q1(i,j,k,2)/work1(i,j,k)
+         q2(i,j,k,3) = Q(i,j,k,3) - work2(i,j,k)*q1(i,j,k,3)/work1(i,j,k)
+      enddo
+      enddo
+      enddo
+
 
 #endif
 
