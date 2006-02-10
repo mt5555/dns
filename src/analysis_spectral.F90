@@ -139,6 +139,7 @@ else
    allocate(Q(nx,ny,nz,ndim))
    allocate(q1(nx,ny,nz,ndim))
    allocate(q2(nx,ny,nz,ndim))
+   allocate(work1(nx,ny,nz))
    if (nxdecomp*nydecomp*nzdecomp>1) then
       allocate(q3(nx,ny,nz,ndim))
       allocate(work1(nx,ny,nz))
@@ -259,11 +260,12 @@ do
          read_uvw=.true.	
       endif
 
+#if 0
       do n=1,ndim
          ! compute u_x, u_y and u_z
-         call der(Q(1,1,1,n),q1(1,1,1,1),dummy,work,DX_ONLY,1)
-         call der(Q(1,1,1,n),q1(1,1,1,2),dummy,word,DX_ONLY,2)
-         call der(Q(1,1,1,n),q1(1,1,1,3),dummy,word,DX_ONLY,3)
+         call der(Q(1,1,1,n),q1(1,1,1,1),dummy,work1,DX_ONLY,1)
+         call der(Q(1,1,1,n),q1(1,1,1,2),dummy,work1,DX_ONLY,2)
+         call der(Q(1,1,1,n),q1(1,1,1,3),dummy,work1,DX_ONLY,3)
          
          do k=nz1,nz2
          do j=ny1,ny2
@@ -276,7 +278,7 @@ do
          enddo
          enddo
       enddo
-
+#endif
 
       call compute_hfree_spec(Q,q1,q2,q3)
       call output_hfree_spec(time,time)

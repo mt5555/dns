@@ -1,7 +1,7 @@
 7            ! input file type
 1            ! file I/O header type 1-5
 ns_uvw       ! equations
-zero        ! initial condition:  KH-blob, KH-anal, iso12
+iso12        ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
 balu          ! forcing:  none, iso, iso12, iso12w, iso23w
 value        ! viscosity type  (value, smallest, kediff, Re)
