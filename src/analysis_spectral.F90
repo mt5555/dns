@@ -258,10 +258,43 @@ do
          endif
          read_uvw=.true.	
       endif
+
+      do n=1,ndim
+         ! compute u_x, u_y and u_z
+         call der(Q(1,1,1,n),q1(1,1,1,1),dummy,work,DX_ONLY,1)
+         call der(Q(1,1,1,n),q1(1,1,1,2),dummy,word,DX_ONLY,2)
+         call der(Q(1,1,1,n),q1(1,1,1,3),dummy,word,DX_ONLY,3)
+         
+         do k=nz1,nz2
+         do j=ny1,ny2
+         do i=nx1,nx2
+              Q(i,j,k,n)  = n'th component of velocity at i,j,k
+              q1(i,j,k,1) = d/dx of Q(i,j,k,n)
+              q1(i,j,k,2) = d/dy of Q(i,j,k,n)
+              q1(i,j,k,3) = d/dz of Q(i,j,k,n)
+         enddo
+         enddo
+         enddo
+      enddo
+
+
       call compute_hfree_spec(Q,q1,q2,q3)
       call output_hfree_spec(time,time)
    endif
    
+
+
+   ! compute u_x, u_xx
+   call der(Q(1,1,1,n),d1,d2,work,numder,1)
+
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      ke = ke + .5*Q(i,j,k,n)**2
+
+      rhs(i,j,k,n) = rhs(i,j,k,n) +  mu*d2(i,j,k) - Q(i,j,k,1)*d1(i,j,k) 
+
+
    
    if (compute_uvw) then
       if (.not. read_uvw) then	
