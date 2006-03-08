@@ -31,10 +31,10 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -L/usr/local/pkg/mpich-gm/mpich-gm-pgi/mpich-gm-1.2.6.14/lib -lfmpich  -lmpich  -L/opt/gm/lib/ -lgm
                  #-lpthread
    endif
-   ifeq ($(HOST),s873487)
-      VENDOR=INTEL8
-      #MPI = -DUSE_MPI -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
-      #MPILIB =   -llamf77mpi -lmpi -llam -lutil
+   ifeq ($(HOST),s854018)
+      VENDOR=PGI
+      MPI = -DUSE_MPI -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
+      MPILIB =   -llamf77mpi -lmpi -llam -lutil -lpthread
    endif
    ifeq ($(HOST),reddish)
       VENDOR=PGI
@@ -284,7 +284,8 @@ analysis_spec2d: analysis_spec2d.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 clean: 
-	rm -f temp* *.d *.o *.mod dns dnss dnsa dnsgrid dnsghost dnsi dnsvor \
+	rm -f temp* *.d *.o *.mod dns dnsz dnss dnsa \
+                            dnsgrid dnsghost dnsi dnsvor \
                             cdns dnsibm conv analysis_rms     \
                             analysis_isoave analysis analysis_sk \
                             analysis_spec2d splitspec \

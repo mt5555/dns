@@ -1,4 +1,19 @@
 *******************************************************************************
+3/6/2006
+Kerr's compression of our 2048^3 data set project.
+
+ccs-2 machine "lindor"
+/usb1 /usb2 /usb3
+
+start xpsi jobs?  use sftp hpss.lanl.gov
+
+
+Test case on D800:
+   64^3  using "decay.inp" initial condition
+   temp0001.0000.[uvw]
+
+
+*******************************************************************************
 6/30/2005
 rotation case (modeled after leslie smith's run)
 

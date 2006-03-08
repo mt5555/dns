@@ -2,6 +2,7 @@
 subroutine output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use spectrum
+use isoave
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
@@ -20,7 +21,7 @@ real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
 real*8 :: divx,divi
 integer i,j,k,n,ierr,csig
-integer :: n1,n1d,n2,n2d,n3,n3d
+integer :: n1,n1d,n2,n2d,n3,n3d,pv_type,stype
 character(len=80) :: message
 CPOINTER fid,fidj,fidS,fidcore
 
@@ -81,12 +82,42 @@ else
 endif
 
 
-
 !
 ! the "expensive" scalars
+! compute, and output to a file
+call compute_pv_dissipation(Q,q1,q2,work1,work2)
+
 !
-! call compute_expensive_scalars(  )
-! output these to a file...
+! structure functions
+!
+if (diag_struct==1) then
+   pv_type=1
+   stype=3                   ! structure functions of u,v,w
+   if (npassive==1) stype=4; ! structure functions of u,v,w and PV
+   
+   ! compute pv in work2, vorticity in q1
+   call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
+   work2 = Q(:,:,:,4)  ! make a copy
+   Q(:,:,:,4) = work1  ! overwrite 4'th component with PV
+    
+   ! angle averaged functions:
+   call isoavep(Q,q1,q2,q3,stype,csig)
+   ! if csig>0, isoavep did not complete - interrupted by SIGURG
+   if (my_pe==io_pe .and. csig==0) then
+      write(message,'(f10.4)') 10000.0000 + time
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".isostr"
+      call copen(message,"w",fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
+         call abort(message)
+      endif
+      call writeisoave(fid,time)
+      call cclose(fid,ierr)
+   endif
+
+   Q(:,:,:,4) = work2  ! restore
+endif
+
 
 
 end subroutine
@@ -94,13 +125,7 @@ end subroutine
 
 
 
-subroutine compute_expensive_scalars
-end subroutine
-
-
-
-
-subroutine compute_pv_dissipation(q_diss,Q,Qhat,work1,work2,d1)
+subroutine compute_pv_dissipation(Q,vor,potvor,omegadotrho_nu,omegadotrho_kappa)
 use params
 use fft_interface
 !bw
@@ -116,14 +141,13 @@ use fft_interface
 !bw  
 !bw  
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-real*8 :: d1(nx,ny,nz)
 real*8 :: vor(nx,ny,nz,3)
 real*8 :: potvor(nx,ny,nz)
+real*8 :: omegadotrho_nu(nx,ny,nz)
+real*8 :: omegadotrho_kappa(nx,ny,nz)
+real*8 :: enstr_diss, 
+
 real*8 :: dummy(1)
-real*8 :: enstr_diss, omegadotrho_nu(nx,ny,nz), omegadotrho_kappa(nx,ny,nz)
 integer :: pv_type, i, j, k, im, jm, km
 
 
@@ -134,8 +158,6 @@ integer :: pv_type, i, j, k, im, jm, km
 !bw
 !bw I probably don't have the work arrays correct in these calls.
 !bw
-call vorticity(Q,vor,work1,work2)
-call potential_vorticity(potvor,vor,Q,d1,work,pv_type)
 !bw
 !bw
 !bw Compute this quantity in 3 stages in physical space
@@ -145,47 +167,27 @@ call potential_vorticity(potvor,vor,Q,d1,work,pv_type)
 !bw Then fft, then
 !bw
 
-omegadotrho_nu = 0
+if (npassive==0) call abort("Error: compute pv called, but npassive=0")
 
-   call der(Q(1,1,1,4),d1,dummy,work1,DX_ONLY,1)
-   do k=nz1,nz2
-      do j=ny1,ny2
-         do i=nx1,nx2
-            omegadotrho_nu(i,j,k) = omegadotrho_nu(i,j,k) &
-                              + d1(i,j,k)*vor(i,j,k,1)
-         enddo
-      enddo
-   enddo
-  ! compute theta_y
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
-   do k=nz1,nz2
-      do j=ny1,ny2
-         do i=nx1,nx2
-            omegadotrho_nu(i,j,k) = omegadotrho_nu(i,j,k) + d1(i,j,k)*vor(i,j,k,2)
-         enddo
-      enddo
-   enddo
- 
-omegadotrho_kappa(i,j,k) = omegadotrho_nu(i,j,k)
+! potvor = grad(Q(:,:,:,4)) dot vorticity  
+! (use omegadotrho_* arrays as work arrays)
+pv_type=2
+call potential_vorticity(potvor,vor,Q,omegadotrho_nu,omegadotrho_kappa,pv_type)
+
+! compute d/dz of theta, store in vor(:,:,:,1)
+call der(Q(1,1,1,np1),vor,dummy,omegadotrho_nu,DX_ONLY,3)
+
+omegadotrho_nu = potvor - bous*vor(:,:,:,1)/Lz  
+omegadotrho_kappa = potvor + fcor*vor(:,:,:,1)/Lz 
+
   
-   ! compute theta_z -- do not forget to add in coriolis here
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
-   do k=nz1,nz2
-      do j=ny1,ny2
-         do i=nx1,nx2
-            omegadotrho_nu(i,j,k) = omegadotrho_nu(i,j,k) + &
-                            d1(i,j,k)/Lz*(vor(i,j,k,3)-bous)
-            omegadotrho_kappa(i,j,k) = omegadotrho_kappa(i,j,k) + &
-                                d1(i,j,k)/Lz*(vor(i,j,k,3)+fcor)
-         enddo
-      enddo
-   enddo
 !bw 
 !bw Now laplacian both omegadotrho_nu  and omegadotrho_kappa
 !bw
    call fft3d(omegadotrho_nu,work1)
    call fft3d(omegadotrho_kappa,work1)
-!bw
+
+   enstr_diss = 0
    do k=nz1,nz2
       km=(kmcord(k))
       do j=ny1,ny2
@@ -195,27 +197,13 @@ omegadotrho_kappa(i,j,k) = omegadotrho_nu(i,j,k)
             rwave = im**2 + jm**2 + (km/Lz)**2
             omegadotrho_nu(i,j,k) = -omegadotrho_nu(i,j,k)*rwave
             omegadotrho_kappa(i,j,k) = -omegadotrho_kappa(i,j,k)*rwave
-         enddo
-      enddo
-   enddo
-!bw Transform back -- I hope this is the right way to do this.
-   call ifft3d(omegadotrho_nu,work1)
-   call ifft3d(omegadotrho_kappa,work1)
-!bw Now take the area average
-   enstr_diss = 0
-   do k=nz1,nz2
-      km=(kmcord(k))
-      do j=ny1,ny2
-         jm=(jmcord(j))
-         do i=nx1,nx2
-            im=(imcord(i))
+
             xfac = 8
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
-            enstr_diss = enstr_diss &
-                         + nu*omegadotrho_nu(i,j,k) &
-                         + kamma*omegadotrho_kappa(i,j,k)
+            enstr_diss = enstr_diss + xfac*  &
+                 ( nu*omegadotrho_nu(i,j,k) +  kamma*omegadotrho_kappa(i,j,k))
          enddo
       enddo
    enddo
