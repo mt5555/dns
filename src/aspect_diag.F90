@@ -52,9 +52,14 @@ if ( g_bdy_x1==PERIODIC .and. &
 
    call compute_spec(time,Q,q1,work1,work2)
    call compute_spec_2d(time,Q,q1,work1,work2)
+   call compute_pv_spec(time,Q,q1,work1,work2)
+!bw   call compute_bous_spec
    call output_spec(time,time_initial)
    call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
+!bw   call output_pv_spec(time,time_initial) ! Too complicated for now
+   call output_pv2_spec(time,time_initial)
    call output_2d_spec(time,time_initial)  
+!bw    call output_bous
 
    !set this flag so that for next timestep, we will compute and save
    !spectral transfer functions:
@@ -85,7 +90,7 @@ endif
 !
 ! the "expensive" scalars
 ! compute, and output to a file
-call compute_pv_dissipation(Q,q1,q2,work1,work2)
+call compute_potens_dissipation(Q,q1,q2,work1,work2)
 
 !
 ! structure functions
@@ -125,7 +130,7 @@ end subroutine
 
 
 
-subroutine compute_pv_dissipation(Q,vor,potvor,omegadotrho_nu,omegadotrho_kappa)
+subroutine compute_potens_dissipation(Q,vor,potvor,omegadotrho_nu,omegadotrho_kappa)
 use params
 use fft_interface
 !bw
@@ -154,10 +159,7 @@ integer :: pv_type, i, j, k, im, jm, km
 !
 ! For this subroutine pv_type = 1 (the full potential vorticity)
 !
-
-!bw
-!bw I probably don't have the work arrays correct in these calls.
-!bw
+pv_type = 1
 !bw
 !bw
 !bw Compute this quantity in 3 stages in physical space
@@ -171,7 +173,7 @@ if (npassive==0) call abort("Error: compute pv called, but npassive=0")
 
 ! potvor = grad(Q(:,:,:,4)) dot vorticity  
 ! (use omegadotrho_* arrays as work arrays)
-pv_type=2
+pv_type=1
 call potential_vorticity(potvor,vor,Q,omegadotrho_nu,omegadotrho_kappa,pv_type)
 
 ! compute d/dz of theta, store in vor(:,:,:,1)
@@ -180,7 +182,6 @@ call der(Q(1,1,1,np1),vor,dummy,omegadotrho_nu,DX_ONLY,3)
 omegadotrho_nu = potvor - bous*vor(:,:,:,1)/Lz  
 omegadotrho_kappa = potvor + fcor*vor(:,:,:,1)/Lz 
 
-  
 !bw 
 !bw Now laplacian both omegadotrho_nu  and omegadotrho_kappa
 !bw
