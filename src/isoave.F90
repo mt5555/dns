@@ -357,6 +357,25 @@ endif
 ntranspose=0
 ntot=real(g_nx)*g_ny*g_nz
 
+if(stype==4) then
+!bw
+!bw   Trickery for the bousinesq case
+!bw      Compute vorticity and then the potential vorticity
+!bw      work has the vorticity 
+     call vorticity(Q,work,work1,work2)
+!bw      work3 has the potential vorticity  (that we want to put in Q(4)) 
+!bw    
+     call potential_vorticity(work3,work,Q,work1,work2,pv_type)
+!bw      store theta in work
+         work = Q(:,:,:,4)
+!bw      copy pv to Q(4)
+         Q(:,:,:,4) = work3
+!bw
+!bw      by now Q should have
+!bw      Q(1-3) = u,v,w
+!bw      Q(4) = pv
+!bw      then we can go ahead and accumulate the two point correlations.
+end if
 
 call zero_str
 
@@ -671,6 +690,13 @@ Do idir=1,ndir
 
 100 continue
    enddo
+
+if(stype==4) then
+!bw
+!bw Copy density back to Q(4)
+!bw
+         Q(:,:,:,4) = work
+end if
 
 
    write(message,'(a,i5)') 'isoavep: number of calls to transpose_*() ',ntranspose
