@@ -52,8 +52,8 @@ if ( g_bdy_x1==PERIODIC .and. &
 
    call compute_spec(time,Q,q1,work1,work2)
    call compute_spec_2d(time,Q,q1,work1,work2)
-   call compute_pv_spec(time,Q,q1,work1,work2)
-!bw   call compute_bous_spec
+   call compute_pv_spec(time,Q,q1,q2,q3,work1,work2)
+!bw   call compute_bous
    call output_spec(time,time_initial)
    call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
 !bw   call output_pv_spec(time,time_initial) ! Too complicated for now
@@ -150,7 +150,7 @@ real*8 :: vor(nx,ny,nz,3)
 real*8 :: potvor(nx,ny,nz)
 real*8 :: omegadotrho_nu(nx,ny,nz)
 real*8 :: omegadotrho_kappa(nx,ny,nz)
-real*8 :: enstr_diss, 
+real*8 :: enstr_diss
 
 real*8 :: dummy(1)
 integer :: pv_type, i, j, k, im, jm, km
