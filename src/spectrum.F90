@@ -49,6 +49,19 @@ real*8,private ::  cospec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  cospec_x(0:g_nx/2,n_var)   
 real*8,private ::  cospec_y(0:g_ny/2,n_var)
 real*8,private ::  cospec_z(0:g_nz/2,n_var)
+!bw spectrum for pv and pv^2/2
+real*8,private ::  qspec_x(0:g_nx/2)
+real*8,private ::  qspec_y(0:g_ny/2)
+real*8,private ::  qspec_z(0:g_nz/2)
+real*8,private ::  qspec_r(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  q2spec_x(0:g_nx/2)
+real*8,private ::  q2spec_y(0:g_ny/2)
+real*8,private ::  q2spec_z(0:g_nz/2)
+real*8,private ::  q2spec_r(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  bspec_x(0:g_nx/2,n_var)
+real*8,private ::  bspec_y(0:g_ny/2,n_var)
+real*8,private ::  bspec_z(0:g_nz/2,n_var)
+real*8,private ::  bspec_r(0:max(g_nx,g_ny,g_nz))
 
 
 integer,private :: iwave=-1
@@ -156,6 +169,98 @@ if (ndim>=3) then
 endif
 end subroutine
 
+subroutine compute_pv_spec(time,Q,q1,q2,q3,work1,work2)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)   ! (u,v,w)
+real*8 :: q1(nx,ny,nz,n_var) 
+real*8 :: q2(nx,ny,nz,n_var) 
+real*8 :: q3(nx,ny,nz,n_var) 
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: time, pv2energy
+real*8 pv(nx,ny,nz)  ! used for potential vorticity
+real*8 pv2(nx,ny,nz)  ! used for potential enstrophy
+
+!local
+integer :: iwave_max,n,pv_type, i,j,k
+real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
+real*8 :: rwave,xfac
+!
+! use the full pv
+!
+pv_type = 1
+iwave_max=max(g_nx,g_ny,g_nz)
+!bw
+!bw  For pv q=pv spectrum
+!bw
+qspec_r=0
+qspec_x=0
+qspec_y=0
+qspec_z=0
+!bw
+!bw For potential enstrophy Q = q^2/2
+!bw
+q2spec_r=0
+q2spec_x=0
+q2spec_y=0
+q2spec_z=0
+
+do i=1,n_var
+   q1(:,:,:,i)=Q(:,:,:,i)
+enddo
+! 
+!   pv = pv + (vorticity + f) dot grad rho
+!   Q = Q + pv^2/2 
+!
+!bw   Compute the vorticity and the potential vorticity
+!bw
+!bw
+!bw I probably don't have the work arrays correct in these calls.
+!bw
+! compute pv in work1, vorticity in q1
+   call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
+!bw
+!bw Compute the FFT of the pv
+!bw
+call fft3d(work1,work2)
+!
+! 
+!
+pv2energy=0
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+    rwave = imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2
+    iwave = nint(Lz*sqrt(rwave))
+
+    xfac = 8
+    if (kmcord(k)==0) xfac=xfac/2
+    if (jmcord(j)==0) xfac=xfac/2
+    if (imcord(i)==0) xfac=xfac/2
+    pv2energy=xfac*work1(i,j,k)*work1(i,j,k)
+
+    q2spec_r(iwave)=q2spec_r(iwave)+pv2energy
+    q2spec_x(abs(imcord(i)))=q2spec_x(abs(imcord(i))) + pv2energy
+    q2spec_y(abs(jmcord(j)))=q2spec_y(abs(jmcord(j))) + pv2energy
+    q2spec_z(abs(kmcord(k)))=q2spec_z(abs(kmcord(k))) + pv2energy
+enddo
+enddo
+enddo
+!bw computing pv is complicated so set all those to zero for the moment
+qspec_x=.5*qspec_x
+qspec_y=.5*qspec_y
+qspec_z=.5*qspec_z
+q2spec_x=.5*q2spec_x
+q2spec_y=.5*q2spec_y
+q2spec_z=.5*q2spec_z
+
+time_old=time
+
+end subroutine
+
+
 
 
 subroutine compute_spec_2d(time,Q,q1,work1,work2)
@@ -258,6 +363,55 @@ enddo
 spec_x=.5*spec_x
 spec_y=.5*spec_y
 spec_z=.5*spec_z
+
+
+
+time_old=time
+
+
+end subroutine
+
+subroutine compute_bous(time,Q,q1,work1,work2)
+!bw
+!bw  Compute the energy spectrum for the Bousinesq equations
+!bw  energy = u^2+v^2+w^2+theta^2
+!bw
+!bw
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,4)   ! (u,v,h)
+real*8 :: q1(nx,ny,nz,4)  ! (u,v,h)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: time
+
+!local
+integer :: iwave_max,i
+real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
+
+iwave_max=max(g_nx,g_ny,g_nz)
+spec_r=0
+spec_r2=0
+spec_d2=0
+spec_x=0
+spec_y=0
+spec_z=0
+
+
+q1=Q
+
+!bw
+!bw for bousinesq you can loop over all the Q's
+!bw
+do i=1,ndim
+   call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
+       bspec_x(0,i),bspec_y(0,i),bspec_z(0,i),iwave_max,0)
+   bspec_r = bspec_r + .5*spec_r2
+enddo
+bspec_x=.5*bspec_x
+bspec_y=.5*bspec_y
+bspec_z=.5*bspec_z
 
 
 
@@ -734,7 +888,195 @@ if (my_pe==io_pe) then
 endif
 end subroutine
 
+subroutine output_pv2_spec(time,time_file)
+!bw
+!bw  This subroutine outputs the potential enstrophy spectrum
+!bw  The notation here is Q = q^2/2 = q2
+!bw  
+!bw  
+!bw
+use params
+implicit none
+real*8 :: time,time_file
 
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=80) :: message
+CPOINTER fid
+
+
+
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+!
+! Don't plot the potential enstrophy spectrum at all
+! If we are also computing 2d spectrum, dont bother to plot
+! 3D spectrum 
+!if (iwave_2d <= iwave ) then
+!   write(message,'(a,f10.4)') " Energy Spectrum t=",time
+!   call logplotascii(spec_r(0,1),iwave,message(1:25))
+!   !call logplotascii(spec_x,g_nx/2,message)
+!   !call logplotascii(spec_y,g_ny/2,message)
+!   !call logplotascii(spec_z,g_nz/2,message)
+!endif
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".pv2spec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,q2spec_r,1+iwave)
+   x=1+g_nx/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,q2spec_x,1+g_nx/2)
+   x=1+g_ny/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,q2spec_y,1+g_ny/2)
+   x=1+g_nz/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,q2spec_z,1+g_nz/2)
+   call cclose(fid,ierr)
+
+endif
+end subroutine
+
+subroutine output_pv_spec(time,time_file)
+!bw
+!bw  This subroutine outputs the potential vorticity spectrum
+!bw  The notation here is q = (omega + Omega) dot grad rho
+!bw  
+!bw  
+!bw
+use params
+implicit none
+real*8 :: time,time_file
+
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=80) :: message
+CPOINTER fid
+
+
+
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+!
+! Don't plot the potential enstrophy spectrum at all
+! If we are also computing 2d spectrum, dont bother to plot
+! 3D spectrum 
+!if (iwave_2d <= iwave ) then
+!   write(message,'(a,f10.4)') " Energy Spectrum t=",time
+!   call logplotascii(spec_r(0,1),iwave,message(1:25))
+!   !call logplotascii(spec_x,g_nx/2,message)
+!   !call logplotascii(spec_y,g_ny/2,message)
+!   !call logplotascii(spec_z,g_nz/2,message)
+!endif
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".pvspec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,qspec_r,1+iwave)
+   x=1+g_nx/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,qspec_x,1+g_nx/2)
+   x=1+g_ny/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,qspec_y,1+g_ny/2)
+   x=1+g_nz/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,qspec_z,1+g_nz/2)
+   call cclose(fid,ierr)
+
+endif
+end subroutine
+
+subroutine output_bous(time,time_file)
+!bw
+!bw This subroutine outputs the total energy for the  
+!bw Boussinesq equations
+!bw
+use params
+implicit none
+real*8 :: time,time_file
+
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=80) :: message
+CPOINTER fid
+
+
+
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+!
+! Don't plot the potential enstrophy spectrum at all
+! If we are also computing 2d spectrum, dont bother to plot
+! 3D spectrum 
+!if (iwave_2d <= iwave ) then
+!   write(message,'(a,f10.4)') " Energy Spectrum t=",time
+!   call logplotascii(spec_r(0,1),iwave,message(1:25))
+!   !call logplotascii(spec_x,g_nx/2,message)
+!   !call logplotascii(spec_y,g_ny/2,message)
+!   !call logplotascii(spec_z,g_nz/2,message)
+!endif
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".bousspec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
+      call abort(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)
+   call cwrite8(fid,bspec_r,1+iwave)
+   x=1+g_nx/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,bspec_x,1+g_nx/2)
+   x=1+g_ny/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,bspec_y,1+g_ny/2)
+   x=1+g_nz/2; call cwrite8(fid,x,1)
+      call cwrite8(fid,bspec_z,1+g_nz/2)
+   call cclose(fid,ierr)
+
+endif
+end subroutine
 
 
 subroutine output_tran(time,Q,q1,q2,q3,work1,work2)
