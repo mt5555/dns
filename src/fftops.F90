@@ -382,7 +382,7 @@ real*8 dummy(1)
 
 if (n_var<3) call abort("potential vorticity() requires n_var>2")
 
-call vorticity(Q,vor,work1,work2)
+call vorticity(u,vor,d1,work)
    
 if(pv_type == 1) then
    !bw
