@@ -46,7 +46,7 @@
 \DeclareMathOperator{\Span}{span}
 
 
-\title{Coordinate scaling in the LANL DNS code}
+\title{Coordinate scaling in the LANL-Sandia DNS code}
 \author{Mark Taylor}
 
 \begin{document}
@@ -347,16 +347,16 @@ k_y = 2\pi$. Scaling out the $2\pi$, we get
 \[
 (j-1/2)^2 \le  l^2 +  m^2 < (j+1/2)^2.
 \]  
-\section{Comparing with Smith \& Waleffe (SM)}
+\section{Comparing with Smith \& Waleffe (SW02)}
 
 \subsection*{Wave numbers}
 Wave numbers are dimensional and should be computed $k_f = 2 \pi
 k_f^m$, where the superscript $m$ stands for Mark. 
 
 \subsection*{Rossby Number}
-SM computes this Rossby number,
+SW02 computes this Rossby number,
 \begin{equation}
-  Ro = \frac{(k_f^2 \epsilon_f)^{1/3}}{\text{fcor}/2},
+  Ro = \frac{(k_f^2 \epsilon_f)^{1/3}}{\text{fcor}/2}, 
 \end{equation}
 where each number in the equation is computed as,
 \begin{description}
@@ -365,36 +365,65 @@ where each number in the equation is computed as,
      scalars.m. It can also be found for each time in the output file
      if one looks at the $d/dt$ line and hunts for the f parameter (for
      the forcing).
-  \item[3)] fcor is an input to the code.
+  \item[3)] fcor is an input to the code. There is some question as to
+    whether we should divide by $fcor/2$ or $fcor$, see SW02 Eq 3.2
+  \item[4)] Changes to the input to gridsetup.py\\
+            \begin{verbatim}
+             ./gridsetup 1 1 1 32 32 32 2 2 2 2 2 2 1
+            \end{verbatim}
 \end{description}
 
 \subsection*{Time Scale}
 To be consistent with SM multiply the time in the output file by the
-time scale from SM, $t_{sm} = \frac{1}{(\epsilon_f (2 \pi k_f)^2)^{1/3}}$
+time scale from SM, $t_{sw02} = (\epsilon_f (2 \pi k_f)^2)^{1/3}$
 
 \subsection*{Froude number}
 
 Modifications to Mark's code to accomodate this is to include the
-addition of a parameter {\bg{bous}} which multiplies the vertical
+addition of a parameter {\bf{bous}} which multiplies the vertical
 velocity in the  density anomoly equation. The equations we actually
 solve in the code are,
 We would like to solve the NS equations in the box pictured in
 Fig.~\ref{F:box}.  The equations are
 \[ 
-\frac{ \partial  \uv }{\partial t}  + (\curl \uv + \text{fcor} \khat) \times \uv
+\frac{ \partial  \uv }{\partial t}  + (\curl \uv + \text{fcor} ~\khat) \times \uv
 +  
-\grad \pi + \text{bous} \theta \khat = \nu \Delta \uv 
+\grad \pi + \text{bous}~ \theta \khat = \nu \Delta \uv 
 \] 
 \[ 
 \grad \cdot \uv = 0 
 \] 
 \[ 
 \frac{ \partial  \theta }{\partial t}  + \uv \cdot \grad \theta -  
-\text{bous} \uv \cdot \khat = \kappa \Delta \theta.
+\text{bous} ~\uv \cdot \khat = \kappa \Delta \theta.
 \] 
 Therefore to compute a consistent Froude number,
 \begin{equation}
-Fr = \frac{(\epsilon_f k_f^2)^{1/2}}{\text{bous}}.
+Fr = \frac{(\epsilon_f k_f^2)^{1/3}}{\text{bous}}.
 \end{equation}
+Basically, $\text{bous}$ in Mark's code is the is the same as $N$ in SW02 eq
+2.1-2.3.
+
+\subsection*{First test, $N\ne0, f=0$ - no rotation}
+
+First test, $f=0, N\ne0$. Choose $bous=107.08$ with hyperviscosity. Then
+\begin{equation}
+Fr = \frac{\left((.5)(2 \pi 24)^{2}\right)^{1/3}}{107.08}= .21
+\end{equation} 
+Forcing is: 
+\begin{verbatim}
+sto_high_24
+\end{verbatim}.
+A plot of the spectrum is in Figure \ref{fig:norot} and should be
+compared to SW02's Figure 2.  We're doing pretty well.
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=4in]{frp21}
+\caption{Spectrum from $200^3$ simulation of LANL/Sandia DNS code with
+  no rotation and $Fr=.21$ }
+\label{fig:norot}
+\end{center}
+\end{figure}
+
 
 \end{document}
