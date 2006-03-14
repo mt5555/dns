@@ -139,7 +139,7 @@ use fft_interface
 !bw  This routine computes the dissipation of Q = q^2/2
 !bw  
 !bw  enstr_diss = - nu < q laplacian (omega dot 
-!bw                                   grad (rho_o - b z + \tilde{rho}) >
+!bw                                   grad (rho_o - b z + \tilde{rho}))>
 !bw  
 !bw               - kappa < q laplacian (grad \tilde{rho}
 !bw                                      dot  omega_a) >
@@ -158,10 +158,6 @@ real*8 :: dummy(1)
 integer :: pv_type, i, j, k, im, jm, km
 
 
-!
-! For this subroutine pv_type = 1 (the full potential vorticity)
-!
-pv_type = 1
 !bw
 !bw
 !bw Compute this quantity in 3 stages in physical space
@@ -178,6 +174,10 @@ if (npassive==0) call abort("Error: compute pv called, but npassive=0")
 pv_type=2
 call potential_vorticity(potvor,vor,Q,omegadotrho_nu,omegadotrho_kappa,pv_type)
 
+!
+! If we compute this with pv_type = 2, then we have to recompute the
+! plain vorticity so we can compute the total potential vorticity later
+!
 ! compute d/dz of theta, store in vor(:,:,:,1)
 call der(Q(1,1,1,np1),vor,dummy,omegadotrho_nu,DX_ONLY,3)
 
@@ -200,108 +200,59 @@ omegadotrho_kappa = potvor + fcor*vor(:,:,:,1)/Lz
             rwave = im**2 + jm**2 + (km/Lz)**2
             omegadotrho_nu(i,j,k) = -omegadotrho_nu(i,j,k)*rwave
             omegadotrho_kappa(i,j,k) = -omegadotrho_kappa(i,j,k)*rwave
-
-            xfac = 8
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-            enstr_diss = enstr_diss + xfac*  &
-                 ( nu*omegadotrho_nu(i,j,k) +  kamma*omegadotrho_kappa(i,j,k))
          enddo
       enddo
    enddo
-
-
-end subroutine
-
-subroutine compute_bous_scalars(Q,vor,potvor,omegadotrho_nu,omegadotrho_kappa)
-use params
-use fft_interface
 !bw
-!bw  This routine computes the domain integrals of 
-!bw    pe
-!bw    ke 
-!bw    total e 
-!bw    total e dissipation
-!bw    q=pv
-!bw    total pv dissipation
-!bw    Q = 1/2 q = potential enstrophy
-!bw    total Q dissipation
-!bw  
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: vor(nx,ny,nz,3)
-real*8 :: potvor(nx,ny,nz)
-real*8 :: omegadotrho_nu(nx,ny,nz)
-real*8 :: omegadotrho_kappa(nx,ny,nz)
-real*8 :: enstr_diss
-
-real*8 :: dummy(1)
-integer :: pv_type, i, j, k, im, jm, km
-
-if (npassive==0) call abort("Error: compute pv called, but npassive=0")
-
-! potvor = grad(Q(:,:,:,4)) dot vorticity  
-! (use omegadotrho_* arrays as work arrays)
-pv_type=2
-call potential_vorticity(potvor,vor,Q,omegadotrho_nu,omegadotrho_kappa,pv_type)
-
-! compute d/dz of theta, store in vor(:,:,:,1)
-call der(Q(1,1,1,np1),vor,dummy,omegadotrho_nu,DX_ONLY,3)
-
-omegadotrho_nu = potvor - bous*vor(:,:,:,1)/Lz  
-omegadotrho_kappa = potvor + fcor*vor(:,:,:,1)/Lz 
-
-!bw 
-!bw Now laplacian both omegadotrho_nu  and omegadotrho_kappa
+!bw Fourier transform back to physical space because we need these quantites
+!bw times the total potential vorticity integrated in the volume.
 !bw
+
    call fft3d(omegadotrho_nu,work1)
    call fft3d(omegadotrho_kappa,work1)
-
-   ke = 0
+!bw
+!bw Now integrate around the volume
+!bw Note that we have to call potential_vorticity again with the
+!bw type=1 to multliply the laplacian omegadotrho_nu and 
+!bw        omegadotrho_kappa by q, the total potential vorticity.
+!bw        normally we'd pass 'vor' in 'somearray' but we've used it
+!bw        to store d theta/d z?
+pv_type=1
+call potential_vorticity(potvor,somearray,Q,someworkarray,someworkarray,pv_type)
    pe = 0
+   ke = 0
    totale = 0
-   pv = 0
    potens = 0
+   pv = 0
    energy_diss = 0
    pv_diss = 0
    enstr_diss = 0
    do k=nz1,nz2
-      km=(kmcord(k))
       do j=ny1,ny2
-         jm=(jmcord(j))
          do i=nx1,nx2
-!bw
-!bw         For the potential enstrophy dissipation 
-!bw
-            im=(imcord(i))
-            rwave = im**2 + jm**2 + (km/Lz)**2
-            omegadotrho_nu(i,j,k) = -omegadotrho_nu(i,j,k)*rwave
-            omegadotrho_kappa(i,j,k) = -omegadotrho_kappa(i,j,k)*rwave
-
             xfac = 8
             if (km==0) xfac=xfac/2
             if (jm==0) xfac=xfac/2
             if (im==0) xfac=xfac/2
-            enstr_diss = enstr_diss + xfac*  &
-                 ( nu*omegadotrho_nu(i,j,k) +  kamma*omegadotrho_kappa(i,j,k))
+            ke = ke + Q(i,j,k,1)**2+Q(i,j,k,2)**2 + Q(i,j,k,3)**2
+            pe = pe + grav/bous*Q(i,j,k,4)**2
+            totale = totale + ke + pe
 !bw
-!bw         For the potential vorticy dissipation
+!bw         For the energy dissipation we have to compute laplician
+!bw         (ke)  and laplacian (theta^2), but I'm not sure how to best
+!bw         do that yet. Need to discuss with Mark.
 !bw
+            energy_diss = energy_diss
+            pv = pv + xfac*potvor(i,j,k)
+            potens = potens + xfac(pv*pv*.5)
+            pv_diss = pv_diss + xfac*(nu*omegadotrho_nu(i,j,k) 
+                                   +  kappa*omegadotrho_kappa(i,j,k)) 
+            enstr_diss = enstr_diss + xfac*potvor(i,j,k)*
+                 ( nu*omegadotrho_nu(i,j,k) +  kappa*omegadotrho_kappa(i,j,k))
+
          enddo
-      enddo
-   enddo
-
-
-
-
-
-
+       enddo
+    enddo
 
 end subroutine
-
-
-
-
-
-
 
