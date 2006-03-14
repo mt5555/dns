@@ -431,10 +431,10 @@ We'd like to compute the following (dimensional) quantities integrated
 around in the volume:
 
 \begin{itemize}
-\item[1.] Total energy
+\item[1.] Total energy and total energy dissipation
 
 \begin{equation}
-\int_V \frac{\partial}{\partial t} 
+\frac{\partial}{\partial t} \int_V 
          \left[ (u^2 + v^2 + w^2) +\frac{g}{\text{bous}}
            \theta^2\right] 
 = \int_V \left[ \nu \nabla^2 (u^2 + v^2 + w^2) 
@@ -442,19 +442,40 @@ around in the volume:
                          \right]
 \end{equation}
 
-\item[2.] Total energy dissipation
+\item[2.] Potential energy, $\frac{g}{\text{bous}} \theta^2$
 
-\item[3.] Potential energy
+\item[3.] Kinetic energy, $u^2 + v^2 + w^2$ 
+  
+\item[4.] Potential vorticity (q) and its production-dissipation which
+  should globally integrate to zero I think.
+\begin{equation}
+\frac{\partial}{\partial t} \int_V 
+         \left[ q \right] 
+= \int_V \left[ \nu \nabla^2 (\mathbf\omega \cdot \nabla \rho) 
+                     + \kappa \nabla^2 (\nabla \theta^2 \cdot (\mathbf\omega
+                     + \text{fcor} ~{\bf{\hat{z}}} ))
+                         \right]
+\end{equation}
 
-\item[4.] Kinetic energy
+Here $\mathbf = \mathbf\nabla \times \mathbf u$ is the vorticity and
+$\rho = \rho_o -\text{bous}~ z + \theta(x,y,z)$. Also, $q =
+(\mathbf\omega + \text{fcor}~\mathbf{\hat{z}}) \cdot \mathbf\nabla \rho.$
 
-\item[5.] Potential vorticity
+\item[5.] Potential enstrophy $Q = q^2/2$ and its
+  production-dissipation. This is the important production-dissipation
+  rate we need for our two-point correlation.
 
-\item[6.] Potential vorticity production-dissipation
+\begin{equation}
+\frac{\partial}{\partial t} \int_V 
+         \left[ Q \right]  
+= \int_V \left[ \nu  ~q ~\nabla^2 ~(\mathbf\omega \cdot \nabla \rho) 
+                     + \kappa  ~q ~\nabla^2 (\nabla \theta^2 \cdot
+                     (\mathbf\omega 
+                     + \text{fcor} ~{\bf{\hat{z}}} )) 
+                         \right] 
+\end{equation}
 
-\item[7.] Potential enstrophy
-
-\item[8.] Potential enstrophy production-dissipation
+\item[6.] two-point correlation (coming)
 
 \end{itemize}
 
