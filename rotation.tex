@@ -425,5 +425,38 @@ compared to SW02's Figure 2.  We're doing pretty well.
 \end{center}
 \end{figure}
 
+\section{Bousinesq scalars we're interested in computing}
+
+We'd like to compute the following (dimensional) quantities integrated
+around in the volume:
+
+\begin{itemize}
+\item[1.] Total energy
+
+\begin{equation}
+\int_V \frac{\partial}{\partial t} 
+         \left[ (u^2 + v^2 + w^2) +\frac{g}{\text{bous}}
+           \theta^2\right] 
+= \int_V \left[ \nu \nabla^2 (u^2 + v^2 + w^2) 
+                     + \frac{\kappa g}{\text{bous}} \nabla^2 \theta^2
+                         \right]
+\end{equation}
+
+\item[2.] Total energy dissipation
+
+\item[3.] Potential energy
+
+\item[4.] Kinetic energy
+
+\item[5.] Potential vorticity
+
+\item[6.] Potential vorticity production-dissipation
+
+\item[7.] Potential enstrophy
+
+\item[8.] Potential enstrophy production-dissipation
+
+\end{itemize}
+
 
 \end{document}
