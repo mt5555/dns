@@ -112,7 +112,7 @@ if (diag_struct==1) then
    ! if csig>0, isoavep did not complete - interrupted by SIGURG
    if (my_pe==io_pe .and. csig==0) then
       write(message,'(f10.4)') 10000.0000 + time
-      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".isostr"
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".bisostr"
       call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
@@ -210,6 +210,91 @@ omegadotrho_kappa = potvor + fcor*vor(:,:,:,1)/Lz
          enddo
       enddo
    enddo
+
+
+end subroutine
+
+subroutine compute_bous_scalars(Q,vor,potvor,omegadotrho_nu,omegadotrho_kappa)
+use params
+use fft_interface
+!bw
+!bw  This routine computes the domain integrals of 
+!bw    pe
+!bw    ke 
+!bw    total e 
+!bw    total e dissipation
+!bw    q=pv
+!bw    total pv dissipation
+!bw    Q = 1/2 q = potential enstrophy
+!bw    total Q dissipation
+!bw  
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: vor(nx,ny,nz,3)
+real*8 :: potvor(nx,ny,nz)
+real*8 :: omegadotrho_nu(nx,ny,nz)
+real*8 :: omegadotrho_kappa(nx,ny,nz)
+real*8 :: enstr_diss
+
+real*8 :: dummy(1)
+integer :: pv_type, i, j, k, im, jm, km
+
+if (npassive==0) call abort("Error: compute pv called, but npassive=0")
+
+! potvor = grad(Q(:,:,:,4)) dot vorticity  
+! (use omegadotrho_* arrays as work arrays)
+pv_type=2
+call potential_vorticity(potvor,vor,Q,omegadotrho_nu,omegadotrho_kappa,pv_type)
+
+! compute d/dz of theta, store in vor(:,:,:,1)
+call der(Q(1,1,1,np1),vor,dummy,omegadotrho_nu,DX_ONLY,3)
+
+omegadotrho_nu = potvor - bous*vor(:,:,:,1)/Lz  
+omegadotrho_kappa = potvor + fcor*vor(:,:,:,1)/Lz 
+
+!bw 
+!bw Now laplacian both omegadotrho_nu  and omegadotrho_kappa
+!bw
+   call fft3d(omegadotrho_nu,work1)
+   call fft3d(omegadotrho_kappa,work1)
+
+   ke = 0
+   pe = 0
+   totale = 0
+   pv = 0
+   potens = 0
+   energy_diss = 0
+   pv_diss = 0
+   enstr_diss = 0
+   do k=nz1,nz2
+      km=(kmcord(k))
+      do j=ny1,ny2
+         jm=(jmcord(j))
+         do i=nx1,nx2
+!bw
+!bw         For the potential enstrophy dissipation 
+!bw
+            im=(imcord(i))
+            rwave = im**2 + jm**2 + (km/Lz)**2
+            omegadotrho_nu(i,j,k) = -omegadotrho_nu(i,j,k)*rwave
+            omegadotrho_kappa(i,j,k) = -omegadotrho_kappa(i,j,k)*rwave
+
+            xfac = 8
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            enstr_diss = enstr_diss + xfac*  &
+                 ( nu*omegadotrho_nu(i,j,k) +  kamma*omegadotrho_kappa(i,j,k))
+!bw
+!bw         For the potential vorticy dissipation
+!bw
+         enddo
+      enddo
+   enddo
+
+
+
+
+
 
 
 end subroutine
