@@ -1,16 +1,4 @@
 *******************************************************************************
-rotation.tex
-   added some notes about compiling
-   (to switch from turb_diags.F90  to aspect_diag.F90, you
-   need to do "make dnsb" instead of "make dns"
-
-   added the .5 to KE.
-
-   added ke,pe,ke_diss and pe_diss to aspect_diag.F90
-   added output to aspect_diag.F90
-
-still didn't get a chance to look at the spectrum code.
-
 
 
 
