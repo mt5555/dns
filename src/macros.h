@@ -19,6 +19,16 @@
 #define mpi_isent mpi_isend_
 #define mpi_waitall mpi_waitall_
 #define mpi_wtime mpi_wtime_
+
+#define mpi_file_open mpi_file_open_
+#define mpi_file_write mpi_file_write_
+#define mpi_file_read mpi_file_read_
+#define mpi_file_close mpi_file_close_
+#define mpi_file_seek mpi_file_seek_
+#define mpi_file_delete mpi_file_delete_
+#define mpi_info_create mpi_info_create_
+#define mpi_info_set mpi_info_set_
+
 #endif
 
 !
@@ -27,6 +37,8 @@
 ! 
 #ifdef MPI_REAL8_LAM
 #define MPI_REAL8 MPI_DOUBLE_PRECISION
+#define MPI_REAL4 MPI_REAL
+#define MPI_OFFSET_KIND 8
 #endif
 
 

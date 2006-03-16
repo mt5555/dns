@@ -461,9 +461,9 @@ if (io_nodes(my_z)==my_pe) then
       ! if file exists, then new stripe and stride settings are ignored,
       ! so delete file first
       call mpi_file_delete(fname,MPI_INFO_NULL,ierr)
-      call mpi_Info_create(infoin,ierr)
-      call mpi_Info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
-      call mpi_Info_set(infoin, "striping_unit", mpi_stride ,ierr)
+      call mpi_info_create(infoin,ierr)
+      call mpi_info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
+      call mpi_info_set(infoin, "striping_unit", mpi_stride ,ierr)
       call mpi_file_open(comm_io,fname, &
            MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
            infoin, fid,ierr)
