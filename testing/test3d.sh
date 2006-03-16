@@ -152,6 +152,8 @@ endif
 if (`uname` == OSF1) then
    set opt = "$opt -b -mio "
 endif
+
+set opt = "$opt -mio "
 echo command line options:  $opt
 
 

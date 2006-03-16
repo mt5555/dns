@@ -225,8 +225,8 @@ MODEL_PSIVOR     = ns_psivor.o  dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(PSIVOR_DIAG)
 
 dns:  $(MODEL_SPEC) 
 	$(LINK) -o dns $(MODEL_SPEC) $(LDFLAGS) $(MPILIB)
-dnsz: $(MODEL_SPEC_SCALE) 
-	$(LINK) -o dnsz $(MODEL_SPEC_SCALE) $(LDFLAGS) $(MPILIB)
+dnsb: $(MODEL_SPEC_SCALE) 
+	$(LINK) -o dnsb $(MODEL_SPEC_SCALE) $(LDFLAGS) $(MPILIB)
 
 dnsa:  $(MODEL_ALPHA) 
 	$(LINK) -o dnsa $(MODEL_ALPHA) $(LDFLAGS) $(MPILIB)
@@ -286,7 +286,7 @@ analysis_spec2d: analysis_spec2d.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 clean: 
-	rm -f temp* *.d *.o *.mod dns dnsz dnss dnsa \
+	rm -f temp* *.d *.o *.mod dns dnsb dnss dnsa \
                             dnsgrid dnsghost dnsi dnsvor \
                             cdns dnsibm conv analysis_rms     \
                             analysis_isoave analysis analysis_sk \

@@ -1,4 +1,20 @@
 *******************************************************************************
+rotation.tex
+   added some notes about compiling
+   (to switch from turb_diags.F90  to aspect_diag.F90, you
+   need to do "make dnsb" instead of "make dns"
+
+   added the .5 to KE.
+
+   added ke,pe,ke_diss and pe_diss to aspect_diag.F90
+   added output to aspect_diag.F90
+
+still didn't get a chance to look at the spectrum code.
+
+
+
+
+*******************************************************************************
 3/6/2006
 Kerr's compression of our 2048^3 data set project.
 
@@ -11,6 +27,45 @@ start xpsi jobs?  use sftp hpss.lanl.gov
 Test case on D800:
    64^3  using "decay.inp" initial condition
    temp0001.0000.[uvw]
+
+
+OS/porting glitches:  (D800, LAM MPI)
+MPI_REAL8 not defined.  put in MPI_REAL8=MPI_DOUBLE_PRECISION
+put in MPI_OFFSET for arguments to mpi_file_seek.
+
+
+bug (fixed): mpi_bcast on character*16 arrays:
+    length argument to mpi_bcast has to be multiplied by 16,
+    since each string has 16 characters.
+
+bug (fixed) bottom of subroutine SETUP:  
+      Most of the input is read only be process 0 and then
+      broadcast to the other processes.  But at the end of
+      SETUP all processes were doing some input file reads,
+      and for me, the my_id<>0 processes were crashing.
+
+
+bug (not fixed) SPEC7
+     in RSSTIO, the call to spec7() hangs.  I tracked this down
+     to the mpi_allreduce of length "m1".  Two processes have m1=0,
+     while the remaining processes have m1=6.
+
+     The calls to spec8, spec9 and spec10a also hang, but 
+        I didn't track down what was causing this.  
+
+     I just commented out all of these calls.
+
+bug (not fixed) FSPASS
+     same "m1" problem.  In the mpi_allreduce, 6 of the 8 processes think
+     m1=3, but the remaining processes thik m1=0.
+
+     This problem I tracked down, but it took my quite a lot of 
+     debugging.  The problem turns out to be with 8 processors,
+     using your c16 data file, some of the processes do not 
+     execute the bug "j1" loop in FSPASS, and hence they do not
+     call SPEC23D (which is where m1 seems to be set), and so 
+     when the call SPEC23D_T, they have m1=0 and the all_reduce fails.
+
 
 
 *******************************************************************************

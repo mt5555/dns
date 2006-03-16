@@ -15,13 +15,15 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer,parameter :: nints_e=49,npints_e=51
-real*8 :: ints_e(nints_e)
-real*8 :: pints_e(npints_e,n_var)
+integer :: nints_e
+integer,parameter :: nints_e_max=100
+real*8 :: ints_e(nints_e_max)
 real*8 :: x,zero_len
 real*8 :: divx,divi
 integer i,j,k,n,ierr,csig
 integer :: n1,n1d,n2,n2d,n3,n3d,pv_type,stype
+
+
 character(len=80) :: message
 CPOINTER fid,fidj,fidS,fidcore
 
@@ -90,10 +92,27 @@ endif
 !
 ! the "expensive" scalars
 !bw compute scalars as a function of time, and output to a file
-call compute_potens_dissipation(Q,Qhat,q1,q2,q3,work1,work2)
-!bw need to put in ke, pe, etot, q^2/2, q, potensdiss (maybe pvdiss too)
-!bw maybe you can put all this in one subroutine like compute_potens_dissipation
-!
+call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
+if (nints_e > nints_e_max) call abort("Error: aspec_diag.F90: nints_e_max too small")
+
+
+! output turb scalars
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".scalars-bous"
+   call copen(message,"w",fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "diag_output(): Error opening .scalars-bous file errno=",ierr
+      call abort(message)
+   endif
+   x=nints_e; call cwrite8(fid,x,1)
+   call cwrite8(fid,time,1)
+   call cwrite8(fid,ints_e,nints_e)
+   call cclose(fid,ierr)
+endif
+
+
+
 !
 ! two-point correlations
 !
@@ -132,22 +151,10 @@ end subroutine
 
 
 
-subroutine compute_potens_dissipation(Q,Qhat,vor,potvor,theta_z,omegadotrho_nu,omegadotrho_kappa)
+subroutine compute_expensive_scalars(Q,Qhat,vor,potvor,theta_z,omegadotrho_nu,omegadotrho_kappa,nints,ints)
 use params
 use fft_interface
 implicit none
-! 
-!bw  This routine computes the dissipation of Q = q^2/2
-!bw  
-!bw  enstr_diss = - nu < q laplacian (omega dot 
-!bw                                   grad (rho_o - b z + \tilde{rho}))>
-!bw  
-!bw               - kappa < q laplacian (grad \tilde{rho}
-!bw                                      dot  omega_a) >
-!bw  
-!bw  
-!bw  
-!bw  
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: vor(nx,ny,nz,3)
@@ -155,22 +162,38 @@ real*8 :: potvor(nx,ny,nz)
 real*8 :: theta_z(nx,ny,nz)
 real*8 :: omegadotrho_nu(nx,ny,nz)
 real*8 :: omegadotrho_kappa(nx,ny,nz)
-real*8 :: enstr_diss
+integer :: nints
+real*8  :: ints(*)
 
+! local variables
+real*8,allocatable :: ints2(:)
+real*8 :: enstr_diss
 real*8 :: dummy(1)
 integer :: pv_type, i, j, k, im, jm, km
 real*8 :: xw,xw2,u2,xw_viss,xfac, vx,wx,uy,wy,uz,vz,pe,totale,potens,pv
-real*8 :: energy_diss,ke,ke_diss,h_diss,ens_diss,rwave,pv_diss
+real*8 :: ke,pe_diss,ke_diss,h_diss,ens_diss,rwave,pv_diss,kappa
 
 
 !
 !  Compute scalars from the spectral data of prognostic variables 
 !  stored in Qhat.  We need to add pe and pe_diss here.  
 !
+!  note: Qhat is stored in a more efficient FFT format, so
+!  these loops do not look like the loops over FFT coefficients
+!  that appear later. 
+!
+if (npassive==0) call abort("Error: aspect_diag.F90: not coded for npassive==0")
+if (mu_hyper_value/=0) call abort("Error: aspect_diag.F90: not coded for hyper viscosity")
+if (mu_hypo_value/=0) call abort("Error: aspect_diag.F90: not coded for hypo viscosity")
+
+! viscosity of theta:
+kappa = mu/schmidt(np1)
+
+pe = 0
+ke = 0
 ke=0
 ke_diss=0
-h_diss=0
-ens_diss=0
+pe_diss=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nslabx
@@ -180,18 +203,6 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2) then
-               xw2=hyper_scale(1)*(im*im*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(2)*(jm*jm*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-               xw_viss=xw_viss + mu_hyper_value*xw2
-            endif
-            if (mu_hyper==0) then
-               xw_viss=xw_viss + mu_hyper_value
-            endif
-            if (mu_hypo==1 .and. xw>0) then
-               xw_viss=xw_viss + mu_hypo_value/xw
-            endif
 
             xfac = 2*2*2
             if (km==0) xfac=xfac/2
@@ -203,9 +214,13 @@ do j=1,ny_2dz
                  Qhat(k,i,j,3)*Qhat(k,i,j,3)
             
             ke = ke + .5*xfac*u2
+            pe = pe + (grav/bous)*Qhat(k,i,j,np1)**2
+
             ke_diss = ke_diss + xfac*xw_viss*u2
-               
-            ! u_x term
+            pe_diss = pe_diss + &
+                 xfac*(xw*kappa)*(grav/bous)*Qhat(k,i,j,np1)**2
+
+#if 0               
             vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
             wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)
             uy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),1)
@@ -220,13 +235,27 @@ do j=1,ny_2dz
                  Qhat(k,i,j,3)*(vx-uy)) 
             ens_diss = ens_diss + 2*xfac*mu*xw_viss*  &
                  ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
-            
+#endif            
       enddo
    enddo
 enddo
 
 
 
+
+
+!
+!bw  Now computes the dissipation of Q = q^2/2
+!bw  
+!bw  enstr_diss = - nu < q laplacian (omega dot 
+!bw                                   grad (rho_o - b z + \tilde{rho}))>
+!bw  
+!bw               - kappa < q laplacian (grad \tilde{rho}
+!bw                                      dot  omega_a) >
+!bw  
+!bw  
+!bw  
+!bw  
 !bw
 !bw
 !bw Compute this quantity in 3 stages in physical space
@@ -236,7 +265,6 @@ enddo
 !bw Then fft, then
 !bw
 
-if (npassive==0) call abort("Error: compute pv called, but npassive=0")
 
 ! potvor = grad(Q(:,:,:,4)) dot vorticity  
 ! (use omegadotrho_* arrays as work arrays)
@@ -249,73 +277,81 @@ call der(Q(1,1,1,np1),theta_z,dummy,omegadotrho_nu,DX_ONLY,3)
 omegadotrho_nu = potvor - bous*theta_z/Lz
 omegadotrho_kappa = potvor + fcor*theta_z/Lz
 
+! now overwrite potvor with pvtype=1 potvor:
+potvor = potvor + fcor*theta_z/Lz - bous*theta_z/Lz
+
+
 !bw 
 !bw Now laplacian both omegadotrho_nu  and omegadotrho_kappa
 !bw
-   call fft3d(omegadotrho_nu,vor)
-   call fft3d(omegadotrho_kappa,vor)
+call fft3d(omegadotrho_nu,vor)
+call fft3d(omegadotrho_kappa,vor)
 
-   enstr_diss = 0
-   do k=nz1,nz2
-      km=(kmcord(k))
-      do j=ny1,ny2
-         jm=(jmcord(j))
-         do i=nx1,nx2
-            im=(imcord(i))
-            rwave = im**2 + jm**2 + (km/Lz)**2
-            omegadotrho_nu(i,j,k) = -omegadotrho_nu(i,j,k)*rwave
-            omegadotrho_kappa(i,j,k) = -omegadotrho_kappa(i,j,k)*rwave
-         enddo
+do k=nz1,nz2
+   km=(kmcord(k))
+   do j=ny1,ny2
+      jm=(jmcord(j))
+      do i=nx1,nx2
+         im=(imcord(i))
+         rwave = im**2 + jm**2 + (km/Lz)**2
+         omegadotrho_nu(i,j,k) = -omegadotrho_nu(i,j,k)*rwave
+         omegadotrho_kappa(i,j,k) = -omegadotrho_kappa(i,j,k)*rwave
       enddo
    enddo
+enddo
 !bw
 !bw Fourier transform back to physical space because we need these quantites
 !bw times the total potential vorticity integrated in the volume.
 !bw
+call fft3d(omegadotrho_nu,vor)
+call fft3d(omegadotrho_kappa,vor)
 
-   call fft3d(omegadotrho_nu,vor)
-   call fft3d(omegadotrho_kappa,vor)
 
-   ! now overwrite potvor with pvtype=1 potvor:
-   potvor = potvor + fcor*theta_z/Lz - bous*theta_z/Lz
+pv = 0
+pv_diss = 0
+potens = 0
+enstr_diss = 0
+enstr_diss = 0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         pv = pv + potvor(i,j,k)
+         potens = potens + (pv*pv*.5)
+         pv_diss = pv_diss + (mu*omegadotrho_nu(i,j,k) &
+              +  kappa*omegadotrho_kappa(i,j,k)) 
+         enstr_diss = enstr_diss + potvor(i,j,k)* &
+              ( mu*omegadotrho_nu(i,j,k) +  kappa*omegadotrho_kappa(i,j,k))
+         
+      enddo
+   enddo
+enddo
+! grid space calculations need to be normalized:
+pv=pv/g_nx/g_ny/g_nz
+pv_diss=u4/g_nx/g_ny/g_nz
+potens=potens/g_nx/g_ny/g_nz
+enstr_diss=enstr_diss/g_nx/g_ny/g_nz
 
-   pe = 0
-   ke = 0
-   totale = 0
-   potens = 0
-   pv = 0
-   energy_diss = 0
-   pv_diss = 0
-   enstr_diss = 0
-   do k=nz1,nz2
-      do j=ny1,ny2
-         do i=nx1,nx2
-            ke = ke + .5*(Q(i,j,k,1)**2+Q(i,j,k,2)**2 + Q(i,j,k,3)**2)
-            pe = pe + grav/bous*Q(i,j,k,4)**2
-            totale = totale + ke + pe
-!bw
-!bw         For the energy dissipation we have to compute laplician
-!bw         (ke)  and laplacian (theta^2), but I'm not sure how to best
-!bw         do that yet. Need to discuss with Mark.
-!bw
-!
-! As for KE, PE, and their dissipation rates, all of that is computed
-! in ns.F90 and output at every timestep.  But that means that data
-! will be in a different matlab file than the "expensive" scalars.
-! so maybe it is more convienient to recompute it here and output it
-! in this file.  
-!
-           energy_diss = energy_diss
-            pv = pv + potvor(i,j,k)
-            potens = potens + (pv*pv*.5)
-            pv_diss = pv_diss + (mu*omegadotrho_nu(i,j,k) &
-                                   +  kappa*omegadotrho_kappa(i,j,k)) 
-            enstr_diss = enstr_diss + potvor(i,j,k)* &
-                 ( mu*omegadotrho_nu(i,j,k) +  kappa*omegadotrho_kappa(i,j,k))
 
-         enddo
-       enddo
-    enddo
+! store the integrals for output:
+ints(1)=ke 
+ints(2)=pe
+ints(3)=ke_diss 
+ints(4)=pe_diss
+ints(5)=pv
+ints(6)=pv_diss
+ints(7)=potens
+ints(8)=enstr_diss
+nints=8
 
-end subroutine
+
+! global sum over all processors:
+#ifdef USE_MPI
+   allocate(ints2(nints))
+   ints2=ints
+   call mpi_allreduce(ints2,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   deallocate(ints2)
+#endif
+
+
+end subroutine compute_expensive_scalars
 

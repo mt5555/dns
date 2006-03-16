@@ -367,10 +367,20 @@ where each number in the equation is computed as,
      the forcing).
   \item[3)] fcor is an input to the code. There is some question as to
     whether we should divide by $fcor/2$ or $fcor$, see SW02 Eq 3.2
-  \item[4)] Changes to the input to gridsetup.py\\
+  \item[4)] Example to set the FORTRAN arrays sizes before compiling:  
+           ($32^3$ simulation on 8 processors, prognostic variables: 
+            $u,v,w$ and $\theta$) \\
             \begin{verbatim}
-             ./gridsetup 1 1 1 32 32 32 2 2 2 2 2 2 1
+             ./gridsetup.py 1 1 8 32 32 32 2 2 2 0 0 0 4
             \end{verbatim}
+\item[5)] The Boussenesque version can be run with the standard
+\texttt{dns} executable by setting (in the
+input file) one passive scalar of type 4 and the 
+\texttt{bous} parameter.  But to
+enable the Boussenesque specific diagnostics, you need to use
+\texttt{dnsb}, which is compiled by \begin{verbatim} make dnsb
+\end{verbatim}
+
 \end{description}
 
 \subsection*{Time Scale}
@@ -379,7 +389,7 @@ time scale from SM, $t_{sw02} = (\epsilon_f (2 \pi k_f)^2)^{1/3}$
 
 \subsection*{Froude number}
 
-Modifications to Mark's code to accomodate this is to include the
+Modifications to the dns code to accomodate this is to include the
 addition of a parameter {\bf{bous}} which multiplies the vertical
 velocity in the  density anomoly equation. The equations we actually
 solve in the code are,
@@ -401,7 +411,7 @@ Therefore to compute a consistent Froude number,
 \begin{equation}
 Fr = \frac{(\epsilon_f k_f^2)^{1/3}}{\text{bous}}.
 \end{equation}
-Basically, $\text{bous}$ in Mark's code is the is the same as $N$ in SW02 eq
+Basically, $\text{bous}$ in the code is the is the same as $N$ in SW02 eq
 2.1-2.3.
 
 \subsection*{First test, $N\ne0, f=0$ - no rotation}
@@ -435,16 +445,16 @@ around in the volume:
 
 \begin{equation}
 \frac{\partial}{\partial t} \int_V 
-         \left[ (u^2 + v^2 + w^2) +\frac{g}{\text{bous}}
+         \left[ .5 (u^2 + v^2 + w^2) +\frac{g}{\text{bous}}
            \theta^2\right] 
-= \int_V \left[ \nu \nabla^2 (u^2 + v^2 + w^2) 
+= \int_V \left[ .5 \nu \nabla^2 (u^2 + v^2 + w^2) 
                      + \frac{\kappa g}{\text{bous}} \nabla^2 \theta^2
                          \right]
 \end{equation}
 
 \item[2.] Potential energy, $\frac{g}{\text{bous}} \theta^2$
 
-\item[3.] Kinetic energy, $u^2 + v^2 + w^2$ 
+\item[3.] Kinetic energy, $.5 ( u^2 + v^2 + w^2 )$ 
   
 \item[4.] Potential vorticity (q) and its production-dissipation which
   should globally integrate to zero I think.
