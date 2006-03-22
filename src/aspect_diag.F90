@@ -327,7 +327,7 @@ do k=nz1,nz2
 enddo
 ! grid space calculations need to be normalized:
 pv=pv/g_nx/g_ny/g_nz
-pv_diss=u4/g_nx/g_ny/g_nz
+pv_diss=pv_diss/g_nx/g_ny/g_nz
 potens=potens/g_nx/g_ny/g_nz
 enstr_diss=enstr_diss/g_nx/g_ny/g_nz
 
