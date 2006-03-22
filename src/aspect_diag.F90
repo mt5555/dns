@@ -214,11 +214,11 @@ do j=1,ny_2dz
                  Qhat(k,i,j,3)*Qhat(k,i,j,3)
             
             ke = ke + .5*xfac*u2
-            pe = pe + (grav/bous)*Qhat(k,i,j,np1)**2
+            pe = pe + .5*(grav/bous)*Qhat(k,i,j,np1)**2
 
-            ke_diss = ke_diss + xfac*xw_viss*u2
+            ke_diss = ke_diss + .5*xfac*xw_viss*u2
             pe_diss = pe_diss + &
-                 xfac*(xw*kappa)*(grav/bous)*Qhat(k,i,j,np1)**2
+                 .5*xfac*(xw*kappa)*(grav/bous)*Qhat(k,i,j,np1)**2
 
 #if 0               
             vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
