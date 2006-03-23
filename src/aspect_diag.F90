@@ -154,6 +154,7 @@ end subroutine
 subroutine compute_expensive_scalars(Q,Qhat,vor,potvor,theta_z,omegadotrho_nu,omegadotrho_kappa,nints,ints)
 use params
 use fft_interface
+use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
@@ -169,7 +170,7 @@ real*8  :: ints(*)
 real*8,allocatable :: ints2(:)
 real*8 :: enstr_diss
 real*8 :: dummy(1)
-integer :: pv_type, i, j, k, im, jm, km
+integer :: pv_type, i, j, k, im, jm, km, ierr
 real*8 :: xw,xw2,u2,xw_viss,xfac, vx,wx,uy,wy,uz,vz,pe,totale,potens,pv
 real*8 :: ke,pe_diss,ke_diss,h_diss,ens_diss,rwave,pv_diss,kappa
 
@@ -347,7 +348,7 @@ nints=8
 ! global sum over all processors:
 #ifdef USE_MPI
    allocate(ints2(nints))
-   ints2=ints
+   ints2(1:nints)=ints(1:nints)
    call mpi_allreduce(ints2,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    deallocate(ints2)
 #endif
