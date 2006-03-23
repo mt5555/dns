@@ -5,6 +5,10 @@
 % make sure viscosity is in Marks units. All the .hspec files (even those from 
 % Takeshi's data are in Marks units already
 
+namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
+name = 'skhel512a0007.0000';
+mu = 1e-4;
+
 %name = 'helicity_data/helicity_spc/check256_hq_0000.0000';
 %namedir = '/home2/skurien/';
 %mu = 6.0d-3;                          % viscosity in Takeshi's units
@@ -20,9 +24,9 @@
 %name = 'dns/src/hel128_hpi2/hel128_hpi2_0000.0000';
 %mu = 5.0e-4;
 
-namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
-name = 'hel256_hpi2_all';
-mu = 2e-4;
+%namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
+%name = 'hel256_hpi2_all';
+%mu = 2e-4;
 
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel128_h3pi8/';
 %name = 'hel128_h3pi8_0000.0000';
