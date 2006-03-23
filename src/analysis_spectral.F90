@@ -263,19 +263,19 @@ do
 
 #if 0
       q1=0
-      ! compute v_x - u_y
+      ! compute u_y - v_x
       call der(Q(1,1,1,2),work1,dummy,work2,DX_ONLY,1)
       q1(:,:,:,3) = work1
       call der(Q(1,1,1,1),work1,dummy,work2,DX_ONLY,2)
       q1(:,:,:,3) = q1(:,:,:,3)-work1
 
-      ! compute u_z - w_x
+      ! compute w_x - u_z
       call der(Q(1,1,1,1),work1,dummy,work2,DX_ONLY,3)
       q1(:,:,:,2) = work1
       call der(Q(1,1,1,3),work1,dummy,work2,DX_ONLY,1)
       q1(:,:,:,2) = q1(:,:,:,2)-work1
 
-      ! compute w_y - v_z
+      ! compute v_z - w_y
       call der(Q(1,1,1,3),work1,dummy,work2,DX_ONLY,2)
       q1(:,:,:,1) = work1
       call der(Q(1,1,1,2),work1,dummy,work2,DX_ONLY,3)
