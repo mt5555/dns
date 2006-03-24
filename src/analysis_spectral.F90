@@ -261,6 +261,7 @@ do
          read_uvw=.true.	
       endif
 
+      !this piece computes the non-helical part in physical space. Set #if 1 to run
 #if 0
       q1=0
       ! compute u_y - v_x
