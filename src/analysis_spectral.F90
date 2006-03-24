@@ -261,7 +261,7 @@ do
          read_uvw=.true.	
       endif
 
-#if 1
+#if 0
       q1=0
       ! compute u_y - v_x
       call der(Q(1,1,1,2),work1,dummy,work2,DX_ONLY,1)
@@ -317,7 +317,7 @@ do
          
 #endif
 
-      call compute_hfree_spec(q1,Q,q2,q3)
+      call compute_hfree_spec(Q,q1,q2,q3)
       call output_hfree_spec(time,time)
    endif
    
