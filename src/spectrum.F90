@@ -2147,7 +2147,7 @@ do j=ny1,ny2
             spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
             
-            ! store helicity(k) and varh(k) (variance of the helicity)
+            ! store helicity(k) and spec_varh(k) (variance of the helicity)
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
@@ -2304,7 +2304,7 @@ cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
 cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
 rhel_spec_n(i) = rhel_spec_n(i)/pcountn(i)
 rhel_spec_p(i) = rhel_spec_p(i)/pcountp(i)
-rhel_rms_spec(i) = sqrt(rhel_rms_spec(i)/rcount(i))
+rhel_rms_spec(i) = (rhel_rms_spec(i)/rcount(i))
 
 enddo
 
