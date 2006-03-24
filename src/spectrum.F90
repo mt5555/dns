@@ -1820,7 +1820,6 @@ real*8 :: p1(nx,ny,nz,3)
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: countn(0:max(g_nx,g_ny,g_nz)), countp(0:max(g_nx,g_ny,g_nz))
-real*8 :: pcountn(0:max(g_nx,g_ny,g_nz)), pcountp(0:max(g_nx,g_ny,g_nz)),rcount(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
@@ -1960,9 +1959,7 @@ costta_pdf = 0
 rhel_pdf = 0
 countp = 0
 countn = 0
-pcountp = 0
-pcountn = 0
-rcount = 0
+
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -2117,18 +2114,15 @@ do j=ny1,ny2
             
             rhel_pdf(iwave,ind) = rhel_pdf(iwave,ind) + 1        
             
-            !spectrum of relative helicity
+            !distribution of mean relative helicity as funciton of wavenumber
             if (rhel >= 0) then
                rhel_spec_p(iwave) = rhel_spec_p(iwave) + rhel
-               pcountp(iwave) = pcountp(iwave)+1	
             else 
                rhel_spec_n(iwave) = rhel_spec_n(iwave) + rhel
-               pcountn(iwave) = pcountn(iwave)+1
 
             endif
             !spectrum of variance of relative helicity
             rhel_rms_spec(iwave) = rhel_rms_spec(iwave) + rhel**2	            
-            rcount(iwave) = rcount(iwave) + 1
             
          endif
          
@@ -2209,16 +2203,6 @@ call mpi_reduce(spec_r_in,rhel_spec_p,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3
 
 spec_r_in = rhel_rms_spec
 call mpi_reduce(spec_r_in,rhel_rms_spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-
-
-spec_r_in = pcountn
-call mpi_reduce(spec_r_in,pcountn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-
-spec_r_in = pcountp
-call mpi_reduce(spec_r_in,pcountp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
-
-spec_r_in = rcount
-call mpi_reduce(spec_r_in,rcount,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 
 do n = 1,nbin
@@ -2302,9 +2286,11 @@ enddo
 do i = 1,iwave+1
 cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
 cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
-rhel_spec_n(i) = rhel_spec_n(i)/pcountn(i)
-rhel_spec_p(i) = rhel_spec_p(i)/pcountp(i)
-rhel_rms_spec(i) = (rhel_rms_spec(i)/rcount(i))
+!below do not need to be averaged over shells!
+!rhel_spec_n(i) = rhel_spec_n(i)/pcountn(i)
+!rhel_spec_p(i) = rhel_spec_p(i)/pcountp(i)
+!rhel_rms_spec(i) = (rhel_rms_spec(i)/rcount(i))
+!spec_varhe(i) = (spec_varhe(i)/vcount(i))
 
 enddo
 
