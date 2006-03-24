@@ -42,6 +42,7 @@ real*8,private ::  time_old=-1
 
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  spec_varhe(0:max(g_nx,g_ny,g_nz))
 
 ! cospectrum in x,y,z directions.
 ! n_var=1,3:  uv, uw, vw
@@ -860,6 +861,7 @@ if (my_pe==io_pe) then
    x=1+iwave; call cwrite8(fid,x,1)   
    call cwrite8(fid,spec_helicity_rn,1+iwave)
    call cwrite8(fid,spec_helicity_rp,1+iwave)
+   call cwrite8(fid,spec_varhe,1+iwave)
    call cwrite8(fid,spec_E,1+iwave)
    call cwrite8(fid,spec_kEk,1+iwave)
    call cwrite8(fid,E33,1+iwave)
@@ -868,11 +870,12 @@ if (my_pe==io_pe) then
    call cwrite8(fid,I2I3,1+iwave)
    call cwrite8(fid,R2I3,1+iwave)
    call cwrite8(fid,par,1+iwave)
-   call cwrite8(fid,cos_tta_spec_n,1+iwave)
-   call cwrite8(fid,cos_tta_spec_p,1+iwave)
    call cwrite8(fid,rhel_spec_n,1+iwave)
    call cwrite8(fid,rhel_spec_p,1+iwave)
    call cwrite8(fid,rhel_rms_spec,1+iwave)
+   call cwrite8(fid,cos_tta_spec_n,1+iwave)
+   call cwrite8(fid,cos_tta_spec_p,1+iwave)
+
    x=nbin
    call cwrite8(fid,x,1)
    do i=1,1+iwave
@@ -1940,6 +1943,7 @@ diss1=0
 diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
+spec_varhe=0
 spec_E = 0
 spec_kEk=0
 E33 = 0
@@ -2088,7 +2092,7 @@ do j=ny1,ny2
          energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
               jm*(II(1)*RR(3) - RR(1)*II(3)) + &
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
-         
+         	
          ! relative helicity and its distribution in current wavenumber
          if (iwave > 0) then
             rhel = energy/(xw*xfac*(sum(RR*RR)+sum(II*II)))
@@ -2143,12 +2147,12 @@ do j=ny1,ny2
             spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
             
-            ! store helicity(k)
+            ! store helicity(k) and varh(k) (variance of the helicity)
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
                  spec_helicity_rn(iwave) + energy
-            
+            spec_varhe(iwave) = spec_varhe(iwave) + energy**2
             
             hetot=hetot+energy
             diss1=diss1 -2*energy*iwave**2*pi2_squared
@@ -2166,6 +2170,8 @@ spec_r_in=spec_helicity_rp
 call mpi_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
 call mpi_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=spec_varhe
+call mpi_reduce(spec_r_in,spec_varhe,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_E
 call mpi_reduce(spec_r_in,spec_E,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_kEk
@@ -2273,6 +2279,7 @@ iwave = (iwave/2)           ! max wave number in sphere.
 do i=iwave+2,iwave_max
    spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
+   varhe(iwave+1)=varhe(iwave+1)+varhe(i)
    spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
    E33(iwave+1)=E33(iwave+1)+E33(i)

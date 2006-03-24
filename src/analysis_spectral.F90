@@ -261,7 +261,7 @@ do
          read_uvw=.true.	
       endif
 
-#if 0
+#if 1
       q1=0
       ! compute u_y - v_x
       call der(Q(1,1,1,2),work1,dummy,work2,DX_ONLY,1)
@@ -299,7 +299,7 @@ do
       enddo
       enddo
 
-      ! now compute u - helicity * vorticity / enstophy
+      ! now compute u - helicity * vorticity / enstrophy
       do k=nz1,nz2
       do j=ny1,ny2
       do i=nx1,nx2
@@ -309,11 +309,15 @@ do
       enddo
       enddo
       enddo
-
-
+      
+      ! the remaining piece
+      
+         q1 = Q - q2
+      
+         
 #endif
 
-      call compute_hfree_spec(Q,q1,q2,q3)
+      call compute_hfree_spec(q1,Q,q2,q3)
       call output_hfree_spec(time,time)
    endif
    
