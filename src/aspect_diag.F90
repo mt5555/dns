@@ -151,7 +151,7 @@ end subroutine
 
 
 
-subroutine compute_expensive_scalars(Q,Qhat,vor,potvor,theta_z,omegadotrho_nu,omegadotrho_kappa,nints,ints)
+subroutine compute_expensive_scalars(Q,Qhat,vor,potvor,theta_z,omegadotrho_nu,omegadotrho_kappa,nints_e,ints_e)
 use params
 use fft_interface
 use mpi
@@ -163,8 +163,8 @@ real*8 :: potvor(nx,ny,nz)
 real*8 :: theta_z(nx,ny,nz)
 real*8 :: omegadotrho_nu(nx,ny,nz)
 real*8 :: omegadotrho_kappa(nx,ny,nz)
-integer :: nints
-real*8  :: ints(*)
+integer :: nints_e
+real*8  :: ints_e(*)
 
 ! local variables
 real*8,allocatable :: ints2(:)
@@ -334,24 +334,25 @@ enstr_diss=enstr_diss/g_nx/g_ny/g_nz
 
 
 ! store the integrals for output:
-ints(1)=ke 
-ints(2)=pe
-ints(3)=ke_diss 
-ints(4)=pe_diss
-ints(5)=pv
-ints(6)=pv_diss
-ints(7)=potens
-ints(8)=enstr_diss
-nints=8
+ints_e(1)=ke 
+ints_e(2)=pe
+ints_e(3)=ke_diss 
+ints_e(4)=pe_diss
+ints_e(5)=pv
+ints_e(6)=pv_diss
+ints_e(7)=potens
+ints_e(8)=enstr_diss
+nints_e=8
 
 
 ! global sum over all processors:
 #ifdef USE_MPI
-   allocate(ints2(nints))
-   ints2(1:nints)=ints(1:nints)
-   call mpi_allreduce(ints2,ints,nints,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   allocate(ints2(nints_e))
+   ints2(1:nints_e)=ints_e(1:nints_e)
+   call mpi_allreduce(ints2,ints_e,nints_e,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    deallocate(ints2)
 #endif
+
 
 
 end subroutine compute_expensive_scalars
