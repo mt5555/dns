@@ -1813,7 +1813,7 @@ integer :: ierr,skip_fft
 real*8 :: pgrid(nx,ny,nz,3)
 real*8 :: cmodes_r(nx,ny,nz,3)
 real*8 :: cmodes_i(nx,ny,nz,3)
-real*8 :: p1(nx,ny,nz,3)
+real*8 :: p1(nx,ny,nz,3),p2(nx,ny,nz,3)
 
 
 ! local variables
@@ -1865,10 +1865,17 @@ enddo
 #endif
 
 p1=pgrid
+p2=cmodes_r
 ! compute fft in p1. (use cmodes_r as work array)
 do n = 1,3
    call fft3d(p1(1,1,1,n),cmodes_r)
 enddo
+
+! compute fft in p2 (use cmodes_r as work array)
+do n = 1,3
+   call fft3d(p2(1,1,1,n),cmodes_r)
+enddo
+
 do n = 1,3
    call sincos_to_complex_field(p1(1,1,1,n),cmodes_r(1,1,1,n),cmodes_i(1,1,1,n))
 enddo
