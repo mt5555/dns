@@ -2126,7 +2126,7 @@ do j=ny1,ny2
                pcountn(iwave) = pcountn(iwave)+1
 
             endif
-	   !spectrum of variance of relative helicity
+            !spectrum of variance of relative helicity
             rhel_rms_spec(iwave) = rhel_rms_spec(iwave) + rhel**2	            
             rcount(iwave) = rcount(iwave) + 1
             
