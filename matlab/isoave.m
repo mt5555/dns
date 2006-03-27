@@ -50,6 +50,7 @@ disp('6 = Scaling laws for total structure function (for paper)');
 disp('7 = plot 4th order functions');
 disp('8 = plot helical structure functions');
 disp('9 = Mixed (anisotropic) structure functions');
+disp('10= Scaling of potential vorticity/velocity correlation');
 
 in=input('Enter choice: ');
 
@@ -70,6 +71,9 @@ elseif (in==8)
    check_isotropy=0;
 elseif (in==9)
    klaws=4;
+   check_isotropy=0;
+elseif (in==10)
+   klaws=5
    check_isotropy=0;
 else
    klaws=1;
@@ -105,7 +109,9 @@ for i=0:1
 for j=0:1
 for k=0:1
    ext = sprintf('.isostr%i%i%i',i,j,k);
-
+if (klaws ==5)
+   ext = sprintf('.bisostr');
+end
   [xx,y45,y415,y43,epsl]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy);
   yysum=yysum+y45*epsl/eps/8;
   figure(10);

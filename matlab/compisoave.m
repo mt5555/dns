@@ -4,7 +4,8 @@ function [y45,y415,y43,epsilon,h_epsilon,y215,ytt,Dlt1_wt,Dlt2_wt]=compisoave(na
 % klaws==1   4/5ths  and other laws
 % klaws==2   4th order structure functions
 % klaws==3   2/15 law
-% 
+% klaws==4   Anisotropic structure functions
+% klaws==5   pv/velocity correlation, 2/3-law
 % check_isotropy==1    2nd and 3rd order isotropy checks
 %
 %
@@ -652,3 +653,10 @@ if (klaws==4)
      format
 
 end
+
+
+if (klaws==5)
+%
+% analysis of pv/velocity correlations
+%
+
