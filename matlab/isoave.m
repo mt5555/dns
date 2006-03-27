@@ -112,7 +112,7 @@ for k=0:1
 if (klaws ==5)
    ext = sprintf('.bisostr');
 end
-  [xx,y45,y415,y43,epsl]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy);
+  [xx,y45,y415,y43,y23,epsl]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy);
   yysum=yysum+y45*epsl/eps/8;
   figure(10);
   plot(xx,y45);

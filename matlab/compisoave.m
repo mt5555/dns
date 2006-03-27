@@ -41,7 +41,7 @@ sphere_harm = 1
 [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
     SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt,D_lltt,Dl,Dt,...
-    h_epsilon] ...
+    h_epsilon,Q_eps] ...
 = readisostr( [name,ext] );
 
 if sphere_harm ~= 0
@@ -655,8 +655,44 @@ if (klaws==4)
 end
 
 
-if (klaws==5)
+
 %
 % analysis of pv/velocity correlations
+% 2/3 law
 %
+if (klaws==5)
+yyave=0*xx;
+figure(4); subplot(1,1,1);
+
+for i=1:ndir
+  x = r_val(:,i);                       % units of box length
+  x_plot=x*nx*delx_over_eta;            % units of r/eta
+
+    y=Dl(:,i,2)./((Q_eps)*(x.)); 
+  
+  semilogx(x_plot,y,[':',cdir(i)],'MarkerSize',5); hold on;
+
+  yyave=yyave+w(i)*spline(x,y,xx);
+
+
+end
+
+semilogx(xx_plot,yyave,'k','LineWidth',2.5);
+
+y23=yyave;
+max(yyave)
+title('2/3 law');
+ylabel(pname);
+xlabel('r/\eta');
+x=1:xmax; semilogx(x,(2/3)*x./x,'k');
+xlabel('r/\eta');
+ax=axis;  axis([1,xmax,ax(3),ax(4)]);
+hold off;
+if (plot_points==1) 
+  print('-dpsc',[bname,'_23.ps']);
+  print -djpeg 23.jpg
+end
+
+end
+
 

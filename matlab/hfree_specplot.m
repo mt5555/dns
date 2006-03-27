@@ -13,13 +13,13 @@
 %name = 'skhel512a_7to8.8';
 %mu = 1e-4;
 
-%namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
-%name = 'skhel512a0007.0000';
-%mu = 1e-4;
-
 namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
-name = 'skhel512a_uperp_0007.0000';
+name = 'skhel512a0007.0000';
 mu = 1e-4;
+
+%namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
+%name = 'skhel512a_uperp_0007.0000';
+%mu = 1e-4;
 
 %namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
 %name = 'skhel512a_upar_0007.0000';
@@ -57,13 +57,13 @@ spec_r_save_fac3=[];
 
 % note: endianopen() will notwork with .spec and  .hspec files
 %because first number is not necessaryly an integer 
-pname = [strrep(name,'_','-'),'.hf_spec'];
+pname = [strrep(name,'_','-'),'.hf_spec']
 fid=fopen([namedir,name,'.hf_spec'],'r','l');
 
 costta_spec = [];
 costta_spec_ave = [];
-cosphi_spec = [];
-cosphi_spec_ave = [];
+rhel_spec = [];
+rhel_spec_ave = [];
 hspec_n = [];
 hspec_p = [];
 hspec_ave = hspec_n + hspec_p;
@@ -84,7 +84,7 @@ r2i3_ave = [];
 par = [];
 par_ave = [];
 costta_pdf_ave = [];
-cosphi_pdf_ave = [];
+rhel_pdf_ave = [];
 rhel_rms_ave = [];
 costta_pdf = [];
 
@@ -99,6 +99,7 @@ time
 n_r=fread(fid,1,'float64')
 hspec_n=fread(fid,n_r,'float64');
 hspec_p = fread(fid,n_r,'float64');
+hspec_var = fread(fid,n_r,'float64');
 espec = fread(fid,n_r,'float64');
 kekspec = fread(fid,n_r,'float64');
 e33 = fread(fid,n_r,'float64'); %square component of I orthogonal to R
@@ -107,20 +108,19 @@ rr2 = fread(fid,n_r,'float64'); %square of R
 i2i3 = fread(fid,n_r,'float64'); 
 r2i3 = fread(fid,n_r,'float64');
 par = fread(fid,n_r,'float64'); %|R\crossI|/(R^2 + I^2)
+rhel_specn = fread(fid,n_r,'float64');
+rhel_specp = fread(fid,n_r,'float64');
+rhel_rms = fread(fid,n_r,'float64');
 costta_specn = fread(fid,n_r,'float64');
 costta_specp = fread(fid,n_r,'float64');
-cosphi_specn = fread(fid,n_r,'float64');
-cosphi_specp = fread(fid,n_r,'float64');
-rhel_rms = fread(fid,n_r,'float64');
 nbin = fread(fid,1,'float64'); %nbin is an integer stored as a float
-%nbin=100;
 costta_pdf = zeros(n_r,nbin);
-cosphi_pdf = zeros(n_r,nbin); %the relative helicity pdf
+rhel_pdf = zeros(n_r,nbin); %the relative helicity pdf
 for i = 1:n_r
 costta_pdf(i,:) = (fread(fid,nbin,'float64'))';
 end
 for i = 1:n_r
-cosphi_pdf(i,:) = (fread(fid,nbin,'float64'))';
+rhel_pdf(i,:) = (fread(fid,nbin,'float64'))';
 end
 
 
@@ -137,7 +137,7 @@ end
 if (time < 1)
      hspec_ave = 0*(hspec_n + hspec_p); % initialize hf_spec_ave
 end
-%if (time>=1)
+
 if (time >= 1)
 j=j+1
 if (length(hspec_ave)==0) 
@@ -148,10 +148,11 @@ end
 
 if (length(spec_ave)==0)  
   spec_ave = espec;
+  hspec_var_ave = hspec_var;
   costta_specn_ave = costta_specn;
   costta_specp_ave = costta_specp;
-   cosphi_specn_ave = cosphi_specn;
-  cosphi_specp_ave = cosphi_specp;
+   rhel_specn_ave = rhel_specn;
+   rhel_specp_ave = rhel_specp;
     kekspec_ave = kekspec;
     e33_ave = e33;
     ii2_ave = ii2;
@@ -163,16 +164,16 @@ if (length(spec_ave)==0)
     
     for i = 1:n_r
       costta_pdf_ave(i,:) = costta_pdf(i,:);
-      cosphi_pdf_ave(i,:) = cosphi_pdf(i,:);
+      rhel_pdf_ave(i,:) = rhel_pdf(i,:);
     end
-    
-    
+
 else
   spec_ave = spec_ave + espec;
+  hspec_var_ave = hspec_var_ave + hspec_var;
   costta_specn_ave = costta_specn_ave + costta_specn;
   costta_specp_ave = costta_specp_ave + costta_specp;  
-  cosphi_specn_ave = cosphi_specn_ave + cosphi_specn;
-  cosphi_specp_ave = cosphi_specp_ave + cosphi_specp;  
+  rhel_specn_ave = rhel_specn_ave + rhel_specn;
+  rhel_specp_ave = rhel_specp_ave + rhel_specp;  
   kekspec_ave = kekspec_ave + kekspec;
   e33_ave = e33_ave + e33;
   ii2_ave = ii2_ave + ii2;
@@ -183,11 +184,11 @@ else
   rhel_rms_ave = rhel_rms_ave + rhel_rms;
   for i = 1:n_r
     costta_pdf_ave(i,:) = costta_pdf_ave(i,:)+ costta_pdf(i,:);
-    cosphi_pdf_ave(i,:) = cosphi_pdf_ave(i,:)+cosphi_pdf(i,:);
+    rhel_pdf_ave(i,:) = rhel_pdf_ave(i,:) + rhel_pdf(i,:);
   end
   
-end
-end
+end % end if (length_spec...)
+end % end if (time >=1)
 
 k = [0:n_r-1];
 
@@ -250,15 +251,18 @@ disp(sprintf('Energy dissipation rate = %d',e))
 %legend('Total Helicity','Mean dissipation rate')
 %xlabel('time');
 %ylabel(pname);
-[time,count]=fread(fid,1,'float64');
-end
+[time,count]=fread(fid,1,'float64')
+
+end % end while loop
 
 hspec_ave = hspec_ave/(j);
 spec_ave = spec_ave/(j);
+hspec_var_ave = hspec_var_ave/(j);
+kekspec_ave = kekspec_ave/(j);
 costta_specn_ave = costta_specn_ave/(j);
 costta_specp_ave = costta_specp_ave/(j);
-cosphi_specn_ave = cosphi_specn_ave/(j);
-cosphi_specp_ave = cosphi_specp_ave/(j);
+rhel_specn_ave = rhel_specn_ave/(j);
+rhel_specp_ave = rhel_specp_ave/(j);
 e33_ave = e33_ave/(j);
 ii2_ave = ii2_ave/(j);
 rr2_ave = rr2_ave/(j);
@@ -268,7 +272,7 @@ par_ave = par_ave/(j);
 rhel_rms_ave = rhel_rms_ave/(j);
 for i = 1:n_r
   costta_pdf_ave(i,:) = costta_pdf_ave(i,:)/j;
-  cosphi_pdf_ave(i,:) = cosphi_pdf_ave(i,:)/j;
+  rhel_pdf_ave(i,:) = rhel_pdf_ave(i,:)/j;
 end
 
 
@@ -296,13 +300,10 @@ title('Spectrum of cosine of helicity angle');
 %hold off
 
 figure(27)
-%semilogx(k,(cosphi_specn_ave),'r');hold on;
-%semilogx(k,(cosphi_specp_ave),'k');hold on;
-semilogx(k,(cosphi_specp_ave+cosphi_specn_ave),'b');hold on;
-%semilogx(k,abs(hspec_ave)./kekspec,'m');hold on;
-semilogx(k,rhel_rms_ave./(cosphi_specp_ave+cosphi_specn_ave), 'k');
+semilogx(k,abs(rhel_specp_ave+rhel_specn_ave),'b');hold on;
+semilogx(k,sqrt(abs(rhel_rms_ave - (rhel_specp_ave+rhel_specn_ave).^2)), 'k');
 grid on;
-title('Spectrum of relative helicity');
+title('Spectrum of relative helicity and variance of relative helicity');
 %hold off
 
 
@@ -318,7 +319,7 @@ end
 
 figure(35)
 for i = 10:n_r-20
-plot(binvals, cosphi_pdf_ave(i,:),'-');
+plot(binvals, rhel_pdf_ave(i,:),'-');
 hold on;
 title('PDF of relative helicity for each wavenumber')
 xlabel('Relative helicity')
@@ -390,6 +391,17 @@ title('Average compensated energy spectra');
 legend('|R\timesI|/(R^2+I^2)');
 set(gca,'fontsize',18);	      
 xlabel('k')
+
+figure(40)
+loglog(k,abs(hspec_ave)./kekspec_ave,'m');hold on;
+title('Relative helicity = <H(k)>/<2kE(k)> ')
+xlabel('k')
+
+figure(41)
+loglog(k,sqrt(abs(hspec_var_ave - hspec_ave.^2)),'m');hold on;
+title('variance helicity = sqrt(<H(k)^2> - <H(k)>^2) ')
+xlabel('k')
+
 
 
 % compute MEAN helicity in time -- in Mark's units

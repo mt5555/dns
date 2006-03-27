@@ -2,7 +2,7 @@ function ...
     [nx,ndelta,ndir,r_val,ke,epsilon,mu,...
     D_ll,D_lll,D1_tt,D2_tt,D1_ltt,D2_ltt,...
     SP_lll,SN_lll,SP1_ltt,SP2_ltt,SN1_ltt,SN2_ltt,H_ltt,H_tt,D_lltt,Dl,Dt,...
-    h_epsilon] ...
+    h_epsilon,Q_epsilon] ...
      = readisostr(fname)
 
 
@@ -137,6 +137,11 @@ if (nscalars>=7)
   h_epsilon=1;
   if (nscalars>=8) 
     [h_epsilon,count]=fread(fid,1,'float64');  
+  end
+  
+  Q_eps=1;
+  if (nscalars>=9)
+     [Q_eps,count]=fread(fid,1,'float64');
   end
 
   eta = (mu^3 / epsilon)^.25;
