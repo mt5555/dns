@@ -19,7 +19,7 @@ integer,parameter :: ndelta_max=100
 integer,parameter :: pmax=10       ! has to be 6 or greater
 
 !
-!  str_type=0    standard structure functions (including helical)
+!  str_type=0    standard structure functions (including helical and pv/velocity)
 !  str_type=1    fractional structure functions power < 1
 !  str_type=2    fractional structure functions power > 1
 !  str_type=3    fractional structure functions power (see subroutine)
@@ -211,7 +211,7 @@ x=ndelta; call cwrite8(fid,x,1)
 x=ndir;   call cwrite8(fid,x,1)   
 x=pmax-1+5;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 x=pmax-1+3;    call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
-x=8;      call cwrite8(fid,x,1)   ! number of scalars
+x=9;      call cwrite8(fid,x,1)   ! number of scalars   OK?? sk
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
 
@@ -279,7 +279,7 @@ call cwrite8(fid,mu,1)
 call cwrite8(fid,ke,1)
 call cwrite8(fid,epsilon,1)
 call cwrite8(fid,h_epsilon,1)
-
+call cwrite8(fid,enstr_diss,1)	!sk added potens_dissiation to output(OK??)
 
 end subroutine
 
