@@ -1,11 +1,10 @@
-%
 %########################################################################
-%#  plot of DNS structure function output file
+%#  read in Boussenesque scalars   *.scalars-bous
 %########################################################################
 %
 %
 clear all;
-apply_fix=0;
+
 
 % defaults:
 nx=0;
@@ -20,18 +19,19 @@ f_k= 24;
 
 
 nscalars=0
-nscalars_e=0
-
+ints=[];
+time=[];
 while (1) 
-  [ni]=fread(fid,1,'float64')
-  nints=ni
-  time=fread(fid,1,'float64')
-  data1=fread(fid,[nints],'float64')
-  ints=[data1]
+  [ni,count]=fread(fid,1,'float64')
+  if (count~=`1) break;   end
+  data=fread(fid,1,'float64')
+  time=[time,data]
+  data=fread(fid,ni,'float64')
+  % might need to take the transpose of 'data' here:
+  ints=[ints,data]
+  nscalars = nscalars+1;
 end;  
-  nints=ni;
-  
-  nints;
+
 
 disp(sprintf('nints=%i  total scalars read=%i',nints,nscalars))
 fclose(fid); 
@@ -39,19 +39,16 @@ fclose(fid);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  the scalars computed every time step 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-l=size(ints); 
-l=l(2); 
 
-ke=ints(1);
-pe=ints(2);
-pv=ints(5);
-potens=ints(7);
+ke=ints(1,:);
+pe=ints(2,:);
+pv=ints(5,:);
+potens=ints(7,:);
 
 
 tote = ke + pe;
 
 time_2=[];
-
 
 
 figure(1)
