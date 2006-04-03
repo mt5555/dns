@@ -91,7 +91,7 @@ integer :: idir_max
 real*8  :: t1(3),t2(3)
 
 ! also added to the file for completeness:
-real*8,private :: epsilon,mu,ke,h_epsilon=0
+real*8,private :: epsilon,mu,ke,h_epsilon=0,enstr_diss
 
 private init
 
