@@ -373,11 +373,11 @@ where each number in the equation is computed as,
             \begin{verbatim}
              ./gridsetup.py 1 1 8 32 32 32 2 2 2 0 0 0 4
             \end{verbatim}
-\item[5)] The Boussenesque version can be run with the standard
+\item[5)] The Boussinesq version can be run with the standard
 \texttt{dns} executable by setting (in the
 input file) one passive scalar of type 4 and the 
 \texttt{bous} parameter.  But to
-enable the Boussenesque specific diagnostics, you need to use
+enable the Boussinesq specific diagnostics, you need to use
 \texttt{dnsb}, which is compiled by \begin{verbatim} make dnsb
 \end{verbatim}
 
@@ -460,33 +460,32 @@ around in the volume:
 
 \begin{equation}
 \frac{\partial}{\partial t} \frac{1}{2} \int_V  
-         \left[  (u^2 + v^2 + w^2) +\frac{g}{\text{bous}} 
-           \theta^2\right]  
+         \left[  (u^2 + v^2 + w^2) +   \theta^2\right]  
 = \frac{1}{2}\int_V \left[  \nu \nabla^2 (u^2 + v^2 + w^2)  
-                     + \frac{\kappa g}{\text{bous}} \nabla^2 \theta^2
+                     + \kappa \nabla^2 \theta^2
                          \right] 
 \end{equation}
 
-\item[2.] Potential energy, $\frac{1}{2}\frac{g}{\text{bous}} \theta^2$
+\item[2.] Potential energy, $\frac{1}{2} \theta^2$ 
 
 \item[3.] Kinetic energy, $\frac{1}{2} ( u^2 + v^2 + w^2 )$ 
   
 \item[4.] Potential vorticity (q) and its production-dissipation which
   should globally integrate to zero I think.
   \begin{equation}
-  \frac{\partial}{\partial t} \int_V  
-           \left[ q \right] 
-  = \int_V \left[ \nu \nabla^2 (\mathbf\omega \cdot \nabla \rho)  
-                       + \kappa \nabla^2 (\nabla \theta^2 \cdot
-                       (\mathbf\omega 
-                       + \text{fcor} ~{\bf{\hat{z}}} )) 
-                           \right] 
+  \frac{\partial}{\partial t} \int_V   
+           \left[ q \right]  
+  = \int_V \left[ \nu \nabla^2 (\mathbf\omega \cdot \nabla \bar\theta)   
+                       + \kappa \nabla^2 (\nabla \theta^2 \cdot 
+                       (\mathbf\omega  
+                       + \text{fcor} ~{\bf{\hat{z}}} ))  
+                           \right]  
   \end{equation}
   
   Here $\mathbf = \mathbf\nabla \times \mathbf u$ is the vorticity and
-  $\rho = \rho_o -\text{bous}~ z + \theta(x,y,z)$. Also, $q =
+  $\bar\theta = \theta_o -\text{bous}~ z + \theta(x,y,z)$. Also, $q =
   (\mathbf\omega + \text{fcor}~\mathbf{\hat{z}}) \cdot \mathbf\nabla
-  \rho.$
+  \bar\theta.$
 
 \item[5.] Potential enstrophy $Q = q^2/2$ and its
   production-dissipation. This is the important production-dissipation
@@ -496,19 +495,33 @@ around in the volume:
 
 \item[7.] Potential enstrophy
   \begin{equation} 
-    \frac{\partial}{\partial t} \int_V  
-    \left[ Q \right]   
-    = \int_V \left[ \nu  ~q ~\nabla^2 ~(\mathbf\omega \cdot \nabla \rho)  
-      + \kappa  ~q ~\nabla^2 (\nabla \theta^2 \cdot 
-      (\mathbf\omega  
-      + \text{fcor} ~{\bf{\hat{z}}} ))  
-    \right]  
+    \frac{\partial}{\partial t} \int_V   \left[ Q \right]   
+    = \int_V \left[ \nu  ~q ~\nabla^2 ~(\mathbf\omega \cdot \nabla
+      \bar\theta)   
+      + \kappa  ~q ~\nabla^2 (\nabla \theta^2 \cdot  
+      (\mathbf\omega   
+      + \text{fcor} ~{\bf{\hat{z}}} ))   
+    \right]   
   \end{equation} 
 
 \item[8.] two-point correlation (coming)
 
 \end{itemize}
 
-
+\section{Comparing SW to KSW}
+In the two-point correlation paper the equations we use are scaled
+differently than than we use in Mark's code (which are the same
+equations used in SW). To make comparisions with our results in the
+two-point correlation paper we have to keep in mind the following
+scalings. Note, these are relationships between {\sl{dimensional}}
+quantities, not nondimensional quantities.
+\begin{gather}
+\tilde\rho = (\frac{b \rho_o}{g})^{1/2} ~\theta\\
+(\frac{g}{\rho_o b})^{1/2}~\rho = (\frac{g \rho_o}{b}) - \text{bous}
+~z + \theta = \bar\theta \\
+N = \text{bous} = (\frac{g b}{\rho_o})^{1/2}\\
+pe_{\text{ksw}} = \frac{1}{2} \theta^2 = \frac{g}{\rho_o b} \tilde\rho^2\\
+q_{\text{ksw}} = (\frac{g}{b \rho_o})^{1/2} q_{\text{SW}}
+\end{gather}
 
 \end{document}
