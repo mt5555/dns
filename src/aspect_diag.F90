@@ -137,7 +137,9 @@ if (diag_struct==1) then
          write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
          call abort(message)
       endif
-      call writeisoave(fid,time)
+      ! add the enstrophy dissipation (stored in position 8) 
+      ! to the structure function file
+      call writeisoave2(fid,time,ints_e(8),1)
       call cclose(fid,ierr)
    endif
 
@@ -184,7 +186,7 @@ real*8 :: ke,pe_diss,ke_diss,h_diss,ens_diss,rwave,pv_diss,kappa
 !  that appear later. 
 !
 if (npassive==0) call abort("Error: aspect_diag.F90: not coded for npassive==0")
-if (mu_hyper_value/=0) call abort("Error: aspect_diag.F90: not coded for hyper viscosity")
+!if (mu_hyper_value/=0) call abort("Error: aspect_diag.F90: not coded for hyper viscosity")
 if (mu_hypo_value/=0) call abort("Error: aspect_diag.F90: not coded for hypo viscosity")
 
 ! viscosity of theta:
@@ -192,7 +194,6 @@ kappa = mu/schmidt(np1)
 
 pe = 0
 ke = 0
-ke=0
 ke_diss=0
 pe_diss=0
 do j=1,ny_2dz
@@ -215,11 +216,11 @@ do j=1,ny_2dz
                  Qhat(k,i,j,3)*Qhat(k,i,j,3)
             
             ke = ke + .5*xfac*u2
-            pe = pe + .5*(grav/bous)*Qhat(k,i,j,np1)**2
+            pe = pe + .5*Qhat(k,i,j,np1)**2
 
             ke_diss = ke_diss + .5*xfac*xw_viss*u2
             pe_diss = pe_diss + &
-                 .5*xfac*(xw*kappa)*(grav/bous)*Qhat(k,i,j,np1)**2
+                 .5*xfac*(xw*kappa)*Qhat(k,i,j,np1)**2
 
 #if 0               
             vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
@@ -352,6 +353,11 @@ nints_e=8
    call mpi_allreduce(ints2,ints_e,nints_e,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    deallocate(ints2)
 #endif
+
+
+
+print *,'aspect_diag ke=',ke
+print *,'aspect_diag pe=',pe
 
 
 

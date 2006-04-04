@@ -1346,7 +1346,7 @@ call mpi_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,i
 if (g_nz == 1)  then
    iwave = min(g_nx/2,g_ny/2)
 else
-   iwave = floor(min(Lz*g_nx/2,Lz*g_ny/2,g_nz/2.))
+   iwave = floor(min(Lz*g_nx/2.0,Lz*g_ny/2.0,g_nz/2.0))
 endif
 
 ! for all waves outside sphere, sum into one wave number:

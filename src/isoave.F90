@@ -191,15 +191,36 @@ end subroutine
 
 
 
-
-
-
 subroutine writeisoave(fid,time)
+implicit none
+CPOINTER fid
+real*8  :: time,scalars(1)
+integer :: nscalars=0
+call writeisoave2(fid,time,scalars,nscalars)
+end
+
+
+
+
+subroutine writeisoave2(fid,time,scalars,nscalars)
+!
+!
+!  output structure functions and then append scalars known
+!  to isoave module (or computed by isoave module):
+!     time, dimensions, mu, ke,  epssilon, h_epsilon
+!  then add scalars passed in the argument list
+!
+!  the scalars are so that the matlab codes which analize the
+!  structure functions can have convientient access to these
+!  quantities.
+!
 use params
 implicit none
 
 CPOINTER fid
 real*8 :: time
+integer :: nscalars
+real*8 :: scalars(nscalars)
 !local
 integer :: i,idir,p
 real*8 :: x
@@ -211,7 +232,7 @@ x=ndelta; call cwrite8(fid,x,1)
 x=ndir;   call cwrite8(fid,x,1)   
 x=pmax-1+5;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 x=pmax-1+3;    call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
-x=9;      call cwrite8(fid,x,1)   ! number of scalars   OK?? sk
+x=8+nscalars;      call cwrite8(fid,x,1)   ! number of scalars
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
 
 
@@ -279,7 +300,8 @@ call cwrite8(fid,mu,1)
 call cwrite8(fid,ke,1)
 call cwrite8(fid,epsilon,1)
 call cwrite8(fid,h_epsilon,1)
-call cwrite8(fid,enstr_diss,1)	!sk added potens_dissiation to output(OK??)
+
+call cwrite8(fid,scalars,nscalars)
 
 end subroutine
 
