@@ -197,7 +197,8 @@ CPOINTER fid
 real*8  :: time,scalars(1)
 integer :: nscalars=0
 call writeisoave2(fid,time,scalars,nscalars)
-end
+end subroutine
+
 
 
 
