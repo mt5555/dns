@@ -48,7 +48,7 @@ character(len=280) basename,fname,tname,fname_ux
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
-real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
+real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale,divx,divi
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec
@@ -71,7 +71,7 @@ call init_model
 !cd
 !header_type=1; scale=1;
 !header_type=4; scale=1/(2*pi)    ! for Takeshi's data
-header_type=2; scale=1/(2*pi)     ! Livescu shear data
+header_type=2; scale=1/(2*pi); u12_shear=10.2     ! Livescu shear data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
@@ -253,6 +253,10 @@ do
       endif
       read_uvw=.true.	
       endif
+
+      call compute_div(Q,q1(1,1,1,1),q1(1,1,1,2),q1(1,1,1,3),divx,divi)
+      write(message,'(3(a,e12.5))') 'max(div)=',divx
+      call print_message(message)	
 
       
       do i=0,nxdecomp-1

@@ -79,6 +79,8 @@ real*8,allocatable  :: SN_ltt(:,:,:)      ! D_ltt(ndelta,ndir,2)
 real*8,allocatable :: w2s2(:,:,:)
 real*8 :: w2s2_mean(3)
 
+
+real*8  :: u12_shear=0        ! externally imposed shere
 real*8 :: u_shear(3,3)    ! stress tensor
 real*8 :: u_shear2(3,3)    ! copy of stress tensor
 
@@ -89,6 +91,9 @@ real*8,allocatable  :: dwork3(:,:,:)
 logical  :: use_max_shear_direction=.true.   ! requires str_type==4
 integer :: idir_max
 real*8  :: t1(3),t2(3)
+
+
+
 
 ! also added to the file for completeness:
 real*8,private :: epsilon,mu,ke,h_epsilon=0,enstr_diss
@@ -465,7 +470,7 @@ enddo
    u_shear2=u_shear
    call mpi_allreduce(u_shear2,u_shear,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
-
+u_shear(1,2)=u_shear(1,2)+u12_shear;
 
 epsilon=mu*ke_diss/ntot
 if (epsilon==0) epsilon=1e-20
