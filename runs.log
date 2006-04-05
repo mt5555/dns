@@ -55,22 +55,57 @@ bug (not fixed) FSPASS
      when the call SPEC23D_T, they have m1=0 and the all_reduce fails.
 
 
+Set jdebug=0 on Kerr's advice to avoid all of the above problems.
+on 8 cpus, it hangs. On 4 cpus, there is a problem in RSPASS,
+the allocate statement, the second dimension, nword3b=0
+
+RSPASS: nword3b=0  disable allocate on Kerr's advice
+
+It seems uw still needs to be allocated, so I only dont
+allocate u if nword3b=0.  
+then I got a strange error about memory allocation, that went
+away if i added ",STAT=istat" to all the allocate statements
+(and I check istat after each one to make sure the allocate
+worked).  
+
+1 and 4 cpus the code now runs and produces output,
+but the output is different.  I've attached:
+
+1.out      stdout for 1 cpu run
+fsave.1    'fsave' output file
+4.out      stdout for 1 cpu run
+fsave.4    'fsave' output file
+
+on 2 cpus, the code crashes (I haven't tracked this down yet)
+and on 8 cpus the code still hangs, but I haven't tracked that
+down yet either.
+
+
+2 cpu code: added another STAT= and fixed the problem.
+
+8 cpu case:  problem is m1=3,0 in spec23_d
+
+
+
+
+
+
+
+
+
+
 
 *******************************************************************************
 6/30/2005
 rotation case (modeled after leslie smith's run)
 
-<<<<<<< runs.log
-                                  
-256x256x32    R0=.88, .48,  .16   
-=======
 to add passive scalar:
 ./gridsetup.py 1 1 32 128 128 128 2 2 2 0 0 0 4
 
 
 
 256x256x32    R0=.88, .48,  .16
->>>>>>> 1.215
+
 R0 = (epsilon_f * (2pi k_f)**2 )**(1/3) / (.5*fcor)         
 
 Leslie's runs:
@@ -112,21 +147,15 @@ rotA  128x128x32
 
 rotB  128x128x32                                    
    k_f=16  fcor=40  mu_hyper=1.0  mu=0
-<<<<<<< runs.log
-   epsilon_f   .52 ?
-   epsilon_ke  .52 ?
-   R0 =  .87 ?
 
-
-1/Omega  = time for one revolution: 
-time * Omega = number of revolutions of run
-=======
    eddy turnover time: .72  
    epsilon_f   .52
    epsilon_ke  .51
    R0 =  .87 
    KE:  .1 -> .22  in time=10
->>>>>>> 1.215
+
+1/Omega  = time for one revolution: 
+time * Omega = number of revolutions of run
 
 
 
