@@ -2271,9 +2271,11 @@ do idir=1,ndir
    endif
 enddo
 if (my_pe==io_pe) then
-write(6,*)'u_strain = '
-write(6,*)u_strain
-write(6,*)'Idir_max= ',idir_max	
+write(6,*)'u_strain tensor = '
+write(6,'(3f15.5)') u_strain(1,:)
+write(6,'(3f15.5)') u_strain(2,:)
+write(6,'(3f15.5)') u_strain(3,:)
+write(6,*) 'rhat direction which maximizes S12**2 + S13**3, idir_max=',idir_max	
 endif
 
 
@@ -2319,14 +2321,14 @@ else
 
    err = (sp12-maxval)/maxval
    if(my_pe==io_pe) then
-      if (abs(err)>1e-30 ) then
+      if (abs(err)>1e-11 ) then
          print *,'Error r S t1 /= maxval:  ',sp12,maxval, abs(err)
       endif
    endif
    
    if(my_pe==io_pe) then
       err = sp13/maxval
-      if (abs(err)>1e-30 ) then
+      if (abs(err)>1e-11 ) then
          print *,'Error r S t2 should be 0:  ',sp13, abs(err)
       endif
    endif
