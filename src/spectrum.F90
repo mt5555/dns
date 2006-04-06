@@ -1817,7 +1817,7 @@ real*8 :: p1(nx,ny,nz,3)
 ! local variables
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
-real*8 :: countn(0:max(g_nx,g_ny,g_nz)), countp(0:max(g_nx,g_ny,g_nz))
+real*8 :: countn(0:max(g_nx,g_ny,g_nz)), countp(0:max(g_nx,g_ny,g_nz)),pcount(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_x_in(0:g_nx/2,n_var)   
 real*8 ::  spec_y_in(0:g_ny/2,n_var)
 real*8 ::  spec_z_in(0:g_nz/2,n_var)
