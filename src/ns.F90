@@ -225,7 +225,7 @@ real*8 xw,xw2,xfac,tmx1,tmx2,xw_viss
 real*8 uu,vv,ww,dummy
 integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
+real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,ens_alpha
 real*8 :: p_diss(n_var),pke(n_var)
 real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(3),ens_diss
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
@@ -373,7 +373,7 @@ do i=nx1,nx2
 #endif
 
    vorave = vorave + vor(3)
-   ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
+   !ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
    
    helave = helave + Q(i,j,k,1)*vor(1) + & 
         Q(i,j,k,2)*vor(2) + & 
@@ -444,6 +444,7 @@ ux2ave=0
 ke_diss=0
 h_diss=0
 ens_diss=0
+ens_alpha =0
 uxx2ave=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
@@ -504,8 +505,16 @@ do j=1,ny_2dz
                      Qhat(k,i,j,2)*(uz-wx) + &
                      Qhat(k,i,j,3)*(vx-uy)) 
                ! compute (1-alpha^2 k^2)^2  2*k^2 vor vor:   
-               if (alpha_value>0) then
-                  ! incorrect if using hyperviscosity
+               
+               !compute enstrophy for alpha equations
+                  if(infinite_alpha==1) then
+                     ens_alpha = ens_alpha + 2*xw*xw * &
+                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
+                  else                 
+                 ens_alpha = ens_alpha+(1+ xw*alpha_value**2)**2 * &           
+                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)   
+                 endif
+                   ! incorrect if using hyperviscosity
                   if (infinite_alpha==1) then
                      ens_diss=ens_diss + 2*xfac*(mu*xw*(xw)**2)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
@@ -513,10 +522,10 @@ do j=1,ny_2dz
                      ens_diss = ens_diss + 2*xfac*(mu*xw* (1+xw*alpha_value**2)**2)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                   endif
-               else    
-                       ens_diss = ens_diss+ 2*xfac*mu*xw*  &
-                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
-               endif
+                   
+                      
+                        
+               
                
          endif
 
@@ -758,7 +767,8 @@ if (compute_ints==1) then
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
    ints(6)=ke        
-   ints(7)=ensave/g_nx/g_ny/g_nz
+  ! ints(7)=ensave/g_nx/g_ny/g_nz
+   ints(7) = ens_alpha
    ints(8)=a_diss    
    ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-ke_diss                 ! <u,u_xx>
