@@ -43,6 +43,7 @@ real*8,private ::  time_old=-1
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_varhe(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  spec_meanhe(0:max(g_nx,g_ny,g_nz))
 
 ! cospectrum in x,y,z directions.
 ! n_var=1,3:  uv, uw, vw
@@ -97,10 +98,6 @@ real*8 ::  spec_rhs(0:max(g_nx,g_ny,g_nz))   ! transfer spec of u dot RHS
 real*8 ::  spec_tmp(0:max(g_nx,g_ny,g_nz))   ! storage, for calling program convienience
 
 contains
-
-
-
-
 
 
 
@@ -861,6 +858,7 @@ if (my_pe==io_pe) then
    x=1+iwave; call cwrite8(fid,x,1)   
    call cwrite8(fid,spec_helicity_rn,1+iwave)
    call cwrite8(fid,spec_helicity_rp,1+iwave)
+   call cwrite8(fid,spec_meanhe,1+iwave)
    call cwrite8(fid,spec_varhe,1+iwave)
    call cwrite8(fid,spec_E,1+iwave)
    call cwrite8(fid,spec_kEk,1+iwave)
@@ -1942,6 +1940,7 @@ diss1=0
 diss2=0
 spec_helicity_rp=0
 spec_helicity_rn=0
+spec_meanhe=0
 spec_varhe=0
 spec_E = 0
 spec_kEk=0
@@ -2027,7 +2026,7 @@ do j=ny1,ny2
 
             costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1.0        
             
-            ! spectrum of angles         
+            ! mean value of angles in each wavenumber        
 !            cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
             if (cos_tta >= 0) then
                cos_tta_spec_p(iwave) = cos_tta_spec_p(iwave) + (cos_tta)
@@ -2114,13 +2113,14 @@ do j=ny1,ny2
             
             rhel_pdf(iwave,ind) = rhel_pdf(iwave,ind) + 1        
             
-            !distribution of mean relative helicity as funciton of wavenumber
+            !distribution of total relative helicity in each wavenumber
             if (rhel >= 0) then
                rhel_spec_p(iwave) = rhel_spec_p(iwave) + rhel
             else 
                rhel_spec_n(iwave) = rhel_spec_n(iwave) + rhel
 
             endif
+
             !spectrum of variance of relative helicity
             rhel_rms_spec(iwave) = rhel_rms_spec(iwave) + rhel**2	            
             
@@ -2141,13 +2141,15 @@ do j=ny1,ny2
             spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
             
-            ! store helicity(k) and spec_varh(k) (variance of the helicity)
+            ! store helicity(k), mean helicity spec_meanhe(k) and spec_varh(k) (variance of the helicity)
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
                  spec_helicity_rn(iwave) + energy
+            spec_meanhe(iwave) = spec_meanhe(iwave) + energy
             spec_varhe(iwave) = spec_varhe(iwave) + energy**2
-            
+            pcount(iwave) = pcount(iwave) + 1
+       
             hetot=hetot+energy
             diss1=diss1 -2*energy*iwave**2*pi2_squared
             diss2=diss2 -2*energy*rwave*pi2_squared  
@@ -2164,6 +2166,8 @@ spec_r_in=spec_helicity_rp
 call mpi_reduce(spec_r_in,spec_helicity_rp,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_helicity_rn
 call mpi_reduce(spec_r_in,spec_helicity_rn,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=spec_meanhe
+call mpi_reduce(spec_r_in,spec_meanhe,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_varhe
 call mpi_reduce(spec_r_in,spec_varhe,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_E
@@ -2263,6 +2267,7 @@ iwave = (iwave/2)           ! max wave number in sphere.
 do i=iwave+2,iwave_max
    spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
+   spec_meanhe(iwave+1)=spec_meanhe(iwave+1)+spec_meanhe(i)
    spec_varhe(iwave+1)=spec_varhe(iwave+1)+spec_varhe(i)
    spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
@@ -2282,15 +2287,18 @@ do i=iwave+2,iwave_max
 
 enddo
 
-!average costta and rhel values over sphere (exclude iwave=0)
+!average costta and other mean values over sphere (exclude iwave=0)
 do i = 1,iwave+1
 cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
 cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
+spec_meanhe(i) = (spec_meanhe(i)/pcount(i))
+spec_varhe(i) = (spec_varhe(i)/pcount(i))
+
 !below do not need to be averaged over shells!
 !rhel_spec_n(i) = rhel_spec_n(i)/pcountn(i)
 !rhel_spec_p(i) = rhel_spec_p(i)/pcountp(i)
 !rhel_rms_spec(i) = (rhel_rms_spec(i)/rcount(i))
-!spec_varhe(i) = (spec_varhe(i)/vcount(i))
+
 
 enddo
 
