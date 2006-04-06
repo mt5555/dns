@@ -575,7 +575,7 @@ Do idir=1,ndir
       xvec=rperp2;
       xmin=99;
       do i=1,3
-         if (xvec(i)/=0 .and. abs(xvec(i))< xmin ) then
+         if (abs(xvec(i))>1e-8 .and. abs(xvec(i))< xmin ) then
             xmin=abs(xvec(i))
          endif
       enddo
