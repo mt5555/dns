@@ -470,7 +470,6 @@ enddo
    u_shear2=u_shear
    call mpi_allreduce(u_shear2,u_shear,9,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
-u_shear(1,2)=u_shear(1,2)+u12_shear;
 
 epsilon=mu*ke_diss/ntot
 if (epsilon==0) epsilon=1e-20
@@ -478,8 +477,13 @@ h_epsilon=mu*h_diss
 if (h_epsilon==0) h_epsilon=1e-20
 ke=ke/ntot
 u_shear=u_shear/ntot
+u_shear(1,2)=u_shear(1,2)+u12_shear;
+
 if (my_pe==io_pe) then
-   write(6,*)'u_shear = ', u_shear
+   print *,'u_shear'
+   write(6,'(3e15.5)') u_shear(1,:)
+   write(6,'(3e15.5)') u_shear(2,:)
+   write(6,'(3e15.5)') u_shear(3,:)
 endif
 
 eta = (mu**3 / epsilon)**.25
