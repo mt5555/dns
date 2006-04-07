@@ -873,13 +873,26 @@ real*8,save,allocatable :: fhat(:,:,:,:)
 real*8 ener(512),ener2(512),ener_test(512),ffnorm
 integer,save :: numk(512),numk2(512)
 real*8,save :: ener_target(512)
+integer,save :: fwidth
 
 if (0==init_sforcing) then
    init_sforcing=1
+
+   ! set the width of the forcing.  If fparam1==0, we use the 
+   ! default (fwidth=8).  To get fwidth=0, specify in the input 
+   ! file fparam1=.1  (non zero, but will round to zero below)
+   if (fparam1==0) then
+      ! default is +/- 8  (from Smith & Waleffe)
+      fwidth=8
+   else
+      ! otherwise, it was specified in the input file:
+      fwidth = fparam1
+   endif
+
    allocate(fhat(g_nz2,nslabx,ny_2dz,3))
    if (forcing_type==8) then
-      numb1=max(forcing_peak_waveno-1,1)
-      numb=forcing_peak_waveno+1
+      numb1=max(forcing_peak_waveno-1,fwidth)
+      numb=forcing_peak_waveno+fwidth
       ener_target=0
       do wn=numb1,numb
          ! Smith & Waleffe:  esp( -.5 (k-k0)**2 )  /  sqrt(2pi)

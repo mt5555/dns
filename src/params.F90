@@ -159,6 +159,9 @@ integer :: forcing_type   ! 0 = none
                           !     can only be used by the z-decomp model!
 integer :: forcing_peak_waveno = 0
 real*8  :: ffval = 1    !  normalize some forcings so <f,f> = ffval
+real*8  :: fparam1 = 0  !  another forcing parameter. meaning depends
+                        ! on forcing_type, may be ignored 
+
 
 integer :: header_user=1    ! I/O header type from input file
 

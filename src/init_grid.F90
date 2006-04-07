@@ -584,6 +584,8 @@ if (my_pe==io_pe) then
       call read_type6()
    else if (input_file_type==7) then
       call read_type7()
+   else if (input_file_type==7) then
+      call read_type8()
    else
       ! if you add a new variable and new input type, be sure to add
       ! it to the MPI broadcast!
@@ -641,6 +643,8 @@ endif
 
 call mpi_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(forcing_peak_waveno,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call mpi_bcast(ffval,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call mpi_bcast(fparam1,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(g_bdy_x1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(g_bdy_x2,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(g_bdy_y1,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
@@ -2003,6 +2007,302 @@ end subroutine
 
 
 subroutine read_type7
+use params
+implicit none
+
+!local variables
+character(len=80) message
+character(len=20) sdata
+real*8 rvalue,xfac,kmode
+integer i
+
+read(5,'(i2)') header_user
+if (header_user<1 .or. header_user>5) then
+   print *,'header_user = ',header_user
+   call abort("invalid header type specified")
+endif
+
+read(5,'(a12)') sdata
+write(*,'(a,a)') 'equations: ',sdata
+if (sdata=='ns_uvw') then
+   equations=NS_UVW
+else if (sdata=='ns_psivor') then
+   equations=NS_PSIVOR
+else if (sdata=='shallow') then
+   equations=SHALLOW
+else if (sdata(1:3)=='cns') then
+   equations=CNS
+else 
+   print *,'value = >>',sdata,'<<'
+   call abort("invalid equations specified")
+endif
+
+read(5,'(a12)') sdata
+print *,'initial condition: ',sdata
+if (sdata=='KH-blob') then
+   init_cond=0
+else if (sdata=='KH-anal') then
+   init_cond=1
+else if (sdata=='iso12') then
+   init_cond=2
+else if (sdata=='sht') then
+   init_cond=3
+else if (sdata=='vxpair') then
+   init_cond=4
+else if (sdata=='iso12e') then
+   init_cond=5
+else if (sdata=='zero') then
+   init_cond=6
+else if (sdata=='decay2048') then
+   init_cond=7
+else if (sdata=='decay2048_e') then
+   init_cond=8
+else if (sdata=='decay2048_s') then
+   init_cond=9
+else if (sdata=='3d_rot') then
+   init_cond=10
+else 
+   print *,'value = >>',sdata,'<<'
+   call abort("invalid initial condtion specified on line 3 on input file")
+endif
+
+read(5,*) init_cond_subtype
+
+
+read(5,'(a12)') sdata
+print *,'forcing: ',sdata
+if (sdata=='none') then
+   forcing_type=0
+else if (sdata=='iso12') then
+   forcing_type=1
+else if (sdata=='iso12w') then
+   forcing_type=2
+else if (sdata=='iso') then
+   forcing_type=3
+else if (sdata=='iso23w') then
+   forcing_type=4
+else if (sdata=='balu') then
+   forcing_type=5
+else if (sdata=='iso12_hel') then
+   forcing_type=6
+else if (sdata=='iso_high_24') then
+   forcing_peak_waveno=24
+   forcing_type=7
+else if (sdata=='iso_high_16') then
+   forcing_peak_waveno=16
+   forcing_type=7
+else if (sdata=='sto_high_24') then
+   forcing_peak_waveno=24
+   forcing_type=8
+else if (sdata=='sto_high_16') then
+   forcing_peak_waveno=16
+   forcing_type=8
+else if (sdata=='sto_high_10') then
+   forcing_peak_waveno=10
+   forcing_type=8
+else if (sdata=='sto_high_8') then
+   forcing_peak_waveno=8
+   forcing_type=8
+else if (sdata=='sto_high_3') then
+   forcing_peak_waveno=3
+   forcing_type=8
+else if (sdata=='sto_high_4') then
+   forcing_peak_waveno=4
+   forcing_type=8
+else 
+   call abort("invalid forcing type specified on line 4 on input file")
+endif
+
+! read two forcing parameters:
+read(5,*) ffval,fparam1
+
+
+!
+! viscosity
+!
+read(5,'(a12)') sdata
+read(5,*) rvalue
+if (sdata=='value') then
+   mu=rvalue
+else if (sdata=='kediff') then
+   if (ndim==2) then
+      kmode=sqrt( (g_nx**2 + g_ny**2 )/4.0)
+   else
+      kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+   endif
+   xfac = 2*2*pi*2*pi*kmode**2
+   ! diff_2h =  mu*xfac
+   mu = rvalue/xfac
+else if (sdata=='hyper') then
+   if (ndim==2) then
+      kmode=sqrt( (g_nx**2 + g_ny**2 )/4.0)
+   else
+      kmode=sqrt( (g_nx**2 + g_ny**2 + g_nz**2)/9.0)
+   endif
+   xfac = 2* (2*pi*kmode)**8
+   mu_hyper_value = rvalue/xfac
+   mu_hyper = 4
+else 
+   call abort("non supported viscosity type")
+endif
+
+!
+! hyper viscosity
+!
+read(5,'(a12)') sdata
+read(5,*) rvalue
+if (sdata=='none') then
+   ! do nothing
+else if (sdata=='hyper0') then
+   mu_hyper=0
+   mu_hyper_value = rvalue
+else if (sdata=='hyper4') then
+   mu_hyper=2
+   mu_hyper_value = rvalue
+else if (sdata=='hyper8') then
+   mu_hyper=4
+   mu_hyper_value = rvalue
+else if (sdata=='hyper16') then
+   mu_hyper=8
+   mu_hyper_value = rvalue
+else 
+   call abort("non supported hyper viscosity type")
+endif
+
+!
+! hypo viscosity
+!
+read(5,'(a12)') sdata
+read(5,*) rvalue
+if (sdata=='none') then
+   ! do nothing
+else if (sdata=='hypo2') then
+   mu_hypo=1
+   mu_hypo_value = rvalue
+else 
+   call abort("non supported hypo viscosity type")
+endif
+
+read(5,*) fcor
+read(5,*) Lz
+read(5,*) bous
+
+read(5,*) alpha_value
+read(5,*) smagorinsky
+read(5,*) input_npassive
+allocate(input_schmidt(input_npassive))
+allocate(input_passive_type(input_npassive))
+print *,'npassive (from input file): ',input_npassive
+do i=1,input_npassive
+   read(5,*) input_schmidt(i),input_passive_type(i)
+   print *,input_schmidt(i),input_passive_type(i)
+enddo
+
+
+
+read(5,*) diag_struct
+read(5,*) diag_pdfs
+
+
+read(5,'(a12)') sdata
+print *,'method: ',sdata
+if (sdata=='fft') then
+   numerical_method=FOURIER
+   dealias=0
+else if (sdata=='fft-dealias') then
+   numerical_method=FOURIER
+   dealias=1
+else if (sdata=='fft-sphere') then
+   numerical_method=FOURIER
+   dealias=2
+else if (sdata=='4th') then
+   numerical_method=FOURTH_ORDER
+   dealias=0
+else
+   print *,'value=',sdata
+   call abort("only 'fft' derivative method supported")
+endif
+
+
+read(5,'(a12)') sdata
+print *,'b.c. x-direction: ',sdata
+if (sdata=='periodic') then
+   g_bdy_x1=PERIODIC
+   g_bdy_x2=PERIODIC
+else if (sdata=='in0/onesided') then
+   g_bdy_x1=INFLOW0_ONESIDED
+   g_bdy_x2=INFLOW0_ONESIDED
+else if (sdata=='in0') then
+   g_bdy_x1=INFLOW0
+   g_bdy_x2=INFLOW0
+else
+   call abort("x boundary condition not supported")
+endif
+
+read(5,'(a12)') sdata
+print *,'b.c. y-direction: ',sdata
+if (sdata=='periodic') then
+   g_bdy_y1=PERIODIC
+   g_bdy_y2=PERIODIC
+else if (sdata=='reflect') then
+   g_bdy_y1=REFLECT
+   g_bdy_y2=REFLECT
+else if (sdata=='custom0') then
+   g_bdy_y1=REFLECT_ODD
+   g_bdy_y2=INFLOW0_ONESIDED
+else if (sdata=='custom1') then
+   g_bdy_y1=REFLECT_ODD
+   g_bdy_y2=INFLOW0
+else
+   call abort("y boundary condition not supported")
+endif
+
+read(5,'(a12)') sdata
+print *,'b.c. z-direction: ',sdata
+if (sdata=='periodic') then
+   g_bdy_z1=PERIODIC
+   g_bdy_z2=PERIODIC
+else
+   call abort("only 'perodic' b.c. supported in z-direction")
+endif
+
+read(5,*) time_final
+read(5,*) cfl_adv
+read(5,*) cfl_vis
+read(5,*) delt_min
+read(5,*) delt_max
+read(5,*) restart_dt
+read(5,*) diag_dt
+read(5,*) model_dt
+read(5,*) screen_dt
+read(5,*) output_dt
+read(5,*) output_vorticity
+read(5,*) ncustom
+allocate(custom(ncustom))
+do i=1,ncustom
+   read(5,*) custom(i)
+enddo
+
+
+if (numerical_method==FOURIER) then
+   ! make sure boundary conditons are periodic:
+   if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
+       g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
+       g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
+      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+   endif
+endif
+
+
+end subroutine
+
+
+
+
+
+
+
+subroutine read_type8
 use params
 implicit none
 
