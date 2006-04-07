@@ -74,6 +74,8 @@ integer,private :: nbin=200
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes 
 real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
+real*8 ::  spec_meanE(0:max(g_nx,g_ny,g_nz)) ! mean energy in each mode
+real*8 ::  spec_varE(0:max(g_nx,g_ny,g_nz)) ! variance of energy in each mode
 real*8 ::  E33(0:max(g_nx,g_ny,g_nz))  ! E_33 component of spec tensor
 real*8 ::  II2sq(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
 real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
@@ -862,12 +864,19 @@ if (my_pe==io_pe) then
    call cwrite8(fid,spec_varhe,1+iwave)
    call cwrite8(fid,spec_E,1+iwave)
    call cwrite8(fid,spec_kEk,1+iwave)
+   call cwrite8(fid,spec_meanE,1+iwave)
+   call cwrite8(fid,spec_varE,1+iwave)
+
+   ! these quantities are disabled; see corresponding code in compute_hfree_spec
+#if 0
    call cwrite8(fid,E33,1+iwave)
    call cwrite8(fid,II2sq,1+iwave)
    call cwrite8(fid,RRsq,1+iwave)
    call cwrite8(fid,I2I3,1+iwave)
    call cwrite8(fid,R2I3,1+iwave)
    call cwrite8(fid,par,1+iwave)
+#endif
+
    call cwrite8(fid,rhel_spec_n,1+iwave)
    call cwrite8(fid,rhel_spec_p,1+iwave)
    call cwrite8(fid,rhel_rms_spec,1+iwave)
@@ -1944,12 +1953,19 @@ spec_meanhe=0
 spec_varhe=0
 spec_E = 0
 spec_kEk=0
+spec_varE=0
+
+#if 0
+
 E33 = 0
 II2sq = 0
 RRsq = 0
 I2I3  = 0
 R2I3 = 0
 par = 0
+
+#endif
+
 cos_tta_spec_n = 0
 cos_tta_spec_p = 0
 rhel_spec_n = 0
@@ -2058,8 +2074,10 @@ do j=ny1,ny2
          xw=sqrt(rwave*pi2_squared)
          e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
          
+         ! these are turned off because they don't give anything useful
+#if 0
          ! In coordinate system with x_1 || k, x_2 || RR and x_3 ||(k \cross RR):
-
+         
          ! E_33 component of energy tensor (= I_3^2 = square of component of II orthogonal to RR)
          E33(iwave)=E33(iwave)+ 0.5*xfac*(mod_ii**2 - (sum(II*RR)/(mod_rr))**2)
          
@@ -2074,7 +2092,8 @@ do j=ny1,ny2
          I2I3(iwave) = I2I3(iwave) + 0.5*xfac*((sum(II*RR)/(mod_rr))*&
               sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
 
-         ! R_2*I_3 = RR*I_3 (the part of the energy tensor that contributes to the helicity
+         ! R_2*I_3 = RR*I_3 (the part of the energy tensor that contributes 
+         ! to the helicity
          R2I3(iwave) = R2I3(iwave) + 0.5*xfac*(mod_rr*sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
          
          !par = abs(RR\cross II)/(RR^2+II^2)
@@ -2083,6 +2102,7 @@ do j=ny1,ny2
               (II(1)*RR(3) - RR(1)*II(3))**2 + &
               (RR(1)*II(2) - II(1)*RR(2))**2)/(mod_rr**2 + mod_ii**2)
          endif
+#endif
 
          !	helicity(k) = k\cdot RR(k) cross II(k)            
          energy = xfac * 2 * pi2 * (im*(RR(2)*II(3) - II(2)*RR(3)) + &
@@ -2137,11 +2157,13 @@ do j=ny1,ny2
          
          !if (abs(rhel) <= delta) then
          if (.true.) then
-            ! store E(k) and kE(k)
+            ! store E(k),kE(k), varE(k)
             spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
             spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
-            
-            ! store helicity(k), mean helicity spec_meanhe(k) and spec_varh(k) (variance of the helicity)
+            spec_varE(iwave) = spec_varE(iwave) + (0.5*xfac*(sum(RR*RR)+ sum(II*II)))**2
+
+            ! store helicity(k), mean helicity spec_meanhe(k) 
+	    ! and spec_varh(k) (variance of the helicity in each wavenumber)
             if (energy>0) spec_helicity_rp(iwave)= & 
                  spec_helicity_rp(iwave)+energy
             if (energy<0) spec_helicity_rn(iwave)= &
@@ -2174,6 +2196,12 @@ spec_r_in=spec_E
 call mpi_reduce(spec_r_in,spec_E,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=spec_kEk
 call mpi_reduce(spec_r_in,spec_kEk,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spec_r_in=spec_varE
+call mpi_reduce(spec_r_in,spec_varE,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+
+! these quantities correspond to those disabled above. Make sure to turn those on before turning this on.
+#if 0
 spec_r_in=E33
 call mpi_reduce(spec_r_in,E33,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=II2sq
@@ -2186,6 +2214,7 @@ spec_r_in=R2I3
 call mpi_reduce(spec_r_in,R2I3,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spec_r_in=par
 call mpi_reduce(spec_r_in,par,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+#endif
 
 spec_r_in = cos_tta_spec_n
 call mpi_reduce(spec_r_in,cos_tta_spec_n,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
@@ -2271,6 +2300,7 @@ do i=iwave+2,iwave_max
    spec_varhe(iwave+1)=spec_varhe(iwave+1)+spec_varhe(i)
    spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
    spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
+   spec_varE(iwave+1)=spec_varE(iwave+1)+spec_varE(i)
    E33(iwave+1)=E33(iwave+1)+E33(i)
    II2sq(iwave+1)=II2sq(iwave+1)+II2sq(i)
    RRsq(iwave+1)=RRsq(iwave+1)+ RRsq(i)
@@ -2293,6 +2323,8 @@ cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
 cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
 spec_meanhe(i) = (spec_meanhe(i)/pcount(i))
 spec_varhe(i) = (spec_varhe(i)/pcount(i))
+spec_meanE(i) = (spec_E(i)/pcount(i))
+spec_varE(i) = (spec_varE(i)/pcount(i))
 
 !below do not need to be averaged over shells!
 !rhel_spec_n(i) = rhel_spec_n(i)/pcountn(i)
