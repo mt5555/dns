@@ -584,7 +584,7 @@ if (my_pe==io_pe) then
       call read_type6()
    else if (input_file_type==7) then
       call read_type7()
-   else if (input_file_type==7) then
+   else if (input_file_type==8) then
       call read_type8()
    else
       ! if you add a new variable and new input type, be sure to add
