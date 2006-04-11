@@ -2113,9 +2113,6 @@ else
    call abort("invalid forcing type specified on line 4 on input file")
 endif
 
-! read two forcing parameters:
-read(5,*) ffval,fparam1
-
 
 !
 ! viscosity
@@ -2409,6 +2406,9 @@ else
    call abort("invalid forcing type specified on line 4 on input file")
 endif
 
+
+! read two forcing parameters:
+read(5,*) ffval,fparam1
 
 !
 ! viscosity
