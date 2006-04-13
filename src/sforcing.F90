@@ -166,7 +166,7 @@ if (0==init_sforcing) then
       numb=forcing_peak_waveno+8
       call sforcing_init()
       do wn=numb1,numb
-         ener_target(wn)=.1*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
+         ener_target(wn)=exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
       enddo
    endif
    if (numb>numb_max) call abort("sforcing12: numb_max too small")

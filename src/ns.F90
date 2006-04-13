@@ -508,10 +508,10 @@ do j=1,ny_2dz
                
                !compute enstrophy for alpha equations
                   if(infinite_alpha==1) then
-                     ens_alpha = ens_alpha + 2*xw*xw * &
+                     ens_alpha = ens_alpha + xfac*xw*xw * &
                         ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                   else                 
-                 ens_alpha = ens_alpha+(1+ xw*alpha_value**2)**2 * &           
+                 ens_alpha = ens_alpha+ xfac*(1+ xw*alpha_value**2)**2 * &           
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)   
                  endif
                    ! incorrect if using hyperviscosity
