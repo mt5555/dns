@@ -902,7 +902,7 @@ if (0==init_sforcing) then
          ! units of f:  m/s**2
          ! units of ffval =  m**2 / s**4
          if (fparam1<0) then
-            ener_target(wn)=ffval*0
+            ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
          else
             ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
          endif
