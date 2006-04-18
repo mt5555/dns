@@ -24,7 +24,7 @@ real*8 :: divx,divi
 real*8 :: one=1
 integer i,j,k,n,ierr,csig
 integer :: n1,n1d,n2,n2d,n3,n3d
-character(len=80) :: message
+character(len=280) :: message
 CPOINTER fid,fidj,fidS,fidcore
 
 
