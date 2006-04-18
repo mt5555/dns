@@ -886,7 +886,7 @@ if (0==init_sforcing) then
       fwidth=8
    else
       ! otherwise, it was specified in the input file:
-      ! fparam1 <= means use older forcing function
+      ! fparam1 < 0   means use older forcing function
       fwidth = abs(fparam1)
    endif
 
@@ -898,12 +898,13 @@ if (0==init_sforcing) then
       do wn=numb1,numb
          ! Smith & Waleffe:  esp( -.5 (k-k0)**2 )  /  sqrt(2pi)
          ! my wave numbers have an extra 2pi.
-         ! This is normalized so that <f,f>=  ffval
          ! units of f:  m/s**2
          ! units of ffval =  m**2 / s**4
          if (fparam1<0) then
+            ! original forcing function. I'm not sure if <f,f>=ffval  
             ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
          else
+            ! This is normalized so that <f,f>=  ffval
             ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
          endif
       enddo
