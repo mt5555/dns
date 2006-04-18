@@ -246,6 +246,8 @@ if (doit_screen) then
    !                                    = sqrt(20/3 KE mu /epsilon)/mu
    !                                      sqrt(20/3 KE /epsilon) * sqrt(mu)
    !    
+   ! note: in 2D, the <u> = sqrt(2 KE/2) !
+   !
    ! units:  epsilon:  m^2/s^3
    !         KE        m^2/s^2
    !         mu        m^2/s
@@ -259,10 +261,10 @@ if (doit_screen) then
       else
          epsilon=-(  -mu*ints(1)  )
       endif
-      lambda=sqrt( mu*(2*ea1/3) / (epsilon/15) )
+      lambda=sqrt( mu*(2*ea1/ndim) / (epsilon/15) )
 
 
-      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ea1/3)/mu, &
+      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ea1/ndim)/mu, &
            '  R=',1/mu,' lambda=',lambda
       call print_message(message)	
       
