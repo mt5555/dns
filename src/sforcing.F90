@@ -886,7 +886,8 @@ if (0==init_sforcing) then
       fwidth=8
    else
       ! otherwise, it was specified in the input file:
-      fwidth = fparam1
+      ! fparam1 <= means use older forcing function
+      fwidth = abs(fparam1)
    endif
 
    allocate(fhat(g_nz2,nslabx,ny_2dz,3))
@@ -900,7 +901,11 @@ if (0==init_sforcing) then
          ! This is normalized so that <f,f>=  ffval
          ! units of f:  m/s**2
          ! units of ffval =  m**2 / s**4
-         ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
+         if (fparam1<0) then
+            ener_target(wn)=ffval*0
+         else
+            ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
+         endif
       enddo
 
       ! compute number of coefficients in each band
