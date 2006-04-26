@@ -363,7 +363,6 @@ im_max=xnx/2-1
 jm_max=xny/2-1
 km_max=xnz/2-1
 
-
 if (io_read==1) then
    if (output_spec) then
       call input1_spec(p,work,work2,fid,fpe,im_max,jm_max,km_max)
@@ -581,20 +580,28 @@ real*8 :: work2(nx,ny,nz)
 !local
 character(len=80) message
 character(len=280) fname
-character(len=80) base
+character(len=280) base
 integer :: n,header_type
 real*8 :: time
 real*8 :: time_in
 
+
+Q=0
+
+
 if (time<0) then
-   base="restart"
+   base=rundir(1:len_trim(rundir)) // "restart"
 else
    write(message,'(f10.4)') 10000.0000 + time
-   base=runname(1:len_trim(runname)) // message(2:10) 
+   base=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) 
+endif
+
+if (r_compressed) then
+   call uvw_compressed_io(base,time,1,Q,Qhat,work1,work2)
+   return
 endif
 
 
-Q=0
 if (equations==NS_UVW) then
 
 if (udm_input) then
@@ -602,51 +609,51 @@ if (udm_input) then
 else
    if (r_spec) then
       if (header_type /= 1) call abort("Error: spectral I/O requires header_type==1");
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".us"
+      fname = base(1:len_trim(base)) // ".us"
       call print_message("Input: ")
-      call print_message(fname)
+      call print_message(trim(fname))
       call singlefile_io2(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec)
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vs"
+      fname = base(1:len_trim(base)) // ".vs"
       call print_message(fname)
       call singlefile_io2(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec)
       if (ndim==3) then
-         fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".ws"
-         call print_message(fname)
+         fname = base(1:len_trim(base)) // ".ws"
+         call print_message(trim(fname))
          call singlefile_io2(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec)
       endif
       do n=1,ndim
          call ifft3d(Q(1,1,1,n),work1)
       enddo
    else
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
+      fname = base(1:len_trim(base)) // ".u"
       call print_message("Input: ")
-      call print_message(fname)
+      call print_message(trim(fname))
       call singlefile_io3(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec,header_type)
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
-      call print_message(fname)
+      fname = base(1:len_trim(base)) // ".v"
+      call print_message(trim(fname))
       call singlefile_io3(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec,header_type)
       if (ndim==3) then
-         fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".w"
-         call print_message(fname)
+         fname = base(1:len_trim(base)) // ".w"
+         call print_message(trim(fname))
          call singlefile_io3(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec,header_type)
       endif
    endif
 endif
 
 else if (equations==SHALLOW) then
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
+   fname = base(1:len_trim(base)) // ".u"
    if (r_spec) fname=fname(1:len_trim(fname)) // "s"
    call print_message("Input: ")
-   call print_message(fname)
+   call print_message(trim(fname))
    call singlefile_io3(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec,header_type)
 
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
+   fname = base(1:len_trim(base)) // ".v"
    if (r_spec) fname=fname(1:len_trim(fname)) // "s"
-   call print_message(fname)
+   call print_message(trim(fname))
    call singlefile_io3(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec,header_type)
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".h"
+   fname = base(1:len_trim(base)) // ".h"
    if (r_spec) fname=fname(1:len_trim(fname)) // "s"
-   call print_message(fname)
+   call print_message(trim(fname))
    call singlefile_io3(time_in,Q(1,1,1,n_var),fname,work1,work2,1,io_pe,r_spec,header_type)
 
    if (r_spec) then
@@ -660,31 +667,31 @@ else if (equations==SHALLOW) then
 else if (equations==NS_PSIVOR) then
    if (header_type /= 1) call abort("Error: NS_PSIVOR I/O requires header_type==1");
    call tracers_restart(io_pe)
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".vor"
+   fname = base(1:len_trim(base)) // ".vor"
    call print_message("Input: ")
-   call print_message(fname)
+   call print_message(trim(fname))
    call singlefile_io(time_in,Qhat(1,1,1,1),fname,work1,work2,1,io_pe)
-   !fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".psi"
+   !fname = base(1:len_trim(base)) // ".psi"
    !call singlefile_io(time_in,Qhat,fname,work1,work2,1,io_pe)
 
 else if (equations==CNS) then
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".u"
+   fname = base(1:len_trim(base)) // ".u"
    call print_message("Input: ")
-   call print_message(fname)
+   call print_message(trim(fname))
    call singlefile_io3(time_in,Q(1,1,1,1),fname,work1,work2,1,io_pe,r_spec,header_type)
-   fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".v"
-   call print_message(fname)
+   fname = base(1:len_trim(base)) // ".v"
+   call print_message(trim(fname))
    call singlefile_io3(time_in,Q(1,1,1,2),fname,work1,work2,1,io_pe,r_spec,header_type)
    if (ndim==3) then
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".w"
-      call print_message(fname)
+      fname = base(1:len_trim(base)) // ".w"
+      call print_message(trim(fname))
       call singlefile_io3(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec,header_type)
    endif
    if (n_var-ndim==2) then
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".p"
+      fname = base(1:len_trim(base)) // ".p"
       n=ndim+1
       call singlefile_io3(time_in,Q(1,1,1,n),fname,work1,work2,1,io_pe,r_spec,header_type)
-      fname = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // ".rho"
+      fname = base(1:len_trim(base)) // ".rho"
       n=ndim+2
       call singlefile_io3(time_in,Q(1,1,1,n),fname,work1,work2,1,io_pe,r_spec,header_type)
    endif  
@@ -721,8 +728,16 @@ character(len=80) base
 integer :: n
 real*8 :: time
 
-
 write(message,'(f10.4)') 10000.0000 + time
+
+if (w_compressed) then
+   fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) 
+   call uvw_compressed_io(fname,time,0,Q,q1,work1,work2)
+   return
+endif
+
+
+
 
 if (equations==NS_UVW .and. w_spec) then
    
@@ -826,6 +841,161 @@ endif
 
 
 end subroutine
+
+
+
+
+
+
+subroutine uvw_compressed_io(basename,time,io_read,Q,Qhat,work1,work2)
+!
+!  compressed I/O routine
+!  io_read=0   write data
+!  io_read=1   read data
+!
+use params
+use tracers
+use mpi
+use fft_interface
+use transpose
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+integer :: io_read
+character(len=*) :: basename
+
+!local
+character(len=80) message
+character(len=280) fname
+character(len=80) base
+integer :: n,im,jm,km,ierr,i,j,k
+integer n1,n1d,n2,n2d,n3,n3d
+real*8 :: time
+CPOINTER :: fid
+
+
+write(message,'(f10.4)') 10000.0000 + time
+if (equations/=NS_UVW) then
+   call abort("compressed I/O requires NS_UVW equations")
+endif
+if (ndim/=3) then
+   call abort("compressed I/O requires ndim==3")
+endif
+if (ncpu_x*ncpu_y>1) then
+   call abort("compressed I/O requies ncpu_x=ncpu_y=1")
+endif
+if (nx2-nx1+1 /= g_nx) then
+   call abort("compressed I/O x dimension error")
+endif
+if (ny2-ny1+1 /= g_ny) then
+   call abort("compressed I/O y dimension error")
+endif
+
+if (io_read) then
+   call print_message("reading compressed I/O:")
+else
+   call print_message("writing compressed I/O:")
+endif
+
+fname = basename(1:len_trim(basename)) // ".uc"
+call print_message(trim(fname))
+call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,io_read,io_pe,.false.,2)
+   
+fname = basename(1:len_trim(basename)) // ".vc"
+call print_message(trim(fname))
+call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,io_read,io_pe,.false.,2)
+
+fname = basename(1:len_trim(basename)) // ".wc"
+call print_message(trim(fname))
+if (io_read==0) then
+   ! output u,v and z-averaged w
+   ! this subroutine requires ncpux=ncpuy=1, so now have everyone compute
+   ! their z-ave and then reduce to io_pe
+   work1=0
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      work1(i,j,1)=work1(i,j,1)+Q(i,j,k,ndim)/g_nz
+   enddo
+   enddo
+   enddo
+#ifdef USE_MPI
+   call mpi_reduce(work1,work2,nx*ny,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+#else
+   work2=work1
+#endif
+   
+   if (my_pe==io_pe) then
+      call copen(fname,"w",fid,ierr)
+      do j=ny1,ny2
+         call mwrite8(fid,work2(nx1,j,1),nx2-nx1+1)
+      enddo
+      call cclose(fid,ierr)
+   endif
+else
+   ! read in u,v and z-averaged w
+   ! then recover w from div(u)=0
+   work2=0
+   if (my_pe==io_pe) then
+      call copen(fname,"r",fid,ierr)
+      do j=ny1,ny2
+         call mread8(fid,work2(nx1,j,1),nx2-nx1+1)
+      enddo
+      call cclose(fid,ierr)
+   endif
+#ifdef USE_MPI
+   call mpi_bcast(work2,nx*ny,MPI_REAL8,io_pe,comm_3d,ierr)
+#endif
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      Q(i,j,k,ndim)=work2(i,j,1)
+   enddo
+   enddo
+   enddo
+
+   ! now use the divergence relation to recover the rest of Q(:,:,:,3)
+   ! in wave number space:  (l,m,n)   
+   !   i l*u + m*v + n*w = 0    so for n<>0    w = -(l*u + m*v)/n
+   ! and the n=0 component has already been computed and stored in
+   ! Q(:,:,:,3) above.  
+   call print_message("recovering u_3 from div(u)=0 relation...")
+   do n=1,3
+      work1=Q(:,:,:,n)
+      call z_fft3d_trashinput(work1,Qhat(1,1,1,n),work2)
+   enddo
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            
+            ! the divergence
+            ! 0 =  - im*rhs(k,i+z_imsign(i),j,1) &
+            !     - jm*rhs(k,i,j+z_jmsign(j),2) &
+            !     - km*rhs(k+z_kmsign(k),i,j,3)/Lz
+
+            if (km/=0) then
+               Qhat(k+z_kmsign(k),i,j,3) = Qhat(k+z_kmsign(k),i,j,3) + &
+(-Lz/km) * ( im*Qhat(k,i+z_imsign(i),j,1) + jm*Qhat(k,i,j+z_jmsign(j),2) )
+            endif
+         enddo
+      enddo
+   enddo
+   do n=1,3
+      call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work1)
+   enddo
+   call print_message("done")
+endif
+
+   
+
+end subroutine
+
+
 
 
 
@@ -969,7 +1139,7 @@ do n=np1,np2
    write(ext2,'(i3)') 100+passive_type(n)
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
         // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
-   call print_message(fname)	
+   call print_message(trim(fname))	
    call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
 
 

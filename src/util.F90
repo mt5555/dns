@@ -30,7 +30,7 @@ implicit none
 character(len=*) message
 integer :: ierr
 if (my_pe==io_pe) then
-   write(*,'(a)') message
+   write(*,'(a)') trim(message)
 endif
 
 ! for parallel debugging with print_message():

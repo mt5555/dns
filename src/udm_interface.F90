@@ -11,7 +11,7 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: bufudm(nslabx,nslaby,nslabz,n_var)
 real*8 :: time
-character(len=80) fname
+character(len=*) fname
 
 
 !local
@@ -197,6 +197,7 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 bufudm(nx2-nx1+1, ny2-ny1+1, nz2-nz1+1)
+character(len=280) base
 
 
 !local
@@ -214,7 +215,6 @@ character(len=80) fnameudm
 character(len=80) attrname 
 character(len=80) dsnameudm
 character(len=80) dotudm
-character(len=80) base
 character*2 nochar 
 ! character*(5) dbgname 
 
@@ -228,7 +228,7 @@ Q=0
    dotudm = '.'//char(0)
    attrname = 'time'//char(0)
    nochar(1:1) = char(0)
-   fnameudm = rundir(1:len_trim(rundir)) // base(1:len_trim(base)) // '.h5'//char(0)
+   fnameudm = base(1:len_trim(base)) // '.h5'//char(0)
    call print_message("Restarting from UDM file:")
    call print_message(fnameudm)
    call UDM_FILE_OPEN(fnameudm, UDM_HDF_OPEN_READ, fidudm, ierr)

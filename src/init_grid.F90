@@ -433,12 +433,17 @@ if (my_pe==io_pe) then
    !
    !   -mio  use mpi-io with a stripe of 64 for grid point I/O
    !
+   !   -zi     read input from compressed (NS_UVW) file format
+   !   -zo     ouput using compressed (NS_UVW) file format
    !
    !   -cout <text>   type of data to output for the convert.F90 program
    !                   "uvw", "vor", "vorm", "norm2", "passive", "gradu"
    !
    !   -isodir <n>    use at most n directions in isoave calculation
    !   -isodel <n>    use seperation distances at most n grid points.
+   !
+   !   -i4             set input to 4 bytes
+   !   -o4             set output to 4 bytes 
    !
    rundir="./"
    runname="temp"
@@ -476,6 +481,8 @@ if (my_pe==io_pe) then
             convert_opt=9 
          else if (carg(1:11)=="iotest") then
             convert_opt=10 
+         else if (carg(1:11)=="stats") then
+            convert_opt=11 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abort("-cout unrecognized option")
@@ -524,6 +531,14 @@ if (my_pe==io_pe) then
          r_spec=.true.
       else if (message(1:3)=="-so" .and. len_trim(message)==3) then
          w_spec=.true.
+      else if (message(1:3)=="-zi" .and. len_trim(message)==3) then
+         r_compressed=.true.
+      else if (message(1:3)=="-zo" .and. len_trim(message)==3) then
+         w_compressed=.true.
+      else if (message(1:3)=="-i4" .and. len_trim(message)==3) then
+         input_size=4
+      else if (message(1:3)=="-o4" .and. len_trim(message)==3) then
+         output_size=4
       else if (message(1:5)=="-smax" .and. len_trim(message)==5) then
          i=i+1
          if (i>iargc()) exit
@@ -599,10 +614,16 @@ endif
 #ifdef USE_MPI
 call mpi_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call mpi_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
-call mpi_bcast(r_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+
+call mpi_bcast(r_spec,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
+call mpi_bcast(w_spec,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
+call mpi_bcast(r_compressed,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
+call mpi_bcast(w_compressed,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
+call mpi_bcast(input_size,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call mpi_bcast(output_size,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+
 call mpi_bcast(user_specified_isodel,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(user_specified_isodir,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call mpi_bcast(w_spec,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(spec_max,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(byteswap_input,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(compute_passive_on_restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

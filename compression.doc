@@ -1,0 +1,86 @@
+
+Notes on Bob Kerr's Data Compression Algorithm
+
+I implemented a grid space version of Bob Kerr's compression
+algorithm.  This algorithm was applied to our 2048^3 data set.  The
+original data contains wave numbers up to 1024.  To compress this, we
+first filtered it down to wave numbers up to 720.  We chose 720
+because this is slightly more than a 2/3 dealiasing (which would
+truncate to 683), and 720 corresponds to an FFT of length 1440, which
+can be handled by any FFT that can do powers of 2 and 3.
+We then output the first two velocity components (u and v) in
+grid space on a 1440^3 grid.  The data is a standard "brick-of-floats".
+
+For the 3'rd component of velocity, we only output the average
+in the z-direction, since the rest of that field can be obtained
+from the fact that the flow is divergence free.  This data
+is again the grid space values, on a standard brick-of-floats
+1440^2 grid.  It is also processor and FFT independent.  
+
+
+For each snapshot, I produced 3 files:
+
+file.u        1440^3 real*4 numbers = u component of velocity, 
+                                        on a 1440^3 grid
+file.v        1440^3 real*4 numbers = v component of velocity
+                                        on a 1440^3 grid  
+file.w        1440^2 real*4 numbers = z average of w component of velocity
+                                        on a 1440^2 grid
+               
+
+Here is some pseudo code which shows how to read the data
+and recover the w component by taking FFTs:.  
+
+integer(parameter) :: N=1440     !  2^5 *  3^2 * 5
+integer(parameter) :: Nf=720
+real*8 :: u(N,N,N),v(N,N,N),w(N,N,N)
+complex*16 :: uf(0:Nf,0:Nf,0:Nf),vf(0:Nf,0:Nf,0:Nf),wf(0:Nf,0:Nf,0:Nf)
+
+call mpi_open(fidu,filename.u)
+call mpi_open(fidv,filename.v)
+call mpi_open(fidw,filename.w)
+do k=1,N
+do j=1,N
+do i=1,N
+   call mpi_read(fidu,u(i,j,k)) 
+   call mpi_read(fidv,v(i,j,k))
+enddo
+enddo
+enddo
+
+do j=1,N
+do i=1,N
+   read w(i,j,1)
+   do k=2,N
+      w(i,j,k)=w(i,j,1)    ! fill in w everywhere with its z-average
+   enddo        
+enddo
+enddo
+
+!
+! at this point, w only contains the field averaged in z.  
+! now *add* in the rest of the field, using div(u,v,w)=0
+!
+call fft(u,uf,N)
+call fft(v,vf,N)
+call fft(w,wf,N)
+
+do k=0,Nf
+do j=0,Nf
+do i=0,Nf
+   ! divergence free implies that
+   ! sqrt(-1)*i*uf + sqrt(-1)*j*vf + sqrt(-1)*k*wf = 0
+   ! solve for wf to get:   
+   if (k/=0) then
+        wf(i,j,k) = wf(i,j,k) + (i*uf(i,j,k) + j*vf(i,j,k)) / k
+   endif
+enddo
+enddo
+enddo
+! transform back to grid space:
+call ifft(uf,u,N)
+call ifft(vf,v,N)
+call ifft(wf,w,N)
+
+
+

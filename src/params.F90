@@ -60,6 +60,9 @@ logical :: w_spec=.false.           ! set to .true. to write spectral coefficiei
                                     ! instead of grid point values 
 integer :: spec_max=-1              ! max number of spectral modes to write
                                     ! -1 = use dealiased maximum
+logical :: r_compressed=.false.       ! NS_UVW Kerr compression
+logical :: w_compressed=.false.       ! 
+                                 
 
 
 logical :: udm_input=.false.        ! use UDM for input/restart files
@@ -315,8 +318,8 @@ real*8            :: dealias_23_kmax
 
 integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
                              ! For periodic FFT case, o_nx=g_nx+1 because we do not
-                             ! store the point at x=1.  for 4th order case, we 
-                             ! may store this point.  
+                             ! store the point at x=1, but we output it.
+                             ! for 4th order case, we may store this point.  
                              
 integer :: g_nx2,g_ny2,g_nz2 ! dimension used by fft
                              ! (because FFT99 requires 2 extra points)

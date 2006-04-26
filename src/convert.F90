@@ -3,19 +3,29 @@
 !
 ! Read in a sequence of data files and convert them
 !
+! -zi       input file uses NS_UVW compression (only works with input_uvw)
+! -zo       ouput data using NS_UVW compression (only works with ouput_uvw)
+!
+! -si       input file contains spectral coefficients instead of grid data
+! -so       output spectral coefficieints instead of grid data
+!
+! -o4       output_size=4 (default is 8 bytes)
+! -i4       input_size=4 (instead of default of 8) 
+!
 ! type of conversion controled by -cout argument:
 !
 !  -cout uvw      (can be used with -si/-so  spectral input/output)
 !                  and -smax spectral coefficient truncation to 
 !                  perform downsampling or upsampling)
-!  -count 4uvw     as above, but real*4 output
+!  -cout 4uvw     as above, but real*4 output, scalars-by-scalar
+!                     (cant do compressed output) 
 !  -cout vor
 !  -cout vorm
 !  -cout norm2
 !  -cout passive    convert passive scalar file
 !                   need to specify shmidt_in and type_in below
 !  -cout gradu      output <u_i,j>  matrixes for subcubes
-!
+!  -cout stats      read data, print some stats
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -55,8 +65,8 @@ character(len=8) :: ext2,ext
 
 ! input file
 tstart=.0000
-tstop=.32
-tinc=1.0
+tstop=5.0
+tinc=.5
 
 ! to read times from  file times.dat:
 ! tstart=-1; tinc=0; tname="times.dat"
@@ -78,11 +88,7 @@ call init_model
 
 if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5 .or. &
     convert_opt==10 ) then
-   if (equations==SHALLOW) then
-      allocate(vor(nx,ny,nz,n_var)) ! used for shallow water output routiens
-   else
-      allocate(vor(1,1,1,1)) ! dummy variable -wont be used
-   endif
+   allocate(vor(nx,ny,nz,n_var)) ! used for shallow water output routiens
    allocate(Q(nx,ny,nz,n_var))
 else if (convert_opt == 4 .or. convert_opt==6) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
@@ -105,35 +111,34 @@ do
       if (icount==1)  open(83,file=fname)
       read(83,*,err=100,end=100) time
    endif	
+   write(message,'(a,i4,a,f10.4)') 'iter=',icount,' attempting to read time=',time
+   call print_message(message)
 
    Q=0
 
    if (convert_opt==0) then  ! -cout uvw  
-      call input_uvw(time,Q,vor,work1,work2,header_user)  ! user specified
-!      print *,'attempting to read headerless input data...'
-!      call input_uvw(time,Q,vor,work1,work2,2)  ! no headers
+      ! read data, header type =1, or specified in input file
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      call print_stats(Q,vor,work1,work2)
+
       ! just reoutput the variables:
       if (w_spec) then
          do n=1,3
             call fft3d(Q(1,1,1,n),work1)
          enddo
       endif
-      if (w_spec /= r_spec) then
+      if ((w_spec /= r_spec) .or. (w_compressed /= r_compressed)) then
          ! converting from spec to grid (or vice versa) 
          basename=runname(1:len_trim(runname))
       else
          ! dont clobber input file!
          basename=runname(1:len_trim(runname)) // "-new."
       endif
-      if (w_spec ) then
-         !user specified headers (same as input file)
-         call output_uvw(basename,time,Q,vor,work1,work2,header_user)  
-      else	
-         ! default grid space output:  no headers
-         call output_uvw(basename,time,Q,vor,work1,work2,2) 
-         ! use this to preserve header type of input file
-         ! call output_uvw(basename,time,Q,vor,work1,work2,header_user) 
-      endif
+      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
+      ! output headerless data:
+      ! call output_uvw(basename,time,Q,vor,work1,work2,2)
+
    endif
 
    if (convert_opt==1) then  ! -cout vor
@@ -352,7 +357,11 @@ do
    endif
 
 
-
+   if (convert_opt==11) then ! -cout stats    test compression data
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      call print_stats(Q,vor,work1,work2)
+   endif
 
 
    if (tstart>=0) then
@@ -883,4 +892,70 @@ return
 
 100 continue
 call print_message("Error reading subcube list file...")
+end subroutine
+
+
+
+subroutine print_stats(Q,div,work1,work2)
+use params
+use mpi
+implicit none
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: div(nx,ny,nz,3)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: mx(3),mx2(3),divx,divi,ens,ke
+integer :: n,ierr,i,j,k
+character(len=280) :: message
+
+call vorticity(div,Q,work1,work2)
+ens=0
+ke=0
+do n=1,3
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         ens=ens + div(i,j,k,n)**2
+         ke=ke+.5*Q(i,j,k,n)**2
+      enddo
+   enddo
+enddo
+enddo
+ens=ens/g_nx/g_ny/g_nz
+ke=ke/g_nx/g_ny/g_nz
+#ifdef USE_MPI
+   divi=ke
+   call mpi_allreduce(divi,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   divi=ens
+   call mpi_allreduce(divi,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+
+
+write(message,'(a,3f18.14)') 'STATS:  KE = ',ke
+call print_message(message)
+
+
+do n=1,3
+   mx(n)=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)))
+enddo 
+#ifdef USE_MPI
+   mx2=mx
+   call mpi_allreduce(mx2,mx,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+
+write(message,'(a,3f18.14)') 'STATS:  maxU = ',mx
+call print_message(message)
+
+call compute_div(Q,div,work1,work2,divx,divi)
+write(message,'(3(a,e12.5))') 'STATS:  max(div)=',divx
+call print_message(message)	
+
+
+write(message,'(3(a,f18.12))') 'STATS:  enstrophy=',ens
+call print_message(message)	
+
+
+
+
 end subroutine

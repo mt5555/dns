@@ -1079,6 +1079,8 @@ if (z_pe==ncpu_z-1 .and. o_nz>g_nz) extra_k=1
 do k=1,nslabz+extra_k
 do y_pe=0,ncpu_y-1
 do x_pe=0,ncpu_x-1
+
+
    ! for non-perfect load balanced cases, the last few columns
    ! of data will not be real data.
    ! Find the largest value jx<=ny_2dx such that the corresponding
