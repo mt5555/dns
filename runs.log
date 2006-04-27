@@ -6,12 +6,17 @@
 3/6/2006
 Kerr's compression of our 2048^3 data set project.
 
-ccs-2 machine "lindor"
-/usb1 /usb2 /usb3
+how to get files off of HPSS and onto lindor?
+ccs-2 machine "lindor":  /usb1 /usb2 /usb3
 
-start xpsi jobs?  
+psi                  doesn't support 2GB files
+sftp hpss.lanl.gov   connection refused
+
+to get files off of HPSS onto QSC:
 xpsi get --pfsComp 32 filename
-use sftp hpss.lanl.gov
+
+
+
 
 
 Test case on D800:
