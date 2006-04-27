@@ -2,7 +2,7 @@
 #BSUB -o compress.o -e compress.e
 #BSUB -q smallq
 #BSUB -J convert
-#BSUB -W 110:00
+#BSUB -W 110
 #BSUB -n 64
 #BXXX -wa URG -wt 2
 
