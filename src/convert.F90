@@ -17,8 +17,9 @@
 !  -cout uvw      (can be used with -si/-so  spectral input/output)
 !                  and -smax spectral coefficient truncation to 
 !                  perform downsampling or upsampling)
-!  -cout 4uvw     as above, but real*4 output, scalars-by-scalar
-!                     (cant do compressed output) 
+!  -cout 4uvw     as above, but loops over fields 1 by 1 
+!                   (and only needs 3 scalar arrays, but cant do stats,compressed output) 
+!                   use -o4 to get real*4 output
 !  -cout vor
 !  -cout vorm
 !  -cout norm2
@@ -92,7 +93,7 @@ if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5 .or. &
    allocate(Q(nx,ny,nz,n_var))
 else if (convert_opt == 4 .or. convert_opt==6) then
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
-   allocate(Q(nx,ny,nz,1))
+   allocate(Q(nx,ny,nz,1)) ! only need 1 slot
 else if (convert_opt == 7 .or. convert_opt==8) then
    allocate(vor(nx,ny,nz,1)) ! only first component used
    allocate(Q(nx,ny,nz,n_var))
@@ -200,6 +201,7 @@ do
    if (convert_opt==4) then  ! -cout 4uvw
       ! 2048^3 needs 192GB storage.  can run on 128 cpus.
       !  can run on 64 cpus, if running 2 jobs per node.
+      ! this could will output 1 field at a time.  only needs 3 arrays.
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
 
@@ -208,15 +210,24 @@ do
                  "." // extension(i:i)
          call print_message("input file:")	
 	 call print_message(fname(1:len_trim(fname)))
-         call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
+         call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,r_spec,header_user)
          print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
 
-	 call print_message("outputting as REAL*4...")
-         output_size=4
-         fname = basename(1:len_trim(basename)) // sdata(2:10) // &
-                 "." // extension(i:i) // "4"
-	 call print_message(fname(1:len_trim(fname)))
-         call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+         if (w_spec) then
+            do n=1,3
+               call fft3d(Q(1,1,1,n),work1)
+            enddo
+            fname = basename(1:len_trim(basename)) // sdata(2:10) // &
+                 "." // extension(i:i) // "s"
+         else
+            fname = basename(1:len_trim(basename)) // sdata(2:10) // &
+                 "." // extension(i:i) // "-new"
+         endif
+         call print_message(fname(1:len_trim(fname)))
+
+         call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,header_user)
+         ! headerless:
+         ! call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,2)
       enddo	
    endif
    if (convert_opt==5) then  ! -cout norm

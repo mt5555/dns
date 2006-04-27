@@ -19,8 +19,8 @@ range=0:50;
 fid2=-1;
 
 
-%fid=fopen('/home/mataylo/codes/dnsdata/decay/decay2048.scalars','r','l'); 
-%nx=2048;
+fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
+nx=2048;
 
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
@@ -28,7 +28,7 @@ fid2=-1;
 %fid=endianopen('/nh/nest/u/taylorm/sc1024A.scalars','r');
 %nx=1024;
 
-fid=endianopen('/home/mataylo/codes/kerr/test/temp0000.0000.scalars','r');
+%fid=endianopen('/home/mataylo/codes/kerr/test/temp0000.0000.scalars','r');
 
 
 %fid=endianopen('/home/mataylo/all.scalars','r');
@@ -118,6 +118,16 @@ maxW=maxs(3,:);  % at time_after
 maxvor=maxs(5,:);
 time_after=maxs(6,:);
 time=maxs(7,:);
+
+% $$$ % time  ke  
+% $$$ for i=1:length(time)
+% $$$    disp(sprintf('time=%7.4f   KE=%18.14f   ens=%18.12f',time(i),ke(i),ens(i)))
+% $$$ end
+% $$$ for i=1:length(time_after)
+% $$$    disp(sprintf('time=%7.4f   maxU=%18.14f  %18.14f  %18.14f',time_after(i),maxU(i),maxV(i),maxW(i)))
+% $$$ end
+% $$$ return
+
 
 Ea = ints(6,:) + .5*alpha^2 *ints(2,:); % at time
 

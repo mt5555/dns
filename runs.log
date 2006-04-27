@@ -9,7 +9,9 @@ Kerr's compression of our 2048^3 data set project.
 ccs-2 machine "lindor"
 /usb1 /usb2 /usb3
 
-start xpsi jobs?  use sftp hpss.lanl.gov
+start xpsi jobs?  
+xpsi get --pfsComp 32 filename
+use sftp hpss.lanl.gov
 
 
 Test case on D800:
