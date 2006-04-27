@@ -1,0 +1,94 @@
+#! /bin/tcsh 
+#BSUB -o converth5.o -e converth5.e
+#BSUB -q aq
+#BSUB -J converth5
+#BSUB -W 24:00
+#BSUB -n 512
+#BSUB -wa URG -wt 20
+#BXXX -extsched "RMS_SNODE;railmask=3" 
+#BXXX -m "qbd32 qbd33 qbd34 qbd35 qbd36 qbd37 qbd38 qbd39 qbd40 qbd41 qbd42 qbd43 qbd44 qbd45 qbd46 qbd47 qbd48 qbd49"
+
+#
+# estimated isoave time:  150 timesteps = 630min.
+#                  time for ndelta=3:     111min   512 cpus
+#                           ndelta=74: ? 
+#
+#                  time for 1024 subsampled: ndelta=73  IN
+# 
+
+module list
+set NCPUS=512
+set name = decay2048
+set refin=$HOME/dns/prod/$name.inp
+
+
+set SRC=$HOME/dns/src
+set COMP=$HOME/comp/converth5
+set WDIR=/scratch2/taylorm
+
+mkdir $COMP
+mkdir $WDIR
+set WDIR=$WDIR/$name
+mkdir $WDIR
+
+
+if (!(-d $WDIR)) then
+   echo $WDIR does not exist"
+   exit 1
+endif
+   if (!(-d $COMP)) then
+      echo $COMP does not exist"
+      exit 1
+   endif
+
+
+
+   cd $COMP
+   rm -f convert*.x
+   \cp -f $SRC/* .
+
+   cp -f $SRC/convert.F90 temp.F90
+#   sed 's/\!SEDtstart/tstart=3.7900; tstop=3.7900; tinc=tstop-tstart/' temp.F90 > convert.F90
+
+#   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times0.dat"/' temp.F90 > convert.F90
+   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times5.dat"/' temp.F90 > convert.F90
+
+
+   ./gridsetup.py 1 1 $NCPUS 2048 2048 2048
+   make dep
+   make clean
+   make  -j 4 convert
+   mv -f convert convert2048.x
+
+
+set echo
+cd 
+
+
+# output 1024 spectral data:
+#date
+#prun -v -n $NCPUS  $COMP/convert2048.x -mio -cout uvw -so -smax 1024 -d $WDIR   $name < $refin
+#date
+
+
+# output 2048 UDM vorticity:
+date
+prun -v -n $NCPUS  $COMP/convert2048.x -mio -cout vor -uo -d $WDIR   $name < $refin
+date
+
+
+
+# process spectral data:
+#prun -v -n $NCPUS $COMP/convert2048.x -si -d $WDIR  $name < $refin
+
+
+
+
+
+
+
+
+
+
+
+

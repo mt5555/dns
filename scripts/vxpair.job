@@ -1,0 +1,90 @@
+#! /bin/tcsh 
+#BSUB -o vxpair.o  -e vxpair.e
+#BSUB -q smallq
+#BSUB -J vxpair
+#BSUB -W 600
+#BSUB -n 64
+#BSUB -wa URG -wt 5
+
+module load MPI_default
+module list
+
+set name = vx4800a
+set NCPU = 64
+set mesh = "64 1 1"
+
+set restart = 1
+set recompile = 0  
+
+
+set refin=$HOME/dns/prod/$name.inp
+
+set SRC=$HOME/dns/src
+set COMP=$HOME/comp/$name
+set WDIR=/scratch2/taylorm
+set EXE=$HOME/$name-$NCPU.x
+
+mkdir $COMP
+mkdir $WDIR
+set WDIR=/scratch2/taylorm/$name
+mkdir $WDIR
+
+
+#cd $WDIR
+#$HOME/dns/savehpss.sh $name
+
+
+set MPIRUN = "prun -v -n $NCPU"
+
+if (!(-d $WDIR)) then
+   echo $WDIR does not exist"
+   exit 1
+endif
+
+
+if ($recompile == 1) then
+   if (!(-d $COMP)) then
+      echo $COMP does not exist"
+      exit 1
+   endif
+   rm -f $EXE
+   cd $COMP
+   \cp -f $SRC/* .
+   ./gridsetup.py $mesh 4800 2880 1 2 2 0 2 2 0 2
+   make dep
+   make clean
+   make -j 4 dnsvor
+   cp -f dnsvor $EXE
+   rm -f *
+endif
+
+
+if ($restart == 1) then
+   #search HPSS for newest restart file
+   cd $WDIR
+   #$HOME/dns/getrestart.sh $name $WDIR vor all
+   $HOME/dns/getrestart.sh $name $WDIR vor
+   if (!($status == 0)) then
+      exit 1
+   endif
+   cd 
+   $MPIRUN $EXE -mio  -t -r  -d $WDIR  $name < $refin 
+else
+    cd
+   $MPIRUN $EXE -mio -t -d $WDIR  $name < $refin
+endif
+
+
+cd 
+#bsub -n 4 < cronqsc/vxpair_save.job
+
+
+
+
+
+
+
+
+
+
+

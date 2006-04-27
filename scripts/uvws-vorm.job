@@ -1,0 +1,74 @@
+#! /bin/tcsh 
+#BSUB -o convert.o -e convert.e
+#BSUB -q smallq
+#BSUB -J convert
+#BSUB -W 4:00
+#BSUB -n 4
+#
+# 
+
+module list
+set NCPUS=4
+set name = decay2048
+set fname = decay2048-512.
+set refin=$HOME/dns/prod/$name.inp
+
+
+set SRC=$HOME/dns/src
+set COMP=$HOME/comp/convert2
+set WDIR=/scratch2/taylorm
+
+mkdir $COMP
+mkdir $WDIR
+set WDIR=$WDIR/$name
+mkdir $WDIR
+
+
+if (!(-d $WDIR)) then
+   echo $WDIR does not exist"
+   exit 1
+endif
+   if (!(-d $COMP)) then
+      echo $COMP does not exist"
+      exit 1
+   endif
+
+
+
+   cd $COMP
+   rm -f convert*.x
+   \cp -f $SRC/* .
+
+   cp -f $SRC/convert.F90 temp.F90
+   sed 's/\!SEDtstart/tstart=.4603; tstop=3.7900; tinc=tstop-tstart/' temp.F90 > convert.F90
+
+
+   ./gridsetup.py 1 1 $NCPUS 512 512 512
+   make dep
+   make clean
+   make  -j 4 convert
+   mv -f convert convert2048.x
+
+
+cd 
+
+
+date
+# read 1024^3 spec data, output 256^3 spec data:
+prun -v -n $NCPUS  $COMP/convert2048.x -si -cout vorm -d $WDIR \
+     $fname < $refin
+date
+
+
+
+
+
+
+
+
+
+
+
+
+
+

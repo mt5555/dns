@@ -1,0 +1,99 @@
+#! /bin/tcsh 
+#BSUB -o sc1024A.o -e sc1024A.e
+#BSUB -q largeq
+#BSUB -J sc1024A
+#BSUB -W 480
+#BSUB -n 512
+#BSUB -wa URG -wt 10
+
+
+# put datestape in .o and .e file:
+set datestamp = `date`
+sh -c 'echo ".e output test" 1>&2'
+sh -c "echo '$datestamp' 1>&2"
+echo $datestamp
+
+module load MPI_64bit_R5  
+module list
+
+set name = sc1024A
+set refin=$HOME/dns/prod/$name.inp
+
+
+set NCPU = 512
+set mesh = "1 1 512 1024 1024 1024"
+# use restart file from PSI?
+
+set restart = 1
+set recompile = 0  
+
+
+set SRC=$HOME/dns/src
+set COMP=$HOME/comp/$name
+set WDIR=/scratch2/taylorm
+set EXE=$HOME/$name-$NCPU.x
+
+mkdir $COMP
+mkdir $WDIR
+set WDIR=/scratch2/taylorm/$name
+mkdir $WDIR
+
+
+#cd $WDIR
+#$HOME/dns/savehpss.sh $name
+
+
+set MPIRUN = "prun -v -n $NCPU"
+
+if (!(-d $WDIR)) then
+   echo $WDIR does not exist"
+   exit 1
+endif
+
+
+if ($recompile == 1) then
+   if (!(-d $COMP)) then
+      echo $COMP does not exist"
+      exit 1
+   endif
+   rm -f $EXE
+   cd $COMP
+   \cp -f $SRC/* .
+   ./gridsetup.py $mesh
+   make dep
+   make clean
+   make -j 4 dns
+   cp -f dns $EXE
+   rm -f *
+endif
+
+
+if ($restart == 1) then
+   #search HPSS for newest restart file
+   cd $WDIR
+   #$HOME/dns/getrestart.sh $name $WDIR uvw all
+   $HOME/dns/getrestart.sh $name $WDIR 
+   if (!($status == 0)) then
+      exit 1
+   endif
+   cd 
+   $MPIRUN $EXE -mio  -t -r -d $WDIR  $name < $refin 
+else
+    cd
+   $MPIRUN $EXE -mio -t -d $WDIR  $name < $refin
+endif
+
+
+cd 
+bsub < cronqsc/sc1024A_save.job
+
+
+
+
+
+
+
+
+
+
+

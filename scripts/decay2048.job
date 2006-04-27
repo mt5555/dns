@@ -1,0 +1,114 @@
+#! /bin/tcsh 
+#BSUB -o decay2048.o -e decay2048.e
+#BSUB -q aq
+#BSUB -J decay2048
+#BSUB -W 600
+#BSUB -n 1024
+#BSUB -wa URG -wt 20
+#BXXX -extsched "RMS_SNODE;railmask=3" 
+#BXXX -m "qbd32 qbd33 qbd34 qbd35 qbd36 qbd37 qbd38 qbd39 qbd40 qbd41 qbd42 qbd43 qbd44 qbd45 qbd46 qbd47 qbd48 qbd49"
+
+
+module list
+
+set name = decay2048
+#set refin=$HOME/dns/prod/{$name}_rescale.inp
+set refin=$HOME/dns/prod/$name.inp
+#set refin=$HOME/dns/prod/$name.noio.inp
+
+
+set NCPU = 1024
+set mesh = "1 1 1024 2048 2048 2048"
+# use restart file from PSI?
+
+set restart = 1
+set recompile = 0
+
+
+
+set SRC=$HOME/dns/src
+set COMP=$HOME/comp/$name
+set WDIR=/scratch2/taylorm
+set EXE=$HOME/$name-$NCPU.x
+
+mkdir $COMP
+mkdir $WDIR
+set WDIR=$WDIR/$name
+mkdir $WDIR
+
+#touch /users/taylorm/RUNNING
+rinfo
+
+
+#cd $WDIR
+#$HOME/dns/savehpss.sh $name
+
+
+set MPIRUN = "prun -v -n $NCPU"
+
+if (!(-d $WDIR)) then
+   echo $WDIR does not exist"
+   exit 1
+endif
+
+
+if ($recompile == 1) then
+   rm -f $EXE
+   if (!(-d $COMP)) then
+      echo $COMP does not exist"
+      exit 1
+   endif
+
+   cd $COMP
+   \cp -f $SRC/* .
+   ./gridsetup.py $mesh
+   make dep
+   make clean
+   make -j 4 dns
+   cp -f dns $EXE
+endif
+
+set echo
+
+if ($restart == 1) then
+
+   #search HPSS for newest restart file
+   cd $WDIR
+   #$HOME/dns/getrestart.sh $name $WDIR uvw all
+   $HOME/dns/getrestart.sh $name $WDIR 
+   #$HOME/dns/getrestart.sh $name HPSS
+   if ( !($status == 0 ) ) then
+      exit 1
+   endif
+   cd 
+   $MPIRUN $EXE -t -r -mio -d $WDIR $name < $refin 
+else
+   #cleanup:  
+   \rm -f {$name}\*.sf
+   \rm -f {$name}\*.scalars
+   \rm -f {$name}\*.spec
+   \rm -f {$name}\*.u
+   \rm -f {$name}\*.v
+   \rm -f {$name}\*.w
+
+    cd 
+   $MPIRUN $EXE -t  -mio  -d $WDIR $name < $refin
+endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
