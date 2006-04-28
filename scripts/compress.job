@@ -1,14 +1,25 @@
 #! /bin/tcsh 
 #BSUB -o compress.o -e compress.e
 #BSUB -q smallq
-#BSUB -J convert
-#BSUB -W 110
-#BSUB -n 64
+#BSUB -J compress
+#BSUB -W 300
+#BSUB -n 128
 #BXXX -wa URG -wt 2
+
+cd
+cat > times0.dat <<EOF
+3.7900
+3.7527
+3.6781
+3.6027
+3.5279
+EOF
 
 
 module list
-set NCPUS=64
+set NCPUS = 128
+set NCPUS2 = 96
+set compile = 1
 set name = decay2048
 set refin=$HOME/dns/prod/$name.inp
 
@@ -31,15 +42,14 @@ if (!(-d $COMP)) then
   echo $COMP does not exist"
   exit 1
 endif
-if (1) then
+if ( $compile ) then
    cd $COMP
    rm -f convert*.x
    \cp -f $SRC/* .
 
    cp -f $SRC/convert.F90 temp.F90
-   sed 's/\!SEDtstart/tstart=3.7900; tstop=3.7900; tinc=tstop-tstart/' temp.F90 > convert.F90
-#   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times0.dat"/' temp.F90 > convert.F90
-#   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times5.dat"/' temp.F90 > convert.F90
+#   sed 's/\!SEDtstart/tstart=3.7900; tstop=3.7900; tinc=tstop-tstart/' temp.F90 > convert.F90
+   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times0.dat"/' temp.F90 > convert.F90
 
    ./gridsetup.py 1 1 $NCPUS 2048 2048 2048
    make dep
@@ -47,29 +57,31 @@ if (1) then
    make  -j 4 convert
    mv -f convert convert.2048
 
-   ./gridsetup.py 1 1 $NCPUS 1440 1440 1440
+   ./gridsetup.py 1 1 $NCPUS2 1440 1440 1440
    make dep
    make clean
    make  -j 4 convert
    mv -f convert convert.1440
 
-
+endif
 set echo
 cd 
+cp -f times0.dat $WDIR
+
 
 
 # output 1024 spectral data:
 date
 # read .u,v,w,  output spectral
-prun -v -n $NCPU $SRC/convert.$grid1 -cout uvw -mio -so -smax 1440 -d $WDIR   $name -i $refin  
+prun -v -n $NCPUS $COMP/convert.2048 -cout uvw -mio -so -smax 1440 -d $WDIR   $name -i $refin  
 date
 
 # read .u,v,w,  output compressed versions:
-prun -v -n $NCPU $SRC/convert.$grid2 -cout uvw -si -zo -o4 -d $WDIR   $name -i $refin  
+prun -v -n $NCPUS2 $COMP/convert.1440 -cout uvw -si -zo -o4 -d $WDIR   $name -i $refin  
 date
 
 # read compressed version, compute stats
-prun -v -n $NCPU $SRC/convert.$grid2 -cout stats -zi -i4  -d $WDIR   $name -i $refin 
+prun -v -n $NCPUS2 $COMP/convert.1440 -cout stats -zi -i4  -d $WDIR   $name -i $refin 
 date
 
 
