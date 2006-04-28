@@ -70,7 +70,7 @@ tstop=5.0
 tinc=.5
 
 ! to read times from  file times.dat:
-! tstart=-1; tinc=0; tname="times.dat"
+  tstart=-1; tinc=0; tname="times.dat"
 
 ! these lines are modifed by some sed scripts for automatic running
 ! of this code by putting in new values of tstart, tstop, tinc,

@@ -7,7 +7,7 @@ original data contains wave numbers up to 1024.  To compress this, we
 first filtered it down to wave numbers up to 720.  We chose 720
 because this is slightly more than a 2/3 dealiasing (which would
 truncate to 683), and 720 corresponds to an FFT of length 1440, which
-can be handled by any FFT that can do powers of 2 and 3.
+can be handled by any FFT that can do powers of 2,3 and 5. (2^5 3^2 5)
 We then output the first two velocity components (u and v) in
 grid space on a 1440^3 grid.  The data is a standard "brick-of-floats".
 
