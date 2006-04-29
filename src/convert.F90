@@ -121,11 +121,13 @@ do
       ! read data, header type =1, or specified in input file
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
-      call print_stats(Q,vor,work1,work2)
+      if (g_nz < 2048) call print_stats(Q,vor,work1,work2)
 
       ! just reoutput the variables:
       if (w_spec) then
          do n=1,3
+            write(message,'(a,i4)') 'w_spec fft3d: n=',n
+            call print_message(message)
             call fft3d(Q(1,1,1,n),work1)
          enddo
       endif

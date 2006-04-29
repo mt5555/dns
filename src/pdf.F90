@@ -592,7 +592,7 @@ do j=1,ndelta
       print *,'ERROR in PDF normalization: '
       print *,'ndelta = ',j
       print *,'sum:     ',sum(pdfdata(:,j))
-      print *,'un-norm: ',sum(str%pdf),g_nx*g_ny*g_nz
+      print *,'un-norm: ',sum(str%pdf),g_nx*g_ny*real(g_nz)  ! g_n^3 can overflow integers
       print *,'ncalls:  ',str%ncalls 	
       print *,'nbin:    ',str%nbin,nbin
    endif
