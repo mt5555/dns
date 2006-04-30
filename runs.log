@@ -9,6 +9,7 @@ Kerr's compression of our 2048^3 data set project.
 TODO:
 par down decay.out to match filenames on HPSS
     read in a line, see if it occurs in list of times, output it
+   (sandia/times.py)
 
 how to get files off of HPSS and onto lindor?
    ccs-2 machine "lindor":  /usb1 /usb2 /usb3
