@@ -872,6 +872,7 @@ character(len=280) fname
 character(len=80) base
 integer :: n,im,jm,km,ierr,i,j,k
 integer n1,n1d,n2,n2d,n3,n3d
+logical :: do_mpi_io_save
 real*8 :: time
 CPOINTER :: fid
 
@@ -909,6 +910,12 @@ call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,io_read,io_pe,.false.,2)
 
 fname = basename(1:len_trim(basename)) // ".wc"
 call print_message(trim(fname))
+
+! temp. turn off MPI-IO, if it was enabled 
+do_mpi_io_save=do_mpi_io
+do_mpi_io=.false.
+
+
 if (io_read==0) then
    ! output u,v and z-averaged w
    ! this subroutine requires ncpux=ncpuy=1, so now have everyone compute
@@ -926,7 +933,8 @@ if (io_read==0) then
 #else
    work2=work1
 #endif
-   
+
+
    if (my_pe==io_pe) then
       call copen(fname,"w",fid,ierr)
       do j=ny1,ny2
@@ -991,6 +999,9 @@ else
    call print_message("done")
 endif
 
+
+! restore MPI-IO flag
+do_mpi_io=do_mpi_io_save
    
 
 end subroutine

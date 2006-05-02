@@ -121,7 +121,7 @@ do
       ! read data, header type =1, or specified in input file
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
-      if (g_nz < 2048) call print_stats(Q,vor,work1,work2)
+      call print_stats(Q,vor,work1,work2)
 
       ! just reoutput the variables:
       if (w_spec) then
@@ -213,12 +213,14 @@ do
          call print_message("input file:")	
 	 call print_message(fname(1:len_trim(fname)))
          call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,r_spec,header_user)
-         print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
+         if (my_pe==io_pe) then
+             print *,'max input (io_pe): ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
+         endif
 
          if (w_spec) then
-            do n=1,3
-               call fft3d(Q(1,1,1,n),work1)
-            enddo
+            write(message,'(a,i4)') 'w_spec fft3d: n=',i
+            call print_message(message)
+            call fft3d(Q(1,1,1,1),work1)
             fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i) // "s"
          else
