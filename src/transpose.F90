@@ -89,6 +89,8 @@ inc=ncpu_z/nio
 
 if (io_pe==my_pe) then
    print *,'number of mpi_io cpus: ',nio,do_mpi_io
+   print *,'output_size (bytes): ',output_size
+   print *,'input_size  (bytes): ',input_size
 endif
 
 if (nio>1) then
@@ -1570,20 +1572,19 @@ do x_pe=0,ncpu_x-1
       if (random) then
          call random_data(buf,o_nx*ny_2dx_actual)
       else
-         if (do_mpi_io) then
 #ifdef USE_MPI_IO
+         if (do_mpi_io) then
             zpos = z_pe*nslabz + k-1 
             ypos = y_pe*nslaby + x_pe*ny_2dx_actual
-            zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
+            zpos = input_size*(offset + zpos*o_nx*o_ny+ypos*o_nx)
             if (first_seek) then
                call mpi_file_seek(fid,zpos,MPI_SEEK_SET,ierr)
                first_seek=.false.
             endif
-            call mpi_file_read(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
-#endif
-         else
-            call mread8(fid,buf,o_nx*ny_2dx_actual)
+!            call mpi_file_read(fid,buf,o_nx*ny_2dx_actual,MPI_REAL8,statuses,ierr)
          endif
+#endif
+         call mread8(fid,buf,o_nx*ny_2dx_actual)
       endif
 
       if (o_ny>g_ny) then
@@ -1592,17 +1593,16 @@ do x_pe=0,ncpu_x-1
          if (random) then
             call random_data(saved_edge,o_nx)
          else
+#ifdef 0
             if (do_mpi_io) then
-#ifdef USE_MPI_IO
                zpos = z_pe*nslabz + k -1
                ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual
-               zpos = 8*(offset + zpos*o_nx*o_ny+ypos*o_nx)
-               !               call mpi_file_seek(fid,zpos,MPI_SEEK_SET,ierr)
-               call mpi_file_read(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
-#endif
-            else
-               call mread8(fid,saved_edge,o_nx)      
+               zpos = input_size*(offset + zpos*o_nx*o_ny+ypos*o_nx)
+               ! call mpi_file_seek(fid,zpos,MPI_SEEK_SET,ierr)
+               ! call mpi_file_read(fid,saved_edge,o_nx,MPI_REAL8,statuses,ierr)
             endif
+#endif
+            call mread8(fid,saved_edge,o_nx)      
          endif
       endif
       endif

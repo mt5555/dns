@@ -394,17 +394,14 @@ end subroutine
 
 subroutine singlefile_mpi_io(time,p,fname,work,work2,io_read,header_type)
 !
-! I/O routines where all data goes through a single PE and is
-! written to a single file
+! I/O routines using mpi_io to write a single file
 !
 ! io_read=0    write data to file fname
 ! io_read=1    read data from file fname
 !
 ! fpe       processor to do the file I/O
 !
-! output_spec=.true.     i/o on 2/3 dealiased spectral coefficients
-! output_spec=.false.    i/o on full 3d array p 
-!                     (grid point data or non-dealiased spec coeff.)
+!
 !
 use params
 use mpi
@@ -873,7 +870,7 @@ character(len=80) base
 integer :: n,im,jm,km,ierr,i,j,k
 integer n1,n1d,n2,n2d,n3,n3d
 logical :: do_mpi_io_save
-real*8 :: time
+real*8 :: time,mx,mx2,ke,vx,wx,uy,wy,uz,vz,ens,xfac,u2
 CPOINTER :: fid
 
 
@@ -903,10 +900,32 @@ endif
 fname = basename(1:len_trim(basename)) // ".uc"
 call print_message(trim(fname))
 call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,io_read,io_pe,.false.,2)
+if (io_read) then
+   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)))
+#ifdef USE_MPI
+   mx2=mx
+   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+write(message,'(a,3f18.14)') 'compressed_io: maxU = ',mx
+call print_message(message)
+endif
+
+
    
 fname = basename(1:len_trim(basename)) // ".vc"
 call print_message(trim(fname))
 call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,io_read,io_pe,.false.,2)
+if (io_read) then
+   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)))
+#ifdef USE_MPI
+   mx2=mx
+   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+write(message,'(a,3f18.14)') 'compressed_io: maxV = ',mx
+call print_message(message)
+endif
+
+
 
 fname = basename(1:len_trim(basename)) // ".wc"
 call print_message(trim(fname))
@@ -974,6 +993,7 @@ else
       work1=Q(:,:,:,n)
       call z_fft3d_trashinput(work1,Qhat(1,1,1,n),work2)
    enddo
+
    do j=1,ny_2dz
       jm=z_jmcord(j)
       do i=1,nslabx
@@ -990,13 +1010,66 @@ else
                Qhat(k+z_kmsign(k),i,j,3) = Qhat(k+z_kmsign(k),i,j,3) + &
 (-Lz/km) * ( im*Qhat(k,i+z_imsign(i),j,1) + jm*Qhat(k,i,j+z_jmsign(j),2) )
             endif
+
          enddo
       enddo
    enddo
+
+
+   ke=0
+   ens=0
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            xfac = 2*2*2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            
+            u2=Qhat(k,i,j,1)*Qhat(k,i,j,1) + &
+                 Qhat(k,i,j,2)*Qhat(k,i,j,2) + &
+                 Qhat(k,i,j,3)*Qhat(k,i,j,3)
+            
+            ke = ke + .5*xfac*u2
+
+            ! u_x term
+            vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
+            wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)
+            uy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),1)
+            wy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),3)
+            uz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,1)/Lz
+            vz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,2)/Lz
+            ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
+            ens = ens + xfac* &           
+                 ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)   
+
+         enddo
+      enddo
+   enddo
+
+
+   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)))
+#ifdef USE_MPI
+   mx2=mx
+   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   mx2=ke
+   call mpi_allreduce(mx2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   mx2=ens
+   call mpi_allreduce(mx2,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+   write(message,'(a,3f18.14)') 'compressed_io: maxW = ',mx
+   call print_message(message)
+   write(message,'(a,3f18.14)') 'compressed_io: ke =   ',ke
+   call print_message(message)
+   write(message,'(a,3f18.14)') 'compressed_io: ens =  ',ens
+   call print_message(message)
    do n=1,3
       call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work1)
    enddo
-   call print_message("done")
+   call print_message("done with uncompress")
 endif
 
 

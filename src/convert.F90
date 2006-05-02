@@ -375,7 +375,7 @@ do
    if (convert_opt==11) then ! -cout stats    test compression data
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
-      call print_stats(Q,vor,work1,work2)
+!      call print_stats(Q,vor,work1,work2)
    endif
 
 
@@ -923,7 +923,8 @@ real*8 :: mx(3),mx2(3),divx,divi,ens,ke
 integer :: n,ierr,i,j,k
 character(len=280) :: message
 
-call vorticity(div,Q,work1,work2)
+!call vorticity(div,Q,work1,work2)
+div=0
 ens=0
 ke=0
 do n=1,3
