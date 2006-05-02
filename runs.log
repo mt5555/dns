@@ -7,9 +7,9 @@
 Kerr's compression of our 2048^3 data set project.
 
 TODO:
-par down decay.out to match filenames on HPSS
-    read in a line, see if it occurs in list of times, output it
-   (sandia/times.py)
+PYTHON:  read compress.o
+         find time in decay.out
+         print out comparision:    scalars.m, 2048^3 read
 
 how to get files off of HPSS and onto lindor?
    ccs-2 machine "lindor":  /usb1 /usb2 /usb3
@@ -95,17 +95,20 @@ list of times:
 0003.0145 
 0003.0812 
 0003.1481 
+
+get-in:
 0003.2146 
 0003.2838 
 0003.3563 
 0003.3924 
 0003.4596 
-0003.5279 in
-0003.6027 in
-0003.6781 in
-0003.7527 in
-0003.7900   scratch2    compress-in    check for compile, turn compile off
 
+c-in
+0003.5279 
+0003.6027 
+0003.6781 
+0003.7527 
+0003.7900 
 
 =============
 
