@@ -1051,24 +1051,29 @@ else
    enddo
 
 
-   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)))
+
 #ifdef USE_MPI
-   mx2=mx
-   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
    mx2=ke
    call mpi_allreduce(mx2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    mx2=ens
    call mpi_allreduce(mx2,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
+   do n=1,3
+      call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work1)
+   enddo
+
+#ifdef USE_MPI
+   mx2=mx
+   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)))
    write(message,'(a,3f18.14)') 'compressed_io: maxW = ',mx
    call print_message(message)
    write(message,'(a,3f18.14)') 'compressed_io: ke =   ',ke
    call print_message(message)
    write(message,'(a,3f18.14)') 'compressed_io: ens =  ',ens
    call print_message(message)
-   do n=1,3
-      call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work1)
-   enddo
+
    call print_message("done with uncompress")
 endif
 
