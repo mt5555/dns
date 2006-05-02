@@ -578,9 +578,9 @@ real*8 :: work2(nx,ny,nz)
 character(len=80) message
 character(len=280) fname
 character(len=280) base
-integer :: n,header_type
+integer :: n,header_type,im,jm,km,i,j,k,ierr
 real*8 :: time
-real*8 :: time_in
+real*8 :: time_in,mx(3),mx2,ke,ens,uy,uz,vx,vz,wx,wy,u2,xfac
 
 
 Q=0
@@ -618,9 +618,63 @@ else
          call print_message(trim(fname))
          call singlefile_io2(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec)
       endif
+      ! compute and print KE, ens
+      ke=0; ens=0
+      do k=nz1,nz2
+         km=kmcord(k)
+         do j=ny1,ny2
+            jm=jmcord(j)
+            do i=nx1,nx2
+               im=imcord(i)
+               ! u_x term
+               vx = - im*pi2*Q(i+imsign(i),j,k,2)
+               wx=0
+               if (ndim==3) wx = - im*pi2*Q(i+imsign(i),j,k,ndim)
+               uy = - jm*pi2*Q(i,j+jmsign(j),k,1)
+               wy=0
+               if (ndim==3) wy = - jm*pi2*Q(i,j+jmsign(j),k,ndim)
+               uz =  - km*pi2*Q(i,j,k+kmsign(k),1)
+               vz =  - km*pi2*Q(i,j,k+kmsign(k),2)
+               
+               u2=0
+               do n=1,ndim
+                  u2=u2+Q(i,j,k,n)*Q(i,j,k,n)
+               enddo
+            
+               xfac = 2*2*2
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+               
+               ke = ke + .5*xfac*u2
+               ens = ens + xfac* &           
+                    ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)   
+
+            enddo
+         enddo
+      enddo
+#ifdef USE_MPI
+      mx2=ke
+      call mpi_allreduce(mx2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      mx2=ens
+      call mpi_allreduce(mx2,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
       do n=1,ndim
          call ifft3d(Q(1,1,1,n),work1)
+         mx(n)=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)))
+#ifdef USE_MPI
+         mx2=mx(n)
+         call mpi_allreduce(mx2,mx(n),1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
       enddo
+      write(message,'(a,3f18.14)') 'spec_io: maxW = ',mx
+      call print_message(message)
+      write(message,'(a,3f18.14)') 'spec_io: ke =   ',ke
+      call print_message(message)
+      write(message,'(a,3f18.14)') 'spec_io: ens =  ',ens
+      call print_message(message)
+
+
    else
       fname = base(1:len_trim(base)) // ".u"
       call print_message("Input: ")
@@ -1062,11 +1116,11 @@ else
       call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work1)
    enddo
 
+   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)))
 #ifdef USE_MPI
    mx2=mx
    call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
-   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)))
    write(message,'(a,3f18.14)') 'compressed_io: maxW = ',mx
    call print_message(message)
    write(message,'(a,3f18.14)') 'compressed_io: ke =   ',ke

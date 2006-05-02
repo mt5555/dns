@@ -923,15 +923,15 @@ real*8 :: mx(3),mx2(3),divx,divi,ens,ke
 integer :: n,ierr,i,j,k
 character(len=280) :: message
 
+
 !call vorticity(div,Q,work1,work2)
-div=0
 ens=0
 ke=0
 do n=1,3
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
-         ens=ens + div(i,j,k,n)**2
+!         ens=ens + div(i,j,k,n)**2
          ke=ke+.5*Q(i,j,k,n)**2
       enddo
    enddo
@@ -968,8 +968,8 @@ write(message,'(3(a,e12.5))') 'STATS:  max(div)=',divx
 call print_message(message)	
 
 
-write(message,'(3(a,f18.12))') 'STATS:  enstrophy=',ens
-call print_message(message)	
+!write(message,'(3(a,f18.12))') 'STATS:  enstrophy=',ens
+!call print_message(message)	
 
 
 
