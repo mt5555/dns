@@ -1,0 +1,101 @@
+#! /bin/tcsh 
+#BSUB -o compress2.o -e compress2.e
+#BSUB -q smallq
+#BSUB -J compress2
+#BSUB -W 590
+#BSUB -n 48
+#BXXX -wa URG -wt 2
+
+#
+# looks like 110m per snapshot.  
+#
+# 7900 done  96min per snapshot
+# 10:21->11:46          read spectral, output ocmpressed  85m 
+# 11:46->13:22  96min   read compressed, comp stats
+#
+# 7527:  
+#     read spec, output compressed  7:06-9:20  135m
+# 7527:  (no enstrophy!)
+#     read spec, output compressed 0:13->1:29   76m
+#     read and check compressed:   1:29->2:00   31m
+# 6781: (with enstroph):
+#     IN   8:41 11:18 11:50        160m, 30m
+#
+#
+cd
+
+set compile = 1
+cat > times2.dat <<EOF
+0003.2146
+0003.2838
+0003.3563
+0003.3924
+0003.4596
+EOF
+
+module load MPI_default
+module list
+set NCPUS = 48
+#set NCPUS = 4
+
+
+set name = decay2048
+set refin=$HOME/dns/prod/$name.inp
+
+
+set SRC=$HOME/dns/src
+set COMP=$HOME/comp/compress2
+set WDIR=/scratch2/taylorm
+
+mkdir $COMP
+mkdir $WDIR
+set WDIR=$WDIR/$name
+mkdir $WDIR
+
+
+if (!(-d $WDIR)) then
+   echo $WDIR does not exist"
+   exit 1
+endif
+if (!(-d $COMP)) then
+  echo $COMP does not exist"
+  exit 1
+endif
+if ( $compile ) then
+   cd $COMP
+   rm -f convert*.x
+   \cp -f $SRC/* .
+
+   cp -f $SRC/convert.F90 temp.F90
+#   sed 's/\!SEDtstart/tstart=3.7900; tstop=3.7900; tinc=tstop-tstart/' temp.F90 > convert.F90
+   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times2.dat"/' temp.F90 > convert.F90
+
+# 2048/64= 32 slabs per cpu    *4 = 128
+# 1440/48 = 30 slabs per cpu   *4=120
+
+   ./gridsetup.py 1 1 $NCPUS 1440 1440 1440
+   make dep
+   make clean
+   make  -j 4 convert
+   mv -f convert convert.1440
+
+endif
+set echo
+cd 
+cp -f times2.dat $WDIR
+
+
+
+date
+# read .u,v,w,  output compressed versions:
+prun -v -n $NCPUS $COMP/convert.1440 -mio -cout uvw -si -zo -o4 -d $WDIR   $name -i $refin  
+date
+
+# read compressed version, compute stats
+prun -v -n $NCPUS $COMP/convert.1440 -mio -cout stats -zi -i4  -d $WDIR   $name -i $refin 
+date
+
+
+
+
+

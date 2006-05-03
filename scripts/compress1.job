@@ -1,8 +1,8 @@
 #! /bin/tcsh 
-#BSUB -o compress.o -e compress.e
+#BSUB -o compress1.o -e compress1.e
 #BSUB -q smallq
 #BSUB -J compress
-#BSUB -W 275
+#BSUB -W 295
 #BSUB -n 64
 #BXXX -wa URG -wt 2
 #
@@ -10,10 +10,11 @@
 #
 cd
 cat > times1.dat <<EOF
-3.7527
-3.6781
-3.6027
-3.5279
+0003.2146
+0003.2838
+0003.3563
+0003.3924
+0003.4596
 EOF
 
 module load MPI_default
