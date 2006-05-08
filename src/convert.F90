@@ -59,7 +59,7 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-real*8 :: schmidt_in,mn,mx
+real*8 :: schmidt_in,mn,mx,mx2
 integer :: type_in
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -213,8 +213,13 @@ do
          call print_message("input file:")	
 	 call print_message(fname(1:len_trim(fname)))
          call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,r_spec,header_user)
+         mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)))
+#ifdef USE_MPI
+         mx2=mx
+         call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
          if (my_pe==io_pe) then
-             print *,'max input (io_pe): ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1))
+             print *,'max input: ',mx
          endif
 
          if (w_spec) then

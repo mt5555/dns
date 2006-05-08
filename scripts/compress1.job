@@ -2,7 +2,8 @@
 #BSUB -o compress1.o -e compress1.e
 #BSUB -q smallq
 #BSUB -J compress
-#BSUB -W 295
+#BXXX -W 400
+#BSUB -W 100
 #BSUB -n 64
 #BXXX -wa URG -wt 2
 #
@@ -10,11 +11,11 @@
 #
 cd
 cat > times1.dat <<EOF
-0003.2146
-0003.2838
-0003.3563
-0003.3924
-0003.4596
+0002.9181
+0002.9511
+0003.0145
+0003.0812
+0003.1481
 EOF
 
 module load MPI_default
