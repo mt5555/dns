@@ -82,7 +82,6 @@ while (1)
   ns_e = fread(fid,1,'float64');
   time = fread(fid,1,'float64');
   data1 = fread(fid,[ns_e,1],'float64');
-  data1=[time;data1];
 end
 
 disp(sprintf('nints=%i  total scalars read=%i',nints,nscalars))

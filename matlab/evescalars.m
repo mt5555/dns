@@ -58,11 +58,14 @@ mu_hyper_value =0;
 %TO TOGGLE BETWEEN ALPHA FINITE AND ALPHA  INFTY CASE
 %           MAY
 %*******************************************************
-fid = fopen('C:\matlabR12\work\2D_1024r3_nohypoCFL.01v1e-40005.0771.scalars','r'); %001989713, 003589 , tf = 8.5, tturn = 1.37
-%fid = fopen('C:\matlabR12\work\2D_a3.25_ffval_355.30scaled_Helm_r0_1024v1e-40000.0000.scalars','r'); %
 
+%fid = fopen('/tmp/eve/2D_1024r3_nohypoCFL.01v1e-40005.0771.scalars','r'); %001989713, 003589 , tf = 8.5, tturn = 1.37
+
+fid = fopen('/tmp/eve/2D_a100_ffval_355.30scaled_Helm_r0_1024v1e-40000.0000.scalars','r');
+
+
+%fid = fopen('C:\matlabR12\work\2D_a3.25_ffval_355.30scaled_Helm_r0_1024v1e-40000.0000.scalars','r'); %
 %fid = fopen('C:\matlabR12\work\2D_a100_ffval_355.30scaled_Helm_r0_1024v1e-40000.0000.scalars','r'); %
-fid = fopen('C:\matlabR12\work\2D_a1000_ffval_355.30scaled_Helm_r0_1024v1e-40000.0000.scalars','r'); %
 %fid = fopen('C:\matlabR12\work\2D_a1e6_ffval_355.30scaled_Helm_r0_1024v1e-40000.0000.scalars','r'); %
 %fid = fopen('C:\matlabR12\work\2D_a_inf_ffval_355.30scaled_Helm_r0_1024v1e-40000.0000.scalars','r'); %
 %**********************************
@@ -207,8 +210,12 @@ fid = fopen('C:\matlabR12\work\2D_a1000_ffval_355.30scaled_Helm_r0_1024v1e-40000
 nx = 1024;
 %nx=256;
 %nx=512;
-%***********************************************************************************
 
+% only read data within this time range:
+tstart=1.0;
+tstop=1.2;
+
+%***********************************************************************************
 nscalars=0;
 nscalars_e=0;
 while (1) 
@@ -230,26 +237,27 @@ while (1)
   mu=fread(fid,1,'float64');
   alpha=fread(fid,1,'float64');
   
-[nints,ns,nscalars];
+%[nints,ns,nscalars]
   data1=fread(fid,[nints,ns],'float64');
   data2=fread(fid,[nints,ns],'float64');
 
-  if (nscalars==0) 
-    ints=data1;
-    maxs=data2;
-  else
-    ints=[ints,data1];
-    maxs=[maxs,data2];
+  time = data2(7);
+  % only read data in this time range:  
+  if ( tstart <= time & time <= tstop) 
+    if (nscalars==0) 
+      ints=data1;
+      maxs=data2;
+    else
+      ints=[ints,data1];
+      maxs=[maxs,data2];
+    end
+    nscalars=nscalars+ns;
   end
-  nscalars=nscalars+ns;
-  
 
   % now read the "expensive" integrals, which are not computed every time step
-  ns_e = fread(fid,1,'float64');
-  time = fread(fid,1,'float64');
+  [ns_e,count] = fread(fid,1,'float64');
+  [time,count] = fread(fid,1,'float64');
   data1 = fread(fid,[ns_e,1],'float64');
-  data1=[time;data1]
-  
 end
 
   disp(sprintf('nints=%i  total scalars read=%i',nints,nscalars))
