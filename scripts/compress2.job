@@ -2,7 +2,7 @@
 #BSUB -o compress2.o -e compress2.e
 #BSUB -q smallq
 #BSUB -J compress2
-#BSUB -W 590
+#BSUB -W 500
 #BSUB -n 48
 #BXXX -wa URG -wt 2
 
@@ -26,12 +26,13 @@ cd
 
 set compile = 1
 cat > times2.dat <<EOF
-0002.9181
-0002.9511
-0003.0145
-0003.0812
-0003.1481
+0002.6100 
+0002.6700 
+0002.7021 
+0002.7621 
+0002.7922 
 EOF
+
 
 module load MPI_default
 module list

@@ -213,14 +213,7 @@ do
          call print_message("input file:")	
 	 call print_message(fname(1:len_trim(fname)))
          call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,r_spec,header_user)
-         mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)))
-#ifdef USE_MPI
-         mx2=mx
-         call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
-         if (my_pe==io_pe) then
-             print *,'max input: ',mx
-         endif
+         call print_max(Q,i)
 
          if (w_spec) then
             write(message,'(a,i4)') 'w_spec fft3d: n=',i
@@ -234,17 +227,21 @@ do
          endif
          call print_message(fname(1:len_trim(fname)))
 
-         call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,header_user)
-         ! headerless:
-         ! call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,2)
+         if (w_spec .or. r_spec) then
+            ! converting to/from spectral, keep same headers
+            call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,header_user)
+         else
+            ! assume we are just converting to headerless brick-of-floats
+            call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,2)
+         endif
       enddo	
    endif
    if (convert_opt==5) then  ! -cout norm
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
       call input_uvw(time,Q,vor,work1,work2,header_user)
-      print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
-                            maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
-                            maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
+      do i=1,ndim
+         call print_max(Q(1,1,1,i),i)
+      enddo
       call print_message("computing norm squared...")
       do k=nz1,nz2
       do j=ny1,ny2
@@ -380,7 +377,10 @@ do
    if (convert_opt==11) then ! -cout stats    test compression data
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
-!      call print_stats(Q,vor,work1,work2)
+      do i=1,ndim
+         call print_max(Q(1,1,1,i),i)
+      enddo
+!     call print_stats(Q,vor,work1,work2)
    endif
 
 
@@ -916,11 +916,33 @@ end subroutine
 
 
 
+subroutine print_max(p,n)
+use params
+use mpi
+implicit none
+integer n,ierr
+real*8 :: p(nx,ny,nz)
+real*8 :; mx,mx2
+
+mx=maxval(abs(p(nx1:nx2,ny1:ny2,nz1:nz2)))
+#ifdef USE_MPI
+mx2=mx
+call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+if (my_pe==io_pe) then
+   write(*,'(a,i2,a,e20.15)') 'n=',n,' max abs val =',mx
+endif
+end subroutine
+
+
+
 subroutine print_stats(Q,div,work1,work2)
 use params
 use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,3)
+
+
 real*8 :: div(nx,ny,nz,3)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)

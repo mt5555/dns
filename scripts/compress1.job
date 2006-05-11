@@ -2,20 +2,20 @@
 #BSUB -o compress1.o -e compress1.e
 #BSUB -q smallq
 #BSUB -J compress
-#BXXX -W 400
-#BSUB -W 100
+#BSUB -W 400
 #BSUB -n 64
 #BXXX -wa URG -wt 2
 #
 #  55min per snapshot
 #
+
 cd
 cat > times1.dat <<EOF
-0002.9181
-0002.9511
-0003.0145
-0003.0812
-0003.1481
+0002.6100 
+0002.6700 
+0002.7021 
+0002.7621 
+0002.7922 
 EOF
 
 module load MPI_default
