@@ -660,12 +660,7 @@ else
       call mpi_allreduce(mx2,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
       do n=1,ndim
-         call ifft3d(Q(1,1,1,n),work1)
-         mx(n)=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)))
-#ifdef USE_MPI
-         mx2=mx(n)
-         call mpi_allreduce(mx2,mx(n),1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
+         call global_max_abs(Q(1,1,1,n),mx(n))
       enddo
       write(message,'(a,3f18.14)') 'spec_io: maxW = ',mx
       call print_message(message)
@@ -910,8 +905,8 @@ use mpi
 use fft_interface
 use transpose
 implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer :: io_read
@@ -955,13 +950,9 @@ fname = basename(1:len_trim(basename)) // ".uc"
 call print_message(trim(fname))
 call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,io_read,io_pe,.false.,2)
 if (io_read) then
-   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)))
-#ifdef USE_MPI
-   mx2=mx
-   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
-write(message,'(a,3f18.14)') 'compressed_io: maxU = ',mx
-call print_message(message)
+   call global_max_abs(Q(1,1,1,1),mx)
+   write(message,'(a,3f18.14)') 'compressed_io: maxU = ',mx
+   call print_message(message)
 endif
 
 
@@ -970,13 +961,9 @@ fname = basename(1:len_trim(basename)) // ".vc"
 call print_message(trim(fname))
 call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,io_read,io_pe,.false.,2)
 if (io_read) then
-   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)))
-#ifdef USE_MPI
-   mx2=mx
-   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
-write(message,'(a,3f18.14)') 'compressed_io: maxV = ',mx
-call print_message(message)
+   call global_max_abs(Q(1,1,1,2),mx)
+   write(message,'(a,3f18.14)') 'compressed_io: maxV = ',mx
+   call print_message(message)
 endif
 
 
@@ -1112,15 +1099,10 @@ else
    mx2=ens
    call mpi_allreduce(mx2,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
-   do n=1,3
-      call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work1)
-   enddo
+   ! recover w
+   call z_ifft3d(Qhat(1,1,1,3),Q(1,1,1,3),work1)
 
-   mx=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,3)))
-#ifdef USE_MPI
-   mx2=mx
-   call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
+   call global_max_abs(Q(1,1,1,3),mx)
    write(message,'(a,3f18.14)') 'compressed_io: maxW = ',mx
    call print_message(message)
    write(message,'(a,3f18.14)') 'compressed_io: ke =   ',ke

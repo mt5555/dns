@@ -1232,7 +1232,7 @@ end subroutine
 !  this is tricky, so for now just set it to zero.  If dealiasing
 !  is being used, it will already be set to 0.  If dealiasing is
 !  disabled (dealias==0) and im_max < g_nx/2, go in and set to 
-!  zero by hand before outputting.  
+!  zero by hand before outputting.  (not yet implemented)
 !
 !  
 
@@ -1264,6 +1264,21 @@ truncation=(dealias_nx < g_nx .or. dealias_ny < g_ny .or. dealias_nz < g_nz)
 if (dealias==0 .and. truncation) then
    call abort("output1_spec: spectral truncation not accurate")
 endif
+
+#if 0
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+!   if (imcord(i)==g_nx/2) print *,imcord(i),jmcord(j),kmcord(k),p(i,j,k)
+!   if (jmcord(j)==g_ny/2) print *,imcord(i),jmcord(j),kmcord(k),p(i,j,k)
+!   if (kmcord(k)==g_nz/2) print *,imcord(i),jmcord(j),kmcord(k),p(i,j,k)
+   if (imcord(i)==g_nx/2) p(i,j,k)=0
+   if (jmcord(j)==g_ny/2) p(i,j,k)=0
+   if (kmcord(k)==g_nz/2) p(i,j,k)=0
+enddo
+enddo
+enddo
+#endif
 
 
 

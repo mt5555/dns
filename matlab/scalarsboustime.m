@@ -29,7 +29,7 @@ while (1)
   time=[time,data];
   data=fread(fid,ni,'float64');
   % might need to take the transpose of 'data' here:
-  ints=[ints;data];
+  ints=[ints,data];
   nscalars = nscalars+1;
 end;  
 
