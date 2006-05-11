@@ -660,6 +660,7 @@ else
       call mpi_allreduce(mx2,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
       do n=1,ndim
+         call ifft3d(Q(1,1,1,n),work1)
          call global_max_abs(Q(1,1,1,n),mx(n))
       enddo
       write(message,'(a,3f18.14)') 'spec_io: maxW = ',mx

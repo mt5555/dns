@@ -619,6 +619,7 @@ call mpi_bcast(r_spec,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
 call mpi_bcast(w_spec,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
 call mpi_bcast(r_compressed,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
 call mpi_bcast(w_compressed,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
+call mpi_bcast(header_user,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(input_size,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(output_size,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 
