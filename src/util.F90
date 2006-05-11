@@ -33,6 +33,7 @@ if (my_pe==io_pe) then
    write(*,'(a)') trim(message)
 endif
 
+!done do this: not everyone calls print_message:
 ! for parallel debugging with print_message():
 !call mpi_barrier(comm_3d,ierr)
 

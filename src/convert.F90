@@ -222,8 +222,8 @@ do
             fname = basename(1:len_trim(basename)) // sdata(2:10) // &
                  "." // extension(i:i) // "s"
          else
-            fname = basename(1:len_trim(basename)) // sdata(2:10) // &
-                 "." // extension(i:i) // "-new"
+            fname = basename(1:len_trim(basename)) // "-new" // sdata(2:10) // &
+                 "." // extension(i:i)
          endif
          call print_message(fname(1:len_trim(fname)))
 
