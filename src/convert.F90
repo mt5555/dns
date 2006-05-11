@@ -59,7 +59,7 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-real*8 :: schmidt_in,mn,mx,mx2
+real*8 :: schmidt_in,mn,mx
 integer :: type_in
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -180,9 +180,9 @@ do
    if (convert_opt==3) then  ! -cout norm2
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
       call input_uvw(time,Q,vor,work1,work2,header_user)
-      print *,'max input: ',maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,1)), &
-                            maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,2)), &
-                            maxval(Q(nx1:nx2,ny1:ny2,nz1:nz2,3))
+      do i=1,ndim
+         call print_max(Q(1,1,1,i),i)
+      enddo
       call print_message("computing norm squared...")
       do k=nz1,nz2
       do j=ny1,ny2
@@ -922,13 +922,9 @@ use mpi
 implicit none
 integer n,ierr
 real*8 :: p(nx,ny,nz)
-real*8 :; mx,mx2
+real*8 :: mx
 
-mx=maxval(abs(p(nx1:nx2,ny1:ny2,nz1:nz2)))
-#ifdef USE_MPI
-mx2=mx
-call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
+call global_max_abs(p,mx)
 if (my_pe==io_pe) then
    write(*,'(a,i2,a,e20.15)') 'n=',n,' max abs val =',mx
 endif
@@ -980,12 +976,8 @@ call print_message(message)
 
 
 do n=1,3
-   mx(n)=maxval(abs(Q(nx1:nx2,ny1:ny2,nz1:nz2,n)))
+   call global_max_abs(Q(1,1,1,n),mx(n))
 enddo 
-#ifdef USE_MPI
-   mx2=mx
-   call mpi_allreduce(mx2,mx,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
-#endif
 
 write(message,'(a,3f18.14)') 'STATS:  maxU = ',mx
 call print_message(message)

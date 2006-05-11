@@ -1401,6 +1401,22 @@ call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 
 end subroutine
 
+subroutine global_max_abs(p,mx)
+use params
+use mpi
+implicit none
+real*8 :: p(nx,ny,nz)
+real*8 :: mx,mx2
+integer :: ierr
+
+mx=maxval(abs(p(nx1:nx2,ny1:ny2,nz1:nz2)))
+#ifdef USE_MPI
+mx2=mx
+call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+
+end subroutine
+
 
 subroutine ke_shell_z(Qhat,hscale,nvar2)
 !
