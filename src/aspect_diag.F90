@@ -101,6 +101,7 @@ if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".scalars-bous"
    call copen(message,"w",fid,ierr)
+   write(6,*) "Opening -bous file"
    if (ierr/=0) then
       write(message,'(a,i5)') "diag_output(): Error opening .scalars-bous file errno=",ierr
       call abort(message)
@@ -242,6 +243,10 @@ do j=1,ny_2dz
    enddo
 enddo
 
+ke = ke * Lz
+pe = pe * Lz
+ke = ke * Lz
+pe = pe * Lz
 
 
 
@@ -318,7 +323,7 @@ do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
          pv = pv + potvor(i,j,k)
-         potens = potens + (pv*pv*.5)
+         potens = potens + (potvor(i,j,k)*potvor(i,j,k)*.5)
          pv_diss = pv_diss + (mu*omegadotrho_nu(i,j,k) &
               +  kappa*omegadotrho_kappa(i,j,k)) 
          enstr_diss = enstr_diss + potvor(i,j,k)* &
