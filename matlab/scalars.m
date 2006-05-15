@@ -1,4 +1,4 @@
- %
+%
 %########################################################################
 %#  plot of DNS structure function output file
 %########################################################################
@@ -28,12 +28,17 @@ nx=2048;
 %fid=endianopen('/nh/nest/u/taylorm/sc1024A.scalars','r');
 %nx=1024;
 
+<<<<<<< scalars.m
+fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
+f_k= 24; fcor=0;
+=======
 %fid=endianopen('/home/mataylo/codes/kerr/test/temp0000.0000.scalars','r');
 
 
 %fid=endianopen('/home/mataylo/all.scalars','r');
 %f_k= 16; fcor=40;
 
+>>>>>>> 1.80
 
 
 nscalars=0;

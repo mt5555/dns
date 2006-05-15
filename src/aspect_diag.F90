@@ -368,3 +368,14 @@ print *,'aspect_diag pe=',pe
 
 end subroutine compute_expensive_scalars
 
+<<<<<<< aspect_diag.F90
+
+
+
+
+
+
+
+
+=======
+>>>>>>> 1.15

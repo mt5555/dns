@@ -13,8 +13,8 @@ f_k=0;
 
 fid2=-1;
 
-fid=endianopen('../../../all.scalars-bous','r');
-%fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars-bous','r');
+%fid=endianopen('../../../all.scalars-bous','r');
+fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21asp/all.scalars-bous','r');
 f_k= 24;
 
 
@@ -43,11 +43,11 @@ fclose(fid);
 
 ke=ints(1,:);
 pe=ints(2,:);
-pv=ints(5,:);
-potens=ints(7,:);
+pv=ints(5,:)
+potens=ints(7,:)
 
 
-tote = ke + pe;
+tote = ke + pe
 
 time_2=[];
 
@@ -55,16 +55,16 @@ time_2=[];
 figure(1)
 clf
 hold on
-plot(time,ke,'r')
-plot(time,pe,'g')
-plot(time,tote,'k')
+plot(time,ke,'r-')
+plot(time,pe,'g-')
+plot(time,tote,'k-')
 title('KE: red  PE:  green  Etot: black');
 hold off
 
 figure(2)
 clf
 hold on
-plot(time,pv,'g')
+plot(time,pv,'g-')
 title('PV');
 hold off
 

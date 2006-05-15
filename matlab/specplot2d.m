@@ -1,8 +1,8 @@
 clear
-name = 'r160000.0000'
+name = 'all'
 epsilon=.41;
 CK=1.5*epsilon^(2/3);
-namedir = '/home/mataylo/';
+namedir = '/home/wingate/data1/Rotation/r16c/';
 
 asciprint = 1 % if == 1 print out the data to asci files
 
