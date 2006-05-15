@@ -377,10 +377,12 @@ do
    if (convert_opt==11) then ! -cout stats    test compression data
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
-      do i=1,ndim
-         call print_max(Q(1,1,1,i),i)
-      enddo
-!     call print_stats(Q,vor,work1,work2)
+      if (r_compressed) then
+!         skip this.  reader will print stats, and div(u)=0
+!         call print_stats(Q,vor,work1,work2)
+      else
+         call print_stats(Q,vor,work1,work2)
+      endif
    endif
 
 

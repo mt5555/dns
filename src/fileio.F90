@@ -580,7 +580,7 @@ character(len=280) fname
 character(len=280) base
 integer :: n,header_type,im,jm,km,i,j,k,ierr
 real*8 :: time
-real*8 :: time_in,mx(3),mx2,ke,ens,uy,uz,vx,vz,wx,wy,u2,xfac
+real*8 :: time_in,mx(3),mx2,ke,ens,ux,uy,uz,vx,vy,vz,wx,wy,wz,u2,xfac
 
 
 Q=0
@@ -627,14 +627,18 @@ else
             do i=nx1,nx2
                im=imcord(i)
                ! u_x term
+               ! ux = - im*pi2*Q(i+imsign(i),j,k,1)
                vx = - im*pi2*Q(i+imsign(i),j,k,2)
                wx=0
                if (ndim==3) wx = - im*pi2*Q(i+imsign(i),j,k,ndim)
                uy = - jm*pi2*Q(i,j+jmsign(j),k,1)
+               ! vy = - jm*pi2*Q(i,j+jmsign(j),k,v)
                wy=0
                if (ndim==3) wy = - jm*pi2*Q(i,j+jmsign(j),k,ndim)
                uz =  - km*pi2*Q(i,j,k+kmsign(k),1)
                vz =  - km*pi2*Q(i,j,k+kmsign(k),2)
+               ! wz=0
+               ! if (ndim==3) wz = - km*pi2*Q(i,j,k+kmsign(k),ndim)
                
                u2=0
                do n=1,ndim

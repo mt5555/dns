@@ -2,7 +2,7 @@
 #BSUB -o compress2.o -e compress2.e
 #BSUB -q smallq
 #BSUB -J compress2
-#BSUB -W 500
+#BSUB -W 600
 #BSUB -n 48
 #BXXX -wa URG -wt 2
 
@@ -26,11 +26,11 @@ cd
 
 set compile = 1
 cat > times2.dat <<EOF
-0002.6100 
-0002.6700 
-0002.7021 
-0002.7621 
-0002.7922 
+0002.3700
+0002.4247
+0002.4519
+0002.5090
+0002.5500
 EOF
 
 
@@ -91,6 +91,9 @@ date
 # read .u,v,w,  output compressed versions:
 prun -v -n $NCPUS $COMP/convert.1440 -mio -cout uvw -si -zo -o4 -d $WDIR   $name -i $refin  
 date
+
+
+
 
 # read compressed version, compute stats
 prun -v -n $NCPUS $COMP/convert.1440 -mio -cout stats -zi -i4  -d $WDIR   $name -i $refin 
