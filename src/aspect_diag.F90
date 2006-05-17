@@ -54,8 +54,7 @@ if ( g_bdy_x1==PERIODIC .and. &
 
    call compute_spec(time,Q,q1,work1,work2)
    call compute_spec_2d(time,Q,q1,work1,work2)
-   call compute_pv_spec(time,Q,q1,q2,q3,work1,work2)
-!bw   call compute_bous
+   call compute_pv2_spec(time,Q,q1,q2,q3,work1,work2)
    call output_spec(time,time_initial)
 !bw   call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
 !bw   call output_pv_spec(time,time_initial) ! Too complicated for now

@@ -361,11 +361,11 @@ implicit none
 !
 !
 
-real*8 u(nx,ny,nz,n_var)    ! input
-real*8 vor(nx,ny,nz,3)      ! input
-real*8 d1(nx,ny,nz)     !  work array used for derivatives
-real*8 work(nx,ny,nz)   ! work array 
-real*8 pv(nx,ny,nz)          ! output
+real*8 u(nx,ny,nz,n_var)    ! input state variable
+real*8 vor(nx,ny,nz,3)      ! vorticty (computed and returned output)
+real*8 d1(nx,ny,nz)         ! work array used for derivatives
+real*8 work(nx,ny,nz)       ! work array 
+real*8 pv(nx,ny,nz)         ! output
 integer pv_type
 !bw  pv_type
 !bw  full    = 1   q = omega_a dot grad theta + fcor d theta/dz -bous omega_3
@@ -1418,20 +1418,24 @@ call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 end subroutine
 
 
-subroutine ke_shell_z(Qhat,hscale,nvar2)
+subroutine ke_shell_z(Qhat,hscale)
 !
 ! compute the KE in shell   kstart2 < k**2 <= kstop2
 ! for z-decomposition data
 !
 !  Note: for Lz<>1, this routine assumes scaling domain by Lz 
 !  
+!  hscale(:,1)     viscosity in (x,y,z) directions used for momentum
+!
+!  hscale(:,np1:np2)  viscosity in (x,y,z) directions used for scalars
 !
 use params
 use mpi
 implicit none
-integer :: kstart2,kstop2,nvar2
-real*8 Qhat(g_nz2,nslabx,ny_2dz,nvar2)           ! Fourier data at time t
-real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,hscale(3),xw2,cfl
+integer :: kstart2,kstop2
+real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 hscale(ndim,n_var)
+real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,xw2,cfl
 integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start
 
 ! units of E = m**2/s**2
@@ -1461,47 +1465,47 @@ else
 endif
 
 
-
-   ke=0
-   
-   do j=1,ny_2dz
-      jm=z_jmcord(j)
-      do i=1,nslabx
-         im=z_imcord(i)
-         do k=1,g_nz
-            km=z_kmcord(k)
-            xfac = 2*2*2
-            if (km==0) xfac=xfac/2
-            if (jm==0) xfac=xfac/2
-            if (im==0) xfac=xfac/2
-
-            u2=0
-            do n=1,nvar2
-               u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
-            enddo
-
-            if (dealias==1) then
-               if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*u2
-               if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*u2
-               if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
-            endif
-            if (dealias==2) then
-               xw = jm*jm + im*im + km*km 
-               if (kstart2 < xw  .and. xw <= kstop2) then
-                  ke(1) = ke(1) + .5*xfac*u2
-               endif
-            endif
+ke=0
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+         xfac = 2*2*2
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+         
+         u2=0
+         do n=1,n_var
+            u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
          enddo
+         
+         if (dealias==1) then
+            if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*u2
+            if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*u2
+            if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
+         endif
+         if (dealias==2) then
+            xw = jm*jm + im*im + km*km 
+            if (kstart2 < xw  .and. xw <= kstop2) then
+               ke(1) = ke(1) + .5*xfac*u2
+            endif
+         endif
       enddo
    enddo
+enddo
 #ifdef USE_MPI
-   ke2 = ke
-   call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+ke2 = ke
+call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
+
+
 if (dealias==1) then
-   hscale(1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
-   hscale(2) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
-   hscale(3) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+   hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
+   hscale(2,1) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
+   hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
 
    im=g_nx/3
    jm=g_ny/3
@@ -1521,42 +1525,137 @@ if (dealias==1) then
       cfl = cfl/(3*delt)  ! divide by 3 and apply speretaly to each term:
    endif
 
-   xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
+   xw2=mu_hyper_value*hscale(1,1)*(im*im*pi2_squared)**mu_hyper
    max_hyper(1)= xw2
    if (xw2>cfl) then
       print *,'x: warning: hyper viscosity CFL: ',xw2*delt
-      hscale(1)=(cfl/xw2)*hscale(1)
-      xw2=mu_hyper_value*hscale(1)*(im*im*pi2_squared)**mu_hyper
+      hscale(1,1)=(cfl/xw2)*hscale(1,1)
+      xw2=mu_hyper_value*hscale(1,1)*(im*im*pi2_squared)**mu_hyper
       max_hyper(1)= xw2*delt
    endif
    
-   xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
+   xw2=mu_hyper_value*hscale(2,1)*(jm*jm*pi2_squared)**mu_hyper
    max_hyper(2)= xw2
    if (xw2>cfl) then
       print *,'y: warning: hyper viscosity CFL: ',xw2*delt
-      hscale(2)=(cfl/xw2)*hscale(2)
-      xw2=mu_hyper_value*hscale(2)*(jm*jm*pi2_squared)**mu_hyper
+      hscale(2,1)=(cfl/xw2)*hscale(2,1)
+      xw2=mu_hyper_value*hscale(2,1)*(jm*jm*pi2_squared)**mu_hyper
       max_hyper(2)= xw2*delt
    endif
    
-   xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+   xw2=mu_hyper_value*hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
    max_hyper(3)= xw2
    if (xw2>cfl) then
       print *,'z: warning: hyper viscosity CFL: ',xw2*delt
-      hscale(3)=(cfl/xw2)*hscale(3)
-      xw2=mu_hyper_value*hscale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+      hscale(3,1)=(cfl/xw2)*hscale(3,1)
+      xw2=mu_hyper_value*hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
       max_hyper(3)= xw2*delt
    endif
 endif
 
 
 if (dealias==2) then
-   hscale(1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
-   hscale(2)=hscale(1)
-   hscale(3)=hscale(1)
+   hscale(1,1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
+   hscale(2,1)=hscale(1,1)
+   hscale(3,1)=hscale(1,1)
 endif
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  no repeat all of that, but this time for passive scalars
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+do n=np1,np2
+   ke=0
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nslabx
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            xfac = 2*2*2
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            
+            u2=Qhat(k,i,j,n)*Qhat(k,i,j,n)
+            
+            if (dealias==1) then
+               if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*u2
+               if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*u2
+               if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
+            endif
+            if (dealias==2) then
+               xw = jm*jm + im*im + km*km 
+               if (kstart2 < xw  .and. xw <= kstop2) then
+                  ke(1) = ke(1) + .5*xfac*u2
+               endif
+            endif
+         enddo
+      enddo
+   enddo
+#ifdef USE_MPI
+   ke2 = ke
+   call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+#endif
+   
+   if (dealias==1) then
+      hscale(1,n) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
+      hscale(2,n) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
+      hscale(3,n) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+      
+      im=g_nx/3
+      jm=g_ny/3
+      km=g_nz/3
+      
+      !
+      !  make sure that hyper viscosity does not exceed a CFL condition 
+      !  (see above)
+      cfl= 1      
+      if (delt>0) then
+         cfl = cfl/(3*delt)  ! divide by 3 and apply speretaly to each term:
+      endif
+      
+      xw2=mu_hyper_value*hscale(1,n)*(im*im*pi2_squared)**mu_hyper
+      max_hyper(1)= xw2
+      if (xw2>cfl) then
+         print *,'x: warning: scalar hyper viscosity CFL: ',xw2*delt
+         hscale(1,n)=(cfl/xw2)*hscale(1,n)
+         xw2=mu_hyper_value*hscale(1,n)*(im*im*pi2_squared)**mu_hyper
+         max_hyper(1)= xw2*delt
+      endif
+      
+      xw2=mu_hyper_value*hscale(2,n)*(jm*jm*pi2_squared)**mu_hyper
+      max_hyper(2)= xw2
+      if (xw2>cfl) then
+         print *,'y: warning: scalar hyper viscosity CFL: ',xw2*delt
+         hscale(2,n)=(cfl/xw2)*hscale(2,n)
+         xw2=mu_hyper_value*hscale(2,n)*(jm*jm*pi2_squared)**mu_hyper
+         max_hyper(2)= xw2*delt
+      endif
+      
+      xw2=mu_hyper_value*hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+      max_hyper(3)= xw2
+      if (xw2>cfl) then
+         print *,'z: warning: scalar hyper viscosity CFL: ',xw2*delt
+         hscale(3,n)=(cfl/xw2)*hscale(3,n)
+         xw2=mu_hyper_value*hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+         max_hyper(3)= xw2*delt
+      endif
+   endif
+   if (dealias==2) then
+      hscale(1,n) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
+      hscale(2,n)=hscale(1,n)
+      hscale(3,n)=hscale(1,n)
+   endif
+enddo
+
+
+
 end subroutine
+
+
 
 
 

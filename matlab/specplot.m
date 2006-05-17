@@ -21,15 +21,15 @@ tsave=[];
 
 
 %name='tmix256D';
-%namedir='/home/taylorm/data/dns/tmix/tmix256D/';
+%namedir='/home/taylorm/codes/dns_data/tmix/tmix256D/';
 %CK_orig=1.613; movie_plot=1; endian='l';
 %movie_times=.3:.1:1;
 %mu=1.75e-4;
 
-name='temp0000.0000';
-namedir='../';
-CK_orig=1.613; movie_plot=0; endian='l';
-mu=1e-4;
+%name='temp0000.0000';
+%namedir='../';
+%CK_orig=1.613; movie_plot=0; endian='l';
+%mu=1e-4;
 
 
 %name='decay2048-ave64.-new.0000.4026';
@@ -38,7 +38,7 @@ mu=1e-4;
 %movie_plot=0; CK_orig=1.613; decay_scale=1; endian='l';
 
 
-%  name='decay2048'; namedir='/home/taylorm/data/dns/decay/';
+%  name='decay2048'; namedir='/home/mataylo/codes/dns_data/decay/';
 %  CK_orig=1.613; decay_scale=1; endian='l';
 %  % save spectrum at these times:
 %  movie_plot=0; movie=1; 
@@ -72,8 +72,6 @@ mu=1e-4;
 %namedir = '/home2/skurien/rotation/Rot1/';
 %name='all';
 %namedir='/home/wingate/ccs/Rotation/Rot1/';
-name = 'all';
-namedir = '//home/wingate/Projects/KH/Boussinesq/n21/';
 
 
 spec_r_save=[];
@@ -143,17 +141,20 @@ while (time>=.0 & time<=1000.6)
   spec_ux=spec_scale*fread(fid,n_x,'float64');
   spec_vx=spec_scale*fread(fid,n_x,'float64');  
   spec_wx=spec_scale*fread(fid,n_x,'float64');  
+  n_x
   
   n_y=fread(fid,1,'float64');
   spec_uy=spec_scale*fread(fid,n_y,'float64');
   spec_vy=spec_scale*fread(fid,n_y,'float64');
   spec_wy=spec_scale*fread(fid,n_y,'float64');
+  n_y
   
   n_z=fread(fid,1,'float64');
   spec_uz=spec_scale*fread(fid,n_z,'float64');
   spec_vz=spec_scale*fread(fid,n_z,'float64');
   spec_wz=spec_scale*fread(fid,n_z,'float64');  
-
+  n_z
+  
   i=find( abs(time-tsave)<.0001);
   if (length(i)>=1) 
      tsave(i)

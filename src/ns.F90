@@ -227,7 +227,7 @@ integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,ens_alpha
 real*8 :: p_diss(n_var),pke(n_var)
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(3),ens_diss
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(ndim,n_var),ens_diss
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3)
@@ -435,7 +435,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (mu_hyper>=2) then
    ! compute hyper viscosity scaling based on energy in last shell:
-   call ke_shell_z(Qhat,hyper_scale,ndim)
+   call ke_shell_z(Qhat,hyper_scale)
 endif
 
 
@@ -456,9 +456,9 @@ do j=1,ny_2dz
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
             if (mu_hyper>=2) then
-               xw2=hyper_scale(1)*(im*im*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(2)*(jm*jm*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(3)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+               xw2=hyper_scale(1,1)*(im*im*pi2_squared)**mu_hyper
+               xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)**mu_hyper
+               xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
                xw_viss=xw_viss + mu_hyper_value*xw2
             endif
             if (mu_hyper==0) then
@@ -541,7 +541,7 @@ if (compute_ints==1 .and. compute_transfer) then
       spec_diff=spec_diff+spec_tmp
       spec_f=spec_f+spec_tmp
    enddo
-   ! spec_f = (for now) spectrum of advection + diffusion termskmrswith all terms
+   ! spec_f = (for now) spectrum of advection + diffusion terms
 endif
 
 
@@ -726,6 +726,16 @@ do ns=np1,np2
             else
                xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
+               ! add in hyper viscosity, if used:
+               if (mu_hyper>=2) then
+                  xw2=hyper_scale(1,ns)*(im*im*pi2_squared)**mu_hyper
+                  xw2=xw2+hyper_scale(2,ns)*(jm*jm*pi2_squared)**mu_hyper
+                  xw2=xw2+hyper_scale(3,ns)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
+                  xw_viss=xw_viss + mu_hyper_value*xw2
+               endif
+               if (mu_hyper==0) then
+                  xw_viss=xw_viss + mu_hyper_value
+               endif
                rhs(k,i,j,ns)=rhs(k,i,j,ns) - xw_viss*Qhat(k,i,j,ns)
                if (passive_type(ns)==2) rhs(k,i,j,ns)=rhs(k,i,j,ns)+p(k,i,j)
             endif
