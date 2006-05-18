@@ -1110,9 +1110,9 @@ else
    call global_max_abs(Q(1,1,1,3),mx)
    write(message,'(a,3f18.14)') 'compressed_io: maxW = ',mx
    call print_message(message)
-   write(message,'(a,3f18.14)') 'compressed_io: ke =   ',ke
+   write(message,'(a,3e24.14)') 'compressed_io: ke =   ',ke
    call print_message(message)
-   write(message,'(a,3f18.14)') 'compressed_io: ens =  ',ens
+   write(message,'(a,3e24.14)') 'compressed_io: ens =  ',ens
    call print_message(message)
 
    call print_message("done with uncompress")

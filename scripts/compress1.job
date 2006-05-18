@@ -11,11 +11,11 @@
 
 cd
 cat > times1.dat <<EOF
-0002.3700
-0002.4247
-0002.4519
-0002.5090
-0002.5500
+0002.3157 
+0002.1581 
+0002.1140 
+0002.0416 
+0001.9955 
 EOF
 
 module load MPI_default
@@ -76,6 +76,27 @@ cp -f times1.dat $WDIR
 date
 # read .u,v,w,  output spectral
 prun -v -n $NCPUS $COMP/convert.2048 -cout 4uvw -mio -so -smax 1440 -d $WDIR   $name -i $refin  
+date
+
+
+#0000.4020   
+#0000.4026 
+#0000.4188 
+#0000.5551 
+#0000.8149 
+#0001.0511 
+#0001.3081 
+#0001.5439 
+#0001.8033 
+#0002.0416 
+
+cat > times1.dat <<EOF
+0002.0416
+EOF
+cp -f times1.dat $WDIR
+
+# output real*4 headerless (will have a -new in the name)
+prun -v -n $NCPUS $COMP/convert.2048 -cout 4uvw -mio -o4 -d $WDIR   $name -i $refin  
 date
 
 
