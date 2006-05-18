@@ -232,6 +232,7 @@ do i=nx1,nx2
     pv2energy=xfac*work1(i,j,k)*work1(i,j,k)
 
     q2spec_r(iwave)=q2spec_r(iwave)+pv2energy
+!bw these need to accumulate the correct directional spectra.
     q2spec_x(abs(imcord(i)))=q2spec_x(abs(imcord(i))) + pv2energy
     q2spec_y(abs(jmcord(j)))=q2spec_y(abs(jmcord(j))) + pv2energy
     q2spec_z(abs(kmcord(k)))=q2spec_z(abs(kmcord(k))) + pv2energy
@@ -239,6 +240,7 @@ enddo
 enddo
 enddo
 !bw computing pv is complicated so set all those to zero for the moment
+q2spec_r=.5*q2spec_r
 q2spec_x=.5*q2spec_x
 q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
