@@ -669,9 +669,9 @@ else
       enddo
       write(message,'(a,3f18.14)') 'spec_io: maxW = ',mx
       call print_message(message)
-      write(message,'(a,3f18.14)') 'spec_io: ke =   ',ke
+      write(message,'(a,3e24.14)') 'spec_io: ke =   ',ke
       call print_message(message)
-      write(message,'(a,3f18.14)') 'spec_io: ens =  ',ens
+      write(message,'(a,3e24.14)') 'spec_io: ens =  ',ens
       call print_message(message)
 
 
