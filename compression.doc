@@ -5,15 +5,67 @@
 For more information: contact Mark Taylor at mataylo@sandia.gov or
 mt@mp3dev.org.
 
-
-
 1. Description of Data Sets
 
-1A.  2048^3 data:  
+These data sets are described in Kurien and Taylor (Los Alamos Science
+29, 2005).  The data contains snapshots of the velocity field, from
+DNS simulations in a triply periodic box.  The box has sides of length
+1.  Many statistics (KE, dissipation rates, enstrophy, etc) were saved
+from every timestep.  If you are interested in this data, contact Mark
+Taylor.
+
+
+1A.  2048^3 data.
+
+This data set is modeled after the upgraded Corrsin Wind Tunnel,
+(Kang, Chester and Meneveau, J. Fluid Mech. 480, 2003).  We start with
+an initial flow field with random uncorrelated phases but a prescribed
+energy spectrum.  The flow is then evolved for a short time until the
+phases become correlated enough to give a reasonable mean-derivative
+skewness.  The energy spectrum is then reinitialized back to the
+original spectrum while retaining the correlated phases.  This
+reinitialization was done at t=0.4020, and thus we only include
+snapshots from t>=0.4020.  The simulation was then run out to t=3.79.
+
+Duration:  t=.4020 to 3.7900
+R_lambda:  181 at t=.4020, peaks at 208 and then decays to 152
+Eddy turnover time:  .89 at t=.4020, increasing to 6.5
+
+This data is stored on disk1 and disk2 in the "decay2048" directories.
+Filenames are of the form:
+   decay2048????.????.uc
+   decay2048????.????.vc
+   decay2048????.????.wc
+where ????.???? is the simulation time.  
+
+
+1B. 1024^3 data
+
+This data used a deterministic forcing in the first two wave number
+shells, as described in (Taylor, Kurien, Eyink, Phys. Rev. E. 68, 2003).
+The run is initialized with random uncorrelated phases and a prescribed
+k^-(5/3) energy spectrum.  The data reaches a statistical equallibrium
+around t=1.0, and most of the snapshots are from after this time, but
+we have also included snapshots from t=.5 and t=.8.  
+
+Duration:  t=0 to 2.5  
+R_lambda = 460 +/- 5%  for t>0.5
+Eddy Turnover time:  1.05
+
+This data is stored on disk2 in the "sc1024A" directory.
+Filenames are of the form:
+   sc1024A????.????.uc
+   sc1024A????.????.vc
+   sc1024A????.????.wc
+where ????.???? is the simulation time.  
+
+The simulation was initialized with a k^-5/3 spectrum
+(random phase) at t=0, and the run to time t=2.5.
 
 
 
-2 Grid Space Compression Algorithm
+
+2. Grid Space Compression Algorithm
 
 I implemented a grid space version of Bob Kerr's compression
 algorithm.  This algorithm was applied to our 2048^3 decaying

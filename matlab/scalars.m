@@ -19,14 +19,14 @@ range=0:50;
 fid2=-1;
 
 
-fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
-nx=2048;
+%fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
+%nx=2048;
 
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-%fid=endianopen('/home/mataylo/codes/dns_data/sc1024A/sc1024A.scalars','r');
-%nx=1024;
+fid=endianopen('/home/mataylo/codes/dns_data/sc1024A/sc1024A.scalars','r');
+nx=1024;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
@@ -123,7 +123,7 @@ time=maxs(7,:);
 % $$$ end
 % $$$ for i=1:length(time_after)
 % $$$    disp(sprintf('time=%7.4f   maxU=%18.14f  %18.14f  %18.14f',time_after(i),maxU(i),maxV(i),maxW(i)))
-% $$$ end
+% $$$ end%
 % $$$ return
 
 
@@ -183,8 +183,6 @@ if (mu>0)
   xlabel('time')
   print -djpeg -r72 rl.jpg
 end
-
-
 
 
 figure(3);
