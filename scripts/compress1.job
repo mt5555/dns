@@ -9,13 +9,18 @@
 #  55min per snapshot
 #
 
+#0001.6586 
+#0001.7075   done
+#0001.7569   done
+#0001.8484   
+#0001.8988   done
+#0001.9493 
+
+
 cd
 cat > times1.dat <<EOF
-0002.3157 
-0002.1581 
-0002.1140 
-0002.0416 
-0001.9955 
+0002.2066
+0002.2609 
 EOF
 
 module load MPI_default
@@ -23,7 +28,7 @@ module list
 set NCPUS = 64
 #set NCPUS = 4
 
-set compile = 1
+set compile = 0
 
 set name = decay2048
 set refin=$HOME/dns/prod/$name.inp
@@ -79,19 +84,21 @@ prun -v -n $NCPUS $COMP/convert.2048 -cout 4uvw -mio -so -smax 1440 -d $WDIR   $
 date
 
 
-#0000.4020   
+exit
+
+
+
 #0000.4026 
 #0000.4188 
+#0000.4603 
 #0000.5551 
 #0000.8149 
 #0001.0511 
 #0001.3081 
 #0001.5439 
-#0001.8033 
-#0002.0416 
 
 cat > times1.dat <<EOF
-0002.0416
+0001.5439 
 EOF
 cp -f times1.dat $WDIR
 

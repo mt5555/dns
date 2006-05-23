@@ -121,7 +121,9 @@ do
       ! read data, header type =1, or specified in input file
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
-      call print_stats(Q,vor,work1,work2)
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,vor,work1,work2)
+      endif
 
       ! just reoutput the variables:
       if (w_spec) then

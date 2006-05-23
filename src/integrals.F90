@@ -27,7 +27,7 @@ call divergence(p,Q,work1,work2)
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   divmx=max(divmx,p(i,j,k))
+   divmx=max(divmx,abs(p(i,j,k)))
    divi=divi+p(i,j,k)
 enddo
 enddo

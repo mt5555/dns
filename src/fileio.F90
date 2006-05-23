@@ -580,7 +580,7 @@ character(len=280) fname
 character(len=280) base
 integer :: n,header_type,im,jm,km,i,j,k,ierr
 real*8 :: time
-real*8 :: time_in,mx(3),mx2,ke,ens,ux,uy,uz,vx,vy,vz,wx,wy,wz,u2,xfac
+real*8 :: time_in,mx(3),mx2,ke,ens,ux,uy,uz,vx,vy,vz,wx,wy,wz,u2,xfac,divmx
 
 
 Q=0
@@ -619,7 +619,7 @@ else
          call singlefile_io2(time_in,Q(1,1,1,ndim),fname,work1,work2,1,io_pe,r_spec)
       endif
       ! compute and print KE, ens
-      ke=0; ens=0
+      ke=0; ens=0; divmx=0
       do k=nz1,nz2
          km=kmcord(k)
          do j=ny1,ny2
@@ -627,18 +627,20 @@ else
             do i=nx1,nx2
                im=imcord(i)
                ! u_x term
-               ! ux = - im*pi2*Q(i+imsign(i),j,k,1)
+               ux = - im*pi2*Q(i+imsign(i),j,k,1)
                vx = - im*pi2*Q(i+imsign(i),j,k,2)
                wx=0
                if (ndim==3) wx = - im*pi2*Q(i+imsign(i),j,k,ndim)
                uy = - jm*pi2*Q(i,j+jmsign(j),k,1)
-               ! vy = - jm*pi2*Q(i,j+jmsign(j),k,v)
+               vy = - jm*pi2*Q(i,j+jmsign(j),k,2)
                wy=0
                if (ndim==3) wy = - jm*pi2*Q(i,j+jmsign(j),k,ndim)
                uz =  - km*pi2*Q(i,j,k+kmsign(k),1)
                vz =  - km*pi2*Q(i,j,k+kmsign(k),2)
-               ! wz=0
-               ! if (ndim==3) wz = - km*pi2*Q(i,j,k+kmsign(k),ndim)
+               wz=0
+               if (ndim==3) wz = - km*pi2*Q(i,j,k+kmsign(k),ndim)
+
+               divmx=max(divmx,abs(ux+vy+wz))
                
                u2=0
                do n=1,ndim
@@ -662,6 +664,8 @@ else
       call mpi_allreduce(mx2,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
       mx2=ens
       call mpi_allreduce(mx2,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      mx2=divmx
+      call mpi_allreduce(mx2,divmx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
       do n=1,ndim
          call ifft3d(Q(1,1,1,n),work1)
@@ -672,6 +676,8 @@ else
       write(message,'(a,3e24.14)') 'spec_io: ke =   ',ke
       call print_message(message)
       write(message,'(a,3e24.14)') 'spec_io: ens =  ',ens
+      call print_message(message)
+      write(message,'(a,3e24.14)') 'spec_io: max(div) = ',divmx
       call print_message(message)
 
 
