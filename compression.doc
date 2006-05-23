@@ -1,24 +1,53 @@
+       Notes on Bob Kerr's Data Compression Algorithm
+        as applied to two DNS data sets computed by 
+           LANL's Turbulence Working Group (TWG).
 
-Notes on Bob Kerr's Data Compression Algorithm
+For more information: contact Mark Taylor at mataylo@sandia.gov or
+mt@mp3dev.org.
+
+
+
+1. Description of Data Sets
+
+1A.  2048^3 data:  
+
+
+
+2 Grid Space Compression Algorithm
 
 I implemented a grid space version of Bob Kerr's compression
-algorithm.  This algorithm was applied to our 2048^3 data set.  The
-original data contains wave numbers up to 1024.  To compress this, we
-first filtered it down to wave numbers up to 720.  We chose 720
-because this is slightly more than a 2/3 dealiasing (which would
-truncate to 683), and 720 corresponds to an FFT of length 1440, which
-can be handled by any FFT that can do powers of 2,3 and 5. (2^5 3^2 5)
-We then output the first two velocity components (u and v) in
-grid space on a 1440^3 grid.  The data is a standard "brick-of-floats".
+algorithm.  This algorithm was applied to our 2048^3 decaying
+turbulence data set, and our 1024^3 deterministically forced
+dataset.  
 
-For the 3'rd component of velocity, we only output the average
-in the z-direction, since the rest of that field can be obtained
-from the fact that the flow is divergence free.  This data
-is again the grid space values, on a standard brick-of-floats
-1440^2 grid.  It is also processor and FFT independent.  
+The compression involves two steps. 
 
+Step 1:  Fourier Filtering 
 
-For each snapshot, I produced 3 files:
+For the 2048^3 data (wave numbers 0..1024) the data was first Fourier
+filtered by removing wave numbers beyond 720.  Then an FFT is used to
+transform this data back to grid space, but now on a 1440^3 grid.
+We chose 720 because this is slightly more than a 2/3 dealiasing
+(which would truncate to 683), and 720 corresponds to an FFT of length
+1440, which can be handled by any FFT that can do powers of 2,3 and
+5. (2^5 3^2 5).
+
+The 1024^3 data set was not filtered.
+
+Step 2:  Utilize the fact that the flow divergence free
+
+We then output the grid space values of the first two velocity
+components, U and V, as a real*4 "brick-of-floats".  For the third
+velocity component, W, we only about its average in the z-direction,
+since the rest of that field can be obtained from the fact that the
+flow is divergence free.  This data is again the grid space values, on
+a standard "square-of-floats".  The output is headerless, in IEEE
+single precision (little endian) format, and written out in the
+natural x,y,z order.
+
+Note that all steps were performed in double precision (real*8), but
+the final output was truncated to single precision (real*4).  Thus for
+each snapshot of the 2048^3 decaying data, we have three files:
 
 file.u        1440^3 real*4 numbers = u component of velocity, 
                                         on a 1440^3 grid
@@ -26,13 +55,33 @@ file.v        1440^3 real*4 numbers = v component of velocity
                                         on a 1440^3 grid  
 file.w        1440^2 real*4 numbers = z average of w component of velocity
                                         on a 1440^2 grid
-               
 
-Here is some pseudo code which shows how to read the data
-and recover the w component by taking FFTs:.  
+for a total of 23887877768 bytes (22.25GB) per snapshot.
+
+For each snapshot of the 1024^3 forced dataset, we have two files
+of size 1024^3 and one file of size 1024^2, for a total of 8GB 
+per snapshot.  The data was computed and compressed on
+LANL's QSC system (A Compaq ES-45 cluster).  
+
+
+
+
+
+
+3. Pseudo Code to Uncompress the Data:
+               
+Here is some pseudo code which shows how to read the data and recover
+the w component by taking FFTs.  Running this or a similar code would
+require 135GB of memory.  It is hoped that this pseudo code will
+show how one can modify an existing spectral DNS code to be able
+to read an uncompress the data.  Or contact Mark Taylor for
+more details or for a copy of the TWG DNS code (Fortran/MPI) which can
+read and uncompress this data on any cluster.
+
+
 
 integer(parameter) :: N=1440     !  2^5 *  3^2 * 5
-integer(parameter) :: Nf=720
+integer(parameter) :: Nf=N/2     ! number fourier coefficients
 real*8 :: u(N,N,N),v(N,N,N),w(N,N,N)
 complex*16 :: uf(0:Nf,0:Nf,0:Nf),vf(0:Nf,0:Nf,0:Nf),wf(0:Nf,0:Nf,0:Nf)
 
@@ -72,7 +121,7 @@ do i=0,Nf
    ! sqrt(-1)*i*uf + sqrt(-1)*j*vf + sqrt(-1)*k*wf = 0
    ! solve for wf to get:   
    if (k/=0) then
-        wf(i,j,k) = wf(i,j,k) + (i*uf(i,j,k) + j*vf(i,j,k)) / k
+        wf(i,j,k) = wf(i,j,k) - (i*uf(i,j,k) + j*vf(i,j,k)) / k
    endif
 enddo
 enddo
