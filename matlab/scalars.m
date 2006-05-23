@@ -25,8 +25,8 @@ nx=2048;
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-fid=endianopen('/home/mataylo/codes/dns_data/sc1024A/sc1024A.scalars','r');
-nx=1024;
+%fid=endianopen('/home/mataylo/codes/dns_data/sc1024A/sc1024A.scalars','r');
+%nx=1024;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
@@ -117,14 +117,14 @@ maxvor=maxs(5,:);
 time_after=maxs(6,:);
 time=maxs(7,:);
 
-% time  ke  
-for i=1:length(time)
-   disp(sprintf('time=%7.4f   KE=%18.14f   ens=%18.12f',time(i),ke(i),ens(i)))
-end
-for i=1:length(time_after)
-   disp(sprintf('time=%7.4f   maxU=%18.14f  %18.14f  %18.14f',time_after(i),maxU(i),maxV(i),maxW(i)))
-end
-return
+% $$$ % time  ke  
+% $$$ for i=1:length(time)
+% $$$    disp(sprintf('time=%7.4f   KE=%18.14f   ens=%18.12f',time(i),ke(i),ens(i)))
+% $$$ end
+% $$$ for i=1:length(time_after)
+% $$$    disp(sprintf('time=%7.4f   maxU=%18.14f  %18.14f  %18.14f',time_after(i),maxU(i),maxV(i),maxW(i)))
+% $$$ end
+% $$$ return
 
 
 Ea = ints(6,:) + .5*alpha^2 *ints(2,:); % at time
@@ -156,11 +156,11 @@ Euse=Ea;
 %Euse=ke_v;
 
 epsilon=-(  ke_diss_d-mu*alpha^2*ints(1,:) );
-lambda=sqrt( mu*(2*Euse/3) / (epsilon/15)  );
+lambda=sqrt( mu*(2*Euse/3) ./ (epsilon/15)  );
 eta = (mu^3 ./ abs(epsilon)).^(.25);
 
 epsilon_ke=-ke_diss_d;
-lambda_ke=sqrt( mu*(2*ke/3) / (epsilon_ke/15)  );
+lambda_ke=sqrt( mu*(2*ke/3) ./ (epsilon_ke/15)  );
 
 if (mu>0)
   R_l = lambda.*sqrt(2*Euse/3)/mu;
@@ -174,20 +174,25 @@ end
 disp(sprintf('max vor_z = %e',max(vor_z)));
 
 if (mu>0)
-  figure(2);  hold on;
+  figure(2);  
   plot(time,R_l,'b'); hold on;
   plot(time,R_l_ke,'r'); hold on;
+  hold off;
   title('R_\lambda');
   legend('R_{\lambda}', 'R_{\lambda}(total KE)')
   xlabel('time')
   print -djpeg -r72 rl.jpg
 end
 
+
+
+
 figure(3);
 plot(time,lambda)
-     title('\lambda')
-     xlabel('time')
+title('\lambda')
+xlabel('time')
 print -djpeg -r72 lambda.jpg
+
 
 
 if (nx>0) 
@@ -273,7 +278,6 @@ if (f_k>0)
   R0 = sum(R0)/length(R0);
   disp(sprintf('Smith''s R0 (average over last half of data) = %f ',R0));
 end
-
 
 if (mu>0) 
   % averge eta to a number
