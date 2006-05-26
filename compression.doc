@@ -7,25 +7,33 @@ mt@mp3dev.org.
 
 1. Description of Data Sets
 
-These data sets are described in Kurien and Taylor (Los Alamos Science
-29, 2005).  The data contains snapshots of the velocity field, from
-DNS simulations in a triply periodic box.  The box has sides of length
-1.  Many statistics (KE, dissipation rates, enstrophy, etc) were saved
-from every timestep.  If you are interested in this data, contact Mark
-Taylor.
+These data sets are briefly described in Kurien and Taylor (Los Alamos
+Science 29, 2005).  The data contains snapshots of the velocity field,
+from DNS simulations in a triply periodic box.  The box has sides of
+length 1.  Note that many Fourier DNS codes assume a box of length 2
+pi.  If you are using such a code, you must rescale this data
+accordingly.
+
+For each snapshot, we include the KE and enstrophy.  This data (and
+other statistics) was also computed at every timestep during the
+simulations, and is available by email from Mark Taylor.  Recomputing
+the KE and enstrophy is a good way to check if you have correctly read
+in and uncompressed the data.
 
 
 1A.  2048^3 data.
 
-This data set is modeled after the upgraded Corrsin Wind Tunnel,
-(Kang, Chester and Meneveau, J. Fluid Mech. 480, 2003).  We start with
-an initial flow field with random uncorrelated phases but a prescribed
-energy spectrum.  The flow is then evolved for a short time until the
-phases become correlated enough to give a reasonable mean-derivative
-skewness.  The energy spectrum is then reinitialized back to the
-original spectrum while retaining the correlated phases.  This
-reinitialization was done at t=0.4020, and thus we only include
-snapshots from t>=0.4020.  The simulation was then run out to t=3.79.
+This data set is modeled after the upgraded Corrsin Wind Tunnel
+experiment, (Kang, Chester and Meneveau, J. Fluid Mech. 480, 2003).
+We start with an initial flow field with random uncorrelated phases
+but a prescribed energy spectrum.  The flow is then evolved for a
+short time until the phases become correlated enough to give a
+reasonable mean-derivative skewness.  The energy spectrum is then
+reinitialized back to the original spectrum while retaining the
+correlated phases.  This reinitialization was done at t=0.4020, and
+thus we only include snapshots from t>=0.4020.  The simulation was
+then run out to t=3.79.   (Is the t=0.4020 snapshot just before
+or just after the renormalization?  We need to check)
 
 Duration:  t=.4020 to 3.7900
 R_lambda:  181 at t=.4020, peaks at 208 and then decays to 152
@@ -39,12 +47,17 @@ Filenames are of the form:
 where ????.???? is the simulation time.  
 
 
+[TODO: get this data with check.py?]
+edit check.py, set printstats=1 and run:
+cat compress2.o.b? | ./check.py
+
+
 1B. 1024^3 data
 
 This data used a deterministic forcing in the first two wave number
 shells, as described in (Taylor, Kurien, Eyink, Phys. Rev. E. 68, 2003).
 The run is initialized with random uncorrelated phases and a prescribed
-k^-(5/3) energy spectrum.  The data reaches a statistical equallibrium
+k^-(5/3) energy spectrum.  The data reaches a statistical equilibrium
 around t=1.0, and most of the snapshots are from after this time, but
 we have also included snapshots from t=.5 and t=.8.  
 
@@ -59,25 +72,45 @@ Filenames are of the form:
    sc1024A????.????.wc
 where ????.???? is the simulation time.  
 
+
 The simulation was initialized with a k^-5/3 spectrum
 (random phase) at t=0, and the run to time t=2.5.
+
+snapshots data:
+time           ke                   enstrophy
+2.5000   0.18685664640632E+01   0.99769437679933E+05
+2.4000   0.18733191607508E+01   0.10420300848982E+06
+2.3000   0.18989228578210E+01   0.10805798457487E+06
+2.2000   0.19219437577668E+01   0.10958010829487E+06
+2.1000   0.19316863765580E+01   0.10538607005809E+06
+2.0000   0.19241592622061E+01   0.10185734802712E+06
+1.9000   0.18979338733753E+01   0.99940630814358E+05
+1.8000   0.18579778733417E+01   0.99127252949821E+05
+1.7000   0.18543735272404E+01   0.10126378248862E+06
+1.5000   0.18731786732484E+01   0.98521452026956E+05
+1.4000   0.18804331989756E+01   0.10025657478789E+06
+1.3000   0.18659376839902E+01   0.10391080424108E+06
+1.2000   0.18905897872825E+01   0.10823996500447E+06
+1.1000   0.19165399498552E+01   0.11063981923013E+06
+1.0000   0.19599579614381E+01   0.11634538084080E+06
+0.8000   0.19628859030721E+01   0.10952098993512E+06
+0.5000   0.19703730180068E+01   0.13790919733085E+06
+
 
 
 
 
 2. Grid Space Compression Algorithm
 
-I implemented a grid space version of Bob Kerr's compression
-algorithm.  This algorithm was applied to our 2048^3 decaying
-turbulence data set, and our 1024^3 deterministically forced
-dataset.  
+The data sets described above are stored in a grid space version of
+Bob Kerr's compression algorithm.
 
 The compression involves two steps. 
 
 Step 1:  Fourier Filtering 
 
 For the 2048^3 data (wave numbers 0..1024) the data was first Fourier
-filtered by removing wave numbers beyond 720.  Then an FFT is used to
+filtered by removing wave numbers beyond 720.  Then an FFT was used to
 transform this data back to grid space, but now on a 1440^3 grid.
 We chose 720 because this is slightly more than a 2/3 dealiasing
 (which would truncate to 683), and 720 corresponds to an FFT of length
@@ -115,9 +148,14 @@ of size 1024^3 and one file of size 1024^2, for a total of 8GB
 per snapshot.  The data was computed and compressed on
 LANL's QSC system (A Compaq ES-45 cluster).  
 
-
-
-
+To uncompress the data, we use the divergence free relation,
+in the Fourier/frequency domain.  Let (uf,vf,wf) denote
+arrays of complex Fourier coefficients for the flow (u,v,w),
+with wave numbers (i,j,k).  Because of 
+    sqrt(-1)*i*uf + sqrt(-1)*j*vf + sqrt(-1)*k*wf = 0
+we can recover all Fourier coefficients of wf from uf and vf, except
+for k=0.  The contribution to w from the k=0 coefficients is of course
+the z-average, which is exactly what is stored in "file.w".
 
 
 3. Pseudo Code to Uncompress the Data:
@@ -129,7 +167,6 @@ show how one can modify an existing spectral DNS code to be able
 to read an uncompress the data.  Or contact Mark Taylor for
 more details or for a copy of the TWG DNS code (Fortran/MPI) which can
 read and uncompress this data on any cluster.
-
 
 
 integer(parameter) :: N=1440     !  2^5 *  3^2 * 5
@@ -182,6 +219,9 @@ enddo
 call ifft(uf,u,N)
 call ifft(vf,v,N)
 call ifft(wf,w,N)
+
+
+
 
 
 
