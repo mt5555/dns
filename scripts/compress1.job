@@ -2,25 +2,27 @@
 #BSUB -o compress1.o -e compress1.e
 #BSUB -q smallq
 #BSUB -J compress
-#BSUB -W 400
+#BSUB -W 500
 #BSUB -n 64
 #BXXX -wa URG -wt 2
 #
 #  55min per snapshot
 #
 
-#0001.6586 
-#0001.7075   done
-#0001.7569   done
-#0001.8484   
-#0001.8988   done
-#0001.9493 
 
+#0001.1038 
+#0001.1598 
+#0001.1959 
+#0001.2500 
+#0001.3081  (also sk)
 
 cd
 cat > times1.dat <<EOF
-0002.2066
-0002.2609 
+0001.1038 
+0001.1598 
+0001.1959 
+0001.2500 
+0001.3081 
 EOF
 
 module load MPI_default
@@ -84,7 +86,6 @@ prun -v -n $NCPUS $COMP/convert.2048 -cout 4uvw -mio -so -smax 1440 -d $WDIR   $
 date
 
 
-exit
 
 
 
@@ -98,7 +99,7 @@ exit
 #0001.5439 
 
 cat > times1.dat <<EOF
-0001.5439 
+0001.3081
 EOF
 cp -f times1.dat $WDIR
 
