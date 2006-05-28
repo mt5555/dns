@@ -227,7 +227,7 @@ integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,ens_alpha
 real*8 :: p_diss(n_var),pke(n_var)
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(ndim,n_var),ens_diss
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(ndim,n_var),ens_diss2,ens_diss4,ens_diss6
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3)
@@ -443,7 +443,9 @@ ke=0
 ux2ave=0
 ke_diss=0
 h_diss=0
-ens_diss=0
+ens_diss2=0
+ens_diss4=0
+ens_diss6=0
 ens_alpha =0
 uxx2ave=0
 do j=1,ny_2dz
@@ -515,19 +517,14 @@ do j=1,ny_2dz
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)   
                  endif
                    ! incorrect if using hyperviscosity
-                  if (infinite_alpha==1) then
-                     ens_diss=ens_diss + 2*xfac*(mu*xw*(xw)**2)*  &
+                 
+                  ens_diss2=ens_diss2 + 2*xfac*(mu*xw)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
-                  else
-                     ens_diss = ens_diss + 2*xfac*(mu*xw* (1+xw*alpha_value**2)**2)*  &
-                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
-                  endif
-                   
-                      
-                        
-               
-               
-         endif
+                  ens_diss4=ens_diss4 + 2*xfac*(mu*xw*xw)*  &
+                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)
+                  ens_diss6=ens_diss6 + 2*xfac*(mu*xw*(xw)**2)*  &
+                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)      
+             endif           
 
       enddo
    enddo
@@ -783,7 +780,9 @@ if (compute_ints==1) then
    ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-ke_diss                 ! <u,u_xx>
    ints(11)=h_diss
-   ints(12)=ens_diss
+   ints(12)=ens_diss2
+   ints(13)=ens_diss4
+   ints(14)=ens_diss6
    maxs(5)=maxvor
 
 !   ints(6)=pke(4)
