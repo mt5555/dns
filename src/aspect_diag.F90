@@ -242,13 +242,6 @@ do j=1,ny_2dz
    enddo
 enddo
 
-ke = ke * Lz
-pe = pe * Lz
-ke = ke * Lz
-pe = pe * Lz
-
-
-
 
 !
 !bw  Now computes the dissipation of Q = q^2/2
@@ -367,14 +360,3 @@ print *,'aspect_diag pe=',pe
 
 end subroutine compute_expensive_scalars
 
-<<<<<<< aspect_diag.F90
-
-
-
-
-
-
-
-
-=======
->>>>>>> 1.15
