@@ -19,14 +19,14 @@ range=0:50;
 fid2=-1;
 
 
-%fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
-%nx=2048;
+fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
+nx=2048;
 
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-fid=endianopen('/home/mataylo/codes/dns_data/sc1024A/sc1024A.scalars','r');
-nx=1024;
+%fid=endianopen('/home/mataylo/codes/dns_data/sc1024A/sc1024A.scalars','r');
+%nx=1024;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
@@ -96,7 +96,7 @@ fclose(fid);
 l=size(ints);
 l=l(2);
 
-if (ns>=11) 
+if (nints>=11) 
    h_diss=ints(11,:);   
 end
 ke_diss_d=ints(10,:);

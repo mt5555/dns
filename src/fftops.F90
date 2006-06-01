@@ -1418,6 +1418,8 @@ call mpi_allreduce(mx2,mx,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 end subroutine
 
 
+
+
 subroutine ke_shell_z(Qhat,hscale)
 !
 ! compute the KE in shell   kstart2 < k**2 <= kstop2
@@ -1488,7 +1490,7 @@ do j=1,ny_2dz
             if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
          endif
          if (dealias==2) then
-            xw = jm*jm + im*im + km*km 
+            xw = jm*jm + im*im + km*km/(Lz*Lz) 
             if (kstart2 < xw  .and. xw <= kstop2) then
                ke(1) = ke(1) + .5*xfac*u2
             endif
@@ -1563,7 +1565,7 @@ endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!  no repeat all of that, but this time for passive scalars
+!  now repeat all of that, but this time for passive scalars
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=np1,np2
@@ -1587,7 +1589,7 @@ do n=np1,np2
                if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
             endif
             if (dealias==2) then
-               xw = jm*jm + im*im + km*km 
+               xw = jm*jm + im*im + km*km/(Lz*Lz)
                if (kstart2 < xw  .and. xw <= kstop2) then
                   ke(1) = ke(1) + .5*xfac*u2
                endif

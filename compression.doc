@@ -7,33 +7,42 @@ mt@mp3dev.org.
 
 1. Description of Data Sets
 
-These data sets are briefly described in Kurien and Taylor (Los Alamos
-Science 29, 2005).  The data contains snapshots of the velocity field,
-from DNS simulations in a triply periodic box.  The box has sides of
-length 1.  Note that many Fourier DNS codes assume a box of length 2
-pi.  If you are using such a code, you must rescale this data
-accordingly.
+These data sets are briefly described in S. Kurien and M.A. Taylor,
+"Direct Numerical Simulation of Turbulence - Data Generation and
+Statistical Analysis", Los Alamos Science, 29 (2005) 142--151.  The
+data contains snapshots of the velocity field, from DNS simulations in
+a triply periodic box.  The box has sides of length 1.  Note that many
+Fourier DNS codes assume a box of length 2 pi.  If you are using such
+a code, you must rescale this data accordingly.
 
 For each snapshot, we include the KE and enstrophy.  This data (and
 other statistics) was also computed at every timestep during the
 simulations, and is available by email from Mark Taylor.  Recomputing
 the KE and enstrophy is a good way to check if you have correctly read
-in and uncompressed the data.
+in and uncompressed the data.  To verify the integrety of the 
+compressed data files, we have included the md5 checksum of every
+file in "md5sum.out".  This was computed on QSC (the machine used
+to compresses the data).  Then the data was copied to the USB disks attached
+to a Linux workstation and the md5 sums were verified again on this
+system.
 
 
 1A.  2048^3 data.
 
 This data set is modeled after the upgraded Corrsin Wind Tunnel
-experiment, (Kang, Chester and Meneveau, J. Fluid Mech. 480, 2003).
-We start with an initial flow field with random uncorrelated phases
-but a prescribed energy spectrum.  The flow is then evolved for a
-short time until the phases become correlated enough to give a
-reasonable mean-derivative skewness.  The energy spectrum is then
-reinitialized back to the original spectrum while retaining the
-correlated phases.  This reinitialization was done at t=0.4020, and
-thus we only include snapshots from t>=0.4020.  The simulation was
-then run out to t=3.79.   (Is the t=0.4020 snapshot just before
-or just after the renormalization?  We need to check)
+experiment, (Kang, Chester and Meneveau, "Decaying turbulence in an
+active-grid-generated flow and comparisons with large-eddy
+simulation", J. Fluid Mech. 480, 2003).  We start with an initial flow
+field with random uncorrelated phases but a prescribed energy
+spectrum.  The flow is then evolved for a short time until the phases
+become correlated enough to give a reasonable mean-derivative
+skewness.  The energy spectrum is then reinitialized back to the
+original spectrum while retaining the correlated phases.  This
+reinitialization was done at t=0.4020, and thus we only include
+snapshots from t>=0.4020.  The simulation was then run out to t=3.79.
+(The t=0.4020 snapshot the snapshot just before the renormalization.
+It is provided as a reference and should not be considered as part of
+the simulation)
 
 Duration:  t=.4020 to 3.7900
 R_lambda:  181 at t=.4020, peaks at 208 and then decays to 152
@@ -47,9 +56,75 @@ Filenames are of the form:
 where ????.???? is the simulation time.  
 
 
-[TODO: get this data with check.py?]
-edit check.py, set printstats=1 and run:
-cat compress2.o.b? | ./check.py
+ time               KE               Enstrophy
+ 0.4020     2.210360120232e-02      7.818009066737e+03
+ 0.4026     3.805026964614e-02      2.288941791091e+04
+ 0.4188     3.690181533067e-02      1.745150203958e+04
+ 0.4328     3.606695173845e-02      1.621522156075e+04
+ 0.4603     3.452270959126e-02      1.553188584727e+04
+ 0.4894     3.294043690046e-02      1.514102172733e+04
+ 0.5551     2.955198030044e-02      1.387420079469e+04
+ 0.6034     2.728597472575e-02      1.261006134060e+04
+ 0.6491     2.535662077989e-02      1.134070659993e+04
+ 0.7019     2.338371035070e-02      9.930643655649e+03
+ 0.7536     2.169650906123e-02      8.694657451604e+03
+ 0.8149     1.996812635833e-02      7.449945780811e+03
+ 0.8545     1.898535058904e-02      6.764576032006e+03
+ 0.9040     1.788378475897e-02      6.021728419087e+03
+ 0.9512     1.694561686200e-02      5.418153089714e+03
+ 1.0017     1.604360384774e-02      4.866191416556e+03
+ 1.0511     1.524901639655e-02      4.407402717750e+03
+ 1.1037     1.448278502481e-02      3.988621827836e+03
+ 1.1598     1.374714454786e-02      3.607994618901e+03
+ 1.1959     1.330904724752e-02      3.392609822420e+03
+ 1.2500     1.270122071920e-02      3.106035639451e+03
+ 1.3081     1.210466399449e-02      2.837619649946e+03
+ 1.3456     1.174611063741e-02      2.683091178888e+03
+ 1.4034     1.123225224567e-02      2.469725981745e+03
+ 1.4434     1.090029173299e-02      2.337361211547e+03
+ 1.5038     1.043222914570e-02      2.157720782570e+03
+ 1.5439     1.014065629304e-02      2.049368075628e+03
+ 1.6124     9.676167983702e-03      1.882656844023e+03
+ 1.6586     9.384490984754e-03      1.781085565116e+03
+ 1.7075     9.092082630943e-03      1.682404965067e+03
+ 1.7569     8.813745527858e-03      1.590554590799e+03
+ 1.8484     8.336451113597e-03      1.437896164558e+03
+ 1.8988     8.092885982495e-03      1.362803214517e+03
+ 1.9493     7.861832544977e-03      1.293418865501e+03
+ 1.9955     7.660721577368e-03      1.234406187773e+03
+ 2.0416     7.468998900460e-03      1.179628855821e+03
+ 2.1140     7.184617684986e-03      1.100429447336e+03
+ 2.1581     7.020891385574e-03      1.055646622295e+03
+ 2.2066     6.848400337779e-03      1.009363958888e+03
+ 2.2609     6.663874395715e-03      9.608833084719e+02
+ 2.3157     6.486779405975e-03      9.154830188656e+02
+ 2.3700     6.319634002840e-03      8.735396132768e+02
+ 2.4247     6.158784440460e-03      8.342622259708e+02
+ 2.4519     6.081569440010e-03      8.158112663524e+02
+ 2.5090     5.924597747320e-03      7.789272740644e+02
+ 2.5500     5.816478973920e-03      7.537613044828e+02
+ 2.6100     5.664482000550e-03      7.242010816107e+02
+ 2.6700     5.519170096890e-03      6.864734956413e+02
+ 2.7021     5.444167606810e-03      6.699569342458e+02
+ 2.7621     5.308784127550e-03      6.404425346584e+02
+ 2.7921     5.243268694090e-03      6.263865953175e+02
+ 2.8522     5.116593407130e-03      5.996432134764e+02
+ 2.9181     4.983713588500e-03      5.721914842159e+02
+ 2.9511     4.919314244020e-03      5.589940552769e+02
+ 3.0812     4.679970512870e-03      5.106969944804e+02
+ 3.1481     4.564968446760e-03      4.880077821408e+02
+ 3.2146     4.455649870800e-03      4.668957098317e+02
+ 3.2838     4.346867783740e-03      4.462480349431e+02
+ 3.3563     4.238114525650e-03      4.259906616078e+02
+ 3.3924     4.185649135570e-03      4.163653275511e+02
+ 3.4596     4.091324822560e-03      3.992125008020e+02
+ 3.5279     3.999509364830e-03      3.827166554260e+02
+ 3.6027     3.903127804290e-03      3.656547288210e+02
+ 3.6781     3.810335320290e-03      3.495763860122e+02
+ 3.7527     3.722479350320e-03      3.346334068853e+02
+ 3.7900     3.679965743060e-03      3.274841826735e+02
+
+
 
 
 1B. 1024^3 data
