@@ -163,8 +163,8 @@ do
          fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // sdata(2:10) // ".vor"
          call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
          if (alpha_value>0) then
-         call print_message("computing v vorticity...")
-            call v_vorticity2d(vor,Q,work1,work2,vor(1,1,1,2))
+            call print_message("computing v vorticity...")
+            call v_vorticity2d(vor,work1)
             fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // sdata(2:10) // ".vvor"
             call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
          endif
