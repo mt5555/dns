@@ -160,12 +160,12 @@ do
          call print_message("computing vorticity...")
          call vorticity2d(vor,Q,work1,work2)
          write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // sdata(2:10) // ".vor"
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vor"
          call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
          if (alpha_value>0) then
             call print_message("computing v vorticity...")
             call v_vorticity2d(vor,work1)
-            fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // sdata(2:10) // ".vvor"
+            fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vvor"
             call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
          endif
       endif
