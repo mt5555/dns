@@ -157,13 +157,13 @@ do
          call output_uvw(basename,time,vor,Q,work1,work2,header_user)
       endif
       if (ndim==2) then
-         call print_message("computing vorticity...")
+         call print_message("computing 2D vorticity...")
          call vorticity2d(vor,Q,work1,work2)
          write(sdata,'(f10.4)') 10000.0000 + time
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vor"
          call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
          if (alpha_value>0) then
-            call print_message("computing v vorticity...")
+            call print_message("computing 2D v vorticity...")
             call v_vorticity2d(vor,work1)
             fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vvor"
             call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
