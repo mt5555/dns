@@ -149,12 +149,29 @@ do
    if (convert_opt==1) then  ! -cout vor
       call input_uvw(time,Q,vor,work1,work2,header_user)
       ! outputing vorticity
-      basename=runname(1:len_trim(runname)) // "-vor."
+      if (ndim==3) then
+         basename=runname(1:len_trim(runname)) // "-vor."
+         call print_message("computing vorticity...")
+         call vorticity(vor,Q,work1,work2)
+         call print_message("output vorticity...")
+         call output_uvw(basename,time,vor,Q,work1,work2,header_user)
+      endif
+      if (ndim==2) then
+         call print_message("computing vorticity...")
+         call vorticity2d(vor,Q,work1,work2)
+         write(sdata,'(f10.4)') 10000.0000 + time
+         fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // sdata(2:10) // ".vor"
+         call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
+         if (alpha_value>0) then
+         call print_message("computing v vorticity...")
+            call v_vorticity2d(vor,Q,work1,work2,vor(1,1,1,2))
+            fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // sdata(2:10) // ".vvor"
+            call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
+         endif
+      endif
 
-      call print_message("computing vorticity...")
-      call vorticity(vor,Q,work1,work2)
-      call print_message("output vorticity...")
-      call output_uvw(basename,time,vor,Q,work1,work2,header_user)
+
+
    endif
 
    if (convert_opt==2) then  ! -cout vorm

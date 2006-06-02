@@ -521,6 +521,42 @@ vor=0
 end subroutine
 
 
+subroutine v_vorticity2d(vor,u,dx,dxx,work)
+!
+!  compute   v_vorticity = (1-alpha^2 laplacian) u_vorticity
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 u(nx,ny,nz,2)    ! input
+real*8 vor(nx,ny,nz)    ! output
+real*8 dx(nx,ny,nz) 
+real*8 dxx(nx,ny,nz) 
+real*8 work(nx,ny,nz) 
+
+! local variables
+integer i,j,k,n
+real*8 dummy(1)
+
+call vorticity2d(vor,u,dx,work)
+
+if (alpha_value>0) then
+do n=1,2
+   call der(vor,dx,dxx,work,DX_AND_DXX,n)
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      vor(i,j,k) = vor(i,j,k) - (alpha_value**2)*dxx(i,j,k)
+   enddo
+   enddo
+   enddo
+enddo
+endif
+
+end subroutine
+
+
 
 
 subroutine divergence(div,u,work1,work2)

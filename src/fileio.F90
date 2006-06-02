@@ -827,6 +827,11 @@ else if (equations==NS_UVW) then
          call vorticity2d(q1,Q,work1,work2)
          fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vor"
          call singlefile_io3(time,q1,fname,work1,work2,0,io_pe,.false.,header_type)
+         if (alpha_value>0) then
+            call v_vorticity2d(q1,Q,work1,work2,q1(1,1,1,2))
+            fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) // message(2:10) // ".vvor"
+            call singlefile_io3(time,q1,fname,work1,work2,0,io_pe,.false.,header_type)
+         endif
       endif
    endif
    
