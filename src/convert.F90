@@ -30,8 +30,8 @@
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
-!    tstart=0
-!    tstop=1
+!    tstart=4.000000000 edit below
+!    tstop=4.5
 !    tinc=.5
 !    basename="temp"
 !
@@ -65,9 +65,9 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=5.9
-tstop=6.1
-tinc=.1
+tstart=5.7
+tstop=5.7
+tinc=.3
 
 ! to read times from  file times.dat:
 !  tstart=-1; tinc=0; tname="times.dat"

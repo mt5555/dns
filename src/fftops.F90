@@ -551,7 +551,11 @@ do k=nz1,nz2
       do i=nx1,nx2
          im=imcord(i)
          if (im==g_nx/2) im=0
-         vor(i,j,k) = vor(i,j,k)*(1 + (alpha_value**2)*(im*im +km*km/(Lz*Lz) + jm*jm)*pi2_squared)
+             if(infinite_alpha ==1) then
+                vor(i,j,k) = vor(i,j,k)*((im*im +km*km/(Lz*Lz) + jm*jm)*pi2_squared)         
+             else       
+                 vor(i,j,k) = vor(i,j,k)*(1 + (alpha_value**2)*(im*im +km*km/(Lz*Lz) + jm*jm)*pi2_squared)
+         endif
       enddo
    enddo
 enddo
