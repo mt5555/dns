@@ -166,6 +166,10 @@ else if (init_cond_subtype==2) then
 else if (init_cond_subtype==3) then
    ! slope: k**2, peak k=6
    call livescu_spectrum(enerb_target,NUMBANDS,0,init_cond_subtype)
+else if (init_cond_subtype==4) then
+   do nb=1,NUMBANDS
+	enerb_target(nb) = 10.0 * nb**(-4)
+   enddo
 else
    call abort("init_data_decay: bad init_cond_subtype")
 endif
