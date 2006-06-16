@@ -106,6 +106,7 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 !     1               use Livescu initial spectrum, peaked at 10
 !     2               use Tzaki initial spectrum
 !     3               Livescu spectrum, peaked at 6
+!     4               k**-4 spectrum
 !
 use params
 use mpi
