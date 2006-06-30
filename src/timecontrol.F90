@@ -218,7 +218,7 @@ if (doit_screen) then
 
    if (mu_hyper_value>0 .and. mu_hyper>=2 .and. dealias==1) then
       write(message,'(a,3e12.4)') 'hyper-vis (tensor) cfl: ',&
-           max_hyper
+           max_hyper*delt
       call print_message(message)
    endif
 
