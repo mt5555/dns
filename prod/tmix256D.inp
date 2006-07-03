@@ -1,0 +1,43 @@
+6            ! input file type
+ns_uvw       ! equations
+decay2048    ! initial condition:  KH-blob, KH-anal, iso12
+3            ! init condition subtype
+none          ! forcing:  none, iso, iso12, iso12w, iso23w
+value        ! viscosity type  (value, smallest, kediff, Re)
+1.75e-4        ! viscosity coefficient.  (300)
+none        ! hyper vis
+0.0         ! hyper vis value
+none        ! hypo vis
+0.0         ! hypo vis value
+0            ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+.0            ! smagorinsky
+8             ! max number of schmidt numbers for passive scalars
+1.0, 0        ! passive scalar 1:  schmidt number, type
+1.0, 3        ! passive scalar 2:  schmidt number, type
+.5, 0         ! passive scalar 3:  schmidt number, type
+.5, 3        ! passive scalar 4:  schmidt number, type
+.1, 0        ! passive scalar 5:  schmidt number, type
+.1, 3        ! passive scalar 6:  schmidt number, type
+.05, 0        ! passive scalar 7:  schmidt number, type
+.05, 3        ! passive scalar 8:  schmidt number, type
+0            ! compute_structure functions
+1            ! compute pdfs
+fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+.75          ! time to run
+1.50         ! adv cfl  (0 = disabled, use min_dt)
+.25           ! vis cfl  (0 = disabled, use min_dt)
+0             ! min_dt  
+1             ! max_dt 
+0.0          ! restart_dt  (0 = restart output disabled)
+.05          ! diag_dt   
+.01          ! model_dt   
+.01          ! screen_dt
+.05          ! output_dt  (0 = output disabled, except for custom out times)
+0           ! n_output_custom  number of custom output times  
+00.00       ! custom output times, one per line
+
+
+

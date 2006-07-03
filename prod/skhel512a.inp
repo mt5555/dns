@@ -1,0 +1,30 @@
+4            ! input file type
+ns_uvw       ! equations
+iso12         ! initial condition:  KH-blob, KH-anal, iso12
+0            ! init condition subtype
+iso12_hel         ! forcing:  none, iso, iso12, iso12w, iso23w, iso12_hel
+value        ! viscosity type  (value, smallest, kediff, Re)
+1e-4        ! viscosity coefficient.  (300) (128--5e-4,256--2e-4,512--6e-5)
+none        ! hyper vis
+0.0         ! hyper vis value
+none        ! hypo vis
+0.0         ! hypo vis value
+0          ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+.0            ! smagorinsky
+0            ! compute_structure functions
+fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+10          ! time to run
+1.50         ! adv cfl  (0 = disabled, use min_dt)
+.25           ! vis cfl  (0 = disabled, use min_dt)
+0             ! min_dt
+1             ! max_dt
+0.0          ! restart_dt  (0 = restart output disabled)
+0.2          ! diag_dt
+0.2            ! model_dt
+-10          ! screen_dt
+0.2           ! output_dt  (0 = output disabled, except for custom outtimes)
+0           ! n_output_custom  number of custom output times
+00.00       ! custom output times, one per line

@@ -1,0 +1,28 @@
+3            ! input file type
+ns_psivor    ! equations
+vxpair       ! initial condition:  KH-blob, KH-anal, iso12, restart
+6            ! initial condition subtype
+none         ! forcing:  none, iso12
+value        ! viscosity type  (value, smallest, kediff, Re)
+1e-7         ! viscosity coefficient.  (300)
+0.0           ! alpha (for NS-alpha model)
+0.0            ! smagorinsky
+0            ! compute struct
+4th           ! derivative method  (fft, fft-dealias, 4th)
+in0/onesided   ! x bc 
+custom0        ! y bc
+periodic     ! z bc
+40.0          ! time to run
+1.45          ! adv cfl  (0 = disabled, use min_dt)
+.25           ! vis cfl  (0 = disabled, use min_dt)
+0             ! min_dt  
+1             ! max_dt 
+0.0          ! restart_dt  (0 = restart output disabled)
+.1          ! diag_dt   
+1.0         ! screen_dt
+5.0         ! output_dt  (0 = output disabled, except for custom output times)
+0           ! n_output_custom  number of custom output times  
+.41        ! custom output times, one per line
+.42
+.43
+.44
