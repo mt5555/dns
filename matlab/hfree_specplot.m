@@ -71,18 +71,24 @@ espec = [];
 spec_ave = [];
 kekspec = [];
 kekspec_ave = [];
-e33 = [];
-e33_ave = [];
-ii2 = [];
-ii2_ave = [];
-rr2 = [];
-rr2_ave = [];
-i2i3 = [];
-i2i3_ave = [];
-r2i3 = [];
-r2i3_ave = [];
-par = [];
-par_ave = [];
+spec_meanE_ave=[];
+spec_varE_ave =[];
+
+%the diagnostics below are disabled, can reactivate them in spectrum.F90
+%e33 = [];
+%e33_ave = [];
+%ii2 = [];
+%ii2_ave = [];
+%rr2 = [];
+%rr2_ave = [];
+%i2i3 = [];
+%i2i3_ave = [];
+%r2i3 = [];
+%r2i3_ave = [];
+%par = [];
+%par_ave = [];
+%
+
 costta_pdf_ave = [];
 rhel_pdf_ave = [];
 rhel_rms_ave = [];
@@ -99,15 +105,22 @@ time
 n_r=fread(fid,1,'float64')
 hspec_n=fread(fid,n_r,'float64');
 hspec_p = fread(fid,n_r,'float64');
+hspec_mean = fread(fid,n_r,'float64');
 hspec_var = fread(fid,n_r,'float64');
 espec = fread(fid,n_r,'float64');
 kekspec = fread(fid,n_r,'float64');
-e33 = fread(fid,n_r,'float64'); %square component of I orthogonal to R
-ii2 = fread(fid,n_r,'float64'); %square component of I along R
-rr2 = fread(fid,n_r,'float64'); %square of R
-i2i3 = fread(fid,n_r,'float64'); 
-r2i3 = fread(fid,n_r,'float64');
-par = fread(fid,n_r,'float64'); %|R\crossI|/(R^2 + I^2)
+spec_meanE = fread(fid,n_r,'float64');
+spec_varE = fread(fid,n_r,'float64');
+
+%these are disabled, need to reactivate them in spectrum.F90 if needed
+%e33 = fread(fid,n_r,'float64'); %square component of I orthogonal to R
+%ii2 = fread(fid,n_r,'float64'); %square component of I along R
+%rr2 = fread(fid,n_r,'float64'); %square of R
+%i2i3 = fread(fid,n_r,'float64'); 
+%r2i3 = fread(fid,n_r,'float64');
+%par = fread(fid,n_r,'float64'); %|R\crossI|/(R^2 + I^2)
+%
+
 rhel_specn = fread(fid,n_r,'float64');
 rhel_specp = fread(fid,n_r,'float64');
 rhel_rms = fread(fid,n_r,'float64');
@@ -148,18 +161,25 @@ end
 
 if (length(spec_ave)==0)  
   spec_ave = espec;
+  kekspec_ave = kekspec;
+  spec_meanE_ave = spec_meanE;
+  spec_varE_ave = spec_varE;
   hspec_var_ave = hspec_var;
+  hspec_mean_ave = hspec_mean;
   costta_specn_ave = costta_specn;
   costta_specp_ave = costta_specp;
    rhel_specn_ave = rhel_specn;
    rhel_specp_ave = rhel_specp;
-    kekspec_ave = kekspec;
-    e33_ave = e33;
-    ii2_ave = ii2;
-    rr2_ave = rr2;
-    i2i3_ave = i2i3;
-    r2i3_ave = r2i3;
-    par_ave = par;
+   
+% these have been disabled, see above 
+%    e33_ave = e33;
+%    ii2_ave = ii2;
+%    rr2_ave = rr2;
+%    i2i3_ave = i2i3;
+%    r2i3_ave = r2i3;
+%    par_ave = par;
+%
+
     rhel_rms_ave = rhel_rms;
     
     for i = 1:n_r
@@ -169,18 +189,25 @@ if (length(spec_ave)==0)
 
 else
   spec_ave = spec_ave + espec;
+  kekspec_ave = kekspec_ave + kekspec;
+  spec_meanE_ave = spec_meanE_ave + spec_meanE;
+  spec_varE_ave = spec_varE_ave + spec_varE;
   hspec_var_ave = hspec_var_ave + hspec_var;
+  hspec_mean_ave = hspec_mean_ave + hspec_mean;
   costta_specn_ave = costta_specn_ave + costta_specn;
   costta_specp_ave = costta_specp_ave + costta_specp;  
   rhel_specn_ave = rhel_specn_ave + rhel_specn;
   rhel_specp_ave = rhel_specp_ave + rhel_specp;  
-  kekspec_ave = kekspec_ave + kekspec;
-  e33_ave = e33_ave + e33;
-  ii2_ave = ii2_ave + ii2;
-  rr2_ave = rr2_ave + rr2;
-  i2i3_ave = i2i3_ave+i2i3;
-  r2i3_ave = r2i3_ave+r2i3;
-  par_ave = par_ave+ par;
+  
+% these have been disabled, see above
+%  e33_ave = e33_ave + e33;
+%  ii2_ave = ii2_ave + ii2;
+%  rr2_ave = rr2_ave + rr2;
+%  i2i3_ave = i2i3_ave+i2i3;
+%  r2i3_ave = r2i3_ave+r2i3;
+%  par_ave = par_ave+ par;
+%
+
   rhel_rms_ave = rhel_rms_ave + rhel_rms;
   for i = 1:n_r
     costta_pdf_ave(i,:) = costta_pdf_ave(i,:)+ costta_pdf(i,:);
@@ -255,30 +282,48 @@ disp(sprintf('Energy dissipation rate = %d',e))
 
 end % end while loop
 
-hspec_ave = hspec_ave/(j);
+
 spec_ave = spec_ave/(j);
-hspec_var_ave = hspec_var_ave/(j);
 kekspec_ave = kekspec_ave/(j);
+spec_meanE_ave = spec_meanE_ave/(j);
+spec_varE_ave = spec_varE_ave/(j);
+hspec_var_ave = hspec_var_ave/(j);
+hspec_mean_ave = hspec_mean_ave/(j);
+hspec_ave = hspec_ave/(j);
 costta_specn_ave = costta_specn_ave/(j);
 costta_specp_ave = costta_specp_ave/(j);
 rhel_specn_ave = rhel_specn_ave/(j);
 rhel_specp_ave = rhel_specp_ave/(j);
-e33_ave = e33_ave/(j);
-ii2_ave = ii2_ave/(j);
-rr2_ave = rr2_ave/(j);
-i2i3_ave = i2i3_ave/(j);
-r2i3_ave = r2i3_ave/(j);
-par_ave = par_ave/(j);
+
+% these have been disabled
+%e33_ave = e33_ave/(j);
+%ii2_ave = ii2_ave/(j);
+%rr2_ave = rr2_ave/(j);
+%i2i3_ave = i2i3_ave/(j);
+%r2i3_ave = r2i3_ave/(j);
+%par_ave = par_ave/(j);
+%
+
 rhel_rms_ave = rhel_rms_ave/(j);
 for i = 1:n_r
   costta_pdf_ave(i,:) = costta_pdf_ave(i,:)/j;
   rhel_pdf_ave(i,:) = rhel_pdf_ave(i,:)/j;
 end
 
+figure(23)
+loglog(k,spec_ave.*k'.^(4/3),'b'); hold on;
+loglog(k,spec_meanE_ave.*k'.^(10/3),'m');hold on;
+loglog(k,sqrt(abs(spec_varE_ave - spec_meanE_ave.^2)).*k'.^(10/3),'k');hold on;
+legend('energy spectrum','mean energy','rms energy')
+xlabel('k')
+ylabel(pname)
+
 
 figure(24)
-loglog(k,abs(hspec_ave),'b'); hold on;
-title('Average helicity spectrum')
+loglog(k,abs(hspec_ave).*k'.^(4/3),'b'); hold on;
+loglog(k,hspec_mean_ave.*k'.^(7/3) ,'m');hold on;
+loglog(k,sqrt(abs(hspec_var_ave - hspec_mean_ave.^2)).*k'.^(7/3),'k');hold on;
+legend('helicity spectrum','mean helicity','rms helicity')
 xlabel('k')
 ylabel(pname);
 
@@ -300,8 +345,8 @@ title('Spectrum of cosine of helicity angle');
 %hold off
 
 figure(27)
-semilogx(k,abs(rhel_specp_ave+rhel_specn_ave),'b');hold on;
-semilogx(k,sqrt(abs(rhel_rms_ave - (rhel_specp_ave+rhel_specn_ave).^2)), 'k');
+loglog(k,abs(rhel_specp_ave+rhel_specn_ave),'b');hold on;
+loglog(k,sqrt(abs(rhel_rms_ave - (rhel_specp_ave+rhel_specn_ave).^2)), 'k');
 grid on;
 title('Spectrum of relative helicity and variance of relative helicity');
 %hold off
@@ -339,67 +384,63 @@ legend('E(k) k^{5/3}','E(k) k^{4/3}');
 set(gca,'fontsize',18);	      
 xlabel('k')
 
-figure(33)
-semilogx(k,0.5*e33_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
-semilogx(k,0.5*e33_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
-set(gca,'fontsize',16);
-title('Average compensated energy spectra');
-legend('I_3^2(k) k^{5/3}','I_3^2(k) k^{4/3}');
-set(gca,'fontsize',18);	      
-xlabel('k')
-
-figure(34)
-semilogx(k,0.5*ii2_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
-semilogx(k,0.5*ii2_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
-set(gca,'fontsize',16);
-title('Average compensated energy spectra');
-legend('I_2^2(k) k^{5/3}','I_2^2(k) k^{4/3}');
-set(gca,'fontsize',18);	      
-xlabel('k')
-
-figure(36)
-semilogx(k,0.5*rr2_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
-semilogx(k,0.5*rr2_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
-set(gca,'fontsize',16);
-title('Average compensated energy spectra');
-legend('RR^2(k) k^{5/3}','RR^2(k) k^{4/3}');
-set(gca,'fontsize',18);	      
-xlabel('k')
-
-figure(37)
-semilogx(k,0.5*i2i3_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
-semilogx(k,0.5*i2i3_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
-set(gca,'fontsize',16);
-title('Average compensated energy spectra');
-legend('I_2I_3(k) k^{5/3}','I_2I_3(k) k^{4/3}');
-set(gca,'fontsize',18);	      
-xlabel('k')
-
-figure(38)
-semilogx(k,0.5*r2i3_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
-semilogx(k,0.5*r2i3_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
-set(gca,'fontsize',16);
-title('Average compensated energy spectra');
-legend('R_2I_3(k) k^{5/3}','R_2I_3(k) k^{4/3}');
-set(gca,'fontsize',18);	      
-xlabel('k')
-
-figure(39)
-loglog(k,0.5*par_ave,'k','linewidth',[2]);hold on;
-set(gca,'fontsize',16);
-title('Average compensated energy spectra');
-legend('|R\timesI|/(R^2+I^2)');
-set(gca,'fontsize',18);	      
-xlabel('k')
+% these have been disabled, see above
+%figure(33)
+%semilogx(k,0.5*e33_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
+%semilogx(k,0.5*e33_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+%set(gca,'fontsize',16);
+%title('Average compensated energy spectra');
+%legend('I_3^2(k) k^{5/3}','I_3^2(k) k^{4/3}');
+%set(gca,'fontsize',18);	      
+%xlabel('k')
+%
+%figure(34)
+%semilogx(k,0.5*ii2_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
+%semilogx(k,0.5*ii2_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+%set(gca,'fontsize',16);
+%title('Average compensated energy spectra');
+%legend('I_2^2(k) k^{5/3}','I_2^2(k) k^{4/3}');
+%set(gca,'fontsize',18);	      
+%xlabel('k')
+%
+%figure(36)
+%semilogx(k,0.5*rr2_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
+%semilogx(k,0.5*rr2_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+%set(gca,'fontsize',16);
+%title('Average compensated energy spectra');
+%legend('RR^2(k) k^{5/3}','RR^2(k) k^{4/3}');
+%set(gca,'fontsize',18);	      
+%xlabel('k')
+%
+%figure(37)
+%semilogx(k,0.5*i2i3_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
+%semilogx(k,0.5*i2i3_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+%set(gca,'fontsize',16);
+%title('Average compensated energy spectra');
+%legend('I_2I_3(k) k^{5/3}','I_2I_3(k) k^{4/3}');
+%set(gca,'fontsize',18);	      
+%xlabel('k')
+%
+%figure(38)
+%semilogx(k,0.5*r2i3_ave.*k'.^(5/3),'k','linewidth',[2]);hold on;
+%semilogx(k,0.5*r2i3_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+%set(gca,'fontsize',16);
+%title('Average compensated energy spectra');
+%legend('R_2I_3(k) k^{5/3}','R_2I_3(k) k^{4/3}');
+%set(gca,'fontsize',18);	      
+%xlabel('k')
+%
+%figure(39)
+%loglog(k,0.5*par_ave,'k','linewidth',[2]);hold on;
+%set(gca,'fontsize',16);
+%title('Average compensated energy spectra');
+%legend('|R\timesI|/(R^2+I^2)');
+%set(gca,'fontsize',18);	      
+%xlabel('k')
 
 figure(40)
 loglog(k,abs(hspec_ave)./kekspec_ave,'m');hold on;
 title('Relative helicity = <H(k)>/<2kE(k)> ')
-xlabel('k')
-
-figure(41)
-loglog(k,sqrt(abs(hspec_var_ave - hspec_ave.^2)),'m');hold on;
-title('variance helicity = sqrt(<H(k)^2> - <H(k)>^2) ')
 xlabel('k')
 
 

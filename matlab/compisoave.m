@@ -44,6 +44,12 @@ sphere_harm = 1
     h_epsilon,Q_eps] ...
 = readisostr( [name,ext] );
 
+%for testing, set these to 1
+%epsilon=1
+%h_epsilon=1
+%Q_eps=1
+%mu=1
+
 if sphere_harm ~= 0
 
   [Dlt1_wt, Dlt2_wt] = sphere_harm_weight(Dl(:,:,1),Dl(:,:,2),sphere_harm);
@@ -668,7 +674,7 @@ for i=1:ndir
   x = r_val(:,i);                       % units of box length
   x_plot=x*nx*delx_over_eta;            % units of r/eta
 
-    y=Dl(:,i,2)./((Q_eps)*(x.)); 
+    y=Dl(:,i,2)./((Q_eps)*(x)); 
   
   semilogx(x_plot,y,[':',cdir(i)],'MarkerSize',5); hold on;
 

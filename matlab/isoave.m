@@ -22,9 +22,9 @@ ext='.isostr';
 %nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 
 %anisotropic structure functions have suffix .isostr4
-name='/auto/nest/u/skurien/dns/src/skhel512a0009.0000'
-nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
-ext='.isostr4';
+%name='/auto/nest/u/skurien/dns/src/skhel512a0009.0000'
+%nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+%ext='.isostr4';
 
 %%anisotropic structure functions have suffix .isostr4
 %name='/auto/nest/u/skurien/dns/src/skhel512a0006.0000'
@@ -36,6 +36,11 @@ ext='.isostr4';
 %nx=512; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 %ext='.isostr4';
 
+%potential vorticity correlation functions have suffix .bisostr
+name='/nh/u/skurien/projects/pv/data_analysis/f21norot0068.0000'
+nx=128; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+%Q_eps = 1;
+ext='.bisostr';
 
 
 ndir_use=73;

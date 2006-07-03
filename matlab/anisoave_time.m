@@ -17,12 +17,16 @@ nydecomp=1;
 nzdecomp=1;
 
 %name='/auto/nest/u/skurien/dns/src/skhel512a'
-name='/nh/u/skurien/projects/shear/skhel512a'
-nx=512; delx_over_eta=2.5; epsilon=2.72;teddy = 1.05; %Rl=250
+%name='/nh/u/skurien/projects/shear/skhel512a'
+%name='/nh/u/skurien/projects/shear/livescu/512-3b/512-3b'
+name='/nh/u/skurien/projects/shear/livescu/S=1.275/fort.274'
+nx=512; delx_over_eta=1.855; epsilon=5.398;teddy = 1.05; %Rl=250
 
 cdir = ['k','b','g','r','m','c','k--','b--','r--','m--','c--','k.-','b.-','r.-']; %colors, one for each m-comp.
 col = 0;
-times=[5:0.2:7.2];
+%times=[5:0.2:7.2];
+
+times=[0];
 
 ndir_use = 0;
 
@@ -58,8 +62,8 @@ else
     % get the weights:
     wname=sprintf('../src/voronoi/isoave.weights%i',ndir);
     disp(sprintf('Reading Voronio weights from file:  %s',wname))
-    w=textread(wname,'%f')
-     length(w)
+     w=textread(wname,'%f');
+     length(w);
     % take every other weight
    w=2*w(1:2:length(w));
   end
@@ -180,30 +184,35 @@ ylt2_ds = ylt2_ds + w(dir)*spline(x,ylt2_d,xx);
 ylt_ds = ylt_ds + w(dir)*spline(x,(ylt1_d+ylt2_d),xx);
 
 
-%figure(99)
-%semilogx(x_plot, ylt1_d, cdir(col),'MarkerSize',msize);hold on;
-%figure(98)
-%semilogx(x_plot, ylt2_d, cdir(col),'MarkerSize',msize);hold on;
+figure(99)
+loglog(x_plot, abs(ylt1_d), cdir(col),'MarkerSize',msize);hold on;
+title('|D_{LT2}| in 73 directions')
+figure(98)
+loglog(x_plot, abs(ylt2_d), cdir(col),'MarkerSize',msize);hold on;
+title('|D_{LT3}| in 73 directions')
+figure(97)
+loglog(x_plot, abs(ylt1_d+ylt2_d), cdir(col),'MarkerSize',msize);hold on;
+title('|D_{LT2} + D_{LT3}| in 73 directions')
 
+  if (dir==dir_max)
 
-%  if (dir==dir_max)
-
-  if (dir==47)
+%  if (dir==2)
      ylt1_d = Dl(:,dir,1);
      ylt2_d = Dl(:,dir,2);
 
        figure(1)
 %       subplot(2,1,1)
        loglog(x_plot, abs(ylt2_d./ylt1_d),cdir(col),'MarkerSize',msize);hold on;
-       title('Ratio D_{LT3}/D_{LT2}')
+       title('Ratio D_{LT3}/D_{LT2} computed in max shear direction')
        figure(2)
        loglog(x_plot,abs(ylt1_d),cdir(col),'Markersize',msize);hold on;
-       title('|D_{LT2}|')
+       title('|D_{LT2}| computed in max shear direction')
        figure(3)
        loglog(x_plot,abs(ylt2_d),cdir(col),'Markersize',msize);hold on;
-        title('|D_{LT3}|')
+        title('|D_{LT3}| computed in max shear direction')
+     figure(4)
        loglog(x_plot,abs(ylt1_d+ylt2_d),cdir(index),'Markersize',msize);hold on;
-       title('|D_{LT}|= |D_{LT2}+D_{LT3}|')
+       title('|D_{LT}|= |D_{LT2}+D_{LT3}| computed in max shear direction')
        
        
 %       loglog(x, (ylt2_d),['--',cdir(index)],'MarkerSize',msize);hold on;
@@ -212,9 +221,10 @@ ylt_ds = ylt_ds + w(dir)*spline(x,(ylt1_d+ylt2_d),xx);
 %       loglog(x, -(ylt1_d),['+',cdir(index)],'MarkerSize',msize);hold on;
 %       loglog(x, -(ylt2_d),['--',cdir(index)],'MarkerSize',msize);hold on;
 %       title(sprintf('++ -ve S_{LT1}; -- -ve S_{LT2}; In special directions'))
-  end
+
+     end %matches if (dir==..)
        
-  end
+     end %matches for dir = 1:ndir
 
 ylt1_ds_time = ylt1_ds_time + ylt1_ds;
 ylt2_ds_time = ylt2_ds_time + ylt2_ds;
@@ -263,7 +273,7 @@ title(sprintf('Average -ve S_{LT1} and S_{LT2} projected on j=1, scube = %d', in
 
 end
 
-end
+end %matches for j==
 
 
 end  %matches for subx
@@ -281,10 +291,11 @@ ylt2_ds_time = ylt2_ds_time/length(times);
 ylt_ds_time = ylt_ds_time/length(times);
 
 figure(95)
-semilogx(xx_plot,abs(ylt1_ds_time),'r-');hold on;
-semilogx(xx_plot,abs(ylt2_ds_time),'b-');hold on;
-semilogx(xx_plot,abs(ylt_ds_time),'m-');hold on;
-
+loglog(xx_plot,abs(ylt1_ds_time),'r-');hold on;
+loglog(xx_plot,abs(ylt2_ds_time),'b-');hold on;
+loglog(xx_plot,abs(ylt_ds_time),'m-');hold on;
+legend('|D_{LT2}|','|D_{LT3}|','|D_{LT}|')
+title('angle averaged')
 
 ylt1_time(:,:) = ylt1_time(:,:)/length(times);
 ylt2_time(:,:) = ylt2_time(:,:)/length(times);
