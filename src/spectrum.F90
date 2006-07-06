@@ -91,6 +91,8 @@ real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
 real*8 ::  spec_model(0:max(g_nx,g_ny,g_nz)) ! spectrum of div(tau) or smagorinsky term
 real*8 ::  spec_model_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_rhs(0:max(g_nx,g_ny,g_nz))   ! transfer spec of u dot RHS
+real*8 ::  spec_ens(0:max(g_nx,g_ny,g_nz))   ! enstropy spectrum
+real*8 ::  spec_ens2(0:max(g_nx,g_ny,g_nz))   ! enstropy spectrum
 
 real*8 ::  spec_tmp(0:max(g_nx,g_ny,g_nz))   ! storage, for calling program convienience
 

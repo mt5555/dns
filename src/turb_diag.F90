@@ -65,6 +65,8 @@ if ( g_bdy_x1==PERIODIC .and. &
       call print_message(message)	
    endif
 
+   call compute_enstropy_transfer(Q,q1,q2,q3,work1,work2)
+!  call output_enstropy_spectrum()   we still have to write this
 
 endif
 endif
@@ -1046,3 +1048,94 @@ end subroutine
 
 
 
+
+
+subroutine compute_enstropy_transfer(Q_grid,Qhat,vor_hat,q_hat,work,work2)
+!
+!
+use params
+use fft_interface
+use spectrum
+implicit none
+real*8 :: Q_grid(nx,ny,nz,n_var)    
+real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: vor_hat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: q_hat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 work(nx,ny,nz)
+real*8 work2(nx,ny,nz)
+
+
+! local variables
+integer i,j,k,km,im,jm,n
+real*8 :: vx,wx,uy,wy,uz,vz,xw
+
+
+! take the FFT of Q
+do n=1,n_var
+   work=Q_grid(:,:,:,n)
+   call z_fft3d_trashinput(work,Qhat(1,1,1,n),work2) 
+enddo
+
+!compute vorticity (in spectral space)
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+
+         ! u_x term
+         vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
+         wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)
+         uy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),1)
+         wy = - pi2*jm*Qhat(k,i,j+z_jmsign(j),3)
+         uz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,1)/Lz
+         vz =  - pi2*km*Qhat(k+z_kmsign(k),i,j,2)/Lz
+         
+         vor_hat(k,i,j,1) = (wy-vz)
+         vor_hat(k,i,j,2) = (uz-wx)
+         vor_hat(k,i,j,3) = (vx-uy)
+
+      enddo
+   enddo
+enddo
+
+! compute enstropy spectrum   vor(k)*vor(k)
+spec_ens=0
+do n=1,3
+   call compute_spectrum_z_fft(vor_hat(1,1,1,n),vor_hat(1,1,1,n),spec_tmp)
+   spec_ens=spec_ens+spec_tmp
+enddo
+
+! compute q-enstrlpy spectrum:
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nslabx
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+         vor_hat(k,i,j,1) = (1+xw*alpha_value**2)*vor_hat(k,i,j,1)
+         vor_hat(k,i,j,2) = (1+xw*alpha_value**2)*vor_hat(k,i,j,2)
+         vor_hat(k,i,j,3) = (1+xw*alpha_value**2)*vor_hat(k,i,j,3)
+      enddo
+   enddo
+enddo
+
+
+! compute q-enstropy spectrum  
+spec_ens2=0
+do n=1,3
+   call compute_spectrum_z_fft(vor_hat(1,1,1,n),vor_hat(1,1,1,n),spec_tmp)
+   spec_ens2=spec_ens2+spec_tmp
+enddo
+
+
+
+
+
+
+end subroutine

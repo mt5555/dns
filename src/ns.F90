@@ -421,7 +421,10 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  spec_diff:  spectrum of u dot (u cross omega) 
+!              (used as temporary storage for now)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=0
    do n=1,3
@@ -530,6 +533,12 @@ do j=1,ny_2dz
    enddo
 enddo
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  spec_tmp:  spectrum of u dot (u cross omega + grad(pi) + diffusion) 
+!  since spectrum of u dot grad(pi) is zero, we can now take the
+!  differece between spec_tmp and spec_diff to get the diffusion
+!  spectrum.  (stored in spec_diff)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=-spec_diff
    spec_f=0
@@ -753,7 +762,7 @@ do ns=np1,np2
 enddo
 
 
-
+! compute spectrum of u dot RHS, store in spec_rhs
 if (compute_ints==1 .and. compute_transfer) then
    spec_rhs=0
    do n=1,3
