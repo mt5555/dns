@@ -33,6 +33,7 @@ periodic     ! z bc
 .1           ! model_dt  
 -10          ! screen_dt
 10.0          ! output_dt  (0 = output disabled, except for custom out times)
+0             ! also output the vorticity 
 0           ! n_output_custom  number of custom output times  
 00.00       ! custom output times, one per line
 

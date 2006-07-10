@@ -20,6 +20,9 @@ ifeq ($(UNAME),Linux)
    #VENDOR=INTEL8
    MPI = 
    MPILIB = 
+   ifeq ($(HOST),dosadi)
+      VENDOR=INTEL8
+   endif
    ifeq ($(HOST),mauve.lanl.gov)
       VENDOR=INTEL8
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 

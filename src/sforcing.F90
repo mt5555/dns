@@ -892,7 +892,7 @@ if (0==init_sforcing) then
 
    allocate(fhat(g_nz2,nslabx,ny_2dz,3))
    if (forcing_type==8) then
-      numb1=max(forcing_peak_waveno-1,fwidth)
+      numb1=max(forcing_peak_waveno-fwidth,1)
       numb=forcing_peak_waveno+fwidth
       ener_target=0
       do wn=numb1,numb
