@@ -1635,20 +1635,18 @@ if (str_type==4) then
    !   y20 = (3*rhat(3)**2 - 1)              ! 3*cost*cost - 1
 
    ! note: Dl() Dt() arrays are indexed 2:pmax - they start at 2
-!   Dl(idel,idir,2) = Dl(idel,idir,2) + y2_2*(slt) 
-!   Dl(idel,idir,3) = Dl(idel,idir,3) +  y22*(slt)
-!   Dl(idel,idir,4) = Dl(idel,idir,4) + y2_1*(slt)
-!   Dl(idel,idir,5) = Dl(idel,idir,5) + y21*(slt)
-!   Dl(idel,idir,6) = Dl(idel,idir,6) + y20*(slt)
    Dl(idel,idir,2) = Dl(idel,idir,2) + slt1	!for matlab
    Dl(idel,idir,3) = Dl(idel,idir,3) + slt2	
-
-!   Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + y2_2*(stt)
-!   Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + y22*(stt)
-!   Dt(idel,idir,1,4) = Dt(idel,idir,1,4) + y2_1*(stt)
-!   Dt(idel,idir,1,5) = Dt(idel,idir,1,5) + y21*(stt)
-!   Dt(idel,idir,1,6) = Dt(idel,idir,1,6) + y20*(stt)
    Dt(idel,idir,1,2) = Dt(idel,idir,1,2) + stt	!for matlab
+
+
+
+   slt1 = delu1*delu2
+   slt2 = delu2*delu3
+   stt =  delu2*delu3
+   Dl(idel,idir,4) = Dl(idel,idir,4) + slt1	
+   Dl(idel,idir,5) = Dl(idel,idir,5) + slt2	
+   Dt(idel,idir,1,3) = Dt(idel,idir,1,3) + stt
 	
 endif
 
