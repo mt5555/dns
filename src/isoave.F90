@@ -408,9 +408,9 @@ do n=1,ndim
    enddo
 enddo
 
-
+if (ndim==3) then
 Qs=Q
-do n=1,3
+do n=1,ndim
    call fft3d(Qs(1,1,1,n),Qst)  ! use Qst as a work array
 enddo
 
@@ -455,8 +455,7 @@ do k=nz1,nz2
       enddo
    enddo
 enddo
-
-
+endif
 
 
 
