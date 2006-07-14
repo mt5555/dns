@@ -28,9 +28,11 @@ sc_count=sc_count+1;
 %timename='0000.7019';
 %basename='/scratch1/taylorm/decay2048/decay2048-new.';
 
-timename='0000.0000';
-basename='/scratch1/taylorm/shear/shear';
+%timename='0000.0000';
+%basename='/scratch1/taylorm/shear/shear';
 
+timename='0000.0000';
+basename='~/projects/shear/livescu/S=1.275/fort.298';
 
 
 namesc=sprintf('%i5',sc+10000); namesc=namesc(2:5);
@@ -267,8 +269,8 @@ while (time>=.0 & time<=9999.3)
     loglog(0:ncor-1,mean_1./mean_scale,'r'); hold on;
     loglog(0:ncor-1,mean_2./mean_scale,'g');
     loglog(0:ncor-1,mean_3./mean_scale,'b');
-    loglog(0:ncor-1,.01*(0:ncor-1).^-(7/3));
-    axis([1 128 1e-9 1e-3]);
+    loglog(0:ncor-1,.01*(0:ncor-1).^-(7/3),'k');
+%    axis([1 128 1e-9 1e-3]);
     hold off;
     title(sprintf('E12 (red),  E13 (green),  E23 (blue)'));
     
@@ -276,9 +278,16 @@ while (time>=.0 & time<=9999.3)
     loglog(0:ncor-1,-mean_1./mean_scale,'r'); hold on;
     loglog(0:ncor-1,-mean_2./mean_scale,'g');
     loglog(0:ncor-1,-mean_3./mean_scale,'b');
-    axis([1 128 1e-9 1e-3]);
+     loglog(0:ncor-1,.01*(0:ncor-1).^-(7/3),'k');
+%    axis([1 128 1e-9 1e-3]);
     hold off;
     
+    figure(5);clf;
+    loglog(0:ncor-1,abs(mean_1./mean_scale),'r'); hold on;
+    loglog(0:ncor-1,abs(mean_2./mean_scale),'g');
+    loglog(0:ncor-1,abs(mean_3./mean_scale),'b');
+    hold off;
+    title(sprintf('|E12| (red),  |E13| (green),  |E23| (blue)'));
   end
   
 

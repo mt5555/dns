@@ -11,7 +11,7 @@ eta = 1/(nx*delx_over_eta);
 ext='.isostr';
 ndir = 73;
 
-name='/nh/nest/u/taylorm/sc1024A'
+name='/xraid/skurien/dns_data/sc1024a/sc1024A'
 nx=1024; delx_over_eta=2.95; epsilon=3.57;teddy = 1.05;
 ext='.new.isostr';
 times=[1.2:0.1:2.4];
@@ -111,6 +111,7 @@ for i= 1:2:5;
 figure(i+1);
 loglog(xx_plot(3:lenx),yyl_tangave(3:lenx,i),'r.-','LineWidth',0.1); hold on;
 loglog(xx_plot(3:lenx),yyt_tangave(3:lenx,i),'k.-','LineWidth',0.1); hold on;
+loglog(xx_plot(3:lenx),yyl_tangave(3:lenx,i)+yyt_tangave(3:lenx,i),'b.-','LineWidth',0.1); hold on;
 set(gca,'fontsize',14)
 lo_str = ['\langle \Delta u_L(r)^',sprintf('%i',i+1),'\rangle'];
 tr_str = ['\langle \Delta u_T(r)^',sprintf('%i',i+1),'\rangle'];

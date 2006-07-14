@@ -220,11 +220,11 @@ y_const= 1.2*(yyt_tangave(lex,i))/(xx_plot(lex)).^exp;
      set(gca,'fontsize',14)
      text(xx_plot(1)-1,1.2*(yyt_tangave(4,i)),['r^{',sprintf('%3.2f',exp),'}']);
      sname = sprintf('scalings_%i_dir%d',p,ndir);
-     print('-depsc', sname);
+%     print('-depsc', sname);
 
      figure(21)
      axis([0 1 0 0.5]) 
      cname = sprintf('exponents_dir%d',ndir);
-     print('-depsc', cname);
+%     print('-depsc', cname);
 
 end

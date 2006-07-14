@@ -19,7 +19,8 @@ nzdecomp=1;
 %name='/auto/nest/u/skurien/dns/src/skhel512a'
 %name='/nh/u/skurien/projects/shear/skhel512a'
 %name='/nh/u/skurien/projects/shear/livescu/512-3b/512-3b'
-name='/nh/u/skurien/projects/shear/livescu/S=1.275/fort.274'
+%name='/nh/u/skurien/projects/shear/livescu/S=1.275/fort.298';
+name='/nh/u/skurien/projects/shear/livescu/S=10.2/fort.266';
 nx=512; delx_over_eta=1.855; epsilon=5.398;teddy = 1.05; %Rl=250
 
 cdir = ['k','b','g','r','m','c','k--','b--','r--','m--','c--','k.-','b.-','r.-']; %colors, one for each m-comp.

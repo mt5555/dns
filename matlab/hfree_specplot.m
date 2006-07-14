@@ -439,8 +439,8 @@ xlabel('k')
 %xlabel('k')
 
 figure(40)
-loglog(k,abs(hspec_ave)./kekspec_ave,'m');hold on;
-title('Relative helicity = <H(k)>/<2kE(k)> ')
+loglog(k,k'.*abs(hspec_ave)./kekspec_ave,'m');hold on;
+title('Relative helicity = <H(k)>/<2kE(k)> compensated by k')
 xlabel('k')
 
 

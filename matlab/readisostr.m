@@ -130,9 +130,9 @@ if (nscalars>=7)
   nx=fread(fid,1,'float64');
   ny=fread(fid,1,'float64');
   nz=fread(fid,1,'float64');
-  mu=fread(fid,1,'float64');   
+  mu=fread(fid,1,'float64');  
   ke=fread(fid,1,'float64');
-  epsilon=fread(fid,1,'float64'); 
+  epsilon=fread(fid,1,'float64');
 
   h_epsilon=1;
   if (nscalars>=8) 

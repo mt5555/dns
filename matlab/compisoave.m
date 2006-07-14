@@ -60,6 +60,8 @@ end
 eta = (mu^3 / epsilon)^.25;
 delx_over_eta=(1/nx)/eta;
 
+delx_over_eta = 1                    %this is not being read correctly
+
 
 %
 % use only 49 directions:
@@ -672,18 +674,23 @@ figure(4); subplot(1,1,1);
 
 for i=1:ndir
   x = r_val(:,i);                       % units of box length
-  x_plot=x*nx*delx_over_eta;            % units of r/eta
-
-    y=Dl(:,i,2)./((Q_eps)*(x)); 
   
-  semilogx(x_plot,y,[':',cdir(i)],'MarkerSize',5); hold on;
+   
+  x_plot=x*nx*delx_over_eta            % units of r/eta
+  Dl(:,i,1);
+  Q_eps
+  
+    y=Dl(:,i,1)./((Q_eps)*(x));
+  
+  semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',5); hold on;
 
-  yyave=yyave+w(i)*spline(x,y,xx);
+  yyave=yyave+w(i)*spline(x,y,xx)
 
 
 end
 
-semilogx(xx_plot,yyave,'k','LineWidth',2.5);
+xx_plot
+semilogx(xx_plot,yyave,'r.-','LineWidth',2.5);
 
 y23=yyave;
 max(yyave)
