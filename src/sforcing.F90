@@ -889,6 +889,11 @@ if (0==init_sforcing) then
       ! fparam1 < 0   means use older forcing function
       fwidth = abs(fparam1)
    endif
+   if (io_pe==my_pe) then
+      print *,'Stochastic high wavenumber forcing initialization'
+      write(*,'(a,i3,a,i2)') 'Forcing wave numbers: ',forcing_peak_waveno,'+/-',fwidth
+      write(*,'(a,f8.4)') 'sqrt( <f,f> ) = ',ffval
+   endif
 
    allocate(fhat(g_nz2,nslabx,ny_2dz,3))
    if (forcing_type==8) then
@@ -909,7 +914,7 @@ if (0==init_sforcing) then
             ! original forcing function. I'm not sure if <f,f>=ffval  
             !ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)    
          else
-            ! This is normalized so that <f,f>=  ffval
+            ! This is normalized so that sqrt(<f,f>) =  ffval
             ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
          endif
       enddo
