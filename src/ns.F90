@@ -427,7 +427,7 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=0
-   do n=1,3
+   do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_diff=spec_diff+spec_tmp
    enddo
@@ -542,7 +542,7 @@ enddo
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=-spec_diff
    spec_f=0
-   do n=1,3
+   do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_diff=spec_diff+spec_tmp
       spec_f=spec_f+spec_tmp
@@ -622,9 +622,12 @@ stop
 ! spec_tmp = spectrum of advection + diffusion terms + forcing terms
 ! so compute the difference and store in spec_f to get the spectrum
 ! of just the forcing terms.  
+write(6,*)'min(3) = ',minval(Qhat(:,:,:,3))
+write(6,*)'max(3) = ',maxval(Qhat(:,:,:,3))
+
 if (compute_ints==1 .and. compute_transfer) then
    spec_f=-spec_f
-   do n=1,3
+   do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_f=spec_f+spec_tmp
    enddo
@@ -765,7 +768,7 @@ enddo
 ! compute spectrum of u dot RHS, store in spec_rhs
 if (compute_ints==1 .and. compute_transfer) then
    spec_rhs=0
-   do n=1,3
+   do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_rhs=spec_rhs+spec_tmp
    enddo

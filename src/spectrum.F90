@@ -1897,7 +1897,7 @@ do j=ny1,ny2
          xw=sqrt(rwave*pi2_squared)
          e2 = e2 + .5*xfac*(sum(RR*RR)+ sum(II*II))
          
-         ! these are turned off because they don't give anything useful
+         ! these are turned off because they don't seem to give anything useful
 #if 0
          ! In coordinate system with x_1 || k, x_2 || RR and x_3 ||(k \cross RR):
          
@@ -1961,7 +1961,7 @@ do j=ny1,ny2
                rhel_spec_p(iwave) = rhel_spec_p(iwave) + rhel
             else 
                rhel_spec_n(iwave) = rhel_spec_n(iwave) + rhel
-
+	       
             endif
 
             !spectrum of variance of relative helicity

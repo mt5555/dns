@@ -307,6 +307,7 @@ do
          q2(i,j,k,1) = Q(i,j,k,1) - work2(i,j,k)*q1(i,j,k,1)/work1(i,j,k)
          q2(i,j,k,2) = Q(i,j,k,2) - work2(i,j,k)*q1(i,j,k,2)/work1(i,j,k)
          q2(i,j,k,3) = Q(i,j,k,3) - work2(i,j,k)*q1(i,j,k,3)/work1(i,j,k)
+
       enddo
       enddo
       enddo
