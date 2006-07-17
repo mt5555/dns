@@ -890,7 +890,7 @@ if (0==init_sforcing) then
       fwidth = abs(fparam1)
    endif
    if (io_pe==my_pe) then
-      print *,'Stochastic high wavenumber forcing initialization'
+      print *,'Stochastic high wavenumber forcing initialization:'
       write(*,'(a,i3,a,i2)') 'Forcing wave numbers: ',forcing_peak_waveno,'+/-',fwidth
       write(*,'(a,f8.4)') 'sqrt( <f,f> ) = ',ffval
    endif
