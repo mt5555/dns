@@ -1,5 +1,35 @@
 *******************************************************************************
 
+*******************************************************************************
+7/20/2006
+
+N=12288
+
+Rl = 2000
+
+
+ett = 2*ke/eps
+Rl = lambda*sqrt( 2 KE/3) / mu
+Rl = sqrt(20/3 KE / (mu*epsilon))  
+eps = mu * grad(u)^2
+eta = (mu^3/epsilon)^.25  = delta_x/3
+
+pick units with eps=1
+eta^4/3 = mu
+Rl = sqrt ( 20/3 KE eta^(-4/3) ) = sqrt(20/3 KE) eta^(-2/3)  = 460
+12x resolution increase = 5.24 increase in Rl
+
+delta_t = delta_x / Umax =  C eta / KE 
+delta_t/ett = C eta / KE  eps/2ke  = C eta*eps/ke**2
+
+plot:  max(u,v,w), delx*maxs(4), delt, sqrt(2*KE/3)
+
+
+
+
+                            
+
+
 
 
 *******************************************************************************

@@ -242,9 +242,10 @@ if (doit_screen) then
    !       < u1,u1  > =  (1/3)  || u ||^2         = (2/3) KE
    !
    ! lambda**2 = (2/3) KE / (1/15)epsilon/mu  = 10 KE mu / epsilon
-   ! R_lambda = lambda*sqrt(2 KE/3)/mu  = sqrt(10 KE mu/epsilon) * sqrt(2 KE/3)/mu
-   !                                    = sqrt(20/3 KE mu /epsilon)/mu
-   !                                      sqrt(20/3 KE /epsilon) * sqrt(mu)
+   ! R_lambda = lambda*sqrt(2 KE/3)/mu  
+   !                = sqrt(10 KE mu/epsilon) * sqrt(2 KE/3)/mu
+   !                = sqrt(20/3 KE mu /epsilon)/mu
+   !                = sqrt(20/3 KE / (mu*epsilon))
    !    
    ! note: in 2D, the <u> = sqrt(2 KE/2) !
    !
