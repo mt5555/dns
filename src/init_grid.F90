@@ -771,6 +771,8 @@ if (Lz/=1) then
    write(message,'(a,e10.4)') 'aspect ratio Lz = ',Lz
    call print_message(message)
 endif
+
+
 if (bous/=0) then
    write(message,'(a,e10.4)') 'Boussenesque parameter bous = ',bous
    call print_message(message)
