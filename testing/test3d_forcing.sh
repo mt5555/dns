@@ -23,7 +23,7 @@ if ($#argv == 0 ) then
    echo " 2 = run lots of 3D test cases (different dimensions)"
    echo " p  = run several 3D test cases in parallel (2 and 4 cpus)"
    echo " pr = run several 3D test cases in parallel, with restart"
-   echo " pudm = run several 3D test cases in parallel, with udm restart"
+   echo " pz = run several 3D test cases in parallel, with compressed restart"
    echo " ps = run several 3D test cases in parallel, with spec  restart"
 
    echo " makeref  = generate new reference output, 3D"
@@ -34,16 +34,22 @@ if ($1 == makeref) then
 
    ./gridsetup.py 1 1 1 32 32 32
    make ; rm -f $refout 
-   ./dns -d $rundir reference3d  -i $refin > $refout
-   ./dns -s -d $rundir reference3ds  -i $refin > $refout
-  cat $refout
+   ./dns -d $rundir reference3d  -i $refin | tee $refout
+   ./dns -s -d $rundir reference3ds  -i $refin | tee $refout
+   ./dns -zo -d $rundir reference3dz  -i $refin | tee $refout
+
   cd $rundir
   mv reference3d0000.0000.u restart.u
   mv reference3d0000.0000.v restart.v
   mv reference3d0000.0000.w restart.w
+
   mv reference3ds0000.0000.us restart.us
   mv reference3ds0000.0000.vs restart.vs
   mv reference3ds0000.0000.ws restart.ws
+
+  mv reference3dz0000.0000.uc restart.uc
+  mv reference3dz0000.0000.vc restart.vc
+  mv reference3dz0000.0000.wc restart.wc
 
 endif
 
@@ -120,7 +126,7 @@ endif
 
 
 
-if ($1 == p || $1 == pr || $1 == pudm || $1 == ps) then
+if ($1 == p || $1 == pr || $1 == pz || $1 == ps) then
 
 if ($1 == pr) then
    set opt = "-r"
@@ -128,9 +134,9 @@ if ($1 == pr) then
 else if ($1 == ps) then
    set opt = "-s -r" 
    echo USING SPEC RESTART   
-else if ($1 == pudm) then
-   set opt = "-r -ui" 
-   echo USING UDM RESTART   
+else if ($1 == pz) then
+   set opt = "-r -zi" 
+   echo USING COMPRESSED RESTART   
 else
    set opt = ""
    echo NOT USING RESTART
