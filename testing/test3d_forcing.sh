@@ -16,7 +16,7 @@ endif
 
 
 if ($#argv == 0 ) then
-   echo "./test3d.sh [1,2,p]"
+   echo "./test3d_forcing.sh [1,2,p,...]"
    echo " 1 = run dns without restart, simple 3D test case"
    echo " r = run dns with restart, simple 3D test case"
    echo " s = run dns with passive scalars, with and without restart, simple 3D test case"
