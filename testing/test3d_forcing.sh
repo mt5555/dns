@@ -17,7 +17,8 @@ endif
 
 if ($#argv == 0 ) then
    echo "./test3d.sh [1,2,p]"
-   echo " 1 = run dns with and without restart, simple 3D test case"
+   echo " 1 = run dns without restart, simple 3D test case"
+   echo " r = run dns with restart, simple 3D test case"
    echo " s = run dns with passive scalars, with and without restart, simple 3D test case"
    echo " 2 = run lots of 3D test cases (different dimensions)"
    echo " p  = run several 3D test cases in parallel (2 and 4 cpus)"
@@ -56,7 +57,11 @@ echo "***********************************************************"
 echo "without restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
+endif
 
+
+if ($1 == r) then
+./gridsetup.py 1 1 1 32 32 32
 
 echo "***********************************************************"
 echo "with restart:"
@@ -67,11 +72,6 @@ echo "***********************************************************"
 echo "with spectral restart:"
 make >& /dev/null ;  rm -f $tmp ; ./dns -s -r -d $rundir reference3d  -i $refin > $tmp 
 ../testing/check.sh $tmp $refout
-
-
-
-
-
 
 endif
 

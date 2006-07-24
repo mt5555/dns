@@ -89,7 +89,7 @@ Running the code.
 Step 4.
 Looking at the data.
 
-Not yet documented - contact Mark Taylor (mt@lanl.gov) for help.
+Not yet documented - contact Mark Taylor (mataylo@sandia.gov) for help.
 
 There are matlab scripts in the dns/matlab directory for
 reading and processing all the output produced by the code.
