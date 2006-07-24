@@ -19,14 +19,14 @@ range=0:50;
 fid2=-1;
 
 
-fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
-nx=2048;
+%fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
+%nx=2048;
 
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-%fid=endianopen('/home/mataylo/codes/dns_data/sc1024A/sc1024A.scalars','r');
-%nx=1024;
+fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
+nx=1024;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
@@ -112,10 +112,12 @@ ens = ints(7,:);   %  enstrophy
 maxU=maxs(1,:);  % at time_after
 maxV=maxs(2,:);  % at time_after
 maxW=maxs(3,:);  % at time_after
-%  maxs(4,:)     % max used for CFL, at time_after
+maxUcfl=maxs(4,:);     % max used for CFL, at time_after
 maxvor=maxs(5,:);
 time_after=maxs(6,:);
 time=maxs(7,:);
+
+
 
 % $$$ % time  ke  
 % $$$ for i=1:length(time)
@@ -186,10 +188,12 @@ end
 
 
 figure(3);
-plot(time,lambda)
-title('\lambda')
-xlabel('time')
-print -djpeg -r72 lambda.jpg
+% $$$ plot(time,lambda)
+% $$$ title('\lambda')
+% $$$ xlabel('time')
+% $$$ print -djpeg -r72 lambda.jpg
+
+
 
 
 
@@ -267,6 +271,26 @@ tturn=-2*ke./ke_diss_d;
 tturn = tturn(ceil(length(tturn)/2):length(tturn));
 tturn = sum(tturn)/length(tturn);
 disp(sprintf('eddy turnover time (averaged over last haf of data) = %f ',tturn));
+
+
+maxU = maxU(ceil(length(maxU)/2):length(maxU));
+maxU = sum(maxU)/length(maxU);
+disp(sprintf('maxU (average over last half of data) = %f ',maxU));
+maxV = maxV(ceil(length(maxV)/2):length(maxV));
+maxV = sum(maxV)/length(maxV);
+disp(sprintf('maxV (average over last half of data) = %f ',maxV));
+maxW = maxW(ceil(length(maxW)/2):length(maxW));
+maxW = sum(maxW)/length(maxW);
+disp(sprintf('maxW (average over last half of data) = %f ',maxW));
+
+maxUcfl=maxUcfl/nx;
+maxUcfl = maxUcfl(ceil(length(maxUcfl)/2):length(maxUcfl));
+maxUcfl = sum(maxUcfl)/length(maxUcfl);
+disp(sprintf('maxUcfl (average over last half of data) = %f ',maxUcfl));
+
+ke = ke(ceil(length(ke)/2):length(ke));
+ke = sum(ke)/length(ke);
+disp(sprintf('ke (average over last half of data) = %f ',ke));
 
 
 % averge Smith's R0 to a number

@@ -110,7 +110,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 !local
-integer :: iwave_max,i,n
+integer :: iwave_max,i,n,j
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 

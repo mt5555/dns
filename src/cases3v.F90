@@ -38,6 +38,8 @@ if (init==0) return
 
 
 ! compute U using random vorticity
+! rantype=0   reproducable with different parallel decompositions, slow
+! rantype=1   fast, not reproducable
 call ranvor(Q,PSI,work,work2,rantype)
 
 

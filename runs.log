@@ -4,8 +4,10 @@
 7/20/2006
 
 N=12288
-
 Rl = 2000
+delt=.0001 ett
+vorticity, velocity, pressure saved every .02 ett
+
 
 
 ett = 2*ke/eps
@@ -14,19 +16,31 @@ Rl = sqrt(20/3 KE / (mu*epsilon))
 eps = mu * grad(u)^2
 eta = (mu^3/epsilon)^.25  = delta_x/3
 
-pick units with eps=1
-eta^4/3 = mu
-Rl = sqrt ( 20/3 KE eta^(-4/3) ) = sqrt(20/3 KE) eta^(-2/3)  = 460
-12x resolution increase = 5.24 increase in Rl
-
-delta_t = delta_x / Umax =  C eta / KE 
-delta_t/ett = C eta / KE  eps/2ke  = C eta*eps/ke**2
-
-plot:  max(u,v,w), delx*maxs(4), delt, sqrt(2*KE/3)
 
 
+sc1024A runs:
+
+eps:  3.58
+eta: .000331    eta/delx = .3388
+     spherical:  eta * kmax = eta* nx*pi*2*sqrt(2)/3  = 1.0034
+     2/3:        eta * kmax = eta* nx*pi*(2/3)        = .7095
+
+Rl=435
+ett=1.05
+mu=3.5e-5
+maxU = 6.18,6.33,6.04
+maxUcfl = 11.77
+ke = 1.886      sqrt(ke)=1.37  =  maxU/4.5
+delt ~ 1.2e-4
 
 
+My CFL:  (delt=.0001)
+11.77 * delt/delx = 1.5                     OR
+8.6 sqrt(ke) delt/delx = 1.5             1.9*maxU delt/delx = 1.5
+sqrt(ke) delt/delx = .17                       maxU delt/delx = .8
+
+Pope:   sqrt(k) delt/delx = .05
+        maxU delt/delx = .22
                             
 
 

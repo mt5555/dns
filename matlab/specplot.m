@@ -26,10 +26,10 @@ tsave=[];
 %movie_times=.3:.1:1;
 %mu=1.75e-4;
 
-%name='temp0000.0000';
-%namedir='../';
-%CK_orig=1.613; movie_plot=0; endian='l';
-%mu=1e-4;
+name='temp0000.0000';
+namedir='../src/';
+CK_orig=1.613; movie_plot=0; endian='l';
+mu=1e-4;
 
 
 %name='decay2048-ave64.-new.0000.4026';

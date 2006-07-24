@@ -637,9 +637,6 @@ stop
 ! spec_tmp = spectrum of advection + diffusion terms + forcing terms
 ! so compute the difference and store in spec_f to get the spectrum
 ! of just the forcing terms.  
-write(6,*)'min(3) = ',minval(Qhat(:,:,:,3))
-write(6,*)'max(3) = ',maxval(Qhat(:,:,:,3))
-
 if (compute_ints==1 .and. compute_transfer) then
    spec_f=-spec_f
    do n=1,ndim
