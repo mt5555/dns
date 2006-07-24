@@ -320,9 +320,25 @@ enddo
 ! ns_vorticity1:  compute vorticity-hat, transform into rhsg.
 !                 3 calls to z_ifft3d:  FFT: 3x,3y,3z  transpose: 3z,6x,6y
 ! 
+! 
+! This subroutine, when using a 1D data decompostion (hyperslabs in Z)
+! will save 1 parallel traspose, at the expense of 1 extra FFT.
 ! ns_vorticity2:  Q_grid: vx,wx,uy,wy:  FFT: 4x,4y  tranpose: 4x,4y
 !                 Q_hat: uz,vz          FFT: 2x,2y,2z  tranpose 2z,4x,4y
 ! total:                                FFT: 6x,6y,2z  tranpose: 2z,8x,8y
+!  2 expensive transforms, 14 FFTs.  
+!  cost of full spectral algorithm:  9 FFTs, 3 expensive transforms.
+!
+!
+! Can we do the same trick with a pencil decomposition?  pencils in x
+! compute from Q_hat:  wy-vz, uz, uy
+! compute from Qgrid:  wx,vx
+!
+! ns_vorticity3:  Q_grid: vx,wx         FFT: 4x        tranpose: 4x
+!                 Q_hat: wy-uz,vz,uy    FFT: 3x,3y,3z  tranpose 3z,6x,6y
+! total:                                FFT: 7x,3y,3z     10x,3z,6y
+!    13 FFTs,  expensive transforms: 3z+6y         
+!    cost of full spectral algorithm: 9 FFTs, expensive transforms: 3z+6y 
 !               
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -337,12 +353,11 @@ enddo
 #ifdef ALPHA_MODEL
    call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
-   if (ncpu_z==1) then
+!  if (ncpu_x==1 .and. ncpu_y==1) then
+!     call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
+!  else
       call ns_vorticity(rhsg,Qhat,work,p)
-      ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
-   else
-      call ns_vorticity(rhsg,Qhat,work,p)
-   endif
+!  endif
 #endif
 
 
