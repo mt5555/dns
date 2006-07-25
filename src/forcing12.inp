@@ -1,33 +1,40 @@
-4            ! input file type
-ns_uvw       ! equations
-iso12         ! initial condition:  KH-blob, KH-anal, iso12
+8             ! input file type
+1             ! file I/O header type   1-5
+ns_uvw        ! equations
+iso12        ! initial condition:  KH-blob, KH-anal, iso12
 0            ! init condition subtype
-iso12       ! forcing:  none, iso, iso12, iso12w, iso23w
+iso12        ! forcing:  none, iso, iso12, iso12w, iso23w
+0.0  0       ! forcing parameters (not used for iso12)
 value        ! viscosity type  (value, smallest, kediff, Re)
-3e-3        ! viscosity coefficient.  (300)
-none        ! hyper vis
+1e-4         ! viscosity coefficient.  (300)
+none         ! hyper vis
 0.0         ! hyper vis value
 none        ! hypo vis
 0.0         ! hypo vis value
-0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
-.0            ! smagorinsky
-0            ! compute_structure functions
-fft-sphere   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
-periodic     ! x bc  (periodic, no-slip)
-periodic     ! y bc
-periodic     ! z bc
-2.0          ! time to run
-1.45         ! adv cfl  (0 = disabled, use min_dt)
-.25           ! vis cfl  (0 = disabled, use min_dt)
-0             ! min_dt  
-1             ! max_dt 
-0.0          ! restart_dt  (0 = restart output disabled)
--10          ! diag_dt   
-0            ! model_dt   
--10          ! screen_dt
-1.0           ! output_dt  (0 = output disabled, except for custom out times)
-0           ! n_output_custom  number of custom output times  
-00.00       ! custom output times, one per line
+0.0           ! fcoriolis  rotation
+1.0           ! Z sscaling  (aspect ratio)
+0             ! Bous. parameter  (for stratified problems)
+0             ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+0             ! smagorinsky
+0             ! Number of passive scalars
+0             ! compute_structure functions
+0             ! compute pdf functions
+fft-dealias   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+periodic      ! x bc  (periodic, no-slip)
+periodic      ! y bc
+periodic      ! z bc
+2.0           ! time to run
+1.5           ! adv cfl  (0 = disabled, use min_dt) 
+0.200         ! vis cfl  (0 = disabled, use min_dt) 
+0.000001      ! min_dt  
+.1            ! max_dt 
+0             ! restart_dt  (this is not used)
+.2            ! diag_dt    how often to dump simple diagnostics to file
+.2            ! model_dt   compute and output spectra, structure functions, expensive diagnostics
+-10           ! screen_dt  output info to stdout
+.2            ! output_dt  output snapshots
+0             ! also output the vorticity 
+0             ! n_output_custom  number of custom output times  
 
 
 
