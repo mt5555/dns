@@ -14,12 +14,15 @@ ett = 2*ke/eps
 Rl = lambda*sqrt( 2 KE/3) / mu
 Rl = sqrt(20/3 KE / (mu*epsilon))  
 eps = mu * grad(u)^2
-eta = (mu^3/epsilon)^.25  = delta_x/3
+eta = (mu^3/epsilon)^.25  = delta_x/3           mu ~= N^(-4/3)
+                                                      2x = .40
+                                                     12x = .036
 
-
-
-sc1024A runs:
-
+12288 run modeled after sc1024A:
+   delt = 1e-5
+   mu = .001        Rl = 
+g 
+hxtfsc1024A runs:t
 eps:  3.58
 eta: .000331    eta/delx = .3388
      spherical:  eta * kmax = eta* nx*pi*2*sqrt(2)/3  = 1.0034
