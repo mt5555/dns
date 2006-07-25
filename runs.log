@@ -10,18 +10,41 @@ vorticity, velocity, pressure saved every .02 ett
 
 
 
+
 ett = 2*ke/eps
 lambda=sqrt( mu*(2*Euse/3) ./ (epsilon/15)  );
 Rl = lambda*sqrt( 2 KE/3) / mu
-Rl = sqrt(20/3 KE / (mu*epsilon))  
+Rl = KE sqrt(20/3 / (mu*epsilon))  
 eps = mu * grad(u)^2
 eta = (mu^3/epsilon)^.25  = delta_x/3           mu ~= N^(-4/3)
                                                       2x = .40
                                                      12x = .036
 
 12288 run modeled after sc1024A:
-   delt = 1e-5
-   mu = .125e-6          Rl = 
+   ke=1.886  eps=3.58  mu = 1.25e-6   
+
+   delt = 1e-5   sqrt(ke) delt/delx = .17
+   Rl = 2290
+   eta*kmax_spherical = eta * nx*pi*2*sqrt(2)/3 = 1.0
+   eta*kmax_2/3       = eta * nx*pi*(2/3) = .70
+
+12288 with Rl=2000 
+   ke=1.886  eps=3.58  mu = 1.6e-6   
+
+   delt = 1e-5      sqrt(ke) delt/delx = .17
+   Rl = 2034                 
+   eta*kmax_spherical = eta * nx*pi*2*sqrt(2)/3 = 1.2
+   eta*kmax_2/3       = eta * nx*pi*(2/3) = .84
+
+
+12288 with Rl=2000 
+   ke=1.886  eps=3.58  mu = 2e-6
+
+   delt = 1e-5      sqrt(ke) delt/delx = .17
+   Rl = 2034                 
+   eta*kmax_spherical = eta * nx*pi*2*sqrt(2)/3 = 1.2
+   eta*kmax_2/3       = eta * nx*pi*(2/3) = .84
+
 
 
 
