@@ -9,8 +9,6 @@ delt=.0001 ett
 vorticity, velocity, pressure saved every .02 ett
 
 
-
-
 ett = 2*ke/eps
 lambda=sqrt( mu*(2*Euse/3) ./ (epsilon/15)  );
 Rl = lambda*sqrt( 2 KE/3) / mu
@@ -19,6 +17,17 @@ eps = mu * grad(u)^2
 eta = (mu^3/epsilon)^.25  = delta_x/3           mu ~= N^(-4/3)
                                                       2x = .40
                                                      12x = .036
+
+
+Resolution Requirements  N^3, 2/3 dealiasing:
+     ke=1.886  eps=3.58 
+
+     eta*kmax = eta * 2*pi*(N/3)
+     eta*kmax = (mu^3/epsilon)^.25 * N*pi*(2/3)
+     mu^3 =  eps*[(eta*kmax)/(pi*2N/3)]**4 
+     mu   =  eps**(1/3) * [(eta*kmax)/(2*pi*N/3)]**4/3 
+     Rl   = ke sqrt(20/3/(mu*eps)
+
 
 12288 run modeled after sc1024A:
    ke=1.886  eps=3.58  mu = 1.25e-6   

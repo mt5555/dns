@@ -1,35 +1,144 @@
-Outline of steps required to compile and run the CCS-2 DNS code:
+               Sandia/LANL DNS code
+                    Mark Taylor
+                 mataylo@sandia.gov
 
+
+
+This directory and its subdirectories contain the Sandia/LANL DNS
+code.  This code solves viscous fluid dynamics equations in a periodic
+rectangular domain (2D or 3D) with a pseudo-spectral method or 4th
+order finite differences and with the standard RK4 time stepping
+scheme.
+
+The code is documented in 
+[1] Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
+[2] Kurien and Taylor, Los Alamos Science 29, 2005. 
+
+
+The code has options to solve the following equations:
+1. Navier-Stokes (primitive variables)  2D and 3D
+2. Navier-Stokes (stream function/vorticity) 2D only
+2. Lagrangian Averaged Navier Stokes (The Alpha Model)  2D and 3D
+3. Shallow water  2D only
+4. Boussinesque (with stratification)  3D only
+
+In can optionally allow for rotation, arbitrary aspect ratio and an
+arbitrary number of passive scalars.  It is an MPI code and can use
+an arbitrary 3D domain decomposition, (allowing for both slab
+decomposition and pencil decomposition).  For a grid of size N^3, it
+can run on up to N^3/8 processors.  It has been run on as many as 2048
+processors (with grids of size 512^3, 1024^3 and 2048^3)
+
+This README file contains instructions to compile and run
+the purest form of the code: Navier-Stokes with deterministic
+low waver number forcing, use RK4 and a pseudo-spectral 
+method.  The equations are solved in a triply periodic cube
+of side length 1 with no passive scalars or rotation.
+The deterministic low wave number forcing we use is a simplified
+version of Overholt and Pope, Comput. Fluids 27 1998, and
+is documented in detail in [1].  Some more, but incomplete documentation
+for this code is in the file "dns.doc" and rotation.tex.
+
+
+The steps required to compile and run the code are:
+
+0.  Choose the resolution
 1.  set up the grid dimensions
 2.  compile the code
-3.  run 
-4.  analysis of output
+3.  edit the input file, forcing12.inp
+4.  run 
+5.  validate the results 
+6.  analysis of output
 
 
+Step 0.
+Choose the resolution and resolution requirements.
+
+The parameters set by the user are the grid resolution and viscosity
+coefficieint.  The forcing we use is such that epsilon=3.58 and
+KE=1.89, and so the eddy turnover time is 1.05.  (These values are
+from N=1024^3. At other values of N, they may change slightly)
+But if we assume these values of KE and epsilon, we can then
+determine the correct viscosity to use for a given N:
+
+grid of size:             N^3
+resolution constraint:    G = eta*kmax
+
+Suggested value of G for this problem (forced low wave number 
+turbulence) G=1.0.   (For improved resolution in the viscous regime,
+some people use the more restrictive G=1.5)
+
+The code supports two types of dealiasing: spherical and 2/3 rule.
+
+spherical dealiasing,  kmax = 2*pi*N*sqrt(2)/3
+2/3 dealising:         kmax = 2*pi*N/3
+
+(the 2pi shows up in the wave number because our box is of side
+length 1). 
+
+Given the choice of G and N, we can then determine the viscosity.
+
+Using that eta = (mu^3/epsilon)^.25, we have:
+
+mu =    epsilon**(1/3) * [G/kmax]**4/3 
+
+The resulting Taylor Reynolds number:
+
+Rl  = KE sqrt(20/(3*mu*epsilon))
+
+
+Example 1
+    1024^3, with 2/3 dealiasing and G=1.  The viscosity
+    coefficient used should be: mu = 5.5e-5.  
+    The expected Rl = 347
+
+Example 2:
+    1024^3, with spherical dealiasing and G=1.  The viscosity
+    coefficient used should be: mu = 3.5e-5
+    The expected Rl = 437
+
+Example 3:
+    64^3, with spherical dealiasing and G=1.  The viscosity
+    coefficient used should be: mu = .0014
+    The expected Rl = 69
 
 
 Step 1.
 Set up the grid dimensions.  
 
 I use a python script, 'gridsetup.py' which will create the
-needed 'params.h' file.  Here are some examples:
+needed 'params.h' file.   To run an N^3 problem, with a 
+domain decompostion of nx*ny*nz (so NCPUS=nx*ny*nz):
 
-      To setup for a 64x64x64 grid, on 4 cpu:
-      (parallel decomposition: 1x1x4, so 4 hyperslabs in the z-direction)
+      ./gridsetup.py  nx ny nz  N N N
 
-      % cd dns/src
-      % ./gridsetup.py 1 1 4 64 64 64 
+Here are some examples:
 
-
-      And a 32x32x32 grid, to run using just 1 cpu:
-
+      A 32x32x32 grid, to run using just 1 cpu:
       % cd dns/src
       % ./gridsetup.py 1 1 1 32 32 32
 
+      A 64x64x64 grid, on 4 cpu:
+      (parallel decomposition: 1x1x4, so 4 hyperslabs in the z-direction)
+      % cd dns/src
+      % ./gridsetup.py 1 1 4 64 64 64 
+
+      A 64x64x64 grid, on 64 cpu:
+      (parallel decomposition: 1x2x32, so a pensil decomposition)
+      % cd dns/src
+      % ./gridsetup.py 1 2 32 64 64 64 
+
+
+There are several restrictions:  For a grid N^3, N must be a power
+of 2,3,5, and N/nx, N/ny and N/nz must be an even integers.
+The python script will give an error if these restrictions are 
+violated.
+
 If you do not have python installed on your system, you can
-instead copy the file 'params.h'test' to params.h' and then
+instead copy the file 'params.h.test' to params.h' and then
 edit params.h by hand.  By default, it is set up to run a 32^3
-simulaiton on 1 cpu.
+simulation on 1 cpu.
+
 
 
 Step 2.
@@ -46,20 +155,31 @@ To build the code on one of the above systems, just run:
       % make
 
 
-Compiling the code on Windows using Visual Studio and Intel Fortran 90:
-      I haven't done this yet, but it should be possible.
-      I think these options need to be added in various configuration
-      pull down windows:
-
-      Intel fortran compiler options:  -Vaxlib -w90 -O1 -tpp7
-      Preprocessor options:   -DLINUX -DUSE_FFT99
-
 
 
 
 Step 3.
-Running the code.
+Edit the input file
 
+    The input file for this forced case is "forcing12.inp" in
+    the src directory.  
+
+    Parameters of interest:
+
+    viscosity coefficient mu (line 9)    change to value computed above
+                                         in step 0.
+    derivative method (line 14)          set to "fft-dealias" for 2/3 rule,
+                                         or "fft-sphere" for spherical 
+                                         dealiasing 
+    time to run (line 26)                time is measured in dimensional units
+                                         For this problem, 1 eddy turnover time
+                                         (after the code equilibriates) is 
+                                         close to 1 dimensional time, so set
+                                         this to 1.0
+ 
+
+Step 4.
+Run the code:
     To run the code on a single processor:
 
         ./dns  -i forcing12.inp output_name  
@@ -85,8 +205,48 @@ Running the code.
     the filename would be:  output_name0000.2500.u.
 
 
+    For a parallel run:
+        mpirun -np X  ./dns -mio -i forcing12.inp output_name  
 
-Step 4.
+    The "-mio" option will turn on MPI-IO.  Without MPI-IO, all output
+    will be funneled through processor 0.  With MPI-IO, the code will
+    still produce identical files, but will have up to M
+    processors write data with asynchronious non-overlapping
+    writes.  The default value of M is 32, but it can be tweaked by
+    editing subroutine "mpi_io_init".   M can be set to be equal to
+    the number of processes if your MPI-IO library and/or parallel file
+    system has good I/O aggregation.
+
+
+    These output files are also used as restart files.  
+    The restart is exact. To do a restart run copy (or create links)
+    the snapshot to used to restart.u, restart.v and restart.w,
+    and then add the "-r" option when running the code.
+   
+
+Step 5.
+Validate the results.
+
+There are several test cases and scripts which run short problems
+and make sure the output is identical to the reference solutions.
+These are not yet documented.
+
+A quick test:  run the 64^3 problem, with the forcing12.inp
+input file, with mu=.0014, "fft-sphere", and time=1.0.  
+At time 1.0, the data (given in stdout) should be approximatly:
+
+kmax*eta =  
+KE       = 
+R_lambda = 
+
+I haven't done a detailed sensitiviy study, but fluctuations up to 20%
+of the above should be reasonable.
+ 
+
+
+
+
+Step 6.
 Looking at the data.
 
 Not yet documented - contact Mark Taylor (mataylo@sandia.gov) for help.

@@ -6,7 +6,7 @@ iso12        ! initial condition:  KH-blob, KH-anal, iso12
 iso12        ! forcing:  none, iso, iso12, iso12w, iso23w
 0.0  0       ! forcing parameters (not used for iso12)
 value        ! viscosity type  (value, smallest, kediff, Re)
-1e-4         ! viscosity coefficient.  (300)
+.0014        ! viscosity coefficient.  (300)
 none         ! hyper vis
 0.0         ! hyper vis value
 none        ! hypo vis
@@ -19,11 +19,11 @@ none        ! hypo vis
 0             ! Number of passive scalars
 0             ! compute_structure functions
 0             ! compute pdf functions
-fft-dealias   ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+fft-sphere    ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic      ! x bc  (periodic, no-slip)
 periodic      ! y bc
 periodic      ! z bc
-2.0           ! time to run
+1.0           ! time to run
 1.5           ! adv cfl  (0 = disabled, use min_dt) 
 0.200         ! vis cfl  (0 = disabled, use min_dt) 
 0.000001      ! min_dt  
