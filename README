@@ -235,9 +235,9 @@ A quick test:  run the 64^3 problem, with the forcing12.inp
 input file, with mu=.0014, "fft-sphere", and time=1.0.  
 At time 1.0, the data (given in stdout) should be approximatly:
 
-kmax*eta =  
-KE       = 
-R_lambda = 
+kmax*eta =  .9990
+KE       =  1.6800
+R_lambda =  61.47
 
 I haven't done a detailed sensitiviy study, but fluctuations up to 20%
 of the above should be reasonable.
