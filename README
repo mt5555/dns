@@ -145,9 +145,10 @@ Step 2.
 Compilation
 
 A makefile is included which should run on Linux, SGI, OSF1 (Compaq)
-AIX and SunOS.  On Linux, the makefile by default used the Intel F90
-compiler, but you can edit the file and switch this to Lahey or PGI.
-For the other systems, it uses the vendor supplied F90 compiler.
+AIX and SunOS, but some editing will probably be required.  On Linux,
+the makefile by default used the Intel F90 compiler, but you can edit
+the file and switch this to Lahey or PGI.  For the other systems, it
+uses the vendor supplied F90 compiler.
 
 To build the code on one of the above systems, just run:
 
@@ -233,17 +234,21 @@ These are not yet documented.
 
 A quick test:  run the 64^3 problem, with the forcing12.inp
 input file, with mu=.0014, "fft-sphere", and time=1.0.  
-This problem takes 20m on a PC bought in 2003.
 At time 1.0, the data (given in stdout) should be approximatly:
              
-kmax*eta =  .9990
-KE       =  1.6800
-R_lambda =  61.47
 
-I haven't done a detailed sensitiviy study, but fluctuations up to 20%
-of the above should be reasonable.
- 
+            intel compiler       PGI compiler
+              AMD Athlon           pentium M
+              Linux FC4           Linux RHEL4      
 
+kmax*eta =      .9990                .9839   
+KE       =     1.6800               1.6828
+R_lambda =    61.47                59.7
+run time       20min                 66min
+
+The initial condition has random phases, and so these results are
+compiler and OS dependent.  I haven't done detailed sensitivity study,
+but fluctuations of 5% in the above numbers should be reasonable.
 
 
 
