@@ -187,8 +187,7 @@ Run the code:
 
     using the input file 'forcing12.inp'.  This runs a triply 
     periodic forced turbulence problem.  The forcing is in
-    wave numbers 1 and 2.  It should reach equilibrium at time 
-    t=.75, with an R_lambda=37.  
+    wave numbers 1 and 2. 
 
     Each snapshot is in a file named:
 
