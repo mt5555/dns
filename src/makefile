@@ -17,11 +17,16 @@ F77FIXED=
 ifeq ($(UNAME),Linux)
    VENDOR=LAHEY
    #VENDOR=PGI
+   #VENDOR=PGIMPI
    #VENDOR=INTEL8
    MPI = 
    MPILIB = 
    ifeq ($(HOST),dosadi)
       VENDOR=INTEL8
+   endif
+   ifeq ($(ARCH),x86_64)
+      VENDOR=PGIMPI
+      MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
    endif
    ifeq ($(HOST),mauve.lanl.gov)
       VENDOR=INTEL8
@@ -62,6 +67,12 @@ ifeq ($(UNAME),Linux)
    #FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
    FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
+   endif 
+
+   ifeq ($(VENDOR),PGIMPI)
+   F90 = mpif90
+   CC=pgcc
+   FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
    endif 
 
 

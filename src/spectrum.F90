@@ -1100,7 +1100,7 @@ real*8 :: spectrum_z(0:g_nz/2)
 
 ! local variables
 real*8 rwave
-real*8 :: spectrum_in(max(g_nx,g_ny,g_nz))
+real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy,denergy,xfac,xw
 integer i,j,k
 
