@@ -247,8 +247,8 @@ call print_message(message)
 do 
    time_old=time
 
-   if(do_mpi_io .and. io_pe==my_pe .and. g_nz>2000) &
-       call system("touch /users/taylorm/RUNNING")
+!   if(do_mpi_io .and. io_pe==my_pe .and. g_nz>2000) &
+!       call system("touch /users/taylorm/RUNNING")
    call rk4(time,Q,Qhat,q1,q2,q3,work1,work2)
 
    maxs(8)=-1  
