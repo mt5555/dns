@@ -1,0 +1,87 @@
+#!/bin/tcsh 
+#PBS -l size=768
+#PBS -l walltime=60:00
+#PBS -A 7101/16.12
+#PBS -o bench.o -e bench.e
+#PBS -N bench-dns
+#PBS -q standard
+#XXXB -wa URG -wt 10
+
+
+
+# put datestape in .o and .e file:
+set datestamp = `date`
+sh -c 'echo ".e output test" 1>&2'
+sh -c "echo '$datestamp' 1>&2"
+echo $datestamp
+
+set name = sc768A
+set refin=$HOME/dns/src/forcing12-bench.inp
+set recompile = 1
+
+# nodes  processes
+#CO:
+#  64       64     1.080
+#  96       96 
+# 128,     128     .499
+# 192      192
+# 384      2x192
+# 768      4x192
+# 1536     8x192    .0470
+# 3072    16x192    .0270
+#VN:
+#  64      128     .693
+#  96      192
+# 128,     2x128  
+# 192      2x192
+# 384      6x192
+# 768      8x192
+# 1536     16x192    .0354
+# 3072     32x192    .0191 
+#
+set NCPU = 1536
+set mesh = "8 1 192 768 768 768"
+#set MPIRUN = "yod -sz $NCPU"
+set MPIRUN = "yod -VN -sz $NCPU"
+
+
+# use restart file from PSI?
+
+set SRC=$HOME/dns/src
+set WDIR=/scratch1/mataylo
+set EXE=$HOME/$name-$NCPU.x
+
+mkdir $WDIR
+
+
+
+if (!(-d $WDIR)) then
+   echo $WDIR does not exist"
+   exit 1
+endif
+
+
+if ($recompile == 1) then
+   cd $SRC
+   ./gridsetup.py $mesh
+   make dep
+   make clean
+   make dns
+   \cp -f dns $EXE
+endif
+
+
+    cd
+    $MPIRUN $EXE -mio -t -d $WDIR  $name < $refin
+
+
+
+
+
+
+
+
+
+
+
+
