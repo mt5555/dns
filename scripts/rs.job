@@ -1,14 +1,16 @@
 #!/bin/tcsh 
-#PBS -l size=800
-#PBS -l walltime=60:00
+#PBS -l size=3072
+#PBS -l walltime=10:00
 #PBS -A 7101/16.12
 #PBS -o bench.o -e bench.e
 #PBS -N bench-dns
 #PBS -q standard
 #XXXB -wa URG -wt 10
-
-
-
+#
+#
+#  run this script as an execuatable (do not qsub)
+#  it will compile the code and then qsub itself
+#
 # put datestape in .o and .e file:
 set datestamp = `date`
 sh -c 'echo ".e output test" 1>&2'
@@ -17,7 +19,13 @@ echo $datestamp
 
 set name = sc768A
 set refin=$HOME/dns/src/forcing12-bench.inp
-set recompile = 1
+
+if ( ${?PBS_JOBID} ) then
+   set recompile = 0
+else
+   set recompile = 1
+endif
+
 
 #
 #  next:  3072
@@ -26,34 +34,41 @@ set recompile = 1
 
 # nodes  processes
 #CO:
-#  64       64     1.080
-#  96       96 
-# 128,     128     .499
-# 192      192
-# 384      384
+#  64       64          1.080
+#  96       96           .737  .741
+# 128,     128           .499
+# 192      192           .3406
+# 384      384           .172
+# 768      768  2x384   .102
+# 1536    1536  4x384                hangs
+# 3072    3072  8x384     .2059      redo?  probably .0206?    
 # 384      2x192
 # 768      4x192
-# 1536     8x192    .0470
-# 3072    16x192    .0270
+# 1536     8x192          .0470
+# 3072    16x192          .0270
+
 #VN:
 #  64      128             .693
-#  96      192            .483
-# 192      384  1x384      .264
+#  96      192             .483
+# 192      384             .264
+#
 #  384      768  2x384     .134
 #  768     1536  4x384     .0744
-# 1536     3072  8x384   hung?
-# 3072     6144 16x384   in QUE
+# 1536     3072  8x384     .0378
+# 3072     6144 16x384     .0249
 #
-# 128,     256  2x128     .402
 # 192      384  2x192     .265
 # 384      768  4x192     .144
 # 768      1536 8x192     .0693
 # 1536     3072 16x192    .0354
 # 3072     6144 32x192    .0191 
 #
+# 128,     256  2x128     .402
+# 3072     6144 16x16x24        .0252
+# 3072     6144 64x1x96    
 #
-set NCPU = 1536
-set mesh = "4 1 384 768 768 768"
+set NCPU = 6144
+set mesh = "64 1 96 768 768 768"
 #set MPIRUN = "yod -sz $NCPU"
 set MPIRUN = "yod -VN -sz $NCPU"
 
@@ -75,17 +90,26 @@ endif
 
 
 if ($recompile == 1) then
+   rm -f $EXE
    cd $SRC
    ./gridsetup.py $mesh
    make dep
-   make clean
+   #make clean
    make dns
    \cp -f dns $EXE
 endif
 
-
+if ( ${?PBS_JOBID} ) then
     cd
     $MPIRUN $EXE -mio -t -d $WDIR  $name < $refin
+else
+    cd
+    cd dns
+    qsub scripts/rs.job
+endif
+
+
+
 
 
 

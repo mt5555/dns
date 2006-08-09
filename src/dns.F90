@@ -152,7 +152,10 @@ if (maxval(tims_max(6:11))>0) then
    call print_message(message)
    write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_y   ',tims_ave(11),tims_max(11)
    call print_message(message)
+   write(message,'(a,2f9.2)')          '   traspose total     ',sum(tims_ave(6:11))
+   call print_message(message)
 endif
+
 if (tims_max(14)>0) then
    write(message,'(a,2f9.2,a,f4.3,a)') '   Biot-Savart        ',tims_ave(14),tims_max(14)
    call print_message(message)
