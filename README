@@ -45,7 +45,7 @@ The steps required to compile and run the code are:
 0.  Choose the resolution
 1.  set up the grid dimensions
 2.  compile the code
-3.  edit the input file, forcing12.inp
+3.  edit the input file, forcing12.inp or forcing12-bench.inp
 4.  run 
 5.  validate the results 
 6.  analysis of output
@@ -162,9 +162,15 @@ To build the code on one of the above systems, just run:
 Step 3.
 Edit the input file
 
-    The input file for this forced case is "forcing12.inp" in
-    the src directory.  
+    There are two choices for input files for this forced case in
+    the src directory:
 
+      forcing12.inp         runs 1 eddy turnover time, with output
+
+      forcing12-bench.inp   runs 5 timesteps, only diagnostic output
+                            reports cpu time per timestep, averaged
+                            over the last 4 timesteps.
+                             
     Parameters of interest:
 
     viscosity coefficient mu (line 9)    change to value computed above
