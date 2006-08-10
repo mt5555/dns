@@ -124,15 +124,16 @@ Here are some examples:
       % ./gridsetup.py 1 1 4 64 64 64 
 
       A 64x64x64 grid, on 64 cpu:
-      (parallel decomposition: 1x2x32, so a pensil decomposition)
+      (parallel decomposition: 2x1x32, so a pensil decomposition)
       % cd dns/src
-      % ./gridsetup.py 1 2 32 64 64 64 
+      % ./gridsetup.py 2 1 32 64 64 64 
 
 
-There are several restrictions:  For a grid N^3, N must be a power
-of 2,3,5, and N/nx, N/ny and N/nz must be an even integers.
-The python script will give an error if these restrictions are 
-violated.
+For a grid N^3, N must be a power
+of 2,3,5, and N/nx, N/ny and N/nz must be an even integers.  There are
+some other restrictions because of how we wrote our transpose routines.
+gridsetup.py will issue warnings if they are violated, and the code will
+print error messages and stop.
 
 If you do not have python installed on your system, you can
 instead copy the file 'params.h.test' to params.h' and then
@@ -189,13 +190,13 @@ Step 4.
 Run the code:
     To run the code on a single processor:
 
-        ./dns  -i forcing12.inp output_name  
+        ./dns  -i forcing12-bench.inp output_name  
 
-    using the input file 'forcing12.inp'.  This runs a triply 
+    using the input file 'forcing12-bench.inp'.  This runs a triply 
     periodic forced turbulence problem.  The forcing is in
     wave numbers 1 and 2. 
 
-    Each snapshot is in a file named:
+    The output files are:
 
         output_name0000.0000.u         u component of velocity
         output_name0000.0000.v         v component of velocity
