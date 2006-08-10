@@ -51,8 +51,8 @@ call random_seed(put=seed)
 deallocate(seed)
 
 
-if(do_mpi_io .and. io_pe==my_pe .and. g_nz>2000) &
-       call system("touch /users/taylorm/RUNNING")
+!if(do_mpi_io .and. io_pe==my_pe .and. g_nz>2000) &
+!       call system("touch /users/taylorm/RUNNING")
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

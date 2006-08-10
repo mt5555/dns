@@ -319,6 +319,7 @@ enddo
 !
 ! ns_vorticity1:  compute vorticity-hat, transform into rhsg.
 !                 3 calls to z_ifft3d:  FFT: 3x,3y,3z  transpose: 3z,6x,6y
+! if we modify code to work in x-pencil grid space:               3z,3x,6y
 ! 
 ! 
 ! This subroutine, when using a 1D data decompostion (hyperslabs in Z)
@@ -330,15 +331,16 @@ enddo
 !  cost of full spectral algorithm:  9 FFTs, 3 expensive transforms.
 !
 !
-! Can we do the same trick with a pencil decomposition?  pencils in x
-! compute from Q_hat:  wy-vz, uz, uy
-! compute from Qgrid:  wx,vx
+! Can we do the same trick with a pencil decomposition?  pencils in y
+! compute (while computing Qgrid from Qhat):  vx, uy
+! transform over just w1,w2 (first two components of vorticity)
 !
-! ns_vorticity3:  Q_grid: vx,wx         FFT: 4x        tranpose: 4x
-!                 Q_hat: wy-uz,vz,uy    FFT: 3x,3y,3z  tranpose 3z,6x,6y
-! total:                                FFT: 7x,3y,3z     10x,3z,6y
-!    13 FFTs,  expensive transforms: 3z+6y         
-!    cost of full spectral algorithm: 9 FFTs, expensive transforms: 3z+6y 
+! computing vx:                 FFT: 1x     transpose:  1x
+! computing uy:                 FFT: 1x,1y  transpose:  2x,1y
+! w1,w2:                        FFT: 2x,2y,2z  tranpose: 4x,4y,2z
+! total:                        FFT: 3x,4y,2z    7x 5y 2z
+! if we modify code to work in x-pencil grid space:  3x 5y 2z
+! 
 !               
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !

@@ -773,6 +773,141 @@ end
 
 
 
+subroutine zx_ifft3d_and_dx(fin,f,fx,work)
+!
+!  compute inverse fft 3d of fin, return in f
+!  also return df/dx in fx                               
+!  fin and f can overlap in memory
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 f(nx,ny,nz)  ! output
+real*8 fx(nx,ny,nz) ! output
+
+! true size must be nx,ny,nz:
+real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+
+work=fin
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+call mult_by_ik(work,f,n1,n1d,n2,n2d,n3,n3d)       ! compute fx code
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                 ! compute fx code
+call transpose_from_x(f,fx,n1,n1d,n2,n2d,n3,n3d)   ! compute fx code
+
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+
+
+end
+
+
+
+
+subroutine zx_ifft3d_and_dy(fin,f,fy,work)
+!
+!  compute inverse fft 3d of fin, return in f
+!  also return df/dy in fx                               
+!  fin and f can overlap in memory
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 f(nx,ny,nz)  ! output
+real*8 fy(nx,ny,nz) ! output
+
+! true size must be nx,ny,nz:
+real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+
+work=fin
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+! work -> df/dy    (using f as a work array)
+call mult_by_ik(work,f,n1,n1d,n2,n2d,n3,n3d)        ! new code for fy
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
+call transpose_from_y(f,fy,n1,n1d,n2,n2d,n3,n3d)    ! new code for fy
+call transpose_to_x(fy,f,n1,n1d,n2,n2d,n3,n3d)      ! new code for fy
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
+call transpose_from_x(f,fy,n1,n1d,n2,n2d,n3,n3d)    ! new code for fy
+
+! work -> f
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+
+end
+
+
+
+
+subroutine mult_by_ik(p,px,n1,n1d,n2,n2d,n3,n3d)
+!
+!  take derivative in Fourier space
+!
+integer n1,n1d,n2,n2d,n3,n3d
+real*8 p(n1d,n2d,n3d)
+real*8 px(n1d,n2d,n3d)
+integer i,j,k
+
+do k=1,n3
+   do j=1,n2
+      ! note: for i=2, m=0, we are actually working with the cos(n1/2) mode
+      ! but d/dx of this mode goes to sin(n1/2) = 0, so just take m=0 
+      do i = 1, n1,2
+         m=(i-1)/2
+         px(i+1,j,k) = pi2* m * p(i,j,k)
+         px(i,j,k) = -pi2 *m * p(i+1,j,k)
+      enddo
+   enddo
+enddo
+end subroutine mult_by_ik
+
+
+
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

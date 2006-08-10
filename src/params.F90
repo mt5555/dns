@@ -73,6 +73,8 @@ integer :: output_size=8            ! output real*8
 integer :: input_size=8             ! input real*8
 logical :: compute_passive_on_restart = .false.
 
+logical :: using_x_pencils          ! grid data is stored in x-pencil decomp
+                                    ! transform to Q(nx,ny,nz) before output
 
 !
 ! options used by various utility programs:
