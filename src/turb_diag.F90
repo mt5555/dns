@@ -1,4 +1,40 @@
 #include "macros.h"
+
+
+logical function call_output_model(doit_model,doit_diag,time)
+!
+!  The subroutine output_model() below is called every timestep
+!  This routine will return .true. if it needs to be called,
+!  and .false. if output_model() will do nothing if called
+!
+!  The point of this routine is for the super efficient ns_xpencil.F90 when
+!  using an x-pencil decompostion.  That decomposition must be converted
+!  back to our reference decompostion before output and these diagnostics
+!  can be called.
+!
+!  failsafe version of call_output_model():  always return .true.
+!  No extra costs for most models in the DNS code: only when using 
+!  ns_xpencil.F90.   (and ns_xpencil.F90 is only necessary when running
+!  with a pencil decomposition instead of slabs)
+!  
+use params
+use spectrum
+implicit none
+logical :: doit_model,doit_diag
+real*8 :: time
+
+
+call_output_model=.false.
+if (compute_transfer) call_output_model=.true.
+if (doit_model .or. time==time_initial) call_output_model=.true.
+if ( (compute_passive_on_restart .and. time==time_initial) .or. &
+    doit_model) call_output_model=.true.
+end function
+
+
+
+
+
 subroutine output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use pdf

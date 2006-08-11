@@ -1700,6 +1700,42 @@ end subroutine transpose_from_z_3d
 
 
 
+subroutine transpose_from_x_3d(Qin,Qout)
+!use params
+implicit none
+real*8 :: Qin(g_nx2,nslabz,ny_2dx,n_var)
+real*8 :: Qout(nx,ny,nz,n_var)
+! local
+integer :: n1,n1d,n2,n2d,n3,n3d,n
+n1=g_nx
+n1d=g_nx2
+n2=nslabz
+n2d=nslabz
+n3=ny_2dx
+n3d=ny_2dx
+do n=1,n_var
+   call transpose_from_x(Qin(1,1,1,n),Qout(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+end subroutine transpose_from_x_3d
+
+
+
+subroutine transpose_to_x_3d(Qin,Qout)
+!use params
+implicit none
+real*8 :: Qin(nx,ny,nz,n_var)
+real*8 :: Qout(g_nx2,nslabz,ny_2dx,n_var)
+! local
+integer :: n1,n1d,n2,n2d,n3,n3d,n
+do n=1,n_var
+   call transpose_to_x(Qin(1,1,1,n),Qout(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+enddo
+end subroutine transpose_to_x_3d
+
+
+
+
+
 
 
 

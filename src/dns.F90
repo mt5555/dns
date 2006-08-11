@@ -207,7 +207,7 @@ integer :: itime
 
 !local variables
 real*8,save :: q2(nx,ny,nz,n_var)
-real*8,save :: q3(nx,ny,nz,n_var)
+real*8,save :: rhs(nx,ny,nz,n_var)
 
 
 real*8  :: time=0
@@ -252,7 +252,7 @@ do
 
 !   if(do_mpi_io .and. io_pe==my_pe .and. g_nz>2000) &
 !       call system("touch /users/taylorm/RUNNING")
-   call rk4(time,Q,Qhat,q1,q2,q3,work1,work2)
+   call rk4(time,Q,Qhat,q1,q2,rhs,work1,work2)
 
    maxs(8)=-1  
    if (my_pe==io_pe) then
@@ -296,7 +296,7 @@ do
    endif
 
    if (itime>=itime_final) time_final=time
-   call time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
+   call time_control(itime,time,Q,Qhat,q1,q2,rhs,work1,work2)
 
    if (itime==0) then
       ! set all timers to zero so they dont include initialization

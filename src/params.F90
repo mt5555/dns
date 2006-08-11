@@ -73,9 +73,14 @@ integer :: output_size=8            ! output real*8
 integer :: input_size=8             ! input real*8
 logical :: compute_passive_on_restart = .false.
 
-logical :: using_x_pencils          ! grid data is stored in x-pencil decomp
-                                    ! transform to Q(nx,ny,nz) before output
-
+logical :: data_x_pencils=.false.   ! Q currently stored in x-pencil decomp
+                                    ! not our regular (nx,ny,nz) decomp
+logical :: rhs_trashed = .false.    ! set to true if diagnostics use this
+                                    ! as a work array (so time stepping has
+                                    ! to recompute anything stored here) 
+logical :: use_vorticity3=.false.   ! compute vorticity assuming uy and vx
+                                    ! were already computed and saved in RHS
+                                    ! array
 !
 ! options used by various utility programs:
 !

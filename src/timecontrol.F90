@@ -1,5 +1,5 @@
 #include "macros.h"
-subroutine time_control(itime,time,Q,Qhat,q1,q2,q3,work1,work2)
+subroutine time_control(itime,time,Q,Qhat,q1,q2,rhs,work1,work2)
 use params
 use transpose
 implicit none
@@ -7,7 +7,7 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: q2(nx,ny,nz,n_var)
-real*8 :: q3(nx,ny,nz,n_var)
+real*8 :: rhs(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time
@@ -23,6 +23,7 @@ real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss,xtmp
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen,doit_model
 logical :: convert_back_to_x_pencils
+logical,external :: call_output_model
 integer :: n1,n1d,n2,n2d,n3,n3d
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
@@ -346,9 +347,30 @@ if (doit_screen) then
 
 endif
 
+
+
+
+
+
+! will we be calling diagnostics, which may trash data in rhs?
+rhs_trashed = call_output_model(doit_model,doit_diag,time)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! If data in Q is using x-pencil decomposition instead of
+! the standard Q(nx,ny,nz) decompostion, convert if we are computing
+! diagnostics or doing output:
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (data_x_pencils) then
+   if (doit_output .or. rhs_trashed) then
+      data_x_pencils = .false.
+      q1=Q
+      call transpose_from_x_3d(q1,Q)
+   endif
+endif
 !
-!  restart dumps
-!
+!  restart dumps 
+!  each processor writes its own file.  
+!  this is no longer used -  we can restart from singlefile snapshot output
 if (doit_restart) then
    call print_message("writing restart file...")
    call multfile_io(time,Q(1,1,1,1),0)  ! write headers
@@ -356,27 +378,9 @@ if (doit_restart) then
       call multfile_io(time,Q(1,1,1,i),i) ! write u,v,w files
    enddo
 endif
-
-
-!
-! If data in Q is using x-pencil decomposition instead of
-! the standard Q(nx,ny,nz) decompostion, convert if necessary:
-convert_back_to_x_pencils=.false.
-if (using_x_pencils) then
-if (doit_ouput .or. call_model_output() ) then
-   convert_back_to_x_pencils=.true.
-   q1=Q
-!   call transpose_from_x_3d(q1,Q)
-endif
-endif
-
-
-
-
 !
 !  output dumps
 !
-
 if (doit_output) then
    write(message,'(a,f10.4)') "writing output files at t=",time
    call print_message(message)
@@ -394,7 +398,6 @@ if (doit_output) then
    call print_message("done with output")
 
 endif
-
 !
 ! diagnostic output
 !
@@ -405,18 +408,10 @@ else if (diag_dt==0) then
    ! if diagnostics are turned off, dont save the scalars!
    nscalars=0  
 endif
-
-
 !
 ! model specific output
 !
-call output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
-
-if (convert_back_to_x_pencils) then
-   q1=Q
-!   call transpose_to_x_3d(q1,Q)
-endif
-
+call output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,rhs,work1,work2)
 
 
 

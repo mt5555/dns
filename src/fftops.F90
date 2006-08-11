@@ -619,6 +619,7 @@ end subroutine
 subroutine fft3d(f,work)
 !
 !  compute the spectrum, ouput in f
+!  f stored using reference (nx,ny,nz) decompostion
 !
 use params
 use fft_interface
@@ -648,6 +649,8 @@ end
 subroutine ifft3d(f,work)
 !
 !  compute inverse fft 3d of f, return in f
+! 
+!  f uses reference (nx,ny,nz) decompostion
 !
 use params
 use fft_interface
@@ -686,6 +689,9 @@ end
 subroutine z_fft3d_trashinput(f,fout,work)
 !
 !  compute fft of f, return in fout.
+!  f:     data stored with reference (nx,ny,nz) decomposition
+!  fout:  data stored with z-decompostion 
+!
 !  f,fout can overlap in memory
 !  data in f is ovewritten
 !
@@ -729,9 +735,65 @@ end
 
 
 
+
+subroutine zx_fft3d_trashinput(f,fout,work)
+!
+!  compute fft of f, return in fout.
+!  f:     data stored with x-pencil decompostion
+!  fout:  data stored with z-pencil decompostion 
+!
+!  f,fout can overlap in memory
+!  data in f is ovewritten
+!
+use params
+use fft_interface
+use transpose
+
+implicit none
+real*8 f(nx,ny,nz)    ! input
+real*8 fout(g_nz2,nslabx,ny_2dz)  ! output
+real*8 work(nx,ny,nz) ! work array1
+integer n1,n1d,n2,n2d,n3,n3d
+
+
+!
+!  for the full spectral method, we will be working mostly in
+!  the z-transform fourier space, 
+!     pt(g_nz2,nslabx,ny_2dz)
+!  so we also need that ny_2dz is even
+if (mod(ny_2dz,2)/=0) then
+   call abort("ny_2dz is not even.  cant use z-decomp FFTs")
+endif
+
+
+n1=g_nx
+n1d=g_nx2
+n2=nslabz
+n2d=nslabz
+n3=ny_2dx
+n3d=ny_2dx
+call fft1(f,n1,n1d,n2,n2d,n3,n3d)     
+call transpose_from_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+call fft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_z(work,fout,n1,n1d,n2,n2d,n3,n3d)
+call fft1(fout,n1,n1d,n2,n2d,n3,n3d)
+
+
+end
+
+
+
+
 subroutine z_ifft3d(fin,f,work)
 !
 !  compute inverse fft 3d of fin, return in f
+!  fin:  data stored with z-decompostion 
+!  f:    data stored with reference (nx,ny,nz) decomposition
+!
 !  fin and f can overlap in memory
 !
 use params
@@ -770,6 +832,55 @@ call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 
 end
+
+
+
+
+
+
+subroutine zx_ifft3d(fin,f,work)
+!
+!  compute inverse fft 3d of fin, return in f
+!  fin:  data stored with z-decompostion 
+!  f:    data stored with x-decompostion
+!
+!  fin and f can overlap in memory
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 work(nx,ny,nz)    
+! true size must be nx,ny,nz:
+real*8 f(g_nz2,nslabx,ny_2dz) 
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+
+f=fin
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+
+end
+
+
 
 
 
@@ -829,7 +940,7 @@ end
 subroutine zx_ifft3d_and_dy(fin,f,fy,work)
 !
 !  compute inverse fft 3d of fin, return in f
-!  also return df/dy in fx                               
+!  also return df/dy in fy                               
 !  fin and f can overlap in memory
 !
 use params
@@ -887,10 +998,13 @@ subroutine mult_by_ik(p,px,n1,n1d,n2,n2d,n3,n3d)
 !
 !  take derivative in Fourier space
 !
+use params
+implicit none
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 px(n1d,n2d,n3d)
-integer i,j,k
+integer i,j,k,m
+
 
 do k=1,n3
    do j=1,n2
@@ -907,6 +1021,22 @@ end subroutine mult_by_ik
 
 
 
+
+! convinience function for routines which only know Qn
+! with dimensions nx,ny,nz
+subroutine z_fft3d_nvar(Q_grid,Q,work1,work2) 
+use params
+implicit none
+real*8 :: Q_grid(nx,ny,nz,n_var)
+real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+integer n
+do n=1,n_var
+   work2=Q_grid(:,:,:,n)
+   call z_fft3d_trashinput(work2,Q(1,1,1,n),work1)
+enddo
+end subroutine
 
 
 
