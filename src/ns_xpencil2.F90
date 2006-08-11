@@ -24,7 +24,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine rk4(time,Q_grid,Q,Q_tmp,Q_old,rhsg,work1,work2)
 use params
-use transpose
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
@@ -72,17 +71,6 @@ endif
 
 
 
-if (.not. data_x_pencils) then
-   ! initial data, or after output/diagnostics, data in Q_grid may be
-   ! stored in nx,ny,nz decompostion instead of x-pencils.  
-   ! convert data to x-pencil decompostion:
-   Q_tmp=Q_grid
-   call transpose_to_x_3d(Q_tmp,Q_grid)
-   data_x_pencils=.true.
-endif
-
-
-
 
 if (use_vorticity3) then
    ! call fast version that computes Vx and Uy during U iffts:
@@ -99,17 +87,16 @@ subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2)
 use params
 implicit none
 real*8 :: time
-!real*8 :: Q_grid(nx,ny,nz,n_var)
-real*8 :: Q_grid(g_nx2,nslabz,ny_2dx,n_var)
+real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
-! overlapped in memory: (real size: nx,ny,nz)
+! overlapped in memory:
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: rhsg(g_nx2,nslabz,ny_2dx,n_var)
+real*8 :: rhsg(nx,ny,nz,n_var)
 
 
 ! local variables
@@ -130,7 +117,7 @@ do n=1,n_var
    enddo
    enddo
    enddo
-   call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
@@ -152,7 +139,7 @@ do n=1,n_var
    enddo
 
 
-   call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 ! stage 3
@@ -168,7 +155,7 @@ do n=1,n_var
    enddo
    enddo
 
-   call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 ! stage 4
@@ -183,7 +170,7 @@ do n=1,n_var
    enddo
    enddo
    enddo
-   call zx_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 time = time + delt
@@ -191,9 +178,9 @@ time = time + delt
 ! compute max U  
 maxs(1:4)=0
 maxs(10:11)=-9e20
-do k=1,ny_2dx
-do j=1,nslabz
-do i=1,g_nx
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
    do n=1,ndim
       maxs(n)=max(maxs(n),abs(Q_grid(i,j,k,n)))   ! max u,v,w
    enddo
@@ -220,17 +207,16 @@ subroutine rk4reshape2(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2)
 use params
 implicit none
 real*8 :: time
-!real*8 :: Q_grid(nx,ny,nz,n_var)
-real*8 :: Q_grid(g_nx2,nslabz,ny_2dx,n_var)
+real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
-! overlapped in memory: (real size: nx,ny,nz)
+! overlapped in memory:
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: rhsg(g_nx2,nslabz,ny_2dx,n_var)
+real*8 :: rhsg(nx,ny,nz,n_var)
 
 
 ! local variables
@@ -242,8 +228,9 @@ if (rhs_trashed) then
    rhs_trashed=.false.
    ! put Vx in rhsg(:,:,:,2) and Uy in rhsg(:,:,:,1)
    ! this will avoid 1 transform
-   call zx_ifft3d_and_dy(Q(1,1,1,1),Q_tmp,rhsg(1,1,1,1),work)
-   call zx_ifft3d_and_dx(Q(1,1,1,2),Q_tmp,rhsg(1,1,1,2),work)
+   call z_ifft3d_and_dy(Q(1,1,1,1),Q_tmp,rhsg(1,1,1,1),work)
+   call z_ifft3d_and_dx(Q(1,1,1,2),Q_tmp,rhsg(1,1,1,2),work)
+
 endif
 
 ! stage 1
@@ -261,10 +248,10 @@ do n=1,n_var
    enddo
 enddo
 
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call z_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
+call z_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
 do n=3,n_var
-   call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
@@ -285,10 +272,10 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call z_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
+call z_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
 do n=3,n_var
-   call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
@@ -306,10 +293,10 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call z_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
+call z_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
 do n=3,n_var
-   call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
@@ -326,10 +313,10 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call z_ifft3d_and_dy(Q(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
+call z_ifft3d_and_dx(Q(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
 do n=3,n_var
-   call zx_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
+   call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
@@ -339,9 +326,9 @@ time = time + delt
 ! compute max U  
 maxs(1:4)=0
 maxs(10:11)=-9e20
-do k=1,ny_2dx
-do j=1,nslabz
-do i=1,g_nx
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
    do n=1,ndim
       maxs(n)=max(maxs(n),abs(Q_grid(i,j,k,n)))   ! max u,v,w
    enddo
@@ -395,14 +382,12 @@ integer compute_ints,rkstage
 
 ! input, but data can be trashed if needed
 real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
-!real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
-real*8 Q_grid(g_nx2,nslabz,ny_2dx,n_var)
+real*8 Q_grid(nx,ny,nz,n_var)                         ! grid data at time t
 
 ! output  (rhsg and rhs are overlapped in memory)
 ! true size must be nx,ny,nz,n_var
 real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)
-!real*8 rhsg(nx,ny,nz,n_var)
-real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
+real*8 rhsg(nx,ny,nz,n_var)    
 
 ! work/storage
 real*8 work(nx,ny,nz)
@@ -463,9 +448,9 @@ helave=0
 maxvor=0
 
 ! rhs = u x vor
-do k=1,ny_2dx
-do j=1,nslabz
-do i=1,g_nx
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
    vor(1)=rhsg(i,j,k,1)
    vor(2)=rhsg(i,j,k,2)
    vor(3)=rhsg(i,j,k,3)
@@ -508,10 +493,9 @@ enddo
 enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! back to spectral space
-! we are done with rhsg - from now on only use rhs (spectral space version)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
-   call zx_fft3d_trashinput(Q_grid(1,1,1,n),rhs(1,1,1,n),work)
+   call z_fft3d_trashinput(Q_grid(1,1,1,n),rhs(1,1,1,n),work)
 enddo
 
 
@@ -679,8 +663,6 @@ endif
 
 
 
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! compute information for transfer spectrum
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -695,7 +677,6 @@ if (compute_ints==1 .and. compute_transfer) then
       spec_f=spec_f+spec_tmp
    enddo
 endif
-
 
 
 !  make rhs div-free
@@ -818,8 +799,7 @@ subroutine ns_vorticity(rhsg,Qhat,work,p)
 use params
 implicit none
 real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
-!real*8 rhsg(nx,ny,nz,n_var)    
-real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
+real*8 rhsg(nx,ny,nz,n_var)    
 real*8 work(nx,ny,nz)
 real*8 p(g_nz2,nslabx,ny_2dz)    
 
@@ -878,7 +858,7 @@ subroutine ns_vorticity3(rhsg,Qhat,work,p)
 use params
 implicit none
 real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
-real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
+real*8 rhsg(nx,ny,nz,n_var)    
 real*8 work(nx,ny,nz)
 real*8 p(g_nz2,nslabx,ny_2dz)    
 
@@ -888,12 +868,12 @@ real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 
 
 ! third component of vorticity   vx-uy
-do k=1,ny_2dx
-do j=1,nslabz
-do i=1,g_nx
-   rhsg(i,j,k,3)=rhsg(i,j,k,2)-rhsg(i,j,k,1)
-enddo
-enddo
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         rhsg(i,j,k,3)=rhsg(i,j,k,2)-rhsg(i,j,k,1)
+      enddo
+   enddo
 enddo
 
 

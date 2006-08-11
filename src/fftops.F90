@@ -791,7 +791,7 @@ end
 subroutine z_ifft3d(fin,f,work)
 !
 !  compute inverse fft 3d of fin, return in f
-!  fin:  data stored with z-decompostion 
+!  fin:  data stored with z-pencil decompostion 
 !  f:    data stored with reference (nx,ny,nz) decomposition
 !
 !  fin and f can overlap in memory
@@ -841,8 +841,8 @@ end
 subroutine zx_ifft3d(fin,f,work)
 !
 !  compute inverse fft 3d of fin, return in f
-!  fin:  data stored with z-decompostion 
-!  f:    data stored with x-decompostion
+!  fin:  data stored with z-pencil decompostion 
+!  f:    data stored with x-pencil decompostion
 !
 !  fin and f can overlap in memory
 !
@@ -888,6 +888,130 @@ subroutine zx_ifft3d_and_dx(fin,f,fx,work)
 !
 !  compute inverse fft 3d of fin, return in f
 !  also return df/dx in fx                               
+!
+!  fin:   data stored with z-pencil decompostion 
+!  f,fx:  data stored with x-pencil decompostion
+!
+!  fin and f can overlap in memory
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 f(nx,ny,nz)  ! output
+real*8 fx(nx,ny,nz) ! output
+
+! true size must be nx,ny,nz:
+real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+
+work=fin
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+call mult_by_ik(work,f,n1,n1d,n2,n2d,n3,n3d)       ! compute fx code
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                 ! compute fx code
+
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+
+
+
+
+end
+
+
+
+
+subroutine zx_ifft3d_and_dy(fin,f,fy,work)
+!
+!  compute inverse fft 3d of fin, return in f
+!  also return df/dy in fy                               
+!
+!  fin:   data stored with z-pencil decompostion 
+!  f,fy:  data stored with x-pencil decompostion
+!
+!  fin and f can overlap in memory
+!
+use params
+use fft_interface
+use transpose
+implicit none
+real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 f(nx,ny,nz)  ! output
+real*8 fy(nx,ny,nz) ! output
+
+! true size must be nx,ny,nz:
+real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+
+
+!local
+integer n1,n1d,n2,n2d,n3,n3d
+integer i,j,k
+
+n1=g_nz
+n1d=g_nz2   	
+n2=nslabx
+n2d=nslabx
+n3=ny_2dz
+n3d=ny_2dz
+
+work=fin
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+
+! work -> df/dy    (using f as a work array)
+call mult_by_ik(work,f,n1,n1d,n2,n2d,n3,n3d)        ! new code for fy
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
+call transpose_from_y(f,fy,n1,n1d,n2,n2d,n3,n3d)    ! new code for fy
+call transpose_to_x(fy,f,n1,n1d,n2,n2d,n3,n3d)      ! new code for fy
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
+
+
+! work -> f
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+
+
+
+end
+
+
+
+
+
+
+
+subroutine z_ifft3d_and_dx(fin,f,fx,work)
+!
+!  compute inverse fft 3d of fin, return in f
+!  also return df/dx in fx                               
+!
+!  fin:   data stored with z-pencil decompostion 
+!  f,fx:  data stored with reference (nx,ny,nz) decompostion
+!
 !  fin and f can overlap in memory
 !
 use params
@@ -937,10 +1061,14 @@ end
 
 
 
-subroutine zx_ifft3d_and_dy(fin,f,fy,work)
+subroutine z_ifft3d_and_dy(fin,f,fy,work)
 !
 !  compute inverse fft 3d of fin, return in f
 !  also return df/dy in fy                               
+!
+!  fin:   data stored with z-pencil decompostion 
+!  f,fy:  data stored with reference (nx,ny,nz) decompostion
+!
 !  fin and f can overlap in memory
 !
 use params
@@ -990,6 +1118,10 @@ call transpose_from_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 
 end
+
+
+
+
 
 
 
