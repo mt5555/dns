@@ -22,6 +22,7 @@ real*8 :: cfl_used_psvis
 real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss,xtmp
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen,doit_model
+logical :: convert_back_to_x_pencils
 integer :: n1,n1d,n2,n2d,n3,n3d
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
@@ -357,6 +358,18 @@ if (doit_restart) then
 endif
 
 
+!
+! If data in Q is using x-pencil decomposition instead of
+! the standard Q(nx,ny,nz) decompostion, convert if necessary:
+convert_back_to_x_pencils=.false.
+if (using_x_pencils) then
+if (doit_ouput .or. call_model_output() ) then
+   convert_back_to_x_pencils=.true.
+   q1=Q
+!   call transpose_from_x_3d(q1,Q)
+endif
+endif
+
 
 
 
@@ -399,6 +412,10 @@ endif
 !
 call output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
 
+if (convert_back_to_x_pencils) then
+   q1=Q
+!   call transpose_to_x_3d(q1,Q)
+endif
 
 
 
