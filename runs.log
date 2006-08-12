@@ -1,13 +1,5 @@
 TODO:
 
-diag routines:  
-  call_model_output()
-
-if (using_x_pencils) then
-if (call_model_output() or doit_output) then
-   convert to x,y,z decomposition
-endif
-endif
 
 turb_diag.F90   
    turb_diag.F90
