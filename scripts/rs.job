@@ -1,6 +1,6 @@
 #!/bin/tcsh 
 #PBS -l size=3072
-#PBS -l walltime=10:00
+#PBS -l walltime=30:00
 #PBS -A 7101/16.12
 #PBS -o bench.o -e bench.e
 #PBS -N bench-dns
@@ -27,10 +27,6 @@ else
 endif
 
 
-#
-#  next:  3072
-#         1x1526
-#         2x1536 
 
 # nodes  processes
 #CO:
@@ -40,10 +36,10 @@ endif
 # 192      192           .3406
 # 384      384           .172
 # 768      768  2x384   .102
-# 1536    1536  4x384                hangs
-# 3072    3072  8x384     .2059      redo?  probably .0206?    
-# 384      2x192
-# 768      4x192
+# 1536    1536  4x384    .0542
+# 3072    3072  8x384     .0259, .0256, .0256
+# 384      2x192          .179
+# 768      4x192          .101
 # 1536     8x192          .0470
 # 3072    16x192          .0270
 
@@ -63,14 +59,27 @@ endif
 # 1536     3072 16x192    .0354
 # 3072     6144 32x192    .0191 
 #
-# 128,     256  2x128     .402
-# 3072     6144 16x16x24        .0252
-# 3072     6144 64x1x96    
+# 128,     256  2x128        .402
+# 3072     6144 16x16x24     .0252
+# 3072     6144 64x1x96      .0195
 #
-set NCPU = 6144
-set mesh = "64 1 96 768 768 768"
-#set MPIRUN = "yod -sz $NCPU"
-set MPIRUN = "yod -VN -sz $NCPU"
+#
+#  next:  3072
+#         2x1x1536 VN  wont compile
+#         4x1x1536 VN  compiles, wont load
+#  2048^3
+#    4x1x1024 VN   .614
+#    2x1x1024  wont load   
+#
+#    2x1x1024 CO   .872
+#    1x1x1024  wont load
+#
+
+set NCPU = 1024
+#set mesh = "1 1 1536 768 768 768"
+set mesh = "1 1 1024 2048 2048 2048"
+set MPIRUN = "yod -sz $NCPU"
+#set MPIRUN = "yod -VN -sz $NCPU"
 
 
 # use restart file from PSI?
