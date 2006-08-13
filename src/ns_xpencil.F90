@@ -482,10 +482,7 @@ call wallclock(tmx1)
 ! see notes in ns.F90 about pros/cons on how to compute vorticity
 !
 if (use_vorticity3) then
-!   call zx_ifft3d_and_dy(Qhat(1,1,1,1),p,rhsg(1,1,1,1),work)
-!   call zx_ifft3d_and_dx(Qhat(1,1,1,2),p,rhsg(1,1,1,2),work)
    call ns_vorticity3(rhsg,Qhat,work,p)  
-!   call ns_vorticity(rhsg,Qhat,work,p)
 else
    call ns_vorticity(rhsg,Qhat,work,p)
 endif

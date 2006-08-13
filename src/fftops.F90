@@ -800,9 +800,10 @@ use params
 use fft_interface
 use transpose
 implicit none
+! true size of all arrays:  nx,ny,nz:
+! work used as a work array and its shape must match fin
 real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
-real*8 f(nx,ny,nz)    ! output
-! true size must be nx,ny,nz:
+real*8 f(nx,ny,nz)               ! output
 real*8 work(g_nz2,nslabx,ny_2dz) ! work array
 
 
@@ -850,9 +851,10 @@ use params
 use fft_interface
 use transpose
 implicit none
+! true size of all arrays:  nx,ny,nz:
+! f used as a work array and its shape must match fin
 real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
 real*8 work(nx,ny,nz)    
-! true size must be nx,ny,nz:
 real*8 f(g_nz2,nslabx,ny_2dz) 
 
 
@@ -898,12 +900,12 @@ use params
 use fft_interface
 use transpose
 implicit none
+! true size of all arrays:  nx,ny,nz:
+! f used as a work array and its shape must match fin
 real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
-real*8 f(nx,ny,nz)  ! output
-real*8 fx(nx,ny,nz) ! output
-
-! true size must be nx,ny,nz:
-real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+real*8 f(g_nz2,nslabx,ny_2dz)    ! output
+real*8 fx(nx,ny,nz)              ! output
+real*8 work(nx,ny,nz)            ! work array
 
 
 !local
@@ -917,20 +919,20 @@ n2d=nslabx
 n3=ny_2dz
 n3d=ny_2dz
 
-work=fin
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+f=fin   
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 
-call mult_by_ik(work,f,n1,n1d,n2,n2d,n3,n3d)       ! compute fx code
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                 ! compute fx code
+call mult_by_ik(f,fx,n1,n1d,n2,n2d,n3,n3d)       ! compute fx code
+call ifft1(fx,n1,n1d,n2,n2d,n3,n3d)                 ! compute fx code
 
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
 
 
 
@@ -954,12 +956,13 @@ use params
 use fft_interface
 use transpose
 implicit none
+! true size of all arrays:  nx,ny,nz:
+! f used as a work array and its shape must match fin
 real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
-real*8 f(nx,ny,nz)  ! output
-real*8 fy(nx,ny,nz) ! output
+real*8 f(g_nz2,nslabx,ny_2dz)  ! output
+real*8 fy(nx,ny,nz)              ! output
+real*8 work(nx,ny,nz)
 
-! true size must be nx,ny,nz:
-real*8 work(g_nz2,nslabx,ny_2dz) ! work array
 
 
 !local
@@ -973,26 +976,24 @@ n2d=nslabx
 n3=ny_2dz
 n3d=ny_2dz
 
-work=fin
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
+f=fin
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
 
-! work -> df/dy    (using f as a work array)
-call mult_by_ik(work,f,n1,n1d,n2,n2d,n3,n3d)        ! new code for fy
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
-call transpose_from_y(f,fy,n1,n1d,n2,n2d,n3,n3d)    ! new code for fy
-call transpose_to_x(fy,f,n1,n1d,n2,n2d,n3,n3d)      ! new code for fy
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
+! f -> df/dy   
+call mult_by_ik(f,fy,n1,n1d,n2,n2d,n3,n3d)        ! new code for fy
+call ifft1(fy,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
+call transpose_from_y(fy,work,n1,n1d,n2,n2d,n3,n3d)    ! new code for fy
+call transpose_to_x(work,fy,n1,n1d,n2,n2d,n3,n3d)      ! new code for fy
+call ifft1(fy,n1,n1d,n2,n2d,n3,n3d)                  ! new code for fy
 
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-! work -> f
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-
-call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
-call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
 
 
 
@@ -1018,11 +1019,11 @@ use params
 use fft_interface
 use transpose
 implicit none
+! true size of all arrays:  nx,ny,nz:
+! work used as a work array and its shape must match fin
 real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
-real*8 f(nx,ny,nz)  ! output
-real*8 fx(nx,ny,nz) ! output
-
-! true size must be nx,ny,nz:
+real*8 f(nx,ny,nz)               ! output
+real*8 fx(nx,ny,nz)              ! output
 real*8 work(g_nz2,nslabx,ny_2dz) ! work array
 
 
@@ -1075,11 +1076,11 @@ use params
 use fft_interface
 use transpose
 implicit none
+! true size of all arrays:  nx,ny,nz:
+! work used as a work array and its shape must match fin
 real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
 real*8 f(nx,ny,nz)  ! output
 real*8 fy(nx,ny,nz) ! output
-
-! true size must be nx,ny,nz:
 real*8 work(g_nz2,nslabx,ny_2dz) ! work array
 
 
@@ -1154,9 +1155,12 @@ end subroutine mult_by_ik
 
 
 
+subroutine z_fft3d_nvar(Q_grid,Q,work1,work2) 
 ! convinience function for routines which only know Qn
 ! with dimensions nx,ny,nz
-subroutine z_fft3d_nvar(Q_grid,Q,work1,work2) 
+!
+! input:  Q_grid:   state vector in grid space (nx,ny,nz) decomposition
+! output: Q         state vector in spectral space, z-pencil decomposition
 use params
 implicit none
 real*8 :: Q_grid(nx,ny,nz,n_var)
