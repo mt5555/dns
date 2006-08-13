@@ -17,7 +17,7 @@
 !  In this case, the amount of communcation is reduced by 33%
 !
 !  When using a slab decomposition, this routine will not save any 
-!  communication, but it will save some on processor memory copies
+!  communication, but it will save some on-processor memory copies
 !
 !
 !
@@ -37,6 +37,7 @@ real*8 :: rhsg(nx,ny,nz,n_var)
 
 logical,save :: firstcall=.true.
 integer n
+
 
 if (firstcall) then
    firstcall=.false.
@@ -67,10 +68,11 @@ if (firstcall) then
    rhs_trashed=.true.  ! set flag to initialize rhs if necessary
 
    ! enable (maybe more efficient) vorticity routine
-!   if (ncpu_y == 1 ) use_vorticity3=.true.
+   if (ncpu_y == 1 ) use_vorticity3=.true.
 endif
 
 
+call printmax(Q_grid,1,nx,ny,nz)
 
 if (.not. data_x_pencils) then
    ! initial data, or after output/diagnostics, data in Q_grid may be
@@ -81,7 +83,8 @@ if (.not. data_x_pencils) then
    data_x_pencils=.true.
 endif
 
-
+call printmax(Q_grid,2,g_nx2,nslabz,ny_2dx)
+! 3.3457 
 
 
 if (use_vorticity3) then
@@ -92,6 +95,38 @@ else
    call rk4reshape(time,Q_grid,Q,rhsg,rhsg,Q_tmp,Q_old,work1,work2)
 endif
 end
+
+
+
+subroutine printmax(Q,type,n1,n2,n3)
+use params
+implicit none
+integer n1,n2,n3
+real*8 Q(n1,n2,n3)
+real*8 mx
+integer i,j,k,type
+mx=0
+if (type==1) then
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      mx=max(mx,abs(Q(i,j,k)))
+   enddo
+   enddo
+   enddo
+endif
+if (type==2) then
+   do k=1,ny_2dx
+   do j=1,nslabz
+   do i=1,g_nx
+      mx=max(mx,abs(Q(i,j,k)))
+   enddo
+   enddo
+   enddo
+endif
+print *,'maximum = ',mx
+end subroutine
+
 
 
 
@@ -116,6 +151,7 @@ real*8 :: rhsg(g_nx2,nslabz,ny_2dx,n_var)
 real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
+
 
 ! stage 1
 call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2,1)
@@ -187,6 +223,8 @@ do n=1,n_var
 enddo
 
 time = time + delt
+
+
 
 ! compute max U  
 maxs(1:4)=0
@@ -444,7 +482,10 @@ call wallclock(tmx1)
 ! see notes in ns.F90 about pros/cons on how to compute vorticity
 !
 if (use_vorticity3) then
+!   call zx_ifft3d_and_dy(Qhat(1,1,1,1),p,rhsg(1,1,1,1),work)
+!   call zx_ifft3d_and_dx(Qhat(1,1,1,2),p,rhsg(1,1,1,2),work)
    call ns_vorticity3(rhsg,Qhat,work,p)  
+!   call ns_vorticity(rhsg,Qhat,work,p)
 else
    call ns_vorticity(rhsg,Qhat,work,p)
 endif
@@ -861,7 +902,7 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
-call z_ifft3d(p,rhsg(1,1,1,n),work)
+call zx_ifft3d(p,rhsg(1,1,1,n),work)
 enddo
 end subroutine
 
@@ -913,7 +954,7 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
-call z_ifft3d(p,rhsg(1,1,1,n),work)
+call zx_ifft3d(p,rhsg(1,1,1,n),work)
 
 n=2
 do j=1,ny_2dz
@@ -929,7 +970,7 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
-call z_ifft3d(p,rhsg(1,1,1,n),work)
+call zx_ifft3d(p,rhsg(1,1,1,n),work)
 
 end subroutine
 
