@@ -14,6 +14,9 @@ endif
 
 if ($#argv == 0 ) then
    echo "./test3d_forcing.sh [1,2,p,...]  [dns,dnsp,...]"
+   echo 
+   echo 'to add options:  ./test3d_forcing.sh 2 "dnsp -v3"'
+   echo 
    echo " 1 = run dns without restart, simple 3D test case"
    echo " r = run dns with restart, simple 3D test case"
    echo " s = run dns with passive scalars, with and without restart, simple 3D test case"
@@ -29,7 +32,7 @@ endif
 
 set code = dns
 if ($#argv == 2) then
-set code = $2
+set code = "$2"
 endif
 echo "==============================================================="
 echo "Running code: " $code

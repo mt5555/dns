@@ -68,7 +68,7 @@ if (firstcall) then
    rhs_trashed=.true.  ! set flag to initialize rhs if necessary
 
    ! enable (maybe more efficient) vorticity routine
-   if (ncpu_y == 1 ) use_vorticity3=.true.
+   ! if (ncpu_y == 1 ) use_vorticity3=.true.
 endif
 
 
@@ -124,7 +124,6 @@ if (type==2) then
    enddo
    enddo
 endif
-print *,'maximum = ',mx
 end subroutine
 
 

@@ -1,19 +1,28 @@
 TODO:
-   movie:  mpeg1 800x600   too big for WMA on 1gz laptop
-                 600x450   try this?
-      iso12_1024 data:  look at intermittency? 
+
+memory problem on RS
+#  2048^3  VN  4x1x1024 runs, 2x1x1024  wont load   
+#          CO  2x1x1024 runs, 1x1x1024  wont load
+
+1152 GB.  2048 cpus:  .5625GB per cpu
+1152 GB.  1024 cpus:  1.125 GB per cpu
+           512 cps:  2.25 GB per cpu    (<- this should run)
+
+switch to malloc? 
+check subroutines?
 
 
-to get files of HPSS with stripe set:
-   xpsi get -pfsComp 32 dns/decay2048/\*4026.u
 
-Angle averging:  153 calls to transpose_z()
-     1 stage RK:   9 transpose_z().  = 36 transposes per timestep
-     angle averaging:  4.25 timesteps.
-     True cost: 150 timesteps.
-     time this again with **p replaced by multiplication?
+dnsp    test output - make sure it is in correct format
+                      (via restart?)
+dnsp2   remove when dnsp is validated
+port ns_vorticity3 to ns.F90 model (since it will save 1 z transpose)
+
+move scaling notes from runs.doc to here?
 
 
+
+**********************************************************************************
 0 BUG:  Energy, when computed in spectral space: the cos(N/2) mode
         is weighted to heavily.  Not a problem for any dealiased case
         since that mode will always be zero.  This effects many routines
@@ -25,12 +34,11 @@ Angle averging:  153 calls to transpose_z()
        10/3/04: checked on kiwi with 5x1x1 and 1x1x5, both produced
        output files w/o any errors (didn't check output)
 
-2. ns_ghost: 
+1. ns_ghost: 
         benchmark parallel decompostions
         1000^3  4th and spectral
         2000^3 on 512?
        
-1. save scalars every 10 timesteps instead of at diag_dt time?
 2. construct convergence test for KH problem
        use E&Liu KH problem?  what value of mu?
        mu=0:  at t=1, E is down .25e-6.  dk/dt = -1.25e-6
@@ -43,8 +51,17 @@ Angle averging:  153 calls to transpose_z()
 
 10. use a mpi defined type for the buffer->2d array copy in transpose.F90
 100. post more messages at once in tranpose.F90?  
-101. divergence: go to Shashkov formula?  
 
+
+**********************************************************************************
+to get files of HPSS with stripe set:
+   xpsi get -pfsComp 32 dns/decay2048/\*4026.u
+
+**********************************************************************************
+Angle averging:  153 calls to transpose_z()
+     1 stage RK:   9 transpose_z().  = 36 transposes per timestep
+     angle averaging:  4.25 timesteps.
+     True cost: 150 timesteps.
 
 **********************************************************************************
 memory use:
