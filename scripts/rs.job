@@ -1,5 +1,5 @@
 #!/bin/tcsh 
-#PBS -l size=3072
+#PBS -l size=800
 #PBS -l walltime=30:00
 #PBS -A 7101/16.12
 #PBS -o bench.o -e bench.e
@@ -20,11 +20,7 @@ echo $datestamp
 set name = sc768A
 set refin=$HOME/dns/src/forcing12-bench.inp
 
-if ( ${?PBS_JOBID} ) then
-   set recompile = 0
-else
-   set recompile = 1
-endif
+set recompile = 1
 
 
 
@@ -39,7 +35,13 @@ endif
 # 1536    1536  4x384    .0542
 # 3072    3072  8x384     .0259, .0256, .0256
 # 384      2x192          .179
-# 768      4x192          .101
+
+# 768      4x192          .101        dnsp-v3:   
+# 768      8x96                       dnsp-v3:   IN
+# 768      16x48                       dnsp-v3: 
+# 768      32x24                       dnsp-v3: 
+
+
 # 1536     8x192          .0470
 # 3072    16x192          .0270
 
@@ -49,15 +51,19 @@ endif
 # 192      384             .264
 #
 #  384      768  2x384     .134
-#  768     1536  4x384     .0744
+#  768     1536  4x384     .0744        dnsp-v3: .0632
 # 1536     3072  8x384     .0378
 # 3072     6144 16x384     .0249
 #
 # 192      384  2x192     .265
 # 384      768  4x192     .144
-# 768      1536 8x192     .0693
+# 768      1536 8x192     .0693, .0707   dnsp:.0594     dsnp-v3: .0586,.0587
 # 1536     3072 16x192    .0354
 # 3072     6144 32x192    .0191 
+#
+# 768      1536 16x96                 dnsp-v3: .0559
+# 768      1536 32x48           dnsp:.0657     dnsp-v3: .0605,.0602
+#
 #
 # 128,     256  2x128        .402
 # 3072     6144 16x16x24     .0252
@@ -74,13 +80,18 @@ endif
 #    2x1x1024 CO   .872
 #    1x1x1024  wont load
 #
+# 512: 3333 steps per eddy turnover time
+# 2048:  13000 steps = 2.2h   1.2TB  
+# 4096                        9.2TB
 
-set NCPU = 1024
-#set mesh = "1 1 1536 768 768 768"
-set mesh = "1 1 1024 2048 2048 2048"
+set NCPU = 768
+set mesh = "8 1 96 768 768 768"
+#set mesh = "4 1 1024 2048 2048 2048"
 set MPIRUN = "yod -sz $NCPU"
 #set MPIRUN = "yod -VN -sz $NCPU"
 
+set code = dnsp
+set opt = "-mio -t"
 
 # use restart file from PSI?
 
@@ -104,13 +115,13 @@ if ($recompile == 1) then
    ./gridsetup.py $mesh
    make dep
    #make clean
-   make dns
-   \cp -f dns $EXE
+   make $code
+   \cp -f $code $EXE
 endif
 
 if ( ${?PBS_JOBID} ) then
     cd
-    $MPIRUN $EXE -mio -t -d $WDIR  $name < $refin
+    $MPIRUN $EXE $opt  -d $WDIR  $name < $refin
 else
     cd
     cd dns

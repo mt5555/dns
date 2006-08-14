@@ -317,24 +317,19 @@ enddo
 ! if we modify code to work in x-pencil grid space:               3z,3x,6y
 ! 
 ! 
-! This subroutine, when using a 1D data decompostion (hyperslabs in Z)
-! will save 1 parallel traspose, at the expense of 1 extra FFT.
-! ns_vorticity2:  Q_grid: vx,wx,uy,wy:  FFT: 4x,4y  tranpose: 4x,4y
-!                 Q_hat: uz,vz          FFT: 2x,2y,2z  tranpose 2z,4x,4y
-! total:                                FFT: 6x,6y,2z  tranpose: 2z,8x,8y
-!  2 expensive transforms, 14 FFTs.  
-!  cost of full spectral algorithm:  9 FFTs, 3 expensive transforms.
-!
-!
-! Can we do the same trick with a pencil decomposition?  pencils in y
+! ns_vorticity3:
 ! compute (while computing Qgrid from Qhat):  vx, uy
 ! transform over just w1,w2 (first two components of vorticity)
 !
 ! computing vx:                 FFT: 1x     transpose:  1x
 ! computing uy:                 FFT: 1x,1y  transpose:  2x,1y
 ! w1,w2:                        FFT: 2x,2y,2z  tranpose: 4x,4y,2z
-! total:                        FFT: 3x,4y,2z    7x 5y 2z
-! if we modify code to work in x-pencil grid space:  3x 5y 2z
+! total:                        FFT: 3x,4y,2z  transpose: 7x 5y 2z
+! 
+! So this is always cheaper if x & y tranposes are on processor.
+!
+! note: for ns_xpencil, tranpose cost is only:  3x 5y 2z
+! and this is cheaper if y tranpose is on procossor (ncpu_y==1)
 ! 
 !               
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -350,10 +345,8 @@ enddo
 #ifdef ALPHA_MODEL
    call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
-!  if (ncpu_x==1 .and. ncpu_y==1)
-!     call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
-!   if (ncpy_y == 1) then
-!      call ns_vorticity3(rhsg,Qhat,work,p)
+!   if (ncpu_x==1 .and. ncpu_y == 1 ) then
+!      call ns_vorticity3(rhsg,Qhat,work,p)  ! not yet coded
    call ns_vorticity(rhsg,Qhat,work,p)
 #endif
 

@@ -67,9 +67,8 @@ if (firstcall) then
 
    rhs_trashed=.true.  ! set flag to initialize rhs if necessary
 
-   ! enable (maybe more efficient) vorticity routine
-   ! if (ncpu_y == 1 ) use_vorticity3=.true. 
-   ! turn this on with "-v3" option
+   ! enable more efficient vorticity routine
+   if (ncpu_y == 1 ) use_vorticity3=.true. 
 endif
 
 

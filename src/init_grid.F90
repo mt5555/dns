@@ -562,7 +562,7 @@ if (my_pe==io_pe) then
          if (i>iargc()) exit
          !call getarg(i,carg)
       else if (message(1:3)=="-v3") then
-         print *,'Enabling ns_vorticity3 code (only if using dnsp model)'
+         print *,'User enabled ns_vorticity3 code (only if using dnsp model)'
          use_vorticity3=.true.
       else if (message(1:1)/="-") then
          ! this must be the runname
