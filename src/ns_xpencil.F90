@@ -68,7 +68,10 @@ if (firstcall) then
    rhs_trashed=.true.  ! set flag to initialize rhs if necessary
 
    ! enable more efficient vorticity routine
-   if (ncpu_y == 1 ) use_vorticity3=.true. 
+   if (ncpu_y == 1 ) then
+	use_vorticity3=.true. 
+	call print_message("Enabling use_vorticity3 (more efficient) option.")
+   endif	
 endif
 
 
@@ -111,6 +114,7 @@ real*8 :: work2(nx,ny,nz)
 ! overlapped in memory: (real size: nx,ny,nz)
 real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
 real*8 :: rhsg(g_nx2,nslabz,ny_2dx,n_var)
+
 
 
 ! local variables

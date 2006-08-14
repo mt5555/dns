@@ -110,23 +110,28 @@ I use a python script, 'gridsetup.py' which will create the
 needed 'params.h' file.   To run an N^3 problem, with a 
 domain decompostion of nx*ny*nz (so NCPUS=nx*ny*nz):
 
-      ./gridsetup.py  nx ny nz  N N N
+      ./gridsetup.py  nx ny nz  N N N 2 2 0
+
+(The 2,2,0 specifies how the arrays are padded in x,y,z directions.
+2,2,0 is optimal for the spectral method, but other values are needed
+if finite differences or hybrid options are enabled).
+
 
 Here are some examples:
 
       A 32x32x32 grid, to run using just 1 cpu:
       % cd dns/src
-      % ./gridsetup.py 1 1 1 32 32 32
+      % ./gridsetup.py 1 1 1 32 32 32 2 2 0
 
       A 64x64x64 grid, on 4 cpu:
       (parallel decomposition: 1x1x4, so 4 hyperslabs in the z-direction)
       % cd dns/src
-      % ./gridsetup.py 1 1 4 64 64 64 
+      % ./gridsetup.py 1 1 4 64 64 64 2 2 0
 
       A 64x64x64 grid, on 64 cpu:
       (parallel decomposition: 2x1x32, so a pensil decomposition)
       % cd dns/src
-      % ./gridsetup.py 2 1 32 64 64 64 
+      % ./gridsetup.py 2 1 32 64 64 64 2 2 0
 
 
 For a grid N^3, N must be a power

@@ -1,5 +1,5 @@
 #!/bin/tcsh 
-#PBS -l size=800
+#PBS -l size=2048
 #PBS -l walltime=30:00
 #PBS -A 7101/16.12
 #PBS -o bench.o -e bench.e
@@ -36,10 +36,11 @@ set recompile = 1
 # 3072    3072  8x384     .0259, .0256, .0256
 # 384      2x192          .179
 
-# 768      4x192          .101        dnsp-v3:   
-# 768      8x96                       dnsp-v3:   IN
-# 768      16x48                       dnsp-v3: 
-# 768      32x24                       dnsp-v3: 
+# 768      4x192          .101        dnsp-v3:  .0900
+# 768      8x96                       dnsp-v3:  .0837
+# 768      16x48                       dnsp-v3: .0790
+# 768      32x24                       dnsp-v3: .1004
+# 768      64x12                       dnsp-v3: .1059
 
 
 # 1536     8x192          .0470
@@ -74,21 +75,29 @@ set recompile = 1
 #         2x1x1536 VN  wont compile
 #         4x1x1536 VN  compiles, wont load
 #  2048^3
-#    4x1x1024 VN   .614
-#    2x1x1024  wont load   
+#   64x1x64
+#   32x1x128
+#   16x1x256
+#    8x1x512
+#    4x1x1024 VN   .614      dnsp-v3: 
+#    2x1x1024                dnsp-v3:     IN
+#    1x1x1024   1,208,918,416
+#    1x1x512   wont compile.  2.4GB per process             
+#
 #
 #    2x1x1024 CO   .872
 #    1x1x1024  wont load
 #
 # 512: 3333 steps per eddy turnover time
 # 2048:  13000 steps = 2.2h   1.2TB  
-# 4096                        9.2TB
-
-set NCPU = 768
-set mesh = "8 1 96 768 768 768"
-#set mesh = "4 1 1024 2048 2048 2048"
-set MPIRUN = "yod -sz $NCPU"
-#set MPIRUN = "yod -VN -sz $NCPU"
+# 4096                        9.2TB      (compiles on 8192 cpus = 1.14GB/cpu)
+#
+#   
+set NCPU = 4096
+#set mesh = "64 1 12 768 768 768"
+set mesh = "4 1 1024 2048 2048 2048"
+#set MPIRUN = "yod -sz $NCPU"
+set MPIRUN = "yod -VN -sz $NCPU"
 
 set code = dnsp
 set opt = "-mio -t"
@@ -112,21 +121,17 @@ endif
 if ($recompile == 1) then
    rm -f $EXE
    cd $SRC
-   ./gridsetup.py $mesh
-   make dep
+   ./gridsetup.py $mesh 2 2 0
+   #make dep
    #make clean
    make $code
    \cp -f $code $EXE
 endif
 
-if ( ${?PBS_JOBID} ) then
-    cd
-    $MPIRUN $EXE $opt  -d $WDIR  $name < $refin
-else
-    cd
-    cd dns
-    qsub scripts/rs.job
-endif
+
+cd
+$MPIRUN $EXE $opt  -d $WDIR  $name < $refin
+
 
 
 
