@@ -73,12 +73,12 @@ time_target=time_final
 umax=maxs(4)+fcor/pi
 
 if (ndim==3) then
-   mumax = mu*(delx**-2) + &
-           mu*(dely**-2) + &
-           mu*((Lz*delz)**-2) 
+   mumax = mu*(delx**(-2)) + &
+           mu*(dely**(-2)) + &
+           mu*((Lz*delz)**(-2)) 
 else
-   mumax = mu*(delx**-2) + &
-           mu*(dely**-2) 
+   mumax = mu*(delx**(-2)) + &
+           mu*(dely**(-2)) 
 endif
 psmax=0
 if (npassive>0) then
@@ -172,7 +172,7 @@ else
 endif
 
 
-doit_restart=check_time(itime,time,restart_dt,0,0.0,time_next,1,0)
+doit_restart=check_time(itime,time,restart_dt,0,0d0,time_next,1,0)
 time_target=min(time_target,time_next)
 
 ! ouput of various fields.  
@@ -184,7 +184,7 @@ time_target=min(time_target,time_next)
 !
 ! diagnostic output (output to .scalars file)
 ! every diag_dt, and final time
-doit_diag=check_time(itime,time,diag_dt,0,0.0,time_next,1,0)
+doit_diag=check_time(itime,time,diag_dt,0,0d0,time_next,1,0)
 time_target=min(time_target,time_next)
 
 !
@@ -194,10 +194,10 @@ time_target=min(time_target,time_next)
 ! dns:      spectrum, structure functions and time averages
 ! dnsvor:   tracers, contour info
 !
-doit_model=check_time(itime,time,model_dt,0,0.0,time_next,0,0)
+doit_model=check_time(itime,time,model_dt,0,0d0,time_next,0,0)
 time_target=min(time_target,time_next)
 
-doit_screen=check_time(itime,time,screen_dt,0,0.0,time_next,1,0)
+doit_screen=check_time(itime,time,screen_dt,0,0d0,time_next,1,0)
 time_target=min(time_target,time_next)
 ! also output first 5 timesteps, unless screen_dt==0
 if (itime<5 .and. screen_dt/=0) doit_screen=.true.

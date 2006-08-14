@@ -1608,7 +1608,7 @@ do x_pe=0,ncpu_x-1
          if (random) then
             call random_data(saved_edge,o_nx)
          else
-#ifdef 0
+#if 0
             if (do_mpi_io) then
                zpos = z_pe*nslabz + k -1
                ypos = y_pe*nslaby + (1+x_pe)*ny_2dx_actual

@@ -956,7 +956,7 @@ if (ny2-ny1+1 /= g_ny) then
    call abort("compressed I/O y dimension error")
 endif
 
-if (io_read) then
+if (1==io_read) then
    call print_message("reading compressed I/O:")
 else
    call print_message("writing compressed I/O:")
@@ -965,7 +965,7 @@ endif
 fname = basename(1:len_trim(basename)) // ".uc"
 call print_message(trim(fname))
 call singlefile_io3(time,Q(1,1,1,1),fname,work1,work2,io_read,io_pe,.false.,2)
-if (io_read) then
+if (1==io_read) then
    call global_max_abs(Q(1,1,1,1),mx)
    write(message,'(a,3f18.14)') 'compressed_io: maxU = ',mx
    call print_message(message)
@@ -976,7 +976,7 @@ endif
 fname = basename(1:len_trim(basename)) // ".vc"
 call print_message(trim(fname))
 call singlefile_io3(time,Q(1,1,1,2),fname,work1,work2,io_read,io_pe,.false.,2)
-if (io_read) then
+if (1==io_read) then
    call global_max_abs(Q(1,1,1,2),mx)
    write(message,'(a,3f18.14)') 'compressed_io: maxV = ',mx
    call print_message(message)

@@ -220,7 +220,7 @@ if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
    call divergence(p,u,work,work2)
-   call helmholtz_periodic_inv(p,work,alpha,beta,one)
+   call helmholtz_periodic_inv(p,work,alpha,beta)
 
    !work=p  ! RHS
    !p=0  ! initial guess
@@ -391,15 +391,15 @@ if(pv_type == 1) then
    !bw Assume the density, (\tilde(rho)) is in u(:,:,:,4).
    !bw
    !compute theta_x
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,1)
    pv = d1*vor(:,:,:,1)
    
    ! compute theta_y
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
    pv=pv + d1*vor(:,:,:,2)
    
    ! compute theta_z -- do not forget to add in coriolis here
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*(vor(:,:,:,3)+fcor)
    pv = pv - bous*vor(:,:,:,3)
    
@@ -408,13 +408,13 @@ elseif (pv_type == 2) then
 ! pv = omega dot grad theta
 !
    !compute theta_x
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,1)
    pv = d1*vor(:,:,:,1)
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
    pv=pv + d1*vor(:,:,:,2)
 
    ! compute theta_z -- do not forget to add in coriolis here
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*vor(:,:,:,3)
    
 elseif (pv_type == 3) then
@@ -422,7 +422,7 @@ elseif (pv_type == 3) then
    !bw pv = -bous * omega_3 +  fcor theta / d z
    !bw
    ! compute theta_z -- do not forget to add in coriolis here
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = - bous*vor(:,:,:,3)+fcor*d1/Lz
 
 elseif (pv_type == 4) then
@@ -431,7 +431,7 @@ elseif (pv_type == 4) then
    !bw
    pv = 0
    ! compute theta_z -- do not forget to add in coriolis here
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = fcor*d1/Lz
 elseif (pv_type == 5) then
    !bw
@@ -445,15 +445,15 @@ elseif (pv_type == 6) then
 !
 
    !compute theta_x
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,1)
    pv = d1*vor(:,:,:,1)
    
    ! compute theta_y
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
    pv = pv + d1*vor(:,:,:,2)
 
    ! compute theta_z -- do not forget to add in coriolis here
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*vor(:,:,:,3)
    pv = pv - bous*vor(:,:,:,3)
 
@@ -462,15 +462,15 @@ elseif (pv_type == 7) then
 ! pv = omega dot grad theta + fcor  d theta / d z
 !
    !compute theta_x
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,1)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,1)
    pv = d1*vor(:,:,:,1)
 
    ! compute theta_y
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,2)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
    pv = pv + d1*vor(:,:,:,2)
    
    ! compute theta_z -- do not forget to add in coriolis here
-   call der(u(1,1,1,4),d1,dummy,work,DX_ONLY,3)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*(vor(:,:,:,3)+fcor)
 
 endif

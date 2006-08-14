@@ -13,6 +13,7 @@ Fortran callable wrappers to C binary I/O
 
 
 
+#include <string.h>
 #include <stdio.h>
 #include <errno.h>
 extern int errno;
