@@ -617,6 +617,7 @@ endif
 call mpi_bcast(runname,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 call mpi_bcast(rundir,80,MPI_CHARACTER,io_pe,comm_3d ,ierr)
 
+call mpi_bcast(use_vorticity3,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
 call mpi_bcast(r_spec,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
 call mpi_bcast(w_spec,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
 call mpi_bcast(r_compressed,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)

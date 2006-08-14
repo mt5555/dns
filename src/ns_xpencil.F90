@@ -68,11 +68,10 @@ if (firstcall) then
    rhs_trashed=.true.  ! set flag to initialize rhs if necessary
 
    ! enable (maybe more efficient) vorticity routine
-   ! if (ncpu_y == 1 ) use_vorticity3=.true.
+   ! if (ncpu_y == 1 ) use_vorticity3=.true. 
+   ! turn this on with "-v3" option
 endif
 
-
-call printmax(Q_grid,1,nx,ny,nz)
 
 if (.not. data_x_pencils) then
    ! initial data, or after output/diagnostics, data in Q_grid may be
@@ -82,9 +81,6 @@ if (.not. data_x_pencils) then
    call transpose_to_x_3d(Q_tmp,Q_grid)
    data_x_pencils=.true.
 endif
-
-call printmax(Q_grid,2,g_nx2,nslabz,ny_2dx)
-! 3.3457 
 
 
 if (use_vorticity3) then
@@ -97,34 +93,6 @@ endif
 end
 
 
-
-subroutine printmax(Q,type,n1,n2,n3)
-use params
-implicit none
-integer n1,n2,n3
-real*8 Q(n1,n2,n3)
-real*8 mx
-integer i,j,k,type
-mx=0
-if (type==1) then
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      mx=max(mx,abs(Q(i,j,k)))
-   enddo
-   enddo
-   enddo
-endif
-if (type==2) then
-   do k=1,ny_2dx
-   do j=1,nslabz
-   do i=1,g_nx
-      mx=max(mx,abs(Q(i,j,k)))
-   enddo
-   enddo
-   enddo
-endif
-end subroutine
 
 
 
@@ -477,6 +445,7 @@ call wallclock(tmx1)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! see notes in ns.F90 about pros/cons on how to compute vorticity
 !
@@ -485,7 +454,6 @@ if (use_vorticity3) then
 else
    call ns_vorticity(rhsg,Qhat,work,p)
 endif
-
 
 
 
@@ -550,7 +518,6 @@ enddo
 do n=1,3
    call zx_fft3d_trashinput(Q_grid(1,1,1,n),rhs(1,1,1,n),work)
 enddo
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! From this point on, Q_grid() may be used as a work array
@@ -679,7 +646,6 @@ if (compute_ints==1 .and. compute_transfer) then
    enddo
    ! spec_f = (for now) spectrum of advection + diffusion terms
 endif
-
 
 
 

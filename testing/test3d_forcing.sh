@@ -13,9 +13,8 @@ endif
 
 
 if ($#argv == 0 ) then
-   echo "./test3d_forcing.sh [1,2,p,...]  [dns,dnsp,...]"
+   echo "./test3d_forcing.sh [1,2,p,...]  [dns,dnsp,...] [options]"
    echo 
-   echo 'to add options:  ./test3d_forcing.sh 2 "dnsp -v3"'
    echo 
    echo " 1 = run dns without restart, simple 3D test case"
    echo " r = run dns with restart, simple 3D test case"
@@ -31,20 +30,28 @@ if ($#argv == 0 ) then
 endif
 
 set code = dns
-if ($#argv == 2) then
-set code = "$2"
+if ($#argv >= 2) then
+  set code = "$2"
 endif
+set opt = "-d $rundir -i $refin"
+if ($#argv >= 3) then
+  set opt = "$3 $4 $5 $6 $opt"
+endif
+
+
+
 echo "==============================================================="
-echo "Running code: " $code
+echo "Running code: " $code 
+echo "with options:" $opt
 echo "==============================================================="
 
 if ($1 == makeref) then
 
    ./gridsetup.py 1 1 1 32 32 32
    make $code; rm -f $refout 
-   ./$code -d $rundir reference3d  -i $refin | tee $refout
-   ./$code -s -d $rundir reference3ds  -i $refin | tee $refout
-   ./$code -zo -d $rundir reference3dz  -i $refin | tee $refout
+   ./$code $opt   reference3d   | tee $refout
+   ./$code $opt -s  reference3ds   | tee $refout
+   ./$code $opt -zo  reference3dz   | tee $refout
 
   cd $rundir
   mv reference3d0000.0000.u restart.u
@@ -69,7 +76,7 @@ if ($1 == 1) then
 
 echo "***********************************************************"
 echo "without restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 endif
 
@@ -79,12 +86,12 @@ if ($1 == r) then
 
 echo "***********************************************************"
 echo "with restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code -r -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 echo "with spectral restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code -s -r -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -s -r  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
@@ -95,11 +102,11 @@ endif
 if ($1 == 2) then
 
 ./gridsetup.py 1 1 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; ./$code -r -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 1 1 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; ./$code -r -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -115,13 +122,13 @@ if ($1 == s) then
 echo "***********************************************************"
 echo "with 3 passive scalars"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make $code >& /dev/null ;  rm -f $tmp ; ./$code  -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt   reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 echo "with 3 passive scalars and restart"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make $code >& /dev/null ;  rm -f $tmp ; ./$code -r  -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r   reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
@@ -137,47 +144,46 @@ endif
 if ($1 == p || $1 == pr || $1 == pz || $1 == ps) then
 
 if ($1 == pr) then
-   set opt = "-r"
+   set opt = "-r $opt"
    echo USING RESTART
 else if ($1 == ps) then
-   set opt = "-s -r" 
+   set opt = "-s -r $opt" 
    echo USING SPEC RESTART   
 else if ($1 == pz) then
-   set opt = "-r -zi" 
+   set opt = "-r -zi $opt" 
    echo USING COMPRESSED RESTART   
 else
-   set opt = ""
    echo NOT USING RESTART
 endif
 if (`uname` == OSF1) then
-   set opt = "$opt -b -mio "
+   set opt = "$opt -b -mio $opt"
 endif
 echo command line options:  $opt
 
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 4 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 1 2 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt   reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 2 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt -d $rundir reference3d  -i $refin > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
 
 
