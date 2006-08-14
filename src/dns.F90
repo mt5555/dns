@@ -9,9 +9,11 @@ program DNS
 use params
 use mpi
 implicit none
-real*8,save :: Q(nx,ny,nz,n_var)
-real*8,save :: Qhat(nx,ny,nz,n_var)
-real*8,save :: q1(nx,ny,nz,n_var)
+real*8,save :: Q(nx,ny,nz,n_var)        ! grid space state variable
+real*8,save :: Qhat(nx,ny,nz,n_var)     ! Fourier space state variable
+real*8,save :: q1(nx,ny,nz,n_var)       ! work arrays
+real*8,save :: q2(nx,ny,nz,n_var)       ! work arrays
+real*8,save :: rhs(nx,ny,nz,n_var)      ! right hand side of equations
 real*8,save :: work1(nx,ny,nz)
 real*8,save :: work2(nx,ny,nz)
 character(len=80) message
@@ -93,7 +95,8 @@ tims=0
 ! tims(1) times the total initialization
 tims(1)=tmx2-tmx1
 
-call dns_solve(Q,Qhat,q1,work1,work2,itime)
+call dns_solve(Q,Qhat,q1,q2,rhs,work1,work2,itime)
+
 
 
 
@@ -192,7 +195,7 @@ end program DNS
 !  main time stepping loop
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine dns_solve(Q,Qhat,q1,work1,work2,itime)
+subroutine dns_solve(Q,Qhat,q1,q2,rhs,work1,work2,itime)
 use params
 use mpi
 use tracers
@@ -201,14 +204,13 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
+real*8 :: q2(nx,ny,nz,n_var)       ! work arrays
+real*8 :: rhs(nx,ny,nz,n_var)      ! right hand side of equations
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer :: itime
 
 !local variables
-real*8,save :: q2(nx,ny,nz,n_var)
-real*8,save :: rhs(nx,ny,nz,n_var)
-
 
 real*8  :: time=0
 integer :: ierr,n
