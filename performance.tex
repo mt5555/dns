@@ -1,0 +1,236 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb,latexsym,amsmath}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse % we are not running PDFLaTeX                                         
+\else
+\pdfoutput=1 % we are running PDFLaTeX                                          
+\pdftrue
+\fi
+\ifpdf
+\usepackage[pdftex]{graphicx}
+\else
+\usepackage{graphicx}
+\fi
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps, .jpg}
+\fi
+
+
+
+\textwidth = 6.5 in
+\textheight = 9 in
+\oddsidemargin = 0.0 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.2 in
+\parindent = 0.0 in
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\khat}{\hat{\mathbf k}}
+\newcommand{\uv}{\mathbf u}
+%\newcommand{\vor}{\mathbf \omega}
+\newcommand{\vor}{\mathbf w}
+\newcommand{\n}{\mathbf n}
+
+
+\newcommand{\grad}{\nabla}
+\newcommand{\curl}{\grad \times}
+\renewcommand{\div}{\grad \cdot}
+
+\DeclareMathOperator{\Span}{span}
+
+
+\title{Performance of the Sandia/LANL DNS code}
+\author{Mark Taylor}
+
+\begin{document}
+%\maketitle
+
+
+The Sandia/LANL DNS code solves viscous fluid dynamics equations in a
+periodic rectangular domain (2D or 3D) with a pseudo-spectral method
+or 4th order finite differences and with the standard RK4 time
+stepping scheme.
+
+The code is documented in 
+\begin{enumerate}
+\item Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
+\item Kurien and Taylor, Los Alamos Science 29, 2005. 
+\end{enumerate}
+Results from this code have also been used in four additional journal
+publications.  Our largest simulation to date is 4 eddy turnover
+times of decaying turbulence at $2048^3$.  
+
+This document describes one particular model in the DNS code:
+Using the pseudo-spectral method to solve the 
+incompressible Navier-Stokes equations in a tripply periodic
+box.  It is an MPI code which can use
+an arbitrary 3D domain decomposition, (allowing for both slab
+decomposition and pencil decomposition).  For a grid of size $N^3$, it
+can run on up to $\frac{N^3}{8}$ processors.  It has 
+been run on as many as 6144 processors with grids as large
+as $4096^3$.
+
+We solve the NS equations in a square box of side length 1.
+The equations are
+\[
+\frac{ \partial  \uv }{\partial t}  + \vor  \times \uv + 
+\grad \pi   = \nu \Delta \uv
+\]
+\[
+\div \uv = 0
+\]
+where $\vor = \curl \uv$ and $\pi = .5 \uv^2 + p$.  
+We use a pressure projection method,
+where $\grad \pi$ is determined so that the solution remains
+divergence free.  Thus the continuity equation $\div \uv = 0$
+is eliminated by taking
+\[
+ \pi = - \Delta^{-1} \div \left( \vor \times \uv  \right)
+\]
+
+
+\section{Outline of Numerical Method}
+
+We use the classic 4th order Runge Kutta scheme with an explicit
+treatment of diffusion.  This requires, for each timestep, 4 evaluations 
+of the right-hand-side (RHS) of the Navier-Stokes equation,
+\[
+  - \vor  \times \uv + 
+\grad \Delta^{-1} \div \left( \vor \times \uv  \right) +  \nu \Delta \uv
+\]
+Denote the Fourier coefficients of $\uv$ by $\hat \uv$, and
+let $\n = \vor \times \uv$.   
+We advance in time $\hat \uv$, so for each
+of the 4 Runge-Kutta stages we must compute the Fourier coefficients 
+of the RHS.  Starting with $\hat \uv$, the steps are
+\begin{enumerate}
+\item  $\uv$ = iFFT($\hat \uv$).  Cost: 3D inverse FFT
+\item  $\hat \vor = \curl \hat \uv$.  (single on processor loop, cost: $O(N^3)$)
+\item  $\vor$ = iFFT($\hat \vor$).  Cost: 3D inverse FFT 
+\item  Compute $\n = \vor \times \uv$.  (single on processor loop, cost: $O(N^3)$)
+\item  $\hat\n$=FFT($\n$).  Cost: 3D FFT
+\item  Compute Fourier coefficients of remaning linear terms,
+$-\grad \Delta^{-1} \div \hat\n +  \nu \Delta \hat \uv$ (single on processor loop, cost $O(N^3)$). 
+\item  Compute Fourier coefficients of the RHS.  Cost: free
+(can be combined with the previous step).
+\end{enumerate}
+
+
+\section{Complexity}
+
+We will ignore the on processor loops, since they require no
+communication and their total cost is $O(N^3)$, while the cost of the
+FFT is $O(N^3 log N)$.   Thus the cost of the method is all in
+the cost of the 3 FFTs.  Each FFT is applied to a 3 component
+vector field, so the total cost is given by 9 scalar 3D FFTs.  
+All the parallel communication is hidden in the FFTs. 
+
+The FFT looks something like this.  We start with a scalar variable
+like $\pi$, stored with an x-pencil decomposition:
+\begin{enumerate}
+\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the x-direction)
+\item Tranpose from x-pencil to y-pencil decompostion
+\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the y-direction)
+\item Tranpose from y-pencil to z-pencil decompostion
+\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in z-direction)
+\end{enumerate}
+and end up with $\hat \pi$, stored with a z-pencil decompostion.
+The Inverse FFT simply reverses the above steps.  
+
+To estimate the cost of this algorithm, we just need a model for the
+transpose operation and $N^2$ simultaneous 1D FFTs.  
+Many codes first use a real-to-complex FFT, followed by
+complex-to-complex FFTs for the last two (of size N/2).  
+Our code uses only real-to-real FFTs, always of length N.
+
+The total cost of the three 3D FFTs algorithm is thus:
+\begin{enumerate}
+\item 27 $N^2$ 1D real-to-real FFTs of length N
+\item 3 x-pencil to y-pencil tranposes of size $N^3$.  
+\item 3 y-pencil to z-pencil tranposes of size $N^3$.  
+\item 6 z-pencil to y-pencil tranposes of size $N^3$.  
+\item 6 y-pencil to x-pencil tranposes of size $N^3$.  
+\end{enumerate}
+
+
+\section{Vorticity Evaluation Trick}
+
+
+There is a trick one can use to eliminate one transpose.
+In Step 3 above, we only compute the second and third components
+of $\vor$.  The first component, $\vor_1 = \uv_2,1 - \uv_1,2$ is
+instead computed during Step 1 with a modified iFFT.  While
+computing the inverse FFT of $\uv$, one can also return 
+$\uv_2,1$ and $\uv_1,2$.  This requires the same number of
+y-pencil to x-pencil transposes, but one less z-pencil to y-pencil
+transpose.  
+
+The total cost of the algorithm becomes
+\begin{enumerate}
+\item 27 $N^2$ 1D real-to-real FFTs of length N
+\item 3 x-pencil to y-pencil tranposes of size $N^3$.  
+\item 3 y-pencil to z-pencil tranposes of size $N^3$.  
+\item 5 z-pencil to y-pencil tranposes of size $N^3$.  
+\item 6 y-pencil to x-pencil tranposes of size $N^3$.  
+\end{enumerate}
+
+\section{Code Specific Tranpose Details}
+Our code actually allows for a full 3D data decompostion
+(not that usefull for the full pseudo spectral code, but useful
+for some finite difference/spectral hybrids).  Because of this,
+the FFT involves two extra steps.  The code
+is defined to have a {\em reference} decompostion which
+can be slabs, pencils or cubes.  The actual FFT algorithm
+(in the code, see \texttt{zx\_ifft3d()} ) looks like this:
+
+\begin{enumerate}
+\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the x-direction)
+\item Tranpose from x-pencil to reference decompostion
+\item Tranpose from reference to y-pencil decompostion
+\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the y-direction)
+\item Tranpose from y-pencil to reference decompostion
+\item Tranpose from reference to z-pencil decompostion
+\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in z-direction)
+\end{enumerate}
+
+This algorithm contains two extra steps.  The most efficient
+configuration is if the reference decompostion happens to be x-y slabs.
+In that case, then the two extra steps (and the x-pencil tranposes)
+are all done on-processor (simple memory copies).
+If the reference decomposition is y-pencils, then again the
+two extra steps are on-processor memory copies with
+negligible cost (and the serve to arrange the data so all
+FFTs are done with a stride of 1).
+
+This with our code, for efficiency, it is best to use a reference 
+decomposition of y-pencils or x-y slabs.  Using x-pencils or z-pencils 
+for the reference decompostion is very inefficient.  
+
+
+\section{Dealiasing}
+
+There are three types of dealiasing commenly used in these codes.
+\begin{enumerate}
+\item phase shifting
+\item 2/3 rule
+\item spherical
+\end{enumerate}
+
+\section{CFD: Resolution Condition}
+
+\section{CFD: Determinstic Low Wave Number Forcing}
+
+\section{CFD: Resolution and $R_\lambda$}
+
+
+\end{document}
