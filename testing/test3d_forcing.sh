@@ -6,10 +6,6 @@ set refout=../testing/reference3d_f.out
 set rundir=../testing/3df
 set tmp=/tmp/temp.out
 
-set MPIRUN  = "mpirun -np"
-if (`uname` == OSF1) then
-   set MPIRUN =  "prun -n"
-endif
 
 
 if ($#argv == 0 ) then
@@ -38,6 +34,13 @@ if ($#argv >= 3) then
   set opt = "$3 $4 $5 $6 $opt"
 endif
 
+set MPIRUN  = "mpirun -np"
+if (`uname` == OSF1) then
+   set MPIRUN =  "prun -n"
+endif
+if (`uname` == Darwin) then
+   set opt = "-b $opt"
+endif
 
 
 echo "==============================================================="
@@ -88,6 +91,7 @@ echo "***********************************************************"
 echo "with restart:"
 make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   > $tmp 
 ../testing/check.sh $tmp $refout
+
 
 echo "***********************************************************"
 echo "with spectral restart:"

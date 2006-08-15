@@ -94,9 +94,8 @@ ifeq ($(UNAME),Linux)
 endif
 ifeq ($(UNAME),Darwin)
    F90 = g95
-   MPI =  -DUSE_MPI  -DMPI_HAS_REAL8   -I/sw/include/lammpi
-#  -DMPI_REAL8_LAM
-   MPILIB = -L/sw/lib/lammpi  -llammpio -llamf77mpi -lmpi -llam 
+#   MPI =  -DUSE_MPI  -DMPI_REAL8_LAM -DMPI_HAS_REAL8   -I/sw/include/lammpi
+#   MPILIB = -L/sw/lib/lammpi  -llammpio -llamf77mpi -lmpi -llam 
    FFLAGS = -fno-second-underscore -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99 -DLINUX
 endif
 ifeq ($(UNAME),SunOS)
