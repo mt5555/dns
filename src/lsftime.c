@@ -1,4 +1,4 @@
-#if (defined AIX || defined HPUX || defined OSF1)
+#ifdef F_NO_UNDERSCORE
 #define FORTRAN(A) A
 #else
 #define FORTRAN(A) A##_

@@ -10,11 +10,7 @@ character(len=*) message
 character(len=15) :: pre="ABORT"
 write(*,'(a)') pre // message
 
-#ifdef AIX
-call flush_(6)
-#else
 call flush(6)
-#endif
 
 #ifdef USE_MPI
    call mpi_abort(comm_3d,1,ierr)

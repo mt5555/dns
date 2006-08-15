@@ -12,6 +12,8 @@ ARCH = $(shell uname -m)
 HOST = $(shell hostname)
 # use this if compiler needs additional options to compile fixed format code:
 F77FIXED=
+MPI = 
+MPILIB = 
 
 
 ifeq ($(UNAME),Linux)
@@ -19,8 +21,6 @@ ifeq ($(UNAME),Linux)
    #VENDOR=PGI
    #VENDOR=PGIMPI
    #VENDOR=INTEL8
-   MPI = 
-   MPILIB = 
    ifeq ($(HOST),dosadi)
       VENDOR=INTEL8
    endif
@@ -55,8 +55,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9562/bin/lf95
    F90 = lf95
-   FFLAGS = -g  -DLINUX $(MPI) -DUSE_FFT99
-   #FFLAGS =  -tpp -O -DLINUX $(MPI) -DUSE_FFT99
+   FFLAGS = -g  $(MPI) -DUSE_FFT99
+   #FFLAGS =  -tpp -O $(MPI) -DUSE_FFT99
    LDFLAGS = --staticlink  #-Lstk -lstk
    CC = gcc
    endif
@@ -64,49 +64,61 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),PGI)
    F90 = pgf90
    CC=pgcc
-   #FFLAGS = -Bstatic -Mrecursive -fast -DLINUX $(MPI)  -DUSE_FFT99 
-   FFLAGS = -Mrecursive -g -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS = -Bstatic -Mrecursive -fast  $(MPI)  -DUSE_FFT99 
+   FFLAGS = -Mrecursive -g  $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif 
 
    ifeq ($(VENDOR),PGIMPI)
    F90 = mpif90
    CC=pgcc
-   FFLAGS =  -Mrecursive  -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -Mrecursive  -fast  $(MPI)  -DUSE_FFT99 
    endif 
 
 
    ifeq ($(VENDOR),INTEL)
    F90 = ifc
    CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7   $(MPI)  -DUSE_FFT99 
    endif
 
    ifeq ($(VENDOR),INTEL8)
    F90 = ifort
    CC=gcc
-   #FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
-   FFLAGS =  -auto -w90  -Vaxlib  -O1   -DLINUX $(MPI)  -DUSE_FFT99 
-   #FFLAGS =  -w90  -Vaxlib -O1 -tpp7  -DLINUX $(MPI)  -DUSE_FFT99 
+   #FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7   $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -auto -w90  -Vaxlib  -O1    $(MPI)  -DUSE_FFT99 
+   #FFLAGS =  -w90  -Vaxlib -O1 -tpp7   $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif
 
 endif
+
+
 ifeq ($(UNAME),Darwin)
-   F90 = g95
 #   MPI =  -DUSE_MPI  -DMPI_REAL8_LAM -DMPI_HAS_REAL8   -I/sw/include/lammpi
 #   MPILIB = -L/sw/lib/lammpi  -llammpio -llamf77mpi -lmpi -llam 
-   FFLAGS = -fno-second-underscore -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99 -DLINUX
+#   F90 = g95
+#   FFLAGS = -fno-second-underscore -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99 
+
+   CC = cc -DF_NO_UNDERSCORE
+   F90 = xlf95
+   F77FIXED = -qfixed
+   FFLAGS = -WF,"-Dflush=flush_,-Dabort=punt,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict 
+   LDFLAGS = -lSystemStubs
 endif
+
+
 ifeq ($(UNAME),SunOS)
    F90 = f95
    #MPILIB = -L/usr/local/src/mpich/lib/solaris/ch_p4  -lmpi -lsocket -lnsl
    #MPI = -DUSE_MPI -I/usr/local/src/mpich/include
    # default -fast is -xvector=yes, but this introduces bugs in test.F90!
-   FFLAGS = -fast -xvector=no -xarch=v9  -DSUNOS $(MPI) -DUSE_STKFFT
+   FFLAGS = -fast -xvector=no -xarch=v9   $(MPI) -DUSE_STKFFT
    LDFLAGS = -Lstk -lstk
    CC = cc -xarch=v9 -c
 endif
+
+
 ifeq ($(UNAME),IRIX64)
    F90 = f90
    MPI = -DUSE_MPI
@@ -123,15 +135,18 @@ ifeq ($(UNAME),IRIX64)
    LDFLAGS =  -l scs $(LSFLIB)  #-Lstk -lstk
    # When SGI adds padding to data in params.h, MPI breaks:  
    FFLAGS = -64 -Ofast -OPT:reorg_common=OFF -macro_expand  -DIRIX64  -DNDEBUG -DUSE_SGIFFT $(MPI)
-   CPPFLAGS = 
    CC = cc -64 $(LSFFLAGS)
 endif
+
+
 ifeq ($(UNAME),AIX)
    F90 = mpxlf95
    F77FIXED = -qfixed
-   FFLAGS = -WF,"-DAIX,-Dabort=punt,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
-   CC = cc -DAIX
+a   FFLAGS = -WF,"-Dflush=flush_ -Dabort=punt,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
+   CC = cc -DF_NO_UNDERSCORE
 endif
+
+
 ifeq ($(UNAME),OSF1)
    F90 = f90
 
@@ -164,14 +179,6 @@ ifeq ($(UNAME),OSF1)
       endif	
    endif
 
-
-   ifeq ($(HOST),milkyway.lanl.gov)
-      MPI =  -DUSE_MPI_IO  -DUSE_MPI -I/usr/opt/MPI196/include
-      MPILIB = -L/usr/opt/MPI196/lib -lfmpi -lmpi 
-      UDM =  
-      UDMLIB = 
-      LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) #-Lstk -lstk 
-   endif
 
    # note: shallow water model cannot use -automatic
    FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
