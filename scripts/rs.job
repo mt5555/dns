@@ -78,8 +78,8 @@ set recompile = 1
 #   64x1x64
 #   32x1x128
 #   16x1x256
-#    8x1x512
-#    4x1x1024 VN   .614      dnsp-v3: 
+#    8x1x512                 dnsp-v3:  IN
+#    4x1x1024 VN   .614      dnsp-v3:    .561
 #    2x1x1024                dnsp-v3:     IN
 #    1x1x1024   1,208,918,416
 #    1x1x512   wont compile.  2.4GB per process             
@@ -90,12 +90,12 @@ set recompile = 1
 #
 # 512: 3333 steps per eddy turnover time
 # 2048:  13000 steps = 2.2h   1.2TB  
-# 4096                        9.2TB      (compiles on 8192 cpus = 1.14GB/cpu)
+# 4096:  27000 steps = ?      9.2TB      (compiles on 8192 cpus = 1.14GB/cpu)
 #
 #   
 set NCPU = 4096
 #set mesh = "64 1 12 768 768 768"
-set mesh = "4 1 1024 2048 2048 2048"
+set mesh = "1 1 512 2048 2048 2048"
 #set MPIRUN = "yod -sz $NCPU"
 set MPIRUN = "yod -VN -sz $NCPU"
 

@@ -26,7 +26,7 @@ ifeq ($(UNAME),Linux)
    endif
    ifeq ($(ARCH),x86_64)
       VENDOR=PGIMPI
-      MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
+      MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO -DMALLOC_Q
    endif
    ifeq ($(HOST),mauve.lanl.gov)
       VENDOR=INTEL8
@@ -72,7 +72,7 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),PGIMPI)
    F90 = mpif90
    CC=pgcc
-   FFLAGS = -mcmodel=medium -tp=amd64  -Mrecursive  -fast -DLINUX $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -Mrecursive  -fast -DLINUX $(MPI)  -DUSE_FFT99 
    endif 
 
 

@@ -9,6 +9,15 @@ program DNS
 use params
 use mpi
 implicit none
+#ifdef MALLOC_Q
+real*8,allocatable :: Q(:,:,:,:)        ! grid space state variable
+real*8,allocatable :: Qhat(:,:,:,:)     ! Fourier space state variable
+real*8,allocatable :: q1(:,:,:,:)       ! work arrays
+real*8,allocatable :: q2(:,:,:,:)       ! work arrays
+real*8,allocatable :: rhs(:,:,:,:)      ! right hand side of equations
+real*8,allocatable :: work1(:,:,:)
+real*8,allocatable :: work2(:,:,:)
+#else
 real*8,save :: Q(nx,ny,nz,n_var)        ! grid space state variable
 real*8,save :: Qhat(nx,ny,nz,n_var)     ! Fourier space state variable
 real*8,save :: q1(nx,ny,nz,n_var)       ! work arrays
@@ -16,6 +25,7 @@ real*8,save :: q2(nx,ny,nz,n_var)       ! work arrays
 real*8,save :: rhs(nx,ny,nz,n_var)      ! right hand side of equations
 real*8,save :: work1(nx,ny,nz)
 real*8,save :: work2(nx,ny,nz)
+#endif
 character(len=80) message
 integer :: ierr,i,j,k,n,itime=0
 real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
@@ -25,6 +35,16 @@ integer,allocatable :: seed(:)
 ! initialize global constants:
 ints=0
 maxs=0
+
+#ifdef MALLOC_Q
+allocate(Q(nx,ny,nz,n_var))
+allocate(Qhat(nx,ny,nz,n_var))
+allocate(q1(nx,ny,nz,n_var))
+allocate(q2(nx,ny,nz,n_var))
+allocate(rhs(nx,ny,nz,n_var))
+allocate(work1(nx,ny,nz))
+allocate(work2(nx,ny,nz))
+#endif
 
 
 call set_sighandler()
