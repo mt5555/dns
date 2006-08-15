@@ -53,13 +53,15 @@
 \author{Mark Taylor}
 
 \begin{document}
-%\maketitle
+\maketitle
 
 
 The Sandia/LANL DNS code solves viscous fluid dynamics equations in a
-periodic rectangular domain (2D or 3D) with a pseudo-spectral method
-or 4th order finite differences and with the standard RK4 time
-stepping scheme.
+rectangular domain (2D or 3D).  It has many options for the equations
+(Navier-Stokes, Boussinesq, shallow water) discretization (pseudo spectral, 
+finite differences, hybrid, RK4, RK2, stabilized leapfrog).  This document
+describes the RK4 pseudo-spectral model for modeling isotropic homogeneous
+turbulence (incompressible Navier-Stokes) in a 3D triply periodic box.
 
 The code is documented in 
 \begin{enumerate}
@@ -68,34 +70,30 @@ The code is documented in
 \end{enumerate}
 Results from this code have also been used in four additional journal
 publications.  Our largest simulation to date is 4 eddy turnover
-times of decaying turbulence at $2048^3$.  
-
-This document describes one particular model in the DNS code:
-Using the pseudo-spectral method to solve the 
-incompressible Navier-Stokes equations in a tripply periodic
-box.  It is an MPI code which can use
-an arbitrary 3D domain decomposition, (allowing for both slab
-decomposition and pencil decomposition).  For a grid of size $N^3$, it
-can run on up to $\frac{N^3}{8}$ processors.  It has 
+times of decaying turbulence at $2048^3$.  We use MPI and allow
+for arbitrary 3D domain decomposition, (which includes slabs,
+pencils or cubes0.  For a grid of size $N^3$, it
+can run on up to $N^3/8$ processors.  It has 
 been run on as many as 6144 processors with grids as large
 as $4096^3$.
 
-We solve the NS equations in a square box of side length 1.
+We solve the equations in a square box of side length 1.
 The equations are
 \[
 \frac{ \partial  \uv }{\partial t}  + \vor  \times \uv + 
-\grad \pi   = \nu \Delta \uv
+\grad p   = \nu \Delta \uv + f
 \]
 \[
 \div \uv = 0
 \]
-where $\vor = \curl \uv$ and $\pi = .5 \uv^2 + p$.  
-We use a pressure projection method,
-where $\grad \pi$ is determined so that the solution remains
-divergence free.  Thus the continuity equation $\div \uv = 0$
+with vorticity $\vor = \curl \uv$, forcing function $f$, and $p$ is the modified pressure
+given by $p = .5 \uv^2 + p'$ (with $p'$ being the actual Navier-Stokes pressure).
+We use a pressure projection method, which determines
+$\grad p$ so that the solution remains
+divergence free.  In this method, the continuity equation $\div \uv = 0$
 is eliminated by taking
 \[
- \pi = - \Delta^{-1} \div \left( \vor \times \uv  \right)
+ p = - \Delta^{-1} \div \left( \vor \times \uv  \right)
 \]
 
 
@@ -119,7 +117,7 @@ of the RHS.  Starting with $\hat \uv$, the steps are
 \item  $\vor$ = iFFT($\hat \vor$).  Cost: 3D inverse FFT 
 \item  Compute $\n = \vor \times \uv$.  (single on processor loop, cost: $O(N^3)$)
 \item  $\hat\n$=FFT($\n$).  Cost: 3D FFT
-\item  Compute Fourier coefficients of remaning linear terms,
+\item  Compute Fourier coefficients of remaining linear terms,
 $-\grad \Delta^{-1} \div \hat\n +  \nu \Delta \hat \uv$ (single on processor loop, cost $O(N^3)$). 
 \item  Compute Fourier coefficients of the RHS.  Cost: free
 (can be combined with the previous step).
@@ -130,21 +128,22 @@ $-\grad \Delta^{-1} \div \hat\n +  \nu \Delta \hat \uv$ (single on processor loo
 
 We will ignore the on processor loops, since they require no
 communication and their total cost is $O(N^3)$, while the cost of the
-FFT is $O(N^3 log N)$.   Thus the cost of the method is all in
+FFT is $O(N^3 \log N)$.   Thus the cost of the method is all in
 the cost of the 3 FFTs.  Each FFT is applied to a 3 component
 vector field, so the total cost is given by 9 scalar 3D FFTs.  
 All the parallel communication is hidden in the FFTs. 
 
 The FFT looks something like this.  We start with a scalar variable
-like $\pi$, stored with an x-pencil decomposition:
+like $p$, (which could also be one component of the velocity vector $\uv$)
+stored with an x-pencil decomposition:
 \begin{enumerate}
-\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the x-direction)
-\item Tranpose from x-pencil to y-pencil decompostion
-\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the y-direction)
-\item Tranpose from y-pencil to z-pencil decompostion
-\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in z-direction)
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the x-direction)
+\item Transpose from x-pencil to y-pencil decomposition
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the y-direction)
+\item Transpose from y-pencil to z-pencil decomposition
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in z-direction)
 \end{enumerate}
-and end up with $\hat \pi$, stored with a z-pencil decompostion.
+and end up with $\hat p$, stored with a z-pencil decomposition.
 The Inverse FFT simply reverses the above steps.  
 
 To estimate the cost of this algorithm, we just need a model for the
@@ -156,10 +155,10 @@ Our code uses only real-to-real FFTs, always of length N.
 The total cost of the three 3D FFTs algorithm is thus:
 \begin{enumerate}
 \item 27 $N^2$ 1D real-to-real FFTs of length N
-\item 3 x-pencil to y-pencil tranposes of size $N^3$.  
-\item 3 y-pencil to z-pencil tranposes of size $N^3$.  
-\item 6 z-pencil to y-pencil tranposes of size $N^3$.  
-\item 6 y-pencil to x-pencil tranposes of size $N^3$.  
+\item 3 x-pencil to y-pencil transposes of size $N^3$.  
+\item 3 y-pencil to z-pencil transposes of size $N^3$.  
+\item 6 z-pencil to y-pencil transposes of size $N^3$.  
+\item 6 y-pencil to x-pencil transposes of size $N^3$.  
 \end{enumerate}
 
 
@@ -168,69 +167,198 @@ The total cost of the three 3D FFTs algorithm is thus:
 
 There is a trick one can use to eliminate one transpose.
 In Step 3 above, we only compute the second and third components
-of $\vor$.  The first component, $\vor_1 = \uv_2,1 - \uv_1,2$ is
+of $\vor$.  The first component, $\vor_1 = \uv_{2,1} - \uv_{1,2}$ is
 instead computed during Step 1 with a modified iFFT.  While
-computing the inverse FFT of $\uv$, one can also return 
-$\uv_2,1$ and $\uv_1,2$.  This requires the same number of
-y-pencil to x-pencil transposes, but one less z-pencil to y-pencil
+computing the inverse FFT of $\uv$, one can also efficiently compute 
+$\uv_{2,1}$ and $\uv_{1,2}$.  This requires the same number of FFTs and
+y-pencil to x-pencil transposes as would be required to compute $\vor_1$,
+but it has the advantage of requiring one less z-pencil to y-pencil
 transpose.  
 
 The total cost of the algorithm becomes
 \begin{enumerate}
 \item 27 $N^2$ 1D real-to-real FFTs of length N
-\item 3 x-pencil to y-pencil tranposes of size $N^3$.  
-\item 3 y-pencil to z-pencil tranposes of size $N^3$.  
-\item 5 z-pencil to y-pencil tranposes of size $N^3$.  
-\item 6 y-pencil to x-pencil tranposes of size $N^3$.  
+\item 3 x-pencil to y-pencil transposes of size $N^3$.  
+\item 3 y-pencil to z-pencil transposes of size $N^3$.  
+\item 5 z-pencil to y-pencil transposes of size $N^3$.  
+\item 6 y-pencil to x-pencil transposes of size $N^3$.  
 \end{enumerate}
 
-\section{Code Specific Tranpose Details}
-Our code actually allows for a full 3D data decompostion
-(not that usefull for the full pseudo spectral code, but useful
+\section{Code Specific Transpose Details}
+Our code actually allows for a full 3D data decomposition
+(not that useful for the full pseudo spectral code, but useful
 for some finite difference/spectral hybrids).  Because of this,
 the FFT involves two extra steps.  The code
-is defined to have a {\em reference} decompostion which
+is defined to have a {\em reference} decomposition which
 can be slabs, pencils or cubes.  The actual FFT algorithm
-(in the code, see \texttt{zx\_ifft3d()} ) looks like this:
+(in the code, see the subroutines 
+\texttt{zx\_ifft3d()} and \texttt{zx\_fft3d()} in \texttt{fftops.F90} ) 
+looks like this:
 
 \begin{enumerate}
-\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the x-direction)
-\item Tranpose from x-pencil to reference decompostion
-\item Tranpose from reference to y-pencil decompostion
-\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in the y-direction)
-\item Tranpose from y-pencil to reference decompostion
-\item Tranpose from reference to z-pencil decompostion
-\item Compute 1D FFT of $\pi$ ($N^2$ FFTs in z-direction)
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the x-direction)
+\item Transpose from x-pencil to reference decomposition
+\item Transpose from reference to y-pencil decomposition
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the y-direction)
+\item Transpose from y-pencil to reference decomposition
+\item Transpose from reference to z-pencil decomposition
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in z-direction)
 \end{enumerate}
 
 This algorithm contains two extra steps.  The most efficient
-configuration is if the reference decompostion happens to be x-y slabs.
-In that case, then the two extra steps (and the x-pencil tranposes)
+configuration is if the reference decomposition happens to be x-y slabs.
+In that case, then the two extra steps (and the x-pencil transposes)
 are all done on-processor (simple memory copies).
 If the reference decomposition is y-pencils, then again the
-two extra steps are on-processor memory copies with
-negligible cost (and the serve to arrange the data so all
-FFTs are done with a stride of 1).
+two extra steps are on-processor memory copies with only 
+a small cost.  They also serve to arrange the data so all
+FFTs are done with a stride of 1 and thus their cost is offset
+by allowing for a more efficient FFT.
 
-This with our code, for efficiency, it is best to use a reference 
-decomposition of y-pencils or x-y slabs.  Using x-pencils or z-pencils 
-for the reference decompostion is very inefficient.  
+Thus with our code, for efficiency, it is best to use a reference 
+decomposition of y-pencils (requiring two distributed tranposes for
+each FFT) or x-y slabs (requiring one distributed transpose for each FFT).  
+Using x-pencils or z-pencils  for the reference decomposition is very inefficient.  
+
+
+\section{Memory requirements}
+
+The storage requirements of the code, for a grid of size $N^3$ 
+are approximatly 18 real*8 arrays of size $N^3$, for a total
+of $144 N^3$ bytes.  
+
+The memory usage is fully scalable.  If there are $N_p$ processes,
+each one requires no more than $144 N^3/N_p$ bytes.  
+
+
+\section{Cost of a single transpose}
+
+Take a computational grid of size $N^3$, and assuming the code is
+using a reference decompostion of y-pencils, so the domain
+decompostion looks like $N_1 \times 1 \times N_2$, with the total
+number of processes $N_p = N_1 N_2 $.   Then the distributed
+tranposes are just the x-pencil to/fro y-pencil and y-pencil to/from
+z-pencil routines.  
+
+For the x-pencil to/from y-pencil transpose the cost is
+\begin{enumerate}
+\item MPI\_Isend:  $N_1 -1$ messages of size $N^3/(N_1^2 N_2)$
+\item MPI\_Irecv:  $N_1 -1$ messages of size $N^3/(N_1^2 N_2)$
+\end{enumerate}
+
+For the y-pencil to/from z-pencil transpose the cost is
+\begin{enumerate}
+\item MPI\_Isend:  $N_2 -1$ messages of size $N^3/(N_2^2 N_1)$
+\item MPI\_Irecv:  $N_2 -1$ messages of size $N^3/(N_2^2 N_1)$
+\end{enumerate}
+
+
+Each scalar tranpose requires the network transmit a total just
+shy of $2N^3$ real*8 numbers.  
+
 
 
 \section{Dealiasing}
 
-There are three types of dealiasing commenly used in these codes.
+There are three types of dealiasing commonly used in these codes.
 \begin{enumerate}
 \item phase shifting
 \item 2/3 rule
 \item spherical
 \end{enumerate}
 
+Dealiasing is necessary when computing the nonlinear term 
+$\vor \times \uv$.  On a computational grid of size $N^3$, the 
+Fourier coefficient $\hat \uv(l,m,n)$ has a wave number 
+given by $2 \pi (l,m,n)$.  (We have the $2\pi$ factor since our
+domain is of side length 1.)  The maximum wave number is $2 \pi N/2$ and the
+2/3 rule sets to zero all coefficients all wave numbers larger than
+$(2 \pi) (2/3)(N/2)$. To be precise, we set to zero (or do not even compute)
+\[
+\hat \uv(l,m,n) = 0 \qquad  \text{ for } l > \frac{N}{3}, \quad m > \frac{N}{3}, \text{ or }  n > \frac{N}{3}.
+\]
+With this type of dealiasing, we define the maximum wave number
+in our simulation to be $k_\text{max} = 2 \pi N/3$
+
+Spherical dealiasing does not exactly remove all aliasing errors
+from the nonlinear term.  It instead relies on the fact that in
+fully developed turbulence, the energy will decay at a rate of
+$k^{-5/3}$.  (where $k$ is the spherical wave number, $k = 2 \pi \|(l,m,n)\|$. )
+Under this assumption, bounds on the aliasing errors can be derived
+suggesting it is sufficient to dealias using:
+\[
+\hat \uv(l,m,n) =0 \qquad \text{ for } \sqrt{l^2 + m^2 + n^2} > \frac{\sqrt{2}}{3} N
+\]
+With this type of dealiasing, we define the maximum wave number
+in our simulation to be $k_\text{max} = 2 \pi N\sqrt{2}/3$
+
+Phase shifting is an exact dealiasing which does not result in any
+loss of resolution ($k_\text{max} = \pi N$) but requires additional
+3D FFTs.  We have not implemented phase shifting.
+
+
+
 \section{CFD: Resolution Condition}
 
-\section{CFD: Determinstic Low Wave Number Forcing}
+Forced turbulence simulations, where one is primarily interested in
+the inertial range dynamics, are usually run with a resolution condition
+given by
+\[
+   k_\text{max} \eta \ge 1
+\]
+where $\eta$ is the Kolmogorov length scale
+\[
+\eta =   {\nu^{\frac34}} / {\epsilon^\frac14} 
+\]
+and $\epsilon$ is the KE dissipation rate.  The Komogorov length scales gives an estimate of the length scales
+where the flow becomes dominated by viscosity effects and the dynamics
+beyond those lengths scales do not effect the larger, turbulent length
+scales.
 
-\section{CFD: Resolution and $R_\lambda$}
+More conservative investigators will sometimes require
+\[
+   k_\text{max} \eta \ge 1.5
+\]
+or even larger values for special applications.  
+
+This resolution condition determines the amount of viscosity $\nu$
+needed.  In practice, one chooses the smallest viscosity possible
+viscosity (for a given forcing) so that this resolution condition is
+not violated.
+
+
+\section{CFD: Deterministic Low Wave Number Forcing}
+
+The deterministic low wave number forcing we use is a simplified
+version of Overholt and Pope, Comput. Fluids 27 1998, and
+is documented in detail in Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
+
+The forcing results in an eddy turnover time of about 1.0,
+with $KE=1.9$ and $\epsilon=3.6$.  With this forcing, 
+one should choose the viscosity so that the flow
+will be correctly resolved by
+\[
+\nu = \epsilon^{\frac13} \left( {G}/{k_\text{max}} \right)^{\frac43}
+\]
+where $G=k_\text{max} \eta$ is the value of the resolution condition
+chosen.   The resulting Taylor Reynolds number will be
+\[
+R_\lambda = \text{KE} \sqrt{\frac{20}{3\nu\epsilon}}
+\]
+
+\section{CFD: Example: $12288^3$ with spherical dealiasing}
+Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
+for a problem of size $N=12288$, we have
+\[
+\nu = \epsilon^{\frac13} \left( {G}/{k_\text{max}} \right)^{\frac43}
+= 1.3 \times 10^{-6}
+\]
+and 
+\[
+R_\lambda = \text{KE} \sqrt{\frac{20}{3\nu\epsilon}} = 2300
+\]
+
+
 
 
 \end{document}

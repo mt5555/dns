@@ -2,7 +2,27 @@
                     Mark Taylor
                  mataylo@sandia.gov
 
+===================================================================
 
+ Note: this README describes the "dns" model.  For pencil 
+ decompostions, we now (8/15/2006) have a more efficient model 
+ "dnsp" that should be used instead (dnsp does not yet allow for
+ passive tracers).  To compile, type "make dnsp" instead, and
+ the executable will be named "dnsp".  
+
+  dnsp should be used with a parallel decomposition of the form
+
+  N1 x 1 x N2  with N1 << N2.  
+
+  i.e. to run a 4096^3 simulation on 8192 processors, modify the
+  instructions below to:
+
+  ./gridsetup.py 2 1 2048 4096 4096 4096 2 2 0
+  make dnp
+
+
+
+===================================================================
 
 This directory and its subdirectories contain the Sandia/LANL DNS
 code.  This code solves viscous fluid dynamics equations in a periodic
@@ -159,7 +179,7 @@ uses the vendor supplied F90 compiler.
 To build the code on one of the above systems, just run:
 
       % cd dns/src
-      % make
+      % make dns
 
 
 
