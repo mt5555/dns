@@ -175,16 +175,11 @@ computing the inverse FFT of $\uv$, one can also efficiently compute
 $\uv_{2,1}$ and $\uv_{1,2}$.  This requires the same number of FFTs and
 y-pencil to x-pencil transposes as would be required to compute $\vor_1$,
 but it has the advantage of requiring one less z-pencil to y-pencil
-transpose.  
+transpose.  With a slab decompostion, this will reduce the amount
+of communication by 1/9. With a pencil decompostion, the reduction
+is 1/18.  
 
-The total cost of the algorithm becomes
-\begin{enumerate}
-\item 27 $N^2$ 1D real-to-real FFTs of length N
-\item 3 x-pencil to y-pencil transposes of size $N^3$.  
-\item 3 y-pencil to z-pencil transposes of size $N^3$.  
-\item 5 z-pencil to y-pencil transposes of size $N^3$.  
-\item 6 y-pencil to x-pencil transposes of size $N^3$.  
-\end{enumerate}
+
 
 \section{Code Specific Transpose Details}
 Our code actually allows for a full 3D data decomposition
@@ -198,19 +193,22 @@ can be slabs, pencils or cubes.  The actual FFT algorithm
 looks like this:
 
 \begin{enumerate}
-\item Compute 1D FFT of $p$ ($N^2$ FFTs in the x-direction)
-\item Transpose from x-pencil to reference decomposition
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the x-direction, on processor)
+\item Transpose from x-pencil to reference decomposition 
 \item Transpose from reference to y-pencil decomposition
-\item Compute 1D FFT of $p$ ($N^2$ FFTs in the y-direction)
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the y-direction, on processor)
 \item Transpose from y-pencil to reference decomposition
 \item Transpose from reference to z-pencil decomposition
-\item Compute 1D FFT of $p$ ($N^2$ FFTs in z-direction)
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in z-direction, on processor)
 \end{enumerate}
+
 
 This algorithm contains two extra steps.  The most efficient
 configuration is if the reference decomposition happens to be x-y slabs.
 In that case, then the two extra steps (and the x-pencil transposes)
 are all done on-processor (simple memory copies).
+For performance at high resolution, one is usually required to
+use y-pencils to allow for more parallization.  
 If the reference decomposition is y-pencils, then again the
 two extra steps are on-processor memory copies with only 
 a small cost.  They also serve to arrange the data so all
@@ -259,6 +257,20 @@ Each scalar tranpose requires the network transmit a total just
 shy of $2N^3$ real*8 numbers.  
 
 
+\section{Total cost of the code}
+
+The total cost of the code, in terms of communication and flops,
+and assuming a y-pencil reference decomposition 
+(with the total number of processors $N_p = N_1 N_2$) and a grid of $N^3$
+can thus be estimated as
+
+\begin{enumerate}
+\item $27N^2$ 1D real-to-real FFTs of length N
+\item MPI\_Isend:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
+\item MPI\_Irecv:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
+\item MPI\_Isend:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
+\item MPI\_Irecv:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
+\end{enumerate}
 
 \section{Dealiasing}
 
@@ -335,33 +347,38 @@ not violated.
 
 \section{CFD: Deterministic Low Wave Number Forcing}
 
-The deterministic low wave number forcing we use is a simplified
-version of Overholt and Pope, Comput. Fluids 27 1998, and
-is documented in detail in Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
+The deterministic low wave number forcing we use is a version
+of Overholt and Pope, Comput. Fluids 27 1998.  It uses a simplified
+version of their formula for the relaxation timesscale, and only forces
+in the first two spherical wave numbers shells.
+It is documented in detail in Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
 
-The forcing results in an eddy turnover time of about 1.0,
-with $KE=1.9$ and $\epsilon=3.6$.  With this forcing, 
-one should choose the viscosity so that the flow
-will be correctly resolved by
+The forcing results in an eddy turnover time of 1.0,
+with $KE=1.9$ and $\epsilon=3.6$.  When using this forcing,
+after deciding on the resolution condition $G=k_\text{max} \eta$,
+one can determine the viscosity (which must be specified in the
+input file) to use in the simulation based on the resolution and type of dealiasing
+using
 \[
-\nu = \epsilon^{\frac13} \left( {G}/{k_\text{max}} \right)^{\frac43}
+ \nu = \epsilon^{\frac13} \left( {G}/{k_\text{max}} \right)^{\frac43}
 \]
-where $G=k_\text{max} \eta$ is the value of the resolution condition
-chosen.   The resulting Taylor Reynolds number will be
+The resulting Taylor Reynolds number will be
 \[
-R_\lambda = \text{KE} \sqrt{\frac{20}{3\nu\epsilon}}
+R_\lambda = \text{KE} \sqrt{\frac{20}{3\nu\epsilon}}  = 2.1 (k_\text{max}/G)^{\frac23}
 \]
 
-\section{CFD: Example: $12288^3$ with spherical dealiasing}
+\subsection{CFD: Example: $12288^3$ with spherical dealiasing}
 Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
-for a problem of size $N=12288$, we have
+for a problem of size $N=12288 \quad (k_\text{max} = 36396)$, we have
 \[
-\nu = \epsilon^{\frac13} \left( {G}/{k_\text{max}} \right)^{\frac43}
-= 1.3 \times 10^{-6}
+\nu = 1.3 \times 10^{-6} \qquad  R_\lambda =  2300
 \]
-and 
+
+\subsection{CFD: Example: $12288^3$ with 2/3 rule dealiasing}
+Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
+for a problem of size $N=12288 \quad (k_\text{max} = 25736)$, we have
 \[
-R_\lambda = \text{KE} \sqrt{\frac{20}{3\nu\epsilon}} = 2300
+\nu = 2 \times 10^{-6} \qquad  R_\lambda =  1800
 \]
 
 
