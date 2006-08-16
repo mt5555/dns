@@ -1,0 +1,142 @@
+#!/bin/tcsh 
+#PBS -l size=3096
+#PBS -l walltime=60:00
+#PBS -A 7101/16.12
+#PBS -o rs3072.o -e rs3072.e
+#PBS -N bench-dns
+#PBS -q standard
+#XXXB -wa URG -wt 10
+#
+#
+#
+# put datestape in .o and .e file:
+set datestamp = `date`
+sh -c 'echo ".e output test" 1>&2'
+sh -c "echo '$datestamp' 1>&2"
+echo $datestamp
+
+#
+#  3072^3 = 4.1TB
+#  3072 cpus:  1.4GB per process  (wont run VN, will run CO)
+#
+#  4096^3 = 9.6TB
+#  8192 cpus:  1.2 GB per process  (wont run VN, will run CO)
+#
+set name = sc2048A
+set refin=$HOME/dns/src/forcing12-bench.inp
+
+set recompile = 1
+set code = dnsp
+set opt = "-mio -t"
+set SRC=$HOME/dns/src
+set WDIR=/scratch1/mataylo
+mkdir $WDIR
+set EXE=$HOME/$name-$$
+
+#
+#   CO or VN mode?
+#
+set VN=1
+if ( $VN == 1) then
+   set MPIRUN = "yod -VN -sz"
+else
+   set MPIRUN = "yod -sz"
+endif
+
+
+
+set NCPU = 6144
+set mesh = "4 1 1536 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 6144
+set mesh = "8 1 768 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 6144
+set mesh = "16 1 384 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 6144
+set mesh = "32 1 192 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 6144
+set mesh = "64 1 96 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 3072
+set mesh = "2 1 1536 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 3072
+set mesh = "4 1 768 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 3072
+set mesh = "8 1 384 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 3072
+set mesh = "16 1 192 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 3072
+set mesh = "32 1 96 3072 3072 3072"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+
+
+
+
+
+
+
+
+
+
+
