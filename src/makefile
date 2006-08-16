@@ -95,16 +95,18 @@ endif
 
 
 ifeq ($(UNAME),Darwin)
-#   MPI =  -DUSE_MPI  -DMPI_REAL8_LAM -DMPI_HAS_REAL8   -I/sw/include/lammpi
-#   MPILIB = -L/sw/lib/lammpi  -llammpio -llamf77mpi -lmpi -llam 
-#   F90 = g95
-#   FFLAGS = -fno-second-underscore -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99 
+#   MPI =  -DUSE_MPI  -DMPI_REAL8_LAM    -I/sw/include/lammpi
+   MPI =  -DUSE_MPI      -I/sw/include/
+   MPILIB = -L/sw/lib/  -llammpio -llamf77mpi -lmpi -llam 
+   F90 = g95
+   FFLAGS =  -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99 
+   CC = cc -DG77_UNDERSCORE
 
-   CC = cc -DF_NO_UNDERSCORE
-   F90 = xlf95
-   F77FIXED = -qfixed
-   FFLAGS = -WF,"-Dflush=flush_,-Dabort=punt,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict 
-   LDFLAGS = -lSystemStubs
+#   CC = cc -DF_NO_UNDERSCORE
+#   F90 = xlf95
+#   F77FIXED = -qfixed
+#   FFLAGS = -WF,"-Dflush=flush_,-Dabort=punt,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict 
+#   LDFLAGS = -lSystemStubs
 endif
 
 

@@ -39,6 +39,7 @@ if (`uname` == OSF1) then
    set MPIRUN =  "prun -n"
 endif
 if (`uname` == Darwin) then
+   set MPIRUN =  "mpiexec -np"
    set opt = "-b $opt"
 endif
 
@@ -79,7 +80,7 @@ if ($1 == 1) then
 
 echo "***********************************************************"
 echo "without restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 endif
 
@@ -89,13 +90,13 @@ if ($1 == r) then
 
 echo "***********************************************************"
 echo "with restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
 echo "***********************************************************"
 echo "with spectral restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -s -r  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -s -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
@@ -106,11 +107,11 @@ endif
 if ($1 == 2) then
 
 ./gridsetup.py 1 1 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 1 1 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -126,13 +127,13 @@ if ($1 == s) then
 echo "***********************************************************"
 echo "with 3 passive scalars"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt   reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt   reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 echo "with 3 passive scalars and restart"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r   reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r   reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
@@ -167,27 +168,27 @@ echo command line options:  $opt
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 4 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 1 2 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt   reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt   reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 2 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   > $tmp 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 

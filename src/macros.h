@@ -1,3 +1,4 @@
+
 #ifdef MPI_UNDERSCORE
 #define mpi_reduce mpi_reduce_
 #define mpi_allreduce mpi_allreduce_

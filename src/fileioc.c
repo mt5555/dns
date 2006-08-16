@@ -4,11 +4,25 @@ Fortran callable wrappers to C binary I/O
 
  */
 
+//
+//   FORTRAN is used if the original name does not have an underscore
+//   FORTRAN2 is used if the original name does have an underscore
+//
 #ifdef F_NO_UNDERSCORE
 #define FORTRAN(A) A
+#define FORTRAN2(A) A
+#else
+#ifdef G77_UNDERSCORE
+#define FORTRAN(A) A##_
+#define FORTRAN2(A) A##__
 #else
 #define FORTRAN(A) A##_
+#define FORTRAN2(A) A##_
 #endif
+#endif
+
+
+
 
 
 
@@ -21,7 +35,7 @@ extern int errno;
 
 static int byteswap_input=0;
 
-void FORTRAN(set_byteswap_input)(int *val) {
+void FORTRAN2(set_byteswap_input)(int *val) {
    byteswap_input=*val;
 }
 

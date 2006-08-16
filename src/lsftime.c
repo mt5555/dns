@@ -1,8 +1,22 @@
+//
+//   FORTRAN is used if the original name does not have an underscore
+//   FORTRAN2 is used if the original name does have an underscore
+//
 #ifdef F_NO_UNDERSCORE
 #define FORTRAN(A) A
+#define FORTRAN2(A) A
+#else
+#ifdef G77_UNDERSCORE
+#define FORTRAN(A) A##_
+#define FORTRAN2(A) A##__
 #else
 #define FORTRAN(A) A##_
+#define FORTRAN2(A) A##_
 #endif
+#endif
+
+
+
 
 
 
@@ -172,7 +186,7 @@ extern  void    ExceptionHandler( int nSignal )
 
 }
 
-void  FORTRAN(set_sighandler)(void) {
+void  FORTRAN2(set_sighandler)(void) {
 
         if( signal( SIGURG, ExceptionHandler ) == SIG_ERR ) {
                 fprintf( stderr, "** WARNING** Can't catch signal SIGURG" );
@@ -183,7 +197,7 @@ void  FORTRAN(set_sighandler)(void) {
 
 }
 
-void FORTRAN(caught_sig)(int *i) {
+void FORTRAN2(caught_sig)(int *i) {
 
 *i=sig_received;
 
@@ -207,7 +221,7 @@ void FORTRAN(caught_sig)(int *i) {
 /* Written by Jerry Melendez, CIC-7                                     */
 /************************************************************************/
 
-extern  int     FORTRAN(lsf_time_remaining)(int *TTRL) {
+extern  int     FORTRAN2(lsf_time_remaining)(int *TTRL) {
     /* typedef enum    { FALSE = 0, TRUE = 1 } Bool_t;*/
 typedef struct {
                 int  initialized;
@@ -253,7 +267,7 @@ auto    time_t  Ctime;
 
 #else
 
-extern  int     FORTRAN(lsf_time_remaining)(int *TTRL){
+extern  int     FORTRAN2(lsf_time_remaining)(int *TTRL){
 return 1;
 
 }
