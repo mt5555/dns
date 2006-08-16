@@ -4,22 +4,13 @@
 
 ===================================================================
 
- Note: this README describes the "dns" model.  For pencil 
- decompostions, we now (8/15/2006) have a more efficient model 
- "dnsp" that should be used instead (dnsp does not yet allow for
- passive tracers).  To compile, type "make dnsp" instead, and
- the executable will be named "dnsp".  
+ README: updated 8/15/2006:  
 
-  dnsp should be used with a parallel decomposition of the form
-
-  N1 x 1 x N2  with N1 << N2.  
-
-  i.e. to run a 4096^3 simulation on 8192 processors, modify the
-  instructions below to:
-
-  ./gridsetup.py 2 1 2048 4096 4096 4096 2 2 0
-  make dnp
-
+For pencil decompostions, we now (8/15/2006) have a more efficient
+model "dnsp" that should be used instead of "dns" (but dnsp does not
+yet allow for passive tracers which are not needed for the NSF
+benchmarks).  To compile, type "make dnsp" instead of "make dns", and
+the executable will be named "dnsp".
 
 
 ===================================================================
@@ -165,6 +156,21 @@ instead copy the file 'params.h.test' to params.h' and then
 edit params.h by hand.  By default, it is set up to run a 32^3
 simulation on 1 cpu.
 
+NOTE:  The most efficient configuration for large processor counts
+will be with ny=1 and nx<nz.  For example, to run a 4096^3 simulation 
+on 8192 processors, I would modify the instructions below to:
+
+./gridsetup.py 4 1 2048 4096 4096 4096 2 2 0
+Other possibilities which might be more efficient:
+(we need a performance model :-)
+./gridsetup.py 8 1 1024 4096 4096 4096 2 2 0
+./gridsetup.py 16 1 512 4096 4096 4096 2 2 0
+./gridsetup.py 32 1 256 4096 4096 4096 2 2 0
+./gridsetup.py 64 1 128 4096 4096 4096 2 2 0
+
+
+
+
 
 
 Step 2.
@@ -179,7 +185,7 @@ uses the vendor supplied F90 compiler.
 To build the code on one of the above systems, just run:
 
       % cd dns/src
-      % make dns
+      % make dnsp
 
 
 
@@ -215,7 +221,7 @@ Step 4.
 Run the code:
     To run the code on a single processor:
 
-        ./dns  -i forcing12-bench.inp output_name  
+        ./dnsp  -i forcing12-bench.inp output_name  
 
     using the input file 'forcing12-bench.inp'.  This runs a triply 
     periodic forced turbulence problem.  The forcing is in
@@ -238,7 +244,7 @@ Run the code:
 
 
     For a parallel run:
-        mpirun -np X  ./dns -mio -i forcing12.inp output_name  
+        mpirun -np X  ./dnsp -mio -i forcing12.inp output_name  
 
     The "-mio" option will turn on MPI-IO.  Without MPI-IO, all output
     will be funneled through processor 0.  With MPI-IO, the code will
