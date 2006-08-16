@@ -25,7 +25,7 @@ echo $datestamp
 #  4096^3 = 9.6TB
 #  8192 cpus:  1.2 GB per process  (wont run VN, will run CO)
 #
-set name = sc2048A
+set name = sc3072A
 set refin=$HOME/dns/src/forcing12-bench.inp
 
 set recompile = 1
