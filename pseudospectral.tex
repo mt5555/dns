@@ -40,6 +40,7 @@
 %\newcommand{\vor}{\mathbf \omega}
 \newcommand{\vor}{\mathbf w}
 \newcommand{\n}{\mathbf n}
+\newcommand{\f}{\mathbf f}
 
 
 \newcommand{\grad}{\nabla}
@@ -49,7 +50,7 @@
 \DeclareMathOperator{\Span}{span}
 
 
-\title{Performance of the Sandia/LANL DNS code}
+\title{Outline of Pseudo-Spectral Method used in the Sandia/LANL DNS code}
 \author{Mark Taylor}
 
 \begin{document}
@@ -81,7 +82,7 @@ We solve the equations in a square box of side length 1.
 The equations are
 \[
 \frac{ \partial  \uv }{\partial t}  + \vor  \times \uv + 
-\grad p   = \nu \Delta \uv + f
+\grad p   = \nu \Delta \uv + \f
 \]
 \[
 \div \uv = 0
@@ -93,7 +94,7 @@ $\grad p$ so that the solution remains
 divergence free.  In this method, the continuity equation $\div \uv = 0$
 is eliminated by taking
 \[
- p = - \Delta^{-1} \div \left( \vor \times \uv  \right)
+ p =  \Delta^{-1} \div \left( -\vor \times \uv  + \f \right)
 \]
 
 
@@ -104,7 +105,7 @@ treatment of diffusion.  This requires, for each timestep, 4 evaluations
 of the right-hand-side (RHS) of the Navier-Stokes equation,
 \[
   - \vor  \times \uv + 
-\grad \Delta^{-1} \div \left( \vor \times \uv  \right) +  \nu \Delta \uv
+\grad \Delta^{-1} \div \left( \vor \times \uv  -\f \right) +  \nu \Delta \uv + \f
 \]
 Denote the Fourier coefficients of $\uv$ by $\hat \uv$, and
 let $\n = \vor \times \uv$.   
@@ -113,13 +114,14 @@ of the 4 Runge-Kutta stages we must compute the Fourier coefficients
 of the RHS.  Starting with $\hat \uv$, the steps are
 \begin{enumerate}
 \item  $\uv$ = iFFT($\hat \uv$).  Cost: 3D inverse FFT
-\item  $\hat \vor = \curl \hat \uv$.  (single on processor loop, cost: $O(N^3)$)
+\item  $\hat \vor = \curl \hat \uv$.  (single loop, no communication, cost: $O(N^3)$)
 \item  $\vor$ = iFFT($\hat \vor$).  Cost: 3D inverse FFT 
-\item  Compute $\n = \vor \times \uv$.  (single on processor loop, cost: $O(N^3)$)
+\item  Compute $\n = \vor \times \uv$.  (single loop, no communication, cost: $O(N^3)$)
 \item  $\hat\n$=FFT($\n$).  Cost: 3D FFT
+\item  Compute $\hat \f$.  Cost: negligable if forcing implemented in Fourier space.
 \item  Compute Fourier coefficients of remaining linear terms,
-$-\grad \Delta^{-1} \div \hat\n +  \nu \Delta \hat \uv$ (single on processor loop, cost $O(N^3)$). 
-\item  Compute Fourier coefficients of the RHS.  Cost: free
+$\grad \Delta^{-1} \div (\hat\n - \hat \f) +  \nu \Delta \hat \uv$ (two loops, no communication, cost $O(N^3)$). 
+\item  Add intermediate results to form Fourier coefficients of the RHS.  Cost: free
 (can be combined with the previous step).
 \end{enumerate}
 
@@ -237,7 +239,7 @@ Take a computational grid of size $N^3$, and assuming the code is
 using a reference decompostion of y-pencils, so the domain
 decompostion looks like $N_1 \times 1 \times N_2$, with the total
 number of processes $N_p = N_1 N_2 $.   Then the distributed
-tranposes are just the x-pencil to/fro y-pencil and y-pencil to/from
+tranposes are just the x-pencil to/from y-pencil and y-pencil to/from
 z-pencil routines.  
 
 For the x-pencil to/from y-pencil transpose the cost is
@@ -262,17 +264,19 @@ shy of $2N^3$ real*8 numbers.
 
 There are three types of dealiasing commonly used in these codes.
 \begin{enumerate}
-\item phase shifting
+\item Phase shifting
 \item 2/3 rule
-\item spherical
+\item Spherical
 \end{enumerate}
 
 Dealiasing is necessary when computing the nonlinear term 
 $\vor \times \uv$.  On a computational grid of size $N^3$, the 
 Fourier coefficient $\hat \uv(l,m,n)$ has a wave number 
 given by $2 \pi (l,m,n)$.  (We have the $2\pi$ factor since our
-domain is of side length 1.)  The maximum wave number is $2 \pi N/2$ and the
-2/3 rule sets to zero all coefficients all wave numbers larger than
+domain is of side length 1.)  The maximum wave number is $2 \pi N/2$.
+
+\subsection{2/3 rule}
+The 2/3 rule sets to zero all coefficients all wave numbers larger than
 $(2 \pi) (2/3)(N/2)$. To be precise, we set to zero (or do not even compute)
 \[
 \hat \uv(l,m,n) = 0 \qquad  \text{ for } l > \frac{N}{3}, \quad m > \frac{N}{3}, \text{ or }  n > \frac{N}{3}.
@@ -280,6 +284,7 @@ $(2 \pi) (2/3)(N/2)$. To be precise, we set to zero (or do not even compute)
 With this type of dealiasing, we define the maximum wave number
 in our simulation to be $k_\text{max} = 2 \pi N/3$
 
+\subsection{Spherical dealiasing}
 Spherical dealiasing does not exactly remove all aliasing errors
 from the nonlinear term.  It instead relies on the fact that in
 fully developed turbulence, the energy will decay at a rate of
@@ -292,6 +297,7 @@ suggesting it is sufficient to dealias using:
 With this type of dealiasing, we define the maximum wave number
 in our simulation to be $k_\text{max} = 2 \pi N\sqrt{2}/3$
 
+\subsection{Phase shifting}
 Phase shifting is an exact dealiasing which does not result in any
 loss of resolution ($k_\text{max} = \pi N$) but requires additional
 3D FFTs.  We have not implemented phase shifting.
