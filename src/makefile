@@ -145,7 +145,7 @@ endif
 ifeq ($(UNAME),AIX)
    F90 = mpxlf95
    F77FIXED = -qfixed
-a   FFLAGS = -WF,"-Dflush=flush_ -Dabort=punt,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
+   FFLAGS = -WF,"-Dflush=flush_,-Dabort=punt,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
    CC = cc -DF_NO_UNDERSCORE
 endif
 
