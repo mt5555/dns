@@ -51,7 +51,12 @@ try:
         nx=atoi(str[2])
         ny=atoi(str[4])
         nz=np/nx/ny  # sometimes nz is *** in the output file
-        key=(nx,ny,nz)                        
+
+        str=lookfor1(sys.stdin,"Global grid:",startstr)
+        str=split(str)
+        N=atoi(str[0])
+        
+        key=(N,np,nx,ny,nz)                        
         # now look for time
         str=lookfor1(sys.stdin,"dns_solve:",startstr)
         str=split(str)
@@ -74,15 +79,18 @@ except search_failed,e:
     sys.exit(1)
     
 except eof,e:
-    print 'time(m) per timestep'
+    print '%% time(m) per timestep'
     x=tsolve.keys()
     x.sort()
-    count=0
+    res_last=0
     for k in x:
+        if (k[0]!=res_last):
+            print '%% res = %i' % k[0]
+            res_last=k[0]
+            count=0
         count=count+1
         best=min(tsolve[k])   # time for 1 timesetp, seconds
-        np=k[0]*k[1]*k[2]
-        print "ncpu(%i)=%i ncpux(%i)=%i; time(%i)=%e  " %  (count,np,count,k[0],count,best)
+        print "ncpu%i(%i)=%i; ncpux%i(%i)=%i; time%i(%i)=%e  "   %  (k[0],count,k[1],k[0],count,k[2],k[0],count,best)
 
 
     sys.exit(0)
