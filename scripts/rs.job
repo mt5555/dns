@@ -77,7 +77,7 @@ set recompile = 1
 #  2048^3
 #   64x1x64
 #   32x1x128
-#   16x1x256                 dnsp-v3: IN
+#   16x1x256                 dnsp-v3:  .631  .607
 #    8x1x512                 dnsp-v3:  .531            (5 days)
 #    4x1x1024 VN   .614      dnsp-v3:  .561
 #    2x1x1024                dnsp-v3:   

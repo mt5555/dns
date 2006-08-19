@@ -2,12 +2,12 @@
 
 Fortran callable wrappers to C binary I/O 
 
- */
 
 //
 //   FORTRAN is used if the original name does not have an underscore
 //   FORTRAN2 is used if the original name does have an underscore
 //
+ */
 #ifdef F_NO_UNDERSCORE
 #define FORTRAN(A) A
 #define FORTRAN2(A) A

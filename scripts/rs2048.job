@@ -2,7 +2,7 @@
 #PBS -l size=2048
 #PBS -l walltime=60:00
 #PBS -A 7101/16.12
-#PBS -o rs2048.o -e rs2048.e
+#PBS -o rs2048-co2.o -e rs2048-co2.e
 #PBS -N bench-dns
 #PBS -q standard
 #XXXB -wa URG -wt 10
@@ -36,7 +36,7 @@ set EXE=$HOME/$name-$$
 #
 #   CO or VN mode?
 #
-set VN=1
+set VN=0
 if ( $VN == 1) then
    set MPIRUN = "yod -VN -sz"
 else
@@ -45,100 +45,52 @@ endif
 
 
 
-set NCPU = 4096
-set mesh = "4 1 1024 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-set NCPU = 4096
-set mesh = "8 1 512 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-set NCPU = 4096
-set mesh = "16 1 256 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
 
-set NCPU = 4096
-set mesh = "32 1 128 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+# set NCPU = 2048
+# set mesh = "2 1 1024 2048 2048 2048"
+# cd $SRC
+# rm -f $EXE ; rm -f $code 
+# ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+# $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
 
-set NCPU = 4096
-set mesh = "64 1 64 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+# set NCPU = 2048
+# set mesh = "4 1 512 2048 2048 2048"
+# cd $SRC
+# rm -f $EXE ; rm -f $code 
+# ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+# $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
+# set NCPU = 2048
+# set mesh = "8 1 256 2048 2048 2048"
+# cd $SRC
+# rm -f $EXE ; rm -f $code 
+# ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+# $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
+# set NCPU = 2048
+# set mesh = "16 1 128 2048 2048 2048"
+# cd $SRC
+# rm -f $EXE ; rm -f $code 
+# ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+# $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
+# set NCPU = 2048
+# set mesh = "32 1 64 2048 2048 2048"
+# cd $SRC
+# rm -f $EXE ; rm -f $code 
+# ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+# $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
-
-set NCPU = 2048
-set mesh = "2 1 1024 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-
-set NCPU = 2048
-set mesh = "4 1 512 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-set NCPU = 2048
-set mesh = "8 1 256 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-set NCPU = 2048
-set mesh = "16 1 128 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-set NCPU = 2048
-set mesh = "32 1 64 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-
+#didn't run CO mode: MPICH_UNEX_BUFFER_SIZE  60M
+#does run eith 180M
+setenv MPICH_UNEX_BUFFER_SIZE 180M
 set NCPU = 1024
 set mesh = "1 1 1024 2048 2048 2048"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
 

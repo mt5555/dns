@@ -99,7 +99,7 @@ if (color==0) call mpi_comm_free(comm_1,ierr2)
 
 
 
-write(message,'(a,i5,a,i3,a,i3,a,i3)') "Running parallel.  NCPUS=", &
+write(message,'(a,i5,a,i4,a,i4,a,i4)') "Running parallel.  NCPUS=", &
    ncpus," = ",ncpu_x," x",ncpu_y," x",ncpu_z
 call print_message(message)
 #else
