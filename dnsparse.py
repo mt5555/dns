@@ -90,7 +90,7 @@ except eof,e:
             count=0
         count=count+1
         best=min(tsolve[k])   # time for 1 timesetp, seconds
-        print "ncpu%i(%i)=%i; ncpux%i(%i)=%i; time%i(%i)=%e  "   %  (k[0],count,k[1],k[0],count,k[2],k[0],count,best)
+        print "ncpu%i(%i)=%i; ncpux%i(%i)=%i; ncpuz%i(%i)=%i;  time%i(%i)=%e  "   %          (k[0],count,k[1],k[0],count,k[2],k[0],count,k[4],k[0],count,best)
 
 
     sys.exit(0)

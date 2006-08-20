@@ -1,0 +1,63 @@
+#!/bin/tcsh 
+#PBS -l size=2048
+#PBS -l walltime=8:00:00
+#PBS -A 7101/16.12
+#PBS -o sc2048.o  -e sc2048.e
+#PBS -N sc2048
+#PBS -q standard
+#XXXB -wa URG -wt 10
+#
+#
+#  run this script as an execuatable (do not qsub)
+#  it will compile the code and then qsub itself
+#
+# put datestape in .o and .e file:
+set datestamp = `date`
+sh -c 'echo ".e output test" 1>&2'
+sh -c "echo '$datestamp' 1>&2"
+echo $datestamp
+
+#
+#  2048^3  = 1.2 TB
+#  512 cpus:  2.4GB per process
+#  1024 cpus:  1.2GB per process (wont run VN, will run CO)
+#
+set name = sc2048A
+set refin=$HOME/dns/prod/sc2048A.inp
+
+set recompile = 1
+set code = dnsp
+set opt = "-mio "
+set SRC=$HOME/dns/src
+set WDIR=/scratch1/mataylo/sc2048A
+mkdir $WDIR
+set EXE=$HOME/$name-$$
+
+#
+#   CO or VN mode?
+#
+set VN=1
+if ( $VN == 1) then
+   set MPIRUN = "yod -VN -sz"
+else
+   set MPIRUN = "yod -sz"
+endif
+
+
+set NCPU = 4096
+set mesh = "8 1 512 2048 2048 2048"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+
+
+
+
+
+
+
+
