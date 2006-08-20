@@ -2,7 +2,8 @@
 #PBS -l size=2048
 #PBS -l walltime=10:00:00
 #PBS -A 7101/16.12
-#PBS -o sc2048.o  -e sc2048.e
+#PBS -j oe 
+#XXX -o sc2048.o 
 #PBS -N sc2048
 #PBS -q standard
 #XXXB -wa URG -wt 10
