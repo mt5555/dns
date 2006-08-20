@@ -25,7 +25,7 @@ echo $datestamp
 set name = sc2048A
 set refin=$HOME/dns/prod/sc2048A.inp
 
-set recompile = 1
+set recompile = 0
 set restart = 1
 set code = dnsp
 set opt = "-mio "
