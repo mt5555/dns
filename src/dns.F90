@@ -349,34 +349,6 @@ end subroutine
 
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!  called when we catch a signal.  
-!  FORTRAN is not very re-entrant, so be carefull what you do
-!  here.  Some other subroutine has been interrupted, and it will
-!  resume execution when this routine returns.
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer(4) function signal_handler(signum)
-use params
-implicit none
-integer(2) signum
-
-! if we got a kill signal, set flag to exit program:
-maxs(9)=1
-
-! what does the return value do?
-signal_handler=1
-end
-
-
-
-
-
-
-
-
-
 
 
 
