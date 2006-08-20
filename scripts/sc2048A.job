@@ -1,6 +1,6 @@
 #!/bin/tcsh 
 #PBS -l size=2048
-#PBS -l walltime=8:00:00
+#PBS -l walltime=10:00:00
 #PBS -A 7101/16.12
 #PBS -o sc2048.o  -e sc2048.e
 #PBS -N sc2048
@@ -26,12 +26,13 @@ set name = sc2048A
 set refin=$HOME/dns/prod/sc2048A.inp
 
 set recompile = 1
+set restart = 1
 set code = dnsp
 set opt = "-mio "
 set SRC=$HOME/dns/src
 set WDIR=/scratch1/mataylo/sc2048A
 mkdir $WDIR
-set EXE=$HOME/$name-$$
+set EXE=$HOME/$name-x
 
 #
 #   CO or VN mode?
@@ -45,12 +46,28 @@ endif
 
 
 set NCPU = 4096
-set mesh = "8 1 512 2048 2048 2048"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
+if ($recompile == 1) then
+   set mesh = "8 1 512 2048 2048 2048"
+   cd $SRC
+   rm -f $EXE ; rm -f $code 
+   ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+endif
+
+
+if ($restart == 1) then
+   cd $WDIR
+   #$HOME/dns/getrestart.sh $name $WDIR uvw all
+   $HOME/dns/getrestart.sh $name $WDIR 
+   if (!($status == 0)) then
+      exit 1
+   endif
+   cd 
+   $MPIRUN $NCPU $EXE $opt -r  -d $WDIR  $name < $refin
+else
+    cd
+   $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+endif
 
 
 

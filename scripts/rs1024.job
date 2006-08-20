@@ -2,7 +2,7 @@
 #PBS -l size=2048
 #PBS -l walltime=60:00
 #PBS -A 7101/16.12
-#PBS -o rs2048-co2.o -e rs2048-co2.e
+#PBS -o rs1024-vn.o -e rs1024-vn.e
 #PBS -N bench-dns
 #PBS -q standard
 #XXXB -wa URG -wt 10
