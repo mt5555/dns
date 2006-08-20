@@ -7,9 +7,9 @@
 #PBS -q standard
 #XXXB -wa URG -wt 10
 #
-#
-#  run this script as an execuatable (do not qsub)
-#  it will compile the code and then qsub itself
+# .54m per timestep
+#  13000 timesteps = 117h
+# 
 #
 # put datestape in .o and .e file:
 set datestamp = `date`

@@ -61,7 +61,10 @@ Resolution Requirements  N^3, 2/3 dealiasing:
    eta*kmax_2/3       = eta * nx*pi*(2/3) = .84
 
 
+sc4096A:  should take 20 days on 16K cores
+sc3072A: 8.3 days on 12K cores
 sc2048A:  (see sc2048A.job, sc2048A.inp)
+This run should take 13K timesteps.  on 4096cores, .5min per = 120h  
 2048 run modeled after sc1024A:
    ke=1.886  eps=3.58  mu = 1.35e-5   
    eta*kmax_spherical = eta * nx*pi*2*sqrt(2)/3 = 1.0
