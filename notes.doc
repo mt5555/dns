@@ -1,17 +1,5 @@
 TODO:
 
-memory problem on RS
-#  2048^3  VN  4x1x1024 runs, 2x1x1024  wont load   
-#          CO  2x1x1024 runs, 1x1x1024  wont load
-
-1152 GB.  2048 cpus:  .5625GB per cpu
-1152 GB.  1024 cpus:  1.125 GB per cpu
-           512 cps:  2.25 GB per cpu    (<- this should run)
-
-switch to malloc? 
-check subroutines?
-
-
 
 dnsp    test output - make sure it is in correct format
                       (via restart?)
