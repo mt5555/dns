@@ -92,6 +92,29 @@ except eof,e:
         best=min(tsolve[k])   # time for 1 timesetp, seconds
         print "ncpu%i(%i)=%i; ncpux%i(%i)=%i; ncpuz%i(%i)=%i;  time%i(%i)=%e  "   %          (k[0],count,k[1],k[0],count,k[2],k[0],count,k[4],k[0],count,best)
 
+    tbest={}
+    for k in x:
+        key=(k[0],k[1])
+        if (tbest.has_key(key)):
+            tbest[key].append(tsolve[k])
+        else:
+            tbest[key]=tsolve[k]
+
+    x=tbest.keys();
+    x.sort();
+    res_last=0
+    for k in x:
+        if (k[0]!=res_last):
+            print '%% res = %i' % k[0]
+            res_last=k[0]
+            count=0
+        count=count+1
+        best=min(tbest[k])
+        eperd = 3333*res_last/512.  # number of timesteps
+        eperd = eperd*best     # time in min for 1 eddy turnover
+        eperd = 24*60./eperd   # eddy turnover per day
+        print "nbest%i(%i)=%5i; tbest%i(%i)=%e; eddypd%i(%i)=%e" % (k[0],count,k[1],k[0],count,best,k[0],count,eperd)
+
 
     sys.exit(0)
 
