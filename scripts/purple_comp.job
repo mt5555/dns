@@ -25,9 +25,9 @@ echo $datestamp
 #  min: 64 cpus  
 #
 set name = scbench
-set refin=$HOME/codes/dns/src/forcing12-bench.inp
+set refin=$HOME/dns/src/forcing12-bench.inp
 
-set SRC=$HOME/codes/dns/src
+set SRC=$HOME/dns/src
 
 set NCPU = 64
 set mesh = "1 1 64 1024 1024 1024"
