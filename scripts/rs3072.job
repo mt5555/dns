@@ -23,7 +23,9 @@ echo $datestamp
 # 
 #
 #  4096^3 = 9.6TB
-#  8192 cpus:  1.2 GB per process  (wont run VN, will run CO)
+#  16384 VN mode  (.6GB per process)
+#
+#  5120^3 = 18.75TB  - requires 19200 cores = close to full machine.
 #
 set name = sc3072A
 set refin=$HOME/dns/src/forcing12-bench.inp

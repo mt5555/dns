@@ -62,14 +62,9 @@ try:
         str=split(str)
         time=atof(str[5])  # time in min
 
-        if tsolve.has_key(key):
-            x=[]
-            x.append(tsolve[key])
-            x.append(time)
-            tsolve[key]=x
-        else:
+        if not tsolve.has_key(key):
             tsolve[key]=[]
-            tsolve[key].append(time)
+        tsolve[key].append(time)
 
         
         
@@ -96,9 +91,10 @@ except eof,e:
     for k in x:
         key=(k[0],k[1])
         if (tbest.has_key(key)):
-            tbest[key].append(tsolve[k])
+            tbest[key] = tbest[key]+ tsolve[k]
         else:
             tbest[key]=tsolve[k]
+
 
     x=tbest.keys();
     x.sort();
