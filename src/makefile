@@ -100,7 +100,7 @@ ifeq ($(UNAME),Darwin)
    MPI =  -DUSE_MPI      -I/sw/include/
    MPILIB = -L/sw/lib/  -llammpio -llamf77mpi -lmpi -llam 
    F90 = g95
-   FFLAGS =  -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99 
+   FFLAGS =  -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99  
    CC = cc -DG77_UNDERSCORE
 
 #   CC = cc -DF_NO_UNDERSCORE
