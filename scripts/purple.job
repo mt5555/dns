@@ -1,0 +1,86 @@
+#!/bin/tcsh 
+#PBS -l size=2048
+#PBS -l walltime=60:00
+#PBS -A 7101/16.12
+#PBS -o rs1024-vn.o -e rs1024-vn.e
+#PBS -N bench-dns
+#PBS -q standard
+#XXXB -wa URG -wt 10
+#
+#
+#  run this script as an execuatable (do not qsub)
+#  it will compile the code and then qsub itself
+#
+# put datestape in .o and .e file:
+
+
+
+set name = scbench
+set refin=$HOME/dns/src/forcing12-bench.inp
+set SRC=$HOME/dns/src
+set WDIR=/scratch1/mataylo
+mkdir $WDIR
+
+set NCPU = 64
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 128
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 256
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe  $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 512
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe  $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 1024
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe  $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 2048
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe  $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 1536
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe  $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 3072
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe  $file  -d $WDIR  scbench < $refin
+end
+
+set NCPU = 6144
+cd $SRC
+foreach file ( dnsp*-$NCPU* )
+   echo 'using executable: ' $file
+   poe  $file  -d $WDIR  scbench < $refin
+end
+

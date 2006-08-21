@@ -1,0 +1,238 @@
+#!/bin/tcsh 
+#PBS -l size=2048
+#PBS -l walltime=60:00
+#PBS -A 7101/16.12
+#PBS -o rs1024-vn.o -e rs1024-vn.e
+#PBS -N bench-dns
+#PBS -q standard
+#XXXB -wa URG -wt 10
+#
+#
+#  run this script as an execuatable (do not qsub)
+#  it will compile the code and then qsub itself
+#
+# put datestape in .o and .e file:
+set datestamp = `date`
+sh -c 'echo ".e output test" 1>&2'
+sh -c "echo '$datestamp' 1>&2"
+echo $datestamp
+
+#
+#  3072^3 = 4.1TB
+#  3072 cpus:  1.4GB per process  (wont run VN, will run CO)
+# purple: 4GB per node.  
+#  1024^3  = 153GB
+#  min: 64 cpus  
+#
+set name = scbench
+set refin=$HOME/codes/dns/src/forcing12-bench.inp
+
+set SRC=$HOME/codes/dns/src
+
+set NCPU = 64
+set mesh = "1 1 64 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-1
+
+set NCPU = 128
+set mesh = "1 1 128 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-1
+
+set NCPU = 256
+set mesh = "1 1 256 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-1
+
+set NCPU = 256
+set mesh = "2 1 128 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-2
+
+set NCPU = 256
+set mesh = "4 1 64 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-3
+
+
+set NCPU = 512
+set mesh = "2 1 256 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-1
+
+set NCPU = 512
+set mesh = "4 1 128 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-2
+
+set NCPU = 512
+set mesh = "8 1 64 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-3
+
+
+set NCPU = 1024
+set mesh = "4 1 256 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-1
+
+set NCPU = 1024
+set mesh = "8 1 128 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-2
+
+set NCPU = 1024
+set mesh = "16 1 64 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-3
+
+set NCPU = 2048
+set mesh = "8 1 256 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-1
+
+set NCPU = 2048
+set mesh = "16 1 128 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-2
+
+set NCPU = 2048
+set mesh = "32 1 64 1024 1024 1024"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp1024-$NCPU-3
+
+
+
+set NCPU = 1024
+set mesh = "1 1 1024 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-1
+
+set NCPU = 1536
+set mesh = "1 1 1536 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-1
+
+
+set NCPU = 1536
+set mesh = "2 1 768 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-2
+
+
+set NCPU = 1536
+set mesh = "4 1 384 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-3
+
+
+set NCPU = 3072
+set mesh = "2 1 1536 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-1
+
+
+set NCPU = 3072
+set mesh = "4 1 768 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-2
+
+
+set NCPU = 3072
+set mesh = "8 1 384 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-3
+
+
+
+set NCPU = 6144
+set mesh = "4 1 1536 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-1
+
+
+set NCPU = 6144
+set mesh = "8 1 768 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-2
+
+
+set NCPU = 6144
+set mesh = "16 1 384 3072 3072 3072"
+cd $SRC
+rm -f dnsp ; rm -f dnsp 
+./gridsetup.py $mesh 2 2 0 ; 
+make dnsp 
+\cp -f dnsp dnsp3072-$NCPU-3
+
+
+
