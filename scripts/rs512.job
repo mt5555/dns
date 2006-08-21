@@ -2,7 +2,7 @@
 #PBS -l size=2048
 #PBS -l walltime=60:00
 #PBS -A 7101/16.12
-#PBS -o rs1024-vn.o -e rs1024-vn.e
+#PBS -o rs512-vn.o -e rs512-vn.e
 #PBS -N bench-dns
 #PBS -q standard
 #XXXB -wa URG -wt 10
@@ -18,10 +18,10 @@ sh -c "echo '$datestamp' 1>&2"
 echo $datestamp
 
 #
-#  1024^3  = 153GB
-#  min (VN) mode: 256 cpus
+#  512^3  = 19gb
+#  min (VN) mode: 32 cpus
 #
-set name = sc1024A
+set name = sc512A
 set refin=$HOME/dns/src/forcing12-bench.inp
 
 set recompile = 1
@@ -44,29 +44,73 @@ endif
 
 
 #setenv MPICH_UNEX_BUFFER_SIZE 180M
+set NCPU = 32
+set mesh = "1 1 32 512 512 512"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 64
+set mesh = "1 1 64 512 512 512"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 128
+set mesh = "1 1 128 512 512 512"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
 set NCPU = 256
-set mesh = "1 1 256 1024 1024 1024"
+set mesh = "1 1 256 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
-set NCPU = 512
-set mesh = "1 1 512 1024 1024 1024"
+
+set NCPU = 256
+set mesh = "2 1 128 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
-set NCPU = 512
-set mesh = "1 1 512 1024 1024 1024"
+
+
+set NCPU = 256
+set mesh = "4 1 64 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
+
 set NCPU = 512
-set mesh = "2 1 256 1024 1024 1024"
+set mesh = "2 1 256 512 512 512"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 512
+set mesh = "4 1 128 512 512 512"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 512
+set mesh = "8 1 64 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
@@ -75,21 +119,32 @@ $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
 
 set NCPU = 1024
-set mesh = "2 1 512 1024 1024 1024"
+set mesh = "4 1 256 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
 
 set NCPU = 1024
-set mesh = "4 1 256 1024 1024 1024"
+set mesh = "8 1 128 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
 
 set NCPU = 1024
-set mesh = "8 1 128 1024 1024 1024"
+set mesh = "16 1 64 512 512 512"
+cd $SRC
+rm -f $EXE ; rm -f $code 
+./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+set NCPU = 2048
+set mesh = "8 1 256 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
@@ -97,21 +152,25 @@ $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
 
 set NCPU = 2048
-set mesh = "4 1 512 1024 1024 1024"
+set mesh = "16 1 128 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
 
 set NCPU = 2048
-set mesh = "8 1 256 1024 1024 1024"
+set mesh = "32 1 64 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
-set NCPU = 2048
-set mesh = "16 1 128 1024 1024 1024"
+
+
+
+set NCPU = 4096
+set mesh = "16 1 256 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
@@ -119,31 +178,19 @@ $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
 
 
 set NCPU = 4096
-set mesh = "8 1 512 1024 1024 1024"
+set mesh = "32 1 128 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
 
 set NCPU = 4096
-set mesh = "16 1 256 1024 1024 1024"
+set mesh = "64 1 64 512 512 512"
 cd $SRC
 rm -f $EXE ; rm -f $code 
 ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
 $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-set NCPU = 4096
-set mesh = "32 1 128 1024 1024 1024"
-cd $SRC
-rm -f $EXE ; rm -f $code 
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
-$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
-
-
-
-
-
-
 
 
 
