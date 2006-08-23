@@ -456,10 +456,12 @@ if (io_nodes(my_z)==my_pe) then
    else
       ! if file exists, then new stripe and stride settings are ignored,
       ! so delete file first
-      call mpi_file_delete(fname,MPI_INFO_NULL,ierr)
+      ! call mpi_file_delete(fname,MPI_INFO_NULL,ierr)
       call mpi_info_create(infoin,ierr)
-      call mpi_info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
+#ifdef OSF1
       call mpi_info_set(infoin, "striping_unit", mpi_stride ,ierr)
+#endif
+      call mpi_info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
       call mpi_file_open(comm_io,fname, &
            MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
            infoin, fid,ierr)
@@ -581,17 +583,18 @@ character(len=280) base
 integer :: n,header_type,im,jm,km,i,j,k,ierr
 real*8 :: time
 real*8 :: time_in,mx(3),mx2,ke,ens,ux,uy,uz,vx,vy,vz,wx,wy,wz,u2,xfac,divmx
+real*8 :: tmx1,tmx2
 
+call wallclock(tmx1)
 
 Q=0
-
-
 if (time<0) then
    base=rundir(1:len_trim(rundir)) // "restart"
 else
    write(message,'(f10.4)') 10000.0000 + time
    base=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) 
 endif
+
 
 if (r_compressed) then
    call uvw_compressed_io(base,time,1,Q,Qhat,work1,work2)
@@ -759,6 +762,10 @@ endif
 if (header_type==1 .or. header_type==5) then
    time=time_in
 endif
+call wallclock(tmx2)
+write(message,'(a,f6.3)') 'input_uvw: time(min)=',(tmx2-tmx1)/60.
+call print_message(message)
+
 end subroutine
 
 
@@ -783,8 +790,9 @@ character(len=80) message
 character(len=280) fname
 character(len=80) base
 integer :: n
-real*8 :: time
+real*8 :: time,tmx1,tmx2
 
+call wallclock(tmx1)
 write(message,'(f10.4)') 10000.0000 + time
 
 if (w_compressed) then
@@ -901,6 +909,9 @@ if (ndim==3 .and. output_vorticity/=0) then
    endif
 endif
 
+call wallclock(tmx2)
+write(message,'(a,f6.3)') 'output_uvw: time(min)=',(tmx2-tmx1)/60.
+call print_message(message)
 
 end subroutine
 

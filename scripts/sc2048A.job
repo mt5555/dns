@@ -1,6 +1,6 @@
 #!/bin/tcsh 
 #PBS -l size=2048
-#PBS -l walltime=10:00:00
+#PBS -l walltime=6:00:00
 #PBS -A 7101/16.12
 #PBS -j oe 
 #XXX -o sc2048.o 
