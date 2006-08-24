@@ -202,6 +202,8 @@ endif
 ! if grid is a cube and only powers of 2 and at most one power of 3
 ! we can compute the flops:
 ! formulas accurate to < 1% on resolutions 16 ... 256
+if (forcing_type==1 .and. equations==NS_UVW .and. dealias==2 .and. &
+numerical_method==FOURIER) then 
 if (g_nx==g_ny .and. g_nx == g_nz) then
    nf=g_nx
    power3=.false.
@@ -223,9 +225,12 @@ if (g_nx==g_ny .and. g_nx == g_nz) then
       endif
       tmx1 = 60*tims_max(2)/itime  ! time in seconds
       flops = flop/tmx1/ncpu_x/ncpu_y/ncpu_z
+      write(message,'(a,e12.4)')  'total FLOP:     ',flop
+      call print_message(message)
       write(message,'(a,f10.2)')  'MFLOPS per cpu: ',flops/1e6
       call print_message(message)
    endif
+endif
 endif
 
 
