@@ -20,8 +20,8 @@ EVENT = FLOPS
 
 
 On Cobalt: (NCSA)
+   pfmon -efp_ops_retired dnsp -i temp.inp
 
-pfmon -efp_ops_retired dnsp -i temp.inp
 
 resolution:  16^3         flops             FLOP per timestep:
     -6                   80161720    diff:    8949342
@@ -91,11 +91,12 @@ end
 b = [8949342   ;  78413858 ;    702394764; 6062569260; 53102820392]' ./ (N.^3);
 c=A\b'; % solve A * [c0;c1;c2] = b
 semilogx(N,b,'o'); hold on;
-x=8:128; f=(c(1)*4*x.^3+c(2)*4*27*log2(x).*x.^3)./(x.^3);
+x=12:256; f=(c(1)*4*x.^3+c(2)*4*27*log2(x).*x.^3)./(x.^3);
 plot(x,f); hold off;
 disp(sprintf('%10.1f  N^3 +  %5.3f 27 N^3 log2(N) ',c(1),c(2)));
 (A*c - b')./b'
-
+# answer:  4(  297 N^3 + 2.28 27 N^3 log2(N) )
+# error:  less that 1%
 
 
 clear; N=[12, 24,48,96,192];
@@ -109,6 +110,8 @@ x=12:256; f=(c(1)*4*x.^3+c(2)*4*27*log2(x).*x.^3)./(x.^3);
 plot(x,f); hold off;
 disp(sprintf('%10.1f  N^3  +  %5.3f 27 N^3 log2(N) ',c(1),c(2)));
 (A*c - b')./b' % residula
+# answer:  4(  340 N^3 + 2.24 27 N^3 log2(N) )
+# error:  less that 1%
 
 
 

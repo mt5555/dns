@@ -225,7 +225,7 @@ if (g_nx==g_ny .and. g_nx == g_nz) then
       endif
       tmx1 = 60*tims_max(2)/itime  ! time in seconds
       flops = flop/tmx1/ncpu_x/ncpu_y/ncpu_z
-      write(message,'(a,e12.4)')  'total FLOP:     ',flop
+      write(message,'(a,e12.4)')  'Estimated FLOP per timestep: ',flop
       call print_message(message)
       write(message,'(a,f10.2)')  'MFLOPS per cpu: ',flops/1e6
       call print_message(message)
