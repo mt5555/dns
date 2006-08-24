@@ -32,23 +32,12 @@ time=-2(3 timesteps):    44364017    diff:    9230453
 time=-1(2 timesteps):    35133564
 
 
-resolution:  24^3           flops          diff
-     -6                   300568043 
-     -5                   266761491 
-     -4                   232954458 
-     -3                   199147507 
 
 resolution:  32^3           flops          diff
-     -6                   696585740 
-     -5                   618171882 
-     -4                   539757688 
+     -6                   696585740 78413858
+     -5                   618171882 78414194
+     -4                   539757688 78413964
      -3                   461343724 
-
-resolution:  48^3           flops          diff
-      -6                 2662196785 
-      -5                 2359773672 
-      -4                 2057350011 
-      -3                 1754926332 
 
 
 resolution:  64^3           flops          diff
@@ -57,8 +46,72 @@ resolution:  64^3           flops          diff
      -4                 4784290372        702395166
      -3                 4081895206
 
+resolution:  128^3           flops          diff
+     -4                  41068986552      6062569260
+     -3                  35006417292
+resolution:  256^3           flops          diff
+     -4                  358258523792                 26min
+     -3                       IN
+
+
+
+resolution:  12^3           flops          diff
+     -4                   26885228        3873213
+     -3                   23012015
+
+resolution:  24^3           flops          diff
+     -6                   300568043  33806552  
+     -5                   266761491  33807033
+     -4                   232954458  33806951
+     -3                   199147507 
+resolution:  48^3           flops          diff
+      -6                 2662196785 302423113
+      -5                 2359773672 302423661
+      -4                 2057350011 302423679 
+      -3                 1754926332 
+
+resolution:  96^3           flops          diff
+     -4                   17571976245      2595103294
+     -3                   14976872951
+
+resolution:  192^3           flops          diff
+     -4                  153149117982   22711603057
+     -3                  130437514925                    (5min)
+
 
 Fit to:  c0 + c1 N^3 + c2 27 N^3 log2(N):   (because we do 27 FFT's)
+
+
+
+
+clear; N=[16,32,64,128];
+for i=1:length(N)
+   A(i,:) = [ 4*N(i)^3 , 4*27*log2(N(i))*N(i)^3    ]/N(i)^3;
+end
+b = [8949342   ;  78413858 ;    702394764; 6062569260]' ./ (N.^3);
+c=A\b'; % solve A * [c0;c1;c2] = b
+semilogx(N,b,'o'); hold on;
+x=8:128; f=(c(1)*4*x.^3+c(2)*4*27*log2(x).*x.^3)./(x.^3);
+plot(x,f); hold off;
+disp(sprintf('%10.1f  N^3 +  %5.3f 27 N^3 log2(N) ',c(1),c(2)));
+(A*c - b')./b'
+
+
+
+clear; N=[12, 24,48,96,192];
+b = [ 3873213; 33806552 ; 302423113; 2595103294;22711603057 ]'./(N.^3);
+for i=1:length(N)
+   A(i,:) = [ 4*N(i)^3 , 4*27*N(i)^3*log2(N(i)) ]/N(i)^3;
+end
+c=A\b'; % solve A * [c0;c1;c2] = b
+loglog(N,b,'o'); hold on;
+x=12:256; f=(c(1)*4*x.^3+c(2)*4*27*log2(x).*x.^3)./(x.^3);
+plot(x,f); hold off;
+disp(sprintf('%10.1f  N^3  +  %5.3f 27 N^3 log2(N) ',c(1),c(2)));
+(A*c - b')./b' % residula
+
+
+
 
 
 
