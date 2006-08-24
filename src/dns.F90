@@ -28,7 +28,9 @@ real*8,save :: work2(nx,ny,nz)
 #endif
 character(len=80) message
 integer :: ierr,i,j,k,n,itime=0
-real*8 tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
+real*8 :: tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
+real*8 :: nf,flop,flops
+logical :: power3
 integer,allocatable :: seed(:)
 
 
@@ -150,6 +152,7 @@ write(message,'(a,2f9.2,a,2f10.5)') 'dns_solve:      ',tims_ave(2),tims_max(2),&
 call print_message(message)
 
 
+
 write(message,'(a,2f9.2,a,f4.3,a)') '   time_control       ',tims_ave(3),tims_max(3)
 call print_message(message)
 write(message,'(a,2f9.2,a,f4.3,a)') '   RHS                ',tims_ave(5),tims_max(5)
@@ -195,6 +198,36 @@ if (tims_max(17)>0) then
    write(message,'(a,2f9.2,a,f4.3,a)') '   elliptical contours',tims_ave(17),tims_max(17)
    call print_message(message)
 endif
+
+! if grid is a cube and only powers of 2 and at most one power of 3
+! we can compute the flops:
+! formulas accurate to < 1% on resolutions 16 ... 256
+if (g_nx==g_ny .and. g_nx == g_nz) then
+   nf=g_nx
+   power3=.false.
+   if (mod(g_nx,3)==0) then
+      nf=nf/3
+      power3=.true.
+   endif
+   ! nf should only contain powers of 2:
+   ! flop = floating point operations for 1 timestep
+   if ( ( nf - 2**nint(log(nf)/log(2d0)) ) == 0 ) then
+      if (power3) then
+         ! 4(  340 N^3 + 2.24 27 N^3 log2(N) )
+         nf=g_nx
+         flop = 4 *(340*nf**3 + 2.24*27*(nf**3)*log(nf)/log(2d0) )
+      else
+         ! 4(  297 N^3 + 2.28 27 N^3 log2(N) )
+         nf=g_nx
+         flop = 4 *(297*nf**3 + 2.28*27*(nf**3)*log(nf)/log(2d0) )
+      endif
+      tmx1 = 60*tims_max(2)/itime  ! time in seconds
+      flops = flop/tmx1/ncpu_x/ncpu_y/ncpu_z
+      write(message,'(a,f10.2)')  'MFLOPS per cpu: ',flops/1e6
+      call print_message(message)
+   endif
+endif
+
 
 
 call close_mpi
