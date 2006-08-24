@@ -29,6 +29,9 @@ ifeq ($(UNAME),Linux)
       # needed if >2GB per process:   -DMALLOC_Q
       MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO 
    endif
+   ifeq ($(ARCH),ia64)
+      VENDOR=INTEL8
+   endif
    ifeq ($(HOST),mauve.lanl.gov)
       VENDOR=INTEL8
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 
