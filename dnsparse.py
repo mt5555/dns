@@ -62,9 +62,8 @@ try:
         str=split(str)
         time=atof(str[5])  # time in min
 
-        if not tsolve.has_key(key):
-            tsolve[key]=[]
-        tsolve[key].append(time)
+        # create empty list if needed, then append new data
+        tsolve.setdefault(key,[]).append(time)
 
         
         
@@ -85,15 +84,22 @@ except eof,e:
             count=0
         count=count+1
         best=min(tsolve[k])   # time for 1 timesetp, seconds
-        print "ncpu%i(%i)=%i; ncpux%i(%i)=%i; ncpuz%i(%i)=%i;  time%i(%i)=%e  "   %          (k[0],count,k[1],k[0],count,k[2],k[0],count,k[4],k[0],count,best)
+        print "ncpu%i(%i)=%i;  time%i(%i)=%e; # (%2i,%i,%4i)  res/nz=%i "   %          (k[0],count,k[1],k[0],count,best,k[2],k[3],k[4],res_last/k[4])
 
     tbest={}
+    tbest_nx={}
+    tbest_nz={}
+    # key=(N,np,nx,ny,nz)                        
     for k in x:
         key=(k[0],k[1])
         if (tbest.has_key(key)):
             tbest[key] = tbest[key]+ tsolve[k]
+            tbest_nx[key] = tbest_nx[key]+ [ k[2] ]
+            tbest_nz[key] = tbest_nz[key]+ [ k[4] ]
         else:
             tbest[key]=tsolve[k]
+            tbest_nx[key] = [ k[2] ]
+            tbest_nz[key] = [ k[4] ]
 
 
     x=tbest.keys();
@@ -106,10 +112,14 @@ except eof,e:
             count=0
         count=count+1
         best=min(tbest[k])
+
+        i = tbest[k].index(best)
+        print "# res=%i NCPU=%i best was: (%i,%i,%i)  res/nx=%i res/nz=%i" % (res_last,k[1],tbest_nx[k][i],1,tbest_nz[k][i],res_last/tbest_nx[k][i],res_last/tbest_nz[k][i])
+
         eperd = 3333*res_last/512.  # number of timesteps
         eperd = eperd*best     # time in min for 1 eddy turnover
         eperd = 24*60./eperd   # eddy turnover per day
-        print "nbest%i(%i)=%5i; tbest%i(%i)=%e; eddypd%i(%i)=%e" % (k[0],count,k[1],k[0],count,best,k[0],count,eperd)
+        print "nbest%i(%i)=%5i; tbest%i(%i)=%e; eddypd%i(%i)=%e;" % (k[0],count,k[1],k[0],count,best,k[0],count,eperd)
 
 
     sys.exit(0)

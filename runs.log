@@ -1,5 +1,70 @@
 *******************************************************************************
-7/27  
+8/23
+FLOP count runs
+
+N^3 = 16,24,32,48,64
+time = -1,-2,-3      
+
+dnsp
+forcing12-bench.inp  (but set to 1,2 or 3 timesteps)
+
+
+Couldn't get opcontrol to work.  (lapic not used?)
+1. sudo opcontrol --no-vmlinux
+2. sudo opcontrol --start    
+--event=FLOPS
+3. ./dnsp -i temp.inp 
+4. opreport -l ./dnsp
+2. sudo opcontrol --shutdown
+EVENT = FLOPS
+
+
+On Cobalt: (NCSA)
+
+pfmon -efp_ops_retired dnsp -i temp.inp
+
+resolution:  16^3         flops             FLOP per timestep:
+    -6                   80161720    diff:    8949342
+    -5                   71212378    diff:    8949549
+    -4                   62262829    idff:    8949448
+time=-3(4 timesteps):    53313381    diff:    8949364
+time=-2(3 timesteps):    44364017    diff:    9230453  
+time=-1(2 timesteps):    35133564
+
+
+resolution:  24^3           flops          diff
+     -6                   300568043 
+     -5                   266761491 
+     -4                   232954458 
+     -3                   199147507 
+
+resolution:  32^3           flops          diff
+     -6                   696585740 
+     -5                   618171882 
+     -4                   539757688 
+     -3                   461343724 
+
+resolution:  48^3           flops          diff
+      -6                 2662196785 
+      -5                 2359773672 
+      -4                 2057350011 
+      -3                 1754926332 
+
+
+resolution:  64^3           flops          diff
+     -6                 6189080299        702394764
+     -5                 5486685535        702395163
+     -4                 4784290372        702395166
+     -3                 4081895206
+
+
+Fit to:  c0 + c1 N^3 + c2 27 N^3 log2(N):   (because we do 27 FFT's)
+
+
+
+
+*******************************************************************************
+8/23  
 
 Redstorm run:
 
@@ -14,7 +79,6 @@ This run should take 13K timesteps.  on 4096cores, .5min per = 120h
 
 NSF1:  first Tag of code for NSF petascale RFP:
 NSF2:  Tag of debugged dnsp code
-
 
 
 
