@@ -84,7 +84,7 @@ except eof,e:
             count=0
         count=count+1
         best=min(tsolve[k])   # time for 1 timesetp, seconds
-        print "ncpu%i(%i)=%i;  time%i(%i)=%e; # (%2i,%i,%4i)  res/nz=%i "   %          (k[0],count,k[1],k[0],count,best,k[2],k[3],k[4],res_last/k[4])
+        print "ncpu%i(%i)=%i;  time%i(%i)=%e; %% (%2i,%i,%4i)  res/nz=%i "   %          (k[0],count,k[1],k[0],count,best,k[2],k[3],k[4],res_last/k[4])
 
     tbest={}
     tbest_nx={}
@@ -108,13 +108,14 @@ except eof,e:
     for k in x:
         if (k[0]!=res_last):
             print '%% res = %i' % k[0]
+            print 'nbest%i=[]; tbest%i=[]; eddypd%i=[];' % (k[0],k[0],k[0])
             res_last=k[0]
             count=0
         count=count+1
         best=min(tbest[k])
 
         i = tbest[k].index(best)
-        print "# res=%i NCPU=%i best was: (%i,%i,%i)  res/nx=%i res/nz=%i" % (res_last,k[1],tbest_nx[k][i],1,tbest_nz[k][i],res_last/tbest_nx[k][i],res_last/tbest_nz[k][i])
+        print "%% res=%i NCPU=%i best was: (%i,%i,%i)  res/nx=%i res/nz=%i" % (res_last,k[1],tbest_nx[k][i],1,tbest_nz[k][i],res_last/tbest_nx[k][i],res_last/tbest_nz[k][i])
 
         eperd = 3333*res_last/512.  # number of timesteps
         eperd = eperd*best     # time in min for 1 eddy turnover
