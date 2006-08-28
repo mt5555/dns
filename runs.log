@@ -213,8 +213,8 @@ ke = 1.886      sqrt(ke)=1.37  =  maxU/4.5
 delt ~ 1.2e-4
 
 
-My CFL:  (delt=.0001)
-11.77 * delt/delx = 1.5                     OR
+My CFL:  (delt=.0001)   
+11.77 * delt/delx = 1.5   delt< .12/N                OR
 8.6 sqrt(ke) delt/delx = 1.5             1.9*maxU delt/delx = 1.5
 sqrt(ke) delt/delx = .17                       maxU delt/delx = .8
 
