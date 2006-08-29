@@ -1000,7 +1000,7 @@ ASSERT("transpose_from_y dimension failure 7",n3d==nx_2dy)
 
 
 
-do iproc=0,ncpu_y-1  ! loop over each slab
+do iproc2=0,ncpu_y-1  ! loop over each slab
 #ifdef A2AOVERLAP
    iproc=mod(ncpu_y+iproc2-my_y,ncpu_y)
 #else
