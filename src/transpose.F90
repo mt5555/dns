@@ -1,5 +1,7 @@
 #include "macros.h"
 
+#undef A2AOVERLAP
+
 module transpose
 use params
 use mpi
@@ -329,7 +331,6 @@ n2=nslabx
 n2d=nslabx
 n3=ny_2dz
 n3d=ny_2dz
-
 
 
 do iproc2=0,ncpu_z-1  ! loop over each slab
