@@ -31,6 +31,8 @@ ifeq ($(UNAME),Linux)
    endif
    ifeq ($(ARCH),ia64)
       VENDOR=INTEL8
+      MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8
+      MPILIB = -lmpi
    endif
    ifeq ($(HOST),mauve.lanl.gov)
       VENDOR=INTEL8
@@ -94,6 +96,7 @@ ifeq ($(UNAME),Linux)
    #FFLAGS =  -w90  -Vaxlib -O1 -tpp7   $(MPI)  -DUSE_FFT99 
    #LDFLAGS = -Lstk -lstk
    endif
+
 
 endif
 
