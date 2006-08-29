@@ -305,7 +305,7 @@ real*8 pt(g_nz2,nslabx,ny_2dz)
 integer n1,n1d,n2,n2d,n3,n3d
 
 !local variables
-integer iproc
+integer iproc,iproc2
 integer i,j,k,jj,l
 #ifdef USE_MPI
 !real*8 sendbuf(nslabx*nslabz*ny_2dz)
@@ -332,7 +332,12 @@ n3d=ny_2dz
 
 
 
-do iproc=0,mpidims(3)-1  ! loop over each slab
+do iproc2=0,ncpu_z-1  ! loop over each slab
+#ifdef A2AOVERLAP
+   iproc=mod(ncpu_z+iproc2-my_z,ncpu_z)
+#else
+   iproc=iproc2
+#endif
 
    if (iproc==my_z) then
       do j=1,ny_2dz  ! loop over points in a single slab
@@ -437,7 +442,7 @@ real*8 pt(g_nz2,nslabx,ny_2dz)
 integer n1,n1d,n2,n2d,n3,n3d
 
 !local variables
-integer iproc
+integer iproc,iproc2
 integer i,j,k,jj,l
 #ifdef USE_MPI
 !real*8 sendbuf(nslabx*nslabz*ny_2dz)
@@ -463,7 +468,12 @@ ASSERT("transpose_from_z dimension failure 5",n2d==nslabx)
 ASSERT("transpose_from_z dimension failure 6",n3==ny_2dz)
 ASSERT("transpose_from_z dimension failure 7",n3d==ny_2dz)
 
-do iproc=0,mpidims(3)-1  ! loop over each slab
+do iproc2=0,ncpu_z-1  ! loop over each slab
+#ifdef A2AOVERLAP
+   iproc=mod(ncpu_z+iproc2-my_z,ncpu_z)
+#else
+   iproc=iproc2
+#endif
 
 
    if (iproc==my_z) then
@@ -577,7 +587,7 @@ real*8 pt(g_nx2,nslabz,ny_2dx)
 integer n1,n1d,n2,n2d,n3,n3d
 
 !local variables
-integer iproc
+integer iproc,iproc2
 integer i,j,k,jj,l
 #ifdef USE_MPI
 !real*8 sendbuf(nslabx*nslabz*ny_2dx)
@@ -605,7 +615,14 @@ n3=ny_2dx
 n3d=ny_2dx
 
 
-do iproc=0,mpidims(1)-1  ! loop over each slab
+do iproc2=0,ncpu_x-1  ! loop over each slab
+#ifdef A2AOVERLAP
+   iproc=mod(ncpu_x+iproc2-my_x,ncpu_x)
+#else
+   iproc=iproc2
+#endif
+
+
    if (iproc==my_x) then
       do j=1,ny_2dx  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dx +j -1
@@ -696,7 +713,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 
 
 !local variables
-integer iproc
+integer iproc,iproc2
 integer i,j,k,jj,l
 #ifdef USE_MPI
 !real*8 sendbuf(nslabx*nslabz*ny_2dx)
@@ -724,7 +741,13 @@ ASSERT("transpose_from_x2 dimension failure 6",n3==ny_2dx)
 ASSERT("transpose_from_x2 dimension failure 7",n3d==ny_2dx)
 
 
-do iproc=0,mpidims(1)-1  ! loop over each slab
+do iproc2=0,ncpu_x-1  ! loop over each slab
+#ifdef A2AOVERLAP
+   iproc=mod(ncpu_x+iproc2-my_x,ncpu_x)
+#else
+   iproc=iproc2
+#endif
+
    if (iproc==my_x) then
       do j=1,ny_2dx  ! loop over points in a single slab
          jj=ny1 + iproc*ny_2dx +j -1
@@ -823,7 +846,7 @@ real*8 pt(g_ny2,nslabz,nx_2dy)
 integer n1,n1d,n2,n2d,n3,n3d
 
 !local variables
-integer iproc
+integer iproc,iproc2
 integer i,j,k,ii,l
 #ifdef USE_MPI
 !real*8 sendbuf(nslaby*nslabz*nx_2dy)
@@ -851,7 +874,14 @@ n3d=nx_2dy
 
 
 
-do iproc=0,mpidims(2)-1  ! loop over each slab
+do iproc2=0,ncpu_y-1  ! loop over each slab
+#ifdef A2AOVERLAP
+   iproc=mod(ncpu_y+iproc2-my_y,ncpu_y)
+#else
+   iproc=iproc2
+#endif
+
+
    if (iproc==my_y) then
       do i=1,nx_2dy  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2dy +i -1
@@ -939,7 +969,7 @@ real*8 pt(g_ny2,nslabz,nx_2dy)
 integer n1,n1d,n2,n2d,n3,n3d
 
 !local variables
-integer iproc
+integer iproc,iproc2
 integer i,j,k,ii,l
 #ifdef USE_MPI
 !real*8 sendbuf(nslaby*nslabz*nx_2dy)
@@ -970,7 +1000,12 @@ ASSERT("transpose_from_y dimension failure 7",n3d==nx_2dy)
 
 
 
-do iproc=0,mpidims(2)-1  ! loop over each slab
+do iproc=0,ncpu_y-1  ! loop over each slab
+#ifdef A2AOVERLAP
+   iproc=mod(ncpu_y+iproc2-my_y,ncpu_y)
+#else
+   iproc=iproc2
+#endif
    if (iproc==my_y) then
       do i=1,nx_2dy  ! loop over points in a single slab
          ii=nx1 + iproc*nx_2dy +i-1
