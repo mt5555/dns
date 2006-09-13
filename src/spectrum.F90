@@ -18,13 +18,6 @@ Number of shells:  .5*g_nz*Lz
 However, we only allocate space for .5*g_nz shells, so this code will
 print an error message if Lz>1
 
-Note:  Spectrum does now know about any variable scaling that
-might be used.  For example, in ns_aspect, when Lz<>1, we
-also scale the z-component of velocity by Lz.  w should be
-scaled back to physical coordinates before calling these
-routines.
-
-
 
 
 #endif
@@ -1293,8 +1286,8 @@ use params
 use mpi
 implicit none
 integer :: ierr
-real*8 :: p1(g_nz2,nslabx,ny_2dz)
-real*8 :: p2(g_nz2,nslabx,ny_2dz)
+real*8 :: p1(g_nz2,nx_2dz,ny_2dz)
+real*8 :: p2(g_nz2,nx_2dz,ny_2dz)
 real*8 :: spec(0:max(g_nx,g_ny,g_nz))
 
 ! local variables
@@ -1314,7 +1307,7 @@ spec=0
 
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -1536,8 +1529,6 @@ do j=ny1,ny2
          cospec_z(abs(km),1:ndim)=cospec_z(abs(km),1:ndim)+co_energy(1:ndim)  ! vw
          cospec_r(iwave,1:ndim)=cospec_r(iwave,1:ndim)+co_energy(1:ndim)
 
-! NOTE:  Input to this routine is already in PHYSICAL UNITS
-! so the z-component has already been scaled by Lz in aspect ration case.
          energy = xfac*(p1(i,j,k,1)*(wy-vz) + &
                           p1(i,j,k,2)*(uz-wx) + &
                           p1(i,j,k,3)*(vx-uy)) 

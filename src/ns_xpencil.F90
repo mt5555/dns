@@ -105,14 +105,14 @@ implicit none
 real*8 :: time
 !real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q_grid(g_nx2,nslabz,ny_2dx,n_var)
-real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q(g_nz2,nx_2dz,ny_2dz,n_var)
+real*8 :: Q_tmp(g_nz2,nx_2dz,ny_2dz,n_var)
+real*8 :: Q_old(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 ! overlapped in memory: (real size: nx,ny,nz)
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: rhsg(g_nx2,nslabz,ny_2dx,n_var)
 
 
@@ -128,7 +128,7 @@ call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2,1)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q_old(k,i,j,n)=Q(k,i,j,n)
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0
@@ -149,7 +149,7 @@ call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
       Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2
@@ -166,7 +166,7 @@ call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
       Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)
@@ -183,7 +183,7 @@ call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2,4)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6
    enddo
@@ -230,14 +230,14 @@ implicit none
 real*8 :: time
 !real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q_grid(g_nx2,nslabz,ny_2dx,n_var)
-real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q(g_nz2,nx_2dz,ny_2dz,n_var)
+real*8 :: Q_tmp(g_nz2,nx_2dz,ny_2dz,n_var)
+real*8 :: Q_old(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 ! overlapped in memory: (real size: nx,ny,nz)
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: rhsg(g_nx2,nslabz,ny_2dx,n_var)
 
 
@@ -259,7 +259,7 @@ call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q_old(k,i,j,n)=Q(k,i,j,n)
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0
@@ -285,7 +285,7 @@ call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
       Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2
@@ -306,7 +306,7 @@ call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
       Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)
@@ -327,7 +327,7 @@ call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6
    enddo
@@ -402,20 +402,20 @@ real*8 time
 integer compute_ints,rkstage
 
 ! input, but data can be trashed if needed
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 !real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 real*8 Q_grid(g_nx2,nslabz,ny_2dx,n_var)
 
 ! output  (rhsg and rhs are overlapped in memory)
 ! true size must be nx,ny,nz,n_var
-real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 !real*8 rhsg(nx,ny,nz,n_var)
 real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
 
 ! work/storage
 real*8 work(nx,ny,nz)
 ! actual dimension: nx,ny,nz, since sometimes used as work array
-real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 p(g_nz2,nx_2dz,ny_2dz)    
                                  
 
 !local
@@ -559,7 +559,7 @@ ens_diss6=0
 uxx2ave=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -707,7 +707,7 @@ endif
 !  make rhs div-free
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -728,7 +728,7 @@ enddo
 
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -823,11 +823,11 @@ end
 subroutine ns_vorticity(rhsg,Qhat,work,p)
 use params
 implicit none
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 !real*8 rhsg(nx,ny,nz,n_var)    
 real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
 real*8 work(nx,ny,nz)
-real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 p(g_nz2,nx_2dz,ny_2dz)    
 
 !local
 integer n,i,j,k,im,km,jm
@@ -838,7 +838,7 @@ real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 do n=1,3
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -883,10 +883,10 @@ subroutine ns_vorticity3(rhsg,Qhat,work,p)
 !
 use params
 implicit none
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
 real*8 work(nx,ny,nz)
-real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 p(g_nz2,nx_2dz,ny_2dz)    
 
 !local
 integer n,i,j,k,im,km,jm
@@ -908,7 +908,7 @@ enddo
 n=1
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
 !      im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -924,7 +924,7 @@ call zx_ifft3d(p,rhsg(1,1,1,n),work)
 n=2
 do j=1,ny_2dz
 !   jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)

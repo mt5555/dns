@@ -367,8 +367,13 @@ logical :: qt_uptodate
 
 if (firstcall) then
    firstcall=.false.
+   ! we have to be using a slab decomposition
    if (ncpu_x*ncpu_y>1) then
-      call abort("isoave: requires x-y hyperslab parallel decomposition")
+      call abort("isoave: requires x-y slab decomposition")
+   endif   
+   ! in the z-pencil space, we have to have z-x slabs
+   if (nslabx /= nx_2dz) then
+      call abort("isoave: z-pencil decomposition to be using z-x slabs")
    endif   
    call init
 endif

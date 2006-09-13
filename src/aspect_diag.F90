@@ -27,7 +27,7 @@ use spectrum
 use isoave
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: q2(nx,ny,nz,n_var)
 real*8 :: q3(nx,ny,nz,n_var)
@@ -181,7 +181,7 @@ use fft_interface
 use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: vor(nx,ny,nz,3)
 real*8 :: potvor(nx,ny,nz)
 real*8 :: theta_z(nx,ny,nz)
@@ -220,7 +220,7 @@ ke_diss=0
 pe_diss=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)

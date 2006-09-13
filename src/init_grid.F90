@@ -120,7 +120,7 @@ if (numerical_method==FOURIER) then
 ! this is needed to gaurentee that the sine and cosine modes
 ! are on the same processor.  
 !
-
+! when fourier computations are done with the reference decomposition:
 if (mod(nslabx,2)/=0) then
    call abort("nslabx must be even")
 endif
@@ -129,6 +129,14 @@ if (mod(nslaby,2)/=0) then
 endif
 if (mod(nslabz,2)/=0 .and. g_nz>1) then
    call abort("nslabz must be even if g_nz>1")
+endif
+
+! when fourier computations are done in the z-pencil decomposition
+if (mod(nx_2dz,2)/=0) then
+   call abort("nx_2dz must be even")
+endif
+if (mod(ny_2dz,2)/=0) then
+   call abort("ny_2dz must be even")
 endif
 endif
 
@@ -324,9 +332,12 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! local grid data, z-decomposition
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do i=nx1,nx2
-   z_imcord(i-nx1+1)=imcord(i)
-   z_imsign(i-nx1+1)=imsign(i)
+if (nx_2dz /= nslabx) then
+   call abort('nx_2dz /= nslabx: need to fix this loop!')
+endif
+do i=1,nx_2dz
+   z_imcord(i)=imcord(i+nx1-1)
+   z_imsign(i)=imsign(i+nx1-1)
 enddo
 
 z_kmcord=g_kmcord

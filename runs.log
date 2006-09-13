@@ -20,7 +20,16 @@ EVENT = FLOPS
 
 
 On Cobalt: (NCSA)
+   qsub -I -V -l walltime=00:30:00,ncpus=8,mem=8gb
+
    pfmon -efp_ops_retired dnsp -i temp.inp
+
+
+%module load histx+.1.2a
+%lipfpm -h
+%lipfpm -e CPU_CYCLES -e FP_OPS_RETIRED ./a.out
+
+
 
 
 resolution:  16^3         flops             FLOP per timestep:
@@ -38,6 +47,9 @@ resolution:  32^3           flops          diff
      -5                   618171882 78414194
      -4                   539757688 78413964
      -3                   461343724 
+
+     -3 NCPU=2              65139
+                          1834353
 
 
 resolution:  64^3           flops          diff
@@ -220,6 +232,12 @@ sqrt(ke) delt/delx = .17                       maxU delt/delx = .8
 
 Pope:   sqrt(k) delt/delx = .05
         maxU delt/delx = .22
+
+delt/ett =  (CFL delx/sqrt(k)) / ett 
+         = (CFL delx/sqrt(k)) / (2*ke/epsilon)
+         = CFL delx .5 k^{-3/2} epsilon
+           
+
 
 
 eta*kmax=1, eps=3.58

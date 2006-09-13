@@ -82,8 +82,8 @@ real*8 :: work(nx,ny,nz)
 real*8 :: Q(nx,ny,nz,3)
 real*8 :: q4(nx,ny,nz,3)
 real*8 :: rhs(nx,ny,nz,3)
-real*8 :: q4z(g_nz2,nslabx,ny_2dz,3) 
-real*8 :: rhsz(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: q4z(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: rhsz(g_nz2,nx_2dz,ny_2dz,3) 
 real*8 :: f_diss,fxx_diss
 
 ! local
@@ -128,8 +128,8 @@ subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss,model_spec)
 use params
 use mpi
 implicit none
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
 integer :: model_spec
 integer km,jm,im,i,j,k,n,wn,ierr,kfmax
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
@@ -179,7 +179,7 @@ if (g_u2xave==0) then
    g_u2xave=0
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -306,8 +306,8 @@ subroutine sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,model_spec)
 use params
 use mpi
 implicit none
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
 integer :: model_spec
 integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
@@ -356,7 +356,7 @@ if (g_u2xave==0) then
    g_u2xave=0
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -657,7 +657,7 @@ allocate(wnforcing(numb1:numb))
    ! count the number of wavenumbers in each band on this CPU.  
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -683,7 +683,7 @@ allocate(wnforcing(numb1:numb))
    ! store all the indexes
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -744,8 +744,8 @@ use params
 use mpi
 implicit none
 integer :: new_f
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
 integer km,jm,im,i,j,k,n,wn,ierr
 real*8 xw,xfac,f_diss,fsum,fxx_diss
 
@@ -863,8 +863,8 @@ use params
 use mpi
 implicit none
 integer :: new_f
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3) 
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,3) 
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
 integer km,jm,im,i,j,k,n,ierr,ntest,wn,wn2,ii
 real*8 xfac,f_diss,fsum,fxx_diss,vor(3),ux,uy,uz,wx,wy,wz,vx,vy,vz,xw
 real*8,save,allocatable :: fhat(:,:,:,:)
@@ -895,7 +895,7 @@ if (0==init_sforcing) then
       write(*,'(a,f8.4)') 'sqrt( <f,f> ) = ',ffval
    endif
 
-   allocate(fhat(g_nz2,nslabx,ny_2dz,3))
+   allocate(fhat(g_nz2,nx_2dz,ny_2dz,3))
    if (forcing_type==8) then
       numb1=max(forcing_peak_waveno-fwidth,1)
       numb=forcing_peak_waveno+fwidth
@@ -930,7 +930,7 @@ if (0==init_sforcing) then
       numk=0
       do j=1,ny_2dz
          jm=z_jmcord(j)
-         do i=1,nslabx
+         do i=1,nx_2dz
             im=z_imcord(i)
             do k=1,g_nz
                km=z_kmcord(k)
@@ -957,10 +957,10 @@ if (new_f==1) then
 
    ! compute forcing function fhat:
    ener=0
-   call gaussian(rhs,g_nz2*nslabx*ny_2dz*3)
+   call gaussian(rhs,g_nz2*nx_2dz*ny_2dz*3)
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -1050,7 +1050,7 @@ fxx_diss=0
 do n=1,ndim
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -1268,12 +1268,12 @@ implicit none
 integer :: nmax
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: rmodes2(-nmax:nmax,-nmax:nmax,-nmax:nmax)
-real*8 :: p(g_nz2,nslabx,ny_2dz)
+real*8 :: p(g_nz2,nx_2dz,ny_2dz)
 integer :: i,j,k,ierr
 
 rmodes=0
 do j=1,ny_2dz
-do i=1,nslabx
+do i=1,nx_2dz
 do k=1,g_nz
    if (abs(z_imcord(i))<=nmax .and. abs(z_jmcord(j))<=nmax .and. &
        abs(z_kmcord(k))<=nmax ) then
@@ -1303,11 +1303,11 @@ use params
 implicit none
 integer :: nmax
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
-real*8 :: p(g_nz2,nslabx,ny_2dz)
+real*8 :: p(g_nz2,nx_2dz,ny_2dz)
 integer :: i,j,k
 
 do j=1,ny_2dz
-do i=1,nslabx
+do i=1,nx_2dz
 do k=1,g_nz
    if (abs(z_imcord(i))<=nmax .and. abs(z_jmcord(j))<=nmax .and. &
        abs(z_kmcord(k))<=nmax ) then

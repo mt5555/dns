@@ -20,9 +20,9 @@ ifeq ($(UNAME),Linux)
    VENDOR=LAHEY
    #VENDOR=PGI
    #VENDOR=PGIMPI
-   #VENDOR=INTEL8
+   #VENDOR=INTEL
    ifeq ($(HOST),dosadi)
-      VENDOR=INTEL8
+      VENDOR=INTEL
    endif
    ifeq ($(ARCH),x86_64)
       VENDOR=PGIMPI
@@ -30,17 +30,17 @@ ifeq ($(UNAME),Linux)
       MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO 
    endif
    ifeq ($(ARCH),ia64)
-      VENDOR=INTEL8
+      VENDOR=INTEL
       MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8
       MPILIB = -lmpi
    endif
    ifeq ($(HOST),mauve.lanl.gov)
-      VENDOR=INTEL8
+      VENDOR=INTEL
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 
       MPILIB =  -lmpi
    endif
    ifeq ($(HOST),s873487)
-      VENDOR=INTEL8
+      VENDOR=INTEL
    endif
    ifeq ($(HOST),s854018)
       VENDOR=PGI
@@ -83,12 +83,6 @@ ifeq ($(UNAME),Linux)
 
 
    ifeq ($(VENDOR),INTEL)
-   F90 = ifc
-   CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7   $(MPI)  -DUSE_FFT99 
-   endif
-
-   ifeq ($(VENDOR),INTEL8)
    F90 = ifort
    CC=gcc
    #FFLAGS =  -auto -w90  -Vaxlib  -O1 -tpp7   $(MPI)  -DUSE_FFT99 

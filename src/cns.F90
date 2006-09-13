@@ -429,7 +429,7 @@ use transpose
 implicit none
 real*8 f(nx,ny,nz)    ! input/output
 !real*8 work(nx,ny,nz) ! work array
-real*8 work(g_nz2,nslabx,ny_2dz)
+real*8 work(g_nz2,nx_2dz,ny_2dz)
 real*8 :: alpha
 real*8 :: beta
 
@@ -451,11 +451,11 @@ endif
 if (firstcall) then
    firstcall=.false.
 
-   allocate(sinx(nslabx))
+   allocate(sinx(nx_2dz))
    allocate(siny(ny_2dz))
    allocate(sinz(g_nz))
 
-   do i=1,nslabx
+   do i=1,nx_2dz
       sinx(i)=4*sin(z_imcord(i)*pi2*delx)/(3*delx) -&
            sin(z_imcord(i)*pi2*2*delx)/(6*delx)
       sinx(i)=-sinx(i)**2
@@ -488,7 +488,7 @@ call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 call fft1(work,n1,n1d,n2,n2d,n3,n3d)
 
 do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
       do k=1,g_nz
          xfac=(sinx(i) + siny(j) + sinz(k))
          if (abs(xfac)<1e-12) xfac=0

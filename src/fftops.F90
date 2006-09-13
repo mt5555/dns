@@ -701,7 +701,7 @@ use transpose
 
 implicit none
 real*8 f(nx,ny,nz)    ! input
-real*8 fout(g_nz2,nslabx,ny_2dz)  ! output
+real*8 fout(g_nz2,nx_2dz,ny_2dz)  ! output
 real*8 work(nx,ny,nz) ! work array1
 integer n1,n1d,n2,n2d,n3,n3d
 
@@ -709,7 +709,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !
 !  for the full spectral method, we will be working mostly in
 !  the z-transform fourier space, 
-!     pt(g_nz2,nslabx,ny_2dz)
+!     pt(g_nz2,nx_2dz,ny_2dz)
 !  so we also need that ny_2dz is even
 if (mod(ny_2dz,2)/=0) then
    call abort("ny_2dz is not even.  cant use z-decomp FFTs")
@@ -751,7 +751,7 @@ use transpose
 
 implicit none
 real*8 f(nx,ny,nz)    ! input
-real*8 fout(g_nz2,nslabx,ny_2dz)  ! output
+real*8 fout(g_nz2,nx_2dz,ny_2dz)  ! output
 real*8 work(nx,ny,nz) ! work array1
 integer n1,n1d,n2,n2d,n3,n3d
 
@@ -759,7 +759,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !
 !  for the full spectral method, we will be working mostly in
 !  the z-transform fourier space, 
-!     pt(g_nz2,nslabx,ny_2dz)
+!     pt(g_nz2,nx_2dz,ny_2dz)
 !  so we also need that ny_2dz is even
 if (mod(ny_2dz,2)/=0) then
    call abort("ny_2dz is not even.  cant use z-decomp FFTs")
@@ -802,9 +802,9 @@ use transpose
 implicit none
 ! true size of all arrays:  nx,ny,nz:
 ! work used as a work array and its shape must match fin
-real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 fin(g_nz2,nx_2dz,ny_2dz)  ! input
 real*8 f(nx,ny,nz)               ! output
-real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+real*8 work(g_nz2,nx_2dz,ny_2dz) ! work array
 
 
 !local
@@ -813,8 +813,8 @@ integer i,j,k
 
 n1=g_nz
 n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 
@@ -853,9 +853,9 @@ use transpose
 implicit none
 ! true size of all arrays:  nx,ny,nz:
 ! f used as a work array and its shape must match fin
-real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 fin(g_nz2,nx_2dz,ny_2dz)  ! input
 real*8 work(nx,ny,nz)    
-real*8 f(g_nz2,nslabx,ny_2dz) 
+real*8 f(g_nz2,nx_2dz,ny_2dz) 
 
 
 !local
@@ -864,8 +864,8 @@ integer i,j,k
 
 n1=g_nz
 n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 
@@ -902,8 +902,8 @@ use transpose
 implicit none
 ! true size of all arrays:  nx,ny,nz:
 ! f used as a work array and its shape must match fin
-real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
-real*8 f(g_nz2,nslabx,ny_2dz)    ! output
+real*8 fin(g_nz2,nx_2dz,ny_2dz)  ! input
+real*8 f(g_nz2,nx_2dz,ny_2dz)    ! output
 real*8 fx(nx,ny,nz)              ! output
 real*8 work(nx,ny,nz)            ! work array
 
@@ -914,8 +914,8 @@ integer i,j,k
 
 n1=g_nz
 n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 
@@ -958,8 +958,8 @@ use transpose
 implicit none
 ! true size of all arrays:  nx,ny,nz:
 ! f used as a work array and its shape must match fin
-real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
-real*8 f(g_nz2,nslabx,ny_2dz)  ! output
+real*8 fin(g_nz2,nx_2dz,ny_2dz)  ! input
+real*8 f(g_nz2,nx_2dz,ny_2dz)  ! output
 real*8 fy(nx,ny,nz)              ! output
 real*8 work(nx,ny,nz)
 
@@ -971,8 +971,8 @@ integer i,j,k
 
 n1=g_nz
 n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 
@@ -1021,10 +1021,10 @@ use transpose
 implicit none
 ! true size of all arrays:  nx,ny,nz:
 ! work used as a work array and its shape must match fin
-real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 fin(g_nz2,nx_2dz,ny_2dz)  ! input
 real*8 f(nx,ny,nz)               ! output
 real*8 fx(nx,ny,nz)              ! output
-real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+real*8 work(g_nz2,nx_2dz,ny_2dz) ! work array
 
 
 !local
@@ -1033,8 +1033,8 @@ integer i,j,k
 
 n1=g_nz
 n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 
@@ -1078,10 +1078,10 @@ use transpose
 implicit none
 ! true size of all arrays:  nx,ny,nz:
 ! work used as a work array and its shape must match fin
-real*8 fin(g_nz2,nslabx,ny_2dz)  ! input
+real*8 fin(g_nz2,nx_2dz,ny_2dz)  ! input
 real*8 f(nx,ny,nz)  ! output
 real*8 fy(nx,ny,nz) ! output
-real*8 work(g_nz2,nslabx,ny_2dz) ! work array
+real*8 work(g_nz2,nx_2dz,ny_2dz) ! work array
 
 
 !local
@@ -1090,8 +1090,8 @@ integer i,j,k
 
 n1=g_nz
 n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 
@@ -1164,7 +1164,7 @@ subroutine z_fft3d_nvar(Q_grid,Q,work1,work2)
 use params
 implicit none
 real*8 :: Q_grid(nx,ny,nz,n_var)
-real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer n
@@ -1880,7 +1880,7 @@ use params
 use mpi
 implicit none
 integer :: kstart2,kstop2
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 real*8 hscale(ndim,n_var)
 real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,xw2,cfl
 integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start
@@ -1915,7 +1915,7 @@ endif
 ke=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -2012,7 +2012,7 @@ do n=np1,np2
    ke=0
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)

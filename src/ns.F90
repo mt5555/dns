@@ -61,14 +61,14 @@ use params
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
-real*8 :: Q(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: Q_tmp(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: Q_old(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Q(g_nz2,nx_2dz,ny_2dz,n_var)
+real*8 :: Q_tmp(g_nz2,nx_2dz,ny_2dz,n_var)
+real*8 :: Q_old(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 ! overlapped in memory:
-real*8 :: rhs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: rhsg(nx,ny,nz,n_var)
 
 
@@ -83,7 +83,7 @@ call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q_old(k,i,j,n)=Q(k,i,j,n)
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0
@@ -101,7 +101,7 @@ call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
       Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2
@@ -118,7 +118,7 @@ call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
       Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)
@@ -135,7 +135,7 @@ call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4)
 
 do n=1,n_var
    do j=1,ny_2dz
-   do i=1,nslabx
+   do i=1,nx_2dz
    do k=1,g_nz
       Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6
    enddo
@@ -201,17 +201,17 @@ real*8 time
 integer compute_ints,rkstage
 
 ! input, but data can be trashed if needed
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 
 ! output  (rhsg and rhs are overlapped in memory)
-real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 rhsg(nx,ny,nz,n_var)    
 
 ! work/storage
 real*8 work(nx,ny,nz)
 ! actual dimension: nx,ny,nz, since sometimes used as work array
-real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 p(g_nz2,nx_2dz,ny_2dz)    
                                  
 
 !local
@@ -458,7 +458,7 @@ ens_alpha =0
 uxx2ave=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -599,7 +599,7 @@ rhs=0
 if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -653,7 +653,7 @@ enddo
 !  make rhs div-free
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -674,7 +674,7 @@ enddo
 
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -728,7 +728,7 @@ do ns=np1,np2
    ! de-alias, and store in RHS(:,:,:,ns)
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -828,10 +828,10 @@ end
 subroutine ns_vorticity(rhsg,Qhat,work,p)
 use params
 implicit none
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 real*8 rhsg(nx,ny,nz,n_var)    
 real*8 work(nx,ny,nz)
-real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 p(g_nz2,nx_2dz,ny_2dz)    
 
 !local
 integer n,i,j,k,im,km,jm
@@ -842,7 +842,7 @@ real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 do n=1,3
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -931,14 +931,14 @@ subroutine alpha_model_forcing(rhs,Qhat,div,divs,gradu,gradv,gradw,work,p,a_diss
 use params
 use sforcing
 implicit none
-real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)           ! Fourier data at time t
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)          ! Fourier data at time t
-real*8 p(g_nz2,nslabx,ny_2dz)    
+real*8 rhs(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)          ! Fourier data at time t
+real*8 p(g_nz2,nx_2dz,ny_2dz)    
 real*8 work(nx,ny,nz)
 
 ! overlapped in memory:
 real*8 div(nx,ny,nz,n_var)
-real*8 divs(g_nz2,nslabx,ny_2dz,n_var)
+real*8 divs(g_nz2,nx_2dz,ny_2dz,n_var)
 
 real*8 gradu(nx,ny,nz,n_var)
 real*8 gradv(nx,ny,nz,n_var)
@@ -954,7 +954,7 @@ real*8 :: D(3,3),dummy,xfac
 integer :: i2,j2,k2,i1,j1,k1,ii,jj,kk
 real*8  :: wtot,w,r
 real*8  :: gfilt(0:1000)
-real*8 p2(g_nz2,nslabx,ny_2dz)    
+real*8 p2(g_nz2,nx_2dz,ny_2dz)    
 external helmholtz_periodic
 
 
@@ -1067,7 +1067,7 @@ a_diss=0
 do n=1,3
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -1106,7 +1106,7 @@ a_diss=0
 do n=1,3
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -1151,8 +1151,8 @@ subroutine helm(out,in)
 use params
 implicit none
 
-real*8 out(g_nz2,nslabx,ny_2dz)
-real*8 in(g_nz2,nslabx,ny_2dz)
+real*8 out(g_nz2,nx_2dz,ny_2dz)
+real*8 in(g_nz2,nx_2dz,ny_2dz)
 
 !local
 integer i,j,k,m1,m2,im,jm,km,l,n
@@ -1161,7 +1161,7 @@ real*8 :: xfac
 
 do j=1,ny_2dz
    jm=z_jmcord(j)
-   do i=1,nslabx
+   do i=1,nx_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
@@ -1191,9 +1191,9 @@ subroutine helminv(rhs,divs,Qhat,a_diss)
 use params
 implicit none
 
-real*8 rhs(g_nz2,nslabx,ny_2dz,n_var)    
-real*8 Qhat(g_nz2,nslabx,ny_2dz,n_var)    
-real*8 divs(g_nz2,nslabx,ny_2dz,n_var)    
+real*8 rhs(g_nz2,nx_2dz,ny_2dz,n_var)    
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)    
+real*8 divs(g_nz2,nx_2dz,ny_2dz,n_var)    
 real*8 a_diss
 
 !local
@@ -1204,7 +1204,7 @@ a_diss=0
 do n=1,3
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)

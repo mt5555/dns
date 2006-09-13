@@ -27,7 +27,7 @@ use pdf
 use spectrum
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: q2(nx,ny,nz,n_var)
 real*8 :: q3(nx,ny,nz,n_var)
@@ -219,8 +219,8 @@ real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: wsum(nx,ny,nz)
 real*8 :: work1(nx,ny,nz)
 real*8 :: dxx(nx,ny,nz)
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
-real*8 :: f(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
+real*8 :: f(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: time
 
 ! local

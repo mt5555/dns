@@ -477,9 +477,10 @@ real*8 :: tims(ntimers)=0
 ! parallel decompositions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !integer :: ncpu_x=1,ncpu_y=1,ncpu_z=1
-integer :: ny_2dx=nslaby/ncpu_x    
-integer :: nx_2dy=nslabx/ncpu_y    
-integer :: ny_2dz=nslaby/ncpu_z    
+integer :: ny_2dx=nslaby/ncpu_x       ! y-dim in x-pencil-decomposition
+integer :: nx_2dy=nslabx/ncpu_y       ! x-dim in y-pencil-decomposition
+integer :: ny_2dz=nslaby/ncpu_z       ! y-dim in z-pencil-decomposition 
+integer :: nx_2dz=nslabx              ! x-dim in z-pencil-decomposition 
 
 integer :: io_pe
 integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
@@ -556,6 +557,7 @@ dealias_23_kmax2_1 = floor( (dealias_23_kmax-1)**2 )
 
 
 ! these values must divide with no remainder:
+#if 0
 if (ncpu_x*ny_2dx<nslaby) then
    call print_message("*WARNING*:  transpose_to_x not perfectly load balanced")
    ny_2dx=ny_2dx+1
@@ -571,28 +573,79 @@ if (ncpu_z*ny_2dz<nslaby) then
    ny_2dz=ny_2dz + mod(ny_2dz,2)
    call print_message("*WARNING*:  transpose_to_z not perfectly load balanced")
 endif
+#endif
 
-#if 0
+#if 1
 if (0/=mod(nslaby,ncpu_x)) then
    fail=1
-   call print_message("ncpu_x does not divide ny");
+   call print_message("ncpu_x does not divide nslaby");
 endif
 if (0/=mod(nslabx,ncpu_y)) then
    fail=1
-   call print_message("ncpu_y does not divide nx");
+   call print_message("ncpu_y does not divide nslabx");
 endif
-if (0/=mod(ny2-ny1+1,ncpu_z)) then
+if (0/=mod(nslaby,ncpu_z)) then
    fail=1
-   call print_message("ncpu_z does not divide nz");
+   call print_message("ncpu_z does not divide nslaby");
 endif
 #endif
 
 
+!
+!
+! if z-pencil decomposition has y dimesnion of only 1, lets
+! double it.   (only transpose_to/from_z() routines can handle this)
+!
+! This allows us to run a 1x1xN decompostion for a N^3 grid
+! 
+! check: 
+!      ncpu_z = (nslabx/nx_2dz) * (nslaby/ny_2dz)
+! which means that:  nslabx, nslaby must be even
+!           
+if (ny_2dz==1) then
+   if (0/=mod(nslaby,2)) then
+      fail=1
+      call print_message("Error: for 1x1xN decomposition, nslaby must be even");
+   endif
+   if (0/=mod(nslabx,2)) then
+      fail=1
+      call print_message("Error: for 1x1xN decomposition, nslabx must be even");
+   endif
+   if (ncpu_z /= (nslabx/nx_2dz)*(nslaby/ny_2dz)) then
+      fail=1
+      call print_message("Strange error in tranpose_to_z setup - check!")
+   endif
+
+   ny_2dz=2
+   nx_2dz=nslabx/2
+endif
 
 
-! memory contraint: 2D decomposition should fit in a 3D decomposition array
+
+
+!
+! memory contraint: pencil decomposition should fit in a 3D decomposition array
 ! check if: (g_nz2)*nslabx*ny_2d <= nx*ny*nz)
 !
+if ( (g_nz2)*ny_2dz*real(nx_2dz,r8kind) >  ny*nz*real(nx,r8kind)) then
+   fail=1
+   call print_message("insufficient storage.");
+   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
+   call print_message(message)	
+   write(message,'(a,f10.0)') "storage needed for 2D z-decomposition: ", &
+     (g_nz2)*ny_2dz*real(nslabx,r8kind)
+   call print_message(message)	
+endif
+if ( (g_ny2)*nx_2dy*real(nslabz,r8kind) > nx*ny*real(nz,r8kind)) then
+   fail=1
+   call print_message("insufficient storage.");
+   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
+   call print_message(message)	
+   write(message,'(a,f10.0)') "storage needed for 2D y-decomposition: ", &
+     (g_ny2)*nx_2dy*real(nslabz,r8kind)
+   call print_message(message)	
+
+endif
 if ((g_nx2)*ny_2dx*real(nslabz,r8kind) > nx*nz*real(ny,r8kind) )  then
    fail=1
    call print_message("insufficient storage.");
@@ -606,26 +659,7 @@ endif
 
 
 
-if ( (g_ny2)*nx_2dy*real(nslabz,r8kind) > nx*ny*real(nz,r8kind)) then
-   fail=1
-   call print_message("insufficient storage.");
-   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
-   call print_message(message)	
-   write(message,'(a,f10.0)') "storage needed for 2D y-decomposition: ", &
-     (g_ny2)*nx_2dy*real(nslabz,r8kind)
-   call print_message(message)	
 
-endif
-
-if ( (g_nz2)*ny_2dz*real(nslabx,r8kind) >  ny*nz*real(nx,r8kind)) then
-   fail=1
-   call print_message("insufficient storage.");
-   write(message,'(a,3i6,a,f10.0)') "nx,ny,nz=",nx,ny,nz,"   nx*ny*nz=",nx*ny*real(nz,r8kind)
-   call print_message(message)	
-   write(message,'(a,f10.0)') "storage needed for 2D z-decomposition: ", &
-     (g_nz2)*ny_2dz*real(nslabx,r8kind)
-   call print_message(message)	
-endif
 
 
 

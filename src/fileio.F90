@@ -933,7 +933,7 @@ use fft_interface
 use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,3)
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,3)
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer :: io_read
@@ -1064,7 +1064,7 @@ else
 
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
@@ -1088,7 +1088,7 @@ else
    ens=0
    do j=1,ny_2dz
       jm=z_jmcord(j)
-      do i=1,nslabx
+      do i=1,nx_2dz
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)

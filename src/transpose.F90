@@ -23,9 +23,10 @@ subroutine transpose_init
 #ifdef USE_MPI
 integer max_size
 
+! compute send/rec buffer size for x,y and z transpose
 max_size=1
 if (ncpu_z>1) then
-   max_size=max(max_size,nslabx*nslabz*ny_2dz)
+   max_size=max(max_size,nx_2dz*nslabz*ny_2dz)
 endif
 if (ncpu_x>1) then
    max_size=max(max_size,nslabx*nslabz*ny_2dx)
@@ -132,165 +133,8 @@ end subroutine
 
 #undef PBLOCK
 #ifdef PBLOCK
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-! transform data in a cartesian decomposition into a 2D decomposition
-! with z as the leading index.
-!
-! input: p
-! ouput: pt, and the dimensions of pt: n1,n1d,n2,n2d,n3,n3d
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine transpose_to_z(p,pt,n1,n1d,n2,n2d,n3,n3d)
-!use params
-real*8 p(nx,ny,nz)
-real*8 pt(g_nz2,nslabx,ny_2dz)
-integer n1,n1d,n2,n2d,n3,n3d
-
-!local variables
-integer iproc,iproc2
-integer i,j,k,jj,l
-integer,parameter :: maxbuf=min(PBLOCK,ncpu_z)   ! maximum number of MPI buffers
-integer :: n          ! loop over message blocks
-integer :: ncount     ! number of message blocks
-integer :: nb         ! loop over MPI buffers
-integer :: nbcount    ! actual number of MPI buffers
-
-#ifdef USE_MPI
-real*8 :: sendbuf(nslabx*nslabz*ny_2dz,maxbuf)
-real*8 :: recbuf(nslabx*nslabz*ny_2dz,maxbuf)
-integer :: ierr,dest_pe,request(maxbuf,2),statuses(MPI_STATUS_SIZE,maxbuf,2)
-integer :: dest_pe3(3),tag
-#endif
-
-call wallclock(tmx1)
-
-!
-! each cube is broken, along the y axis, into mpidims(3) slabs of
-! size ny_2dz = (ny2-ny1+1)/mpidims(3)
-!
-! in the z direction, the dimension is nslabz = (nz2-nz1+1)
-!
-
-n1=g_nz
-n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
-n3=ny_2dz
-n3d=ny_2dz
-
-
-! do the message to one's self
-iproc=my_z
-do j=1,ny_2dz  ! loop over points in a single slab
-   jj=ny1 + iproc*ny_2dz +j -1
-   !ASSERT("transpose_to_z jj failure 1s",jj<=ny2)
-   ASSERT("transpose_to_z jj failure 2s",jj>=ny1)
-   do k=nz1,nz2
-   do i=nx1,nx2
-      if (jj>ny2) then
-         pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=0
-      else
-         pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=p(i,jj,k)
-      endif
-   enddo
-   enddo
-enddo
-
-
-#ifdef USE_MPI
-iproc2=0
-do  ! loop over blocks of messages of size nbcount
-
-   ncount=min(maxbuf, mpidims(3)-iproc2)
-   nb=0
-   do n=1,ncount 
-      iproc=iproc2+n-1
-      if (iproc/=my_z) then
-         nb=nb+1
-         dest_pe3(1)=my_x
-         dest_pe3(2)=my_y
-         dest_pe3(3)=iproc
-         call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-         ASSERT("transpose_to_z: MPI_cart_rank failure",ierr==0)
-
-         tag=my_z
-         L=nslabz*nslabx*ny_2dz
-         call mpi_irecv(recbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,1),ierr)
-         ASSERT("transpose_to_z: MPI_IRecv failure 1",ierr==0)
-
-         L=0
-         do j=1,ny_2dz  ! loop over points in a single slab
-            jj=ny1 + iproc*ny_2dz +j -1
-            !ASSERT("transpose_to_z jj failure 1",jj<=ny2)
-            ASSERT("transpose_to_z jj failure 2",jj>=ny1)
-            do k=nz1,nz2
-               do i=nx1,nx2
-                  L=L+1
-                  if (jj>ny2) then
-                     sendbuf(L,nb)=0
-                  else
-                     sendbuf(L,nb)=p(i,jj,k)
-                  endif
-               enddo
-            enddo
-         enddo
-         
-         tag=iproc
-         call mpi_isend(sendbuf(1,nb),L,MPI_REAL8,dest_pe,tag,comm_3d,request(nb,2),ierr)
-         ASSERT("transpose_to_z: MPI_ISend failure 1",ierr==0)
-      endif
-   enddo
-
-
-   ! wait on all the receives
-   nbcount=nb
-   if (nbcount>0) then
-      ! wait for all receives to finish
-      call mpi_waitall(nbcount,request(1,1),statuses,ierr) 	
-      ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
-
-      ! copy data out of receive buffers   
-      nb=0
-      do n=1,ncount
-         iproc=iproc2+n-1
-         if (iproc/=my_z) then
-            nb=nb+1
-            L=0
-            do j=1,ny_2dz  ! loop over points in a single slab
-               do k=nz1,nz2
-                  do i=nx1,nx2
-                     L=L+1
-                     pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=recbuf(L,nb)
-                  enddo
-               enddo
-            enddo
-         endif
-      enddo
-
-      ! wait for all sends to finish
-      call mpi_waitall(nbcount,request(1,2),statuses,ierr) 	
-      ASSERT("transpose_to_z: MPI_waitalll failure 1",ierr==0)
-   endif
-
-
-   iproc2=iproc2+ncount
-   ASSERT("iproc2 error 1 ",iproc2<=mpidims(3))
-   if (iproc2==mpidims(3)) exit
-enddo
-
-#endif
-
-
-call wallclock(tmx2) 
-tims(6)=tims(6)+(tmx2-tmx1)          
-end subroutine
-
+  PBLOCK code deleted - see old versions in CVS if interested
 #else
-
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! transform data in a cartesian decomposition into a 2D decomposition
@@ -303,15 +147,13 @@ end subroutine
 subroutine transpose_to_z(p,pt,n1,n1d,n2,n2d,n3,n3d)
 !use params
 real*8 p(nx,ny,nz)
-real*8 pt(g_nz2,nslabx,ny_2dz)
+real*8 pt(g_nz2,nx_2dz,ny_2dz)
 integer n1,n1d,n2,n2d,n3,n3d
 
 !local variables
-integer iproc,iproc2
-integer i,j,k,jj,l
+integer iproc,iproc2,splitx,iproc_x,iproc_y
+integer i,j,k,jj,l,ii
 #ifdef USE_MPI
-!real*8 sendbuf(nslabx*nslabz*ny_2dz)
-!real*8 recbuf(nslabx*nslabz*ny_2dz)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -319,19 +161,46 @@ integer dest_pe3(3),tag
 call wallclock(tmx1)
 
 !
-! each cube is broken, along the y axis, into mpidims(3) slabs of
-! size ny_2dz = (ny2-ny1+1)/mpidims(3)
+! tranpose from reference decompostion to z-pencil decomposition
 !
-! in the z direction, the dimension is nslabz = (nz2-nz1+1)
+! reference decompostion:  processors:   ncpu_x x ncpu_y x ncpu_z
+! grid size (each process)               nslabx x nslaby x nslabz 
+!
+! In the z-pencil domain, the parallel decomposition is:
+!    ncpu_x  x  (ncpu_y*ncpu_z)   x  1
+!
+!  the array is:  p(g_nz2,nx_2dz,ny_2dz)
+!  where p(k,i,j)   i = x direction index
+!                   j = y direction index
+!                   k = z direction index
+!  
+! Consider the case with ncpu_z = N  (mesh size in Z-direction) 
+! Then y direction ny_2dz=1 and we cant do Fourier computations!
+!
+! So we need to modify so that the decomposition is:
+!     2*ncpu_x  x  (ncpu_y*ncpu_z/2)   x  1
+!
+! Original algorithm:
+! each cube (which depending on ncpu_x,y and z, may actually be a pencil or 
+! slab) is broken, along the y axis, into ncpu_z slabs of
+! size ny_2dz = (ny2-ny1+1)/ncpu_z
+!
+! Now we want to modify this so that each cube is broken along the y axis
+! into (ncpu_z/2) slabs, and along the x axis into 2.
+! so it sends half as much x data and twice as much y data 
+! 
+!  
+!  
 !
 
 n1=g_nz
 n1d=g_nz2   	
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 
+splitx=nslabx/nx_2dz  
 
 do iproc2=0,ncpu_z-1  ! loop over each slab
 #ifdef A2AOVERLAP
@@ -339,13 +208,27 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
 #else
    iproc=iproc2
 #endif
+   ! each cube is broken into ncpu_z pieces, each of which 
+   ! is sent to a different process
+   iproc_y = iproc/splitx        ! split y direction into this many pieces
+   iproc_x = mod(iproc,splitx)   ! split x direction into this many pieces
+   
 
    if (iproc==my_z) then
       do j=1,ny_2dz  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dz +j -1
+         jj=ny1 + iproc_y*ny_2dz +j -1
          !ASSERT("transpose_to_z jj failure 1",jj<=ny2)
          ASSERT("transpose_to_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
+         do i=1,nx_2dz
+            ii=nx1 + iproc_x*nx_2dz +i -1
+            if (jj>ny2) then
+               pt(k+iproc*nslabz-nz1+1,i,j)=0
+            else
+               pt(k+iproc*nslabz-nz1+1,i,j)=p(ii,jj,k)
+            endif
+         enddo
+#if 0
          do i=nx1,nx2
             if (jj>ny2) then
                pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=0
@@ -353,6 +236,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
                pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=p(i,jj,k)
             endif
          enddo
+#endif
          enddo
       enddo
    else
@@ -363,7 +247,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
       ASSERT("transpose_to_z: MPI_cart_rank failure",ierr==0)
 
-      l=ny_2dz*nslabz*nslabx
+      l=ny_2dz*nslabz*nx_2dz
       tag=my_z
       call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_to_z: MPI_IRecv failure 1",ierr==0)
@@ -371,16 +255,17 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
 
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dz +j -1
+         jj=ny1 + iproc_y*ny_2dz +j -1
          !ASSERT("transpose_to_z jj failure 1",jj<=ny2)
          ASSERT("transpose_to_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
-         do i=nx1,nx2
+         do i=1,nx_2dz
+            ii=nx1 + iproc_x*nx_2dz +i -1
             l=l+1
             if (jj>ny2) then
                sendbuf(l)=0
             else
-               sendbuf(l)=p(i,jj,k)
+               sendbuf(l)=p(ii,jj,k)
             endif
          enddo
          enddo
@@ -396,9 +281,9 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
          do k=nz1,nz2
-         do i=nx1,nx2
+         do i=1,nx_2dz
 	    l=l+1
-            pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)=recbuf(l)
+            pt(k+iproc*nslabz-nz1+1,i,j)=recbuf(l)
          enddo
          enddo
       enddo
@@ -439,15 +324,13 @@ end subroutine
 subroutine transpose_from_z(pt,p,n1,n1d,n2,n2d,n3,n3d)
 !use params
 real*8 p(nx,ny,nz)
-real*8 pt(g_nz2,nslabx,ny_2dz)
+real*8 pt(g_nz2,nx_2dz,ny_2dz)
 integer n1,n1d,n2,n2d,n3,n3d
 
 !local variables
-integer iproc,iproc2
-integer i,j,k,jj,l
+integer iproc,iproc2,splitx,iproc_x,iproc_y
+integer i,j,k,jj,l,ii
 #ifdef USE_MPI
-!real*8 sendbuf(nslabx*nslabz*ny_2dz)
-!real*8 recbuf(nslabx*nslabz*ny_2dz)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -464,17 +347,20 @@ call wallclock(tmx1)
 ! via a call to transpose_to_z().
 ASSERT("transpose_from_z dimension failure 2",n1==g_nz)
 ASSERT("transpose_from_z dimension failure 3",n1d==g_nz2)
-ASSERT("transpose_from_z dimension failure 4",n2==nslabx)
-ASSERT("transpose_from_z dimension failure 5",n2d==nslabx)
+ASSERT("transpose_from_z dimension failure 4",n2==nx_2dz)
+ASSERT("transpose_from_z dimension failure 5",n2d==nx_2dz)
 ASSERT("transpose_from_z dimension failure 6",n3==ny_2dz)
 ASSERT("transpose_from_z dimension failure 7",n3d==ny_2dz)
 
+splitx=nslabx/nx_2dz  
 do iproc2=0,ncpu_z-1  ! loop over each slab
 #ifdef A2AOVERLAP
    iproc=mod(ncpu_z+iproc2-my_z,ncpu_z)
 #else
    iproc=iproc2
 #endif
+   iproc_y = iproc/splitx        ! split y direction into this many pieces
+   iproc_x = mod(iproc,splitx)   ! split x direction into this many pieces
 
 
    if (iproc==my_z) then
@@ -484,8 +370,9 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
          ASSERT("transpose_from_z jj failure 2",jj>=ny1)
          if (jj<=ny2) then
          do k=nz1,nz2
-         do i=nx1,nx2
-            p(i,jj,k)=pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)
+         do i=1,nx_2dz
+            ii=nx1 + iproc_x*nx_2dz +i -1
+            p(ii,jj,k)=pt(k+iproc*nslabz-nz1+1,i,j)
          enddo
          enddo
          endif
@@ -499,7 +386,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
       ASSERT("transpose_from_z: MPI_cart_rank failure 1",ierr==0)
 
-      l=ny_2dz*nslabz*nslabx
+      l=ny_2dz*nslabz*nx_2dz
       tag=my_z
       call mpi_irecv(recbuf,l,MPI_REAL8,dest_pe,tag,comm_3d,request(1),ierr)
       ASSERT("transpose_from_z: MPI_IRecv failure 1",ierr==0)
@@ -507,9 +394,9 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
          do k=nz1,nz2
-         do i=nx1,nx2
+         do i=1,nx_2dz
             l=l+1
-            sendbuf(l)=pt(k+iproc*nslabz-nz1+1,i-nx1+1,j)
+            sendbuf(l)=pt(k+iproc*nslabz-nz1+1,i,j)
          enddo
          enddo
       enddo
@@ -528,9 +415,10 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
          !ASSERT("transpose_from_z jj failure 1",jj<=ny2)
          ASSERT("transpose_from_z jj failure 2",jj>=ny1)
          do k=nz1,nz2
-         do i=nx1,nx2
+         do i=1,nx_2dz
+            ii=nx1 + iproc_x*nx_2dz +i -1
 	    l=l+1
-            if (jj<=ny2) p(i,jj,k)=recbuf(l)
+            if (jj<=ny2) p(ii,jj,k)=recbuf(l)
          enddo
          enddo
       enddo
@@ -591,8 +479,6 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc,iproc2
 integer i,j,k,jj,l
 #ifdef USE_MPI
-!real*8 sendbuf(nslabx*nslabz*ny_2dx)
-!real*8 recbuf(nslabx*nslabz*ny_2dx)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -717,8 +603,6 @@ integer n1,n1d,n2,n2d,n3,n3d
 integer iproc,iproc2
 integer i,j,k,jj,l
 #ifdef USE_MPI
-!real*8 sendbuf(nslabx*nslabz*ny_2dx)
-!real*8 recbuf(nslabx*nslabz*ny_2dx)
 integer ierr,dest_pe,request(2),statuses(MPI_STATUS_SIZE,2)
 integer dest_pe3(3),tag
 #endif
@@ -1727,7 +1611,7 @@ end subroutine
 subroutine transpose_from_z_3d(Qhat,q1)
 !use params
 implicit none
-real*8 :: Qhat(g_nz2,nslabx,ny_2dz,n_var)
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 
 ! local
@@ -1735,8 +1619,8 @@ integer :: n1,n1d,n2,n2d,n3,n3d,n
 
 n1=g_nz
 n1d=g_nz2
-n2=nslabx
-n2d=nslabx
+n2=nx_2dz
+n2d=nx_2dz
 n3=ny_2dz
 n3d=ny_2dz
 do n=1,ndim
