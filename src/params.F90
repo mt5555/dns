@@ -598,7 +598,7 @@ endif
 ! Does this code work in the non-perfect load balanced case?
 ! Probably not - so lets check for that too.
 !
-if (ny_2dz==1) then
+if (nslaby == ncpu_z) then
    ! double the size in y, half the size in x:
    ny_2dz=2*ny_2dz
    nx_2dz=nx_2dz/2
@@ -617,17 +617,18 @@ if (ny_2dz==1) then
    endif
 
    ! also make sure we are perfectly load balanced:
+   ! we allow this, but it is not tested with this tweaked transpose_to/from_z
    if (0/=mod(nslaby,ncpu_x)) then
       fail=1
-      call print_message("ncpu_x does not divide nslaby");
+      call print_message("Error: ncpu_x does not divide nslaby");
    endif
    if (0/=mod(nslabx,ncpu_y)) then
       fail=1
-      call print_message("ncpu_y does not divide nslabx");
+      call print_message("Error: ncpu_y does not divide nslabx");
    endif
    if (0/=mod(nslaby,ncpu_z)) then
       fail=1
-      call print_message("ncpu_z does not divide nslaby");
+      call print_message("Error:  ncpu_z does not divide nslaby");
    endif
 endif
 
