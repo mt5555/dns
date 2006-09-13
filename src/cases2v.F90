@@ -236,7 +236,8 @@ if (init_cond_subtype ==0) then
 !  my standard test case:
    biotsavart_cutoff=.001  
    biotsavart_ubar=.089
-   biotsavart_apply=5  ! disabled
+   biotsavart_apply=5  
+   !biotsavart_apply=-1  ! disabled
    yscale=3
    delta=.2
 
