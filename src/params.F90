@@ -556,7 +556,12 @@ dealias_23_kmax2_1 = floor( (dealias_23_kmax-1)**2 )
 
 
 
-! these values must divide with no remainder:
+! for perfect load balancing in x,y or z pencil decomposition space,
+! these values must divide with no remainder.
+!
+! violating these conditions should now work.  tested by testvx.sh
+! but only for 2D problems?
+!
 if (ncpu_x*ny_2dx<nslaby) then
    call print_message("*WARNING*:  transpose_to_x not perfectly load balanced")
    ny_2dx=ny_2dx+1
@@ -581,7 +586,8 @@ endif
 !
 !
 ! if z-pencil decomposition has y dimesnion of only 1, lets
-! double it.   (only transpose_to/from_z() routines can handle this)
+! double it.   (only transpose_to/from_z() routines have been 
+! modified to handle this)
 !
 ! This allows us to run a 1x1xN decompostion for a N^3 grid
 ! 
