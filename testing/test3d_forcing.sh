@@ -18,6 +18,7 @@ if ($#argv == 0 ) then
    echo " 2 = run lots of 3D test cases (different dimensions)"
    echo " p  = run several 3D test cases in parallel (2 and 4 cpus)"
    echo " pr = run several 3D test cases in parallel, with restart"
+   echo " prbig = run several 3D test cases in parallel, with restart, 64 cpus"
    echo " pz = run several 3D test cases in parallel, with compressed restart"
    echo " ps = run several 3D test cases in parallel, with spec  restart"
 
@@ -142,7 +143,21 @@ endif
 
 
 
+if ($1 == prbig) then
+   set opt = "-r $opt"
+   echo USING RESTART
 
+echo "***********************************************************"
+./gridsetup.py 1 1 16 32 32 32 2 2 0
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 16 1 1 32 32 32 2 3 4 4 3 2 
+make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+endif
 
 
 
