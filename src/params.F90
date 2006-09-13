@@ -603,21 +603,23 @@ endif
 ! which means that:  nslabx, nslaby must be even
 !           
 if (ny_2dz==1) then
-   if (0/=mod(nslaby,2)) then
+   ! double the size in y, half the size in x:
+   ny_2dz=2*ny_2dz
+   nx_2dz=nx_2dz/2
+
+   if (0/=mod(nslabx,nx_2dz)) then
       fail=1
-      call print_message("Error: for 1x1xN decomposition, nslaby must be even");
+      call print_message("Error: nslabx/nx_2dz problem");
    endif
-   if (0/=mod(nslabx,2)) then
+   if (0/=mod(nslaby,ny_2dz)) then
       fail=1
-      call print_message("Error: for 1x1xN decomposition, nslabx must be even");
+      call print_message("Error: nslaby/ny_2dz problem");
    endif
    if (ncpu_z /= (nslabx/nx_2dz)*(nslaby/ny_2dz)) then
       fail=1
       call print_message("Strange error in tranpose_to_z setup - check!")
    endif
 
-   ny_2dz=2
-   nx_2dz=nslabx/2
 endif
 
 
