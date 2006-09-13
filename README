@@ -267,10 +267,19 @@ Validate the results.
 
 There are several test cases and scripts which run short problems
 and make sure the output is identical to the reference solutions.
-These are not yet documented.
+(These are not yet documented.)
 
 A quick test:  run the 64^3 problem, with the forcing12.inp
 input file, with mu=.0014, "fft-sphere", and time=1.0.  
+
+To run this test on 2 processors:
+cd src
+./gridsetup.py 1 1 2 64 64 64 2 2 0
+make dnsp
+./dnsp -i forcing12.inp
+
+To run on more processors, see scripts/readme.job
+
 At time 1.0, the data (given in stdout) should be approximatly:
              
 

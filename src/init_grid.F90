@@ -16,10 +16,7 @@ call init_input_file()
 call init_grid()     
 call mpi_io_init(1) 
 
-#ifdef BYTESWAP_INPUT
-   call set_byteswap_input(1);
-#endif
-   if (byteswap_input) call set_byteswap_input(1);
+if (byteswap_input) call set_byteswap_input(1);
 
 
 !
@@ -111,7 +108,7 @@ implicit none
 
 !local variables
 real*8 :: one=1
-integer i,j,k,l,ierr,i0,i1,j0,j1,k0,k1
+integer i,j,k,l,ierr,i0,i1,j0,j1,k0,k1,ii,jj,iproc_x,iproc_y,splitx
 character(len=80) message
 
 
@@ -128,7 +125,10 @@ if (mod(nslaby,2)/=0) then
    call abort("nslaby must be even")
 endif
 if (mod(nslabz,2)/=0 .and. g_nz>1) then
-   call abort("nslabz must be even if g_nz>1")
+   call print_message("********************************************************************************")
+   call print_message("WARNING:  nslabz must be even if g_nz>1")
+   call print_message("WARNING:  Fourier computations done in reference decomposition will be incorrect")
+   call print_message("********************************************************************************")
 endif
 
 ! when fourier computations are done in the z-pencil decomposition
@@ -317,7 +317,7 @@ enddo
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! special data used for y-decomposition sine transform
+! data for y-pencil decomposition
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do i=1,nx_2dy
    k= -1 + nx1 + i + my_y*nx_2dy    ! nslabx/ncpu_y   
@@ -330,15 +330,36 @@ enddo
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! local grid data, z-decomposition
+! data for z-pencil decomposition
+! this code must match what is in transpose_to/from_z()
+! 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (nx_2dz /= nslabx) then
-   call abort('nx_2dz /= nslabx: need to fix this loop!')
-endif
+splitx=nslabx/nx_2dz  
+iproc_y = my_z/splitx        ! split y direction into this many pieces
+iproc_x = mod(my_z,splitx)   ! split x direction into this many pieces
+
 do i=1,nx_2dz
-   z_imcord(i)=imcord(i+nx1-1)
-   z_imsign(i)=imsign(i+nx1-1)
+   ii=nx1 + iproc_x*nx_2dz +i -1
+   if (ii>nx2 .or. ii<nx1)  then
+      call abort("Error in z-pencil decomp. setup: bad ii value")
+   endif
+   z_imcord(i)=imcord(ii)
+   z_imsign(i)=imsign(ii)
 enddo
+
+
+do j=1,ny_2dz
+   jj = -1 + ny1 + j + iproc_y*ny_2dz      ! ncpy_z*ny_2dz = nslaby
+   if (jj>ny2) then
+      z_jmcord(j)=0  ! possible, for not-perfect load balance cases
+   else
+      z_jmcord(j)=jmcord(jj)
+   endif
+   z_jmsign(j)=sign(1,z_jmcord(j))
+   if (z_jmcord(j)==0) z_jmsign(j)=0
+   if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
+enddo
+
 
 z_kmcord=g_kmcord
 do k=1,g_nz
@@ -348,22 +369,9 @@ do k=1,g_nz
 enddo
 
 
-do j=1,ny_2dz
-   L = -1 + ny1 + j + my_z*ny_2dz      ! ncpy_z*ny_2dz = nslaby
-   if (L>ny2) then
-      z_jmcord(j)=0  ! possible, for not-perfect load balance cases
-   else
-      z_jmcord(j)=jmcord(L)
-   endif
-   z_jmsign(j)=sign(1,z_jmcord(j))
-   if (z_jmcord(j)==0) z_jmsign(j)=0
-   if (z_jmcord(j)==g_ny/2) z_jmsign(j)=0
-enddo
-
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! local grid data, x-decomposition
+! data for x-pencil decomposition
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do k=nz1,nz2
    x_kmcord(k-nz1+1)=kmcord(k)

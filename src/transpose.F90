@@ -365,7 +365,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
 
    if (iproc==my_z) then
       do j=1,ny_2dz  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dz +j -1
+         jj=ny1 + iproc_y*ny_2dz +j -1
          !ASSERT("transpose_from_z jj failure 1",jj<=ny2)
          ASSERT("transpose_from_z jj failure 2",jj>=ny1)
          if (jj<=ny2) then
@@ -411,7 +411,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
 
       l=0
       do j=1,ny_2dz  ! loop over points in a single slab
-         jj=ny1 + iproc*ny_2dz +j -1
+         jj=ny1 + iproc_y*ny_2dz +j -1
          !ASSERT("transpose_from_z jj failure 1",jj<=ny2)
          ASSERT("transpose_from_z jj failure 2",jj>=ny1)
          do k=nz1,nz2

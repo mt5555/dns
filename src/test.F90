@@ -11,18 +11,21 @@ subroutine test
 use params
 
 
-
+!call print_message('Running some tests...')
 !call test_fft_fd
-!call test_transform
+!call test_transpose
 !call test_fft
 !call test_poisson
 !call test_divfree
-call test_poisson_dirichlet
+!call test_poisson_dirichlet
 !call test_poisson_ghost
+!call abort('ending after test')
 
 end subroutine
 
 
+! enable/disable all test codes:  (they take up memory!)
+#if 0
 
 
 subroutine test_poisson_dirichlet
@@ -120,7 +123,7 @@ end subroutine
 
 
 
-#if 0
+
 
 
 subroutine test_poisson_ghost
@@ -300,7 +303,7 @@ end subroutine
 
 
 
-subroutine test_transform
+subroutine test_transpose
 use params
 use transpose
 implicit none
@@ -308,6 +311,7 @@ implicit none
 real*8 input(nx,ny,nz)
 real*8 output(nx,ny,nz)
 real*8 work(nx,ny,nz)
+real*8 workz(g_nz2,nx_2dz,ny_2dz)
 real*8 mx,tx1,tx2,tmax,tave
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k,n,ierr
@@ -319,22 +323,42 @@ do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
    input(i,j,k)=zcord(k)+xcord(i)+ycord(j)
+!   input(i,j,k)=xcord(i)
 enddo
 enddo
 enddo
+
+!!$if (my_pe==3) then
+!!$do k=nz1,nz2
+!!$   print *,'k=',k
+!!$do j=ny1,ny2
+!!$   write(*,'(100f8.2)') (input(i,j,k),i=nx1,nx2)
+!!$enddo
+!!$enddo
+!!$endif
 
 output=0
-call transpose_to_x(input,work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_x(work,output,n1,n1d,n2,n2d,n3,n3d)
-mx=maxval(abs(input-output))
-call maxvalMPI(mx)
-write(message,*) 'transpose x round trip error:',mx
-call print_message(message)
+call transpose_to_z(input,workz,n1,n1d,n2,n2d,n3,n3d)
 
+!!$if (my_pe==3) then
+!!$do j=1,n3
+!!$   print *,'workz array  j=',j
+!!$do i=1,n2
+!!$   write(*,'(100f8.2)') (workz(k,i,j),k=1,n1)
+!!$enddo
+!!$enddo
+!!$endif
 
-output=0
-call transpose_to_z(input,work,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(work,output,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_z(workz,output,n1,n1d,n2,n2d,n3,n3d)
+!!$if (my_pe==3) then
+!!$do k=nz1,nz2
+!!$   print *,'k=',k
+!!$do j=ny1,ny2
+!!$   write(*,'(100f8.2)') (output(i,j,k),i=nx1,nx2)
+!!$enddo
+!!$enddo
+!!$endif
+
 mx=maxval(abs(input-output))
 call maxvalMPI(mx)
 write(message,*) 'transpose z round trip error:',mx
@@ -347,6 +371,14 @@ call transpose_from_y(work,output,n1,n1d,n2,n2d,n3,n3d)
 mx=maxval(abs(input-output))
 call maxvalMPI(mx)
 write(message,*) 'transpose y round trip error:',mx
+call print_message(message)
+
+output=0
+call transpose_to_x(input,work,n1,n1d,n2,n2d,n3,n3d)
+call transpose_from_x(work,output,n1,n1d,n2,n2d,n3,n3d)
+mx=maxval(abs(input-output))
+call maxvalMPI(mx)
+write(message,*) 'transpose x round trip error:',mx
 call print_message(message)
 
 
