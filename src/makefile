@@ -77,7 +77,7 @@ ifeq ($(UNAME),Linux)
 
    ifeq ($(VENDOR),PGIMPI)
    F90 = mpif90
-   CC=pgcc
+   CC = mpicc
    FFLAGS =  -Mrecursive  -fast  $(MPI)  -DUSE_FFT99 
    endif 
 

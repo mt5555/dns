@@ -456,7 +456,7 @@ if (init_zero) then
 endif
 
 ! random vorticity
-call input1(PSI,work1,work2,null,io_pe,.true.,-1)  
+call input1(PSI(1,1,1,1),work1,work2,null,io_pe,.true.,-1)  
 
 ! invert to get PSI
 alpha=0

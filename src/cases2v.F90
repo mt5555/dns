@@ -488,7 +488,7 @@ else if (biotsavart_apply==-2) then
    ! short cut for PSI boundary values.  used for quicker testing:
    ! psi on the boundary fixed for all time from the initial conditon:
    call print_message("Setting PSI boundary values (fixed for all time)")
-   call set_biotsavart(Qhat)    ! set based on PSI computed above 
+   call set_biotsavart(Qhat(1,1,1,1))    ! set based on PSI computed above 
 else
    ! psi on the boundary always computed from w in time stepping loop.
 endif

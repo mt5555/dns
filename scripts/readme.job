@@ -1,22 +1,28 @@
 #!/bin/tcsh 
-#PBS -l size=128
-#PBS -l walltime=30:00
+#XXX -q standard
+#XXX -l size=128
+#PBS -l nodes=32:ppn=2
 #PBS -A 7101/16.12
-#PBS -o std_test.o -e stdtest.e
+#PBS -j oe
 #PBS -N std_test
-#PBS -q standard
+#PBS -l walltime=30:00
 
 set code = dnsp
 set name = std_test
 set refin=$HOME/dns/src/forcing12.inp
 
-set NCPU = 64
-set mesh = "1 1 1 $NCPU 64 64 2 2 0"
-set MPIRUN = "yod -sz $NCPU"
+set NCPU = 128
+set mesh = "4 1 32 64 64 64 2 2 0"
 set EXE = std_test.x
-
 set SRC=$HOME/dns/src
-set WDIR=/scratch1/mataylo
+
+
+#set MPIRUN = "yod -sz $NCPU"
+#set WDIR=/scratch1/mataylo/std_test
+set MPIRUN = "mpiexec -np $NCPU"
+set WDIR=/scratchp3/mataylo/std_test
+
+
 mkdir $WDIR
 
 if (!(-d $WDIR)) then
@@ -25,11 +31,13 @@ if (!(-d $WDIR)) then
 endif
 
 cd $SRC
-./gridsetup.py $mesh 2 2 0
+\rm -f $EXE
+./gridsetup.py $mesh 
 make $code
 \cp -f $code $EXE
 
-$MPIRUN $EXE $opt  -d $WDIR  $name < $refin
+set echo
+$MPIRUN $EXE -i $refin  -d $WDIR  $name 
 
 
 

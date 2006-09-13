@@ -285,26 +285,29 @@ At time 1.0, the data (given in stdout) should be approximatly:
 
 
 *** dns code **********************************************************
-            intel compiler       PGI compiler       g95
-              AMD Athlon           pentium M         powerPC
-              Linux FC4           Linux RHEL4       MAC OS10.4
-                                                            2cpu
-kmax*eta =      .9990                .9839                 .9626
-KE       =     1.6800               1.6828                1.7197 
-R_lambda =    61.47                59.7                     58.4  
-run time       20min                 66min                 12.65
+            intel compiler  PGI compiler     g95
+              AMD Athlon     pentium M     powerPC
+              Linux FC4     Linux RHEL4   MAC OS10.4
+                                            2cpu
+kmax*eta =      .9990         .9839        .9626
+KE       =     1.6800        1.6828        1.7197 
+R_lambda =    61.47           59.7          58.4  
+run time       20min           66min       12.65
 
 
 *** dnsp code **********************************************************
 
-            intel compiler       PGI compiler       g95
-              AMD Athlon           pentium M         powerPC
-              Linux FC4           Linux RHEL4       MAC OS10.4
-                                                     1cpu     2cpu   
-kmax*eta =                                            .9626  .9626  
-KE       =                                           1.7197   1.7197
-R_lambda =                                             58.4    58.4
-run time                                              14.5m   11.4m
+            intel compiler  PGI compiler    g95         intel on Thunderbird
+              AMD Athlon    pentium M      powerPC      intel x86_64
+              Linux FC4     Linux RHEL4    MAC OS10.4     Linux
+CPUS     =                                 1cpu  2cpu      1x1x64  2x1x64  4x1x32
+kmax*eta =                                .9626  .9626    .9990   SAME    SAME
+KE       =                               1.7197   1.7197  1.6801 
+R_lambda =                                 58.4   58.4     61.47 
+d/dt vis =                                                -3.5569         
+d/dt f   =                                                 4.5351 
+run time =                                14.5m   11.4m    .42m
+
 
 **************************************************************************
 
