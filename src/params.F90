@@ -557,7 +557,6 @@ dealias_23_kmax2_1 = floor( (dealias_23_kmax-1)**2 )
 
 
 ! these values must divide with no remainder:
-#if 0
 if (ncpu_x*ny_2dx<nslaby) then
    call print_message("*WARNING*:  transpose_to_x not perfectly load balanced")
    ny_2dx=ny_2dx+1
@@ -573,22 +572,10 @@ if (ncpu_z*ny_2dz<nslaby) then
    ny_2dz=ny_2dz + mod(ny_2dz,2)
    call print_message("*WARNING*:  transpose_to_z not perfectly load balanced")
 endif
-#endif
 
-#if 1
-if (0/=mod(nslaby,ncpu_x)) then
-   fail=1
-   call print_message("ncpu_x does not divide nslaby");
-endif
-if (0/=mod(nslabx,ncpu_y)) then
-   fail=1
-   call print_message("ncpu_y does not divide nslabx");
-endif
-if (0/=mod(nslaby,ncpu_z)) then
-   fail=1
-   call print_message("ncpu_z does not divide nslaby");
-endif
-#endif
+
+
+
 
 
 !
@@ -602,6 +589,9 @@ endif
 !      ncpu_z = (nslabx/nx_2dz) * (nslaby/ny_2dz)
 ! which means that:  nslabx, nslaby must be even
 !           
+! Does this code work in the non-perfect load balanced case?
+! Probably not - so lets check for that too.
+!
 if (ny_2dz==1) then
    ! double the size in y, half the size in x:
    ny_2dz=2*ny_2dz
@@ -620,6 +610,19 @@ if (ny_2dz==1) then
       call print_message("Strange error in tranpose_to_z setup - check!")
    endif
 
+   ! also make sure we are perfectly load balanced:
+   if (0/=mod(nslaby,ncpu_x)) then
+      fail=1
+      call print_message("ncpu_x does not divide nslaby");
+   endif
+   if (0/=mod(nslabx,ncpu_y)) then
+      fail=1
+      call print_message("ncpu_y does not divide nslabx");
+   endif
+   if (0/=mod(nslaby,ncpu_z)) then
+      fail=1
+      call print_message("ncpu_z does not divide nslaby");
+   endif
 endif
 
 

@@ -1,6 +1,6 @@
 #include "macros.h"
 
-function call_output_model()
+logical function call_output_model()
 !
 !  The subroutine output_model() below is called every timestep
 !  This routine will return .true. if it needs to be called,
@@ -16,7 +16,8 @@ function call_output_model()
 !  ns_xpencil.F90.   (and ns_xpencil.F90 is only necessary when running
 !  with a pencil decomposition instead of slabs)
 !  
-return .true.
+call_output_model=.true.
+return
 end function
 
 

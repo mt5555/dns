@@ -1,5 +1,8 @@
 TODO:
 
+add note about load balancing:  
+   reference decomp must be load balanced
+   but pencil decompositions dont have to be perfectly balanced. 
 
 
 dnsp    test output - make sure it is in correct format

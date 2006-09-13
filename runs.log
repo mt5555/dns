@@ -541,8 +541,8 @@ delta=.1
 viscosity = 1e-7 
 
 
-./gridsetup.py NCPU 1 1 4800 2880 1 2 2 0 2 2 0 2
-./gridsetup.py NCPU 1 1 2400 1440 1 2 2 0 2 2 0 2
+./gridsetup.py NCPU 1 1 1 4800 2880 1 2 2 0 2 2 0 2
+./gridsetup.py NCPU 1 1 1 2400 1440 1 2 2 0 2 2 0 2
 
 KIWI: 4 cpus  time(min) per timestep:  .468   timestep ~ .0011s
       2 cpus                           .644
