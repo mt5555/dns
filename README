@@ -301,11 +301,11 @@ run time       20min           66min       12.65
               AMD Athlon    pentium M      powerPC      intel x86_64
               Linux FC4     Linux RHEL4    MAC OS10.4     Linux
 CPUS     =                                 1cpu  2cpu      1x1x64  2x1x64  4x1x32
-kmax*eta =                                .9626  .9626    .9990   SAME    SAME
-KE       =                               1.7197   1.7197  1.6801 
-R_lambda =                                 58.4   58.4     61.47 
-d/dt vis =                                                -3.5569         
-d/dt f   =                                                 4.5351 
+kmax*eta =                                .9626  same     .9990   SAME    SAME
+KE       =                               1.7197           1.6801 
+R_lambda =                                 58.4           61.47 
+d/dt vis =                               -4.1263          -3.5569         
+d/dt f   =                                4.3034           4.5351 
 run time =                                14.5m   11.4m    .42m
 
 
@@ -313,7 +313,9 @@ run time =                                14.5m   11.4m    .42m
 
 The initial condition has random phases, and so these results are
 compiler and OS dependent.  I haven't done detailed sensitivity study,
-but fluctuations of 5% in the above numbers should be reasonable.
+but you can get a sence of the fluctuations by looking at the above
+numbers.
+ 
 
 
 
