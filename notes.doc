@@ -1,5 +1,8 @@
 TODO:
 
+test.sh:  some dimenion settings only agree 10 digits?
+testvx.sh:  broken?
+
 add note about load balancing:  
    reference decomp must be load balanced
    but pencil decompositions dont have to be perfectly balanced. 
