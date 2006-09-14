@@ -312,7 +312,6 @@ enddo
 do k=nz1,nz2,2
    k0=k
    k1=k+1
-   print *,'k1=',k1
    if ( kmcord(k0)==0 ) kmcord_exp(k1)=0
 enddo
 
