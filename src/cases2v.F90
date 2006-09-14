@@ -240,6 +240,7 @@ if (init_cond_subtype ==0) then
    !biotsavart_apply=-1  ! disabled
    yscale=3
    delta=.2
+   xlocation=1.5
 
    if (g_nx==65) then
       print *,'disabling offset'
