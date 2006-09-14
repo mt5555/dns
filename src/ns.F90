@@ -145,7 +145,6 @@ do n=1,n_var
 enddo
 
 time = time + delt
-
 ! compute max U  
 maxs(1:4)=0
 maxs(10:11)=-9e20

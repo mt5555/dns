@@ -133,6 +133,23 @@ endif
 
 if ($1 == 2) then
 
+./gridsetup.py 1 1 1 128 128 1  0 0 0  2 3 1
+make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp 
+../testing/check.sh $tmp $refout
+
+
+./gridsetup.py 1 1 1 128 128 1  0 0 0  3 2 1
+make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp 
+../testing/check.sh $tmp $refout
+
+
+
+./gridsetup.py 1 1 1 128 128 1  0 0 0  1 2 3
+make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp 
+../testing/check.sh $tmp $refout
+
+
+
 ./gridsetup.py 1 1 1 128 128 1  
 make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
@@ -165,21 +182,6 @@ make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp
 ../testing/check.sh $tmp $refout
 
 
-
-./gridsetup.py 1 1 1 128 128 1  0 0 0  2 3 1
-make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp 
-../testing/check.sh $tmp $refout
-
-
-./gridsetup.py 1 1 1 128 128 1  0 0 0  3 2 1
-make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp 
-../testing/check.sh $tmp $refout
-
-
-
-./gridsetup.py 1 1 1 128 128 1  0 0 0  1 2 3
-make >& /dev/null ;  rm -f $tmp ; ./dns $opt < $refin >& $tmp 
-../testing/check.sh $tmp $refout
 
 
 
