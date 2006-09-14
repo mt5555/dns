@@ -4,8 +4,7 @@ test.sh:  ifort: some dimenion settings only agree 10 digits?
           pgf90 (sulaco):  run agree exactly
           gf95 (mac)  runs agree exactly
 
-testvx.sh:  differences in 3rd digit: track down
-
+testvx.sh:  fixed! run in parallel at work.
 
 dnsp    test output - make sure it is in correct format
                       (via restart?)
