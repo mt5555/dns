@@ -287,7 +287,9 @@ integer,allocatable :: g_kmcord(:)
 integer :: imcord(nxd),jmcord(nyd),kmcord(nzd)  ! fft modes local
 integer :: imsign(nxd),jmsign(nyd),kmsign(nzd)  ! fft modes local
 ! fft modes, local 3D decomposition, exponential basis
-integer :: imcord_exp(nxd),jmcord_exp(nyd),kmcord_exp(nzd) 
+! these numbers are always used in pairs, so if nz2 is odd, max
+! dimension needs to be nz2+1.  Since nz2<=nzd, just add 1 to be save:
+integer :: imcord_exp(nxd+1),jmcord_exp(nyd+1),kmcord_exp(nzd+1) 
 
 ! fft modes, local z-decompostion
 integer,allocatable :: z_imcord(:),Z_jmcord(:),z_kmcord(:)  ! fft modes local
@@ -723,7 +725,6 @@ pi=1
 pi=4*atan(pi)
 pi2=2*pi
 pi2_squared=4*pi*pi
-
 
 end subroutine
 

@@ -59,8 +59,6 @@ call init_model()
 !call iso_stats(Q,Qhat,work1,work2)
 call test           ! optional testing  routines go here
 
-
-
 ! set the random seed - otherwise it will be the same for all CPUs,
 ! producing a bad initial condition.  
 call random_seed(size=k)
@@ -73,6 +71,7 @@ deallocate(seed)
 
 !if(do_mpi_io .and. io_pe==my_pe .and. g_nz>2000) &
 !       call system("touch /users/taylorm/RUNNING")
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

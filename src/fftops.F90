@@ -269,33 +269,14 @@ real*8 :: u(nx,ny,nz,3)
 real*8 :: work(nx,ny,nz)
 integer :: i
 
+
 do i=1,3
-if (i==2) then
-   print *,'maxval before'
-   print *,maxval(abs(u(nx1:nx2,ny1:ny2,nz1:nz2,2)))
-endif
    call fft3d(u(1,1,1,i),work)
    call fft_filter_dealias(u(1,1,1,i))
    call ifft3d(u(1,1,1,i),work)
-if (i==2) then
-   print *,'maxval after'
-   print *,maxval(abs(u(nx1:nx2,ny1:ny2,nz1:nz2,2)))
-endif
 enddo
 
 end subroutine
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1806,11 +1787,7 @@ real*8 xfac
          jm=abs(jmcord(j))
          do i=nx1,nx2
             im=abs(imcord(i))
-
             if (dealias_remove(im,jm,km)) then 
-               if (jm==0 .and. km==0)  then
-                  write(*,'(6i4,e20.5)') i,j,k,im,jm,km,p(i,j,k)
-               endif
                p(i,j,k)=0
             endif
          enddo

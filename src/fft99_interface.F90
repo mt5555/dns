@@ -218,9 +218,7 @@ do k=1,n3
    !         p(n1+1,jj,k)=0
    !         p(n1+2,jj,k)=0
    !   enddo
-   
    call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,-1)
-   
    !     move the last cosine mode into slot of first sine mode:
    do j=1,n2
       p(2,j,k)=p(n1+1,j,k)

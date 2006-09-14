@@ -14,7 +14,9 @@ call transpose_init()
 call fft_interface_init()
 call init_input_file()
 call init_grid()     
+
 call mpi_io_init(1) 
+
 
 if (byteswap_input) call set_byteswap_input(1);
 
@@ -220,8 +222,6 @@ endif
 
 
 
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! global grid data
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -293,27 +293,28 @@ do k=bz1,bz2
    if (kmcord(k)==g_nz/2) kmsign(k)=0
 enddo
 
-imcord_exp=imcord
-jmcord_exp=jmcord
-kmcord_exp=kmcord
+
+imcord_exp(1:nx)=imcord(1:nx)
+jmcord_exp(1:ny)=jmcord(1:ny)
+kmcord_exp(1:nz)=kmcord(1:nz)
 do i=nx1,nx2,2
    i0=i
    i1=i+1
    if ( imcord(i0)==0 ) imcord_exp(i1)=0
 enddo
+
 do j=ny1,ny2,2
    j0=j
    j1=j+1
    if ( jmcord(j0)==0 ) jmcord_exp(j1)=0
 enddo
+
 do k=nz1,nz2,2
    k0=k
    k1=k+1
+   print *,'k1=',k1
    if ( kmcord(k0)==0 ) kmcord_exp(k1)=0
 enddo
-
-
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -397,11 +398,6 @@ do j=1,ny_2dx
    if (x_jmcord(j)==0) x_jmsign(j)=0
    if (x_jmcord(j)==g_ny/2) x_jmsign(j)=0
 enddo
-
-
-
-
-
 
 
 end subroutine

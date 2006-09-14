@@ -48,6 +48,7 @@ integer :: kinit(50)
 real*8 :: eps
 real*8 :: amp
 
+
 Q=0
 
 
@@ -89,8 +90,6 @@ do i=nx1,nx2
 enddo
 enddo
 enddo
-
-   
 
 
 end subroutine

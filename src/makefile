@@ -43,11 +43,12 @@ ifeq ($(UNAME),Linux)
       VENDOR=INTEL
    endif
    ifeq ($(HOST),s854018)
-      VENDOR=PGI
-# Note: LAM 7.1 added MPI_REAL8, but it is broken for collectives
-# so we need 
-      MPI =  -DUSE_MPI -DUSE_MPI_IO -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
-      MPILIB =   -llammpio -llamf77mpi -lmpi -llam -lutil -lpthread
+      VENDOR=INTEL
+#      VENDOR=PGI
+## Note: LAM 7.1 added MPI_REAL8, but it is broken for collectives
+## so we need 
+#      MPI =  -DUSE_MPI -DUSE_MPI_IO -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
+#      MPILIB =   -llammpio -llamf77mpi -lmpi -llam -lutil -lpthread
    endif
    ifeq ($(HOST),reddish)
       VENDOR=PGI
