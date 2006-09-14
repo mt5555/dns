@@ -26,12 +26,12 @@ endif
 if ($1 == 1) then
 
    ./gridsetup.py 1 1 1 65 65 1 2 2 0 2 2 0
-make dnsvor >& /dev/null ;  rm -f $tmp ; ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
    ./gridsetup.py 1 1 1 64 64 1   2 2 0   2 2 0    2
-make dnsvor >& /dev/null ;  rm -f $tmp ; ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -41,15 +41,15 @@ if ($1 == p) then
 
 
 ./gridsetup.py 5 1 1 65 65 1  2 2 0 2 2 0
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 5 1 65 65 1  2 2 0 2 2 0
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 5 ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 5 5 1 65 65 1  2 2 0 2 2 0
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 25 ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 25 ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -61,15 +61,15 @@ if ($1 == po) then
 
 
 ./gridsetup.py 2 1 1 64 64 1  2 2 0 2 2 0     2
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 2 1 64 64 1  2 2 0 2 2 0     2
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 2 ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 2 2 1 64 64 1  2 2 0 2 2 0     2
-make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dnsvor -d /tmp < $refin > $tmp 
+make dnsvor >& /dev/null ;  rm -f $tmp ; mpirun -np 4 ./dnsvor -d /tmp < $refin >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
