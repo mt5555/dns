@@ -10,6 +10,10 @@ forcing12-bench.inp  (but set to 1,2 or 3 timesteps)
 
 
 Couldn't get opcontrol to work.  (lapic not used?)
+
+see if FLOPS is possible:
+0. sudo opcontrol --list-events
+
 1. sudo opcontrol --no-vmlinux
 2. sudo opcontrol --start    
 --event=FLOPS
