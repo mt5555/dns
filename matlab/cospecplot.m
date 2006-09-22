@@ -47,7 +47,8 @@ nameselect=[basename,timename,'.select'];
 il=1; jl=2; S=1; eps_l=1;  % default values if 'select' file doesnt exist
 fid=fopen(nameselect);
 for i=1:sc;
-  [data,n]=fscanf(fid,'%f %f %f %f %f %f %f %f',8);
+  [data,n]=fscanf(fid,'%f %f %f %f %f %f %f
+ %f',8);
   if (n==8)
     il=data(7); jl=data(8);  S=data(6); eps_l=data(5);
     data=fscanf(fid,'%f %f %f',[3,3]); 

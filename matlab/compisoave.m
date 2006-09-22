@@ -676,20 +676,21 @@ for i=1:ndir
   x = r_val(:,i);                       % units of box length
   
    
-  x_plot=x*nx*delx_over_eta            % units of r/eta
+  x_plot=x*nx*delx_over_eta;            % units of r/eta
   Dl(:,i,1);
   Q_eps
   
     y=Dl(:,i,1)./((Q_eps)*(x));
   
   semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',5); hold on;
+  pause
 
-  yyave=yyave+w(i)*spline(x,y,xx)
+  yyave=yyave+w(i)*spline(x,y,xx);
 
 
 end
 
-xx_plot
+xx_plot;
 semilogx(xx_plot,yyave,'r.-','LineWidth',2.5);
 
 y23=yyave;

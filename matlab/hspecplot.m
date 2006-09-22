@@ -36,9 +36,9 @@ mu = 1e-4;
 %name = 'hel256_h0';
 %mu = 2e-4;
 
-%namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
-%name = 'skhel512_hpi2';
-%mu = 1e-4;
+namedir = '/xraid/skurien/dns_data/skhel512a/';
+name = 'skhel512_hpi2';
+mu = 1e-4;
 
 
 %namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';

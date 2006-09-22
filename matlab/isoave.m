@@ -37,11 +37,15 @@ ext='.isostr';
 %ext='.isostr4';
 
 %potential vorticity correlation functions have suffix .bisostr
-name='/nh/u/skurien/projects/pv/data_analysis/lowforc/n210040.0000'
-nx=128; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+%name='/nh/u/skurien/projects/pv/data_analysis/lowforc/n210040.0000'
+%nx=128; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 %Q_eps = 1;
 ext='.bisostr';
 
+name='/nh/u/skurien/projects/pv/data_analysis/lowforc/qg0170.0000'
+nx=256; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
+Q_eps = 1;
+ext='.bisostr';
 
 ndir_use=73;
 

@@ -1,10 +1,11 @@
-%read and compute mean k*E(k). Use to calculate relative helicity in conjunction%with hspecplot
+%read and compute mean k*E(k). Use to calculate relative helicity
+%in conjunction with hspecplot
 
 %namedir = '/scratch2/taylorm/sc1024A/';
 %name = 'sc1024A';
 %mu=.35e-4;
 
-namedir = '/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/';
+namedir = '/xraid/skurien/dns_data/skhel512a/';
 name = 'skhel512_hpi2';
 mu = 1e-4;
 
@@ -57,6 +58,6 @@ kspec_ave = kspec_ave/(j);
 %plot relative helicity hspec_ave/2/kspec_ave
 if (relh ==1)
      figure(13);clf
-semilogx(k,abs(hspec_ave)./(kspec_ave),'k'); % kspec_ave already has factor 2
+semilogx(k,k'.*abs(hspec_ave)./(kspec_ave),'k'); % kspec_ave already has factor 2
 
 end
