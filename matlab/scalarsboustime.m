@@ -43,9 +43,9 @@ fclose(fid);
 
 ke=ints(1,:);
 pe=ints(2,:);
-pv=ints(5,:)
-potens=ints(7,:)
-
+pv=ints(5,:);
+potens=ints(7,:);
+potens_diss=ints(8,:);
 
 tote = ke + pe
 

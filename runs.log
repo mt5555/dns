@@ -237,10 +237,11 @@ sqrt(ke) delt/delx = .17                       maxU delt/delx = .8
 Pope:   sqrt(k) delt/delx = .05
         maxU delt/delx = .22
 
-delt/ett =  (CFL delx/sqrt(k)) / ett 
-         = (CFL delx/sqrt(k)) / (2*ke/epsilon)
-         = CFL delx .5 k^{-3/2} epsilon
-           
+64^3 forcing12.inp case (ke=1.71)  
+.005  sqrt(k) delt/delx = .41  blows up  12 timesteps
+.0045 blows up t=3
+.004  sqrt(k) delt/delx = .333 stable to t=10
+
 
 
 
