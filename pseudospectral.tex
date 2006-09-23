@@ -306,18 +306,59 @@ shy of $2N^3$ real*8 numbers.
 
 \section{Total cost of the code}
 
-The total cost of the code, in terms of communication and flops,
+The total cost of the code, for 1 Runge-Kutta stage,
+in terms of communication and flops,
 and assuming a y-pencil reference decomposition 
-(with the total number of processors $N_p = N_1 N_2$) and a grid of $N^3$
+(with the total number of processes $N_p = N_1 N_2$) and a grid of $N^3$
 can thus be estimated as
 
 \begin{enumerate}
 \item $27N^2$ 1D real-to-real FFTs of length N
-\item MPI\_Isend:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
-\item MPI\_Irecv:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
-\item MPI\_Isend:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
-\item MPI\_Irecv:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
+\item Each process: MPI\_Isend:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
+\item Each process: MPI\_Irecv:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
+\item Each process: MPI\_Isend:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
+\item Each process: MPI\_Irecv:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
 \end{enumerate}
+
+For the total ammount of bytes that must be sent over the network, add
+the above numbers and multiply by the number of processes to get: $34
+\cdot 8 N^3$ bytes.  (When using a slab decomposition, this is $16
+\cdot 8 N^3$.)  These numbers are per Runge-Kutta stage.  One timestep
+requires 4 stages, so for the total per timestep we need to multiply
+by 4.
+
+I've also measured the FLOP count per timestep with the following
+procedure:  Using a hardware counter, measure the FLOP count
+for a run with 5 timesteps and 4 timesteps, and take their
+difference, to get the FLOP count per timestep.  
+I did this using the FFT91 Fourier Transform, with resolutions
+N=16, 32, 64,128 and 256.  Curve fitting the data resultant data
+gave the following:  
+
+{\bf FLOP count estimate per timestep for $N^3$ grid, N a power of 2:}
+\[
+4(  297 N^3 + 2.28 27 N^3 \log_2(N) )
+\]
+
+Repeating this procedure with resolutions of N=12, 24, 48, 96 and 192,
+gave
+
+{\bf FLOP count estimate per timestep for $N^3$ grid, N a power of 2 and one power of 3:}
+\[
+4(  340 N^3 + 2.24 27 N^3 \log_2(N) )
+\]
+
+Since there are 4 Runge-Kutta stage per timestep, the quantity
+in brackets can be considered the cost for each stage.
+These estimates, for the ranges of N given, were accurate to better
+than 1\%.  
+
+
+
+
+
+
+
 
 \section{Dealiasing}
 
