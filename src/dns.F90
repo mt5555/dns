@@ -273,7 +273,7 @@ real*8 :: time_old=0
 real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
-real*8 :: tmx1,tmx2,tmx_save
+real*8 :: tmx1,tmx2
 integer,external :: lsf_time_remaining
 integer :: lsftime,i,time_needed
 
@@ -356,10 +356,10 @@ do
    if (itime==0) then
       ! set all timers to zero so they dont include initialization
       ! except for tims(1) and tims(4) which time initializaiton stuff.  
-      tmx_save = tims(3)
-      tims(2:ntimers)=0
+      tims(4) = tims(3)   ! tims(3) = total time in time_control(), tims(4)=time of first call to time_control()
+      tims(2:3)=0
+      tims(5:ntimers)=0
       call wallclock(tmx1)     ! start the main timer *AFTER* 1 complete time step:
-      tims(4)=tmx_save
    endif
 
    itime=itime+1
