@@ -175,24 +175,25 @@ end subroutine
 
 
 
-subroutine compute_expensive_scalars(Q,Qhat,vor,potvor,theta_z,omegadotrho_nu,omegadotrho_kappa,nints_e,ints_e)
+subroutine compute_expensive_scalars(Q,Qhat,vor,potensdiss_mu, &
+      potensdiss_kappa,potvor,theta_z,nints_e,ints_e) 
 use params
 use fft_interface
 use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
-real*8 :: vor(nx,ny,nz,3)
+real*8 :: vor(nx,ny,nz,n_var)
 real*8 :: potvor(nx,ny,nz)
 real*8 :: theta_z(nx,ny,nz)
-real*8 :: omegadotrho_nu(nx,ny,nz)
-real*8 :: omegadotrho_kappa(nx,ny,nz)
-integer :: nints_e
+real*8 :: potensdiss_mu(nx,ny,nz,n_var)
+real*8 :: potensdiss_kappa(nx,ny,nz,n_var)
+integer :: nints_e, ivar
 real*8  :: ints_e(*)
 
 ! local variables
 real*8,allocatable :: ints2(:)
-real*8 :: enstr_diss
+real*8 :: enstr_diss, potens_diss, potens_diss_kappa, potens_diss_mu
 real*8 :: dummy(1)
 integer :: pv_type, i, j, k, im, jm, km, ierr
 real*8 :: xw,xw2,u2,xw_viss,xfac, vx,wx,uy,wy,uz,vz,pe,totale,potens,pv
@@ -268,89 +269,185 @@ enddo
 !
 !bw  Now computes the dissipation of Q = q^2/2
 !bw  
-!bw  enstr_diss = - nu < q laplacian (omega dot 
-!bw                                   grad (rho_o - b z + \tilde{rho}))>
+!bw  enstr_diss = - mu < q (grad rho) dot laplacian omega >
 !bw  
-!bw               - kappa < q laplacian (grad \tilde{rho}
-!bw                                      dot  omega_a) >
+!bw               - kappa < q omega_a dot laplacian(grad \tilde\rho) >
 !bw  
-!bw  
-!bw  
-!bw  
+
+
+! potvor = grad(rho) dot vorticity  
+! (use the first element of the potensdiss_* arrays as work arrays)
+pv_type=1
+call potential_vorticity(potvor,vor,Q,potensdiss_mu(:,:,:,1)&
+     &,potensdiss_kappa(:,:,:,1),pv_type)
+potensdiss_kappa = vor
+
+do ivar = 1,3
 !bw
+!bw First compute the _mu part of the dissipation. You already
+!bw have omega from calling potential_vorticity stored in vor
+!bw The fft of the vorticity is in potensdiss_kappa
+!bw The dummy array is potensdiss_mu(:,:,:,1)
 !bw
-!bw Compute this quantity in 3 stages in physical space
-!bw   1. omega dot grad \tilde{rho}
-!bw   2. omega_3 b
-!bw   3. omega_3 f
-!bw Then fft, then
+  call fft3d(potensdiss_kappa(:,:,:,ivar),potensdiss_mu(:,:,:,1))
 !bw
-
-
-! potvor = grad(Q(:,:,:,4)) dot vorticity  
-! (use omegadotrho_* arrays as work arrays)
-pv_type=2
-call potential_vorticity(potvor,vor,Q,omegadotrho_nu,omegadotrho_kappa,pv_type)
-
-! compute d/dz of theta,
-call der(Q(1,1,1,np1),theta_z,dummy,omegadotrho_nu,DX_ONLY,3)
-
-omegadotrho_nu = potvor - bous*theta_z/Lz
-omegadotrho_kappa = potvor + fcor*theta_z/Lz
-
-! now overwrite potvor with pvtype=1 potvor:
-potvor = potvor + fcor*theta_z/Lz - bous*theta_z/Lz
-
-
+!bw Compute the Laplacian
+!bw
+  do k=nz1,nz2
+     km=(kmcord(k))
+     do j=ny1,ny2
+        jm=(jmcord(j))
+        do i=nx1,nx2
+           im=(imcord(i))
+           rwave = im**2 + jm**2 + (km/Lz)**2
+           potensdiss_kappa(i,j,k,ivar) = -potensdiss_kappa(i,j,k,ivar)*rwave
+        enddo
+     enddo
+  enddo
+!bw
+!bw Fourier transform back to physical space
+!bw CHECK THE CALL SEQUENCE AND MEMORY
+  call ifft3d(potensdiss_kappa(:,:,:,ivar),potensdiss_mu(:,:,:,1))
+enddo
+!bw
+!bw Now compute <q grad rho dot laplacian omega>
+!bw Here one needs grad rho. Store it for use in the second
+!bw part. Store grad theta in potensdiss_mu note.
 !bw 
-!bw Now laplacian both omegadotrho_nu  and omegadotrho_kappa
-!bw
-call fft3d(omegadotrho_nu,vor)
-call fft3d(omegadotrho_kappa,vor)
 
+   call der(q(1,1,1,np1),potensdiss_mu(:,:,:,1),dummy,theta_z,DX_ONLY,1)
+   call der(q(1,1,1,np1),potensdiss_mu(:,:,:,2),dummy,theta_z,DX_ONLY,2)
+   call der(q(1,1,1,np1),potensdiss_mu(:,:,:,3),dummy,theta_z,DX_ONLY,3)
+   
+!bw
+!bw  Add in the last part
+!bw
+   potensdiss_mu(:,:,:,3) = potensdiss_mu(:,:,:,3) - bous
+!bw
+!bw Take the dot product and integrate
+!bw
+potens_diss_mu = 0
 do k=nz1,nz2
    km=(kmcord(k))
    do j=ny1,ny2
       jm=(jmcord(j))
       do i=nx1,nx2
          im=(imcord(i))
-         rwave = im**2 + jm**2 + (km/Lz)**2
-         omegadotrho_nu(i,j,k) = -omegadotrho_nu(i,j,k)*rwave
-         omegadotrho_kappa(i,j,k) = -omegadotrho_kappa(i,j,k)*rwave
+         xfac = 2*2*2
+         if (im==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (km==0) xfac=xfac/2
+            
+         potens_diss_mu = potens_diss_mu + mu*xfac*potvor(i,j,k)*( &
+                          potensdiss_kappa(i,j,k,1)*potensdiss_mu(i,j,k,1) + &
+                          potensdiss_kappa(i,j,k,2)*potensdiss_mu(i,j,k,2) + &
+                          potensdiss_kappa(i,j,k,3)*potensdiss_mu(i,j,k,3) &
+         )
       enddo
    enddo
 enddo
+potens_diss_mu=potens_diss_mu/g_nx/g_ny/g_nz
 !bw
-!bw Fourier transform back to physical space because we need these quantites
-!bw times the total potential vorticity integrated in the volume.
+!bw Now compute the second part of the potential enstrophy dissipation
 !bw
-call fft3d(omegadotrho_nu,vor)
-call fft3d(omegadotrho_kappa,vor)
 
 
-pv = 0
-pv_diss = 0
-potens = 0
-enstr_diss = 0
-enstr_diss = 0
+!bw compute the gradient of theta and store it in potensdiss_kappa
+
+call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,1),dummy,potensdiss_mu,DX_ONLY,1)
+call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,2),dummy,potensdiss_mu,DX_ONLY,2)
+call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,3),dummy,potensdiss_mu,DX_ONLY,3)
+
+do ivar = 1,3
+!bw
+!bw fft to fourier space to compute the laplacian, use vor as the dummy array
+!bw
+  call fft3d(potensdiss_kappa(:,:,:,ivar),vor)
+!bw
+!bw Compute the Laplacian
+!bw
+
+  do k=nz1,nz2
+     km=(kmcord(k))
+     do j=ny1,ny2
+        jm=(jmcord(j))
+        do i=nx1,nx2
+           im=(imcord(i))
+           rwave = im**2 + jm**2 + (km/Lz)**2
+           potensdiss_kappa(i,j,k,ivar) = -potensdiss_kappa(i,j,k,ivar)*rwave
+        enddo
+     enddo
+  enddo
+!bw
+!bw Fourier transform back to physical space
+!bw CHECK THE CALL SEQUENCE AND MEMORY
+  call ifft3d(potensdiss_kappa(:,:,:,ivar),vor)
+enddo
+!bw
+!bw
+!bw Compute the absolute vorticity 
+!bw Since we are finished with the theta_z array we use that as work arrays.
+!bw
+call vorticity(q,vor,potensdiss_mu(:,:,:,1),theta_z)
+!bw   
+!bw  Add in the coriolis term to the z component of the vorticity
+!bw  and store the /absolute/ vorticity in vor
+!bw
+vor(:,:,:,3) = vor(:,:,:,3) + fcor 
+!bw
+!bw Now take the dot product, multiply by the potential vorticity
+!bw and integrate over the domain
+!bw
+potens_diss_kappa = 0
 do k=nz1,nz2
+   km=(kmcord(k))
    do j=ny1,ny2
+      jm=(jmcord(j))
       do i=nx1,nx2
+        im=(imcord(i))
+         xfac = 2*2*2
+         if (im==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (km==0) xfac=xfac/2
+         potens_diss_kappa = potens_diss_kappa + kappa*potvor(i,j,k)*( &
+                          vor(i,j,k,1)*potensdiss_kappa(i,j,k,1) + &
+                          vor(i,j,k,2)*potensdiss_kappa(i,j,k,2) + &
+                          vor(i,j,k,3)*potensdiss_kappa(i,j,k,3) &
+         )
+      enddo
+   enddo
+enddo
+potens_diss_kappa=potens_diss_kappa/g_nx/g_ny/g_nz
+!bw
+!bw Compute the total potential enstrophy dissipation rate
+!bw Don't forget the minus sign
+!bw
+potens_diss = - (potens_diss_kappa + potens_diss_mu)
+!bw
+!bw Check that you're integrating this correctly with all the right
+!bw xfacs!
+!bw
+pv = 0
+potens = 0
+do k=nz1,nz2
+   km=(kmcord(k))
+   do j=ny1,ny2
+      jm=(jmcord(j))
+      do i=nx1,nx2
+         im=(imcord(i))
+         xfac = 2*2*2
+         if (im==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (km==0) xfac=xfac/2
          pv = pv + potvor(i,j,k)
          potens = potens + (potvor(i,j,k)*potvor(i,j,k)*.5)
-         pv_diss = pv_diss + (mu*omegadotrho_nu(i,j,k) &
-              +  kappa*omegadotrho_kappa(i,j,k)) 
-         enstr_diss = enstr_diss + potvor(i,j,k)* &
-              ( mu*omegadotrho_nu(i,j,k) +  kappa*omegadotrho_kappa(i,j,k))
-         
       enddo
    enddo
 enddo
+
 ! grid space calculations need to be normalized:
 pv=pv/g_nx/g_ny/g_nz
-pv_diss=pv_diss/g_nx/g_ny/g_nz
 potens=potens/g_nx/g_ny/g_nz
-enstr_diss=enstr_diss/g_nx/g_ny/g_nz
 
 
 ! store the integrals for output:
@@ -359,9 +456,9 @@ ints_e(2)=pe
 ints_e(3)=ke_diss 
 ints_e(4)=pe_diss
 ints_e(5)=pv
-ints_e(6)=pv_diss
+ints_e(6)=0
 ints_e(7)=potens
-ints_e(8)=enstr_diss
+ints_e(8)=potens_diss
 nints_e=8
 
 
