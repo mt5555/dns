@@ -354,9 +354,9 @@ potens_diss_mu=potens_diss_mu/g_nx/g_ny/g_nz
 
 !bw compute the gradient of theta and store it in potensdiss_kappa
 
-call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,1),dummy,potensdiss_mu,DX_ONLY,1)
-call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,2),dummy,potensdiss_mu,DX_ONLY,2)
-call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,3),dummy,potensdiss_mu,DX_ONLY,3)
+call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,1),dummy,potensdiss_mu(:,:,:,1),DX_ONLY,1)
+call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,2),dummy,potensdiss_mu(:,:,:,1),DX_ONLY,2)
+call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,3),dummy,potensdiss_mu(:,:,:,1),DX_ONLY,3)
 
 do ivar = 1,3
 !bw
