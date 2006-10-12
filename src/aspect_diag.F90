@@ -184,10 +184,10 @@ implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: vor(nx,ny,nz,n_var)
-real*8 :: potvor(nx,ny,nz)
-real*8 :: theta_z(nx,ny,nz)
 real*8 :: potensdiss_mu(nx,ny,nz,n_var)
 real*8 :: potensdiss_kappa(nx,ny,nz,n_var)
+real*8 :: potvor(nx,ny,nz)
+real*8 :: theta_z(nx,ny,nz)
 integer :: nints_e, ivar
 real*8  :: ints_e(*)
 
@@ -278,8 +278,7 @@ enddo
 ! potvor = grad(rho) dot vorticity  
 ! (use the first element of the potensdiss_* arrays as work arrays)
 pv_type=1
-call potential_vorticity(potvor,vor,Q,potensdiss_mu(:,:,:,1)&
-     &,potensdiss_kappa(:,:,:,1),pv_type)
+call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
 potensdiss_kappa = vor
 
 do ivar = 1,3
@@ -289,7 +288,7 @@ do ivar = 1,3
 !bw The fft of the vorticity is in potensdiss_kappa
 !bw The dummy array is potensdiss_mu(:,:,:,1)
 !bw
-  call fft3d(potensdiss_kappa(:,:,:,ivar),potensdiss_mu(:,:,:,1))
+  call fft3d(potensdiss_kappa(1,1,1,ivar),potensdiss_mu)
 !bw
 !bw Compute the Laplacian
 !bw
@@ -299,7 +298,7 @@ do ivar = 1,3
         jm=(jmcord(j))
         do i=nx1,nx2
            im=(imcord(i))
-           rwave = im**2 + jm**2 + (km/Lz)**2
+           rwave = pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
            potensdiss_kappa(i,j,k,ivar) = -potensdiss_kappa(i,j,k,ivar)*rwave
         enddo
      enddo
@@ -307,17 +306,16 @@ do ivar = 1,3
 !bw
 !bw Fourier transform back to physical space
 !bw CHECK THE CALL SEQUENCE AND MEMORY
-  call ifft3d(potensdiss_kappa(:,:,:,ivar),potensdiss_mu(:,:,:,1))
+  call ifft3d(potensdiss_kappa(1,1,1,ivar),potensdiss_mu)
 enddo
 !bw
 !bw Now compute <q grad rho dot laplacian omega>
 !bw Here one needs grad rho. Store it for use in the second
 !bw part. Store grad theta in potensdiss_mu note.
 !bw 
-
-   call der(q(1,1,1,np1),potensdiss_mu(:,:,:,1),dummy,theta_z,DX_ONLY,1)
-   call der(q(1,1,1,np1),potensdiss_mu(:,:,:,2),dummy,theta_z,DX_ONLY,2)
-   call der(q(1,1,1,np1),potensdiss_mu(:,:,:,3),dummy,theta_z,DX_ONLY,3)
+call der(q(1,1,1,np1),potensdiss_mu(1,1,1,1),dummy,theta_z,DX_ONLY,1)
+call der(q(1,1,1,np1),potensdiss_mu(1,1,1,2),dummy,theta_z,DX_ONLY,2)
+call der(q(1,1,1,np1),potensdiss_mu(1,1,1,3),dummy,theta_z,DX_ONLY,3)
    
 !bw
 !bw  Add in the last part
@@ -353,27 +351,28 @@ potens_diss_mu=potens_diss_mu/g_nx/g_ny/g_nz
 
 
 !bw compute the gradient of theta and store it in potensdiss_kappa
+!   we are done with potensdiss_mu(), so use it as a work array
+call der(Q(1,1,1,np1),potensdiss_kappa(1,1,1,1),dummy,potensdiss_mu,DX_ONLY,1)
+call der(Q(1,1,1,np1),potensdiss_kappa(1,1,1,2),dummy,potensdiss_mu,DX_ONLY,2)
+call der(Q(1,1,1,np1),potensdiss_kappa(1,1,1,3),dummy,potensdiss_mu,DX_ONLY,3)
 
-call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,1),dummy,potensdiss_mu(:,:,:,1),DX_ONLY,1)
-call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,2),dummy,potensdiss_mu(:,:,:,1),DX_ONLY,2)
-call der(Q(1,1,1,np1),potensdiss_kappa(:,:,:,3),dummy,potensdiss_mu(:,:,:,1),DX_ONLY,3)
+
 
 do ivar = 1,3
 !bw
 !bw fft to fourier space to compute the laplacian, use vor as the dummy array
 !bw
-  call fft3d(potensdiss_kappa(:,:,:,ivar),vor)
+  call fft3d(potensdiss_kappa(1,1,1,ivar),vor)
 !bw
 !bw Compute the Laplacian
 !bw
-
   do k=nz1,nz2
      km=(kmcord(k))
      do j=ny1,ny2
         jm=(jmcord(j))
         do i=nx1,nx2
            im=(imcord(i))
-           rwave = im**2 + jm**2 + (km/Lz)**2
+           rwave = pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
            potensdiss_kappa(i,j,k,ivar) = -potensdiss_kappa(i,j,k,ivar)*rwave
         enddo
      enddo
@@ -381,14 +380,15 @@ do ivar = 1,3
 !bw
 !bw Fourier transform back to physical space
 !bw CHECK THE CALL SEQUENCE AND MEMORY
-  call ifft3d(potensdiss_kappa(:,:,:,ivar),vor)
+  call ifft3d(potensdiss_kappa(1,1,1,ivar),vor)
 enddo
+
+
 !bw
 !bw
 !bw Compute the absolute vorticity 
-!bw Since we are finished with the theta_z array we use that as work arrays.
 !bw
-call vorticity(q,vor,potensdiss_mu(:,:,:,1),theta_z)
+call vorticity(vor,q,potensdiss_mu(1,1,1,1),potensdiss_mu(1,1,1,2))
 !bw   
 !bw  Add in the coriolis term to the z component of the vorticity
 !bw  and store the /absolute/ vorticity in vor
