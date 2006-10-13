@@ -18,7 +18,7 @@ none        ! hypo vis
 .0            ! smagorinsky
 1             ! max number of schmidt numbers for passive scalars
 1. 4            ! schmidt number = nu/kappa, ratio of viscous coeffs, type
-0            ! compute_structure functions
+1            ! compute_structure functions
 0            ! compute pdf functions
 fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
