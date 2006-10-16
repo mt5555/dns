@@ -59,7 +59,7 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
-real*8 :: schmidt_in,mn,mx
+real*8 :: schmidt_in,mn,mx,a0,a1
 integer :: type_in
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -162,12 +162,26 @@ do
          write(sdata,'(f10.4)') 10000.0000 + time
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vor"
          call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
+
+         ! compute the v vorticity, in vor(:,:,:,2)
          if (alpha_value>0) then
             call print_message("computing 2D v vorticity...")
-            call v_vorticity2d(vor,work1)
+            vor(:,:,:,2)=vor(:,:,:,1)
+            call v_vorticity2d(vor(1,1,1,2),work1)
             fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vvor"
-            call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
+            call singlefile_io3(time,vor(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_user)
          endif
+
+         ! compute the stream function, stored in vor(:,:,:,2)
+         call print_message("computing 2D stream function...")
+         vor(:,:,:,2)=vor(:,:,:,1)
+         call fft3d(vor(1,1,1,2),work1)
+         a0=0; a1=-1
+         call fft_laplace_inverse(vor(1,1,1,2),a0,a1)
+         call ifft3d(vor(1,1,1,2),work1)
+
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".psi"
+         call singlefile_io3(time,vor(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_user)
       endif
 
 
