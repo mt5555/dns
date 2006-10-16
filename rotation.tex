@@ -475,8 +475,9 @@ around in the volume:
   \begin{equation}
   \frac{\partial}{\partial t} \int_V   
            \left[ q \right]  
-  = \int_V \left[ \nu \nabla^2 (\mathbf\omega \cdot \nabla \bar\theta)   
-                       + \kappa \nabla^2 (\nabla \theta^2 \cdot 
+  = \int_V \left[ \nu (\nabla^2 \mathbf\omega) \cdot \mathbf{\nabla}
+    (\theta - bous \mathbf{\hat{z}})
+                       + \kappa (\nabla^2 \mathbf{\nabla} \theta) \cdot  
                        (\mathbf\omega  
                        + \text{fcor} ~{\bf{\hat{z}}} ))  
                            \right]  
@@ -496,9 +497,9 @@ around in the volume:
 \item[7.] Potential enstrophy
   \begin{equation} 
     \frac{\partial}{\partial t} \int_V   \left[ Q \right]   
-    = \int_V \left[ \nu  ~q ~\nabla^2 ~(\mathbf\omega \cdot \nabla
-      \bar\theta)   
-      + \kappa  ~q ~\nabla^2 (\nabla \theta^2 \cdot  
+    = \int_V \left[ \nu  ~q (~\nabla^2 ~\mathbf\omega) \cdot \mathbf{\nabla}
+      (\theta - bous \mathbf{\hat{z}})   
+      + \kappa  ~q ~\nabla^2 (\mathbf{\nabla} \theta) \cdot  
       (\mathbf\omega   
       + \text{fcor} ~{\bf{\hat{z}}} ))   
     \right]   
