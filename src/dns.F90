@@ -337,7 +337,7 @@ do
    endif
    
    if (maxs(9)>0) then
-      write(message,'(a,f10.0)') "Error detected.  error code: ",maxs(9)
+      write(message,'(a,f10.0)') "Stopping because of caught signal = ",maxs(9)
       call print_message("** ERROR ****************************************")
       call print_message(message)
       itime_final=itime
