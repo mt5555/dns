@@ -593,29 +593,6 @@ endif
 
 
 
-#if 0
-rhs=0
-if (forcing_type>0) call sforce(rhs,Qhat,f_diss,fxx_diss)
-do j=1,ny_2dz
-   jm=z_jmcord(j)
-   do i=1,nx_2dz
-      im=z_imcord(i)
-      do k=1,g_nz
-         km=z_kmcord(k)
-
-         ! compute the divergence
-         p(k,i,j)= - im*rhs(k,i+z_imsign(i),j,1) &
-              - jm*rhs(k,i,j+z_jmsign(j),2) &
-              - km*rhs(k+z_kmsign(k),i,j,3)/Lz
-
-      enddo
-   enddo
-enddo
-call z_ifft3d(p,rhsg,work)
-print *,'maxval div: ',maxval(abs(rhsg(nx1:nx2,ny1:ny2,nz1:nz2,1)))
-stop
-#endif
-
 
 
 
@@ -633,20 +610,6 @@ if (compute_ints==1 .and. compute_transfer) then
       spec_f=spec_f+spec_tmp
    enddo
 endif
-
-#undef TESTGRIDSPACE
-#ifdef TESTGRIDSPACE
-print *,'grid space dealiasing'
-! fft to grid space:
-do n=1,3
-   call z_ifft3d(rhs(1,1,1,n),Q(1,1,1,n),work)
-enddo
-call divfree_gridspace_aspect(Q,p,work,rhs)
-! back to spectral space:  
-do n=1,3
-   call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
-enddo
-#else
 
 
 !  make rhs div-free
@@ -694,22 +657,15 @@ do j=1,ny_2dz
             rhs(k,i,j,3)=0
          endif
 
-#if 0
-         if (forcing_type==5) then
-         ! balu forcing: keep mode=10 fixed.
-         ! in 2D: modes (0,10) and (6,8)
-         if (90.25 <= im**2+jm**2 + km**2 .and. im**2+jm**2+km**2<110.25) then
-            rhs(k,i,j,1)=0
-            rhs(k,i,j,2)=0
-            rhs(k,i,j,3)=0
+         if (alpha_B>0) then
+            ! apply H^{-1}
+            ! divide rhs(:,:,:,:) by  (1 + alpha_B**2(2*pi*k)**2)
          endif
-         endif
-#endif
 
       enddo
    enddo
 enddo
-#endif
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! passive scalars:

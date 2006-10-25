@@ -37,6 +37,12 @@ else
 endif
 call print_message(message)
 
+If (alpha_B>0) then
+   write(message,'(a,f14.8)') "Running NS-Bardina-alpha model: alpha_B=",alpha_B
+   call print_message(message)
+endif
+
+
 write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
 call print_message(message)
 write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz

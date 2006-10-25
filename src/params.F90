@@ -36,6 +36,7 @@ real*8  :: max_hyper(3)       ! some diagnostics
 integer :: mu_hypo =0         !large wave number dissipation = (del**-2)**mu_hyper
 real*8  :: mu_hypo_value=0    !viscosity value 
 real*8  :: alpha_value=0      !for the alpha model  
+real*8  :: alpha_B=0          !for the alpha Bardina model  
 integer :: infinite_alpha=0   !flag for infinite alpha case
 real*8  :: smagorinsky=0      !for smagorinsky term
 real*8  :: H0=0               ! used by shallow water model
