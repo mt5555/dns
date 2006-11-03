@@ -341,9 +341,9 @@ do
       ! compute U using random vorticity: (for testing)
       ! call ranvor(Q,vor,work1,work2,1)
 
-      do n=1,3
-         call detrend_data(Q(1,1,1,n),0)
-      enddo
+!      do n=1,3
+!         call detrend_data(Q(1,1,1,n),0)
+!      enddo
       call compute_spec(time,Q,vor,work1,work2)
       call output_spec(time,time)
       call output_helicity_spec(time,time) 

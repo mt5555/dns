@@ -1663,7 +1663,7 @@ subroutine accumulate_str_uq(idir,idel,u1,u2,u3,q1,ur1,ur2,ur3,qr,rhat,rperp1,rp
 !
 !  (u1,u2,u3)      velocity at the point x
 !  (ur1,ur2,ur3)   velocity at the point x+r
-!      q           scalar at the point x
+!      q1           scalar at the point x
 !      qr          scalar at the point x+r
 !
 !

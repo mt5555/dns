@@ -37,7 +37,7 @@ real*8 :: time
 logical :: doit_model,doit_diag
 
 ! local variables
-integer :: nints_e
+integer :: nints_e = 0
 integer,parameter :: nints_e_max=100
 real*8 :: ints_e(nints_e_max)
 real*8 :: x,zero_len
@@ -143,26 +143,27 @@ if (diag_struct==1) then
    stype=3                   ! structure functions of u,v,w
    if (npassive==1) stype=4; ! structure functions of u,v,w and PV
    
-   ! compute pv in work2, vorticity in q1
+   ! compute pv in work1, vorticity in q1
    call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
    work2 = Q(:,:,:,4)  ! make a copy
    Q(:,:,:,4) = work1  ! overwrite 4'th component with PV
     
    ! angle averaged functions:
-   call isoavep(Q,q1,q2,q3,stype,csig)
+!sk denotes the lines which compute bisotr, which can be disabled	
+!sk    call isoavep(Q,q1,q2,q3,stype,csig)
    ! if csig>0, isoavep did not complete - interrupted by SIGURG
    if (my_pe==io_pe .and. csig==0) then
       write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".bisostr"
-      call copen(message,"w",fid,ierr)
+!sk      call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
          call abort(message)
       endif
       ! add the enstrophy dissipation (stored in position 8) 
       ! to the structure function file
-      call writeisoave2(fid,time,ints_e(8),1)
-      call cclose(fid,ierr)
+!sk      call writeisoave2(fid,time,ints_e(8),1)
+!sk      call cclose(fid,ierr)
    endif
 
    Q(:,:,:,4) = work2  ! restore
@@ -474,8 +475,9 @@ nints_e=8
 
 print *,'aspect_diag ke=',ke
 print *,'aspect_diag pe=',pe
-
-
+print *,'aspect_diag pv=',pv
+print *,'aspect_diag potens=',potens
+print *,'aspect_diag potens_diss=',potens_diss
 
 end subroutine compute_expensive_scalars
 
