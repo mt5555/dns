@@ -322,6 +322,9 @@ real*8            :: dealias_sphere_kmax
 integer           :: dealias_23_kmax2 
 integer           :: dealias_23_kmax2_1 
 real*8            :: dealias_23_kmax 
+! actuall largest wave number in the code (including the 2pi factor
+! because our domain is of size 1)
+real*8            :: xkmax
 
 integer :: o_nx,o_ny,o_nz    ! dimensions of plotting output data
                              ! For periodic FFT case, o_nx=g_nx+1 because we do not
@@ -342,7 +345,7 @@ real*8  :: delt_min = 0
 real*8  :: delt_max = 1
 real*8  :: time_final = 1 
 real*8  :: time_initial = 0
-
+logical :: E_kmax_cfl = .false.    ! cfl_adv = delt*sqrt(ke)*kmax
 
 real*8 :: output_dt = 0           ! output prognostic variables
 integer :: output_vorticity = 0   ! also output vorticity

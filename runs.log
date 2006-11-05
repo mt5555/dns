@@ -165,12 +165,6 @@ vorticity, velocity, pressure saved every .02 ett
 
 my delt:  sqrt(ke) delt/delx = .17  (see below)
 
-ett/delt = (2 ke / eps) / (.17 delx/sqrt(ke))
-         = 2 .17 ke^3/2 / eps / delx
-delx ett/delt  = 2 .17 (ke eps^-2/3)^3/2  
- ett/delt  = 2 .17 (sqrt(3/20)  R_l )^3/2  / (kmax delx)
-
-
 
 
 ett = 2*ke/eps
@@ -233,14 +227,15 @@ eta: .000331    eta/delx = .3388
 Rl=435
 ett=1.05
 mu=3.5e-5
-maxU = 6.18,6.33,6.04
+maxU = 6.18,6.33,6.04  
 maxUcfl = 11.77
 ke = 1.886      sqrt(ke)=1.37  =  maxU/4.5
+eps=3.58               k eps-2/3 = .806
 delt ~ 1.2e-4
 
 
 My CFL:  (delt=.0001)   
-11.77 * delt/delx = 1.5   delt< .12/N                OR
+11.77 * delt/delx = 1.5   delt< .13/N                OR
 8.6 sqrt(ke) delt/delx = 1.5             1.9*maxU delt/delx = 1.5
 sqrt(ke) delt/delx = .17                       maxU delt/delx = .8
 

@@ -91,10 +91,16 @@ if (equations==SHALLOW .and. grav>0) then
    umax=umax + sqrt(grav*H0)/min(delx,dely)   
 endif
 
-!if u=0, take very small timesteps 
+! advective CFL.  if u=0, take very small timesteps 
 xtmp=1e-8
-umax=max(umax,xtmp)
-delt = cfl_adv/umax                         ! advective CFL
+if (E_kmax_cfl) then
+   umax=xkmax*max( sqrt(ints(6)),xtmp )
+   delt = cfl_adv/umax
+else
+   umax=max(umax,xtmp)
+   delt = cfl_adv/umax             
+endif
+
 if (mu>0) delt = min(delt,cfl_vis/mumax)    ! viscous CFL
 if (psmax>0) delt = min(delt,cfl_vis/psmax)    ! viscous CFL for passive scalars
 delt = max(delt,delt_min)
@@ -278,16 +284,8 @@ if (doit_screen) then
       write(message,'(a,3f13.4)') 'mesh spacing/eta: ',&
            delx/eta,dely/eta,delz/eta
       call print_message(message)	
-      if (dealias==1)  then
-         write(message,'(a,3f13.4)') '2/3 dealiasing kmax*eta: ',&
-           2*pi*g_nmin*eta/3
-         call print_message(message)	
-      endif
-      if (dealias==2)  then
-         write(message,'(a,3f13.4)') 'spherical dealiasing kmax*eta: ',&
-           2*pi*sqrt(2.)*g_nmin*eta/3
-         call print_message(message)	
-      endif
+      write(message,'(a,3f13.4)') 'kmax*eta: ',xkmax*eta
+      call print_message(message)	
       
       !eddy turn over time
       ! 

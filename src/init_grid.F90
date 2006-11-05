@@ -47,6 +47,8 @@ write(message,'(a,i6,a,i6,a,i6)') "Global grid: ",g_nx," x",g_ny," x",g_nz
 call print_message(message)
 write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",nz
 call print_message(message)
+write(message,'(a,f8.2)') 'kmax/2pi = ',xkmax/2/pi
+
 
 !
 ! are we also tracking passive scalars?
@@ -57,8 +59,6 @@ call print_message(message)
 ! cns.F90 to advect them, and here assign all extra variables
 ! if n_var>5 to be passive scalars
 !
-
-
 if (equations==NS_UVW) then
    ! NS_UVW requires u,v,w (n_var>=3) even for 2d problems
    ! prognostic variables > 3 are passive scalars:
@@ -115,8 +115,9 @@ use mpi
 implicit none
 
 !local variables
-real*8 :: one=1
+real*8 :: one=1,xw,maxw
 integer i,j,k,l,ierr,i0,i1,j0,j1,k0,k1,ii,jj,iproc_x,iproc_y,splitx
+integer im,jm,km
 character(len=80) message
 
 
@@ -403,6 +404,23 @@ do j=1,ny_2dx
    if (x_jmcord(j)==0) x_jmsign(j)=0
    if (x_jmcord(j)==g_ny/2) x_jmsign(j)=0
 enddo
+
+
+! compute maximum wave number
+maxw=0
+do k=nz1,nz2
+   km=abs(kmcord(k))
+   do j=ny1,ny2
+      jm=abs(jmcord(j))
+      do i=nx1,nx2
+         im=abs(imcord(i))
+         xw=im**2 + jm**2 + km**2
+         if (dealias_remove(im,jm,km)) xw=0
+         maxw=max(maxw,xw)
+      enddo
+   enddo
+enddo
+xkmax=2*pi*sqrt(maxw)
 
 
 end subroutine
@@ -800,6 +818,13 @@ if (bous/=0) then
    write(message,'(a,e10.4)') 'Boussenesque parameter bous = ',bous
    call print_message(message)
 endif
+
+
+if (cfl_adv<0) then
+   cfl_adv=-cfl_adv
+   E_kmax_cfl=.true.
+endif
+
 
 end subroutine
 

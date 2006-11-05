@@ -24,7 +24,7 @@ periodic      ! x bc  (periodic, no-slip)
 periodic      ! y bc
 periodic      ! z bc
 -3           ! time to run
-1.5           ! adv cfl  (0 = disabled, use min_dt) 
+-.5           ! adv cfl  (0 = disabled, use min_dt) 
 0.200         ! vis cfl  (0 = disabled, use min_dt) 
 0.000001      ! min_dt  
 .1            ! max_dt 

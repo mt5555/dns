@@ -55,8 +55,9 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 
-
+\section{Introduction}
 The Sandia/LANL DNS code solves viscous fluid dynamics equations in a
 rectangular domain (2D or 3D).  It has many options for the equations
 (Navier-Stokes, Boussinesq, shallow water) discretization (pseudo spectral, 
@@ -98,7 +99,19 @@ is eliminated by taking
 \]
 
 
+
+
 \section{Outline of Numerical Method}
+With the pressure projection method, the Navier-Stokes equations
+can be written as a single prognostic equation
+\[
+\frac{ \partial  \uv }{\partial t} = 
+  - \vor  \times \uv + 
+\grad \Delta^{-1} \div \left( \vor \times \uv  -\f \right) +  \nu \Delta \uv + \f
+\]
+The terms on the RHS can all be explictly computed via the FFT, and
+thus the equation can be thought of as a system of ODE's for the
+Fourier coefficients of $\uv$.  
 
 \subsection{RK4} 
 
@@ -135,13 +148,6 @@ $\grad \Delta^{-1} \div (\hat\n - \hat \f) +  \nu \Delta \hat \uv$ (two loops, n
 \end{enumerate}
 
 
-\subsection{CFL based time step}
-
-If the time step used is based on the CFL condition, than at
-the end of each timestep one global collective is required 
-(of a single real*8 value).  In practice we perform two global collectives
-(a sum and a min) of 96 bytes of data.  This is used for the CFL condition
-and other diagnostics.  
 
 
 \section{Complexity}
@@ -183,7 +189,7 @@ The total cost of of doing three of the 3D FFTs is thus:
 \end{enumerate}
 
 
-\section{Vorticity Evaluation Trick}
+\subsection{Vorticity Evaluation Trick}
 
 
 There is a trick one can use to eliminate one transpose.
@@ -209,7 +215,7 @@ transpose.  With a slab decompostion, this will reduce the amount
 of communication by 1/9. With a pencil decompostion, the reduction
 is 1/18.  
 
-\section{Other Savings}
+\subsection{Other Savings}
 
 I know of one other trick which can be used to recover the vorticity
 in grid space from the intermediate products of the $\uv = \text{iFFT}(\hat\uv)$ 
@@ -228,7 +234,7 @@ processor counts.
 And of course there could be many other tricks I dont know about!
 
 
-\section{Code Specific Transpose Details}
+\subsection{Code Specific Transpose Details}
 Our code actually allows for a full 3D data decomposition
 (not that useful for the full pseudo spectral code, but useful
 for some finite difference/spectral hybrids).  Because of this,
@@ -268,17 +274,9 @@ each FFT) or x-y slabs (requiring one distributed transpose for each FFT).
 Using x-pencils or z-pencils  for the reference decomposition is very inefficient.  
 
 
-\section{Memory requirements}
-
-The storage requirements of the code, for a grid of size $N^3$ 
-are approximatly 18 real*8 arrays of size $N^3$, for a total
-of $144 N^3$ bytes.  
-
-The memory usage is fully scalable.  If there are $N_p$ processes,
-each one requires no more than $144 N^3/N_p$ bytes.  
 
 
-\section{Cost of a single transpose}
+\subsection{Cost of a single transpose}
 
 Take a computational grid of size $N^3$, and assuming the code is
 using a reference decompostion of y-pencils, so the domain
@@ -304,7 +302,7 @@ Each scalar tranpose requires the network transmit a total just
 shy of $2N^3$ real*8 numbers.  
 
 
-\section{Total cost of the code}
+\subsection{Total cost of the code}
 
 The total cost of the code, for 1 Runge-Kutta stage,
 in terms of communication and flops,
@@ -355,6 +353,14 @@ than 1\%.
 
 
 
+\section{Memory requirements}
+
+The storage requirements of the code, for a grid of size $N^3$ 
+are approximatly 18 real*8 arrays of size $N^3$, for a total
+of $144 N^3$ bytes.  
+
+The memory usage is fully scalable.  If there are $N_p$ processes,
+each one requires no more than $144 N^3/N_p$ bytes.  
 
 
 
@@ -404,7 +410,44 @@ loss of resolution ($k_\text{max} = \pi N$) but requires additional
 
 
 
-\section{CFD: Resolution Condition}
+\section{Simulations of Turbulence}
+
+
+\subsection{Relevant Parameters}
+We give some of the parameters used to discribe turbulent flow.
+
+Velocity
+\[
+\uv = \left( u_1, u_2, u_3 \right)
+\]
+
+Kinetic energy
+\[
+k=\frac12 < \uv \cdot \uv > = \frac12   \sum_i < u_i^2 > 
+\]
+For the isotropic case, we can take $k=\frac32 <u_1^2 >$.
+Dissipation rate
+\[
+\epsilon = \nu \sum_i < \grad u_i \cdot \grad u_i >
+\]
+Kolmogorov length scale
+\[
+\eta = {\nu^{\frac34}}  {\epsilon^{-\frac14}} 
+\]
+Taylor length scale
+\[
+\lambda = \sqrt{  \frac{ <u_1>  } { <u_{1,1}> } } = 10 k \nu / \epsilon
+\]
+Taylor Reynols number
+\[
+R_\lambda = \frac{\lambda < u_1 > }{\nu} = k \sqrt{\frac{20}{3 \nu \epsilon}  }
+\]
+Eddy turnover time
+\[
+t_e = 2 k / \epsilon
+\]
+
+\subsection{Resolution Condition}
 
 Forced turbulence simulations, where one is primarily interested in
 the inertial range dynamics, are usually run with a resolution condition
@@ -412,11 +455,7 @@ given by
 \[
    k_\text{max} \eta \ge 1
 \]
-where $\eta$ is the Kolmogorov length scale
-\[
-\eta =   {\nu^{\frac34}} / {\epsilon^\frac14} 
-\]
-and $\epsilon$ is the KE dissipation rate.  The Komogorov length scales gives an estimate of the length scales
+The Komogorov length scales gives an estimate of the length scales
 where the flow becomes dominated by viscosity effects and the dynamics
 beyond those lengths scales do not effect the larger, turbulent length
 scales.
@@ -430,44 +469,100 @@ or even larger values for special applications.
 This resolution condition determines the amount of viscosity $\nu$
 needed.  In practice, one chooses the smallest viscosity possible
 viscosity (for a given forcing) so that this resolution condition is
-not violated.
+not violated.  
 
 
-\section{CFD: Deterministic Low Wave Number Forcing}
+
+
+
+
+\subsection{CFL based time step}
+
+If the time step used is based on the CFL condition, than at
+the end of each timestep one global collective is required 
+(of a single real*8 value).  In practice we perform two global collectives
+(a sum and a min) of 96 bytes of data.  This is used for the CFL condition
+and other diagnostics.  
+
+The usual CFL condition is written as 
+\[
+\Delta t \le C_0  { \Delta x } / { \text{max} ( \uv ) }
+\]
+For incompressible homogeneous isotropic turbulence, it is customary
+to write this in terms of the kinetic energy $k$, and maximum
+wave number $k_\text{max}$,
+\[
+\Delta t \le C  { \Delta x } / { \sqrt{k} } \qquad k=\frac12 < \uv^2 >
+\]
+We have determined, via experiment, that a stable timestep is
+given by 
+\[
+C=0.5.
+\]  
+As a check on this value, consider that given
+in Pope, {\em Turbulent Flows},
+\[
+\]
+
+
+We write the time step in terms of eddy turnover time by
+\[
+\Delta t / t_e =  \frac12 C k^{-3/2} \epsilon k_\text{max}^{-1}
+\]
+
+\subsection{Deterministic Low Wave Number Forcing}
 
 The deterministic low wave number forcing we use is a version
 of Overholt and Pope, Comput. Fluids 27 1998.  It uses a simplified
-version of their formula for the relaxation timesscale, and only forces
+version of their formula for the relaxation time scale, and only forces
 in the first two spherical wave numbers shells.
 It is documented in detail in Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
 
-The forcing results in an eddy turnover time of 1.0,
-with $KE=1.9$ and $\epsilon=3.6$.  When using this forcing,
-after deciding on the resolution condition $G=k_\text{max} \eta$,
+The forcing results in an eddy turnover time of $t_e = 1.05$,
+with $k=1.9$ and $\epsilon=3.6$.  When using this forcing,
+after deciding on the resolution condition $k_\text{max} \eta$,
 one can determine the viscosity (which must be specified in the
-input file) to use in the simulation based on the resolution and type of dealiasing
-using
+input file) to use in the simulation based on the resolution and 
+type of dealiasing.
+Taking
 \[
- \nu = \epsilon^{\frac13} \left( {G}/{k_\text{max}} \right)^{\frac43}
+   k_\text{max} \eta = 1
 \]
+we have $ \nu = \epsilon^{1/3} k_\text{max}^{-4/3}$.
 The resulting Taylor Reynolds number will be
 \[
-R_\lambda = \text{KE} \sqrt{\frac{20}{3\nu\epsilon}}  = 2.1 (k_\text{max}/G)^{\frac23}
+R_\lambda =   \sqrt{\frac{20}{3}} k \epsilon^{-2/3} k_\text{max}^{2/3}  =   2.1 k_\text{max}^{2/3}
 \]
+and the CFL condition is
+\[
+\Delta t / t_e =   \frac12 C k^{-3/2} \epsilon k_\text{max}^{-1} = .35 k_\text{max}^{-1}
+\]
+assuming $C=.5$
+
 
 \subsection{CFD: Example: $12288^3$ with spherical dealiasing}
 Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
 for a problem of size $N=12288 \quad (k_\text{max} = 36396)$, we have
 \[
-\nu = 1.3 \times 10^{-6} \qquad  R_\lambda =  2300
+\nu = 1.3 \times 10^{-6} \qquad  R_\lambda =  2300 \qquad \Delta t / t_e = .96\times10^{-5}
 \]
+100,000 timesteps are required for 1 eddy turnover time.  
 
 \subsection{CFD: Example: $12288^3$ with 2/3 rule dealiasing}
 Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
 for a problem of size $N=12288 \quad (k_\text{max} = 25736)$, we have
 \[
-\nu = 2 \times 10^{-6} \qquad  R_\lambda =  1800
+\nu = 2 \times 10^{-6} \qquad  R_\lambda =  1800\qquad \Delta t / t_e = 1.4\times10^{-5}
 \]
+71,000 timesteps are required for 1 eddy turnover time.  
+
+\subsection{CFD: Example: $1024^3$ with 2/3 rule dealiasing}
+Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
+for a problem of size $N=1024 \quad (k_\text{max} = 3033)$, we have
+\[
+\nu = 3.5 \times 10^{-5} \qquad  R_\lambda =  440\qquad \Delta t / t_e = 1.2\times10^{-4}
+\]
+8,333 timesteps are required for 1 eddy turnover time.  
 
 
 
