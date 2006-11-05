@@ -151,7 +151,8 @@ This run should take 13K timesteps.  on 4096cores, .5min per = 120h
 
 NSF1:  first Tag of code for NSF petascale RFP:
 NSF2:  Tag of debugged dnsp code
-NSF3:  Tag dnsp + instrumented FFT and A2A overlaop ????   <- do this
+NSF3:  Tag dnsp + instrumented FFT and A2A overlaop 
+
 
 
 *******************************************************************************
