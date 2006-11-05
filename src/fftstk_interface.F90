@@ -48,6 +48,7 @@ sum over m=1..n/2:
 
 
 module fft_interface
+use params
 implicit none
 integer, parameter ::  num_fftsizes=3
 
@@ -99,8 +100,8 @@ subroutine fftinit(n,index)
 integer n,index
 character*80 message
 
-if (init==0) call abort("fft_james_interface.F90: call fft_interface_init to initialize first!");
-if (n>1000000) call abort("fft_james_interface.F90: n>1 million")
+if (init==0) call abort("fftstk_interface.F90: call fft_interface_init to initialize first!");
+if (n>1000000) call abort("fftstk_interface.F90: n>1 million")
 
 fftdata(index)%size=n
 
@@ -125,7 +126,7 @@ i=0
 do 
    i=i+1
    if (i>num_fftsizes) then
-      write(message_str,'(a,i10)') "fft_james_interface.F90:  Failed initializing an fft of size =",n1
+      write(message_str,'(a,i10)') "fftstk_interface.F90:  Failed initializing an fft of size =",n1
       call abort(message_str)
    endif
 
@@ -151,9 +152,11 @@ subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 
-
+real*8 tmx1,tmx2
 integer index,i,k,j
-real*8 tmp
+
+call wallclock(tmx1)
+if (tims(19)==0) ncalls(19)=0  ! timer was reset, so reset counter too
 
 if (n1==1) return
 ASSERT("ifft1: dimension too small ",1+n1<=n1d);
@@ -169,6 +172,9 @@ do k=1,n3
 #endif
 enddo
 
+call wallclock(tmx2) 
+tims(19)=tims(19)+(tmx2-tmx1)          
+ncalls(19)=ncalls(19)+1
 end subroutine
 
 
@@ -184,7 +190,10 @@ integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 
 integer index,i,j,k
-real*8 tmp
+real*8 tmx1,tmx2
+
+call wallclock(tmx1)
+if (tims(18)==0) ncalls(18)=0  ! timer was reset, so reset counter too
 
 if (n1==1) return
 ASSERT("fft1: dimension too small ",1+n1<=n1d);
@@ -207,6 +216,9 @@ do k=1,n3
       enddo
    enddo
 enddo
+call wallclock(tmx2) 
+tims(18)=tims(18)+(tmx2-tmx1)          
+ncalls(18)=ncalls(18)+1
 end subroutine
 
 

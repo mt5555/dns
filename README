@@ -37,8 +37,8 @@ In can optionally allow for rotation, arbitrary aspect ratio and an
 arbitrary number of passive scalars.  It is an MPI code and can use
 an arbitrary 3D domain decomposition, (allowing for both slab
 decomposition and pencil decomposition).  For a grid of size N^3, it
-can run on up to N^3/8 processors.  It has been run on as many as 2048
-processors (with grids of size 512^3, 1024^3 and 2048^3)
+can run on up to N^3/8 processors.  It has been run on as many as 6144
+processors (with grids up to 3072^3)
 
 This README file contains instructions to compile and run
 the purest form of the code: Navier-Stokes with deterministic

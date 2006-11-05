@@ -19,17 +19,20 @@
 !  When using a slab decomposition, this routine will not save any 
 !  communication, but it will save some on-processor memory copies
 !
-!
+!  ns_xpencil.F90 does not support:
+!    passive scalars
+!    hyper viscosity
+!    rotation
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine rk4(time,Q_grid,Q,Q_tmp,Q_old,rhsg,work1,work2)
+subroutine rk4(time,Q_grid,Q,Q_tmp,Q_old,rhsg,work,work2)
 use params
 use transpose
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: work1(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
@@ -62,10 +65,10 @@ if (firstcall) then
       call abort("Error: dnsp (x-pensil) model with tracers not yet coded")
    endif
 
-   ! intialize Q with Fourier Coefficients:
-   call z_fft3d_nvar(Q_grid,Q,work1,work2) 
+   if (data_x_pencils) call abort("ns_xpencil: this is not possible")
 
-   rhs_trashed=.true.  ! set flag to initialize rhs if necessary
+   ! intialize Q with Fourier Coefficients:
+   call z_fft3d_nvar(Q_grid,Q,work,work2) 
 
    ! enable more efficient vorticity routine
    if (ncpu_y == 1 ) then
@@ -74,23 +77,22 @@ if (firstcall) then
    endif	
 endif
 
-
 if (.not. data_x_pencils) then
    ! initial data, or after output/diagnostics, data in Q_grid may be
    ! stored in nx,ny,nz decompostion instead of x-pencils.  
    ! convert data to x-pencil decompostion:
-   Q_tmp=Q_grid
-   call transpose_to_x_3d(Q_tmp,Q_grid)
+   Q_tmp=Q_grid;   call transpose_to_x_3d(Q_tmp,Q_grid)
    data_x_pencils=.true.
 endif
 
 
+
 if (use_vorticity3) then
    ! call fast version that computes Vx and Uy during U iffts:
-   ! saves on the number of z transforms
-   call rk4reshape2(time,Q_grid,Q,rhsg,rhsg,Q_tmp,Q_old,work1,work2)
+   ! saves 1 z transforms per RK stage
+   call rk4reshape2(time,Q_grid,Q,rhsg,rhsg,Q_tmp,Q_old,work,work2)
 else
-   call rk4reshape(time,Q_grid,Q,rhsg,rhsg,Q_tmp,Q_old,work1,work2)
+   call rk4reshape(time,Q_grid,Q,rhsg,rhsg,Q_tmp,Q_old,work,work2)
 endif
 end
 
@@ -118,13 +120,13 @@ real*8 :: rhsg(g_nx2,nslabz,ny_2dx,n_var)
 
 
 ! local variables
-real*8 :: ke_old,time_old,vel
+real*8 :: ke_old,time_old,vel,dummy
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 
 
 ! stage 1
-call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2,1)
+call ns3D(rhs,rhs,Q,Q_grid,time,1,work,work2,1,dummy,dummy)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -145,7 +147,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,dummy,dummy)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -162,7 +164,7 @@ do n=1,n_var
 enddo
 
 ! stage 3
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,dummy,dummy)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -178,7 +180,7 @@ do n=1,n_var
 enddo
 
 ! stage 4
-call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2,4)
+call ns3D(rhs,rhs,Q_tmp,Q_grid,time+delt,0,work,work2,4,dummy,dummy)
 
 
 do n=1,n_var
@@ -246,16 +248,23 @@ real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 
-if (rhs_trashed) then
-   rhs_trashed=.false.
-   ! put Vx in rhsg(:,:,:,2) and Uy in rhsg(:,:,:,1)
-   ! this will avoid 1 transform
-   call zx_ifft3d_and_dy(Q(1,1,1,1),Q_tmp,rhsg(1,1,1,1),work)
-   call zx_ifft3d_and_dx(Q(1,1,1,2),Q_tmp,rhsg(1,1,1,2),work)
+! storage for first two components of vorticity, needed for
+! use_vorticity3 trick:
+real*8,save,allocatable  :: uygrid(:,:,:)
+real*8,save,allocatable  :: vxgrid(:,:,:)
+logical,save :: firstcall=.true.
+
+if (firstcall) then
+   firstcall=.false.
+   ! initialize uygrid,vxgrid
+   allocate(uygrid(nx,ny,nz))
+   allocate(vxgrid(nx,ny,nz))
+   call zx_ifft3d_and_dy(Q(1,1,1,1),work2,uygrid,work)
+   call zx_ifft3d_and_dx(Q(1,1,1,2),work2,vxgrid,work)
 endif
 
 ! stage 1
-call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1)
+call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,uygrid,vxgrid)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -269,8 +278,8 @@ do n=1,n_var
    enddo
 enddo
 
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
+call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
 do n=3,n_var
    call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -281,7 +290,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,uygrid,vxgrid)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -293,8 +302,8 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
+call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
 do n=3,n_var
    call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -302,7 +311,7 @@ enddo
 
 
 ! stage 3
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,uygrid,vxgrid)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -314,15 +323,15 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
+call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
 do n=3,n_var
    call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
 ! stage 4
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,uygrid,vxgrid)
 
 
 do n=1,n_var
@@ -334,8 +343,8 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q(1,1,1,1),Q_grid(1,1,1,1),rhsg(1,1,1,1),work)
-call zx_ifft3d_and_dx(Q(1,1,1,2),Q_grid(1,1,1,2),rhsg(1,1,1,2),work)
+call zx_ifft3d_and_dy(Q(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
+call zx_ifft3d_and_dx(Q(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
 do n=3,n_var
    call zx_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -376,7 +385,7 @@ end subroutine
 
 
 
-subroutine ns3d(rhs,rhsg,Qhat,Q_grid,time,compute_ints,work,p,rkstage)
+subroutine ns3d(rhs,rhsg,Qhat,Q_grid,time,compute_ints,work,p,rkstage,uygrid,vxgrid)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -405,6 +414,9 @@ integer compute_ints,rkstage
 real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 !real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 real*8 Q_grid(g_nx2,nslabz,ny_2dx,n_var)
+real*8 uygrid(g_nz2,nx_2dz,ny_2dz)    
+real*8 vxgrid(g_nz2,nx_2dz,ny_2dz)    
+
 
 ! output  (rhsg and rhs are overlapped in memory)
 ! true size must be nx,ny,nz,n_var
@@ -416,7 +428,6 @@ real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
 real*8 work(nx,ny,nz)
 ! actual dimension: nx,ny,nz, since sometimes used as work array
 real*8 p(g_nz2,nx_2dz,ny_2dz)    
-                                 
 
 !local
 
@@ -426,34 +437,17 @@ integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
 real*8 :: p_diss(n_var),pke(n_var),enstrophy
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(ndim,n_var),ens_diss2,ens_diss4,ens_diss6
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,ens_diss2,ens_diss4,ens_diss6
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3)
 
-!
-! NOTE: for Fourier Coefficients with mode  im=g_nx/2, this is the
-! sole "cosine" mode.  Its derivative maps to the g_nx/2 sine mode
-! which aliases to 0 on the grid.  So this coefficient should be
-! ignored.  This subroutine assumes everything is dealiased, and so
-! this mode will be removed no matter what we do with it, and so
-! we just dont wory about the case when im=g_nx/2.
-!
 call wallclock(tmx1)
-
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  PASSIVE SCALARS  advection code goes here
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! see notes in ns.F90 about pros/cons on how to compute vorticity
 !
 if (use_vorticity3) then
-   call ns_vorticity3(rhsg,Qhat,work,p)  
+   call ns_vorticity3(rhsg,Qhat,work,p,uygrid,vxgrid)  
 else
    call ns_vorticity(rhsg,Qhat,work,p)
 endif
@@ -478,21 +472,17 @@ do i=1,g_nx
    vor(2)=rhsg(i,j,k,2)
    vor(3)=rhsg(i,j,k,3)
 
-   vorave = vorave + vor(3)
-   !ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
-   
-   helave = helave + Q_grid(i,j,k,1)*vor(1) + & 
-        Q_grid(i,j,k,2)*vor(2) + & 
-        Q_grid(i,j,k,3)*vor(3)  
-   
-   maxvor = max(maxvor,abs(vor(1)))
-   maxvor = max(maxvor,abs(vor(2)))
-   maxvor = max(maxvor,abs(vor(3)))
+   if (compute_ints==1) then
+      vorave = vorave + vor(3)
+      helave = helave + Q_grid(i,j,k,1)*vor(1) + & 
+           Q_grid(i,j,k,2)*vor(2) + & 
+           Q_grid(i,j,k,3)*vor(3)  
+      maxvor = max(maxvor,abs(vor(1)))
+      maxvor = max(maxvor,abs(vor(2)))
+      maxvor = max(maxvor,abs(vor(3)))
+   endif
 
 
-   ! add any rotation to vorticity before computing u cross vor
-   vor(3)=vor(3) + fcor
-   
    !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
    !  w*(wy-vz) - u*(vx-uy)
@@ -506,10 +496,6 @@ do i=1,g_nx
    Q_grid(i,j,k,1) = uu
    Q_grid(i,j,k,2) = vv
    Q_grid(i,j,k,3) = ww
-
-!   if (npassive>0 .and. passive_type(np1)==4) then
-!      Q(i,j,k,3)=Q(i,j,k,3)+bous*Q(i,j,k,np1)
-!   endif
 
 enddo
 enddo
@@ -531,7 +517,7 @@ enddo
 !  spec_diff:  spectrum of u dot (u cross omega) 
 !              (used as temporary storage for now)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (compute_ints==1 .and. compute_transfer) then
+if (rkstage==1 .and. compute_transfer) then
    spec_diff=0
    do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
@@ -542,12 +528,6 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (mu_hyper>=2) then
-   ! compute hyper viscosity scaling based on energy in last shell:
-   call ke_shell_z(Qhat,hyper_scale)
-endif
-
-
 ke=0
 ux2ave=0
 ke_diss=0
@@ -566,18 +546,6 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2) then
-               xw2=hyper_scale(1,1)*(im*im*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-               xw_viss=xw_viss + mu_hyper_value*xw2
-            endif
-            if (mu_hyper==0) then
-               xw_viss=xw_viss + mu_hyper_value
-            endif
-            if (mu_hypo==1 .and. xw>0) then
-               xw_viss=xw_viss + mu_hypo_value/xw
-            endif
 
             rhs(k,i,j,1)=rhs(k,i,j,1) - xw_viss*Qhat(k,i,j,1)
             rhs(k,i,j,2)=rhs(k,i,j,2) - xw_viss*Qhat(k,i,j,2)
@@ -639,7 +607,7 @@ enddo
 !  differece between spec_tmp and spec_diff to get the diffusion
 !  spectrum.  (stored in spec_diff)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (compute_ints==1 .and. compute_transfer) then
+if (rkstage==1 .and. compute_transfer) then
    spec_diff=-spec_diff
    spec_f=0
    do n=1,ndim
@@ -694,7 +662,7 @@ endif
 ! spec_tmp = spectrum of advection + diffusion terms + forcing terms
 ! so compute the difference and store in spec_f to get the spectrum
 ! of just the forcing terms.  
-if (compute_ints==1 .and. compute_transfer) then
+if (rkstage==1 .and. compute_transfer) then
    spec_f=-spec_f
    do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
@@ -755,16 +723,8 @@ do j=1,ny_2dz
 enddo
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! passive scalars:
-! dealias the RHS scalars, and add diffusion:
-! for passiv_type=2, also add p computed above p = (pressure + .5*u**2 )
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
 ! compute spectrum of u dot RHS, store in spec_rhs
-if (compute_ints==1 .and. compute_transfer) then
+if (rkstage==1 .and. compute_transfer) then
    spec_rhs=0
    do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
@@ -876,16 +836,17 @@ end subroutine
 
 
 
-subroutine ns_vorticity3(rhsg,Qhat,work,p)
+subroutine ns_vorticity3(rhsg,Qhat,work,p,uygrid,vxgrid)
 !
 !  fast version, where vx and uy have already been computed
-!  and stored in rhsg(:,:,:,1) and rhsg(:,:,:,2)
 !
 use params
 implicit none
 real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
 real*8 work(nx,ny,nz)
+real*8 uygrid(g_nz2,nx_2dz,ny_2dz)    
+real*8 vxgrid(g_nz2,nx_2dz,ny_2dz)    
 real*8 p(g_nz2,nx_2dz,ny_2dz)    
 
 !local
@@ -897,7 +858,7 @@ real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
 do k=1,ny_2dx
 do j=1,nslabz
 do i=1,g_nx
-   rhsg(i,j,k,3)=rhsg(i,j,k,2)-rhsg(i,j,k,1)
+   rhsg(i,j,k,3)=vxgrid(i,j,k)-uygrid(i,j,k)
 enddo
 enddo
 enddo

@@ -50,6 +50,7 @@ In otherwords:
 
 
 module fft_interface
+use params
 implicit none
 integer, parameter ::  num_fftsizes=3
 
@@ -166,10 +167,13 @@ integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 w(n2*(n1+1))
 
-real*8 :: scale=1
+real*8 :: scale=1,tmx1,tmx2
 character(len=80) message_str
-
 integer index,j,k
+
+call wallclock(tmx1)
+if (tims(19)==0) ncalls(19)=0  ! timer was reset, so reset counter too
+
 if (n1==1) return
 ASSERT("ifft1: dimension too small ",n1+2<=n1d)
 call getindex(n1,index)
@@ -189,6 +193,9 @@ do k=1,n3
    call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,1)
 enddo
 
+call wallclock(tmx2) 
+tims(19)=tims(19)+(tmx2-tmx1)          
+ncalls(19)=ncalls(19)+1
 end subroutine
 
 
@@ -204,8 +211,13 @@ integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 :: scale
 real*8 :: w(n2*(n1+1)) 
-
+real*8 :: tmx1,tmx2
 integer index,j,k
+
+call wallclock(tmx1)
+if (tims(18)==0) ncalls(18)=0  ! timer was reset, so reset counter too
+
+
 if (n1==1) return
 ASSERT("fft1: dimension too small ",n1+2<=n1d)
 call getindex(n1,index)
@@ -225,6 +237,9 @@ do k=1,n3
    enddo
    
 enddo
+call wallclock(tmx2) 
+tims(18)=tims(18)+(tmx2-tmx1)          
+ncalls(18)=ncalls(18)+1
 end subroutine
 
 

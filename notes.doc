@@ -1,5 +1,18 @@
 TODO:
 
+DNS code:  1024^3 with pfmon on 16 cpus?
+           measure flops on laptop + FC6?
+           check performance with: A2AOVERLAP, STK
+           time with/without scalars - disable in ns_xpencils
+           time FFT99 vs STK, add ACML
+           time XT3?
+
+NSF3 tag
+
+benchmark:  
+  http://people.inf.ethz.ch/arbenz/book/Chapter5/wpp3DFFT.c
+
+
 dnsp    test output - make sure it is in correct format
                       (via restart?)
 port ns_vorticity3 to ns.F90 model (since it will save 1 z transpose)

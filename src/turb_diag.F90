@@ -1,45 +1,13 @@
 #include "macros.h"
 
 
-logical function call_output_model(doit_model,doit_diag,time)
-!
-!  The subroutine output_model() below is called every timestep
-!  This routine will return .true. if it needs to be called,
-!  and .false. if output_model() will do nothing if called
-!
-!  The point of this routine is for the super efficient ns_xpencil.F90 when
-!  using an x-pencil decompostion.  That decomposition must be converted
-!  back to our reference decompostion before output and these diagnostics
-!  can be called.
-!
-!  failsafe version of call_output_model():  always return .true.
-!  No extra costs for most models in the DNS code: only when using 
-!  ns_xpencil.F90.   (and ns_xpencil.F90 is only necessary when running
-!  with a pencil decomposition instead of slabs)
-!  
-use params
-use spectrum
-implicit none
-logical :: doit_model,doit_diag
-real*8 :: time
-
-
-call_output_model=.false.
-if (compute_transfer) call_output_model=.true.
-if (doit_model .or. time==time_initial) call_output_model=.true.
-if ( (compute_passive_on_restart .and. time==time_initial) .or. &
-    doit_model) call_output_model=.true.
-end function
-
-
-
-
 
 subroutine output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,q3,work1,work2)
 use params
 use pdf
 use spectrum
 use isoave
+use transpose
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
@@ -65,8 +33,13 @@ CPOINTER fid,fidj,fidS,fidcore
 
 
 
-
 if (compute_transfer) then
+   ! convert Q to reference decomp, if necessary
+   if (data_x_pencils) then
+      data_x_pencils = .false.
+      q1=Q; call transpose_from_x_3d(q1,Q)
+   endif
+
    compute_transfer=.false.
    ! spec_r computed last time step
    ! spec_diff, spec_f, spec_rhs were computed in RHS computation at the
@@ -82,16 +55,23 @@ endif
 ! compute spectrum
 ! always compute at first timestep because transfer cannot be computed
 ! on last timestep.   
-if (doit_model .or. time==time_initial) then
+if (doit_model .or. (time==time_initial .and. model_dt/=0)) then
 if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then
+
+   ! convert Q to reference decomp, if necessary
+   if (data_x_pencils) then
+      data_x_pencils = .false.
+      q1=Q; call transpose_from_x_3d(q1,Q)
+   endif
+
    call compute_spec(time,Q,q1,work1,work2)
    call output_spec(time,time_initial)
    call output_helicity_spec(time,time_initial)  ! put all hel spec in same file
 
    !set this flag so that for next timestep, we will compute and save
-   !spectral transfer functions:
+   !spectral transfer functions during RHS calculation:
    compute_transfer=.true.
 
    ! for incompressible equations, print divergence as diagnostic:
@@ -101,7 +81,7 @@ if ( g_bdy_x1==PERIODIC .and. &
       call print_message(message)	
    endif
 
-   call compute_enstropy_transfer(Q,q1,q2,q3,work1,work2)
+!  call compute_enstropy_transfer(Q,Qhat,q2,q3,work1,work2)
 !  call output_enstropy_spectrum()   we still have to write this
 
 endif
@@ -116,6 +96,12 @@ else
    return
 endif
 
+
+! convert Q to reference decomp, if necessary
+if (data_x_pencils) then
+   data_x_pencils = .false.
+   q1=Q; call transpose_from_x_3d(q1,Q)
+endif
 
 
 
@@ -1106,11 +1092,11 @@ integer i,j,k,km,im,jm,n
 real*8 :: vx,wx,uy,wy,uz,vz,xw
 
 
-! take the FFT of Q
-do n=1,n_var
-   work=Q_grid(:,:,:,n)
-   call z_fft3d_trashinput(work,Qhat(1,1,1,n),work2) 
-enddo
+!take the FFT of Q  (already done - dont have to recompute here)
+!do n=1,n_var
+!   work=Q_grid(:,:,:,n)
+!   call z_fft3d_trashinput(work,Qhat(1,1,1,n),work2) 
+!enddo
 
 !compute vorticity (in spectral space)
 do j=1,ny_2dz
@@ -1168,10 +1154,6 @@ do n=1,3
    call compute_spectrum_z_fft(vor_hat(1,1,1,n),vor_hat(1,1,1,n),spec_tmp)
    spec_ens2=spec_ens2+spec_tmp
 enddo
-
-
-
-
 
 
 end subroutine

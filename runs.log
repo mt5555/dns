@@ -151,7 +151,7 @@ This run should take 13K timesteps.  on 4096cores, .5min per = 120h
 
 NSF1:  first Tag of code for NSF petascale RFP:
 NSF2:  Tag of debugged dnsp code
-
+NSF3:  Tag dnsp + instrumented FFT and A2A overlaop ????   <- do this
 
 
 *******************************************************************************
@@ -161,6 +161,15 @@ N=12288
 Rl = 2000
 delt=.0001 ett
 vorticity, velocity, pressure saved every .02 ett
+
+my delt:  sqrt(ke) delt/delx = .17  (see below)
+
+ett/delt = (2 ke / eps) / (.17 delx/sqrt(ke))
+         = 2 .17 ke^3/2 / eps / delx
+delx ett/delt  = 2 .17 (ke eps^-2/3)^3/2  
+ ett/delt  = 2 .17 (sqrt(3/20)  R_l )^3/2  / (kmax delx)
+
+
 
 
 ett = 2*ke/eps

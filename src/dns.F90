@@ -99,23 +99,16 @@ seed=seed+my_pe+1000*time_initial
 call random_seed(put=seed)
 deallocate(seed)
 
+call wallclock(tmx2)
+tims(1)=tmx2-tmx1  ! total initialization
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  Solve the equations
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-call wallclock(tmx2)
 write(message,'(a)') 'Time stepping...(calling dns_solve)'
 call print_message(message)
-! set all counters to zero (so they dont include initialization)
-tims=0
-! tims(1) times the total initialization
-tims(1)=tmx2-tmx1
-
 call dns_solve(Q,Qhat,q1,q2,rhs,work1,work2,itime)
-
-
-
 
 
 
@@ -174,6 +167,12 @@ if (maxval(tims_max(6:11))>0) then
    write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_y   ',tims_ave(11),tims_max(11)
    call print_message(message)
    write(message,'(a,2f9.2)')          '   traspose total     ',sum(tims_ave(6:11))
+   call print_message(message)
+endif
+if (maxval(tims_max(18:19))>0) then
+   write(message,'(a,2f9.2,a,f5.1,a)') '   FFT                ',tims_ave(18),tims_max(18),' count per timestep=',ncalls(18)/real(itime),' N^2'
+   call print_message(message)
+   write(message,'(a,2f9.2,a,f5.1,a)') '   iFFT               ',tims_ave(19),tims_max(19),' count per timestep=',ncalls(19)/real(itime),' N^2'
    call print_message(message)
 endif
 

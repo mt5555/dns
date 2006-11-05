@@ -173,7 +173,7 @@ complex-to-complex FFTs for the last two (of size N/2).
 Our code uses only real-to-real FFTs, always of length N (the cost
 is identical).
 
-The total cost of the three 3D FFTs algorithm is thus:
+The total cost of of doing three of the 3D FFTs is thus:
 \begin{enumerate}
 \item 27 $N^2$ 1D real-to-real FFTs of length N
 \item 3 x-pencil to y-pencil transposes of size $N^3$.  

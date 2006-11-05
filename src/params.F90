@@ -76,9 +76,6 @@ logical :: compute_passive_on_restart = .false.
 
 logical :: data_x_pencils=.false.   ! Q currently stored in x-pencil decomp
                                     ! not our regular (nx,ny,nz) decomp
-logical :: rhs_trashed = .false.    ! set to true if diagnostics use this
-                                    ! as a work array (so time stepping has
-                                    ! to recompute anything stored here) 
 logical :: use_vorticity3=.false.   ! compute vorticity assuming uy and vx
                                     ! were already computed and saved in RHS
                                     ! array
@@ -448,8 +445,9 @@ real*8 :: ints(nints),maxs(nints)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-integer,parameter :: ntimers=17
+integer,parameter :: ntimers=19
 real*8 :: tims(ntimers)=0
+integer :: ncalls(ntimers)=0
 !  tims(1)    time for initialization
 !  tims(2)    total runtime after initialization
 !  tims(3)    time spent in time_control() after initialization
@@ -467,6 +465,8 @@ real*8 :: tims(ntimers)=0
 !  tims(15)    compute_psi
 !  tims(16)    tracer_advance
 !  tims(17)    ellipitical contours
+!  tims(18)    FFT
+!  tims(19)    iFFT
 !
 !
 

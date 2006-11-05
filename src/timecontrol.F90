@@ -23,7 +23,6 @@ real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss,xtmp
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen,doit_model
 logical :: convert_back_to_x_pencils
-logical,external :: call_output_model
 integer :: n1,n1d,n2,n2d,n3,n3d
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
@@ -344,45 +343,23 @@ if (doit_screen) then
            'total d/dt(w) vis=',delens_tot,'   mu <w,w_xx>= ',ens_diss
       call print_message(message)	
    endif
-
 endif
 
 
 
 
-
-
-! will we be calling diagnostics, which may trash data in rhs?
-rhs_trashed = call_output_model(doit_model,doit_diag,time)
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! If data in Q is using x-pencil decomposition instead of
-! the standard Q(nx,ny,nz) decompostion, convert if we are computing
-! diagnostics or doing output:
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (data_x_pencils) then
-   if (doit_output .or. rhs_trashed) then
-      data_x_pencils = .false.
-      q1=Q
-      call transpose_from_x_3d(q1,Q)
-   endif
-endif
-!
-!  restart dumps 
-!  each processor writes its own file.  
-!  this is no longer used -  we can restart from singlefile snapshot output
-if (doit_restart) then
-   call print_message("writing restart file...")
-   call multfile_io(time,Q(1,1,1,1),0)  ! write headers
-   do i=1,3	
-      call multfile_io(time,Q(1,1,1,i),i) ! write u,v,w files
-   enddo
-endif
 !
 !  output dumps
 !
 if (doit_output) then
    write(message,'(a,f10.4)') "writing output files at t=",time
+
+   ! convert Q to reference decomp, if necessary
+   if (data_x_pencils) then
+      data_x_pencils = .false.
+      q1=Q; call transpose_from_x_3d(q1,Q)
+   endif
+
    call print_message(message)
    if (equations==NS_UVW .and. w_spec) then
       call transpose_from_z_3d(Qhat,q1)
