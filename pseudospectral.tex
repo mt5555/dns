@@ -430,6 +430,10 @@ Dissipation rate
 \[
 \epsilon = \nu \sum_i < \grad u_i \cdot \grad u_i >
 \]
+Integral-like length scale
+\[
+L = k^{3/2}/\epsilon
+\]
 Kolmogorov length scale
 \[
 \eta = {\nu^{\frac34}}  {\epsilon^{-\frac14}} 
@@ -492,7 +496,7 @@ For incompressible homogeneous isotropic turbulence, it is customary
 to write this in terms of the kinetic energy $k$, and maximum
 wave number $k_\text{max}$,
 \[
-\Delta t \le C  { \Delta x } / { \sqrt{k} } \qquad k=\frac12 < \uv^2 >
+\Delta t \le C    k^{-1/2} k_\text{max}^{-1}
 \]
 We have determined, via experiment, that a stable timestep is
 given by 
@@ -500,14 +504,15 @@ given by
 C=0.5.
 \]  
 As a check on this value, consider that given
-in Pope, {\em Turbulent Flows},
+in Pope, {\em Turbulent Flows}, Cambridge University Press, 2000.
 \[
+ \Delta t = \frac1{20} \Delta x k^{-1/2} = .105   k^{-1/2} k_\text{max}^{-1}
 \]
-
+where we have assumed a 2/3 dealiasing.  
 
 We write the time step in terms of eddy turnover time by
 \[
-\Delta t / t_e =  \frac12 C k^{-3/2} \epsilon k_\text{max}^{-1}
+\Delta t / t_e =  \frac12 C L^{-1}  k_\text{max}^{-1}
 \]
 
 \subsection{Deterministic Low Wave Number Forcing}
@@ -518,8 +523,9 @@ version of their formula for the relaxation time scale, and only forces
 in the first two spherical wave numbers shells.
 It is documented in detail in Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
 
-The forcing results in an eddy turnover time of $t_e = 1.05$,
-with $k=1.9$ and $\epsilon=3.6$.  When using this forcing,
+The forcing results in $k=1.9$ and $\epsilon=3.6$, which gives
+an eddy turnover time of $t_e = 1.05$ and $L=.73$. 
+When using this forcing,
 after deciding on the resolution condition $k_\text{max} \eta$,
 one can determine the viscosity (which must be specified in the
 input file) to use in the simulation based on the resolution and 
@@ -529,13 +535,11 @@ Taking
    k_\text{max} \eta = 1
 \]
 we have $ \nu = \epsilon^{1/3} k_\text{max}^{-4/3}$.
-The resulting Taylor Reynolds number will be
+The resulting Taylor Reynolds and CFL condition are
 \[
-R_\lambda =   \sqrt{\frac{20}{3}} k \epsilon^{-2/3} k_\text{max}^{2/3}  =   2.1 k_\text{max}^{2/3}
-\]
-and the CFL condition is
-\[
-\Delta t / t_e =   \frac12 C k^{-3/2} \epsilon k_\text{max}^{-1} = .35 k_\text{max}^{-1}
+R_\lambda =   \sqrt{\frac{20}{3}} L^{2/3} k_\text{max}^{2/3}  =   2.1 k_\text{max}^{2/3}
+\qquad
+\Delta t / t_e =    .35 k_\text{max}^{-1}
 \]
 assuming $C=.5$
 
