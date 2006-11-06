@@ -285,19 +285,20 @@ do ns=np1,np2
    enddo
    enddo
    enddo
-   if (passive_type(np1)==4) then
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      rhsg(i,j,k,ns)=rhsg(i,j,k,ns) - bous*Q(i,j,k,3)
-   enddo
-   enddo
-   enddo
-   endif
-
    ! we cannot dealias here, because below we use rhsg(:,:,:,3), below
    ! which coult potentially trash some of rhs(:,:,:,4)
 enddo
+
+! chceck of first scaler is the density and we are running boussinisque
+if (passive_type(np1)==4) then
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      rhsg(i,j,k,np1)=rhsg(i,j,k,np1) - bous*Q(i,j,k,3)
+   enddo
+   enddo
+   enddo
+endif
 
 
 
@@ -343,12 +344,11 @@ enddo
 #ifdef ALPHA_MODEL
    call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
-  if (ncpu_z==1) then
+!   if (ncpu_x==1 .and. ncpu_y == 1 ) then
+!      call ns_vorticity3(rhsg,Qhat,work,p)  ! not yet coded
+!   else
       call ns_vorticity(rhsg,Qhat,work,p)
-      ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
-   else
-      call ns_vorticity(rhsg,Qhat,work,p)
-   endif
+!   endif
 #endif
 
 

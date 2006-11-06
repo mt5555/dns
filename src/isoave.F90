@@ -240,9 +240,6 @@ x=pmax-1+5;   call cwrite8(fid,x,1)   ! number of longitudinal (1 per direction)
 x=pmax-1+3;    call cwrite8(fid,x,1)   ! number of transverse (2 per direction)
 x=8+nscalars;      call cwrite8(fid,x,1)   ! number of scalars
 x=0;      call cwrite8(fid,x,1)   ! number of future type2
-!
-! Susan cannot read things below here!
-!
 
 
 ! write out the r values
