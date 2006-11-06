@@ -285,8 +285,7 @@ do ns=np1,np2
    enddo
    enddo
    enddo
-
-   if (passive_type(ns)==4) then
+   if (passive_type(np1)==4) then
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
@@ -299,7 +298,6 @@ do ns=np1,np2
    ! we cannot dealias here, because below we use rhsg(:,:,:,3), below
    ! which coult potentially trash some of rhs(:,:,:,4)
 enddo
-
 
 
 
@@ -341,12 +339,16 @@ enddo
 ! x,yder from Qgrid:       6x,6y,12FFT 
 !
 
+
 #ifdef ALPHA_MODEL
    call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
-!   if (ncpu_x==1 .and. ncpu_y == 1 ) then
-!      call ns_vorticity3(rhsg,Qhat,work,p)  ! not yet coded
-   call ns_vorticity(rhsg,Qhat,work,p)
+  if (ncpu_z==1) then
+      call ns_vorticity(rhsg,Qhat,work,p)
+      ! call ns_voriticyt2(rhsg,Q,Qhat,work,p)  ! not yet coded!
+   else
+      call ns_vorticity(rhsg,Qhat,work,p)
+   endif
 #endif
 
 

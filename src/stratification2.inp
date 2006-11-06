@@ -4,7 +4,7 @@ ns_uvw       ! equations
 zero        ! initial condition:  KH-blob, KH-anal, iso12
 0           ! init condition subtype
 sto_high_24   ! forcing:  none, iso, iso12, iso12w, iso23w
-1.0  8        ! forcing strength <f,f>, and width in wave # space
+2.0  8        ! forcing strength <f,f>, and width in wave # space
 value        ! viscosity type  (value, smallest, kediff, Re)
 0e-4        ! viscosity coefficient.  (300)
 hyper16      ! hyper vis
@@ -24,7 +24,7 @@ fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-2.0          ! time to run
+80.0          ! time to run
 1.5          ! adv cfl  (0 = disabled, use min_dt) .8
 0.200           ! vis cfl  (0 = disabled, use min_dt) .01
 0.000010             ! min_dt  
