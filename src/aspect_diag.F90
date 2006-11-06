@@ -258,6 +258,7 @@ enddo
 ! potvor = grad(rho) dot vorticity  
 ! (use the first element of the potensdiss_* arrays as work arrays)
 pv_type=1
+!
 call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
 potensdiss_kappa = vor
 
@@ -306,17 +307,10 @@ call der(q(1,1,1,np1),potensdiss_mu(1,1,1,3),dummy,theta_z,DX_ONLY,3)
 !bw
 potens_diss_mu = 0
 do k=nz1,nz2
-   km=(kmcord(k))
    do j=ny1,ny2
-      jm=(jmcord(j))
       do i=nx1,nx2
-         im=(imcord(i))
-         xfac = 2*2*2
-         if (im==0) xfac=xfac/2
-         if (jm==0) xfac=xfac/2
-         if (km==0) xfac=xfac/2
             
-         potens_diss_mu = potens_diss_mu + mu*xfac*potvor(i,j,k)*( &
+         potens_diss_mu = potens_diss_mu + potvor(i,j,k)*( &
                           potensdiss_kappa(i,j,k,1)*potensdiss_mu(i,j,k,1) + &
                           potensdiss_kappa(i,j,k,2)*potensdiss_mu(i,j,k,2) + &
                           potensdiss_kappa(i,j,k,3)*potensdiss_mu(i,j,k,3) &
@@ -324,7 +318,7 @@ do k=nz1,nz2
       enddo
    enddo
 enddo
-potens_diss_mu=potens_diss_mu/g_nx/g_ny/g_nz
+potens_diss_mu=mu*potens_diss_mu/g_nx/g_ny/g_nz
 !bw
 !bw Now compute the second part of the potential enstrophy dissipation
 !bw
@@ -380,16 +374,9 @@ vor(:,:,:,3) = vor(:,:,:,3) + fcor
 !bw
 potens_diss_kappa = 0
 do k=nz1,nz2
-   km=(kmcord(k))
    do j=ny1,ny2
-      jm=(jmcord(j))
       do i=nx1,nx2
-        im=(imcord(i))
-         xfac = 2*2*2
-         if (im==0) xfac=xfac/2
-         if (jm==0) xfac=xfac/2
-         if (km==0) xfac=xfac/2
-         potens_diss_kappa = potens_diss_kappa + kappa*potvor(i,j,k)*( &
+         potens_diss_kappa = potens_diss_kappa + potvor(i,j,k)*( &
                           vor(i,j,k,1)*potensdiss_kappa(i,j,k,1) + &
                           vor(i,j,k,2)*potensdiss_kappa(i,j,k,2) + &
                           vor(i,j,k,3)*potensdiss_kappa(i,j,k,3) &
@@ -397,7 +384,7 @@ do k=nz1,nz2
       enddo
    enddo
 enddo
-potens_diss_kappa=potens_diss_kappa/g_nx/g_ny/g_nz
+potens_diss_kappa=kappa*potens_diss_kappa/g_nx/g_ny/g_nz
 !bw
 !bw Compute the total potential enstrophy dissipation rate
 !bw Don't forget the minus sign
@@ -410,15 +397,8 @@ potens_diss = - (potens_diss_kappa + potens_diss_mu)
 pv = 0
 potens = 0
 do k=nz1,nz2
-   km=(kmcord(k))
    do j=ny1,ny2
-      jm=(jmcord(j))
       do i=nx1,nx2
-         im=(imcord(i))
-         xfac = 2*2*2
-         if (im==0) xfac=xfac/2
-         if (jm==0) xfac=xfac/2
-         if (km==0) xfac=xfac/2
          pv = pv + potvor(i,j,k)
          potens = potens + (potvor(i,j,k)*potvor(i,j,k)*.5)
       enddo
