@@ -4,8 +4,7 @@ pseudtospectral.tex:
    put in Pope formula 
    put in Flop counts
 code
-   compute kmax
-   code up sqrt(k) kmax CFL
+   run README problem with -.5 CFL
 
 
 DNS code:  1024^3 with pfmon on 16 cpus?
