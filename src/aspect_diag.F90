@@ -391,7 +391,6 @@ do k=nz1,nz2
    enddo
 enddo
 potens_diss_kappa=kappa*potens_diss_kappa/g_nx/g_ny/g_nz
-stop
 !bw
 !bw Compute the total potential enstrophy dissipation rate
 !bw Don't forget the minus sign
