@@ -178,6 +178,11 @@ real*8 :: dummy(1)
 integer :: pv_type, i, j, k, im, jm, km, ierr
 real*8 :: xw,xw2,u2,xw_viss,xfac, vx,wx,uy,wy,uz,vz,pe,totale,potens,pv
 real*8 :: ke,pe_diss,ke_diss,h_diss,ens_diss,rwave,pv_diss,kappa
+!
+! For debuging potential_vorticity
+!
+real*8 :: delxx, delyy, delzz, answer, abserror, xx, yy, zz,twopi
+twopi = 6.2831853071795864769d0
 
 
 !
@@ -258,13 +263,14 @@ enddo
 ! potvor = grad(rho) dot vorticity  
 ! (use the first element of the potensdiss_* arrays as work arrays)
 pv_type=1
-!
+
 call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
 potensdiss_kappa = vor
 
+
 do ivar = 1,3
 !bw
-!bw First compute the _mu part of the dissipation. You already
+!bw First compute the _mu part of the ddissipation. You already
 !bw have omega from calling potential_vorticity stored in vor
 !bw The fft of the vorticity is in potensdiss_kappa
 !bw The dummy array is potensdiss_mu(:,:,:,1)
@@ -385,6 +391,7 @@ do k=nz1,nz2
    enddo
 enddo
 potens_diss_kappa=kappa*potens_diss_kappa/g_nx/g_ny/g_nz
+stop
 !bw
 !bw Compute the total potential enstrophy dissipation rate
 !bw Don't forget the minus sign
