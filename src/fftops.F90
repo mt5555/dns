@@ -372,8 +372,10 @@ integer i,j,k,n
 real*8 dummy(1)
 
 if (n_var<3) call abort("potential vorticity() requires n_var>2")
+if(pv_type/=1) call abort("fftops: potential_vorticity")
 
 call vorticity(vor,u,d1,work)
+
    
 if(pv_type == 1) then
    !bw
@@ -387,8 +389,7 @@ if(pv_type == 1) then
    
    ! compute theta_y
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
-   pv=pv + d1*vor(:,:,:,2)
-   
+   pv=pv + d1*vor(:,:,:,2) 
    ! compute theta_z -- do not forget to add in coriolis here
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*(vor(:,:,:,3)+fcor)
