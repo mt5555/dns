@@ -13,9 +13,12 @@ f_k=0;
 
 fid2=-1;
 
-%fid=endianopen('../../../all.scalars-bous','r');
-fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21asp/all.scalars-bous','r');
+
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low3/qg64/qg64_low3_all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low3/qg64/qg0194.0000.scalars-bous','r');
+fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/qg64_low4_all.scalars-bous','r');
 f_k= 24;
+
 
 
 nscalars=0;
@@ -43,9 +46,9 @@ fclose(fid);
 
 ke=ints(1,:);
 pe=ints(2,:);
-pv=ints(5,:);
-potens=ints(7,:);
-potens_diss=ints(8,:);
+pv=ints(5,:)
+potens=ints(7,:)
+potens_diss=ints(8,:)
 
 tote = ke + pe
 
@@ -71,10 +74,15 @@ hold off
 figure(3)
 clf
 hold on
-plot(time,potens,'g')
+plot(time,potens,'g');hold on;
 title('Potential enstrophy');
 hold off
 
+figure(4)
+clf
+hold on
+plot(time(1:length(time)-1),diff(potens)./diff(time),'b');
+title('potential enstrophy dissipation rate dQ/dt')
 
 print -depsc bous-scalars.ps
 

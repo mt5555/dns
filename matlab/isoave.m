@@ -42,7 +42,7 @@ ext='.isostr';
 %Q_eps = 1;
 ext='.bisostr';
 
-name='/nh/u/skurien/projects/pv/data_analysis/lowforc/qg0170.0000'
+name='/nh/u/skurien/projects/pv/data_analysis/lowforc/qg0292.0000'
 nx=256; delx_over_eta=2.5; epsilon=2.72; teddy=1.24; % R_l=250
 Q_eps = 1;
 ext='.bisostr';
@@ -98,7 +98,7 @@ xx=(1:.5:(nx./2.5)) / nx;
 if (in==6) 
   compisoave_paper(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 else
-  [y45,y415,y43,eps,h_eps,y215]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
+  [y45,y415,y43,eps,h_eps,y215,y23]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 end
 
 return
@@ -121,7 +121,7 @@ for k=0:1
 if (klaws ==5)
    ext = sprintf('.bisostr');
 end
-  [xx,y45,y415,y43,y23,epsl]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy);
+  [xx,y45,y415,y43,epsl]=compisoave(name,ext,ndir_use,klaws,plot_posneg,check_isotropy);
   yysum=yysum+y45*epsl/eps/8;
   figure(10);
   plot(xx,y45);

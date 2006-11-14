@@ -1,4 +1,4 @@
-function [y45,y415,y43,epsilon,h_epsilon,y215,ytt,Dlt1_wt,Dlt2_wt]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
+function [y45,y415,y43,epsilon,h_epsilon,y215,y23]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,plot_points)
 %
 % compute angle average and plot a single snapshot
 % klaws==1   4/5ths  and other laws
@@ -116,7 +116,11 @@ disp(sprintf('ndir:     %f',ndir));
 disp(' ')
 
 
-
+y45 = 0;
+y415 = 0;
+y43 = 0;
+y215 = 0;
+y23 = 0;
 
 
 
@@ -678,12 +682,12 @@ for i=1:ndir
    
   x_plot=x*nx*delx_over_eta;            % units of r/eta
   Dl(:,i,1);
-  Q_eps
+  Q_eps;
   
-    y=Dl(:,i,1)./((Q_eps)*(x));
-  
-  semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',5); hold on;
-  pause
+ %   y=Dl(:,i,1)./((Q_eps)*(x));   % normalize by dissipation rate 
+    y = Dl(:,i,1)./(Q_eps*x);
+ 
+  semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',5); hold on;  
 
   yyave=yyave+w(i)*spline(x,y,xx);
 
