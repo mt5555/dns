@@ -257,6 +257,7 @@ logical,save :: firstcall=.true.
 if (firstcall) then
    firstcall=.false.
    ! initialize uygrid,vxgrid
+   call print_message('allocating extra arrays for use_vorticity3')
    allocate(uygrid(nx,ny,nz))
    allocate(vxgrid(nx,ny,nz))
    call zx_ifft3d_and_dy(Q(1,1,1,1),work2,uygrid,work)
@@ -265,7 +266,6 @@ endif
 
 ! stage 1
 call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,uygrid,vxgrid)
-
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
@@ -414,14 +414,13 @@ integer compute_ints,rkstage
 real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 !real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 real*8 Q_grid(g_nx2,nslabz,ny_2dx,n_var)
-real*8 uygrid(g_nz2,nx_2dz,ny_2dz)    
-real*8 vxgrid(g_nz2,nx_2dz,ny_2dz)    
+real*8 uygrid(nx,ny,nz)
+real*8 vxgrid(nx,ny,nz)
 
 
 ! output  (rhsg and rhs are overlapped in memory)
 ! true size must be nx,ny,nz,n_var
 real*8 rhs(g_nz2,nx_2dz,ny_2dz,n_var)
-!real*8 rhsg(nx,ny,nz,n_var)
 real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
 
 ! work/storage
@@ -447,6 +446,9 @@ call wallclock(tmx1)
 ! see notes in ns.F90 about pros/cons on how to compute vorticity
 !
 if (use_vorticity3) then
+   k=ny_2dx
+   j=nslabz
+   i=g_nx
    call ns_vorticity3(rhsg,Qhat,work,p,uygrid,vxgrid)  
 else
    call ns_vorticity(rhsg,Qhat,work,p)
@@ -845,8 +847,8 @@ implicit none
 real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 real*8 rhsg(g_nx2,nslabz,ny_2dx,n_var)
 real*8 work(nx,ny,nz)
-real*8 uygrid(g_nz2,nx_2dz,ny_2dz)    
-real*8 vxgrid(g_nz2,nx_2dz,ny_2dz)    
+real*8 uygrid(g_nz2,nslabz,ny_2dz)    
+real*8 vxgrid(g_nz2,nslabz,ny_2dz)    
 real*8 p(g_nz2,nx_2dz,ny_2dz)    
 
 !local
@@ -862,7 +864,6 @@ do i=1,g_nx
 enddo
 enddo
 enddo
-
 
 
 ! compute 1st and 2nd components in the usual method:

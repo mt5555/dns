@@ -170,9 +170,11 @@ if (maxval(tims_max(6:11))>0) then
    call print_message(message)
 endif
 if (maxval(tims_max(18:19))>0) then
-   write(message,'(a,2f9.2,a,f5.1,a)') '   FFT                ',tims_ave(18),tims_max(18),' count per timestep=',ncalls(18)/real(itime),' N^2'
+   write(message,'(a,2f9.2,a,f5.1,a)') '   FFT                ',tims_ave(18),tims_max(18),' count per timestep=',&
+   ncalls(18)/real(itime),' N^2'
    call print_message(message)
-   write(message,'(a,2f9.2,a,f5.1,a)') '   iFFT               ',tims_ave(19),tims_max(19),' count per timestep=',ncalls(19)/real(itime),' N^2'
+   write(message,'(a,2f9.2,a,f5.1,a)') '   iFFT               ',tims_ave(19),tims_max(19),' count per timestep=',&
+   ncalls(19)/real(itime),' N^2'
    call print_message(message)
 endif
 
