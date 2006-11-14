@@ -676,14 +676,14 @@ type(pdf_structure_function) :: str
 
 ! local variables
 real*8,allocatable :: pdfdata(:,:)
-integer :: bin,ierr,n,ndelta,ncalls
+integer :: bin,ierr,n,ndelta,ncalls2
 
 
 #ifdef USE_MPI
 ! find maximum value of bin  MPI max
 call mpi_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
-call mpi_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
-str%ncalls=ncalls  ! in case io_pe has ncalls=0
+call mpi_allreduce(str%ncalls,ncalls2,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+str%ncalls=ncalls2  ! in case io_pe has ncalls=0
 
 ! resize all str's to size bin
 call resize_pdf(str,bin)
@@ -728,14 +728,14 @@ type(jpdf_structure_function) :: str
 
 ! local variables
 real*8,allocatable :: pdfdata(:,:,:)
-integer :: bin,ierr,n,ndelta,ncalls
+integer :: bin,ierr,n,ndelta,ncalls2
 
 
 #ifdef USE_MPI
 ! find maximum value of bin  MPI max
 call mpi_allreduce(str%nbin,bin,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
-call mpi_allreduce(str%ncalls,ncalls,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
-str%ncalls=ncalls  ! in case io_pe has ncalls=0
+call mpi_allreduce(str%ncalls,ncalls2,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
+str%ncalls=ncalls2  ! in case io_pe has ncalls=0
 
 ! resize all str's to size bin
 call resize_jpdf(str,bin)
