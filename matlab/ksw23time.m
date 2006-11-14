@@ -14,7 +14,7 @@ name = '~/projects/pv/data_analysis/lowforc/low4/qg64/qg';
 pname = 'qg';
 ext='.bisostr';
 times=[200:2:256];
-nx = 256;
+nx = 64;
 
 %check this subroutine, for now set averages to 1
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
