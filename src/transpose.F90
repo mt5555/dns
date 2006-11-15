@@ -1,6 +1,6 @@
 #include "macros.h"
 
-#undef A2AOVERLAP
+#define A2AOVERLAP
 
 module transpose
 use params
