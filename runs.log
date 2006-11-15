@@ -1,4 +1,30 @@
 *******************************************************************************
+11/14
+
+RS Jumbo runs
+
+3072^3  
+VN mode
+9216cores   done
+6144cores   not enough memory.  should require .7gb per core.  
+             (setenv MPICH_UNEX_BUFFER_SIZE 180M)
+
+6144cores   trying w/o MPICH above
+
+
+3072cores
+
+CO mode
+3072nodes  
+
+
+
+
+
+
+
+
+*******************************************************************************
 8/23
 FLOP count runs
 
