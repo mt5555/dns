@@ -250,16 +250,16 @@ integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 
 ! storage for first two components of vorticity, needed for
 ! use_vorticity3 trick:
-real*8,save,allocatable  :: uygrid(:,:,:)
-real*8,save,allocatable  :: vxgrid(:,:,:)
+real*8,save  :: uygrid(nx,ny,nz)
+real*8,save  :: vxgrid(nx,ny,nz)
 logical,save :: firstcall=.true.
 
 if (firstcall) then
    firstcall=.false.
    ! initialize uygrid,vxgrid
-   call print_message('allocating extra arrays for use_vorticity3')
-   allocate(uygrid(nx,ny,nz))
-   allocate(vxgrid(nx,ny,nz))
+   !call print_message('allocating extra arrays for use_vorticity3')
+   !allocate(uygrid(nx,ny,nz))
+   !allocate(vxgrid(nx,ny,nz))
    call zx_ifft3d_and_dy(Q(1,1,1,1),work2,uygrid,work)
    call zx_ifft3d_and_dx(Q(1,1,1,2),work2,vxgrid,work)
 endif
