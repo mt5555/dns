@@ -441,8 +441,12 @@ real*8 :: one=1,xfac,diff_2h,kmode
 integer i,j,k,l,ierr
 character(len=80) message,carg
 integer input_file_type
+#ifdef GFORTRAN
 integer,intrinsic :: iargc
 intrinsic :: getarg
+#else
+integer,external :: iargc
+#endif
 
 if (my_pe==io_pe) then
    !
