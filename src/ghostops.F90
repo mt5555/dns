@@ -91,7 +91,7 @@ endif
 !
 #ifdef COMPACT
 if (ndim/=2) then
-   call abort("helmholtz_dirichlet_inv() not coded for 3D compact")
+   call abortdns("helmholtz_dirichlet_inv() not coded for 3D compact")
 endif
 axy=(delx**2+dely**2)/(12*delx*delx*dely*dely)
 
@@ -119,7 +119,7 @@ if (beta==0) then
    return
 endif
 if (alpha/=0) then
-   call abort("helmholtz_dirichlet_inv() cant yet handle alpha=0")
+   call abortdns("helmholtz_dirichlet_inv() cant yet handle alpha=0")
 endif
 !
 !  let phi = f on the boundary, 0 inside

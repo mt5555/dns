@@ -59,7 +59,7 @@ wval(2)=4/8.
 wval(3)=2/8.
 wval(4)=1/8.
 if (nelld /= 4) then
-   call abort("ellipse init error")
+   call abortdns("ellipse init error")
 endif
 
 do np=1,npd
@@ -105,7 +105,7 @@ if (io_pe==my_pe) then
    call copen(fname,"w",fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "output ellipse: Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
 
    
@@ -132,7 +132,7 @@ if (io_pe==my_pe) then
    call copen(fname,"w",fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "output vxline: Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    
    tmp=vxline_count
@@ -181,7 +181,7 @@ if (center_only==1) return
 
 
 if (mxw_init<=0) then
-   call abort("ellipse(): mxw_init was not set")
+   call abortdns("ellipse(): mxw_init was not set")
 endif
 
 #ifdef COMP_ELLIPSE_CONTOUR
@@ -496,7 +496,7 @@ integer :: np,count,ierr
             print *,'count=',count
             print *,mxcord(1),r(np),cosc(np)
             print *,mxcord(2),r(np),sinc(np)
-            call abort("findellipse() count iteration failure")
+            call abortdns("findellipse() count iteration failure")
          endif
       enddo
    enddo
@@ -566,7 +566,7 @@ integer :: reset
          r(np)=(Rint(1)+Rint(2))/2
          if (Rint(2)-Rint(1) < contour_eps) exit
          count=count+1
-         if (count>1000 .or. r(np)<-9d10) call abort("ellipse() count iteration failure")
+         if (count>1000 .or. r(np)<-9d10) call abortdns("ellipse() count iteration failure")
       enddo
 
 
@@ -574,7 +574,7 @@ integer :: reset
            Rint(2)==Rint_orig(2) ) then
          !print *,'Rint_org: ',Rint_orig
          !print *,'Rint:     ',Rint
-         if (reset==1) call abort("ellipse(): bad [rmin,rmax] stopping...")
+         if (reset==1) call abortdns("ellipse(): bad [rmin,rmax] stopping...")
          call print_message("ellipse(): bad [Rmin,Rmax]. Resetting and trying again...")
          r(np)=0
          reset=1
@@ -650,7 +650,7 @@ if (1<=igrid .and. igrid+1<o_nx .and. 1<=jgrid .and. jgrid+1<o_ny) then
          winterp=-9d20
       endif
 else
-   call abort("interp4w: ellipse iteration point outside of domain")
+   call abortdns("interp4w: ellipse iteration point outside of domain")
 endif
 
 
@@ -719,7 +719,7 @@ integer :: igrid,jgrid,jj,jc
    else
       print *,'interpolation point outside of domain: '
       write(*,'(2i5,2e14.5,f5.0)') my_pe,xi,yi
-      call abort("findcenter_finegrid(): point outside of domain") 
+      call abortdns("findcenter_finegrid(): point outside of domain") 
    endif
 end subroutine
 

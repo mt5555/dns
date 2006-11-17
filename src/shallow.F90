@@ -38,13 +38,13 @@ if (firstcall) then
    enddo
    if (equations/=SHALLOW) then
       call print_message("Error: shallow water model can only run equations=SHALLOW")
-      call abort("initial conditions are probably incorrect.")
+      call abortdns("initial conditions are probably incorrect.")
    endif
    if (ndim/=2) then
-      call abort("Error: shallow water model cannot run in 3D")
+      call abortdns("Error: shallow water model cannot run in 3D")
    endif
    if (nz/=1) then
-      call abort("Error: shallow water model cannot run in 3D")
+      call abortdns("Error: shallow water model cannot run in 3D")
    endif
 endif
 

@@ -37,22 +37,22 @@ integer :: n
 !
 
 if ( (nx1-1)<nghost ) then 
-    call abort("nx1 too small for number of ghost cells requested")
+    call abortdns("nx1 too small for number of ghost cells requested")
 endif
 if ( (nx-nx2)<nghost) then 
-    call abort("nx too small for number of ghost cells requested")
+    call abortdns("nx too small for number of ghost cells requested")
 endif
 if ( (ny1-1)<nghost) then 
-    call abort("ny1 too small for number of ghost cells requested")
+    call abortdns("ny1 too small for number of ghost cells requested")
 endif
 if ( (ny-ny2)<nghost) then 
-    call abort("ny too small for number of ghost cells requested")
+    call abortdns("ny too small for number of ghost cells requested")
 endif
 if ( (nz1-1)<nghost .and. ndim==3 ) then 
-    call abort("nz1 too small for number of ghost cells requested")
+    call abortdns("nz1 too small for number of ghost cells requested")
 endif
 if ( (nz-nz2)<nghost .and.  ndim==3 ) then 
-    call abort("nz too small for number of ghost cells requested")
+    call abortdns("nz too small for number of ghost cells requested")
 endif
 
 firstcall=.false.

@@ -112,8 +112,8 @@ subroutine fftinit(n,index)
 integer n,index
 character*80 message
 
-if (init==0) call abort("fft99_interface.F90: call fft_interface_init to initialize first!")
-if (n>1000000) call abort("fft99_interface.F90: n>1 million")
+if (init==0) call abortdns("fft99_interface.F90: call fft_interface_init to initialize first!")
+if (n>1000000) call abortdns("fft99_interface.F90: n>1 million")
 
 fftdata(index)%size=n
 allocate(fftdata(index)%trigs(n+15))
@@ -123,7 +123,7 @@ write(message,'(a,i6)') 'Initializing SGI FFT of size n=',n
 call print_message(message)
 
 CALL DZFFTM (0, n, 1, 0, 0, 0, 0, 0, fftdata(index)%trigs, 0,0)
-if (n<0) call abort("Error: invalid value of n for fft")
+if (n<0) call abortdns("Error: invalid value of n for fft")
 
 end subroutine
 
@@ -142,7 +142,7 @@ do
    i=i+1
    if (i>num_fftsizes) then
       write(message_str,'(a,i10)') "fft_interface.F90:  Failed initializing an fft of size =",n1
-      call abort(message_str)
+      call abortdns(message_str)
    endif
 
    if (fftdata(i)%size==0) then

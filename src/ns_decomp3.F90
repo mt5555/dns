@@ -30,10 +30,10 @@ if (firstcall) then
       call fft3d(Q(1,1,1,n),rhs)  ! use rhs as a work array
    enddo
    if (dealias/=1) then
-      call abort("Error: using ns3dspectral model, requires dealias==1")
+      call abortdns("Error: using ns3dspectral model, requires dealias==1")
    endif
    if (forcing_type==1) then
-      call abort("Error: SPEC_SLOW model cannot use forcing_type=1")
+      call abortdns("Error: SPEC_SLOW model cannot use forcing_type=1")
    endif
 endif
 

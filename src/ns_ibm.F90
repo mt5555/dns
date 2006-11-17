@@ -36,7 +36,7 @@ logical,save :: body_form=.false.
 if (firstcall) then
    firstcall=.false.
    if (alpha_value/=0) then
-      call abort("Error: dnsgrid cannot handle alpha>0.")
+      call abortdns("Error: dnsgrid cannot handle alpha>0.")
    endif
 
 ! set up coefficients for 'jamal' timestepping scheme

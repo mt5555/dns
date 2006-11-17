@@ -1,13 +1,13 @@
 #include "macros.h"
 
 
-subroutine abort(message)
+subroutine abortdns(message)
 use mpi
 use params
 implicit none
 integer ierr
 character(len=*) message
-character(len=15) :: pre="ABORT"
+character(len=15) :: pre="ABORTDNS: "
 write(*,'(a)') pre // message
 
 call flush(6)

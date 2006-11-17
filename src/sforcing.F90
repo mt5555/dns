@@ -62,7 +62,7 @@ if (forcing_type==7) call sforcing12(rhs,Qhat,f_diss,fxx_diss,3)
 if (forcing_type==8) call stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,0)
 
 if (Lz/=1 .and. forcing_type/=8) then
-   call abort("Error: only forcing_type==8 has been coded for Lz<>1")
+   call abortdns("Error: only forcing_type==8 has been coded for Lz<>1")
 endif
 
 
@@ -169,7 +169,7 @@ if (0==init_sforcing) then
          ener_target(wn)=exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
       enddo
    endif
-   if (numb>numb_max) call abort("sforcing12: numb_max too small")
+   if (numb>numb_max) call abortdns("sforcing12: numb_max too small")
 endif
 
 
@@ -345,7 +345,7 @@ if (0==init_sforcing) then
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
-   if (numb>numb_max) call abort("sforcing12_helicity: numb_max too small")
+   if (numb>numb_max) call abortdns("sforcing12_helicity: numb_max too small")
 endif
 
 
@@ -782,7 +782,7 @@ if (0==init_sforcing) then
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
       if (abs(z_imcord(i))>numbs .or. abs(z_jmcord(j))>numbs .or. abs(z_kmcord(k))>numbs)  then 
-           call abort("Index error in sforcing_random12")
+           call abortdns("Index error in sforcing_random12")
       endif
    enddo
    enddo
@@ -1140,7 +1140,7 @@ print *,'<R,R> ='
 do wn=numb1,numb
    print *,ff(wn,:)
 enddo
-call abort("end stats")
+call abortdns("end stats")
 #endif
 
 
@@ -1458,7 +1458,7 @@ do km=-nmax,nmax
    else if (sm==3) then
       b=rmodes(im,jm,km)/8
    else
-      call abort("this cant happen")
+      call abortdns("this cant happen")
    endif
 
    cmodes(1,ip,jp,kp)=cmodes(1,ip,jp,kp) + a;    

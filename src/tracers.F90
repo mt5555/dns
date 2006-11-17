@@ -54,7 +54,7 @@ numt_max=2*in_numt
 
 
 if (allocated(tracer)) then
-   call abort("allocate_tracers(): error: tracers allready allocated")
+   call abortdns("allocate_tracers(): error: tracers allready allocated")
 endif
 
 allocate(tracer(numt_max,ndim+1))  
@@ -122,7 +122,7 @@ call print_message(message)
 
 if (numt-numt_insert>0) then
    if (numt-numt_insert /= vxline_count) then
-      call abort("Error: non-insert tracers <> vxline_count")
+      call abortdns("Error: non-insert tracers <> vxline_count")
    endif
 endif
 
@@ -182,14 +182,14 @@ if (my_pe==fpe) then
          write(message,'(a,i5)') "tracer_io(): Error opening file. Error no=",ierr
          call print_message(message)
          call print_message(fname)
-         call abort("")
+         call abortdns("")
       endif
       call cread8e(fid,x,1,ierr)
       if (ierr/=1) then
          write(message,'(a,i5)') "tracer_io(): Error reading file"
          call print_message(message)
          call print_message(fname)
-         call abort("")
+         call abortdns("")
       endif
       numt_in=x
 
@@ -198,7 +198,7 @@ if (my_pe==fpe) then
       
       call cread8(fid,x,1)
       if (ndim+1 /= nint(x)) then
-         call abort("Error: ndim in code not the same as ndim in tracers restart file")
+         call abortdns("Error: ndim in code not the same as ndim in tracers restart file")
       endif
       call allocate_tracers(numt_in)
       do j=1,ndim+1
@@ -213,7 +213,7 @@ if (my_pe==fpe) then
          write(message,'(a,i5)') "tracer_io(): Error opening file. Error no=",ierr
          call print_message(message)
          call print_message(fname)
-         call abort("")
+         call abortdns("")
       endif
       x=numt
       call cwrite8(fid,x,1)
@@ -241,7 +241,7 @@ if (my_pe==fpe) then
             write(message,'(a,i5)') "tracer_io(): Error cross opening file. Error no=",ierr
             call print_message(message)
             call print_message(fname)
-            call abort("")
+            call abortdns("")
          endif
          x=ncross
          call cwrite8(fid,x,1)
@@ -348,7 +348,7 @@ else if (rk4stage==4) then
 endif
 
 if (g_bdy_y1 /= REFLECT_ODD) then
-   call abort("tracers module requires y1 boundary REFLECT_ODD")
+   call abortdns("tracers module requires y1 boundary REFLECT_ODD")
 endif
 
 do j=inty1,inty2
@@ -431,7 +431,7 @@ do i=1,numt
             tracer(i,j)=tracer(i,j)+c1*trhs(j)
             tracer_tmp(i,j)=tracer_old(i,j)+c2*trhs(j)
          enddo
-         if (maxval(abs(Qint(:,1)))>10) call abort("qint to big")
+         if (maxval(abs(Qint(:,1)))>10) call abortdns("qint to big")
 
       else
          ! point does not belong to my_pe, set position to -inf
@@ -443,7 +443,7 @@ do i=1,numt
    else
       ! print *,'tracer has left the domain: ',i
       ! write(*,'(2i5,2e14.5,f5.0)') my_pe,i,tracer(i,1),tracer(i,2),tracer(i,3)
-      ! call abort("tracer_advance(): point has left domain") 
+      ! call abortdns("tracer_advance(): point has left domain") 
    endif
 enddo
 
@@ -474,7 +474,7 @@ if (rk4stage==4) then
         endif
         if (ierr>10) exit ! this do loop
       enddo
-      call abort("Error: tracers above were not claimed by any CPU")
+      call abortdns("Error: tracers above were not claimed by any CPU")
    endif
 
    ! check for crossings before insertting points
@@ -515,7 +515,7 @@ do k=numt_insert+1,numt
    if (told(k,1)<center(1) .and. tnew(k,1)>=center(1)) then
       ! if angle crosses -pi/2, add to crossing:
       if (1+ncross>ncross_max) then
-         call abort("tracers(): ncross_max too small")
+         call abortdns("tracers(): ncross_max too small")
       endif
       ncross=ncross+1
       cross(ncross,1)=tnew(k,ndim+1)  ! particle label
@@ -632,7 +632,7 @@ end subroutine
 
       if (( cosalf.lt.cutoff ).or.( asq.gt.epsd ) ) then
           if (numt+1>numt_max) then
-             call abort("error: tracer insertion: array too small")
+             call abortdns("error: tracer insertion: array too small")
           endif
 
 #if 0

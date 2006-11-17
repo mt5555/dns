@@ -369,11 +369,11 @@ if (firstcall) then
    firstcall=.false.
    ! we have to be using a slab decomposition
    if (ncpu_x*ncpu_y>1) then
-      call abort("isoave: requires x-y slab decomposition")
+      call abortdns("isoave: requires x-y slab decomposition")
    endif   
    ! in the z-pencil space, we have to have z-x slabs
    if (nslabx /= nx_2dz) then
-      call abort("isoave: z-pencil decomposition to be using z-x slabs")
+      call abortdns("isoave: z-pencil decomposition to be using z-x slabs")
    endif   
    call init
 endif
@@ -384,7 +384,7 @@ if (stype==2) nd=2
 if (stype==1) nd=1
 
 if (nd > n_var) then
-   call abort("n_var insufficint for chosen stype/nd structure functions")
+   call abortdns("n_var insufficint for chosen stype/nd structure functions")
 endif
 
 ntranspose=0
@@ -604,7 +604,7 @@ Do idir=1,ndir
       xmin=abs(rhat(1)*rperp1(1)+rhat(2)*rperp1(2)+rhat(3)*rperp1(3))+ &
            abs(rhat(1)*rperp2(1)+rhat(2)*rperp2(2)+rhat(3)*rperp2(3)) + &
            abs(rperp2(1)*rperp1(1)+rperp2(2)*rperp1(2)+rperp2(3)*rperp1(3))
-      if (xmin>1e-15) call abort("isaove.F90: orthogonality error")
+      if (xmin>1e-15) call abortdns("isaove.F90: orthogonality error")
 
       ! data is in x-y hyperslabs.  
       ! z-direction=0
@@ -702,7 +702,7 @@ Do idir=1,ndir
          qt_uptodate=.false.
          call comp_str_xy(Qs,stype,idir,rhat,rperp1,rperp2,dir_shift)
       else
-         call abort("parallel computation of direction not supported")
+         call abortdns("parallel computation of direction not supported")
       endif
 
 100 continue
@@ -756,7 +756,7 @@ integer :: n1,n1d,n2,n2d,n3,n3d,ierr,p
 if (firstcall) then
    firstcall=.false.
    if (ncpu_x*ncpu_y>1) then
-      call abort("isoave: requires x-y hyperslab parallel decomposition")
+      call abortdns("isoave: requires x-y hyperslab parallel decomposition")
    endif   
    call init
 endif
@@ -960,7 +960,7 @@ do idir=1,ndir
          call transpose_from_z(subcube_st,subcube_s,n1,n1d,n2,n2d,n3,n3d)
          call comp_str_subcube_xy(Qs,idir,rhat,rperp1,rperp2,dir_shift,subcube_s)
       else
-         call abort("parallel computation of direction not supported")
+         call abortdns("parallel computation of direction not supported")
       endif
    enddo
 
@@ -993,7 +993,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
 if (firstcall) then
    if (ncpu_x*ncpu_y*ncpu_z>1) then
-      call abort("isoave1: can only run with 1 MPI cpu")
+      call abortdns("isoave1: can only run with 1 MPI cpu")
    endif   
    firstcall=.false.
    call init
@@ -1094,19 +1094,19 @@ do idir=1,ndir
 
          i2 = i + rvec(1)
          do
-            if (i2<nx1) call abort("isoave: i2<nx1")
+            if (i2<nx1) call abortdns("isoave: i2<nx1")
             if (i2<=nx2) exit
             i2=i2-nslabx
          enddo
          j2 = j + rvec(2)
          do
-            if (j2<ny1) call abort("isoave: j2<ny1")
+            if (j2<ny1) call abortdns("isoave: j2<ny1")
             if (j2<=ny2) exit
             j2=j2-nslaby
          enddo
          k2 = k + rvec(3)
          do
-            if (k2<nz1) call abort("isoave: k2<nz1")
+            if (k2<nz1) call abortdns("isoave: k2<nz1")
             if (k2<=nz2) exit
             k2=k2-nslabz
          enddo
@@ -1164,13 +1164,13 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
          i2 = i + rvec(1)
          do
-            if (i2<nx1) call abort("isoave: i2<nx1")
+            if (i2<nx1) call abortdns("isoave: i2<nx1")
             if (i2<=nx2) exit
             i2=i2-nslabx
          enddo
          j2 = j + rvec(2)
          do
-            if (j2<ny1) call abort("isoave: j2<ny1")
+            if (j2<ny1) call abortdns("isoave: j2<ny1")
             if (j2<=ny2) exit
             j2=j2-nslaby
          enddo
@@ -1241,14 +1241,14 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
          i2 = i + rvec(1)
          do
-            if (i2<1) call abort("isoave: i2<nx1")
+            if (i2<1) call abortdns("isoave: i2<nx1")
             if (i2<=nslabx) exit
             i2=i2-nslabx
          enddo
 
          k2 = k + rvec(3)
          do
-            if (k2<1) call abort("isoave: k2<nz1")
+            if (k2<1) call abortdns("isoave: k2<nz1")
             if (k2<=g_nz) exit
             k2=k2-g_nz
          enddo
@@ -1316,13 +1316,13 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
 
          i2 = i + rvec(1)
          do
-            if (i2<nx1) call abort("isoave: i2<nx1")
+            if (i2<nx1) call abortdns("isoave: i2<nx1")
             if (i2<=nx2) exit
             i2=i2-nslabx
          enddo
          j2 = j + rvec(2)
          do
-            if (j2<ny1) call abort("isoave: j2<ny1")
+            if (j2<ny1) call abortdns("isoave: j2<ny1")
             if (j2<=ny2) exit
             j2=j2-nslaby
          enddo
@@ -1384,14 +1384,14 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n,m,p
          
             i2 = i + rvec(1)
             do
-               if (i2<1) call abort("isoave: i2<nx1")
+               if (i2<1) call abortdns("isoave: i2<nx1")
                if (i2<=nslabx) exit
                i2=i2-nslabx
             enddo
             
             k2 = k + rvec(3)
             do
-               if (k2<1) call abort("isoave: k2<nz1")
+               if (k2<1) call abortdns("isoave: k2<nz1")
                if (k2<=g_nz) exit
                k2=k2-g_nz
             enddo
@@ -1772,7 +1772,7 @@ integer :: idir,idel,i2,j2,k2,i,j,k,n
 if (firstcall) then
    firstcall=.false.
    if (ncpu_x*ncpu_y*ncpu_z>1) then
-      call abort("isoave: can only be called if running on 1 cpu")
+      call abortdns("isoave: can only be called if running on 1 cpu")
    endif
    call init
 endif
@@ -1830,12 +1830,12 @@ integer :: i,j,idel,idir,max_delta
 real*8 :: rvec(3)
 
 if (str_type/=4 .and. use_max_shear_direction) then
-   call abort("Error: isoave.F90 init():  use_max_shear_direction requires str_type==4")
+   call abortdns("Error: isoave.F90 init():  use_max_shear_direction requires str_type==4")
 endif
 
 ! fractional powers
 if (pmax<10) then
-   call abort("pmax set too small") 
+   call abortdns("pmax set too small") 
 endif
 
 fractional_power(2)=.1
@@ -1902,7 +1902,7 @@ do i=9,16
 enddo
 ! determine maximum value of delta to use for this grid
 if (j > ndelta_max) then
-   call abort("isoave init: j > ndelta_max")
+   call abortdns("isoave init: j > ndelta_max")
 endif
 
 max_delta = g_nmin/2
@@ -2034,7 +2034,7 @@ dir(:,73)=(/3,1,-1/)
 
 
 if (ndir_max<73) then
-   call abort("isoave: ndir_max <  73")
+   call abortdns("isoave: ndir_max <  73")
 endif
 
 
@@ -2104,7 +2104,7 @@ else if (numzero < 2 ) then
    enddo
 
 else
-   call abort("compute_perp(): this is not possible")
+   call abortdns("compute_perp(): this is not possible")
 endif
 rp1(i)=-r(j)
 rp1(j)=r(i)

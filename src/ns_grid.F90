@@ -25,7 +25,7 @@ character(len=240) :: base
 if (firstcall) then
    firstcall=.false.
    if (alpha_value/=0) then
-      call abort("Error: dnsgrid cannot handle alpha>0.")
+      call abortdns("Error: dnsgrid cannot handle alpha>0.")
    endif
 endif
 

@@ -98,16 +98,16 @@ endif
 if (ncall==1) then
    if (equations/=NS_PSIVOR) then
       call print_message("Error: psi-vor model can only run equations=NS_PSIVOR")
-      call abort("initial conditions are probably incorrect.")
+      call abortdns("initial conditions are probably incorrect.")
    endif
    if (ndim/=2) then
-      call abort("Error: psi-vor model cannot run in 3D")
+      call abortdns("Error: psi-vor model cannot run in 3D")
    endif
    if (nz/=1) then
-      call abort("Error: psi-vor model cannot run in 3D")
+      call abortdns("Error: psi-vor model cannot run in 3D")
    endif
    if (alpha_value/=0) then
-      call abort("Error: dnsgrid cannot handle alpha>0.")
+      call abortdns("Error: dnsgrid cannot handle alpha>0.")
    endif
 
    ! set boundary data

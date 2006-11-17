@@ -110,7 +110,7 @@ if (nio>1) then
    call mpi_barrier(comm_3d,ierr)
 !print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_nodes(my_z)
    call mpi_barrier(comm_3d,ierr)
-   if (io_nodes(my_z)<0) call abort("error in MPI-IO decomposition")
+   if (io_nodes(my_z)<0) call abortdns("error in MPI-IO decomposition")
 else
    io_nodes=0
 endif
@@ -1000,7 +1000,7 @@ ASSERT("output1 dimension failure 6",n3==ny_2dx)
 ASSERT("output1 dimension failure 7",n3d==ny_2dx)
 
 if (o_nz>g_nz .and. g_bdy_z1/=PERIODIC) then
-   call abort("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
+   call abortdns("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
 endif
 
 do z_pe=0,ncpu_z-1
@@ -1192,7 +1192,7 @@ dealias_nz=min(2+2*km_max,g_nz)
 
 truncation=(dealias_nx < g_nx .or. dealias_ny < g_ny .or. dealias_nz < g_nz)
 if (dealias==0 .and. truncation) then
-   call abort("output1_spec: spectral truncation not accurate")
+   call abortdns("output1_spec: spectral truncation not accurate")
 endif
 
 #if 0
@@ -1470,7 +1470,7 @@ ny_2dx_actual = ny_2dx
 first_seek=.true.
 
 if (o_nz>g_nz .and. g_bdy_z1/=PERIODIC) then
-   call abort("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
+   call abortdns("output1: cannot handle o_nz=g_nz+1 with non-periodic b.c.")
 endif
 
 
@@ -1698,7 +1698,7 @@ character(len=80) :: message
 call mread8e(fid,buf,len,ierr)
 if (ierr /= len) then
    write(message,*) "ERROR: mread8() elements requested: ",len," elements read: ",ierr
-   call abort(message)
+   call abortdns(message)
 endif
 end subroutine
 
@@ -1729,7 +1729,7 @@ if (do_mpi_io) then
    endif
    if (ierr==0) ierr=len  ! return length read, if OK
 #else
-   call abort("MPI_IO support not compiled in")	
+   call abortdns("MPI_IO support not compiled in")	
 #endif
 else
    if (input_size==4) then
@@ -1766,7 +1766,7 @@ if (do_mpi_io) then
    call mpi_file_read(fid,buf,len,MPI_BYTE,statuses,ierr)
    if (ierr==0) ierr=len  ! return length read, if OK
 #else
-   call abort("MPI_IO support not compiled in")	
+   call abortdns("MPI_IO support not compiled in")	
 #endif
 else
    call cread1e(fid,buf,len,ierr)
@@ -1802,7 +1802,7 @@ if (do_mpi_io) then
       call mpi_file_write(fid,buf,len,MPI_REAL8,statuses,ierr)
    endif
 #else
-   call abort("MPI_IO support not compiled in")	
+   call abortdns("MPI_IO support not compiled in")	
 #endif
 else
    if (output_size==4) then
@@ -1834,7 +1834,7 @@ if (do_mpi_io) then
 #ifdef USE_MPI_IO
    call mpi_file_write(fid,buf,len,MPI_BYTE,statuses,ierr)
 #else
-   call abort("MPI_IO support not compiled in")	
+   call abortdns("MPI_IO support not compiled in")	
 #endif
 else
    call cwrite1(fid,buf,len)

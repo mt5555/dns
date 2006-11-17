@@ -698,7 +698,7 @@ if ( nz2>nz) then
    call print_message("nz is too small. nz must be >=nz2")	
 endif
 
-if (fail/=0) call abort("params.F90 dimension settings failure")
+if (fail/=0) call abortdns("params.F90 dimension settings failure")
 
 allocate(g_xcord(g_nx+1))
 allocate(g_ycord(g_ny+1))

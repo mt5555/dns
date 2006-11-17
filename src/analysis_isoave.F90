@@ -183,7 +183,7 @@ do
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
-            call abort(message)
+            call abortdns(message)
          endif
 
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.spdf"
@@ -191,7 +191,7 @@ do
          call copen(fname,"w",fid2,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
-            call abort(message)
+            call abortdns(message)
          endif
 
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.cores"
@@ -199,7 +199,7 @@ do
          call copen(fname,"w",fidcore,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .cores file errno=",ierr
-            call abort(message)
+            call abortdns(message)
          endif
       endif
       
@@ -316,7 +316,7 @@ do
             call copen(fname,"w",fid,ierr)
             if (ierr/=0) then
                write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
-               call abort(message)
+               call abortdns(message)
             endif
             call writeisoave(fid,time)
             call cclose(fid,ierr)
@@ -324,7 +324,7 @@ do
             call copen(fname_ux,"w",fid,ierr)
             if (ierr/=0) then
                write(message,'(a,i5)') "output_model(): Error opening .ux file errno=",ierr
-               call abort(message)
+               call abortdns(message)
             endif
             call write_ux(fid,time)
             call cclose(fid,ierr)
@@ -363,7 +363,7 @@ do
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .isow2s2 file errno=",ierr
-            call abort(message)
+            call abortdns(message)
          endif
          call writeisoave_w2s2(fid,time)
          call cclose(fid,ierr)
@@ -385,7 +385,7 @@ do
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .iso1 file errno=",ierr
-            call abort(message)
+            call abortdns(message)
          endif
          call writeisoave_scalar(fid,time)
          call cclose(fid,ierr)
@@ -509,7 +509,7 @@ character(len=80) message,sdata
 character(len=280) basename,fname
 integer :: N,ix,iy,iz
 
-if (ncpu_x*ncpu_y*ncpu_z > 1) call abort("convert_sk must be run serial")
+if (ncpu_x*ncpu_y*ncpu_z > 1) call abortdns("convert_sk must be run serial")
 ! read in data from alien file format, store in Q
 open(unit = 10, form = 'unformatted', status = 'old', &
      file = '/home/scratch/taylorm/check256_hapiq_t0.8_velfield.out')

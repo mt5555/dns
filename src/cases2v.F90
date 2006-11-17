@@ -441,7 +441,7 @@ else if (initial_vor==1) then
    wd(0) = wd(0)/2
    yd(nd) = 0
 else
-   call abort("error vxpair(): bad value of initial_vor")
+   call abortdns("error vxpair(): bad value of initial_vor")
 endif
 
 delsq = delta**2

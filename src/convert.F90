@@ -487,11 +487,11 @@ real*8 :: zwindow(nz)
 integer :: xinside(nx),yinside(ny),zinside(nz),grad_count
 
 if (nx1<3 .or. nx2+2>nx)&
-     call abort('Error: insufficient ghost cells in x direction')
+     call abortdns('Error: insufficient ghost cells in x direction')
 if (ny1<3 .or. ny2+2>ny)&
-     call abort('Error: insufficient ghost cells in y direction')
+     call abortdns('Error: insufficient ghost cells in y direction')
 if (nz1<3 .or. nz2+2>nz) then
-     call abort('Error: insufficient ghost cells in z direction')
+     call abortdns('Error: insufficient ghost cells in z direction')
 endif
 
 ! update ghost cell data
@@ -811,11 +811,11 @@ CPOINTER :: fid
 
 ! check to make sure we have 2 ghost cells in all directions:
 if (nx1<3 .or. nx2+2>nx)&
-     call abort('Error: insufficient ghost cells in x direction')
+     call abortdns('Error: insufficient ghost cells in x direction')
 if (ny1<3 .or. ny2+2>ny)&
-     call abort('Error: insufficient ghost cells in y direction')
+     call abortdns('Error: insufficient ghost cells in y direction')
 if (nz1<3 .or. nz2+2>nz)&
-     call abort('Error: insufficient ghost cells in z direction')
+     call abortdns('Error: insufficient ghost cells in z direction')
 
 ! update ghost cell data
 call ghost_update_x(Q,3)
@@ -897,7 +897,7 @@ do
       ! swap 3 & 1
       call rotcube(1,3,x0,x1,x2,x3,c0)
    else
-      call abort("error: largest <gradu> element is on diagional")
+      call abortdns("error: largest <gradu> element is on diagional")
    endif
 
 

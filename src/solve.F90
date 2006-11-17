@@ -277,7 +277,7 @@ if (btype==-1) then
    else
       ! other types of b.c. not supported, mostly because bc_biotsavart
       ! is hard-coded for btype=2
-      call abort("compute_psi(): specified boundery conditions not supported")
+      call abortdns("compute_psi(): specified boundery conditions not supported")
    endif
 endif
 

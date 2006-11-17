@@ -39,8 +39,8 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 
       MPILIB =  -lmpi
    endif
-   ifeq ($(HOST),s873487)
-      VENDOR=INTEL
+   ifeq ($(HOST),nostromo)
+      VENDOR=GNU
    endif
    ifeq ($(HOST),s854018)
       VENDOR=INTEL
@@ -91,6 +91,12 @@ ifeq ($(UNAME),Linux)
    #LDFLAGS = -Lstk -lstk
    endif
 
+   ifeq ($(VENDOR),GNU)
+   F90 = gfortran
+   CC=gcc
+   #FFLAGS =  -O2 -std=gnu -ffixed-line-length-132 $(MPI) -DUSE_FFT99  -DGFORTRAN
+   FFLAGS =  -O2  -ffixed-line-length-132 $(MPI) -DUSE_FFT99  -DGFORTRAN
+   endif
 
 endif
 
@@ -106,7 +112,7 @@ ifeq ($(UNAME),Darwin)
 #   CC = cc -DF_NO_UNDERSCORE
 #   F90 = xlf95
 #   F77FIXED = -qfixed
-#   FFLAGS = -WF,"-Dflush=flush_,-Dabort=punt,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict 
+#   FFLAGS = -WF,"-Dflush=flush_,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict 
 #   LDFLAGS = -lSystemStubs
 endif
 
@@ -145,7 +151,7 @@ endif
 ifeq ($(UNAME),AIX)
    F90 = mpxlf95
    F77FIXED = -qfixed
-   FFLAGS = -WF,"-Dflush=flush_,-Dabort=punt,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
+   FFLAGS = -WF,"-Dflush=flush_,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
    CC = cc -DF_NO_UNDERSCORE
 endif
 

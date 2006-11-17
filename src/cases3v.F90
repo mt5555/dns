@@ -175,7 +175,7 @@ else if (init_cond_subtype==4) then
 	enerb_target(nb) = 10.0 * nb**(-4)
    enddo
 else
-   call abort("init_data_decay: bad init_cond_subtype")
+   call abortdns("init_data_decay: bad init_cond_subtype")
 endif
 
 ! number of bands to use in initial condtion. doesn't really matter
@@ -432,7 +432,7 @@ else if (init_cond_subtype==105) then   ! run N
    F=.05
    init_zero=.true.
 else
-   call abort("init_data_swt(): init_cond_subtype set to unsupported value")
+   call abortdns("init_data_swt(): init_cond_subtype set to unsupported value")
 endif
    
 
@@ -597,7 +597,7 @@ if (n_var>=3) then
    enddo
    enddo
 else
-   call abort("init_data_sht() with shallow water equations requires n_var==3")
+   call abortdns("init_data_sht() with shallow water equations requires n_var==3")
 endif
 endif
 

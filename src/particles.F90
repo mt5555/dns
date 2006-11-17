@@ -49,7 +49,7 @@ nump_max=2*in_nump
 
 
 if (allocated(particle)) then
-   call abort("allocate_particles(): error: particles allready allocated")
+   call abortdns("allocate_particles(): error: particles allready allocated")
 endif
 
 allocate(particle(nump_max,2*ndim+1))  
@@ -163,20 +163,20 @@ if (my_pe==fpe) then
          write(message,'(a,i5)') "particle_io(): Error opening file. Error no=",ierr
          call print_message(message)
          call print_message(fname)
-         call abort("")
+         call abortdns("")
       endif
       call cread8e(fid,x,1,ierr)
       if (ierr/=1) then
          write(message,'(a,i5)') "particle_io(): Error reading file"
          call print_message(message)
          call print_message(fname)
-         call abort("")
+         call abortdns("")
       endif
       nump_in=x
 
       call cread8(fid,x,1)
       if (2*ndim+1 /= nint(x)) then
-         call abort("Error: ndim in code not the same as ndim in particles restart file")
+         call abortdns("Error: ndim in code not the same as ndim in particles restart file")
       endif
       call allocate_particles(nump_in)
       do j=1,2*ndim+1
@@ -191,7 +191,7 @@ if (my_pe==fpe) then
          write(message,'(a,i5)') "particle_io(): Error opening file. Error no=",ierr
          call print_message(message)
          call print_message(fname)
-         call abort("")
+         call abortdns("")
       endif
       x=nump
       call cwrite8(fid,x,1)
@@ -385,7 +385,7 @@ do i=1,nump
       endif
    else
       ! partical has left the domain
-      call abort("paritcal has left computational domain")
+      call abortdns("paritcal has left computational domain")
    endif
 enddo
 
@@ -427,7 +427,7 @@ if (rk4stage==4) then
       do i=1,nump
          write(*,'(i5,3f12.5)') i,particle(i,1),particle(i,2),particle(i,3)
       enddo
-      call abort("particle_advance(): point has left domain") 
+      call abortdns("particle_advance(): point has left domain") 
    endif
 
 

@@ -36,7 +36,7 @@ else if (n<1000) then
 else if (n<10000) then
    n=2
 else 
-   call abort("opps, we assumed no more than 10000 cpus along one direction!")
+   call abortdns("opps, we assumed no more than 10000 cpus along one direction!")
 endif
 write(tmp,'(i5)') 10000+my_x
 message="-" // tmp(n:5)
@@ -55,7 +55,7 @@ fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) //  &
 call copen(fname,"w",fid,ierr)
 if (ierr/=0) then
    write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
-   call abort(message)
+   call abortdns(message)
 endif
 
 call cwrite8(fid,time,1)
@@ -80,7 +80,7 @@ endif
 call copen(fname,"w",fid,ierr)
 if (ierr/=0) then
    write(message,'(a,i5)') "multfile_io(): Error opening file errno=",ierr
-   call abort(message)
+   call abortdns(message)
 endif
 
 if (output_size==8) then
@@ -152,7 +152,7 @@ if (my_pe==io_pe) then
    if (ierr/=0) then
       call print_message(message)
       write(message,'(a,i5)') "diag_output(): Error opening .scalars file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    x=nv; call cwrite8(fid,x,1)
    x=nscalars; call cwrite8(fid,x,1)
@@ -167,7 +167,7 @@ if (my_pe==io_pe) then
    call cclose(fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "diag_output(): Error closing .scalars file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
 endif
 
@@ -340,7 +340,7 @@ if (my_pe==fpe) then
       write(message,'(a,i5)') "singlefile_io(): Error opening file. Error no=",ierr
       call print_message(message)
       call print_message(fname)
-      call abort("")
+      call abortdns("")
    endif
    if (header_type==1) call header1_io(io_read,output_spec,fid,time,xnx,xny,xnz)
    if (header_type==2) call header2_io(io_read,fid,time,xnx,xny,xnz)
@@ -428,7 +428,7 @@ integer*8 infoin
 CPOINTER fid
 
 #ifndef USE_MPI_IO
-call abort("singlefile_mpi_io: error: code not compiled with MPI-IO")   
+call abortdns("singlefile_mpi_io: error: code not compiled with MPI-IO")   
 #else
 
 
@@ -470,7 +470,7 @@ if (io_nodes(my_z)==my_pe) then
       write(message,'(a,i5)') "singlefile_mpi_io(): Error opening file. Error no=",ierr
       call print_message(message)
       call print_message(fname)
-      call abort("")
+      call abortdns("")
    endif
    call print_message("MPI-IO open finished")
 endif
@@ -514,7 +514,7 @@ if (header_type==4) then
    if (offset==0) then
       ! we should convert offset to total number of bytes!
       ! need to change this code and input1(), output1()
-      call abort("Error: MPI-IO can not handle header_type==4 with real*8 data") 
+      call abortdns("Error: MPI-IO can not handle header_type==4 with real*8 data") 
    endif
 endif
 if (header_type==5) then
@@ -608,7 +608,7 @@ if (udm_input) then
    call udm_read_uvw(time_in,base,Q,work1,work2)
 else
    if (r_spec) then
-      if (header_type /= 1) call abort("Error: spectral I/O requires header_type==1");
+      if (header_type /= 1) call abortdns("Error: spectral I/O requires header_type==1");
       fname = base(1:len_trim(base)) // ".us"
       call print_message("Input: ")
       call print_message(trim(fname))
@@ -725,7 +725,7 @@ else if (equations==SHALLOW) then
 
 
 else if (equations==NS_PSIVOR) then
-   if (header_type /= 1) call abort("Error: NS_PSIVOR I/O requires header_type==1");
+   if (header_type /= 1) call abortdns("Error: NS_PSIVOR I/O requires header_type==1");
    call tracers_restart(io_pe)
    fname = base(1:len_trim(base)) // ".vor"
    call print_message("Input: ")
@@ -952,19 +952,19 @@ CPOINTER :: fid
 
 write(message,'(f10.4)') 10000.0000 + time
 if (equations/=NS_UVW) then
-   call abort("compressed I/O requires NS_UVW equations")
+   call abortdns("compressed I/O requires NS_UVW equations")
 endif
 if (ndim/=3) then
-   call abort("compressed I/O requires ndim==3")
+   call abortdns("compressed I/O requires ndim==3")
 endif
 if (ncpu_x*ncpu_y>1) then
-   call abort("compressed I/O requies ncpu_x=ncpu_y=1")
+   call abortdns("compressed I/O requies ncpu_x=ncpu_y=1")
 endif
 if (nx2-nx1+1 /= g_nx) then
-   call abort("compressed I/O x dimension error")
+   call abortdns("compressed I/O x dimension error")
 endif
 if (ny2-ny1+1 /= g_ny) then
-   call abort("compressed I/O y dimension error")
+   call abortdns("compressed I/O y dimension error")
 endif
 
 if (1==io_read) then
@@ -1338,7 +1338,7 @@ if (io_read==1) then
    if (ierr/=1) then
       write(message,'(a,i5)') "header1_io(): Error reading file"
       call print_message(message)
-      call abort("")
+      call abortdns("")
    endif
    call mread8(fid,xnx,1)
    call mread8(fid,xny,1)
@@ -1353,14 +1353,14 @@ if (io_read==1) then
          call print_message("Input routines can only upsample.") 
          call print_message("Output routines can only downsample.") 
          call print_message("Run code at higher resolution, calling Output to downsample")
-         call abort("error in header1_io")
+         call abortdns("error in header1_io")
       endif
    else
       print *,'grid input data'
       write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
-      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+      if (int(xnx)/=o_nx) call abortdns("Error: data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abortdns("Error: data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abortdns("Error: data file nz <> nz set in params.h");
       call mread8(fid,g_xcord(1),o_nx)
       call mread8(fid,g_ycord(1),o_ny)
       call mread8(fid,g_zcord(1),o_nz)
@@ -1378,7 +1378,7 @@ else
          call print_message("Error: spectral output requires zero padding") 
          call print_message("Output routines can only downsample.") 
          call print_message("Input routines can input this data directly")
-         call abort("error in header1_io")
+         call abortdns("error in header1_io")
       endif
    else
       call mwrite8(fid,g_xcord(1),o_nx)
@@ -1412,14 +1412,14 @@ if (io_read==1) then
    if (ierr/=1) then
       write(message,'(a,i5)') "header5_io(): Error reading file"
       call print_message(message)
-      call abort("")
+      call abortdns("")
    endif
    call mread8(fid,Lz,1)
    ! run sanity check on Lz
    if (Lz < .001  .or. Lz > 20 ) then
       print *,'Error fileio.F90: input file aspect ratio out of range?'
       print *,'Lz = ',Lz
-      call abort("abort...")
+      call abortdns("abort...")
    endif
 
    call mread8(fid,xnx,1)
@@ -1435,14 +1435,14 @@ if (io_read==1) then
          call print_message("Input routines can only upsample.") 
          call print_message("Output routines can only downsample.") 
          call print_message("Run code at higher resolution, calling Output to downsample")
-         call abort("error in header5_io")
+         call abortdns("error in header5_io")
       endif
    else
       print *,'grid input data'
       write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
-      if (int(xnx)/=o_nx) call abort("Error: data file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abort("Error: data file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abort("Error: data file nz <> nz set in params.h");
+      if (int(xnx)/=o_nx) call abortdns("Error: data file nx <> nx set in params.h");
+      if (int(xny)/=o_ny) call abortdns("Error: data file ny <> ny set in params.h");
+      if (int(xnz)/=o_nz) call abortdns("Error: data file nz <> nz set in params.h");
       call mread8(fid,g_xcord(1),o_nx)
       call mread8(fid,g_ycord(1),o_ny)
       call mread8(fid,g_zcord(1),o_nz)
@@ -1461,7 +1461,7 @@ else
          call print_message("Error: spectral output requires zero padding") 
          call print_message("Output routines can only downsample.") 
          call print_message("Input routines can input this data directly")
-         call abort("error in header5_io")
+         call abortdns("error in header5_io")
       endif
    else
       call mwrite8(fid,g_xcord(1),o_nx)
@@ -1502,7 +1502,7 @@ if (io_read==1) then
    if (ierr/=1) then
       write(message,'(a,i5)') "header3_io(): Error reading file"
       call print_message(message)
-      call abort("")
+      call abortdns("")
    endif
    call mread1e(fid,message,80,ierr)
    call mread1e(fid,message,80,ierr)
@@ -1545,11 +1545,11 @@ if (io_read==1) then
    if (ierr/=4) then
       write(message,'(a,i5)') "header4_io(): Error reading file"
       call print_message(message)
-      call abort("")
+      call abortdns("")
    endif
 else
    ! dont know how to write a fortran header
-   call abort("ERROR: header_type==4 output not supported")
+   call abortdns("ERROR: header_type==4 output not supported")
 endif
 end subroutine header4_io
 

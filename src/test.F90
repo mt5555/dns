@@ -19,7 +19,7 @@ use params
 !call test_divfree
 !call test_poisson_dirichlet
 !call test_poisson_ghost
-!call abort('ending after test')
+!call abortdns('ending after test')
 
 end subroutine
 

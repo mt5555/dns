@@ -196,7 +196,7 @@ do i=9,16
 enddo
 ! determine maximum value of delta to use for this grid
 if (j > delta_num_max) then
-   call abort("structf init: j > delta_num_max")
+   call abortdns("structf init: j > delta_num_max")
 endif
 
 max_delta = g_nmin/2
@@ -320,7 +320,7 @@ integer n,ndelta
 ndelta=str%delta_num
 
 n=str%nbin
-if (bin<n) call abort("resize_pdf: attempting to shrink pdf");
+if (bin<n) call abortdns("resize_pdf: attempting to shrink pdf");
 if (bin==n) return;
 
 
@@ -383,7 +383,7 @@ integer n,ndelta
 ndelta=str%delta_num
 
 n=str%nbin
-if (bin<n) call abort("resize_pdf: attempting to shrink pdf");
+if (bin<n) call abortdns("resize_pdf: attempting to shrink pdf");
 if (bin==n) return;
 
 
@@ -435,7 +435,7 @@ character(len=80) message
 real*8 x
 
 if (structf_init==0) then
-   call abort("Error: output_pdf() called, but structf module not initialized")
+   call abortdns("Error: output_pdf() called, but structf module not initialized")
 endif
 
 if (core_num>0) then
@@ -767,7 +767,7 @@ integer :: n1,n1d,n2,n2d,n3,n3d,n
 real*8 :: pt(n1d,n2d,n3d)
 real*8 :: core(n1)
 if (n1>g_nx) then
-   call abort("Error: compute_core() called on non traspose-x data?")
+   call abortdns("Error: compute_core() called on non traspose-x data?")
 endif
 core(1:n1)=pt(1:n1,1,1)
 core_num=max(core_num,n)

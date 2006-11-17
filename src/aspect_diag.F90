@@ -93,7 +93,7 @@ endif
 ! the "expensive" scalars
 !bw compute scalars as a function of time, and output to a file
 call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
-if (nints_e > nints_e_max) call abort("Error: aspec_diag.F90: nints_e_max too small")
+if (nints_e > nints_e_max) call abortdns("Error: aspec_diag.F90: nints_e_max too small")
 
 
 ! output turb scalars
@@ -104,7 +104,7 @@ if (my_pe==io_pe) then
    write(6,*) "Opening -bous file"
    if (ierr/=0) then
       write(message,'(a,i5)') "diag_output(): Error opening .scalars-bous file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    x=nints_e; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
@@ -137,7 +137,7 @@ if (diag_struct==1) then
 !sk      call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
-         call abort(message)
+         call abortdns(message)
       endif
       ! add the enstrophy dissipation (stored in position 8) 
       ! to the structure function file
@@ -193,9 +193,9 @@ twopi = 6.2831853071795864769d0
 !  these loops do not look like the loops over FFT coefficients
 !  that appear later. 
 !
-if (npassive==0) call abort("Error: aspect_diag.F90: not coded for npassive==0")
-!if (mu_hyper_value/=0) call abort("Error: aspect_diag.F90: not coded for hyper viscosity")
-if (mu_hypo_value/=0) call abort("Error: aspect_diag.F90: not coded for hypo viscosity")
+if (npassive==0) call abortdns("Error: aspect_diag.F90: not coded for npassive==0")
+!if (mu_hyper_value/=0) call abortdns("Error: aspect_diag.F90: not coded for hyper viscosity")
+if (mu_hypo_value/=0) call abortdns("Error: aspect_diag.F90: not coded for hypo viscosity")
 
 ! viscosity of theta:
 kappa = mu/schmidt(np1)

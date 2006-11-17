@@ -96,13 +96,13 @@ real*8 px(nx,ny,nz)
 integer n1,n1d,n2,n2d,n3,n3d
 
 if (g_bdy_x1/=PERIODIC ) then
-   call abort('der() can only handle periodic boundaries')
+   call abortdns('der() can only handle periodic boundaries')
 endif
 if (g_bdy_y1/=PERIODIC) then
-   call abort('der() can only handle periodic boundaries')
+   call abortdns('der() can only handle periodic boundaries')
 endif
 if (g_bdy_z1/=PERIODIC ) then
-   call abort('der() can only handle periodic boundaries')
+   call abortdns('der() can only handle periodic boundaries')
 endif
 
 if (numerical_method==FOURTH_ORDER) then
@@ -296,7 +296,7 @@ real*8 work(nx,ny,nz)
 integer i,j,k,n
 real*8 dummy(1)
 
-if (n_var<3) call abort("vorticity() requires n_var>2")
+if (n_var<3) call abortdns("vorticity() requires n_var>2")
 
 vor=0
 do n=1,ndim
@@ -371,8 +371,8 @@ integer pv_type
 integer i,j,k,n
 real*8 dummy(1)
 
-if (n_var<3) call abort("potential vorticity() requires n_var>2")
-if(pv_type/=1) call abort("fftops: potential_vorticity")
+if (n_var<3) call abortdns("potential vorticity() requires n_var>2")
+if(pv_type/=1) call abortdns("fftops: potential_vorticity")
 
 call vorticity(vor,u,d1,work)
 
@@ -706,7 +706,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !     pt(g_nz2,nx_2dz,ny_2dz)
 !  so we also need that ny_2dz is even
 if (mod(ny_2dz,2)/=0) then
-   call abort("ny_2dz is not even.  cant use z-decomp FFTs")
+   call abortdns("ny_2dz is not even.  cant use z-decomp FFTs")
 endif
 
 
@@ -756,7 +756,7 @@ integer n1,n1d,n2,n2d,n3,n3d
 !     pt(g_nz2,nx_2dz,ny_2dz)
 !  so we also need that ny_2dz is even
 if (mod(ny_2dz,2)/=0) then
-   call abort("ny_2dz is not even.  cant use z-decomp FFTs")
+   call abortdns("ny_2dz is not even.  cant use z-decomp FFTs")
 endif
 
 
@@ -1192,7 +1192,7 @@ integer i,j,k,im,jm,km
 real*8 xfac,xm,ym,zm
 
 if (numerical_method==FOURTH_ORDER) then
-if (Lz/=1) call abort("dzscale must be 1 for FD methods")
+if (Lz/=1) call abortdns("dzscale must be 1 for FD methods")
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
@@ -1901,7 +1901,7 @@ else if (dealias==2) then
    kstart2=dealias_sphere_kmax2_1
    kstop2=dealias_sphere_kmax2
 else
-   call abort('ke_shell_z():  Error: bad dealiasing type')
+   call abortdns('ke_shell_z():  Error: bad dealiasing type')
 endif
 
 

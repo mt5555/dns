@@ -45,27 +45,27 @@ integer n
 if (firstcall) then
    firstcall=.false.
    if (smagorinsky>0) then
-      call abort("Error: ns3dspectral model does not yet support Smagorinsky")
+      call abortdns("Error: ns3dspectral model does not yet support Smagorinsky")
    endif
 
    if (dealias==0) then
-      call abort("Error: using ns3dspectral model, which must be run dealiased")
+      call abortdns("Error: using ns3dspectral model, which must be run dealiased")
    endif
    if (numerical_method/=FOURIER) then
-      call abort("Error: ns3dspectral model requires FFT method.")
+      call abortdns("Error: ns3dspectral model requires FFT method.")
    endif
    if (equations/=NS_UVW) then
       call print_message("Error: ns3dspectral model can only runs equations==NS_UVW")
-      call abort("initial conditions are probably incorrect.")
+      call abortdns("initial conditions are probably incorrect.")
    endif
    if (alpha_value/=0) then
-      call abort("Error: alpha>0 but this is not the alpha model!")
+      call abortdns("Error: alpha>0 but this is not the alpha model!")
    endif
    if (npassive>0) then
-      call abort("Error: dnsp (x-pensil) model with tracers not yet coded")
+      call abortdns("Error: dnsp (x-pensil) model with tracers not yet coded")
    endif
 
-   if (data_x_pencils) call abort("ns_xpencil: this is not possible")
+   if (data_x_pencils) call abortdns("ns_xpencil: this is not possible")
 
    ! intialize Q with Fourier Coefficients:
    call z_fft3d_nvar(Q_grid,Q,work,work2) 
@@ -248,8 +248,11 @@ real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 
-#define BENCHMARK_STORAGE
+#undef BENCHMARK_STORAGE
 #ifdef BENCHMARK_STORAGE
+! trick to save some storage - used to run 4096^3 on RS
+! this trick would work fine except if diagnostics are turned on,
+! rhsg() array will not be saved between calls to rk4reshape2()
 #define uysave rhsg(1,1,1,1)
 #define vxsave rhsg(1,1,1,2)
 #else
@@ -263,7 +266,9 @@ logical,save :: firstcall=.true.
 if (firstcall) then
    firstcall=.false.
 #ifdef BENCHMARK_STORAGE
-   call print_message('WARNING: using BENCHMARK_STORAGE option - diagnostics, in enabled, will corrupt solution')
+   call print_message("********************************************************************************")
+   call print_message('WARNING:BENCHMARK_STORAGE enabled - diagnostics, if enabled, will corrupt solution')
+   call print_message("********************************************************************************")
 #else
    ! initialize uysave,vxsave
    call print_message('allocating extra arrays for use_vorticity3')

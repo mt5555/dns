@@ -87,7 +87,7 @@ endif
       call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "diag_output(): Error opening .scalars-turb file errno=",ierr
-         call abort(message)
+         call abortdns(message)
       endif
       x=nints_e; call cwrite8(fid,x,1)
       call cwrite8(fid,time,1)
@@ -103,7 +103,7 @@ endif
       call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "diag_output(): Error opening .pscalars-turb file errno=",ierr
-         call abort(message)
+         call abortdns(message)
       endif
       x=npints_e; call cwrite8(fid,x,1)
       x=npassive; call cwrite8(fid,x,1)
@@ -132,7 +132,7 @@ if (diag_struct==1) then
       call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
-         call abort(message)
+         call abortdns(message)
       endif
       call writeisoave(fid,time)
       call cclose(fid,ierr)
@@ -149,7 +149,7 @@ if (diag_pdfs==1) then
       call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
-         call abort(message)
+         call abortdns(message)
       endif
 
       if (compute_uvw_jpdfs) then
@@ -158,7 +158,7 @@ if (diag_pdfs==1) then
       call copen(message,"w",fidj,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .jpdf file errno=",ierr
-         call abort(message)
+         call abortdns(message)
       endif
       endif
 
@@ -168,7 +168,7 @@ if (diag_pdfs==1) then
       call copen(message,"w",fidS,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
-         call abort(message)
+         call abortdns(message)
       endif
       endif
 

@@ -559,7 +559,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)
@@ -584,7 +584,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    x=npassive; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
@@ -644,7 +644,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "output_helicity_spec(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)
@@ -658,7 +658,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "output_helicity_spec(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)
@@ -671,7 +671,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "output_cospec(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    x=g_nx/2; call cwrite8(fid,x,1)
    x=g_ny/2; call cwrite8(fid,x,1)
@@ -737,7 +737,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "output_2d_spec(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    call cwrite8(fid,time,1)
    x=1+iwave_2d; call cwrite8(fid,x,1)  
@@ -748,7 +748,7 @@ if (my_pe==io_pe) then
    call cclose(fid,ierr)
 
 !   if (npassive>0) then
-!      call abort("Error: ouput of 2d spectrum for scalers not coded")
+!      call abortdns("Error: ouput of 2d spectrum for scalers not coded")
 !      ! add spectrum of scalars
 !   endif
 
@@ -789,7 +789,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)')"output_hfree_spec(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)   
@@ -885,7 +885,7 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
    endif
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)
@@ -951,7 +951,7 @@ if (my_pe==io_pe) then
    if (ierr/=0) then
       write(message,'(a,i5)') &
       "transfer spec_write(): Error opening file errno=",ierr
-      call abort(message)
+      call abortdns(message)
       endif
       
       if (equations==NS_UVW .or. equations==CNS) then
@@ -1100,7 +1100,7 @@ integer i,j,k
 
 rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 if (nint(rwave)>iwave_max) then
-   call abort("compute_spectrum: called with insufficient storege for spectrum()")
+   call abortdns("compute_spectrum: called with insufficient storege for spectrum()")
 endif
 iwave_max=nint(rwave)
 
@@ -1218,7 +1218,7 @@ integer ::  i,j,k,n,km
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 )
 if (nint(rwave)>iwave_max) then
-   call abort("compute_spectrum_2d: called with insufficient storege for spectrum()")
+   call abortdns("compute_spectrum_2d: called with insufficient storege for spectrum()")
 endif
 iwave_max=nint(rwave)
 
@@ -1300,7 +1300,7 @@ integer i,j,k,jm,km,im,iwave_max
 rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 iwave_max=nint(rwave)
 if (iwave_max>max(g_nx,g_ny,g_nz)) then
-   call abort("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
+   call abortdns("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
 endif
 
 spec=0
@@ -1374,11 +1374,11 @@ real*8 :: energy
 integer i,j,k,jm,km,im,iwave_max
 
 
-if (Lz/=1) call abort("Error: compute_spetrum_fft cant handle Lz<>1")
+if (Lz/=1) call abortdns("Error: compute_spetrum_fft cant handle Lz<>1")
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/2.0)**2 )
 iwave_max=nint(rwave)
 if (iwave_max>max(g_nx,g_ny,g_nz)) then
-   call abort("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
+   call abortdns("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
 endif
 
 
@@ -1457,7 +1457,7 @@ real*8 :: diss1,diss2,hetot,co_energy(3),xw,xfac
 integer i,j,k,jm,km,im,iwave_max,n
 
 if (ndim<3) then
-   call abort("compute_helicity_specturm: can only be used in 3D")
+   call abortdns("compute_helicity_specturm: can only be used in 3D")
 endif
 
 if (skip_fft==0) then
@@ -1470,7 +1470,7 @@ endif
 rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 iwave_max=nint(rwave)
 if (iwave_max > max(g_nx,g_ny,g_nz)) then
-   call abort("compute_helicity_spec(): called with insufficient storege for spectrum()")
+   call abortdns("compute_helicity_spec(): called with insufficient storege for spectrum()")
 endif
 
 
@@ -1653,10 +1653,10 @@ integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ra,rb,ind
 complex*16 tmp
 
 
-if (Lz/=1) call abort("Error: compute_hfree_spec cant handle Lz<>1")
+if (Lz/=1) call abortdns("Error: compute_hfree_spec cant handle Lz<>1")
 
 if (ndim<3) then
-   call abort("compute_hfree_spec: can only be used in 3D")
+   call abortdns("compute_hfree_spec: can only be used in 3D")
 endif
 
 #undef TESTEXP
@@ -1846,12 +1846,12 @@ do j=ny1,ny2
             
             if (ind>nbin) then 
                write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
-               call abort("Error: spectrum.F90: ind>nbin")
+               call abortdns("Error: spectrum.F90: ind>nbin")
                
             endif
             if (ind<1) then
                write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
-               call abort("Error: spectrum.F90: ind<1")            
+               call abortdns("Error: spectrum.F90: ind<1")            
             endif
 
             costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1.0        
@@ -1936,12 +1936,12 @@ do j=ny1,ny2
             
             if (ind>nbin) then 
                write(6,*)"iwave,rhel,ind = ",iwave,rhel,ind
-               call abort("Error: spectrum.F90: ind>nbin")
+               call abortdns("Error: spectrum.F90: ind>nbin")
                
             endif
             if (ind<1) then 
                write(6,*)"iwave,rhel,ind = ",iwave,rhel,ind
-               call abort("Error: spectrum.F90: ind<1")
+               call abortdns("Error: spectrum.F90: ind<1")
                
             endif
             
@@ -2224,7 +2224,7 @@ do i=nx1,nx2,2
       print *,i0,imcord_exp(i0),imcord_exp(i1)
       print *,j0,jmcord_exp(j0),jmcord_exp(j1)
       print *,k0,kmcord_exp(k0),kmcord_exp(k1)
-      call abort(" ")
+      call abortdns(" ")
    endif
 
    ! make sure that i0 is the positive mode, i1 is the negative mode:
@@ -2235,7 +2235,7 @@ do i=nx1,nx2,2
       print *,i0,imcord_exp(i0),imcord_exp(i1)
       print *,j0,imcord_exp(j0),imcord_exp(j1)
       print *,k0,imcord_exp(k0),imcord_exp(k1)
-      call abort(" ")
+      call abortdns(" ")
    endif
 
 
@@ -2261,7 +2261,7 @@ do i=nx1,nx2,2
       else if (sm==3) then
          b=p(ii,jj,kk)/8
       else
-         call abort("this cant happen")
+         call abortdns("this cant happen")
       endif
 
       ! cos(N/2) mode is stored with the cos(0) mode.

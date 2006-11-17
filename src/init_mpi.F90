@@ -26,16 +26,16 @@ my_z=0
 #ifdef USE_MPI
 
 call mpi_init(ierr1)
-if (ierr1/=0) call abort("mpi_init failure")
+if (ierr1/=0) call abortdns("mpi_init failure")
 call mpi_comm_rank(MPI_COMM_WORLD,my_world_pe,ierr2)
-if (ierr2/=0) call abort("mpi_comm_rank failure")
+if (ierr2/=0) call abortdns("mpi_comm_rank failure")
 call mpi_comm_size(MPI_COMM_WORLD,initial_live_procs,ierr3)
-if (ierr3/=0) call abort("mpi_comm_size failure")
+if (ierr3/=0) call abortdns("mpi_comm_size failure")
 
 #else
 ! make sure we are running with MPI!
 if (ncpu_x * ncpu_y * ncpu_z /= 1) then
-   call abort("code was not compiled with MPI support!")
+   call abortdns("code was not compiled with MPI support!")
 endif
 #endif
 
@@ -65,7 +65,7 @@ if (ncpu_x * ncpu_y * ncpu_z /= ncpus) then
    write(message,'(a,i5)') "Total cpus = ",initial_live_procs
    write(message,'(a,i5)') "cpus for cartesian communicator = ",ncpus
    call print_message(message)
-   call abort("Terminating.")
+   call abortdns("Terminating.")
 endif
 
 
@@ -77,10 +77,10 @@ reorder=.true.
 
 
 call mpi_cart_create(MPI_COMM_WORLD,3,mpidims,isperiodic,reorder,comm_3d,ierr1)
-if (ierr1/=0) call abort("mpi_cart_create failure")
+if (ierr1/=0) call abortdns("mpi_cart_create failure")
 
 call mpi_cart_get(comm_3d,3,mpidims,isperiodic,mpicoords,ierr1)
-if (ierr1/=0) call abort("mpi_cart_get failure")
+if (ierr1/=0) call abortdns("mpi_cart_get failure")
 !print *,'me=',my_pe," mpi coords: ",mpicoords(1),mpicoords(2),mpicoords(3)
 
 ! get processor number with coords = mpicoords

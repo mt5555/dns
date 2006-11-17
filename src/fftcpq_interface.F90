@@ -108,7 +108,7 @@ integer n,index,stat
 character*80 message
 #include <cxmldef.for>
 
-if (init==0) call abort("fftcpq_interface.F90: call fft_interface_init to initialize first!");
+if (init==0) call abortdns("fftcpq_interface.F90: call fft_interface_init to initialize first!");
 
 write(message,'(a,i6)') 'Initializing CXML FFT of size n=',n
 call print_message(message)
@@ -137,7 +137,7 @@ do
    i=i+1
    if (i>num_fftsizes) then
       write(message_str,'(a,i10)') "fft_interface.F90:  Failed initializing an fft of size =",n1
-      call abort(message_str)
+      call abortdns(message_str)
    endif
 
    if (fftdata(i)%size==0) then

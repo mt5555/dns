@@ -179,7 +179,7 @@ integer*8 fidmpi,infoin
    call UDM_FILE_CLOSE(fidudm, ierr)
 
 #else
-   call abort("udm_write_uvw: Error: UDM support not compiled in")
+   call abortdns("udm_write_uvw: Error: UDM support not compiled in")
 #endif
 end subroutine
 
@@ -248,11 +248,11 @@ Q=0
 !   call UDM_ATTR_READ(attrname,dotudm,fidudm,UDM_ATOMIC_INT, nzstored, ierr)
 !
 !   if (nxstored .ne. ncpu_x *(nx2 - nx1 + 1))  &   
-!       call abort("ERROR: data file nx <> nx set in params.h")
+!       call abortdns("ERROR: data file nx <> nx set in params.h")
 !   if (nystored .ne. ncpu_y *(ny2 - ny1 + 1))  & 
-!       call abort("ERROR: data file ny <> ny set in params.h")
+!       call abortdns("ERROR: data file ny <> ny set in params.h")
 !   if (nzstored .ne. ncpu_z *(nz2 - nz1 + 1))  & 
-!       call abort("ERROR: data file nz <> nz set in params.h")
+!       call abortdns("ERROR: data file nz <> nz set in params.h")
 
 !  read g_xcord, g_ycor and g_zcord
 
@@ -260,7 +260,7 @@ Q=0
 !   dsnameudm(13:13) = char(0)
 !   call FIO_INFO_CREATE(fidudm,dsnameudm,UDM_INFOTYPE_DATASET,infoid,ierr) 
 !   call FIO_INFO_ITEM_GET(infoid, UDM_INFO_DIMS,   dimsudm,   ierr)
-!   if (dimsudm .ne. 1) call abort("ERROR: datafile g_xcord wrong")
+!   if (dimsudm .ne. 1) call abortdns("ERROR: datafile g_xcord wrong")
 !   call FIO_INFO_ITEM_GET(infoid, UDM_INFO_GSIZES, sizesudm, ierr)
 !   offsetsudm(1) = 0
 !   call FIO_INFO_ITEM_SET(infoid, UDM_INFO_SIZES, sizesudm, ierr) 
@@ -271,7 +271,7 @@ Q=0
 !   dsnameudm(1:12) = 'coords/ycord'
 !   call FIO_INFO_CREATE(fidudm,dsnameudm,UDM_INFOTYPE_DATASET,infoid,ierr)
 !   call FIO_INFO_ITEM_GET(infoid, UDM_INFO_DIMS,   dimsudm,   ierr)
-!   if (dimsudm .ne. 1) call abort("ERROR: datafile g_ycord wrong")
+!   if (dimsudm .ne. 1) call abortdns("ERROR: datafile g_ycord wrong")
 !   call FIO_INFO_ITEM_GET(infoid, UDM_INFO_GSIZES, sizesudm, ierr)
 !   call FIO_INFO_ITEM_SET(infoid, UDM_INFO_SIZES, sizesudm, ierr)  
 !   call FIO_INFO_ITEM_SET(infoid, UDM_INFO_OFFSETS, offsetsudm, ierr)  
@@ -281,7 +281,7 @@ Q=0
 !   dsnameudm(1:12) = 'coords/zcord'
 !   call FIO_INFO_CREATE(fidudm,dsnameudm,UDM_INFOTYPE_DATASET,infoid,ierr)
 !   call FIO_INFO_ITEM_GET(infoid, UDM_INFO_DIMS,   dimsudm,   ierr)
-!   if (dimsudm .ne. 1) call abort("ERROR: datafile g_zcord wrong")
+!   if (dimsudm .ne. 1) call abortdns("ERROR: datafile g_zcord wrong")
 !   call FIO_INFO_ITEM_GET(infoid, UDM_INFO_GSIZES, sizesudm, ierr)
 !   call FIO_INFO_ITEM_SET(infoid, UDM_INFO_SIZES, sizesudm, ierr)  
 !   call FIO_INFO_ITEM_SET(infoid, UDM_INFO_OFFSETS, offsetsudm, ierr)  
@@ -291,16 +291,16 @@ Q=0
    dsnameudm = 'u'//char(0)
    call UDM_INFO_CREATE(nochar, dsnameudm,fidudm,UDM_INFO_DATA_DIST, infoid, ierr)
    CALL UDM_INFO_ITEM_GET(infoid, UDM_INFO_NDIMS, dimsudm, ierr)
-   if (dimsudm .ne. 3) call abort("ERROR: datafile is wrong")
+   if (dimsudm .ne. 3) call abortdns("ERROR: datafile is wrong")
    CALL UDM_INFO_ITEM_GET(infoid, UDM_INFO_DIMS_TOTAL, gsizesudm, ierr)
 
    if (base(1:len_trim(base))=="restart") then
       if (gsizesudm(1) .ne. (ncpu_z *nslabz))    &
-           call abort("ERROR: nz, ncpu_z in param.h not consistent the datafile")
+           call abortdns("ERROR: nz, ncpu_z in param.h not consistent the datafile")
       if (gsizesudm(2) .ne. (ncpu_y *nslaby))    &
-           call abort("ERROR: ny, ncpu_y in param.h not consistent the datafile")
+           call abortdns("ERROR: ny, ncpu_y in param.h not consistent the datafile")
       if (gsizesudm(3) .ne. (ncpu_x *nslabx))    &
-           call abort("ERROR: nx, ncpu_x in param.h not consistent the datafile")
+           call abortdns("ERROR: nx, ncpu_x in param.h not consistent the datafile")
    endif
    if (io_pe==my_pe) &
         write(*,'(a,3i6)') 'UDM input file grid: ',gsizesudm(1:3)
@@ -364,7 +364,7 @@ Q=0
 
 
 #else
-   call abort("udm_write_uvw: Error: UDM support not compiled in")
+   call abortdns("udm_write_uvw: Error: UDM support not compiled in")
 #endif
 
 end subroutine

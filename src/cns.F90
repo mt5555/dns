@@ -25,14 +25,14 @@ logical,save :: firstcall=.true.
 if (firstcall) then
    firstcall=.false.
    if (alpha_value/=0) then
-      call abort("Error: cdns cannot handle alpha>0.")
+      call abortdns("Error: cdns cannot handle alpha>0.")
    endif
    if (numerical_method /= FOURTH_ORDER) then
-      call abort("Error: cdns requires 4th order derivatives")
+      call abortdns("Error: cdns requires 4th order derivatives")
    endif
    if (equations/=CNS) then
       call print_message("Error: cdns model can only runs equations==CNS")
-      call abort("initial conditions are probably incorrect.")
+      call abortdns("initial conditions are probably incorrect.")
    endif
 endif
 

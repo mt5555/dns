@@ -23,26 +23,26 @@ integer :: n
 if (firstcall) then
    firstcall=.false.
    if (smagorinsky>0) then
-      call abort("Error: ns3dspectral model does not yet support Smagorinsky")
+      call abortdns("Error: ns3dspectral model does not yet support Smagorinsky")
    endif
 
    if (dealias==0) then
-      call abort("Error: using ns3dspectral model, which must be run dealiased")
+      call abortdns("Error: using ns3dspectral model, which must be run dealiased")
    endif
    if (numerical_method/=FOURIER) then
-      call abort("Error: ns3dspectral model requires FFT method.")
+      call abortdns("Error: ns3dspectral model requires FFT method.")
    endif
    if (equations/=NS_UVW) then
       call print_message("Error: ns3dspectral model can only runs equations==NS_UVW")
-      call abort("initial conditions are probably incorrect.")
+      call abortdns("initial conditions are probably incorrect.")
    endif
 #ifdef ALPHA_MODEL
    if (Lz/=1) then
-      call abort("Error: NS alpha model with aspect ratio not implemented")
+      call abortdns("Error: NS alpha model with aspect ratio not implemented")
    endif
 #else
    if (alpha_value/=0) then
-      call abort("Error: alpha>0 but this is not the alpha model!")
+      call abortdns("Error: alpha>0 but this is not the alpha model!")
    endif
 #endif  
 

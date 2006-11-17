@@ -100,8 +100,8 @@ subroutine fftinit(n,index)
 integer n,index
 character*80 message
 
-if (init==0) call abort("fftstk_interface.F90: call fft_interface_init to initialize first!");
-if (n>1000000) call abort("fftstk_interface.F90: n>1 million")
+if (init==0) call abortdns("fftstk_interface.F90: call fft_interface_init to initialize first!");
+if (n>1000000) call abortdns("fftstk_interface.F90: n>1 million")
 
 fftdata(index)%size=n
 
@@ -127,7 +127,7 @@ do
    i=i+1
    if (i>num_fftsizes) then
       write(message_str,'(a,i10)') "fftstk_interface.F90:  Failed initializing an fft of size =",n1
-      call abort(message_str)
+      call abortdns(message_str)
    endif
 
    if (fftdata(i)%size==0) then

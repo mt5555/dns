@@ -72,7 +72,7 @@ if (equations==NS_UVW) then
       if (io_pe==my_pe) then
          print *,'ERROR: input file gives data for ',input_npassive,' passive scalars'
          print *,'but dimensions are setup for ',npassive,' passive scalars'
-         call abort('stopping...')
+         call abortdns('stopping...')
       endif
    endif
    npassive=min(npassive,input_npassive)
@@ -128,24 +128,24 @@ if (numerical_method==FOURIER) then
 !
 ! when fourier computations are done with the reference decomposition:
 if (mod(nslabx,2)/=0) then
-   call abort("nslabx must be even")
+   call abortdns("nslabx must be even")
 endif
 if (mod(nslaby,2)/=0) then
-   call abort("nslaby must be even")
+   call abortdns("nslaby must be even")
 endif
 if (mod(nslabz,2)/=0 .and. g_nz>1) then
    call print_message("********************************************************************************")
-   call print_message("WARNING:  nslabz must be even if g_nz>1")
-   call print_message("WARNING:  Fourier computations done in reference decomposition will be incorrect")
+   call print_message("WARNING:  nslabz must be even if g_nz>1.  Fourier computations done in the ")
+   call print_message("          reference decompostion (such as some diagnostics) will be incorrect")
    call print_message("********************************************************************************")
 endif
 
 ! when fourier computations are done in the z-pencil decomposition
 if (mod(nx_2dz,2)/=0) then
-   call abort("nx_2dz must be even")
+   call abortdns("nx_2dz must be even")
 endif
 if (mod(ny_2dz,2)/=0) then
-   call abort("ny_2dz must be even")
+   call abortdns("ny_2dz must be even")
 endif
 endif
 
@@ -348,7 +348,7 @@ iproc_x = mod(my_z,splitx)   ! split x direction into this many pieces
 do i=1,nx_2dz
    ii=nx1 + iproc_x*nx_2dz +i -1
    if (ii>nx2 .or. ii<nx1)  then
-      call abort("Error in z-pencil decomp. setup: bad ii value")
+      call abortdns("Error in z-pencil decomp. setup: bad ii value")
    endif
    z_imcord(i)=imcord(ii)
    z_imsign(i)=imsign(ii)
@@ -441,7 +441,9 @@ real*8 :: one=1,xfac,diff_2h,kmode
 integer i,j,k,l,ierr
 character(len=80) message,carg
 integer input_file_type
-integer,external :: iargc
+integer,intrinsic :: iargc
+intrinsic :: getarg
+
 if (my_pe==io_pe) then
    !
    ! command line parameters
@@ -497,7 +499,7 @@ if (my_pe==io_pe) then
          byteswap_input=.true.
       else if (message(1:5)=="-cout" .and. len_trim(message)==5) then
          i=i+1
-         if (i>iargc()) call abort("-cout option requires an argument")
+         if (i>iargc()) call abortdns("-cout option requires an argument")
          call getarg(i,carg)
          if (carg(1:3)=="uvw") then
             convert_opt=0 
@@ -525,7 +527,7 @@ if (my_pe==io_pe) then
             convert_opt=11 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
-            call abort("-cout unrecognized option")
+            call abortdns("-cout unrecognized option")
          endif
       else if (message(1:2)=="-d") then
          i=i+1
@@ -644,7 +646,7 @@ if (my_pe==io_pe) then
    else
       ! if you add a new variable and new input type, be sure to add
       ! it to the MPI broadcast!
-      call abort("bad input file")
+      call abortdns("bad input file")
    endif
 
 
@@ -866,7 +868,7 @@ read(5,*) rvalue
 if (sdata=='value') then
    mu=rvalue
 else 
-   call abort("only viscosity type 'value' supported for input format=0")
+   call abortdns("only viscosity type 'value' supported for input format=0")
 endif
 
 read(5,'(a12)') sdata
@@ -883,26 +885,26 @@ else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
 else
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
 read(5,'(a12)') sdata
 if (sdata=='periodic') then
 else
-   call abort("only 'perodic' b.c. supported")
+   call abortdns("only 'perodic' b.c. supported")
 endif
 
 read(5,'(a12)') sdata
 if (sdata=='periodic') then
 else
-   call abort("only 'perodic' b.c. supported")
+   call abortdns("only 'perodic' b.c. supported")
 endif
 
 read(5,'(a12)') sdata
 if (sdata=='periodic') then
 else
-   call abort("only 'perodic' b.c. supported")
+   call abortdns("only 'perodic' b.c. supported")
 endif
 
 read(5,*) time_final
@@ -964,7 +966,7 @@ else if (sdata=='iso12e') then
    init_cond=5
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid initial condtion specified on line 3 on input file")
+   call abortdns("invalid initial condtion specified on line 3 on input file")
 endif
 
 read(5,*) init_cond_subtype
@@ -979,7 +981,7 @@ else if (sdata=='iso12') then
 else if (sdata=='iso12w') then
    forcing_type=2
 else 
-   call abort("invalid forcing type specified on line 4 on input file")
+   call abortdns("invalid forcing type specified on line 4 on input file")
 endif
 
 
@@ -1006,7 +1008,7 @@ else if (sdata=='hyper') then
    mu_hyper_value = rvalue/xfac
    mu_hyper = 4
 else 
-   call abort("non supported viscosity type")
+   call abortdns("non supported viscosity type")
 endif
 
 read(5,*) alpha_value
@@ -1029,7 +1031,7 @@ else if (sdata=='4th') then
    dealias=0
 else
    print *,'value=',sdata
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
@@ -1045,7 +1047,7 @@ else if (sdata=='in0') then
    g_bdy_x1=INFLOW0
    g_bdy_x2=INFLOW0
 else
-   call abort("x boundary condition not supported")
+   call abortdns("x boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1063,7 +1065,7 @@ else if (sdata=='custom1') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0
 else
-   call abort("y boundary condition not supported")
+   call abortdns("y boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1072,7 +1074,7 @@ if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
    g_bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported in z-direction")
+   call abortdns("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(5,*) time_final
@@ -1097,7 +1099,7 @@ if (numerical_method==FOURIER) then
    if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
        g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
        g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
-      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+      call abortdns("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif
 
@@ -1131,7 +1133,7 @@ else if (sdata=='shallow') then
    equations=SHALLOW
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid equations specified")
+   call abortdns("invalid equations specified")
 endif
 
 read(5,'(a12)') sdata
@@ -1158,7 +1160,7 @@ else if (sdata=='decay2048_s') then
    init_cond=9
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid initial condtion specified on line 3 on input file")
+   call abortdns("invalid initial condtion specified on line 3 on input file")
 endif
 
 read(5,*) init_cond_subtype
@@ -1179,7 +1181,7 @@ else if (sdata=='iso23w') then
 else if (sdata=='balu') then
    forcing_type=5
 else 
-   call abort("invalid forcing type specified on line 4 on input file")
+   call abortdns("invalid forcing type specified on line 4 on input file")
 endif
 
 
@@ -1206,7 +1208,7 @@ else if (sdata=='hyper') then
    mu_hyper_value = rvalue/xfac
    mu_hyper = 4
 else 
-   call abort("non supported viscosity type")
+   call abortdns("non supported viscosity type")
 endif
 
 read(5,*) alpha_value
@@ -1230,7 +1232,7 @@ else if (sdata=='4th') then
    dealias=0
 else
    print *,'value=',sdata
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
@@ -1246,7 +1248,7 @@ else if (sdata=='in0') then
    g_bdy_x1=INFLOW0
    g_bdy_x2=INFLOW0
 else
-   call abort("x boundary condition not supported")
+   call abortdns("x boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1264,7 +1266,7 @@ else if (sdata=='custom1') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0
 else
-   call abort("y boundary condition not supported")
+   call abortdns("y boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1273,7 +1275,7 @@ if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
    g_bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported in z-direction")
+   call abortdns("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(5,*) time_final
@@ -1298,7 +1300,7 @@ if (numerical_method==FOURIER) then
    if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
        g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
        g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
-      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+      call abortdns("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif
 
@@ -1330,7 +1332,7 @@ else if (sdata=='shallow') then
    equations=SHALLOW
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid equations specified")
+   call abortdns("invalid equations specified")
 endif
 
 read(5,'(a12)') sdata
@@ -1357,7 +1359,7 @@ else if (sdata=='decay2048_s') then
    init_cond=9
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid initial condtion specified on line 3 on input file")
+   call abortdns("invalid initial condtion specified on line 3 on input file")
 endif
 
 read(5,*) init_cond_subtype
@@ -1380,7 +1382,7 @@ else if (sdata=='balu') then
 else if (sdata=='iso12_hel') then
    forcing_type=6
 else 
-   call abort("invalid forcing type specified on line 4 on input file")
+   call abortdns("invalid forcing type specified on line 4 on input file")
 endif
 
 
@@ -1410,7 +1412,7 @@ else if (sdata=='hyper') then
    mu_hyper_value = rvalue/xfac
    mu_hyper = 4
 else 
-   call abort("non supported viscosity type")
+   call abortdns("non supported viscosity type")
 endif
 
 !
@@ -1427,7 +1429,7 @@ else if (sdata=='hyper8') then
    mu_hyper=4
    mu_hyper_value = rvalue
 else 
-   call abort("non supported hyper viscosity type")
+   call abortdns("non supported hyper viscosity type")
 endif
 
 !
@@ -1441,7 +1443,7 @@ else if (sdata=='hypo2') then
    mu_hypo=1
    mu_hypo_value = rvalue
 else 
-   call abort("non supported hypo viscosity type")
+   call abortdns("non supported hypo viscosity type")
 endif
 
 
@@ -1468,7 +1470,7 @@ else if (sdata=='4th') then
    dealias=0
 else
    print *,'value=',sdata
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
@@ -1484,7 +1486,7 @@ else if (sdata=='in0') then
    g_bdy_x1=INFLOW0
    g_bdy_x2=INFLOW0
 else
-   call abort("x boundary condition not supported")
+   call abortdns("x boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1502,7 +1504,7 @@ else if (sdata=='custom1') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0
 else
-   call abort("y boundary condition not supported")
+   call abortdns("y boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1511,7 +1513,7 @@ if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
    g_bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported in z-direction")
+   call abortdns("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(5,*) time_final
@@ -1536,7 +1538,7 @@ if (numerical_method==FOURIER) then
    if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
        g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
        g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
-      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+      call abortdns("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif
 
@@ -1572,7 +1574,7 @@ else if (sdata(1:3)=='cns') then
    equations=CNS
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid equations specified")
+   call abortdns("invalid equations specified")
 endif
 
 read(5,'(a12)') sdata
@@ -1601,7 +1603,7 @@ else if (sdata=='3d_rot') then
    init_cond=10
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid initial condtion specified on line 3 on input file")
+   call abortdns("invalid initial condtion specified on line 3 on input file")
 endif
 
 read(5,*) init_cond_subtype
@@ -1639,7 +1641,7 @@ else if (sdata=='sto_high_10') then
    forcing_peak_waveno=10
    forcing_type=8
 else 
-   call abort("invalid forcing type specified on line 4 on input file")
+   call abortdns("invalid forcing type specified on line 4 on input file")
 endif
 
 
@@ -1669,7 +1671,7 @@ else if (sdata=='hyper') then
    mu_hyper_value = rvalue/xfac
    mu_hyper = 4
 else 
-   call abort("non supported viscosity type")
+   call abortdns("non supported viscosity type")
 endif
 
 !
@@ -1689,7 +1691,7 @@ else if (sdata=='hyper16') then
    mu_hyper=8
    mu_hyper_value = rvalue
 else 
-   call abort("non supported hyper viscosity type")
+   call abortdns("non supported hyper viscosity type")
 endif
 
 !
@@ -1703,7 +1705,7 @@ else if (sdata=='hypo2') then
    mu_hypo=1
    mu_hypo_value = rvalue
 else 
-   call abort("non supported hypo viscosity type")
+   call abortdns("non supported hypo viscosity type")
 endif
 
 
@@ -1731,7 +1733,7 @@ else if (sdata=='4th') then
    dealias=0
 else
    print *,'value=',sdata
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
@@ -1747,7 +1749,7 @@ else if (sdata=='in0') then
    g_bdy_x1=INFLOW0
    g_bdy_x2=INFLOW0
 else
-   call abort("x boundary condition not supported")
+   call abortdns("x boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1765,7 +1767,7 @@ else if (sdata=='custom1') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0
 else
-   call abort("y boundary condition not supported")
+   call abortdns("y boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -1774,7 +1776,7 @@ if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
    g_bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported in z-direction")
+   call abortdns("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(5,*) time_final
@@ -1799,7 +1801,7 @@ if (numerical_method==FOURIER) then
    if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
        g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
        g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
-      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+      call abortdns("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif
 
@@ -1831,7 +1833,7 @@ else if (sdata(1:3)=='cns') then
    equations=CNS
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid equations specified")
+   call abortdns("invalid equations specified")
 endif
 
 read(5,'(a12)') sdata
@@ -1860,7 +1862,7 @@ else if (sdata=='3d_rot') then
    init_cond=10
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid initial condtion specified on line 3 on input file")
+   call abortdns("invalid initial condtion specified on line 3 on input file")
 endif
 
 read(5,*) init_cond_subtype
@@ -1895,7 +1897,7 @@ else if (sdata=='sto_high_10') then
    forcing_peak_waveno=10
    forcing_type=8
 else 
-   call abort("invalid forcing type specified on line 4 on input file")
+   call abortdns("invalid forcing type specified on line 4 on input file")
 endif
 
 
@@ -1925,7 +1927,7 @@ else if (sdata=='hyper') then
    mu_hyper_value = rvalue/xfac
    mu_hyper = 4
 else 
-   call abort("non supported viscosity type")
+   call abortdns("non supported viscosity type")
 endif
 
 !
@@ -1945,7 +1947,7 @@ else if (sdata=='hyper16') then
    mu_hyper=8
    mu_hyper_value = rvalue
 else 
-   call abort("non supported hyper viscosity type")
+   call abortdns("non supported hyper viscosity type")
 endif
 
 !
@@ -1959,7 +1961,7 @@ else if (sdata=='hypo2') then
    mu_hypo=1
    mu_hypo_value = rvalue
 else 
-   call abort("non supported hypo viscosity type")
+   call abortdns("non supported hypo viscosity type")
 endif
 
 
@@ -1998,7 +2000,7 @@ else if (sdata=='4th') then
    dealias=0
 else
    print *,'value=',sdata
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
@@ -2014,7 +2016,7 @@ else if (sdata=='in0') then
    g_bdy_x1=INFLOW0
    g_bdy_x2=INFLOW0
 else
-   call abort("x boundary condition not supported")
+   call abortdns("x boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -2032,7 +2034,7 @@ else if (sdata=='custom1') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0
 else
-   call abort("y boundary condition not supported")
+   call abortdns("y boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -2041,7 +2043,7 @@ if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
    g_bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported in z-direction")
+   call abortdns("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(5,*) time_final
@@ -2067,7 +2069,7 @@ if (numerical_method==FOURIER) then
    if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
        g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
        g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
-      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+      call abortdns("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif
 
@@ -2091,7 +2093,7 @@ integer i
 read(5,'(i2)') header_user
 if (header_user<1 .or. header_user>5) then
    print *,'header_user = ',header_user
-   call abort("invalid header type specified")
+   call abortdns("invalid header type specified")
 endif
 
 read(5,'(a12)') sdata
@@ -2106,7 +2108,7 @@ else if (sdata(1:3)=='cns') then
    equations=CNS
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid equations specified")
+   call abortdns("invalid equations specified")
 endif
 
 read(5,'(a12)') sdata
@@ -2135,7 +2137,7 @@ else if (sdata=='3d_rot') then
    init_cond=10
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid initial condtion specified on line 3 on input file")
+   call abortdns("invalid initial condtion specified on line 3 on input file")
 endif
 
 read(5,*) init_cond_subtype
@@ -2182,7 +2184,7 @@ else if (sdata=='sto_high_4') then
    forcing_peak_waveno=4
    forcing_type=8
 else 
-   call abort("invalid forcing type specified on line 4 on input file")
+   call abortdns("invalid forcing type specified on line 4 on input file")
 endif
 
 
@@ -2212,7 +2214,7 @@ else if (sdata=='hyper') then
    mu_hyper_value = rvalue/xfac
    mu_hyper = 4
 else 
-   call abort("non supported viscosity type")
+   call abortdns("non supported viscosity type")
 endif
 
 !
@@ -2235,7 +2237,7 @@ else if (sdata=='hyper16') then
    mu_hyper=8
    mu_hyper_value = rvalue
 else 
-   call abort("non supported hyper viscosity type")
+   call abortdns("non supported hyper viscosity type")
 endif
 
 !
@@ -2249,7 +2251,7 @@ else if (sdata=='hypo2') then
    mu_hypo=1
    mu_hypo_value = rvalue
 else 
-   call abort("non supported hypo viscosity type")
+   call abortdns("non supported hypo viscosity type")
 endif
 
 read(5,*) fcor
@@ -2289,7 +2291,7 @@ else if (sdata=='4th') then
    dealias=0
 else
    print *,'value=',sdata
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
@@ -2305,7 +2307,7 @@ else if (sdata=='in0') then
    g_bdy_x1=INFLOW0
    g_bdy_x2=INFLOW0
 else
-   call abort("x boundary condition not supported")
+   call abortdns("x boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -2323,7 +2325,7 @@ else if (sdata=='custom1') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0
 else
-   call abort("y boundary condition not supported")
+   call abortdns("y boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -2332,7 +2334,7 @@ if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
    g_bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported in z-direction")
+   call abortdns("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(5,*) time_final
@@ -2358,7 +2360,7 @@ if (numerical_method==FOURIER) then
    if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
        g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
        g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
-      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+      call abortdns("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif
 
@@ -2384,7 +2386,7 @@ integer i
 read(5,'(i2)') header_user
 if (header_user<1 .or. header_user>5) then
    print *,'header_user = ',header_user
-   call abort("invalid header type specified")
+   call abortdns("invalid header type specified")
 endif
 
 read(5,'(a12)') sdata
@@ -2399,7 +2401,7 @@ else if (sdata(1:3)=='cns') then
    equations=CNS
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid equations specified")
+   call abortdns("invalid equations specified")
 endif
 
 read(5,'(a12)') sdata
@@ -2428,7 +2430,7 @@ else if (sdata=='3d_rot') then
    init_cond=10
 else 
    print *,'value = >>',sdata,'<<'
-   call abort("invalid initial condtion specified on line 3 on input file")
+   call abortdns("invalid initial condtion specified on line 3 on input file")
 endif
 
 read(5,*) init_cond_subtype
@@ -2475,7 +2477,7 @@ else if (sdata=='sto_high_4') then
    forcing_peak_waveno=4
    forcing_type=8
 else 
-   call abort("invalid forcing type specified on line 4 on input file")
+   call abortdns("invalid forcing type specified on line 4 on input file")
 endif
 
 
@@ -2508,7 +2510,7 @@ else if (sdata=='hyper') then
    mu_hyper_value = rvalue/xfac
    mu_hyper = 4
 else 
-   call abort("non supported viscosity type")
+   call abortdns("non supported viscosity type")
 endif
 
 !
@@ -2531,7 +2533,7 @@ else if (sdata=='hyper16') then
    mu_hyper=8
    mu_hyper_value = rvalue
 else 
-   call abort("non supported hyper viscosity type")
+   call abortdns("non supported hyper viscosity type")
 endif
 
 !
@@ -2545,7 +2547,7 @@ else if (sdata=='hypo2') then
    mu_hypo=1
    mu_hypo_value = rvalue
 else 
-   call abort("non supported hypo viscosity type")
+   call abortdns("non supported hypo viscosity type")
 endif
 
 read(5,*) fcor
@@ -2585,7 +2587,7 @@ else if (sdata=='4th') then
    dealias=0
 else
    print *,'value=',sdata
-   call abort("only 'fft' derivative method supported")
+   call abortdns("only 'fft' derivative method supported")
 endif
 
 
@@ -2601,7 +2603,7 @@ else if (sdata=='in0') then
    g_bdy_x1=INFLOW0
    g_bdy_x2=INFLOW0
 else
-   call abort("x boundary condition not supported")
+   call abortdns("x boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -2619,7 +2621,7 @@ else if (sdata=='custom1') then
    g_bdy_y1=REFLECT_ODD
    g_bdy_y2=INFLOW0
 else
-   call abort("y boundary condition not supported")
+   call abortdns("y boundary condition not supported")
 endif
 
 read(5,'(a12)') sdata
@@ -2628,7 +2630,7 @@ if (sdata=='periodic') then
    g_bdy_z1=PERIODIC
    g_bdy_z2=PERIODIC
 else
-   call abort("only 'perodic' b.c. supported in z-direction")
+   call abortdns("only 'perodic' b.c. supported in z-direction")
 endif
 
 read(5,*) time_final
@@ -2654,7 +2656,7 @@ if (numerical_method==FOURIER) then
    if (g_bdy_x1/=PERIODIC .or. g_bdy_x2/=PERIODIC .or. &
        g_bdy_y1/=PERIODIC .or. g_bdy_y2/=PERIODIC .or. &
        g_bdy_z1/=PERIODIC .or. g_bdy_z2/=PERIODIC) then
-      call abort("FOURIER method requires all boundary conditions be PERIODIC")
+      call abortdns("FOURIER method requires all boundary conditions be PERIODIC")
    endif
 endif
 

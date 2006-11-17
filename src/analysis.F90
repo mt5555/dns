@@ -90,7 +90,7 @@ if(i3dspec == 1) then
    endif
      do n=1,ns
         nb=nb+1
-        if (nb>100000) call abort("analysis: error: nb too small")
+        if (nb>100000) call abortdns("analysis: error: nb too small")
         call cread8e(fscalar,integrals(1,nb),ni,ierr)
         call cread8e(fscalar,maximums(1,nb),ni,ierr)
      enddo
@@ -162,7 +162,7 @@ if(iscalars.ne.0) then
      write(6,*) "alpha = ",alpha
      do n=1,ns
         nb=nb+1
-        if (nb>100000) call abort("analysis: error: nb too small")
+        if (nb>100000) call abortdns("analysis: error: nb too small")
         call cread8e(fscalar,integrals(1,nb),ni,ierr)
         call cread8e(fscalar,maximums(1,nb),ni,ierr)
      enddo

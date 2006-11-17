@@ -435,7 +435,7 @@ else if (rantype==1) then
    enddo
    enddo
 else
-   call abort("decay():  invalid 'rantype'")
+   call abortdns("decay():  invalid 'rantype'")
 endif
 alpha=0
 beta=1
