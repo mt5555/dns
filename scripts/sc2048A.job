@@ -1,6 +1,6 @@
 #!/bin/tcsh 
-#PBS -l size=2048
-#PBS -l walltime=6:00:00
+#PBS -l size=4096
+#PBS -l walltime=1:00:00
 #PBS -A 7101/16.12
 #PBS -j oe 
 #XXX -o sc2048.o 
@@ -28,10 +28,10 @@ set refin=$HOME/dns/prod/sc2048A.inp
 
 set recompile = 0
 set restart = 1
-set code = dnsp
+set code = dns
 set opt = "-mio "
 set SRC=$HOME/dns/src
-set WDIR=/scratch1/mataylo/sc2048A
+set WDIR=/scratch2/mataylo/sc2048A
 mkdir $WDIR
 set EXE=$HOME/$name-x
 
@@ -46,10 +46,10 @@ else
 endif
 
 
-set NCPU = 4096
+set NCPU = 8192
 
 if ($recompile == 1) then
-   set mesh = "8 1 512 2048 2048 2048"
+   set mesh = "8 1 1024 2048 2048 2048"
    cd $SRC
    rm -f $EXE ; rm -f $code 
    ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE

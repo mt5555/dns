@@ -248,24 +248,34 @@ real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 
+#define BENCHMARK_STORAGE
+#ifdef BENCHMARK_STORAGE
+#define uysave rhsg(1,1,1,1)
+#define vxsave rhsg(1,1,1,2)
+#else
 ! storage for first two components of vorticity, needed for
 ! use_vorticity3 trick:
-real*8,save  :: uygrid(nx,ny,nz)
-real*8,save  :: vxgrid(nx,ny,nz)
+real*8,save,allocatable  :: uysave(:,:,:)
+real*8,save,allocatable  :: vxsave(:,:,:)
+#endif
 logical,save :: firstcall=.true.
 
 if (firstcall) then
    firstcall=.false.
-   ! initialize uygrid,vxgrid
-   !call print_message('allocating extra arrays for use_vorticity3')
-   !allocate(uygrid(nx,ny,nz))
-   !allocate(vxgrid(nx,ny,nz))
-   call zx_ifft3d_and_dy(Q(1,1,1,1),work2,uygrid,work)
-   call zx_ifft3d_and_dx(Q(1,1,1,2),work2,vxgrid,work)
+#ifdef BENCHMARK_STORAGE
+   call print_message('WARNING: using BENCHMARK_STORAGE option - diagnostics, in enabled, will corrupt solution')
+#else
+   ! initialize uysave,vxsave
+   call print_message('allocating extra arrays for use_vorticity3')
+   allocate(uysave(nx,ny,nz))
+   allocate(vxsave(nx,ny,nz))
+#endif
+   call zx_ifft3d_and_dy(Q(1,1,1,1),work2,uysave,work)
+   call zx_ifft3d_and_dx(Q(1,1,1,2),work2,vxsave,work)
 endif
 
 ! stage 1
-call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,uygrid,vxgrid)
+call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,uysave,vxsave)
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
@@ -278,8 +288,8 @@ do n=1,n_var
    enddo
 enddo
 
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
+call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uysave,work)
+call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxsave,work)
 do n=3,n_var
    call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -290,7 +300,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,uygrid,vxgrid)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,uysave,vxsave)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -302,8 +312,8 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
+call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uysave,work)
+call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxsave,work)
 do n=3,n_var
    call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -311,7 +321,7 @@ enddo
 
 
 ! stage 3
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,uygrid,vxgrid)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,uysave,vxsave)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -323,15 +333,15 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
-call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
+call zx_ifft3d_and_dy(Q_tmp(1,1,1,1),Q_grid(1,1,1,1),uysave,work)
+call zx_ifft3d_and_dx(Q_tmp(1,1,1,2),Q_grid(1,1,1,2),vxsave,work)
 do n=3,n_var
    call zx_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
 ! stage 4
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,uygrid,vxgrid)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,uysave,vxsave)
 
 
 do n=1,n_var
@@ -343,8 +353,8 @@ do n=1,n_var
    enddo
    enddo
 enddo
-call zx_ifft3d_and_dy(Q(1,1,1,1),Q_grid(1,1,1,1),uygrid,work)
-call zx_ifft3d_and_dx(Q(1,1,1,2),Q_grid(1,1,1,2),vxgrid,work)
+call zx_ifft3d_and_dy(Q(1,1,1,1),Q_grid(1,1,1,1),uysave,work)
+call zx_ifft3d_and_dx(Q(1,1,1,2),Q_grid(1,1,1,2),vxsave,work)
 do n=3,n_var
    call zx_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
