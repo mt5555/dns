@@ -59,7 +59,6 @@ end
 
 eta = (mu^3 / epsilon)^.25;
 delx_over_eta=(1/nx)/eta;
-
 delx_over_eta = 1                    %this is not being read correctly
 
 
@@ -123,12 +122,12 @@ y215 = 0;
 y23 = 0;
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  klaws == 1      4/5, 4/15  and 4/3 laws
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (klaws==1) 
-
-%
-%  the 4/5 law
-%
 figure(1); subplot(1,1,1);
 yyave=0*xx;
 yyave_sq=0*xx;
@@ -339,9 +338,15 @@ ndir
 long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
 
-end
+end  % klaws==1 loop
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  klaws==3     2/15 law
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %  the 2/15 law 
 %
@@ -410,12 +415,15 @@ if(htt)
   end
 end
 
-
-
 end
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  check isotropy loop
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (check_isotropy)
 
 %
@@ -565,10 +573,15 @@ ax=axis;  axis([1,xmax2,ax(3),ax(4)]);
 hold off;
 print -deps isocheck3.ps;
 
-
-
 end
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  klaws==2      4th order structure funtions
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (klaws==2) 
 
 %
@@ -653,50 +666,51 @@ end
 
 end
 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  klaws==4      mixed structure funtions
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (klaws==4)
 %
 % analysis of mixed structure functions
 %
-
 [ux, dir_max] = read_ux( [name,'.ux'] );
      aniso_sfn(Dl,Dt,Dlt1_wt,Dlt2_wt,ndelta,ndir,dir_max,r_val,nx,delx_over_eta,xx)
      
      format short g; disp(ux);
      format
-
 end
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  klaws==5    
 %
 % analysis of pv/velocity correlations
 % 2/3 law
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (klaws==5)
 yyave=0*xx;
 figure(4); subplot(1,1,1);
 
+
 for i=1:ndir
   x = r_val(:,i);                       % units of box length
   
-   
   x_plot=x*nx*delx_over_eta;            % units of r/eta
-  Dl(:,i,1);
-  Q_eps;
   
- %   y=Dl(:,i,1)./((Q_eps)*(x));   % normalize by dissipation rate 
-    y = Dl(:,i,1)./(Q_eps*x);
- 
+  y=Dl(:,i,1)./((Q_eps)*(x));   % normalize by dissipation rate 
+
   semilogx(x_plot,y,['o-',cdir(i)],'MarkerSize',5); hold on;  
-
   yyave=yyave+w(i)*spline(x,y,xx);
-
-
 end
-
-xx_plot;
 semilogx(xx_plot,yyave,'r.-','LineWidth',2.5);
-
 y23=yyave;
 max(yyave)
 title('2/3 law');

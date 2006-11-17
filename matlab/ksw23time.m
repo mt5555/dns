@@ -10,10 +10,12 @@ delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
 
 %name = '~/projects/pv/data_analysis/lowforc/qg';
-name = '~/projects/pv/data_analysis/lowforc/low4/qg64/qg';
+%name = '~/projects/pv/data_analysis/lowforc/low4/qg64/qg';
+name = '~/data/qg';
 pname = 'qg';
 ext='.bisostr';
-times=[200:2:256];
+%times=[200:2:256];
+times=[200:200];
 nx = 64;
 
 %check this subroutine, for now set averages to 1
@@ -30,31 +32,29 @@ ndir_use=73;
 
 if (ndir_use>0) ndir=ndir_use; end;
 
-if (ndir==3)
-  w=ones([1,3])/3;
-else
-  equalw=0;
-  if (equalw) 
-    % put this in to use equally weighted:
-    w=ones([1,ndir])/ndir;
-    disp(sprintf('Using equal weights for spherical integration'))
-  else
-    % get the weights:
-    wname=sprintf('../src/voronoi/isoave.weights%i',ndir);
-    disp(sprintf('Reading Voronio weights from file:  %s',wname))
-    w=textread(wname,'%f');
-    % take every other weight
-    w=2*w(1:2:length(w));
-  end
-end
-if (abs(1-sum(w))>1e-7) 
-  disp('error: weights do not sum to 1')
-  return;
-end
+% $$$ if (ndir==3)
+% $$$   w=ones([1,3])/3;
+% $$$ else
+% $$$   equalw=0;
+% $$$   if (equalw) 
+% $$$     % put this in to use equally weighted:
+% $$$     w=ones([1,ndir])/ndir;
+% $$$     disp(sprintf('Using equal weights for spherical integration'))
+% $$$   else
+% $$$     % get the weights:
+% $$$     wname=sprintf('../src/voronoi/isoave.weights%i',ndir);
+% $$$     disp(sprintf('Reading Voronio weights from file:  %s',wname))
+% $$$     w=textread(wname,'%f');
+% $$$     % take every other weight
+% $$$     w=2*w(1:2:length(w));
+% $$$   end
+% $$$ end
+% $$$ if (abs(1-sum(w))>1e-7) 
+% $$$   disp('error: weights do not sum to 1')
+% $$$   return;
+% $$$ end
 
 
-ndir_use=0;
-%ndir_use=49;  disp('USING ONLY 49 DIRECTIONS')
 
 % this type of averging is expensive:
 time_and_angle_ave=1;
@@ -88,9 +88,7 @@ ppname = [pname,tstr(2:10),ext];
       klaws=5;                          % compute 2/3 laws
       plot_posneg=0;
       check_isotropy=0;
-      
       [y45,y415,y43,epsl,h_eps,y215,y23]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
-     pause
       
       y23_iso_ave=y23_iso_ave+y23';  %accumulate the angle averaged y23 from each frame
       
@@ -106,15 +104,15 @@ ppname = [pname,tstr(2:10),ext];
     
     eta_l = (mu^3 / eps_l)^.25;
     delx_over_eta_l=(1/nx)/eta_l;
-    Q_eps_l
-    
+
     for dir=1:ndir
       x=r_val(:,dir)/nx;               % box length
       y=Dl(:,dir,1)./(Q_eps_l*x);               % for forced data
-      
-      y23 = w(dir)*spline(x,y,xx);
-      
+
+%      y23 = w(dir)*spline(x,y,xx);
+      y23 = spline(x,y,xx);
       y23_ave(:,dir)=y23_ave(:,dir)+y23';  % accumulate the y23 for each direction, from each frame.
+
 
     end
   end

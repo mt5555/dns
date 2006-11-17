@@ -1,21 +1,58 @@
 *******************************************************************************
 11/14
 
+dns code:
+RS size -d output:
+4096:  804307056 * 18384 =  12272 GB         512GB per array
+       511175888*8*4096  = 15599GB 
+3072:  1417862352*3072 = 4056 GB   (19 arrays)
+2048:  637377744*2048 = 1215 GB    (19 arrays)
+
+at high CPU counts, it looks like there is some storage growing
+faster than linear?  
+
+
 RS Jumbo runs
+dnsp = 20 arrays =  20*8*N^3 =  1.49e-7 N^3 GB
 
-3072^3  
-VN mode
-9216cores   done
-6144cores   not enough memory.  should require .7gb per core.  
-             (setenv MPICH_UNEX_BUFFER_SIZE 180M)
-
-6144cores   trying w/o MPICH above
+4096^3   10240 GB   min VN mode:   16384
+16384    allocate() fails.
+         try with static allocation  IN-Q
 
 
-3072cores
-
+3072^3        4320 GB      VN mode:  6144
 CO mode
 3072nodes  
+
+VN mode
+18432       done
+9216cores   done
+6144cores   not enough memory.  should require .7gb per core.  
+6144cores   ok w/o MPICH_UNEX_BUFFER_SIZE 180M)
+
+
+2048^2     1300 GB    min VN mode:  2048 cpus.
+VN mode
+16384  done
+8192   done
+4096   done
+2048   ?
+
+
+1024^2    160GB    min VN mode: 256 cpus
+
+16384     ?
+8192      ?
+4096->256   done
+
+
+512^2   ?   redo this data?
+16384  
+8192   
+4096   
+
+
+
 
 
 
