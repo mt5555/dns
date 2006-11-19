@@ -115,9 +115,10 @@ integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
 real*8 w(n2*(n1+1))
 
-real*8 :: scale=1,tmx1,tmx2
+real*8 :: tmx1,tmx2
 character(len=80) message_str
 integer index,j,k
+CPOINTER :: plan
 
 call wallclock(tmx1)
 if (tims(19)==0) ncalls(19)=0  ! timer was reset, so reset counter too
@@ -131,7 +132,6 @@ ASSERT("ifft1: dimension too small ",n2==n2d)
 
 do k=1,n3
    do j=1,n2
-
       ! move the last cosine mode back into correct location:
       p(n1+1,j,k)=p(2,j,k)
       p(2,j,k)=0             ! not needed?
@@ -139,14 +139,13 @@ do k=1,n3
    enddo
 enddo
 
-flags = 
-
-!call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,1)
-call fftw_plan_many_dft_c2r(int rank, n1,n2*n3,p, const int *inembed?,
-                       n1d, int idist?, p, const int *onembed?,
-                       n1d, int odist?, flags);
-
-
+print *,'calling dfftw_c2r'
+#if 1
+call dfftw_plan_many_dft_c2r(plan, 1, n1,n2*n3,p, n1d, &
+                       1, n1d, p, n1d, 1, n1d, FFTW_MEASURE)
+call dfftw_execute(plan)
+call dfftw_destroy_plan(plan)
+#endif
 
 call wallclock(tmx2) 
 tims(19)=tims(19)+(tmx2-tmx1)          
@@ -168,6 +167,7 @@ real*8 :: scale
 real*8 :: w(n2*(n1+1)) 
 real*8 :: tmx1,tmx2
 integer index,j,k
+CPOINTER :: plan
 
 call wallclock(tmx1)
 if (tims(18)==0) ncalls(18)=0  ! timer was reset, so reset counter too
@@ -175,7 +175,18 @@ if (tims(18)==0) ncalls(18)=0  ! timer was reset, so reset counter too
 
 if (n1==1) return
 ASSERT("fft1: dimension too small ",n1+2<=n1d)
-call getindex(n1,index)
+ASSERT("ifft1: dimension too small ",n2==n2d)
+
+! number of FFTs to compute:  n2*n3
+! stride:  n1d
+print *,'calling dfftw'
+#if 1
+call dfftw_plan_many_dft_r2c(plan, 1, n1,n2*n3,p, n1d, &
+                       1, n1d, p, n1d, 1, n1d, FFTW_MEASURE)
+call dfftw_execute(plan)
+call dfftw_destroy_plan(plan)
+#endif
+print *,'done calling dfftw'
 
 scale=n1
 scale=1/scale
@@ -185,12 +196,10 @@ do k=1,n3
    !         p(n1+1,jj,k)=0
    !         p(n1+2,jj,k)=0
    !   enddo
-   call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,1,n1d,n1,n2,-1)
    !     move the last cosine mode into slot of first sine mode:
    do j=1,n2
       p(2,j,k)=p(n1+1,j,k)
    enddo
-   
 enddo
 call wallclock(tmx2) 
 tims(18)=tims(18)+(tmx2-tmx1)          

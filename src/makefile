@@ -94,7 +94,8 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),GNU)
    F90 = gfortran
    CC=gcc
-   FFLAGS =  -O2  -ffixed-line-length-132 $(MPI) -DUSE_FFT99  -DGFORTRAN
+   FFLAGS =  -O2  -ffixed-line-length-132 $(MPI) -I/usr/include -DUSE_FFTW  -DGFORTRAN
+   LDFLAGS = -lfftw3
    endif
 
 endif
