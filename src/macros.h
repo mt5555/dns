@@ -58,7 +58,7 @@
 #define my_z    mpicoords(3)
 
 ! variable used to hold C style pointers.  should be at least 64 bits
-#define CPOINTER real*8
+#define CPOINTER integer*8
 
 ! equations
 #define NS_UVW  0

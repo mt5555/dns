@@ -139,8 +139,15 @@ do k=1,n3
    enddo
 enddo
 
-print *,'calling dfftw_c2r'
 #if 1
+do k=1,n3
+   do j=1,n2
+      call dfftw_plan_dft_c2r_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_MEASURE)
+      call dfftw_execute(plan)
+      call dfftw_destroy_plan(plan)
+   enddo
+enddo
+#else
 call dfftw_plan_many_dft_c2r(plan, 1, n1,n2*n3,p, n1d, &
                        1, n1d, p, n1d, 1, n1d, FFTW_MEASURE)
 call dfftw_execute(plan)
@@ -179,17 +186,28 @@ ASSERT("ifft1: dimension too small ",n2==n2d)
 
 ! number of FFTs to compute:  n2*n3
 ! stride:  n1d
-print *,'calling dfftw'
 #if 1
+do k=1,n3
+   do j=1,n2
+      call dfftw_plan_dft_r2c_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_MEASURE)
+      call dfftw_execute(plan)
+      call dfftw_destroy_plan(plan)
+   enddo
+enddo
+
+
+#else
 call dfftw_plan_many_dft_r2c(plan, 1, n1,n2*n3,p, n1d, &
                        1, n1d, p, n1d, 1, n1d, FFTW_MEASURE)
 call dfftw_execute(plan)
 call dfftw_destroy_plan(plan)
 #endif
-print *,'done calling dfftw'
+
+
 
 scale=n1
 scale=1/scale
+p=p*scale
 
 do k=1,n3
    !   do j=1,n2

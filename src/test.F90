@@ -14,18 +14,20 @@ use params
 !call print_message('Running some tests...')
 !call test_fft_fd
 !call test_transpose
-!call test_fft
+call test_fft
 !call test_poisson
 !call test_divfree
 !call test_poisson_dirichlet
 !call test_poisson_ghost
 !call abortdns('ending after test')
 
+stop
+
 end subroutine
 
 
 ! enable/disable all test codes:  (they take up memory!)
-#if 0
+#if 1
 
 
 subroutine test_poisson_dirichlet
@@ -688,6 +690,8 @@ inputyy=0
 inputz = 0
 inputzz=0
 
+
+
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
@@ -721,7 +725,7 @@ enddo
 enddo
 
 
-
+#if 0
 do i=nx1,nx2
 do j=ny1,ny2
 do k=nz1,nz2
@@ -734,17 +738,6 @@ enddo
 enddo
 enddo
 
-
-do i=nx1,nx2
-do j=ny1,ny2
-do k=nz1,nz2
-   cf1=3*2*pi 
-   input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
-   inputz(i,j,k)=     -cf1*5*sin(cf1*zcord(k))    + inputz(i,j,k)
-   inputzz(i,j,k)=-cf1*cf1*5*cos(cf1*zcord(k))    + inputzz(i,j,k)
-enddo
-enddo
-enddo
 
 
 do i=nx1,nx2
@@ -761,7 +754,17 @@ enddo
 enddo
 enddo
 
-
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+   cf1=3*2*pi 
+   input(i,j,k)=           5*cos(cf1*zcord(k))    + input(i,j,k)
+   inputz(i,j,k)=     -cf1*5*sin(cf1*zcord(k))    + inputz(i,j,k)
+   inputzz(i,j,k)=-cf1*cf1*5*cos(cf1*zcord(k))    + inputzz(i,j,k)
+enddo
+enddo
+enddo
+#endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! d/dx
