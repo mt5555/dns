@@ -1,5 +1,5 @@
 ;================================================;
-;  conwomap_1.ncl
+;  contour.ncl
 ;================================================;
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"   
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"   
@@ -10,7 +10,7 @@ begin
 ;
   setfileoption("bin","ReadByteOrder","LittleEndian")
   path  = "../../Projects/KH/Boussinesq/B1/"
-  data = cbinread(path+"all.v",-1,"double")
+  data = cbinread(path+"all.pv",-1,"double")
 ;  print(data)
   ndata1 = sizeof(data)
   ndata2 =ndata1/8. ; 8 bytes per double
@@ -42,7 +42,8 @@ begin
    print(slicedims)
    icounter = 3+nx+ny+nz
    contarray=0
-   do k=1,nz
+   navg = nz
+   do k=1,navg
     do i=1,nx
       do j=1,ny
 	icounter = icounter + 1
@@ -53,7 +54,7 @@ begin
    end do
    do i=1,nx
      do j=1,ny
-      contarray(i-1,j-1) = contarray(i-1,j-1)/nz
+      contarray(i-1,j-1) = contarray(i-1,j-1)/navg
 ;      if (fabs((/contarray(i-1,j-1)/)).gt.1.) then
 ;         print(i)
 ;	 print(j)
@@ -80,11 +81,17 @@ begin
 
   res                     = True          ; plot mods desired
 
+;  The following is for setting manual levels
+;  res@cnLevelSelectionMode = "ManualLevels"
+;  res@cnLevelSpacingF     = .1
+;  res@cnMinLevelValF      = -.4
+;  res@cnMaxLevelValF      = .4
   res@cnFillOn            = True          ; turn on color
   res@lbTitleFontHeightF  = .007              ; controls the font size 
   res@lbOrientation =   "vertical"          ; vertical label bar
   res@gsnSpreadColors     = True          ; use full range of colormap
- 
+  res@cnLinesOn          = False 
+
 ;  res@vpWidthF            = 0.5           ; change aspect ratio of plot
 ;  res@vpHeightF           = 0.3
 
