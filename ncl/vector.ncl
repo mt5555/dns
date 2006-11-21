@@ -47,7 +47,8 @@ begin
    uarray=0.
    varray=0.
    pvarray = 0.
-   do k=1,nz
+   navg = 2
+   do k=1,navg
     do i=1,nx
       do j=1,ny
 	icounter = icounter + 1
@@ -60,9 +61,9 @@ begin
    end do
    do i=1,nx
      do j=1,ny
-      uarray(i-1,j-1) = uarray(i-1,j-1)/nz
-      varray(i-1,j-1) = varray(i-1,j-1)/nz
-      pvarray(i-1,j-1) = pvarray(i-1,j-1)/nz
+      uarray(i-1,j-1) = uarray(i-1,j-1)/navg
+      varray(i-1,j-1) = varray(i-1,j-1)/navg
+      pvarray(i-1,j-1) = pvarray(i-1,j-1)/navg
      end do
    end do
 ;
@@ -84,16 +85,27 @@ begin
 
   res                     = True          ; plot mods desired
 
-  res@cnFillOn            = True          ; turn on color
   res@lbTitleFontHeightF  = .007              ; controls the font size 
   res@lbOrientation =   "vertical"          ; vertical label bar
   res@gsnSpreadColors     = True          ; use full range of colormap
- 
+  res@vcMinFracLengthF     = 0.33
+  res@vcRefMagnitudeF     = 3.0
+  res@vcRefLengthF        = 3.0
+  res@vcLevelSelectionMode = "ManualLevels"
+;  res@vcLevelSelectionMode = "AutomaticLevels"
+  res@vcLevelSpacingF      = 2.0
+  res@vcMinLevelValF       = -3.
+  res@vcMaxLevelValF       = 3.
+   res@vcFillArrowsOn           = True   
+   res@vcMonoFillArrowFillColor = False ; in different colors
+   res@vcFillArrowEdgeColor     = 1     ; Draw the edges in black.
+   res@vcFillArrowWidthF        = 0.055 ; Make vectors thinner.
 ;  res@vpWidthF            = 0.5           ; change aspect ratio of plot
 ;  res@vpHeightF           = 0.3
 
-  plot=gsn_csm_vector_scalar_map_ce(wks,uarray,varray,\
-                                    pvarray,res)
+  plot1=gsn_vector(wks,uarray,varray,res)
+;  plot=gsn_csm_vector_scalar(wks,uarray,varray,\
+;                                    pvarray,res)
 
 ; note that the default plot draw here still uses the long_name and
 ; units of the variable as labels.
