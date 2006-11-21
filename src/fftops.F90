@@ -361,8 +361,8 @@ integer pv_type
 !bw  pv_type
 !bw  full    = 1   q = omega_a dot grad theta + fcor d theta/dz -bous omega_3
 !bw  i         2   q = omega dot grad theta    (3D NSE with p-scalar)
-!bw  ii        3   q = omega_3 - fcor/bous d theta / dz (QG)
-!bw  iii       4   q = d theta / d z			(Ro->0, Fr=1)
+!bw  ii        3   q =  -bous * omega_3 +  fcor theta / d (QG)
+!bw  iii       4   q = fcor * d theta / d z	(Ro->0, Fr=1)
 !bw  iv        5   q = omega_3				(Fr->0, Ro=1)
 !bw  v         6   q = bous omega_3 + omega_i diff_i theta 
 !bw  vi        7   q = fcor d theta / d z + omega_i diff_i theta
