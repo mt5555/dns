@@ -10,6 +10,8 @@
 subroutine test
 use params
 
+#undef ENABLE_TESTING
+#ifdef ENABLE_TESTING
 
 !call print_message('Running some tests...')
 !call test_fft_fd
@@ -20,15 +22,13 @@ call test_fft
 !call test_poisson_dirichlet
 !call test_poisson_ghost
 !call abortdns('ending after test')
-
 stop
+#endif
 
 end subroutine
 
-
 ! enable/disable all test codes:  (they take up memory!)
-#if 1
-
+#ifdef ENABLE_TESTING
 
 subroutine test_poisson_dirichlet
 use params
