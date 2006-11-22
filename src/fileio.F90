@@ -1330,7 +1330,6 @@ logical :: output_spec
 ! local
 integer :: ierr,	i
 character(len=80) message
-real*8 :: temp(g_nz+1)
 
 
 if (io_read==1) then
@@ -1383,7 +1382,7 @@ else
    else
       call mwrite8(fid,g_xcord(1),o_nx)
       call mwrite8(fid,g_ycord(1),o_ny)
-      call mwrite8(fid,temp(1),o_nz)
+      call mwrite8(fid,g_zcord(1),o_nz)
    endif
    
 endif
@@ -1404,7 +1403,6 @@ logical :: output_spec
 ! local
 integer :: ierr,	i
 character(len=80) message
-real*8 :: temp(g_nz+1)
 
 
 if (io_read==1) then
@@ -1466,7 +1464,7 @@ else
    else
       call mwrite8(fid,g_xcord(1),o_nx)
       call mwrite8(fid,g_ycord(1),o_ny)
-      call mwrite8(fid,temp(1),o_nz)
+      call mwrite8(fid,g_zcord(1),o_nz)
    endif
    
 endif
