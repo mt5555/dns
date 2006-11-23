@@ -770,11 +770,16 @@ enddo
 ! d/dx
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call der(input,px,pxx,work,DX_AND_DXX,1)
-
 error=maxval(abs(px(nx1:nx2,ny1:ny2,nz1:nz2)-inputx(nx1:nx2,ny1:ny2,nz1:nz2)))
 call maxvalMPI(error)
 write(message,'(a,e15.10)') "x-direction d/dx error=",error
 call print_message(message)
+call print_diff(px,inputx)
+!print *,'inputx modes'
+!call fft3d(inputx,work); call print_modes(inputx)
+!print *,'px modes'
+!call fft3d(px,work); call print_modes(input)
+
 
 
 error=maxval(abs(pxx(nx1:nx2,ny1:ny2,nz1:nz2)-inputxx(nx1:nx2,ny1:ny2,nz1:nz2)))
@@ -841,6 +846,35 @@ call print_message(message)
 
 end subroutine
 
+
+subroutine print_diff(p1,p2)
+use params
+implicit none
+real*8 :: p1(nx,ny,nz)
+real*8 :: p2(nx,ny,nz)
+real*8 :: xdif,xmax,tol
+character(len=80) message
+integer :: i,j,k,count
+
+count=0
+xmax=0
+tol=1e-11
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+   xdif=p1(i,j,k)-p2(i,j,k)
+   xmax=max(xmax,xdif)
+   if (abs(xdif)>tol) then
+      count=count+1
+      if (count<100)write(*,'(3i4,2f12.6,e15.5)') i,j,k,p1(i,j,k),p2(i,j,k),xdif
+      if (count==100) call print_message('count==100, disabling output')
+   endif
+   
+enddo
+enddo
+enddo
+write(*,'(i5,a,e15.5)') count,' values have error > ',tol
+end subroutine
 
 
 

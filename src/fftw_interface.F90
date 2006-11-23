@@ -113,7 +113,6 @@ end subroutine
 subroutine ifft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 p(n1d,n2d,n3d)
-real*8 w(n2*(n1+1))
 
 real*8 :: tmx1,tmx2
 character(len=80) message_str
@@ -139,17 +138,18 @@ do k=1,n3
    enddo
 enddo
 
+! FFTW_MEASURE
 #if 1
 do k=1,n3
    do j=1,n2
-      call dfftw_plan_dft_c2r_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_MEASURE)
+      call dfftw_plan_dft_c2r_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_ESTIMATE)
       call dfftw_execute(plan)
       call dfftw_destroy_plan(plan)
    enddo
 enddo
 #else
 call dfftw_plan_many_dft_c2r(plan, 1, n1,n2*n3,p, n1d, &
-                       1, n1d, p, n1d, 1, n1d, FFTW_MEASURE)
+                       1, n1d, p, n1d, 1, n1d, FFTW_ESTIMATE)
 call dfftw_execute(plan)
 call dfftw_destroy_plan(plan)
 #endif
@@ -169,9 +169,7 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 p(n1d,n2d,n3d)
-real*8 :: scale
-real*8 :: w(n2*(n1+1)) 
+real*8 :: p(n1d,n2d,n3d)
 real*8 :: tmx1,tmx2
 integer index,j,k
 CPOINTER :: plan
@@ -182,14 +180,14 @@ if (tims(18)==0) ncalls(18)=0  ! timer was reset, so reset counter too
 
 if (n1==1) return
 ASSERT("fft1: dimension too small ",n1+2<=n1d)
-ASSERT("ifft1: dimension too small ",n2==n2d)
+ASSERT("fft1: dimension too small ",n2==n2d)
 
 ! number of FFTs to compute:  n2*n3
 ! stride:  n1d
 #if 1
 do k=1,n3
    do j=1,n2
-      call dfftw_plan_dft_r2c_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_MEASURE)
+      call dfftw_plan_dft_r2c_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_ESTIMATE)
       call dfftw_execute(plan)
       call dfftw_destroy_plan(plan)
    enddo
@@ -198,16 +196,13 @@ enddo
 
 #else
 call dfftw_plan_many_dft_r2c(plan, 1, n1,n2*n3,p, n1d, &
-                       1, n1d, p, n1d, 1, n1d, FFTW_MEASURE)
+                       1, n1d, p, n1d, 1, n1d, FFTW_ESTIMATE)
 call dfftw_execute(plan)
 call dfftw_destroy_plan(plan)
 #endif
 
 
-
-scale=n1
-scale=1/scale
-p=p*scale
+p=p/n1
 
 do k=1,n3
    !   do j=1,n2
