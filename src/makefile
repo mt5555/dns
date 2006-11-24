@@ -1,8 +1,10 @@
 # Makefile for dns
 #
 # FFT OPTIONS:
+#     USE_FFT99  (default)
+#     USE_FFTW
+#     USE_FFTWGURU
 #     USE_STKFFT
-#     USE_FFT99
 #     USE_SGIFFT
 #
 #
@@ -21,8 +23,16 @@ ifeq ($(UNAME),Linux)
    #VENDOR=PGI
    #VENDOR=PGIMPI
    #VENDOR=INTEL
+
+   FFT = -DUSE_FFT99
+   FFTLIB =
+
    ifeq ($(HOST),dosadi)
       VENDOR=INTEL
+      #FFT = -DUSE_FFTWGURU
+      #FFTLIB =  -lfftw3
+      #FFT = -DUSE_STK
+      #FFTLIB = -Lstk -lstk
    endif
    ifeq ($(ARCH),x86_64)
       VENDOR=PGIMPI
@@ -41,6 +51,8 @@ ifeq ($(UNAME),Linux)
    endif
    ifeq ($(HOST),nostromo)
       VENDOR=GNU
+      FFT = -DUSE_FFTWGURU
+      FFTLIB =  -lfftw3
    endif
    ifeq ($(HOST),s854018)
       VENDOR=INTEL
@@ -62,41 +74,41 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9562/bin/lf95
    F90 = lf95
-   FFLAGS = -g  $(MPI) -DUSE_FFT99
-   #FFLAGS =  -tpp -O $(MPI) -DUSE_FFT99
-   LDFLAGS = --staticlink  #-Lstk -lstk
+   FFLAGS = -g  $(MPI) $(FFT)
+   #FFLAGS =  -tpp -O $(MPI) $(FFT)
+   LDFLAGS = --staticlink  $(FFTLIB)
    CC = gcc
    endif
 
    ifeq ($(VENDOR),PGI)
    F90 = pgf90
    CC=pgcc
-   #FFLAGS = -Bstatic -Mrecursive -fast  $(MPI)  -DUSE_FFT99 
-   FFLAGS = -Mrecursive -g  $(MPI)  -DUSE_FFT99 
-   #LDFLAGS = -Lstk -lstk
+   #FFLAGS = -Bstatic -Mrecursive -fast  $(MPI)  $(FFT) 
+   FFLAGS = -Mrecursive -g  $(MPI)  $(FFT) 
+   LDFLAGS = $(FFTLIB)
    endif 
 
    ifeq ($(VENDOR),PGIMPI)
    F90 = mpif90
    CC = mpicc
-   FFLAGS =  -Mrecursive  -fast  $(MPI)  -DUSE_FFT99 
+   FFLAGS =  -Mrecursive  -fast  $(MPI)  $(FFT) 
+   LDFLAGS = $(FFTLIB)
    endif 
 
 
    ifeq ($(VENDOR),INTEL)
    F90 = ifort
    CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib  -O1    $(MPI)  -DUSE_FFT99 
-   #FFLAGS =  -w90  -Vaxlib -O1 -tpp7   $(MPI)  -DUSE_FFT99 
-   #LDFLAGS = -Lstk -lstk
+   FFLAGS =  -auto -w90  -Vaxlib  -O1    $(MPI)  $(FFT) 
+   #FFLAGS =  -w90  -Vaxlib -O1 -tpp7   $(MPI)  $(FFT) 
+   LDFLAGS = $(FFTLIB)
    endif
 
    ifeq ($(VENDOR),GNU)
    F90 = gfortran
    CC=gcc
-   FFLAGS =  -O2  -ffixed-line-length-132 $(MPI) -I/usr/include -DUSE_FFTWGURU  -DGFORTRAN
-   #FFLAGS =  -O2  -ffixed-line-length-132 $(MPI) -I/usr/include -DUSE_FFT99  -DGFORTRAN
-   LDFLAGS = -lfftw3
+   FFLAGS =  -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  -DGFORTRAN
+   LDFLAGS = $(FFTLIB)
    endif
 
 endif
@@ -107,13 +119,13 @@ ifeq ($(UNAME),Darwin)
    MPI =  -DUSE_MPI      -I/sw/include/
    MPILIB = -L/sw/lib/  -llammpio -llamf77mpi -lmpi -llam 
    F90 = g95
-   FFLAGS =  -O2 -ffixed-line-length-132 $(MPI) -DUSE_FFT99  
+   FFLAGS =  -O2 -ffixed-line-length-132 $(MPI) 
    CC = cc -DG77_UNDERSCORE
 
 #   CC = cc -DF_NO_UNDERSCORE
 #   F90 = xlf95
 #   F77FIXED = -qfixed
-#   FFLAGS = -WF,"-Dflush=flush_,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict 
+#   FFLAGS = -WF,"-Dflush=flush_,-DNDEBUG"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict 
 #   LDFLAGS = -lSystemStubs
 endif
 
@@ -152,7 +164,7 @@ endif
 ifeq ($(UNAME),AIX)
    F90 = mpxlf95
    F77FIXED = -qfixed
-   FFLAGS = -WF,"-Dflush=flush_,-DUSE_MPI,-DUSE_FFT99,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
+   FFLAGS = -WF,"-Dflush=flush_,-DUSE_MPI,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
    CC = cc -DF_NO_UNDERSCORE
 endif
 
@@ -345,3 +357,6 @@ params.h:
 	exit 1
 
 
+# fft_inteface, when using FFTW-GURU, depends on transpose.o, 
+# but make dep system cannot detect this
+fft_interface.o: macros.h params.o transpose.o makefile 
