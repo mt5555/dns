@@ -45,30 +45,25 @@ In otherwords:
  rearranged:         0 4 1 1 2 2 3 3 * *
 
 
-
-fftw_plan fftw_plan_many_dft_r2c(int rank, const int *n, int howmany,
-                                      double *in, const int *inembed,
-                                      int istride, int idist,
-                                      fftw_complex *out, const int *onembed,
-                                      int ostride, int odist,
-                                      unsigned flags);
-fftw_plan fftw_plan_many_dft_c2r(int rank, const int *n, int howmany,
-                                      fftw_complex *in, const int *inembed,
-                                      int istride, int idist,
-                                      double *out, const int *onembed,
-                                      int ostride, int odist,
-                                      unsigned flags);
-
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #endif
 
 
 module fft_interface
 use params
+use transpose
 implicit none
 include 'fftw3.f'
+
+integer :: init=0
+integer, parameter ::  num_fftsizes=6
+type fftdata_d
+   CPOINTER :: plan
+   integer :: size
+   integer :: howmany
+   integer :: direction
+end type
+type(fftdata_d) :: fftdata(num_fftsizes)
 
 
 contains 
@@ -77,7 +72,104 @@ contains
 
 
 
-subroutine fft_interface_init()
+subroutine fft_interface_init(f,work,nx,ny,nz)
+integer :: nx,ny,nz
+real*8 :: f(nx,ny,nz)
+real*8 :: work(nx,ny,nz)
+integer :: i,n1,n1d,n2,n2d,n3,n3d,index
+
+init=1
+do i=1,num_fftsizes
+   fftdata(i)%size = 0	
+   fftdata(i)%howmany = 0	
+   fftdata(i)%direction = 0	
+enddo
+
+call print_message("Initializing FFTW Plans...")
+! force initialization of plans.
+f=0
+call transpose_to_z(f,work,n1,n1d,n2,n2d,n3,n3d)
+call getindex(n1,n2*n3,1,index,f)
+call getindex(n1,n2*n3,-1,index,f)
+
+call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+call getindex(n1,n2*n3,1,index,f)
+call getindex(n1,n2*n3,-1,index,f)
+
+call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+call getindex(n1,n2*n3,1,index,f)
+call getindex(n1,n2*n3,-1,index,f)
+call print_message("Done initializing FFTW Plans.")
+
+
+end subroutine
+
+
+
+
+
+subroutine fftinit(n,howmany,direction,index,f,n1d)
+integer n,index,direction,howmany,n1d
+real*8 :: f(n1d,howmany)
+character(len=80) message
+
+if (init==0) call abortdns("fftw_interface.F90: call fft_interface_init to initialize first!")
+if (n>1000000) call abortdns("fftw_interface.F90: n>1 million")
+
+fftdata(index)%size=n
+fftdata(index)%howmany=howmany
+fftdata(index)%direction=direction
+
+write(message,'(a,i6,i3,i12)') 'Initializing FFTW: size, direction, howmany=',n,direction,howmany
+call print_message(message)
+
+
+fftdata(index)%plan=1
+
+if (direction==1) then
+  call dfftw_plan_guru_dft_r2c(fftdata(index)%plan,1,n,1,1, &
+          1, howmany,n1d,n1d/2,f,f,FFTW_ESTIMATE)
+endif
+if (direction==-1) then
+  call dfftw_plan_guru_dft_c2r(fftdata(index)%plan,1,n,1,1, &
+          1, howmany,n1d/2,n1d,f,f,FFTW_ESTIMATE)
+endif
+if (fftdata(index)%plan==0) then
+   call abortdns("fftwguru_interface.F90:  fftw_plan_guru failed")
+endif
+
+end subroutine
+
+
+
+
+subroutine getindex(n1,howmany,direction,i,f)
+integer :: n1,direction,howmany
+real*8,optional :: f(*)
+character(len=80) message_str
+integer i,k
+
+
+i=0
+do 
+   i=i+1
+   if (i>num_fftsizes) then
+      write(message_str,'(a,i10)') "fftwguru_interface.F90:  Failed initializing an fft of size =",n1
+      call abortdns(message_str)
+   endif
+
+   if (fftdata(i)%size==0) then  ! we didnt find a plan - make a new one
+      if (present(f)) then
+         call fftinit(n1,howmany,direction,i,f,n1+2)      
+      else
+         write(message_str,'(a,i10)') "fftwguru_interface.F90:  initialization not found for size =",n1
+         call abortdns(message_str)
+      endif
+      exit 
+   endif
+   if (n1==fftdata(i)%size .and. direction==fftdata(i)%direction &
+          .and. howmany==fftdata(i)%howmany .and. 0/=fftdata(i)%plan) exit 
+enddo
 end subroutine
 
 
@@ -119,7 +211,7 @@ real*8 p(n1d,n2d,n3d)
 
 real*8 :: tmx1,tmx2
 character(len=80) message_str
-integer index,j,k
+integer j,k,index
 CPOINTER :: plan
 
 call wallclock(tmx1)
@@ -128,6 +220,7 @@ if (tims(19)==0) ncalls(19)=0  ! timer was reset, so reset counter too
 if (n1==1) return
 ASSERT("ifft1: dimension too small ",n1+2<=n1d)
 ASSERT("ifft1: dimension too small ",n2==n2d)
+call getindex(n1,n2*n3,-1,index)
 
 
 ! number of FFTs to compute:  n2*n3
@@ -144,18 +237,12 @@ enddo
 
 ! FFTW_MEASURE
 #if 0
-do k=1,n3
-   do j=1,n2
-      call dfftw_plan_dft_c2r_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_ESTIMATE)
-      call dfftw_execute(plan)
-      call dfftw_destroy_plan(plan)
-   enddo
-enddo
-#endif
 call dfftw_plan_many_dft_c2r(plan, 1, n1,n2*n3,p, n1d/2, &
                        1, n1d/2, p, n1d, 1, n1d, FFTW_ESTIMATE)
 call dfftw_execute(plan)
 call dfftw_destroy_plan(plan)
+#endif
+call dfftw_execute_dft_c2r(fftdata(index)%plan,p,p)
 
 
 call wallclock(tmx2) 
@@ -175,7 +262,7 @@ subroutine fft1(p,n1,n1d,n2,n2d,n3,n3d)
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: p(n1d,n2d,n3d)
 real*8 :: tmx1,tmx2
-integer index,j,k
+integer j,k,index
 CPOINTER :: plan
 
 call wallclock(tmx1)
@@ -185,24 +272,17 @@ if (tims(18)==0) ncalls(18)=0  ! timer was reset, so reset counter too
 if (n1==1) return
 ASSERT("fft1: dimension too small ",n1+2<=n1d)
 ASSERT("fft1: dimension too small ",n2==n2d)
+call getindex(n1,n2*n3,1,index)
 
 ! number of FFTs to compute:  n2*n3
 ! stride:  n1d
 #if 0
-do k=1,n3
-   do j=1,n2
-      call dfftw_plan_dft_r2c_1d(plan, n1,p(1,j,k),p(1,j,k),FFTW_ESTIMATE)
-      call dfftw_execute(plan)
-      call dfftw_destroy_plan(plan)
-   enddo
-enddo
-#endif
-
 call dfftw_plan_many_dft_r2c(plan, 1, n1,n2*n3,&
 p, n1d, 1, n1d, p, n1d/2, 1, n1d/2,  FFTW_ESTIMATE)
 call dfftw_execute(plan)
 call dfftw_destroy_plan(plan)
-
+#endif
+call dfftw_execute_dft_r2c(fftdata(index)%plan,p,p)
 
 do k=1,n3
    !   do j=1,n2

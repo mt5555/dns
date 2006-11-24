@@ -1,5 +1,20 @@
 #include "macros.h"
 
+subroutine f90random_seed(istart)
+integer :: istart,k
+integer,allocatable :: seed(:)
+
+call random_seed(size=k)
+allocate(seed(k))
+call random_seed(get=seed)
+seed=seed+istart
+call random_seed(put=seed)
+deallocate(seed)
+
+end subroutine
+
+
+
 
 subroutine abortdns(message)
 use mpi

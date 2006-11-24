@@ -8,6 +8,7 @@
 program DNS
 use params
 use mpi
+use fft_interface
 implicit none
 #ifdef MALLOC_Q
 real*8,allocatable :: Q(:,:,:,:)        ! grid space state variable
@@ -31,7 +32,6 @@ integer :: ierr,i,j,k,n,itime=0
 real*8 :: tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
 real*8 :: nf,flop,flops
 logical :: power3
-integer,allocatable :: seed(:)
 
 
 ! initialize global constants:
@@ -50,28 +50,28 @@ allocate(work2(nx,ny,nz))
 
 
 call set_sighandler()
-
 call init_mpi       
 call wallclock(tmx1)  ! wallclock may use MPI timers, call after init_mpi
 call init_mpi_comm3d()
-
-call init_model()
-!call iso_stats(Q,Qhat,work1,work2)
-call test           ! optional testing  routines go here
-
-! set the random seed - otherwise it will be the same for all CPUs,
-! producing a bad initial condition.  
-call random_seed(size=k)
-allocate(seed(k))
-call random_seed(get=seed)
-seed=seed+my_pe
-call random_seed(put=seed)
-deallocate(seed)
-
-
 !if(do_mpi_io .and. io_pe==my_pe .and. g_nz>2000) &
 !       call system("touch /users/taylorm/RUNNING")
 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! initialize model
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+call init_model()
+! fftw needs to do FFTs to initialize
+call fft_interface_init(work1,work2,nx,ny,nz)  
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! optional testing  routines go here
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!call iso_stats(Q,Qhat,work1,work2)
+call test   
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -79,25 +79,20 @@ deallocate(seed)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 write(message,'(a)') 'Initial data'
 call print_message(message)
+! set the random seed (used for some initial conditions) 
+! otherwise it will be the same for all CPUs, producing a bad initial condition.  
+call f90random_seed(my_pe)  
 Q=0
 call init_data(Q,Qhat,q1,work1,work2)
-
+! reset the random seed (used for some forcings) based on initial_time, 
+! so we dont have the same seed every time we restart. 
+call f90random_seed(nint(my_pe+1000*time_initial))
 
 
 #ifdef USE_MPI
 call mpi_barrier(comm_3d,ierr)
 #endif
 
-
-
-! reset the random seed based on initial time, 
-! so we dont have the same seed every time we restart. 
-call random_seed(size=k)
-allocate(seed(k))
-call random_seed(get=seed)
-seed=seed+my_pe+1000*time_initial
-call random_seed(put=seed)
-deallocate(seed)
 
 call wallclock(tmx2)
 tims(1)=tmx2-tmx1  ! total initialization

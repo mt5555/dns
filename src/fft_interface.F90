@@ -8,6 +8,8 @@
 #include "fft99_interface.F90"
 #elif (defined USE_FFTW)
 #include "fftw_interface.F90"
+#elif (defined USE_FFTWGURU)
+#include "fftwguru_interface.F90"
 #else
 #include "fft99_interface.F90"
 #endif

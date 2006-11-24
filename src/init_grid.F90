@@ -8,10 +8,8 @@ character(len=80) ::  message
 integer :: i,n,k
 
 
-
 call params_init()
 call transpose_init()
-call fft_interface_init()
 call init_input_file()
 call init_grid()     
 
@@ -96,6 +94,7 @@ if (input_npassive>0) then
 deallocate(input_passive_type)
 deallocate(input_schmidt)
 endif
+
 
 end subroutine
 
