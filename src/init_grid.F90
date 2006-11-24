@@ -456,9 +456,6 @@ if (my_pe==io_pe) then
    !
    !   -i <infile>   take input from infile instead of stdin
    !
-   !   -t   enable LSF timelimit feature.  Only needed if you are 
-   !        running under LSF and dont want the code to stop with 30min left
-   !
    !   -r     use a restart file for the initial conditions
    !   -nors  but dont use a restart file for passive scalars
    !          (usefull for adding scalars to a restart run)
@@ -592,8 +589,6 @@ if (my_pe==io_pe) then
          if (j>0) then
             read(carg,'(i5)') spec_max
          endif
-      else if (message(1:2)=="-t") then
-         enable_lsf_timelimit=1
       else if (message(1:3)=="-ui") then
          udm_input=.true.
       else if (message(1:3)=="-uo") then
@@ -613,7 +608,6 @@ if (my_pe==io_pe) then
       else
          print *,'Invalid option (IGNORED):',message
          print *,'./dns [-[t,r,b,s,ui,uo]]  [-i params.inp] [-d rundir] [runname] '
-         print *,'-t  enable LSF time remaining check, if compiled in'
          print *,'-r  restart from rundir/restart.[uvw,h5] '
          print *,'-mio use MPI-IO'
          print *,'more options: see init_grid.F90'
@@ -698,7 +692,6 @@ call mpi_bcast(screen_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(output_dt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(output_vorticity,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
-call mpi_bcast(enable_lsf_timelimit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(init_cond,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(init_cond_subtype,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(input_npassive,1,MPI_INTEGER,io_pe,comm_3d ,ierr)

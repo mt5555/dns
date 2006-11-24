@@ -214,8 +214,7 @@ if (itime<5 .and. screen_dt/=0) doit_screen=.true.
 !
 if (doit_screen) then
    call print_message("")
-   write(message,'(a,f9.5,a,i6,a,f9.5,a,f6.0,i2)') 'time=',time,'(',itime,')  next output=',time_target, &
-      '  LSF minutes left: ',maxs(8),enable_lsf_timelimit
+   write(message,'(a,f9.5,a,i6,a,f9.5,a,f6.0,i2)') 'time=',time,'(',itime,')  next output=',time_target
    call print_message(message)	
 
    write(message,'(a,f9.7,a,f6.3,a,f6.3,a,f6.3)') &

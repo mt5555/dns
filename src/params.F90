@@ -41,7 +41,6 @@ integer :: infinite_alpha=0   !flag for infinite alpha case
 real*8  :: smagorinsky=0      !for smagorinsky term
 real*8  :: H0=0               ! used by shallow water model
 integer,parameter :: r8kind=kind(mu)
-integer :: enable_lsf_timelimit = 0
 integer :: equations=NS_UVW        ! NS_UVW    = NS / NS-alpha
                                    ! SHALLOW   = Shallow water / shallow water-alpha
                                    ! NS_PSIVOR = NS Streamfunction-Vorticity
@@ -419,7 +418,7 @@ real*8 :: ints(nints),maxs(nints)
 ! for convience, we store the time data in maxs(6:7)
 ! maxs(6) = time (at end of time step)  T
 ! maxs(7) = time at begining of time step T-1
-! maxs(8) = time (in min) remaining from LSF job (or -1).
+! maxs(8) = not used
 ! maxs(9) = error conditions.  0 = no error
 !                              1 = kill signal detected by handler
 ! maxs(10) = max of 1st passive scalar (if npassive>0)

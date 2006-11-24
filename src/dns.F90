@@ -270,8 +270,7 @@ real*8 :: ea_new=0,ea_old
 real*8 :: ke_new=0
 real*8 :: ints_buf(nints)
 real*8 :: tmx1,tmx2
-integer,external :: lsf_time_remaining
-integer :: lsftime,i,time_needed
+integer :: i,time_needed
 
 
 delt=0
@@ -305,12 +304,6 @@ do
 !       call system("touch /users/taylorm/RUNNING")
    call rk4(time,Q,Qhat,q1,q2,rhs,work1,work2)
 
-   maxs(8)=-1  
-   if (my_pe==io_pe) then
-      if (lsf_time_remaining(lsftime)==0) then
-         maxs(8)=lsftime/60.0
-      endif
-   endif
    call caught_sig(i); maxs(9)=i;
 
 #ifdef USE_MPI
@@ -325,13 +318,6 @@ do
    maxs(6)=time
    maxs(7)=time_old
 
-   if (maxs(8)>=0 .and. maxs(8)<time_needed .and. enable_lsf_timelimit==1) then
-      write(message,'(a,f20.10)') "LSF timelimit approaching. Stoping at time=",time
-      call print_message("** OUT OF TIME ****************************************")
-      call print_message(message)
-      itime_final=itime
-   endif
-   
    if (maxs(9)>0) then
       write(message,'(a,f10.0)') "Stopping because of caught signal = ",maxs(9)
       call print_message("** ERROR ****************************************")
