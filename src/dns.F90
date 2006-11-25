@@ -30,6 +30,7 @@ real*8,save :: work2(nx,ny,nz)
 character(len=80) message
 integer :: ierr,i,j,k,n,itime=0
 real*8 :: tmx1,tmx2,tims_max(ntimers),tims_ave(ntimers)
+real*8 :: transpose_tot_ave,transpose_tot_max
 real*8 :: nf,flop,flops
 logical :: power3
 
@@ -122,7 +123,15 @@ tims_max=tims_max/60
 tims_ave=tims_ave/60
 
 ! sum the total of all transposes
-! transpose_tot=sum(tims(6:11))
+transpose_tot_ave=sum(tims(6:11))
+transpose_tot_max=sum(tims(6:11))
+#ifdef USE_MPI
+   tmx1=sum(tims(6:11))
+   call mpi_allreduce(tmx1,transpose_tot_max,1,MPI_REAL8,MPI_MAX,comm_3d,ierr) 
+   call mpi_allreduce(tmx1,transpose_tot_ave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   transpose_tot_ave=transpose_tot_ave/ncpus
+#endif
+
 
 
 
@@ -165,7 +174,7 @@ if (maxval(tims_max(6:11))>0) then
    call print_message(message)
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_y   ',tims_ave(11),tims_max(11)
    call print_message(message)
-   write(message,'(a,2f9.4)')          '   traspose total     ',sum(tims_ave(6:11))
+   write(message,'(a,2f9.4)')          '   traspose total     ',transpose_tot_ave,transpose_tot_max
    call print_message(message)
 endif
 if (maxval(tims_max(18:19))>0) then
