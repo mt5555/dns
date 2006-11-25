@@ -31,8 +31,8 @@ periodic      ! z bc
 0             ! restart_dt  (this is not used)
 .01           ! diag_dt    how often to dump simple diagnostics to file
 .05           ! model_dt   compute and output spectra, structure functions, expensive diagnostics
--20           ! screen_dt  output info to stdout
-.1            ! output_dt  output snapshots
+-40           ! screen_dt  output info to stdout
+.025          ! output_dt  output snapshots
 0             ! also output the vorticity 
 0             ! n_output_custom  number of custom output times  
 

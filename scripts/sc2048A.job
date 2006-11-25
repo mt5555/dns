@@ -1,7 +1,8 @@
 #!/bin/tcsh 
-#PBS -l size=4096
-#PBS -l walltime=1:00:00
-#PBS -A 7101/16.12
+#PBS -l size=2048
+#PBS -l walltime=14:00:00
+#XXXPBS -A 7101/16.12
+#PBS -A 105916/01
 #PBS -j oe 
 #XXX -o sc2048.o 
 #PBS -N sc2048
@@ -28,12 +29,20 @@ set refin=$HOME/dns/prod/sc2048A.inp
 
 set recompile = 0
 set restart = 1
-set code = dns
+set code = dnsp
 set opt = "-mio "
 set SRC=$HOME/dns/src
 set WDIR=/scratch2/mataylo/sc2048A
 mkdir $WDIR
-set EXE=$HOME/$name-x
+set EXE=$HOME/$name-4
+
+
+#
+# set a default of 8
+# MPI-I/O stripe setting is ignored
+/usr/local/bin/set_dir_stripe $WDIR 8
+
+
 
 #
 #   CO or VN mode?
@@ -46,10 +55,10 @@ else
 endif
 
 
-set NCPU = 8192
+set NCPU = 4096
 
 if ($recompile == 1) then
-   set mesh = "8 1 1024 2048 2048 2048"
+   set mesh = "4 1 1024 2048 2048 2048"
    cd $SRC
    rm -f $EXE ; rm -f $code 
    ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE

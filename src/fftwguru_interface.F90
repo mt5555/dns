@@ -120,7 +120,7 @@ fftdata(index)%size=n
 fftdata(index)%howmany=howmany
 fftdata(index)%direction=direction
 
-write(message,'(a,i6,i3,i12)') 'Initializing FFTW: size, direction, howmany=',n,direction,howmany
+write(message,'(a,i6,i3,i12)') 'Starting FFTW_MEASURE: size, direction, howmany=',n,direction,howmany
 call print_message(message)
 
 
@@ -128,11 +128,11 @@ fftdata(index)%plan=1
 
 if (direction==1) then
   call dfftw_plan_guru_dft_r2c(fftdata(index)%plan,1,n,1,1, &
-          1, howmany,n1d,n1d/2,f,f,FFTW_ESTIMATE)
+          1, howmany,n1d,n1d/2,f,f,FFTW_MEASURE)
 endif
 if (direction==-1) then
   call dfftw_plan_guru_dft_c2r(fftdata(index)%plan,1,n,1,1, &
-          1, howmany,n1d/2,n1d,f,f,FFTW_ESTIMATE)
+          1, howmany,n1d/2,n1d,f,f,FFTW_MEASURE)
 endif
 if (fftdata(index)%plan==0) then
    call abortdns("fftwguru_interface.F90:  fftw_plan_guru failed")

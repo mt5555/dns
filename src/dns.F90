@@ -149,26 +149,26 @@ if (tims_max(13)>0) then
    call print_message(message)
 endif
 if (maxval(tims_max(6:11))>0) then
-   write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_z     ',tims_ave(6),tims_max(6)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_z     ',tims_ave(6),tims_max(6)
    call print_message(message)
-   write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_z   ',tims_ave(7),tims_max(7)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_z   ',tims_ave(7),tims_max(7)
    call print_message(message)
-   write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_x     ',tims_ave(8),tims_max(8)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_x     ',tims_ave(8),tims_max(8)
    call print_message(message)
-   write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_x   ',tims_ave(9),tims_max(9)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_x   ',tims_ave(9),tims_max(9)
    call print_message(message)
-   write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_to_y     ',tims_ave(10),tims_max(10)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_y     ',tims_ave(10),tims_max(10)
    call print_message(message)
-   write(message,'(a,2f9.2,a,f4.3,a)') '   transpose_from_y   ',tims_ave(11),tims_max(11)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_y   ',tims_ave(11),tims_max(11)
    call print_message(message)
-   write(message,'(a,2f9.2)')          '   traspose total     ',sum(tims_ave(6:11))
+   write(message,'(a,2f9.4)')          '   traspose total     ',sum(tims_ave(6:11))
    call print_message(message)
 endif
 if (maxval(tims_max(18:19))>0) then
-   write(message,'(a,2f9.2,a,f5.1,a)') '   FFT                ',tims_ave(18),tims_max(18),' count per timestep=',&
+   write(message,'(a,2f9.4,a,f5.1,a)') '   FFT                ',tims_ave(18),tims_max(18),' count per timestep=',&
    ncalls(18)/real(itime),' N^2'
    call print_message(message)
-   write(message,'(a,2f9.2,a,f5.1,a)') '   iFFT               ',tims_ave(19),tims_max(19),' count per timestep=',&
+   write(message,'(a,2f9.4,a,f5.1,a)') '   iFFT               ',tims_ave(19),tims_max(19),' count per timestep=',&
    ncalls(19)/real(itime),' N^2'
    call print_message(message)
 endif

@@ -43,10 +43,14 @@ if (`uname` == Darwin) then
    set MPIRUN =  "mpiexec -np"
    set opt = "-b $opt"
 endif
+if (`arch` == x86_64) then
+   set MPIRUN =  "yod -VN -sz "
+endif
 
 
 echo "==============================================================="
-echo "Running code: " $code 
+echo "Running code: " $code   
+echo "MPIRUN = " $MPIRUN
 echo "with options:" $opt
 echo "==============================================================="
 
@@ -93,6 +97,7 @@ echo "***********************************************************"
 echo "with restart:"
 make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
+
 
 
 echo "***********************************************************"
