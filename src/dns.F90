@@ -121,6 +121,10 @@ tims_ave=tims
 tims_max=tims_max/60
 tims_ave=tims_ave/60
 
+! sum the total of all transposes
+! transpose_tot=sum(tims(6:11))
+
+
 
 
 call print_message('CPU times (min):   (avg/max)')
