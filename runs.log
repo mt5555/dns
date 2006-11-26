@@ -1,5 +1,18 @@
 *******************************************************************************
+11/23
+Benchmarks on RS/dualcore with FFTW
+
+4096^3   done
+3072^3   done
+2048^3   done
+1024^3   done
+512^3    done
+
+*******************************************************************************
 11/14
+NOTE:  11/23: FFTW routine is over 2X faster than FFT99,
+       so i stoped with these benchmarks and I'm rerunning above
+
 
 dns code:
 RS size -d output:
