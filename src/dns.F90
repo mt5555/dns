@@ -131,7 +131,8 @@ transpose_tot_max=sum(tims(6:11))
    call mpi_allreduce(tmx1,transpose_tot_ave,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
    transpose_tot_ave=transpose_tot_ave/ncpus
 #endif
-
+transpose_tot_ave=transpose_tot_ave/60
+transpose_tot_max=transpose_tot_max/60
 
 
 

@@ -1,0 +1,213 @@
+#!/bin/tcsh 
+#PBS -l size=4096
+#PBS -l walltime=90:00
+#PBS -A 7101/16.12
+#PBS -j oe
+#PBS -N dns512
+#PBS -q standard
+#XXXB -wa URG -wt 10
+#
+#
+#  run this script as an execuatable (do not qsub)
+#  it will compile the code and then qsub itself
+#
+# put datestape in .o and .e file:
+set datestamp = `date`
+sh -c 'echo ".e output test" 1>&2'
+sh -c "echo '$datestamp' 1>&2"
+echo $datestamp
+
+# for some reason, we start in /home/mataylo:
+if ( ${?PBS_JOBID} ) then
+   cd $PBS_O_WORKDIR
+endif
+
+set name = sc512A
+set refin=$HOME/dns/src/forcing12-bench.inp
+
+set code = dnsp
+set opt = "-mio -t"
+set SRC=$HOME/dns/src
+set WDIR=/scratch1/mataylo/dns
+mkdir $WDIR
+set BIN=$WDIR
+
+
+#
+#   CO or VN mode?
+#
+set VN=1
+if ( $VN == 1) then
+   set MPIRUN = "yod -VN -sz"
+else
+   set MPIRUN = "yod -sz"
+endif
+if (! ${?PBS_JOBID} ) then
+    set MPIRUN = echo
+    set compile = 1
+else
+    set compile = 0
+endif
+
+
+#setenv MPICH_UNEX_BUFFER_SIZE 180M
+
+
+set NCPU = 32
+set mesh = "1 1 32 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 64
+set mesh = "1 1 64 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 128
+set mesh = "1 1 128 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+set NCPU = 256
+set mesh = "1 1 256 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 256
+set mesh = "2 1 128 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+set NCPU = 256
+set mesh = "4 1 64 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 512
+set mesh = "2 1 256 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 512
+set mesh = "4 1 128 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 512
+set mesh = "8 1 64 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+set NCPU = 1024
+set mesh = "4 1 256 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 1024
+set mesh = "8 1 128 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 1024
+set mesh = "16 1 64 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+set NCPU = 2048
+set mesh = "8 1 256 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 2048
+set mesh = "16 1 128 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 2048
+set mesh = "32 1 64 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+
+set NCPU = 4096
+set mesh = "16 1 256 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 4096
+set mesh = "32 1 128 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 4096
+set mesh = "64 1 64 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+
+
+
+set NCPU = 8192
+set mesh = "64 1 512 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+set NCPU = 8192
+set mesh = "32 1 256 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+set NCPU = 8192
+set mesh = "64 1 128 512 512 512"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+./compile.csh $compile $SRC $code "$mesh" $EXE
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+
