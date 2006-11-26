@@ -63,9 +63,10 @@ call init_mpi_comm3d()
 ! initialize model
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 call init_model()
-! fftw needs to do FFTs to initialize
-call fft_interface_init(work1,work2,nx,ny,nz)  
-
+#ifdef USE_FFTWGURU 
+! FFTW needs to perform FFTs during initialization
+call fft_interface_init(work1,work2)
+#endif
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

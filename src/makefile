@@ -29,8 +29,8 @@ ifeq ($(UNAME),Linux)
 
    ifeq ($(HOST),dosadi)
       VENDOR=INTEL
-      #FFT = -DUSE_FFTWGURU
-      #FFTLIB =  -lfftw3
+      FFT = -DUSE_FFTWGURU
+      FFTLIB =  -lfftw3
       #FFT = -DUSE_STK
       #FFTLIB = -Lstk -lstk
    endif

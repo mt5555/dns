@@ -47,6 +47,7 @@ write(message,'(a,i6,a,i6,a,i6)') "Local grid (with padding): ",nx," x",ny," x",
 call print_message(message)
 write(message,'(a,f8.2)') 'kmax/2pi = ',xkmax/2/pi
 
+call fft_interface_init()
 
 !
 ! are we also tracking passive scalars?

@@ -71,11 +71,8 @@ contains
 
 
 
-subroutine fft_interface_init(f,work,nx,ny,nz)
-integer :: nx,ny,nz
-real*8 :: f(nx,ny,nz)
-real*8 :: work(nx,ny,nz)
-integer :: i,n1,n1d,n2,n2d,n3,n3d,index
+subroutine fft_interface_init()
+integer :: i
 
 init=1
 do i=1,num_fftsizes
