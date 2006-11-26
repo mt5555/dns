@@ -1,0 +1,82 @@
+#! /bin/tcsh 
+#PBS -l size=2048
+#PBS -l walltime=10:00:00
+#PBS -A 7101/16.12
+#PBS -j oe
+#PBS -N isoave
+#PBS -q standard
+#
+#  run this script as an execuatable (do not qsub)
+#  it will compile the code and then qsub itself
+#
+
+# for some reason, we start in /home/mataylo:
+if ( ${?PBS_JOBID} ) then
+   cd $PBS_O_WORKDIR
+endif
+
+set NCPUS=4096
+set name = sc2048A
+set refin=$HOME/dns/prod/$name.inp
+
+
+set code = analysis_isoave
+set opt = "-mio"
+set SRC=$HOME/dns/src
+set WDIR=/scratch1/mataylo/dns
+mkdir $WDIR
+set BIN=$WDIR
+
+set COMP=$WDIR/comp
+mkdir $COMP
+
+
+if (! ${?PBS_JOBID} ) then
+    set MPIRUN = echo
+    set compile = 1
+else
+    set MPIRUN = "yod -VN -sz"
+    set compile = 0
+endif
+
+set NCPU = 32
+set mesh = "1 1 4096 2048 2048 2048"
+set EXE = `echo $BIN/$code-$mesh | sed 's/ /-/g'`
+
+if ( $compile ) then
+   cd $COMP
+   \cp -f $SRC/* .
+
+   cp -f $SRC/analysis_isoave_mt.F90 temp.F90
+   sed 's/\!SEDtstart/tstart=0.5; tstop=1.0; tinc=.1/' temp.F90 > convert.F90
+#   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times0.dat"/' temp.F90 > convert.F90
+
+
+   ./compile.csh $compile $COMP $code "$mesh" $EXE
+endif
+$MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+
+
+
+
+# output 2048 UDM vorticity:
+#date
+#prun -v -n $NCPUS  $COMP/convert2048.x -mio -cout vor -uo -d $WDIR   $name < $refin
+#date
+
+
+
+# process spectral data:
+#prun -v -n $NCPUS $COMP/convert2048.x -si -d $WDIR  $name < $refin
+
+
+
+
+
+
+
+
+
+
+
+
