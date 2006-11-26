@@ -12,6 +12,10 @@ set EXE = $5
 cd $SRC
 rm -f $code
 rm -f $EXE
-./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+./gridsetup.py $mesh 2 2 0 
+
+make $code 
+
+\cp -f $code $EXE
 
 
