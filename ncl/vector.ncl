@@ -88,6 +88,31 @@ begin
   res@lbTitleFontHeightF  = .007              ; controls the font size 
   res@lbOrientation =   "vertical"          ; vertical label bar
   res@gsnSpreadColors     = True          ; use full range of colormap
+<<<<<<< vector.ncl
+  res@gsnScalarContour    = True          ; contours desired
+ 
+  res@cnLevelSelectionMode = "ManualLevels"     ; set manual contour levels
+  res@cnFillOn            = True          ; turn on color
+;  res@cnMinLevelValF       = -40.0               ; set min contour level
+;  res@cnMaxLevelValF       = 40.0                ; set max contour level
+;  res@cnLevelSpacingF      = 20.0               ; set contour spacing
+
+  res@vcRefMagnitudeF           = .020             ; define vector ref mag
+;  res@vcRefLengthF              = .10           ; define length of vec ref
+;  res@vcRefAnnoOrthogonalPosF   = -1.0            ; move ref vector
+; res@vcRefAnnoArrowLineColor   = "white"         ; change ref vector color
+;  res@vcRefAnnoArrowUseVecColor = False           ; don't use vec color for ref
+
+  res@vcLevelSelectionMode    = "ExplicitLevels"
+  res@vcLevels = (/2., 1., -1, -2/)
+  res@vcLevelSpacingF          = 10
+  res@vcMaxLevelValF          = 3.
+  res@vcMinLevelValF          =-3.
+;  res@vcGlyphStyle            = "CurlyVector"     ; turn on curley vectors
+  res@vcLineArrowColor        = "red"           ; change vector color
+;  res@vcLineArrowThicknessF   = .50               ; change vector thickness
+  res@vcVectorDrawOrder       = "PostDraw"        ; draw vectors last
+=======
   res@vcMinFracLengthF     = 0.33
   res@vcRefMagnitudeF     = 3.0
   res@vcRefLengthF        = 3.0
@@ -102,7 +127,6 @@ begin
    res@vcFillArrowWidthF        = 0.055 ; Make vectors thinner.
 ;  res@vpWidthF            = 0.5           ; change aspect ratio of plot
 ;  res@vpHeightF           = 0.3
-
   plot1=gsn_vector(wks,uarray,varray,res)
 ;  plot=gsn_csm_vector_scalar(wks,uarray,varray,\
 ;                                    pvarray,res)
