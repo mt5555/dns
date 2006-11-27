@@ -23,7 +23,6 @@ print(timescale)
   setfileoption("bin","ReadByteOrder","LittleEndian")
 ;  path  = "../../Projects/KH/Boussinesq/f21norot/hyper4/"
 ;  path  = "../../Projects/KH/Boussinesq/low/"
-  path  = "../../Projects/KH/Boussinesq/B1/"
 ;  path  = "../../Projects/KH/Boussinesq/n21nf100/"
 ;  path  = "../../Projects/KH/Boussinesq/r16A1/hyper4/"
 ;  path  = "../../Projects/KH/Boussinesq/r16A1/"
@@ -39,13 +38,43 @@ print(timescale)
 ;  path  = "../../Projects/KH/Boussinesq/n21asp1/"
 ;  path  = "../../Projects/KH/Boussinesq/n21aspp1/"
 ;  path  = "../../Projects/KH/Boussinesq/n21aspp01/"
+  path  = "../../Projects/KH/Boussinesq/Bp01/"
   pathwrite = path+"ke.txt"
-  griddata = cbinread(path+"all.scalars-bous",-1,"double")
+  griddata = cbinread(path+"Bp01.scalars-bous",-1,"double")
   ndata1 = sizeof(griddata)
   ndata2 =ndata1/8. ; 8 bytes per double
   ndata = doubletoint(ndata2)
   print(ndata)
-  dims = ndata/10
+  print(griddata)
+;
+; Compute the total number of time increments in the data
+;
+  icount = 0
+  ni = (/griddata(0)/)
+  nints = doubletoint(ni)
+  if (nints.eq.8) then
+    stride=10
+  else
+    stride=16
+  end if
+;
+;
+;
+  dims = 0
+do while (icount.lt.ndata)
+   ni = (/griddata(icount)/)
+   nints = doubletoint(ni)
+   if(nints.eq.8) then
+    stride=10
+   else
+    stride=16
+   end if
+   icount = icount + stride
+   dims=dims + 1
+  end do
+;
+;
+;
   print(dims)
   dim = (/dims/)
   time = new(dim,"double")
@@ -57,7 +86,13 @@ print(timescale)
   pv_diss = new(dim,"double")
   potens = new(dim,"double")
   enstr_diss = new(dim,"double")
-;  print(griddata)
+  pv_qg=new(dim,"double")
+  potens_qg=new(dim,"double")
+  pv_r0=new(dim,"double")
+  potens_r0=new(dim,"double")
+  pv_fr0=new(dim,"double")
+  potens_fr0=new(dim,"double")
+  print(griddata)
 ;
 ; defaults
 ; 
@@ -67,29 +102,67 @@ f_k = 0
 ;
 ; Loop over all possible data
 ;
-icount = 0
+;
+;
+; If nints = 8 then start with stride with a factor of 10
+;
+    ni = (/griddata(0)/)
+    nints = doubletoint(ni)
+    print(nints)
+    time(0) = (/griddata(1)/)
+    print(time(0))
+;
+    if (nints.eq.8) then
+       stride=10
+    else
+       stride=16
+    end if
 ;
 ;
 ;
-  do while (icount .lt.  dims )
+  icount = 0
+  stride=0
+  do while (icount .le.  dims-1)
 ;
 ;   Assign data
 ;
-    ni = (/griddata(icount*10)/)
+    print(icount)
+    ni = (/griddata(stride)/)
     nints = doubletoint(ni)
-    time(icount) = (/griddata(icount*10 + 1)/)
-    ke(icount) = (/griddata(icount*10 + 2)/)
-    pe(icount) = (/griddata(icount*10 + 3)/)
-    ke_diss(icount) = (/griddata(icount*10 + 4)/)
-    pe_diss(icount) = (/griddata(icount*10 + 5)/)
-    pv(icount) = (/griddata(icount*10 + 6)/)
-    pv_diss(icount) = (/griddata(icount*10 + 7)/)
-    potens(icount) = (/griddata(icount*10 + 8)/)
-    enstr_diss(icount) = (/griddata(icount*10 + 9)/)
+    print(nints)
+    time(icount) = (/griddata(stride + 1)/)
+    print(time(icount))
+    ke(icount) = (/griddata(stride + 2)/)
+    pe(icount) = (/griddata(stride + 3)/)
+    ke_diss(icount) = (/griddata(stride + 4)/)
+    pe_diss(icount) = (/griddata(stride + 5)/)
+    pv(icount) = (/griddata(stride + 6)/)
+    pv_diss(icount) = (/griddata(stride + 7)/)
+    potens(icount) = (/griddata(stride + 8)/)
+    enstr_diss(icount) = (/griddata(stride + 9)/)
+    if (nints.eq.8) then
+       pv_qg(icount) = 0.
+       potens_qg(icount) = 0.
+       pv_r0(icount) = 0.
+       potens_r0(icount) = 0.
+       pv_fr0(icount) = 0.
+       potens_fr0(icount) = 0.
+    else
+       pv_qg(icount) = (/griddata(stride + 10)/)
+       potens_qg(icount) = (/griddata(stride + 11)/)
+       pv_r0(icount) = (/griddata(stride + 12)/)
+       potens_r0(icount) = (/griddata(stride + 13)/)
+       pv_fr0(icount) = (/griddata(stride + 14)/)
+       potens_fr0(icount) = (/griddata(stride + 15)/)
+    end if
+    if (nints.eq.8) then
+       stride=stride + 10
+    else
+       stride=stride + 16
+    end if
     icount = icount + 1
-;
   end do
-
+;
   time = time*timescale
   print(time)
   pe = pe*energyscale
@@ -148,6 +221,54 @@ icount = 0
      toprint(:,1)=enstr_diss(:)
      opt = True
      opt@fout = path+"potens_diss.txt"
+     write_matrix(toprint, "2e15.6", opt)
+;
+;    Write out the qg potential vorticity
+;     
+     toprint(:,0)=time(:)
+     toprint(:,1)=pv_qg(:)
+     opt = True
+     opt@fout = path+"potvor_qg.txt"
+     write_matrix(toprint, "2e15.6", opt)
+;
+;    Write out the qg potential enstrophy 
+;     
+     toprint(:,0)=time(:)
+     toprint(:,1)=potens_qg(:)
+     opt = True
+     opt@fout = path+"potens_qg.txt"
+     write_matrix(toprint, "2e15.6", opt)
+;
+;    Write out the r0 potential vorticity
+;     
+     toprint(:,0)=time(:)
+     toprint(:,1)=pv_r0(:)
+     opt = True
+     opt@fout = path+"potvor_r0.txt"
+     write_matrix(toprint, "2e15.6", opt)
+;
+;    Write out the r0 potential enstrophy 
+;     
+     toprint(:,0)=time(:)
+     toprint(:,1)=potens_r0(:)
+     opt = True
+     opt@fout = path+"potens_r0.txt"
+     write_matrix(toprint, "2e15.6", opt)
+;
+;    Write out the fr0 potential vorticity
+;     
+     toprint(:,0)=time(:)
+     toprint(:,1)=pv_fr0(:)
+     opt = True
+     opt@fout = path+"potvor_fr0.txt"
+     write_matrix(toprint, "2e15.6", opt)
+;
+;    Write out the fr0 potential enstrophy 
+;     
+     toprint(:,0)=time(:)
+     toprint(:,1)=potens_fr0(:)
+     opt = True
+     opt@fout = path+"potens_fr0.txt"
      write_matrix(toprint, "2e15.6", opt)
 ;
 ; now plot is ke, pe, tote versus time
