@@ -42,6 +42,8 @@ def lookfor1(fid,key1,key2="",allow_eof=0):
 
 
 tsolve={}
+tfft={}
+ttr={}
 try:
     while 1:
         startstr="Running parallel.  NCPUS="
@@ -60,10 +62,26 @@ try:
         # now look for time
         str=lookfor1(sys.stdin,"dns_solve:",startstr)
         str=split(str)
-        time=atof(str[5])  # time in min
+        time=atof(str[5])  # time in min per timestep
+        time_tot=atof(str[2])  # total time in min
+        nstep=nint(time_tot/time)  # number of timesteps timed
+
+        # now look for tranpose time.  note typo in output
+        str=lookfor1(sys.stdin,"traspose total ",startstr)
+        time_tr=atof(str[2])
+        time_tr=time_tr/nstep
+
+        # now look for FFT time.  note typo in output
+        str=lookfor1(sys.stdin,"FFT ",startstr)
+        time_fft=atof(str[2])
+        str=lookfor1(sys.stdin,"iFFT ",startstr)
+        time_fft += atof(str[2])
+        time_fft = time_fft/nstep
 
         # create empty list if needed, then append new data
         tsolve.setdefault(key,[]).append(time)
+        tfft.setdefault(key,[]).append(time_fft)
+        ttr.setdefault(key,[]).append(time_tr)
 
         
         
