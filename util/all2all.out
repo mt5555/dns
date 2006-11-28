@@ -1,0 +1,76 @@
+2048^3 problem:
+array size:  64GB  
+each process has 64MB of data
+and it sends/recvs  64KB to 1023 other processes.
+
+send bandwidth:  64MB / (7.06*60) = 151 MB/s
+total:  151 GB/s
+
+ 
+====================================================================
+2048^3 problem on 1024 nodes, using 1 cpu per node:
+
+several runs of all2all.F90:
+
+ Min alltoall : (in minutes)   6.3367525736490897E-003
+ Max alltoall : (in minutes)   7.0634007453918457E-003
+ Min alltoall + copy time: (in minutes)   1.7378147443135581E-002
+ Max alltoall + copy time: (in minutes)   1.7628482977549234E-002
+
+ Min alltoall : (in minutes)   6.2856833140055324E-003
+ Max alltoall : (in minutes)   6.9946845372517892E-003
+ Min alltoall + copy time: (in minutes)   1.7327733834584551E-002
+ Max alltoall + copy time: (in minutes)   1.7558149496714273E-002
+
+
+
+====================================================================
+DNS code   ./gridsetup.py 1 1 1024 2048 2048 2048 2 2 0
+REF:  y-pencils
+
+x -> y   3    (x->REF  REF->y)     from_x     to_y
+y -> z   3    (y->REF  REF->z)     to_z       from_y
+z -> y   5    (z->REF  REF->y)     from_z     to_y
+y -> x   6    (y->REF  REF->x)     to_x       from_y
+
+total cost PER stage
+    9 from_y, 8  to_y
+    3 from_x, 6 to_x
+    5 from_z, 3 to_z             
+
+Transposes per timestep:   to_z  12   from_z  20
+
+from_z  .4134/3 = .138 per timestep  = 6.9e-3 per transpose
+to_z    .2093/3 =                      5.8e-3 per transpose
+
+from_y  .3091/3/36  =  2.9e-3 per transpose
+to_y    .1524/3/32  =  1.6e-3 per transpose
+from_x  .0376/3/12  =  1.0e-3 per transpose
+to_x    .0766/3/24  =  1.1e-3 per transpose
+   
+
+dnsp code:(3 timesteps)
+
+initialization:      1.03     1.03
+initial output:      0.00     0.00
+dns_solve:           2.56     2.56  per timestep:    0.85472   0.85474
+   time_control            0.00     0.00
+   RHS                     1.63     1.64
+   transpose_to_z        0.1854   0.2093
+   transpose_from_z      0.3486   0.4134
+   transpose_to_x        0.0752   0.0766
+   transpose_from_x      0.0370   0.0376
+   transpose_to_y        0.1516   0.1524
+   transpose_from_y      0.3082   0.3091
+   traspose total        1.1060   1.1768
+   FFT                   0.3011   0.3044 count per timestep= 36.0 N^2
+   iFFT                  0.4195   0.4701 count per timestep= 72.0 N^2
+Estimated FLOP per timestep:   0.3347E+14
+MFLOPS per cpu:     637.38
+
+
+
+
+
+
+
