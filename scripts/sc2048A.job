@@ -1,5 +1,5 @@
 #!/bin/tcsh 
-#PBS -l size=2048
+#PBS -l size=4096
 #PBS -l walltime=14:00:00
 #XXXPBS -A 7101/16.12
 #PBS -A 105916/01
@@ -47,7 +47,7 @@ set EXE=$HOME/$name-4
 #
 #   CO or VN mode?
 #
-set VN=1
+set VN=0
 if ( $VN == 1) then
    set MPIRUN = "yod -VN -sz"
 else

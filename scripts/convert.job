@@ -1,12 +1,16 @@
-#! /bin/tcsh 
+#! /bin/tcsh  -f
+#PBS -l size=1024
+#PBS -l walltime=90:00
+#PBS -A 105916/01
+#PBS -j oe
+#PBS -N convert
+#PBS -q standard
 #BSUB -o convert.o -e convert.e
 #BSUB -q aq
 #BSUB -J convert
 #BSUB -W 24:00
 #BSUB -n 512
 #BSUB -wa URG -wt 20
-#BXXX -extsched "RMS_SNODE;railmask=3" 
-#BXXX -m "qbd32 qbd33 qbd34 qbd35 qbd36 qbd37 qbd38 qbd39 qbd40 qbd41 qbd42 qbd43 qbd44 qbd45 qbd46 qbd47 qbd48 qbd49"
 
 #
 # estimated isoave time:  150 timesteps = 630min.
@@ -16,7 +20,6 @@
 #                  time for 1024 subsampled: ndelta=73  IN
 # 
 
-module list
 set NCPUS=1024
 set name = sc2048A
 set refin=$HOME/dns/prod/$name.inp
@@ -36,18 +39,18 @@ if (!(-d $WDIR)) then
    echo $WDIR does not exist"
    exit 1
 endif
-   if (!(-d $COMP)) then
-      echo $COMP does not exist"
-      exit 1
-   endif
+if (!(-d $COMP)) then
+   echo $COMP does not exist"
+   exit 1
+endif
 
 
-
+if (0) then
    cd $COMP
-   rm -f convert*.x
+   \rm -f convert*.x
    \cp -f $SRC/* .
 
-   cp -f $SRC/convert.F90 temp.F90
+   \cp -f $SRC/convert.F90 temp.F90
 #   sed 's/\!SEDtstart/tstart=3.7900; tstop=3.7900; tinc=tstop-tstart/' temp.F90 > convert.F90
    sed 's/\!SEDtstart/tstart=1.0; tstop=1.0; tinc=1/' temp.F90 > convert.F90
 
@@ -60,7 +63,10 @@ endif
    make clean
    make  -j 2 convert
    mv -f convert convert2048.x
+endif
 
+
+setenv MPICH_UNEX_BUFFER_SIZE 180M
 
 cd 
 # output spectral data:
