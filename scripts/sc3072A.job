@@ -1,0 +1,94 @@
+#!/bin/tcsh 
+#PBS -l size=3072
+#PBS -l walltime=30:00
+#PBS -A 105916/01
+#PBS -j oe 
+#PBS -N sc3072
+#PBS -q standard
+#XXXB -wa URG -wt 10
+#
+# .54m per timestep
+#  13000 timesteps = 117h
+# 
+#
+# put datestape in .o and .e file:
+set datestamp = `date`
+sh -c 'echo ".e output test" 1>&2'
+sh -c "echo '$datestamp' 1>&2"
+echo $datestamp
+
+#
+#  2048^3  = 1.2 TB
+#  512 cpus:  2.4GB per process
+#  1024 cpus:  1.2GB per process (wont run VN, will run CO)
+#
+set name = sc3072A
+set refin=$HOME/dns/prod/sc3072A.inp
+
+set recompile = 0
+set restart = 2       # 1 = regular restart, 2=spec restart (see below)
+set code = dnsp
+set opt = "-mio -nov3"
+set SRC=$HOME/dns/src
+set WDIR=/scratch2/mataylo/$name
+mkdir $WDIR
+set EXE=$WDIR/$name-6k
+
+
+#
+# set a default of 8
+# MPI-I/O stripe setting is ignored
+/usr/local/bin/set_dir_stripe $WDIR 8
+
+
+
+#
+#   CO or VN mode?
+#
+set VN=1
+if ( $VN == 1) then
+   set MPIRUN = "yod -VN -sz"
+else
+   set MPIRUN = "yod -sz"
+endif
+
+
+set NCPU = 6144
+
+if ($recompile == 1) then
+   set mesh = "4 1 1536 3072 3072 3072"
+   cd $SRC
+   rm -f $EXE ; rm -f $code 
+   ./gridsetup.py $mesh 2 2 0 ; make $code ; \cp -f $code $EXE
+endif
+
+
+if ($restart == 1) then
+   cd $WDIR
+   $HOME/dns/getrestart.sh $name $WDIR 
+   if (!($status == 0)) then
+      exit 1
+   endif
+   cd 
+   $MPIRUN $NCPU $EXE $opt -r  -d $WDIR  $name < $refin
+else if ($restart == 2) then
+   cd $WDIR
+   ln -fs sc2048A0001.0000.us restart.us
+   ln -fs sc2048A0001.0000.vs restart.vs
+   ln -fs sc2048A0001.0000.ws restart.ws
+   cd 
+   $MPIRUN $NCPU $EXE $opt -r -si  -d $WDIR  $name < $refin
+else
+    cd
+   $MPIRUN $NCPU $EXE $opt  -d $WDIR  $name < $refin
+endif
+
+
+
+
+
+
+
+
+
+

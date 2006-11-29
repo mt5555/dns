@@ -75,9 +75,7 @@ logical :: compute_passive_on_restart = .false.
 
 logical :: data_x_pencils=.false.   ! Q currently stored in x-pencil decomp
                                     ! not our regular (nx,ny,nz) decomp
-logical :: use_vorticity3=.false.   ! compute vorticity assuming uy and vx
-                                    ! were already computed and saved in RHS
-                                    ! array
+logical :: use_vorticity3=.true.    ! compute vorticity during u iFFT
 !
 ! options used by various utility programs:
 !

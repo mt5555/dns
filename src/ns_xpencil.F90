@@ -71,9 +71,9 @@ if (firstcall) then
    call z_fft3d_nvar(Q_grid,Q,work,work2) 
 
    ! enable more efficient vorticity routine
-   if (ncpu_y == 1 ) then
-	use_vorticity3=.true. 
-	call print_message("Enabling use_vorticity3 (more efficient) option.")
+   if (ncpu_y /= 1 .and. use_vorticity3) then
+	use_vorticity3=.false.
+	call print_message("Disabling use_vorticity3 option since ncpu_y <> 1")
    endif	
 endif
 
