@@ -43,7 +43,10 @@ def lookfor1(fid,key1,key2="",allow_eof=0):
 
 tsolve={}
 tfft={}
-ttr={}
+tr_x={}
+tr_y={}
+tr_z={}
+tr_tot={}
 try:
     while 1:
         startstr="Running parallel.  NCPUS="
@@ -63,26 +66,59 @@ try:
         str=lookfor1(sys.stdin,"dns_solve:",startstr)
         str=split(str)
         time=atof(str[5])  # time in min per timestep
-        time_tot=atof(str[2])  # total time in min
-        nstep=nint(time_tot/time)  # number of timesteps timed
+        time_tot=atof(str[1])  # total time in min
+#        nstep=int(.1+time_tot/time)  # number of timesteps timed
+        nstep=3
+        
+        # now look for tranpose time.  note typo in output
+        str=lookfor1(sys.stdin,"transpose_to_z ",startstr)
+        str=split(str)
+        time_to_z=atof(str[0])/nstep/12
+        # now look for tranpose time.  note typo in output
+        str=lookfor1(sys.stdin,"transpose_from_z ",startstr)
+        str=split(str)
+        time_from_z=atof(str[0])/nstep/20
+        # now look for tranpose time.  note typo in output
+        str=lookfor1(sys.stdin,"transpose_to_x ",startstr)
+        str=split(str)
+        time_to_x=atof(str[0])/nstep/24
+        # now look for tranpose time.  note typo in output
+        str=lookfor1(sys.stdin,"transpose_from_x ",startstr)
+        str=split(str)
+        time_from_x=atof(str[0])/nstep/12
+        # now look for tranpose time.  note typo in output
+        str=lookfor1(sys.stdin,"transpose_to_y ",startstr)
+        str=split(str)
+        time_to_y=atof(str[0])/nstep/32
+        # now look for tranpose time.  note typo in output
+        str=lookfor1(sys.stdin,"transpose_from_y ",startstr)
+        str=split(str)
+        time_from_y=atof(str[0])/nstep/36
 
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"traspose total ",startstr)
-        time_tr=atof(str[2])
-        time_tr=time_tr/nstep
+        str=split(str)
+        time_tr=atof(str[0])/nstep
+
+
 
         # now look for FFT time.  note typo in output
         str=lookfor1(sys.stdin,"FFT ",startstr)
-        time_fft=atof(str[2])
+        str=split(str)
+        time_fft=atof(str[0])
         str=lookfor1(sys.stdin,"iFFT ",startstr)
-        time_fft += atof(str[2])
+        str=split(str)
+        time_fft += atof(str[0])
         time_fft = time_fft/nstep
 
         # create empty list if needed, then append new data
         tsolve.setdefault(key,[]).append(time)
         tfft.setdefault(key,[]).append(time_fft)
-        ttr.setdefault(key,[]).append(time_tr)
-
+        tr_x.setdefault(key,[]).append((time_to_x + time_from_x) /2)
+        tr_y.setdefault(key,[]).append((time_to_y + time_from_y) /2)
+        tr_z.setdefault(key,[]).append((time_to_z + time_from_z) /2)
+        tr_tot.setdefault(key,[]).append((time_tr))
+        
         
         
 except search_failed,e:
@@ -103,10 +139,15 @@ except eof,e:
         count=count+1
         best=min(tsolve[k])   # time for 1 timesetp, seconds
         print "ncpu%i(%i)=%i;  time%i(%i)=%e; %% (%2i,%i,%4i)  res/nz=%i "   %          (k[0],count,k[1],k[0],count,best,k[2],k[3],k[4],res_last/k[4])
-
+        
     tbest={}
+    tbest_fft={}
     tbest_nx={}
     tbest_nz={}
+    tbest_tr_x={}
+    tbest_tr_y={}
+    tbest_tr_z={}
+    tbest_tr_tot={}
     # key=(N,np,nx,ny,nz)                        
     for k in x:
         key=(k[0],k[1])
@@ -114,10 +155,20 @@ except eof,e:
             tbest[key] = tbest[key]+ tsolve[k]
             tbest_nx[key] = tbest_nx[key]+ [ k[2] ]
             tbest_nz[key] = tbest_nz[key]+ [ k[4] ]
+            tbest_tr_x[key] = tbest_tr_x[key] + tr_x[k]
+            tbest_tr_y[key] = tbest_tr_y[key] + tr_y[k]
+            tbest_tr_z[key] = tbest_tr_z[key] + tr_z[k]
+            tbest_tr_tot[key] = tbest_tr_tot[key] + tr_tot[k]
+            tbest_fft[key] = tbest_fft[key] + tfft[k]
         else:
             tbest[key]=tsolve[k]
             tbest_nx[key] = [ k[2] ]
             tbest_nz[key] = [ k[4] ]
+            tbest_tr_x[key] = tr_x[k]
+            tbest_tr_y[key] = tr_y[k]
+            tbest_tr_z[key] = tr_z[k]
+            tbest_tr_tot[key] = tr_tot[k]
+            tbest_fft[key] = tfft[k]
 
 
     x=tbest.keys();
@@ -139,7 +190,11 @@ except eof,e:
         eperd = eperd*best     # time in min for 1 eddy turnover
         eperd = 24*60./eperd   # eddy turnover per day
         print "nbest%i(%i)=%5i; tbest%i(%i)=%e; eddypd%i(%i)=%e;" % (k[0],count,k[1],k[0],count,best,k[0],count,eperd)
+        print "tr_x%i(%i)=%e; tr_y%i(%i)=%e; tr_z%i(%i)=%e;" %         (k[0],count,tbest_tr_x[k][i],k[0],count,tbest_tr_y[k][i],k[0],count,tbest_tr_z[k][i] )
+        print "tr_tot%i(%i)=%e; " %         (k[0],count,tbest_tr_tot[k][i])
+        print "fft%i(%i)=%e; " %            (k[0],count,tbest_fft[k][i])
 
+        # bi-direciton bandwidth: each transpose is sending 
 
     sys.exit(0)
 

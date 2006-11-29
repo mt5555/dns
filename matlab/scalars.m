@@ -25,8 +25,10 @@ fid2=-1;
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
-nx=1024;
+%fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
+%nx=1024;
+fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A0000.3000.scalars','r');
+nx=2048;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;

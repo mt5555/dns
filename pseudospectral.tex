@@ -179,9 +179,10 @@ complex-to-complex FFTs for the last two (of size N/2).
 Our code uses only real-to-real FFTs, always of length N (the cost
 is identical).
 
-The total cost of of doing three of the 3D FFTs is thus:
+The total cost of of doing the 3D FFT and 2 3D iFFTs is thus:
 \begin{enumerate}
-\item 27 $N^2$ 1D real-to-real FFTs of length N
+\item 9 $N^2$ 1D real-to-complex FFTs of length N
+\item 18 $N^2$ 1D complex-to-real iFFTs of length N
 \item 3 x-pencil to y-pencil transposes of size $N^3$.  
 \item 3 y-pencil to z-pencil transposes of size $N^3$.  
 \item 6 z-pencil to y-pencil transposes of size $N^3$.  
@@ -209,7 +210,7 @@ instead computed during the step when $\uv$ is computed via the iFFT
 from $\hat \uv$.  While
 computing the inverse FFT of $\uv$, one can also efficiently compute 
 $\uv_{2,1}$ and $\uv_{1,2}$.  This requires the same number of 1D FFTs and
-y-to-x pencil transposes as would be required to compute $\vor_1$,
+y-to-x pencil transposes as would be required to compute $\vor_3$,
 but it has the advantage of requiring one less z-to-y pencil
 transpose.  With a slab decompostion, this will reduce the amount
 of communication by 1/9. With a pencil decompostion, the reduction

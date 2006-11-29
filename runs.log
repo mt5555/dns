@@ -8,6 +8,13 @@ Benchmarks on RS/dualcore with FFTW
 1024^3   done
 512^3    done
 
+Redoing with A2A overlap:
+
+4096^3  done
+3072^3 done
+
+
+
 *******************************************************************************
 11/14
 NOTE:  11/23: FFTW routine is over 2X faster than FFT99,

@@ -82,6 +82,8 @@ read_uvw=.false.
 
 !str_type=4		!used to flag anisotropic structure functions
 str_type=0	
+use_max_shear_direction=.false.  !use to compute shear tensor with maximum S_1,2
+
 
 tstart=0.0
 tstop=0.0
