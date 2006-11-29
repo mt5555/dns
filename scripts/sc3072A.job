@@ -28,6 +28,7 @@ set refin=$HOME/dns/prod/sc3072A.inp
 set recompile = 0
 set restart = 2       # 1 = regular restart, 2=spec restart (see below)
 set code = dnsp
+#-nov3 turn off use_vorticyt3.  needed if running on 3072 nodes. 
 set opt = "-mio -nov3"
 set SRC=$HOME/dns/src
 set WDIR=/scratch2/mataylo/$name

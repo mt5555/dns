@@ -12,8 +12,11 @@ ext='.isostr';
 %name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-%name='/home/mataylo/codes/dns_data/sc1024A/sc1024A0002.0000.new'
+%name='/home/mataylo/data/dns/sc1024A/sc1024A0002.0000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
+
+%name='/home/mataylo/data/dns/sc2048A/sc2048A0001.0000.new'
+%nx=2048; delx_over_eta=3.0; epsilon=4.0; teddy=.98; % R_l=434
 
 %name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0005.8000.new'
 %nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
