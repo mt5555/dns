@@ -13,9 +13,6 @@ fcor=0;
 f_k=0;
 
 
-range=0:50;
-%range = 1
-%range=0:.5:2;
 fid2=-1;
 
 
@@ -27,7 +24,7 @@ fid2=-1;
 
 %fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
 %nx=1024;
-fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A0000.3000.scalars','r');
+fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A.scalars','r');
 nx=2048;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
@@ -171,7 +168,6 @@ if (mu>0)
   R_large = 1 * sqrt(2*Euse) / mu;
   R_l_ke=lambda_ke.*sqrt(2*ke/3)/mu;
 end
-
 
 
 
