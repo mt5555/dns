@@ -17,14 +17,14 @@
 # 
 
 module list
-set NCPUS=512
-set name = decay2048
+set NCPUS=1024
+set name = sc2048A
 set refin=$HOME/dns/prod/$name.inp
 
 
 set SRC=$HOME/dns/src
-set COMP=$HOME/comp/convert
-set WDIR=/scratch2/taylorm
+set COMP=/scratch1/mataylo/comp
+set WDIR=/scratch2/mataylo
 
 mkdir $COMP
 mkdir $WDIR
@@ -49,26 +49,26 @@ endif
 
    cp -f $SRC/convert.F90 temp.F90
 #   sed 's/\!SEDtstart/tstart=3.7900; tstop=3.7900; tinc=tstop-tstart/' temp.F90 > convert.F90
+   sed 's/\!SEDtstart/tstart=1.0; tstop=1.0; tinc=1/' temp.F90 > convert.F90
 
-   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times0.dat"/' temp.F90 > convert.F90
+#   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times0.dat"/' temp.F90 > convert.F90
 #   sed 's/\!SEDtstart/tstart=-1;tinc=0;tname="times5.dat"/' temp.F90 > convert.F90
 
 
    ./gridsetup.py 1 1 $NCPUS 2048 2048 2048
    make dep
    make clean
-   make  -j 4 convert
+   make  -j 2 convert
    mv -f convert convert2048.x
 
 
-set echo
 cd 
-
-
-# output 1024 spectral data:
+# output spectral data:
 date
-prun -v -n $NCPUS  $COMP/convert2048.x -mio -cout uvw -so -smax 1024 -d $WDIR   $name < $refin
+#prun -v -n $NCPUS  $COMP/convert2048.x -mio -cout uvw -so -smax 1024 -d $WDIR   $name < $refin
+yod -sz $NCPUS  $COMP/convert2048.x -mio -cout uvw -so -smax 2048 -d $WDIR   $name < $refin
 date
+
 
 
 # output 2048 UDM vorticity:
