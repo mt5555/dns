@@ -224,7 +224,7 @@ do j=1,ny_2dz
                  Qhat(k,i,j,3)*Qhat(k,i,j,3)
             
             ke = ke + .5*xfac*u2
-            pe = pe + .5*Qhat(k,i,j,np1)**2
+            pe = pe + .5*xfac*Qhat(k,i,j,np1)**2
 
             ke_diss = ke_diss + .5*xfac*xw_viss*u2
             pe_diss = pe_diss + &
@@ -417,57 +417,57 @@ potens=potens/g_nx/g_ny/g_nz
 !
 ! Compute the same things for QG PV
 !
-!pv_type=3
-!call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
-!pvqg = 0
-!potensqg = 0
-!do k=nz1,nz2
-!   do j=ny1,ny2
-!      do i=nx1,nx2
-!         pvqg = pvqg + potvor(i,j,k)
-!         potensqg = potensqg + (potvor(i,j,k)*potvor(i,j,k)*.5)
-!      enddo
-!   enddo
-!enddo
+pv_type=3
+call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
+pvqg = 0
+potensqg = 0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         pvqg = pvqg + potvor(i,j,k)
+         potensqg = potensqg + (potvor(i,j,k)*potvor(i,j,k)*.5)
+      enddo
+   enddo
+enddo
 ! normalize:
-!pvqg=pvqg/g_nx/g_ny/g_nz
-!potensqg=potensqg/g_nx/g_ny/g_nz
+pvqg=pvqg/g_nx/g_ny/g_nz
+potensqg=potensqg/g_nx/g_ny/g_nz
 !
 ! Compute the same things for Ro->0 PV
 !
-!pv_type=4
-!call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
-!pvro0 = 0
-!potensro0 = 0
-!do k=nz1,nz2
-!   do j=ny1,ny2
-!      do i=nx1,nx2
-!         pvro0 = pvro0 + potvor(i,j,k)
-!         potensro0 = potensro0 + (potvor(i,j,k)*potvor(i,j,k)*.5)
-!      enddo
-!   enddo
-!enddo
-!! normalize:
-!pvro0=pvro0/g_nx/g_ny/g_nz
-!potensro0=potensro0/g_nx/g_ny/g_nz
+pv_type=4
+call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
+pvro0 = 0
+potensro0 = 0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         pvro0 = pvro0 + potvor(i,j,k)
+         potensro0 = potensro0 + (potvor(i,j,k)*potvor(i,j,k)*.5)
+      enddo
+   enddo
+enddo
+! normalize:
+pvro0=pvro0/g_nx/g_ny/g_nz
+potensro0=potensro0/g_nx/g_ny/g_nz
 !
 ! Compute the same things for Fr->0 PV
 !
-!pv_type=5
-!call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
-!pvfr0 = 0
-!potensfr0 = 0
-!do k=nz1,nz2
-!   do j=ny1,ny2
-!      do i=nx1,nx2
-!         pvfr0 = pvfr0 + potvor(i,j,k)
-!         potensfr0 = potensfr0 + (potvor(i,j,k)*potvor(i,j,k)*.5)
-!      enddo
-!   enddo
-!enddo
+pv_type=5
+call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
+pvfr0 = 0
+potensfr0 = 0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         pvfr0 = pvfr0 + potvor(i,j,k)
+         potensfr0 = potensfr0 + (potvor(i,j,k)*potvor(i,j,k)*.5)
+      enddo
+   enddo
+enddo
 ! normalize:
-!pvfr0=pvfr0/g_nx/g_ny/g_nz
-!potensfr0=potensfr0/g_nx/g_ny/g_nz
+pvfr0=pvfr0/g_nx/g_ny/g_nz
+potensfr0=potensfr0/g_nx/g_ny/g_nz
 
 ! store the integrals for output:
 ints_e(1)=ke 
@@ -478,13 +478,13 @@ ints_e(5)=pv
 ints_e(6)=0
 ints_e(7)=potens
 ints_e(8)=potens_diss
-!ints_e(9)=pvqg
-!ints_e(10)=potensqg
-!ints_e(11)=pvro0
-!ints_e(12)=potensro0
-!ints_e(13)=pvfr0
-!ints_e(14)=potensfr0
-nints_e=8
+ints_e(9)=pvqg
+ints_e(10)=potensqg
+ints_e(11)=pvro0
+ints_e(12)=potensro0
+ints_e(13)=pvfr0
+ints_e(14)=potensfr0
+nints_e=14
 
 
 ! global sum over all processors:
