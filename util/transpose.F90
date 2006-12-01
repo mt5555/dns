@@ -47,19 +47,22 @@ integer my_rank
 integer ycomm, zcomm
 integer yid, zid
 
-integer ierr, idummy, nproc2
-real dummy
+integer ierr, nproc2
 
-real *8 :: ux(nxg, ny, nz)            !  decmop:  1xPROCYxPROCZ
-real *8 :: uy(nxg/PROCY, nyg, nz)     !  decomp   PROCYx1xPROCZ 
+real *8 :: ux(nxg, ny, nz)
+real *8 :: uy(nxg/PROCY, nyg, nz)
 
 real*8 :: spack(nxg*ny*nz), rpack(nxg*ny*nz)
 
 integer bsize
 integer i, j, k, n
 
-real*8 :: tmx3,tmx4,tmx2,tmx1,tmx_max,tmx_min
-real*8 :: a2a_max, a2a_min
+real*8 :: tmx3,tmx4,tmx2,tmx1, tme
+real*8 :: a2a_max=0.0, a2a_min=1e10, a2a_sum=0.0
+real*8 :: trs_max=0.0, trs_min=1e10, trs_sum=0.0
+real*8 :: tme_g
+integer :: iter, iter_max=1000
+
 real*8 :: error, error_max, error_max_g
 
 call mpi_init(ierr)
@@ -86,28 +89,41 @@ do k = 1, nz
   end do
 end do
 
-tmx1 = MPI_Wtime()
+iter: do iter = 1, iter_max
 
-!Pack data for alltoall in y-direction
-bsize = nxg*ny*nz/npy
-do n = 0, npy-1
-  spack(n*bsize+1:(n+1)*bsize) = & 
-    reshape(ux(n*nxg/npy+1:(n+1)*nxg/npy, 1:ny, 1:nz), (/bsize/))
-end do
+  tmx1 = MPI_Wtime()
+  
+  !Pack data for alltoall in y-direction
+  bsize = nxg*ny*nz/npy
+  do n = 0, npy-1
+    spack(n*bsize+1:(n+1)*bsize) = & 
+      reshape(ux(n*nxg/npy+1:(n+1)*nxg/npy, 1:ny, 1:nz), (/bsize/))
+  end do
+  
+  tmx2 = MPI_Wtime()
+  
+  call MPI_Alltoall(spack,bsize,MPI_REAL8,rpack,bsize,MPI_REAL8,ycomm,ierr)
+  
+  tmx3 = MPI_Wtime()
+  
+  !Unpack the data
+  do n = 0, npy-1
+    uy(1:nxg/PROCY, n*ny+1:(n+1)*ny, 1:nz) = &
+      reshape(rpack(n*bsize+1:(n+1)*bsize), (/nxg/PROCY, ny, nz/) ) 
+  end do
+  
+  tmx4 = MPI_Wtime()
 
-tmx2 = MPI_Wtime()
+  tme = tmx4-tmx1
+  if(tme>trs_max) trs_max = tme
+  if(tme<trs_min) trs_min = tme
+  trs_sum = trs_sum+tme
 
-call MPI_Alltoall(spack,bsize,MPI_REAL8,rpack,bsize,MPI_REAL8,ycomm,ierr)
-
-tmx3 = MPI_Wtime()
-
-!Unpack the data
-do n = 0, npy-1
-  uy(1:nxg/PROCY, n*ny+1:(n+1)*ny, 1:nz) = &
-    reshape(rpack(n*bsize+1:(n+1)*bsize), (/nxg/PROCY, ny, nz/) ) 
-end do
-
-tmx4 = MPI_Wtime()
+  tme = tmx3-tmx2
+  if(tme>a2a_max) a2a_max = tme
+  if(tme<a2a_min) a2a_min = tme
+  a2a_sum = a2a_sum+tme
+end do iter
 
 !DEBUG -  if transpose was done correct
 !error_max = 0.0
@@ -122,20 +138,22 @@ tmx4 = MPI_Wtime()
 !call MPI_Reduce(error_max,error_max_g,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierr)
 !if(my_rank .eq. 0) print *, 'maximum error is', error_max_g
 
-tmx4=tmx4-tmx1
-call MPI_Reduce(tmx4,tmx_max,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierr)
-call MPI_Reduce(tmx4,tmx_min,1,MPI_REAL8,MPI_MIN,0,MPI_COMM_WORLD,ierr)
 
-tmx4=tmx3-tmx2
-call MPI_Reduce(tmx4,a2a_max,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierr)
-call MPI_Reduce(tmx4,a2a_min,1,MPI_REAL8,MPI_MIN,0,MPI_COMM_WORLD,ierr)
+if(my_rank==0) print *, 'All times in seconds'
 
-if(my_rank==0) then
-   print *,'Min alltoall : (in min)',a2a_min/60.0
-   print *,'Max alltoall : (in min)',a2a_max/60.0
-   print *,'Min alltoall + copy time: (in min)',tmx_min/60.0
-   print *,'Max alltoall + copy time: (in min)',tmx_max/60.0
-endif
+call MPI_Reduce(trs_max,tme_g,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierr)
+if(my_rank==0) print *, 'Max transpose: ', tme_g 
+call MPI_Reduce(trs_min,tme_g,1,MPI_REAL8,MPI_MIN,0,MPI_COMM_WORLD,ierr)
+if(my_rank==0) print *, 'Min transpose: ', tme_g 
+call MPI_Reduce(trs_sum,tme_g,1,MPI_REAL8,MPI_SUM,0,MPI_COMM_WORLD,ierr)
+if(my_rank==0) print *, 'Ave transpose: ', tme_g/real(iter_max)/real(nproc)
+
+call MPI_Reduce(a2a_max,tme_g,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierr)
+if(my_rank==0) print *, 'Max All_to_all: ', tme_g 
+call MPI_Reduce(a2a_min,tme_g,1,MPI_REAL8,MPI_MIN,0,MPI_COMM_WORLD,ierr)
+if(my_rank==0) print *, 'Min All_to_all: ', tme_g 
+call MPI_Reduce(a2a_sum,tme_g,1,MPI_REAL8,MPI_SUM,0,MPI_COMM_WORLD,ierr)
+if(my_rank==0) print *, 'Ave All_to_all: ', tme_g/real(iter_max)/real(nproc)
 
 call MPI_Finalize(ierr)
 
