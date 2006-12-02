@@ -449,8 +449,8 @@ real*8 xw,xw2,xfac,tmx1,tmx2,xw_viss
 real*8 uu,vv,ww,dummy
 integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
-real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2
-real*8 :: p_diss(n_var),pke(n_var),enstrophy
+real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,u3
+real*8 :: enstrophy
 real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,ens_diss2,ens_diss4,ens_diss6
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
@@ -480,6 +480,7 @@ vorave=0
 ensave=0
 helave=0
 maxvor=0
+u3=0
 
 ! rhs = u x vor
 do k=1,ny_2dx
@@ -497,6 +498,9 @@ do i=1,g_nx
       maxvor = max(maxvor,abs(vor(1)))
       maxvor = max(maxvor,abs(vor(2)))
       maxvor = max(maxvor,abs(vor(3)))
+      u3 = u3 + Q_grid(i,j,k,1)**3 + & 
+           Q_grid(i,j,k,2)**3 + & 
+           Q_grid(i,j,k,3)**3  
    endif
 
 
@@ -604,7 +608,7 @@ do j=1,ny_2dz
                  enstrophy = enstrophy+ xfac* &           
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)   
 
-
+#if 0
                ! incorrect if using hyperviscosity
                   ens_diss2=ens_diss2 + 2*xfac*(mu*xw)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
@@ -612,6 +616,7 @@ do j=1,ny_2dz
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)
                   ens_diss6=ens_diss6 + 2*xfac*(mu*xw*(xw)**2)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)      
+#endif
              endif           
 
       enddo
@@ -766,13 +771,12 @@ if (compute_ints==1) then
    ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-ke_diss                 ! <u,u_xx>
    ints(11)=h_diss
-   ints(12)=ens_diss2
-   ints(13)=ens_diss4
-   ints(14)=ens_diss6
+   ints(12)=u3/g_nx/g_ny/g_nz
+!   ints(12)=ens_diss2
+!   ints(13)=ens_diss4
+!   ints(14)=ens_diss6
    maxs(5)=maxvor
 
-!   ints(6)=pke(4)
-!   ints(10)=-p_diss(4)
 endif
 
 if (forcing_type==8) then
