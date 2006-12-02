@@ -25,6 +25,24 @@ Redoing with A2A overlap:
 3072^3 done
 
 
+Bandwidth numbers:
+Running Ramanan's transpose code (MPI_alltoall in subcommunicators)
+
+Min. over all runs, of the max time
+            tr max  tr+copy
+4096x4    .00636   .2886 (???)  
+4x4096    .00185   .00409
+128x128   .00444   .0136
+
+
+DNS code. 4096^3, using a 4x1x4096 decomposition:
+
+transpose_to/from_x:    .00725     (this is like the 4x4096 case above)
+transpose_to/from_z:    .0123      (this is like the 4096x4 case above)
+
+
+
+
 
 
 
@@ -251,6 +269,8 @@ sc3072A modeled after sc2048A data:
     nu = eps^(1/3) k_max^(-4/3)  = .84e-5
 
 IN, but always gets ec_node failuer errors.
+
+dsacp  rs:/scratch2/mataylo/sc2048A  hpss:dns
 
 
 

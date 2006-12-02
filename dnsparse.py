@@ -69,31 +69,33 @@ try:
         time_tot=atof(str[1])  # total time in min
 #        nstep=int(.1+time_tot/time)  # number of timesteps timed
         nstep=3
-        
+
+        #trval = 0   # use the average
+        trval = 1   # use the max
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"transpose_to_z ",startstr)
         str=split(str)
-        time_to_z=atof(str[0])/nstep/12
+        time_to_z=atof(str[trval])/nstep/12
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"transpose_from_z ",startstr)
         str=split(str)
-        time_from_z=atof(str[0])/nstep/20
+        time_from_z=atof(str[trval])/nstep/20
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"transpose_to_x ",startstr)
         str=split(str)
-        time_to_x=atof(str[0])/nstep/24
+        time_to_x=atof(str[trval])/nstep/24
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"transpose_from_x ",startstr)
         str=split(str)
-        time_from_x=atof(str[0])/nstep/12
+        time_from_x=atof(str[trval])/nstep/12
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"transpose_to_y ",startstr)
         str=split(str)
-        time_to_y=atof(str[0])/nstep/32
+        time_to_y=atof(str[trval])/nstep/32
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"transpose_from_y ",startstr)
         str=split(str)
-        time_from_y=atof(str[0])/nstep/36
+        time_from_y=atof(str[trval])/nstep/36
 
         # now look for tranpose time.  note typo in output
         str=lookfor1(sys.stdin,"traspose total ",startstr)
