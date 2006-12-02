@@ -24,13 +24,13 @@ periodic      ! x bc  (periodic, no-slip)
 periodic      ! y bc
 periodic      ! z bc
 1.00          ! time to run
-1.5           ! adv cfl  (0 = disabled, use min_dt) 
+1.0           ! adv cfl  (0 = disabled, use min_dt) 
 0.200         ! vis cfl  (0 = disabled, use min_dt) 
 0.000001      ! min_dt  
 .1            ! max_dt 
 0             ! restart_dt  (this is not used)
 .01           ! diag_dt    how often to dump simple diagnostics to file
-.05           ! model_dt   compute and output spectra, structure functions, expensive diagnostics
+.02           ! model_dt   compute and output spectra, structure functions, expensive diagnostics
 -40           ! screen_dt  output info to stdout
 .020          ! output_dt  output snapshots
 0             ! also output the vorticity 
