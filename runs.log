@@ -1,4 +1,15 @@
 *******************************************************************************
+12/02
+sc2048decay
+  restart from sc2048A below, at time t=1.0, but with no forcing.
+  added u3 to diagnostics.  See how this decays for Jens Lorenz.
+  u3 in turb-diag does not have the abs(), so we cant get u3 from
+  older runs.
+
+
+
+
+*******************************************************************************
 11/23
 Benchmarks on RS/dualcore with FFTW
 
@@ -12,6 +23,8 @@ Redoing with A2A overlap:
 
 4096^3  done
 3072^3 done
+
+
 
 
 
@@ -237,6 +250,7 @@ sc3072A modeled after sc2048A data:
    ASSUME eps=4.00  kmax=1448*2*pi  
     nu = eps^(1/3) k_max^(-4/3)  = .84e-5
 
+IN, but always gets ec_node failuer errors.
 
 
 

@@ -498,9 +498,8 @@ do i=1,g_nx
       maxvor = max(maxvor,abs(vor(1)))
       maxvor = max(maxvor,abs(vor(2)))
       maxvor = max(maxvor,abs(vor(3)))
-      u3 = u3 + Q_grid(i,j,k,1)**3 + & 
-           Q_grid(i,j,k,2)**3 + & 
-           Q_grid(i,j,k,3)**3  
+      u3 = u3 + abs(  Q_grid(i,j,k,1)**3 + & 
+           Q_grid(i,j,k,2)**3 + Q_grid(i,j,k,3)**3  )
    endif
 
 

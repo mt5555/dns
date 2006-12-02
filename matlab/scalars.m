@@ -22,9 +22,11 @@ fid2=-1;
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
-nx=1024;
+%fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
+%nx=1024;
 %fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A.scalars','r');
+%nx=2048;
+%fid=endianopen('/home/mt/sc2048decay0001.0000.scalars','r');
 %nx=2048;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
@@ -104,6 +106,7 @@ vor_z=ints(4,:);
 hel=ints(5,:);
 ke=ints(6,:);   %  ke 
 ens = ints(7,:);   %  enstrophy
+u3 = ints(12,:);   %  problem dependent.  for ns_xpencil.F90 = u^3
 % ints(8,:)   < u,div(tau)' >  (alpha model only)
 % ints(9,:)   < u,f>           (alpha model only)
 % ints(1,:)  < u_xx,u_xx> >   (used for E_alpha dissapation term)
