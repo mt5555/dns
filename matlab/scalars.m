@@ -24,8 +24,8 @@ fid2=-1;
 
 %fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
 %nx=1024;
-%fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A.scalars','r');
-%nx=2048;
+fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A.scalars','r');
+nx=2048;
 %fid=endianopen('/home/mt/sc2048decay0001.0000.scalars','r');
 %nx=2048;
 

@@ -257,9 +257,15 @@ Redstorm run:
 sc2048A:  (see sc2048A.job, sc2048A.inp)
 This run should take 13K timesteps.  on 4096cores, .5min per = 120h  
 2048 run modeled after sc1024A:
-sc2048A data:
+sc2048A data:  
    ke = 1.95  eps=4.00  mu=1.35e-5    kmax=965*2*pi
    kmax*eta = .959    eta=.000158     ett = .976
+
+eyeball averages over last 25% of run:  
+   ke = 1.90  eps=3.8  mu=1.35e-5    kmax=965*2*pi
+   (and this agrees better with sc1024A data)
+
+
 sc1024A data:
    ke=1.886  eps=3.58  mu = .35e-4
    eta*kmax_spherical = eta * nx*pi*2*sqrt(2)/3 = 1.0
