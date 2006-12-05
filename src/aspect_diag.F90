@@ -129,20 +129,20 @@ if (diag_struct==1) then
     
    ! angle averaged functions:
 !sk denotes the lines which compute bisotr, which can be disabled	
-!sk    call isoavep(Q,q1,q2,q3,stype,csig)
+    call isoavep(Q,q1,q2,q3,stype,csig)
    ! if csig>0, isoavep did not complete - interrupted by SIGURG
    if (my_pe==io_pe .and. csig==0) then
       write(message,'(f10.4)') 10000.0000 + time
       message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".bisostr"
-!sk      call copen(message,"w",fid,ierr)
+      call copen(message,"w",fid,ierr)
       if (ierr/=0) then
          write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
          call abortdns(message)
       endif
       ! add the enstrophy dissipation (stored in position 8) 
       ! to the structure function file
-!sk      call writeisoave2(fid,time,ints_e(8),1)
-!sk      call cclose(fid,ierr)
+      call writeisoave2(fid,time,ints_e(8),1)
+      call cclose(fid,ierr)
    endif
 
    Q(:,:,:,4) = work2  ! restore
