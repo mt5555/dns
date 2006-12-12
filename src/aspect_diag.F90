@@ -128,7 +128,6 @@ if (diag_struct==1) then
    Q(:,:,:,4) = work1  ! overwrite 4'th component with PV
     
    ! angle averaged functions:
-!sk denotes the lines which compute bisotr, which can be disabled	
     call isoavep(Q,q1,q2,q3,stype,csig)
    ! if csig>0, isoavep did not complete - interrupted by SIGURG
    if (my_pe==io_pe .and. csig==0) then
