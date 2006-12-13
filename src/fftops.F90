@@ -371,7 +371,7 @@ integer pv_type
 integer i,j,k,n
 real*8 dummy(1)
 
-write(6,*)'pv_type in potential_vorticity',pv_type
+!write(6,*)'pv_type in potential_vorticity',pv_type
 
 if (n_var<3) call abortdns("potential vorticity() requires n_var>2")
 if(pv_type/=1) call abortdns("fftops: potential_vorticity")
