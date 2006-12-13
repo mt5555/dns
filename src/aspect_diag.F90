@@ -468,6 +468,10 @@ enddo
 pvfr0=pvfr0/g_nx/g_ny/g_nz
 potensfr0=potensfr0/g_nx/g_ny/g_nz
 
+!
+!
+!always set pv_type = 1 after
+pv_type=1
 ! store the integrals for output:
 ints_e(1)=ke 
 ints_e(2)=pe
