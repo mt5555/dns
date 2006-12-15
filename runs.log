@@ -263,7 +263,7 @@ sc2048A data:
 
 eyeball averages over last 25% of run:  
    ke = 1.90  eps=3.8  mu=1.35e-5    kmax=965*2*pi
-   (and this agrees better with sc1024A data)
+   (and this agrees better with sc1024A data)        R_lambda = 700
 
 
 sc1024A data:
