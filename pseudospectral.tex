@@ -375,6 +375,26 @@ each one requires no more than $144 N^3/N_p$ bytes.
 
 \section{Dealiasing}
 
+
+On a computational grid of size $N^3$, the 
+Fourier coefficient $\hat \uv(l,m,n)$ has a wave number 
+given by $(2 \pi/L) (l,m,n)$, where $L$ is the length of the
+domain. 
+\[
+\Delta x = \frac{L}{N} \qquad
+k_\text{max} = \frac{2 \pi }{L} \frac{N}{2} = \frac{\pi}{\Delta x}
+\]
+In our code, $L=1$, and thus the wave numbers are given as integer
+multiples of $2 \pi$.  Many codes use a domain of side length length
+$L=2\pi$, in which case the wave numbers are integers.  When comparing
+parameters from different runs, it is important to recognize that all
+{\em dimensional} values (length scales, energies, dissipation rates)
+depend on $L$.
+
+Dealiasing is necessary when computing the nonlinear term 
+$\vor \times \uv$.   Dealiasing will
+remove some of the high wave numbers, so in practice the effective
+$k_\text{max}$ will depend on the type of dealiasing used.
 There are three types of dealiasing commonly used in these codes.
 \begin{enumerate}
 \item Phase shifting
@@ -382,11 +402,6 @@ There are three types of dealiasing commonly used in these codes.
 \item Spherical
 \end{enumerate}
 
-Dealiasing is necessary when computing the nonlinear term 
-$\vor \times \uv$.  On a computational grid of size $N^3$, the 
-Fourier coefficient $\hat \uv(l,m,n)$ has a wave number 
-given by $2 \pi (l,m,n)$.  (We have the $2\pi$ factor since our
-domain is of side length 1.)  The maximum wave number is $2 \pi N/2$.
 
 \subsection{2/3 rule}
 The 2/3 rule sets to zero all coefficients all wave numbers larger than
@@ -396,6 +411,44 @@ $(2 \pi) (2/3)(N/2)$. To be precise, we set to zero (or do not even compute)
 \]
 With this type of dealiasing, we define the maximum wave number
 in our simulation to be $k_\text{max} = 2 \pi N/3$
+
+\subsection{Phase shifting}
+Phase shifting is an exact dealiasing which does not result in any
+loss of resolution ($k_\text{max} = \pi N$) but requires additional
+3D FFTs.  We have not implemented phase shifting.
+
+Originally developed by Patterson and Orszag (1971).  It requires 8
+FFTs (in three-dimensions) as the 2/3 rule (per dimensionn), but the
+FFTs are 2/3 the size.  It is always more expensive than using the
+2/3 rule.  (Canuto et al., 1998, page 85, but this may not take into
+account the cost of message passing).
+
+A related dealising is used by the DNS Earth Simulator code (Yokokawa et
+al., 2002).  They claim (citing Canuto) that the
+coefficients
+\[
+\hat \uv(l,m,n)  \qquad \text{ for } \sqrt{l^2 + m^2 + n^2} < \frac{\sqrt{2}}{3} N
+\]
+can be computed without aliasing error in 18 3D FFTs (as opposed to
+9 3D FFTs for 2/3 rule.  
+
+There is also the Rogallo (1977, 1981) scheme.  Developed for a two
+stage time stepping scheme.  The second stage uses a different phase
+from the first, and the aliasing errors can then be shown to be
+reduced to $O(\Delta t^2)$.  I dont know if any one has extended this
+to an RK4 scheme.  This is the scheme used by the RK2 Georga Tech
+code.  
+
+Finally, Chuck Zemach (1994, personal notes) developed
+a phase shifting approach that exactly remove dealiasing for all wave numbers.  
+Each inverse transform must be performed 4 times (with 4 different phases)
+and no changes are required for the forward transform.  This gives a total of
+27 3D FFTs (instead of 9 3D FFTs).  He claims that the phase shifting
+algorith would require that the inverse transforms be performed with
+8 different phases for a total of 51 3D FFTs, which contradicts 
+the above.  Consult Canuto to track this down...
+
+
 
 \subsection{Spherical dealiasing}
 Spherical dealiasing does not exactly remove all aliasing errors
@@ -409,11 +462,6 @@ suggesting it is sufficient to dealias using:
 \]
 With this type of dealiasing, we define the maximum wave number
 in our simulation to be $k_\text{max} = 2 \pi N\sqrt{2}/3$
-
-\subsection{Phase shifting}
-Phase shifting is an exact dealiasing which does not result in any
-loss of resolution ($k_\text{max} = \pi N$) but requires additional
-3D FFTs.  We have not implemented phase shifting.
 
 
 
@@ -430,34 +478,75 @@ Velocity
 
 Kinetic energy
 \[
-k=\frac12 < \uv \cdot \uv > = \frac12   \sum_i < u_i^2 > 
+E=\frac12 < \uv \cdot \uv > = \frac12   \sum_i < u_i^2 > 
 \]
-For the isotropic case, we can take $k=\frac32 <u_1^2 >$.
+For the isotropic case, we can take $E=\frac32 <u_1^2 >$.
+
 Dissipation rate
 \[
 \epsilon = \nu \sum_i < \grad u_i \cdot \grad u_i >
 \]
-Integral-like length scale
-\[
-L = k^{3/2} \epsilon^{-1}
-\]
+%Integral-like length scale
+%\[
+%L = E^{3/2} \epsilon^{-1}
+%\]
 Kolmogorov length scale
 \[
 \eta = {\nu^{\frac34}}  {\epsilon^{-\frac14}} 
 \]
 Taylor length scale
 \[
-\lambda = \sqrt{  \frac{ <u_1>  } { <u_{1,1}> } } = 10 k \nu / \epsilon
+\lambda = \sqrt{  \frac{ <u_1>  } { <u_{1,1}> } } = 10 E \nu / \epsilon
 \]
 Taylor Reynols number
-\[
-R_\lambda = \frac{\lambda < u_1 > }{\nu} = k \sqrt{\frac{20}{3 \nu \epsilon}  }
-= \sqrt{\frac{20}{3}}  L^{2/3} \eta^{-2/3}
-\]
+\begin{equation}
+R_\lambda = \frac{\lambda < u_1 > }{\nu} = E \sqrt{\frac{20}{3 \nu \epsilon}  }
+= \sqrt{\frac{20}{3}}  \frac{E}{(\epsilon \eta)^{2/3}}
+\label{E:Rlambda}
+\end{equation}
 Eddy turnover time
+\begin{equation}
+t_e = 2 E / \epsilon
+\label{E:Teddy}
+\end{equation}
+
+\subsection{CFL based time step}
+
+If the time step used is based on the CFL condition, than at
+the end of each timestep one global collective is required 
+(of a single real*8 value).  In practice we perform two global collectives
+(a sum and a min) of 96 bytes of data.  This is used for the CFL condition
+and other diagnostics.  
+
+The usual CFL condition is written as 
 \[
-t_e = 2 k / \epsilon
+\Delta t \le C_0  { \Delta x } / { \text{max} ( \uv ) }
 \]
+For incompressible homogeneous isotropic turbulence, it is customary
+to write this in terms of the kinetic energy $E$, and maximum
+wave number $k_\text{max}$,
+\[
+\Delta t \le C    E^{-1/2} k_\text{max}^{-1}
+\]
+We have determined, via experiment, that a stable timestep is
+given by 
+\[
+C=0.5.
+\]  
+As a check on this value, consider that given
+in Pope, {\em Turbulent Flows}, Cambridge University Press, 2000.
+\[
+ \Delta t = \frac1{20} \Delta x E^{-1/2} = .105   E^{-1/2} k_\text{max}^{-1}
+\]
+where we have assumed a 2/3 dealiasing ($k_\text{max}=0.66\pi/\Delta x)$.  
+
+We write the time step in terms of eddy turnover time $t_e = 2 E / \epsilon $
+by
+\[
+\Delta t / t_e =  \frac12 C E^{-3/2} \epsilon  k_\text{max}^{-1}
+\]
+
+
 
 \subsection{Resolution Condition}
 
@@ -483,45 +572,16 @@ needed.  In practice, one chooses the smallest viscosity possible
 viscosity (for a given forcing) so that this resolution condition is
 not violated.  
 
-
-
-
-
-
-\subsection{CFL based time step}
-
-If the time step used is based on the CFL condition, than at
-the end of each timestep one global collective is required 
-(of a single real*8 value).  In practice we perform two global collectives
-(a sum and a min) of 96 bytes of data.  This is used for the CFL condition
-and other diagnostics.  
-
-The usual CFL condition is written as 
+The dissipation rate $\epsilon$ is controlled by the forcing used.
+Once the forcing is determined, $\epsilon$ can be computated or
+estimated and then the appropriate diffusion coefficieint $\nu$ is
+determined from the resolution condition:
 \[
-\Delta t \le C_0  { \Delta x } / { \text{max} ( \uv ) }
+ \nu = \epsilon^{1/3} \left( \frac{C_r}{k_\text{max}} \right)^{4/3}
 \]
-For incompressible homogeneous isotropic turbulence, it is customary
-to write this in terms of the kinetic energy $k$, and maximum
-wave number $k_\text{max}$,
-\[
-\Delta t \le C    k^{-1/2} k_\text{max}^{-1}
-\]
-We have determined, via experiment, that a stable timestep is
-given by 
-\[
-C=0.5.
-\]  
-As a check on this value, consider that given
-in Pope, {\em Turbulent Flows}, Cambridge University Press, 2000.
-\[
- \Delta t = \frac1{20} \Delta x k^{-1/2} = .105   k^{-1/2} k_\text{max}^{-1}
-\]
-where we have assumed a 2/3 dealiasing.  
+where $C_r=1.0$ or the more conservative $C_r=1.5$. 
 
-We write the time step in terms of eddy turnover time by
-\[
-\Delta t / t_e =  \frac12 C L^{-1}  k_\text{max}^{-1}
-\]
+
 
 \subsection{Deterministic Low Wave Number Forcing}
 
@@ -531,57 +591,52 @@ version of their formula for the relaxation time scale, and only forces
 in the first two spherical wave numbers shells.
 It is documented in detail in Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
 
-This forcing results in a $k$ and $\epsilon$ which are relatively
+This forcing results in a $E$ and $\epsilon$ which are relatively
 insenstive to resolution.  At $N=1024$, we obtain 
-$k=1.9$ and $\epsilon=3.6$, which gives
+$E=1.9$ and $\epsilon=3.6$, which gives
 an eddy turnover time of $t_e = 1.05$ and $L=.73$. 
-At $N=2048$, we get $k=1.9$ and $\epsilon=3.8$, which gives
+At $N=2048$, we get $E=1.9$ and $\epsilon=3.8$, which gives
 an eddy turnover time of 1.0 and $L=.68$. 
 
-When using this forcing,
-after deciding on the resolution condition $k_\text{max} \eta$,
-and taking $t_e=1.0$ and $L=.70$,   
-one can determine the viscosity (which must be specified in the
-input file) to use in the simulation based on the resolution and 
-type of dealiasing.
-Taking
+For the example calculations below, we will take the resolution condition
+$ k_\text{max} \eta = 1 $ and CFL constant $C=.5$.  
+For convenience we rewrite Eq.~\ref{E:Rlambda} and Eq.~\ref{E:Teddy} here as
 \[
-   k_\text{max} \eta = 1
-\]
-we have $ \nu = \epsilon^{1/3} k_\text{max}^{-4/3}$.
-The resulting Taylor Reynolds and CFL condition are
-\[
-R_\lambda =   \sqrt{\frac{20}{3}} L^{2/3} k_\text{max}^{2/3}  =   2.0 k_\text{max}^{2/3}
+R_\lambda =   2.582 E \epsilon^{-2/3} \eta^{-2/3}
 \qquad
-\Delta t / t_e =    .36 k_\text{max}^{-1}
+\Delta t / t_e =    .25 E^{-3/2} \epsilon k_\text{max}^{-1}
 \]
-assuming $C=.5$
 
-
-\subsection{CFD: Example: $12288^3$ with spherical dealiasing}
-Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
-for a problem of size $N=12288 \quad (k_\text{max} = 36396)$, we have
+\begin{enumerate}
+\item $N=12288^3$, Spherical dealiasing ($k_\text{max} = 36396$), 
+resolution condition $k_\text{max} \eta=1$:
 \[
 \nu = 1.3 \times 10^{-6} \qquad  R_\lambda =  2200 \qquad \Delta t / t_e = 1.0\times10^{-5}
 \]
 100,000 timesteps are required for 1 eddy turnover time.  
 
-\subsection{CFD: Example: $12288^3$ with 2/3 rule dealiasing}
-Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
-for a problem of size $N=12288 \quad (k_\text{max} = 25736)$, we have
+\item $N=12288^3$, 2/3 rule dealiasing ($k_\text{max} = 25736$), 
+resolution condition $k_\text{max} \eta=1$:
 \[
 \nu = 2 \times 10^{-6} \qquad  R_\lambda =  1800\qquad \Delta t / t_e = 1.4\times10^{-5}
 \]
 71,000 timesteps are required for 1 eddy turnover time.  
 
-\subsection{CFD: Example: $1024^3$ with 2/3 rule dealiasing}
-Assuming a spherical dealiasing, with resolution condition $k_\text{max} \eta=1$, 
-for a problem of size $N=1024 \quad (k_\text{max} = 3033)$, we have
+\item $N=1024^3$, 2/3 rule dealiasing ($k_\text{max} = 3033$), 
+resolution condition $k_\text{max} \eta=1$:
 \[
 \nu = 3.5 \times 10^{-5} \qquad  R_\lambda =  440\qquad \Delta t / t_e = 1.2\times10^{-4}
 \]
 8,333 timesteps are required for 1 eddy turnover time.  
 
+\end{enumerate}
+
+
+
+
+\subsection{Deterministic Low Wave Number Forcing (Earth Simulator)}
+
+\subsection{Stochastic Low Wave Number Forcing (Georga Tech)}
 
 
 
