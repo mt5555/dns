@@ -488,7 +488,7 @@ Dissipation rate
 \]
 %Integral-like length scale
 %\[
-%L = E^{3/2} \epsilon^{-1}
+%l = E^{3/2} \epsilon^{-1}
 %\]
 Kolmogorov length scale
 \[
@@ -582,6 +582,19 @@ determined from the resolution condition:
 where $C_r=1.0$ or the more conservative $C_r=1.5$. 
 
 
+\section{Forcing Examples}
+
+For the example calculations below, we will take the resolution condition
+$ k_\text{max} \eta = C_r $ and CFL constant $C=.5$.  
+For convenience we rewrite Eq.~\ref{E:Rlambda} and Eq.~\ref{E:Teddy} here 
+in terms of out integral-like length scale $l=E^{3/2}/ \epsilon$ and
+maximum wave number $k_\text{max}$:
+\[
+R_\lambda =   2.582 \,  (l k_\text{max}/C_r)^{2/3}
+\qquad
+\Delta t / t_e  =   .5 C   (l k_\text{max}/C_r)^{-1} 
+\]
+
 
 \subsection{Deterministic Low Wave Number Forcing}
 
@@ -594,40 +607,34 @@ It is documented in detail in Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003.
 This forcing results in a $E$ and $\epsilon$ which are relatively
 insenstive to resolution.  At $N=1024$, we obtain 
 $E=1.9$ and $\epsilon=3.6$, which gives
-an eddy turnover time of $t_e = 1.05$ and $L=.73$. 
+an eddy turnover time of $t_e = 1.05$.
 At $N=2048$, we get $E=1.9$ and $\epsilon=3.8$, which gives
-an eddy turnover time of 1.0 and $L=.68$. 
+an eddy turnover time of 1.00.  For our extrapolations to higher resolutions, 
+we will use the later set of numbers.  
 
-For the example calculations below, we will take the resolution condition
-$ k_\text{max} \eta = 1 $ and CFL constant $C=.5$.  
-For convenience we rewrite Eq.~\ref{E:Rlambda} and Eq.~\ref{E:Teddy} here as
-\[
-R_\lambda =   2.582 E \epsilon^{-2/3} \eta^{-2/3}
-\qquad
-\Delta t / t_e =    .25 E^{-3/2} \epsilon k_\text{max}^{-1}
-\]
 
+Examples:
 \begin{enumerate}
-\item $N=12288^3$, Spherical dealiasing ($k_\text{max} = 36396$), 
-resolution condition $k_\text{max} \eta=1$:
+\item $N=12288^3$, $L=1$, Spherical dealiasing ($k_\text{max} = 36396$), 
+$C_r=1$ and $C=.5$:
 \[
 \nu = 1.3 \times 10^{-6} \qquad  R_\lambda =  2200 \qquad \Delta t / t_e = 1.0\times10^{-5}
 \]
 100,000 timesteps are required for 1 eddy turnover time.  
 
-\item $N=12288^3$, 2/3 rule dealiasing ($k_\text{max} = 25736$), 
-resolution condition $k_\text{max} \eta=1$:
-\[
-\nu = 2 \times 10^{-6} \qquad  R_\lambda =  1800\qquad \Delta t / t_e = 1.4\times10^{-5}
-\]
-71,000 timesteps are required for 1 eddy turnover time.  
+%% \item $N=12288^3$, $L=1$, 2/3 rule dealiasing ($k_\text{max} = 25736$), 
+%% $C_r=1$ and $C=.5$:(FIX BELOW)
+%% \[
+%% \nu = 2 \times 10^{-6} \qquad  R_\lambda =  1800\qquad \Delta t / t_e = 1.4\times10^{-5}
+%% \]
+%% 71,000 timesteps are required for 1 eddy turnover time.  
 
-\item $N=1024^3$, 2/3 rule dealiasing ($k_\text{max} = 3033$), 
-resolution condition $k_\text{max} \eta=1$:
-\[
-\nu = 3.5 \times 10^{-5} \qquad  R_\lambda =  440\qquad \Delta t / t_e = 1.2\times10^{-4}
-\]
-8,333 timesteps are required for 1 eddy turnover time.  
+%% \item $N=1024^3$, $L=1$, 2/3 rule dealiasing ($k_\text{max} = 3033$), 
+%% $C_r=1$ and $C=.5$:  (FIX BELOW)
+%% \[
+%% \nu = 3.5 \times 10^{-5} \qquad  R_\lambda =  440\qquad \Delta t / t_e = 1.2\times10^{-4}
+%% \]
+%% 8,333 timesteps are required for 1 eddy turnover time.  
 
 \end{enumerate}
 
