@@ -587,7 +587,7 @@ where $C_r=1.0$ or the more conservative $C_r=1.5$.
 For the example calculations below, we will take the resolution condition
 $ k_\text{max} \eta = C_r $ and CFL constant $C=.5$.  
 For convenience we rewrite Eq.~\ref{E:Rlambda} and Eq.~\ref{E:Teddy} here 
-in terms of out integral-like length scale $l=E^{3/2}/ \epsilon$ and
+in terms of our integral-like length scale $l=E^{3/2}/ \epsilon$ and
 maximum wave number $k_\text{max}$:
 \[
 R_\lambda =   2.582 \,  (l k_\text{max}/C_r)^{2/3}
@@ -615,35 +615,107 @@ we will use the later set of numbers.
 
 Examples:
 \begin{enumerate}
-\item $N=12288^3$, $L=1$, Spherical dealiasing ($k_\text{max} = 36396$), 
+\item $N=1024^3$, $L=1$, Spherical dealiasing ($k_\text{max} = 482(2\pi)$)
 $C_r=1$ and $C=.5$:
 \[
-\nu = 1.3 \times 10^{-6} \qquad  R_\lambda =  2200 \qquad \Delta t / t_e = 1.0\times10^{-5}
+\nu = 3.6 \times 10^{-5} \qquad  R_\lambda =  420\qquad t_e / \Delta t = 8300
 \]
-100,000 timesteps are required for 1 eddy turnover time.  
 
-%% \item $N=12288^3$, $L=1$, 2/3 rule dealiasing ($k_\text{max} = 25736$), 
-%% $C_r=1$ and $C=.5$:(FIX BELOW)
-%% \[
-%% \nu = 2 \times 10^{-6} \qquad  R_\lambda =  1800\qquad \Delta t / t_e = 1.4\times10^{-5}
-%% \]
-%% 71,000 timesteps are required for 1 eddy turnover time.  
+\item $N=2048^3$, $L=1$, Spherical dealiasing ($k_\text{max} = 965(2\pi)$),
+$C_r=1$ and $C=.5$:
+\[
+\nu = 1.4 \times 10^{-5} \qquad  R_\lambda =  670\qquad t_e / \Delta t = 17000
+\]
 
-%% \item $N=1024^3$, $L=1$, 2/3 rule dealiasing ($k_\text{max} = 3033$), 
-%% $C_r=1$ and $C=.5$:  (FIX BELOW)
-%% \[
-%% \nu = 3.5 \times 10^{-5} \qquad  R_\lambda =  440\qquad \Delta t / t_e = 1.2\times10^{-4}
-%% \]
-%% 8,333 timesteps are required for 1 eddy turnover time.  
+\item $N=4096^3$, $L=1$, Spherical dealiasing ($k_\text{max} = 1930(2\pi)$),
+$C_r=1$ and $C=.5$:
+\[
+\nu = 5.6 \times 10^{-6} \qquad  R_\lambda =  1063\qquad t_e / \Delta t = 33000
+\]
+
+\item $N=12288^3$, $L=1$, 2/3 rule dealiasing ($k_\text{max} = 4096(2\pi) = 25736$), 
+$C_r=1$ and $C=.5$:
+\[
+\nu = 2.1 \times 10^{-6} \qquad  R_\lambda =  1800\qquad t_e/\Delta t = 71000
+\]
+
+\item $N=12288^3$, $L=1$, Spherical dealiasing ($k_\text{max} = 5792(2\pi) = 36392$), 
+$C_r=1$ and $C=.5$:
+\[
+\nu = 1.3 \times 10^{-6} \qquad  R_\lambda =  2200 \qquad t_e / \Delta t  = 100000
+\]
+
+
 
 \end{enumerate}
 
 
 
 
-\subsection{Deterministic Low Wave Number Forcing (Earth Simulator)}
+\subsection{Deterministic Low Wave Number Forcing (Japanese Earth Simulator)}
 
-\subsection{Stochastic Low Wave Number Forcing (Georga Tech)}
+Similar to above.  Deterministic, wave number shells 1 and 2.
+$E=0.5, \epsilon=0.0668$.  
+
+Examples:
+\begin{enumerate}
+\item $N=4096^3$, $L=2\pi$, Spherical dealiasing ($k_\text{max} = 1930$),
+$C_r=1$ and $C=.5$:  (my formulas)
+\[
+\nu = 1.7 \times 10^{-5} \qquad  R_\lambda =  1200\qquad t_e / \Delta t = 41000
+\]
+Note: JES runs actually used $\Delta t = .25 \times 10^{-3}$, so 60,000
+timesteps were required per eddy turnover time.  The also give $\eta=.528\times10^{-3}$.
+
+
+\item $N=12288^3$, $L=1$, 2/3 rule dealiasing ($k_\text{max} = 4096$), 
+$C_r=1$ and $C=.5$:  
+\[
+\nu = 6.2 \times 10^{-6} \qquad  R_\lambda =  2000\qquad t_e/\Delta t = 87000
+\]
+
+\item $N=12288^3$, $L=1$, Spherical dealiasing ($k_\text{max} = 5792$), 
+$C_r=1$ and $C=.5$:  
+\[
+\nu = 3.9 \times 10^{-6} \qquad  R_\lambda =  2500 \qquad t_e / \Delta t  = 123000
+\]
+
+
+
+\end{enumerate}
+
+
+
+\subsection{Other Examples}
+
+
+\begin{enumerate}
+\item Gotoh et al, 2002 with Stochastic forcing:  $N=1024^3$, $L=2\pi$, Spherical dealiasing 
+($k_\text{max}$ = 482), $E=1.79, \epsilon=.506$.  Taking $C_r=1$ and $C=.5$): 
+\[
+\nu = 2.1 \times 10^{-4} \qquad  R_\lambda =  450\qquad t_e / \Delta t = 9100
+\]
+Published numbers:  $R_\lambda=460, nu=2 \times 10^{-4}$.
+
+\item Watanabe and Gotoh, 2004:  $N=1024^3$, $L=2\pi$, Spherical dealiasing 
+($k_\text{max}$ = 482), $E=1.97, \epsilon=.591$.  Taking $C_r=1$ and $C=.5$): 
+\[
+\nu = 2.2 \times 10^{-4} \qquad  R_\lambda =  440\qquad t_e / \Delta t = 9000
+\]
+Published numbers:  $R_\lambda=427, nu=2.4 \times 10^{-4}$.
+
+\item Yeung 2005b:  $N=1024^3$, $L=2\pi$, Spherical dealiasing 
+($k_\text{max}$ = 482), $E=3.53, \epsilon=1.302$.  Taking $C_r=1.5$ and $C=.5$): 
+\[
+\nu = 5.0 \times 10^{-4} \qquad  R_\lambda =  360\qquad t_e / \Delta t = 6500
+\]
+Published numbers:  $R_\lambda=390, \nu=4.37 \times 10^{-4}$.
+
+
+
+
+\end{enumerate}
+
 
 
 
