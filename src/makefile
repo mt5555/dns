@@ -35,11 +35,14 @@ ifeq ($(UNAME),Linux)
       #FFTLIB = -Lstk -lstk
    endif
    ifeq ($(ARCH),x86_64)
-      VENDOR=PGIMPI
+      #VENDOR=PGIMPI
       # needed if >2GB per process:   -DMALLOC_Q
-      MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO 
-      FFT = -I/home/mataylo/fftw/include -DUSE_FFTWGURU
-      FFTLIB = -L/home/mataylo/fftw/lib  -lfftw3
+      #MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO 
+      #FFT = -I/home/mataylo/fftw/include -DUSE_FFTWGURU
+      #FFTLIB = -L/home/mataylo/fftw/lib  -lfftw3
+      VENDOR=INTEL
+      MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
+      MPILIB =  $(MPI_LD_FLAGS) -lmpi 	
    endif
    ifeq ($(ARCH),ia64)
       VENDOR=INTEL
