@@ -95,10 +95,10 @@ Running the code
 
 3. the input file.  
 
-   line 1.  input file type.  0-7
+   line 1.  input file type.  0-8
 
    Each input file type has its own routine to read in the parameters
-   in init_grid.F90.  number 7 is the newest input file format, documented
+   in init_grid.F90.  number 8 is the newest input file format, documented
    here.  The others should be considered obsolete.
 
    line 2   equations. valid values:    ns_uvw
@@ -154,7 +154,26 @@ Running the code
               iso23w    stochastic, white in time, wave numbers 2,3
               balu      Relax to E(10)=1 
 
-   line 7    viscosity type.  
+              iso12_hel    Susan's helicity forcing in wave numbers 1,2
+
+              High wave number forcing options:
+                to add addition peak wave number forcings, see
+                init_grid.F90:;read_type8() 
+
+              iso_high_NN   (where NN has to be 16 or 24)
+                             Deterministic forcing in wave numbers NN+/-8
+                             peaked at wave number NN
+
+              sto_high_NN    where NN has to be 3,4,8,10,26 or 24 
+                             Stochastic forcing in wave numbers 
+                                   NN +/- fparam1  (for fparam1, see below)
+                             peaked at wave number NN
+
+   line 7     ffval,fparam1    Only used by the sto_high_NN forcings
+                               ffval = sqrt<f,f> 
+                               fparam1 = width of forcing in wave nubmers
+
+   line 8    viscosity type.  
                value:      data on line 7 is actual value
                smallest:   use smallest grid will support (not coded?)
                kediff      data on line 7 is KE dissipation rate of smallest 
@@ -163,57 +182,62 @@ Running the code
                hyper       data on line 7 is ??? (check code)
 
 
-   line 8    viscosity data, see line 6.
+   line 9    viscosity data, see line 6.
 
-   line 9    hyper viscosity type:   none, 
-   line 10    hyper viscosity value
-   line 11   hypo viscosity type:  none,   
-   line 12   hypo viscosity value
+   line 10    hyper viscosity type:   none, 
+   line 11    hyper viscosity value
+   line 12   hypo viscosity type:  none,   
+   line 13   hypo viscosity value
 
-   line 13   fcor, the rotation speed about z-axis      
-   line 14   Lz    aspect ratio in z direction
-   line 15   bous  A boussenesque parameter
+   line 14   fcor, the rotation speed about z-axis      
+   line 15   Lz    aspect ratio in z direction
+   line 16   bous  A boussenesque parameter
 
-   line 16    alpha    alpha=0:      dont use alpha model
+   line 17    alpha    alpha=0:      dont use alpha model
                       0<alpha<=1    value of alpha
                       alpha>1       value of alpha in units of delx
                       allpha=9999   run with alpha=infinity (not coded?)
 
-   line 17    smagorinsky   0:      dont use
+   line 18    smagorinsky   0:      dont use
 
-   line 18    number of scalars 
-   line 19+   schmidt number,  scalar_type    (one line for each scalar)
+   line 19    number of scalars 
+   line 20+   schmidt number,  scalar_type    (one line for each scalar)
 
 (line numbers now assume 0 scalars)
-   line 19    compute angle averaged structure functions?   value: 0 or 1
-   line 20    compute velocity and passive scalar PDFs?     value: 0 or 1
+   line 20    compute angle averaged structure functions?   value: 0 or 1
+   line 21    compute velocity and passive scalar PDFs?     value: 0 or 1
 
-   line 21    numerical method:  fft, fft-dealias, fft-sphere, 4th
-   line 22    x boundary condition:   (model dependent)  
-   line 23    y boundary condition:   
-   line 24    z boundary condition:   
+   line 22    numerical method:  fft, fft-dealias, fft-sphere, 4th
+   line 23    x boundary condition:   (model dependent)  
+   line 24    y boundary condition:   
+   line 25    z boundary condition:   
 
-   line 25    amount of time to run
-   line 26    advective CFL number  suggested value:  1.5
-   line 27    viscous CFL number.   suggested value:  .25
-   line 28    min dt
-   line 29    max dt
+   line 26    amount of time to run
+   line 27    advective CFL number  suggested value:  1.5
+   line 28    viscous CFL number.   suggested value:  .25
+   line 29    min dt
+   line 30    max dt
           
-   line 30    restart_dt   (ignored)
+             for the *_dt settings below:  
+                  0 = disabled
+                < 0 = timesteps. example: -10 means output every 10 timesteps
+                > 0 = time.   example:  .1 means output every t=.1 time units
 
-   line 31    diag_dt      save scalar data (collected every timestep) to .scalar file
+   line 31    restart_dt   (ignored)
+
+   line 32    diag_dt      save scalar data (collected every timestep) to .scalar file
                            when mod(time,diag_dt)==0.  Can also be used in 
                            output_model() in addition to model_dt.
                             
-   line 32    model_dt     compute and output model specific data (output_model()):
+   line 33    model_dt     compute and output model specific data (output_model()):
                                 spectrum, scalars_turb, PDFs, structure functions... 
 
-   line 33    screen_dt    output diagnostic info to stdou
-   line 34    output_dt    output data files (can be used for restart)
-   line 35    output_vorticity?    
-   line 36    n_output_custom   Number of custom output times to follow (0 is okay)
+   line 34    screen_dt    output diagnostic info to stdou
+   line 35    output_dt    output data files (can be used for restart)
+   line 36    output_vorticity?    
+   line 37    n_output_custom   Number of custom output times to follow (0 is okay)
                                 1 per line
-   line 37+                 custom output times.  
+   line 38+                 custom output times.  
 
 
 
