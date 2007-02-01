@@ -422,23 +422,23 @@ Phase shifting is an exact dealiasing which does not result in any
 loss of resolution ($k_\text{max} = \pi N$) but requires additional
 3D FFTs.  We have not implemented phase shifting.
 
-Originally developed by Patterson and Orszag (1971).  It requires 8
-FFTs (in three-dimensions) as the 2/3 rule (per dimensionn), but the
+Originally developed by Patterson and Orszag (1971).  It requires 8 times as many 
+FFTs (in three-dimensions) as the 2/3 rule, but the
 FFTs are 2/3 the size.  It is always more expensive than using the
 2/3 rule.  (Canuto et al., 1998, page 85, but this may not take into
 account the cost of message passing).
 
 A related dealising is used by the DNS Earth Simulator code (Yokokawa et
-al., 2002).  They claim (citing Canuto) that the
-coefficients
+al., 2002).  
+This requires computing the nonlinear term with only two phases (as opposed to
+the 8 phases required above), and then applying a spherical truncation:  
 \[
 \hat \uv(l,m,n)  \qquad \text{ for } \sqrt{l^2 + m^2 + n^2} < \frac{\sqrt{2}}{3} N
 \]
-can be computed without aliasing error in 18 3D FFTs (as opposed to
-9 3D FFTs for 2/3 rule.  
+The cost is 18 3D FFTs (as opposed to 9 3D FFTs for 2/3 rule.  
 
 There is also the Rogallo (1977, 1981) scheme.  Developed for a two
-stage time stepping scheme.  The second stage uses a different phase
+stage time stepping scheme.  The second stage uses a different (random) phase
 from the first, and the aliasing errors can then be shown to be
 reduced to $O(\Delta t^2)$.  I dont know if any one has extended this
 to an RK4 scheme.  This is the scheme used by the RK2 Georga Tech
@@ -448,10 +448,9 @@ Finally, Chuck Zemach (1994, personal notes) developed
 a phase shifting approach that exactly remove dealiasing for all wave numbers.  
 Each inverse transform must be performed 4 times (with 4 different phases)
 and no changes are required for the forward transform.  This gives a total of
-27 3D FFTs (instead of 9 3D FFTs).  He claims that the phase shifting
-algorith would require that the inverse transforms be performed with
-8 different phases for a total of 51 3D FFTs, which contradicts 
-the above.  Consult Canuto to track this down...
+27 3D FFTs (instead of 9 3D FFTs).  It is cheaper than the Patterson and Orszag approach, 
+but still quite expensive when compared with just two phases and spherical
+dealiasing.  
 
 
 
