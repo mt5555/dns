@@ -23,14 +23,15 @@ ifeq ($(UNAME),Linux)
    #VENDOR=PGI
    #VENDOR=PGIMPI
    #VENDOR=INTEL
+   #VENDOR=GNU
 
    FFT = -DUSE_FFT99
    FFTLIB =
 
    ifeq ($(HOST),dosadi)
-      VENDOR=INTEL
-      FFT = -DUSE_FFTWGURU
-      FFTLIB =  -lfftw3
+      VENDOR=GNU
+      #FFT = -DUSE_FFTWGURU
+      #FFTLIB =  -lfftw3
       #FFT = -DUSE_STK
       #FFTLIB = -Lstk -lstk
    endif

@@ -313,11 +313,16 @@ can thus be estimated as
 
 \begin{enumerate}
 \item $9N^2$ 1D real-to-complex FFTs, $18N^2$ 1D complex-to-real FFTs.  (length $N$)
-\item Each process: MPI\_Isend:  $3(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
-\item Each process: MPI\_Irecv:  $3(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
-\item Each process: MPI\_Isend:  $6(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
-\item Each process: MPI\_Irecv:  $6(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
+\item Each process: MPI\_Isend:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
+\item Each process: MPI\_Irecv:  $9(N_1 -1)$ messages of size $8N^3/(N_1^2 N_2)$ bytes.
+\item Each process: MPI\_Isend:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
+\item Each process: MPI\_Irecv:  $8(N_2 -1)$ messages of size $8N^3/(N_2^2 N_1)$ bytes.
 \end{enumerate}
+
+Note: The 9 which appears above comes from combining the messages from the (3) x-pencil-to-y-pencil 
+and the (6) y-pencil-to-x-pencil.  The 8 comes from combining the messages from the (3) y-pencil-to-z-pencil 
+and the (5) z-pencil-to-y-pencil transposes.  
+
 
 For the total ammount of bytes that must be sent over the network, add
 the above numbers and multiply by the number of processes to get: $34

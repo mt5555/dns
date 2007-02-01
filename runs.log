@@ -3,8 +3,10 @@
 sc2048decay
   restart from sc2048A below, at time t=1.0, but with no forcing.
   added u3 to diagnostics.  See how this decays for Jens Lorenz.
-  u3 in turb-diag does not have the abs(), so we cant get u3 from
-  older runs.
+
+  decay2048 does not uave u3 or u4:
+     they are in turb-diag now, but they were not present at the time
+     decay2048 was run.  Also, u3 does not have the absolute value.
 
 
 
