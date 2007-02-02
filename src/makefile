@@ -60,7 +60,7 @@ ifeq ($(UNAME),Linux)
       FFT = -DUSE_FFTWGURU
       FFTLIB =  -lfftw3
    endif
-   ifeq ($(HOST),s854018)
+   ifeq ($(HOST),sulaco)
       VENDOR=INTEL
 #      VENDOR=PGI
 ## Note: LAM 7.1 added MPI_REAL8, but it is broken for collectives

@@ -204,6 +204,7 @@ Running the code
    line 20+   schmidt number,  scalar_type    (one line for each scalar)
 
 (line numbers now assume 0 scalars)
+              (these next two are only used by turb_diag.F90:)
    line 20    compute angle averaged structure functions?   value: 0 or 1
    line 21    compute velocity and passive scalar PDFs?     value: 0 or 1
 
