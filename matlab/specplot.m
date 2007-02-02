@@ -26,8 +26,8 @@ tsave=[];
 %movie_times=.3:.1:1;
 %mu=1.75e-4;
 
-name='temp0000.0000';
-namedir='../src/';
+name='qg648610.0000';
+namedir='/home/mataylo/';
 CK_orig=1.613; movie_plot=0; endian='l';
 mu=1e-4;
 
@@ -99,7 +99,7 @@ end
 
 CK=CK_orig;
 j=0;
-while (time>=.0 & time<=1000.6)
+while (time>=.0 & time<=9000.6)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
@@ -180,6 +180,7 @@ while (time>=.0 & time<=1000.6)
     subplot(1,1,1);
     stitle=sprintf('Spectrum t=%8.4f',time);
     loglog53(n_r-1,spec_r,stitle,CK); hold on;
+
     %spec_r=spec_r./fac3;
     %loglog53(n_r-1,spec_r,stitle,CK); hold on;
     hold off;

@@ -24,10 +24,14 @@ fid2=-1;
 
 %fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
 %nx=1024;
-fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A.scalars','r');
-nx=2048;
+%fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A.scalars','r');
+%nx=2048;
 %fid=endianopen('/home/mt/sc2048decay0001.0000.scalars','r');
 %nx=2048;
+
+fid=endianopen('/home/mataylo/qg648810.0000.scalars','r');
+nx=64;
+fcor=100; f_k=2;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
@@ -302,6 +306,7 @@ if (f_k>0)
   R0 = sum(R0)/length(R0);
   disp(sprintf('Smith''s R0 (average over last half of data) = %f ',R0));
 end
+
 
 if (mu>0) 
   % averge eta to a number
