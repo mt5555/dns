@@ -10,13 +10,16 @@ delx_over_eta=1;
 eta = 1/(nx*delx_over_eta);
 
 %name = '~/projects/pv/data_analysis/lowforc/qg';
-%name = '~/projects/pv/data_analysis/lowforc/low4/qg64/qg';
-name = '~/data/qg';
+name = '~/projects/pv/data_analysis/lowforc/low4/qg64/qg';
+times=[200:2:492];
+nx=64;
+%name = '~/data/qg';
+name = '~/projects/pv/data_analysis/lowforc/low4/qg256/qg';
 pname = 'qg';
 ext='.bisostr';
-%times=[200:2:256];
-times=[200:200];
-nx = 64;
+times=[30:2:102];
+%times=[100:100];
+%nx = 256;
 
 %check this subroutine, for now set averages to 1
 [avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
@@ -105,6 +108,7 @@ ppname = [pname,tstr(2:10),ext];
     eta_l = (mu^3 / eps_l)^.25;
     delx_over_eta_l=(1/nx)/eta_l;
 
+    Q_eps_l    
     for dir=1:ndir
       x=r_val(:,dir)/nx;               % box length
       y=Dl(:,dir,1)./(Q_eps_l*x);               % for forced data

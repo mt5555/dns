@@ -16,8 +16,15 @@ fid2=-1;
 
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low3/qg64/qg64_low3_all.scalars-bous','r');
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low3/qg64/qg0194.0000.scalars-bous','r');
-fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/qg64_low4_all.scalars-bous','r');
-f_k= 24;
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso12/qg64_low4_all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/noforc/qg64all_noforc.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/qg256_all8.0.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/qg256_all100.0.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/qg64_iso23w_all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg64_iso12w_all.scalars-bous','r');
+fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg64_sto16_all.scalars-bous','r');
+
+
 
 
 
@@ -46,11 +53,11 @@ fclose(fid);
 
 ke=ints(1,:);
 pe=ints(2,:);
-pv=ints(5,:)
-potens=ints(7,:)
-potens_diss=ints(8,:)
+pv=ints(5,:);
+potens=ints(7,:);
+potens_diss=ints(8,:);
 
-tote = ke + pe
+tote = ke + pe;
 
 time_2=[];
 
@@ -81,8 +88,16 @@ hold off
 figure(4)
 clf
 hold on
-plot(time(1:length(time)-1),diff(potens)./diff(time),'b');
-title('potential enstrophy dissipation rate dQ/dt')
+dt = diff(time);
+dqdt = diff(potens)./dt;
+plot(time(1:length(time)-1),dqdt,'b');
+plot(time(1:length(time)), -potens_diss,'k');
+plot(time(1:length(time)-1), (dqdt + potens_diss(1:length(time)-1)),'m');
+mean_forc = mean((dqdt + potens_diss(1:length(time)-1))./dqdt)
+mean_dqdt = mean(dqdt(50:93))
+legend('\Delta Q/\Delta t', 'potens\_diss','difference');
+grid on;
+title('potential enstrophy dissipation rate dQ/dt check')
 
 print -depsc bous-scalars.ps
 

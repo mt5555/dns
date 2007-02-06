@@ -35,9 +35,18 @@ fcor=100; f_k=2;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
-%fid=endianopen('/home/mataylo/codes/kerr/test/temp0000.0000.scalars','r');
-%fid=endianopen('/home/mataylo/all.scalars','r');
-%f_k= 16; fcor=40;
+
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg648810.0000.scalars','r');
+%nx=64;f_k = 2; fcor=100;
+
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/qg642620.0000.scalars','r');
+%nx=64;f_k = 2; fcor=100;
+
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg640000.0000.scalars','r');
+nx=64;f_k = 16; fcor=100;
+
+fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg64_sto16_all.scalars','r');
+%nx=64;f_k = 16; fcor=100;
 
 
 nscalars=0;
@@ -106,6 +115,8 @@ if (nints>=11)
 end
 ke_diss_d=ints(10,:);
 ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
+disp(sprintf('mean ke_diss_f = %f', mean(ke_diss_f)))
+
 vor_z=ints(4,:);
 hel=ints(5,:);
 ke=ints(6,:);   %  ke 
@@ -344,6 +355,8 @@ disp(sprintf('epsilon_ke (averaged over last haf of data) = %f ',epsilon_ke));
 ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
 ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
 disp(sprintf('epsilon_f (averaged over last haf of data) = %f ',ke_diss_f));
+Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * fcor);
+disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
 
 ke_diss_tot = ke_diss_tot(ceil(length(ke_diss_tot)/2):length(ke_diss_tot));
 ke_diss_tot = sum(ke_diss_tot)/length(ke_diss_tot);

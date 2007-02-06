@@ -61,9 +61,14 @@ mu=2e-4;
 %name = 'skhel512_hpi2';
 %mu = 1e-4;
 
-namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
-name = 'sc1024A';
-mu = 3.5e-5;
+%namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
+%name = 'sc1024A';
+%mu = 3.5e-5;
+
+name = 'sc2048A';
+namedir = '/xraid/skurien/dns_data/sc2048A/';
+
+
 
 % plot all the spectrum:
 movie=0; % 1 to plot all the spectra
