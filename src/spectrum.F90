@@ -33,10 +33,30 @@ real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  time_old=-1
 
+!helicity related spectra (sk)
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_varhe(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_meanhe(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes 
+real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
+real*8 ::  spec_meanE(0:max(g_nx,g_ny,g_nz)) ! mean energy in each mode
+real*8 ::  spec_varE(0:max(g_nx,g_ny,g_nz)) ! variance of energy in each mode
+real*8 ::  E33(0:max(g_nx,g_ny,g_nz))  ! E_33 component of spec tensor
+real*8 ::  II2sq(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
+real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
+real*8 ::  I2I3(0:max(g_nx,g_ny,g_nz))  ! I_2*I_3
+real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
+real*8 ::  par(0:max(g_nx,g_ny,g_nz))   ! abs(R\cross I)/(R^2+I^2)
+real*8 ::  cos_tta_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of cos_tta betn RR and II
+real*8 ::  cos_tta_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of cos_tta
+real*8 ::  rhel_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of rel hel
+real*8 ::  rhel_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of rel hel
+real*8 ::  rhel_rms_spec(0:max(g_nx,g_ny,g_nz)) ! spec of rms of rel hel
+real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),200) !pdfs of cos(tta) for each k
+real*8 ::  tmp_pdf(200)                          !pdfs of cos(tta) for each k
+real*8 ::  rhel_pdf(0:max(g_nx,g_ny,g_nz),200)!pdfs of rel hel for
+each k
 
 ! cospectrum in x,y,z directions.
 ! n_var=1,3:  uv, uw, vw
@@ -60,24 +80,7 @@ integer,private :: nbin=200
 
 
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
-real*8 ::  spec_E(0:max(g_nx,g_ny,g_nz)) !E(k) from helicity free modes 
-real*8 ::  spec_kEk(0:max(g_nx,g_ny,g_nz))  ! k E(k)
-real*8 ::  spec_meanE(0:max(g_nx,g_ny,g_nz)) ! mean energy in each mode
-real*8 ::  spec_varE(0:max(g_nx,g_ny,g_nz)) ! variance of energy in each mode
-real*8 ::  E33(0:max(g_nx,g_ny,g_nz))  ! E_33 component of spec tensor
-real*8 ::  II2sq(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
-real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
-real*8 ::  I2I3(0:max(g_nx,g_ny,g_nz))  ! I_2*I_3
-real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
-real*8 ::  par(0:max(g_nx,g_ny,g_nz))   ! abs(R\cross I)/(R^2+I^2)
-real*8 ::  cos_tta_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of cos_tta betn RR and II
-real*8 ::  cos_tta_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of cos_tta
-real*8 ::  rhel_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of rel hel
-real*8 ::  rhel_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of rel hel
-real*8 ::  rhel_rms_spec(0:max(g_nx,g_ny,g_nz)) ! spec of rms of rel hel
-real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),200) !pdfs of cos(tta) for each k
-real*8 ::  tmp_pdf(200)                          !pdfs of cos(tta) for each k
-real*8 ::  rhel_pdf(0:max(g_nx,g_ny,g_nz),200)!pdfs of rel hel for each k
+
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
@@ -1625,7 +1628,7 @@ end subroutine
 
 subroutine compute_hfree_spec(pgrid,cmodes_r,cmodes_i,p1)
 !
-!
+!various manipulations of helicity (sk)
 
 use params
 use mpi
