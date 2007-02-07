@@ -55,8 +55,7 @@ real*8 ::  rhel_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of rel hel
 real*8 ::  rhel_rms_spec(0:max(g_nx,g_ny,g_nz)) ! spec of rms of rel hel
 real*8 ::  costta_pdf(0:max(g_nx,g_ny,g_nz),200) !pdfs of cos(tta) for each k
 real*8 ::  tmp_pdf(200)                          !pdfs of cos(tta) for each k
-real*8 ::  rhel_pdf(0:max(g_nx,g_ny,g_nz),200)!pdfs of rel hel for
-each k
+real*8 ::  rhel_pdf(0:max(g_nx,g_ny,g_nz),200)  !pdfs of rel hel for each k
 
 ! cospectrum in x,y,z directions.
 ! n_var=1,3:  uv, uw, vw
@@ -182,7 +181,7 @@ real*8 pv(nx,ny,nz)  ! used for potential vorticity
 real*8 pv2(nx,ny,nz)  ! used for potential enstrophy
 
 !local
-integer :: iwave_max,n,pv_type, i,j,k
+integer :: iwave_max,n,pv_type, i,j,k,iw
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 real*8 :: rwave,xfac
@@ -221,7 +220,7 @@ do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
     rwave = imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2
-    iwave = nint(Lz*sqrt(rwave))
+    iw = nint(Lz*sqrt(rwave))
 
     xfac = 8
     if (kmcord(k)==0) xfac=xfac/2
@@ -229,7 +228,7 @@ do i=nx1,nx2
     if (imcord(i)==0) xfac=xfac/2
     pv2energy=xfac*work1(i,j,k)*work1(i,j,k)
 
-    q2spec_r(iwave)=q2spec_r(iwave)+pv2energy
+    q2spec_r(iw)=q2spec_r(iw)+pv2energy
 !bw these need to accumulate the correct directional spectra.
     q2spec_x(abs(imcord(i)))=q2spec_x(abs(imcord(i))) + pv2energy
     q2spec_y(abs(jmcord(j)))=q2spec_y(abs(jmcord(j))) + pv2energy
@@ -244,6 +243,24 @@ q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
 time_old=time
+
+
+if (g_nz == 1)  then
+   iwave = min(g_nx/2,g_ny/2)
+else
+   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+endif
+
+! for spherical spectra, for all waves outside sphere, 
+! sum into one wave number:
+! we only output wave numbers 0:iwave
+do i=iwave+2,iwave_max
+   q2spec_r(iwave+1)=q2spec_r(iwave+1)+q2spec_r(i)
+enddo
+iwave=iwave+1
+
+
+
 
 end subroutine
 
@@ -1098,7 +1115,7 @@ real*8 :: spectrum_z(0:g_nz/2)
 real*8 rwave
 real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy,denergy,xfac,xw
-integer i,j,k
+integer i,j,k,iw
 
 
 rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
@@ -1120,7 +1137,7 @@ do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
     rwave = imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2
-    iwave = nint(Lz*sqrt(rwave))
+    iw = nint(Lz*sqrt(rwave))
 
     xfac = 8
     if (kmcord(k)==0) xfac=xfac/2
@@ -1128,7 +1145,7 @@ do i=nx1,nx2
     if (imcord(i)==0) xfac=xfac/2
     energy=xfac*p(i,j,k)*p(i,j,k)
 
-    spectrum(iwave)=spectrum(iwave)+energy
+    spectrum(iw)=spectrum(iw)+energy
     spectrum_x(abs(imcord(i)))=spectrum_x(abs(imcord(i))) + energy
     spectrum_y(abs(jmcord(j)))=spectrum_y(abs(jmcord(j))) + energy
     spectrum_z(abs(kmcord(k)))=spectrum_z(abs(kmcord(k))) + energy
@@ -1138,7 +1155,7 @@ do i=nx1,nx2
     if (mu_hyper==4) then
        xw=xw**4  ! viscosity = (del**2)**mu_hyper
     endif
-    spec_d(iwave)=spec_d(iwave)  -mu*xw*energy
+    spec_d(iw)=spec_d(iw)  -mu*xw*energy
 
 
 enddo
@@ -1297,7 +1314,7 @@ real*8 :: spec(0:max(g_nx,g_ny,g_nz))
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy
-integer i,j,k,jm,km,im,iwave_max
+integer i,j,k,jm,km,im,iwave_max,iw
 
 
 rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
@@ -1316,7 +1333,7 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iwave = nint(Lz*sqrt(rwave))
+         iw = nint(Lz*sqrt(rwave))
          
          energy = 8
          if (km==0) energy=energy/2
@@ -1324,7 +1341,7 @@ do j=1,ny_2dz
          if (im==0) energy=energy/2
          energy=energy*p1(k,i,j)*p2(k,i,j)
          
-         spec(iwave)=spec(iwave)+energy
+         spec(iw)=spec(iw)+energy
          
 enddo
 enddo
@@ -1374,7 +1391,7 @@ real*8 :: spec(0:max(g_nx,g_ny,g_nz))
 real*8 rwave
 real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy
-integer i,j,k,jm,km,im,iwave_max
+integer i,j,k,jm,km,im,iwave_max,iw
 
 
 if (Lz/=1) call abortdns("Error: compute_spetrum_fft cant handle Lz<>1")
@@ -1395,7 +1412,7 @@ do j=ny1,ny2
          km=kmcord(k)
 
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iwave = nint(Lz*sqrt(rwave))
+         iw = nint(Lz*sqrt(rwave))
          
          energy = 8
          if (km==0) energy=energy/2
@@ -1403,7 +1420,7 @@ do j=ny1,ny2
          if (im==0) energy=energy/2
          energy=energy*p1(i,j,k)*p2(i,j,k)
          
-         spec(iwave)=spec(iwave)+energy
+         spec(iw)=spec(iw)+energy
          
 enddo
 enddo
@@ -1415,12 +1432,13 @@ spec_r_in=spec
 call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
+!max wave number in sphere.
 if (g_nz == 1)  then
-   iwave = min(g_nx,g_ny)
+   iwave = min(g_nx/2,g_ny/2)
 else
-   iwave = min(g_nx,g_ny,g_nz)
+   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
-iwave = (iwave/2)           ! max wave number in sphere.
+
 
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
@@ -1457,7 +1475,7 @@ real*8 ::  spec_z_in(0:g_nz/2,n_var)
 
 real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,xfac
-integer i,j,k,jm,km,im,iwave_max,n
+integer i,j,k,jm,km,im,iwave_max,n,iw
 
 if (ndim<3) then
    call abortdns("compute_helicity_specturm: can only be used in 3D")
@@ -1497,7 +1515,7 @@ do j=ny1,ny2
          km=kmcord(k)
 
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iwave = nint(Lz*sqrt(rwave))
+         iw = nint(Lz*sqrt(rwave))
          
          !ux = - pi2*im*p1(i+imsign(i),j,k,1)
          vx = - pi2*im*p1(i+imsign(i),j,k,2)
@@ -1520,7 +1538,7 @@ do j=ny1,ny2
 
          ! compute k E(k)
          xw=sqrt(rwave*pi2_squared)
-         spec_kEk(iwave)=spec_kEk(iwave)+xw*xfac* &
+         spec_kEk(iw)=spec_kEk(iw)+xw*xfac* &
             (p1(i,j,k,1)**2 + p1(i,j,k,2)**2 + p1(i,j,k,3)**2)
 
          co_energy(1) = xfac*p1(i,j,k,1)*p1(i,j,k,2)
@@ -1530,18 +1548,18 @@ do j=ny1,ny2
          cospec_x(abs(im),1:ndim)=cospec_x(abs(im),1:ndim)+co_energy(1:ndim)  ! uv
          cospec_y(abs(jm),1:ndim)=cospec_y(abs(jm),1:ndim)+co_energy(1:ndim)  ! uw
          cospec_z(abs(km),1:ndim)=cospec_z(abs(km),1:ndim)+co_energy(1:ndim)  ! vw
-         cospec_r(iwave,1:ndim)=cospec_r(iwave,1:ndim)+co_energy(1:ndim)
+         cospec_r(iw,1:ndim)=cospec_r(iw,1:ndim)+co_energy(1:ndim)
 
          energy = xfac*(p1(i,j,k,1)*(wy-vz) + &
                           p1(i,j,k,2)*(uz-wx) + &
                           p1(i,j,k,3)*(vx-uy)) 
-         if (energy>0) spec_helicity_rp(iwave)=spec_helicity_rp(iwave)+energy
-         if (energy<0) spec_helicity_rn(iwave)=spec_helicity_rn(iwave)+energy
+         if (energy>0) spec_helicity_rp(iw)=spec_helicity_rp(iw)+energy
+         if (energy<0) spec_helicity_rn(iw)=spec_helicity_rn(iw)+energy
 
 
 
          hetot=hetot+energy
-         diss1=diss1 -2*energy*iwave**2*pi2_squared
+         diss1=diss1 -2*energy*iw**2*pi2_squared
          diss2=diss2 -2*energy*rwave*pi2_squared
 enddo
 enddo
@@ -1600,9 +1618,6 @@ else
 endif
 
 
-
-
-
 ! for all waves outside sphere, sum into one wave number:
 do i=iwave+2,iwave_max
    spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
@@ -1651,7 +1666,7 @@ real*8 :: energy,vx,wx,uy,wy,uz,vz,heltot
 real*8 :: diss1,diss2,hetot,co_energy(3),xw,RR(3),II(3),mod_rr,mod_ii
 real*8 :: WR(3),WI(3)
 real*8 :: cos_tta,rhel,delta,rp,ip,e1,e2,xfac,maxct,minct,rhmin,rhmax
-integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ra,rb,ind
+integer i,j,k,jm,km,im,iwave_max,n,ibin,a,b,ra,rb,ind,iw
 
 complex*16 tmp
 
@@ -1830,7 +1845,7 @@ do j=ny1,ny2
          km=kmcord_exp(k)
          
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iwave = nint(Lz*sqrt(rwave))
+         iw = nint(Lz*sqrt(rwave))
 
          !     compute angle between Re and Im parts of u(k)
          RR = cmodes_r(i,j,k,:)
@@ -1839,7 +1854,7 @@ do j=ny1,ny2
          mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
          mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
          
-         if (iwave > 0) then
+         if (iw > 0) then
             cos_tta = (RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3))/&
                  (mod_rr*mod_ii)
             
@@ -1848,25 +1863,25 @@ do j=ny1,ny2
             ind = nint(a + b*(cos_tta))
             
             if (ind>nbin) then 
-               write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
+               write(6,*)"iw,cos(tta),ind = ",iw,cos_tta,ind
                call abortdns("Error: spectrum.F90: ind>nbin")
                
             endif
             if (ind<1) then
-               write(6,*)"iwave,cos(tta),ind = ",iwave,cos_tta,ind
+               write(6,*)"iw,cos(tta),ind = ",iw,cos_tta,ind
                call abortdns("Error: spectrum.F90: ind<1")            
             endif
 
-            costta_pdf(iwave,ind) = costta_pdf(iwave,ind) + 1.0        
+            costta_pdf(iw,ind) = costta_pdf(iw,ind) + 1.0        
             
             ! mean value of angles in each wavenumber        
-!            cos_tta_spec(iwave) = cos_tta_spec(iwave) + abs(cos_tta)
+!            cos_tta_spec(iw) = cos_tta_spec(iw) + abs(cos_tta)
             if (cos_tta >= 0) then
-               cos_tta_spec_p(iwave) = cos_tta_spec_p(iwave) + (cos_tta)
-               countp(iwave) = countp(iwave)+1	
+               cos_tta_spec_p(iw) = cos_tta_spec_p(iw) + (cos_tta)
+               countp(iw) = countp(iw)+1	
             else 
-               cos_tta_spec_n(iwave) = cos_tta_spec_n(iwave) + (cos_tta)
-               countn(iwave) = countn(iwave)+1
+               cos_tta_spec_n(iw) = cos_tta_spec_n(iw) + (cos_tta)
+               countn(iw) = countn(iw)+1
 
             endif
            endif
@@ -1896,26 +1911,26 @@ do j=ny1,ny2
          ! In coordinate system with x_1 || k, x_2 || RR and x_3 ||(k \cross RR):
          
          ! E_33 component of energy tensor (= I_3^2 = square of component of II orthogonal to RR)
-         E33(iwave)=E33(iwave)+ 0.5*xfac*(mod_ii**2 - (sum(II*RR)/(mod_rr))**2)
+         E33(iw)=E33(iw)+ 0.5*xfac*(mod_ii**2 - (sum(II*RR)/(mod_rr))**2)
          
          ! I_2^2 (square of the component of II along RR) (presents zero contribution to helicity?)
-         II2sq(iwave) = II2sq(iwave) + 0.5*xfac*(sum(II*RR)/(mod_rr))**2
+         II2sq(iw) = II2sq(iw) + 0.5*xfac*(sum(II*RR)/(mod_rr))**2
 
          ! RR^2 (square of RR) 
-         RRsq(iwave) = RRsq(iwave)+0.5*xfac*sum(RR*RR)
+         RRsq(iw) = RRsq(iw)+0.5*xfac*sum(RR*RR)
 
          ! I_2*I_3 (the part of the energy tensor that doesn't contribute to 
          ! either energy or helicity
-         I2I3(iwave) = I2I3(iwave) + 0.5*xfac*((sum(II*RR)/(mod_rr))*&
+         I2I3(iw) = I2I3(iw) + 0.5*xfac*((sum(II*RR)/(mod_rr))*&
               sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
 
          ! R_2*I_3 = RR*I_3 (the part of the energy tensor that contributes 
          ! to the helicity
-         R2I3(iwave) = R2I3(iwave) + 0.5*xfac*(mod_rr*sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
+         R2I3(iw) = R2I3(iw) + 0.5*xfac*(mod_rr*sqrt(mod_ii**2 -(sum(II*RR)/(mod_rr))**2))
          
          !par = abs(RR\cross II)/(RR^2+II^2)
-         if (iwave > 0) then
-         par(iwave) = par(iwave) + sqrt((RR(2)*II(3) - II(2)*RR(3))**2 + &
+         if (iw > 0) then
+         par(iw) = par(iw) + sqrt((RR(2)*II(3) - II(2)*RR(3))**2 + &
               (II(1)*RR(3) - RR(1)*II(3))**2 + &
               (RR(1)*II(2) - II(1)*RR(2))**2)/(mod_rr**2 + mod_ii**2)
          endif
@@ -1927,7 +1942,7 @@ do j=ny1,ny2
               (km/Lz)*(RR(1)*II(2) - II(1)*RR(2)))
          	
          ! relative helicity and its distribution in current wavenumber
-         if (iwave > 0) then
+         if (iw > 0) then
             rhel = energy/(xw*xfac*(sum(RR*RR)+sum(II*II)))
 !            write(6,*)"rhel = ",rhel
 !            if (rhel < rhmin) rhmin = rhel
@@ -1938,28 +1953,28 @@ do j=ny1,ny2
 	
             
             if (ind>nbin) then 
-               write(6,*)"iwave,rhel,ind = ",iwave,rhel,ind
+               write(6,*)"iw,rhel,ind = ",iw,rhel,ind
                call abortdns("Error: spectrum.F90: ind>nbin")
                
             endif
             if (ind<1) then 
-               write(6,*)"iwave,rhel,ind = ",iwave,rhel,ind
+               write(6,*)"iw,rhel,ind = ",iw,rhel,ind
                call abortdns("Error: spectrum.F90: ind<1")
                
             endif
             
-            rhel_pdf(iwave,ind) = rhel_pdf(iwave,ind) + 1        
+            rhel_pdf(iw,ind) = rhel_pdf(iw,ind) + 1        
             
             !distribution of total relative helicity in each wavenumber
             if (rhel >= 0) then
-               rhel_spec_p(iwave) = rhel_spec_p(iwave) + rhel
+               rhel_spec_p(iw) = rhel_spec_p(iw) + rhel
             else 
-               rhel_spec_n(iwave) = rhel_spec_n(iwave) + rhel
+               rhel_spec_n(iw) = rhel_spec_n(iw) + rhel
 	       
             endif
 
             !spectrum of variance of relative helicity
-            rhel_rms_spec(iwave) = rhel_rms_spec(iwave) + rhel**2	            
+            rhel_rms_spec(iw) = rhel_rms_spec(iw) + rhel**2	            
             
          endif
          
@@ -1975,22 +1990,22 @@ do j=ny1,ny2
          !if (abs(rhel) <= delta) then
          if (.true.) then
             ! store E(k),kE(k), varE(k)
-            spec_E(iwave)=spec_E(iwave) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
-            spec_kEk(iwave)=spec_kEk(iwave) + xw*xfac*(sum(RR*RR)+ sum(II*II))
-            spec_varE(iwave) = spec_varE(iwave) + (0.5*xfac*(sum(RR*RR)+ sum(II*II)))**2
+            spec_E(iw)=spec_E(iw) + 0.5*xfac*(sum(RR*RR)+ sum(II*II))
+            spec_kEk(iw)=spec_kEk(iw) + xw*xfac*(sum(RR*RR)+ sum(II*II))
+            spec_varE(iw) = spec_varE(iw) + (0.5*xfac*(sum(RR*RR)+ sum(II*II)))**2
 
             ! store helicity(k), mean helicity spec_meanhe(k) 
 	    ! and spec_varh(k) (variance of the helicity in each wavenumber)
-            if (energy>0) spec_helicity_rp(iwave)= & 
-                 spec_helicity_rp(iwave)+energy
-            if (energy<0) spec_helicity_rn(iwave)= &
-                 spec_helicity_rn(iwave) + energy
-            spec_meanhe(iwave) = spec_meanhe(iwave) + energy
-            spec_varhe(iwave) = spec_varhe(iwave) + energy**2
-            pcount(iwave) = pcount(iwave) + 1
+            if (energy>0) spec_helicity_rp(iw)= & 
+                 spec_helicity_rp(iw)+energy
+            if (energy<0) spec_helicity_rn(iw)= &
+                 spec_helicity_rn(iw) + energy
+            spec_meanhe(iw) = spec_meanhe(iw) + energy
+            spec_varhe(iw) = spec_varhe(iw) + energy**2
+            pcount(iw) = pcount(iw) + 1
        
             hetot=hetot+energy
-            diss1=diss1 -2*energy*iwave**2*pi2_squared
+            diss1=diss1 -2*energy*iw**2*pi2_squared
             diss2=diss2 -2*energy*rwave*pi2_squared  
          endif
       enddo
@@ -2102,14 +2117,14 @@ if (my_pe==io_pe) then
    print *,'helicity dissipation (exact):    ',diss2*mu
 endif
 
+! maximum wave number for spherical shells:
 if (g_nz == 1)  then
-   iwave = min(g_nx,g_ny)
+   iwave = min(g_nx/2,g_ny/2)
 else
-   iwave = min(g_nx,g_ny,g_nz)
+   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
-iwave = (iwave/2)           ! max wave number in sphere.
 
-! for all waves outside sphere, sum into one wave number:
+! for all waves outside sphere, sum into one wave number, iwave+1:
 do i=iwave+2,iwave_max
    spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
    spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)

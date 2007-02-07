@@ -26,8 +26,8 @@ tsave=[];
 %movie_times=.3:.1:1;
 %mu=1.75e-4;
 
-name='qg648610.0000';
-namedir='/home/mataylo/';
+name='qg64_sto16_all';
+namedir='/home/mt/Desktop/';
 CK_orig=1.613; movie_plot=0; endian='l';
 mu=1e-4;
 
@@ -73,8 +73,8 @@ mu=1e-4;
 %name='all';
 %namedir='/home/wingate/ccs/Rotation/Rot1/';
 
-name = 'qg64_sto16_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/';
+%name = 'qg64_sto16_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/';
 
 
 spec_r_save=[];
@@ -106,6 +106,7 @@ while (time>=.0 & time<=9000.6)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
+  n_r
 
   knum=0:(n_r-1);
   eta=0;
@@ -144,19 +145,19 @@ while (time>=.0 & time<=9000.6)
   spec_ux=spec_scale*fread(fid,n_x,'float64');
   spec_vx=spec_scale*fread(fid,n_x,'float64');  
   spec_wx=spec_scale*fread(fid,n_x,'float64');  
-  n_x
+  %n_x
   
   n_y=fread(fid,1,'float64');
   spec_uy=spec_scale*fread(fid,n_y,'float64');
   spec_vy=spec_scale*fread(fid,n_y,'float64');
   spec_wy=spec_scale*fread(fid,n_y,'float64');
-  n_y
+  %n_y
   
   n_z=fread(fid,1,'float64');
   spec_uz=spec_scale*fread(fid,n_z,'float64');
   spec_vz=spec_scale*fread(fid,n_z,'float64');
   spec_wz=spec_scale*fread(fid,n_z,'float64');  
-  n_z
+  %n_z
   
   i=find( abs(time-tsave)<.0001);
   if (length(i)>=1) 
@@ -293,6 +294,8 @@ while (time>=.0 & time<=9000.6)
      figure(5); clf; subplot(1,1,1)
 
      np_r=fread(fidp,1,'float64');
+     np_r
+     pspec_r=[];
      for np=1:npassive 
         pspec_r(:,np)=fread(fidp,np_r,'float64');
         c2(np)=sum(pspec_r(:,np)); 
@@ -422,7 +425,7 @@ while (time>=.0 & time<=9000.6)
   
   
   time=fread(fid,1,'float64');
-  time
+  %time
   if (fidt>=0) 
     num_spec=fread(fidt,1,'float64');
     time_t=fread(fidt,1,'float64');
