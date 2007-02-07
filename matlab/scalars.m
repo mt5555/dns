@@ -29,9 +29,9 @@ fid2=-1;
 %fid=endianopen('/home/mt/sc2048decay0001.0000.scalars','r');
 %nx=2048;
 
-fid=endianopen('/home/mataylo/qg648810.0000.scalars','r');
+fid=endianopen('/home/mataylo/tmp/qg640000.0000.scalars','r');
 nx=64;
-fcor=100; f_k=2;
+fcor=100; f_k=16;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;

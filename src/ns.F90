@@ -294,7 +294,7 @@ if (passive_type(np1)==4) then
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      rhsg(i,j,k,np1)=rhsg(i,j,k,np1) - bous*Q(i,j,k,3)
+      rhsg(i,j,k,np1)=rhsg(i,j,k,np1) + bous*Q(i,j,k,3)
    enddo
    enddo
    enddo
@@ -408,7 +408,7 @@ do i=nx1,nx2
    Q(i,j,k,3) = ww
 
    if (npassive>0 .and. passive_type(np1)==4) then
-      Q(i,j,k,3)=Q(i,j,k,3)+bous*Q(i,j,k,np1)
+      Q(i,j,k,3)=Q(i,j,k,3)-bous*Q(i,j,k,np1)
    endif
 
 enddo
