@@ -710,7 +710,6 @@ do ns=np1,np2
                rhs(k,i,j,ns)=rhs(k,i,j,ns) - xw_viss*Qhat(k,i,j,ns)
                if (passive_type(ns)==2) rhs(k,i,j,ns)=rhs(k,i,j,ns)+p(k,i,j)
             endif
-#if 0
             if (compute_ints==1) then
                xfac = 2*2*2
                if (km==0) xfac=xfac/2
@@ -720,7 +719,6 @@ do ns=np1,np2
                pke(ns) = pke(ns) + .5*xfac*u2
                p_diss(ns) = p_diss(ns) + xfac*xw_viss*u2
          endif
-#endif
          enddo
       enddo
    enddo
@@ -757,10 +755,11 @@ if (compute_ints==1) then
    ints(12)=ens_diss2
    ints(13)=ens_diss4
    ints(14)=ens_diss6
+   ints(15)=pke(np1)
+   ints(16)=-p_diss(np1)
+
    maxs(5)=maxvor
 
-!   ints(6)=pke(4)
-!   ints(10)=-p_diss(4)
 endif
 
 if (forcing_type==8) then

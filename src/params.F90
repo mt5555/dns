@@ -368,7 +368,7 @@ integer :: error_code =0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! scalar quantities of current state
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-integer,parameter :: nints=14
+integer,parameter :: nints=16
 real*8 :: ints(nints),maxs(nints)
 
 !
@@ -410,6 +410,8 @@ real*8 :: ints(nints),maxs(nints)
 ! ints(12) = enstrophy dissipation k^2 |w|^2
 ! ints(13) = enstrophy dissipation k^4 |w|^2
 ! ints(14) = enstrophy dissipation k^6 |w|^2
+! ints(15) = potential energy (when running Boussinesque)
+! ints(16) = potential energy dissipation rate
 ! maxs(5) = max vorticity
 !
 !
