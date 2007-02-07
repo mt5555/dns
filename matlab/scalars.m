@@ -45,7 +45,7 @@ fcor=100; f_k=2;
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg640000.0000.scalars','r');
 nx=64;f_k = 16; fcor=100;
 
-fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg64_sto16_all.scalars','r');
+fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg641960.6469.scalars','r');
 %nx=64;f_k = 16; fcor=100;
 
 

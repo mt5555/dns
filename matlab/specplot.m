@@ -73,6 +73,9 @@ mu=1e-4;
 %name='all';
 %namedir='/home/wingate/ccs/Rotation/Rot1/';
 
+name = 'qg64_sto16_all';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/';
+
 
 spec_r_save=[];
 spec_r_save_fac3=[];

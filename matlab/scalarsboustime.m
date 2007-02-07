@@ -93,8 +93,8 @@ dqdt = diff(potens)./dt;
 plot(time(1:length(time)-1),dqdt,'b');
 plot(time(1:length(time)), -potens_diss,'k');
 plot(time(1:length(time)-1), (dqdt + potens_diss(1:length(time)-1)),'m');
-mean_forc = mean((dqdt + potens_diss(1:length(time)-1))./dqdt)
-mean_dqdt = mean(dqdt(50:93))
+mean_forc = mean((dqdt + potens_diss(1:length(time)-1)))
+mean_dqdt = mean(dqdt(50:92))
 legend('\Delta Q/\Delta t', 'potens\_diss','difference');
 grid on;
 title('potential enstrophy dissipation rate dQ/dt check')
