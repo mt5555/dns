@@ -73,9 +73,11 @@ mu=1e-4;
 %name='all';
 %namedir='/home/wingate/ccs/Rotation/Rot1/';
 
-%name = 'qg64_sto16_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/';
+name = 'qg64_sto16_all';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/';
 
+name = 'qg640000.0000';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -291,7 +293,7 @@ while (time>=.0 & time<=9000.6)
      disp('reading passive scalar spectrum')
      npassive=fread(fidp,1,'float64'); 
      time_p=fread(fidp,1,'float64');
-     figure(5); clf; subplot(1,1,1)
+     figure(5); subplot(1,1,1)
 
      np_r=fread(fidp,1,'float64');
      np_r

@@ -45,8 +45,11 @@ fcor=100; f_k=16;
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg640000.0000.scalars','r');
 nx=64;f_k = 16; fcor=100;
 
-fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg641960.6469.scalars','r');
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg641960.6469.scalars','r');
 %nx=64;f_k = 16; fcor=100;
+
+fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg640000.0000.scalars','r');
+nx=64;f_k = 16; fcor=200;
 
 
 nscalars=0;
@@ -133,6 +136,8 @@ maxUcfl=maxs(4,:);     % max used for CFL, at time_after
 maxvor=maxs(5,:);
 time_after=maxs(6,:);
 time=maxs(7,:);
+pe = ints(15,:);
+pe_diss = ints(16,:);
 
 
 

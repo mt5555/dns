@@ -7,6 +7,7 @@ mu=0;
 ke=0;
 nx=1;
 delx_over_eta=1;
+ext='.bisostr';
 eta = 1/(nx*delx_over_eta);
 
 %name = '~/projects/pv/data_analysis/lowforc/qg';
@@ -16,9 +17,14 @@ nx=64;
 %name = '~/data/qg';
 name = '~/projects/pv/data_analysis/lowforc/low4/qg256/qg';
 pname = 'qg';
-ext='.bisostr';
+
 times=[30:2:102];
-%times=[100:100];
+
+name = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg64';
+pname='qg64';
+times=[1700:5:1795];
+nx=64;
+
 %nx = 256;
 
 %check this subroutine, for now set averages to 1
