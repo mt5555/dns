@@ -22,10 +22,15 @@ fid2=-1;
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/noforc/qg64all_noforc.scalars-bous','r');
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/qg256_all8.0.scalars-bous','r');
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/qg256_all100.0.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/qg64_iso23w_all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/reg_nu/qg64_iso23w_all.scalars-bous','r');
+fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper_all15.scalars-bous','r');
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg64_iso12w_all.scalars-bous','r');
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg64_sto16_all.scalars-bous','r');
-fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg64_100all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg64_200all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/minusN/qg64_stohigh-N_all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/testN/qg64_all.scalars-bous','r');
+fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/testN/minusN/qg64_all.scalars-bous','r');
+
 
 
 nscalars=0;

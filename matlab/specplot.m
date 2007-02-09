@@ -15,16 +15,6 @@ tsave=[];
 
 
 
-%name='sc1024A';
-%namedir='/ccs/scratch/taylorm/dns/sc1024A/';
-%CK_orig=1.613;
-
-
-%name='tmix256D';
-%namedir='/home/taylorm/codes/dns_data/tmix/tmix256D/';
-%CK_orig=1.613; movie_plot=1; endian='l';
-%movie_times=.3:.1:1;
-%mu=1.75e-4;
 
 name='qg64_sto16_all';
 namedir='/home/mt/Desktop/';
@@ -45,39 +35,21 @@ mu=1e-4;
 %  tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 %  tsave=[0 .41 .7 1.0  1.3  1.6 ];
 
-%name = 'sk128_alpha15/sk128_alpha150000.0000';
-%namedir = '/home/skurien/dns/src/';
-
-
-%name='alpha1'; namedir='/home/taylorm/';
-%CK_orig=1.613; decay_scale=0; endian='l';
-%% save spectrum at these times:
-%movie_plot=0; movie=1; tsave=[2.5 5.0];
-
-
-%name = 'decay2048-new.-sc0009_0000.7019';
-%namedir = '/scratch1/taylorm/decay2048/';
-%CK_orig=1.613/(2*pi)^2;
-
-%name = 'decay2048-new.-sc0001_0000.7536';
-%namedir = '/scratch1/taylorm/decay2048/';
-%CK_orig=1.613/(2*pi)^2;
-
-%name = 'skhel512a0000.0000';
-%namedir = '/home/mt/data/skhel/';
-%CK_orig=1.613;
-
-
-%name = 'Rot10002.0000';
-%namedir = '/home2/skurien/rotation/Rot1/';
-%name='all';
-%namedir='/home/wingate/ccs/Rotation/Rot1/';
-
-name = 'qg64_sto16_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/';
-
 name = 'qg640000.0000';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minusN/';
+
+%name = 'qg64_sto16_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/';
+
+%name = 'qg640000.0000';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/';
+
+%name = 'qg640000.0000';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/minusN/';
+
+name = 'qg64hyper0000.0000';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -169,7 +141,7 @@ while (time>=.0 & time<=9000.6)
   end 
 
   if (movie==1)  
-  figure(1);clf;
+  figure(1);
   if (n_z==1) 
     %subplot(2,1,1);
     subplot(1,1,1);
@@ -186,16 +158,17 @@ while (time>=.0 & time<=9000.6)
     subplot(1,1,1);
     stitle=sprintf('Spectrum t=%8.4f',time);
     loglog53(n_r-1,spec_r,stitle,CK); hold on;
-
+        
+    
     %spec_r=spec_r./fac3;
     %loglog53(n_r-1,spec_r,stitle,CK); hold on;
-    hold off;
+    
 
     
     % longitudinal spectraum
-%    figure(4)
+    figure(4);title('longitudinal 1D spectrum');
 %    subplot(2,1,1);
-%    loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
+    loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
 %    loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
 %    hold off;
@@ -203,9 +176,9 @@ while (time>=.0 & time<=9000.6)
 %    % transverse spectraum
 %    subplot(2,1,2);
 %    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
-%    loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
+    loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
 %    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
-%    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
+    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
 %    hold off;
@@ -306,23 +279,29 @@ while (time>=.0 & time<=9000.6)
         L11c(np) = ((3*pi)/(4*c2(np))) * sum(pspec_r(2:np_r,np)'./ (knum(2:np_r)*2*pi))  ;
      end
      ts=sprintf('passive scalars t=%f',time);
-     loglog53(np_r,pspec_r,ts,1.0,3); 
+     loglog53(np_r,pspec_r,ts,1.0,3); hold on;
 
      np_x=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_x(:,np)=fread(fidp,np_x,'float64');
      end
-
+     ts=sprintf('passive scalars t=%f',time);
+%     loglog53(np_x, pspec_x, ts, 1.0,3);hold on;    
+     
      np_y=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_y=fread(fidp,np_y,'float64');
      end
+     ts=sprintf('passive scalars t=%f',time);
+%     loglog53(np_y, pspec_y, ts, 1.0,3);hold on;
      
      np_z=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_z=fread(fidp,np_z,'float64');
      end
-
+     ts=sprintf('passive scalars t=%f',time);
+%     loglog53(np_z, pspec_z, ts, 1.0,3);hold off;
+     
      np=1;
      % 10  .508
      % 
@@ -339,7 +318,12 @@ while (time>=.0 & time<=9000.6)
 
   end
 
-
+  % plot the total energy spectrum
+  figure(6);
+  ts=sprintf('total energy t=%f',time); 
+  loglog53(np_r,spec_r+pspec_r,ts,1.0,3);hold on;
+  
+  
   % now read the cospectrum:
   if (fidco>-1) 
      disp('reading co-spectrum')

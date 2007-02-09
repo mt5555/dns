@@ -29,27 +29,40 @@ fid2=-1;
 %fid=endianopen('/home/mt/sc2048decay0001.0000.scalars','r');
 %nx=2048;
 
-fid=endianopen('/home/mataylo/tmp/qg640000.0000.scalars','r');
-nx=64;
-fcor=100; f_k=16;
+%fid=endianopen('/home/mataylo/tmp/qg640000.0000.scalars','r');
+%nx=64;fcor=100; f_k=16;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
 
+fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/qg640000.0000.scalars','r');
+ne = 64; f_k = 16; fcor = 100;
+
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minusN/qg640000.0000.scalars','r');
+%nx = 64;f_k = 16; fcor = 100;
+
+
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg648810.0000.scalars','r');
 %nx=64;f_k = 2; fcor=100;
 
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/qg642620.0000.scalars','r');
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/reg_nu/qg642620.0000.scalars','r');
 %nx=64;f_k = 2; fcor=100;
 
+fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper0000.0000.scalars','r');
+nx=64;f_k = 2; fcor=100;
+
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg640000.0000.scalars','r');
-nx=64;f_k = 16; fcor=100;
+%nx=64;f_k = 16; fcor=100;
 
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg641960.6469.scalars','r');
 %nx=64;f_k = 16; fcor=100;
 
-fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg640000.0000.scalars','r');
-nx=64;f_k = 16; fcor=200;
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg640000.0000.scalars','r');
+%nx=64;f_k = 16; fcor=200;
+
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/minusN/qg640000.0000.scalars','r');
+%nx=64;f_k = 16; fcor=100;
+
 
 
 nscalars=0;
@@ -119,6 +132,8 @@ end
 ke_diss_d=ints(10,:);
 ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 disp(sprintf('mean ke_diss_f = %f', mean(ke_diss_f)))
+disp(sprintf('first few ke_diss_f = %f %f %f %f %f', ke_diss_f(1:5)))
+size(ke_diss_f)
 
 vor_z=ints(4,:);
 hel=ints(5,:);
@@ -166,6 +181,7 @@ for i=2:l
     j=j+1;
     time_2(j) = .5*(time(i)+time(i-1));
     ke_diss_tot(j)=(ke(i)-ke(i-1))./(time(i)-time(i-1));
+    pe_diss_tot(j)=(pe(i)-pe(i-1))./(time(i)-time(i-1));
     Ea_diss_tot(j)=(Ea(i)-Ea(i-1))./(time(i)-time(i-1));
     h_diss_tot(j)=(hel(i)-hel(i-1))./(time(i)-time(i-1));
     ke_diss_tot2(j)=.5*(ke_diss_d(i)+ke_diss_d(i-1)) + ...
@@ -184,6 +200,7 @@ lambda=sqrt( mu*(2*Euse/3) ./ (epsilon/15)  );
 eta = (mu^3 ./ abs(epsilon)).^(.25);
 
 epsilon_ke=-ke_diss_d;
+epsilon_pe=-pe_diss;
 lambda_ke=sqrt( mu*(2*ke/3) ./ (epsilon_ke/15)  );
 
 if (mu>0)
@@ -292,7 +309,7 @@ print -djpeg -r72 vor.jpg
 tturn=-2*ke./ke_diss_d;
 tturn = tturn(ceil(length(tturn)/2):length(tturn));
 tturn = sum(tturn)/length(tturn);
-disp(sprintf('eddy turnover time (averaged over last haf of data) = %f ',tturn));
+disp(sprintf('eddy turnover time (averaged over last half of data) = %f ',tturn));
 
 
 maxU = maxU(ceil(length(maxU)/2):length(maxU));
@@ -314,6 +331,11 @@ ke = ke(ceil(length(ke)/2):length(ke));
 ke = sum(ke)/length(ke);
 disp(sprintf('ke (average over last half of data) = %f ',ke));
 
+pe = pe(ceil(length(pe)/2):length(pe));
+pe = sum(pe)/length(pe);
+disp(sprintf('pe (average over last half of data) = %f ',pe));
+
+disp(sprintf('Total energy (average over last half of data) = %f ',ke+pe));
 
 % averge Smith's R0 to a number
 if (f_k>0) 
@@ -350,23 +372,30 @@ end
 if (alpha>0)
   epsilon = epsilon(ceil(length(epsilon)/2):length(epsilon));
   epsilon = sum(epsilon)/length(epsilon);
-  disp(sprintf('epsilon_E (averaged over last haf of data) = %f ',epsilon));
+  disp(sprintf('epsilon_E (averaged over last half of data) = %f ',epsilon));
 end
 
 epsilon_ke = epsilon_ke(ceil(length(epsilon_ke)/2):length(epsilon_ke));
 epsilon_ke = sum(epsilon_ke)/length(epsilon_ke);
-disp(sprintf('epsilon_ke (averaged over last haf of data) = %f ',epsilon_ke));
+disp(sprintf('epsilon_ke (averaged over last half of data) = %f ',epsilon_ke));
+
+epsilon_pe = epsilon_pe(ceil(length(epsilon_pe)/2):length(epsilon_pe));
+epsilon_pe = sum(epsilon_pe)/length(epsilon_pe);
+disp(sprintf('epsilon_pe (averaged over last half of data) = %f ',epsilon_pe));
 
 ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
 ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
-disp(sprintf('epsilon_f (averaged over last haf of data) = %f ',ke_diss_f));
+disp(sprintf('epsilon_f (averaged over last half of data) = %f ',ke_diss_f));
 Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * fcor);
 disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
 
 ke_diss_tot = ke_diss_tot(ceil(length(ke_diss_tot)/2):length(ke_diss_tot));
 ke_diss_tot = sum(ke_diss_tot)/length(ke_diss_tot);
-disp(sprintf('d(KE)/dt (averaged over last haf of data) = %f ',ke_diss_tot));
+disp(sprintf('d(KE)/dt (averaged over last half of data) = %f ',ke_diss_tot));
 
+pe_diss_tot = pe_diss_tot(ceil(length(pe_diss_tot)/2):length(pe_diss_tot));
+pe_diss_tot = sum(pe_diss_tot)/length(pe_diss_tot);
+disp(sprintf('d(PE)/dt (averaged over last half of data) = %f ',pe_diss_tot));
 
 print -depsc scalars.ps
 
