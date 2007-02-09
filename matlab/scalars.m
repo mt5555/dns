@@ -29,14 +29,15 @@ fid2=-1;
 %fid=endianopen('/home/mt/sc2048decay0001.0000.scalars','r');
 %nx=2048;
 
-%fid=endianopen('/home/mataylo/tmp/qg640000.0000.scalars','r');
-%nx=64;fcor=100; f_k=16;
+%fid=endianopen('/home/mataylo/tmp/qg64hyper0000.0000.scalars','r');
+fid=endianopen('/home/mataylo/tmp/new/qg640000.0000.scalars','r');
+nx=64;fcor=100; f_k=16;
 
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
 
-fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/qg640000.0000.scalars','r');
-ne = 64; f_k = 16; fcor = 100;
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/qg640000.0000.scalars','r');
+%ne = 64; f_k = 16; fcor = 100;
 
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minusN/qg640000.0000.scalars','r');
 %nx = 64;f_k = 16; fcor = 100;
@@ -48,8 +49,8 @@ ne = 64; f_k = 16; fcor = 100;
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/reg_nu/qg642620.0000.scalars','r');
 %nx=64;f_k = 2; fcor=100;
 
-fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper0000.0000.scalars','r');
-nx=64;f_k = 2; fcor=100;
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper0000.0000.scalars','r');
+%nx=64;f_k = 2; fcor=100;
 
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg640000.0000.scalars','r');
 %nx=64;f_k = 16; fcor=100;
@@ -247,9 +248,11 @@ figure(5)
 clf
 hold on
 plot(time,ke,'k')
+plot(time,pe,'g')
+plot(time,ke+pe,'r')
 %plot(time_2,ke_diss_tot,'r')
 %plot(time,hel,'g')
-title('KE: black,   hel: green');
+title('KE: black,   PE: green');
 hold off
 xlabel('time')
 
@@ -389,6 +392,8 @@ disp(sprintf('epsilon_f (averaged over last half of data) = %f ',ke_diss_f));
 Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * fcor);
 disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
 
+
+
 ke_diss_tot = ke_diss_tot(ceil(length(ke_diss_tot)/2):length(ke_diss_tot));
 ke_diss_tot = sum(ke_diss_tot)/length(ke_diss_tot);
 disp(sprintf('d(KE)/dt (averaged over last half of data) = %f ',ke_diss_tot));
@@ -396,6 +401,8 @@ disp(sprintf('d(KE)/dt (averaged over last half of data) = %f ',ke_diss_tot));
 pe_diss_tot = pe_diss_tot(ceil(length(pe_diss_tot)/2):length(pe_diss_tot));
 pe_diss_tot = sum(pe_diss_tot)/length(pe_diss_tot);
 disp(sprintf('d(PE)/dt (averaged over last half of data) = %f ',pe_diss_tot));
+
+
 
 print -depsc scalars.ps
 

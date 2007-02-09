@@ -760,15 +760,16 @@ if (compute_ints==1) then
 
    maxs(5)=maxvor
 
+   if (forcing_type==2 .or. forcing_type==4 .or. forcing_type==8) then
+      ! in this case, f_diss from stage 1 is not very accurate, so use
+      ! the average.  Reason: at small scales, forcing has a huge 
+      ! effect.  stage1: u & f uncorrelated, <u,f>=small.  But
+      ! after a few stages, u & f very correlated, <u,f>=large.  
+      ints(3)=f_diss_ave
+   endif
+
 endif
 
-if (forcing_type==8) then
-   ! in this case, f_diss from stage 1 is not very accurate, so use
-   ! the average.  Reason: at small scales, forcing has a huge 
-   ! effect.  stage1: u & f uncorrelated, <u,f>=small.  But
-   ! after a few stages, u & f very correlated, <u,v>=large.  
-   ints(3)=f_diss_ave
-endif
 
 call wallclock(tmx2)
 tims(5)=tims(5)+(tmx2-tmx1)
