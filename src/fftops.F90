@@ -359,7 +359,7 @@ real*8 work(nx,ny,nz)       ! work array
 real*8 pv(nx,ny,nz)         ! output
 integer pv_type
 !bw  pv_type
-!bw  full    = 1   q = omega_a dot grad theta + fcor d theta/dz -bous omega_3
+!bw  full    = 1   q = omega dot grad theta + fcor d theta/dz -bous omega_3
 !bw  i         2   q = omega dot grad theta    (3D NSE with p-scalar)
 !bw  ii        3   q =  -bous * omega_3 +  fcor theta / d (QG)
 !bw  iii       4   q = fcor * d theta / d z	(Ro->0, Fr=1)
@@ -371,7 +371,6 @@ integer pv_type
 integer i,j,k,n
 real*8 dummy(1)
 
-!write(6,*)'pv_type in potential_vorticity',pv_type
 
 if (n_var<3) call abortdns("potential vorticity() requires n_var>2")
 !if(pv_type/=1) call abortdns("fftops: potential_vorticity")
@@ -404,10 +403,12 @@ elseif (pv_type == 2) then
    !compute theta_x
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,1)
    pv = d1*vor(:,:,:,1)
+
+   !compute theta_y
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
    pv=pv + d1*vor(:,:,:,2)
 
-   ! compute theta_z -- do not forget to add in coriolis here
+   ! compute theta_z 
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*vor(:,:,:,3)
    
@@ -427,6 +428,7 @@ elseif (pv_type == 4) then
    ! compute theta_z -- do not forget to add in coriolis here
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = fcor*d1/Lz
+
 elseif (pv_type == 5) then
    !bw
    !bw pv = -bous * omega_3
@@ -446,7 +448,7 @@ elseif (pv_type == 6) then
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
    pv = pv + d1*vor(:,:,:,2)
 
-   ! compute theta_z -- do not forget to add in coriolis here
+   ! compute theta_z 
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*vor(:,:,:,3)
    pv = pv - bous*vor(:,:,:,3)
