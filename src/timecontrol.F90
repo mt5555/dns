@@ -41,8 +41,15 @@ time_target=time_final
 !
 ! compute new time step
 !
-! linear advection:
-!      u_t + umax grad(u) + f cross u = 0
+! TODO:  add BOUS dependancy
+!
+! linear advection:  velocity = (u,v,w)
+!      u_t + (u,v,w) grad(u)  + f v = 0
+!      v_t + (u,v,w) grad(v)  + f u = 0
+!      w_t + (u,v,w) grad(w)  + N theta = 0
+!      theta_t + (u,v,w) grad(theta) - N w = 0
+!
+!
 ! FFT:   uk_t + i (2*pi*k*umax + f) uk = 0
 ! stabilityis based on:  2*pi*k*umax + f  =   pi*umax/delx + f
 !                                         =   pi*(umax/delx + f/pi)
