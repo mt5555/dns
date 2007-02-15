@@ -49,7 +49,13 @@ namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minus
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/minusN/';
 
 name = 'qg64hyper0000.0000';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/';
+
+name = 'qg64hyper_all';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
+
+name = 'qg256hyper_all';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -157,7 +163,7 @@ while (time>=.0 & time<=9000.6)
     figure(1)
     subplot(1,1,1);
     stitle=sprintf('Spectrum t=%8.4f',time);
-    loglog53(n_r-1,spec_r,stitle,CK); hold on;
+    loglog53(n_r-1,spec_r,stitle,CK);hold off;
         
     
     %spec_r=spec_r./fac3;
@@ -168,7 +174,7 @@ while (time>=.0 & time<=9000.6)
     % longitudinal spectraum
     figure(4);title('longitudinal 1D spectrum');
 %    subplot(2,1,1);
-    loglog53(n_x,spec_ux,' ',CK*18/55);     hold on;
+    loglog53(n_x,spec_ux,' ',CK*18/55);     hold off;
 %    loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
 %    hold off;
@@ -176,12 +182,14 @@ while (time>=.0 & time<=9000.6)
 %    % transverse spectraum
 %    subplot(2,1,2);
 %    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
-    loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
+    loglog53(n_x,spec_uz,' ',CK*18/55);     hold off;
 %    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
-    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
+    loglog53(n_y,spec_vz,' ',CK*18/55);     hold off;
 %    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
 %    hold off;
+     title('longitudinal 1D spectra of kinetic energy');
+
   end
   end
 
@@ -266,7 +274,7 @@ while (time>=.0 & time<=9000.6)
      disp('reading passive scalar spectrum')
      npassive=fread(fidp,1,'float64'); 
      time_p=fread(fidp,1,'float64');
-     figure(5); subplot(1,1,1)
+     figure(5); clf; subplot(1,1,1)
 
      np_r=fread(fidp,1,'float64');
      np_r
@@ -278,30 +286,33 @@ while (time>=.0 & time<=9000.6)
         c2_diss(np) = mu*2*sum(knum.^2 * (2*pi)^2 .* pspec_r(:,np)')  ; 
         L11c(np) = ((3*pi)/(4*c2(np))) * sum(pspec_r(2:np_r,np)'./ (knum(2:np_r)*2*pi))  ;
      end
-     ts=sprintf('passive scalars t=%f',time);
-     loglog53(np_r,pspec_r,ts,1.0,3); hold on;
+     ts=sprintf('shell averaged passive scalar spectrum t=%f',time);
+     loglog53(np_r,pspec_r,ts,1.0,3); hold off;
+     axis([1 100 1e-6 1]);
 
+     figure(9);hold off
      np_x=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_x(:,np)=fread(fidp,np_x,'float64');
      end
-     ts=sprintf('passive scalars t=%f',time);
-%     loglog53(np_x, pspec_x, ts, 1.0,3);hold on;    
+     ts=sprintf('plane averaged  passive scalars t=%f',time);
+     loglog53(np_x, pspec_x, ts, 1.0,3);hold on;    
      
      np_y=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_y=fread(fidp,np_y,'float64');
      end
-     ts=sprintf('passive scalars t=%f',time);
-%     loglog53(np_y, pspec_y, ts, 1.0,3);hold on;
+     ts=sprintf('plane averaged passive scalars t=%f',time);
+     loglog53(np_y, pspec_y, ts, 1.0,3);hold on;
      
      np_z=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_z=fread(fidp,np_z,'float64');
      end
-     ts=sprintf('passive scalars t=%f',time);
-%     loglog53(np_z, pspec_z, ts, 1.0,3);hold off;
-     
+     ts=sprintf('plane averaged passive scalars t=%f',time);
+     loglog53(np_z, pspec_z, ts, 1.0,3);hold off;
+     axis([1 100  1e-6 1]);
+
      np=1;
      % 10  .508
      % 
@@ -321,7 +332,7 @@ while (time>=.0 & time<=9000.6)
   % plot the total energy spectrum
   figure(6);
   ts=sprintf('total energy t=%f',time); 
-  loglog53(np_r,spec_r+pspec_r,ts,1.0,3);hold on;
+  loglog53(np_r,spec_r+pspec_r,ts,1.0,3);hold off;
   
   
   % now read the cospectrum:

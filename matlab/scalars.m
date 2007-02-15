@@ -36,9 +36,14 @@ nx=64;fcor=100; f_k=16;
 %fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
 %f_k= 24; fcor=0;
 
+<<<<<<< scalars.m
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/qg640000.0000.scalars','r');
+%ne = 64; f_k = 16; fcor = 100;
+=======
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/qg640000.0000.scalars','r');
 %ne = 64; f_k = 16; fcor = 100;
 
+>>>>>>> 1.100
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minusN/qg640000.0000.scalars','r');
 %nx = 64;f_k = 16; fcor = 100;
 
@@ -49,14 +54,25 @@ nx=64;fcor=100; f_k=16;
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/reg_nu/qg642620.0000.scalars','r');
 %nx=64;f_k = 2; fcor=100;
 
+<<<<<<< scalars.m
+fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/forcefix/qg64hyper0000.0000.scalars','r');
+nx=64;f_k = 2; fcor=100;
+=======
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper0000.0000.scalars','r');
 %nx=64;f_k = 2; fcor=100;
+>>>>>>> 1.100
 
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg640000.0000.scalars','r');
 %nx=64;f_k = 16; fcor=100;
 
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg641960.6469.scalars','r');
-%nx=64;f_k = 16; fcor=100;
+fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+                  'low4/qg64/sto_high_4/hyper_nu/bous500/qg64hyper_all80.scalars'],'r')
+nx=64;f_k = 4; fcor=500;
+
+fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+                  'low4/qg256/qg256hyper_all.scalars'],'r')
+nx=256;f_k = 4; fcor=500;
+
 
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg640000.0000.scalars','r');
 %nx=64;f_k = 16; fcor=200;
@@ -134,7 +150,6 @@ ke_diss_d=ints(10,:);
 ke_diss_f=ints(3,:);        % < u,F >   F=f, except for alpha model F=f'
 disp(sprintf('mean ke_diss_f = %f', mean(ke_diss_f)))
 disp(sprintf('first few ke_diss_f = %f %f %f %f %f', ke_diss_f(1:5)))
-size(ke_diss_f)
 
 vor_z=ints(4,:);
 hel=ints(5,:);
@@ -248,8 +263,13 @@ figure(5)
 clf
 hold on
 plot(time,ke,'k')
+<<<<<<< scalars.m
+plot(time,pe,'r')
+plot(time,ke+pe,'b')
+=======
 plot(time,pe,'g')
 plot(time,ke+pe,'r')
+>>>>>>> 1.100
 %plot(time_2,ke_diss_tot,'r')
 %plot(time,hel,'g')
 title('KE: black,   PE: green');
@@ -290,11 +310,11 @@ plot(time,maxvor,'r'); hold on;
 %plot(.4188,2500,'o')
 %plot(.4328,2500,'o')
 %plot(.4603,2500,'o')
-plot(.4894,2500,'.')
+%plot(.4894,2500,'.')
 %plot(.5551,2500,'o')
 %plot(.6034,2500,'o')
 %plot(.8149,2500,'o')
-plot(time,50000*ke,'k');
+%plot(time,50000*ke,'k');
 hold off;
 %axis([0,1,0,5000]);
 title('maximum vorticity component')

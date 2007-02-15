@@ -1,7 +1,7 @@
 clear
 %name = 'all'
 %name = 'qg256hyper_all32'
-name = 'qg64hyper_all'
+name = 'qg64hyper_all80'
 %epsilon=.41;
 %CK=1.5*epsilon^(2/3);
 %namedir = '/home/wingate/data1/Rotation/r16c/';
@@ -31,12 +31,16 @@ while (1)
   numkh=fread(fid,1,'float64');
   numkz=fread(fid,1,'float64');
   spec2d=zeros([numkz,numkh]);  
-
+    
+  
   disp(sprintf('time=%f  kz=%f  kh=%f',time,numkz,numkh));
 
   for ivar=1:numvar
   for kz=1:numkz
     [s,count] = fread(fid,numkh,'float64') ;
+    kz
+    max(s)
+    
     if (count~=numkh)
       disp('Error: error reading file')
       count
