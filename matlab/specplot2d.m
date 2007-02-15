@@ -36,25 +36,26 @@ while (1)
   disp(sprintf('time=%f  kz=%f  kh=%f',time,numkz,numkh));
 
   for ivar=1:numvar
-  for kz=1:numkz
-    [s,count] = fread(fid,numkh,'float64') ;
-    kz
-    max(s)
-    
+      for kz=1:numkz
+        [s,count] = fread(fid,numkh,'float64') ;
+        kz
+        max(s)      
     if (count~=numkh)
       disp('Error: error reading file')
       count
       size(s)
     end
-    spec2d(kz,:) = s';
-  end
+    spec2d(ivar,kz,:) = s';
+      end
   end
 
  
   figure(1)
+  for ivar = 1:numvar
   for kz = 1:numkz
-  loglog53(numkh,spec2d(kz,:)','',2.0,6);hold on;
+  loglog53(numkh,spec2d(ivar,kz,:)','',2.0,6);hold on;
   end  
+  end
   hold on;
   spec = sum(spec2d,1)/numkz;
   loglog53(numkh,spec','E0(kh) and E(kh)',2.0,6)
