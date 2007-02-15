@@ -1,11 +1,14 @@
 \documentclass[12pt]{article}
 \usepackage{amssymb,latexsym,amsmath}
+%\usepackage{epsfig}
+%\usepackage{graphicx}  
+%\DeclareGraphicsExtensions{.pdf, .jpg, .tif, .eps, .jpg}
 
 \newif\ifpdf
 \ifx\pdfoutput\undefined
-\pdffalse % we are not running PDFLaTeX                                         
+\pdffalse % we are not running PDFLaTeX                                        
 \else
-\pdfoutput=1 % we are running PDFLaTeX                                          
+\pdfoutput=1 % we are running PDFLaTeX                                         
 \pdftrue
 \fi
 \ifpdf
@@ -25,7 +28,7 @@
 \textheight = 9 in
 \oddsidemargin = 0.0 in
 \evensidemargin = 0.0 in
-\topmargin = 0.0 in
+\topmargin = -0.5 in
 \headheight = 0.0 in
 \headsep = 0.0 in
 \parskip = 0.2 in
@@ -46,16 +49,18 @@
 \DeclareMathOperator{\Span}{span}
 
 
-\title{Coordinate scaling in the LANL-Sandia DNS code}
-\author{Mark Taylor}
+\title{The Boussinesq equations and Coordinate scalings in the
+  LANL-Sandia DNS code} \author{Mark Taylor, Beth Wingate, Susan Kurien}
 
 \begin{document}
-%\maketitle
+\maketitle
 
 \section{Scaling of the Domain}
+
+
 \begin{figure}
 \begin{center}
-\includegraphics[angle=-90,width=4in]{box}
+\includegraphics[angle=-90,width=4.in]{box}
 \caption{ }
 \label{F:box}
 \end{center}
@@ -347,13 +352,80 @@ k_y = 2\pi$. Scaling out the $2\pi$, we get
 \[
 (j-1/2)^2 \le  l^2 +  m^2 < (j+1/2)^2.
 \]  
-\section{Comparing with Smith \& Waleffe (SW02)}
 
-\subsection*{Wave numbers}
+\section{Running the Model for the Boussinesq equations}
+
+\noindent
+This section discusses important elements of the inputfile and how to
+build the executable.
+
+When you've chosen scalar type = 4 in the gridsetup script (see
+below), you need to add a line to the input file right after the line
+for the smagorinsky coefficient,
+\noindent
+\begin{verbatim}
+.
+.
+.
+107.08        ! Bous. parameter  Fr = .21/bous=107.08
+0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+.0            ! smagorinsky
+1             ! max number of schmidt numbers for passive scalars
+1. 4          ! schmidt number = nu/kappa, ratio of viscous coeffs,type of scalar
+0             ! compute_structure_functions
+.
+.
+. 
+\end{verbatim}
+
+
+Note that the type in this file must match the type in the gridsetup
+command. Also note that if you want to the code to compute the
+two-point correlations of potential vorticity then you need to set the
+value of \texttt{compute structure functions} to 1.
+
+\noindent
+To set up the model you need to use the following:
+
+\begin{description}
+  
+\item[1)] Example to set the FORTRAN arrays sizes before compiling:
+  ($32^3$ simulation on 8 processors, prognostic variables: $u,v,w$
+  and $\theta$). Note the 4 on the end, which
+  indicates the type of scalar equations for the code to use \\
+ 
+  \begin{verbatim}
+      ./gridsetup.py 1 1 8 32 32 32 2 2 2 0 0 0 4
+  \end{verbatim}
+
+  \noindent
+  This one sets up the problem for $128^3$ on 32 processors
+  like this:
+
+  \begin{verbatim}
+   ./gridsetup.py 1 1 32 128 128 128 2 2 2 0 0 0 4
+  \end{verbatim}
+
+\item[2)] Then one makes the Boussinesq equations by
+  typing\\
+
+  \begin{verbatim}
+  gmake dnsb
+  \end{verbatim}
+  
+\end{description}
+
+\noindent
+
+\section{Comparing with Smith \& Waleffe (SW99 and SW02)}
+
+\subsection{Scalings and definitions}
+
+\subsubsection*{$\underline{\text{Wave numbers}}$}
 Wave numbers are dimensional and should be computed $k_f = 2 \pi
 k_f^m$, where the superscript $m$ stands for Mark. 
 
-\subsection*{Rossby Number}
+\subsubsection*{$\underline{\text{Rossby Number}}$}
 SW02 computes this Rossby number,
 \begin{equation}
   Ro = \frac{(k_f^2 \epsilon_f)^{1/3}}{\text{fcor}/2}, 
@@ -367,27 +439,10 @@ where each number in the equation is computed as,
      the forcing).
   \item[3)] fcor is an input to the code. There is some question as to
     whether we should divide by $fcor/2$ or $fcor$, see SW02 Eq 3.2
-  \item[4)] Example to set the FORTRAN arrays sizes before compiling:  
-           ($32^3$ simulation on 8 processors, prognostic variables: 
-            $u,v,w$ and $\theta$) \\
-            \begin{verbatim}
-             ./gridsetup.py 1 1 8 32 32 32 2 2 2 0 0 0 4
-            \end{verbatim}
-\item[5)] The Boussinesq version can be run with the standard
-\texttt{dns} executable by setting (in the
-input file) one passive scalar of type 4 and the 
-\texttt{bous} parameter.  But to
-enable the Boussinesq specific diagnostics, you need to use
-\texttt{dnsb}, which is compiled by \begin{verbatim} make dnsb
-\end{verbatim}
 
 \end{description}
 
-\subsection*{Time Scale}
-To be consistent with SM multiply the time in the output file by the
-time scale from SM, $t_{sw02} = (\epsilon_f (2 \pi k_f)^2)^{1/3}$
-
-\subsection*{Froude number}
+\subsubsection*{$\underline{\text{Froude number}}$}
 
 Modifications to the dns code to accomodate this is to include the
 addition of a parameter {\bf{bous}} which multiplies the vertical
@@ -414,7 +469,73 @@ Fr = \frac{(\epsilon_f k_f^2)^{1/3}}{\text{bous}}.
 Basically, $\text{bous}$ in the code is the is the same as $N$ in SW02 eq
 2.1-2.3.
 
-\subsection*{First test of stratification, $N\ne0, f=0$ - no rotation}
+
+
+\subsubsection*{$\underline{\text{Time Scale}}$}
+To be consistent with SM multiply the time in the output file by the
+time scale from SM, $t_{sw02} = (\epsilon_f (2 \pi k_f)^2)^{1/3}$
+
+
+\subsection{Test of rotation only, $\text{bous} = 0$ (no stratification)}
+
+Compare figure (\ref{fig:SW99Fig3}) and figure (r16ketime).
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=6.in]{SW99Fig3}
+\caption{From Smith and Waleffe 1999}
+\label{fig:SW99Fig3}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=6.in]{r16ketime}
+\caption{From sandia/lanl dns code for different kinds of hypeviscosity}
+\label{fig:r16ketime}
+\end{center}
+\end{figure}
+
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=6.in]{SW99Fig4}
+\caption{From Smith and Waleffe 1999}
+\label{fig:SW99Fig4}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=6.in]{SW99Fig10}
+\caption{From Smith and Waleffe 1999}
+\label{fig:SW99Fig10}
+\end{center}
+\end{figure}
+
+
+\subsection{Test of stratification only, $fcor=0$ (no rotation) }
+
+Compare figure (\ref{fig:SW02Fig2}) to figure (\ref{fig:t900})
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=6.in]{SW02Fig2}
+\caption{From Smith and Waleffe 2002}
+\label{fig:SW02Fig2}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=4.in]{t900}
+\caption{From the sandia/lanl dns code for 3 different types of hyperviscosity.}
+\label{fig:t900}
+\end{center}
+\end{figure}
+
+
+
+
 
 First test, $f=0, N\ne0$. Choose $bous=107.08$ with hyperviscosity. Then
 \begin{equation}
@@ -425,17 +546,34 @@ Forcing is:
 sto_high_24.
 \end{verbatim}
 A plot of the spectrum is in Figure \ref{fig:norot} and should be
-compared to SW02's Figure 2.  We're doing pretty well.
+compared to SW02's Figure 2.
 \begin{figure}
 \begin{center}
-\includegraphics[angle=-90,width=4in]{frp21}
+\includegraphics[angle=-90,width=6.in]{frp21}
 \caption{Spectrum from $200^3$ simulation of LANL/Sandia DNS code with
   no rotation and $Fr=.21$. This is Smith and Waleffe 2002 Figure 3.}
 \label{fig:norot}
 \end{center}
 \end{figure}
 
-\subsection*{Second test, $N\ne0, f\ne0$ - nontrivial rotation and stratification}
+\subsection{Test of nontrivial rotation and stratification $N\ne0, f\ne0$ - }
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=6.in]{SW02Fig4}
+\caption{From Smith and Waleffe 2002}
+\label{fig:SW02Fig4}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=-90,width=4.in]{SW02Fig5}
+\caption{From Smith and Waleffe 2002}
+\label{fig:SW02Fig5}
+\end{center}
+\end{figure}
+
 
 \begin{eqnarray}
 Fr &=& \frac{\left((.5)(2 \pi 24)^{2}\right)^{1/3}}{107.08}= .21 \\ 
