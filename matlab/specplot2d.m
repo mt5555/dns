@@ -27,12 +27,14 @@ while (1)
     break 
   end
   if (time<0 | time>1000) break; end;
+  numvar=fread(fid,1,'float64');
   numkh=fread(fid,1,'float64');
   numkz=fread(fid,1,'float64');
   spec2d=zeros([numkz,numkh]);  
 
   disp(sprintf('time=%f  kz=%f  kh=%f',time,numkz,numkh));
 
+  for ivar=1:numvar
   for kz=1:numkz
     [s,count] = fread(fid,numkh,'float64') ;
     if (count~=numkh)
@@ -41,6 +43,7 @@ while (1)
       size(s)
     end
     spec2d(kz,:) = s';
+  end
   end
 
  

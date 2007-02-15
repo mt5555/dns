@@ -287,21 +287,11 @@ do i=1,n_var
    q1(:,:,:,i)=Q(:,:,:,i)
 enddo
 
-
-! passive scalars:
-do n=np1,np2
-   call compute_spectrum_2d(q1(1,1,1,n),work1,work2,spec_r_2d(0,0,n),&
-       iwave_max,0)
+do i=1,n_var
+   call compute_spectrum_2d(q1(1,1,1,i),work1,work2,spec_r_2d(0,0,n),iwave_max,0)
 enddo
 
-
-do i=1,ndim
-   call fft3d(q1(1,1,1,i),work1)
-   call compute_spectrum_2d(q1(1,1,1,i),work1,work2,spec_r,iwave_max,1)
-   spec_r_2d(:,:,1)=spec_r_2d(:,:,1)+.5*spec_r
-enddo
-
-!time_old=time
+spec_r_2d=spec_r_2d/2
 
 
 
@@ -760,10 +750,13 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
+   x=n_var; call cwrite8(fid,x,1)  
    x=1+iwave_2d; call cwrite8(fid,x,1)  
    x=1+g_nz/2; call cwrite8(fid,x,1)
+   do i=1,n_var
    do k=0,g_nz/2
-      call cwrite8(fid,spec_r_2d(0,k,1),1+iwave_2d)
+      call cwrite8(fid,spec_r_2d(0,k,i),1+iwave_2d)
+   enddo
    enddo
    call cclose(fid,ierr)
 
