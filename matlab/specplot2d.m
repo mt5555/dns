@@ -1,10 +1,14 @@
 clear
-name = 'all'
-epsilon=.41;
-CK=1.5*epsilon^(2/3);
-namedir = '/home/wingate/data1/Rotation/r16c/';
+%name = 'all'
+%name = 'qg256hyper_all32'
+name = 'qg64hyper_all'
+%epsilon=.41;
+%CK=1.5*epsilon^(2/3);
+%namedir = '/home/wingate/data1/Rotation/r16c/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/';
+namedir = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
 
-asciprint = 1 % if == 1 print out the data to asci files
+asciprint = 0 % if == 1 print out the data to asci files
 
 fid=fopen([namedir,name,'.spec2d'],'r');
 if (fid<0) 
@@ -41,8 +45,9 @@ while (1)
 
  
   figure(1)
-  loglog53(numkh,spec2d(1,:)','',2.0,6)
-
+  for kz = 1:numkz
+  loglog53(numkh,spec2d(kz,:)','',2.0,6);hold on;
+  end  
   hold on;
   spec = sum(spec2d,1)/numkz;
   loglog53(numkh,spec','E0(kh) and E(kh)',2.0,6)
