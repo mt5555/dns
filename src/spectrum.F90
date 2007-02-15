@@ -1252,9 +1252,9 @@ do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
 
-   !jm=z_jmcord(j)
-   !im=z_imcord(i)
-   km=abs(z_kmcord(k))
+   !jm=jmcord(j)
+   !im=imcord(i)
+   km=abs(kmcord(k))
    
    rwave = imcord(i)**2 + jmcord(j)**2 
    iwave_2d = nint(sqrt(rwave))
