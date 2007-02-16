@@ -54,8 +54,8 @@ name = 'qg64hyper0000.0000';
 name = 'qg64hyper_all';
 namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
 
-name = 'qg256hyper_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/';
+name = 'qg256hyper0000.0000';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];

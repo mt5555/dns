@@ -1,12 +1,12 @@
 clear
 %name = 'all'
-%name = 'qg256hyper_all32'
-name = 'qg64hyper_all80'
+name = 'qg256hyper_all32'
+%name = 'qg64hyper_all80'
 %epsilon=.41;
 %CK=1.5*epsilon^(2/3);
 %namedir = '/home/wingate/data1/Rotation/r16c/';
-%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/';
-namedir = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
+namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
 
 asciprint = 0 % if == 1 print out the data to asci files
 
