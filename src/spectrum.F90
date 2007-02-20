@@ -277,7 +277,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 !local
-integer :: iwave_max,i,n
+integer :: iwave_max,i
 real*8 ::  spec_r(0:max(g_nx,g_ny),0:g_nz/2)
 
 iwave_max=max(g_nx,g_ny)
@@ -288,7 +288,7 @@ do i=1,n_var
 enddo
 
 do i=1,n_var
-   call compute_spectrum_2d(q1(1,1,1,i),work1,work2,spec_r_2d(0,0,n),iwave_max,0)
+   call compute_spectrum_2d(q1(1,1,1,i),work1,work2,spec_r_2d(0,0,i),iwave_max,0)
 enddo
 
 spec_r_2d=spec_r_2d/2
