@@ -30,7 +30,7 @@ while (1)
   numvar=fread(fid,1,'float64');
   numkh=fread(fid,1,'float64');
   numkz=fread(fid,1,'float64');
-  spec2d=zeros([numkz,numkh]);  
+  spec2d=zeros([ivar,numkz,numkh]);  
     
   
   disp(sprintf('time=%f  kz=%f  kh=%f',time,numkz,numkh));
@@ -52,9 +52,9 @@ while (1)
  
   figure(1)
   for ivar = 1:numvar
-  for kz = 1:numkz
-  loglog53(numkh,spec2d(ivar,kz,:)','',2.0,6);hold on;
-  end  
+    for kz = 1:numkz
+      loglog53(numkh,spec2d(ivar,kz,:)','',2.0,6);hold on;
+    end  
   end
   hold on;
   spec = sum(spec2d,1)/numkz;
