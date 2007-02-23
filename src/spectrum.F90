@@ -31,6 +31,7 @@ real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
+real*8,private ::  q2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  time_old=-1
 
 !helicity related spectra (sk)
@@ -219,6 +220,7 @@ q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
 
+call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,iwave_max,0)
 
 end subroutine
 
@@ -241,12 +243,9 @@ real*8 ::  spec_r(0:max(g_nx,g_ny),0:g_nz/2)
 iwave_max=max(g_nx,g_ny)
 spec_r_2d=0
 
-do i=1,n_var
-   q1(:,:,:,i)=Q(:,:,:,i)
-enddo
 
 do i=1,n_var
-   call compute_spectrum_2d(q1(1,1,1,i),work1,work2,spec_r_2d(0,0,i),iwave_max,0)
+   call compute_spectrum_2d(Q(1,1,1,i),work1,work2,spec_r_2d(0,0,i),iwave_max,0)
 enddo
 
 spec_r_2d=spec_r_2d/2
