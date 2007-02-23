@@ -211,8 +211,10 @@ q2spec_r_2d=0
 ! compute pv in work1, vorticity in q1
 call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
 
+call fft3d(work1,q1)
+
 call compute_spectrum(work1,q2,q3,q2spec_r,spec_r2,&
-     q2spec_x,q2spec_y,q2spec_z,iwave_max,0)
+     q2spec_x,q2spec_y,q2spec_z,iwave_max,1)
 
 !bw computing pv is complicated so set all those to zero for the moment
 q2spec_r=.5*q2spec_r
@@ -221,7 +223,7 @@ q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
 
-call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,iwave_max,0)
+call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,iwave_max,1)
 
 
 end subroutine
