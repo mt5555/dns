@@ -54,8 +54,8 @@ while (1)
   q2spec_z = fread(fid,numkz,'float64') ; 
   
   
-  for kx=1:numkx
-    [q2spec_2d,count] = fread(fid,numkh,'float64') ;
+  for kz=1:numkz
+    [q2spec_2d(kz,:),count] = fread(fid,numkh,'float64') ;
     if (count~=numkh)
       disp('Error: error reading file')
     end
