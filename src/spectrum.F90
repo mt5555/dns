@@ -183,7 +183,6 @@ real*8 pv2(nx,ny,nz)  ! used for potential enstrophy
 !local
 integer :: iwave_max,n,pv_type, i,j,k,iw
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 real*8 :: rwave,xfac
 !
 ! use the full pv
@@ -209,56 +208,15 @@ q2spec_z=0
 !bw
 ! compute pv in work1, vorticity in q1
 call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
-!bw
-!bw Compute the FFT of the pv
-!bw
-call fft3d(work1,work2)
-!
-! 
-!
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-    rwave = imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2
-    iw = nint(Lz*sqrt(rwave))
 
-    xfac = 8
-    if (kmcord(k)==0) xfac=xfac/2
-    if (jmcord(j)==0) xfac=xfac/2
-    if (imcord(i)==0) xfac=xfac/2
-    pv2energy=xfac*work1(i,j,k)*work1(i,j,k)
+call compute_spectrum(work1,q2,q3,q2spec_r,spec_r2,&
+     q2spec_x,q2spec_y,q2spec_z,iwave_max,0)
 
-    q2spec_r(iw)=q2spec_r(iw)+pv2energy
-!bw these need to accumulate the correct directional spectra.
-    q2spec_x(abs(imcord(i)))=q2spec_x(abs(imcord(i))) + pv2energy
-    q2spec_y(abs(jmcord(j)))=q2spec_y(abs(jmcord(j))) + pv2energy
-    q2spec_z(abs(kmcord(k)))=q2spec_z(abs(kmcord(k))) + pv2energy
-enddo
-enddo
-enddo
 !bw computing pv is complicated so set all those to zero for the moment
 q2spec_r=.5*q2spec_r
 q2spec_x=.5*q2spec_x
 q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
-
-time_old=time
-
-
-if (g_nz == 1)  then
-   iwave = min(g_nx/2,g_ny/2)
-else
-   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
-endif
-
-! for spherical spectra, for all waves outside sphere, 
-! sum into one wave number:
-! we only output wave numbers 0:iwave
-do i=iwave+2,iwave_max
-   q2spec_r(iwave+1)=q2spec_r(iwave+1)+q2spec_r(i)
-enddo
-iwave=iwave+1
-
 
 
 
