@@ -31,7 +31,7 @@ real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
-real*8,private ::  q2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
+real*8,private ::  q2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
 real*8,private ::  time_old=-1
 
 !helicity related spectra (sk)
@@ -47,7 +47,7 @@ real*8 ::  E33(0:max(g_nx,g_ny,g_nz))  ! E_33 component of spec tensor
 real*8 ::  II2sq(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
 real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
 real*8 ::  I2I3(0:max(g_nx,g_ny,g_nz))  ! I_2*I_3
-real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
+eal*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
 real*8 ::  par(0:max(g_nx,g_ny,g_nz))   ! abs(R\cross I)/(R^2+I^2)
 real*8 ::  cos_tta_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of cos_tta betn RR and II
 real*8 ::  cos_tta_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of cos_tta
@@ -197,6 +197,7 @@ q2spec_r=0
 q2spec_x=0
 q2spec_y=0
 q2spec_z=0
+q2spec_r_2d=0
 
 ! 
 !   pv =  (vorticity + f) dot grad rho
@@ -222,6 +223,7 @@ q2spec_z=.5*q2spec_z
 
 call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,iwave_max,0)
 
+
 end subroutine
 
 
@@ -238,7 +240,6 @@ real*8 :: time
 
 !local
 integer :: iwave_max,i
-real*8 ::  spec_r(0:max(g_nx,g_ny),0:g_nz/2)
 
 iwave_max=max(g_nx,g_ny)
 spec_r_2d=0
@@ -859,20 +860,21 @@ if (my_pe==io_pe) then
    endif
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,q2spec_r,1+iwave)
    x=1+g_nx/2; call cwrite8(fid,x,1)
-      call cwrite8(fid,q2spec_x,1+g_nx/2)
-   x=1+g_ny/2; call cwrite8(fid,x,1)
-      call cwrite8(fid,q2spec_y,1+g_ny/2)
-   x=1+g_nz/2; call cwrite8(fid,x,1)
-      call cwrite8(fid,q2spec_z,1+g_nz/2)
+   x=1+g_ny/2; call cwrite8(fid,x,1)	 
+   x=1+g_nz/2; call cwrite8(fid,x,1)	 
+   x=1+iwave_2d; call cwrite8(fid,x,1)	
+   call cwrite8(fid,q2spec_r,1+iwave)
+   call cwrite8(fid,q2spec_x,1+g_nx/2)
+   call cwrite8(fid,q2spec_y,1+g_ny/2)
+   call cwrite8(fid,q2spec_z,1+g_nz/2)
+   do k=0,g_nz/2
+      call cwrite8(fid,q2spec_r_2d(0,k),1+iwave_2d)
+   enddo
    call cclose(fid,ierr)
 
 endif
 end subroutine
-
-
-
 
 
 subroutine output_tran(time,Q,q1,q2,q3,work1,work2)

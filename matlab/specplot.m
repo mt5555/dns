@@ -22,6 +22,7 @@ CK_orig=1.613; movie_plot=0; endian='l';
 mu=1e-4;
 
 
+
 %name='decay2048-ave64.-new.0000.4026';
 %name='decay2048-ave32.-new.0000.4026';
 %namedir='/home/taylorm/rider/';
@@ -51,11 +52,25 @@ namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minus
 name = 'qg64hyper0000.0000';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/';
 
-name = 'qg64hyper_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
+%name = 'qg64hyper_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
+
+
+name = 'qg256hyper_all';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
+
 
 name = 'qg256hyper0000.0000';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
+
+%name = 'qg256hyper_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu2.5/';
+
+%name = 'qg256hyper0040.5903';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu15/';
+
+name = 'sc1024A';
+namedir = '/nh/xraid/skurien/dns_data/sc1024a/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -162,9 +177,10 @@ while (time>=.0 & time<=9000.6)
     %spherical wave number
     figure(1)
     subplot(1,1,1);
-    stitle=sprintf('Spectrum t=%8.4f',time);
-    loglog53(n_r-1,spec_r,stitle,CK);hold off;
-        
+    stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
+    
+%    loglog53(n_r-1,spec_r,stitle,CK);hold off;
+   loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',3); hold off;      
     
     %spec_r=spec_r./fac3;
     %loglog53(n_r-1,spec_r,stitle,CK); hold on;
@@ -172,9 +188,9 @@ while (time>=.0 & time<=9000.6)
 
     
     % longitudinal spectraum
-    figure(4);title('longitudinal 1D spectrum');
+%    figure(4);title('longitudinal 1D spectrum');
 %    subplot(2,1,1);
-    loglog53(n_x,spec_ux,' ',CK*18/55);     hold off;
+%    loglog53(n_x,spec_ux,' ',CK*18/55);     hold off;
 %    loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
 %    hold off;
@@ -182,13 +198,13 @@ while (time>=.0 & time<=9000.6)
 %    % transverse spectraum
 %    subplot(2,1,2);
 %    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
-    loglog53(n_x,spec_uz,' ',CK*18/55);     hold off;
+%   loglog53(n_x,spec_uz,' ',CK*18/55);     hold off;
 %    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
-    loglog53(n_y,spec_vz,' ',CK*18/55);     hold off;
+%    loglog53(n_y,spec_vz,' ',CK*18/55);     hold off;
 %    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
 %    hold off;
-     title('longitudinal 1D spectra of kinetic energy');
+%     title('longitudinal 1D spectra of kinetic energy');
 
   end
   end
@@ -327,12 +343,13 @@ while (time>=.0 & time<=9000.6)
      disp(sprintf('t=%f  <c> Gc  %f  %f  %f  %f ',time,sqrt(pspec_r(1,np)),Gc))
 
 
-  end
-
-  % plot the total energy spectrum
+       % plot the total energy spectrum
   figure(6);
   ts=sprintf('total energy t=%f',time); 
   loglog53(np_r,spec_r+pspec_r,ts,1.0,3);hold off;
+  end
+
+
   
   
   % now read the cospectrum:
@@ -406,11 +423,11 @@ while (time>=.0 & time<=9000.6)
       print ('-depsc',sprintf('pspec%.2f.eps',time))
     end       
     disp('pause')
-    pause
+%    pause
   end
   end
   disp('pause')
-  pause
+%  pause
 
   if (fidp>-1)   
     [L11c(1),L11,ke,ke_diss,c2];
