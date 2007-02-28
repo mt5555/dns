@@ -11,24 +11,30 @@ ext='.bisostr';
 eta = 1/(nx*delx_over_eta);
 
 %name = '~/projects/pv/data_analysis/lowforc/qg';
-name = '~/projects/pv/data_analysis/lowforc/low4/qg64/qg';
-times=[200:2:492];
-nx=64;
+%name = '~/projects/pv/data_analysis/lowforc/low4/qg64/qg';
+%times=[200:2:492];
+%nx=64;
 %name = '~/data/qg';
-name = '~/projects/pv/data_analysis/lowforc/low4/qg256/qg';
-pname = 'qg';
+%name = '~/projects/pv/data_analysis/lowforc/low4/qg256/qg';
+%pname = 'qg';
 
-times=[30:2:102];
+%times=[30:2:102];
 
-name = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg64';
-pname='qg64';
-times=[1700:5:1795];
-nx=64;
+%name = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg64';
+%pname='qg64';
+%times=[1700:5:1795];
+%nx=64;
+
+name = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/'
+pname='qg256hyper'
+times=[0:.1:3.3];
+nx=256;
+
 
 %nx = 256;
 
 %check this subroutine, for now set averages to 1
-[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
+%[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
 
 
 
@@ -82,10 +88,10 @@ end
 times_plot=[];
 for t=times
   tstr=sprintf('%10.4f',t+10000);
-  fname=[name,tstr(2:10)];
-  disp([fname,ext]);
-ppname = [pname,tstr(2:10),ext];
-  fid=fopen([fname,ext]);
+  fname=[name,pname,tstr(2:10)];
+  disp([fname,ext])
+ppname = [pname,tstr(2:10),ext]
+  fid=fopen([fname,ext])
   if (fid<0) ;
     disp('error opening file, skipping...');
   else

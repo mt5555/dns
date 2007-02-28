@@ -16,38 +16,13 @@ f_k=0;
 fid2=-1;
 
 
-%fid=fopen('/home/mataylo/codes/dns_data/decay/decay2048.scalars','r','l'); 
-%nx=2048;
-
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-%fid=endianopen('/home/mataylo/data/dns/sc1024A/sc1024A.scalars','r');
-%nx=1024;
-%fid=endianopen('/home/mataylo/data/dns/sc2048A/sc2048A.scalars','r');
-%nx=2048;
-%fid=endianopen('/home/mt/sc2048decay0001.0000.scalars','r');
-%nx=2048;
 
 %fid=endianopen('/home/mataylo/tmp/qg64hyper0000.0000.scalars','r');
 %fid=endianopen('/home/mataylo/tmp/new/qg640000.0000.scalars','r');
 %nx=64;fcor=100; f_k=16;
-
-%fid=endianopen('/home/wingate/Projects/KH/Boussinesq/n21/all.scalars','r');
-%f_k= 24; fcor=0;
-
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/qg640000.0000.scalars','r');
-%ne = 64; f_k = 16; fcor = 100;
-
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minusN/qg640000.0000.scalars','r');
-%nx = 64;f_k = 16; fcor = 100;
-
-
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg648810.0000.scalars','r');
-%nx=64;f_k = 2; fcor=100;
-
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/reg_nu/qg642620.0000.scalars','r');
-%nx=64;f_k = 2; fcor=100;
 
 fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/forcefix/qg64hyper0000.0000.scalars','r');
 nx=64;f_k = 2; fcor=100;
@@ -55,16 +30,13 @@ nx=64;f_k = 2; fcor=100;
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper0000.0000.scalars','r');
 %nx=64;f_k = 2; fcor=100;
 
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/qg640000.0000.scalars','r');
-%nx=64;f_k = 16; fcor=100;
-
 %fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
-%                  'low4/qg64/sto_high_4/hyper_nu/bous500/qg64hyper_all80.scalars'],'r')
+%                  'low4/qg64/sto_high_4/hyper_nu/bous500/qg64hyper_all.scalars'],'r')
 %nx=64;f_k = 4; fcor=500;
 
-%fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
-%                  'low4/qg256/bous500/hyper_nu2.5/qg256hyper_all.scalars'],'r');
-%nx=256;f_k = 4; fcor=500;
+fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+                  'low4/qg256/bous500/hyper_nu2.5/qg256hyper_all.scalars'],'r');
+nx=256;f_k = 4; fcor=500;
 
 %fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
 %                  'low4/qg256/bous500/hyper_nu15/qg256hyper0040.5903.scalars'],'r')
@@ -79,13 +51,14 @@ nx=256;f_k = 4; fcor=1000;
 %nx=256;f_k = 4; fcor=1000;
 
 
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg640000.0000.scalars','r');
-%nx=64;f_k = 16; fcor=200;
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n64/n64_f2000n5_all.scalars','r');
+%nx=64;f_k = 4; fcor=2000; bous=5;
 
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/minusN/qg640000.0000.scalars','r');
-%nx=64;f_k = 16; fcor=100;
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars','r');
+%nx=256;f_k = 4; fcor=2000; bous=5;
 
-
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/n256_f5n2000_all.scalars','r');
+%nx=256;f_k = 4; fcor=5; bous=2000;
 
 nscalars=0;
 nscalars_e=0;
@@ -409,7 +382,9 @@ ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
 ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
 disp(sprintf('epsilon_f (averaged over last half of data) = %f ',ke_diss_f));
 Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * fcor);
+Fr = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * bous);
 disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
+disp(sprintf('Fr computed from epsilon_f = %f ',Fr));
 
 
 

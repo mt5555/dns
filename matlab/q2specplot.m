@@ -7,14 +7,18 @@
 clear
 %name = 'all'
 %name = 'qg256hyper_all32'
-%name = 'qg64hyper_all80'
-name = 'qg256hyper0000.0000'
+name = 'qg64hyper_all'
+name = 'n64_f2000n5_all'
+name = 'n256_f5n2000_all'
+
+%name = 'qg256hyper0000.0000'
 %epsilon=.41;
 %CK=1.5*epsilon^(2/3);
 %namedir = '/home/wingate/data1/Rotation/r16c/';
-namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
-%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
 
+namedir = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
+namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n64/';
+namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
 
 
 fid=fopen([namedir,name,'.pv2spec'],'r');
@@ -64,22 +68,24 @@ while (1)
   % kz-averaged 2d spectrum (becomes 1-dimensional)
   q2spec_2d_ave = sum(q2spec_2d,1)/numkz;
 
- 
+  if (time < 5.00)
   %plot the shell-averaged and plane-averaged spectra
-  figure(1)
-  loglog53(numkr,q2spec_r','',2.0,6);hold on;
-  pause
-  loglog53(numkx,q2spec_x','',2.0,6);hold on;
-  pause
-  loglog53(numky,q2spec_y','',2.0,6);hold on;
-  pause
-  loglog53(numkz,q2spec_z','',2.0,6);hold on;
+  figure(1);clf
+  loglog(1:numkr,q2spec_r,'b');hold on;
+%  pause
+  loglog(1:numkx,q2spec_x,'r');
+%  pause
+  loglog(1:numky,q2spec_y,'k');
+%  pause
+  loglog(1:numkz,q2spec_z,'m');
+  title('blue: q2_r, red: q2_x, black: q2_y, magenta = q2_z');	       
   
   %plot the kz_averaged annulus spectrum
   figure(2)
-  loglog53(numkh,q2spec_2d_ave','',2.0,6);hold on;
-  
-  pause
+  loglog(1:numkh,q2spec_2d_ave','k');
+  title('Q(kh), horizontal annulus-averaged potential enstrophy spectrum');
+  end
+
 end
 
 

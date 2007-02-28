@@ -12,16 +12,7 @@ endian = 'l';  % default endian-ness of spec file
 CK_orig=1.0;
 decay_scale=0;   % special scaling for 2048^3 decaying run
 tsave=[];
-
-
-
-
-name='qg64_sto16_all';
-namedir='/home/mt/Desktop/';
-CK_orig=1.613; movie_plot=0; endian='l';
-mu=1e-4;
-
-
+mu = 1;
 
 %name='decay2048-ave64.-new.0000.4026';
 %name='decay2048-ave32.-new.0000.4026';
@@ -36,41 +27,34 @@ mu=1e-4;
 %  tsave=[0 .41 1.0  1.5  2.0  2.5  3.0 3.5 ];
 %  tsave=[0 .41 .7 1.0  1.3  1.6 ];
 
-name = 'qg640000.0000';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/testN/minusN/';
-
-%name = 'qg64_sto16_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/';
-
-%name = 'qg640000.0000';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/';
-
-%name = 'qg640000.0000';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/minusN/';
-
-name = 'qg64hyper0000.0000';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/';
 
 %name = 'qg64hyper_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
 
 
-name = 'qg256hyper_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
+%name = 'qg256hyper_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
 
 
-name = 'qg256hyper0000.0000';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
+%name = 'qg256hyper0000.0000';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
 
 %name = 'qg256hyper_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu2.5/';
 
-%name = 'qg256hyper0040.5903';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu15/';
+name = 'qg256hyper_all';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/';
 
-name = 'sc1024A';
-namedir = '/nh/xraid/skurien/dns_data/sc1024a/';
+%name = 'sc1024A';
+%namedir = '/nh/xraid/skurien/dns_data/sc1024a/';
+
+%name = 'n256_f2000n5_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/';
+
+%name = 'n256_f5n2000_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
+
+
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -179,8 +163,8 @@ while (time>=.0 & time<=9000.6)
     subplot(1,1,1);
     stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
     
-%    loglog53(n_r-1,spec_r,stitle,CK);hold off;
-   loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',3); hold off;      
+    loglog53(n_r-1,spec_r,stitle,CK);hold off;
+%   loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',3); hold off;      
     
     %spec_r=spec_r./fac3;
     %loglog53(n_r-1,spec_r,stitle,CK); hold on;
@@ -307,6 +291,7 @@ while (time>=.0 & time<=9000.6)
      axis([1 100 1e-6 1]);
 
      figure(9);hold off
+     loglog53(np_r,pspec_r,ts,1.0,3); hold on;
      np_x=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_x(:,np)=fread(fidp,np_x,'float64');
@@ -423,11 +408,11 @@ while (time>=.0 & time<=9000.6)
       print ('-depsc',sprintf('pspec%.2f.eps',time))
     end       
     disp('pause')
-%    pause
+    pause
   end
   end
   disp('pause')
-%  pause
+  pause
 
   if (fidp>-1)   
     [L11c(1),L11,ke,ke_diss,c2];

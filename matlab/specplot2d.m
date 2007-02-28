@@ -1,14 +1,17 @@
 clear
 %name = 'all'
-%name = 'qg256hyper_all32'
-%name = 'qg64hyper_all80'
-name = 'qg256hyper0000.0000'
+name = 'qg256hyper_all'
+%name = 'qg64hyper_all'
+%name = 'n64_f2000n5_all'
+%name = 'n256_f5n2000_all'
 %epsilon=.41;
 %CK=1.5*epsilon^(2/3);
 %namedir = '/home/wingate/data1/Rotation/r16c/';
-namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
-
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n64/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
+namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/';
 asciprint = 0 % if == 1 print out the data to asci files
 
 fid=fopen([namedir,name,'.spec2d'],'r');
