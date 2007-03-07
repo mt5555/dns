@@ -47,7 +47,7 @@ real*8 ::  E33(0:max(g_nx,g_ny,g_nz))  ! E_33 component of spec tensor
 real*8 ::  II2sq(0:max(g_nx,g_ny,g_nz))  ! I_2^2 square of II component along RR
 real*8 ::  RRsq(0:max(g_nx,g_ny,g_nz))  ! RR^2 square of real part only
 real*8 ::  I2I3(0:max(g_nx,g_ny,g_nz))  ! I_2*I_3
-eal*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
+real*8 ::  R2I3(0:max(g_nx,g_ny,g_nz))  ! mod_rr*I_3 
 real*8 ::  par(0:max(g_nx,g_ny,g_nz))   ! abs(R\cross I)/(R^2+I^2)
 real*8 ::  cos_tta_spec_p(0:max(g_nx,g_ny,g_nz)) !pos spec of cos_tta betn RR and II
 real*8 ::  cos_tta_spec_n(0:max(g_nx,g_ny,g_nz)) !neg spec of cos_tta

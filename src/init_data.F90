@@ -399,7 +399,7 @@ real*8 :: ener
 CPOINTER :: null
 character(len=80) ::  message
 
-write(message,'(a,i3,a)') "Initializing double delta passive scalars n=",np," ..."
+write(message,'(a,i3,a)') "Initializing boussinesq passive scalars n=",np," ..."
 call print_message(message)
 
 
