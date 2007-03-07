@@ -379,6 +379,44 @@ deallocate(enerb)
 end subroutine
 
 
+subroutine passive_bous_init(Q,work1,work2,np)
+!
+! low wave number, quasi isotropic initial condition
+!
+use params
+use transpose
+implicit none
+integer :: np
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+real*8 :: ke2,ke,ke_thresh,check
+integer :: i,j,k,n,ierr,NUMBANDS
+real*8,allocatable :: enerb_target(:)
+real*8,allocatable :: enerb(:)
+real*8 :: ener
+CPOINTER :: null
+character(len=80) ::  message
+
+write(message,'(a,i3,a)') "Initializing double delta passive scalars n=",np," ..."
+call print_message(message)
+
+
+NUMBANDS=5
+allocate(enerb_target(NUMBANDS))
+allocate(enerb(NUMBANDS))
+enerb_target(1:NUMBANDS)=1.0
+
+
+call input1(Q(1,1,1,np),work1,work2,null,io_pe,.true.,-1)  
+call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1)
+
+deallocate(enerb_target)
+deallocate(enerb)
+end subroutine
+
+
 
 
 
