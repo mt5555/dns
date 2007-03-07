@@ -29,12 +29,19 @@ mu = 1;
 
 
 %name = 'qg64hyper_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/';
+
+%name = 'qg64hyper_all';
+%namedir = ['/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/' ...
+%           'qg/qg64/sto_high_4/hyper_nu/bous500/'];
+
+%name = 'qg64hyper_all';
+%namedir = ['/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/' ...
+%           'qg/qg64/sto_high_4/hyper_nu/bous1000/'];
 
 
 %name = 'qg256hyper_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
-
 
 %name = 'qg256hyper0000.0000';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
@@ -43,19 +50,22 @@ mu = 1;
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu2.5/';
 
 name = 'qg256hyper_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
 
 %name = 'sc1024A';
 %namedir = '/nh/xraid/skurien/dns_data/sc1024a/';
 
 %name = 'n256_f2000n5_all';
+%name = 'n256_f1000n5_all';
+%name = 'n256high_f1000n5_all';
+%name = 'n256high_f2000n5_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/';
 
-%name = 'n256_f5n2000_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
+name = 'n256_f5n2000_all';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
 
 
-
+spec_r_ave = zeros(514,1);
 spec_r_save=[];
 spec_r_save_fac3=[];
 
@@ -81,12 +91,14 @@ end
 
 CK=CK_orig;
 j=0;
+count = 0
 while (time>=.0 & time<=9000.6)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
-  n_r
-
+  time
+  
+%  if (time>1.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 
@@ -164,7 +176,9 @@ while (time>=.0 & time<=9000.6)
     stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
     
     loglog53(n_r-1,spec_r,stitle,CK);hold off;
-%   loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',3); hold off;      
+    
+%    loglog((0:n_r-1),spec_r','b', 'linewidth',2); hold off; 
+%    loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
     
     %spec_r=spec_r./fac3;
     %loglog53(n_r-1,spec_r,stitle,CK); hold on;
@@ -220,7 +234,7 @@ while (time>=.0 & time<=9000.6)
     spec_tot=fread(fidt,n_r,'float64');
     spec_f=0*spec_tot;    
     spec_model=0*spec_tot;
-
+    
     time_terms=fread(fidt,1,'float64');  
     n_r=fread(fidt,1,'float64');
     spec_diff=fread(fidt,n_r,'float64');
@@ -287,32 +301,32 @@ while (time>=.0 & time<=9000.6)
         L11c(np) = ((3*pi)/(4*c2(np))) * sum(pspec_r(2:np_r,np)'./ (knum(2:np_r)*2*pi))  ;
      end
      ts=sprintf('shell averaged passive scalar spectrum t=%f',time);
-     loglog53(np_r,pspec_r,ts,1.0,3); hold off;
+     loglog53(np_r,pspec_r,ts,1e-5,3); hold off;
      axis([1 100 1e-6 1]);
 
      figure(9);hold off
-     loglog53(np_r,pspec_r,ts,1.0,3); hold on;
+     loglog53(np_r,pspec_r,ts,1e-5,3); hold on;
      np_x=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_x(:,np)=fread(fidp,np_x,'float64');
      end
      ts=sprintf('plane averaged  passive scalars t=%f',time);
-     loglog53(np_x, pspec_x, ts, 1.0,3);hold on;    
+     loglog53(np_x, pspec_x, ts, 1e-5,3);hold on;    
      
      np_y=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_y=fread(fidp,np_y,'float64');
      end
      ts=sprintf('plane averaged passive scalars t=%f',time);
-     loglog53(np_y, pspec_y, ts, 1.0,3);hold on;
+     loglog53(np_y, pspec_y, ts, 1e-5,3);hold on;
      
      np_z=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_z=fread(fidp,np_z,'float64');
      end
      ts=sprintf('plane averaged passive scalars t=%f',time);
-     loglog53(np_z, pspec_z, ts, 1.0,3);hold off;
-     axis([1 100  1e-6 1]);
+     loglog53(np_z, pspec_z, ts, 1e-5,3);hold off;
+%     axis([1 100  1e-6 1]);
 
      np=1;
      % 10  .508
@@ -430,6 +444,12 @@ while (time>=.0 & time<=9000.6)
     time_t=fread(fidt,1,'float64');
   end
 end
+
+%time averaged spectra
+%spec_r_ave = spec_r_ave/count;
+%figure(1)
+%loglog((0:n_r-1),spec_r_ave','b', 'linewidth',2); hold off; 
+%    loglog((0:n_r-1),spec_r_ave.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
 
 fclose(fid);
 if (fidt>0) fclose(fidt); end;

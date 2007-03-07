@@ -19,20 +19,17 @@ fid2=-1;
 %fid=endianopen('/nh/nest/u/skurien/projects/helicity_data/helical_forced/hel512_hpi2/diag/skhel512_hpi2.scalars','r');
 %nx=512;
 
-
-%fid=endianopen('/home/mataylo/tmp/qg64hyper0000.0000.scalars','r');
-%fid=endianopen('/home/mataylo/tmp/new/qg640000.0000.scalars','r');
-%nx=64;fcor=100; f_k=16;
-
-fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/forcefix/qg64hyper0000.0000.scalars','r');
-nx=64;f_k = 2; fcor=100;
-
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper0000.0000.scalars','r');
-%nx=64;f_k = 2; fcor=100;
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/qg64hyper_all.scalars','r');
+%nx=64;f_k = 4; fcor=100;
 
 %fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
-%                  'low4/qg64/sto_high_4/hyper_nu/bous500/qg64hyper_all.scalars'],'r')
+%                  'low4/qg/qg64/sto_high_4/hyper_nu/bous500/qg64hyper_all.scalars'],'r')
 %nx=64;f_k = 4; fcor=500;
+
+fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+                  'low4/qg/qg64/sto_high_4/hyper_nu/bous1000/qg64hyper_all.scalars'],'r');
+nx=64;f_k = 4; fcor=1000;
+
 
 fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
                   'low4/qg256/bous500/hyper_nu2.5/qg256hyper_all.scalars'],'r');
@@ -42,23 +39,32 @@ nx=256;f_k = 4; fcor=500;
 %                  'low4/qg256/bous500/hyper_nu15/qg256hyper0040.5903.scalars'],'r')
 %nx=256;f_k = 4; fcor=500;
 
-fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
-                  'low4/qg256/bous1000/hyper_nu2.5/qg256hyper0000.0000.scalars'],'r')
-nx=256;f_k = 4; fcor=1000;
+%fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+%                  'low4/qg256/bous1000/hyper_nu2.5/qg256hyper_all.scalars'],'r')
+%nx=256;f_k = 4; fcor=1000;
 
 %fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
-%                  'low4/qg256/bous1000/hyper_nu15/qg256hyper0000.0000.scalars'],'r')
+%                  'low4/qg256/bous2000/qg256hyper_all.scalars'],'r')
 %nx=256;f_k = 4; fcor=1000;
+
+fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+                  'low4/qg/qg256/bous1000/qg256hyper_all.scalars'],'r')
+nx=256;f_k = 4; fcor=1000;
 
 
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n64/n64_f2000n5_all.scalars','r');
 %nx=64;f_k = 4; fcor=2000; bous=5;
 
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars','r');
+%id = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256high_f2000n5_all.scalars','r');
 %nx=256;f_k = 4; fcor=2000; bous=5;
 
-%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/n256_f5n2000_all.scalars','r');
-%nx=256;f_k = 4; fcor=5; bous=2000;
+%fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+%                  'low4/Ro0Fr1/n256/n256high_f1000n5_all.scalars'],'r');
+%nx=256;f_k = 4; fcor=1000; bous=5;
+
+
+%fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/n256high_f5n1000_all.scalars','r');
+%nx=256;f_k = 4; fcor=5; bous=1000;
 
 nscalars=0;
 nscalars_e=0;

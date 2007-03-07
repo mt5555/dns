@@ -13,22 +13,27 @@ f_k=0;
 
 fid2=-1;
 
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso12/qg64_low4_all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/noforc/qg64all_noforc.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/qg256_all8.0.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/qg256_all100.0.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/reg_nu/qg64_iso23w_all.scalars-bous','r');
 
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper_all15.scalars-bous','r');
-fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_4/hyper_nu/bous500/qg64hyper_all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/qg64hyper_all.scalars-bous','r');
+fid=endianopen(['~/projects/pv/data_analysis/lowforc/low4/qg/qg64/' ...
+                'sto_high_4/hyper_nu/bous500/qg64hyper_all.scalars-bous'],'r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous1000/qg64hyper_all.scalars-bous','r');
+
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg64_iso12w_all.scalars-bous','r');
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/qg64_sto16_all.scalars-bous','r');
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg64_200all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/qg256hyper_all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/qg256hyper_all13.scalars-bous','r');
+fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/qg256hyper_all.scalars-bous','r');
+%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/qg256hyper_all.scalars-bous','r');
+%fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars-bous','r');
+%fid = endianopen(['~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
+%                  'n256/n256_f1000n5_all.scalars-bous'],'r');
+%fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/n256_f5n2000_all.scalars-bous','r');
+%fid = endianopen(['~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/' ...
+%                  'n256/n256_f5n1000_all.scalars-bous'],'r');
 
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso23w/hyper_nu/qg64hyper_all15.scalars-bous','r');
-fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars-bous','r');
+fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256high_f2000n5_all.scalars-bous','r');
+%fid = endianopen(['~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
+                  'n256/n256high_f1000n5_all.scalars-bous'],'r');
 
 
 nscalars=0;
@@ -56,9 +61,15 @@ fclose(fid);
 
 ke=ints(1,:);
 pe=ints(2,:);
+ke_diss = ints(3,:);
+pe_diss = ints(4,:);
 pv=ints(5,:);
 potens=ints(7,:);
 potens_diss=ints(8,:);
+potens_qg=ints(10,:);
+potens_ro0fr1 = ints(12,:);
+potens_ro1fr0 = ints(14,:);
+
 
 tote = ke + pe;
 
@@ -82,11 +93,13 @@ title('PV');
 hold off
 
 figure(3)
-clf
-hold on
+%clf
 plot(time,potens,'g');hold on;
-title('Potential enstrophy');
-hold off
+plot(time,potens_qg,'b');
+plot(time,potens_ro0fr1,'r');
+plot(time,potens_ro1fr0,'k');
+title('Potential enstrophy: (green: Total); (blue: QG); (red: Ro->0,Fr1); (black: Ro1, Fr->0)');
+
 
 figure(4)
 clf
