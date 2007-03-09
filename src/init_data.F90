@@ -174,7 +174,9 @@ do n=np1,np2
          call passive_KE_init(Q,work1,work2,n,ke_percent)
       endif
       if (passive_type(n)==4) then
-         Q(:,:,:,n)=0
+!sk test passive_bous_init         
+	Q(:,:,:,n)=0
+!	call passive_bous_init(Q,work1,work2,n)
       endif
 
 
