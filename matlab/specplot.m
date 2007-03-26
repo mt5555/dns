@@ -49,8 +49,12 @@ mu = 1;
 %name = 'qg256hyper_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu2.5/';
 
+
 name = 'qg256hyper_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
+
 
 %name = 'sc1024A';
 %namedir = '/nh/xraid/skurien/dns_data/sc1024a/';
@@ -61,8 +65,12 @@ namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous100
 %name = 'n256high_f2000n5_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/';
 
-name = 'n256_f5n2000_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
+%name = 'n256_f5n1000_all';
+%name = 'n256_f5n2000_all';
+%name = 'n256high_f5n1000_all';
+%name = 'n256high_f5n2000_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
+
 
 
 spec_r_ave = zeros(514,1);
@@ -98,7 +106,7 @@ while (time>=.0 & time<=9000.6)
   spec_r=fread(fid,n_r,'float64');
   time
   
-%  if (time>1.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
+  if (time>1.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 
@@ -301,31 +309,31 @@ while (time>=.0 & time<=9000.6)
         L11c(np) = ((3*pi)/(4*c2(np))) * sum(pspec_r(2:np_r,np)'./ (knum(2:np_r)*2*pi))  ;
      end
      ts=sprintf('shell averaged passive scalar spectrum t=%f',time);
-     loglog53(np_r,pspec_r,ts,1e-5,3); hold off;
+     loglog53(np_r,pspec_r,ts,1.0,3); hold off;
      axis([1 100 1e-6 1]);
 
      figure(9);hold off
-     loglog53(np_r,pspec_r,ts,1e-5,3); hold on;
+     loglog53(np_r,pspec_r,ts,1.0,6); hold on;
      np_x=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_x(:,np)=fread(fidp,np_x,'float64');
      end
      ts=sprintf('plane averaged  passive scalars t=%f',time);
-     loglog53(np_x, pspec_x, ts, 1e-5,3);hold on;    
+     loglog53(np_x, pspec_x, ts, 1.0,6);hold on;    
      
      np_y=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_y=fread(fidp,np_y,'float64');
      end
      ts=sprintf('plane averaged passive scalars t=%f',time);
-     loglog53(np_y, pspec_y, ts, 1e-5,3);hold on;
+     loglog53(np_y, pspec_y, ts, 1.0,6);hold on;
      
      np_z=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_z=fread(fidp,np_z,'float64');
      end
      ts=sprintf('plane averaged passive scalars t=%f',time);
-     loglog53(np_z, pspec_z, ts, 1e-5,3);hold off;
+     loglog53(np_z, pspec_z, ts, 1.0,6);hold off;
 %     axis([1 100  1e-6 1]);
 
      np=1;
@@ -345,7 +353,7 @@ while (time>=.0 & time<=9000.6)
        % plot the total energy spectrum
   figure(6);
   ts=sprintf('total energy t=%f',time); 
-  loglog53(np_r,spec_r+pspec_r,ts,1.0,3);hold off;
+  loglog53(np_r,spec_r+pspec_r,ts,1.0,6);hold off;
   end
 
 
@@ -421,12 +429,12 @@ while (time>=.0 & time<=9000.6)
       figure(5)
       print ('-depsc',sprintf('pspec%.2f.eps',time))
     end       
-    disp('pause')
-    pause
+%    disp('pause')
+%    pause
   end
   end
-  disp('pause')
-  pause
+%  disp('pause')
+% pause
 
   if (fidp>-1)   
     [L11c(1),L11,ke,ke_diss,c2];
@@ -446,9 +454,9 @@ while (time>=.0 & time<=9000.6)
 end
 
 %time averaged spectra
-%spec_r_ave = spec_r_ave/count;
-%figure(1)
-%loglog((0:n_r-1),spec_r_ave','b', 'linewidth',2); hold off; 
+spec_r_ave = spec_r_ave/count;
+figure(1)
+loglog((0:n_r-1),spec_r_ave','b', 'linewidth',2); hold off; 
 %    loglog((0:n_r-1),spec_r_ave.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
 
 fclose(fid);

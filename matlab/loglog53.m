@@ -74,7 +74,7 @@ if (option==6)
    x_ck=10:100;      % dont plot 5/3 line
    scalep = 0;
    plaw=-3;
-   ax=[1,1e2,1e-6,1e-1];
+   ax=[1,1e2,1e-10,1e-1];
 end
 
 

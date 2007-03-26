@@ -1,25 +1,30 @@
 clear
 %name = 'all'
-name = 'qg256hyper_all';
+%name = 'qg256hyper_all';
 %name = 'qg64hyper_all';
-%name = 'n64_f2000n5_all';
-%name = 'n256_f5n2000_all';
+%name = 'n256_f1000n5_all';
+%name = 'n256_f2000n5_all';
 %name = 'n256_f5n1000_all';
+name = 'n256_f5n2000_all';
 %name = 'n256high_f2000n5_all';
-%name = 'n256high_f2000n5_all'
+%name = 'n256high_f1000n5_all'
+%name = 'n256high_f5n2000_all';
+%name = 'n256high_f5n1000_all'
 
 epsilon=.41;
 %CK=1.5*epsilon^(2/3);
 %namedir = '/home/wingate/data1/Rotation/r16c/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
-namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/';
 %namedir = ['~/projects/pv/data_analysis/lowforc/low4/qg/qg64/' ...
 %           'sto_high_4/hyper_nu/bous500/'];
 %namedir = ['~/projects/pv/data_analysis/lowforc/low4/qg/qg64/' ...
 %           'sto_high_4/hyper_nu/bous1000/'];
-namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/';
-%namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
-namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/';
+namedir = '~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
+%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -84,35 +89,41 @@ while (1)
   specwz = sum(spec2d_w,2)/numkh;
   spectz = sum(spec2d_t,2)/numkh;
 
+if(0)
   %plot E_h(0,kh)
   figure(1);hold off;
-  loglog53(numkh,spec2d_u(1,:)'+spec2d_v(1,:)','',2.0,6);hold on;
-  loglog53(numkh,spec2d_u(10,:)'+spec2d_v(10,:)','',2.0,6);hold on;
-  loglog53(numkh,spec2d_u(80,:)'+spec2d_v(80,:)','E_h((0, 10, 100),kh)',2.0,6);hold on;
-
+  loglog53(numkh,spec2d_u(1,:)'+spec2d_v(1,:)','',2.0,6);hold on;pause
+  loglog53(numkh,spec2d_u(10,:)'+spec2d_v(11,:)','',2.0,6);hold on;pause
+  loglog53(numkh,spec2d_u(10,:)'+spec2d_v(21,:)','',2.0,6);hold on;pause
+  loglog53(numkh,spec2d_u(10,:)'+spec2d_v(31,:)','',2.0,6);hold on;pause
+  loglog53(numkh,spec2d_u(50,:)'+spec2d_v(41,:)','E_h((0, 10, 20, 30, 40),kh)',2.0,6);hold on;
 
   %plot P(kz,0)
   figure(2);hold off;
-  loglog53(numkz,spec2d_t(:,1),'',2.0,6);hold on;
-  loglog53(numkz,spec2d_t(:,10),'',2.0,6);hold on;
-  loglog53(numkz,spec2d_t(:,100),'P(kz,(0,10,100))',2.0,6);hold on;
+  loglog53(numkz,spec2d_t(:,1),'',2.0,6);hold on;pause
+  loglog53(numkz,spec2d_t(:,11),'',2.0,6);hold on;pause
+  loglog53(numkz,spec2d_t(:,21),'',2.0,6);hold on;pause
+  loglog53(numkz,spec2d_t(:,31),'',2.0,6);hold on;pause
+  loglog53(numkz,spec2d_t(:,41),'P(kz,(0,10,20,30,40,50))',2.0,6);hold on;
+end
 
+if (1)
   %plot the kz-averaged spectra
   figure(3)
   loglog53(numkh,specu'+specv','E_h(kh)',2.0,6);%hold on;
-  figure(4)
-  loglog53(numkh,specw','E_z(kh)',2.0,6);%hold on;
-  figure(5)
-  loglog53(numkh,spect','P(kh)',2.0,6);%hold on;
+%  figure(4)
+%  loglog53(numkh,specw','E_z(kh)',2.0,6);%hold on;
+%  figure(5)
+%  loglog53(numkh,spect','P(kh)',2.0,6);%hold on;
 
   %plot the kh-averaged spectra
-  figure(6)
-  loglog53(numkz,specuz+specvz,'E_h(kz)',2.0,6);%hold on;
-  figure(7)
-  loglog53(numkz,specwz,'E_z(kz)',2.0,6);%hold on;
+%  figure(6)
+%  loglog53(numkz,specuz+specvz,'E_h(kz)',2.0,6);%hold on;
+%  figure(7)
+%  loglog53(numkz,specwz,'E_z(kz)',2.0,6);%hold on;
   figure(8)
   loglog53(numkz,spectz,'P(kz)',2.0,6);%hold on;
-
+end
   
   if (asciprint == 1)
     tstamp=10000+time;
