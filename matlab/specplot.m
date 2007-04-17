@@ -51,9 +51,15 @@ mu = 1;
 
 
 name = 'qg256hyper_all';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
+namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
+
+%name = 'qg512hyper_all';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous500/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
 
 
 %name = 'sc1024A';
@@ -100,13 +106,13 @@ end
 CK=CK_orig;
 j=0;
 count = 0
-while (time>=.0 & time<=9000.6)
+while (time>=.0 & time<=8)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
   time
   
-  if (time>1.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
+%  if (time>1.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 
@@ -327,7 +333,7 @@ while (time>=.0 & time<=9000.6)
      end
      ts=sprintf('plane averaged passive scalars t=%f',time);
      loglog53(np_y, pspec_y, ts, 1.0,6);hold on;
-     
+   
      np_z=fread(fidp,1,'float64');
      for np=1:npassive    
         pspec_z=fread(fidp,np_z,'float64');
