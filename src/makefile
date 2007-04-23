@@ -188,25 +188,9 @@ ifeq ($(UNAME),OSF1)
 #        -lrt -free -lcxxstd -lcxx -lexc -lc
    LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
 
-   # check for MPI module loaded:
-   MOD_MPIR12 = $(shell echo $$MPI_LD_FLAGS | grep MPI)
-   MOD_lampi = $(shell echo $$MPI_LD_FLAGS | grep lampi)
-   ifneq ($(MOD_MPIR12),)
-      # R12
-      MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS)
-      MPILIB =  $(MPI_LD_FLAGS) -lfmpi -lmpio -lmpi  -lelan
-   else
-      ifneq ($(MOD_lampi),)
-         # lampi module
-         MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS)
-         MPILIB =  $(MPI_LD_FLAGS) -lmpi -lelan
-      else
-         # lampi
-         MPI =  -DUSE_MPI -DUSE_MPI_IO -I/users/taylorm/lampi/qsc-stable/include
-         MPILIB =  -L/users/taylorm/lampi/qsc-stable/lib -lmpi  -lelan
-      endif	
-   endif
-
+   # R12
+   MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS)
+   MPILIB =  $(MPI_LD_FLAGS) -lfmpi -lmpio -lmpi  -lelan
 
    # note: shallow water model cannot use -automatic
    FFLAGS =  -fast -automatic  -DOSF1 $(MPI) -DNDEBUG -DUSE_CPQFFT  $(UDM)
