@@ -189,7 +189,7 @@ ifeq ($(UNAME),OSF1)
    LDFLAGS =  -lcxml $(LSFLIB) $(UDMLIB) 
 
    # R12
-   MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS)
+   MPI =  -DUSE_MPI -DUSE_MPI_IO $(MPI_COMPILE_FLAGS) -DMPI_HAS_REAL8
    MPILIB =  $(MPI_LD_FLAGS) -lfmpi -lmpio -lmpi  -lelan
 
    # note: shallow water model cannot use -automatic
