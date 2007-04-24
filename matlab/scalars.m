@@ -76,6 +76,9 @@ nx=256;f_k = 4; fcor=2000; bous = 1000;
 %                  'low4/qg/qg64/sto_high_4/hyper_nu/test-bous-init/qg64test_all.scalars'],'r');
 %nx=64;f_k = 4; fcor=1000;
 
+fid = endianopen(['/home/mataylo/temp0000.0000.scalars'],'r');
+nx=256;
+
 
 nscalars=0;
 nscalars_e=0;

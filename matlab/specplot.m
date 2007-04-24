@@ -15,8 +15,8 @@ tsave=[];
 mu = 1;
 
 %name='decay2048-ave64.-new.0000.4026';
-%name='decay2048-ave32.-new.0000.4026';
-%namedir='/home/taylorm/rider/';
+name='temp0000.0000';
+namedir='/home/mataylo/'
 %movie_plot=0; CK_orig=1.613; decay_scale=1; endian='l';
 
 
@@ -50,11 +50,11 @@ mu = 1;
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu2.5/';
 
 
-name = 'qg256hyper_all';
+%name = 'qg256hyper_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
-namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
+%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 %name = 'qg512hyper_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous500/';
@@ -95,7 +95,7 @@ fidco=endianopen([namedir,name,'.cospec'],'r');
 fidt=-1;
 %fidp=-1;
 
-time=fread(fid,1,'float64')
+time=fread(fid,1,'float64');
 num_spect=0;
 if (fidt>=0) 
   num_spect=fread(fidt,1,'float64');
@@ -105,12 +105,12 @@ end
 
 CK=CK_orig;
 j=0;
-count = 0
+count = 0;
 while (time>=.0 & time<=8)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
-  time
+  disp(sprintf('reading spectrum:  time=%f   n_r=%d',time,n_r));
   
 %  if (time>1.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
   knum=0:(n_r-1);
@@ -139,30 +139,33 @@ while (time>=.0 & time<=8)
   
   ke=sum(spec_r');            % spec_r = .5u_k**2
   ke_diss=mu*2*sum(knum.^2 * (2*pi)^2 .* spec_r')  ; 
-  L11 = ((3*pi)/(4*ke)) * sum(spec_r(2:n_r)'./(knum(2:n_r)*2*pi));  
+  if (ke==0) 
+    L11=0;
+    fac3 = 1;
+  else
+    L11 = ((3*pi)/(4*ke)) * sum(spec_r(2:n_r)'./(knum(2:n_r)*2*pi));  
+    knum2=knum;
+    knum2(1)=.000001;
+    fac3=.5 + atan( 10*log10(knum2'*eta)+12.58 ) / pi;
+    fac3 = 1 + .522*fac3;
+  end
 
-  knum2=knum;
-  knum2(1)=.000001;
-  fac3=.5 + atan( 10*log10(knum2'*eta)+12.58 ) / pi;
-  fac3 = 1 + .522*fac3;
 
   n_x=fread(fid,1,'float64');
   spec_ux=spec_scale*fread(fid,n_x,'float64');
   spec_vx=spec_scale*fread(fid,n_x,'float64');  
   spec_wx=spec_scale*fread(fid,n_x,'float64');  
-  %n_x
   
   n_y=fread(fid,1,'float64');
   spec_uy=spec_scale*fread(fid,n_y,'float64');
   spec_vy=spec_scale*fread(fid,n_y,'float64');
   spec_wy=spec_scale*fread(fid,n_y,'float64');
-  %n_y
   
   n_z=fread(fid,1,'float64');
   spec_uz=spec_scale*fread(fid,n_z,'float64');
   spec_vz=spec_scale*fread(fid,n_z,'float64');
   spec_wz=spec_scale*fread(fid,n_z,'float64');  
-  %n_z
+  disp(sprintf('1D spectrum:  n_x=%d ny=%d nz=%d',n_x,n_y,n_z));
   
   i=find( abs(time-tsave)<.0001);
   if (length(i)>=1) 
@@ -368,7 +371,7 @@ while (time>=.0 & time<=8)
   % now read the cospectrum:
   if (fidco>-1) 
      disp('reading co-spectrum')
-     [ncox,count]=fread(fidco,1,'float64'); 
+     [ncox,nc]=fread(fidco,1,'float64'); 
      ncoy=fread(fidco,1,'float64'); 
      ncoz=fread(fidco,1,'float64'); 
      ncor=fread(fidco,1,'float64'); 
@@ -451,13 +454,21 @@ while (time>=.0 & time<=8)
   end
   
   
-  time=fread(fid,1,'float64');
-  %time
+  [time,nc]=fread(fid,1,'float64');
+  if (nc==0)
+    disp(sprintf('EOF reading %s%s, exiting...',namedir,name))
+  end
+
   if (fidt>=0) 
     num_spec=fread(fidt,1,'float64');
     time_t=fread(fidt,1,'float64');
   end
 end
+
+fclose(fid);
+if (fidt>0) fclose(fidt); end;
+return
+
 
 %time averaged spectra
 spec_r_ave = spec_r_ave/count;
@@ -465,10 +476,6 @@ figure(1)
 loglog((0:n_r-1),spec_r_ave','b', 'linewidth',2); hold off; 
 %    loglog((0:n_r-1),spec_r_ave.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
 
-fclose(fid);
-if (fidt>0) fclose(fidt); end;
-
-%return
 
 
 if (length(spec_r_save>1) )
