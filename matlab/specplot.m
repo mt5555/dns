@@ -106,7 +106,7 @@ end
 CK=CK_orig;
 j=0;
 count = 0;
-while (time>=.0 & time<=8)
+while (time>=.0 & time<=80)
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');

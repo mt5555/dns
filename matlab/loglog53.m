@@ -59,6 +59,7 @@ if (option==4)
    plaw=-3;
    scalep = 0;
    ax=[1,1e4,1e-6,1.0];
+   ax=[1,1e3,1e-8,1.0];
 end
 % decay2048 KE:
 if (option==5) 
