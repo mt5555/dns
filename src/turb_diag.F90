@@ -1157,3 +1157,62 @@ enddo
 
 
 end subroutine
+
+
+
+
+subroutine uw_filter(Q,vor,q1,work1,work2)
+use params
+use mpi
+implicit none
+real*8 :: Q(nx,ny,nz,2)
+real*8 :: vor(nx,ny,nz)
+real*8 :: q1(nx,ny,nz,2)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+! local
+integer i,j,k,n,im,jm,km
+real*8 :: xw2
+
+q1(:,:,:,1)=vor(:,:,:)*Q(:,:,:,1)
+q1(:,:,:,2)=vor(:,:,:)*Q(:,:,:,2)
+
+
+! Apply filter to q1=Q*vor, and vor, and Q
+call fft3d(vor,work1)
+do n=1,2
+   call fft3d(q1(1,1,1,n),work1) 
+   call fft3d(Q(1,1,1,n),work1) 
+enddo
+do k=nz1,nz2
+   km=kmcord(k)
+   do j=ny1,ny2
+      jm=jmcord(j)
+      do i=nx1,nx2
+         im=imcord(i)
+         ! wave number = (im,jm,km)  (can be positive or negative)
+         xw2 = im**2 + jm**2 + km**2
+         q1(i,j,k,1)=q1(i,j,k,1)*exp(-xw2)
+         q1(i,j,k,2)=q1(i,j,k,2)*exp(-xw2)
+         Q(i,j,k,1)=Q(i,j,k,1)*exp(-xw2)
+         Q(i,j,k,2)=Q(i,j,k,2)*exp(-xw2)
+         vor(i,j,k)=vor(i,j,k)*exp(-xw2)
+      enddo
+   enddo
+enddo
+
+call ifft3d(vor,work1)
+do n=1,2
+   call ifft3d(q1(1,1,1,n),work1) 
+   call ifft3d(Q(1,1,1,n),work1) 
+enddo
+
+! now compute bar(u*vor) - bar(u)*var(vor)
+
+q1(:,:,:,1)=q1(:,:,:,1) - vor(:,:,:)*Q(:,:,:,1)
+q1(:,:,:,2)=q1(:,:,:,2) - vor(:,:,:)*Q(:,:,:,2)
+
+
+end subroutine
+

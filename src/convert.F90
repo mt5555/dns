@@ -133,7 +133,7 @@ do
             call fft3d(Q(1,1,1,n),work1)
          enddo
       endif
-      if ((w_spec /= r_spec) .or. (w_compressed /= r_compressed)) then
+      if ((w_spec .neqv. r_spec) .or. (w_compressed .neqv. r_compressed)) then
          ! converting from spec to grid (or vice versa) 
          basename=runname(1:len_trim(runname))
       else
@@ -416,6 +416,21 @@ do
       else
          call print_stats(Q,vor,work1,work2)
       endif
+   endif
+
+
+   if (convert_opt==12) then ! -cout uwbar  
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      call print_stats(Q,vor,work1,work2)
+      call vorticity2d(Q(1,1,1,3),Q,work1,work2)
+      ! overwrite bar(u vor) - bar(u) bar(vor), store in "vor"
+      call print_message("computing uwbar...")
+      call uw_filter(Q,Q(1,1,1,3),vor,work1,work2)
+
+      basename=runname(1:len_trim(runname)) // "-uwbar."
+      call print_message("outputing uwbar...")
+      call output_uvw(basename,time,vor,Q,work1,work2,header_user)
    endif
 
 
