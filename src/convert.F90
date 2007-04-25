@@ -65,7 +65,7 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=0.5
+tstart=0.0
 tstop=0.5
 tinc=.3
 
@@ -423,14 +423,21 @@ do
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
       call print_stats(Q,vor,work1,work2)
-      call vorticity2d(Q(1,1,1,3),Q,work1,work2)
-      ! overwrite bar(u vor) - bar(u) bar(vor), store in "vor"
-      call print_message("computing uwbar...")
-      call uw_filter(Q,Q(1,1,1,3),vor,work1,work2)
+      ! compute the vorticity, store in 3rd component of Q
+      call vorticity2d(vor,Q,work1,work2)
 
-      basename=runname(1:len_trim(runname)) // "-uwbar."
+      call print_message("computing uwbar...")
+      ! overwrite bar(u vor) - bar(u) bar(vor), store in "Q"
+      call uw_filter(Q,vor(1,1,1,1),vor(1,1,1,2),work1,work2)
+
       call print_message("outputing uwbar...")
-      call output_uvw(basename,time,vor,Q,work1,work2,header_user)
+      write(sdata,'(f10.4)') 10000.0000 + time
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+          // sdata(2:10) // ".ubar" 
+      call singlefile_io3(time,Q(1,1,1,1),basename,work1,work2,0,io_pe,.false.,header_user)
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+          // sdata(2:10) // ".vbar" 
+      call singlefile_io3(time,Q(1,1,1,2),basename,work1,work2,0,io_pe,.false.,header_user)
    endif
 
 
