@@ -433,10 +433,10 @@ do
       call print_message("outputing uwbar...")
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-          // sdata(2:10) // ".ubar" 
+          // sdata(2:10) // ".rv" 
       call singlefile_io3(time,Q(1,1,1,1),basename,work1,work2,0,io_pe,.false.,header_user)
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-          // sdata(2:10) // ".vbar" 
+          // sdata(2:10) // ".ru" 
       call singlefile_io3(time,Q(1,1,1,2),basename,work1,work2,0,io_pe,.false.,header_user)
    endif
 
