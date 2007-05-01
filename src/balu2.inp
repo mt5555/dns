@@ -43,11 +43,13 @@ cpu:   128x1x1
 
 ./gridsetup.py 128 1 1 256 256 1 2 2 0 
 make
-./dns -i eve.inp   name
+./dns -i balu2.inp   name
+
 
 % edit convert.F90, set tstart,tstop,tinc
+% edit balu2.inp, set alpha to the value of alpha to use in the filter 
 make convert
-./convert -i eve.inp -cout uwbar name
+./convert -i balu2.inp -cout uwbar name
 
 
 

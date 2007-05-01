@@ -1174,6 +1174,8 @@ real*8 :: uwbar2(nx,ny,nz)
 ! local
 integer i,j,k,n,im,jm,km
 real*8 :: xw2
+real*8 :: dummy,rdotgrad,absvor2,absrvor
+
 
 uwbar1(:,:,:)=vor(:,:,:)*Q(:,:,:,1)
 uwbar2(:,:,:)=vor(:,:,:)*Q(:,:,:,2)
@@ -1214,9 +1216,24 @@ call ifft3d(Q(1,1,1,2),work1)
 Q(:,:,:,1)=uwbar1(:,:,:) - vor(:,:,:)*Q(:,:,:,1)
 Q(:,:,:,2)=uwbar2(:,:,:) - vor(:,:,:)*Q(:,:,:,2)
 
+! compute grad(vor) in uwbar1,uwbar2:
+call der(vor,uwbar1,dummy,work1,DX_ONLY,1)
+call der(vor,uwbar2,dummy,work1,DX_ONLY,2)
+
 ! r dot grad(vor)  /abs(grad(vor))**2        kct
 ! r dot grad(vor)  / abs(r)*abs(grad(vor))   ct
+do k=nz1,nz1
+do j=ny1,ny2
+do i=nx1,nx2
+   rdotgrad = Q(i,j,k,1)*uwbar1(i,j,k) + Q(i,j,k,2)*uwbar2(i,j,k)
+   absvor2 = (uwbar1(i,j,k)**2 + uwbar2(i,j,k)**2)
+   absrvor = sqrt( (Q(i,j,k,1)**2 + Q(i,j,k,2)**2)*absvor2 )
 
+   Q(i,j,k,1) = rdotgrad / absvor2
+   Q(i,j,k,2) = rdotgrad / absrvor
+enddo
+enddo
+enddo
 
 
 end subroutine

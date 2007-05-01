@@ -22,11 +22,13 @@ if (byteswap_input) call set_byteswap_input(1);
 !
 ! scale alpha now that we know delx
 !
+#ifdef ALPHA_MODEL
 if (alpha_value>=1e10) then
    infinite_alpha=1
 else if (alpha_value>=1.0) then
    alpha_value=alpha_value*min(delx,dely,delz)
 endif
+#endif
 if (infinite_alpha==0) then
    write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
         alpha_value,alpha_value/min(delx,dely,delz)
