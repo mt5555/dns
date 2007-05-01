@@ -1194,7 +1194,7 @@ do k=nz1,nz2
       do i=nx1,nx2
          im=imcord(i)
          ! wave number = (im,jm,km)  (can be positive or negative)
-         xw2 = im**2 + jm**2 + km**2
+         xw2 = alpha_value*pi2_squared*(im**2 + jm**2 + km**2)
          uwbar1(i,j,k)=uwbar1(i,j,k)*exp(-xw2)
          uwbar2(i,j,k)=uwbar2(i,j,k)*exp(-xw2)
          Q(i,j,k,1)=Q(i,j,k,1)*exp(-xw2)
@@ -1213,6 +1213,10 @@ call ifft3d(Q(1,1,1,2),work1)
 ! now compute bar(u*vor) - bar(u)*var(vor)
 Q(:,:,:,1)=uwbar1(:,:,:) - vor(:,:,:)*Q(:,:,:,1)
 Q(:,:,:,2)=uwbar2(:,:,:) - vor(:,:,:)*Q(:,:,:,2)
+
+! r dot grad(vor)  /abs(grad(vor))**2        kct
+! r dot grad(vor)  / abs(r)*abs(grad(vor))   ct
+
 
 
 end subroutine
