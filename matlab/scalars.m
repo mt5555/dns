@@ -43,13 +43,13 @@ fid2=-1;
 %                  'low4/qg/qg256/bous2000/qg256hyper_all.scalars'],'r');
 %nx=256;f_k = 4; fcor=2000; bous = 2000;
 
-%fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
-%                  'low4/qg/qg512/bous2000/qg512hyper_all.scalars'],'r');
-%nx=512;f_k = 4; fcor=2000; bous = 2000;
+fid = endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+                  'low4/qg/qg512/bous2000/qg512hyper_all.scalars'],'r');
+nx=512;f_k = 4; fcor=2000; bous = 2000;
 
-fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
-                  'low4/qg/qg256/fcor2000_bous1000/qg256hyper_all.scalars'],'r');
-nx=256;f_k = 4; fcor=2000; bous = 1000;
+%fid = endianopen(['/nh/u/skurien/projects/pv/data_analysis/lowforc/' ...
+%                  'low4/qg/qg256/fcor2000_bous1000/qg256hyper_all.scalars'],'r');
+%nx=256;f_k = 4; fcor=2000; bous = 1000;
 
 
 %fid = endianopen('/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f1000n5_all.scalars','r');

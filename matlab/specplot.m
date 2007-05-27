@@ -56,10 +56,8 @@ namedir='/home/mataylo/'
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
-%name = 'qg512hyper_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous500/';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
+name = 'qg512hyper_all';
+namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
 
 
 %name = 'sc1024A';
@@ -79,7 +77,8 @@ namedir='/home/mataylo/'
 
 
 
-spec_r_ave = zeros(514,1);
+spec_r_ave = zeros(258,1);
+pspec_r_ave = zeros(258,1);
 spec_r_save=[];
 spec_r_save_fac3=[];
 
@@ -105,14 +104,16 @@ end
 
 CK=CK_orig;
 j=0;
-count = 0;
-while (time>=.0 & time<=80)
+
+count = 0
+while (time>=.0 & time<=9)
+
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
   disp(sprintf('reading spectrum:  time=%f   n_r=%d',time,n_r));
   
-%  if (time>1.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
+  if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 
@@ -310,13 +311,17 @@ while (time>=.0 & time<=80)
      np_r=fread(fidp,1,'float64');
      np_r
      pspec_r=[];
+     
+     countp = 0; %for passive scalar average, note assumes npassive = 1
      for np=1:npassive 
         pspec_r(:,np)=fread(fidp,np_r,'float64');
+        if (time_p>3.0) pspec_r_ave = pspec_r_ave + pspec_r; countp = countp+1; end;
         c2(np)=sum(pspec_r(:,np)); 
         % c2_diss = d/dt of .5<c^2>
         c2_diss(np) = mu*2*sum(knum.^2 * (2*pi)^2 .* pspec_r(:,np)')  ; 
         L11c(np) = ((3*pi)/(4*c2(np))) * sum(pspec_r(2:np_r,np)'./ (knum(2:np_r)*2*pi))  ;
      end
+     
      ts=sprintf('shell averaged passive scalar spectrum t=%f',time);
      loglog53(np_r,pspec_r,ts,1.0,3); hold off;
      axis([1 100 1e-6 1]);
@@ -472,9 +477,10 @@ return
 
 %time averaged spectra
 spec_r_ave = spec_r_ave/count;
-figure(1)
-loglog((0:n_r-1),spec_r_ave','b', 'linewidth',2); hold off; 
-%    loglog((0:n_r-1),spec_r_ave.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
+pspec_r_ave = pspec_r_ave/countp;
+figure(10)
+loglog53(n_r-1,spec_r_ave, stitle,CK); hold on; 
+loglog53(np_r,pspec_r_ave,'',1.0,3); hold off;
 
 
 

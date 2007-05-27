@@ -28,7 +28,7 @@ fid2=-1;
 %fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/qg256hyper_all.scalars-bous','r');
 
 
-fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/qg512hyper_all.scalars-bous','r');
+fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/qg512hyper_all.scalars-bous','r');
 
 %fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars-bous','r');
 %fid = endianopen(['~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
@@ -100,8 +100,8 @@ hold off
 
 figure(3)
 %clf
-plot(time,potens,'b');hold on;
-plot(time,potens_qg,'r--');
+plot(time,potens,'b','Linewidth',2);hold on;
+plot(time,potens_qg,'ro','Markersize',6);
 plot(time,potens_ro0fr1,'r.-');
 plot(time,potens_ro1fr0,'k-');
 title('Potential enstrophy: (blue: Total); (red--: QG); (red.-: Ro->0,Fr1); (black: Ro1, Fr->0)');
