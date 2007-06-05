@@ -19,14 +19,15 @@ MPILIB =
 
 
 ifeq ($(UNAME),Linux)
-   VENDOR=LAHEY
-   #VENDOR=PGI
+   #VENDOR=LAHEY
+   VENDOR=PGI
    #VENDOR=PGIMPI
    #VENDOR=INTEL
    #VENDOR=GNU
 
    FFT = -DUSE_FFT99
    FFTLIB =
+
 
    ifeq ($(HOST),dosadi)
       VENDOR=GNU
@@ -44,6 +45,9 @@ ifeq ($(UNAME),Linux)
       VENDOR=INTEL
       MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
       MPILIB =  $(MPI_LD_FLAGS) -lmpi 	
+   ifeq ($(HOST),fod.lanl.gov)
+      VENDOR=PGI
+   endif
    endif
    ifeq ($(ARCH),ia64)
       VENDOR=INTEL
