@@ -29,17 +29,8 @@ ifeq ($(UNAME),Linux)
    FFTLIB =
 
 
-   ifeq ($(HOST),dosadi)
-      VENDOR=GNU
-      #FFT = -DUSE_FFTWGURU
-      #FFTLIB =  -lfftw3
-      #FFT = -DUSE_STK
-      #FFTLIB = -Lstk -lstk
-   endif
-   ifeq ($(HOST),serrano1)
-      VENDOR=INTELMPI
-      MPI = -DNDEBUG -DUSE_MPI
-   endif
+   
+   
    ifeq ($(ARCH),x86_64)
       #VENDOR=PGIMPI
       # needed if >2GB per process:   -DMALLOC_Q
@@ -49,15 +40,29 @@ ifeq ($(UNAME),Linux)
       VENDOR=INTEL
       MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
       MPILIB =  $(MPI_LD_FLAGS) -lmpi 	
-   ifeq ($(HOST),fod.lanl.gov)
-      VENDOR=PGI
    endif
-   endif
+
    ifeq ($(ARCH),ia64)
       VENDOR=INTEL
       MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8
       MPILIB = -lmpi
    endif
+
+ifeq ($(HOST),dosadi)
+      VENDOR=GNU
+      #FFT = -DUSE_FFTWGURU
+      #FFTLIB =  -lfftw3
+      #FFT = -DUSE_STK
+      #FFTLIB = -Lstk -lstk
+   endif
+
+
+   ifeq ($(HOST),serrano1)
+      VENDOR=INTELMPI
+      MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
+      MPILIB = 
+   endif
+
    ifeq ($(HOST),mauve.lanl.gov)
       VENDOR=INTEL
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 
@@ -108,6 +113,7 @@ ifeq ($(UNAME),Linux)
    FFLAGS =  -Mrecursive  -fast  $(MPI)  $(FFT) 
    LDFLAGS = $(FFTLIB)
    endif 
+
 
 
    ifeq ($(VENDOR),INTEL)
