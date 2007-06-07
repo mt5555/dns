@@ -36,6 +36,10 @@ ifeq ($(UNAME),Linux)
       #FFT = -DUSE_STK
       #FFTLIB = -Lstk -lstk
    endif
+   ifeq ($(HOST),serrano1)
+      VENDOR=INTELMPI
+      MPI = -DNDEBUG -DUSE_MPI
+   endif
    ifeq ($(ARCH),x86_64)
       #VENDOR=PGIMPI
       # needed if >2GB per process:   -DMALLOC_Q
@@ -111,6 +115,13 @@ ifeq ($(UNAME),Linux)
    CC=gcc
    FFLAGS =  -auto -w90  -Vaxlib  -O1    $(MPI)  $(FFT) 
    #FFLAGS =  -w90  -Vaxlib -O1 -tpp7   $(MPI)  $(FFT) 
+   LDFLAGS = $(FFTLIB)
+   endif
+
+   ifeq ($(VENDOR),INTELMPI)
+   F90 = mpif90
+   CC=mpicc
+   FFLAGS =  -auto -w90  -Vaxlib  -O1    $(MPI)  $(FFT) 
    LDFLAGS = $(FFTLIB)
    endif
 

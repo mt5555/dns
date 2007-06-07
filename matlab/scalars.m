@@ -84,7 +84,7 @@ nscalars=0;
 nscalars_e=0;
 time = 0.0;
 %while (1) 
-while (time < 8)
+while (time < 80)
 [ni,count]=fread(fid,1,'float64');
   if (count~=1) 
      if (fid2<0) 
