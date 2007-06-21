@@ -224,7 +224,7 @@ real*8 :: p_diss(n_var),pke(n_var)
 real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(ndim,n_var),ens_diss2,ens_diss4,ens_diss6
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
-real*8 :: vor(3)
+real*8 :: vor(3),xi
 #ifdef ALPHA_MODEL
 real*8,save :: gradu(nx,ny,nz,n_var)
 real*8,save :: gradv(nx,ny,nz,n_var)
@@ -391,7 +391,11 @@ do i=nx1,nx2
 
 
    ! add any rotation to vorticity before computing u cross vor
+#ifdef BETAPLANE
+   vor(3)=vor(3) + ycord(j)*fcor
+#else
    vor(3)=vor(3) + fcor
+#endif
    
    !  velocity=(u,v,w)  vorticity=(a,b,c)=(wy-vz,uz-wx,vx-uy)
    !  v*(vx-uy) - w*(uz-wx) = (v vx - v uy + w wx) - w uz
@@ -402,10 +406,22 @@ do i=nx1,nx2
    ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
 
    
+
+#ifdef BALU 
+   xi = 0
+   if (xcord(i) <= 2.1/g_nx) xi=1
+   if (ycord(j) <= 2.1/g_ny) xi=1
+
+   ! overwrite Q with the result
+   Q(i,j,k,1) = uu - xi*Q(i,j,k,1)/BALU   + cos(pi2*ycord(j))
+   Q(i,j,k,2) = vv - xi*Q(i,j,k,2)/BALU
+   Q(i,j,k,3) = ww - xi*Q(i,j,k,3)/BALU
+#else
    ! overwrite Q with the result
    Q(i,j,k,1) = uu
    Q(i,j,k,2) = vv
    Q(i,j,k,3) = ww
+#endif
 
    if (npassive>0 .and. passive_type(np1)==4) then
       Q(i,j,k,3)=Q(i,j,k,3)-bous*Q(i,j,k,np1)

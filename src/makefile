@@ -48,14 +48,13 @@ ifeq ($(UNAME),Linux)
       MPILIB = -lmpi
    endif
 
-ifeq ($(HOST),dosadi)
+    ifeq ($(HOST),dosadi)
       VENDOR=GNU
       #FFT = -DUSE_FFTWGURU
       #FFTLIB =  -lfftw3
       #FFT = -DUSE_STK
       #FFTLIB = -Lstk -lstk
    endif
-
 
    ifeq ($(HOST),serrano1)
       VENDOR=INTELMPI
@@ -70,8 +69,7 @@ ifeq ($(HOST),dosadi)
    endif
    ifeq ($(HOST),nostromo)
       VENDOR=GNU
-      FFT = -DUSE_FFTWGURU
-      FFTLIB =  -lfftw3
+      MPI =  -DBALU=1e-3
    endif
    ifeq ($(HOST),sulaco)
       VENDOR=INTEL
