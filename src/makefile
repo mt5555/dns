@@ -69,7 +69,7 @@ ifeq ($(UNAME),Linux)
    endif
    ifeq ($(HOST),nostromo)
       VENDOR=GNU
-      MPI =  -DBALU=1e-3
+      #MPI =  -DBALU=1e-3
    endif
    ifeq ($(HOST),sulaco)
       VENDOR=INTEL
