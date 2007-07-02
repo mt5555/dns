@@ -8,21 +8,21 @@ setenv CVS_RSH ssh
 
 Put this in your .ssh/config:
 
-Host dosadi
+Host solano
 Hostname solano.homeip.net
-HostKeyAlias dosadi
-User username-on-dosadi
+HostKeyAlias solano
+User username-on-solano
 
 
 Now check that you can login to the CVS server by running:
 
-% ssh dosadi
+% ssh solano
 
 
 =================================================================
 Initial checkout of CVS repository (only done once)
 =================================================================
-cvs -d username@dosadi:/home/mt/cvsroot checkout dns
+cvs -d username@solano:/home/mt/cvsroot checkout dns
 
 this will create a directory dns containing the source code
 
