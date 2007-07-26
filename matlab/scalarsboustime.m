@@ -14,31 +14,36 @@ f_k=0;
 fid2=-1;
 
 
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/qg64hyper_all.scalars-bous','r');
-%fid=endianopen(['~/projects/pv/data_analysis/lowforc/low4/qg/qg64/' ...
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/qg64hyper_all.scalars-bous','r');
+%fid=endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg64/' ...
 %                'sto_high_4/hyper_nu/bous500/qg64hyper_all.scalars-bous'],'r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous1000/qg64hyper_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous1000/qg64hyper_all.scalars-bous','r');
 
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg64_iso12w_all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/qg64_sto16_all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg64_200all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/qg256hyper_all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/qg256hyper_all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/qg256hyper_all.scalars-bous','r');
-%fid=endianopen('~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/qg256hyper_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg64_iso12w_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/qg64_sto16_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg64_200all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/qg256hyper_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/qg256hyper_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/qg256hyper_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/qg256hyper_all.scalars-bous','r');
 
 
-fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/qg512hyper_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/qg512hyper_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/n512_f2000b20_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous200/n512_f2000b200_all.scalars-bous','r');
+fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/n512_f20b2000_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor200_bous2000/n512_f200b2000_all.scalars-bous','r');
 
-%fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars-bous','r');
-%fid = endianopen(['~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
+
+%fid = endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars-bous','r');
+%fid = endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
 %                  'n256/n256_f1000n5_all.scalars-bous'],'r');
-%fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/n256_f5n2000_all.scalars-bous','r');
-%fid = endianopen(['~/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/' ...
+%fid = endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/n256_f5n2000_all.scalars-bous','r');
+%fid = endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/' ...
 %                  'n256/n256_f5n1000_all.scalars-bous'],'r');
 
-%fid = endianopen('~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256high_f2000n5_all.scalars-bous','r');
-%fid = endianopen(['~/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
+%fid = endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256high_f2000n5_all.scalars-bous','r');
+%fid = endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
 %                  'n256/n256high_f1000n5_all.scalars-bous'],'r');
 
 
@@ -99,13 +104,14 @@ title('PV');
 hold off
 
 figure(3)
+subplot(4,1,4);
 %clf
 plot(time,potens,'b','Linewidth',2);hold on;
 plot(time,potens_qg,'ro','Markersize',6);
 plot(time,potens_ro0fr1,'r.-');
 plot(time,potens_ro1fr0,'k-');
-title('Potential enstrophy: (blue: Total); (red--: QG); (red.-: Ro->0,Fr1); (black: Ro1, Fr->0)');
-
+%title('Potential enstrophy: (blue: Total); (red o QG); (red.-: Ro->0,Fr1); (black: Ro1, Fr->0)');
+legend('$Q$','$Q_{qg}$','$Q_{q\sim f \partial_z \rho}$', '$Q_{q\sim N \omega_3}$');
 
 figure(4)
 clf

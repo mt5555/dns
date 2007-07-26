@@ -15,8 +15,8 @@ tsave=[];
 mu = 1;
 
 %name='decay2048-ave64.-new.0000.4026';
-name='temp0000.0000';
-namedir='/home/mataylo/'
+%name='temp0000.0000';
+%namedir='/home/mataylo/'
 %movie_plot=0; CK_orig=1.613; decay_scale=1; endian='l';
 
 
@@ -56,8 +56,11 @@ namedir='/home/mataylo/'
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
-name = 'qg512hyper_all';
-namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
+%name = 'qg512hyper_all';
+%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
+
+name = 'n512_f2000b20_all';
+namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
 
 
 %name = 'sc1024A';
@@ -75,7 +78,8 @@ namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bou
 %name = 'n256high_f5n2000_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
 
-
+%name = 'test0000.0000';
+%namedir = '/nh/u/skurien/dns/src/tests/';
 
 spec_r_ave = zeros(258,1);
 pspec_r_ave = zeros(258,1);

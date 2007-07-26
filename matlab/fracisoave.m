@@ -6,7 +6,7 @@
 %
 
 
-%name='/scratch2/taylorm/sc1024A/sc1024A0001.9000'
+%name='/nh/xraid/skurien/dns_data/sc1024a/sc1024A0001.9000'
 ext='.isostrf';
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 

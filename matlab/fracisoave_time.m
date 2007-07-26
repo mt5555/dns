@@ -1,6 +1,6 @@
 %
 % Calculation of fractional structure function scaling exponents from time-averaged and angle-averaged data
-%S.Kurien
+% S.Kurien
 %
 
 mu=0;
@@ -11,7 +11,7 @@ eta = 1/(nx*delx_over_eta);
 ext='.isostrf';
 ndir = 73;
 
-name='/nh/nest/u/taylorm/sc1024A'
+name='/nh/xraid/skurien/dns_data/sc1024a/sc1024A'
 nx=1024; delx_over_eta=2.95; epsilon=3.57;teddy = 1.05;
 
 times=[1.4:0.1:1.5, 1.7:0.1:2.4];

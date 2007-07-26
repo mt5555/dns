@@ -1,7 +1,8 @@
 clear
 %name = 'all'
+name= 'n512_f2000b20_all';
 %name = 'qg512hyper0002.9619'
-name = 'qg512hyper_all';
+%name = 'qg512hyper_all';
 %name = 'qg256hyper_all';
 %name = 'qg64hyper_all';
 %name = 'n256_f1000n5_all';
@@ -28,7 +29,10 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
-namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
+%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
+namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
+%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/';
+
 asciprint = 0 % if == 1 print out the data to asci files
 
 fid=fopen([namedir,name,'.spec2d'],'r');
@@ -80,12 +84,12 @@ while (time < 6)
   end
 
   % kz-averaged 2d spectra (remaining array is function of kh)
-  specu = sum(spec2d_u,1);
-  specv = sum(spec2d_v,1);
-  specw = sum(spec2d_w,1);
-  spect = sum(spec2d_t,1);
+  specuh = sum(spec2d_u,1);
+  specvh = sum(spec2d_v,1);
+  specwh = sum(spec2d_w,1);
+  specth = sum(spec2d_t,1);
 
-  %kh-averaged 2d spectra (remaining array is function of kz)
+  %kh-averaged 1d spectra (remaining array is function of kz)
   specuz = sum(spec2d_u,2);
   specvz = sum(spec2d_v,2);
   specwz = sum(spec2d_w,2);
@@ -118,14 +122,14 @@ if(1)
   axis([1 128 1e-12 1e-4]) ;
 end
 
-if (0)
+if (1)
   %plot the kz-averaged spectra
   figure(3)
-  loglog53(numkh,specu'+specv','E_h(kh)',2.0,6);%hold on;
+  loglog53(numkh,specuh'+specvh','E_h(kh)',2.0,6);%hold on;
 %  figure(4)
-%  loglog53(numkh,specw','E_z(kh)',2.0,6);%hold on;
+%  loglog53(numkh,specwh','E_z(kh)',2.0,6);%hold on;
 %  figure(5)
-%  loglog53(numkh,spect','P(kh)',2.0,6);%hold on;
+%  loglog53(numkh,specth','P(kh)',2.0,6);%hold on;
 
   %plot the kh-averaged spectra
 %  figure(6)

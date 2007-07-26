@@ -1,3 +1,6 @@
+% plot longitudinal and transverse structure functions and compute their
+% scaling exponents
+
 function[] = long_trans_expcalc(Dl,Dt,ndelta,ndir,r_val,nx,delx_over_eta,xx)
 
 %for i = 1:2:9
@@ -33,15 +36,15 @@ end
 
 yyavel=0*xx;
 yyavet=0*xx;
-for i = 1:2:5
+for i = 1:1:2
 for dir=1:ndir
   x = r_val(:,dir);                       % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
   xx_plot = xx*nx*delx_over_eta;        % units of r/eta
   yl = Dl(:,dir,i);
-yt = Dt(:,dir,i);
+  yt = Dt(:,dir,i);
   yyavel=yyavel+w(dir)*spline(x,yl,xx);
-yyavet = yyavet+w(dir)*spline(x,yt,xx);
+  yyavet = yyavet+w(dir)*spline(x,yt,xx);
 end
 
   figure(12)
@@ -52,20 +55,23 @@ xlabel('r/\eta');
 
 % LONGITUDINAL 
   figure(13)
-der = localslp(xx_plot,yyavel,1);hold on;
-title('Local slopes - longitudinal');
-figure(15)
-ind = inflect(xx_plot,yyavel,3);hold on;
-title('Inflection points - longitudinal');
-p=i+1;
-sprintf('p=%d;',p)
-sprintf('Exps = %f; ',mean(der(ind)))
-sprintf('Error on exps = %f',std(der(ind)))
+ der = localslp(xx_plot,yyavel,1);hold on;
+ title('Local slopes - longitudinal');
+ 
+ %extra stuff for fractional statistics paper
+ if(0)
+ figure(15)
+ ind = inflect(xx_plot,yyavel,3);hold on;
+ title('Inflection points - longitudinal');
+ p=i+1;
+ sprintf('p=%d;',p)
+ sprintf('Exps = %f; ',mean(der(ind)))
+ sprintf('Error on exps = %f',std(der(ind)))
      figure(17)
      k41 = p/3;
      plot(p,mean(der(ind)),'o',p,k41,'x');hold on;
      title('Comparison of exps with K41 - longitudinal');
-%plot(k41,mean(der(ind)),'ro'); hold on;
+plot(k41,mean(der(ind)),'ro'); hold on;
 
 figure(19)
      plot(p,(mean(der(ind))-k41)/k41,'ko');hold on;
@@ -74,13 +80,14 @@ figure(19)
      figure(21)
      plot(p,mean(der(ind)),'o');hold on;
      title('comparison of long and trans exps');
-
+ end
 
 % TRANSVERSE
 figure(14)
 der = localslp(xx_plot,yyavet,1);hold on;
 title('Local slopes - transverse')
-
+%extra stuff for fractional statistics paper
+if(0)
 figure(16)
 ind = inflect(xx_plot,yyavet,3);hold on;
 title('Inflection points - transverse');
@@ -101,7 +108,7 @@ figure(20)
      figure(21)
      plot(p,mean(der(ind)),'x');hold on;
      title('comparison of long and trans exps');
-
+end
 
 end
 

@@ -12,8 +12,8 @@ fname
 
 ndelta=fread(fid,1,'float64');
 ndir  =fread(fid,1,'float64');
-nlon  =fread(fid,1,'float64');
-ntran =fread(fid,1,'float64');
+nlon  =fread(fid,1,'float64')
+ntran =fread(fid,1,'float64')
 nscalars =fread(fid,1,'float64');
 nnew2 =fread(fid,1,'float64');
 
