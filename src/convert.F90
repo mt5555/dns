@@ -442,6 +442,13 @@ do
    endif
 
    if (convert_opt==13) then  ! -cout trunc
+      if (w_spec) then
+         ! -so (spectral output) uses spec_max to specify coefficients to write
+         ! -cout trunc uses spec_max as a truncation parameter, so we cant
+         ! use both of these together 
+         call abortdns("-cout trunc option cant be used with spectral output")
+      endif
+
       ! read data, header type =1, or specified in input file
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  

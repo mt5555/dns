@@ -58,8 +58,17 @@ integer :: dealias=0                ! 0 = none
 logical :: r_spec=.false.           ! set to .true. to read spectral coefficieints 
 logical :: w_spec=.false.           ! set to .true. to write spectral coefficieints 
                                     ! instead of grid point values 
-integer :: spec_max=-1              ! max number of spectral modes to write
+
+integer :: spec_max=-1              ! if w_spec=.true. (spectral output)
+                                    ! this is the max number of spectral modes to 
+                                    ! write to output file
                                     ! -1 = use dealiased maximum
+                                    ! 
+                                    ! It is also used by the -cout trunc
+                                    ! option in convert.F90.  Here it is a
+                                    ! parameter to the truncation filter
+                                    !  
+                                 
 logical :: r_compressed=.false.       ! NS_UVW Kerr compression
 logical :: w_compressed=.false.       ! 
                                  
