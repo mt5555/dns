@@ -27,6 +27,7 @@
 !                   need to specify shmidt_in and type_in below
 !  -cout gradu      output <u_i,j>  matrixes for subcubes
 !  -cout stats      read data, print some stats
+!  -cout trunc	    read data, fft, truncate, fft back.
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -457,8 +458,8 @@ do
 
       ! apply Filter
       do n=1,3
-         ! call the 2/3 truncation filter subroutine in fftops.F90
-         call fft_filter_dealias(Q(1,1,1,n)) 
+         ! call the truncation filter subroutine in fftops.F90
+         call fft_filter_trunc(Q(1,1,1,n)) 
       enddo
      
       ! compute iFFT

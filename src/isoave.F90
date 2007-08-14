@@ -1458,7 +1458,7 @@ if (str_type==0 ) then
    Dt(idel,idir,1,2)=Dt(idel,idir,1,2) + u_t1_sq
    Dt(idel,idir,2,2)=Dt(idel,idir,2,2) + u_t2_sq
    
-   Dl(idel,idir,3)  =  Dl(idel,idir,3) + u_l*u_l_sq
+   Dl(idel,idir,3)  = Dl(idel,idir,3) + u_l*u_l_sq
    Dt(idel,idir,1,3)=Dt(idel,idir,1,3) + u_t1*u_t1_sq
    Dt(idel,idir,2,3)=Dt(idel,idir,2,3) + u_t2*u_t2_sq
    
