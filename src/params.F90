@@ -756,8 +756,6 @@ if (dealias==1) then
    dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
 else if (dealias==2) then
    dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
-else if (dealias==3) then
-   dealias_remove = ( ( im**2 + jm**2 + km**2 ) > kf )
 else
    dealias_remove = .false.
 endif

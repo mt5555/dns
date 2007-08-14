@@ -1806,7 +1806,7 @@ end subroutine
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! Filter out spherical wavenumbers greater than some kf (variable truncation of
+! Filter out spherical wavenumbers greater than some spec_max (variable truncation of
 ! high wavenumbers)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1824,7 +1824,7 @@ real*8 xfac
          jm=abs(jmcord(j))
          do i=nx1,nx2
             im=abs(imcord(i))
-            if (dealias_remove(im,jm,km)) then 
+            if ((im**2 + jm**2 + km**2 ) > spec_max) then 
                p(i,j,k)=0
             endif
          enddo
