@@ -36,7 +36,7 @@ end
 
 yyavel=0*xx;
 yyavet=0*xx;
-for i = 1:1:2
+for i = 1:2:5
 for dir=1:ndir
   x = r_val(:,dir);                       % units of box length
   x_plot=x*nx*delx_over_eta;  % units of r/eta
@@ -51,12 +51,15 @@ end
   loglog(xx_plot,yyavel,'r'); hold on;
   loglog(xx_plot,yyavet,'k'); hold on;
 xlabel('r/\eta');
+    title('Structure functions - longitudinal (red), transverse (black)');
 
+%LONGITUDINAL AND TRANSVERSE LOCAL SLOPES
+figure(13)
+ derl = localslp(xx_plot,yyavel,3);hold on;
+ dert = localslp(xx_plot,yyavet,2);hold on
+ title('Local slopes - longitudinal (red), transverse (black)');
 
 % LONGITUDINAL 
-  figure(13)
- der = localslp(xx_plot,yyavel,1);hold on;
- title('Local slopes - longitudinal');
  
  %extra stuff for fractional statistics paper
  if(0)
@@ -65,27 +68,24 @@ xlabel('r/\eta');
  title('Inflection points - longitudinal');
  p=i+1;
  sprintf('p=%d;',p)
- sprintf('Exps = %f; ',mean(der(ind)))
- sprintf('Error on exps = %f',std(der(ind)))
+ sprintf('Exps = %f; ',mean(derl(ind)))
+ sprintf('Error on exps = %f',std(derl(ind)))
      figure(17)
      k41 = p/3;
-     plot(p,mean(der(ind)),'o',p,k41,'x');hold on;
+     plot(p,mean(derl(ind)),'o',p,k41,'x');hold on;
      title('Comparison of exps with K41 - longitudinal');
-plot(k41,mean(der(ind)),'ro'); hold on;
+plot(k41,mean(derl(ind)),'ro'); hold on;
 
 figure(19)
-     plot(p,(mean(der(ind))-k41)/k41,'ko');hold on;
+     plot(p,(mean(derl(ind))-k41)/k41,'ko');hold on;
      title('Relative scaling exponents - longitudinal');
 
      figure(21)
-     plot(p,mean(der(ind)),'o');hold on;
+     plot(p,mean(derl(ind)),'o');hold on;
      title('comparison of long and trans exps');
  end
 
 % TRANSVERSE
-figure(14)
-der = localslp(xx_plot,yyavet,1);hold on;
-title('Local slopes - transverse')
 %extra stuff for fractional statistics paper
 if(0)
 figure(16)
@@ -93,20 +93,20 @@ ind = inflect(xx_plot,yyavet,3);hold on;
 title('Inflection points - transverse');
 
 sprintf('p=%d;',p)
-sprintf('Exps = %f; ',mean(der(ind)))
-sprintf('Error on exps = %f',std(der(ind)))
+sprintf('Exps = %f; ',mean(dert(ind)))
+sprintf('Error on exps = %f',std(dert(ind)))
      figure(18)
      k41 = p/3;
-     plot(p,mean(der(ind)),'o',p,k41,'x');hold on;
+     plot(p,mean(dert(ind)),'o',p,k41,'x');hold on;
      title('Comparison of exps with K41 - transverse');
-%plot(k41,mean(der(ind)),'ro'); hold on;
+%plot(k41,mean(dert(ind)),'ro'); hold on;
 
 figure(20)
-     plot(p,(mean(der(ind))-k41)/k41,'ko');hold on;
+     plot(p,(mean(dert(ind))-k41)/k41,'ko');hold on;
      title('Relative scaling exponents -  transverse');
 
      figure(21)
-     plot(p,mean(der(ind)),'x');hold on;
+     plot(p,mean(dert(ind)),'x');hold on;
      title('comparison of long and trans exps');
 end
 
