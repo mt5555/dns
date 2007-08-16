@@ -4,7 +4,7 @@
 
 ===================================================================
 
- README: updated 8/15/2006:  
+ README: updated 8/16/2007:  
 
 For pencil decompostions, we now (8/15/2006) have a more efficient
 model "dnsp" that should be used instead of "dns" (but dnsp does not
@@ -30,22 +30,22 @@ The code has options to solve the following equations:
 1. Navier-Stokes (primitive variables)  2D and 3D
 2. Navier-Stokes (stream function/vorticity) 2D only
 2. Lagrangian Averaged Navier Stokes (The Alpha Model)  2D and 3D
-3. Shallow water  2D only
+3. Shallow water and Shallow water alpha  2D only
 4. Boussinesque (with stratification)  3D only
 
 In can optionally allow for rotation, arbitrary aspect ratio and an
-arbitrary number of passive scalars.  It is an MPI code and can use
-an arbitrary 3D domain decomposition, (allowing for both slab
-decomposition and pencil decomposition).  For a grid of size N^3, it
-can run on up to N^3/8 processors.  It has been run on as many as 6144
-processors (with grids up to 3072^3)
+arbitrary number of passive scalars.  It is an MPI code and can use a
+3D domain decomposition, (allowing for slab decomposition, pencil
+decomposition or cube decomposition).  For a grid of size N^3, it can
+run on up to N^3/8 processors.  It has been run on as many as 18432
+processors (with grids up to 4096^3)
 
 This README file contains instructions to compile and run
 the purest form of the code: Navier-Stokes with deterministic
 low waver number forcing, use RK4 and a pseudo-spectral 
 method.  The equations are solved in a triply periodic cube
 of side length 1 with no passive scalars or rotation.
-The deterministic low wave number forcing we use is a simplified
+The deterministic low wave number forcing is a simplified
 version of Overholt and Pope, Comput. Fluids 27 1998, and
 is documented in detail in [1].  Some more, but incomplete documentation
 for this code is in the file "dns.doc" and rotation.tex.
@@ -148,8 +148,8 @@ Here are some examples:
 For a grid N^3, N must be a power
 of 2,3,5, and N/nx, N/ny and N/nz must be an even integers.  There are
 some other restrictions because of how we wrote our transpose routines.
-gridsetup.py will issue warnings if they are violated, and the code will
-print error messages and stop.
+gridsetup.py will issue warnings if they are violated, and, if the code
+is run it will print error messages and stop.
 
 If you do not have python installed on your system, you can
 instead copy the file 'params.h.test' to params.h' and then
@@ -280,22 +280,23 @@ make dnsp
 
 To run on more processors, see scripts/readme.job
 
-At time 1.0, the data (given in stdout) should be approximatly:
+At simulation time 1.0, the data (given in stdout) should be approximatly:
              
 
+*** dns code w/ FFT99 ********************************************************
+             AMD Athlon     PGI compiler     g95           AMD X2
+           FC4   FC6         pentium M     powerPC        F7 gfortran   
+          intel  gfortran   Linux RHEL4   MAC OS10.4    2.1GHZ DDR2-800 
+                                            2cpu         1 core   2 core
+kmax*eta = .9990 1.0214       .9839         .9626        1.0214   same  
+KE       =1.6800 1.6265      1.6828        1.7197        1.6265  
+R_lambda =61.47   62.22       59.7          58.4         62.22  
+run time  20min   22.8       66min         12.65          8.41    4.96  
 
-*** dns code **********************************************************
-            intel compiler  PGI compiler     g95
-              AMD Athlon     pentium M     powerPC
-              Linux FC4     Linux RHEL4   MAC OS10.4
-                                            2cpu
-kmax*eta =      .9990         .9839        .9626
-KE       =     1.6800        1.6828        1.7197 
-R_lambda =    61.47           59.7          58.4  
-run time       20min           66min       12.65
 
 
-*** dnsp code **********************************************************
+
+*** dnsp code w/ FFT99 ******************************************************
 
             intel compiler  PGI compiler    g95         intel on Thunderbird
               AMD Athlon    pentium M      powerPC      intel x86_64
