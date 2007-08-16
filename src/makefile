@@ -23,7 +23,9 @@ ifeq ($(UNAME),Linux)
    VENDOR=PGI
    #VENDOR=PGIMPI
    #VENDOR=INTEL
+   #VENDOR=INTELMPI
    #VENDOR=GNU
+   #VENDOR=GNUMPI
 
    FFT = -DUSE_FFT99
    FFTLIB =
@@ -49,7 +51,8 @@ ifeq ($(UNAME),Linux)
    endif
 
     ifeq ($(HOST),dosadi)
-      VENDOR=GNU
+      VENDOR=GNUMPI
+      MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
       #FFT = -DUSE_FFTWGURU
       #FFTLIB =  -lfftw3
       #FFT = -DUSE_STK
@@ -132,7 +135,14 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),GNU)
    F90 = gfortran
    CC=gcc
-   FFLAGS =  -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  -DGFORTRAN
+   FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
+   LDFLAGS = $(FFTLIB)
+   endif
+
+   ifeq ($(VENDOR),GNUMPI)
+   F90 = mpif90
+   CC=gcc
+   FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)
    endif
 
