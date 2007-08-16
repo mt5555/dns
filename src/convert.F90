@@ -66,9 +66,9 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=0.0
-tstop=0.5
-tinc=.3
+tstart=2.0
+tstop=2.4
+tinc=.1
 
 ! to read times from  file times.dat:
 !  tstart=-1; tinc=0; tname="times.dat"
@@ -477,7 +477,8 @@ do
       enddo
 
       ! give the output file a new name
-      basename=runname(1:len_trim(runname)) // "-trunc."
+      write(message, '(i5)') 10000 + spec_max
+      basename=runname(1:len_trim(runname)) // "-trunc"//message(2:5)//"."
 
       call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       ! output headerless data:

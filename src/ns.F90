@@ -461,6 +461,7 @@ endif
 if (mu_hyper>=2) then
    ! compute hyper viscosity scaling based on energy in last shell:
    call ke_shell_z(Qhat,hyper_scale)
+
 endif
 
 
@@ -483,10 +484,11 @@ do j=1,ny_2dz
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
             if (mu_hyper>=2) then
-               xw2=hyper_scale(1,1)*(im*im*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)**mu_hyper
-               xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-               xw_viss=xw_viss + mu_hyper_value*xw2
+               xw2=hyper_scale(1,1)*(im*im*pi2_squared)
+               xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
+               xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
+               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
+
             endif
             if (mu_hyper==0) then
                xw_viss=xw_viss + mu_hyper_value
@@ -715,10 +717,11 @@ do ns=np1,np2
                xw_viss=xw*mu/schmidt(ns)
                ! add in hyper viscosity, if used:
                if (mu_hyper>=2) then
-                  xw2=hyper_scale(1,ns)*(im*im*pi2_squared)**mu_hyper
-                  xw2=xw2+hyper_scale(2,ns)*(jm*jm*pi2_squared)**mu_hyper
-                  xw2=xw2+hyper_scale(3,ns)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-                  xw_viss=xw_viss + mu_hyper_value*xw2
+	          xw2=hyper_scale(1,ns)*(im*im*pi2_squared)
+                  xw2=xw2+hyper_scale(2,ns)*(jm*jm*pi2_squared)
+                  xw2=xw2+hyper_scale(3,ns)*(km*km*pi2_squared/(Lz*Lz))
+                  xw_viss=xw_viss + mu_hyper_value*(xw2**mu_hyper)
+
                endif
                if (mu_hyper==0) then
                   xw_viss=xw_viss + mu_hyper_value

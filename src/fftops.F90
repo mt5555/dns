@@ -1982,6 +1982,7 @@ if (dealias==1) then
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
    hscale(2,1) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
    hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+   
 
    im=g_nx/3
    jm=g_ny/3
@@ -2029,6 +2030,7 @@ if (dealias==2) then
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
    hscale(2,1)=hscale(1,1)
    hscale(3,1)=hscale(1,1)
+   
 endif
 
 
@@ -2117,8 +2119,10 @@ do n=np1,np2
    endif
 enddo
 
+! raise hscale to 1/mu_hyper because we raise it to mu_hyper in the ns.F90
+!   for  the non-scalar case 
 
-
+   hscale = hscale**(1/mu_hyper)
 end subroutine
 
 

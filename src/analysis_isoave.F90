@@ -69,20 +69,20 @@ call init_model
 !
 
 !cd
-!header_type=1; scale=1;
+header_type=1; scale=1;
 !header_type=4; scale=1/(2*pi)    ! for Takeshi's data
-header_type=2; scale=1/(2*pi); u12_shear=1.275    ! 1.275 or 10.2 Livescu shear data
+!header_type=2; scale=1/(2*pi); u12_shear=1.275    ! 1.275 or 10.2 Livescu shear data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.true.	!computes structure functions (long, trans, mixed)
-str_type=4		!used to flag anisotropic structure functions
+!str_type=4		!used to flag anisotropic structure functions
 compute_hspec=.false.
 read_uvw=.false.
-!use_max_shear_direction=.true. !use to compute shear tensor with maximum S_1,2
 
-tstart=0.0
-tstop=0.0
+
+tstart=2.8
+tstop=4.2
 tinc=0.2
 icount=0
 

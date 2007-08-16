@@ -25,7 +25,7 @@ integer,parameter :: pmax=10       ! has to be 6 or greater
 !  str_type=3    fractional structure functions power (see subroutine)
 !  str_type=4    anisotropic structure functions
 !
-integer :: str_type = 4
+integer :: str_type = 0
 
 real*8 :: fractional_power(2:pmax) 
 integer :: dir(3,ndir_max)
@@ -88,7 +88,7 @@ real*8,allocatable  :: dwork2(:,:)
 real*8,allocatable  :: dwork3(:,:,:)
 
 
-logical  :: use_max_shear_direction=.true.   ! requires str_type==4
+logical  :: use_max_shear_direction=.false.   ! requires str_type==4
 integer :: idir_max
 real*8  :: t1(3),t2(3)
 
@@ -588,8 +588,8 @@ Do idir=1,ndir
            '  (',dir(:,idir),')' ,'  t2=(',xvec,')',' <t2,t2>=',sum(xvec*xvec)
    endif
 
-#if 1
-      ! check orthoginality
+#if 0
+      ! check orthogonality
    if(my_pe==io_pe) then
       print *,'norms: ',sqrt(rhat(1)**2+rhat(2)**2+rhat(3)**2), &
            sqrt(rperp1(1)**2+rperp1(2)**2+rperp1(3)**2), &

@@ -31,8 +31,6 @@ ifeq ($(UNAME),Linux)
    FFTLIB =
 
 
-   
-   
    ifeq ($(ARCH),x86_64)
       #VENDOR=PGIMPI
       # needed if >2GB per process:   -DMALLOC_Q
