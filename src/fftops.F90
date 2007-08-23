@@ -1979,14 +1979,16 @@ call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 
 
 if (dealias==1) then
+   ke=0 ; ke(1)=1
+
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
    hscale(2,1) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
    hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
-   
+   hscale(:,1) = hscale(:,1)**(1d0/mu_hyper)
 
-   im=g_nx/3
-   jm=g_ny/3
-   km=g_nz/3
+   im=im_start
+   jm=jm_start
+   km=km_start
 
 !
 !  make sure that hyper viscosity does not exceed a CFL condition 
@@ -1997,37 +1999,34 @@ if (dealias==1) then
 !
 !   mu (kmax/Lz)**mu_hyper < cfl/delt
 !
-   cfl = 1.0/3     ! divide by 3 and apply speretaly to each term:
+   cfl = 1.0  
 
+   xw2=hscale(1,1)*(im*im*pi2_squared)
+   xw2=xw2+hscale(2,1)*(jm*jm*pi2_squared)
+   xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
+   xw2=mu_hyper_value*xw2**mu_hyper
 
-   xw2=delt*mu_hyper_value*hscale(1,1)*(im*im*pi2_squared)**mu_hyper
-   if (xw2>cfl) then
-      print *,'x: warning: hyper viscosity CFL: ',xw2
-      hscale(1,1)=(cfl/xw2)*hscale(1,1)
-      xw2=delt*mu_hyper_value*hscale(1,1)*(im*im*pi2_squared)**mu_hyper
+   if (delt*xw2>cfl) then
+      print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
+      !  scale 'hscale' by alpha so that 
+      !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
+      !     alpha**mu_hyper xw2 = cfl/delt
+      !     alpha**mu_hyper = cfl/(delt*xw2)
+      hscale(1,1)=( cfl/(delt*xw2) )**(1d0/mu_hyper)
+
+      ! recompute:
+      xw2=hscale(1,1)*(im*im*pi2_squared)
+      xw2=xw2+hscale(2,1)*(jm*jm*pi2_squared)
+      xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
+      xw2=mu_hyper_value*xw2**mu_hyper
    endif
-   max_hyper(1)= xw2
-   
-   xw2=delt*mu_hyper_value*hscale(2,1)*(jm*jm*pi2_squared)**mu_hyper
-   if (xw2>cfl) then
-      print *,'y: warning: hyper viscosity CFL: ',xw2
-      hscale(2,1)=(cfl/xw2)*hscale(2,1)
-      xw2=delt*mu_hyper_value*hscale(2,1)*(jm*jm*pi2_squared)**mu_hyper
-   endif
-   max_hyper(2)= xw2
-   
-   xw2=delt*mu_hyper_value*hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-   if (xw2>cfl) then
-      print *,'z: warning: hyper viscosity CFL: ',xw2
-      hscale(3,1)=(cfl/xw2)*hscale(3,1)
-      xw2=delt*mu_hyper_value*hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-   endif
-   max_hyper(3)= xw2
+   max_hyper = delt*xw2
 endif
 
 
 if (dealias==2) then
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
+   hscale(1,1) = hscale(1,1)**(1d0/mu_hyper)
    hscale(2,1)=hscale(1,1)
    hscale(3,1)=hscale(1,1)
    
@@ -2077,52 +2076,37 @@ do n=np1,np2
       hscale(1,n) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
       hscale(2,n) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
       hscale(3,n) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+      hscale(:,n) = hscale(:,n)**(1d0/mu_hyper)
       
-      im=g_nx/3
-      jm=g_ny/3
-      km=g_nz/3
+      im=im_start
+      jm=jm_start
+      km=km_start
       
-      !
-      !  make sure that hyper viscosity does not exceed a CFL condition 
-      !  (see above)
-      cfl = 1.0/3      ! divide by 3 and apply speretaly to each term:
+      cfl = 1.0 
       
-      xw2=delt*mu_hyper_value*hscale(1,n)*(im*im*pi2_squared)**mu_hyper
-      if (xw2>cfl) then
-         print *,'x: warning: scalar hyper viscosity CFL: ',xw2
-         hscale(1,n)=(cfl/xw2)*hscale(1,n)
-         xw2=delt*mu_hyper_value*hscale(1,n)*(im*im*pi2_squared)**mu_hyper
+      xw2=hscale(1,n)*(im*im*pi2_squared)
+      xw2=xw2+hscale(2,n)*(jm*jm*pi2_squared)
+      xw2=xw2+hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))
+      xw2=mu_hyper_value*xw2**mu_hyper
+      
+      if (delt*xw2>cfl) then
+         print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
+         !  scale 'hscale' by alpha so that 
+         !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
+         !     alpha**mu_hyper xw2 = cfl/delt
+         !     alpha**mu_hyper = cfl/(delt*xw2)
+         hscale(1,n)=( cfl/(delt*xw2) )**(1d0/mu_hyper)
       endif
-      max_hyper(1)= xw2
-      
-      xw2=delt*mu_hyper_value*hscale(2,n)*(jm*jm*pi2_squared)**mu_hyper
-      if (xw2>cfl) then
-         print *,'y: warning: scalar hyper viscosity CFL: ',xw2
-         hscale(2,n)=(cfl/xw2)*hscale(2,n)
-         xw2=delt*mu_hyper_value*hscale(2,n)*(jm*jm*pi2_squared)**mu_hyper
-      endif
-      max_hyper(2)= xw2
-      
-      xw2=delt*mu_hyper_value*hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-      if (xw2>cfl) then
-         print *,'z: warning: scalar hyper viscosity CFL: ',xw2
-         hscale(3,n)=(cfl/xw2)*hscale(3,n)
-         xw2=delt*mu_hyper_value*hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))**mu_hyper
-      endif
-      max_hyper(3)= xw2
-
    endif
    if (dealias==2) then
       hscale(1,n) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
+      hscale(1,n) = hscale(1,n)**(1d0/mu_hyper)
       hscale(2,n)=hscale(1,n)
       hscale(3,n)=hscale(1,n)
    endif
 enddo
 
-! raise hscale to 1/mu_hyper because we raise it to mu_hyper in the ns.F90
-!   for  the non-scalar case 
 
-   hscale = hscale**(1/mu_hyper)
 end subroutine
 
 
