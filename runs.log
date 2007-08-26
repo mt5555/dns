@@ -1,5 +1,16 @@
 *******************************************************************************
-12/02
+8/25/2007
+
+testing boussinesq vs dns:
+dnsb with theta:   10 timesteps:    .32      23% more expensive  
+dns  with 0 scalars, 10 timesteps:   .26  
+
+64^3 problem, 2 cores on dosadi F7
+
+
+
+*******************************************************************************
+12/02/2006
 sc2048decay
   restart from sc2048A below, at time t=1.0, but with no forcing.
   added u3 to diagnostics.  See how this decays for Jens Lorenz.
