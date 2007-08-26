@@ -47,7 +47,7 @@ endif
 ! compute spectrum
 ! always compute at first timestep because transfer cannot be computed
 ! on last timestep.   
-if (doit_model .or. time==time_initial) then
+if (doit_model .or. (time==time_initial .and. model_dt/=0)) then
 if ( g_bdy_x1==PERIODIC .and. &
      g_bdy_y1==PERIODIC .and. &
      g_bdy_z1==PERIODIC) then

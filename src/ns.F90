@@ -247,14 +247,37 @@ call wallclock(tmx1)
 !
 !  PASSIVE SCALARS
 !  compute   -u dot grad(s)
+!
 !  to compute grad(s):   from s, compute: s_x, s_y, s_z 
-!                                needs 2 x-transforms (forward and back),
+!                                needs 2 x-transforms (1 forward, 1 back),
 !                                      2 y-transforms, 
 !                                      2 z-transforms
-!                        from shat:   shat_x, shat_y, shat_z:
-!                                     3 x-transforms (back only)
-!                                     3 y-transforms 
+!                        PLUS: the FFT to compute s from s_hat:  
+!                                       1 x-transform
+!                                       2 y-transform
+!                                       1 z-transform
+!                        TOTAL, with y-pencel reference:  
+!                            6 transposes, 9 FFTs 
+!
+!                        "fast" way: compute some of the derivatives
+!                        while computing the iFFT:   get s_x 
+!                         for 1 extra ifft, no extra transposes
+!                                       1 x-transform
+!                                       2 y-transform
+!                                       1 z-transform
+!                           PLUS:  s_y, s_z:  
+!                                      2 y-transforms, 
+!                                      2 z-transforms
+!                        TOTAL, with y-pencel reference:  
+!                            4 transposes, 8 FFTs 
+!
+! 
+!                        from s_hat:   s_hat_x, s_hat_y, s_hat_z:
+!                                     3 x-transforms (no forward, 3 back)
+!                                     6 y-transforms 
 !                                     3 z-transforms
+!                         PLUS, for BOUSS, we also need s!
+!
 !
 !  For passive scalars of type "2", we also add (pi-u**2) to the RHS
 !  pi will be added later, but u**2 has to be added here
