@@ -1979,7 +1979,6 @@ call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 
 
 if (dealias==1) then
-   ke=0 ; ke(1)=1
 
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
    hscale(2,1) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
@@ -2006,13 +2005,21 @@ if (dealias==1) then
    xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
    xw2=mu_hyper_value*xw2**mu_hyper
 
+  
    if (delt*xw2>cfl) then
-      print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
+      if (my_pe==io_pe) then
+         print *,'delt = ', delt
+         print *,'mu_hyper_value = ', mu_hyper_value
+         print *,'hscale = ', hscale(1,1), hscale(2,1), hscale(3,1)
+         print *,'im,jm,km = ',im,jm,km
+         print *,'mu_hyper = ',mu_hyper
+     	 print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
+     endif
       !  scale 'hscale' by alpha so that 
       !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
       !     alpha**mu_hyper xw2 = cfl/delt
       !     alpha**mu_hyper = cfl/(delt*xw2)
-      hscale(1,1)=( cfl/(delt*xw2) )**(1d0/mu_hyper)
+      hscale(:,1)= hscale(:,1)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
 
       ! recompute:
       xw2=hscale(1,1)*(im*im*pi2_squared)
@@ -2090,12 +2097,14 @@ do n=np1,np2
       xw2=mu_hyper_value*xw2**mu_hyper
       
       if (delt*xw2>cfl) then
-         print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
+         if(my_pe==io_pe) then
+            print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
+         endif
          !  scale 'hscale' by alpha so that 
          !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
          !     alpha**mu_hyper xw2 = cfl/delt
          !     alpha**mu_hyper = cfl/(delt*xw2)
-         hscale(1,n)=( cfl/(delt*xw2) )**(1d0/mu_hyper)
+         hscale(1,n)=hscale(1,n)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
       endif
    endif
    if (dealias==2) then
