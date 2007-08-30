@@ -1994,7 +1994,7 @@ if (dealias==1) then
 !
 !   mu (kmax/Lz)**mu_hyper < cfl/delt
 !
-   cfl = 1.0  
+   cfl = 0.75  
 
    xw2=hscale(1,1)*(im*im*pi2_squared)
    xw2=xw2+hscale(2,1)*(jm*jm*pi2_squared)
@@ -2085,7 +2085,7 @@ do n=np1,np2
       jm=jm_start
       km=km_start
       
-      cfl = 1.0 
+      cfl = 0.75 
       
       xw2=hscale(1,n)*(im*im*pi2_squared)
       xw2=xw2+hscale(2,n)*(jm*jm*pi2_squared)
@@ -2100,7 +2100,7 @@ do n=np1,np2
          !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
          !     alpha**mu_hyper xw2 = cfl/delt
          !     alpha**mu_hyper = cfl/(delt*xw2)
-         hscale(1,n)=hscale(1,n)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
+         hscale(:,n)=hscale(:,n)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
       endif
    endif
    if (dealias==2) then
