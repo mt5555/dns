@@ -1927,12 +1927,8 @@ if (dealias==1 .or. dealias==0) then
    ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
    ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
    km_start = g_nz/3
-   if (km_start >= g_nz/3) km_start=km_start-1
    jm_start = g_ny/3
-   if (jm_start >= g_ny/3.0) jm_start=jm_start-1
-   im_start = g_nx/3.0
-   if (im_start >= g_nx/3) im_start=im_start-1
-
+   im_start = g_nx/3
 else if (dealias==2) then
    kstart2=dealias_sphere_kmax2_1
    kstop2=dealias_sphere_kmax2
