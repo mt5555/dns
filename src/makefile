@@ -85,7 +85,7 @@ ifeq ($(UNAME),Linux)
 
    ifeq ($(HOST),pfe1.lanl.gov)
       VENDOR=INTEL
-      MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
+      MPI = -DNDEBUG -DUSE_MPI -DMPI_UNDERSCORE -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
       MPILIB = $(MPI_LD_FLAGS)
    endif
 
