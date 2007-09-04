@@ -85,8 +85,8 @@ ifeq ($(UNAME),Linux)
 
    ifeq ($(HOST),pfe1.lanl.gov)
       VENDOR=INTEL
-      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI
-      MPILIB= -lmpi
+      MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
+      MPILIB = $(MPI_LD_FLAGS)
    endif
 
    ifeq ($(HOST),reddish)
@@ -126,7 +126,7 @@ me=pmpi_wtime
 
 
    ifeq ($(VENDOR),INTEL)
-   F90 = ifort
+   F90 = ifc
    CC=gcc
    FFLAGS =  -auto -w90  -Vaxlib  -O1    $(MPI)  $(FFT) 
    #FFLAGS =  -w90  -Vaxlib -O1 -tpp7   $(MPI)  $(FFT) 
@@ -135,7 +135,7 @@ me=pmpi_wtime
 
    ifeq ($(VENDOR),INTELMPI)
    F90 = mpif90
-   CC=mpicc
+   CC=gcc
    FFLAGS =  -auto -w90  -Vaxlib  -O1    $(MPI)  $(FFT) 
    LDFLAGS = $(FFTLIB)
    endif
