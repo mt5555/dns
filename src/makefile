@@ -68,10 +68,12 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI 
       MPILIB =  -lmpi
    endif
+
    ifeq ($(HOST),nostromo)
       VENDOR=GNU
       #MPI =  -DBALU=1e-3
    endif
+
    ifeq ($(HOST),sulaco)
       VENDOR=INTEL
 #      VENDOR=PGI
@@ -80,12 +82,20 @@ ifeq ($(UNAME),Linux)
 #      MPI =  -DUSE_MPI -DUSE_MPI_IO -DMPI_UNDERSCORE -DMPI_HAS_REAL8 -DMPI_REAL8_LAM
 #      MPILIB =   -llammpio -llamf77mpi -lmpi -llam -lutil -lpthread
    endif
+
+   ifeq ($(HOST),pfe1.lanl.gov)
+      VENDOR=INTEL
+      MPI = -DNDEBUG -DMPI_HAS_REAL8 -DUSE_MPI
+      MPILIB= -lmpi
+   endif
+
    ifeq ($(HOST),reddish)
       VENDOR=PGI
       MPI = -I/usr/pgi/linux86-64/5.2/include -DUSE_MPI -DMPI_HAS_REAL8
-      MPILIB=  -L/usr/pgi/linux86-64/5.2/lib -lfmpich -lmpich 
-      #MPI = -I/usr/lib/mpi/mpi_pgi/include -DUSE_MPI -DMPI_HAS_REAL8 -Dmpi_wtime=pmpi_wtime
-      #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi 
+      MPILIB=  -L/usr/pgi/linux86-64/5.2/lib -lfmpich -lmpich
+      #MPI = -I/usr/lib/mpi/mpi_pgi/include -DUSE_MPI -DMPI_HAS_REAL8 -Dmpi_wti\
+me=pmpi_wtime
+      #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi
    endif
 
 
