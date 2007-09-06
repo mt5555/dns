@@ -1978,7 +1978,11 @@ if (dealias==1) then
 
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
    hscale(2,1) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
-   hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+   if (km_start==0) then ! 2D problems
+      hscale(3,1)=0
+   else
+      hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+   endif
    hscale(:,1) = hscale(:,1)**(1d0/mu_hyper)
 
    im=im_start
@@ -2078,7 +2082,11 @@ do n=np1,np2
    if (dealias==1) then
       hscale(1,n) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
       hscale(2,n) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
-      hscale(3,n) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+      if (km_start==0) then ! 2D problems
+         hscale(3,1)=0
+      else
+         hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+      endif
       hscale(:,n) = hscale(:,n)**(1d0/mu_hyper)
       
       im=im_start

@@ -1212,7 +1212,7 @@ call ifft3d(uwbar2(1,1,1),work1)
 call ifft3d(Q(1,1,1,1),work1) 
 call ifft3d(Q(1,1,1,2),work1) 
 
-! now compute bar(u*vor) - bar(u)*var(vor)
+! now compute r = Residual = bar(u*vor) - bar(u)*bar(vor)
 Q(:,:,:,1)=uwbar1(:,:,:) - vor(:,:,:)*Q(:,:,:,1)
 Q(:,:,:,2)=uwbar2(:,:,:) - vor(:,:,:)*Q(:,:,:,2)
 
@@ -1220,8 +1220,8 @@ Q(:,:,:,2)=uwbar2(:,:,:) - vor(:,:,:)*Q(:,:,:,2)
 call der(vor,uwbar1,dummy,work1,DX_ONLY,1)
 call der(vor,uwbar2,dummy,work1,DX_ONLY,2)
 
-! r dot grad(vor)  /abs(grad(vor))**2        kct
-! r dot grad(vor)  / abs(r)*abs(grad(vor))   ct
+! r dot grad(vor)  /abs(grad(vor))**2        kappa cos theta
+! r dot grad(vor)  / abs(r)*abs(grad(vor))   cos theta
 do k=nz1,nz1
 do j=ny1,ny2
 do i=nx1,nx2

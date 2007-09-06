@@ -835,7 +835,6 @@ do wn=numb1,numb
       xw=-(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
       fxx_diss = fxx_diss + xfac*xw*fsum
 
-
    enddo
 
 enddo

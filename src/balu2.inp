@@ -3,13 +3,13 @@
 ns_uvw       ! equations
 zero          ! initial condition:  KH-blob, KH-anal, iso12
 0           ! init condition subtype
-sto_high_4  ! forcing:  none, iso, iso12, iso12w, iso23w
+iso12w       ! forcing:  none, iso, iso12, iso12w, iso23w
 1.0 1       ! forcing parameters (not used for iso12, n.n=f^2, n=width of gauss\ian)
 value        ! viscosity type  (value, smallest, kediff, Re)
 0            ! viscosity coefficient.  (300)
 hyper16       ! hyper vis
 1.0         ! hyper vis value
-hypo2       ! hypo vis
+hypo2       ! hypo vis   (hypo2)
 10.0         ! hypo vis value
 0.          ! fcor  rotation
 1.0        ! Z sscaling  (aspect ratio)
@@ -30,7 +30,7 @@ periodic     ! z bc
 .01          ! max_dt
 0.0          ! restart_dt  (this is never used)
 1.0          ! diag_dt   (.scalars)
-1.0           ! model_dt   (sectra, structure functions)
+1.0           ! model_dt   (spectra, structure functions)
 -50          ! screen_dt (0 = disables, +ve = time, -ve = timesteps)
 1.0           ! output_dt  (field data, 0 = output disabled, except for custom\ out times)
 0             ! also output the vorticity
@@ -41,7 +41,7 @@ periodic     ! z bc
 grid:  256x256x1
 cpu:   128x1x1
 
-./gridsetup.py 128 1 1 256 256 1 2 2 0 
+./gridsetup.py 1 1 1 256 256 1 2 2 0 
 make
 ./dns -i balu2.inp   name
 

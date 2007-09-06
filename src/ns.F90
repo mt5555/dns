@@ -221,7 +221,7 @@ integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,ens_alpha
 real*8 :: p_diss(n_var),pke(n_var)
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(ndim,n_var),ens_diss2,ens_diss4,ens_diss6
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(n_var,n_var),ens_diss2,ens_diss4,ens_diss6
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3),xi
@@ -461,6 +461,7 @@ do n=1,3
 enddo
 
 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! From this point on, Q() may be used as a work array
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -478,13 +479,14 @@ if (compute_ints==1 .and. compute_transfer) then
    enddo
 endif
 
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (mu_hyper>=2) then
    ! compute hyper viscosity scaling based on energy in last shell:
    call ke_shell_z(Qhat,hyper_scale)
-
 endif
 
 
@@ -511,7 +513,6 @@ do j=1,ny_2dz
                xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
                xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
                xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
-
             endif
             if (mu_hyper==0) then
                xw_viss=xw_viss + mu_hyper_value
@@ -598,8 +599,6 @@ if (compute_ints==1 .and. compute_transfer) then
 endif
 
 
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in forcing to rhs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -633,10 +632,6 @@ if (forcing_type>0) then
    ! average over all 4 stages
    f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
 endif
-
-
-
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
