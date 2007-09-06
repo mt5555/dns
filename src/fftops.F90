@@ -2003,14 +2003,14 @@ if (dealias==1) then
 
   
    if (delt*xw2>cfl) then
-      if (my_pe==io_pe) then
-         print *,'delt = ', delt
-         print *,'mu_hyper_value = ', mu_hyper_value
-         print *,'hscale = ', hscale(1,1), hscale(2,1), hscale(3,1)
-         print *,'im,jm,km = ',im,jm,km
-         print *,'mu_hyper = ',mu_hyper
-     	 print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
-     endif
+!      if (my_pe==io_pe) then
+!         print *,'delt = ', delt
+!         print *,'mu_hyper_value = ', mu_hyper_value
+!         print *,'hscale = ', hscale(1,1), hscale(2,1), hscale(3,1)
+!         print *,'im,jm,km = ',im,jm,km
+!         print *,'mu_hyper = ',mu_hyper
+!     	 print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
+!     endif
       !  scale 'hscale' by alpha so that 
       !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
       !     alpha**mu_hyper xw2 = cfl/delt
@@ -2093,9 +2093,9 @@ do n=np1,np2
       xw2=mu_hyper_value*xw2**mu_hyper
       
       if (delt*xw2>cfl) then
-         if(my_pe==io_pe) then
-            print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
-         endif
+!        if(my_pe==io_pe) then
+!            print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
+!         endif
          !  scale 'hscale' by alpha so that 
          !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
          !     alpha**mu_hyper xw2 = cfl/delt
