@@ -53,13 +53,13 @@ if (option==3)
    %ax=[1,1e4,1e-9,1000.0];
 end
 
-% used by passive scalars
+% used by passive scalars, 2D
 if (option==4) 
    x_ck=1:1000;
    plaw=-3;
    scalep = 0;
    ax=[1,1e4,1e-6,1.0];
-   ax=[1,1e3,1e-8,1.0];
+   ax=[1,1e3,1e-12,1e-2];
 end
 % decay2048 KE:
 if (option==5) 

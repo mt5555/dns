@@ -78,11 +78,10 @@ namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fco
 %name = 'n256high_f5n2000_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
 
-%name = 'test0000.0000';
-%namedir = '/nh/u/skurien/dns/src/tests/';
+name = 'balu_b0000.0000';
+namedir = '/home/mataylo/scratch3/dns/';
 
-spec_r_ave = zeros(258,1);
-pspec_r_ave = zeros(258,1);
+
 spec_r_save=[];
 spec_r_save_fac3=[];
 
@@ -110,13 +109,18 @@ CK=CK_orig;
 j=0;
 
 count = 0
-while (time>=.0 & time<=9)
+while (time>=.0 & time<=900)
 
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
   disp(sprintf('reading spectrum:  time=%f   n_r=%d',time,n_r));
-  
+
+  if (j==1) 
+    spec_r_ave = zeros(n_r,1);
+    pspec_r_ave = zeros(n_r,1);
+  end
+ 
   if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
   knum=0:(n_r-1);
   eta=0;
