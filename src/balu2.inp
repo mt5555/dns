@@ -23,7 +23,7 @@ fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic     ! x bc  (periodic, no-slip)
 periodic     ! y bc
 periodic     ! z bc
-10          ! time to run
+100          ! time to run
 1.5          ! adv cfl  (0 = disabled, use min_dt) .8
 0.25           ! vis cfl  (0 = disabled, use min_dt) .01
 0.0          ! min_dt

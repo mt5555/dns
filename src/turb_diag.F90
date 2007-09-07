@@ -1196,12 +1196,22 @@ do k=nz1,nz2
       do i=nx1,nx2
          im=imcord(i)
          ! wave number = (im,jm,km)  (can be positive or negative)
-         xw2 = alpha_value*pi2_squared*(im**2 + jm**2 + km**2)
-         uwbar1(i,j,k)=uwbar1(i,j,k)*exp(-xw2)
-         uwbar2(i,j,k)=uwbar2(i,j,k)*exp(-xw2)
-         Q(i,j,k,1)=Q(i,j,k,1)*exp(-xw2)
-         Q(i,j,k,2)=Q(i,j,k,2)*exp(-xw2)
-         vor(i,j,k)=vor(i,j,k)*exp(-xw2)
+         !xw2 = alpha_value*pi2_squared*(im**2 + jm**2 + km**2)
+         !xw2=exp(-xw2)
+
+         ! cutoff filter at wave number 128
+         xw2 = (im**2 + jm**2 + km**2)
+         if (xw2 > 128**2) then
+            xw2=0
+         else
+            xw2=1
+         endif
+
+         uwbar1(i,j,k)=uwbar1(i,j,k)*xw2
+         uwbar2(i,j,k)=uwbar2(i,j,k)*xw2
+         Q(i,j,k,1)=Q(i,j,k,1)*xw2
+         Q(i,j,k,2)=Q(i,j,k,2)*xw2
+         vor(i,j,k)=vor(i,j,k)*xw2
       enddo
    enddo
 enddo
