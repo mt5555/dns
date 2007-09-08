@@ -49,7 +49,7 @@ make
 % edit convert.F90, set tstart,tstop,tinc
 % edit balu2.inp, set alpha to the value of alpha to use in the filter 
 make convert
-./convert -i balu2.inp -cout uwbar name
+./convert -i balu2.inp -cout uwbar -d /tmp/balu balu_b 
 
 
 

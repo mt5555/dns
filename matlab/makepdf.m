@@ -13,7 +13,7 @@ nx=length(x);
 ny=length(y);
 
 % whole plot, but subsample data:
-subsample=1;
+subsample=0;
 skip=4;   x1=1; x2=nx; y1=1; y2=ny;
 
 
@@ -52,28 +52,41 @@ end
 disp(sprintf('min/max kct: %f %f ',qmin,qmax));
 
 
-
+pr=1:64;
 
 figure(1)
 subplot(2,2,1)
-pcolor(x,y,ct')
-shading interp
+pcolor(x(pr),y(pr),ct(pr,pr)')
+colorbar
+shading flat
 axis equal
-title('ct') 
+title('ct   (closeup view of lower left corner)') 
 
 subplot(2,2,2)
-hist(ctarray,40)
+hist(acos(ctarray),40)
+title('PDF of acos(ct) ')
 
 
 subplot(2,2,3)
-pcolor(x,y,(kct)')
-shading interp
+pcolor(x(pr),y(pr),(kct(pr,pr))')
+colorbar
+shading flat
 axis equal
-title('kct') 
+title('kct  (closeup view of lower left corner)') 
+
+% $$$ kctp = (kctarray>0).*kctarray;
+% $$$ kctp = (kctp==0)*1e-12 + kctp;
+% $$$ min(kctp)
+% $$$ kctn = (kctarray<0).*kctarray;
+% $$$ kctn = -(kctn==0)*1e-12 + kctn;
+% $$$ max(kctn)
+
 
 subplot(2,2,4)
-hist(kctarray./ctarray,40);
-
+[h,x]=hist(kctarray,40);
+semilogy(x,h)
+title('PDF kct ')
+axis([-.02 .02 1 1e6 ]);
 
 
 

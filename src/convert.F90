@@ -425,11 +425,11 @@ do
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
       call print_stats(Q,vor,work1,work2)
-      ! compute the vorticity, store in 3rd component of Q
+      ! compute the vorticity, store in vor(:,:,:,1)
       call vorticity2d(vor,Q,work1,work2)
 
       call print_message("computing uwbar...")
-      ! overwrite bar(u vor) - bar(u) bar(vor), store in "Q"
+      ! overwrite Q with bar(u vor) - bar(u) bar(vor)
       call uw_filter(Q,vor(1,1,1,1),vor(1,1,1,2),work1,work2)
 
       call print_message("outputing uwbar...")

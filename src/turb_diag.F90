@@ -1201,7 +1201,7 @@ do k=nz1,nz2
 
          ! cutoff filter at wave number 128
          xw2 = (im**2 + jm**2 + km**2)
-         if (xw2 > 128**2) then
+         if (xw2 > 64**2) then
             xw2=0
          else
             xw2=1
