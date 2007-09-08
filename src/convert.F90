@@ -66,7 +66,7 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=11.0
+tstart=40.0
 tstop=100.0
 tinc=1.0
 
