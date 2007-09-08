@@ -1896,13 +1896,51 @@ end subroutine
 
 subroutine ke_shell_z(Qhat,hscale)
 !
-! compute the KE in shell   kstart2 < k**2 <= kstop2
-! for z-decomposition data
-!
 !  Note: for Lz<>1, this routine assumes scaling domain by Lz 
-!  
-!  hscale(:,1)     viscosity in (x,y,z) directions used for momentum
 !
+! compute a hyperviscosity scaling based on the KE in the last shell
+! for spherical dealiasing, we follow Leslie Smith (ref?):
+!
+!    du/dt + ... =  (h k^2)^mu_hyper  u
+!
+!    KE = energy in the last spherical shell.
+!    scalar hypervis coefficient chosen of the form: 
+!        h = [ sqrt(KE)*  kmax^2P   ]   ^(1/mu_hyper) 
+!
+!
+! Spherical shells my not exist when running large aspect ration cases,
+! and do not make sense when using 2/3 dealiasing.  So we introduce
+! a tensor viscosity h(1:3):
+!
+!    du/dt + ... =  div ( h dot grad u) 
+!                = (h(1) kx^2 + h(2) ky^2 + h(3) kz^2 )^(mu_hyper) u
+!    
+!    KE(:) = KE in last slab kx_max,,ky_max and kz_max
+!    scalar hypervis coefficient chosen of the form: 
+!        h(1) = [ sqrt(KE(1)) kx_max^2P ]^(1/mu_hyper) 
+!        h(2) = [ sqrt(KE(2)) ky_max^2P ]^(1/mu_hyper) 
+!        h(3) = [ sqrt(KE(3)) kz_max^2P ]^(1/mu_hyper) 
+!
+! P chosen to be dimensionally correct:
+!
+! units of E = m**2/s**2
+! units of E(k) = m**3/s**2
+!
+!    du/dt   =    sqrt(KE)   kx_max^2P  k^(2 mu_hyper)  u
+!    m/s**2  =    m**1.5/s   m^(-2P)    m^(-2 mu_hyper)  m/s          
+!      1     =    m**1.5     m^(-2P)    m^(-2 mu_hyper)
+!      1.5 -2P - 2mu_hyper = 0   
+!
+!      P  = .75 - mu_hyper
+!    
+! 
+! What happens if we want to scale by ENS = k^2 KE ?
+!        h = [ ENS^? *  kmax^2P    ]   ^(1/mu_hyper) 
+!        h = [ KE^?  *  kmax^(2P+2)]   ^(1/mu_hyper) 
+!  for correct time units, ? must be 0.5, and thus this produces the same results.
+!
+!We also compute scaling for the scalars:
+!  hscale(:,1)     viscosity in (x,y,z) directions used for momentum
 !  hscale(:,np1:np2)  viscosity in (x,y,z) directions used for scalars
 !
 use params
@@ -1914,15 +1952,9 @@ real*8 hscale(ndim,n_var)
 real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,xw2,cfl
 integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start
 
-! units of E = m**2/s**2
-! units of E(k) = m**3/s**2
-! hyper viscosity:  E(kmax)* k**8 / kmax**(8-1.5)  
-! scaling:  E(kmax)/(kmax**2)(4-.75)
-
-! du/dt = (sqrt(E(kmax))  [1/ (kmax**8 kmax**alpha) ] k**8  u  
-! m/s**2  =  m**1.5/s  kmax**-alpha  m/s
-!  1 = m**1.5 kmax**-alpha     = m**(1.5+alpha)   alpha = -1.5
-
+!
+!  compute kmax based on dealiasing type
+!
 if (dealias==1 .or. dealias==0) then
    ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
    ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
@@ -1937,6 +1969,9 @@ else
 endif
 
 
+!
+!  compute KE in last shell, or last 3 slabs in wave number space:
+!
 ke=0
 do j=1,ny_2dz
    jm=z_jmcord(j)
@@ -1974,6 +2009,9 @@ call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 
+!
+!  Compute hyperviscosity coefficient, and check for viscous CFL violations:
+!
 if (dealias==1) then
 
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
@@ -2036,8 +2074,9 @@ if (dealias==2) then
    hscale(1,1) = hscale(1,1)**(1d0/mu_hyper)
    hscale(2,1)=hscale(1,1)
    hscale(3,1)=hscale(1,1)
-   
 endif
+
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
