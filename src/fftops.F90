@@ -1950,23 +1950,38 @@ integer :: kstart2,kstop2
 real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
 real*8 hscale(ndim,n_var)
 real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,xw2,cfl
-integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start
+integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start,shell_type
 
 !
-!  compute kmax based on dealiasing type
+!  shell_type = 1     use spherical shell of thickness 1 wave number   
+!               2     use slabs of thickness 1 wave number
 !
 if (dealias==1 .or. dealias==0) then
+   ! use SLABS
+   shell_type=2 
    ! dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
    ! take energy in band km such that:  km+1>g_nz/3 .and. km< g_nz/3
    km_start = g_nz/3
    jm_start = g_ny/3
    im_start = g_nx/3
+
+! uncomment next 4 lines use Energy scaling based on spherical shell
+! contained inside 2/3 dealiased cube:
+!   shell_type=1
+!   kstart2=(g_nx/3 - 1 )**2
+!   kstop2=(g_nx/3)**2
+!   print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
+
 else if (dealias==2) then
+   ! use spherical shell
+   shell_type=1   
    kstart2=dealias_sphere_kmax2_1
    kstop2=dealias_sphere_kmax2
 else
    call abortdns('ke_shell_z():  Error: bad dealiasing type')
 endif
+
+
 
 
 !
@@ -1989,12 +2004,12 @@ do j=1,ny_2dz
             u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
          enddo
          
-         if (dealias==1) then
+         if (shell_type==2) then
             if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*u2
             if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*u2
             if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
          endif
-         if (dealias==2) then
+         if (shell_type==1) then
             xw = jm*jm + im*im + km*km/(Lz*Lz) 
             if (kstart2 < xw  .and. xw <= kstop2) then
                ke(1) = ke(1) + .5*xfac*u2
@@ -2012,7 +2027,7 @@ call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 !
 !  Compute hyperviscosity coefficient, and check for viscous CFL violations:
 !
-if (dealias==1) then
+if (shell_type==2) then
 
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
    hscale(2,1) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
@@ -2069,7 +2084,7 @@ if (dealias==1) then
 endif
 
 
-if (dealias==2) then
+if (shell_type==1) then
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
    hscale(1,1) = hscale(1,1)**(1d0/mu_hyper)
    hscale(2,1)=hscale(1,1)
@@ -2099,12 +2114,12 @@ do n=np1,np2
             
             u2=Qhat(k,i,j,n)*Qhat(k,i,j,n)
             
-            if (dealias==1) then
+            if (shell_type==2) then
                if (abs(im)==im_start) ke(1)=ke(1) + .5*xfac*u2
                if (abs(jm)==jm_start) ke(2)=ke(2) + .5*xfac*u2
                if (abs(km)==km_start) ke(3)=ke(3) + .5*xfac*u2
             endif
-            if (dealias==2) then
+            if (shell_type==1) then
                xw = jm*jm + im*im + km*km/(Lz*Lz)
                if (kstart2 < xw  .and. xw <= kstop2) then
                   ke(1) = ke(1) + .5*xfac*u2
@@ -2118,7 +2133,7 @@ do n=np1,np2
    call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
    
-   if (dealias==1) then
+   if (shell_type==2) then
       hscale(1,n) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
       hscale(2,n) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
       if (km_start==0) then ! 2D problems
@@ -2150,7 +2165,7 @@ do n=np1,np2
          hscale(:,n)=hscale(:,n)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
       endif
    endif
-   if (dealias==2) then
+   if (shell_type==1) then
       hscale(1,n) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
       hscale(1,n) = hscale(1,n)**(1d0/mu_hyper)
       hscale(2,n)=hscale(1,n)
