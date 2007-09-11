@@ -202,6 +202,7 @@ else if ($1 == ps) then
 else if ($1 == pz) then
    set opt = "-r -zi $opt" 
    echo USING COMPRESSED RESTART   
+   echo REQUIRES 1 x 1 x N parallel decompostion 
 else
    echo NOT USING RESTART
 endif

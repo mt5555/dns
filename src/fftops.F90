@@ -1948,7 +1948,7 @@ use mpi
 implicit none
 integer :: kstart2,kstop2
 real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
-real*8 hscale(ndim,n_var)
+real*8 hscale(n_var,n_var)
 real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,xw2,cfl
 integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start,shell_type
 
@@ -1967,10 +1967,10 @@ if (dealias==1 .or. dealias==0) then
 
 ! uncomment next 4 lines use Energy scaling based on spherical shell
 ! contained inside 2/3 dealiased cube:
-!   shell_type=1
-!   kstart2=(g_nx/3 - 1 )**2
-!   kstop2=(g_nx/3)**2
-!   print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
+   shell_type=1
+   kstart2=(g_nx/3 - 1 )**2
+   kstop2=(g_nx/3)**2
+   print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
 
 else if (dealias==2) then
    ! use spherical shell
@@ -2000,7 +2000,7 @@ do j=1,ny_2dz
          if (im==0) xfac=xfac/2
          
          u2=0
-         do n=1,n_var
+         do n=1,ndim
             u2=u2+Qhat(k,i,j,n)*Qhat(k,i,j,n)
          enddo
          

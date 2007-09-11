@@ -160,11 +160,11 @@ endif
 
 ifeq ($(UNAME),Darwin)
 #   MPI =  -DUSE_MPI  -DMPI_REAL8_LAM    -I/sw/include/lammpi
-   MPI =  -DUSE_MPI      -I/sw/include/
-   MPILIB = -L/sw/lib/  -llammpio -llamf77mpi -lmpi -llam 
-   F90 = g95
-   FFLAGS =  -O2 -ffixed-line-length-132 $(MPI) 
-   CC = cc -DG77_UNDERSCORE
+    MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
+#   MPILIB = -L/sw/lib/  -llammpio -llamf77mpi -lmpi -llam 
+   F90 = mpif90
+   FFLAGS =  -O2  -DGFORTRAN -ffixed-line-length-132 $(MPI) 
+#   CC = cc -DG77_UNDERSCORE
 
 #   CC = cc -DF_NO_UNDERSCORE
 #   F90 = xlf95
