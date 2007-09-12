@@ -233,7 +233,7 @@ if (doit_screen) then
    call print_message(message)	
 
    if (mu_hyper_value>0 .and. mu_hyper>=2 .and. dealias==1) then
-      write(message,'(a,3e12.4)') 'hyper-vis (tensor) cfl: ',&
+      write(message,'(a,3e12.4)') 'hyper-viscosity cfl: ',&
            max_hyper
       call print_message(message)
    endif
