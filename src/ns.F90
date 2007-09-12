@@ -486,6 +486,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (mu_hyper>=2) then
    ! compute hyper viscosity scaling based on energy in last shell:
+   ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
    call ke_shell_z(Qhat,hyper_scale)
 endif
 

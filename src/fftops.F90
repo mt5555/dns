@@ -1967,10 +1967,10 @@ if (dealias==1 .or. dealias==0) then
 
 ! uncomment next 4 lines use Energy scaling based on spherical shell
 ! contained inside 2/3 dealiased cube:
-   shell_type=1
-   kstart2=(g_nx/3 - 1 )**2
-   kstop2=(g_nx/3)**2
-   print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
+!   shell_type=1
+!   kstart2=(g_nx/3 - 1 )**2
+!   kstop2=(g_nx/3)**2
+!   print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
 
 else if (dealias==2) then
    ! use spherical shell
@@ -1980,8 +1980,6 @@ else if (dealias==2) then
 else
    call abortdns('ke_shell_z():  Error: bad dealiasing type')
 endif
-
-
 
 
 !
@@ -2024,11 +2022,17 @@ call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
 
 
+
 !
 !  Compute hyperviscosity coefficient, and check for viscous CFL violations:
 !
+if (shell_type==1) then
+   hscale(1,1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
+   hscale(1,1) = hscale(1,1)**(1d0/mu_hyper)
+   hscale(2,1)=hscale(1,1)
+   hscale(3,1)=hscale(1,1)
+endif
 if (shell_type==2) then
-
    hscale(1,1) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
    hscale(2,1) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
    if (km_start==0) then ! 2D problems
@@ -2036,12 +2040,28 @@ if (shell_type==2) then
    else
       hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
    endif
-   hscale(:,1) = hscale(:,1)**(1d0/mu_hyper)
+   hscale(1:3,1) = hscale(1:3,1)**(1d0/mu_hyper)
+endif
 
+!
+! check for CFL violations
+!
+if (dealias==0) then  ! no dealiasing
+   im=g_nx/2
+   jm=g_ny/2
+   km=g_nz/2
+endif
+if (dealias==1) then ! 2/3 rule
    im=im_start
    jm=jm_start
    km=km_start
-
+endif
+if (dealias==2) then ! spherical
+   ! im^2 + jm^2 + km^2 =  dealias_sphere_kmax2    
+   im= sqrt(dealias_sphere_kmax2/3.0)    
+   jm=im
+   km=im
+endif
 !
 !  make sure that hyper viscosity does not exceed a CFL condition 
 !  d(u_k)/dt = x u_k      delt*x < cfl   x < cfl/delt
@@ -2051,45 +2071,39 @@ if (shell_type==2) then
 !
 !   mu (kmax/Lz)**mu_hyper < cfl/delt
 !
-   cfl = 0.75  
+cfl = 0.75  
 
+xw2=hscale(1,1)*(im*im*pi2_squared)
+xw2=xw2+hscale(2,1)*(jm*jm*pi2_squared)
+xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
+xw2=mu_hyper_value*xw2**mu_hyper
+
+
+if (delt*xw2>cfl) then
+   !      if (my_pe==io_pe) then
+   !         print *,'delt = ', delt
+   !         print *,'mu_hyper_value = ', mu_hyper_value
+   !         print *,'hscale = ', hscale(1,1), hscale(2,1), hscale(3,1)
+   !         print *,'im,jm,km = ',im,jm,km
+   !         print *,'mu_hyper = ',mu_hyper
+   print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
+   !     endif
+   !  scale 'hscale' by alpha so that 
+   !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
+   !     alpha**mu_hyper xw2 = cfl/delt
+   !     alpha**mu_hyper = cfl/(delt*xw2)
+   hscale(1:3,1)= hscale(1:3,1)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
+   
+   ! recompute:
    xw2=hscale(1,1)*(im*im*pi2_squared)
    xw2=xw2+hscale(2,1)*(jm*jm*pi2_squared)
    xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
    xw2=mu_hyper_value*xw2**mu_hyper
-
-  
-   if (delt*xw2>cfl) then
-!      if (my_pe==io_pe) then
-!         print *,'delt = ', delt
-!         print *,'mu_hyper_value = ', mu_hyper_value
-!         print *,'hscale = ', hscale(1,1), hscale(2,1), hscale(3,1)
-!         print *,'im,jm,km = ',im,jm,km
-!         print *,'mu_hyper = ',mu_hyper
-!     	 print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
-!     endif
-      !  scale 'hscale' by alpha so that 
-      !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
-      !     alpha**mu_hyper xw2 = cfl/delt
-      !     alpha**mu_hyper = cfl/(delt*xw2)
-      hscale(:,1)= hscale(:,1)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
-
-      ! recompute:
-      xw2=hscale(1,1)*(im*im*pi2_squared)
-      xw2=xw2+hscale(2,1)*(jm*jm*pi2_squared)
-      xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
-      xw2=mu_hyper_value*xw2**mu_hyper
-   endif
-   max_hyper = delt*xw2
 endif
+max_hyper = delt*xw2
 
 
-if (shell_type==1) then
-   hscale(1,1) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
-   hscale(1,1) = hscale(1,1)**(1d0/mu_hyper)
-   hscale(2,1)=hscale(1,1)
-   hscale(3,1)=hscale(1,1)
-endif
+
 
 
 
@@ -2133,43 +2147,57 @@ do n=np1,np2
    call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
 #endif
    
-   if (shell_type==2) then
-      hscale(1,n) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
-      hscale(2,n) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
-      if (km_start==0) then ! 2D problems
-         hscale(3,1)=0
-      else
-         hscale(3,1) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
-      endif
-      hscale(:,n) = hscale(:,n)**(1d0/mu_hyper)
-      
-      im=im_start
-      jm=jm_start
-      km=km_start
-      
-      cfl = 0.75 
-      
-      xw2=hscale(1,n)*(im*im*pi2_squared)
-      xw2=xw2+hscale(2,n)*(jm*jm*pi2_squared)
-      xw2=xw2+hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))
-      xw2=mu_hyper_value*xw2**mu_hyper
-      
-      if (delt*xw2>cfl) then
-!        if(my_pe==io_pe) then
-!            print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
-!         endif
-         !  scale 'hscale' by alpha so that 
-         !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
-         !     alpha**mu_hyper xw2 = cfl/delt
-         !     alpha**mu_hyper = cfl/(delt*xw2)
-         hscale(:,n)=hscale(:,n)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
-      endif
-   endif
    if (shell_type==1) then
       hscale(1,n) = sqrt(ke(1)) * (pi2_squared*kstop2)**(-(mu_hyper-.75))
       hscale(1,n) = hscale(1,n)**(1d0/mu_hyper)
       hscale(2,n)=hscale(1,n)
       hscale(3,n)=hscale(1,n)
+   endif
+   if (shell_type==2) then
+      hscale(1,n) = sqrt(ke(1)) * (pi2_squared*im_start**2)**(-(mu_hyper-.75))
+      hscale(2,n) = sqrt(ke(2)) * (pi2_squared*jm_start**2)**(-(mu_hyper-.75))
+      if (km_start==0) then ! 2D problems
+         hscale(3,n)=0
+      else
+         hscale(3,n) = sqrt(ke(3)) * (pi2_squared*(km_start/Lz)**2)**(-(mu_hyper-.75))
+      endif
+      hscale(1:3,n) = hscale(1:3,n)**(1d0/mu_hyper)
+   endif
+
+   ! no check CFL:
+   if (dealias==0) then  ! no dealiasing
+      im=g_nx/2
+      jm=g_ny/2
+      km=g_nz/2
+   endif
+   if (dealias==1) then ! 2/3 rule
+      im=im_start
+      jm=jm_start
+      km=km_start
+   endif
+   if (dealias==2) then ! spherical
+      ! im^2 + jm^2 + km^2 =  dealias_sphere_kmax2    
+      im= sqrt(dealias_sphere_kmax2/3.0)    
+      jm=im
+      km=im
+   endif
+   
+   cfl = 0.75 
+   
+   xw2=hscale(1,n)*(im*im*pi2_squared)
+   xw2=xw2+hscale(2,n)*(jm*jm*pi2_squared)
+   xw2=xw2+hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))
+   xw2=mu_hyper_value*xw2**mu_hyper
+   
+   if (delt*xw2>cfl) then
+      !        if(my_pe==io_pe) then
+      !            print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
+      !         endif
+      !  scale 'hscale' by alpha so that 
+      !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
+      !     alpha**mu_hyper xw2 = cfl/delt
+      !     alpha**mu_hyper = cfl/(delt*xw2)
+      hscale(1:3,n)=hscale(1:3,n)*( cfl/(delt*xw2) )**(1d0/mu_hyper)
    endif
 enddo
 
