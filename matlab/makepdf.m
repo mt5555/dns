@@ -34,13 +34,15 @@ if (subsample==1)
   y=y(rangey);
 end
 
-disp(sprintf('min/max ct: %f %f ',qmin,qmax));
+disp(sprintf('min/max cos(theta): %f %f ',qmin,qmax));
 
 %
 % process KCT
 %
 [x,y,z,kct,time]=getfield(name2);
+kappa=kct./ct;
 kctarray=reshape(kct,[nx*ny,1]);
+kappa_array=reshape(kappa,[nx*ny,1]);
 qmax=max(max(max(kct)));
 qmin=min(min(min(kct)));
 kct = squeeze(kct(:,:,1));
@@ -49,7 +51,7 @@ if (subsample==1)
   x=x(rangex);
   y=y(rangey);
 end
-disp(sprintf('min/max kct: %f %f ',qmin,qmax));
+disp(sprintf('min/max k cos(theta): %f %f ',qmin,qmax));
 
 
 pr=1:64;
@@ -60,19 +62,26 @@ pcolor(x(pr),y(pr),ct(pr,pr)')
 colorbar
 shading flat
 axis equal
-title('ct   (closeup view of lower left corner)') 
+title('cos(\theta)  (lower left corner)') 
 
 subplot(2,2,2)
-hist(acos(ctarray),40)
-title('PDF of acos(ct) ')
+[h,xh]=hist(acos(ctarray),100);
+h=h/sum(h);
+xh=xh/pi;
+plot(xh,h);
+axis([0 1 0.008 .012]);
+xticks(['    0';' pi/4';' pi/2';'3pi/4';'   pi'],' ');
+grid
+title('PDF of \theta ')
 
 
 subplot(2,2,3)
 pcolor(x(pr),y(pr),(kct(pr,pr))')
+caxis([-.001,.001]);
 colorbar
 shading flat
 axis equal
-title('kct  (closeup view of lower left corner)') 
+title('\kappa cos(\theta)  (lower left corner)') 
 
 % $$$ kctp = (kctarray>0).*kctarray;
 % $$$ kctp = (kctp==0)*1e-12 + kctp;
@@ -83,11 +92,16 @@ title('kct  (closeup view of lower left corner)')
 
 
 subplot(2,2,4)
-[h,x]=hist(kctarray,40);
-semilogy(x,h)
-title('PDF kct ')
-axis([-.02 .02 1 1e6 ]);
+[h,xh]=hist(kctarray,200);
+h=h/sum(h);
+[h2,xh2]=hist(kappa_array,200);
+h2=h2/sum(h2);
 
+semilogy(xh,h,xh2,h2)
+title('PDF      \kappa cos(\theta) (blue)       \kappa (green)')
+axis([-.01 .01 1e-6 10 ]);
+grid
+print -r120 -dpng pdfkappa.png 
 
 
 
