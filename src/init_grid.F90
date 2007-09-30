@@ -2535,8 +2535,14 @@ else if (sdata=='hyper0') then
 else if (sdata=='hyper4') then
    mu_hyper=2
    mu_hyper_value = rvalue
+else if (sdata=='hyper6') then
+   mu_hyper=3
+   mu_hyper_value = rvalue
 else if (sdata=='hyper8') then
    mu_hyper=4
+   mu_hyper_value = rvalue
+else if (sdata=='hyper10') then
+   mu_hyper=5
    mu_hyper_value = rvalue
 else if (sdata=='hyper16') then
    mu_hyper=8

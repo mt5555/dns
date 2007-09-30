@@ -2050,18 +2050,23 @@ if (dealias==0) then  ! no dealiasing
    im=g_nx/2
    jm=g_ny/2
    km=g_nz/2
+   cfl = .9
 endif
 if (dealias==1) then ! 2/3 rule
    im=im_start
    jm=jm_start
    km=km_start
+   cfl = 2.0   ! hyper8:  2.9 blows up  2.8 seems stable
 endif
 if (dealias==2) then ! spherical
    ! im^2 + jm^2 + km^2 =  dealias_sphere_kmax2    
    im= sqrt(dealias_sphere_kmax2/3.0)    
    jm=im
    km=im
+   cfl = .9   ! hyper8:  1.5 blows up, 1.25 seems stable, lets use .9
 endif
+
+
 !
 !  make sure that hyper viscosity does not exceed a CFL condition 
 !  d(u_k)/dt = x u_k      delt*x < cfl   x < cfl/delt
@@ -2071,8 +2076,6 @@ endif
 !
 !   mu (kmax/Lz)**mu_hyper < cfl/delt
 !
-cfl = 0.75  
-
 xw2=hscale(1,1)*(im*im*pi2_squared)
 xw2=xw2+hscale(2,1)*(jm*jm*pi2_squared)
 xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
@@ -2086,7 +2089,7 @@ if (delt*xw2>cfl) then
    !         print *,'hscale = ', hscale(1,1), hscale(2,1), hscale(3,1)
    !         print *,'im,jm,km = ',im,jm,km
    !         print *,'mu_hyper = ',mu_hyper
-   print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
+!   print *,'warning: velocity hyper viscosity CFL: ',delt*xw2
    !     endif
    !  scale 'hscale' by alpha so that 
    !     (alpha hscale wavenumber_stuff)**mu_hyper = cfl/delt
@@ -2181,8 +2184,6 @@ do n=np1,np2
       jm=im
       km=im
    endif
-   
-   cfl = 0.75 
    
    xw2=hscale(1,n)*(im*im*pi2_squared)
    xw2=xw2+hscale(2,n)*(jm*jm*pi2_squared)

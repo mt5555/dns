@@ -71,7 +71,9 @@ ifeq ($(UNAME),Linux)
 
    ifeq ($(HOST),nostromo)
       VENDOR=GNU
-      #MPI =  -DBALU=1e-3
+   endif
+   ifeq ($(HOST),mora)
+      VENDOR=INTEL
    endif
 
    ifeq ($(HOST),sulaco)
