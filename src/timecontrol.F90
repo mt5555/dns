@@ -76,7 +76,7 @@ time_target=time_final
 !              dt < .31  / (  mu ( delx**-2 + dely**-2 + delz**-2 ) )
 !             
 !
-umax=maxs(4)+(bous+fcor)/pi
+umax=maxs(4)   !  +(bous+fcor)/pi   bous&fcor correction done below
 
 if (ndim==3) then
    mumax = mu*(delx**(-2)) + &
