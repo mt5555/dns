@@ -775,8 +775,14 @@ endif
 
 
 if (mu_hyper_value>0) then
+if (hyper_implicit == 1) then
+   call print_message('Using IMPLICIT hyper diffusion')
+endif
 write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu_hyper_value
 call print_message(message)
+
+
+
 !kmode=1
 !xfac = 2* (2*pi*2*pi*kmode**2)**mu_hyper
 !diff_2h =  mu_hyper_value*xfac
