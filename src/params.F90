@@ -31,6 +31,7 @@ implicit none
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0               !viscosity
 integer :: mu_hyper=1         !viscosity = (del**2)**mu_hyper
+integer :: hyper_implicit=0   ! 1 = time-split, implicit hyper viscosity
 real*8  :: mu_hyper_value=0   ! hyper viscosity value
 real*8  :: max_hyper          ! some diagnostics
 integer :: mu_hypo =0         !large wave number dissipation = (del**-2)**mu_hyper

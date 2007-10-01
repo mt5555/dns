@@ -684,6 +684,7 @@ call mpi_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu_hyper_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu_hypo_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu_hyper,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call mpi_bcast(hyper_implicit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu_hypo,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(dealias,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(numerical_method,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
@@ -2541,10 +2542,18 @@ else if (sdata=='hyper6') then
 else if (sdata=='hyper8') then
    mu_hyper=4
    mu_hyper_value = rvalue
+else if (sdata=='hyper8_imp') then
+   hyper_implicit=1
+   mu_hyper=4
+   mu_hyper_value = rvalue
 else if (sdata=='hyper10') then
    mu_hyper=5
    mu_hyper_value = rvalue
 else if (sdata=='hyper16') then
+   mu_hyper=8
+   mu_hyper_value = rvalue
+else if (sdata=='hyper16_imp') then
+   hyper_implicit=1
    mu_hyper=8
    mu_hyper_value = rvalue
 else 

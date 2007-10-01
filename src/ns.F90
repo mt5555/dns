@@ -86,11 +86,14 @@ do n=1,n_var
    do i=1,nx_2dz
    do k=1,g_nz
       Q_old(k,i,j,n)=Q(k,i,j,n)
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0
-      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2.0
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0             ! accumulate RHS
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2     ! Euler timestep with dt=delt/2
    enddo
    enddo
    enddo
+enddo
+if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
+do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
@@ -103,15 +106,17 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
-      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3             ! accumulate RHS
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2   ! Euler timestep with dt=delt/2
    enddo
    enddo
    enddo
-
-
+enddo
+if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
+do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
+
 
 ! stage 3
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
@@ -120,12 +125,14 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3
-      Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3            ! accumulate RHS
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)      ! Euler timestep with dt=delt
    enddo
    enddo
    enddo
-
+enddo
+if (hyper_implicit==1) call hyper_filter(Q_tmp,delt)
+do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
@@ -137,12 +144,16 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6            ! final Euler timestep with delt
+   enddo                                                   ! RHS = weighted avarge of 4 RHS computed above
    enddo
    enddo
-   enddo
+enddo
+if (hyper_implicit==1) call hyper_filter(Q,delt)
+do n=1,n_var
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
+
 
 time = time + delt
 ! compute max U  
@@ -484,7 +495,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (mu_hyper>=2) then
+if (mu_hyper>=2 .and. hyper_implicit==0) then
    ! compute hyper viscosity scaling based on energy in last shell:
    ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
    call ke_shell_z(Qhat,hyper_scale)
@@ -509,7 +520,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2) then
+            if (mu_hyper>=2 .and. hyper_implicit==0 ) then
                xw2=hyper_scale(1,1)*(im*im*pi2_squared)
                xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
                xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
@@ -735,7 +746,7 @@ do ns=np1,np2
                xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
                ! add in hyper viscosity, if used:
-               if (mu_hyper>=2) then
+               if (mu_hyper>=2 .and. hyper_implicit==0 ) then
 	          xw2=hyper_scale(1,ns)*(im*im*pi2_squared)
                   xw2=xw2+hyper_scale(2,ns)*(jm*jm*pi2_squared)
                   xw2=xw2+hyper_scale(3,ns)*(km*km*pi2_squared/(Lz*Lz))

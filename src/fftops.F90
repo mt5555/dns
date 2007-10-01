@@ -2082,7 +2082,8 @@ xw2=xw2+hscale(3,1)*(km*km*pi2_squared/(Lz*Lz))
 xw2=mu_hyper_value*xw2**mu_hyper
 
 
-if (delt*xw2>cfl) then
+! only enforce viscous CFL for explict viscosity:
+if (delt*xw2>cfl .and. hyper_implicit==0) then
    !      if (my_pe==io_pe) then
    !         print *,'delt = ', delt
    !         print *,'mu_hyper_value = ', mu_hyper_value
@@ -2167,7 +2168,7 @@ do n=np1,np2
       hscale(1:3,n) = hscale(1:3,n)**(1d0/mu_hyper)
    endif
 
-   ! no check CFL:
+   ! now check CFL:
    if (dealias==0) then  ! no dealiasing
       im=g_nx/2
       jm=g_ny/2
@@ -2189,8 +2190,9 @@ do n=np1,np2
    xw2=xw2+hscale(2,n)*(jm*jm*pi2_squared)
    xw2=xw2+hscale(3,n)*(km*km*pi2_squared/(Lz*Lz))
    xw2=mu_hyper_value*xw2**mu_hyper
-   
-   if (delt*xw2>cfl) then
+
+   ! enforce CFL only for explicit hyper viscosity
+   if (delt*xw2>cfl .and. hyper_implicit==0) then   
       !        if(my_pe==io_pe) then
       !            print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
       !         endif
@@ -2257,6 +2259,90 @@ integer :: im,jm,km,i,j,k,n
 end subroutine
 
 
+
+subroutine hyper_filter(Qhat,dt)
+use params
+implicit none
+! 
+! apply hyper viscosity as a filter to Q
+!
+! INPUT:
+!  Q = Q(t+1):   should be a valid state after an inviscid RK stage:   
+!        Q(t+1) = Q(t) + dt*RHS  
+!
+! OUTPUT 
+!    Q(t+1) =  Q(t+1) / (1-dt*k^8)  
+!
+! This is equivilent to an implicit viscosity term since:
+!
+!           Q(t+1) = Q(t) + dt*RHS  + dt*k^8 Q(t+1)
+!   (1-dt*k^8) Q(t+1) =  Q(t) + dt*RHS
+!    Q(t+1) = [ Q(t) + dt*RHS ] / (1-dt*k^8)
+!
+!
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
+real*8 dt
+
+! local variables:
+real*8 hyper_scale(n_var,n_var)
+real*8 xw2
+integer i,j,k,im,jm,km,n,xfac
+real*8 ke0(n_var)
+real*8 ke1(n_var)
+
+if (mu_hyper<2) return
+if (hyper_implicit /= 1 ) return
+
+! compute hyper viscosity scaling based on energy in last shell:
+! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
+call ke_shell_z(Qhat,hyper_scale)
+
+
+ke0=0
+ke1=0
+
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         xfac = 2*2*2
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+         
+
+
+         xw2=hyper_scale(1,1)*(im*im*pi2_squared)
+         xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
+         xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
+         do n=1,ndim
+            ke0(n)=ke0(n)+.5*xfac*Qhat(k,i,j,n)**2
+            Qhat(k,i,j,n)  = Qhat(k,i,j,n) / ( 1+dt*mu_hyper_value*xw2**mu_hyper )
+            ke1(n)=ke1(n)+.5*xfac*Qhat(k,i,j,n)**2
+         enddo
+
+         do n=np1,np2
+            xw2=hyper_scale(1,n)*(im*im*pi2_squared)
+            xw2=xw2+hyper_scale(2,n)*(jm*jm*pi2_squared)
+            xw2=xw2+hyper_scale(3,n)*(km*km*pi2_squared/(Lz*Lz))
+            ke0(n)=ke0(n)+.5*xfac*Qhat(k,i,j,n)**2
+            Qhat(k,i,j,n)  = Qhat(k,i,j,n) / ( 1+dt*mu_hyper_value*xw2**mu_hyper )
+            ke1(n)=ke1(n)+.5*xfac*Qhat(k,i,j,n)**2
+         enddo
+
+      enddo
+   enddo
+enddo
+do n=1,n_var
+!   print *,n,ke0(n),ke1(n)
+enddo
+
+
+
+end subroutine
 
 
 
