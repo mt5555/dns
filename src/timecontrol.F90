@@ -232,7 +232,7 @@ if (doit_screen) then
            ' cfl_vis=',cfl_used_vis,' cfl_passive_vis=',cfl_used_psvis
    call print_message(message)	
 
-   if (mu_hyper_value>0 .and. mu_hyper>=2 .and. dealias==1) then
+   if (mu_hyper_value>0 .and. mu_hyper>=2 ) then
       write(message,'(a,3e12.4)') 'hyper-viscosity cfl: ',&
            max_hyper
       call print_message(message)
