@@ -2271,13 +2271,13 @@ implicit none
 !        Q(t+1) = Q(t) + dt*RHS  
 !
 ! OUTPUT 
-!    Q(t+1) =  Q(t+1) / (1-dt*k^8)  
+!    Q(t+1) =  Q(t+1) / (1+dt*k^8)  
 !
 ! This is equivilent to an implicit viscosity term since:
 !
-!           Q(t+1) = Q(t) + dt*RHS  + dt*k^8 Q(t+1)
-!   (1-dt*k^8) Q(t+1) =  Q(t) + dt*RHS
-!    Q(t+1) = [ Q(t) + dt*RHS ] / (1-dt*k^8)
+!           Q(t+1) = Q(t) + dt*RHS  - dt*k^8 Q(t+1)
+!   (1+dt*k^8) Q(t+1) =  Q(t) + dt*RHS
+!    Q(t+1) = [ Q(t) + dt*RHS ] / (1+dt*k^8)
 !
 !
 real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
