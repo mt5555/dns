@@ -24,13 +24,14 @@ use mpi
 use fft_interface
 implicit none
 real*8,save  :: Q(nx,ny,nz,n_var)
+real*8,save  :: Qslow(nx,ny,nz,n_var)
 real*8,save  :: vor2d(nx,ny)
 real*8,save  :: dx(nx,ny,nz),dy(nx,ny,nz)
 real*8,save  :: div(nx,ny,nz)
+real*8,save  :: potvor(nx,ny,nz)
 real*8,save  :: div2d(nx,ny)
 real*8,save  :: work1(nx,ny,nz)
 real*8,save  :: work2(nx,ny,nz)
-real*8,save  :: Qslow(nx,ny,nz,n_var)
 real*8,save  :: dxx(1) ! dummy varray 
 !real*8,save  :: vorfilt(nx,ny,nz),pvfilt(nx,ny,nz)
 character(len=80) message,sdata
@@ -200,6 +201,10 @@ Q=0
       Qslow(:,:,:,3)=dx
 
 
+      ! compute potential vorticity, (pvtype=1) 
+      call potential_vorticity(potvor,div,Qslow,work1,work2,1)
+
+
       ! Compute the horizontal divergence of the slow variables
       call der(Qslow(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
       call der(Qslow(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
@@ -251,9 +256,9 @@ Q=0
             kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
          enddo
       enddo
-      keh_slow=keh_slow/g_nx/g_ny*.5
-      kew_slow=kev_slow/g_nx/g_ny*.5
-      vor_slow = vor_slow/g_nx/g_ny*.5
+      keh_slow=.5*keh_slow/g_nx/g_ny
+      kew_slow=.5*kev_slow/g_nx/g_ny
+      vor_slow = .5*vor_slow/g_nx/g_ny
       !
       !        Then the 3d quantities
       !
@@ -263,13 +268,14 @@ Q=0
          do j=ny1,ny2
             do i=nx1,nx2
                pe_slow = pe_slow + (1. + bous*zcord(k)*Qslow(i,j,k,4))**2
-               potens_slow = potens_slow + 0000
+               potens_slow = potens_slow + .5*potvor(i,j,k)**2
             enddo
          enddo
       enddo
 
-      pe_slow = pe_slow/g_nz/g_nx/g_ny*.5
-      potens_slow = potens_slow/g_nz/g_nx/g_ny*.5
+      pe_slow = .5*pe_slow/g_nz/g_nx/g_ny
+      potens_slow = .5*potens_slow/g_nz/g_nx/g_ny
+
 
 #ifdef USE_MPI
       xfac=keh_slow
