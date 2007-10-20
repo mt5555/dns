@@ -24,29 +24,22 @@ use mpi
 use fft_interface
 implicit none
 real*8,save  :: Q(nx,ny,nz,n_var)
-real*8,save  :: Qhat(nx,ny,nz,n_var)
-real*8,save  :: vor(nx,ny,nz,n_var)
-real*8,save  :: vor2d(nx,ny,nz),temp(nx,ny,nz)
-real*8,save  :: vorsave(nx,ny,nz)
+real*8,save  :: vor2d(nx,ny)
 real*8,save  :: dx(nx,ny,nz),dy(nx,ny,nz)
-real*8,save  :: dxx(nx,ny,nz)
-real*8,save  :: div(nx,ny,nz),divhat(nx,ny,nz)
+real*8,save  :: div(nx,ny,nz)
+real*8,save  :: div2d(nx,ny)
 real*8,save  :: work1(nx,ny,nz)
 real*8,save  :: work2(nx,ny,nz)
-real*8,save  :: Qhatslow(nx,ny,nz,n_var),Qslow(nx,ny,nz,n_var)
-real*8,save  :: vorfilt(nx,ny,nz),pvfilt(nx,ny,nz)
-real*8,save  :: u_slow(nx,ny),v_slow(nx,ny),w_slow(nx,ny)
-real*8,save :: u_slow_x(nx,ny),u_slow_y(nx,ny)
+real*8,save  :: Qslow(nx,ny,nz,n_var)
+real*8,save  :: dxx(1) ! dummy varray 
+!real*8,save  :: vorfilt(nx,ny,nz),pvfilt(nx,ny,nz)
 character(len=80) message,sdata
 character(len=280) basename,fname,fnamewrite
 integer ierr,i,j,k,n,km,im,jm,icount,ictof,ivorsave,ntrunc
 integer icentroid,iscalars,i3dspec,i2dspec,ireaduvh
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y, n_r, spec_r
-real*8 :: kr,ke,ck,xfac
-CPOINTER :: fscalar, fspec3d
-real*8, allocatable :: integrals(:,:),maximums(:,:)
-real*8, save :: alpha
+real*8 :: kr,ke,ck,xfac,vor_slow,pe_slow,kev_slow,keh_slow,kew_slow,potens_slow
 integer ni,ns,nb
 
 
@@ -91,7 +84,7 @@ Q=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      open(55,file='keh_slow.txt')
      open(56,file='kev_slow.txt')
-     open(57,file='vort_slow.txt')
+     open(57,file='vor_slow.txt')
      open(58,file='pe_slow.txt')
      open(59,file='potens_slow.txt')
 
@@ -160,94 +153,70 @@ Q=0
 !        subtract from the velocity
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-         call der(Q(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
-         div = dx
-         call der(Q(1,1,1,2),dx,dxx,work1,DX_ONLY,2)
-         div = div + dx
-         divhat=div
-         call fft3d(divhat,work1)
-!
-!        Compute the inverse horizontal laplacian in 2 dimension
-!
-         do j=ny1,ny2
-            jm=(jmcord(j))
-            do i=nx1,nx2
-                  im=(imcord(i))
-                  do k=nz1,nz2
-                  divhat(i,j,k) = -1./(im**2+jm**2)*divhat(i,j,k)
-               enddo
-            enddo
-         enddo
-         div=divhat
-         call ifft3d(div,work1)
-!
-!        Now take derivatives of this to subtract off of each component
-!
-         call der(div,dx,dxx,work1,DX_ONLY,1)
-         call der(div,dy,dxx,work1,DX_ONLY,2)
-!
-         Qslow = 0.
-         do j=ny1,ny2
-            jm=(jmcord(j))
-            do i=nx1,nx2
-                  im=(imcord(i))
-                  do k=nz1,nz2
-                     Qslow(i,j,k,1) = Q(i,j,k,1) - dx(i,j,k)
-                     Qslow(i,j,k,2) = Q(i,j,k,2) - dy(i,j,k)
-                     Qslow(i,j,k,3) = Q(i,j,k,3)
-                     Qslow(i,j,k,4) = Q(i,j,k,4)
-               enddo
-            enddo
-         enddo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!        Compute the slow variables by integrating u, v, and w in the vertical
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      call der(Q(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
+      call der(Q(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
+      div = dx+dy
+      call fft3d(div,work1)
+      !
+      !        Compute the inverse horizontal laplacian in 2 dimension
+      !
+      do k=nz1,nz2
+         do i=nx1,nx2
             do j=ny1,ny2
                jm=(jmcord(j))
-               do i=nx1,nx2
-                  im=(imcord(i))
-                  u_slow(i,j) = 0.d0
-                  v_slow(i,j) = 0.d0
-                  w_slow(i,j) = 0.d0
-                  do k=nz1,nz2
-                     km=(kmcord(k))
-                     u_slow(i,j) = u_slow(i,j) + Qslow(i,j,k,1)
-                     v_slow(i,j) = v_slow(i,j) + Qslow(i,j,k,2)
-                     w_slow(i,j) = w_slow(i,j) + Qslow(i,j,k,3)
-               enddo
-               u_slow(i,j) = u_slow(i,j)/g_nz
-               v_slow(i,j) = v_slow(i,j)/g_nz
-               w_slow(i,j) = w_slow(i,j)/g_nz
+               im=(imcord(i))
+               div(i,j,k) = -div(i,j,k)/((im**2+jm**2)*pi2_squared)
             enddo
          enddo
+      enddo
+      call ifft3d(div,work1)
+      !
+      !        Now take derivatives of this to subtract off of each component
+      !
+      call der(div,dx,dxx,work1,DX_ONLY,1)
+      call der(div,dy,dxx,work1,DX_ONLY,2)
+      !
+      Qslow = 0.
+      do k=nz1,nz2
+         do j=ny1,ny2
+            do i=nx1,nx2
+               Qslow(i,j,k,1) = Q(i,j,k,1) - dx(i,j,k)
+               Qslow(i,j,k,2) = Q(i,j,k,2) - dy(i,j,k)
+               Qslow(i,j,k,3) = Q(i,j,k,3)
+               Qslow(i,j,k,4) = Q(i,j,k,4)
+            enddo
+         enddo
+      enddo
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!        Compute the horizontal divergence of the slow variables
-!bw      The following is not correct since the arrays are 2d
+!    Compute the slow variables by integrating u, v, and w in the vertical
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      call zaverage(Qslow(1,1,1,1),dx)
+      Qslow(:,:,:,1)=dx
+      call zaverage(Qslow(1,1,1,2),dx)
+      Qslow(:,:,:,2)=dx
+      call zaverage(Qslow(1,1,1,3),dx)
+      Qslow(:,:,:,3)=dx
 
-         call der(u_slow,dx,dxx,work1,DX_ONLY,1)
-         u_slow_x = dx
-         call der(v_slow,dx,dxx,work1,DX_ONLY,2)
-         div = 0.
-         do i=nx1,nx2
-            do j=ny1,ny2
-               div(i,j) = u_slow_x + dx
-            enddo
+
+      ! Compute the horizontal divergence of the slow variables
+      call der(Qslow(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
+      call der(Qslow(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
+      do i=nx1,nx2
+         do j=ny1,ny2
+            div2d(i,j) = dx(i,j,nz1) + dy(i,j,nz1)
          enddo
-!
-!        This also will be incorrect since I'm using der on 2d variables
-!
-         vor2d = 0.
-         call der(u_slow,dx,dxx,work1,DX_ONLY,2)
-         u_slow_y = dx
-         call der(v_slow,dx,dxx,work1,DX_ONLY,1)
-         div = 0.
-         do i=nx1,nx2
-            do j=ny1,ny2
-               vor2d(i,j) = dx-u_slow_y
-            enddo
+      enddo
+
+!     compute horizontal vorticity of slow variablles
+      call der(Qslow(1,1,1,1),dy,dxx,work1,DX_ONLY,2)
+      call der(Qslow(1,1,1,2),dx,dxx,work1,DX_ONLY,1)
+      do i=nx1,nx2
+         do j=ny1,ny2
+            vor2d(i,j) = dx(i,j,nz1)-dy(i,j,nz1)
          enddo
+      enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !        Write out files for the vertical vorticity and the
@@ -270,82 +239,87 @@ Q=0
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!         First the two d quantities
+!         First the 2D quantities
 !             
-            keh_slow = 0.
-            kev_slow = 0.
-            vort_slow = 0.
-            do j=ny1,ny2
-               jm=(jmcord(j))
-               do i=nx1,nx2
-                  im=(imcord(i))
-                     vort_slow = vort_slow + vor2d(i,j)**2
-                     keh_slow = keh_slow + (u_slow(i,j)**2+v_slow(i,j)**2)
-                     kev_slow = kev_slow + w_slow(i,j)**2
-               enddo
-            enddo
-            keh_slow=keh_slow/g_nx/g_ny*.5
-            kew_slow=kev_slow/g_nx/g_ny*.5
-            vort_slow = vort_slow/g_nx/g_ny*.5
-!
-!        Then the 3d quantities
-!
-         potens_slow = 0.
-         pe_slow=0.
-         do k=nz1,nz2
-            km=(kmcord(k))
-            do j=ny1,ny2
-               jm=(jmcord(j))
-               do i=nx1,nx2
-                  im=(imcord(i))
-                  pe_slow = pe_slow + (1. + bous*z*Qslow(i,j,k,4))**2
-                  potens_slow = potens_slow + XXX
-               enddo
+      keh_slow = 0.
+      kev_slow = 0.
+      vor_slow = 0.
+      do j=ny1,ny2
+         do i=nx1,nx2
+            vor_slow = vor_slow + vor2d(i,j)**2
+            keh_slow = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
+            kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
+         enddo
+      enddo
+      keh_slow=keh_slow/g_nx/g_ny*.5
+      kew_slow=kev_slow/g_nx/g_ny*.5
+      vor_slow = vor_slow/g_nx/g_ny*.5
+      !
+      !        Then the 3d quantities
+      !
+      potens_slow = 0.
+      pe_slow=0.
+      do k=nz1,nz2
+         do j=ny1,ny2
+            do i=nx1,nx2
+               pe_slow = pe_slow + (1. + bous*zcord(k)*Qslow(i,j,k,4))**2
+               potens_slow = potens_slow + 0000
             enddo
          enddo
-         pe_slow = pe_slow/g_nz/g_nx/g_ny*.5
-         potens_slow = potens_slow/g_nz/g_nx/g_ny*.5
- 
-!#if 0
-!         
-!         fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Tvor"
-!         call singlefile_io(time2,vorfilt,fnamewrite,work1,work2,0,io_pe)
-!         fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".FTvor"
-!         open(42,file=fnamewrite,status='unknown',action='write',form='unformatted')
-!         write(42) vorfilt(nx1:nx2,ny1:ny2,nz1:nz2)
-!         
-!         fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Tpvor"
-!         call singlefile_io(time2,pvfilt,fnamewrite,work1,work2,0,io_pe)
-!         fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".FTpvor"
-!         open(42,file=fnamewrite,status='unknown',action='write',form='unformatted')
-!         write(42) pvfilt(nx1:nx2,ny1:ny2,nz1:nz2)
-         
+      enddo
+
+      pe_slow = pe_slow/g_nz/g_nx/g_ny*.5
+      potens_slow = potens_slow/g_nz/g_nx/g_ny*.5
+
 #ifdef USE_MPI
-!   xfac=ke
-!   call mpi_allreduce(xfac,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-!   xfac=ck
-!  call mpi_allreduce(xfac,ck,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      xfac=keh_slow
+      call mpi_allreduce(xfac,keh_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      xfac=kew_slow
+      call mpi_allreduce(xfac,kew_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      xfac=vor_slow
+      call mpi_allreduce(xfac,vor_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      xfac=pe_slow
+      call mpi_allreduce(xfac,pe_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      xfac=potens_slow
+      call mpi_allreduce(xfac,potens_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
-         if (my_pe==io_pe) then
-            print *,'ke = ',ke
-            write(55,'(e14.6,2x,e14.6)') real(time),keh_slow
-            write(56,'(e14.6,2x,e14.6)') real(time),kev_slow
-            write(57,'(e14.6,2x,e14.6)') real(time),vor_slow
-            write(58,'(e14.6,2x,e14.6)') real(time),pe_slow
-            write(59,'(e14.6,2x,e14.6)') real(time),potens_slow
-         endif
+
+      
+#if 0
+      fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Tvor"
+      call singlefile_io(time2,vorfilt,fnamewrite,work1,work2,0,io_pe)
+      fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".FTvor"
+      open(42,file=fnamewrite,status='unknown',action='write',form='unformatted')
+      write(42) vorfilt(nx1:nx2,ny1:ny2,nz1:nz2)
+      
+      fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Tpvor"
+      call singlefile_io(time2,pvfilt,fnamewrite,work1,work2,0,io_pe)
+      fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".FTpvor"
+      open(42,file=fnamewrite,status='unknown',action='write',form='unformatted')
+      write(42) pvfilt(nx1:nx2,ny1:ny2,nz1:nz2)
+#endif
+         
+      if (my_pe==io_pe) then
+         print *,'ke = ',ke
+         write(55,'(e14.6,2x,e14.6)') real(time),keh_slow
+         write(56,'(e14.6,2x,e14.6)') real(time),kev_slow
+         write(57,'(e14.6,2x,e14.6)') real(time),vor_slow
+         write(58,'(e14.6,2x,e14.6)') real(time),pe_slow
+         write(59,'(e14.6,2x,e14.6)') real(time),potens_slow
+      endif
       
       
       time=time+tinc
       if (time>tstop) exit
    enddo ! DO
-
-
-close(55)
-if (ivorsave /= 0) then
-
-call close_mpi
-end program anal
-
+   
+   
+   close(55)
+   if (ivorsave /= 0) then
+   endif
+   
+   call close_mpi
+end program
+   
 
