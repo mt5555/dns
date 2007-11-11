@@ -39,6 +39,25 @@ mu = 1;
 %namedir = ['/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/' ...
 %           'qg/qg64/sto_high_4/hyper_nu/bous1000/'];
 
+%name = 'qg128sph_all';
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
+%           'qg/qg128/sphere_visc/'];
+
+%name = 'qg128slab_all';
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
+%           'qg/qg128/slab_visc/'];
+
+%name = 'qg128_fftsph_all'; ...
+%                   
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
+%           ...      
+%           'qg/qg128/sphere_dealias/']; ...
+                   
+%name = 'qg128_nhyper_all'; 
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
+%           ...
+%           'qg/qg128/no_hyper/']; ...
+       
 
 %name = 'qg256hyper_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
@@ -57,10 +76,19 @@ mu = 1;
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 %name = 'qg512hyper_all';
-%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
+%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/';
 
-name = 'n512_f2000b20_all';
-namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
+%name = 'qg512hyper8_all';
+%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/hyper8/';
+
+
+name = 'qg512_b2000_all';
+namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+           'low4/qg/qg512/bous2000/correct_hyper/'];                    
+ 
+
+%name = 'n512_f2000b20_all';
+%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
 
 
 %name = 'sc1024A';
@@ -109,12 +137,20 @@ CK=CK_orig;
 j=0;
 
 count = 0
+<<<<<<< specplot.m
+while (time>=0 & time<=35)
+=======
 while (time>=.0 & time<=900)
 
+>>>>>>> 1.98
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
   disp(sprintf('reading spectrum:  time=%f   n_r=%d',time,n_r));
+<<<<<<< specplot.m
+  
+%  if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
+=======
 
   if (j==1) 
     spec_r_ave = zeros(n_r,1);
@@ -122,6 +158,7 @@ while (time>=.0 & time<=900)
   end
  
   if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
+>>>>>>> 1.98
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 
@@ -323,7 +360,7 @@ while (time>=.0 & time<=900)
      countp = 0; %for passive scalar average, note assumes npassive = 1
      for np=1:npassive 
         pspec_r(:,np)=fread(fidp,np_r,'float64');
-        if (time_p>3.0) pspec_r_ave = pspec_r_ave + pspec_r; countp = countp+1; end;
+%        if (time_p>3.0) pspec_r_ave = pspec_r_ave + pspec_r; countp = countp+1; end;
         c2(np)=sum(pspec_r(:,np)); 
         % c2_diss = d/dt of .5<c^2>
         c2_diss(np) = mu*2*sum(knum.^2 * (2*pi)^2 .* pspec_r(:,np)')  ; 
@@ -477,6 +514,7 @@ while (time>=.0 & time<=900)
     time_t=fread(fidt,1,'float64');
   end
 end
+
 
 fclose(fid);
 if (fidt>0) fclose(fidt); end;

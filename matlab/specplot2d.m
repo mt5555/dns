@@ -1,8 +1,9 @@
 clear
 %name = 'all'
-name= 'n512_f2000b20_all';
+%name= 'n512_f2000b20_all';
 %name = 'qg512hyper0002.9619'
 %name = 'qg512hyper_all';
+name = 'qg512_b2000_all';
 %name = 'qg256hyper_all';
 %name = 'qg64hyper_all';
 %name = 'n256_f1000n5_all';
@@ -12,7 +13,11 @@ name= 'n512_f2000b20_all';
 %name = 'n256high_f2000n5_all';
 %name = 'n256high_f1000n5_all'
 %name = 'n256high_f5n2000_all';
-%name = 'n256high_f5n1000_all'
+%name = 'n256high_f5n1000_all';
+%name = 'qg128slab_all';
+%name = 'qg128sph_all';
+%name = 'qg128_nhyper_all';
+
 
 epsilon=.41;
 %CK=1.5*epsilon^(2/3);
@@ -29,9 +34,20 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
-%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/';
-namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%           'low4/qg/qg512/bous1000/'];             
+namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/';
+%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
 %namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/';
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%           'low4/qg/qg128/sphere_visc/'];
+
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%           'low4/qg/qg128/slab_visc/'];
+
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%           'low4/qg/qg128/no_hyper/'];
+
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -44,7 +60,7 @@ end
 
 time=0;
 j = 0; %(count for time average)
-while (time < 6)
+while (time < 35)
   [time,count]=fread(fid,1,'float64');
   if (count ~= 1) 
     disp('EOF reached.  stopping')
@@ -106,7 +122,7 @@ if(1)
   loglog53(numkh,spec2d_u(31,:)'+spec2d_v(31,:)','',2.0,6);hold on;%pause
   loglog53(numkh,spec2d_u(41,:)'+spec2d_v(41,:)','',2.0,6);hold on;%pause
   loglog53(numkh,spec2d_u(51,:)'+spec2d_v(51,:)','',2.0,6);hold on;%pause
-  loglog53(numkh,spec2d_u(61,:)'+spec2d_v(61,:)','E_h((0, 2,5,10, 20, 30, 40,50,60),kh)',2.0,6);hold on;
+  loglog53(numkh,spec2d_u(61,:)'+spec2d_v(61,:)','E_h((10, 20, 30, 40,50,60),kh)',2.0,6);hold on;
 
   %plot P(kz,0)
   figure(2);hold off;
@@ -118,7 +134,7 @@ if(1)
   loglog53(numkz,spec2d_t(:,31),'',2.0,6);hold on; %pause
   loglog53(numkz,spec2d_t(:,41),'',2.0,6);hold on; %pause
   loglog53(numkz,spec2d_t(:,51),'',2.0,6);hold on; %pause
-  loglog53(numkz,spec2d_t(:,61),'P(kz,(0,10,20,30,40,50))',2.0,6);hold on;
+  loglog53(numkz,spec2d_t(:,61),'P(kz,(10,20,30,40,50))',2.0,6);hold on;
   axis([1 128 1e-12 1e-4]) ;
 end
 
@@ -222,7 +238,8 @@ loglog53(numkh,spec2d_Eh_ave(21,:)','',2.0,6);hold on;%pause
 loglog53(numkh,spec2d_Eh_ave(31,:)','',2.0,6);hold on;%pause  
 loglog53(numkh,spec2d_Eh_ave(41,:)','',2.0,6);hold on;%pause  
 loglog53(numkh,spec2d_Eh_ave(51,:)','',2.0,6);hold on;%pause  
-loglog53(numkh,spec2d_Eh_ave(61,:)','E((2,5,10,20,30,40),kz)',2.0,6);hold on;%pause  
+loglog53(numkh,spec2d_Eh_ave(61,:)','E_h((2,5,10,20,30,40),kz), time-avg',2.0,6);hold on;%pause  
+
 
 %normalize x-axis by ratio kz or kh as necessary
 figure(12)
