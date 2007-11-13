@@ -73,18 +73,18 @@ call init_model
 !
 
 !cd
-header_type=1; scale=1;
+header_type=1; scale=1;           ! DNS standard data
 !header_type=4; scale=1/(2*pi)    ! for Takeshi's data
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
 str_type=0
-compute_hspec=.false.
+compute_hspec=.true.
 read_uvw=.false.
-compute_hfree=.true.		!extracting helicity-free modes
+compute_hfree=.false.		!extracting helicity-free modes
 
-tstart=7.0
+tstart=.0031
 tstop=7.0
 tinc=0.2
 icount=0
@@ -131,18 +131,18 @@ endif
 
 
 if (use_serial==1) then
-   allocate(Q(nx,ny,nz,ndim))
+   allocate(Q(nx,ny,nz,n_var))
    allocate(work1(nx,ny,nz))
    allocate(work2(nx,ny,nz))
 else
    ! parallel version requires extra data:
-   allocate(Q(nx,ny,nz,ndim))
-   allocate(q1(nx,ny,nz,ndim))
-   allocate(q2(nx,ny,nz,ndim))
+   allocate(Q(nx,ny,nz,n_var))
+   allocate(q1(nx,ny,nz,n_var))
+   allocate(q2(nx,ny,nz,n_var))
    allocate(work1(nx,ny,nz))
    allocate(work2(nx,ny,nz))
    if (nxdecomp*nydecomp*nzdecomp>1) then
-      allocate(q3(nx,ny,nz,ndim))
+      allocate(q3(nx,ny,nz,n_var))
       allocate(work1(nx,ny,nz))
       allocate(work2(nx,ny,nz))
       allocate(work3(nx,ny,nz))
@@ -153,7 +153,6 @@ endif
 if (compute_cj .or. compute_hfree) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
 endif
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -235,6 +234,7 @@ do
    
    
    if (compute_hspec) then
+      
       if (.not. read_uvw) then	
          if (use_serial==1) then
             stop 'compute_hspec needs q1,q2 allocated'
@@ -246,8 +246,21 @@ do
          endif
          read_uvw=.true.	
       endif
+
+      
       call compute_helicity_spectrum(Q,q2,q1,0)
       call output_helicity_spec(time,time)
+
+
+      ! enable this block of code to recompute spectra.
+      ! NOTE: this will output .spec, .pspec, .kspec, .hspec, .cospec, .spec2d
+      ! and it will erase
+      call compute_spec(time,Q,q1,work1,work2)
+      call output_spec(time,time)
+      call compute_spec_2d(time,Q,q1,work1,work2)
+      call output_2d_spec(time,time)
+
+
    endif
    
    if (compute_hfree) then
