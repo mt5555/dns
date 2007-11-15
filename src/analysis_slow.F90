@@ -166,7 +166,11 @@ Q=0
             do j=ny1,ny2
                jm=(jmcord(j))
                im=(imcord(i))
-               div(i,j,k) = -div(i,j,k)/((im**2+jm**2)*pi2_squared)
+               if (im==0 .and. jm==0) then
+                  div(i,j,k)=0
+               else
+                  div(i,j,k) = -div(i,j,k)/((im**2+jm**2)*pi2_squared)
+               endif
             enddo
          enddo
       enddo

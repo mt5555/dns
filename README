@@ -299,7 +299,7 @@ run time  20min   22.8       66min         12.65          8.41    4.96
 *** dnsp code w/ FFT99 ******************************************************
 
             intel compiler  PGI compiler    g95         intel on Thunderbird
-              AMD Athlon    pentium M      powerPC      intel x86_64
+              AMD Athlon    pentium M      2ghz powerPC   intel x86_64
               Linux FC4     Linux RHEL4    MAC OS10.4     Linux
 CPUS     =                                 1cpu  2cpu      1x1x64  2x1x64  4x1x32
 kmax*eta =                                .9626  same     .9990   SAME    SAME
@@ -309,6 +309,9 @@ d/dt vis =                               -4.1263          -3.5569
 d/dt f   =                                4.3034           4.5351 
 run time =                                14.5m   11.4m    .42m
 
+
+Other collected run times:
+2.4ghz Xeon Linux, ifort, 1 cpu: 13.81
 
 **************************************************************************
 
