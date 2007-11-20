@@ -35,7 +35,8 @@ fid2=-1;
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/qg256hyper_all.scalars-bous','r');
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/qg256hyper_all.scalars-bous','r');
 
-fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/qg512_b1000_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/qg512_b1000_all.scalars-bous','r');
+%fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/new_data/qg512_b1000_newdata_all.scalars-bous','r');
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/hyper4/qg512hyper4_all.scalars-bous','r');
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/qg512_b2000_all.scalars-bous','r');
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/qg512hyper_all.scalars-bous','r');
@@ -43,6 +44,8 @@ fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg51
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous200/n512_f2000b200_all.scalars-bous','r');
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/n512_f20b2000_all.scalars-bous','r');
 %fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor200_bous2000/n512_f200b2000_all.scalars-bous','r');
+
+fid=endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg640/qg640_b3000_all.scalars-bous','r');
 
 
 %fid = endianopen('/research/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars-bous','r');
@@ -114,7 +117,7 @@ title('PV');
 hold off
 
 figure(3)
-subplot(3,1,1);
+subplot(3,1,3);
 %clf
 plot(time,potens,'b','Linewidth',2);hold on;
 plot(time,potens_qg,'ro','Markersize',6);

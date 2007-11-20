@@ -86,6 +86,12 @@ name = 'qg512_b2000_all';
 namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
            'low4/qg/qg512/bous2000/correct_hyper/'];                    
  
+%name = 'qg640_b3000_all';
+%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%           'low4/qg/qg640/'];                    
+ 
+       
+       
 
 %name = 'n512_f2000b20_all';
 %namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
@@ -106,8 +112,8 @@ namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
 %name = 'n256high_f5n2000_all';
 %namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
 
-name = 'balu_b0000.0000';
-namedir = '/home/mataylo/scratch3/dns/';
+%name = 'balu_b0000.0000';
+%namedir = '/home/mataylo/scratch3/dns/';
 
 
 spec_r_save=[];
@@ -137,20 +143,15 @@ CK=CK_orig;
 j=0;
 
 count = 0
-<<<<<<< specplot.m
-while (time>=0 & time<=35)
-=======
-while (time>=.0 & time<=900)
 
->>>>>>> 1.98
+while (time>=0 & time<=35)
+
   j=j+1;
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
   disp(sprintf('reading spectrum:  time=%f   n_r=%d',time,n_r));
-<<<<<<< specplot.m
   
 %  if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
-=======
 
   if (j==1) 
     spec_r_ave = zeros(n_r,1);
@@ -158,7 +159,7 @@ while (time>=.0 & time<=900)
   end
  
   if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
->>>>>>> 1.98
+
   knum=0:(n_r-1);
   eta=0;
   spec_scale=1; 

@@ -78,12 +78,6 @@ nx=512;f_k = 4; fcor=2000; bous = 2000;
 %                  'low4/qg/qg64/sto_high_4/hyper_nu/test-bous-init/qg64test_all.scalars'],'r');
 %nx=64;f_k = 4; fcor=1000;
 
-<<<<<<< scalars.m
-=======
-fid = endianopen(['/home/mataylo/scratch3/dns/balu_b0000.0000.scalars'],'r');
-nx=1024;
-
->>>>>>> 1.111
 
 nscalars=0;
 nscalars_e=0;
