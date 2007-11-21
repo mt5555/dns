@@ -502,11 +502,11 @@ nints_e=14
 
 
 
-print *,'aspect_diag ke=',ke
-print *,'aspect_diag pe=',pe
-print *,'aspect_diag pv=',pv,pvqg,pvro0,pvfr0
-print *,'aspect_diag potens=',potens,potensqg,potensro0,potensfr0
-print *,'aspect_diag potens_diss=',potens_diss
+!print *,'aspect_diag ke=',ke
+!print *,'aspect_diag pe=',pe
+!print *,'aspect_diag pv=',pv,pvqg,pvro0,pvfr0
+!print *,'aspect_diag potens=',potens,potensqg,potensro0,potensfr0
+!print *,'aspect_diag potens_diss=',potens_diss
 
 end subroutine compute_expensive_scalars
 
