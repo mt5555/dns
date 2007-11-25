@@ -38,22 +38,27 @@ character(len=80) message,sdata
 character(len=280) basename,fname,fnamewrite
 integer ierr,i,j,k,n,km,im,jm,icount,ictof,ivorsave,ntrunc
 integer icentroid,iscalars,i3dspec,i2dspec,ireaduvh
-real*8 :: tstart,tstop,tinc,time,time2
-real*8 :: u,v,w,x,y, n_r, spec_r
+real*8 :: tstart,tstop,tinc,time,time2,timescale,energyscale,f_k,epsil_f,timep
+real*8 :: u,v,w,x,y, n_r, spec_r, div_check
 real*8 :: kr,ke,ck,xfac,vor_slow,pe_slow,kev_slow,keh_slow,kew_slow,potens_slow
 integer ni,ns,nb
 
 
 ! input file
-basename="n100f1"
+basename="/home/wingate/Projects/KH/Boussinesq/128v2/n1f100_decay/n1f100"
 if (my_pe==io_pe) print *,basename
-tstart=0.0
-tstop=0.0
-tinc=.1
-ireaduvh = 0 ! =0 Do not read in the u,v,h fields
+tstart=2.0
+tstop=2.0003
+tinc=.0001
+f_k = 24.
+epsil_f = .0253303064
+timescale = (epsil_f*(2.*3.141592*f_k)**2)**(.33333)
+energyscale = (epsil_f/(2.*3.141592*f_k))**(-.66666666)
+write(6,*) "timescale = ",timescale, "energyscale = ",energyscale
+ireaduvh = 1 ! =0 Do not read in the u,v,h fields
 icentroid=0 ! Compute the KE centroid? 0 = no, 1 = yes
 icount=0  ! A counter for averaging to compute time averages
-ictof = 1 ! If 1 then flip endian sign
+ictof = 0 ! If 1 then flip endian sign
 ivorsave=0 ! If 1 then compute an averaged vorticity
 ntrunc = 0 ! If not zero find Q with wave numbers ntrunc and above
 iscalars = 0 ! If not zero read in scalars (for energy as a function&
@@ -68,7 +73,7 @@ call init_mpi_comm3d()
 call init_model
 
 ! byte swap the input data:
-call set_byteswap_input(1);
+!call set_byteswap_input(1);
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -118,6 +123,9 @@ Q=0
          endif
          
          fname = basename(1:len_trim(basename)) // sdata(2:10) // ".v"
+         if (my_pe==io_pe) then
+            print *,'filename: ',fname(1:len_trim(fname))
+         endif
          call singlefile_io(time2,Q(1,1,1,2),fname,work1,work2,1,io_pe)
          if (ictof == 1) then
             fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Fv"
@@ -126,6 +134,9 @@ Q=0
          endif
          
          fname = basename(1:len_trim(basename)) // sdata(2:10) // ".w"
+         if (my_pe==io_pe) then
+            print *,'filename: ',fname(1:len_trim(fname))
+         endif
          call singlefile_io(time2,Q(1,1,1,3),fname,work1,work2,1,io_pe)
          if (ictof == 1) then
             fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Fw"
@@ -134,6 +145,9 @@ Q=0
          endif
 
          fname = basename(1:len_trim(basename)) // sdata(2:10) // ".t04.s001.000"
+         if (my_pe==io_pe) then
+            print *,'filename: ',fname(1:len_trim(fname))
+         endif
          call singlefile_io(time2,Q(1,1,1,4),fname,work1,work2,1,io_pe)
          if (ictof == 1) then
             fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Ft04.s001.000"
@@ -204,19 +218,27 @@ Q=0
       call zaverage(Qslow(1,1,1,3),dx)
       Qslow(:,:,:,3)=dx
 
+      potvor=0.
+      div=0.
 
-      ! compute potential vorticity, (pvtype=1) 
-      call potential_vorticity(potvor,div,Qslow,work1,work2,1)
+      ! compute potential vorticity, (pvtype=4) 
+      call potential_vorticity(potvor,div,Q,work1,work2,4)
 
 
       ! Compute the horizontal divergence of the slow variables
+      
+      div_check = -10000.
       call der(Qslow(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
       call der(Qslow(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
       do i=nx1,nx2
          do j=ny1,ny2
             div2d(i,j) = dx(i,j,nz1) + dy(i,j,nz1)
+            if(abs(div2d(i,j)).ge.div_check) then
+              div_check = abs(div2d(i,j))
+            end if
          enddo
       enddo
+      write(6,*) "The horizontal divergence is  ",div_check
 
 !     compute horizontal vorticity of slow variablles
       call der(Qslow(1,1,1,1),dy,dxx,work1,DX_ONLY,2)
@@ -258,6 +280,7 @@ Q=0
             vor_slow = vor_slow + vor2d(i,j)**2
             keh_slow = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
             kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
+            write(6,*) "Vertical Velocity ",Q(i,j,nz1,3),Qslow(i,j,nz1,3)
          enddo
       enddo
       keh_slow=.5*keh_slow/g_nx/g_ny
@@ -266,13 +289,14 @@ Q=0
       !
       !        Then the 3d quantities
       !
+      write(6,*) "BOUS =",bous
       potens_slow = 0.
       pe_slow=0.
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
                pe_slow = pe_slow + (1. + bous*zcord(k)*Qslow(i,j,k,4))**2
-               potens_slow = potens_slow + .5*potvor(i,j,k)**2
+               potens_slow = potens_slow + potvor(i,j,k)**2
             enddo
          enddo
       enddo
@@ -309,14 +333,14 @@ Q=0
       open(42,file=fnamewrite,status='unknown',action='write',form='unformatted')
       write(42) pvfilt(nx1:nx2,ny1:ny2,nz1:nz2)
 #endif
-         
+      timep = time*timescale   
       if (my_pe==io_pe) then
-         print *,'ke = ',ke
-         write(55,'(e14.6,2x,e14.6)') real(time),keh_slow
-         write(56,'(e14.6,2x,e14.6)') real(time),kev_slow
-         write(57,'(e14.6,2x,e14.6)') real(time),vor_slow
-         write(58,'(e14.6,2x,e14.6)') real(time),pe_slow
-         write(59,'(e14.6,2x,e14.6)') real(time),potens_slow
+         print *,'keh_slow = ',keh_slow
+         write(55,'(e14.6,2x,e14.6)') real(timep),keh_slow*energyscale
+         write(56,'(e14.6,2x,e14.6)') real(timep),kev_slow*energyscale
+         write(57,'(e14.6,2x,e14.6)') real(timep),vor_slow
+         write(58,'(e14.6,2x,e14.6)') real(timep),pe_slow*energyscale
+         write(59,'(e14.6,2x,e14.6)') real(timep),potens_slow
       endif
       
       
