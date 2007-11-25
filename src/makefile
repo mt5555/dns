@@ -19,8 +19,8 @@ MPILIB =
 
 
 ifeq ($(UNAME),Linux)
-   #VENDOR=LAHEY
-   VENDOR=PGI
+   VENDOR=LAHEY
+   #VENDOR=PGI
    #VENDOR=PGIMPI
    #VENDOR=INTEL
    #VENDOR=INTELMPI
@@ -260,6 +260,9 @@ TURB_DIAG = pdf.o turb_diag.o isoave.o subcubes.o
 #diagnostics for 3d aspect ratio runs:
 ASPECT_DIAG = aspect_diag.o isoave.o subcubes.o
 
+#diagnostics for 3d aspect ratio runs:
+SLOW_DIAG = slow_diag.o isoave.o subcubes.o
+
 #diagnostics for compressible DNS runs:
 CDNS_DIAG = pdf.o cdns_diag.F90
 
@@ -282,6 +285,7 @@ MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_PENCIL = ns_xpencil.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_PENCIL2 = ns_xpencil2.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SCALE = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(ASPECT_DIAG)
+MODEL_SPEC_SLOW = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(SLOW_DIAG)
 MODEL_ALPHA      = ns_alpha.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_LERAY      = ns_leray.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SHALLOW    = shallow.o dns.o   $(OBJS1) $(OBJS2) $(OBJS3)   $(SHALLOW_DIAG)
@@ -305,6 +309,8 @@ dns:  $(MODEL_SPEC)
 	$(LINK) -o dns $(MODEL_SPEC) $(LDFLAGS) $(MPILIB)
 dnsb: $(MODEL_SPEC_SCALE) 
 	$(LINK) -o dnsb $(MODEL_SPEC_SCALE) $(LDFLAGS) $(MPILIB)
+dnssl: $(MODEL_SPEC_SLOW) 
+	$(LINK) -o dnsb $(MODEL_SPEC_SLOW) $(LDFLAGS) $(MPILIB)
 dnsp: $(MODEL_SPEC_PENCIL) 
 	$(LINK) -o dnsp $(MODEL_SPEC_PENCIL) $(LDFLAGS) $(MPILIB)
 dnsa:  $(MODEL_ALPHA) 
