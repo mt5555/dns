@@ -1,7 +1,9 @@
 analysis.o: macros.h params.o mpi.o fft_interface.o makefile 
 analysis_isoave.o: macros.h params.o mpi.o isoave.o pdf.o spectrum.o makefile 
+analysis_isoave_mt.o: macros.h params.o mpi.o isoave.o pdf.o spectrum.o makefile 
 analysis_rms.o: macros.h params.o mpi.o fft_interface.o sforcing.o makefile 
 analysis_sk.o: macros.h params.o mpi.o isoave.o pdf.o spectrum.o sforcing.o makefile 
+analysis_slow.o: macros.h params.o mpi.o fft_interface.o makefile 
 analysis_spec2d.o: macros.h params.o mpi.o fft_interface.o makefile 
 aspect_diag.o: macros.h params.o spectrum.o isoave.o fft_interface.o mpi.o makefile 
 bc.o: macros.h params.o mpi.o ghost.o makefile 
@@ -47,6 +49,7 @@ psivor_diag.o: macros.h params.o ellipse.o tracers.o makefile
 sforcing.o: macros.h params.o fft_interface.o mpi.o makefile 
 shallow_diag.o: macros.h params.o spectrum.o makefile 
 shallow.o: macros.h params.o fft_interface.o spectrum.o sforcing.o transpose.o makefile 
+slow_diag.o: macros.h params.o spectrum.o isoave.o fft_interface.o mpi.o makefile 
 solve.o: macros.h params.o ghost.o bc.o mpi.o makefile 
 spectrum.o: macros.h params.o sforcing.o mpi.o makefile 
 splitspec.o: macros.h makefile 

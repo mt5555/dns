@@ -99,8 +99,6 @@ endif
 !bw compute scalars as a function of time, and output to a file
 call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
 if (nints_e > nints_e_max) call abortdns("Error for expensive scalars: aspec_slow.F90: nints_e_max too small")
-call compute_slow_scalars(Q,Qhat,q1,q2,q3(:,:,:,1),work1,work2,work3,vor2d,div2d,nints_e,ints_e)
-if (nints_e > nints_e_max) call abortdns("Error for slow scalars: aspec_slow.F90: nints_e_max too small")
 
 ! output turb scalars
 if (my_pe==io_pe) then
@@ -117,6 +115,10 @@ if (my_pe==io_pe) then
    call cwrite8(fid,ints_e,nints_e)
    call cclose(fid,ierr)
 endif
+
+
+call compute_slow_scalars(Q,Qhat,q1,q2,q3(:,:,:,1),work1,work2,work3,vor2d,div2d,nints_e,ints_e)
+if (nints_e > nints_e_max) call abortdns("Error for slow scalars: aspec_slow.F90: nints_e_max too small")
 ! output slow scalars
 if (my_pe==io_pe) then
    write(message,'(f10.4)') 10000.0000 + time
