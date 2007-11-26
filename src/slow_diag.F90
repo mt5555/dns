@@ -604,7 +604,7 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
             enddo
          enddo
       enddo
-      call ifft3d(div,work1)
+      call ifft3d(q2(:,:,:,1),work1)
       !
       !        Now take derivatives of this to subtract off of each component
       !
@@ -633,10 +633,10 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       Qslow(:,:,:,2)=dx
       call zaverage(Qslow(1,1,1,3),dx)
       Qslow(:,:,:,3)=dx
-!     2 is for potential vorticity
-      q2(:,:,:,2)=0.
-!     3 is for the divergence
+!     3 is for potential vorticity
       q2(:,:,:,3)=0.
+!     2 is for the divergence
+      q2(:,:,:,2)=0.
 
       ! compute potential vorticity, (pvtype=4) 
       ! dx takes the role of work2
