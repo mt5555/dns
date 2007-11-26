@@ -522,12 +522,9 @@ nints_e=14
 #endif
 
 
-
-print *,'aspect_diag ke=',ke
-print *,'aspect_diag pe=',pe
-print *,'aspect_diag pv=',pv,pvqg,pvro0,pvfr0
+if(my_pe==io_pe) then
 print *,'aspect_diag potens=',potens,potensqg,potensro0,potensfr0
-print *,'aspect_diag potens_diss=',potens_diss
+end if
 
 end subroutine compute_expensive_scalars
 !
@@ -637,12 +634,12 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       Qslow(:,:,:,3)=dx
 !     3 is for potential vorticity
       q2(:,:,:,3)=0.
-!     2 is for the divergence
-      q2(:,:,:,2)=0.
+!     1 is for the divergence
+      q2(:,:,:,1)=0.
 
       ! compute potential vorticity, (pvtype=4) 
       ! dx takes the role of work2
-      call potential_vorticity(q2(:,:,:,3),q2(:,:,:,2),Q,work1,dx,4)
+      call potential_vorticity(q2(:,:,:,3),q2(:,:,:,1),Q,work1,dx,4)
 
 
       ! Compute the horizontal divergence of the slow variables
@@ -658,7 +655,7 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
             end if
          enddo
       enddo
-      write(6,*) "The horizontal divergence is  ",div_check
+if(my_pe==io_pe) write(6,*) "The horizontal divergence is  ",div_check
 
 !     compute horizontal vorticity of slow variablles
       call der(Qslow(1,1,1,1),dy,dxx,work1,DX_ONLY,2)
@@ -684,7 +681,6 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
             vor_slow = vor_slow + vor2d(i,j)**2
             keh_slow = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
             kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
-            write(6,*) "Vertical Velocity ",Q(i,j,nz1,3),Qslow(i,j,nz1,3)
          enddo
       enddo
       keh_slow=.5*keh_slow/g_nx/g_ny
@@ -730,8 +726,11 @@ nints_e=5
 #endif
 
 
+if(my_pe==io_pe) then
 
-print *,'slow_diag keh_slow=',keh_slow
-print *,'aspect_diag potens_slow=',potens_slow
+   print *,'slow_diag keh_slow=',keh_slow
+   print *,'slow_diag potens_slow=',potens_slow
+
+end if
 
 end subroutine compute_slow_scalars
