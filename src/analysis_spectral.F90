@@ -255,6 +255,10 @@ do
       ! enable this block of code to recompute spectra.
       ! NOTE: this will output .spec, .pspec, .kspec, .hspec, .cospec, .spec2d
       ! and it will erase
+
+      ! first read in the passive scalars too:
+      call input_passive(runname,time,Q,work1,work2)
+
       call compute_spec(time,Q,q1,work1,work2)
       call output_spec(time,time)
       call compute_spec_2d(time,Q,q1,work1,work2)
