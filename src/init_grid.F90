@@ -778,8 +778,10 @@ if (mu_hyper_value>0) then
 if (hyper_implicit == 1) then
    call print_message('Using IMPLICIT hyper diffusion')
 endif
-write(message,'(a,e10.4)') 'Hyper diffusion coefficient mu=',mu_hyper_value
+write(message,'(a,e10.4,a,i5)') 'Hyper diffusion coefficient mu=',mu_hyper_value, &
+'   grad^k, k=',2*mu_hyper
 call print_message(message)
+
 
 
 

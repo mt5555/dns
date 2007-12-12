@@ -495,7 +495,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (mu_hyper>=2 .and. hyper_implicit==0) then
+if (mu_hyper_value>0 .and. mu_hyper>=2 .and. hyper_implicit==0) then
    ! compute hyper viscosity scaling based on energy in last shell:
    ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
    call ke_shell_z(Qhat,hyper_scale)
