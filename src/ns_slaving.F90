@@ -61,6 +61,26 @@ end
 subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2)
 use params
 implicit none
+
+!notes on slaving technique to be added here
+!stage 1: 
+!
+!
+!
+!
+!stage 2:
+!
+!
+!
+!
+!stage 3:
+!
+!
+!
+!
+!stage 4:
+!
+
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: Q(g_nz2,nx_2dz,ny_2dz,n_var)
