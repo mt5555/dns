@@ -62,7 +62,7 @@ subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2)
 use params
 implicit none
 
-!notes on slaving technique to be added here
+!notes on slaving technique to be added here:
 !stage 1: 
 !
 !
