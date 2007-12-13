@@ -1,7 +1,9 @@
 #include "macros.h"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!  subroutine to take one Runge-Kutta 4th order time step
+!  subroutine to take one Runge-Kutta 4th order time step using the
+! slaving technique of Frisch and Morf; Flow assumes arbitrary
+! hyperviscosity power as defined in the input file.
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine rk4(time,Q_grid,Q,Q_tmp,Q_old,rhs,work1,work2)
@@ -105,7 +107,6 @@ do j=1,ny_2dz
                xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
                xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
                xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
-!	       write(6,*),'xw2 = ',xw2
             endif
             if (mu_hyper==0) then
                xw_viss=xw_viss + mu_hyper_value
@@ -114,9 +115,6 @@ do j=1,ny_2dz
                xw_viss=xw_viss + mu_hypo_value/xw
             endif
 
-!	    if (xw2 > 40*pi2_squared .and. xw2 < 60*pi2_squared) then
-!	       write(6,*)'xw2^mu_hyper = ',xw2**mu_hyper	 
-!	    endif
 
             ch = -xw_viss*delt
 	    ch_h=ch/2
@@ -143,13 +141,6 @@ do j=1,ny_2dz
    enddo
 
 enddo
-      
-!      write(6,*)'delt = ',delt
-!      write(6,*)'xw_viss = ',xw_viss
-!      write(6,*)'mu_hyper = ',mu_hyper
-!      write(6,*)'ch = ',ch
-!      write(6,*)'cf = ',cf
-!      write(6,*)'mu_hyper_value = ',mu_hyper_value
 
 
 if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
