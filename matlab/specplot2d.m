@@ -1,5 +1,6 @@
 clear
 %name = 'all'
+%name = 'qg640_b3000_all'
 %name= 'n512_f2000b20_all';
 %name = 'qg512hyper0002.9619'
 %name = 'qg512hyper_all';
@@ -34,18 +35,21 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg512/bous1000/'];             
-namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/';
-%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
-%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/';
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/';
+%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
+%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/';
+%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg128/sphere_visc/'];
 
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg640/';
+
+
+%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg128/slab_visc/'];
 
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg128/no_hyper/'];
 
 
@@ -190,7 +194,7 @@ end
  
  %time average of spectra
  if(1)
- if (time > 3.5 & time < 6.0)
+ if (time > 3.0 & time < 6.5)
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
@@ -228,7 +232,8 @@ figure(10);hold off;
 %    loglog53(numkz,spec2d_t_ave(:,151),'',2.0,6);hold on;%pause
 %  loglog53(numkz,spec2d_t_ave(:,181),'P(kz,(0,10,20,30,40,50))',2.0,6);hold on;
    %axis([1 128 1e-12 1e-4]) ;
-
+title('Time avg P(kh,kz)')
+   
 figure(11);hold off;
 %loglog53(numkh,spec2d_Eh_ave(1,:)','',2.0,6);hold on;%pause
 %loglog53(numkh,spec2d_Eh_ave(3,:)','',2.0,6);hold on;%pause  
@@ -239,7 +244,7 @@ loglog53(numkh,spec2d_Eh_ave(31,:)','',2.0,6);hold on;%pause
 loglog53(numkh,spec2d_Eh_ave(41,:)','',2.0,6);hold on;%pause  
 loglog53(numkh,spec2d_Eh_ave(51,:)','',2.0,6);hold on;%pause  
 loglog53(numkh,spec2d_Eh_ave(61,:)','E_h((2,5,10,20,30,40),kz), time-avg',2.0,6);hold on;%pause  
-
+title('Time avg Eh(kh,kz)')
 
 %normalize x-axis by ratio kz or kh as necessary
 figure(12)

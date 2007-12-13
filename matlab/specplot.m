@@ -82,9 +82,9 @@ mu = 1;
 %namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/hyper8/';
 
 
-name = 'qg512_b2000_all';
-namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
-           'low4/qg/qg512/bous2000/correct_hyper/'];                    
+%name = 'qg512_b2000_all';
+%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
+%           'low4/qg/qg512/bous2000/correct_hyper/'];                    
  
 %name = 'qg640_b3000_all';
 %namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
@@ -115,6 +115,8 @@ namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
 %name = 'balu_b0000.0000';
 %namedir = '/home/mataylo/scratch3/dns/';
 
+name = 'temp';
+namedir = '/nh/u/skurien/zjzdns/dns/src/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -143,7 +145,7 @@ CK=CK_orig;
 j=0;
 
 count = 0
-
+countp = 0
 while (time>=0 & time<=35)
 
   j=j+1;
@@ -151,14 +153,15 @@ while (time>=0 & time<=35)
   spec_r=fread(fid,n_r,'float64');
   disp(sprintf('reading spectrum:  time=%f   n_r=%d',time,n_r));
   
-%  if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
 
   if (j==1) 
     spec_r_ave = zeros(n_r,1);
     pspec_r_ave = zeros(n_r,1);
   end
  
-  if (time>3.0) spec_r_ave = spec_r_ave + spec_r; count = count+1; end;
+  if (time>3.0) 
+      spec_r_ave = spec_r_ave + spec_r; count = count+1; 
+  end;
 
   knum=0:(n_r-1);
   eta=0;
@@ -352,16 +355,16 @@ while (time>=0 & time<=35)
      disp('reading passive scalar spectrum')
      npassive=fread(fidp,1,'float64'); 
      time_p=fread(fidp,1,'float64');
-     figure(5); clf; subplot(1,1,1)
+     figure(2);hold off;
 
      np_r=fread(fidp,1,'float64');
      np_r
      pspec_r=[];
      
-     countp = 0; %for passive scalar average, note assumes npassive = 1
+     
      for np=1:npassive 
         pspec_r(:,np)=fread(fidp,np_r,'float64');
-%        if (time_p>3.0) pspec_r_ave = pspec_r_ave + pspec_r; countp = countp+1; end;
+        if (time_p>3.0) pspec_r_ave = pspec_r_ave + pspec_r; countp = countp+1, end;
         c2(np)=sum(pspec_r(:,np)); 
         % c2_diss = d/dt of .5<c^2>
         c2_diss(np) = mu*2*sum(knum.^2 * (2*pi)^2 .* pspec_r(:,np)')  ; 
@@ -369,7 +372,7 @@ while (time>=0 & time<=35)
      end
      
      ts=sprintf('shell averaged passive scalar spectrum t=%f',time);
-     loglog53(np_r,pspec_r,ts,1.0,3); hold off;
+     loglog53(np_r,pspec_r,ts,1.0,3); hold on;
      axis([1 100 1e-6 1]);
 
      figure(9);hold off
@@ -519,8 +522,6 @@ end
 
 fclose(fid);
 if (fidt>0) fclose(fidt); end;
-return
-
 
 %time averaged spectra
 spec_r_ave = spec_r_ave/count;
@@ -528,6 +529,11 @@ pspec_r_ave = pspec_r_ave/countp;
 figure(10)
 loglog53(n_r-1,spec_r_ave, stitle,CK); hold on; 
 loglog53(np_r,pspec_r_ave,'',1.0,3); hold off;
+
+return
+
+
+
 
 
 
