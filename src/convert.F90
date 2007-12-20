@@ -66,8 +66,8 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=40.0
-tstop=100.0
+tstart=2.0
+tstop=2.0
 tinc=1.0
 
 
@@ -472,7 +472,7 @@ do
      
       ! compute iFFT
       do n=1,3
-         write(message,'(a,i4)') 'w_spec fft3d: n=',n
+         write(message,'(a,i4)') 'w_spec ifft3d: n=',n
          call print_message(message)
          call ifft3d(Q(1,1,1,n),work1)
       enddo

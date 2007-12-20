@@ -41,6 +41,7 @@ ns_grid.o: macros.h params.o fft_interface.o makefile
 ns_ibm.o: macros.h params.o ibm.o fft_interface.o makefile 
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
 ns_psivor.o: macros.h params.o bc.o tracers.o ellipse.o fft_interface.o makefile 
+ns_slaving.o: macros.h params.o sforcing.o spectrum.o makefile 
 ns_xpencil.o: macros.h params.o transpose.o sforcing.o spectrum.o makefile 
 params.o: macros.h params.h makefile 
 particles.o: macros.h params.o mpi.o ghost.o makefile 
