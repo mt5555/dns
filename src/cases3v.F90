@@ -109,7 +109,9 @@ subroutine init_data_decay(Q,PSI,work,work2,init,rantype,restype)
 !     2               use Tzaki initial spectrum
 !     3               Livescu spectrum, peaked at 6
 !     4               k**-4 spectrum
+!     5		      controlled helicity in each mode
 !
+
 use params
 use mpi
 use transpose
@@ -174,6 +176,11 @@ else if (init_cond_subtype==4) then
    do nb=1,NUMBANDS
 	enerb_target(nb) = 10.0 * nb**(-4)
    enddo
+else if (init_cond_subtype==5) then
+   ! initial energy spectrum with controlled helicity in each mode
+   do nb = 1,NUMBANDS
+        enerb_target(nb) = nb**2
+   enddo
 else
    call abortdns("init_data_decay: bad init_cond_subtype")
 endif
@@ -223,11 +230,14 @@ if (init==1) then
    call ranvor(Q,PSI,work,work2,rantype)
 endif
 
-
-
 ! rescale energy to match enerb_target:
 call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 
+!If using controlled helicity only, use set_helicity_angle
+if (init_cond_subtype == 5) then
+!adjust helicity in each mode
+    call set_helicity_angle(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
+endif
 
 call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,min(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
@@ -653,3 +663,181 @@ do nb=1,numb
    enerb_target(nb)=fac1*fac3/fac2
 enddo
 end subroutine livescu_spectrum
+
+
+subroutine set_helicity_angle(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
+!
+!set the helicity angle in each mode for prescribed spectrum shape.
+!
+!First convert to R,I formulation of fourier modes (Polifke and Shtilman)
+!Set angle between R and I
+!Convert back to real formulation of fourier modes
+!
+
+use params
+use mpi
+use sforcing
+implicit none
+
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
+integer :: model_spec
+integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix
+real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
+real*8 ener(numb_max),temp(numb_max),Qdel(3)
+real*8,allocatable,save :: rmodes(:,:,:,:)
+real*8,allocatable,save :: rmodes2(:,:,:,:)
+real*8,allocatable,save :: cmodes(:,:,:,:,:)
+real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
+real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
+real*8 costta, tta, tta_sgn, theta, phi 
+real*8,save :: h_angle,cos_h_angle,sin_h_angle
+character(len=80) :: message
+
+   h_angle = 0.0d0
+!   h_angle = pi/2
+   cos_h_angle=cos(h_angle)
+   sin_h_angle=sin(h_angle)
+
+if (.not. allocated(rmodes)) then
+   allocate(rmodes(-numb_max:numb_max,-numb_max:numb_max,-numb_max:numb_max,3))
+   allocate(rmodes2(-numb_max:numb_max,-numb_max:numb_max,-numb_max:numb_max,3))
+   allocate(cmodes(2,-numb_max:numb_max,-numb_max:numb_max,-numb_max:numb_max,3))
+endif
+
+do n=1,3
+   ! note: using rmodes(:,:,:,n) fails under ifc/linux.  why?
+   call sincos_to_complex(rmodes(-numb_max,-numb_max,-numb_max,n),&
+      cmodes(1,-numb_max,-numb_max,-numb_max,n),numb_max)
+enddo
+
+
+
+!fix angle between R and I
+if (0==init_sforcing) then
+   !should have h_angle inputted by user eventually
+   h_angle = 0.0d0
+!   h_angle = pi/2
+   cos_h_angle=cos(h_angle)
+   sin_h_angle=sin(h_angle)
+
+   
+endif
+      
+!     apply helicity fix:
+do i=-numb_max,numb_max
+do j=-numb_max,numb_max
+do k=-numb_max,numb_max
+   k2=i**2 + j**2 + k**2
+   if (k2>0 .and. k2 < (.5+numb)**2 ) then
+      RR = cmodes(1,i,j,k,:)
+      II = cmodes(2,i,j,k,:)
+      mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
+      mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+
+      fix = 1
+      if (mod_rr == 0) then
+         fix = 0
+      elseif (mod_ii == 0) then
+         fix = 0
+!      elseif (h_angle == 0.0d0) then
+!         fix = 0
+      endif
+      
+!     do the transformation if fix = 1
+
+      if (fix == 1) then         
+
+         RRhat = RR/mod_rr
+         khat(1) = i/sqrt(k2*1.0d0)
+         khat(2) = j/sqrt(k2*1.0d0)
+         khat(3) = k/sqrt(k2*1.0d0)
+         
+!        yhat = khat X RRhat (coordinate system with zhat=khat and xhat = RRhat
+
+         yhat(1) = khat(2)*RRhat(3) - khat(3)*RRhat(2)
+         yhat(2) = - (khat(1)*RRhat(3) - khat(3)*RRhat(1))
+         yhat(3) = khat(1)*RRhat(2) - khat(2)*RRhat(1)
+         
+!      	first check that RR and II are orthogonal to k (incompressibility).
+!       This is confirmed. Comment out.
+
+!	RRdotk = (RR(1)*i + RR(2)*j + RR(3)*k)
+!	IIdotk = (II(1)*i + II(2)*j + II(3)*k)
+!        write(6,*)'RRdotk_ang = ',acos(RRdotk/mod_rr/sqrt(k2*1.0d0)),i,j,k
+!        write(6,*)'IIdotk_ang = ',acos(IIdotk/mod_ii/sqrt(k2*1.0d0)),i,j,k
+
+!     Rotate II and RR into plane orthogonal to k
+!     Don't need to do this for Mark's isotropic forcing since incompressibility
+!      already ensures this. Comment out.
+
+!      mod_RRxk = sqrt((RR(2)*k - RR(3)*j)**2 + (RR(1)*k - RR(3)*i)**2 + (RR(1)*j - RR(2)*i)**2)
+!      RRxk_hat(1) = (RR(2)*k - RR(3)*j)/mod_RRxk
+!      RRxk_hat(2) = -(RR(1)*k - RR(3)*i)/mod_RRxk
+!      RRxk_hat(3) = (RR(1)*j - RR(2)*i)/mod_RRxk
+!      IIp = mod_ii * RRxk_hat
+
+!     mod_IIxk = sqrt((II(2)*k - II(3)*j)**2 + (II(1)*k - II(3)*i)**2 + (II(1)*j - II(2)*i)**2)
+!      IIxk_hat(1) = (II(2)*k - II(3)*j)/mod_IIxk
+!      IIxk_hat(2) = -(II(1)*k - II(3)*i)/mod_IIxk
+!      IIxk_hat(3) = (II(1)*j - II(2)*i)/mod_IIxk
+!      RR = mod_rr * IIxk_hat
+	
+
+         IIp = II	
+
+!        write II in terms of new coordinate system (z=khat,x=RRhat,y=yhat)
+         
+         II(1) = IIp(1)*RRhat(1) + IIp(2)*RRhat(2) + IIp(3)*RRhat(3)
+         II(2) = IIp(1)*yhat(1) + IIp(2)*yhat(2) + IIp(3)*yhat(3)
+         II(3) = IIp(1)*khat(1) + IIp(2)*khat(2) + IIp(3)*khat(3) !should be zero
+                  
+!        set II to have angle h_angle wrt RR
+         IIp(1) = cos_h_angle*mod_ii
+         IIp(2) = sin_h_angle*mod_ii
+         IIp(3) = II(3)
+         
+         
+!         check angle between RR and IIp 
+!         acos(IIp(1)/mod_ii) == h_angle, or IIp(1)/mod_ii == cos(h_angle)
+!         if (abs(IIp(1) - mod_ii*(cos_h_angle)) >1e-10*mod_ii) then
+!            tta = acos(IIp(1)/mod_ii)
+!            print *,'h_angle = ',tta
+!            write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
+!         endif
+         
+         ! now write II in old (i,j,k) coordinate system
+         
+         II(1) = IIp(1)*RRhat(1) + IIp(2)*yhat(1) + IIp(3)*khat(1)
+         II(2) = IIp(1)*RRhat(2) + IIp(2)*yhat(2) + IIp(3)*khat(2)
+         II(3) = IIp(1)*RRhat(3) + IIp(2)*yhat(3) + IIp(3)*khat(3)
+         
+
+
+!        check angle between final RR and II again
+!         RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
+!         costta = (RRdotII/(mod_rr * mod_ii))
+!	write(6,*),'costta =',costta
+!         if (abs(costta - cos_h_angle) >1e-10) then
+!            tta = acos(costta)
+!           write(6,*),'h_angle = ',h_angle
+!            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
+!         endif
+
+      
+         cmodes(1,i,j,k,:) = RR	
+         cmodes(2,i,j,k,:) = II	
+      endif
+   endif
+enddo
+enddo
+enddo
+      
+!     convert back:
+
+do n=1,3
+      call complex_to_sincos(rmodes(-numb_max,-numb_max,-numb_max,n),&
+      cmodes(1,-numb_max,-numb_max,-numb_max,n),numb_max)
+enddo
+
+end subroutine set_helicity_angle
