@@ -681,8 +681,8 @@ use params
 use mpi
 implicit none
 
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: QI(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: QI(nx,ny,nz,3)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer :: model_spec
@@ -696,6 +696,10 @@ character(len=80) :: message
 integer :: zerosign
 external :: zerosign
 
+if (ndim /= 3) then
+   call abortdns("ERROR: set_helicity_angle() requires ndim=3")
+endif
+
 h_angle = 0.0d0
 !   h_angle = pi/2
 cos_h_angle=cos(h_angle)
@@ -706,7 +710,7 @@ sin_h_angle=sin(h_angle)
 ! take FFT, then convert to complex coefficients
 ! real part is stored in Q array
 ! complex part is stored in QI array
-do n = 1,ndim
+do n = 1,3
    work2=Q(:,:,:,n)
    call fft3d(work2,work)  ! fft(q), result stored in work2
    call sincos_to_complex_field(work2,Q(1,1,1,n),QI(1,1,1,n))
@@ -721,8 +725,8 @@ do iii=nx1,nx2
    i=imcord(iii)
    j=jmcord(jjj)
    k=kmcord(kkk)
-   RR(1:ndim) = Q(iii,jjj,kkk,1:ndim)   
-   II(1:ndim) = Qi(iii,jjj,kkk,1:ndim)
+   RR = Q(iii,jjj,kkk,:)
+   II = Qi(iii,jjj,kkk,:)
 
    k2=i**2 + j**2 + k**2
 
@@ -816,15 +820,15 @@ do iii=nx1,nx2
       !            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
       !         endif
       
-      Q(iii,jjj,kkk,1:ndim)=RR(1:ndim)
-      Qi(iii,jjj,kkk,1:ndim)=II(1:ndim)
+      Q(iii,jjj,kkk,:)=RR
+      Qi(iii,jjj,kkk,:)=II
    endif
 enddo
 enddo
 enddo
 
 !    convert back:
-do n = 1,ndim
+do n = 1,3
    call complex_to_sincos_field(work2,Q(1,1,1,n),QI(1,1,1,n))
    call fft3d(work2,work)
    Q(:,:,:,n)=work2
