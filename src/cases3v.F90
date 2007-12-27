@@ -236,7 +236,7 @@ call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 !If using controlled helicity only, use set_helicity_angle
 if (init_cond_subtype == 5) then
 !adjust helicity in each mode
-    call set_helicity_angle(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
+    call set_helicity_angle(Q,PSI,work,work2)
 endif
 
 call print_message("Isotropic initial condition in wave numbers:");
@@ -665,7 +665,10 @@ enddo
 end subroutine livescu_spectrum
 
 
-subroutine set_helicity_angle(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
+
+
+
+subroutine set_helicity_angle(Q,Qi,work,work2)
 !
 !set the helicity angle in each mode for prescribed spectrum shape.
 !
@@ -679,38 +682,34 @@ use mpi
 use sforcing
 implicit none
 
-real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
-real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: QI(nx,ny,nz,n_var)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
 integer :: model_spec
-integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix
-real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
-real*8 ener(numb_max),temp(numb_max),Qdel(3)
-real*8,allocatable,save :: rmodes(:,:,:,:)
-real*8,allocatable,save :: rmodes2(:,:,:,:)
-real*8,allocatable,save :: cmodes(:,:,:,:,:)
+integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix,iii,jjj,kkk
 real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
 real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
 real*8 costta, tta, tta_sgn, theta, phi 
 real*8,save :: h_angle,cos_h_angle,sin_h_angle
 character(len=80) :: message
 
+integer :: zerosign
+external :: zerosign
+
    h_angle = 0.0d0
 !   h_angle = pi/2
    cos_h_angle=cos(h_angle)
    sin_h_angle=sin(h_angle)
 
-if (.not. allocated(rmodes)) then
-   allocate(rmodes(-numb_max:numb_max,-numb_max:numb_max,-numb_max:numb_max,3))
-   allocate(rmodes2(-numb_max:numb_max,-numb_max:numb_max,-numb_max:numb_max,3))
-   allocate(cmodes(2,-numb_max:numb_max,-numb_max:numb_max,-numb_max:numb_max,3))
-endif
-
-do n=1,3
-   ! note: using rmodes(:,:,:,n) fails under ifc/linux.  why?
-   call sincos_to_complex(rmodes(-numb_max,-numb_max,-numb_max,n),&
-      cmodes(1,-numb_max,-numb_max,-numb_max,n),numb_max)
+! take FFT, then convert to complex coefficients
+! real part is stored in Q array
+! complex part is stored in QI array
+do n = 1,ndim
+   work2=Q(:,:,:,n)
+   call fft3d(work2,work)  ! fft(q), result stored in work2
+   call sincos_to_complex_field(work2,Q(1,1,1,n),QI(1,1,1,n))
 enddo
-
 
 
 !fix angle between R and I
@@ -720,18 +719,21 @@ if (0==init_sforcing) then
 !   h_angle = pi/2
    cos_h_angle=cos(h_angle)
    sin_h_angle=sin(h_angle)
-
-   
 endif
       
 !     apply helicity fix:
-do i=-numb_max,numb_max
-do j=-numb_max,numb_max
-do k=-numb_max,numb_max
+do kkk=nz1,nz2
+do jjj=ny1,ny2
+do iii=nx1,nx2
+   ! wave number (i,j,k)   im positive or negative
+   i=imcord(iii)
+   j=jmcord(jjj)
+   k=kmcord(kkk)
+   RR(1:ndim) = Q(iii,jjj,kkk,1:ndim)   
+   II(1:ndim) = Qi(iii,jjj,kkk,1:ndim)
+
    k2=i**2 + j**2 + k**2
    if (k2>0 .and. k2 < (.5+numb)**2 ) then
-      RR = cmodes(1,i,j,k,:)
-      II = cmodes(2,i,j,k,:)
       mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
       mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
@@ -824,20 +826,20 @@ do k=-numb_max,numb_max
 !            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
 !         endif
 
-      
-         cmodes(1,i,j,k,:) = RR	
-         cmodes(2,i,j,k,:) = II	
+         Q(iii,jjj,kkk,1:ndim)=RR(1:ndim)
+         Qi(iii,jjj,kkk,1:ndim)=II(1:ndim)
       endif
    endif
 enddo
 enddo
 enddo
       
-!     convert back:
-
-do n=1,3
-      call complex_to_sincos(rmodes(-numb_max,-numb_max,-numb_max,n),&
-      cmodes(1,-numb_max,-numb_max,-numb_max,n),numb_max)
+!    convert back:
+do n = 1,ndim
+   call complex_to_sincos_field(work2,Q(1,1,1,n),QI(1,1,1,n))
+   call fft3d(work2,work)
+   Q(:,:,:,n)=work2
 enddo
+
 
 end subroutine set_helicity_angle

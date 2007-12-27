@@ -305,4 +305,13 @@ end subroutine
 
 
 
-
+integer function zerosign(i)
+integer i
+if (i==0) then
+   zerosign=0
+else if (i<0) then
+   zerosign=-1
+else
+   zerosign=1
+endif
+end function

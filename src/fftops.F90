@@ -2347,3 +2347,244 @@ end subroutine
 
 
 
+
+
+subroutine sincos_to_complex_field(p,cmodes_r,cmodes_i)
+#if 0
+  convert set of sine and cosine FFT coefficients to complex coefficients
+  After calling this routine, here is a loop that will extract the modes:
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   ! wave number (im,jm,km)   im positive or negative
+   im=imcord(i)
+   jm=jmcord(j)
+   km=kmcord(k)
+   real_part = c_r(i,j,k)
+   imag_part = c_i(i,j,k)
+enddo
+enddo
+enddo
+
+For details of the 8x8 transform that maps sin/cos to complex
+coefficients, see the sincos_to_complex routine in sforcing.F90
+#endif      
+use params
+implicit none
+integer :: nmax
+real*8 :: p(nx,ny,nz)
+real*8 :: cmodes_r(nx,ny,nz)
+real*8 :: cmodes_i(nx,ny,nz)
+real*8 :: a,b,mx
+integer :: i,j,k,im,jm,km,ii,jj,kk,sm,i0,i1,j0,j1,k0,k1,ck
+
+
+
+cmodes_r=0
+cmodes_i=0
+
+do k=nz1,nz2,2
+do j=ny1,ny2,2
+do i=nx1,nx2,2
+
+   i0=i
+   i1=i+1
+   j0=j
+   j1=j+1
+   k0=k
+   k1=k+1
+   
+   ! verify that this processer has all 8 modes:
+   if (  abs(imcord_exp(i0))/=abs(imcord_exp(i1)) .or. &
+         abs(jmcord_exp(j0))/=abs(jmcord_exp(j1)) .or. & 
+         abs(kmcord_exp(k0))/=abs(kmcord_exp(k1)) ) then
+      print *,'not all modes are on this processor: '
+      print *,i0,imcord_exp(i0),imcord_exp(i1)
+      print *,j0,jmcord_exp(j0),jmcord_exp(j1)
+      print *,k0,kmcord_exp(k0),kmcord_exp(k1)
+      call abortdns(" ")
+   endif
+
+   ! make sure that i0 is the positive mode, i1 is the negative mode:
+   if ( imcord_exp(i0)<0 .or. imcord_exp(i1)>0 .or.  &
+        jmcord_exp(j0)<0 .or. jmcord_exp(j1)>0 .or.  & 
+        kmcord_exp(k0)<0 .or. kmcord_exp(k1)>0 ) then
+      print *,'we have the sign wrong?'
+      print *,i0,imcord_exp(i0),imcord_exp(i1)
+      print *,j0,imcord_exp(j0),imcord_exp(j1)
+      print *,k0,imcord_exp(k0),imcord_exp(k1)
+      call abortdns(" ")
+   endif
+
+
+   ! loop over the 8 sin/cos modes, mapping into 8 complex modes
+   do ii=i0,i1
+   do jj=j0,j1
+   do kk=k0,k1      
+
+      ! sin/cos mode 
+      ! these arrays are the same as imcord(), except the last sin(N/2) wave
+      ! number is zero instead of N/2.  This code sets all N/2 modes to zero
+      im=imcord_exp(ii)  
+      jm=jmcord_exp(jj)
+      km=kmcord_exp(kk)
+   
+      a=0; b=0
+      ! count the number if sin() terms:
+      sm=0; if (im<0) sm=sm+1;  if (jm<0) sm=sm+1;  if (km<0) sm=sm+1
+      if (sm==0) then
+         a=p(ii,jj,kk)/8
+      else if (sm==1) then
+         b=-p(ii,jj,kk)/8
+      else if (sm==2) then
+         a=-p(ii,jj,kk)/8
+      else if (sm==3) then
+         b=p(ii,jj,kk)/8
+      else
+         call abortdns("this cant happen")
+      endif
+
+      ! cos(N/2) mode is stored with the cos(0) mode.
+      ! we ignore cos(N/2) mode, and pretend it is the sin(0) mode
+      ! which must be zero:
+      if ( imcord(ii)==g_nx/2 .or. jmcord(jj)==g_ny/2 .or. &
+          kmcord(kk)==g_nz/2 ) then
+         a=0
+         b=0
+      endif
+
+
+
+      cmodes_r(i0,j0,k0)=cmodes_r(i0,j0,k0) + a;    
+      cmodes_i(i0,j0,k0)=cmodes_i(i0,j0,k0) + b
+
+      cmodes_r(i0,j0,k1)=cmodes_r(i0,j0,k1) + a*sign(1,km)   
+      cmodes_i(i0,j0,k1)=cmodes_i(i0,j0,k1) + b*sign(1,km)
+      
+      cmodes_r(i0,j1,k0)=cmodes_r(i0,j1,k0) + a*sign(1,jm)
+      cmodes_i(i0,j1,k0)=cmodes_i(i0,j1,k0) + b*sign(1,jm)
+      
+      cmodes_r(i0,j1,k1)=cmodes_r(i0,j1,k1) + a*sign(1,jm)*sign(1,km)  
+      cmodes_i(i0,j1,k1)=cmodes_i(i0,j1,k1) + b*sign(1,jm)*sign(1,km)  
+
+      cmodes_r(i1,j0,k0)=cmodes_r(i1,j0,k0) + a*sign(1,im)
+      cmodes_i(i1,j0,k0)=cmodes_i(i1,j0,k0) + b*sign(1,im)
+
+      cmodes_r(i1,j0,k1)=cmodes_r(i1,j0,k1) + a*sign(1,im)*sign(1,km)
+      cmodes_i(i1,j0,k1)=cmodes_i(i1,j0,k1) + b*sign(1,im)*sign(1,km)
+
+      cmodes_r(i1,j1,k0)=cmodes_r(i1,j1,k0) + a*sign(1,im)*sign(1,jm)
+      cmodes_i(i1,j1,k0)=cmodes_i(i1,j1,k0) + b*sign(1,im)*sign(1,jm)
+
+      cmodes_r(i1,j1,k1)=cmodes_r(i1,j1,k1) + a*sign(1,im)*sign(1,jm)*sign(1,km)
+      cmodes_i(i1,j1,k1)=cmodes_i(i1,j1,k1) + b*sign(1,im)*sign(1,jm)*sign(1,km)
+
+   enddo
+   enddo
+   enddo
+enddo
+enddo
+enddo
+end subroutine
+
+
+
+
+
+
+subroutine complex_to_sincos_field(p,cmodes_r,cmodes_i)
+#if 0
+  convert set of complex FFT coefficients to complex coefficients
+
+  For details of the 8x8 transform that maps sin/cos to complex
+  coefficients, see the complex_to_sincos routine in sforcing.F90
+#endif      
+use params
+implicit none
+integer :: nmax
+real*8 :: p(nx,ny,nz)
+real*8 :: cmodes_r(nx,ny,nz)
+real*8 :: cmodes_i(nx,ny,nz)
+real*8 :: Rr, Ri
+integer :: i,j,k,im,jm,km,ii,jj,kk,sm,i0,i1,j0,j1,k0,k1,ck
+
+integer :: zerosign
+external :: zerosign
+
+
+p=0
+
+do k=nz1,nz2,2
+do j=ny1,ny2,2
+do i=nx1,nx2,2
+
+   i0=i
+   i1=i+1
+   j0=j
+   j1=j+1
+   k0=k
+   k1=k+1
+   
+   ! verify that this processer has all 8 modes:
+   if (  abs(imcord_exp(i0))/=abs(imcord_exp(i1)) .or. &
+         abs(jmcord_exp(j0))/=abs(jmcord_exp(j1)) .or. & 
+         abs(kmcord_exp(k0))/=abs(kmcord_exp(k1)) ) then
+      print *,'not all modes are on this processor: '
+      print *,i0,imcord_exp(i0),imcord_exp(i1)
+      print *,j0,jmcord_exp(j0),jmcord_exp(j1)
+      print *,k0,kmcord_exp(k0),kmcord_exp(k1)
+      call abortdns(" ")
+   endif
+
+   ! make sure that i0 is the positive mode, i1 is the negative mode:
+   if ( imcord_exp(i0)<0 .or. imcord_exp(i1)>0 .or.  &
+        jmcord_exp(j0)<0 .or. jmcord_exp(j1)>0 .or.  & 
+        kmcord_exp(k0)<0 .or. kmcord_exp(k1)>0 ) then
+      print *,'we have the sign wrong?'
+      print *,i0,imcord_exp(i0),imcord_exp(i1)
+      print *,j0,imcord_exp(j0),imcord_exp(j1)
+      print *,k0,imcord_exp(k0),imcord_exp(k1)
+      call abortdns(" ")
+   endif
+
+
+   ! loop over the 8 sin/cos modes, mapping into 8 complex modes
+   do ii=i0,i1
+   do jj=j0,j1
+   do kk=k0,k1      
+
+      ! sin/cos mode 
+      ! these arrays are the same as imcord(), except the last sin(N/2) wave
+      ! number is zero instead of N/2.  Our complex modes do not have a N/2
+      ! mode and store the sin(0) coefficient (which is always zero) 
+      ! where the sin(N/2) mode is usually stored
+      im=imcord_exp(ii)
+      jm=jmcord_exp(jj)
+      km=kmcord_exp(kk)
+
+      Rr = cmodes_r(ii,jj,kk)
+      Ri = cmodes_i(ii,jj,kk)
+
+
+      p( i0, j0, k0) = p( i0, j0, k0) + Rr 
+      p( i0, j0, k1) = p( i0, j0, k1) - Ri*zerosign(km) 
+      p( i0, j1, k0) = p( i0, j1, k0) - Ri*zerosign(jm) 
+      p( i0, j1, k1) = p( i0, j1, k1) - Rr*zerosign(jm*km) 
+      p( i1, j0, k0) = p( i1, j0, k0) - Ri*zerosign(im)
+      p( i1, j0, k1) = p( i1, j0, k1) - Rr*zerosign(im*km) 
+      p( i1, j1, k0) = p( i1, j1, k0) - Rr*zerosign(im*jm) 
+      p( i1, j1, k1) = p( i1, j1, k1) + Ri*zerosign(im*jm*km) 
+   enddo
+   enddo
+   enddo
+      
+enddo
+enddo
+enddo
+
+end subroutine
+
+
+
+

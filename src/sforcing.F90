@@ -1100,6 +1100,9 @@ real*8 :: psiy_r(3),psiy_i(3)
 real*8 :: psiz_r(3),psiz_i(3)
 real*8 :: ff(numbs,3)
 
+integer :: zerosign
+external :: zerosign
+
 #undef GATHER_STATS
 #ifdef GATHER_STATS
 ff=0
@@ -1240,18 +1243,6 @@ end subroutine
 
 
 
-integer function zerosign(i)
-integer i
-if (i==0) then
-   zerosign=0
-else if (i<0) then
-   zerosign=-1
-else
-   zerosign=1
-endif
-
-
-end function
 
 
 
@@ -1336,6 +1327,8 @@ real*8 :: Rr,Ri
 real*8 :: cmodes(2,-nmax:nmax,-nmax:nmax,-nmax:nmax)
 real*8 :: rmodes(-nmax:nmax,-nmax:nmax,-nmax:nmax)
 integer :: i,j,k,im,jm,km,imax,ip,jp,kp
+integer :: zerosign
+external :: zerosign
 !
 ! Note: this code also used in random12() above. 
 ! Any bugfixes here, also apply to random12().
