@@ -180,6 +180,7 @@ else if (init_cond_subtype==5) then
    ! initial energy spectrum with controlled helicity in each mode
    do nb = 1,NUMBANDS
         enerb_target(nb) = nb**2
+        enerb_target(nb) = 1      ! mark testing
    enddo
 else
    call abortdns("init_data_decay: bad init_cond_subtype")
@@ -236,7 +237,10 @@ call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 !If using controlled helicity only, use set_helicity_angle
 if (init_cond_subtype == 5) then
 !adjust helicity in each mode
-    call set_helicity_angle(Q,PSI,work,work2)
+   n=3
+   work2=Q(:,:,:,n)
+   call set_helicity_angle(Q,PSI,work,ener)
+   print *,'maxdiff: n=',n,maxval(work2-Q(:,:,:,n))
 endif
 
 call print_message("Isotropic initial condition in wave numbers:");
@@ -274,7 +278,7 @@ print *,'eddy time',2*ener/epsilon
 endif
 
 
-
+stop
 
 
 end subroutine
@@ -668,7 +672,7 @@ end subroutine livescu_spectrum
 
 
 
-subroutine set_helicity_angle(Q,Qi,work,work2)
+subroutine set_helicity_angle(Q,Qi,work,ener)
 !
 !set the helicity angle in each mode for prescribed spectrum shape.
 !
@@ -684,9 +688,10 @@ implicit none
 real*8 :: Q(nx,ny,nz,3)
 real*8 :: QI(nx,ny,nz,3)
 real*8 :: work(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-integer :: model_spec
-integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix,iii,jjj,kkk
+real*8 :: ener  ! energy (input argument)
+integer :: n,wn,fix,iii,jjj,kkk
+integer :: i,j,k
+real*8 :: xw2,xw
 real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
 real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
 real*8 costta, tta, tta_sgn, theta, phi 
@@ -700,20 +705,25 @@ if (ndim /= 3) then
    call abortdns("ERROR: set_helicity_angle() requires ndim=3")
 endif
 
-h_angle = 0.0d0
-!   h_angle = pi/2
+!h_angle = 0.0d0
+h_angle = pi/2
 cos_h_angle=cos(h_angle)
 sin_h_angle=sin(h_angle)
 
+
+write(message,*) 'Setting helicity angle = ',h_angle
+call print_message(message)
 
 
 ! take FFT, then convert to complex coefficients
 ! real part is stored in Q array
 ! complex part is stored in QI array
 do n = 1,3
-   work2=Q(:,:,:,n)
-   call fft3d(work2,work)  ! fft(q), result stored in work2
-   call sincos_to_complex_field(work2,Q(1,1,1,n),QI(1,1,1,n))
+   write(message,*) 'converting gridspace to to complex modes, n=',n   
+   call print_message(message)
+   call fft3d(Q(1,1,1,n),work)    ! inplace FFT
+   work=Q(:,:,:,n)                ! copy fft(q) to work array 
+   call sincos_to_complex_field(work,Q(1,1,1,n),QI(1,1,1,n))  ! convert
 enddo
 
 
@@ -721,22 +731,26 @@ enddo
 do kkk=nz1,nz2
 do jjj=ny1,ny2
 do iii=nx1,nx2
-   ! wave number (i,j,k)   im positive or negative
+   ! note: wave number is (i,j,k)
+   ! index into arrays is (iii,jjj,kkk)
+   !
+   ! to be more consitent with other loops, it would be better
+   ! to have the array index (i,j,k) and wave numbers (im,jm,km) 
+   !
    i=imcord(iii)
    j=jmcord(jjj)
    k=kmcord(kkk)
    RR = Q(iii,jjj,kkk,:)
    II = Qi(iii,jjj,kkk,:)
 
-   k2=i**2 + j**2 + k**2
+   xw2=i**2 + j**2 + k**2
+   xw=sqrt(xw2)
 
    mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
    mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
-   
+
    fix = 1
-   if (mod_rr == 0) then
-      fix = 0
-   elseif (mod_ii == 0) then
+   if (mod_rr == 0 .or. mod_ii == 0 .or. xw==0) then
       fix = 0
       ! elseif (h_angle == 0.0d0) then
       ! fix = 0
@@ -747,9 +761,9 @@ do iii=nx1,nx2
    if (fix == 1) then         
       
       RRhat = RR/mod_rr
-      khat(1) = i/sqrt(k2*1.0d0)
-      khat(2) = j/sqrt(k2*1.0d0)
-      khat(3) = k/sqrt(k2*1.0d0)
+      khat(1) = i/xw
+      khat(2) = j/xw
+      khat(3) = k/xw
       
       ! yhat = khat X RRhat (coordinate system with zhat=khat and xhat = RRhat
       
@@ -760,10 +774,15 @@ do iii=nx1,nx2
       ! frst check that RR and II are orthogonal to k (incompressibility).
       ! This is confirmed. Comment out.
       
-      !	RRdotk = (RR(1)*i + RR(2)*j + RR(3)*k)
-      !	IIdotk = (II(1)*i + II(2)*j + II(3)*k)
-      !        write(6,*)'RRdotk_ang = ',acos(RRdotk/mod_rr/sqrt(k2*1.0d0)),i,j,k
-      !        write(6,*)'IIdotk_ang = ',acos(IIdotk/mod_ii/sqrt(k2*1.0d0)),i,j,k
+      RRdotk = (RR(1)*i + RR(2)*j + RR(3)*k)
+      IIdotk = (II(1)*i + II(2)*j + II(3)*k)
+      if (abs(RRdotk/xw)>(1e-16*sqrt(ener)) .or. abs(IIdotk/xw)>(1e-12*sqrt(ener))) then
+         print *,'WARNING:  RR and II not orthogonal to K:',i,j,k,xw
+         write(6,*)'RRdotk, norm, KE = ',(RRdotk),mod_rr,sqrt(ener)
+         write(6,*)'IIdotk, norm, KE = ',(IIdotk),mod_ii,sqrt(ener)
+         write(6,*)'RRdotk_ang = ',acos(RRdotk/mod_rr/xw)
+         write(6,*)'IIdotk_ang = ',acos(IIdotk/mod_ii/xw)
+      endif
       
       ! Rotate II and RR into plane orthogonal to k
       ! Don't need to do this for Mark's isotropic forcing since incompressibility
@@ -829,9 +848,11 @@ enddo
 
 !    convert back:
 do n = 1,3
-   call complex_to_sincos_field(work2,Q(1,1,1,n),QI(1,1,1,n))
-   call fft3d(work2,work)
-   Q(:,:,:,n)=work2
+   write(message,*) 'converting back to gridspace, n=',n   
+   call print_message(message)
+   call complex_to_sincos_field(work,Q(1,1,1,n),QI(1,1,1,n))
+   Q(:,:,:,n)=work
+   call ifft3d(Q(1,1,1,n),work)
 enddo
 
 
