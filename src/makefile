@@ -70,7 +70,9 @@ ifeq ($(UNAME),Linux)
    endif
 
    ifeq ($(HOST),nostromo)
-      VENDOR=GNU
+      #VENDOR=GNU
+      VENDOR=GNUMPI
+      MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
    endif
    ifeq ($(HOST),mora)
       VENDOR=INTEL

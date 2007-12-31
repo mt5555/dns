@@ -129,14 +129,17 @@ integer,parameter :: NUMBANDS_MAX=1024
 real*8 xw,ener,xfac,theta
 real*8 ::  enerb_target(NUMBANDS_MAX),enerb_work(NUMBANDS_MAX),enerb(NUMBANDS_MAX)
 real*8 :: xnb,ep23,lenscale,eta,fac1,fac2,fac3,ens,epsilon,mu_m
-real*8 :: tmx1,tmx2,p,p1,p2,ku
+real*8 :: tmx1,tmx2,p,p1,p2,ku,h_angle
 
 character(len=80) message,fname
 CPOINTER :: null
 
 
 
-NUMBANDS=NUMBANDS_MAX
+! number of bands to use in initial condtion. 
+! truncate to maximum allowed by spherical dealiasing:
+NUMBANDS= .5 + sqrt(2.0)*g_nmin/3   ! round up  
+NUMBANDS=min(NUMBANDS_MAX,NUMBANDS)
 
 !
 ! cj2.out run: 128^3
@@ -179,18 +182,12 @@ else if (init_cond_subtype==4) then
 else if (init_cond_subtype==5) then
    ! initial energy spectrum with controlled helicity in each mode
    do nb = 1,NUMBANDS
-        enerb_target(nb) = nb**2
-        enerb_target(nb) = 1      ! mark testing
+        enerb_target(nb) = nb**2 / 1000.
    enddo
 else
    call abortdns("init_data_decay: bad init_cond_subtype")
 endif
 
-! number of bands to use in initial condtion. doesn't really matter
-! since it will be truncated by sqrt(2)*g_nmin/3 during initial
-! projection & dealias step
-!
-NUMBANDS=.5 + sqrt(2.0)*g_nmin/3  ! round up
 
 
 if (init==0) return
@@ -234,22 +231,29 @@ endif
 ! rescale energy to match enerb_target:
 call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 
-!If using controlled helicity only, use set_helicity_angle
+! If using controlled helicity initial condition, 
+! set the helicity angle to h_angle
 if (init_cond_subtype == 5) then
-!adjust helicity in each mode
-   n=3
-   work2=Q(:,:,:,n)
-   call set_helicity_angle(Q,PSI,work,ener)
-   print *,'maxdiff: n=',n,maxval(work2-Q(:,:,:,n))
+   h_angle = 0.0d0
+   h_angle = pi/2
+   call set_helicity_angle(Q,PSI,work,h_angle,ener)
+
+   ! debug case:  1,4,9,... 100    9.455 2.5106 27761.2
+!   h_angle=-1  ! disable angle setting, for degugging
+!   n=2
+!   work2=Q(:,:,:,n)
+!   call set_helicity_angle(Q,PSI,work,h_angle,ener)
+!   print *,'n=',n, ' maxval = ',maxval(abs(work2-Q(:,:,:,n)))
+!   stop
 endif
 
 call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,min(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
    write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
         "  E target=",enerb_target(nb)
-   call print_message(message(1:79))
+   call print_message(message)
 enddo
-write(message,'(a,f8.4,a,f8.4)') "Total E=",ener
+write(message,'(a,e16.4)') "Total E=",ener
 call print_message(message)
 
 
@@ -277,8 +281,6 @@ print *,'delx/eta ',  (1./g_nmin)/((mu_m**3 / epsilon ) **.25)
 print *,'eddy time',2*ener/epsilon
 endif
 
-
-stop
 
 
 end subroutine
@@ -672,7 +674,7 @@ end subroutine livescu_spectrum
 
 
 
-subroutine set_helicity_angle(Q,Qi,work,ener)
+subroutine set_helicity_angle(Q,Qi,work,h_angle,ener)
 !
 !set the helicity angle in each mode for prescribed spectrum shape.
 !
@@ -688,14 +690,14 @@ implicit none
 real*8 :: Q(nx,ny,nz,3)
 real*8 :: QI(nx,ny,nz,3)
 real*8 :: work(nx,ny,nz)
-real*8 :: ener  ! energy (input argument)
+real*8 :: h_angle,ener  ! energy (input argument)
 integer :: n,wn,fix,iii,jjj,kkk
 integer :: i,j,k
 real*8 :: xw2,xw
 real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
 real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
 real*8 costta, tta, tta_sgn, theta, phi 
-real*8,save :: h_angle,cos_h_angle,sin_h_angle
+real*8 :: cos_h_angle,sin_h_angle
 character(len=80) :: message
 
 integer :: zerosign
@@ -705,8 +707,6 @@ if (ndim /= 3) then
    call abortdns("ERROR: set_helicity_angle() requires ndim=3")
 endif
 
-!h_angle = 0.0d0
-h_angle = pi/2
 cos_h_angle=cos(h_angle)
 sin_h_angle=sin(h_angle)
 
@@ -737,9 +737,9 @@ do iii=nx1,nx2
    ! to be more consitent with other loops, it would be better
    ! to have the array index (i,j,k) and wave numbers (im,jm,km) 
    !
-   i=imcord(iii)
-   j=jmcord(jjj)
-   k=kmcord(kkk)
+   i=imcord_exp(iii)
+   j=jmcord_exp(jjj)
+   k=kmcord_exp(kkk)
    RR = Q(iii,jjj,kkk,:)
    II = Qi(iii,jjj,kkk,:)
 
@@ -750,10 +750,8 @@ do iii=nx1,nx2
    mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
    fix = 1
-   if (mod_rr == 0 .or. mod_ii == 0 .or. xw==0) then
+   if (mod_rr == 0 .or. mod_ii == 0 .or. xw==0 .or. h_angle==-1) then
       fix = 0
-      ! elseif (h_angle == 0.0d0) then
-      ! fix = 0
    endif
    
    ! do the transformation if fix = 1
@@ -772,11 +770,9 @@ do iii=nx1,nx2
       yhat(3) = khat(1)*RRhat(2) - khat(2)*RRhat(1)
       
       ! frst check that RR and II are orthogonal to k (incompressibility).
-      ! This is confirmed. Comment out.
-      
       RRdotk = (RR(1)*i + RR(2)*j + RR(3)*k)
       IIdotk = (II(1)*i + II(2)*j + II(3)*k)
-      if (abs(RRdotk/xw)>(1e-16*sqrt(ener)) .or. abs(IIdotk/xw)>(1e-12*sqrt(ener))) then
+      if (abs(RRdotk/xw)>(1e-12*sqrt(ener)) .or. abs(IIdotk/xw)>(1e-12*sqrt(ener))) then
          print *,'WARNING:  RR and II not orthogonal to K:',i,j,k,xw
          write(6,*)'RRdotk, norm, KE = ',(RRdotk),mod_rr,sqrt(ener)
          write(6,*)'IIdotk, norm, KE = ',(IIdotk),mod_ii,sqrt(ener)

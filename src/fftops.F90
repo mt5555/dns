@@ -2351,16 +2351,21 @@ end subroutine
 
 subroutine sincos_to_complex_field(p,cmodes_r,cmodes_i)
 #if 0
-  convert set of sine and cosine FFT coefficients to complex coefficients
+  Convert set of sine and cosine FFT coefficients to complex coefficients.
+
+  Note: the N/2 mode (for which the standard FFT allows only the cosine
+  component) will be ignored (assumbed to be zero) by this routine.
+  This mode is usually zero if any type of dealiasing is used.
+
   After calling this routine, here is a loop that will extract the modes:
 
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
    ! wave number (im,jm,km)   im positive or negative
-   im=imcord(i)
-   jm=jmcord(j)
-   km=kmcord(k)
+   im=imcord_exp(i)
+   jm=jmcord_exp(j)
+   km=kmcord_exp(k)
    real_part = c_r(i,j,k)
    imag_part = c_i(i,j,k)
 enddo
@@ -2429,7 +2434,7 @@ do i=nx1,nx2,2
       im=imcord_exp(ii)  
       jm=jmcord_exp(jj)
       km=kmcord_exp(kk)
-   
+
       a=0; b=0
       ! count the number if sin() terms:
       sm=0; if (im<0) sm=sm+1;  if (jm<0) sm=sm+1;  if (km<0) sm=sm+1
