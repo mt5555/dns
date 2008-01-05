@@ -53,6 +53,8 @@ integer :: dealias=0                ! 0 = none
                                     ! 1 = 2/3 rule (exact)
                                     ! 2 = sqrt(2)*N/3 rule (approximate)
 
+logical :: use_phaseshift=.false.   ! .true. = compute nonlinear term with phase shifting
+
 !
 ! I/O options
 !

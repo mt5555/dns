@@ -15,7 +15,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
-
+real*8, allocatable, save :: q2(:,:,:,:)
 logical,save :: firstcall=.true.
 integer :: n
 
@@ -40,23 +40,29 @@ if (firstcall) then
    if (Lz/=1) then
       call abortdns("Error: NS alpha model with aspect ratio not implemented")
    endif
+   if (use_phaseshift) then
+      call abortdns("Error: NS alpha model cannot be run with phase shifting")
+   endif
 #else
    if (alpha_value/=0) then
       call abortdns("Error: alpha>0 but this is not the alpha model!")
    endif
 #endif  
+   if (use_phaseshift) then
+      allocate(q2(nx,ny,nz,ndim))
+   endif
 
    ! intialize Q with Fourier Coefficients:
    call z_fft3d_nvar(Q_grid,Q,work1,work2) 
 endif
 
-call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old,work1,work2)
+call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old,work1,work2,q2)
 end
 
 
 
 
-subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2)
+subroutine rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work,work2,q2)
 use params
 implicit none
 real*8 :: time
@@ -66,8 +72,9 @@ real*8 :: Q_tmp(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: Q_old(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+real*8 :: q2(nx,ny,nz,ndim)  ! only allocated if phase shifting turned on
 
-! overlapped in memory:
+! overlapped in memory:  dont use both in the same n loop
 real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: rhsg(nx,ny,nz,n_var)
 
@@ -79,7 +86,7 @@ integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 
 
 ! stage 1
-call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1)
+call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,q2)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -100,7 +107,7 @@ enddo
 
 
 ! stage 2
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,q2)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -119,7 +126,7 @@ enddo
 
 
 ! stage 3
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,q2)
 
 do n=1,n_var
    do j=1,ny_2dz
@@ -137,7 +144,7 @@ do n=1,n_var
 enddo
 
 ! stage 4
-call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4)
+call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,q2)
 
 
 do n=1,n_var
@@ -185,7 +192,7 @@ end subroutine
 
 
 
-subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p,rkstage)
+subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p,rkstage,vor_ps)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -219,9 +226,12 @@ real*8 rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 rhsg(nx,ny,nz,n_var)    
 
 ! work/storage
+real*8  :: vor_ps(nx,ny,nz,ndim)  ! only allocated if use_phaseshift
+                                  ! phase shifted vorticity 
 real*8 work(nx,ny,nz)
 ! actual dimension: nx,ny,nz, since sometimes used as work array
 real*8 p(g_nz2,nx_2dz,ny_2dz)    
+
                                  
 
 !local
@@ -423,7 +433,9 @@ do i=nx1,nx2
    maxvor = max(maxvor,abs(vor(2)))
    maxvor = max(maxvor,abs(vor(3)))
 
-
+   if (use_phaseshift) vor=vor/2   ! half contribution from this grid
+                                   ! half contribution from phase shifted grid
+   
    ! add any rotation to vorticity before computing u cross vor
 #ifdef BETAPLANE
    vor(3)=vor(3) + ycord(j)*fcor
@@ -474,9 +486,49 @@ enddo
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! phase shifting:  now compute u x vor with a phase shift,
+! and add to RHS:
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#if 0
+if (use_phaseshift) then
+   call phaseshift(Qhat,1)  ! phaseshift Qhat
+   ! compute phaseshifted (u,v,w), store in Q()
+   do n=1,n_var
+      call z_ifft3d(Qhat,Q(1,1,1,n),work)
+   enddo
+   ! compute phaseshifted vorticity, store in vor_ps:
+   call ns_vorticity(vor_ps,Qhat,work,p)
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   vor(1)=vor_ps(i,j,k,1)
+   vor(2)=vor_ps(i,j,k,2)
+   vor(3)=vor_ps(i,j,k,3)
+   uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
+   vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
+   ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
+   ! overwrite Q with the result
+   Q(i,j,k,1) = uu
+   Q(i,j,k,2) = vv
+   Q(i,j,k,3) = ww
+enddo
+enddo
+enddo
+
+   ! back spectral space
+   do n=1,3
+      call z_fft3d_trashinput(Q(1,1,1,n),p,work)
+      rhs(:,:,:,n) = rhs(:,:,:,n) + p/2
+   enddo
+   call phaseshift(Qhat,-1) ! restore Qhat to unphaseshifted version
+endif
+#endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! From this point on, Q() may be used as a work array
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  spec_diff:  spectrum of u dot (u cross omega) 
