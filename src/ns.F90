@@ -41,7 +41,7 @@ if (firstcall) then
       call abortdns("Error: NS alpha model with aspect ratio not implemented")
    endif
    if (use_phaseshift) then
-      call abortdns("Error: NS alpha model cannot be run with phase shifting")
+      call abortdns("Error: NS alpha model cannot yet be run with phase shifting")
    endif
 #else
    if (alpha_value/=0) then
@@ -49,6 +49,7 @@ if (firstcall) then
    endif
 #endif  
    if (use_phaseshift) then
+      if (npassive>0) call abortdns("Error: phaseshift not yet coded for passive scalars")
       allocate(q2(nx,ny,nz,ndim))
    endif
 
@@ -358,7 +359,7 @@ do ns=np1,np2
    ! which coult potentially trash some of rhs(:,:,:,4)
 enddo
 
-! chceck of first scaler is the density and we are running boussinisque
+! check of first scaler is the density and we are running boussinisque
 if (passive_type(np1)==4) then
    do k=nz1,nz2
    do j=ny1,ny2
@@ -409,12 +410,21 @@ endif
 ! x,yder from Qgrid:       6x,6y,12FFT 
 !
 
+#undef TEST_PHASESHIFT
+#ifdef TEST_PHASESHIFT
+do n=1,ndim
+   p=Qhat(:,:,:,n)
+   call z_phaseshift(p,Qhat(1,1,1,n),1)  ! phaseshift Qhat
+   p=Qhat(:,:,:,n)   
+   call z_phaseshift(p,Qhat(1,1,1,n),-1)  ! phaseshift Qhat
+enddo
+#endif
 
 #ifdef ALPHA_MODEL
    call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
 !   if (ncpu_x==1 .and. ncpu_y == 1 ) then
-!      call ns_vorticity3(rhsg,Qhat,work,p)  ! not yet coded
+!      call ns_vorticity3(rhsg,Qhat,work,p)  ! not yet coded, used in ns_xpencil
 !   else
       call ns_vorticity(rhsg,Qhat,work,p)
 !   endif
@@ -515,11 +525,11 @@ enddo
 ! and add to RHS:
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (use_phaseshift) then
-#if 0
-   call phaseshift(Qhat,1)  ! phaseshift Qhat
    ! compute phaseshifted (u,v,w), store in Q()
    do n=1,n_var
-      call z_ifft3d(Qhat,Q(1,1,1,n),work)
+      p=Qhat(:,:,:,n)
+      call z_phaseshift(p,Qhat(1,1,1,n),1)  ! phaseshift Qhat
+      call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work)
    enddo
    ! compute phaseshifted vorticity, store in q2:
    call ns_vorticity(q2,Qhat,work,p)
@@ -527,12 +537,9 @@ if (use_phaseshift) then
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-      vor(1)=q2(i,j,k,1)
-      vor(2)=q2(i,j,k,2)
-      vor(3)=q2(i,j,k,3)
-      uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
-      vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
-      ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
+      uu = ( Q(i,j,k,2)*q2(i,j,k,3) - Q(i,j,k,3)*q2(i,j,k,2) )
+      vv = ( Q(i,j,k,3)*q2(i,j,k,1) - Q(i,j,k,1)*q2(i,j,k,3) )
+      ww = ( Q(i,j,k,1)*q2(i,j,k,2) - Q(i,j,k,2)*q2(i,j,k,1) )
       ! overwrite Q with the result
       Q(i,j,k,1) = uu
       Q(i,j,k,2) = vv
@@ -545,9 +552,9 @@ if (use_phaseshift) then
    do n=1,3
       call z_fft3d_trashinput(Q(1,1,1,n),p,work)
       rhs(:,:,:,n) = rhs(:,:,:,n) + p/2
+      p=Qhat(:,:,:,n)
+      call z_phaseshift(p,Qhat(1,1,1,n),-1) ! restore Qhat to unphaseshifted version
    enddo
-   call phaseshift(Qhat,-1) ! restore Qhat to unphaseshifted version
-#endif
 endif
 
 

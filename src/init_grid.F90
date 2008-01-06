@@ -893,6 +893,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
@@ -1038,6 +1042,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
@@ -1239,6 +1247,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
@@ -1477,6 +1489,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
@@ -1740,6 +1756,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
@@ -2007,6 +2027,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
@@ -2298,6 +2322,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0
@@ -2622,6 +2650,10 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-phase') then
+   numerical_method=FOURIER
+   dealias=2
+   use_phaseshift=.true.
 else if (sdata=='4th') then
    numerical_method=FOURTH_ORDER
    dealias=0

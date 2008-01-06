@@ -2593,3 +2593,78 @@ end subroutine
 
 
 
+
+#if 0
+phase shift algorithm
+let hh = .5 k/N
+(a+ib) exp(ik (x + .5/N)) = (a+ib) exp(i .5 k/N) exp(ikx)
+                          = (a+ib) (cos(hh) + i sin(hh)) exp(ikx)
+
+cos( kx + hh) + i sin( kx + hh) = exp(i (kx+hh)) 
+       = ( cos(kx)+i sin(kx) ) ( cos(hh)+i sin(hh) )
+       =  cos(kx) cos(hh) - sin(kx) sin(hh) + i [ sin(kx)cos(hh) + cos(kx) sin(hh) ]
+
+a cos(kx + hh) = a cos(hh) cos(kx) - a sin(hh) sin(kx)
+b sin(kx + hh) = b sin(hh) cos(kx) + b cos(hh) sin(kx)  
+
+so for a pair of modes:  
+
+
+a cos(kx) + b sin(kx) ==>   [a cos(hh)+b sin(hh)]  cos(kx)
+                          + [b cos(hh)-a sin(hh)]  sin(kx)
+
+
+#endif
+subroutine z_phaseshift(p,pshift,shift)
+!
+!   shift = 1   apply phaseshift of .5 delta_x
+!   shift =-1   apply phaseshift of -.5 delta_x  (inverse operation)
+!
+use params
+implicit none
+real*8 p(g_nz2,nx_2dz,ny_2dz)         
+real*8 pshift(g_nz2,nx_2dz,ny_2dz)    
+integer :: shift,i,j,k,im,jm,km
+real*8 a,b,hh
+
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         ! apply x shift
+         ! if z_imsign(i)==0   then 
+         !    im==0        do nothing (constant mode), hh = 0
+         !    im=N/2 mode  so we only have the cosine component
+         !                 we require this mode to be zero
+         !                 so a=b=0 and shift will have no effect.
+
+         hh = shift*pi2*im/(2*g_nx)
+         ! z_imsign(i) = 1:     a = cosine mode
+         ! im>0                 b = sine mode
+         !                      p = a cos(hh) + b sin(hh)
+         ! z_imsign(i) = -1:    b = cosine mode
+         ! im<0                 a = sine mode
+         !                      p = a cos(hh) - b sin(hh)
+         a = p(k,i,j)               
+         b = p(k,i+z_imsign(i),j) 
+         pshift(k,i,j) = a*cos(hh) + b*sin(hh)
+
+         ! apply y shift
+         hh= shift*pi2*jm/(2*g_ny)
+         a = p(k,i,j)               
+         b = p(k,i,j+z_jmsign(j))
+         pshift(k,i,j) = a*cos(hh) + b*sin(hh)
+
+         ! apply z shift
+         hh= shift*pi2*km/(2*g_nz)
+         a = p(k,i,j)               
+         b = p(k+z_kmsign(k),i,j)
+         pshift(k,i,j) = a*cos(hh) + b*sin(hh)
+
+      enddo
+   enddo
+enddo
+end subroutine
