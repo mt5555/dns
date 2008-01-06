@@ -1,5 +1,5 @@
 #/bin/csh -f
-
+rm -f /tmp/new.out /tmp/ref.out
 
 grep -a -E 'min/max|(u,v,w)|ke|Ea|w_xx' $1 > /tmp/new.out
 grep -a -E 'min/max|(u,v,w)|ke|Ea|w_xx' $2 > /tmp/ref.out

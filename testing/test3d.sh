@@ -57,7 +57,9 @@ if ($1 == 1) then
 echo "***********************************************************"
 echo "without restart:"
 make >& /dev/null ;  rm -f $tmp ; $EXE -d $rundir reference3d  -i $refin > $tmp 
+#make  ;  rm -f $tmp ; $EXE -d $rundir reference3d  -i $refin | tee  $tmp 
 ../testing/check.sh $tmp $refout
+
 
 echo "***********************************************************"
 echo "dnsgrid without restart:"
