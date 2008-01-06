@@ -266,25 +266,7 @@ Running the code
 Scripts for testing:
 ****************************************************************************
 
-test.sh   tests 2D KH rollup
-          models:  dns, dnsgrid
-          methods:  spectral
-          tests several different dimension paddings
-
-test3d.sh  tests 3D forced isotropic turbulence run
-           models:  dns, dnsgrid
-           methods:  spectral
-           dimensions:  lots
-           tests several different dimension paddings
-           tests restart files
-          
-testg.sh  tests 2D KH rollup          
-          models:  dnsgrid, dnsghost
-          methods:  4th
-
-
-
-
+see dns/README and dns/testing/README
 
 
 
