@@ -92,9 +92,17 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      Q_old(k,i,j,n)=Q(k,i,j,n)
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6.0             ! accumulate RHS
-      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2     ! Euler timestep with dt=delt/2
+      if (hyper_implicit==2) then
+         !Q_old(k,i,j,n)=Q(k,i,j,n)
+         !Q(k,i,j,n)=exp_f*Q(k,i,j,n)+cf*rhs(k,i,j,n)                ! accumulate RHS
+         !Q_tmp(k,i,j,n)=exph_f*Q_old(k,i,j,n) + cc*rhs(k,i,j,n)      ! Euler timestep with dt=delt/2
+         !Qb_tmp(k,i,j,n)=Q_tmp(k,i,j,n)
+         !rhsb(k,i,j,n)=rhs(k,i,j,n)
+      else
+         Q_old(k,i,j,n)=Q(k,i,j,n)
+         Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6                ! accumulate RHS
+         Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2      ! Euler timestep with dt=delt/2
+      endif
    enddo
    enddo
    enddo
@@ -103,18 +111,23 @@ if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
+
 
 
 
 ! stage 2
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,q2)
-
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3             ! accumulate RHS
-      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2   ! Euler timestep with dt=delt/2
+      if (hyper_implicit==2) then
+         !Q(k,i,j,n)=Q(k,i,j,n)+2*cf*rhs(k,i,j,n)             ! accumulate RHS
+         !Q_tmp(k,i,j,n)=exph_f*Q_old(k,i,j,n) + cc*rhs(k,i,j,n)! Euler timestep with dt=delt/2
+      else
+         Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3             ! accumulate RHS
+         Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2   ! Euler timestep with dt=delt/2
+      endif
    enddo
    enddo
    enddo
@@ -125,15 +138,21 @@ do n=1,n_var
 enddo
 
 
+
 ! stage 3
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,q2)
-
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3            ! accumulate RHS
-      Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)      ! Euler timestep with dt=delt
+      if (hyper_implicit==2) then
+         !Q(k,i,j,n)=Q(k,i,j,n)+2*cf*rhs(k,i,j,n)
+         !Q_tmp(k,i,j,n) = exph_f * Qb_tmp(k,i,j,n) + cc*( 2.0d0 * rhs(k,i,j,n) - &
+         !     &               rhsb(k,i,j,n) )
+      else
+         Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3               ! accumulate RHS
+         Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)      ! Euler timestep with dt=delt
+      endif
    enddo
    enddo
    enddo
@@ -143,6 +162,8 @@ do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
+
+
 ! stage 4
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,q2)
 
@@ -151,8 +172,12 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6            ! final Euler timestep with delt
-   enddo                                                   ! RHS = weighted avarge of 4 RHS computed above
+      if (hyper_implicit==2) then
+         !Q(k,i,j,n)=Q(k,i,j,n)+cf*rhs(k,i,j,n)
+      else
+         Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6        ! final Euler timestep with delt
+      endif                                               ! RHS = weighted avarge of 4 RHS computed above
+   enddo   
    enddo
    enddo
 enddo
@@ -192,7 +217,7 @@ end subroutine
 
 
 
-subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p,rkstage,vor_ps)
+subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p,rkstage,q2)
 !
 ! evaluate RHS of N.S. equations:   -u dot grad(u) + mu * laplacian(u)
 !
@@ -226,7 +251,7 @@ real*8 rhs(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 rhsg(nx,ny,nz,n_var)    
 
 ! work/storage
-real*8  :: vor_ps(nx,ny,nz,ndim)  ! only allocated if use_phaseshift
+real*8  :: q2(nx,ny,nz,ndim)  ! only allocated if use_phaseshift
                                   ! phase shifted vorticity 
 real*8 work(nx,ny,nz)
 ! actual dimension: nx,ny,nz, since sometimes used as work array
@@ -489,32 +514,32 @@ enddo
 ! phase shifting:  now compute u x vor with a phase shift,
 ! and add to RHS:
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#if 0
 if (use_phaseshift) then
+#if 0
    call phaseshift(Qhat,1)  ! phaseshift Qhat
    ! compute phaseshifted (u,v,w), store in Q()
    do n=1,n_var
       call z_ifft3d(Qhat,Q(1,1,1,n),work)
    enddo
-   ! compute phaseshifted vorticity, store in vor_ps:
-   call ns_vorticity(vor_ps,Qhat,work,p)
+   ! compute phaseshifted vorticity, store in q2:
+   call ns_vorticity(q2,Qhat,work,p)
 
-do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   vor(1)=vor_ps(i,j,k,1)
-   vor(2)=vor_ps(i,j,k,2)
-   vor(3)=vor_ps(i,j,k,3)
-   uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
-   vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
-   ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
-   ! overwrite Q with the result
-   Q(i,j,k,1) = uu
-   Q(i,j,k,2) = vv
-   Q(i,j,k,3) = ww
-enddo
-enddo
-enddo
+   do k=nz1,nz2
+   do j=ny1,ny2
+   do i=nx1,nx2
+      vor(1)=q2(i,j,k,1)
+      vor(2)=q2(i,j,k,2)
+      vor(3)=q2(i,j,k,3)
+      uu = ( Q(i,j,k,2)*vor(3) - Q(i,j,k,3)*vor(2) )
+      vv = ( Q(i,j,k,3)*vor(1) - Q(i,j,k,1)*vor(3) )
+      ww = ( Q(i,j,k,1)*vor(2) - Q(i,j,k,2)*vor(1) )
+      ! overwrite Q with the result
+      Q(i,j,k,1) = uu
+      Q(i,j,k,2) = vv
+      Q(i,j,k,3) = ww
+   enddo
+   enddo
+   enddo
 
    ! back spectral space
    do n=1,3
@@ -522,8 +547,9 @@ enddo
       rhs(:,:,:,n) = rhs(:,:,:,n) + p/2
    enddo
    call phaseshift(Qhat,-1) ! restore Qhat to unphaseshifted version
-endif
 #endif
+endif
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
