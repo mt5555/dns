@@ -1,0 +1,81 @@
+To run a test:  (for example, test3d.sh)
+
+cd dns/src
+../testing/test3d.sh           # lists all possible tests, arguments
+../testing/test3d.sh r         # run the restart test
+../testing/test3d.sh makeref   # generate new reference output
+
+
+All of these tests are only a few timesteps, and then they
+use the check.sh script to make sure the min and max
+of u,v,w,ke,Ea and w_xx have not changed.
+
+The turbulence tests use random initial conditions, and thus
+if anything changes (compiler or hardware) they will produce
+different results.  Thus usually I only run the tests in 
+restart mode, where the initial condition is read from a restart
+file and then the results should be identical.
+
+= Simple test to verify nothing has changed in dns, dnsp:
+../testing/test3d_forcing.sh r [dns,dnsp]
+
+= Also check passive scalars:  
+  (this doesn't test the passive scalars because input file does
+   not initialize them - need to fix this)
+../testing/test3d_forcing.sh s dns
+
+= Simple test to verify parallel code:
+../testing/test3d_forcing.sh pr [dns,dnsp]            2, 4 cpus
+../testing/test3d_forcing.sh prbig [dns,dnsp]         up to 64 cpus
+
+= Tests to verify compressed restart:
+../testing/test3d_forcing.sh pz [dns,dnsp]    
+
+= Tests to verify spectral restart:
+../testing/test3d_forcing.sh ps [dns,dnsp]    
+
+= Test padding/dimensioning of arrays:
+../testing/test3d_forcing.sh 2 [dns,dnsp]
+
+
+=====================================================================
+If code changes result in changes to the reference solutions
+then then they should be regenerated with the makeref option,
+and committed.
+
+
+
+
+=====================================================================
+
+test3d_forcing.sh   tests 3D forced isotropic turbulence run
+                    models: dns, dnsgrid, dnsp  (passed as second argument)
+
+
+test3d.sh  tests 3D decaying isotropic turbulence run
+           models:  dns, dnsgrid
+           methods:  spectral
+           dimensions:  lots
+           tests several different dimension paddings
+           tests restart files
+          
+test.sh   tests 2D KH rollup
+          models:  dns, dnsgrid
+          methods:  spectral
+          tests several different dimension paddings
+
+testg.sh  tests 2D KH rollup          
+          models:  dnsgrid, dnsghost
+          methods:  4th order FD + Biot-Savart
+
+ghost3d.sh  tests 3D decaying turbulence
+            models:  dnsghost, dnsgrid
+            methods:  4th order FD
+
+testvx.sh  tests vortex pair problem
+           model:  2D 4th order psi/vorcity formulation model
+
+
+
+
+
