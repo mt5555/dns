@@ -24,6 +24,7 @@ logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen,doit_model
 logical :: convert_back_to_x_pencils
 integer :: n1,n1d,n2,n2d,n3,n3d
+integer :: indx
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
 real*8,save :: delea_tot=0,delke_tot=0,delens_tot=0
@@ -386,11 +387,13 @@ endif
 if (io_pe==my_pe) then
 if (forcing_type==0) then
 if (time>=time_final-1e-15 .and. maxs_save(7,1)==0) then
+   ! indx=6  ! energy
+   indx=7  ! enstrophy
    print *,'====================================================='
    print *,'short run dissipation rates:'
-   write(*,'(a,e13.7)') 'entire run: ',(ints_save(6,nscalars)-ints_save(6,1))/(maxs_save(7,nscalars)-maxs_save(7,1))
-   mn = minval( (ints_save(6,2:nscalars)-ints_save(6,1:nscalars-1))/(maxs_save(7,2:nscalars)-maxs_save(7,1:nscalars-1)) )
-   mx = maxval( (ints_save(6,2:nscalars)-ints_save(6,1:nscalars-1))/(maxs_save(7,2:nscalars)-maxs_save(7,1:nscalars-1)) )
+   write(*,'(a,e13.7)') 'entire run: ',(ints_save(indx,nscalars)-ints_save(indx,1))/(maxs_save(7,nscalars)-maxs_save(7,1))
+   mn = minval( (ints_save(indx,2:nscalars)-ints_save(indx,1:nscalars-1))/(maxs_save(7,2:nscalars)-maxs_save(7,1:nscalars-1)) )
+   mx = maxval( (ints_save(indx,2:nscalars)-ints_save(indx,1:nscalars-1))/(maxs_save(7,2:nscalars)-maxs_save(7,1:nscalars-1)) )
    write(*,'(a,2e15.7)')'per timestep, min/max: ',mn,mx
    print *,'====================================================='
 endif

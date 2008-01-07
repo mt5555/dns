@@ -182,7 +182,7 @@ else if (init_cond_subtype==4) then
 else if (init_cond_subtype==5) then
    ! initial energy spectrum with controlled helicity in each mode
    do nb = 1,NUMBANDS
-        enerb_target(nb) = nb**2 / 1000.
+      enerb_target(nb) = nb**2 / 1000.
    enddo
 else
    call abortdns("init_data_decay: bad init_cond_subtype")

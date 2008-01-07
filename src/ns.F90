@@ -413,10 +413,8 @@ endif
 #undef TEST_PHASESHIFT
 #ifdef TEST_PHASESHIFT
 do n=1,ndim
-   p=Qhat(:,:,:,n)
-   call z_phaseshift(p,Qhat(1,1,1,n),1)  ! phaseshift Qhat
-   p=Qhat(:,:,:,n)   
-   call z_phaseshift(p,Qhat(1,1,1,n),-1)  ! phaseshift Qhat
+   call z_phaseshift(Qhat(1,1,1,n),1,work)  ! phaseshift Qhat
+   call z_phaseshift(Qhat(1,1,1,n),-1,work)  ! phaseshift Qhat
 enddo
 #endif
 
@@ -527,8 +525,7 @@ enddo
 if (use_phaseshift) then
    ! compute phaseshifted (u,v,w), store in Q()
    do n=1,n_var
-      p=Qhat(:,:,:,n)
-      call z_phaseshift(p,Qhat(1,1,1,n),1)  ! phaseshift Qhat
+      call z_phaseshift(Qhat(1,1,1,n),1,work)  ! phaseshift Qhat
       call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work)
    enddo
    ! compute phaseshifted vorticity, store in q2:
@@ -551,9 +548,9 @@ if (use_phaseshift) then
    ! back spectral space
    do n=1,3
       call z_fft3d_trashinput(Q(1,1,1,n),p,work)
+      call z_phaseshift(p,-1,work)             ! un-phaseshift p
       rhs(:,:,:,n) = rhs(:,:,:,n) + p/2
-      p=Qhat(:,:,:,n)
-      call z_phaseshift(p,Qhat(1,1,1,n),-1) ! restore Qhat to unphaseshifted version
+      call z_phaseshift(Qhat(1,1,1,n),-1,work) ! restore Qhat to unphaseshifted version
    enddo
 endif
 

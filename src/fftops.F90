@@ -2615,7 +2615,7 @@ a cos(kx) + b sin(kx) ==>   [a cos(hh)+b sin(hh)]  cos(kx)
 
 
 #endif
-subroutine z_phaseshift(p,pshift,shift)
+subroutine z_phaseshift(p,shift,work)
 !
 !   shift = 1   apply phaseshift of .5 delta_x
 !   shift =-1   apply phaseshift of -.5 delta_x  (inverse operation)
@@ -2623,7 +2623,7 @@ subroutine z_phaseshift(p,pshift,shift)
 use params
 implicit none
 real*8 p(g_nz2,nx_2dz,ny_2dz)         
-real*8 pshift(g_nz2,nx_2dz,ny_2dz)    
+real*8 work(g_nz2,nx_2dz,ny_2dz)    
 integer :: shift,i,j,k,im,jm,km
 real*8 a,b,hh
 
@@ -2650,21 +2650,22 @@ do j=1,ny_2dz
          !                      p = a cos(hh) - b sin(hh)
          a = p(k,i,j)               
          b = p(k,i+z_imsign(i),j) 
-         pshift(k,i,j) = a*cos(hh) + b*sin(hh)
+         work(k,i,j) = a*cos(hh) + b*sin(hh)
 
          ! apply y shift
          hh= shift*pi2*jm/(2*g_ny)
          a = p(k,i,j)               
          b = p(k,i,j+z_jmsign(j))
-         pshift(k,i,j) = a*cos(hh) + b*sin(hh)
+         work(k,i,j) = a*cos(hh) + b*sin(hh)
 
          ! apply z shift
          hh= shift*pi2*km/(2*g_nz)
          a = p(k,i,j)               
          b = p(k+z_kmsign(k),i,j)
-         pshift(k,i,j) = a*cos(hh) + b*sin(hh)
+         work(k,i,j) = a*cos(hh) + b*sin(hh)
 
       enddo
    enddo
 enddo
+p=work
 end subroutine
