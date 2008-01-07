@@ -17,17 +17,27 @@
 !  -cout uvw      (can be used with -si/-so  spectral input/output)
 !                  and -smax spectral coefficient truncation to 
 !                  perform downsampling or upsampling)
-!  -cout 4uvw     as above, but loops over fields 1 by 1 
+!  -cout 4uvw (4)    as above, but loops over fields 1 by 1 
 !                   (and only needs 3 scalar arrays, but cant do stats,compressed output) 
 !                   use -o4 to get real*4 output
-!  -cout vor
-!  -cout vorm
-!  -cout norm2
-!  -cout passive    convert passive scalar file
-!                   need to specify shmidt_in and type_in below
-!  -cout gradu      output <u_i,j>  matrixes for subcubes
-!  -cout stats      read data, print some stats
-!  -cout trunc	    read data, fft, truncate, fft back.
+!  -cout vor  (1)
+!  -cout vorm (2)
+!  -cout norm  (5)
+!  -cout norm2 (3)
+!  -cout passive (6) convert passive scalar file
+!                    need to specify shmidt_in and type_in below
+!  -cout gradu (7)  output <u_i,j>  matrixes for subcubes
+!  -cout extract_subcube (8)  ?
+!  -cout spec_window  (9)
+!  -cout iotest(10) ?
+!  -cout stats (11) read data, print some stats
+!  -cout uwbar (12) ?
+!  -cout trunc (13) read data, fft, truncate, fft back.
+!
+! option used to check aliasing error:   
+!  -cout nlout (14) compute random U,V,UV.  output U,V,UV
+!  -cout nlin  (15) read in U,V,UV.  recompute UV (on a higher res grid)
+!                   compare UV2,UV in spectral space
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -49,6 +59,7 @@ use params
 use mpi
 use fft_interface
 use spectrum
+use transpose, only : input1
 implicit none
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: vor(:,:,:,:)
@@ -61,6 +72,7 @@ real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
 real*8 :: schmidt_in,mn,mx,a0,a1
+CPOINTER :: null
 integer :: type_in
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -486,6 +498,43 @@ do
       ! call output_uvw(basename,time,Q,vor,work1,work2,2)
    endif
 
+
+
+   if (convert_opt==14) then  ! -cout nlin
+      time2=0
+      w_spec = .true.
+      spec_max = g_nx  ! entire field
+      basename=runname(1:len_trim(runname)) // "."
+
+
+      ! compute two random fields
+      call input1(Q(1,1,1,1),work2,work1,null,io_pe,.true.,-1)  
+      call input1(Q(1,1,1,2),work2,work1,null,io_pe,.true.,-1)  
+      !call compute_nonlinear(Q)
+         ! compute FFT of Q1,Q2
+         ! apply filter, maybe phase shift
+         ! compute FFT of Q1*Q2, apply filter, store in Q3   
+         ! go back to grid space
+      do n=1,3
+         call fft3d(Q(1,1,1,n),work1) ! take FFT so we can output spectral coefficients
+      enddo
+      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
+   endif
+   if (convert_opt==15) then  ! -cout nlout
+      time2=0
+      r_spec = .true.
+      call input_uvw(time2,Q,vor,work1,work2,header_user)   
+      ! save off Q3
+
+      ! compute nonlinear term 
+      do n=2,3
+         call ifft3d(Q(1,1,1,n),work1) 
+      enddo
+      ! call compute_nonlinear(Q)
+
+      call fft3d(Q(1,1,1,3),work1)
+      ! compare, mode by mode,  Q3 with saved Q3
+   endif
 
 
    if (tstart>=0) then

@@ -387,8 +387,9 @@ endif
 if (io_pe==my_pe) then
 if (forcing_type==0) then
 if (time>=time_final-1e-15 .and. maxs_save(7,1)==0) then
+   indx = 5 ! helicity
    ! indx=6  ! energy
-   indx=7  ! enstrophy
+   ! indx=7  ! enstrophy
    print *,'====================================================='
    print *,'short run dissipation rates:'
    write(*,'(a,e13.7)') 'entire run: ',(ints_save(indx,nscalars)-ints_save(indx,1))/(maxs_save(7,nscalars)-maxs_save(7,1))

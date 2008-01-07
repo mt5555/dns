@@ -1,6 +1,39 @@
 #!/bin/tcsh -f
-./gridsetup.py 1 1 2 32 32 32
-make -j 2 dns
+#
+#
+# Check aliasing errors:
+#
+# 1. on an NxNxN grid:
+#    generate a U, apply truncation
+#    output spectral coefficients
+#    output UN = omega cross u (dealised)
+#
+# 2. on an MxMxM grid (M=2N)
+#    read in U, UN
+#    compute UN2 (on MxMxM grid)
+#    compare UN2 with UN.  should agree in all modes in N-truncation
+#
+#
+#
+
+
+set NCPU = 1
+
+if ( $NCPU == 1 ) then
+   set MPIRUN = " "
+   ./gridsetup.py 1 1 $NCPU 32 32 32
+   make dns
+else
+   set MPIRUN = "mpirun -np $NCPU "
+   ./gridsetup.py 1 1 $NCPU 32 32 32
+   make -j 2 dns
+endif
+
+
+
+
+
+
 
 #
 # fft-dealias >=:  -.17e-5  -.56e-7  -.19e-8  -.66e-10 -.82e-11 -.15e-10
@@ -19,46 +52,45 @@ echo $method :  dt = $dt
 rm -f /tmp/temp.out /tmp/dealias*inp
 sed s/DT/$dt/ ../testing/dealias.inp | \
 sed s/METHOD/"$method"/  > /tmp/dealias.inp
-#mpirun -np 2 ./dns -i /tmp/dealias.inp -d /tmp | tee  /tmp/temp.out
-mpirun -np 2 ./dns -i /tmp/dealias.inp -d /tmp >   /tmp/temp.out
-grep "ke:" /tmp/temp.out
+#$MPIRUN./dns -i /tmp/dealias.inp -d /tmp | tee  /tmp/temp.out
+$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >   /tmp/temp.out
 grep "entire run:" /tmp/temp.out
 grep "per timestep, min/max" /tmp/temp.out
 
-set dt = .0025
+set dt = .0028
 echo $method :  dt = $dt
 rm -f /tmp/temp.out /tmp/dealias*inp
 sed s/DT/$dt/ ../testing/dealias.inp | \
 sed s/METHOD/"$method"/  > /tmp/dealias.inp
-mpirun -np 2 ./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
+$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
 grep "entire run:" /tmp/temp.out
 grep "per timestep, min/max" /tmp/temp.out
 
-set dt = .00125
+set dt = .00157
 echo $method :  dt = $dt
 rm -f /tmp/temp.out /tmp/dealias*inp
 sed s/DT/$dt/ ../testing/dealias.inp | \
 sed s/METHOD/"$method"/  > /tmp/dealias.inp
-mpirun -np 2 ./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
+$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
 grep "entire run:" /tmp/temp.out
 grep "per timestep, min/max" /tmp/temp.out
 
-set dt = .000625
+set dt = .000883
 echo $method :  dt = $dt
 rm -f /tmp/temp.out /tmp/dealias*inp
 sed s/DT/$dt/ ../testing/dealias.inp | \
 sed s/METHOD/"$method"/  > /tmp/dealias.inp
-mpirun -np 2 ./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
+$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
 grep "entire run:" /tmp/temp.out
 grep "per timestep, min/max" /tmp/temp.out
 
 
-set dt = .000001
+set dt = .000497
 echo $method :  dt = $dt
 rm -f /tmp/temp.out /tmp/dealias*inp
 sed s/DT/$dt/ ../testing/dealias.inp | \
 sed s/METHOD/"$method"/  > /tmp/dealias.inp
-mpirun -np 2 ./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
+$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
 grep "entire run:" /tmp/temp.out
 grep "per timestep, min/max" /tmp/temp.out
 
