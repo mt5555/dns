@@ -17,7 +17,7 @@ integer :: itime
 integer i,j,k,n
 character(len=80) message
 character(len=80) fname
-real*8 remainder, time_target,psmax,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx
+real*8 remainder, time_target,psmax,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx,mn
 real*8 :: cfl_used_psvis
 real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss,xtmp
 logical,external :: check_time
@@ -27,7 +27,6 @@ integer :: n1,n1d,n2,n2d,n3,n3d
 real*8,save :: t0,t1=0,ke0,ke1=0,ea0,ea1=0,eta,ett
 real*8,save :: ens0,ens1=0
 real*8,save :: delea_tot=0,delke_tot=0,delens_tot=0
-
 
 real*8,allocatable,save :: ints_save(:,:),maxs_save(:,:),ints_copy(:,:)
 integer,save :: nscalars=0,nsize=0
@@ -382,6 +381,22 @@ if (doit_output) then
    call print_message("done with output")
 
 endif
+
+! for short runs, print total change in energy from start to end:
+if (io_pe==my_pe) then
+if (forcing_type==0) then
+if (time>=time_final-1e-15 .and. maxs_save(7,1)==0) then
+   print *,'====================================================='
+   print *,'short run dissipation rates:'
+   write(*,'(a,e13.7)') 'entire run: ',(ints_save(6,nscalars)-ints_save(6,1))/(maxs_save(7,nscalars)-maxs_save(7,1))
+   mn = minval( (ints_save(6,2:nscalars)-ints_save(6,1:nscalars-1))/(maxs_save(7,2:nscalars)-maxs_save(7,1:nscalars-1)) )
+   mx = maxval( (ints_save(6,2:nscalars)-ints_save(6,1:nscalars-1))/(maxs_save(7,2:nscalars)-maxs_save(7,1:nscalars-1)) )
+   write(*,'(a,2e15.7)')'per timestep, min/max: ',mn,mx
+   print *,'====================================================='
+endif
+endif
+endif
+
 !
 ! diagnostic output
 !
@@ -404,6 +419,7 @@ call output_model(doit_model,doit_diag,time,Q,Qhat,q1,q2,rhs,work1,work2)
 ! (do this here so the courant numbers printed above represent the
 ! values used if the time step is not lowered for output control)
 delt = min(delt,time_target-time)
+
 
 call wallclock(tmx2)
 tims(3)=tims(3) + (tmx2-tmx1)
