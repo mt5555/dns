@@ -328,6 +328,10 @@ integer           :: dealias_sphere_kmax2
 integer           :: dealias_sphere_kmax2_1 
 real*8            :: dealias_sphere_kmax 
 
+integer           :: dealias_23sphere_kmax2 
+integer           :: dealias_23sphere_kmax2_1 
+real*8            :: dealias_23sphere_kmax 
+
 integer           :: dealias_23_kmax2 
 integer           :: dealias_23_kmax2_1 
 real*8            :: dealias_23_kmax 
@@ -564,6 +568,11 @@ dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
 dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
 dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
 
+dealias_23sphere_kmax2 = (g_nmin*g_nmin)/9
+dealias_23sphere_kmax = sqrt(real(dealias_sphere_kmax2))
+dealias_23sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
+
+
 dealias_23_kmax2 = (g_nmin*g_nmin)/9
 dealias_23_kmax = sqrt(real(dealias_23_kmax2))
 dealias_23_kmax2_1 = floor( (dealias_23_kmax-1)**2 )
@@ -759,6 +768,8 @@ if (dealias==1) then
    dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
 else if (dealias==2) then
    dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
+else if (dealias==3) then
+   dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_23sphere_kmax2 )
 else
    dealias_remove = .false.
 endif

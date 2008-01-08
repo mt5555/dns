@@ -25,23 +25,25 @@ else
    set MPIRUN = "mpirun -np $NCPU "
 endif
 
-./gridsetup.py 1 1 $NCPU 32 32 32
-make -j2 convert ; mv convert convert.32
-
 #./gridsetup.py 1 1 $NCPU 64 64 64
 #make -j2 convert ; mv convert convert.64
 
+./gridsetup.py 1 1 $NCPU 32 32 32
+make -j2 convert ; mv convert convert.32
+
+
 
 #set method = "fft-dealias"
+set method = "fft-23sphere"
 #set method = "fft-sphere"
-set method = "fft-phase"
+#set method = "fft-phase"
 
 echo $method 
 rm -f /tmp/temp0000.0000* /tmp/dealias*inp /tmp/temp1.out /tmp/temp2.out
 sed s/METHOD/"$method"/  ../testing/dealias.inp > /tmp/dealias.inp
 
 
-$MPIRUN ./convert.32 -smax 10 -so -cout nlout  -i /tmp/dealias.inp -d /tmp  | tee /tmp/temp1.out
+$MPIRUN ./convert.32 -smax 999 -so -cout nlout  -i /tmp/dealias.inp -d /tmp  | tee /tmp/temp1.out
 $MPIRUN ./convert.64 -si -cout nlin  -i /tmp/dealias.inp -d /tmp   | tee /tmp/temp2.out
 
 grep "number of retained modes:" /tmp/temp1.out

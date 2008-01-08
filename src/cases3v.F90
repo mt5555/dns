@@ -136,10 +136,7 @@ CPOINTER :: null
 
 
 
-! number of bands to use in initial condtion. 
-! truncate to maximum allowed by spherical dealiasing:
-NUMBANDS= .5 + sqrt(2.0)*g_nmin/3   ! round up  
-NUMBANDS=min(NUMBANDS_MAX,NUMBANDS)
+NUMBANDS=NUMBANDS_MAX
 
 !
 ! cj2.out run: 128^3

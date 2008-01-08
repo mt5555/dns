@@ -2655,6 +2655,9 @@ else if (sdata=='fft-dealias') then
 else if (sdata=='fft-sphere') then
    numerical_method=FOURIER
    dealias=2
+else if (sdata=='fft-23sphere') then
+   numerical_method=FOURIER
+   dealias=3
 else if (sdata=='fft-phase') then
    numerical_method=FOURIER
    dealias=2
