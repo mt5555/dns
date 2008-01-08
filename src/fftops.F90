@@ -2596,22 +2596,35 @@ end subroutine
 
 #if 0
 phase shift algorithm
-let hh = .5 k/N
-(a+ib) exp(ik (x + .5/N)) = (a+ib) exp(i .5 k/N) exp(ikx)
+
+[0,2pi] domain:
+delta = pi/N
+let hh(k) = k delta  = k pi/N
+
+[0,1] domain:
+delta = 1/2N
+let hh(k) = 2pi k delta = k pi/N
+
+
+(a+ib) exp(ik (x + delta)) = (a+ib) exp(i hh) exp(ikx)
                           = (a+ib) (cos(hh) + i sin(hh)) exp(ikx)
 
-cos( kx + hh) + i sin( kx + hh) = exp(i (kx+hh)) 
-       = ( cos(kx)+i sin(kx) ) ( cos(hh)+i sin(hh) )
-       =  cos(kx) cos(hh) - sin(kx) sin(hh) + i [ sin(kx)cos(hh) + cos(kx) sin(hh) ]
+double angle formula:
+cos( kx + hh) + i sin( kx + hh) = exp(i (kx+hh)) = exp(i kx) exp( i hh)
+   = ( cos(kx)+i sin(kx) ) ( cos(hh)+i sin(hh) )
+   =  cos(kx) cos(hh) - sin(kx) sin(hh) + i [ sin(kx)cos(hh) + cos(kx) sin(hh) ]
 
 a cos(kx + hh) = a cos(hh) cos(kx) - a sin(hh) sin(kx)
 b sin(kx + hh) = b sin(hh) cos(kx) + b cos(hh) sin(kx)  
 
 so for a pair of modes:  
 
+a cos(kx+hh) + b sin(kx+hh) ==   [a cos(hh)+b sin(hh)]  cos(kx)
+                               + [b cos(hh)-a sin(hh)]  sin(kx)
 
-a cos(kx) + b sin(kx) ==>   [a cos(hh)+b sin(hh)]  cos(kx)
-                          + [b cos(hh)-a sin(hh)]  sin(kx)
+and thus the phase shift:
+a -> a cos(hh)+b sin(hh)
+b -> b cos(hh)-a sin(hh)
 
 
 #endif
@@ -2641,8 +2654,8 @@ do j=1,ny_2dz
          !                 we require this mode to be zero
          !                 so a=b=0 and shift will have no effect.
 
-         hh = shift*pi2*im/(2*g_nx)
-         ! z_imsign(i) = 1:     a = cosine mode
+         hh = shift*pi*im/g_nx
+         ! z_imsign(i) = 1:     a = cosine mode  
          ! im>0                 b = sine mode
          !                      p = a cos(hh) + b sin(hh)
          ! z_imsign(i) = -1:    b = cosine mode
@@ -2653,13 +2666,13 @@ do j=1,ny_2dz
          work(k,i,j) = a*cos(hh) + b*sin(hh)
 
          ! apply y shift
-         hh= shift*pi2*jm/(2*g_ny)
+         hh= shift*pi*jm/g_ny
          a = p(k,i,j)               
          b = p(k,i,j+z_jmsign(j))
          work(k,i,j) = a*cos(hh) + b*sin(hh)
 
          ! apply z shift
-         hh= shift*pi2*km/(2*g_nz)
+         hh= shift*pi*km/g_nz
          a = p(k,i,j)               
          b = p(k+z_kmsign(k),i,j)
          work(k,i,j) = a*cos(hh) + b*sin(hh)

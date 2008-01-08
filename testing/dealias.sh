@@ -34,9 +34,9 @@ make -j2 convert ; mv convert convert.32
 
 
 #set method = "fft-dealias"
-set method = "fft-23sphere"
+#set method = "fft-23sphere"
 #set method = "fft-sphere"
-#set method = "fft-phase"
+set method = "fft-phase"
 
 echo $method 
 rm -f /tmp/temp0000.0000* /tmp/dealias*inp /tmp/temp1.out /tmp/temp2.out
