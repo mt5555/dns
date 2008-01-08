@@ -137,6 +137,7 @@ integer i,k
 i=0
 do 
    i=i+1
+
    if (i>num_fftsizes) then
       write(message_str,'(a,i10)') "fft_interface.F90:  Failed initializing an fft of size =",n1
       call abortdns(message_str)

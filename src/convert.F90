@@ -73,7 +73,7 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
 real*8 :: schmidt_in,mn,mx,a0,a1
 CPOINTER :: null
-integer :: type_in
+integer :: type_in,ntot,nzero,nerr
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
@@ -101,17 +101,16 @@ call init_model
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-if (convert_opt==0 .or. convert_opt == 3 .or. convert_opt==5 .or. &
-    convert_opt==10 ) then
-   allocate(vor(nx,ny,nz,n_var)) ! used for shallow water output routiens
-   allocate(Q(nx,ny,nz,n_var))
-else if (convert_opt == 4 .or. convert_opt==6) then
+if (convert_opt == 4 .or. convert_opt==6) then
+   ! special option to save storage, for processing very large data
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
    allocate(Q(nx,ny,nz,1)) ! only need 1 slot
 else if (convert_opt == 7 .or. convert_opt==8) then
+   ! special option to save storage, for processing very large data
    allocate(vor(nx,ny,nz,1)) ! only first component used
    allocate(Q(nx,ny,nz,n_var))
 else
+   ! default: allocate 2 3D arrays
    allocate(vor(nx,ny,nz,n_var))
    allocate(Q(nx,ny,nz,n_var))
 endif
@@ -504,13 +503,12 @@ do
       time2=0
       w_spec = .true.
       spec_max = g_nx  ! entire field
-      basename=runname(1:len_trim(runname)) // "."
-
+      basename=runname(1:len_trim(runname))
 
       ! compute two random fields
       call input1(Q(1,1,1,1),work2,work1,null,io_pe,.true.,-1)  
       call input1(Q(1,1,1,2),work2,work1,null,io_pe,.true.,-1)  
-      !call compute_nonlinear(Q)
+      call compute_nonlinear(Q,vor,work1,work2)
          ! compute FFT of Q1,Q2
          ! apply filter, maybe phase shift
          ! compute FFT of Q1*Q2, apply filter, store in Q3   
@@ -518,22 +516,60 @@ do
       do n=1,3
          call fft3d(Q(1,1,1,n),work1) ! take FFT so we can output spectral coefficients
       enddo
+      ntot=0
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         if (dealias_remove( abs(imcord(i)),abs(jmcord(j)), abs(kmcord(k))  )) then
+         else
+            ntot=ntot+1
+         endif
+      enddo
+      enddo
+      enddo
       call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
+      print *,'number of retained modes: ',ntot
    endif
    if (convert_opt==15) then  ! -cout nlout
       time2=0
       r_spec = .true.
-      call input_uvw(time2,Q,vor,work1,work2,header_user)   
-      ! save off Q3
-
+      call input_uvw(time2,Q,vor,work1,work2,header_user)   ! read spec, but returns grid point values.
       ! compute nonlinear term 
-      do n=2,3
-         call ifft3d(Q(1,1,1,n),work1) 
-      enddo
-      ! call compute_nonlinear(Q)
-
+      call compute_nonlinear(Q,vor,work1,work2)
       call fft3d(Q(1,1,1,3),work1)
+      vor(:,:,:,3)=Q(:,:,:,3)  ! save "exact" solution
+
+      ! read in dealiased solution (again)
+      call input_uvw(time2,Q,vor,work1,work2,header_user)   
+      call fft3d(Q(1,1,1,3),work1)
+
       ! compare, mode by mode,  Q3 with saved Q3
+      ntot=0
+      nzero=0
+      nerr=0
+      mx=0
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         ntot=ntot+1
+         if (abs(Q(i,j,k,3))<1e-15) then
+            nzero=nzero+1
+         else
+            a0 = abs(Q(i,j,k,3)-vor(i,j,k,3))
+            mx=max(mx,a0)
+            if (a0>1e-15) then
+               nerr=nerr+1
+               write(*,'(f6.2,3i4,3e16.7)') sqrt(real(imcord(i)**2+jmcord(j)**2+kmcord(k)**2)),&
+                   imcord(i),jmcord(j),kmcord(k),&
+                    Q(i,j,k,3),vor(i,j,k,3),a0
+            endif
+         endif
+      enddo
+      enddo
+      enddo
+      print *,'number of modes:               ',ntot
+      print *,'number of non-zero modes:      ',ntot-nzero
+      print *,'max error over non-zero modes: ',mx
    endif
 
 
@@ -1144,6 +1180,89 @@ call print_message(message)
 !call print_message(message)	
 
 
+
+
+end subroutine
+
+
+
+
+
+
+
+
+
+subroutine compute_nonlinear(Q,Qhat,work,work_hat)
+use params
+implicit none
+real*8 Q(nx,ny,nz,n_var)
+real*8 Qhat(g_nz2,nx_2dz,ny_2dz,n_var)           ! Fourier data at time t
+real*8 work_hat(g_nz2,nx_2dz,ny_2dz)
+real*8 work(nx,ny,nz)
+! local
+integer :: n,i,j,k,im,jm,km
+
+! apply dealias filter
+do n=1,2
+   call z_fft3d_trashinput(Q(1,1,1,n),Qhat(1,1,1,n),work)
+enddo
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+         ! dealias           
+         if ( dealias_remove(abs(im),abs(jm),abs(km))) then
+            Qhat(k,i,j,1)=0
+            Qhat(k,i,j,2)=0
+         endif
+      enddo
+   enddo
+enddo
+
+! compute nonlinear term in grid space
+do n=1,2
+   call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work)
+enddo
+Q(:,:,:,3)=Q(:,:,:,1)*Q(:,:,:,2)
+! back to spectral space
+call z_fft3d_trashinput(Q(1,1,1,3),Qhat(1,1,1,3),work)
+
+
+if (use_phaseshift) then
+   ! compute nonlinear product with phase shifted values, then
+   ! take the average of this calculation and result above
+   call z_phaseshift(Qhat(1,1,1,1),1,work)  ! phaseshift Qhat
+   call z_phaseshift(Qhat(1,1,1,2),1,work)  ! phaseshift Qhat
+   call z_ifft3d(Qhat(1,1,1,1),work,work_hat)
+   call z_ifft3d(Qhat(1,1,1,2),Q(1,1,1,3),work_hat)
+   Q(:,:,:,3)=Q(:,:,:,3)*work(:,:,:)
+   call z_fft3d_trashinput(Q(1,1,1,3),work_hat,work)
+   call z_phaseshift(Qhat(1,1,1,3),-1,work)  ! un-phaseshift result
+   Qhat(:,:,:,3) = .5*Qhat(:,:,:,3) + .5*work_hat(:,:,:)
+endif
+
+
+
+! apply filter to nonlinear product
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+         ! dealias           
+         if ( dealias_remove(abs(im),abs(jm),abs(km))) then
+            Qhat(k,i,j,3)=0
+         endif
+      enddo
+   enddo
+enddo
+
+
+! return filtered initial condition and final answer in grid space
+call z_ifft3d(Qhat(1,1,1,3),Q(1,1,1,3),work)
 
 
 end subroutine

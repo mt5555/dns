@@ -21,88 +21,34 @@ set NCPU = 1
 
 if ( $NCPU == 1 ) then
    set MPIRUN = " "
-   ./gridsetup.py 1 1 $NCPU 32 32 32
-   make dns
 else
    set MPIRUN = "mpirun -np $NCPU "
-   ./gridsetup.py 1 1 $NCPU 32 32 32
-   make -j 2 dns
 endif
 
+#./gridsetup.py 1 1 $NCPU 32 32 32
+#make -j2 convert ; mv convert convert.32
+
+./gridsetup.py 1 1 $NCPU 96 96 96
+make -j2 convert ; mv convert convert.64
 
 
+#set method = "fft-dealias"
+set method = "fft-sphere"
+#set method = "fft-phase"
+
+echo $method 
+rm -f /tmp/temp0000.0000* /tmp/dealias*inp /tmp/temp1.out /tmp/temp2.out
+sed s/METHOD/"$method"/  ../testing/dealias.inp > /tmp/dealias.inp
 
 
+$MPIRUN ./convert.32 -so -cout nlout  -i /tmp/dealias.inp -d /tmp  | tee /tmp/temp1.out
+$MPIRUN ./convert.64 -si -cout nlin  -i /tmp/dealias.inp -d /tmp   | tee /tmp/temp2.out
 
+grep "number of retained modes:" /tmp/temp1.out
+grep "number of modes" /tmp/temp2.out
+grep "number of non-zero" /tmp/temp2.out
+grep "max error over " /tmp/temp2.out
 
-#
-# fft-dealias >=:  -.17e-5  -.56e-7  -.19e-8  -.66e-10 -.82e-11 -.15e-10
-#             >    -.10e-4  -.34e-6  -.11e-7  -.41e-9  -.21e-10 -.28e-10
-# fft-sphere    :  -.19e-2  -.58e-4  -.17e-5  -.47e-7  -.16e-8  -.94e-10
-
-set i=0
-loop:
-
-if ( $i == 0 ) set method = "fft-dealias"
-if ( $i == 1 ) set method = "fft-sphere"
-if ( $i == 2 ) set method = "fft-phase"
-
-set dt = 0.005
-echo $method :  dt = $dt
-rm -f /tmp/temp.out /tmp/dealias*inp
-sed s/DT/$dt/ ../testing/dealias.inp | \
-sed s/METHOD/"$method"/  > /tmp/dealias.inp
-#$MPIRUN./dns -i /tmp/dealias.inp -d /tmp | tee  /tmp/temp.out
-$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >   /tmp/temp.out
-grep "entire run:" /tmp/temp.out
-grep "per timestep, min/max" /tmp/temp.out
-
-set dt = .0028
-echo $method :  dt = $dt
-rm -f /tmp/temp.out /tmp/dealias*inp
-sed s/DT/$dt/ ../testing/dealias.inp | \
-sed s/METHOD/"$method"/  > /tmp/dealias.inp
-$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
-grep "entire run:" /tmp/temp.out
-grep "per timestep, min/max" /tmp/temp.out
-
-set dt = .00157
-echo $method :  dt = $dt
-rm -f /tmp/temp.out /tmp/dealias*inp
-sed s/DT/$dt/ ../testing/dealias.inp | \
-sed s/METHOD/"$method"/  > /tmp/dealias.inp
-$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
-grep "entire run:" /tmp/temp.out
-grep "per timestep, min/max" /tmp/temp.out
-
-set dt = .000883
-echo $method :  dt = $dt
-rm -f /tmp/temp.out /tmp/dealias*inp
-sed s/DT/$dt/ ../testing/dealias.inp | \
-sed s/METHOD/"$method"/  > /tmp/dealias.inp
-$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
-grep "entire run:" /tmp/temp.out
-grep "per timestep, min/max" /tmp/temp.out
-
-
-set dt = .000497
-echo $method :  dt = $dt
-rm -f /tmp/temp.out /tmp/dealias*inp
-sed s/DT/$dt/ ../testing/dealias.inp | \
-sed s/METHOD/"$method"/  > /tmp/dealias.inp
-$MPIRUN./dns -i /tmp/dealias.inp -d /tmp >  /tmp/temp.out
-grep "entire run:" /tmp/temp.out
-grep "per timestep, min/max" /tmp/temp.out
-
-
-
-echo
-echo 
-
-
-
-@ i += 1
-if ( $i < 3 ) goto loop
 
 
 

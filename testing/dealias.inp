@@ -26,8 +26,8 @@ periodic      ! z bc
 .05          ! time to run  .05  or -50?
 1.5           ! adv cfl  (0 = disabled, use min_dt)
 0.200         ! vis cfl  (0 = disabled, use min_dt)
-DT            ! min_dt    .005
-DT            ! max_dt
+.005           ! min_dt    .005
+.005           ! max_dt
 0             ! restart_dt  (this is not used)
 1            ! diag_dt    how often to dump simple diagnostics to file
 0            ! model_dt   compute and output spectra, structure functions, expensive diagnostics

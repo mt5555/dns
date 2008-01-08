@@ -565,6 +565,8 @@ end subroutine
 subroutine input_uvw(time,Q,Qhat,work1,work2,header_type)
 !
 ! low wave number, quasi isotropic initial condition
+! Qhat array is only used for compressed I/O (3 components)
+! OR if running the PSIVOR model, where it is the vorticity (1 componet)
 !
 use params
 use mpi
