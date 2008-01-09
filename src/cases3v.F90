@@ -137,6 +137,14 @@ CPOINTER :: null
 
 
 NUMBANDS=NUMBANDS_MAX
+if (dealias==1) then
+   NUMBANDS = g_nmin/3
+else if (dealias==2) then
+  NUMBANDS = dealias_sphere_kmax
+else if (dealias==3) then
+   NUMBANDS = dealias_23sphere_kmax
+endif
+!write(6,*)'NUMBANDS = ',NUMBANDS
 
 !
 ! cj2.out run: 128^3
@@ -179,15 +187,7 @@ else if (init_cond_subtype==4) then
 else if (init_cond_subtype==5) then
 ! initial energy spectrum, total energy 1,  with controlled helicity 
 ! in each mode
-if (dealias==1) then
-   NUMBANDS = g_nmin/3
-else if (dealias==2) then
-  NUMBANDS = dealias_sphere_kmax
-else if (dealias==3) then
-   NUMBANDS = dealias_23sphere_kmax
-endif
-ener = 0
-write(6,*)'NUMBANDS = ',NUMBANDS
+   ener = 0
    do nb = 1,NUMBANDS
         enerb_target(nb) = nb**2 
 	ener = ener + enerb_target(nb)
