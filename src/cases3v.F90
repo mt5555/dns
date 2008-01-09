@@ -182,9 +182,9 @@ else if (init_cond_subtype==5) then
 if (dealias==1) then
    NUMBANDS = g_nmin/3
 else if (dealias==2) then
-  NUMBANDS = dealias_sphere_kmax2
+  NUMBANDS = dealias_sphere_kmax
 else if (dealias==3) then
-   NUMBANDS = dealias_23sphere_kmax2
+   NUMBANDS = dealias_23sphere_kmax
 endif
 ener = 0
    do nb = 1,NUMBANDS
