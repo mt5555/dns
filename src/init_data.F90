@@ -622,6 +622,7 @@ do n=1,nvec
 !   call print_message(message)	
 enddo
 
+
 do n=1,nvec
    write(message,*) 'FFT back to grid space, n=',n   
    call print_message(message)

@@ -753,6 +753,10 @@ do iii=nx1,nx2
    mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
    mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
+   if(my_pe == io_pe) then
+   write(6,*)'pre-fix energies ',mod_rr**2+mod_ii**2
+   endif 
+
    fix = 1
    if (mod_rr == 0 .or. mod_ii == 0 .or. xw==0 .or. h_angle==-1) then
       fix = 0
@@ -841,6 +845,15 @@ do iii=nx1,nx2
       
       Q(iii,jjj,kkk,:)=RR
       Qi(iii,jjj,kkk,:)=II
+
+! check if amplitudes have changed
+   mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
+   mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+
+   if(my_pe == io_pe) then
+   write(6,*)'post-fix energies ',mod_rr**2+mod_ii**2
+   endif 
+
    endif
 enddo
 enddo
