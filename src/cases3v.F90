@@ -252,7 +252,7 @@ if (init_cond_subtype == 5) then
 endif
 
 call print_message("Isotropic initial condition in wave numbers:");
-do nb=1,min(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
+do nb=1,max(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
    write(message,'(a,i4,a,e12.4,a,e12.4)') "wn=",nb,"+/-.5   E=",enerb(nb),&
         "  E target=",enerb_target(nb)
    call print_message(message)
