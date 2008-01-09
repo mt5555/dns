@@ -618,6 +618,8 @@ do n=1,nvec
          enddo
       enddo
    enddo
+!   write(message,*) 'E(k) = ',enerb
+!   call print_message(message)	
 enddo
 
 do n=1,nvec

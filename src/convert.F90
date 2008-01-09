@@ -79,9 +79,9 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=2.0
-tstop=2.0
-tinc=1.0
+tstart=2.5
+tstop=2.5
+tinc=0.1
 
 
 ! to read times from  file times.dat:

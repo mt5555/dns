@@ -177,20 +177,26 @@ else if (init_cond_subtype==4) then
 	enerb_target(nb) = 10.0 * nb**(-4)
    enddo
 else if (init_cond_subtype==5) then
-   ! initial energy spectrum with controlled helicity in each mode
+! initial energy spectrum, total energy 1,  with controlled helicity 
+! in each mode
+if (dealias==1) then
+   NUMBANDS = g_nmin/3
+else if (dealias==2) then
+  NUMBANDS = dealias_sphere_kmax2
+else if (dealias==3) then
+   NUMBANDS = dealias_23sphere_kmax2
+endif
+ener = 0
    do nb = 1,NUMBANDS
-      enerb_target(nb) = nb**2 / 1000.
+        enerb_target(nb) = nb**2 
+	ener = ener + enerb_target(nb)
    enddo
+   enerb_target = enerb_target/ener	
 else
    call abortdns("init_data_decay: bad init_cond_subtype")
 endif
 
-
-
 if (init==0) return
-
-
-
 
 if (my_pe==io_pe .and. init_cond_subtype==0) then 
    ! compute some stats:
@@ -231,8 +237,8 @@ call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 ! If using controlled helicity initial condition, 
 ! set the helicity angle to h_angle
 if (init_cond_subtype == 5) then
-   h_angle = 0.0d0
-   h_angle = pi/2
+    h_angle = 0.0d0
+!   h_angle = pi/2
    call set_helicity_angle(Q,PSI,work,h_angle,ener)
 
    ! debug case:  1,4,9,... 100    9.455 2.5106 27761.2

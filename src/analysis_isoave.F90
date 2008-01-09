@@ -80,9 +80,9 @@ compute_hspec=.false.
 read_uvw=.false.
 
 
-tstart=2.0
-tstop=2.0
-tinc=0.2
+tstart=2.4
+tstop=2.5
+tinc=0.1
 icount=0
 
 !number of divisions per axis, for subcube calculations
