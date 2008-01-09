@@ -584,14 +584,14 @@ endif
 ! kmax = 10
 ! kmax2 = 110    (instead of 128)
 !
+dealias_sphere_kmax = floor(  (sqrt(2d0)*g_nmin - 1.5d0)/3 )
+dealias_sphere_kmax2   = (dealias_sphere_kmax+.5)**2  ! rounds to k^2 + k
+dealias_sphere_kmax2_1 = (dealias_sphere_kmax-.5)**2  ! rounds to k^2 - k
+
 !old formulas:
 !dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
 !dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
 !dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
-
-dealias_sphere_kmax = floor(  (sqrt(2d0)*g_nmin - 1.5d0)/3 )
-dealias_sphere_kmax2   = (dealias_sphere_kmax+.5)**2  ! rounds to k^2 + k
-dealias_sphere_kmax2_1 = (dealias_sphere_kmax-.5)**2  ! rounds to k^2 - k
 
 
 

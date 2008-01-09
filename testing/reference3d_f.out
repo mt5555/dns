@@ -1,10 +1,11 @@
-Running parallel.  NCPUS=    1 =   1 x  1 x  1
+Running single threaded
  Run name:         reference3dz
  output directory: ../testing/3df/
  reading input from file: 
- ../testing/reference3d_f.inp                                                    
+ ../testing/reference3d_f.inp                                                   
+  
  Enter input file type: 
- input_file_type=            4
+ input_file_type=           4
 equations: ns_uvw              
  initial condition: iso12               
  forcing: iso12               
@@ -15,37 +16,34 @@ equations: ns_uvw
 Diffusion coefficient mu=0.3710E-02
 Diffusion d/dt(KE)/KE on mode k =    1.:     0.29
 Diffusion d/dt(KE)/KE on mode k =   18.:   100.00
- number of mpi_io cpus:             1  F
- output_size (bytes):             8
- input_size  (bytes):             8
 NS-Alpha:  alpha, alpha/h :    0.00000000    0.0000
 Global grid:     32 x    32 x    32
 Local grid (with padding):     34 x    34 x    34
 Number of passive scalars to be computed:      0
 Initial data
 computing random initial vorticity
- solving for PSI n=            1
+ solving for PSI n=           1
 Initializing FFT99 of size n=    32
- solving for PSI n=            2
- solving for PSI n=            3
+ solving for PSI n=           2
+ solving for PSI n=           3
 computing curl PSI
 random initial condition complete
 Rescaling initial condition
- FFT to spectral space n=            1
- computing E(k) n=            1
- FFT to spectral space n=            2
- computing E(k) n=            2
- FFT to spectral space n=            3
- computing E(k) n=            3
- normalizing to E_target(k) n=            1
- normalizing to E_target(k) n=            2
- normalizing to E_target(k) n=            3
- re-computing E(k) n=            1
- re-computing E(k) n=            2
- re-computing E(k) n=            3
- FFT back to grid space, n=            1
- FFT back to grid space, n=            2
- FFT back to grid space, n=            3
+ FFT to spectral space n=           1
+ computing E(k) n=           1
+ FFT to spectral space n=           2
+ computing E(k) n=           2
+ FFT to spectral space n=           3
+ computing E(k) n=           3
+ normalizing to E_target(k) n=           1
+ normalizing to E_target(k) n=           2
+ normalizing to E_target(k) n=           3
+ re-computing E(k) n=           1
+ re-computing E(k) n=           2
+ re-computing E(k) n=           3
+ FFT back to grid space, n=           1
+ FFT back to grid space, n=           2
+ FFT back to grid space, n=           3
 Isotropic initial condition in wave numbers:
 wn=   1+/-.5   E=  0.1000E+01  E target=  0.1000E+01
 wn=   2+/-.5   E=  0.3150E+00  E target=  0.3150E+00
@@ -69,105 +67,91 @@ initial time:    0.0000
 final time:   *********
 max number timesteps:         10
 
-time=  0.00000(     0)  next output=*********  LSF minutes left:    -1. 0
-next delt=0.0072660 cfl_adv= 1.500 cfl_vis= 0.083 cfl_passive_vis= 0.000
-max: (u,v,w)      3.34579691809261     3.31664524676206     3.81176349358796
-<z-vor>=-0.22698E-15   <hel>=-0.62373E+00   max(vor) 0.67111E+02
-R_lambda=    38.57482  R=   269.50599 lambda=     0.14258
-mesh spacing/eta:        2.6789       2.6789       2.6789
-spherical dealiasing kmax*eta:        1.1057
-eddy turnover time:        1.0958
-ke:  1.5115484022  enstropy:      743.5015         total d/dt(ke):   0.0000000
-d/dt(ke) vis=  -2.7587569 f=   8.9294703 alpha=   0.0000000 total=   6.1707134
+time=  0.00000(     0)  next output=*********
+next delt=0.0070816 cfl_adv= 1.500 cfl_vis= 0.081 cfl_passive_vis= 0.000
+max: (u,v,w)      3.80303866219803     3.36161041877087     3.98450540344524
+<z-vor>=-0.49261E-15   <hel>= 0.22751E+00   max(vor) 0.72917E+02
+R_lambda=    38.52617  R=   269.50599 lambda=     0.14245
+mesh spacing/eta:        2.6797       2.6797       2.6797
+kmax*eta:        1.0618
+eddy turnover time:        1.0938
+ke:  1.5105123622  enstropy:      744.3591         total d/dt(ke):   0.0000000
+d/dt(ke) vis=  -2.7619392 f=   8.9346190 alpha=   0.0000000 total=   6.1726798
 writing output files at t=    0.0000
 writing compressed I/O:
 ../testing/3df/reference3dz0000.0000.uc
 ../testing/3df/reference3dz0000.0000.vc
 ../testing/3df/reference3dz0000.0000.wc
 done with output
- total helicity:   -0.6237323219815268     
 
- 1E0   | *******              Energy Spectrum t=    0.
-       |        ****         
-       |            *****    
-       |                 *** 
-       |                     
-       |                     
-       |                     
-       |                     
-       |                     
-       |                     
-       |                     
-       |                     
-       |                     
- 1E-10 |*                   *
-       +---------------------+
-      k=0                 k=  17
-max(div)= 0.20028E-12
+time=  0.00708(     1)  next output=*********
+next delt=0.0071022 cfl_adv= 1.500 cfl_vis= 0.081 cfl_passive_vis= 0.000
+max: (u,v,w)      3.86312722874791     3.30556510299554     3.96873704843460
+<z-vor>=-0.49261E-15   <hel>= 0.22751E+00   max(vor) 0.72917E+02
+R_lambda=    38.52617  R=   269.50599 lambda=     0.14245
+mesh spacing/eta:        2.6797       2.6797       2.6797
+kmax*eta:        1.0618
+eddy turnover time:        1.0938
+ke:  1.5105123622  enstropy:      744.3591         total d/dt(ke):   0.0000000
+d/dt(ke) vis=  -2.7619392 f=   8.9346190 alpha=   0.0000000 total=   6.1726798
 
-time=  0.00727(     1)  next output=*********  LSF minutes left:    -1. 0
-next delt=0.0071557 cfl_adv= 1.500 cfl_vis= 0.082 cfl_passive_vis= 0.000
-max: (u,v,w)      3.38251718561300     3.36725065702803     3.89051228607067
-<z-vor>=-0.22698E-15   <hel>=-0.62373E+00   max(vor) 0.67111E+02
-R_lambda=    38.57482  R=   269.50599 lambda=     0.14258
-mesh spacing/eta:        2.6789       2.6789       2.6789
-spherical dealiasing kmax*eta:        1.1057
-eddy turnover time:        1.0958
-ke:  1.5115484022  enstropy:      743.5015         total d/dt(ke):   0.0000000
-d/dt(ke) vis=  -2.7587569 f=   8.9294703 alpha=   0.0000000 total=   6.1707134
+time=  0.01418(     2)  next output=*********
+next delt=0.0069214 cfl_adv= 1.500 cfl_vis= 0.079 cfl_passive_vis= 0.000
+max: (u,v,w)      3.91180265358999     3.19944223240742     3.97338667976131
+<z-vor>= 0.31984E-17   <hel>= 0.22450E-01   max(vor) 0.66921E+02
+R_lambda=    40.78436  R=   269.50599 lambda=     0.14904
+mesh spacing/eta:        2.6352       2.6352       2.6352
+kmax*eta:        1.0798
+eddy turnover time:        1.1973
+ke:  1.5464443703  enstropy:      696.1887         total d/dt(ke):   5.0739841
+d/dt(ke) vis=  -2.5832030 f=   6.6347047 alpha=   0.0000000 total=   4.0515016
 
-time=  0.01442(     2)  next output=*********  LSF minutes left:    -1. 0
-next delt=0.0072459 cfl_adv= 1.500 cfl_vis= 0.083 cfl_passive_vis= 0.000
-max: (u,v,w)      3.39218363436473     3.41862873559798     3.92828051958466
-<z-vor>=-0.32624E-15   <hel>=-0.50077E+00   max(vor) 0.65190E+02
-R_lambda=    41.06433  R=   269.50599 lambda=     0.14997
-mesh spacing/eta:        2.6278       2.6278       2.6278
-spherical dealiasing kmax*eta:        1.1271
-eddy turnover time:        1.2123
-ke:  1.5483272404  enstropy:      688.4012         total d/dt(ke):   5.0617715
-d/dt(ke) vis=  -2.5543075 f=   6.5823029 alpha=   0.0000000 total=   4.0279953
+time=  0.02111(     3)  next output=*********
+next delt=0.0068484 cfl_adv= 1.500 cfl_vis= 0.078 cfl_passive_vis= 0.000
+max: (u,v,w)      3.90976571917339     3.15029004725829     4.04345535711230
+<z-vor>=-0.57896E-16   <hel>=-0.11387E+00   max(vor) 0.63414E+02
+R_lambda=    42.45174  R=   269.50599 lambda=     0.15401
+mesh spacing/eta:        2.6017       2.6017       2.6017
+kmax*eta:        1.0937
+eddy turnover time:        1.2786
+ke:  1.5689976349  enstropy:      661.4534         total d/dt(ke):   3.1755263
+d/dt(ke) vis=  -2.4543178 f=   4.6845392 alpha=   0.0000000 total=   2.2302213
 
-time=  0.02167(     3)  next output=*********  LSF minutes left:    -1. 0
-next delt=0.0071382 cfl_adv= 1.500 cfl_vis= 0.081 cfl_passive_vis= 0.000
-max: (u,v,w)      3.37624026257798     3.44342086220250     4.00816728152996
-<z-vor>= 0.15179E-17   <hel>=-0.43060E+00   max(vor) 0.62577E+02
-R_lambda=    42.86614  R=   269.50599 lambda=     0.15542
-mesh spacing/eta:        2.5907       2.5907       2.5907
-spherical dealiasing kmax*eta:        1.1433
-eddy turnover time:        1.3021
-ke:  1.5708843131  enstropy:      650.2874         total d/dt(ke):   3.1523428
-d/dt(ke) vis=  -2.4128865 f=   4.5945710 alpha=   0.0000000 total=   2.1816845
+time=  0.02795(     4)  next output=*********
+next delt=0.0068169 cfl_adv= 1.500 cfl_vis= 0.078 cfl_passive_vis= 0.000
+max: (u,v,w)      3.91216083772426     3.13140884906272     4.09909160416180
+<z-vor>= 0.28937E-15   <hel>=-0.19657E+00   max(vor) 0.59707E+02
+R_lambda=    43.58607  R=   269.50599 lambda=     0.15756
+mesh spacing/eta:        2.5770       2.5770       2.5770
+kmax*eta:        1.1042
+eddy turnover time:        1.3380
+ke:  1.5804445053  enstropy:      636.6616         total d/dt(ke):   1.6538379
+d/dt(ke) vis=  -2.3623284 f=   3.4183570 alpha=   0.0000000 total=   1.0560287
 
-time=  0.02881(     4)  next output=*********  LSF minutes left:    -1. 0
-next delt=0.0070389 cfl_adv= 1.500 cfl_vis= 0.080 cfl_passive_vis= 0.000
-max: (u,v,w)      3.31353824114520     3.48372516771859     4.02018356388475
-<z-vor>=-0.29821E-15   <hel>=-0.39879E+00   max(vor) 0.66769E+02
-R_lambda=    44.13244  R=   269.50599 lambda=     0.15944
-mesh spacing/eta:        2.5625       2.5625       2.5625
-spherical dealiasing kmax*eta:        1.1559
-eddy turnover time:        1.3702
-ke:  1.5823258832  enstropy:      622.4746         total d/dt(ke):   1.5790510
-d/dt(ke) vis=  -2.3096875 f=   3.2597174 alpha=   0.0000000 total=   0.9500300
-
-time=  0.07016(    10)  next output=  0.07016  LSF minutes left:    -1. 0
-next delt=0.0067501 cfl_adv= 1.500 cfl_vis= 0.077 cfl_passive_vis= 0.000
-max: (u,v,w)      3.21864823337692     3.31186062309029     3.95073449139342
-<z-vor>=-0.31821E-15   <hel>=-0.51504E+00   max(vor) 0.68622E+02
-R_lambda=    45.35240  R=   269.50599 lambda=     0.16499
-mesh spacing/eta:        2.5102       2.5102       2.5102
-spherical dealiasing kmax*eta:        1.1799
-eddy turnover time:        1.4673
-ke:  1.5603801772  enstropy:      573.1995         total d/dt(ke):  -1.2044701
-d/dt(ke) vis=  -2.1268525 f=   0.8572169 alpha=   0.0000000 total=  -1.2696356
+time=  0.06939(    10)  next output=  0.06939
+next delt=0.0070943 cfl_adv= 1.500 cfl_vis= 0.081 cfl_passive_vis= 0.000
+max: (u,v,w)      3.99345950144946     2.68541595275925     4.30525889243327
+<z-vor>=-0.10861E-15   <hel>=-0.31007E+00   max(vor) 0.61577E+02
+R_lambda=    44.78976  R=   269.50599 lambda=     0.16253
+mesh spacing/eta:        2.5324       2.5324       2.5324
+kmax*eta:        1.1236
+eddy turnover time:        1.4238
+ke:  1.5684104765  enstropy:      593.7553         total d/dt(ke):  -0.8411049
+d/dt(ke) vis=  -2.2031248 f=   1.3184830 alpha=   0.0000000 total=  -0.8846419
 CPU times (min):   (avg/max)
 initialization:      0.01     0.01
 initial output:      0.00     0.00
-dns_solve:           0.07     0.07  per timestep:    0.00741   0.00741
+dns_solve:           0.03     0.03  per timestep:    0.00323   0.00323
    time_control            0.00     0.00
-   RHS                     0.05     0.05
-   transpose_to_z          0.00     0.00
-   transpose_from_z        0.00     0.00
-   transpose_to_x          0.00     0.00
-   transpose_from_x        0.00     0.00
-   transpose_to_y          0.00     0.00
-   transpose_from_y        0.00     0.00
+   RHS                     0.02     0.02
+   transpose_to_z        0.0011   0.0011
+   transpose_from_z      0.0016   0.0016
+   transpose_to_x        0.0015   0.0015
+   transpose_from_x      0.0011   0.0011
+   transpose_to_y        0.0013   0.0013
+   transpose_from_y      0.0022   0.0022
+   traspose total        0.0090   0.0090
+   FFT                   0.0035   0.0035 count per timestep= 36.0 N^2
+   iFFT                  0.0075   0.0075 count per timestep= 72.0 N^2
+Estimated FLOP per timestep:   0.7927E+08
+MFLOPS per cpu:     408.75
