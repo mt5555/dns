@@ -560,23 +560,58 @@ if (g_nz==1) then
    g_nmin=min(g_nx,g_ny)
 endif
 
-! spherical dealiasing:  sqrt(2) N/3
-! band containing last shell:  
-!      dealias_sphere_kmax2_1 <= k**2 <= dealias_sphere_kmax2
-!  
-dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
-dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
-dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
+! spherical dealiasing
+! pick the sphere that fits inside l^2 + m^2 + n^2 < 2N^2/9
+! but lets truncate so that we only have complete shells:
+!     k-.5 <= sqrt(l^2 + m^2 + n^2))  < k+.5 
+!   k^2-k+.25  <=  l^2 + m^2 + n^2   < k^2 + k + .25
+! (since k and LHS are integers, this is the same as:)
+!   k^2-k   <  l^2 + m^2 + n^2   <= k^2 + k 
+!
+! which implies remove waves:
+!             l^2 + m^2 + n^2   > k^2 + k
+!
+! find integer (k+.5)^2   <   2N^2/9
+!                      k  <  sqrt(2) N / 3 -.5 = (sqrt(2) N -1.5) / 3
+!
+!
+! Example: N=24  phase shift dealiasing allows up to k^2 < 128  k<11.3
+! mode=(11,3,0) k=11.4    (part of the k=11 shell)  REMOVED
+! mode=(11,2,0) k=11.18   (part of the k=11 shell)  KEPT
+!
+! Thus in this case, the k=11 shell is incomplete.  Thus we dealias
+! a little extra and remove *all* modes outside the k=10 shell
+! kmax = 10
+! kmax2 = 110    (instead of 128)
+!
+!old formulas:
+!dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
+!dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
+!dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
 
-dealias_23sphere_kmax2 = (g_nmin*g_nmin)/9
-dealias_23sphere_kmax = sqrt(real(dealias_sphere_kmax2))
-dealias_23sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
+dealias_sphere_kmax = floor(  (sqrt(2d0)*g_nmin - 1.5d0)/3 )
+dealias_sphere_kmax2   = (dealias_sphere_kmax+.5)**2  ! rounds to k^2 + k
+dealias_sphere_kmax2_1 = (dealias_sphere_kmax-.5)**2  ! rounds to k^2 - k
 
 
-dealias_23_kmax2 = (g_nmin*g_nmin)/9
-dealias_23_kmax = sqrt(real(dealias_23_kmax2))
-dealias_23_kmax2_1 = floor( (dealias_23_kmax-1)**2 )
 
+! this dealiasing is used mostly for debugging:
+! pick the sphere that fits inside the 2/3 cube: kmax = N/3.  
+! but lets truncate so that we only have complete shells:
+!     k-.5 <= sqrt(l^2 + m^2 + n^2))  < k+.5 
+!   k^2-k+.25  <=  l^2 + m^2 + n^2   < k^2 + k + .25
+! (since k and LHS are integers, this is the same as:)
+!   k^2-k   <  l^2 + m^2 + n^2   <= k^2 + k 
+!
+! which implies remove waves:
+!             l^2 + m^2 + n^2   > k^2 + k
+!
+! find integer (k+.5)^2   <=  (N/3)^2
+!                      k  <= (N-1.5)/3 
+! so take k = floor( (N-1.5)/3 )   
+dealias_23sphere_kmax = floor ( (g_nmin-1.5d0)/3 )
+dealias_23sphere_kmax2   = (dealias_23sphere_kmax+.5)**2  ! rounds to k^2 + k
+dealias_23sphere_kmax2_1 = (dealias_23sphere_kmax-.5)**2  ! rounds to k^2 - k
 
 
 
@@ -765,7 +800,7 @@ ASSERT("dealias_remove: im >= 0 failed",im>=0)
 ASSERT("dealias_remove: jm >= 0 failed",jm>=0)
 ASSERT("dealias_remove: km >= 0 failed",km>=0)
 if (dealias==1) then
-   dealias_remove = ( (km>g_nz/3)  .or.  (jm>g_ny/3)  .or. (im>g_nx/3) )
+   dealias_remove = ( (3*km>=g_nz)  .or.  (3*jm>=g_ny)  .or. (3*im>=g_nx) )
 else if (dealias==2) then
    dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
 else if (dealias==3) then

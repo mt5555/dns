@@ -558,9 +558,9 @@ do
                nerr=nerr+1
                xw=sqrt(real(imcord(i)**2+jmcord(j)**2+kmcord(k)**2))
                xwerr(int(xw))=max(xwerr(int(xw)),a0)
-               !write(*,'(f6.2,3i4,3e16.7)') xw,&
-               !    imcord(i),jmcord(j),kmcord(k),&
-               !     Q(i,j,k,3),vor(i,j,k,3),a0
+               write(*,'(f6.2,3i4,3e16.7)') xw,&
+                   imcord(i),jmcord(j),kmcord(k),&
+                    Q(i,j,k,3),vor(i,j,k,3),a0
             endif
          endif
       enddo
