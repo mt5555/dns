@@ -1213,10 +1213,7 @@ do n=1,2
    call z_fft3d_trashinput(Q(1,1,1,n),Qhat(1,1,1,n),work)
 enddo
 
-! apply dealias filter
-if (spec_max>0) then
-   print *,'applying additional spherical truncation at ',spec_max
-endif
+! apply dealias filter, and additional filter if user specifed -smax X
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nx_2dz

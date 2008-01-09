@@ -52,6 +52,7 @@ if (firstcall) then
       if (npassive>0) call abortdns("Error: phaseshift not yet coded for passive scalars")
       allocate(q2(nx,ny,nz,ndim))
    endif
+   if (n_var<3) call abortdns("Error: ns_slaving requires n_var>=3")
 
    ! intialize Q with Fourier Coefficients:
    call z_fft3d_nvar(Q_grid,Q,work1,work2) 
@@ -410,14 +411,6 @@ endif
 ! x,yder from Qgrid:       6x,6y,12FFT 
 !
 
-#undef TEST_PHASESHIFT
-#ifdef TEST_PHASESHIFT
-do n=1,ndim
-   call z_phaseshift(Qhat(1,1,1,n),1,work)  ! phaseshift Qhat
-   call z_phaseshift(Qhat(1,1,1,n),-1,work)  ! phaseshift Qhat
-enddo
-#endif
-
 #ifdef ALPHA_MODEL
    call ns_alpha_vorticity(gradu,gradv,gradw,Q,work)
 #else
@@ -524,7 +517,7 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (use_phaseshift) then
    ! compute phaseshifted (u,v,w), store in Q()
-   do n=1,n_var
+   do n=1,3
       call z_phaseshift(Qhat(1,1,1,n),1,work)  ! phaseshift Qhat
       call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work)
    enddo
