@@ -400,11 +400,12 @@ Dealiasing is necessary when computing the nonlinear term
 $\vor \times \uv$.   Dealiasing will
 remove some of the high wave numbers, so in practice the effective
 $k_\text{max}$ will depend on the type of dealiasing used.
-There are three types of dealiasing commonly used in these codes.
+There are many types of dealiasing that can be used.  The types
+supported in the Sandia/LANL DNS code include:
 \begin{enumerate}
-\item Phase shifting
-\item 2/3 rule
-\item Spherical
+\item 2/3 rule   (DNS code option: fft-dealais)
+\item Phase shifting plus spherical truncaton  (DNS code option: fft-phase)
+\item Spherical  (DNS code option: fft-sphere)
 \end{enumerate}
 
 
@@ -417,17 +418,8 @@ $(2 \pi) (2/3)(N/2)$. To be precise, we set to zero (or do not even compute)
 With this type of dealiasing, we define the maximum wave number
 in our simulation to be $k_\text{max} = 2 \pi N/3$
 
-\subsection{Phase shifting}
-Phase shifting is an exact dealiasing which does not result in any
-loss of resolution ($k_\text{max} = \pi N$) but requires additional
-3D FFTs.  We have not implemented phase shifting.
 
-Originally developed by Patterson and Orszag (1971).  It requires 8 times as many 
-FFTs (in three-dimensions) as the 2/3 rule, but the
-FFTs are 2/3 the size.  It is always more expensive than using the
-2/3 rule.  (Canuto et al., 1998, page 85, but this may not take into
-account the cost of message passing).
-
+\subsection{Phase shifting + spherical truncation}
 A related dealising is used by the DNS Earth Simulator code (Yokokawa et
 al., 2002).  
 This requires computing the nonlinear term with only two phases (as opposed to
@@ -436,6 +428,30 @@ the 8 phases required above), and then applying a spherical truncation:
 \hat \uv(l,m,n)  \qquad \text{ for } \sqrt{l^2 + m^2 + n^2} < \frac{\sqrt{2}}{3} N
 \]
 The cost is 18 3D FFTs (as opposed to 9 3D FFTs for 2/3 rule.  
+
+\subsection{Spherical partial dealiasing}
+Spherical partial dealiasing does not exactly remove all aliasing errors
+from the nonlinear term.  It instead relies on the fact that in
+fully developed turbulence, the energy will decay at a rate of
+$k^{-5/3}$.  (where $k$ is the spherical wave number, $k = 2 \pi \|(l,m,n)\|$. )
+Under this assumption, bounds on the aliasing errors can be derived
+suggesting it is sufficient to dealias using:
+\[
+\hat \uv(l,m,n) =0 \qquad \text{ for } \sqrt{l^2 + m^2 + n^2} > \frac{\sqrt{2}}{3} N
+\]
+With this type of dealiasing, we define the maximum wave number
+in our simulation to be $k_\text{max} = 2 \pi N\sqrt{2}/3$
+
+
+\subsection{Other dealiasing methods}
+There is also a phase shifting method which does not require a
+spherical truncation.  This method is an exact dealiasing which does
+not result in any loss of resolution ($k_\text{max} = \pi N$) but
+requires additional 3D FFTs.  Originally developed by Patterson and
+Orszag (1971).  It requires 8 times as many FFTs (in three-dimensions)
+as the 2/3 rule, but the FFTs are 2/3 the size.  It is always more
+expensive than using the 2/3 rule.  (Canuto et al., 1998, page 85, but
+this may not take into account the cost of message passing).
 
 There is also the Rogallo (1977, 1981) scheme.  Developed for a two
 stage time stepping scheme.  The second stage uses a different (random) phase
@@ -451,21 +467,6 @@ and no changes are required for the forward transform.  This gives a total of
 27 3D FFTs (instead of 9 3D FFTs).  It is cheaper than the Patterson and Orszag approach, 
 but still quite expensive when compared with just two phases and spherical
 dealiasing.  
-
-
-
-\subsection{Spherical dealiasing}
-Spherical dealiasing does not exactly remove all aliasing errors
-from the nonlinear term.  It instead relies on the fact that in
-fully developed turbulence, the energy will decay at a rate of
-$k^{-5/3}$.  (where $k$ is the spherical wave number, $k = 2 \pi \|(l,m,n)\|$. )
-Under this assumption, bounds on the aliasing errors can be derived
-suggesting it is sufficient to dealias using:
-\[
-\hat \uv(l,m,n) =0 \qquad \text{ for } \sqrt{l^2 + m^2 + n^2} > \frac{\sqrt{2}}{3} N
-\]
-With this type of dealiasing, we define the maximum wave number
-in our simulation to be $k_\text{max} = 2 \pi N\sqrt{2}/3$
 
 
 

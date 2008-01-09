@@ -79,10 +79,15 @@ Suggested value of G for this problem (forced low wave number
 turbulence) G=1.0.   (For improved resolution in the viscous regime,
 some people use the more restrictive G=1.5)
 
-The code supports two types of dealiasing: spherical and 2/3 rule.
+The code supports several types of dealasing:
 
-spherical dealiasing,  kmax = 2*pi*N*sqrt(2)/3
-2/3 dealising:         kmax = 2*pi*N/3
+1. partial spherical (the most efficient, not fully dealiased)
+2. 2/3 rule (the most efficient in terms of retained modes)
+3. phase shifting (the most efficient in terms of maximum spherical
+   wave number)
+
+with phase shifting or partial spherical, kmax = 2*pi*N*sqrt(2)/3
+with 2/3 dealising:                       kmax = 2*pi*N/3
 
 (the 2pi shows up in the wave number because our box is of side
 length 1). 
