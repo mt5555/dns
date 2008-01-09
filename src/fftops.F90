@@ -2627,12 +2627,19 @@ a -> a cos(hh)+b sin(hh)
 b -> b cos(hh)-a sin(hh)
 
 2D:
+4 modes.  apply x:
+a cos(kx) cos(jy)   ->  acos+bsin cos(kx) cos(jy)    a1
+b sin(kx) cos(jy)   ->  bcos-asin cos(kx) cos(jy)    b1
 
-a cos(kx) cos(jy) 
-b sin(kx) cos(jy)
+c cos(kx) sin(jy)   ->  ccos+dsin cos(kx) sin(jy)    c1
+d sin(kx) sin(jy)   ->  dcos-csin sin(kx) sin(jy)    d1
 
-c cos(kx) sin(jy) 
-d sin(kx) sin(jy)
+apply y:
+a1 cos + c1 sin
+b1 cos + d1 sin
+c1 cos - a1 sin
+d1 cos - b1 sin                          
+
 
 
 #endif
