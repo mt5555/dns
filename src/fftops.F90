@@ -2626,6 +2626,14 @@ and thus the phase shift:
 a -> a cos(hh)+b sin(hh)
 b -> b cos(hh)-a sin(hh)
 
+2D:
+
+a cos(kx) cos(jy) 
+b sin(kx) cos(jy)
+
+c cos(kx) sin(jy) 
+d sin(kx) sin(jy)
+
 
 #endif
 subroutine z_phaseshift(p,shift,work)
@@ -2664,21 +2672,39 @@ do j=1,ny_2dz
          a = p(k,i,j)               
          b = p(k,i+z_imsign(i),j) 
          work(k,i,j) = a*cos(hh) + b*sin(hh)
+      enddo
+   enddo
+enddo
 
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
          ! apply y shift
          hh= shift*pi*jm/g_ny
-         a = p(k,i,j)               
-         b = p(k,i,j+z_jmsign(j))
-         work(k,i,j) = a*cos(hh) + b*sin(hh)
+         a = work(k,i,j)               
+         b = work(k,i,j+z_jmsign(j))
+         p(k,i,j) = a*cos(hh) + b*sin(hh)
+      enddo
+   enddo
+enddo
 
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
          ! apply z shift
          hh= shift*pi*km/g_nz
          a = p(k,i,j)               
          b = p(k+z_kmsign(k),i,j)
          work(k,i,j) = a*cos(hh) + b*sin(hh)
-
       enddo
    enddo
 enddo
+
 p=work
 end subroutine

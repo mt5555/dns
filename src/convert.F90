@@ -549,12 +549,12 @@ do
       do j=ny1,ny2
       do i=nx1,nx2
          ntot=ntot+1
-         if (abs(Q(i,j,k,3))<1e-15) then
+         if (abs(Q(i,j,k,3))<1e-12) then
             nzero=nzero+1
          else
             a0 = abs(Q(i,j,k,3)-vor(i,j,k,3))
             mx=max(mx,a0)
-            if (a0>1e-15) then
+            if (a0>1e-12) then
                nerr=nerr+1
                xw=sqrt(real(imcord(i)**2+jmcord(j)**2+kmcord(k)**2))
                xwerr(int(xw))=max(xwerr(int(xw)),a0)
@@ -1223,6 +1223,7 @@ do j=1,ny_2dz
       im=z_imcord(i)
       do k=1,g_nz
          km=z_kmcord(k)
+
          ! dealias           
          if ( dealias_remove(abs(im),abs(jm),abs(km))) then
             Qhat(k,i,j,1)=0
@@ -1232,6 +1233,8 @@ do j=1,ny_2dz
             Qhat(k,i,j,1)=0
             Qhat(k,i,j,2)=0
          endif
+
+
       enddo
    enddo
 enddo
@@ -1262,8 +1265,8 @@ if (use_phaseshift) then
    call z_fft3d_trashinput(Q(1,1,1,3),work_hat,work)
    call z_phaseshift(work_hat,-1,work)  ! un-phaseshift result
    Qhat(:,:,:,3) = .5*Qhat(:,:,:,3) + .5*work_hat(:,:,:)
-!   Qhat(:,:,:,3) = work_hat
 endif
+
 
 
 ! apply filter to nonlinear product
@@ -1274,6 +1277,11 @@ do j=1,ny_2dz
       do k=1,g_nz
          km=z_kmcord(k)
          ! dealias           
+!         if (  abs(Qhat(k,i,j,3))>1e-10 .or. abs(work_hat(k,i,j))>1e-10 ) then
+!            print *,'uv: ',im,jm,km,Qhat(k,i,j,3),work_hat(k,i,j)
+!         endif
+
+
          if ( dealias_remove(abs(im),abs(jm),abs(km))) then
             Qhat(k,i,j,3)=0
          endif
