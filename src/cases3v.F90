@@ -239,7 +239,7 @@ call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 ! set the helicity angle to h_angle
 if (init_cond_subtype == 5) then
    h_angle = 0.0d0
-!    h_angle = pi/2
+!   h_angle = pi/2
    call set_helicity_angle(Q,PSI,work,h_angle,ener)
 
    ! debug case:  1,4,9,... 100    9.455 2.5106 27761.2
@@ -753,8 +753,9 @@ do iii=nx1,nx2
    mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
    mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
-   if(my_pe == io_pe) then
-   write(6,*)'pre-fix energies ',mod_rr**2+mod_ii**2
+   if (my_pe == io_pe) then
+   write(6,*)'pre-fix RR ',mod_rr**2
+   write(6,*)'pre-fix II ',mod_ii**2
    endif 
 
    fix = 1
@@ -851,7 +852,8 @@ do iii=nx1,nx2
    mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
    if(my_pe == io_pe) then
-   write(6,*)'post-fix energies ',mod_rr**2+mod_ii**2
+   write(6,*)'post-fix RR ',mod_rr**2
+   write(6,*)'post-fix II ',mod_ii**2
    endif 
 
    endif

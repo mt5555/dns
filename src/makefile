@@ -141,7 +141,7 @@ me=pmpi_wtime
    ifeq ($(VENDOR),INTELMPI)
    F90 = mpif90
    CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib  -O1  $(FFT) 
+   FFLAGS =  -auto -w90  -Vaxlib  -O1  $(MPI) $(FFT) 
    LDFLAGS = $(FFTLIB)
    endif
 
