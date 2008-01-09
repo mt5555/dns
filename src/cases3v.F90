@@ -187,6 +187,7 @@ else if (dealias==3) then
    NUMBANDS = dealias_23sphere_kmax
 endif
 ener = 0
+write(6,*)'NUMBANDS = ',NUMBANDS
    do nb = 1,NUMBANDS
         enerb_target(nb) = nb**2 
 	ener = ener + enerb_target(nb)
@@ -237,8 +238,8 @@ call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
 ! If using controlled helicity initial condition, 
 ! set the helicity angle to h_angle
 if (init_cond_subtype == 5) then
-    h_angle = 0.0d0
-!   h_angle = pi/2
+   h_angle = 0.0d0
+!    h_angle = pi/2
    call set_helicity_angle(Q,PSI,work,h_angle,ener)
 
    ! debug case:  1,4,9,... 100    9.455 2.5106 27761.2
