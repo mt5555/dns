@@ -90,10 +90,9 @@ nio=min(mpi_maxio,ncpu_z)
 
 ! no more than 50% of the CPUS should do I/O
 ! on Q, this should be 25%, but sometimes we run 64 cpus on 32 nodes.
-if (ncpu_z*ncpu_x*ncpu_z>4) nio=min(nio,(ncpu_x*ncpu_y*ncpu_z)/4)
+if (ncpu_x*ncpu_y*ncpu_z>4) nio=min(nio,(ncpu_x*ncpu_y*ncpu_z)/4)
 
 inc=ncpu_z/nio
-
 if (io_pe==my_pe) then
    print *,'number of mpi_io cpus: ',nio,do_mpi_io
    print *,'output_size (bytes): ',output_size
