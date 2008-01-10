@@ -123,7 +123,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 .and. hyper_implicit==0 ) then
+            if (mu_hyper>=2 ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -164,7 +164,6 @@ do j=1,ny_2dz
 enddo
 
 
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -185,7 +184,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 .and. hyper_implicit==0 ) then
+            if (mu_hyper>=2) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -218,7 +217,6 @@ do j=1,ny_2dz
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -238,7 +236,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 .and. hyper_implicit==0 ) then
+            if (mu_hyper>=2 ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -272,7 +270,7 @@ do j=1,ny_2dz
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt)
+
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -292,7 +290,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 .and. hyper_implicit==0 ) then
+            if (mu_hyper>=2 ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -321,7 +319,6 @@ do j=1,ny_2dz
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q,delt)
 do n=1,n_var
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -561,7 +558,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 .and. hyper_implicit==0 ) then
+            if (mu_hyper>=2  ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
