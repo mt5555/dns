@@ -1116,6 +1116,10 @@ enddo
 enddo
 enddo
 
+!do i=0,32
+!   print *,'i,spec=',i,spectrum(i)
+!enddo
+
 
 #ifdef USE_MPI
 spectrum_in=spectrum

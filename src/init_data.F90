@@ -70,7 +70,6 @@ else
       call divfree_gridspace(Q,work1,work2,q1) 
    else if (dealias>0)  then
       call print_message('Dealiasing initial data...')
-      call dealias_gridspace(Q,work1)
    endif
 endif
 end subroutine
@@ -541,7 +540,7 @@ do n=1,nvec
          jm=jmcord(j)
          do i=nx1,nx2
             im=imcord(i)
-            xw=sqrt(real(km**2+jm**2+im**2))
+            xw=sqrt(real(km**2/Lz/Lz + jm**2 + im**2))
 
             xfac = (2*2*2)
             if (km==0) xfac=xfac/2
@@ -549,13 +548,21 @@ do n=1,nvec
             if (im==0) xfac=xfac/2
 
             do nb=1,NUMBANDS
-               if (xw>=nb-.5 .and. xw<nb+.5) &
+               if (xw>=nb-.5 .and. xw<nb+.5) then
                     enerb(nb)=enerb(nb)+.5*xfac*Q(i,j,k,n)**2
+                    if (dealias_remove(abs(im),abs(jm),abs(km))) then
+                       print *,'WARNING: adding energy to mode that will be dealiased: ',im,jm,km
+                    endif
+                 endif
             enddo
             !remaining coefficients to 0:
             nb=NUMBANDS+1
-            if (xw>=nb-.5) Q(i,j,k,n)=0
-
+            if (xw>=nb-.5) then 
+               Q(i,j,k,n)=0
+               if (.not. dealias_remove(abs(im),abs(jm),abs(km))) then
+                  ! print *,'NOTE: truncating non-dealiased mode',im,jm,km
+               endif
+            endif
          enddo
       enddo
    enddo
