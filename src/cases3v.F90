@@ -854,7 +854,6 @@ enddo
 enddo
 enddo
 
-<<<<<<< cases3v.F90
 !
 !  The helicity adjustment above did not preserve the fact that
 !  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
