@@ -703,6 +703,7 @@ character(len=80) :: message
 
 integer :: zerosign
 external :: zerosign
+integer :: i1,i2,k1,k2,j1,j2
 
 if (ndim /= 3) then
    call abortdns("ERROR: set_helicity_angle() requires ndim=3")
@@ -760,20 +761,15 @@ do iii=nx1,nx2
    mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
    mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
-   if (my_pe == io_pe) then
-   write(6,*)'pre-fix RR ',mod_rr**2
-   write(6,*)'pre-fix II ',mod_ii**2
-   endif 
 
-   fix = 1
    if (mod_rr == 0 .or. mod_ii == 0 .or. xw==0 .or. h_angle==-1) then
       fix = 0
    endif
+
    
    ! do the transformation if fix = 1
-   
    if (fix == 1) then         
-      
+
       RRhat = RR/mod_rr
       khat(1) = i/xw
       khat(2) = j/xw
@@ -853,31 +849,33 @@ do iii=nx1,nx2
       
       Q(iii,jjj,kkk,:)=RR
       Qi(iii,jjj,kkk,:)=II
-
-      if (my_pe == io_pe) then                                                     
-         if (i == 1 .and. j == 1 .and. k == 1) then                                
-            write(6,*)'Post i,j,k  ',i,j,k                                          
-            write(6,*)'Post RR,II = ',RR, II                                        
-         else if (i == 1 .and. j == 1 .and. k == 1) then                           
-            write(6,*)'Post i,j,k  ',i,j,k                                          
-            write(6,*)'Post RR,II = ',RR, II                                        
-         endif
-      endif
-
-
-! check if amplitudes have changed
-!   mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
-!   mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
-
-!   if(my_pe == io_pe) then
-!   write(6,*)'post-fix RR ',mod_rr**2
-!   write(6,*)'post-fix II ',mod_ii**2
-!   endif 
-
    endif
 enddo
 enddo
 enddo
+
+<<<<<<< cases3v.F90
+!
+!  The helicity adjustment above did not preserve the fact that
+!  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
+!  Reimpose this constraint:
+!
+do n=1,3
+do kkk=nz1,nz2
+do jjj=ny1,ny2
+do iii=nx1,nx2
+   i1=iii; i2 = i1 + imsign(iii)
+   j1=jjj; j2 = j1 + imsign(jjj)
+   k1=kkk; k2 = k1 + imsign(kkk)
+   Q(i2,j2,k2,n)  =   Q(i1,j1,k1,n)
+   Qi(i2,j2,k2,n)  = -Qi(i1,j1,k1,n)
+enddo
+enddo
+enddo
+enddo
+
+
+
 
 !    convert back:
 do n = 1,3
