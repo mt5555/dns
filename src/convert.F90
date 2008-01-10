@@ -59,7 +59,7 @@ use params
 use mpi
 use fft_interface
 use spectrum
-use transpose, only : input1
+use transpose , only : input1
 implicit none
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: vor(:,:,:,:)
