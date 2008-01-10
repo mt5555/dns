@@ -675,9 +675,6 @@ enddo
 end subroutine livescu_spectrum
 
 
-
-
-
 subroutine set_helicity_angle(Q,Qi,work,h_angle,ener)
 !
 !set the helicity angle in each mode for prescribed spectrum shape.
@@ -746,6 +743,16 @@ do iii=nx1,nx2
    k=kmcord_exp(kkk)
    RR = Q(iii,jjj,kkk,:)
    II = Qi(iii,jjj,kkk,:)
+
+   if (my_pe == io_pe) then 
+      if (i == 1 .and. j == 1 .and. k == 1) then
+         write(6,*)'Pre i,j,k  ',i,j,k
+         write(6,*)'Pre RR,II = ',RR, II
+      else if (i == 1 .and. j == 1 .and. k == 1) then    
+         write(6,*)'Pre i,j,k  ',i,j,k
+         write(6,*)'Pre RR,II = ',RR, II
+      endif
+   endif
 
    xw2=i**2 + j**2 + k**2
    xw=sqrt(xw2)
@@ -847,14 +854,25 @@ do iii=nx1,nx2
       Q(iii,jjj,kkk,:)=RR
       Qi(iii,jjj,kkk,:)=II
 
-! check if amplitudes have changed
-   mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
-   mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+      if (my_pe == io_pe) then                                                     
+         if (i == 1 .and. j == 1 .and. k == 1) then                                
+            write(6,*)'Post i,j,k  ',i,j,k                                          
+            write(6,*)'Post RR,II = ',RR, II                                        
+         else if (i == 1 .and. j == 1 .and. k == 1) then                           
+            write(6,*)'Post i,j,k  ',i,j,k                                          
+            write(6,*)'Post RR,II = ',RR, II                                        
+         endif
+      endif
 
-   if(my_pe == io_pe) then
-   write(6,*)'post-fix RR ',mod_rr**2
-   write(6,*)'post-fix II ',mod_ii**2
-   endif 
+
+! check if amplitudes have changed
+!   mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
+!   mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+
+!   if(my_pe == io_pe) then
+!   write(6,*)'post-fix RR ',mod_rr**2
+!   write(6,*)'post-fix II ',mod_ii**2
+!   endif 
 
    endif
 enddo
