@@ -17,7 +17,10 @@
 #
 
 
-set NCPU = 1
+set NCPU1 = 1
+set NCPU2 = 1
+set NCPU = 0
+@ NCPU = $NCPU1 * $NCPU2
 
 if ( $NCPU == 1 ) then
    set MPIRUN = " "
@@ -30,22 +33,22 @@ endif
 # contaiminated = M-(2N-M) = 2(M-N)
 # we want 2(M-N) >= N      2M >= 3N  M>= 3N/2
 set M = 72   # allows for N<=48
-set N = 48
+set N = 40
 
 if ! (-x convert.big)  then
   ./gridsetup.py 1 1 1 $M $M $M
   make -j2 convert ; mv convert convert.big
 endif
 
-./gridsetup.py 1 1 $NCPU $N $N $N
-make -j2 convert ; mv convert convert
+./gridsetup.py $NCPU1 1 $NCPU2 $N $N $N
+make -j2 convert 
 
 
 
 #set method = "fft-sphere"
 #set method = "fft-23sphere"
 #set method = "fft-dealias"
-#set method = "fft-phase"
+set method = "fft-phase"
 
 echo $method 
 rm -f /tmp/temp0000.0000* /tmp/dealias*inp /tmp/temp1.out /tmp/temp2.out
