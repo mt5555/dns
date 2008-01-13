@@ -748,10 +748,12 @@ do iii=nx1,nx2
    if (my_pe == io_pe) then 
       if (i == 1 .and. j == 1 .and. k == 1) then
          write(6,*)'Pre i,j,k  ',i,j,k
-         write(6,*)'Pre RR,II = ',RR, II
-      else if (i == 1 .and. j == 1 .and. k == 1) then    
+         write(6,*) RR
+	 write(6,*) II
+      else if (i == -1 .and. j == -1 .and. k == -1) then    
          write(6,*)'Pre i,j,k  ',i,j,k
-         write(6,*)'Pre RR,II = ',RR, II
+         write(6,*) RR
+	 write(6,*) II
       endif
    endif
 
@@ -850,6 +852,20 @@ do iii=nx1,nx2
       Q(iii,jjj,kkk,:)=RR
       Qi(iii,jjj,kkk,:)=II
    endif
+
+if (my_pe == io_pe) then
+      if (i == 1 .and. j == 1 .and. k == 1) then
+         write(6,*)'post i,j,k  ',i,j,k
+         write(6,*) RR
+	 write(6,*) II
+      else if (i == -1 .and. j == -1 .and. k == -1) then
+         write(6,*)'post i,j,k  ',i,j,k
+         write(6,*) RR
+	 write(6,*) II
+      endif
+   endif
+
+
 enddo
 enddo
 enddo
@@ -860,15 +876,38 @@ enddo
 !  Reimpose this constraint:
 !
 do n=1,3
+   do kkk=nz1,nz2
+      do jjj=ny1,ny2
+         do iii=nx1,nx2
+            i1=iii; i2 = i1 + imsign(iii)
+            j1=jjj; j2 = j1 + imsign(jjj)
+            k1=kkk; k2 = k1 + imsign(kkk)
+            Q(i2,j2,k2,n)  =   Q(i1,j1,k1,n)
+            Qi(i2,j2,k2,n)  = -Qi(i1,j1,k1,n)
+         enddo
+      enddo
+   enddo
+enddo
+
+
 do kkk=nz1,nz2
 do jjj=ny1,ny2
 do iii=nx1,nx2
-   i1=iii; i2 = i1 + imsign(iii)
-   j1=jjj; j2 = j1 + imsign(jjj)
-   k1=kkk; k2 = k1 + imsign(kkk)
-   Q(i2,j2,k2,n)  =   Q(i1,j1,k1,n)
-   Qi(i2,j2,k2,n)  = -Qi(i1,j1,k1,n)
-enddo
+   i=imcord_exp(iii)
+   j=jmcord_exp(jjj)
+   k=kmcord_exp(kkk)
+
+   if (my_pe == io_pe) then
+      if (i == 1 .and. j == 1 .and. k == 1) then
+         write(6,*) "Post  i,j,k  ",i,j,k
+         write(6,*) Q(iii,jjj,kkk,:)
+         write(6,*) Qi(iii,jjj,kkk,:)
+      else if (i == -1 .and. j == -1 .and. k == -1) then
+         write(6,*)'Post i,j,k  ',i,j,k
+         write(6,*) Q(iii,jjj,kkk,:) 
+         write(6,*) Qi(iii,jjj,kkk,:)
+      endif
+   endif
 enddo
 enddo
 enddo
