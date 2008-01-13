@@ -763,7 +763,7 @@ do iii=nx1,nx2
    mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
    mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
-
+   fix=1
    if (mod_rr == 0 .or. mod_ii == 0 .or. xw==0 .or. h_angle==-1) then
       fix = 0
    endif
@@ -875,6 +875,7 @@ enddo
 !  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
 !  Reimpose this constraint:
 !
+#if 1
 do n=1,3
    do kkk=nz1,nz2
       do jjj=ny1,ny2
@@ -888,7 +889,7 @@ do n=1,3
       enddo
    enddo
 enddo
-
+#endif
 
 do kkk=nz1,nz2
 do jjj=ny1,ny2
