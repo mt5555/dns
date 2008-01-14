@@ -229,27 +229,34 @@ endif
 
 ! random vorticity initial condition:
 if (init==1) then
+   !
+   !  We are computing a initial condition from scratch:
+   !
    call ranvor(Q,PSI,work,work2,rantype)
+
+   ! rescale energy to match enerb_target, preserving the phases
+   call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
+   
+   ! If using controlled helicity initial condition, 
+   ! set the helicity angle to h_angle
+   if (init_cond_subtype == 5) then
+      h_angle = 0.0d0
+      !   h_angle = pi/2
+      call set_helicity_angle(Q,PSI,work,h_angle,ener)
+   endif
+
+else if (init==2) then
+   !
+   !  This subroutine was called with an initial condition in Q
+   !  (from a restart file).  Modify it for this run:  
+   !
+   if ( 0 <= init_cond_subtype .and. init_cond_subtype <= 4) then
+      ! rescale energy to match enerb_target, preserving the phases
+      ! used during the intialization procedure for decaying turbulence runs
+      call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
+   endif
 endif
 
-! rescale energy to match enerb_target:
-call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
-
-! If using controlled helicity initial condition, 
-! set the helicity angle to h_angle
-if (init_cond_subtype == 5) then
-   h_angle = 0.0d0
-!   h_angle = pi/2
-   call set_helicity_angle(Q,PSI,work,h_angle,ener)
-
-   ! debug case:  1,4,9,... 100    9.455 2.5106 27761.2
-!   h_angle=-1  ! disable angle setting, for degugging
-!   n=2
-!   work2=Q(:,:,:,n)
-!   call set_helicity_angle(Q,PSI,work,h_angle,ener)
-!   print *,'n=',n, ' maxval = ',maxval(abs(work2-Q(:,:,:,n)))
-!   stop
-endif
 
 call print_message("Isotropic initial condition in wave numbers:");
 do nb=1,max(10,NUMBANDS,max(g_nx/2,g_ny/2,g_nz/2))
