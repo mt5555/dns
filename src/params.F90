@@ -170,6 +170,11 @@ integer :: init_cond_subtype   !  0 = default
                                !     0  tau=5
                                !     1  tau=20
                                !
+real*8  :: init_cond_param1 = 0  ! Initial condition parameters
+real*8  :: init_cond_param2 = 0  ! 0 = default  
+                                 ! value interpreted by initial condition
+                                 ! subroutine. see source. 
+                                 !
                      
 integer :: forcing_type   ! 0 = none
                           ! 1 = relax back to E(1)=1, E(2)=2**(-5/3)
