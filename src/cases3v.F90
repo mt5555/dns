@@ -254,6 +254,13 @@ else if (init==2) then
       ! used during the intialization procedure for decaying turbulence runs
       call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
    endif
+
+   ! If using controlled helicity initial condition, 
+   ! set the helicity angle to h_angle
+   if (init_cond_subtype == 5) then
+      h_angle = init_cond_param1
+      call set_helicity_angle(Q,PSI,work,h_angle,ener)
+   endif
 endif
 
 
