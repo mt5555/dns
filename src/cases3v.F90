@@ -65,7 +65,7 @@ endif
 
 
 ! rescale E to fit enerb_target():
-call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
+call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3,1)
 
 
 call print_message("Isotropic initial condition in wave numbers:");
@@ -124,7 +124,7 @@ real*8 :: work2(nx,ny,nz)
 
 ! local variables
 real*8 :: alpha,beta
-integer km,jm,im,i,j,k,n,wn,ierr,nb,NUMBANDS
+integer km,jm,im,i,j,k,n,wn,ierr,nb,NUMBANDS,do_rescale
 integer,parameter :: NUMBANDS_MAX=1024
 real*8 xw,ener,xfac,theta
 real*8 ::  enerb_target(NUMBANDS_MAX),enerb_work(NUMBANDS_MAX),enerb(NUMBANDS_MAX)
@@ -189,7 +189,7 @@ else if (init_cond_subtype==5) then
 ! in each mode
    ener = 0
    do nb = 1,NUMBANDS
-        enerb_target(nb) = nb**2 
+        enerb_target(nb) = nb**2  ! NM(k)  
 	ener = ener + enerb_target(nb)
    enddo
    enerb_target = enerb_target/ener	
@@ -226,42 +226,36 @@ endif
 
 
 
-
-! random vorticity initial condition:
 if (init==1) then
    !
    !  We are computing a initial condition from scratch:
    !
+   ! random vorticity initial condition:
    call ranvor(Q,PSI,work,work2,rantype)
-
-   ! rescale energy to match enerb_target, preserving the phases
-   call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
-   
-   ! If using controlled helicity initial condition, 
-   ! set the helicity angle to h_angle
-   if (init_cond_subtype == 5) then
-      h_angle = init_cond_param1*pi/180
-      call set_helicity_angle(Q,PSI,work,h_angle,ener)
-   endif
+   do_rescale=1  ! rescale energies, preserving phases
 
 else if (init==2) then
    !
    !  This subroutine was called with an initial condition in Q
    !  (from a restart file).  Modify it for this run:  
    !
-   if ( 0 <= init_cond_subtype .and. init_cond_subtype <= 4) then
-      ! rescale energy to match enerb_target, preserving the phases
-      ! used during the intialization procedure for decaying turbulence runs
-      call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3)
-   endif
-
-   ! If using controlled helicity initial condition, 
-   ! set the helicity angle to h_angle
-   if (init_cond_subtype == 5) then
-      h_angle = init_cond_param1*pi/180
-      call set_helicity_angle(Q,PSI,work,h_angle,ener)
-   endif
+   do_rescale=1   ! rescale energies, preserving phases
+   if (init_cond_subtype == 5 ) do_rescale=0   ! rescale helicity angle, preserving energy
 endif
+
+
+! do_rescale=1:  rescale energy to match enerb_target, preserving the phases
+! do_rescale=0:  just compute ener, enerb 
+call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3,do_rescale)
+
+
+! If using controlled helicity initial condition, 
+! set the helicity angle to h_angle
+if (init_cond_subtype == 5) then
+   h_angle = init_cond_param1*pi/180
+   call set_helicity_angle(Q,PSI,work,h_angle,ener)
+endif
+
 
 
 call print_message("Isotropic initial condition in wave numbers:");
@@ -345,7 +339,7 @@ enddo
 endif
 
 ! rescale E to fit enerb_target():
-call rescale_e(Q,work1,ener,enerb,enerb_target,NUMBANDS,3)
+call rescale_e(Q,work1,ener,enerb,enerb_target,NUMBANDS,3,1)
 
 
 call print_message("Isotropic initial condition in wave numbers:");

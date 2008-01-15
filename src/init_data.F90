@@ -361,7 +361,7 @@ allocate(enerb(NUMBANDS))
 call livescu_spectrum(enerb_target,NUMBANDS,1,init_cond_subtype)
 
 call input1(Q(1,1,1,np),work1,work2,null,io_pe,.true.,-1)  
-call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1)
+call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1,1)
 ! convert to 0,1:
 do k=nz1,nz2
 do j=ny1,ny2
@@ -411,7 +411,7 @@ enerb_target(1:NUMBANDS)=1.0
 
 
 call input1(Q(1,1,1,np),work1,work2,null,io_pe,.true.,-1)  
-call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1)
+call rescale_e(Q(1,1,1,np),work1,ener,enerb,enerb_target,NUMBANDS,1,1)
 
 deallocate(enerb_target)
 deallocate(enerb)
@@ -505,15 +505,19 @@ end subroutine
 
 
 
-subroutine rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,nvec)
+subroutine rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,nvec,do_rescale)
 !
-! rescale initial data
+! rescale initial data to match spectra in enerb_target
+! preserve phases of all modes
+!
+! if do_rescale == 0 rescaling is DISABLED
+! (but we still compute "ener" and "enerb")
 !
 use params
 use transpose
 use mpi
 implicit none
-integer :: NUMBANDS,nvec
+integer :: NUMBANDS,nvec,do_rescale
 real*8 :: Q(nx,ny,nz,nvec)
 real*8 :: work(nx,ny,nz)
 real*8 :: enerb_target(NUMBANDS)
@@ -525,8 +529,9 @@ integer :: n,im,jm,km,i,j,k,nb,ierr
 real*8 :: xfac,xw
 character(len=80) :: message
 
+if (do_rescale==1) call print_message("Rescaling initial condition")
 
-call print_message("Rescaling initial condition")
+
 enerb=0
 do n=1,nvec
    write(message,*) 'FFT to spectral space n=',n   
@@ -575,8 +580,10 @@ enddo
 
 
 do n=1,nvec
-   write(message,*) 'normalizing to E_target(k) n=',n   
-   call print_message(message)
+   if (do_rescale==1) then
+      write(message,*) 'normalizing to E_target(k) n=',n   
+      call print_message(message)
+   endif
 
    do k=nz1,nz2
       km=kmcord(k)
@@ -585,16 +592,20 @@ do n=1,nvec
          do i=nx1,nx2
             im=imcord(i)
             xw=sqrt(real(km**2+jm**2+im**2))
-            
+
+            if (do_rescale==1) then
             do nb=1,NUMBANDS
             if (xw>=nb-.5 .and. xw<nb+.5) then
                Q(i,j,k,n)=Q(i,j,k,n)*sqrt(enerb_target(nb)/(enerb(nb)))
             endif
             enddo
+            endif
          enddo
       enddo
    enddo
 enddo
+
+
 
 ener=0
 enerb=0
