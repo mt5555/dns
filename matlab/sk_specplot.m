@@ -27,9 +27,9 @@ tsave=[2.5];
 %name = 'hel128_hpi2_0000.0000';
 %namedir = '/home2/skurien/dns/src/';
 
-name = 'hel256_hpi2_all';
-namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
-mu=2e-4;
+%name = 'hel256_hpi2_all';
+%namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel256_hpi2/';
+%mu=2e-4;
 
 %name = 'hel256_h0_0000.0000';
 %namedir = '/home2/skurien/helicity_data/helical_forced/hel256_h0/';
@@ -61,12 +61,27 @@ mu=2e-4;
 %name = 'skhel512_hpi2';
 %mu = 1e-4;
 
-%namedir = '/netscratch/skurien/projects/helicity_data/helical_forced/hel512_hpi2/';
-%name = 'sc1024A';
+namedir = '/netscratch/skurien/dns_data/sc1024A/';
+name = 'sc1024A';
+mu = 3.5e-5;
+
+%namedir = '/netscratch/skurien/dns_data/sc1024A/';
+%name = 'sc1024A-trunc0128.0002.0000';
+%name = 'sc1024A-trunc0128_all';
 %mu = 3.5e-5;
 
-name = 'sc2048A';
-namedir = '/xraid/skurien/dns_data/sc2048A/';
+%namedir = '/netscratch/skurien/dns_data/sc1024A/';
+%name = 'sc1024A-trunc0064.0002.0000';
+%name = 'sc1024A-trunc0064_all';
+%mu = 3.5e-5;
+
+%namedir = '/netscratch/skurien/dns_data/sc1024A/';
+%name = 'sc1024A-trunc0032.0002.0000';
+%name = 'sc1024A-trunc0032_all';
+%mu = 3.5e-5;
+
+%name = 'sc2048A';
+%namedir = '/xraid/skurien/dns_data/sc2048A/';
 
 
 
@@ -102,11 +117,11 @@ j=0;l=0;
 while (time>=.0 & time<=9999.3)
   n_r=fread(fid,1,'float64');
   spec_r=fread(fid,n_r,'float64');
-%if (j==0)
-if (time < 1)
+if (j==0)
+%if (time < 1)
      spec_ave =  0*spec_r;  %initialize spec_ave
 end
-if (time >= 1)        %only average times greater than 1 eddy turnover
+if (time >= 2)        %only average times greater than 1 or 2 eddy turnover
      j=j+1;                 %count j's for averaging only after t==1.
      spec_ave = spec_ave + spec_r;
 end
@@ -154,16 +169,16 @@ j
   spec_uz=spec_scale*fread(fid,n_z,'float64');
   spec_vz=spec_scale*fread(fid,n_z,'float64');
   spec_wz=spec_scale*fread(fid,n_z,'float64');  
-
-if (time < 1)
+if (l==0)
+%if (time < 1)
      spec_l =  0*spec_ux ;  %initialize longit.spec
      spec_t1 = 0*spec_vx;
      spec_t2 = 0*spec_wy;
 spec_t3 = 0*spec_uz;
      spec_t = 0*spec_t1;	
 end
-if (time >= 1)        %only average times greater than 1 eddy turnover
-     l=l+1;                 %count j's for averaging only after t==1.
+if (time >= 2.5)        %only average times greater than 1 or 2 eddy turnover
+     l=l+1;                 %count j's for averaging only after t==1 (or  whatever).
      spec_l = spec_l + (spec_ux + spec_vy + spec_wz)/3;
 spec_t1 = (spec_vx + spec_wx)/2;
 spec_t2 = (spec_uy + spec_wy)/2;
@@ -262,17 +277,18 @@ xlabel('k')
 
 % compensated mean spectra
 figure(7)
-%semilogx(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
-%semilogx(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
-loglog(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
-loglog(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]); hold on;
+subplot(2,2,4);
+semilogx(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
+semilogx(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]);hold on;
+%loglog(k,spec_ave.*k'.^(5/3),'k','linewidth',[2]); hold on;
+%loglog(k,spec_ave.*k'.^(4/3),'b-.','linewidth',[2]); hold on;
 
-set(gca,'fontsize',16);
+set(gca,'fontsize',12);
 legend('E(k) k^{5/3}','E(k) k^{4/3}');
     % title('Compensated MEAN energy spectrum');
 %ylabel(pname);
-set(gca,'fontsize',18);
-xlabel('k');
+set(gca,'fontsize',12);
+%xlabel('k');
 
 % compensated mean long and trans spectra
 figure(8)

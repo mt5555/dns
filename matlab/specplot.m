@@ -98,7 +98,27 @@ mu = 1;
 
 
 %name = 'sc1024A';
-%namedir = '/nh/xraid/skurien/dns_data/sc1024a/';
+%namedir = '/netscratch/skurien/dns_data/sc1024a/';
+
+%name = 'dnsslav_hmin0000.0000';
+%namedir = '~/research.old/projects/bottleneck/';
+
+%name = 'invsc256_all';
+%name = 'invsc64_maxh0000.0000';
+%name = 'n64_all';
+%name = 'invsc256_maxh0000.0000';
+%name = 'invsc256_minh0000.0000';
+%namedir = '~/research.old/projects/bottleneck/';
+
+name = 'invsc64_minh_phase0000.0000';
+namedir = '~/research.old/projects/bottleneck/n64/fft-phase/';
+
+%name = 'invsc64_minh_23sph0000.0000';
+%namedir = '~/research.old/projects/bottleneck/n64/fft-23sphere/';
+
+%name = 'dns_23sph0000.0000';
+name = 'dns_phase0000.0000';
+namedir = '~/research.old/projects/bottleneck/n32/';
 
 %name = 'n256_f2000n5_all';
 %name = 'n256_f1000n5_all';
@@ -115,8 +135,9 @@ mu = 1;
 %name = 'balu_b0000.0000';
 %namedir = '/home/mataylo/scratch3/dns/';
 
-name = 'temp';
-namedir = '/nh/u/skurien/zjzdns/dns/src/';
+name = 'temp_all';
+namedir = '/nh/u/skurien/dns/src/tests/';
+
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -130,7 +151,7 @@ fidp=endianopen([namedir,name,'.pspec'],'r');
 fidco=endianopen([namedir,name,'.cospec'],'r');  
 
 
-fidt=-1;
+%fidt=-1;
 %fidp=-1;
 
 time=fread(fid,1,'float64');
@@ -146,7 +167,7 @@ j=0;
 
 count = 0
 countp = 0
-while (time>=0 & time<=35)
+while (time>=0 & time<=500)
 
   j=j+1;
   n_r=fread(fid,1,'float64');
@@ -240,11 +261,13 @@ while (time>=0 & time<=35)
     %spherical wave number
     figure(1)
     subplot(1,1,1);
+    %    loglog53(n_r-1,spec_r,stitle,CK);hold on;
+        
+    loglog((0:n_r-1),spec_r','b', 'linewidth',1); hold on; 
     stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
+    title(stitle);
     
-    loglog53(n_r-1,spec_r,stitle,CK);hold off;
-    
-%    loglog((0:n_r-1),spec_r','b', 'linewidth',2); hold off; 
+    %        stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
 %    loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
     
     %spec_r=spec_r./fac3;
@@ -335,16 +358,19 @@ while (time>=0 & time<=35)
   subplot(2,1,1)
   x=0:n_r-1;
   %semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_f,'b');
-  semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_model,'c',x,spec_tot,'y');
-  title(sprintf('T_k (black)    D_k (red)    M_k(cyan)   dEk/dt(yellow)      time = %f ',time));
+%  semilogx(x,spec_transfer,'k',x,spec_diff,'r',x,spec_model,'c',x, ...
+%           spec_tot,'b');hold on;
+% title(sprintf('T_k (black)    D_k (red)    M_k(cyan)   dEk/dt(blue)      time = %f ',time));
 
+  semilogx(x,spec_transfer,'k');
+  title(sprintf('T_k (black) time = %f ',time));
   subplot(2,1,2)
   %semilogx(x,spec_transfer+spec_diff+spec_f,x,spec_tot,'o');
   flux=0*spec_transfer;
   for i=1:length(spec_transfer)
      flux(i)=-sum(spec_transfer(1:i)); 
   end      
-  semilogx(x,flux); 
+  semilogx(x,flux); hold off;
   grid;
   title(sprintf('E Flux'));
   end

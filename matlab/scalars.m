@@ -42,9 +42,9 @@ fid2=-1;
 %                  'low4/qg/qg256/bous2000/qg256hyper_all.scalars'],'r');
 %nx=256;f_k = 4; fcor=2000; bous = 2000;
 
-fid = endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/' ...
-                  'low4/qg/qg512/bous2000/correct_hyper/qg512_b2000_all.scalars'],'r');
-nx=512;f_k = 4; fcor=2000; bous = 2000;
+%fid = endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/' ...
+%                  'low4/qg/qg512/bous2000/correct_hyper/qg512_b2000_all.scalars'],'r');
+%nx=512;f_k = 4; fcor=2000; bous = 2000;
 
 %fid = endianopen(['/research/skurien/projects/pv/data_analysis/lowforc/' ...
 %                  'low4/qg/qg512/bous2000/qg512hyper_all.scalars'],'r');
@@ -78,12 +78,17 @@ nx=512;f_k = 4; fcor=2000; bous = 2000;
 %                  'low4/qg/qg64/sto_high_4/hyper_nu/test-bous-init/qg64test_all.scalars'],'r');
 %nx=64;f_k = 4; fcor=1000;
 
+fid = endianopen('~/research.old/projects/bottleneck/invsc256_maxh0000.0000.scalars','r');
+nx=256;f_k = 0; fcor=0;
+                                                                                
+fid = endianopen('~/dns/src/tests/temp_all.scalars','r')
+nx=32;f_k = 0; fcor=0;   
 
 nscalars=0;
 nscalars_e=0;
 time = 0.0;
 %while (1) 
-while (time < 80)
+while (time < 500)
 [ni,count]=fread(fid,1,'float64');
   if (count~=1) 
      if (fid2<0) 
@@ -151,7 +156,7 @@ disp(sprintf('mean ke_diss_f = %f', mean(ke_diss_f)))
 
 vor_z=ints(4,:);
 hel=ints(5,:);
-ke=ints(6,:);   %  ke 
+ke=ints(6,:);      %  ke 
 ens = ints(7,:);   %  enstrophy
 u3 = ints(12,:);   %  problem dependent.  for ns_xpencil.F90 = u^3
 % ints(8,:)   < u,div(tau)' >  (alpha model only)
@@ -312,10 +317,17 @@ title('maximum vorticity component')
 xlabel('time');
 print -djpeg -r72 vor.jpg
 
-
-
-
-
+%plot helicity, enstrophy and ratio H/W
+figure(10)
+subplot(3,1,1);
+plot(time,abs(hel),'r');
+ylabel('H');
+subplot(3,1,2);
+plot(time,ens,'b');
+ylabel('W');
+subplot(3,1,3);
+plot(time,abs(hel)./ens,'k');
+ylabel('H/W');
 
 
 
