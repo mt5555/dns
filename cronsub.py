@@ -14,7 +14,7 @@ import os, commands, getopt, sys, exceptions
 #
 #  add script to ~/cronlsf
 #  make sure script has a unique job name, with a line like:  #BSUB -J iso12
-#  create a file iso12.resub with a single line (ASCII) containing
+#  create a file iso12.job.resub with a single line (ASCII) containing
 #  the number of runs to submit.
 #
 #  The .resub file number will be decreased each time a job is submitted
@@ -43,7 +43,9 @@ if (len(sys.argv)== 2):
         submit=1
 
 
-user="taylorm"
+#user="taylorm"
+user="mataylo"
+
 
 #set below for value of path
 #path="cronlsf/"    #requires that we run from home directory
@@ -51,7 +53,8 @@ user="taylorm"
                    # a full path
 
 # are we on IRIX or OSF1?
-(status,out) = commands.getstatusoutput("hostname")
+cmdstat = "bjobs -u all"
+(status,out) = commands.getstatusoutput("/bin/hostname")
 if (status==0):
     if (out=="qbfe1"):
         bsub="bsub"
@@ -65,9 +68,10 @@ if (status==0):
     elif (out=="qscfe1"):
         bsub="bsub"
         path="cronqsc/"
-    elif (out=="bluemountain"):
-        bsub="bsub"
-        path="cronlsf/"
+    elif (out=="blogin2.sandia.gov"):
+        bsub="/apps/torque/bin/qsub"
+        cmdstat = "/apps/torque/bin/qstat"
+        path="crontbird/"
     else:	
         print 'Error getting hostname'
         sys.exit(1)
@@ -80,8 +84,8 @@ else:
 
 
 # get a list of all jobnames queued in LSF
-cmd = "bjobs -u all"
-(status,out) = commands.getstatusoutput(cmd)
+
+(status,out) = commands.getstatusoutput(cmdstat)
 if (status!=0) & (status!=255):
     print 'Error getting list of LSF jobs'
     sys.exit(1)
@@ -90,8 +94,8 @@ if (status!=0) & (status!=255):
 if (status==255) & (find(out,"No unfinished job found")>=0):
     # in this case, there were no jobs in the system,
     # so dont parse to find our running jobs
-    print "bjobs: que is empty?"
-    print "bjobs: ",out
+    print "jobs: que is empty?"
+    print "jobs: ",out
 else:    
     #parse out to get jobname_running
     jobname_running=[]
@@ -99,28 +103,38 @@ else:
     vout=split(out,"\n")
 
     if (len(vout)<2):
-        print 'Error parsing bjobs output: need at least 2 lines'
+        print 'Error parsing jobs output: need at least 2 lines'
         sys.exit(1)
 
     for line in vout:
         sline=split(line)
         if (jobc==-1) & (len(sline)>=7):
-            if (sline[6]=="JOB_NAME"):
+            if (sline[6]=="JOB_NAME"):     # LSF output
                 #find column where job starts
                 jobc=find(line,"JOB_NAME")
+            if (sline[2]=="Name"):         # PBS output 
+                #find column where job starts
+                jobc=find(line,"Name")
 
         if (jobc<0):
-            print 'Error parsing bjobs output for JOB_NAME'
+            print 'Error parsing bjobs output for job name'
             sys.exit(1)
 
-
-        if (len(sline)>=7) & (jobc>=0):
+        if (len(sline)>=3) & (jobc>=0):
             if (sline[1]==user):
-                # get everything in JOB_NAME column and beyond:
+                # LSF get everything in JOB_NAME column and beyond:
                 out=line[jobc:-1]
                 out=split(out," ")
                 if (len(out)==0):
-                    print 'Error parsing bjobs output for jobname'
+                    print 'Error parsing jobs output for jobname'
+                    sys.exit(1)
+                jobname_running.append(out[0]);
+            if (sline[2]==user):  
+                # PBS get everything in JOB_NAME column and beyond:
+                out=line[jobc:-1]
+                out=split(out," ")
+                if (len(out)==0):
+                    print 'Error parsing jobs output for jobname'
                     sys.exit(1)
                 jobname_running.append(out[0]);
 
@@ -161,8 +175,9 @@ for jobscript in vjobscript:
             if (len(out)>=3) & (out[0]=="#BSUB"):
                 if (out[1]=="-J"):
                     jobname=out[2]
-#                if (out[1]=="-n"):
-#                    jobcpus=out[2]
+            if (len(out)>=3) & (out[0]=="#PBS"):
+                if (out[1]=="-N"):
+                    jobname=out[2]
             line=fid.readline()
 
 
@@ -176,7 +191,7 @@ for jobscript in vjobscript:
         #if len(jobcpus)>0:
         #    jobcpus=" -n "+jobcpus+" "
 
-        print 'LSF name: ',jobname
+        print 'que name: ',jobname
 
         # check if it is in que
         i=jobname in jobname_running
