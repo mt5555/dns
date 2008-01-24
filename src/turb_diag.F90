@@ -262,7 +262,7 @@ end subroutine
 
 
 
-subroutine deltafiltered_velocity(Q,Qhat,qi,qr,ufilt,work1,work2)
+subroutine deltafiltered_velocity(Q,qi,qr,ufilt,work1,work2)
 use params
 use transpose
 
@@ -281,32 +281,20 @@ real*8 :: RR(3),II(3),xw2,xw
 integer i,j,k,im,jm,km,i1,i2,j1,j2,k1,k2,kshell,kxw
 
 
-#if 0
-! compute real/complex parts directly from z-pencil Fourier data stord in Qhat
-! this will allow us to skip the 3 FFTs below, *but* we have not yet written
-!  z_sincos_to_complex_field()
-do n=1,3
-   call z_sincos_to_complex_field(Qhat(1,1,1,n),qi(1,1,1,n),qr(1,1,1,n))  ! convert
-enddo
-#else
 ! take FFT, then convert to complex coefficients
 ! real part is stored in Q array
 ! complex part is stored in QI array
-do n = 1,3
-   write(message,*) 'converting gridspace to to complex modes, n=',n   
-   call print_message(message)
-   work1=Q(:,:,:,n)
-   call fft3d(work1,work2)    ! inplace FFT
-   call sincos_to_complex_field(work1,qi(1,1,1,n),qr(1,1,1,n))  ! convert
-enddo
-#endif
+
+n = 1  ! x component
+write(message,*) 'converting gridspace to to complex modes, n=',n   
+call print_message(message)
+uhat=Q(:,:,:,n)
+call fft3d(uhat,work)    ! inplace FFT
+
 
 
 ! loop over a set of shells:
 do kshell=1,g_nmin/3
-
-   work1=0
-   work2=0
 
    ! apply delta filter
    do k=nz1,nz2
@@ -323,38 +311,17 @@ do kshell=1,g_nmin/3
       xw2=i**2 + j**2 + k**2
       kxw=nint(sqrt(xw2))
       if (kshell == kxw) then
-         ! compute transverse quantitiy, store in
-         !work1(i,j,k) = real_part
-         !work2(i,j,k) = imaginary_part
+         ! keep this mode!
+      else
+         uhat(i,j,k)=0
       endif
    enddo
    enddo
    enddo
    
+   call ifft3d(uhat,work)
    
-   !
-   !  the adjustment above did not preserve the fact that
-   !  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
-   !  Reimpose this constraint:
-   !
-   do k=nz1,nz2
-      do j=ny1,ny2
-         do i=nx1,nx2
-            i1=i; i2 = i1 + imsign(i)
-            j1=j; j2 = j1 + imsign(j)
-            k1=k; k2 = k1 + imsign(k)
-            work1(i2,j2,k2)  =  work1(i1,j1,k1)
-            work2(i2,j2,k2)  = -work2(i1,j1,k1)
-         enddo
-      enddo
-   enddo
-   
-   write(message,*) 'converting back to gridspace'
-   call print_message(message)
-   call complex_to_sincos_field(ufilt,work1,work2)
-   call ifft3d(ufilt,work1)
-   
-   ! now compute PDFs of ufilt:
+   ! now compute PDFs of uhat:
 enddo
 
 end subroutine
