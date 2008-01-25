@@ -48,5 +48,5 @@ end
 times=sprintf('%.4f',time+10000);
 times=times(2:length(times));
 orient tall
-print('-dpsc',['ppdf',times,'.ps']); 
-%print('-djpeg',['ppdf',times,'.jpg']); 
+%print('-dpsc',['deltapdf',times,'.ps']); 
+print('-djpeg',['deltapdf',times,'.jpg']); 

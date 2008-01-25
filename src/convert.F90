@@ -646,8 +646,6 @@ do
 
          ! compute delta-filtered component, store in "vor()" array
          do k=1,kshell_max
-            write(message,'(a,i4)') 'computing PDF for delta filtered u for kshell=',k
-            call print_message(message)
 
             work2 = Q(:,:,:,n)
             call fft_filter_shell(work2,k)
@@ -656,8 +654,10 @@ do
             ! compute PDFs
             call global_max_abs(work2,mx)
             binsize = mx/100   ! should produce about 200 bins
-            call compute_pdf_scalar(work2,cpdf(k),binsize)
 
+            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
+            call print_message(message)
+            call compute_pdf_scalar(work2,cpdf(k),binsize)
          enddo
       enddo
       !
@@ -686,8 +686,9 @@ do
    endif
 enddo
 if (io_pe==my_pe) then
-   print *,'convert.F90 finished t=',time
-   print *,tstart,tstop
+   print *,'convert() finished'
+   print *,'tstart = ',tstart
+   print *,'tstop  = ',tstop
 endif
 
 100 continue
