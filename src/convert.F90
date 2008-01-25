@@ -40,6 +40,7 @@
 !                   compare UV2,UV in spectral space
 !
 !  -cout dfilter  (16)   read in U,V,W, output delta-filtered U
+!  -cout dpdf     (17)   read in U,V,W, output delta-filtered U pdfs
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -109,7 +110,7 @@ if (convert_opt == 4 .or. convert_opt==6) then
    ! special option to save storage, for processing very large data
    allocate(vor(1,1,1,1)) ! dummy variable -wont be used
    allocate(Q(nx,ny,nz,1)) ! only need 1 slot
-else if (convert_opt == 7 .or. convert_opt==8) then
+else if (convert_opt == 7 .or. convert_opt==8 ) then
    ! special option to save storage, for processing very large data
    allocate(vor(nx,ny,nz,1)) ! only first component used
    allocate(Q(nx,ny,nz,n_var))
@@ -598,7 +599,8 @@ do
 
          ! compute delta-filtered component, store in "vor()" array
          do k=1,g_nmin/3
-            call fft_filter_shell(Q(1,1,1,n),k) 
+            vor(:,:,:,n)=Q(:,:,:,n)
+            call fft_filter_shell(vor(1,1,1,n),k) 
             call ifft3d(vor(1,1,1,n),work1)
 
             write(message,'(a,i4)') 'outputting delta filtered u for kshell=',k
@@ -619,7 +621,7 @@ do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  output PDFs of delta-filtered u velocity component
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   if (convert_opt==17) then  ! -cout dfilter
+   if (convert_opt==17) then  ! -cout dpdf
       ! number of kshells:  
       kshell_max = g_nmin/3
 
@@ -643,13 +645,14 @@ do
 
          ! compute delta-filtered component, store in "vor()" array
          do k=1,kshell_max
-            call fft_filter_shell(Q(1,1,1,n),k)
-            call ifft3d(vor(1,1,1,n),work1)
+            work2 = Q(:,:,:,n)
+            call fft_filter_shell(work2,k)
+            call ifft3d(work2,work1)
 
             ! compute PDFs
-            call global_max_abs(vor(1,1,1,n),mx)
+            call global_max_abs(work2,mx)
             binsize = mx/100   ! should produce about 200 bins
-            call compute_pdf_scalar(vor(1,1,1,n),cpdf(k),binsize)
+            call compute_pdf_scalar(work2,cpdf(k),binsize)
 
          enddo
       enddo
