@@ -379,7 +379,7 @@ analysis_spec2d: analysis_spec2d.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 
 
 clean: 
-	rm -f temp* *.d *.o *.mod dns dnsb dnsp dnss dnsa \
+	rm -f temp* *.d *.o *.mod dns dnsb dnsslav dnsp dnss dnsa \
                             dnsgrid dnsghost dnsi dnsvor \
                             cdns dnsibm conv analysis_rms     \
                             analysis_isoave analysis analysis_sk \

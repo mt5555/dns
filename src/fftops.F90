@@ -1807,7 +1807,7 @@ end subroutine
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Filter out spherical wavenumbers greater than some spec_max 
-! (variable truncation of high wavenumbers)
+! (low-pass filter)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft_filter_trunc(p)
@@ -1834,9 +1834,36 @@ real*8 xfac
 end subroutine
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Filter out spherical wavenumbers less than some spec_max 
+!(high-pass filter) 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter_hpass(p) 
+use params 
+implicit none 
+real*8 p(nx,ny,nz)
+                                                                                
+integer i,j,k,im,jm,km                                                          
+real*8 xfac                                                                     
+                                                                                
+   do k=nz1,nz2                                                                 
+      km=abs(kmcord(k))                                                         
+      do j=ny1,ny2                                                              
+         jm=abs(jmcord(j))                                                      
+         do i=nx1,nx2                                                           
+            im=abs(imcord(i))                                                   
+            if ((im**2 + jm**2 + km**2 ) < spec_max**2) then                    
+               p(i,j,k)=0                                                       
+            endif                                                               
+         enddo                                                                  
+      enddo                                                                     
+   enddo                                                                        
+                                                                                
+end subroutine        
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! Filter out spherical wavenumbers greater than some spec_max 
-! (variable truncation of high wavenumbers)
+! Filter out spherical wavenumbers other than k_shell specified 
+! (band-filter)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine fft_filter_shell(p,kshell)

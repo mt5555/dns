@@ -41,6 +41,7 @@
 !
 !  -cout dfilter  (16)   read in U,V,W, output delta-filtered U
 !  -cout dpdf     (17)   read in U,V,W, output delta-filtered U pdfs
+!  -cout hpass (18) read data, fft, high-pass filter, fft back.
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -458,6 +459,10 @@ do
       call singlefile_io3(time,Q(1,1,1,2),basename,work1,work2,0,io_pe,.false.,header_user)
    endif
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Low-pass filter or truncation
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
    if (convert_opt==13) then  ! -cout trunc
       if (w_spec) then
          ! -so (spectral output) uses spec_max to specify coefficients to write
@@ -676,6 +681,52 @@ do
 
    endif
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! high-pass filter
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (convert_opt==18) then  ! -cout hpass
+      if (w_spec) then
+         ! -so (spectral output) uses spec_max to specify coefficients to write
+         ! -cout trunc uses spec_max as a truncation parameter, so we cant
+         ! use both of these together 
+         call abortdns("-cout hpass option cant be used with spectral output")
+      endif
+
+      ! read data, header type =1, or specified in input file
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,vor,work1,work2)
+      endif
+
+      ! compute the FFT
+      do n=1,3
+         write(message,'(a,i4)') 'w_spec fft3d: n=',n
+         call print_message(message)
+         call fft3d(Q(1,1,1,n),work1)
+      enddo
+
+      ! apply Filter
+      do n=1,3
+         ! call the truncation filter subroutine in fftops.F90
+         call fft_filter_hpass(Q(1,1,1,n)) 
+      enddo
+     
+      ! compute iFFT
+      do n=1,3
+         write(message,'(a,i4)') 'w_spec ifft3d: n=',n
+         call print_message(message)
+         call ifft3d(Q(1,1,1,n),work1)
+      enddo
+
+      ! give the output file a new name
+      write(message, '(i5)') 10000 + spec_max
+      basename=runname(1:len_trim(runname)) // "-hpass"//message(2:5)//"."
+
+      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
+      ! output headerless data:
+      ! call output_uvw(basename,time,Q,vor,work1,work2,2)
+   endif
 
 
 
