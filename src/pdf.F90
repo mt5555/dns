@@ -100,7 +100,6 @@ type(pdf_structure_function) ::  SCALARS(n_var-2)
 ! pdfs of a generic scalar
 ! convert program will use these to compute PDFs of any quantity of interest
 type(pdf_structure_function),allocatable ::  cpdf(:)
-integer, allocatable :: cpdf_binsize(:)
 integer :: number_of_cpdf = 0
 
 integer :: overflow=0    ! count the number of overflow messages
@@ -240,10 +239,11 @@ enddo
 endif
 
 if (number_of_cpdf > 0) then
-   allocate(cpdf_binsize(number_of_cpdf))
    allocate(cpdf(number_of_cpdf))
    xtmp = 0 ! binsize will be set later
-   call init_pdf(cpdf(i),100, xtmp, 1)
+   do i=1,number_of_cpdf
+      call init_pdf(cpdf(i),100, xtmp, 1)
+   enddo
 endif
 
 
@@ -1062,10 +1062,16 @@ if (structf_init==0) then
 endif
 
 if (present(binsize)) then
+   print *,'here a',pdfdata%ncalls
    if (pdfdata%ncalls/=0) then
       call abortdns("compute_pdf_scalar(): ERROR:  cant change PDF binsize unless ncalls=0")
    endif
    pdfdata%pdf_bin_size=binsize
+endif
+
+print *,'done'
+if (pdfdata%pdf_bin_size == 0) then
+   call abortdns("compute_pdf_scalar(): ERROR:  binsize not initialized")
 endif
 
 
@@ -1074,6 +1080,7 @@ do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
          ! compute structure functions for U,V,W 
+         print *,i,j,k
          del=ux(i,j,k)
          del = del/pdfdata%pdf_bin_size
          bin = nint(del)

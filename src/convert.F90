@@ -83,8 +83,8 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=2.5
-tstop=2.5
+tstart=1.0
+tstop=1.0
 tinc=0.1
 
 
@@ -645,6 +645,9 @@ do
 
          ! compute delta-filtered component, store in "vor()" array
          do k=1,kshell_max
+            write(message,'(a,i4)') 'computing PDF for delta filtered u for kshell=',k
+            call print_message(message)
+
             work2 = Q(:,:,:,n)
             call fft_filter_shell(work2,k)
             call ifft3d(work2,work1)
