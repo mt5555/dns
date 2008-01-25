@@ -481,13 +481,16 @@ do i=nx1,nx2
 
 #ifdef BALU 
    xi = 0
-   if (xcord(i) <= 2.1/g_nx) xi=1
-   if (ycord(j) <= 2.1/g_ny) xi=1
+   if (zcord(k) <= 16.1/g_nz) xi=1
 
    ! overwrite Q with the result
-   Q(i,j,k,1) = uu - xi*Q(i,j,k,1)/BALU   + cos(pi2*ycord(j))
+   Q(i,j,k,1) = uu - xi*Q(i,j,k,1)/BALU   
    Q(i,j,k,2) = vv - xi*Q(i,j,k,2)/BALU
    Q(i,j,k,3) = ww - xi*Q(i,j,k,3)/BALU
+
+   if (zcord(k) <= .1/g_nz) then
+      Q(i,j,k,1) = Q(i,j,k,1) + 1
+   endif
 #else
    ! overwrite Q with the result
    Q(i,j,k,1) = uu
