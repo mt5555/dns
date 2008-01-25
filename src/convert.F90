@@ -630,6 +630,7 @@ do
       compute_uvw_pdfs = .false.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
+      call init_pdf_module()
 
       ! read data, header type =1, or specified in input file
       time2=time

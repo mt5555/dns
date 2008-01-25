@@ -145,6 +145,11 @@ implicit none
 integer idel,i,j
 integer :: nmax,max_delta
 real*8  :: xtmp
+character(len=80) message
+
+if (structf_init==1) return
+structf_init =1
+
 ! we can compute them up to g_nx/2, but no reason to go that far.
 nmax=max(g_nx/3,g_ny/3,g_nz/3)
 
@@ -239,6 +244,8 @@ enddo
 endif
 
 if (number_of_cpdf > 0) then
+   write(message,'(a,i4)') 'allocationg cpdfs: ',number_of_cpdf
+   call print_message(message)
    allocate(cpdf(number_of_cpdf))
    xtmp = 0 ! binsize will be set later
    do i=1,number_of_cpdf
@@ -846,7 +853,6 @@ integer :: bin,idel,i,j,k,i2,nsf,ndelta
 
 
 if (structf_init==0) then
-   structf_init=1
    call init_pdf_module()
 endif
 
@@ -975,7 +981,6 @@ integer :: bin1,bin2,bin,idel,i,j,k,i2,nsf,ndelta
 
 
 if (structf_init==0) then
-   structf_init=1
    call init_pdf_module()
 endif
 
@@ -1057,19 +1062,16 @@ real*8  :: del
 integer :: bin,idel,i,j,k,i2,nsf
 
 if (structf_init==0) then
-   structf_init=1
    call init_pdf_module()
 endif
 
 if (present(binsize)) then
-   print *,'here a',pdfdata%ncalls
    if (pdfdata%ncalls/=0) then
       call abortdns("compute_pdf_scalar(): ERROR:  cant change PDF binsize unless ncalls=0")
    endif
    pdfdata%pdf_bin_size=binsize
 endif
 
-print *,'done'
 if (pdfdata%pdf_bin_size == 0) then
    call abortdns("compute_pdf_scalar(): ERROR:  binsize not initialized")
 endif
@@ -1080,7 +1082,6 @@ do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
          ! compute structure functions for U,V,W 
-         print *,i,j,k
          del=ux(i,j,k)
          del = del/pdfdata%pdf_bin_size
          bin = nint(del)
