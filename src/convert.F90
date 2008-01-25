@@ -39,6 +39,8 @@
 !  -cout nlin  (15) read in U,V,UV.  recompute UV (on a higher res grid)
 !                   compare UV2,UV in spectral space
 !
+!  -cout dfilter  (16)   read in U,V,W, output delta-filtered U
+!
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
 !    tstart=4.000000000 edit below
@@ -59,22 +61,23 @@ use params
 use mpi
 use fft_interface
 use spectrum
+use pdf
 use transpose , only : input1
 implicit none
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: vor(:,:,:,:)
 real*8,save  :: work1(nx,ny,nz)
 real*8,save  :: work2(nx,ny,nz)
-character(len=80) message,sdata,tname
+character(len=80) message,sdata,tname,sdata2
 character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
 real*8 :: schmidt_in,mn,mx,a0,a1
-real*8 :: xwerr(1000),xw
-CPOINTER :: null
-integer :: type_in,ntot,nzero,nerr
+real*8 :: xwerr(1000),xw,binsize
+CPOINTER :: null,fid
+integer :: type_in,ntot,nzero,nerr, kshell_max
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
@@ -575,6 +578,98 @@ do
       print *,'number of non-zero modes:      ',ntot-nzero
       print *,'max error over non-zero modes: ',mx
    endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  output delta-filtered u velocity component
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   if (convert_opt==16) then  ! -cout dfilter
+      ! read data, header type =1, or specified in input file
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,vor,work1,work2)
+      endif
+
+      do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
+         write(message,'(a,i4)') 'computing fft3d of input: n=',n
+         call print_message(message)
+         call fft3d(Q(1,1,1,n),work1)
+
+         ! compute delta-filtered component, store in "vor()" array
+         do k=1,g_nmin/3
+            call fft_filter_shell(Q(1,1,1,n),k) 
+            call ifft3d(vor(1,1,1,n),work1)
+
+            write(message,'(a,i4)') 'outputting delta filtered u for kshell=',k
+            call print_message(message)
+            
+            write(sdata,'(f10.4)') 10000.0000 + time
+            write(sdata2,'(i5)') 10000 + k
+            basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+                 // sdata(2:10) // ".k" // sdata2(2:5)
+            ! call singlefile_io3(time,vor(1,1,1,n),basename,work1,work2,0,io_pe,.false.,header_user)
+            call singlefile_io3(time,vor(1,1,1,n),basename,work1,work2,0,io_pe,.false.,2)
+
+         enddo
+      enddo
+   endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  output PDFs of delta-filtered u velocity component
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   if (convert_opt==17) then  ! -cout dfilter
+      ! number of kshells:  
+      kshell_max = g_nmin/3
+
+      ! tell PDF module what we will be computing: 
+      number_of_cpdf = kshell_max  
+      compute_uvw_pdfs = .false.    ! velocity increment PDFs
+      compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
+      compute_passive_pdfs = .false.  ! passive scalar PDFs
+
+      ! read data, header type =1, or specified in input file
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,vor,work1,work2)
+      endif
+
+      do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
+         write(message,'(a,i4)') 'computing fft3d of input: n=',n
+         call print_message(message)
+         call fft3d(Q(1,1,1,n),work1)
+
+         ! compute delta-filtered component, store in "vor()" array
+         do k=1,kshell_max
+            call fft_filter_shell(Q(1,1,1,n),k)
+            call ifft3d(vor(1,1,1,n),work1)
+
+            ! compute PDFs
+            call global_max_abs(vor(1,1,1,n),mx)
+            binsize = mx/100   ! should produce about 200 bins
+            call compute_pdf_scalar(vor(1,1,1,n),cpdf(k),binsize)
+
+         enddo
+      enddo
+      !
+      ! now output the PDF data
+      !
+      write(sdata,'(f10.4)') 10000.0000 + time
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".cpdf"
+      print *,fname
+      call copen(fname,"w",fid,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+         call abortdns(message)
+      endif
+      call output_pdf(time,NULL,NULL,NULL,fid,NULL)
+      if (my_pe==io_pe) call cclose(fid,ierr)
+
+   endif
+
+
 
 
    if (tstart>=0) then
@@ -1291,3 +1386,7 @@ call z_ifft3d(Qhat(1,1,1,3),Q(1,1,1,3),work)
 
 
 end subroutine
+
+
+
+

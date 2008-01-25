@@ -1833,6 +1833,36 @@ real*8 xfac
 
 end subroutine
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Filter out spherical wavenumbers greater than some spec_max 
+! (variable truncation of high wavenumbers)
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter_shell(p,kshell)
+use params
+implicit none
+real*8 p(nx,ny,nz)
+integer kshell
+
+integer i,j,k,im,jm,km,ks
+real*8 xw2
+
+   do k=nz1,nz2
+      km=(kmcord(k))
+      do j=ny1,ny2
+         jm=(jmcord(j))
+         do i=nx1,nx2
+            im=(imcord(i))
+            xw2 =  (im**2 + jm**2 + (km/Lz)**2 )
+            ks = nint(sqrt(xw2))
+            if (ks /= kshell) p(i,j,k)=0
+         enddo
+      enddo
+   enddo
+
+end subroutine
+
 
 
 

@@ -53,7 +53,7 @@ integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec
 logical :: read_uvw
-CPOINTER :: fid,fid1,fid2,fidcore
+CPOINTER :: fid,fid1,fid2,fidcore,fid3
 
 
 call init_mpi
@@ -215,7 +215,7 @@ do
       endif
       call compute_all_pdfs(Q,q1)
 
-      call output_pdf(time,fid,fid1,fid2,fidcore)
+      call output_pdf(time,fid,fid1,fid2,fid3,fidcore)
       if (my_pe==io_pe) call cclose(fid,ierr)
       if (my_pe==io_pe) call cclose(fid2,ierr)
       if (my_pe==io_pe) call cclose(fidcore,ierr)

@@ -21,7 +21,7 @@ real*8 :: pints_e(npints_e,n_var)
 real*8 :: x
 integer i,j,k,n,ierr,csig
 character(len=80) :: message
-CPOINTER fid,fidj,fidS
+CPOINTER fid,fidj,fidS,fidC
 
 
 
@@ -173,7 +173,7 @@ if (diag_pdfs==1) then
       endif
 
    endif
-   call output_pdf(time,fid,fidj,fidS)
+   call output_pdf(time,fid,fidj,fidS,fidC)
    if (my_pe==io_pe) call cclose(fid,ierr)
    if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
    if (compute_passive_pdfs .and. my_pe==io_pe) call cclose(fidS,ierr)

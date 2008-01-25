@@ -29,7 +29,7 @@ real*8 :: one=1
 integer i,j,k,n,ierr,csig
 integer :: n1,n1d,n2,n2d,n3,n3d
 character(len=280) :: message
-CPOINTER fid,fidj,fidS,fidcore
+CPOINTER fid,fidj,fidS,fidcore,fidC
 
 
 
@@ -239,7 +239,7 @@ if (diag_pdfs==1) then
       endif
 
    endif
-   call output_pdf(time,fid,fidj,fidS,fidcore)
+   call output_pdf(time,fid,fidj,fidS,fidC,fidcore)
    if (my_pe==io_pe) call cclose(fid,ierr)
    if (my_pe==io_pe) call cclose(fidcore,ierr)
    if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
@@ -249,82 +249,9 @@ endif
 ! time averaged dissapation and forcing:
 !call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
 
-#if 0
-if (diag_pdfs==1) then
-   ! compute delta-filtered transverse velocity
-   call detalfiltered_velocity(Qhat,q1,q2,q3,work1,work2)
-
-endif
-#endif
-
 
 end subroutine
 
-
-
-subroutine deltafiltered_velocity(Q,qi,qr,ufilt,work1,work2)
-use params
-use transpose
-
-!input
-integer :: stype
-real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: qi(nx,ny,nz,n_var)       
-real*8 :: qr(nx,ny,nz,n_var)       
-real*8 :: ufilt(nx,ny,nz)
-real*8 :: work1(nx,ny,nz)
-real*8 :: work2(nx,ny,nz)
-
-! local
-real*8 :: RR(3),II(3),xw2,xw
-integer i,j,k,im,jm,km,i1,i2,j1,j2,k1,k2,kshell,kxw
-
-
-! take FFT, then convert to complex coefficients
-! real part is stored in Q array
-! complex part is stored in QI array
-
-n = 1  ! x component
-write(message,*) 'converting gridspace to to complex modes, n=',n   
-call print_message(message)
-uhat=Q(:,:,:,n)
-call fft3d(uhat,work)    ! inplace FFT
-
-
-
-! loop over a set of shells:
-do kshell=1,g_nmin/3
-
-   ! apply delta filter
-   do k=nz1,nz2
-   do j=ny1,ny2
-   do i=nx1,nx2
-      ! note: wave number is (im,jm,km)
-      ! index into arrays is (i,j,k)
-      im =imcord_exp(iii)
-      jm =jmcord_exp(jjj)
-      km = kmcord_exp(kkk)
-      RR = qr(i,j,k,1:3)
-      II = qi(i,j,k,1:3)
-      
-      xw2=i**2 + j**2 + k**2
-      kxw=nint(sqrt(xw2))
-      if (kshell == kxw) then
-         ! keep this mode!
-      else
-         uhat(i,j,k)=0
-      endif
-   enddo
-   enddo
-   enddo
-   
-   call ifft3d(uhat,work)
-   
-   ! now compute PDFs of uhat:
-enddo
-
-end subroutine
 
 
 #if 0

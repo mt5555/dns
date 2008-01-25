@@ -536,6 +536,10 @@ if (my_pe==io_pe) then
             convert_opt=14 
          else if (carg(1:4)=="nlin") then
             convert_opt=15 
+         else if (carg(1:7)=="dfilter") then
+            convert_opt=16 
+         else if (carg(1:4)=="dpdf") then
+            convert_opt=17 
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abortdns("-cout unrecognized option")

@@ -97,6 +97,12 @@ type(pdf_structure_function) ::  epsilon
 ! which is never more than n_var-2
 type(pdf_structure_function) ::  SCALARS(n_var-2)  
 
+! pdfs of a generic scalar
+! convert program will use these to compute PDFs of any quantity of interest
+type(pdf_structure_function),allocatable ::  cpdf(:)
+integer, allocatable :: cpdf_binsize(:)
+integer :: number_of_cpdf = 0
+
 integer :: overflow=0    ! count the number of overflow messages
 integer :: joverflow=0    ! count the number of overflow messages
 real*8  :: one_third = (1d0/3d0)
@@ -139,6 +145,7 @@ implicit none
 
 integer idel,i,j
 integer :: nmax,max_delta
+real*8  :: xtmp
 ! we can compute them up to g_nx/2, but no reason to go that far.
 nmax=max(g_nx/3,g_ny/3,g_nz/3)
 
@@ -216,13 +223,14 @@ do idel=1,delta_num_max
    endif
 enddo
 
-
+if (compute_uvw_pdfs) then
 do i=1,NUM_SF
    call init_pdf(SF(i,1),100,uscale,numx)
    call init_pdf(SF(i,2),100,uscale,numy)
    call init_pdf(SF(i,3),100,uscale,numz)
 enddo
 call init_pdf(epsilon,100,epsscale,1)
+endif
 
 if (npassive==0) compute_passive_pdfs=.false.
 if (compute_passive_pdfs) then
@@ -230,6 +238,14 @@ do i=1,npassive
    call init_pdf(SCALARS(i),100,pscale,1)
 enddo
 endif
+
+if (number_of_cpdf > 0) then
+   allocate(cpdf_binsize(number_of_cpdf))
+   allocate(cpdf(number_of_cpdf))
+   xtmp = 0 ! binsize will be set later
+   call init_pdf(cpdf(i),100, xtmp, 1)
+endif
+
 
 
 if (compute_uvw_jpdfs) then
@@ -239,6 +255,7 @@ do i=1,NUM_JPDF
    call init_jpdf(jpdf_v(i,3),100,.1d0, min(numy,numz))
 enddo
 endif
+
 
 core_num=0
 end subroutine
@@ -421,13 +438,14 @@ end subroutine
 
 
 
-subroutine output_pdf(time,fid,fidj,fidS,fidcore)
+subroutine output_pdf(time,fid,fidj,fidS,fidC,fidcore)
 use params
 implicit none
 real*8 time
 CPOINTER fid   ! velcoity PDFs
 CPOINTER fidj  ! joint velocity PDFs
 CPOINTER fidS  ! passive scalar PDFs
+CPOINTER fidC  ! cpdf scalar PDFs
 CPOINTER fidcore  ! x-direction core data
 
 integer i,j,ierr,ndelta,numm,n
@@ -456,18 +474,25 @@ if (core_num>0) then
    core_num=0
 endif
 
-
+if (compute_uvw_pdfs) then
 do j=1,3
 do i=1,NUM_SF
    call mpisum_pdf(SF(i,j))  
 enddo
 enddo
 call mpisum_pdf(epsilon)
+endif
 
 if (compute_passive_pdfs) then
 do i=1,npassive
    call mpisum_pdf(SCALARS(i))
 enddo	
+endif
+
+if (number_of_cpdf>0) then
+   do i=1,number_of_cpdf
+      call mpisum_pdf(cpdf(i))
+   enddo
 endif
 
 if (compute_uvw_jpdfs) then
@@ -481,17 +506,19 @@ endif
 
 
 if (my_pe==io_pe) then
-   call cwrite8(fid,time,1)
-   ! number of structure functions
-   x=NUM_SF ; call cwrite8(fid,x,1)
-   do i=1,NUM_SF
-   do j=1,3
-      call normalize_and_write_pdf(fid,SF(i,j),SF(i,j)%nbin)   
-   enddo
-   enddo
-   ! number of plain pdf's
-   x=1 ; call cwrite8(fid,x,1)
-   call normalize_and_write_pdf(fid,epsilon,epsilon%nbin)   
+   if (compute_uvw_pdfs) then
+      call cwrite8(fid,time,1)
+      ! number of structure functions
+      x=NUM_SF ; call cwrite8(fid,x,1)
+      do i=1,NUM_SF
+         do j=1,3
+            call normalize_and_write_pdf(fid,SF(i,j),SF(i,j)%nbin)   
+         enddo
+      enddo
+      ! number of plain pdf's
+      x=1 ; call cwrite8(fid,x,1)
+      call normalize_and_write_pdf(fid,epsilon,epsilon%nbin)   
+   endif
 
    if (compute_passive_pdfs) then
       call cwrite8(fidS,time,1)
@@ -501,6 +528,16 @@ if (my_pe==io_pe) then
          call normalize_and_write_pdf(fidS,SCALARS(i),SCALARS(i)%nbin)   
       enddo	
    endif
+
+   if (number_of_cpdf>0) then
+      call cwrite8(fidC,time,1)
+      ! number of structure functions
+      x=number_of_cpdf ; call cwrite8(fidC,x,1)
+      do i=1,number_of_cpdf
+         call normalize_and_write_pdf(fidC,cpdf(i),cpdf(i)%nbin)   
+      enddo	
+   endif
+   
 
    if (compute_uvw_jpdfs) then
       call cwrite8(fidj,time,1)
@@ -515,16 +552,17 @@ if (my_pe==io_pe) then
 endif
 
 
-
-do i=1,NUM_SF
-do j=1,3
-   ! reset PDF's
-   SF(i,j)%ncalls=0
-   SF(i,j)%pdf=0
-enddo
-enddo
-epsilon%ncalls=0
-epsilon%pdf=0
+if (compute_uvw_pdfs) then
+   do i=1,NUM_SF
+      do j=1,3
+         ! reset PDF's
+         SF(i,j)%ncalls=0
+         SF(i,j)%pdf=0
+      enddo
+   enddo
+   epsilon%ncalls=0
+   epsilon%pdf=0
+endif
 
 if (compute_passive_pdfs) then
    do i=1,npassive
@@ -532,6 +570,16 @@ if (compute_passive_pdfs) then
       SCALARS(i)%pdf=0
    enddo	
 endif
+
+if (number_of_cpdf>0) then
+   do i=1,number_of_cpdf
+      cpdf(i)%ncalls=0
+      cpdf(i)%pdf=0
+   enddo
+endif
+
+
+
 
 if (compute_uvw_jpdfs) then
 do i=1,NUM_JPDF
@@ -993,7 +1041,7 @@ end subroutine
 
 
 
-subroutine compute_pdf_scalar(ux,pdfdata)
+subroutine compute_pdf_scalar(ux,pdfdata,binsize)
 !
 ! compute a pdf of a scalar, 1 point corrolation
 ! 
@@ -1002,6 +1050,7 @@ use params
 implicit none
 real*8 :: ux(nx,ny,nz)
 type(pdf_structure_function) ::  pdfdata
+real*8,optional :: binsize
 
 ! local variables
 real*8  :: del
@@ -1010,6 +1059,13 @@ integer :: bin,idel,i,j,k,i2,nsf
 if (structf_init==0) then
    structf_init=1
    call init_pdf_module()
+endif
+
+if (present(binsize)) then
+   if (pdfdata%ncalls/=0) then
+      call abortdns("compute_pdf_scalar(): ERROR:  cant change PDF binsize unless ncalls=0")
+   endif
+   pdfdata%pdf_bin_size=binsize
 endif
 
 
@@ -1043,6 +1099,9 @@ end subroutine
 
 subroutine compute_all_pdfs(Q,gradu)
 !
+!  Compute the velocity increment PDFs 
+!  compute the epsilon PDF
+!  compute the passive scalar PDFs
 !
 use params
 use fft_interface
@@ -1060,6 +1119,7 @@ real*8 :: dummy(1),ensave
 real*8 :: tmx1,tmx2
 
 
+if (compute_uvw_pdfs) then
 
 call wallclock(tmx1)
 call print_message("computing x direction pdfs...")
@@ -1123,6 +1183,10 @@ enddo
 gradu(:,:,:,1)=mu*gradu(:,:,:,1); 
 gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
 call compute_pdf_scalar(gradu,epsilon)
+endif
+
+
+
 
 if (compute_passive_pdfs) then
    call print_message("computing passive scalar pdfs...")
