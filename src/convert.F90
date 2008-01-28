@@ -689,12 +689,12 @@ do
       endif
 
       write(sdata,'(f10.4)') 10000.0000 + time
-      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".cpdf"
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".sf"
       call print_message(fname)
       if (my_pe==io_pe) then
          call copen(fname,"w",fidu,ierr)
          if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .pdf file errno=",ierr
+            write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
             call abortdns(message)
          endif
       endif
