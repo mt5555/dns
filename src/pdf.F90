@@ -90,7 +90,7 @@ end type
 ! are raised to the 1/4 power before binning up the PDF.  
 !
 !integer,parameter :: NUM_SF=8
-integer,parameter :: NUM_SF=3   ! just compute first 3 pdfs
+integer,parameter :: NUM_SF=3   ! just compute first 3 pdfs * 3 directions
 type(pdf_structure_function) ::  SF(NUM_SF,3)
 type(pdf_structure_function) ::  epsilon
 ! number of scalar structure functions:  params.F90::npassive 
@@ -1126,11 +1126,11 @@ real*8 :: vor(3),uij,uji
 real*8 :: dummy(1),ensave
 real*8 :: tmx1,tmx2
 
+call wallclock(tmx1)
 
 if (compute_uvw_pdfs) then
 
-call wallclock(tmx1)
-call print_message("computing x direction pdfs...")
+call print_message("computing x direction increment pdfs...")
 do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
    call compute_cores(gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d,core_data(1,n),n)
@@ -1141,7 +1141,7 @@ if (compute_uvw_jpdfs) then
 endif
 
 
-call print_message("computing y direction pdfs...")
+call print_message("computing y direction increment pdfs...")
 do n=1,3
    call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
@@ -1151,7 +1151,7 @@ if (compute_uvw_jpdfs) then
 endif
 
 
-call print_message("computing z direction pdfs...")
+call print_message("computing z direction increment pdfs...")
 do n=1,3
    call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
 enddo
@@ -1191,6 +1191,7 @@ enddo
 gradu(:,:,:,1)=mu*gradu(:,:,:,1); 
 gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
 call compute_pdf_scalar(gradu,epsilon)
+call print_message("done with increment pdfs.")
 endif
 
 
@@ -1210,8 +1211,9 @@ if (compute_passive_pdfs) then
          call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,i),i)
       enddo
    enddo
+   call print_message("done with passive scalar pdfs.")
 endif
-call print_message("done with pdfs.")
+
 
 
 

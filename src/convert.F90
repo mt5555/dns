@@ -635,7 +635,7 @@ do
       compute_uvw_pdfs = .true.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
-      call init_pdf_module()
+
 
       ! read data, header type =1, or specified in input file
       time2=time
@@ -643,6 +643,12 @@ do
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
+
+      call global_max_abs(Q(1,1,1,1),mx)  ! max of abs(U) component
+      uscale = mx/100     ! binsize for velocity increment PDFs
+      epsscale = uscale   ! binsize for epsilon
+      call init_pdf_module()
+
 
       call print_message("computing velocity increment PDFs")
       call compute_all_pdfs(Q,vor)
