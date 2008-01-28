@@ -10,9 +10,9 @@
 clear all;
 
 
-dp=10;    % which seperation length index to plot
+dp=2;    % which seperation length index to plot
 
-fid=fopen('/home/mt/codes/dns/src/temp0001.0000.cpdf','r','l');
+fid=fopen('/home/mt/codes/dns/src/temp0001.0000.sf','r','l');
 
 components=['u','v','w'];
 var=['x','y','z'];
@@ -28,8 +28,7 @@ var=['x','y','z'];
       [n_del1,delta1,bin_size1,n_bin1,n_call1,bins1,pdf1]=read1pdf(fid);
       % ignore the i<>j PDFs
       if (i==j)
-        figure(j)
-        subplot(4,1,1)
+        subplot(3,1,i)
         semilogy(bins1,pdf1(:,dp))
         title(sprintf('time=%f',time1));
         ylabel(['\Delta',sprintf('_{  %i%s} %s',delta1(dp),var(i),components(j))]);

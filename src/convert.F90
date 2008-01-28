@@ -78,7 +78,7 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
 real*8 :: schmidt_in,mn,mx,a0,a1
 real*8 :: xwerr(1000),xw,binsize
-CPOINTER :: null,fidu,fid
+CPOINTER :: null=0,fidu,fid
 integer :: type_in,ntot,nzero,nerr, kshell_max
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -635,7 +635,6 @@ do
       compute_uvw_pdfs = .true.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
-
 
       ! read data, header type =1, or specified in input file
       time2=time

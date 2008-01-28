@@ -23,7 +23,7 @@ real*8 :: pscale=.0025           ! bin size for scalar increment
 
 real*8 :: core_data(g_nx,n_var)      ! used to take x direction cores thru data
 real*8 :: core_ddata(g_nx,3,n_var)   ! used to take x direction cores of derivativs
-integer :: core_num                  ! number of cores taken
+integer :: core_num = 0              ! number of cores taken
 
 integer           :: structf_init=0
 integer,parameter :: delta_num_max=100
@@ -463,7 +463,8 @@ if (structf_init==0) then
    call abortdns("Error: output_pdf() called, but structf module not initialized")
 endif
 
-if (core_num>0) then
+
+if (core_num>0 .and. fidcore/=0) then
    ! output cores:
    if (my_pe==io_pe) then
       x=g_nx;  call cwrite8(fidcore,x,1)
