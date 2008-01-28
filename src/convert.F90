@@ -78,7 +78,7 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy
 real*8 :: schmidt_in,mn,mx,a0,a1
 real*8 :: xwerr(1000),xw,binsize
-CPOINTER :: null,fid
+CPOINTER :: null,fidu,fid
 integer :: type_in,ntot,nzero,nerr, kshell_max
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
@@ -632,7 +632,7 @@ do
 
       ! tell PDF module what we will be computing: 
       number_of_cpdf = kshell_max  
-      compute_uvw_pdfs = .false.    ! velocity increment PDFs
+      compute_uvw_pdfs = .true.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
       call init_pdf_module()
@@ -643,6 +643,9 @@ do
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
+
+      call print_message("computing velocity increment PDFs")
+      call compute_all_pdfs(Q,vor)
 
       do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
          write(message,'(a,i4)') 'computing fft3d of input: n=',n
@@ -670,14 +673,29 @@ do
       !
       write(sdata,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".cpdf"
-      print *,fname
-      call copen(fname,"w",fid,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
-         call abortdns(message)
+      call print_message(fname)
+      if (my_pe==io_pe) then
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+            call abortdns(message)
+         endif
       endif
-      call output_pdf(time,NULL,NULL,NULL,fid,NULL)
+
+      write(sdata,'(f10.4)') 10000.0000 + time
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".cpdf"
+      call print_message(fname)
+      if (my_pe==io_pe) then
+         call copen(fname,"w",fidu,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+            call abortdns(message)
+         endif
+      endif
+      call output_pdf(time,fidu,NULL,NULL,fid,NULL)
+
       if (my_pe==io_pe) call cclose(fid,ierr)
+      if (my_pe==io_pe) call cclose(fidu,ierr)
 
    endif
 
