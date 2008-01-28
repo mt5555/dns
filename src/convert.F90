@@ -677,7 +677,7 @@ do
       if (my_pe==io_pe) then
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+            write(message,'(a,i5)') "output_model(): Error opening .cpdf file errno=",ierr
             call abortdns(message)
          endif
       endif
@@ -688,7 +688,7 @@ do
       if (my_pe==io_pe) then
          call copen(fname,"w",fidu,ierr)
          if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .spdf file errno=",ierr
+            write(message,'(a,i5)') "output_model(): Error opening .pdf file errno=",ierr
             call abortdns(message)
          endif
       endif

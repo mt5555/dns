@@ -540,7 +540,7 @@ if (my_pe==io_pe) then
             convert_opt=16 
          else if (carg(1:4)=="dpdf") then
             convert_opt=17 
-	 else if (carg(1:4)=='hpass") then
+	 else if (carg(1:4)=="hpass") then
 	    convert_opt=18   
          else
             print *,'cout option: ',carg(1:len_trim(carg))
