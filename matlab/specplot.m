@@ -97,8 +97,8 @@ mu = 1;
 %namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
 
 
-%name = 'sc1024A';
-%namedir = '/netscratch/skurien/dns_data/sc1024a/';
+name = 'sc1024A';
+namedir = '/netscratch/skurien/dns_data/sc1024a/';
 
 %name = 'dnsslav_hmin0000.0000';
 %namedir = '~/research.old/projects/bottleneck/';

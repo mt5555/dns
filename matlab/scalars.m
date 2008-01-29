@@ -80,9 +80,13 @@ fid2=-1;
 
 fid = endianopen('~/research.old/projects/bottleneck/invsc256_maxh0000.0000.scalars','r');
 nx=256;f_k = 0; fcor=0;
-                                                                                
-fid = endianopen('~/dns/src/tests/temp_all.scalars','r')
-nx=32;f_k = 0; fcor=0;   
+
+fid = endianopen('/netscratch/skurien/dns_data/sc1024A/sc1024A.scalars','r')
+nx=1024; f_k=0;fcor=0
+
+
+%fid = endianopen('/netscratch/skurien/dns_data/sc2048A/sc2048A.scalars','r')
+%nx=2048; f_k=0;fcor=0
 
 nscalars=0;
 nscalars_e=0;
@@ -170,9 +174,10 @@ maxUcfl=maxs(4,:);     % max used for CFL, at time_after
 maxvor=maxs(5,:);
 time_after=maxs(6,:);
 time=maxs(7,:);
-pe = ints(15,:);
+if (nints >=15)
+pe = ints(15,:)
 pe_diss = ints(16,:);
-
+end
 
 
 % $$$ % time  ke  
@@ -200,7 +205,7 @@ for i=2:l
     j=j+1;
     time_2(j) = .5*(time(i)+time(i-1));
     ke_diss_tot(j)=(ke(i)-ke(i-1))./(time(i)-time(i-1));
-    pe_diss_tot(j)=(pe(i)-pe(i-1))./(time(i)-time(i-1));
+    %pe_diss_tot(j)=(pe(i)-pe(i-1))./(time(i)-time(i-1));
     Ea_diss_tot(j)=(Ea(i)-Ea(i-1))./(time(i)-time(i-1));
     h_diss_tot(j)=(hel(i)-hel(i-1))./(time(i)-time(i-1));
     ke_diss_tot2(j)=.5*(ke_diss_d(i)+ke_diss_d(i-1)) + ...
@@ -219,7 +224,7 @@ lambda=sqrt( mu*(2*Euse/3) ./ (epsilon/15)  );
 eta = (mu^3 ./ abs(epsilon)).^(.25);
 
 epsilon_ke=-ke_diss_d;
-epsilon_pe=-pe_diss;
+%epsilon_pe=-pe_diss;
 lambda_ke=sqrt( mu*(2*ke/3) ./ (epsilon_ke/15)  );
 
 if (mu>0)
@@ -265,8 +270,8 @@ end
 figure(5)
 hold on
 plot(time,ke,'k')
-plot(time,pe,'r')
-plot(time,ke+pe,'b')
+%plot(time,pe,'r')
+%plot(time,ke+pe,'b')
 %plot(time_2,ke_diss_tot,'r')
 %plot(time,hel,'g')
 title('KE: black, PE: red, Etot: blue');
@@ -357,11 +362,11 @@ ke = ke(ceil(length(ke)/2):length(ke));
 ke = sum(ke)/length(ke);
 disp(sprintf('ke (average over last half of data) = %f ',ke));
 
-pe = pe(ceil(length(pe)/2):length(pe));
-pe = sum(pe)/length(pe);
-disp(sprintf('pe (average over last half of data) = %f ',pe));
+%pe = pe(ceil(length(pe)/2):length(pe));
+%pe = sum(pe)/length(pe);
+%disp(sprintf('pe (average over last half of data) = %f ',pe));
 
-disp(sprintf('Total energy (average over last half of data) = %f ',ke+pe));
+%disp(sprintf('Total energy (average over last half of data) = %f ',ke+pe));
 
 % averge Smith's R0 to a number
 if (f_k>0) 

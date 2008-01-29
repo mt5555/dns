@@ -23,11 +23,14 @@ ndir = 73;
 %nx=512; delx_over_eta=1.15; epsilon=1.51;teddy = 1.05;
 %times=[2.8:0.2:4.2];
 
-name='/netscratch/skurien/dns_data/sc1024A/sc1024A-trunc0064.'
-nx=512; delx_over_eta=1.15; epsilon=1.51;teddy = 1.05;
-times=[2.0:0.1:2.5];
+%name='/netscratch/skurien/dns_data/sc1024A/sc1024A-trunc0032.'
+%name='/netscratch/skurien/dns_data/sc1024A/sc1024A-trunc0064.'
+%name='/netscratch/skurien/dns_data/sc1024A/sc1024A-trunc0128.' 
+name='/netscratch/skurien/dns_data/sc1024A/sc1024A'                             
+nx=1024; delx_over_eta=2.95; epsilon=3.57;teddy = 1.05;
+times=[1.7:0.1:2.4];
 
-%name='/netscratch/skurien/dns_data/sc1024A/sc1024A-trunc0032.' ...
+
                  
 %nx=512; delx_over_eta=1.15; epsilon=1.51;teddy = 1.05; ...
                  
@@ -79,7 +82,7 @@ if (abs(1-sum(w))>1e-7)
   return;
 end
 
-  close all;
+%  close all;
 
 times_plot=[];
 for t=times
@@ -107,7 +110,7 @@ yyt_angave = zeros([length(xx),9]);
 for dir=1:ndir;
 
 x=r_val(:,dir);                % units of box length
-x_plot=x*nx*delx_over_eta;  % units of r/eta
+x_plot=x*nx*delx_over_eta_l;  % units of r/eta
 
 yl=Dl(:,dir,ord);
 yt=Dt(:,dir,ord);
@@ -144,15 +147,16 @@ xlabel('r/\eta','FontSize',14);
 end
 
 % LONGITUDINAL 
-for i= 1:2:9;
+for i= 1:2:5;   
 
 % plots local slopes, inflection points etc.
 
 figure(10)
+subplot(2,2,4)
 der = localslp(xx_plot',yyl_tangave(:,i),1);hold on;
 grid on;
 set(gca,'fontsize',14)
-title('Local slopes - longitudinal');
+%title('Local slopes - longitudinal');
 
 %Inflection points, works for 1024^3 data
 if(0)
@@ -184,7 +188,7 @@ figure(19)
      title('Comparison of long and trans exps');
      grid on;
 
-end     
+
      
 
 % PLOT THE STRUCTURE FUNCTIONS AND SCALING LINE
@@ -196,6 +200,7 @@ end
 set(gca,'fontsize',14)
      text(xx_plot(1)-1,1.2*(yyl_tangave(4,i)),['r^{',sprintf('%3.2f',exp),'}']);
 
+end
 
 % TRANSVERSE
 
@@ -205,7 +210,7 @@ set(gca,'fontsize',14)
 figure(10)
 der = localslp(xx_plot',yyt_tangave(:,i),2);hold on;
 set(gca,'fontsize',14)
-title('Local slopes - transverse');
+%title('Local slopes - transverse');
 grid on;
 
 
@@ -238,7 +243,7 @@ figure(20)
      errorbar(p,mean(der(ind)),experr,'x');hold on;
      title('comparison of long and trans exps');
      grid on;
-end
+
 
 %PLOT STRUCTURE FUNCTIONS AND SCALING EXPONENTS
 
@@ -255,5 +260,5 @@ y_const= 1.2*(yyt_tangave(lex,i))/(xx_plot(lex)).^exp;
      axis([0 1 0 0.5]) 
      cname = sprintf('exponents_dir%d',ndir);
 %     print('-depsc', cname);
-
+end
 end
