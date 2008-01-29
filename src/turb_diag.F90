@@ -24,10 +24,10 @@ integer,parameter :: nints_e=49,npints_e=51
 real*8 :: ints_e(nints_e)
 real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
-real*8 :: divx,divi
+real*8 :: divx,divi,mx,binsize
 real*8 :: one=1
 integer i,j,k,n,ierr,csig
-integer :: n1,n1d,n2,n2d,n3,n3d
+integer :: n1,n1d,n2,n2d,n3,n3d,kshell_max
 character(len=280) :: message
 CPOINTER fid,fidj,fidS,fidcore,fidC
 
@@ -199,7 +199,42 @@ endif
 
 
 if (diag_pdfs==1) then
+   kshell_max = g_nmin/3
+   
+   ! tell PDF module what we will be computing: 
+   number_of_cpdf = kshell_max  
+   compute_uvw_pdfs = .true.    ! velocity increment PDFs
+   compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
+   compute_passive_pdfs = .false.  ! passive scalar PDFs
+   
+   call print_message("computing velocity increment PDFs")
    call compute_all_pdfs(Q,q1(1,1,1,1))
+
+
+   do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
+      write(message,'(a,i4)') 'computing fft3d of input: n=',n
+      call print_message(message)
+      call fft3d(Q(1,1,1,n),work1)
+      
+      ! compute delta-filtered component, store in "vor()" array
+      do k=1,kshell_max
+         
+         work2 = Q(:,:,:,n)
+         call fft_filter_shell(work2,k)
+         call ifft3d(work2,work1)
+         
+         ! compute PDFs
+         call global_max_abs(work2,mx)
+         binsize = mx/100   ! should produce about 200 bins
+         
+         write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
+         call print_message(message)
+         call compute_pdf_scalar(work2,cpdf(k),binsize)
+      enddo
+   enddo
+
+
+
 
    if (my_pe==io_pe) then
       write(message,'(f10.4)') 10000.0000 + time
@@ -238,12 +273,23 @@ if (diag_pdfs==1) then
       endif
       endif
 
+      if (number_of_cpdf>0) then
+      write(message,'(f10.4)') 10000.0000 + time
+      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".cpdf"
+      call copen(message,"w",fidC,ierr)
+      if (ierr/=0) then
+         write(message,'(a,i5)') "output_model(): Error opening .cpdf file errno=",ierr
+         call abortdns(message)
+      endif
+      endif
+
    endif
    call output_pdf(time,fid,fidj,fidS,fidC,fidcore)
    if (my_pe==io_pe) call cclose(fid,ierr)
    if (my_pe==io_pe) call cclose(fidcore,ierr)
    if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
    if (compute_passive_pdfs .and. my_pe==io_pe) call cclose(fidS,ierr)
+   if (number_of_cpdf>0  .and. my_pe==io_pe) call cclose(fidC,ierr)
 endif
 
 ! time averaged dissapation and forcing:
