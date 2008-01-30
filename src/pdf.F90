@@ -43,10 +43,11 @@ type pdf_structure_function
 !SGI f90 does not allow allocatable arrays in a struct
 real*8,pointer      :: pdf(:,:)
 integer             :: delta_num    ! number of different values of delta
-integer             :: nbin         ! number of bins
-real*8              :: pdf_bin_size ! size of bin
+integer             :: nbin            ! number of bins
+real*8,pointer      :: pdf_binsize(:)   ! size of bin, for each delta
 integer             :: ncalls       ! number of instances PDF has been computed
-                               ! (i.e. we may compute the PDF for 10 time steps
+                                    ! (i.e. we may compute the PDF for 10 time steps
+real*8,pointer      :: mn(:),mx(:)   ! min,max data value in PDF, for each delta
 end type
 
 type jpdf_structure_function
@@ -282,12 +283,15 @@ integer :: bin,ndelta
 real*8 binsize
 
 str%nbin=bin
-str%pdf_bin_size=binsize
+
 allocate(str%pdf(-bin:bin,ndelta))
+allocate(str%mn(ndelta))
+allocate(str%mx(ndelta))
+allocate(str%pdf_binsize(ndelta))
 str%pdf=0
 str%ncalls=0
 str%delta_num=ndelta
-
+str%pdf_binsize(:)=binsize
 end subroutine
 
 
@@ -442,6 +446,94 @@ end subroutine
 
 
 
+subroutine set_velocity_increment_binsize(nbins)
+!
+!  see turb_diag.F90 for an example on how to use this routine
+!  we first compute the PDFs with a fixed binsize (uscale, default=.01)
+!  during the PDF calculation, the PDFs will also store the min/max values
+!  
+!  we then call this routine which will reset all the pdf data back to 0
+!  and then change the binsize based in the min/max values
+!
+!  we are then ready to compute the PDFs *again*, this time with a 
+!  tuned binsize
+!
+use params
+implicit none
+integer k,i,j,n,nbins,dn
+real*8 :: mx(delta_num_max),binsize(delta_num_max)
+
+mx = 0
+
+dn = SF(1,1)%delta_num  ! number of incements
+
+! SF(i,j)  i'th component of u, j'th direction
+do j=1,3
+   ! for each increment (indexed by k)
+   ! compute maximum value over all three components
+   do i=1,3
+      do k=1,dn
+         mx(k) = max(mx(k),SF(i,j)%mx(k))
+         mx(k) = max(mx(k),-SF(i,j)%mn(k))
+      enddo
+   enddo
+   do i=1,3
+      SF(i,j)%pdf_binsize(1:dn) = mx(1:dn)/(nbins/2)
+   enddo
+enddo
+
+call reset_pdf()
+
+end subroutine
+
+
+
+
+subroutine reset_pdf()
+use params
+implicit none
+integer i,j
+
+if (compute_uvw_pdfs) then
+   do i=1,NUM_SF
+      do j=1,3
+         ! reset PDF's
+         SF(i,j)%ncalls=0
+         SF(i,j)%pdf=0
+      enddo
+   enddo
+   epsilon%ncalls=0
+   epsilon%pdf=0
+endif
+
+if (compute_passive_pdfs) then
+   do i=1,npassive
+      SCALARS(i)%ncalls=0
+      SCALARS(i)%pdf=0
+   enddo	
+endif
+
+if (number_of_cpdf>0) then
+   do i=1,number_of_cpdf
+      cpdf(i)%ncalls=0
+      cpdf(i)%pdf=0
+   enddo
+endif
+
+if (compute_uvw_jpdfs) then
+do i=1,NUM_JPDF
+do j=1,3
+   ! reset JPDF's
+   jpdf_v(i,j)%ncalls=0
+   jpdf_v(i,j)%pdf=0
+enddo
+enddo
+endif
+
+end subroutine
+
+
+
 
 
 
@@ -560,44 +652,7 @@ if (my_pe==io_pe) then
 endif
 
 
-if (compute_uvw_pdfs) then
-   do i=1,NUM_SF
-      do j=1,3
-         ! reset PDF's
-         SF(i,j)%ncalls=0
-         SF(i,j)%pdf=0
-      enddo
-   enddo
-   epsilon%ncalls=0
-   epsilon%pdf=0
-endif
-
-if (compute_passive_pdfs) then
-   do i=1,npassive
-      SCALARS(i)%ncalls=0
-      SCALARS(i)%pdf=0
-   enddo	
-endif
-
-if (number_of_cpdf>0) then
-   do i=1,number_of_cpdf
-      cpdf(i)%ncalls=0
-      cpdf(i)%pdf=0
-   enddo
-endif
-
-
-
-
-if (compute_uvw_jpdfs) then
-do i=1,NUM_JPDF
-do j=1,3
-   ! reset JPDF's
-   jpdf_v(i,j)%ncalls=0
-   jpdf_v(i,j)%pdf=0
-enddo
-enddo
-endif
+call reset_pdf
 
 
 end subroutine
@@ -628,8 +683,17 @@ do i=1,ndelta
    x=delta_val(i); call cwrite8(fid,x,1)
 enddo
 
-! PDF data
-call cwrite8(fid,str%pdf_bin_size,1)
+
+
+! old format: we only had one bin_size for all delta:
+!call cwrite8(fid,str%pdf_bin_size,1)
+
+! new format: write a 0 (so matlab code will know this is new format)
+! then write all the binsizes
+x=0; call cwrite8(fid,x,1)
+call cwrite8(fid,str%pdf_binsize,ndelta)
+
+
 x=str%nbin; call cwrite8(fid,x,1)
 x=str%ncalls; call cwrite8(fid,x,1)
 
@@ -654,7 +718,7 @@ do j=1,ndelta
    endif
 enddo
 
-
+! PDF data
 call cwrite8(fid,pdfdata,(2*nbin+1)*ndelta)
 deallocate(pdfdata)
 end subroutine
@@ -863,7 +927,10 @@ do j=2,NUM_SF
 ASSERT("ndelta must be the same for all U structure functions",ndelta==str(j)%delta_num)
 enddo
 
-
+do n=1,NUM_SF
+   str(n)%mn=9e20
+   str(n)%mx=-9e20
+enddo
 
 do k=1,n3
    do j=1,n2
@@ -883,8 +950,11 @@ do k=1,n3
                      del = w(i2,j,k)-w(i,j,k)
                   endif
 
+                  str(n)%mn(idel) = min(str(n)%mn(idel),del)
+                  str(n)%mx(idel) = max(str(n)%mx(idel),del)
+
                   delv(n)=del
-                  del = del/str(n)%pdf_bin_size
+                  del = del/str(n)%pdf_binsize(idel)
                   bin = nint(del)
 
                   ! increase the size of our PDF function
@@ -911,7 +981,10 @@ do k=1,n3
                   else
                      del=-((-del)**one_third)
                   endif
-                  del = del/str(nsf)%pdf_bin_size
+                  str(nsf)%mn(idel) = min(str(nsf)%mn(idel),del)
+                  str(nsf)%mx(idel) = max(str(nsf)%mx(idel),del)
+
+                  del = del/str(nsf)%pdf_binsize(idel)
                   bin=nint(del)
 
                   if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
@@ -932,7 +1005,11 @@ do k=1,n3
                      nsf=nsf+1
                      ! (delv(ncomp)**2 delv(n)**2  ) ** 1/4
                      del=sqrt(abs(delv(ncomp)*delv(n)))
-                     del = del/str(nsf)%pdf_bin_size
+
+                     str(nsf)%mn(idel) = min(str(nsf)%mn(idel),del)
+                     str(nsf)%mx(idel) = max(str(nsf)%mx(idel),del)
+
+                     del = del/str(nsf)%pdf_binsize(idel)
                      bin=nint(del)
                      
                      if (abs(bin)>str(nsf)%nbin) call resize_pdf(str(nsf),abs(bin)+10) 
@@ -1070,10 +1147,10 @@ if (present(binsize)) then
    if (pdfdata%ncalls/=0) then
       call abortdns("compute_pdf_scalar(): ERROR:  cant change PDF binsize unless ncalls=0")
    endif
-   pdfdata%pdf_bin_size=binsize
+   pdfdata%pdf_binsize(1)=binsize
 endif
 
-if (pdfdata%pdf_bin_size == 0) then
+if (pdfdata%pdf_binsize(1) == 0) then
    call abortdns("compute_pdf_scalar(): ERROR:  binsize not initialized")
 endif
 
@@ -1084,7 +1161,7 @@ do k=nz1,nz2
       do i=nx1,nx2
          ! compute structure functions for U,V,W 
          del=ux(i,j,k)
-         del = del/pdfdata%pdf_bin_size
+         del = del/pdfdata%pdf_binsize(1)
          bin = nint(del)
 
          ! increase the size of our PDF function
@@ -1122,10 +1199,10 @@ real*8 gradu(nx,ny,nz,3)
 
 !local
 integer n1,n1d,n2,n2d,n3,n3d,ierr
-integer i,j,k,n,m1,m2
+integer i,j,k,n,m1,m2,delta_num
 real*8 :: vor(3),uij,uji
 real*8 :: dummy(1),ensave
-real*8 :: tmx1,tmx2
+real*8 :: tmx1,tmx2,mx(delta_num_max),mn(delta_num_max)
 
 call wallclock(tmx1)
 
@@ -1216,6 +1293,18 @@ if (compute_passive_pdfs) then
 endif
 
 
+! compute global min/max of increment PDF data
+#ifdef USE_MPI
+do n=1,NUM_SF
+   do i=1,3
+      delta_num = SF(n,i)%delta_num
+      mx(1:delta_num) = SF(n,i)%mx(1:delta_num)
+      mn(1:delta_num) = SF(n,i)%mn(1:delta_num)
+      call mpi_allreduce(mn,SF(n,i)%mn,delta_num,MPI_REAL8,MPI_MIN,comm_3d,ierr)
+      call mpi_allreduce(mx,SF(n,i)%mx,delta_num,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   enddo
+enddo
+#endif
 
 
 

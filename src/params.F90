@@ -148,7 +148,10 @@ real*8  :: grav=0
 real*8  :: fcor=0                ! rotation in z-axis 
 real*8  :: bous=0                ! bousenesque paramter
 integer :: diag_struct=0         ! compute structure funtions on the fly
-integer :: diag_pdfs=0           ! compute pdfs on the fly
+integer :: diag_pdfs=0           ! 0  disabled
+                                 ! 1  compute pdfs on the fly
+                                 ! -1  compute pdfs if simulation time >= 1.0 
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! initial condition and forcing

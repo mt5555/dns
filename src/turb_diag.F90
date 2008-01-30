@@ -27,7 +27,7 @@ real*8 :: x,zero_len
 real*8 :: divx,divi,mx,binsize
 real*8 :: one=1
 integer i,j,k,n,ierr,csig
-integer :: n1,n1d,n2,n2d,n3,n3d,kshell_max
+integer :: n1,n1d,n2,n2d,n3,n3d,kshell_max,compute_pdfs,output_pdfs
 character(len=280) :: message
 CPOINTER fid,fidj,fidS,fidcore,fidC
 
@@ -198,7 +198,25 @@ if (diag_struct==1) then
 endif
 
 
-if (diag_pdfs==1) then
+compute_pdfs = 0
+output_pdfs = 0
+if (diag_pdfs==1) then   ! flag telling us to compute PDFs
+   compute_pdfs = 1      ! and output after each snapshot 
+   output_pdfs = 1
+endif
+if (diag_pdfs== -1) then   ! flag telling us to compute PDFs
+                         ! but only output at end of run 
+   if (time>1.0) compute_pdfs = 1
+   if (time>=time_final-1e-7) output_pdfs = 1
+
+   ! set uscale = large value based on Q so few bins
+   ! call compute_all_pdfs
+   ! call set_velocity_increment_binsize(400)
+   ! update MATALB code
+endif
+
+
+if (compute_pdfs==1) then
    kshell_max = g_nmin/3
    
    ! tell PDF module what we will be computing: 
@@ -232,9 +250,9 @@ if (diag_pdfs==1) then
          call compute_pdf_scalar(work2,cpdf(k),binsize)
       enddo
    enddo
+endif
 
-
-
+if (output_pdfs==1) then
 
    if (my_pe==io_pe) then
       write(message,'(f10.4)') 10000.0000 + time
@@ -290,6 +308,7 @@ if (diag_pdfs==1) then
    if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
    if (compute_passive_pdfs .and. my_pe==io_pe) call cclose(fidS,ierr)
    if (number_of_cpdf>0  .and. my_pe==io_pe) call cclose(fidC,ierr)
+
 endif
 
 ! time averaged dissapation and forcing:
