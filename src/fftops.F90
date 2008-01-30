@@ -1893,6 +1893,41 @@ end subroutine
 
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Filter out spherical wavenumbers other than k_shell specified 
+! (band-filter)
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter_shell1(p,kshell)
+use params
+implicit none
+real*8 p(nx,ny,nz)
+integer kshell
+
+integer i,j,k,im,jm,km,ks
+real*8 xw2
+
+   do k=nz1,nz2
+      km=(kmcord(k))
+      do j=ny1,ny2
+         jm=(jmcord(j))
+         do i=nx1,nx2
+            im=(imcord(i))
+            if ( im == kshell .and. jm==0 .and. km==0) then
+               ! keep just the cosine mode (k,0,0)
+            else
+               p(i,j,k)=0
+            endif
+         enddo
+      enddo
+   enddo
+
+end subroutine
+
+
+
+
 
 
 
