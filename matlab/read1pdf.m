@@ -6,9 +6,19 @@ delta=fread(fid,n_del,'float64');
 
 
 bin_size=fread(fid,1,'float64');
+if (bin_size == 0)
+  % this means that we have a bin size for every delta
+  bin_size=fread(fid,n_del,'float64');
+end 
+
 n_bin=fread(fid,1,'float64');
 n_call=fread(fid,1,'float64');
-bins=((-n_bin:n_bin)*bin_size)';
+
+bins=zeros([2*n_bin+1,n_del]);
+for i=1:n_del
+  bins(:,i)=((-n_bin:n_bin)*bin_size(i))';
+end
+
 pdf=fread(fid,[(2*n_bin+1),n_del],'float64');
 
 i=2; % always leave the first one 

@@ -12,7 +12,7 @@ clear all;
 
 dp=2;    % which seperation length index to plot
 
-fid=fopen('/home/mt/codes/dns/src/temp0001.0000.sf','r','l');
+fid=fopen('/home/mataylo/codes/dns/src/temp0002.0000.sf','r','l');
 
 components=['u','v','w'];
 var=['x','y','z'];
@@ -29,7 +29,7 @@ var=['x','y','z'];
       % ignore the i<>j PDFs
       if (i==j)
         subplot(3,1,i)
-        semilogy(bins1,pdf1(:,dp))
+        semilogy(bins1(:,dp),pdf1(:,dp))
         title(sprintf('time=%f',time1));
         ylabel(['\Delta',sprintf('_{  %i%s} %s',delta1(dp),var(i),components(j))]);
         set(gca,'YTickLabel','')
