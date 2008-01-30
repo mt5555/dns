@@ -461,26 +461,56 @@ subroutine set_velocity_increment_binsize(nbins)
 use params
 implicit none
 integer k,i,j,n,nbins,dn
-real*8 :: mx(delta_num_max),binsize(delta_num_max)
+real*8 :: mx_lon(delta_num_max),binsize(delta_num_max)
+real*8 :: mx_tran(delta_num_max)
 
-mx = 0
+
 
 dn = SF(1,1)%delta_num  ! number of incements
 
 ! SF(i,j)  i'th component of u, j'th direction
+
+! for each increment (indexed by k)
+! compute maximum value over all three components
+
+mx_lon = 0
+mx_tran = 0
 do j=1,3
-   ! for each increment (indexed by k)
-   ! compute maximum value over all three components
-   do i=1,3
-      do k=1,dn
-         mx(k) = max(mx(k),SF(i,j)%mx(k))
-         mx(k) = max(mx(k),-SF(i,j)%mn(k))
-      enddo
-   enddo
-   do i=1,3
-      SF(i,j)%pdf_binsize(1:dn) = mx(1:dn)/(nbins/2)
+do i=1,3
+   do k=1,dn
+      if (i==j) then
+         mx_lon(k) = max(mx_lon(k),SF(i,j)%mx(k))
+         mx_lon(k) = max(mx_lon(k),-SF(i,j)%mn(k))
+      else
+         mx_tran(k) = max(mx_tran(k),SF(i,j)%mx(k))
+         mx_tran(k) = max(mx_tran(k),-SF(i,j)%mn(k))
+      endif
    enddo
 enddo
+enddo
+
+do j=1,3
+   do i=1,3
+      if (i==j) then
+         SF(i,j)%pdf_binsize(1:dn) = mx_lon(1:dn)/(nbins/2)
+      else
+         SF(i,j)%pdf_binsize(1:dn) = mx_tran(1:dn)/(nbins/2)
+      endif
+   enddo
+enddo
+
+if (my_pe==io_pe) then
+   print *,'              binsize         binsize '
+   print *,'increment   longitudinal     transverse'
+
+   do k=1,dn
+      write(*,'(i4,e20.4,e16.4)') delta_val(k),SF(1,1)%pdf_binsize(k),&
+              SF(1,2)%pdf_binsize(k)
+   enddo
+endif
+
+
+
 
 call reset_pdf()
 

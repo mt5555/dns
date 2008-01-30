@@ -628,7 +628,8 @@ do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==17) then  ! -cout dpdf
       ! number of kshells:  
-      kshell_max = g_nmin/3
+      kshell_max = nint(dealias_sphere_kmax)
+
 
       ! tell PDF module what we will be computing: 
       number_of_cpdf = kshell_max  

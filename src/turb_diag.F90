@@ -28,6 +28,7 @@ real*8 :: divx,divi,mx,binsize
 real*8 :: one=1
 integer i,j,k,n,ierr,csig
 integer :: n1,n1d,n2,n2d,n3,n3d,kshell_max,compute_pdfs,output_pdfs
+integer,save :: pdf_binsize_set=0
 character(len=280) :: message
 CPOINTER fid,fidj,fidS,fidcore,fidC
 
@@ -206,51 +207,65 @@ if (diag_pdfs==1) then   ! flag telling us to compute PDFs
 endif
 if (diag_pdfs== -1) then   ! flag telling us to compute PDFs
                          ! but only output at end of run 
-   if (time>1.0) compute_pdfs = 1
+   if (time> 1.0 ) compute_pdfs = 1
    if (time>=time_final-1e-7) output_pdfs = 1
-
-   ! set uscale = large value based on Q so few bins
-   ! call compute_all_pdfs
-   ! call set_velocity_increment_binsize(400)
-   ! update MATALB code
 endif
 
 
 if (compute_pdfs==1) then
-   kshell_max = g_nmin/3
+   kshell_max = nint(dealias_sphere_kmax)
    
    ! tell PDF module what we will be computing: 
    number_of_cpdf = kshell_max  
    compute_uvw_pdfs = .true.    ! velocity increment PDFs
    compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
    compute_passive_pdfs = .false.  ! passive scalar PDFs
-   
-   call print_message("computing velocity increment PDFs")
+
+   if ( pdf_binsize_set == 0  ) then
+      call print_message("computing velocity increment PDFs to set binsize")
+      call global_max_abs(Q,mx)
+      uscale = mx/1    
+      epsscale=uscale
+      ! comptue PDFs with a large binsize, just so we can get min/max
+      call compute_all_pdfs(Q,q1(1,1,1,1))
+      ! set binsize based on min/max, to get about 400 bins
+      ! this will also erase all PDF data collected so far
+      call set_velocity_increment_binsize(400)  
+   endif
+
+   call print_message("Computing velocity increment PDFs")
    call compute_all_pdfs(Q,q1(1,1,1,1))
 
-
    do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
-      write(message,'(a,i4)') 'computing fft3d of input: n=',n
-      call print_message(message)
-      call fft3d(Q(1,1,1,n),work1)
+      q1(:,:,:,n)=Q(:,:,:,n)
+      call fft3d(q1(1,1,1,n),work1)
       
       ! compute delta-filtered component, store in "vor()" array
+      call print_message("computing delta-filtered PDFs")
       do k=1,kshell_max
          
-         work2 = Q(:,:,:,n)
+         work2 = q1(:,:,:,n)
          call fft_filter_shell(work2,k)
          call ifft3d(work2,work1)
          
-         ! compute PDFs
-         call global_max_abs(work2,mx)
-         binsize = mx/100   ! should produce about 200 bins
-         
-         write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
-         call print_message(message)
-         call compute_pdf_scalar(work2,cpdf(k),binsize)
+         if (pdf_binsize_set==0) then
+            call global_max_abs(work2,mx)
+            binsize = mx/100   ! should produce about 200 bins
+            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
+            call print_message(message)
+
+            ! compute PDFs.  First time, specify binsize
+            call compute_pdf_scalar(work2,cpdf(k),binsize)
+         else
+            ! dont change binsize
+            call compute_pdf_scalar(work2,cpdf(k))
+         endif
       enddo
    enddo
+   pdf_binsize_set=1
 endif
+
+
 
 if (output_pdfs==1) then
 

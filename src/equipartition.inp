@@ -1,0 +1,41 @@
+9             ! input file type
+1             ! file I/O header type   1-5
+ns_uvw        ! equations
+decay2048    ! initial condition:  KH-blob, KH-anal, iso12
+5            ! init condition subtype
+0.0 0.0     ! init condition parameter (helicity angle in deg, dummy param)
+none         ! forcing:  none, iso, iso12, iso12w, iso23w
+0.0  0       ! forcing parameters (not used for iso12)
+value        ! viscosity type  (value, smallest, kediff, Re)
+0.00         ! viscosity coefficient.  (300)
+none         ! hyper vis
+0            ! hyper vis value
+none         ! hypo vis
+0.0          ! hypo vis value
+0.0           ! fcoriolis  rotation
+1.0           ! Z sscaling  (aspect ratio)
+0             ! Bous. parameter  (for stratified problems)
+0             ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+0             ! smagorinsky
+0             ! Number of passive scalars
+0             ! compute_structure functions
+-1             ! compute pdf functions
+fft-phase     ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+periodic      ! x bc  (periodic, no-slip)
+periodic      ! y bc
+periodic      ! z bc
+2            ! time to run
+1.5           ! adv cfl  (0 = disabled, use min_dt) 
+0.200         ! vis cfl  (0 = disabled, use min_dt) 
+0.000          ! min_dt  
+1.001          ! max_dt 
+1             ! restart_dt  (this is not used)
+.05            ! diag_dt    how often to dump simple diagnostics to file
+.01            ! model_dt   compute and output spectra, structure functions, expensive diagnostics
+-100          ! screen_dt  output info to stdout
+1             ! output_dt  output snapshots
+0             ! also output the vorticity 
+0             ! n_output_custom  number of custom output times  
+
+
+

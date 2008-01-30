@@ -752,6 +752,7 @@ do iii=nx1,nx2
    RR = Q(iii,jjj,kkk,:)
    II = Qi(iii,jjj,kkk,:)
 
+#if 0
    if (my_pe == io_pe) then 
       if (i == 1 .and. j == 1 .and. k == 1) then
          write(6,*)'Pre i,j,k  ',i,j,k
@@ -763,6 +764,7 @@ do iii=nx1,nx2
 	 write(6,*) II
       endif
    endif
+#endif
 
    xw2=i**2 + j**2 + k**2
    xw=sqrt(xw2)
