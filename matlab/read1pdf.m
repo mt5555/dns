@@ -16,7 +16,11 @@ n_call=fread(fid,1,'float64');
 
 bins=zeros([2*n_bin+1,n_del]);
 for i=1:n_del
-  bins(:,i)=((-n_bin:n_bin)*bin_size(i))';
+  if (length(bin_size)==1) 
+    bins(:,i)=((-n_bin:n_bin)*bin_size(1))';
+  else
+    bins(:,i)=((-n_bin:n_bin)*bin_size(i))';
+  end
 end
 
 pdf=fread(fid,[(2*n_bin+1),n_del],'float64');
