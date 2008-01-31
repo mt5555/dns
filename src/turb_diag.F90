@@ -26,7 +26,7 @@ real*8 :: pints_e(npints_e,n_var)
 real*8 :: x,zero_len
 real*8 :: divx,divi,mx,binsize
 real*8 :: one=1
-integer i,j,k,n,ierr,csig
+integer i,j,k,n,ierr,csig,k2
 integer :: n1,n1d,n2,n2d,n3,n3d,kshell_max,compute_pdfs,output_pdfs
 integer,save :: pdf_binsize_set=0
 character(len=280) :: message
@@ -216,7 +216,7 @@ if (compute_pdfs==1) then
    kshell_max = nint(dealias_sphere_kmax)
    
    ! tell PDF module what we will be computing: 
-   number_of_cpdf = kshell_max  
+   number_of_cpdf = kshell_max*2   !   
    compute_uvw_pdfs = .true.    ! velocity increment PDFs
    compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
    compute_passive_pdfs = .false.  ! passive scalar PDFs
@@ -236,7 +236,7 @@ if (compute_pdfs==1) then
    call print_message("Computing velocity increment PDFs")
    call compute_all_pdfs(Q,q1(1,1,1,1))
 
-   do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
+   do n=2,2  !  n=1,2,3 loops over (u,v,w) velocity components
       q1(:,:,:,n)=Q(:,:,:,n)
       call fft3d(q1(1,1,1,n),work1)
       
@@ -260,6 +260,27 @@ if (compute_pdfs==1) then
             ! dont change binsize
             call compute_pdf_scalar(work2,cpdf(k))
          endif
+
+         work2 = q1(:,:,:,n)
+         call fft_filter_shell1(work2,k)
+         call ifft3d(work2,work1)
+
+         k2 = kshell_max + k
+         if (pdf_binsize_set==0) then
+            call global_max_abs(work2,mx)
+            binsize = mx/100   ! should produce about 200 bins
+            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
+            call print_message(message)
+
+            ! compute PDFs.  First time, specify binsize
+            call compute_pdf_scalar(work2,cpdf(k2),binsize)
+         else
+            ! dont change binsize
+            call compute_pdf_scalar(work2,cpdf(k2))
+         endif
+
+
+
       enddo
    enddo
    pdf_binsize_set=1

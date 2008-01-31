@@ -79,7 +79,7 @@ real*8 :: kr,ke,ck,xfac,dummy
 real*8 :: schmidt_in,mn,mx,a0,a1
 real*8 :: xwerr(1000),xw,binsize
 CPOINTER :: null=0,fidu,fid
-integer :: type_in,ntot,nzero,nerr, kshell_max
+integer :: type_in,ntot,nzero,nerr, kshell_max,k2
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
@@ -653,7 +653,7 @@ do
       call print_message("computing velocity increment PDFs")
       call compute_all_pdfs(Q,vor)
 
-      do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
+      do n=2,2  !  n=1,2,3 loops over (u,v,w) velocity components
          write(message,'(a,i4)') 'computing fft3d of input: n=',n
          call print_message(message)
          call fft3d(Q(1,1,1,n),work1)
@@ -672,6 +672,21 @@ do
             write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
             call print_message(message)
             call compute_pdf_scalar(work2,cpdf(k),binsize)
+
+            k2=kshell_max+k
+            work2 = Q(:,:,:,n)
+            call fft_filter_shell1(work2,k)
+            call ifft3d(work2,work1)
+
+            ! compute PDFs
+            call global_max_abs(work2,mx)
+            binsize = mx/100   ! should produce about 200 bins
+
+            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF simplified delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
+            call print_message(message)
+            call compute_pdf_scalar(work2,cpdf(k2),binsize)
+
+
          enddo
       enddo
       !
