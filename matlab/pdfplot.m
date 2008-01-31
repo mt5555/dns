@@ -12,7 +12,7 @@ clear all;close all;
 
 
 
-fid=fopen('../temp0002.0000.sf','r','l');
+fid=fopen('./temp0002.0000.sf','r','l');
 
 components=['u','v','w'];
 var=['x','y','z'];
@@ -22,6 +22,7 @@ var=['x','y','z'];
   nSF=fread(fid,1,'float64');           % number of PDFs in file
 
   % LONGITUDINAL PDFS  
+  count=0;
   for j=1:3
     for i=1:3
       % var(i) componenents(j)
@@ -32,8 +33,14 @@ var=['x','y','z'];
       % ignore the i<>j PDFs
       if (i==j)
         %subplot(3,1,i)
-        semilogy(bins1(:,1),pdf1(:,dp)./bin_size1(dp))
-        sum(pdf1)
+        semilogy(bins1(:,dp),pdf1(:,dp)./bin_size1(dp))
+
+        c1=sum(pdf1(:,dp).*bins1(:,dp));
+        c2=sum(pdf1(:,dp).*(bins1(:,dp)-c1).^2);
+        c4=sum(pdf1(:,dp).*(bins1(:,dp)-c1).^4);
+        count=count+1;
+        K(count)=c4/(c2^2);
+
         hold on;
         %title(sprintf('time=%f',time1));
         %ylabel(['\Delta',sprintf('_{  %i%s} %s',delta1(dp),var(i),components(j))]);
@@ -60,4 +67,8 @@ npdf=fread(fid,1,'float64');
 
 
 fclose(fid);
+hold off
+figure(2)
+plot(K)
+axis([0 45 0 4]);
 
