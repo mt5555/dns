@@ -17,12 +17,12 @@ for j=1:3
 
     p=1;
     % structure function to the p'th power
-    str=sum(pdf(:,dp).*bins.^p);
+    str=sum(pdf(:,dp).*bins(:,dp).^p);
     
-    mx=max(bins - bins.*(pdf(:,dp)==0));
-    mn=min(bins - bins.*(pdf(:,dp)==0)); % min over non zero values      
+    mx=max(bins(:,dp) - bins(:,dp).*(pdf(:,dp)==0));
+    mn=min(bins(:,dp) - bins(:,dp).*(pdf(:,dp)==0)); % min over non zero values      
     
-    bar(bins,pdf(:,dp))
+    bar(bins(:,dp),pdf(:,dp))
     ax=axis;
     axmax=max(axmax,ax(4));
     

@@ -9,6 +9,8 @@ bin_size=fread(fid,1,'float64');
 if (bin_size == 0)
   % this means that we have a bin size for every delta
   bin_size=fread(fid,n_del,'float64');
+else
+  bin_size=bin_size*ones(n_del);
 end 
 
 n_bin=fread(fid,1,'float64');
@@ -16,11 +18,7 @@ n_call=fread(fid,1,'float64');
 
 bins=zeros([2*n_bin+1,n_del]);
 for i=1:n_del
-  if (length(bin_size)==1) 
-    bins(:,i)=((-n_bin:n_bin)*bin_size(1))';
-  else
     bins(:,i)=((-n_bin:n_bin)*bin_size(i))';
-  end
 end
 
 pdf=fread(fid,[(2*n_bin+1),n_del],'float64');
