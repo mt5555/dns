@@ -41,6 +41,7 @@ for i=1:npmax
    semilogy(bins,pdf)
    %end
    hold on;
+   pause
    %ax=axis;
    %axis([-.1, 1.1, 0, .15]);
    %xlabel(sprintf('<c^2>=%.4f  K=%.4f ',c2,c4/c2/c2));
@@ -57,6 +58,7 @@ times=times(2:length(times));
 orient tall
 %print('-dpsc',['deltapdf',times,'.ps']); 
 print('-djpeg',['deltapdf',times,'.jpg']); 
+
 
 
 

@@ -862,6 +862,7 @@ do iii=nx1,nx2
       Qi(iii,jjj,kkk,:)=II
    endif
 
+#if 0
 if (my_pe == io_pe) then
       if (i == 1 .and. j == 1 .and. k == 1) then
          write(6,*)'post i,j,k  ',i,j,k
@@ -873,6 +874,7 @@ if (my_pe == io_pe) then
 	 write(6,*) II
       endif
    endif
+#endif
 
 
 enddo

@@ -269,7 +269,7 @@ if (compute_pdfs==1) then
          if (pdf_binsize_set==0) then
             call global_max_abs(work2,mx)
             binsize = mx/100   ! should produce about 200 bins
-            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
+            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF simplified delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
             call print_message(message)
 
             ! compute PDFs.  First time, specify binsize

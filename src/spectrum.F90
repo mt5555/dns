@@ -513,7 +513,7 @@ endif
 ! 3D spectrum 
 if (iwave_2d <= iwave ) then
    write(message,'(a,f10.4)') " Energy Spectrum t=",time
-   call logplotascii(spec_r(0,1),iwave,message(1:25))
+   call logplotascii(spec_r(0,1),iwave,trim(message))
    !call logplotascii(spec_x,g_nx/2,message)
    !call logplotascii(spec_y,g_ny/2,message)
    !call logplotascii(spec_z,g_nz/2,message)
