@@ -632,7 +632,7 @@ do
 
 
       ! tell PDF module what we will be computing: 
-      number_of_cpdf = kshell_max  
+      number_of_cpdf = 2*kshell_max  
       compute_uvw_pdfs = .true.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
