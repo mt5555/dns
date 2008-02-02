@@ -243,7 +243,7 @@ if (compute_pdfs==1) then
       ! compute delta-filtered component, store in "vor()" array
       call print_message("computing delta-filtered PDFs")
       do k=1,kshell_max
-         
+
          work2 = q1(:,:,:,n)
          call fft_filter_shell(work2,k)
          call ifft3d(work2,work1)

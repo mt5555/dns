@@ -1914,7 +1914,7 @@ real*8 xw2
          jm=(jmcord(j))
          do i=nx1,nx2
             im=(imcord(i))
-            if ( im == kshell .and. jm==0 .and. km==0) then
+            if ( abs(im) == kshell .and. jm==0 .and. km==0) then
                ! keep just the cosine mode (k,0,0)
             else
                p(i,j,k)=0
