@@ -41,4 +41,5 @@ while (i<=n_del & n_call>0)
   end
 end
 
-
+% return total number of bins:
+n_bin=2*n_bin+1;
