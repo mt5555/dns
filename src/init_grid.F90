@@ -2811,6 +2811,8 @@ else if (sdata=='decay2048_s') then
    init_cond=9
 else if (sdata=='3d_rot') then
    init_cond=10
+else if (sdata=='TG') then
+   init_cond=11
 else 
    print *,'value = >>',sdata,'<<'
    call abortdns("invalid initial condtion specified on line 3 on input file")
