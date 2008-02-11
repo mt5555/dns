@@ -42,40 +42,74 @@ end subroutine
 
 
 
-subroutine init_EDQMN(Q,PSI,work,work2)
+subroutine init_EDQMN(QR,QI,work,work2)
 !
 !  what is an EDQMN?
 !
 use params
 implicit none
-real*8 :: Q(nx,ny,nz,3)
-real*8 :: PSI(nx,ny,nz,3)
+real*8 :: QR(nx,ny,nz,3)   ! real component
+real*8 :: QI(nx,ny,nz,3)   ! imaginary component
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 
 ! local variables
-integer :: i,j,k
+integer :: i,j,k,i1,j1,k1,im,jm,km,i2,j2,k2,n
 real*8 :: x,y,z
-
+character(len=80) message
 
 do k=nz1,nz2
-   z=zcord(k)
-   do j=ny1,ny2
-      y=ycord(j)
-      do i=nx1,nx2
-         x=xcord(k)
+do j=ny1,ny2
+do i=nx1,nx2
 
-         ! (x,y,z) is the coordinate of the point (i,j,k)
-         ! u velocity:
-         Q(i,j,k,1) =  0
-         ! v velocity:
-         Q(i,j,k,2) =  0
-         ! w velocity:
-         Q(i,j,k,3) =  0
+   ! get the wave number
+   im=imcord_exp(i)
+   jm=jmcord_exp(j)
+   km=kmcord_exp(k)
 
+   ! n=1,2,3 is the u,v and w components of velocity
+   ! QR(i,j,k,n)  real part of mode (im,jm,km)
+   ! QI(i,j,k,n)  imag part of mode (im,jm,km)
+
+   QR(i,j,k,1:3) = 0
+   QI(i,j,k,1:3) = 0
+
+
+enddo
+enddo
+enddo
+
+!
+!  just in case the code above did not preserve the fact that
+!  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
+!  Reimpose this constraint:
+!
+do n=1,3
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            i1=i; i2 = i1 + imsign(i)
+            j1=j; j2 = j1 + imsign(j)
+            k1=k; k2 = k1 + imsign(k)
+            QR(i2,j2,k2,n)  =  QR(i1,j1,k1,n)
+            QI(i2,j2,k2,n)  = -QI(i1,j1,k1,n)
+         enddo
       enddo
    enddo
 enddo
+
+
+!   convert to physical space, store result in QR
+do n = 1,3
+   write(message,*) 'converting back to gridspace, n=',n   
+   call print_message(message)
+   call complex_to_sincos_field(work,QR(1,1,1,n),QI(1,1,1,n))
+   QR(:,:,:,n)=work
+   call ifft3d(QR(1,1,1,n),work)
+enddo
+
+
+
 end subroutine
 
 
