@@ -37,12 +37,48 @@ do k=nz1,nz2
       enddo
    enddo
 enddo
-
-
-
-
-
 end subroutine
+
+
+
+
+subroutine init_EDQMN(Q,PSI,work,work2)
+!
+!  what is an EDQMN?
+!
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,3)
+real*8 :: PSI(nx,ny,nz,3)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+! local variables
+integer :: i,j,k
+real*8 :: x,y,z
+
+
+do k=nz1,nz2
+   z=zcord(k)
+   do j=ny1,ny2
+      y=ycord(j)
+      do i=nx1,nx2
+         x=xcord(k)
+
+         ! (x,y,z) is the coordinate of the point (i,j,k)
+         ! u velocity:
+         Q(i,j,k,1) =  0
+         ! v velocity:
+         Q(i,j,k,2) =  0
+         ! w velocity:
+         Q(i,j,k,3) =  0
+
+      enddo
+   enddo
+enddo
+end subroutine
+
+
 
 
 

@@ -61,6 +61,7 @@ else
    if (init_cond==8) call init_data_decay(Q,Qhat,work1,work2,1,1,0)     ! decay2048_e
    if (init_cond==10) call init_3d_rot(Q,Qhat,work1,work2,1)            ! 3d_rot 
    if (init_cond==11) call init_TG(Q,Qhat,work1,work2)                  ! Taylor Green
+   if (init_cond==12) call init_EDQMN(Q,Qhat,work1,work2)                  !
 
    if (npassive>0) then
       call init_passive_scalars(1,Q,Qhat,work1,work2)

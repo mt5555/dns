@@ -2813,6 +2813,8 @@ else if (sdata=='3d_rot') then
    init_cond=10
 else if (sdata=='TG') then
    init_cond=11
+else if (sdata=='EDQMN') then
+   init_cond=12
 else 
    print *,'value = >>',sdata,'<<'
    call abortdns("invalid initial condtion specified on line 3 on input file")
