@@ -28,9 +28,9 @@ do k=nz1,nz2
 
          ! (x,y,z) is the coordinate of the point (i,j,k)
          ! u velocity:
-         Q(i,j,k,1) =  sin(3*pi2*x) * cos(2*pi2*y)
+         Q(i,j,k,1) =  sin(pi2*x) * cos(pi2*y) * cos(pi2*z)
          ! v velocity:
-         Q(i,j,k,2) =  0
+         Q(i,j,k,2) =  -cos(pi2*x) * sin(pi2*y) * cos(pi2*z)
          ! w velocity:
          Q(i,j,k,3) =  0
 
