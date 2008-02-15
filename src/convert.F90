@@ -663,19 +663,6 @@ do
             k2=kshell_max+k
 
             work2 = Q(:,:,:,n)
-            call fft_filter_shell1(work2,k)
-            call ifft3d(work2,work1)
-
-            ! compute PDFs
-            call global_max_abs(work2,mx)
-            binsize = mx/100   ! should produce about 200 bins
-
-            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF simplified delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
-            call print_message(message)
-            call compute_pdf_scalar(work2,cpdf(k),binsize)
-
-
-            work2 = Q(:,:,:,n)
             call fft_filter_shell(work2,k)
             call ifft3d(work2,work1)
 
@@ -685,8 +672,20 @@ do
 
             write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
             call print_message(message)
-            call compute_pdf_scalar(work2,cpdf(k2),binsize)
+            call compute_pdf_scalar(work2,cpdf(k),binsize)
 
+
+            work2 = Q(:,:,:,n)
+            call fft_filter_shell1(work2,k)
+            call ifft3d(work2,work1)
+
+            ! compute PDFs
+            call global_max_abs(work2,mx)
+            binsize = mx/100   ! should produce about 200 bins
+
+            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF simplified delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
+            call print_message(message)
+            call compute_pdf_scalar(work2,cpdf(k2),binsize)
 
 
          enddo

@@ -3,7 +3,7 @@
 ns_uvw        ! equations
 decay2048    ! initial condition:  KH-blob, KH-anal, iso12
 5            ! init condition subtype
-0.0 0.0     ! init condition parameter (helicity angle in deg, dummy param)
+0.0   0.0     ! init condition parameter (helicity angle in deg, dummy param)
 none         ! forcing:  none, iso, iso12, iso12w, iso23w
 0.0  0       ! forcing parameters (not used for iso12)
 value        ! viscosity type  (value, smallest, kediff, Re)
@@ -24,15 +24,15 @@ fft-phase     ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
 periodic      ! x bc  (periodic, no-slip)
 periodic      ! y bc
 periodic      ! z bc
-100            ! time to run
-1.5           ! adv cfl  (0 = disabled, use min_dt) 
+100.0         ! time to run
+1.0           ! adv cfl  (0 = disabled, use min_dt) 
 0.200         ! vis cfl  (0 = disabled, use min_dt) 
 0.000          ! min_dt  
 1.001          ! max_dt 
 1             ! restart_dt  (this is not used)
 1.00           ! diag_dt    how often to dump simple diagnostics to file
-.01            ! model_dt   compute and output spectra, structure functions, expensive diagnostics
-.1            ! screen_dt  output info to stdout
+.10            ! model_dt   compute and output spectra, structure functions, expensive diagnostics
+-10            ! screen_dt  output info to stdout
 1             ! output_dt  output snapshots
 0             ! also output the vorticity 
 0             ! n_output_custom  number of custom output times  

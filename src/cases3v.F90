@@ -368,6 +368,8 @@ call rescale_e(Q,work,ener,enerb,enerb_target,NUMBANDS,3,do_rescale)
 ! set the helicity angle to h_angle
 if (init_cond_subtype == 5) then
    h_angle = init_cond_param1*pi/180
+   if (init_cond_param1 == -1 ) h_angle = -1  ! special flag to DISABLE helicity
+                                              ! but still execute code, for testing 
    call set_helicity_angle(Q,PSI,work,h_angle,ener)
 endif
 
@@ -867,20 +869,6 @@ do iii=nx1,nx2
    RR = Q(iii,jjj,kkk,:)
    II = Qi(iii,jjj,kkk,:)
 
-#if 0
-   if (my_pe == io_pe) then 
-      if (i == 1 .and. j == 1 .and. k == 1) then
-         write(6,*)'Pre i,j,k  ',i,j,k
-         write(6,*) RR
-	 write(6,*) II
-      else if (i == -1 .and. j == -1 .and. k == -1) then    
-         write(6,*)'Pre i,j,k  ',i,j,k
-         write(6,*) RR
-	 write(6,*) II
-      endif
-   endif
-#endif
-
    xw2=i**2 + j**2 + k**2
    xw=sqrt(xw2)
 
@@ -977,21 +965,6 @@ do iii=nx1,nx2
       Qi(iii,jjj,kkk,:)=II
    endif
 
-#if 0
-if (my_pe == io_pe) then
-      if (i == 1 .and. j == 1 .and. k == 1) then
-         write(6,*)'post i,j,k  ',i,j,k
-         write(6,*) RR
-	 write(6,*) II
-      else if (i == -1 .and. j == -1 .and. k == -1) then
-         write(6,*)'post i,j,k  ',i,j,k
-         write(6,*) RR
-	 write(6,*) II
-      endif
-   endif
-#endif
-
-
 enddo
 enddo
 enddo
@@ -1007,9 +980,18 @@ do n=1,3
       do jjj=ny1,ny2
          do iii=nx1,nx2
             i1=iii; i2 = i1 + imsign(iii)
-            j1=jjj; j2 = j1 + imsign(jjj)
-            k1=kkk; k2 = k1 + imsign(kkk)
-            Q(i2,j2,k2,n)  =   Q(i1,j1,k1,n)
+            j1=jjj; j2 = j1 + jmsign(jjj)
+            k1=kkk; k2 = k1 + kmsign(kkk)
+#if 0
+            if ( abs(Q(i1,j1,k1,n) -  Q(i2,j2,k2,n) ) > 1e-9 ) then
+               print *,'mode 1',imcord_exp(i1),jmcord_exp(j1),kmcord_exp(k1)
+               print *,'mode 2',imcord_exp(i2),jmcord_exp(j2),kmcord_exp(k2)
+               write(*,'(3i4,4e15.4)') iii,jjj,kkk,&
+                 Q(i1,j1,k1,n), Q(i2,j2,k2,n),&
+                Qi(i1,j1,k1,n),Qi(i2,j2,k2,n)
+            endif
+#endif
+             Q(i2,j2,k2,n)  =   Q(i1,j1,k1,n)
             Qi(i2,j2,k2,n)  = -Qi(i1,j1,k1,n)
          enddo
       enddo
@@ -1017,27 +999,6 @@ do n=1,3
 enddo
 #endif
 
-do kkk=nz1,nz2
-do jjj=ny1,ny2
-do iii=nx1,nx2
-   i=imcord_exp(iii)
-   j=jmcord_exp(jjj)
-   k=kmcord_exp(kkk)
-
-   if (my_pe == io_pe) then
-      if (i == 1 .and. j == 1 .and. k == 1) then
-         write(6,*) "Post  i,j,k  ",i,j,k
-         write(6,*) Q(iii,jjj,kkk,:)
-         write(6,*) Qi(iii,jjj,kkk,:)
-      else if (i == -1 .and. j == -1 .and. k == -1) then
-         write(6,*)'Post i,j,k  ',i,j,k
-         write(6,*) Q(iii,jjj,kkk,:) 
-         write(6,*) Qi(iii,jjj,kkk,:)
-      endif
-   endif
-enddo
-enddo
-enddo
 
 
 
