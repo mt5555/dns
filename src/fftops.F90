@@ -1866,7 +1866,7 @@ end subroutine
 ! (band-filter)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine fft_filter_shell(p,kshell)
+subroutine fft_filter_shell00(p,kshell)
 use params
 implicit none
 real*8 p(nx,ny,nz)
@@ -1891,6 +1891,46 @@ real*8 xw2
 end subroutine
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Filter out spherical wavenumbers other than k_shell specified 
+! (band-filter)
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter_shell(p,kshell)
+use params
+implicit none
+real*8 p(nx,ny,nz)
+integer kshell
+
+integer i,j,k,im,jm,km,ks
+real*8 xw2,xw,xl,xr
+
+   do k=nz1,nz2
+      km=(kmcord(k))
+      do j=ny1,ny2
+         jm=(jmcord(j))
+         do i=nx1,nx2
+            im=(imcord(i))
+            xw2 =  (im**2 + jm**2 + (km/Lz)**2 )
+            ks = nint(sqrt(xw2))
+!            if (ks /= kshell) p(i,j,k)=0
+		xw=sqrt(xw2)
+		xl=kshell-0.5
+		xr=kshell+0.5
+    if( xw.le.xl.or.xw.ge.xr ) p(i,j,k)=0
+
+         enddo
+      enddo
+   enddo
+
+end subroutine
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1906,6 +1946,48 @@ real*8 p(nx,ny,nz)
 integer kshell
 
 integer i,j,k,im,jm,km,ks
+real*8 xw2,xw,xl,xr
+
+   do k=nz1,nz2
+      km=(kmcord(k))
+      do j=ny1,ny2
+         jm=(jmcord(j))
+         do i=nx1,nx2
+            im=(imcord(i))
+            xw2 =  (im**2 + jm**2 + (km/Lz)**2 )
+            ks = nint(sqrt(xw2))
+!            if (ks /= kshell) p(i,j,k)=0
+		xw=sqrt(xw2)
+		xl=kshell-0.01
+		xr=kshell+0.01
+    if( xw.le.xl.or.xw.ge.xr ) p(i,j,k)=0
+
+         enddo
+      enddo
+   enddo
+
+end subroutine
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Filter out spherical wavenumbers other than k_shell specified 
+! (band-filter)
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine fft_filter_shell0(p,kshell)
+use params
+implicit none
+real*8 p(nx,ny,nz)
+integer kshell
+
+integer i,j,k,im,jm,km,ks
 real*8 xw2
 
    do k=nz1,nz2
@@ -1914,7 +1996,7 @@ real*8 xw2
          jm=(jmcord(j))
          do i=nx1,nx2
             im=(imcord(i))
-            if ( abs(im) == kshell .and. jm==0 .and. km==0) then
+            if ( im**2+jm**2+km**2 .ge. kshell) then
                ! keep just the cosine mode (k,0,0)
             else
                p(i,j,k)=0
