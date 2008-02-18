@@ -139,7 +139,7 @@ namedir = '~/';
 %namedir = '/nh/u/skurien/dns/src/tests/';
 
 name = 'TG2560000.0000';
-namedir = '/home/mt/';
+namedir = '/home/mataylo/';
 
 
 spec_r_save=[];
@@ -270,8 +270,8 @@ while (time>=0 & time<=500)
     title(stitle);
 %    loglog53(n_r-1,spec_r,stitle,CK);     %default, with k^-5/3 line
 %    loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
-    pause 
         
+
     %        stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
 %    loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
     
@@ -561,7 +561,8 @@ loglog53(n_r-1,spec_r_ave, stitle,CK); hold on;
 if (fidp>-1); 
   loglog53(np_r,pspec_r_ave,'',1.0,3); hold off;
 end
-   
+
+
 return
 
 

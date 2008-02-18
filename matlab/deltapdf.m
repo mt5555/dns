@@ -9,6 +9,7 @@ clear all;
 
 %fid=fopen('/home/mt/codes/dns/src/temp0001.0000.cpdf','r','l');
 %fid=fopen('../src/temp0100.0000.cpdf','r','l');
+%fid=fopen('../src/temp0001.0000.cpdf','r','l');
 fid=fopen('./sc1024A0002.5000.cpdf','r','l');
 
 time=fread(fid,1,'float64');
@@ -59,7 +60,7 @@ for i=1:npmax
 
 
   if (k==1) 
-    plot(bins,pdf,'r*');
+    semilogy(bins,pdf,'r*');
     title(tstring)
     hold on;
   end
