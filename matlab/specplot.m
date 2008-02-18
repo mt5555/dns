@@ -97,8 +97,8 @@ mu = 1;
 %namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
 
 
-name = 'sc1024A';
-namedir = '/netscratch/skurien/dns_data/sc1024a/';
+name = 'sc1024A0002.0329';
+namedir = '~/';
 
 %name = 'dnsslav_hmin0000.0000';
 %namedir = '~/research.old/projects/bottleneck/';
@@ -110,15 +110,15 @@ namedir = '/netscratch/skurien/dns_data/sc1024a/';
 %name = 'invsc256_minh0000.0000';
 %namedir = '~/research.old/projects/bottleneck/';
 
-name = 'invsc64_minh_phase0000.0000';
-namedir = '~/research.old/projects/bottleneck/n64/fft-phase/';
+%name = 'invsc64_minh_phase0000.0000';
+%namedir = '~/research.old/projects/bottleneck/n64/fft-phase/';
 
 %name = 'invsc64_minh_23sph0000.0000';
 %namedir = '~/research.old/projects/bottleneck/n64/fft-23sphere/';
 
 %name = 'dns_23sph0000.0000';
-name = 'dns_phase0000.0000';
-namedir = '~/research.old/projects/bottleneck/n32/';
+%name = 'dns_phase0000.0000';
+%namedir = '~/research.old/projects/bottleneck/n32/';
 
 %name = 'n256_f2000n5_all';
 %name = 'n256_f1000n5_all';
@@ -135,8 +135,11 @@ namedir = '~/research.old/projects/bottleneck/n32/';
 %name = 'balu_b0000.0000';
 %namedir = '/home/mataylo/scratch3/dns/';
 
-name = 'temp_all';
-namedir = '/nh/u/skurien/dns/src/tests/';
+%name = 'temp_all';
+%namedir = '/nh/u/skurien/dns/src/tests/';
+
+name = 'TG2560000.0000';
+namedir = '/home/mt/';
 
 
 spec_r_save=[];
@@ -261,12 +264,14 @@ while (time>=0 & time<=500)
     %spherical wave number
     figure(1)
     subplot(1,1,1);
-    %    loglog53(n_r-1,spec_r,stitle,CK);hold on;
-        
-    loglog((0:n_r-1),spec_r','b', 'linewidth',1); hold on; 
+
     stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
+    loglog((0:n_r-1),spec_r','b', 'linewidth',1); hold on; 
     title(stitle);
-    
+%    loglog53(n_r-1,spec_r,stitle,CK);     %default, with k^-5/3 line
+%    loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
+    pause 
+        
     %        stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
 %    loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
     
@@ -384,7 +389,6 @@ while (time>=0 & time<=500)
      figure(2);hold off;
 
      np_r=fread(fidp,1,'float64');
-     np_r
      pspec_r=[];
      
      
@@ -440,9 +444,9 @@ while (time>=0 & time<=500)
 
 
        % plot the total energy spectrum
-  figure(6);
-  ts=sprintf('total energy t=%f',time); 
-  loglog53(np_r,spec_r+pspec_r,ts,1.0,6);hold off;
+     figure(6);
+     ts=sprintf('total energy t=%f',time); 
+     loglog53(np_r,spec_r+pspec_r,ts,1.0,6);hold off;
   end
 
 
@@ -554,8 +558,10 @@ spec_r_ave = spec_r_ave/count;
 pspec_r_ave = pspec_r_ave/countp;
 figure(10)
 loglog53(n_r-1,spec_r_ave, stitle,CK); hold on; 
-loglog53(np_r,pspec_r_ave,'',1.0,3); hold off;
-
+if (fidp>-1); 
+  loglog53(np_r,pspec_r_ave,'',1.0,3); hold off;
+end
+   
 return
 
 

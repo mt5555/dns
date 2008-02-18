@@ -18,14 +18,18 @@ if (nargin==4) option=0; end;
 if (option==0) 
   x_ck=1:500;
   % x_ck=-1;  % disable scale line
-   scalep = 0;
-   %scalep = 5/3;   % scale out for a 5/3 slope
-   
    plaw=-5/3;
-   ax=[1,1e4,1e-5,1.0];
 
+   scalep = 0;
+   ax=[1,1e3,1e-6,1.0];
+
+   %scalep = 5/3;   % scale out for a 5/3 slope
+   %ax=[1,1e3,1e-2,10.0];
+                      
    %plaw=-3 
    %ax=[1,1e2,1e-6,1.0];
+   
+
 end
 
 % decay2048 KE:
@@ -72,10 +76,16 @@ if (option==5)
 end
 % used by aspect ratio 2D spectrum
 if (option==6) 
-   x_ck=10:100;      % dont plot 5/3 line
+   x_ck=10:100;     
    scalep = 0;
    plaw=-3;
    ax=[1,1e2,1e-10,1e-1];
+end
+if (option==7) 
+   x_ck=10:100;     
+   scalep = 0;
+   plaw=2;
+   ax=[1,1e3,1e-6,1];
 end
 
 
