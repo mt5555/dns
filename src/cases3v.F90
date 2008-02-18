@@ -24,7 +24,7 @@ do k=nz1,nz2
    do j=ny1,ny2
       y=ycord(j)
       do i=nx1,nx2
-         x=xcord(k)
+         x=xcord(i)
 
          ! (x,y,z) is the coordinate of the point (i,j,k)
          ! u velocity:
