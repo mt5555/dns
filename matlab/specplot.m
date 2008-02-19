@@ -266,10 +266,10 @@ while (time>=0 & time<=500)
     subplot(1,1,1);
 
     stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
-    loglog((0:n_r-1),spec_r','b', 'linewidth',1); hold on; 
-    title(stitle);
+%    loglog((0:n_r-1),spec_r','b', 'linewidth',1); hold on; 
+%    title(stitle);
 %    loglog53(n_r-1,spec_r,stitle,CK);     %default, with k^-5/3 line
-%    loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
+    loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
         
 
     %        stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
