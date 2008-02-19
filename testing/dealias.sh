@@ -13,9 +13,15 @@
 #    compute UN2 (on MxMxM grid)
 #    compare UN2 with UN.  should agree in all modes in N-truncation
 #
+# N=40
+# with fft-phase, TRUNC_SHELL:  26745 modes 2.99e-17
+# with fft-phase, :             28017 modes  4.0e-17
+#
+# N=48
+# with fft-phase, TRUNC_SHELL:  47833   2.88e-17
+# with fft-phase, :             48489   2.86e-17
 #
 #
-
 
 set NCPU1 = 1
 set NCPU2 = 1
@@ -33,7 +39,8 @@ endif
 # contaiminated = M-(2N-M) = 2(M-N)
 # we want 2(M-N) >= N      2M >= 3N  M>= 3N/2
 set M = 72   # allows for N<=48
-set N = 40
+#set N = 40
+set N = 48
 
 if ! (-x convert.big)  then
   ./gridsetup.py 1 1 1 $M $M $M
