@@ -600,6 +600,11 @@ dealias_sphere_kmax2_1 = (dealias_sphere_kmax-.5)**2  ! rounds to k^2 - k
 !dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
 !dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
 !dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
+! also, I think (but I'm not sure):
+! and for exact phase shift dealiasing, in dealias_remove below, change
+!    dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
+! to
+!    dealias_remove = ( ( im**2 + jm**2 + km**2 ) >= dealias_sphere_kmax2 )
 
 
 

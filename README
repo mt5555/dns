@@ -3,14 +3,18 @@
                  mataylo@sandia.gov
 
 ===================================================================
+README: updated 1/20/2008:  
 
- README: updated 8/16/2007:  
+We now support the exact dealiasing based on phase shifting and
+a spherical truncation.
+
+
+README: updated 8/16/2007:  
 
 For pencil decompostions, we now (8/15/2006) have a more efficient
 model "dnsp" that should be used instead of "dns" (but dnsp does not
-yet allow for passive tracers which are not needed for the NSF
-benchmarks).  To compile, type "make dnsp" instead of "make dns", and
-the executable will be named "dnsp".
+yet allow for passive tracers) To compile, type "make dnsp" instead of
+"make dns", and the executable will be named "dnsp".
 
 
 ===================================================================
@@ -212,9 +216,13 @@ Edit the input file
 
     viscosity coefficient mu (line 9)    change to value computed above
                                          in step 0.
-    derivative method (line 14)          set to "fft-dealias" for 2/3 rule,
-                                         or "fft-sphere" for spherical 
-                                         dealiasing 
+    derivative method (line 14)          set to "fft-dealias" for 2/3 rule 
+                                         (exact dealiasing)
+                                         or "fft-sphere" for spherical dealising
+                                         (partial dealiasing, suitable for k^-5/3 or steeper spectra)
+                                         or "fft-phase" for phase shifted + spherical dealising
+                                         (exact dealiasing, 2x more expensive) 
+                                            
     time to run (line 26)                time is measured in dimensional units
                                          For this problem, 1 eddy turnover time
                                          (after the code equilibriates) is 
