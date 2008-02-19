@@ -592,20 +592,19 @@ endif
 ! kmax = 10
 ! kmax2 = 110    (instead of 128)
 !
+#undef TRUNC_SHELL
+#ifdef TRUNC_SHELL
+! these formulas truncate at a complete k spectrum shell boundary k+.5
 dealias_sphere_kmax = floor(  (sqrt(2d0)*g_nmin - 1.5d0)/3 )
 dealias_sphere_kmax2   = (dealias_sphere_kmax+.5)**2  ! rounds to k^2 + k
 dealias_sphere_kmax2_1 = (dealias_sphere_kmax-.5)**2  ! rounds to k^2 - k
-
-!old formulas:
-!dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
-!dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
-!dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
-! also, I think (but I'm not sure):
-! and for exact phase shift dealiasing, in dealias_remove below, change
-!    dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
-! to
-!    dealias_remove = ( ( im**2 + jm**2 + km**2 ) >= dealias_sphere_kmax2 )
-
+#else
+! this formula keeps all modes that are fully dealiased
+! so there will be a prartial shell in the spectrum
+dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
+dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
+dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
+#endif
 
 
 ! this dealiasing is used mostly for debugging:
@@ -815,7 +814,11 @@ ASSERT("dealias_remove: km >= 0 failed",km>=0)
 if (dealias==1) then
    dealias_remove = ( (3*km>=g_nz)  .or.  (3*jm>=g_ny)  .or. (3*im>=g_nx) )
 else if (dealias==2) then
+#ifdef TRUNC_SHELL
    dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
+#else
+   dealias_remove = ( ( im**2 + jm**2 + km**2 ) >= dealias_sphere_kmax2 )
+#endif
 else if (dealias==3) then
    dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_23sphere_kmax2 )
 else
