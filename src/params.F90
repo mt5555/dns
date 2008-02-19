@@ -601,7 +601,16 @@ dealias_sphere_kmax2_1 = (dealias_sphere_kmax-.5)**2  ! rounds to k^2 - k
 #else
 ! this formula keeps all modes that are fully dealiased
 ! so there will be a prartial shell in the spectrum
-dealias_sphere_kmax2 = (2*g_nmin*g_nmin)/9
+! we remove  k^2  >= 2N^2/9
+! if this is NOT an integer, that is the same as:
+!           k^2  >= 1 + floor(2N^2/9)
+! if this IS an integer, that is the same as  
+!           k^2  >= nint(2N^2/9)
+if (mod(g_nmin,3)==0) then
+   dealias_sphere_kmax2 = 2*(g_nmin/3)**2
+else
+   dealias_sphere_kmax2 = 1 + floor(  (2*g_nmin*g_nmin)/9d0 )
+endif
 dealias_sphere_kmax = sqrt(real(dealias_sphere_kmax2))
 dealias_sphere_kmax2_1 = floor( (dealias_sphere_kmax-1)**2 )
 #endif

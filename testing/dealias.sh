@@ -40,7 +40,7 @@ endif
 # we want 2(M-N) >= N      2M >= 3N  M>= 3N/2
 set M = 72   # allows for N<=48
 #set N = 40
-set N = 48
+set N = 32
 
 if ! (-x convert.big)  then
   ./gridsetup.py 1 1 1 $M $M $M
