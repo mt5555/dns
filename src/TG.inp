@@ -6,10 +6,10 @@ TG            ! initial condition:  KH-blob, KH-anal, iso12
 0.0 0.0     ! init condition parameter (helicity angle in deg, dummy param)
 none         ! forcing:  none, iso, iso12, iso12w, iso23w
 0.0  0       ! forcing parameters (not used for iso12)
-value        ! viscosity type  (value, smallest, kediff, Re)
-0.00         ! viscosity coefficient.  (300)
-none         ! hyper vis
-0            ! hyper vis value
+value       ! viscosity type  (value, smallest, kediff, Re)
+0             ! viscosity coefficient
+hyperN        ! hyper vis
+1.0  8  120  ! viscosity coefficient, alpha, k_G
 none         ! hypo vis
 0.0          ! hypo vis value
 0.0           ! fcoriolis  rotation

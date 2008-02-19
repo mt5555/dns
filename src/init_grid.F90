@@ -694,6 +694,7 @@ call mpi_bcast(udm_output,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(equations,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu_hyper_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
+call mpi_bcast(k_Gt,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu_hypo_value,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(mu_hyper,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(hyper_implicit,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
@@ -2912,7 +2913,7 @@ endif
 !
 read(5,'(a12)') sdata
 if (sdata=='hyperN') then
-   read(5,*) rvalue, mu_hyper
+   read(5,*) rvalue, mu_hyper, k_Gt
 else
    read(5,*) rvalue
 endif
@@ -2943,7 +2944,7 @@ else if (sdata=='hyper16') then
    mu_hyper_value = rvalue
 else if (sdata=='hyperN') then
    mu_hyper = mu_hyper/2   ! divide by two because we compute (k^2)^mu_hyper
-   mu_hyper_value = rvalue
+   mu_hyper_value = rvalue*(pi2 * k_Gt)**(-2*mu_hyper)
 else if (sdata=='hyper16_imp') then
    hyper_implicit=1
    mu_hyper=8
