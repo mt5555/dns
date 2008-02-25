@@ -39,27 +39,30 @@ real*8 :: f_diss,param,fxx_diss
 ! determinisitic with E1=E2=.5
 if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss,fxx_diss,0)
 
-! stochastic, wave numbers 1,2
+! stochastic, wave numbers 1,2   input file name: 'iso12'
 if (forcing_type==2) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
-! determinisitic with Overholt and Pope spectrum
+! determinisitic with Overholt and Pope spectrum   input file name: 'iso'
 if (forcing_type==3) call sforcing12(rhs,Qhat,f_diss,fxx_diss,1)
 
 ! stochastic, wave numbers 2,3
 if (forcing_type==4) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
 ! determinisitic - Balu: single high wave number 
-! do nothing - this forcing is handled in ns.F90
+! This forcing is handled in ns.F90    input file name: 'balu'
 if (forcing_type==5) call sforcing12(rhs,Qhat,f_diss,fxx_diss,2)
 
-! determinisitic with E1=E2=.5, also impose helicity
+! determinisitic with E1=E2=.5, also impose helicity   input file name: 'iso12_hel'
 if (forcing_type==6) call sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,0)
 
-! determinisitic - high wavenumber
+! determinisitic - high wavenumber   input file name: 'iso_high_24', 'iso_high_16'
 if (forcing_type==7) call sforcing12(rhs,Qhat,f_diss,fxx_diss,3)
 
 ! stochastic high wavenumber forcing
 if (forcing_type==8) call stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,0)
+
+! determinisitic with E1=1.0   input file name: 'iso1'
+if (forcing_type==9) call sforcing12(rhs,Qhat,f_diss,fxx_diss,4)
 
 if (Lz/=1 .and. forcing_type/=8) then
    call abortdns("Error: only forcing_type==8 has been coded for Lz<>1")
@@ -120,10 +123,11 @@ subroutine sforcing12(rhs,Qhat,f_diss,fxx_diss,model_spec)
 ! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
 ! Force 3D wave numbers 2 back to the sphere E=2**(-5/3)
 !
-! model_spec==0    E(1)=E(2)=.5
+! model_spec==0    E(1)=E(2)=.5            'iso12' option
 ! model_spec==1    Overholt & Pope
 ! model_spec==2    Balu
 ! model_spec==3    high wave number for rotation case
+! model_spec==4    E(1) = 1.0              'iso1' option
 !
 use params
 use mpi
@@ -139,21 +143,21 @@ character(len=80) :: message
 
 if (0==init_sforcing) then
    numb1=1
-   if (model_spec==0) then
+   if (model_spec==0) then                        ! 'iso12' option
       numb=2   ! apply forcing in bands 1,2
       call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=.5
       enddo
    endif
-   if (model_spec==1) then  ! like O&P
+   if (model_spec==1) then                         ! 'iso' option   Overhold&Pope
       numb=8
       call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
-   if (model_spec==2) then     ! balu forcing
+   if (model_spec==2) then     ! balu forcing      ' bal  
       numb1=dealias_23_kmax-1
       numb=dealias_23_kmax
       call sforcing_init()
@@ -169,7 +173,20 @@ if (0==init_sforcing) then
          ener_target(wn)=exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
       enddo
    endif
+   if (model_spec==4) then                        ! 'iso1' option
+      numb=1   ! apply forcing in bands 1 only
+      call sforcing_init()
+      do wn=numb1,numb
+         ener_target(wn)=1.0
+      enddo
+   endif
    if (numb>numb_max) call abortdns("sforcing12: numb_max too small")
+   if (io_pe==my_pe) then
+      print *,'Using Deterministic Low Wave Number Forcing. Target spectrum:'
+      do wn=numb1,numb
+         print *,'shell k=',wn,'  energy=',ener_target(wn)
+      enddo
+   endif
 endif
 
 

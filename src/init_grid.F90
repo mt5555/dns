@@ -2871,6 +2871,8 @@ else if (sdata=='sto_high_32') then
 else if (sdata=='sto_high_64') then
    forcing_peak_waveno=64
    forcing_type=8
+else if (sdata=='iso1') then
+   forcing_type=9
 else 
    call abortdns("invalid forcing type specified on line 4 on input file")
 endif
