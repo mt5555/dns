@@ -9,7 +9,7 @@ none         ! forcing:  none, iso, iso12, iso12w, iso23w
 value       ! viscosity type  (value, smallest, kediff, Re)
 0             ! viscosity coefficient
 hyperN        ! hyper vis
-1.0  8  120  ! viscosity coefficient, alpha, k_G
+1.0  80  15.08494466531  ! viscosity coefficient, alpha, k_G
 none         ! hypo vis
 0.0          ! hypo vis value
 0.0           ! fcoriolis  rotation

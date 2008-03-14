@@ -84,8 +84,8 @@ character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
 
 ! input file
-tstart=1.0
-tstop=1.0
+tstart=2.5
+tstop=2.5
 tinc=0.1
 
 
@@ -597,7 +597,7 @@ do
          call print_stats(Q,vor,work1,work2)
       endif
 
-      do n=1,1  !  n=1,2,3 loops over (u,v,w) velocity components
+      do n=2,2  !  n=1,2,3 loops over (u,v,w) velocity components
          write(message,'(a,i4)') 'computing fft3d of input: n=',n
          call print_message(message)
          call fft3d(Q(1,1,1,n),work1)

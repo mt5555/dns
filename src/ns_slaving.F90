@@ -127,7 +127,7 @@ do j=1,ny_2dz
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
-               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
+               xw_viss=xw_viss + mu_hyper_value*(xw2/pi2_squared/k_Gt**2)**mu_hyper
             endif
             if (mu_hyper==0) then
                xw_viss=xw_viss + mu_hyper_value
@@ -188,7 +188,9 @@ do j=1,ny_2dz
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
-               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
+!               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
+               xw_viss=xw_viss + mu_hyper_value*(xw2/pi2_squared/k_Gt**2)**mu_hyper
+
             endif
             if (mu_hyper==0) then
                xw_viss=xw_viss + mu_hyper_value
@@ -207,7 +209,7 @@ do j=1,ny_2dz
                 &   /5040.0d0*delt				
                    else
                       cc = ( exph_f - 1.0d0 )/ch_h*dth
-				cf = (  2.0d0+ ch +exp_f*(-2.0d0+ ch)  )/ch/ch/ch*delt					  
+			cf = (  2.0d0+ ch +exp_f*(-2.0d0+ ch)  )/ch/ch/ch*delt					  
                    endif
 				   		   
       Q(k,i,j,n)=Q(k,i,j,n)+2*rhs(k,i,j,n)*cf             ! accumulate RHS
@@ -240,8 +242,9 @@ do j=1,ny_2dz
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
-               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
-            endif
+!               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
+               xw_viss=xw_viss + mu_hyper_value*(xw2/pi2_squared/k_Gt**2)**mu_hyper 
+           endif
             if (mu_hyper==0) then
                xw_viss=xw_viss + mu_hyper_value
             endif
@@ -259,7 +262,7 @@ do j=1,ny_2dz
                 &   /5040.0d0*delt				
                    else
                       cc = ( exph_f - 1.0d0 )/ch_h*dth
-				cf = (  2.0d0+ ch +exp_f*(-2.0d0+ ch)  )/ch/ch/ch*delt					  
+			cf = (  2.0d0+ ch +exp_f*(-2.0d0+ ch)  )/ch/ch/ch*delt					  
                    endif
 				   		   
       Q(k,i,j,n)=Q(k,i,j,n)+2*rhs(k,i,j,n)*cf             ! accumulate RHS
@@ -294,8 +297,10 @@ do j=1,ny_2dz
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
-               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
-            endif
+!               xw_viss=xw_viss + mu_hyper_value*xw2**mu_hyper
+               xw_viss=xw_viss + mu_hyper_value*(xw2/pi2_squared/k_Gt**2)**mu_hyper
+ 
+           endif
             if (mu_hyper==0) then
                xw_viss=xw_viss + mu_hyper_value
             endif
@@ -310,7 +315,7 @@ do j=1,ny_2dz
 			cf = (  840.0d0 - 42.0d0*ch**2 - 14.0d0*ch**3 - 3.0d0*ch**4  ) &
                 &   /5040.0d0 * delt			
                    else
-				cf = (  -4.0d0-3.0d0*ch - ch**2.0d0+exp_f*(4.0d0-ch)  )/ch/ch/ch* delt				  
+			cf = (  -4.0d0-3.0d0*ch - ch**2.0d0+exp_f*(4.0d0-ch)  )/ch/ch/ch*delt				  
                    endif
 
 				   		   

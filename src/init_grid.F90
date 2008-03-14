@@ -2946,7 +2946,9 @@ else if (sdata=='hyper16') then
    mu_hyper_value = rvalue
 else if (sdata=='hyperN') then
    mu_hyper = mu_hyper/2   ! divide by two because we compute (k^2)^mu_hyper
-   mu_hyper_value = rvalue*(pi2 * k_Gt)**(-2*mu_hyper)
+!   mu_hyper_value = rvalue*(pi2 * k_Gt)**(-2*mu_hyper)
+   mu_hyper_value = rvalue
+
 else if (sdata=='hyper16_imp') then
    hyper_implicit=1
    mu_hyper=8
