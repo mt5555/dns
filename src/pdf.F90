@@ -566,8 +566,32 @@ end subroutine
 
 
 
-
 subroutine output_pdf(time,fid,fidj,fidS,fidC,fidcore)
+use params
+implicit none
+real*8 time
+CPOINTER fid   ! velcoity PDFs
+CPOINTER fidj  ! joint velocity PDFs
+CPOINTER fidS  ! passive scalar PDFs
+CPOINTER fidC  ! cpdf scalar PDFs
+CPOINTER fidcore  ! x-direction core data
+
+integer i,j,ierr,ndelta,numm,n
+character(len=80) message
+real*8 x
+
+call output_pdf_noreset(time,fid,fidj,fidS,fidC,fidcore)
+call reset_pdf
+! note: output pdf will destroy them because of the MPI sum to processor 0
+! maybe we need to fix this so we can output pdfs, but then keep accumulating
+! into the pdf
+end subroutine
+
+
+
+
+
+subroutine output_pdf_noreset(time,fid,fidj,fidS,fidC,fidcore)
 use params
 implicit none
 real*8 time
@@ -681,8 +705,6 @@ if (my_pe==io_pe) then
    endif
 endif
 
-
-call reset_pdf
 
 
 end subroutine

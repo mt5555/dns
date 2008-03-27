@@ -27,7 +27,7 @@ real*8 :: x,zero_len
 real*8 :: divx,divi,mx,binsize
 real*8 :: one=1
 integer i,j,k,n,ierr,csig,k2
-integer :: n1,n1d,n2,n2d,n3,n3d,kshell_max,compute_pdfs,output_pdfs
+integer :: n1,n1d,n2,n2d,n3,n3d,kshell_max
 integer,save :: pdf_binsize_set=0
 character(len=280) :: message
 CPOINTER fid,fidj,fidS,fidcore,fidC
@@ -199,24 +199,12 @@ if (diag_struct==1) then
 endif
 
 
-compute_pdfs = 0
-output_pdfs = 0
-if (diag_pdfs==1) then   ! flag telling us to compute PDFs
-   compute_pdfs = 1      ! and output after each snapshot 
-   output_pdfs = 1
-endif
-if (diag_pdfs== -1) then   ! flag telling us to compute PDFs
-                         ! but only output at end of run 
-   if (time> 1.0 ) compute_pdfs = 1
-   if (time>=time_final-1e-7) output_pdfs = 1
-endif
 
-
-if (compute_pdfs==1) then
+if (diag_pdfs ==1 .or. (diag_pdfs==-1 .and. time > 2.3)  ) then
    kshell_max = nint(dealias_sphere_kmax)
    
    ! tell PDF module what we will be computing: 
-   number_of_cpdf = kshell_max*2   !   
+   number_of_cpdf = kshell_max  !   
    compute_uvw_pdfs = .true.    ! velocity increment PDFs
    compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
    compute_passive_pdfs = .false.  ! passive scalar PDFs
@@ -260,35 +248,12 @@ if (compute_pdfs==1) then
             ! dont change binsize
             call compute_pdf_scalar(work2,cpdf(k))
          endif
-
-         work2 = q1(:,:,:,n)
-         call fft_filter_shell1(work2,k)
-         call ifft3d(work2,work1)
-
-         k2 = kshell_max + k
-         if (pdf_binsize_set==0) then
-            call global_max_abs(work2,mx)
-            binsize = mx/100   ! should produce about 200 bins
-            write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF simplified delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
-            call print_message(message)
-
-            ! compute PDFs.  First time, specify binsize
-            call compute_pdf_scalar(work2,cpdf(k2),binsize)
-         else
-            ! dont change binsize
-            call compute_pdf_scalar(work2,cpdf(k2))
-         endif
-
-
-
       enddo
    enddo
    pdf_binsize_set=1
-endif
 
 
 
-if (output_pdfs==1) then
 
    if (my_pe==io_pe) then
       write(message,'(f10.4)') 10000.0000 + time
@@ -344,8 +309,8 @@ if (output_pdfs==1) then
    if (compute_uvw_jpdfs .and. my_pe==io_pe) call cclose(fidj,ierr)
    if (compute_passive_pdfs .and. my_pe==io_pe) call cclose(fidS,ierr)
    if (number_of_cpdf>0  .and. my_pe==io_pe) call cclose(fidC,ierr)
-
 endif
+
 
 ! time averaged dissapation and forcing:
 !call compute_time_averages(Q,q1,q2,q3(1,1,1,1),q3(1,1,1,2),q3(1,1,1,3),time)
