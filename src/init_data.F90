@@ -89,6 +89,8 @@ subroutine init_data_restart(Q,Qhat,work1,work2)
 !
 !
 use params
+use pdf
+use mpi
 implicit none
 real*8 :: Q(nx,ny,nz,n_var)
 real*8 :: Qhat(nx,ny,nz,n_var)
@@ -98,11 +100,40 @@ real*8 :: work2(nx,ny,nz)
 !local
 character(len=80) message
 character(len=80) fname
-integer :: n
+integer :: n,ierr
+CPOINTER :: fid
 
 Q=0
 time_initial=-1
 call input_uvw(time_initial,Q,Qhat,work1,work2,header_user)
+
+if (diag_pdfs /= 0) then
+   if (my_pe==io_pe) then
+      ! see if there is a restart.cpdf file:
+      call copen(rundir(1:len_trim(rundir)) // "restart.cpdf","r",fid,ierr)
+      if (ierr/=0) then
+         print *,"Could not open restart.cpdf file. code will recompute PDF binsizes"
+      else
+         call read_cpdf_binsize(fid)
+         call cclose(fid,ierr)
+      endif
+#ifdef USE_MPI
+      call mpi_bcast(number_of_cpdf_restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+      if (number_of_cpdf_restart>0) &
+           call mpi_bcast(cpdf_restart_binsize,number_of_cpdf_restart,MPI_REAL8,io_pe,comm_3d ,ierr)
+#endif
+   else
+#ifdef USE_MPI
+      call mpi_bcast(number_of_cpdf_restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+      if (number_of_cpdf_restart>0) then
+         allocate(cpdf_restart_binsize(number_of_cpdf_restart))
+         call mpi_bcast(cpdf_restart_binsize,number_of_cpdf_restart,MPI_REAL8,io_pe,comm_3d ,ierr)
+      endif
+#endif
+   endif
+endif
+
+
 
 
 write(message,'(a,f10.4)') "restart time=",time_initial

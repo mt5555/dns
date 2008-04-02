@@ -103,6 +103,13 @@ type(pdf_structure_function) ::  SCALARS(n_var-2)
 type(pdf_structure_function),allocatable ::  cpdf(:)
 integer :: number_of_cpdf = 0
 
+! on restart runs, if a "restart.cpdf" file was giving
+integer :: number_of_cpdf_restart=0
+real*8,allocatable  :: cpdf_restart_binsize(:)
+
+
+
+
 integer :: overflow=0    ! count the number of overflow messages
 integer :: joverflow=0    ! count the number of overflow messages
 real*8  :: one_third = (1d0/3d0)
@@ -709,6 +716,40 @@ endif
 
 end subroutine
 
+
+
+
+subroutine read_cpdf_binsize(fid)
+!
+!  read "restart.cpdf" to determine binsizes
+! 
+CPOINTER :: fid  
+integer :: kmax
+
+! local
+integer :: ndelta,k,i
+real*8 :: x,time
+
+! read in the number of k-shell pdfs.
+call cread8(fid,time,1) ; kmax = x
+call cread8(fid,x,1) ; kmax = x          ! number of PDFs
+call cread8(fid,x,1) ; ndelta = x        ! number of delta's for each PDF
+if (ndelta>1) &                           ! should be 1
+    call abortdns("Error reading restart CPDF: ndelta should be 1")
+
+
+allocate(cpdf_restart_binsize(kmax)) 
+do k=1,kmax
+   do i=1,ndelta
+      call cread8(fid,x,1); ! delta_val(i)  not used.
+   enddo
+   call cread8(fid,x,1);  ! read in a "0", unused field
+   call cread8(fid,cpdf_restart_binsize(k),ndelta)
+enddo
+
+number_of_cpdf_restart=kmax
+
+end subroutine
 
 
 
