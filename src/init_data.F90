@@ -116,6 +116,7 @@ if (diag_pdfs /= 0) then
       else
          call read_cpdf_binsize(fid)
          call cclose(fid,ierr)
+         print *,"PDF binsizes succesfully read from restart.cpdf file"
       endif
 #ifdef USE_MPI
       call mpi_bcast(number_of_cpdf_restart,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
