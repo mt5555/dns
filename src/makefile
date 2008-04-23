@@ -214,7 +214,7 @@ endif
 ifeq ($(UNAME),AIX)
    F90 = mpxlf95
    F77FIXED = -qfixed
-   FFLAGS = -WF,"-Dflush=flush_,-DUSE_MPI,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
+   FFLAGS = -WF,"-Dflush=flush_,-DUSE_MPI,-DNDEBUG,-DMPI_HAS_REAL8"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
    CC = cc -DF_NO_UNDERSCORE
 
    USE_ALPHA = -WF,"-DALPHA_MODEL"
