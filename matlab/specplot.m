@@ -97,8 +97,10 @@ mu = 1;
 %namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
 
 
-name = 'sc1024A0002.0329';
-namedir = '~/';
+name = 'sc2048A0000.9500';
+namedir = '~/data/dns/sc2048A/';
+name = 'sc1024A';
+namedir = '~/data/dns/sc1024A/';
 
 %name = 'dnsslav_hmin0000.0000';
 %namedir = '~/research.old/projects/bottleneck/';
@@ -138,8 +140,8 @@ namedir = '~/';
 %name = 'temp_all';
 %namedir = '/nh/u/skurien/dns/src/tests/';
 
-name = 'TG2560000.0000';
-namedir = '/home/mataylo/';
+%name = 'TG2560000.0000';
+%namedir = '/home/mataylo/';
 
 
 spec_r_save=[];
@@ -268,8 +270,8 @@ while (time>=0 & time<=500)
     stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
 %    loglog((0:n_r-1),spec_r','b', 'linewidth',1); hold on; 
 %    title(stitle);
-%    loglog53(n_r-1,spec_r,stitle,CK);     %default, with k^-5/3 line
-    loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
+    loglog53(n_r-1,spec_r,stitle,CK);     %default, with k^-5/3 line
+%    loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
         
 
     %        stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);

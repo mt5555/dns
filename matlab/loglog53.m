@@ -23,8 +23,8 @@ if (option==0)
    scalep = 0;
    ax=[1,1e3,1e-6,1.0];
 
-   %scalep = 5/3;   % scale out for a 5/3 slope
-   %ax=[1,1e3,1e-2,10.0];
+   scalep = 5/3;   % scale out for a 5/3 slope
+   ax=[1,1e3,1e-2,10.0];
                       
    %plaw=-3 
    %ax=[1,1e2,1e-6,1.0];

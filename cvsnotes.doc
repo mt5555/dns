@@ -1,28 +1,21 @@
 =================================================================
 Initial Setup
 =================================================================
-Put this in your .cshrc file:
+Check that you can login to the CVS server by running:
+
+% ssh solano.homeip.net
+
+
+Put this in your .cshrc file: (or remember to set it everytime you
+run any cvs commands):
 
 setenv CVS_RSH ssh
-
-
-Put this in your .ssh/config:
-
-Host solano
-Hostname solano.homeip.net
-HostKeyAlias solano
-User username-on-solano
-
-
-Now check that you can login to the CVS server by running:
-
-% ssh solano
 
 
 =================================================================
 Initial checkout of CVS repository (only done once)
 =================================================================
-cvs -d username@solano:/home/mt/cvsroot checkout dns
+cvs -d username@solano.homeip.net:/home/mt/cvsroot checkout dns
 
 this will create a directory dns containing the source code
 

@@ -17,6 +17,8 @@ F77FIXED=
 MPI = 
 MPILIB = 
 
+USE_ALPHA = -DALPHA_MODEL
+USE_LERAY = -DALPHA_MODEL -DLERAY_MODEL
 
 ifeq ($(UNAME),Linux)
    VENDOR=LAHEY
@@ -214,6 +216,9 @@ ifeq ($(UNAME),AIX)
    F77FIXED = -qfixed
    FFLAGS = -WF,"-Dflush=flush_,-DUSE_MPI,-DNDEBUG"  -qsuffix=cpp=F90  -g -O3 -qmaxmem=-1 -qstrict 
    CC = cc -DF_NO_UNDERSCORE
+
+   USE_ALPHA = -WF,"-DALPHA_MODEL"
+   USE_LERAY = -WF,"-DALPHA_MODEL -DLERAY_MODEL"
 endif
 
 
@@ -391,10 +396,11 @@ dep:
 
 -include .depends
 
+
 ns_alpha.o: ns.F90 ns.o
-	$(COMPILE) -DALPHA_MODEL -o ns_alpha.o ns.F90
+	$(COMPILE) $(USE_ALPHA) -o ns_alpha.o ns.F90
 ns_leray.o: ns.F90 ns.o
-	$(COMPILE) -DALPHA_MODEL -DLERAY_MODEL -o ns_leray.o ns.F90
+	$(COMPILE) $(USE_LERAY) -o ns_leray.o ns.F90
 
 params.h:  
 	echo "Run gridsetup.py to generage a params.h file!"
