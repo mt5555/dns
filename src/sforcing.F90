@@ -64,6 +64,11 @@ if (forcing_type==8) call stochastic_highwaveno(rhs,Qhat,f_diss,fxx_diss,0)
 ! determinisitic with E1=1.0   input file name: 'iso1'
 if (forcing_type==9) call sforcing12(rhs,Qhat,f_diss,fxx_diss,4)
 
+! determinisitic E(1) only, with fixed epsilon, also impose helicity   
+! input file name: 'iso1_hel'
+if (forcing_type==6) call sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,2)
+
+
 if (Lz/=1 .and. forcing_type/=8) then
    call abortdns("Error: only forcing_type==8 has been coded for Lz<>1")
 endif
@@ -319,6 +324,7 @@ subroutine sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,model_spec)
 !
 ! model_spec==0    E(1)=E(2)=.5
 ! model_spec==1    Overholt & Pope
+! model_spec==2    forcing in E(1), with prescribed epsilon
 !
 use params
 use mpi
@@ -362,11 +368,20 @@ if (0==init_sforcing) then
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
+   if (model_spec==1) then
+      numb=1
+      call sforcing_init()
+      do wn=numb1,numb
+         ener_target(wn)=0   ! ener_target is not used
+      enddo
+   endif
    if (numb>numb_max) call abortdns("sforcing12_helicity: numb_max too small")
 endif
 
-
-
+!
+!  compute grad(u)^2, used for O&P type relaxation coeffient
+!  (not needed for prescribed epsilon forcing)
+!
 if (g_u2xave==0) then
    ! on first call, this will not have been computed, so lets
    ! compute it here:  ints(2)

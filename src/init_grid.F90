@@ -2841,6 +2841,8 @@ else if (sdata=='balu') then
    forcing_type=5
 else if (sdata=='iso12_hel') then
    forcing_type=6
+else if (sdata=='iso1_hel') then
+   forcing_type=10
 else if (sdata=='iso_high_24') then
    forcing_peak_waveno=24
    forcing_type=7
