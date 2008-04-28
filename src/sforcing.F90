@@ -66,7 +66,7 @@ if (forcing_type==9) call sforcing12(rhs,Qhat,f_diss,fxx_diss,4)
 
 ! determinisitic E(1) only, with fixed epsilon, also impose helicity   
 ! input file name: 'iso1_hel'
-if (forcing_type==6) call sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,2)
+if (forcing_type==6) call sforcing12_helicity_fixepsilon(rhs,Qhat,f_diss,fxx_diss,2)
 
 
 if (Lz/=1 .and. forcing_type/=8) then
@@ -324,7 +324,7 @@ subroutine sforcing12_helicity(rhs,Qhat,f_diss,fxx_diss,model_spec)
 !
 ! model_spec==0    E(1)=E(2)=.5
 ! model_spec==1    Overholt & Pope
-! model_spec==2    forcing in E(1), with prescribed epsilon
+! model_spec==2    forcing in E(1)
 !
 use params
 use mpi
@@ -368,7 +368,7 @@ if (0==init_sforcing) then
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
-   if (model_spec==1) then
+   if (model_spec==2) then
       numb=1
       call sforcing_init()
       do wn=numb1,numb
@@ -434,6 +434,9 @@ if (.not. allocated(rmodes)) then
 endif
 
 
+!
+! compute E(k), and convert from sin/cos to complex mode representation
+!
 f_diss=0
 fxx_diss=0
 ener=0
@@ -477,10 +480,6 @@ do wn=numb1,numb
    enddo
 enddo
 
-
-! convert to complex FFT coefficients (for testing)
-!call random_number(rmodes); rmodes2=rmodes
-
 do n=1,3
    ! note: using rmodes(:,:,:,n) fails under ifc/linux.  why?
    call sincos_to_complex(rmodes(-numb,-numb,-numb,n),&
@@ -500,16 +499,11 @@ do k=-numb,numb
       mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
 
       fix = 1
-      if (mod_rr == 0) then
+      if (mod_rr == 0 .or. mod_ii ==0 .or. k2 == 0) then
          fix = 0
-      elseif (mod_ii == 0) then
-         fix = 0
-!      elseif (h_angle == 0.0d0) then
-!         fix = 0
       endif
       
 !     do the transformation if fix = 1
-
       if (fix == 1) then         
 
          RRhat = RR/mod_rr
@@ -518,36 +512,10 @@ do k=-numb,numb
          khat(3) = k/sqrt(k2*1.0d0)
          
 !        yhat = khat X RRhat (coordinate system with zhat=khat and xhat = RRhat
-
          yhat(1) = khat(2)*RRhat(3) - khat(3)*RRhat(2)
          yhat(2) = - (khat(1)*RRhat(3) - khat(3)*RRhat(1))
          yhat(3) = khat(1)*RRhat(2) - khat(2)*RRhat(1)
          
-!      	first check that RR and II are orthogonal to k (incompressibility).
-!       This is confirmed. Comment out.
-
-!	RRdotk = (RR(1)*i + RR(2)*j + RR(3)*k)
-!	IIdotk = (II(1)*i + II(2)*j + II(3)*k)
-!        write(6,*)'RRdotk_ang = ',acos(RRdotk/mod_rr/sqrt(k2*1.0d0)),i,j,k
-!        write(6,*)'IIdotk_ang = ',acos(IIdotk/mod_ii/sqrt(k2*1.0d0)),i,j,k
-
-!     Rotate II and RR into plane orthogonal to k
-!     Don't need to do this for Mark's isotropic forcing since incompressibility
-!      already ensures this. Comment out.
-
-!      mod_RRxk = sqrt((RR(2)*k - RR(3)*j)**2 + (RR(1)*k - RR(3)*i)**2 + (RR(1)*j - RR(2)*i)**2)
-!      RRxk_hat(1) = (RR(2)*k - RR(3)*j)/mod_RRxk
-!      RRxk_hat(2) = -(RR(1)*k - RR(3)*i)/mod_RRxk
-!      RRxk_hat(3) = (RR(1)*j - RR(2)*i)/mod_RRxk
-!      IIp = mod_ii * RRxk_hat
-
-!     mod_IIxk = sqrt((II(2)*k - II(3)*j)**2 + (II(1)*k - II(3)*i)**2 + (II(1)*j - II(2)*i)**2)
-!      IIxk_hat(1) = (II(2)*k - II(3)*j)/mod_IIxk
-!      IIxk_hat(2) = -(II(1)*k - II(3)*i)/mod_IIxk
-!      IIxk_hat(3) = (II(1)*j - II(2)*i)/mod_IIxk
-!      RR = mod_rr * IIxk_hat
-	
-
          IIp = II	
 
 !        write II in terms of new coordinate system (z=khat,x=RRhat,y=yhat)
@@ -562,32 +530,11 @@ do k=-numb,numb
          IIp(3) = II(3)
          
          
-!         check angle between RR and IIp 
-!         acos(IIp(1)/mod_ii) == h_angle, or IIp(1)/mod_ii == cos(h_angle)
-!         if (abs(IIp(1) - mod_ii*(cos_h_angle)) >1e-10*mod_ii) then
-!            tta = acos(IIp(1)/mod_ii)
-!            print *,'h_angle = ',tta
-!            write(6,*)'postfix angle bet. RR and IIp = ', tta*180/pi
-!         endif
-         
          ! now write II in old (i,j,k) coordinate system
-         
          II(1) = IIp(1)*RRhat(1) + IIp(2)*yhat(1) + IIp(3)*khat(1)
          II(2) = IIp(1)*RRhat(2) + IIp(2)*yhat(2) + IIp(3)*khat(2)
          II(3) = IIp(1)*RRhat(3) + IIp(2)*yhat(3) + IIp(3)*khat(3)
          
-
-
-!        check angle between final RR and II again
-!         RRdotII = RR(1)*II(1) + RR(2)*II(2) + RR(3)*II(3)
-!         costta = (RRdotII/(mod_rr * mod_ii))
-!	write(6,*),'costta =',costta
-!         if (abs(costta - cos_h_angle) >1e-10) then
-!            tta = acos(costta)
-!           write(6,*),'h_angle = ',h_angle
-!            write(6,*)'postfix angle bet. RR and II = ', tta*180/pi
-!         endif
-
       
          cmodes(1,i,j,k,:) = RR	
          cmodes(2,i,j,k,:) = II	
@@ -598,30 +545,18 @@ enddo
 enddo
       
 !     convert back:
-
 do n=1,3
       call complex_to_sincos(rmodes(-numb,-numb,-numb,n),&
       cmodes(1,-numb,-numb,-numb,n),numb)
 enddo
 
-! for testing...
-#if 0
-do i=-numb,numb
-do j=-numb,numb
-do k=-numb,numb
-   if (abs(rmodes(i,j,k,1)-rmodes2(i,j,k,1))>1e-10) then
-   write(*,'(i3,i3,i3,f20.10,f20.10)') i,j,k,rmodes(i,j,k,1),rmodes2(i,j,k,1)
-   endif
-enddo
-enddo
-enddo
-stop
-#endif
-
 
 do wn=numb1,numb
-   ! Qf = Q*sqrt(ener_target/ener)
-   ! forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
+   ! original, without helicity changes:
+   !    Qf = Q*sqrt(ener_target/ener)
+   !    forcing = 1/tau (Qf-Q) = 1/tau * (sqrt(ener_target/ener)-1) Q
+   ! but now we've changed the phase of Qf, and thus we keep the form:
+   !    forcing = 1/tau ( Qf - Q )
 
    tauf=tau_inv
    ! make sure tauf is not too large that forcing is unstable:
@@ -662,6 +597,257 @@ do wn=numb1,numb
 enddo
 end subroutine 
    
+
+
+
+
+subroutine sforcing12_helicity_fixepsilon(rhs,Qhat,f_diss,fxx_diss,model_spec)
+!
+! Add a forcing term to rhs.
+! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
+! Force 3D wave numbers 2 back to the sphere E=2**(-5/3)
+!
+! and in addition, force to a prescribed angle to impose some helicity
+!
+! model_spec==0    E(1)=E(2)=.5
+! model_spec==1    Overholt & Pope
+! model_spec==2    forcing in E(1)
+!
+use params
+use mpi
+implicit none
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
+integer :: model_spec
+integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix
+real*8 xw,xfac,f_diss,tau1,tau2,fxx_diss
+real*8 ener_r(numb_max),ener(numb_max),temp(numb_max),Qdel(3)
+real*8,allocatable,save :: rmodes(:,:,:,:)
+real*8,allocatable,save :: rmodes2(:,:,:,:)
+real*8,allocatable,save :: cmodes(:,:,:,:,:)
+real*8 RR(3),II(3), IIp(3), RRhat(3), khat(3), yhat(3),RRxk_hat(3), IIxk_hat(3),RRxIIp(3)
+real*8 mod_ii, mod_rr, mod_IIp, mod_RRxk, RRdotk, IIdotk, RRdotII, RRdotIIp, mod_IIxk
+real*8 costta, tta, tta_sgn, theta,  phi 
+real*8,save :: h_angle,cos_h_angle,sin_h_angle
+character(len=80) :: message
+
+
+
+if (0==init_sforcing) then
+   !should have h_angle inputted by user eventually
+   h_angle = 0.0d0
+!   h_angle = pi/2
+   cos_h_angle=cos(h_angle)
+   sin_h_angle=sin(h_angle)
+
+   numb1=1
+   if (model_spec==0) then
+      numb=2   ! apply forcing in bands 1,2
+      call sforcing_init()
+   endif
+   if (model_spec==1) then
+      numb=8
+      call sforcing_init()
+   endif
+   if (model_spec==2) then
+      numb=1
+      call sforcing_init()
+   endif
+   if (numb>numb_max) call abortdns("sforcing12_helicity: numb_max too small")
+endif
+
+
+if (ntot==0) return
+! only CPUS which belong to "comm_sforcing" beyond this point!
+
+
+
+if (.not. allocated(rmodes)) then
+   allocate(rmodes(-numb:numb,-numb:numb,-numb:numb,3))
+   allocate(rmodes2(-numb:numb,-numb:numb,-numb:numb,3))
+   allocate(cmodes(2,-numb:numb,-numb:numb,-numb:numb,3))
+endif
+!
+! compute E(k), and convert from sin/cos to complex mode representation
+!
+ener=0
+rmodes=0
+do wn=numb1,numb
+
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      ener(wn)=ener(wn)+.5*xfac*(Qhat(k,i,j,1)**2+Qhat(k,i,j,2)**2+Qhat(k,i,j,3)**2)
+
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)=Qhat(k,i,j,1)
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)=Qhat(k,i,j,2)
+      rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)=Qhat(k,i,j,3)
+   enddo
+enddo
+#ifdef USE_MPI
+   temp=ener
+   call mpi_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   rmodes2=rmodes
+   i=2*numb+1
+   i=3*i*i*i
+   call mpi_allreduce(rmodes2,rmodes,i,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+#endif
+
+
+do n=1,3
+   ! note: using rmodes(:,:,:,n) fails under ifc/linux.  why?
+   call sincos_to_complex(rmodes(-numb,-numb,-numb,n),&
+      cmodes(1,-numb,-numb,-numb,n),numb)
+enddo
+
+      
+!     apply helicity fix:
+do i=-numb,numb
+do j=-numb,numb
+do k=-numb,numb
+   k2=i**2 + j**2 + k**2
+   if (k2>0 .and. k2 < (.5+numb)**2 ) then
+      RR = cmodes(1,i,j,k,:)
+      II = cmodes(2,i,j,k,:)
+      mod_rr = sqrt(RR(1)*RR(1) + RR(2)*RR(2) + RR(3)*RR(3))
+      mod_ii = sqrt(II(1)*II(1) + II(2)*II(2) + II(3)*II(3))
+
+      fix = 1
+      if (mod_rr == 0 .or. mod_ii ==0 .or. k2 == 0) then
+         fix = 0
+      endif
+      
+!     do the transformation if fix = 1
+      if (fix == 1) then         
+
+         RRhat = RR/mod_rr
+         khat(1) = i/sqrt(k2*1.0d0)
+         khat(2) = j/sqrt(k2*1.0d0)
+         khat(3) = k/sqrt(k2*1.0d0)
+         
+!        yhat = khat X RRhat (coordinate system with zhat=khat and xhat = RRhat
+         yhat(1) = khat(2)*RRhat(3) - khat(3)*RRhat(2)
+         yhat(2) = - (khat(1)*RRhat(3) - khat(3)*RRhat(1))
+         yhat(3) = khat(1)*RRhat(2) - khat(2)*RRhat(1)
+         
+         IIp = II	
+
+!        write II in terms of new coordinate system (z=khat,x=RRhat,y=yhat)
+         
+         II(1) = IIp(1)*RRhat(1) + IIp(2)*RRhat(2) + IIp(3)*RRhat(3)
+         II(2) = IIp(1)*yhat(1) + IIp(2)*yhat(2) + IIp(3)*yhat(3)
+         II(3) = IIp(1)*khat(1) + IIp(2)*khat(2) + IIp(3)*khat(3) !should be zero
+                  
+!        set II to have angle h_angle wrt RR
+         IIp(1) = cos_h_angle*mod_ii
+         IIp(2) = sin_h_angle*mod_ii
+         IIp(3) = II(3)
+         
+         
+         ! now write II in old (i,j,k) coordinate system
+         II(1) = IIp(1)*RRhat(1) + IIp(2)*yhat(1) + IIp(3)*khat(1)
+         II(2) = IIp(1)*RRhat(2) + IIp(2)*yhat(2) + IIp(3)*khat(2)
+         II(3) = IIp(1)*RRhat(3) + IIp(2)*yhat(3) + IIp(3)*khat(3)
+         
+      
+         cmodes(1,i,j,k,:) = RR	
+         cmodes(2,i,j,k,:) = II	
+      endif
+   endif
+enddo
+enddo
+enddo
+      
+!     convert back:
+do n=1,3
+      call complex_to_sincos(rmodes(-numb,-numb,-numb,n),&
+      cmodes(1,-numb,-numb,-numb,n),numb)
+enddo
+
+
+!
+! now compute energy dissipation rate from Q dot rmodes:
+!
+ener_r=0
+do wn=numb1,numb
+
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      do n=1,3
+         ener_r(wn)=ener_r(wn) + .5*xfac*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),n)*Qhat(k,i,j,n)
+      end do
+   enddo
+enddo
+#ifdef USE_MPI
+   temp=ener
+   call mpi_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+#endif
+
+   ! Forcing function:
+   !    Q = (u,v,w) state vector in shells for which forcing is applied
+   !    Qf = adjusted Q to maximimize helizity
+   ! Forcing relaxes Q back to QF.  But we also add a tau2 term to inject
+   ! energy even when Q already has maximum helicity: 
+   !    forcing = tau1 ( Qf - Q )   + tau2 Q
+   !
+   !    ener(k)    =  integral of .5 Q^2 in shell k
+   !    ener_r(k)  =  integral of .5 <Q,Qf> in shell k
+   !
+   !  pick tau1 and tau2 so that:
+   !
+   !  epsilon = tau1 ( ener_r(1) - ener(1) ) + tau2 ener(1) 
+
+
+f_diss=0
+fxx_diss=0
+do wn=numb1,numb
+
+   if (ener(wn)<ener_target(wn)) then ! only apply forcing if net input is positive
+   do n=1,wnforcing(wn)%n
+      i=wnforcing(wn)%index(n,1)
+      j=wnforcing(wn)%index(n,2)
+      k=wnforcing(wn)%index(n,3)
+
+      Qdel(1)=tau1*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)-Qhat(k,i,j,1))
+      Qdel(2)=tau1*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)-Qhat(k,i,j,2))
+      Qdel(3)=tau1f*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)-Qhat(k,i,j,3))
+
+
+      rhs(k,i,j,1) = rhs(k,i,j,1) + Qdel(1)
+      rhs(k,i,j,2) = rhs(k,i,j,2) + Qdel(2)
+      rhs(k,i,j,3) = rhs(k,i,j,3) + Qdel(3)
+
+      xfac=8
+      if (z_kmcord(k)==0) xfac=xfac/2
+      if (z_jmcord(j)==0) xfac=xfac/2
+      if (z_imcord(i)==0) xfac=xfac/2
+      f_diss = f_diss + xfac*(Qdel(1)*Qhat(k,i,j,1) +&
+                              Qdel(2)*Qhat(k,i,j,2) + &
+                              Qdel(3)*Qhat(k,i,j,3) ) 
+
+      xw=-(z_imcord(i)**2 + z_jmcord(j)**2 + z_kmcord(k)**2)*pi2_squared
+      fxx_diss = fxx_diss + xfac*xw*(Qdel(1)**2 + Qdel(2)**2 + Qdel(3)**2) 
+
+   enddo
+   endif
+
+enddo
+end subroutine 
+   
+
+
+
 
 
 
