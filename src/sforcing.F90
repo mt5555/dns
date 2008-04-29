@@ -66,7 +66,7 @@ if (forcing_type==9) call sforcing12(rhs,Qhat,f_diss,fxx_diss,4)
 
 ! determinisitic E(1) only, with fixed epsilon, also impose helicity   
 ! input file name: 'iso1_hel'
-if (forcing_type==6) call sforcing12_helicity_fixepsilon(rhs,Qhat,f_diss,fxx_diss,2)
+if (forcing_type==10) call sforcing12_helicity_fixepsilon(rhs,Qhat,f_diss,fxx_diss,1)
 
 
 if (Lz/=1 .and. forcing_type/=8) then
@@ -356,26 +356,24 @@ if (0==init_sforcing) then
    numb1=1
    if (model_spec==0) then
       numb=2   ! apply forcing in bands 1,2
-      call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=.5
       enddo
    endif
    if (model_spec==1) then
       numb=8
-      call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=(real(wn)/numb)**4
       enddo
    endif
    if (model_spec==2) then
       numb=1
-      call sforcing_init()
       do wn=numb1,numb
          ener_target(wn)=0   ! ener_target is not used
       enddo
    endif
    if (numb>numb_max) call abortdns("sforcing12_helicity: numb_max too small")
+   call sforcing_init()
 endif
 
 !
@@ -601,7 +599,7 @@ end subroutine
 
 
 
-subroutine sforcing12_helicity_fixepsilon(rhs,Qhat,f_diss,fxx_diss,model_spec)
+subroutine sforcing12_helicity_fixepsilon(rhs,Qhat,f_diss,fxx_diss,numb_in)
 !
 ! Add a forcing term to rhs.
 ! Force 3D wave numbers 1 back to the sphere E=1**(-5/3)
@@ -609,19 +607,18 @@ subroutine sforcing12_helicity_fixepsilon(rhs,Qhat,f_diss,fxx_diss,model_spec)
 !
 ! and in addition, force to a prescribed angle to impose some helicity
 !
-! model_spec==0    E(1)=E(2)=.5
-! model_spec==1    Overholt & Pope
-! model_spec==2    forcing in E(1)
+! forcing appied in bands k=numb1,numb
 !
 use params
 use mpi
 implicit none
 real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
 real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
-integer :: model_spec
+integer :: numb_in
+
 integer km,jm,im,i,j,k,k2,n,wn,ierr,kfmax,fix
-real*8 xw,xfac,f_diss,tau1,tau2,fxx_diss
-real*8 ener_r(numb_max),ener(numb_max),temp(numb_max),Qdel(3)
+real*8 xw,xfac,f_diss,tau1,tau2,fxx_diss,e1,e2
+real*8 QdotQf(numb_max),QdotQ(numb_max),temp(numb_max),RdotR(numb_max),Qdel(3)
 real*8,allocatable,save :: rmodes(:,:,:,:)
 real*8,allocatable,save :: rmodes2(:,:,:,:)
 real*8,allocatable,save :: cmodes(:,:,:,:,:)
@@ -632,34 +629,20 @@ real*8,save :: h_angle,cos_h_angle,sin_h_angle
 character(len=80) :: message
 
 
-
+numb1=1
+numb = numb_in
 if (0==init_sforcing) then
-   !should have h_angle inputted by user eventually
-   h_angle = 0.0d0
-!   h_angle = pi/2
+   h_angle = fparam1*pi/180 ! from input file
    cos_h_angle=cos(h_angle)
    sin_h_angle=sin(h_angle)
 
-   numb1=1
-   if (model_spec==0) then
-      numb=2   ! apply forcing in bands 1,2
-      call sforcing_init()
-   endif
-   if (model_spec==1) then
-      numb=8
-      call sforcing_init()
-   endif
-   if (model_spec==2) then
-      numb=1
-      call sforcing_init()
-   endif
    if (numb>numb_max) call abortdns("sforcing12_helicity: numb_max too small")
+   call sforcing_init()
 endif
 
 
 if (ntot==0) return
 ! only CPUS which belong to "comm_sforcing" beyond this point!
-
 
 
 if (.not. allocated(rmodes)) then
@@ -670,7 +653,7 @@ endif
 !
 ! compute E(k), and convert from sin/cos to complex mode representation
 !
-ener=0
+QdotQ=0
 rmodes=0
 do wn=numb1,numb
 
@@ -682,7 +665,7 @@ do wn=numb1,numb
       if (z_kmcord(k)==0) xfac=xfac/2
       if (z_jmcord(j)==0) xfac=xfac/2
       if (z_imcord(i)==0) xfac=xfac/2
-      ener(wn)=ener(wn)+.5*xfac*(Qhat(k,i,j,1)**2+Qhat(k,i,j,2)**2+Qhat(k,i,j,3)**2)
+      QdotQ(wn)=QdotQ(wn)+xfac*(Qhat(k,i,j,1)**2+Qhat(k,i,j,2)**2+Qhat(k,i,j,3)**2)
 
       rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)=Qhat(k,i,j,1)
       rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)=Qhat(k,i,j,2)
@@ -690,8 +673,8 @@ do wn=numb1,numb
    enddo
 enddo
 #ifdef USE_MPI
-   temp=ener
-   call mpi_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   temp=QdotQ
+   call mpi_allreduce(temp,QdotQ,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
    rmodes2=rmodes
    i=2*numb+1
    i=3*i*i*i
@@ -762,6 +745,26 @@ do k=-numb,numb
 enddo
 enddo
 enddo
+
+!
+!  The helicity adjustment above did not preserve the fact that
+!  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
+!  Reimpose this constraint:
+!
+do n=1,3
+do i=0,numb
+do j=-numb,numb
+do k=-numb,numb
+   !cmodes(1,i,j,k,n) =  cmodes(1,-i,-j,-k,n)
+   cmodes(2,i,j,k,n) = -cmodes(2,-i,-j,-k,n)
+   !write(*,'(3i3,4f12.8)') i,j,k,cmodes(2,i,j,k,n),cmodes(2,-i,-j,-k,n),&
+   !        cmodes(2,i,j,k,n)+cmodes(2,-i,-j,-k,n)
+enddo
+enddo
+enddo
+enddo
+
+
       
 !     convert back:
 do n=1,3
@@ -773,7 +776,8 @@ enddo
 !
 ! now compute energy dissipation rate from Q dot rmodes:
 !
-ener_r=0
+QdotQf=0
+RdotR = 0
 do wn=numb1,numb
 
    do n=1,wnforcing(wn)%n
@@ -784,44 +788,91 @@ do wn=numb1,numb
       if (z_kmcord(k)==0) xfac=xfac/2
       if (z_jmcord(j)==0) xfac=xfac/2
       if (z_imcord(i)==0) xfac=xfac/2
-      do n=1,3
-         ener_r(wn)=ener_r(wn) + .5*xfac*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),n)*Qhat(k,i,j,n)
-      end do
+
+      QdotQf(wn)=QdotQf(wn) + xfac*( &
+           rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)*Qhat(k,i,j,1) + &
+           rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)*Qhat(k,i,j,2) + &
+           rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)*Qhat(k,i,j,3) )
+
+      RdotR(wn)=RdotR(wn) + xfac*( &
+           rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)**2 + &
+           rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)**2 + &
+           rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)**2 )
+
    enddo
 enddo
 #ifdef USE_MPI
-   temp=ener
-   call mpi_allreduce(temp,ener,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   temp=QdotQf
+   call mpi_allreduce(temp,QdotQf,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
+   temp=RdotR
+   call mpi_allreduce(temp,RdotR,numb,MPI_REAL8,MPI_SUM,comm_sforcing,ierr)
 #endif
 
-   ! Forcing function:
-   !    Q = (u,v,w) state vector in shells for which forcing is applied
-   !    Qf = adjusted Q to maximimize helizity
-   ! Forcing relaxes Q back to QF.  But we also add a tau2 term to inject
-   ! energy even when Q already has maximum helicity: 
-   !    forcing = tau1 ( Qf - Q )   + tau2 Q
-   !
-   !    ener(k)    =  integral of .5 Q^2 in shell k
-   !    ener_r(k)  =  integral of .5 <Q,Qf> in shell k
-   !
-   !  pick tau1 and tau2 so that:
-   !
-   !  epsilon = tau1 ( ener_r(1) - ener(1) ) + tau2 ener(1) 
+
+! Forcing function:
+!    Q = (u,v,w) state vector in shells for which forcing is applied
+!    Qf = adjusted Q to maximimize helizity
+! Forcing relaxes Q back to QF.  But we also add a tau2 term to inject
+! energy even when Q already has maximum helicity: 
+!    forcing = tau1 ( Qf - Q )   + tau2 Q  = tau1 Qf + (tau2-tau1) Q
+!
+!    QdotQ(k)    =  integral of Q^2 in shell k  = 2 E(k)
+!    RdotR(k)    =  integral of Qf^2 in shell k = 2 E(k)
+!
+!    QdotQf(k)  =  integral of <Q,Qf> in shell k
+!
+!   <Q,Qf>  <=  ||Q|| ||Qf|| = Q^2
+!    e1 = sum_k QdotQf(k) - QdotQ(k)  <= 0
+!    e2 = sum_k QdotQ(k)
+!
+!  For a fixed energy dissipation rate, we pick tau1 and tau2 so that:
+!
+!  epsilon = tau1 e1 + tau2 e2       
+!
+!  JHU wants to take tau1 = 1/delt and then determine e2 to get the desired 
+!  epsilon.  
+!  
+!  MT does not like making tau1 depend on delt, since that
+!  means the forcing term no longer has a PDE representation.  Since 
+!  delt is adjusted
+!  based on how often diagnostics are computed, so now the solution will
+!  depend on the diagnostics setting output.
+!  
+e1=0
+e2=0
+do wn=numb1,numb
+   ! check that helicity fix did not change energy:
+   if ( abs(QdotQ(wn) -  RdotR(wn) ) > 1e-6*QdotQ(wn) ) then
+       write(*,'(a,i3,3f12.8)') 'WARNING: Helicity Fix has changed energy: Q^2, QF^2  ',wn,QdotQ(wn),RdotR(wn)
+   endif
+   e1=e1 + QdotQf(wn)-QdotQ(wn)
+   e2=e2 + QdotQ(wn)
+enddo
+
+if (delt>0) then
+   tau1 = 1/delt
+   tau2 = (ffval - tau1*e1) / e2
+   if (tau2>tau1) tau2=tau1      ! for stability
+else
+   tau1 = 0
+   tau2 = 0
+endif
+if (io_pe.eq.my_pe) then
+   print *,'tau1,tau2',tau1,tau2
+endif
 
 
 f_diss=0
 fxx_diss=0
 do wn=numb1,numb
-
-   if (ener(wn)<ener_target(wn)) then ! only apply forcing if net input is positive
    do n=1,wnforcing(wn)%n
       i=wnforcing(wn)%index(n,1)
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
 
-      Qdel(1)=tau1*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1)-Qhat(k,i,j,1))
-      Qdel(2)=tau1*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2)-Qhat(k,i,j,2))
-      Qdel(3)=tau1f*(rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3)-Qhat(k,i,j,3))
+      Qdel(1)=tau1*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),1) + ( tau2-tau1)*Qhat(k,i,j,1)
+      Qdel(2)=tau1*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),2) + ( tau2-tau1)*Qhat(k,i,j,2)
+      Qdel(3)=tau1*rmodes(z_imcord(i),z_jmcord(j),z_kmcord(k),3) + ( tau2-tau1)*Qhat(k,i,j,3)
 
 
       rhs(k,i,j,1) = rhs(k,i,j,1) + Qdel(1)
@@ -840,9 +891,9 @@ do wn=numb1,numb
       fxx_diss = fxx_diss + xfac*xw*(Qdel(1)**2 + Qdel(2)**2 + Qdel(3)**2) 
 
    enddo
-   endif
-
 enddo
+
+
 end subroutine 
    
 

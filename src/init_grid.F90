@@ -22,13 +22,11 @@ if (byteswap_input) call set_byteswap_input(1);
 !
 ! scale alpha now that we know delx
 !
-#ifdef ALPHA_MODEL
 if (alpha_value>=1e10) then
    infinite_alpha=1
 else if (alpha_value>=1.0) then
    alpha_value=alpha_value*min(delx,dely,delz)
 endif
-#endif
 if (infinite_alpha==0) then
    write(message,'(a,f14.8,f10.4)') "NS-Alpha:  alpha, alpha/h :",&
         alpha_value,alpha_value/min(delx,dely,delz)
@@ -2841,7 +2839,7 @@ else if (sdata=='balu') then
    forcing_type=5
 else if (sdata=='iso12_hel') then
    forcing_type=6
-else if (sdata=='iso1_hel') then
+else if (sdata=='fixed1_hel') then
    forcing_type=10
 else if (sdata=='iso_high_24') then
    forcing_peak_waveno=24
