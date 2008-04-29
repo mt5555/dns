@@ -405,8 +405,28 @@ supported in the Sandia/LANL DNS code include:
 \begin{enumerate}
 \item 2/3 rule   (DNS code option: fft-dealais)
 \item Phase shifting plus spherical truncaton  (DNS code option: fft-phase)
-\item Spherical  (DNS code option: fft-sphere)
+\item Spherical truncation (only partial dealiasing, DNS code option: fft-sphere)
 \end{enumerate}
+
+\subsection{Dealiasing Recommendations}
+For many problems, exact dealiasing is not necessary and then
+simple spherical truncation is recommended as it is by far
+the most efficient.  
+
+When exact dealiasing is needed, then
+Phase shifting plus spherical truncation is recommended, as it is
+the most efficient in terms of flops per fully retained retained 
+spherical wave number shells.  Note that phase shifting plus
+spherical truncation requires exactly twice as many FFTs and transposes
+as simple spherical truncation.  (So the complexity analysis in the previous
+section needs to be adjusted accordingly).  
+
+The 2/3 rule is also sometimes usefull.  For a given grid, it requires
+no additional FFTs.  It is most efficient in terms of flops per
+retained wave numbers, but many of the retained wave numbers are
+not that usefull as they lie outside the largest fully retained 
+spherical shell of wave numbers retained by the truncation.
+
 
 
 \subsection{2/3 rule}
@@ -416,7 +436,9 @@ $(2 \pi) (2/3)(N/2)$. To be precise, we set to zero (or do not even compute)
 \hat \uv(l,m,n) = 0 \qquad  \text{ for } l > \frac{N}{3}, \quad m > \frac{N}{3}, \text{ or }  n > \frac{N}{3}.
 \]
 With this type of dealiasing, we define the maximum wave number
-in our simulation to be $k_\text{max} = 2 \pi N/3$
+in our simulation to be $k_\text{max} = 2 \pi N/3$.  
+The total number of modes retained is proportional to $(2 N/3)^3$.
+
 
 
 \subsection{Phase shifting + spherical truncation}
@@ -427,7 +449,16 @@ the 8 phases required above), and then applying a spherical truncation:
 \[
 \hat \uv(l,m,n)  \qquad \text{ for } \sqrt{l^2 + m^2 + n^2} < \frac{\sqrt{2}}{3} N
 \]
-The cost is 18 3D FFTs (as opposed to 9 3D FFTs for 2/3 rule.  
+With this type of dealiasing, we define the maximum wave number
+in our simulation to be $k_\text{max} = 2 \pi N\sqrt{2}/3$.
+Twice as many FFTs are needed, so the total 
+cost is 18 3D FFTs (as opposed to 9 3D FFTs for 2/3 rule).  
+The total number of modes retained is $\frac43 \pi (\frac{\sqrt{2}}{3} N)^3 $
+Comparing this to the 2/3 rule above, one can see that for the same
+grid and twice the cost, this method does not retain twice as many
+modes.  But if you compute cost per fully retained spherical shell $k_\text{max}$,
+you can see this is the most efficient in that regards.
+
 
 \subsection{Spherical partial dealiasing}
 Spherical partial dealiasing does not exactly remove all aliasing errors
