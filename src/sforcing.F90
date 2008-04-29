@@ -542,6 +542,25 @@ enddo
 enddo
 enddo
       
+!
+!  The helicity adjustment above did not preserve the fact that
+!  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
+!  Reimpose this constraint:
+!
+do n=1,3
+do i=0,numb
+do j=-numb,numb
+do k=-numb,numb
+   !cmodes(1,i,j,k,n) =  cmodes(1,-i,-j,-k,n)
+   cmodes(2,i,j,k,n) = -cmodes(2,-i,-j,-k,n)
+   !write(*,'(3i3,4f12.8)') i,j,k,cmodes(2,i,j,k,n),cmodes(2,-i,-j,-k,n),&
+   !        cmodes(2,i,j,k,n)+cmodes(2,-i,-j,-k,n)
+enddo
+enddo
+enddo
+enddo
+
+
 !     convert back:
 do n=1,3
       call complex_to_sincos(rmodes(-numb,-numb,-numb,n),&
