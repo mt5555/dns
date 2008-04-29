@@ -62,7 +62,10 @@ if (firstcall) then
       call abortdns("Error: alpha>0 but this is not the alpha model!")
    endif
    if (npassive>0) then
-      call abortdns("Error: dnsp (x-pensil) model with tracers not yet coded")
+      call abortdns("Error: dnsp (x-pencil) model with tracers not yet coded")
+   endif
+   if (use_phaseshift) then
+      call abortdns("Error: dnsp (x-pencil) model not yet updated for phase shifting.  use dns model")
    endif
 
    if (data_x_pencils) call abortdns("ns_xpencil: this is not possible")

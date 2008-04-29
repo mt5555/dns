@@ -70,7 +70,7 @@ The code is documented in
 \item Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
 \item Kurien and Taylor, Los Alamos Science 29, 2005. 
 \end{enumerate}
-Results from this code have also been used in four additional journal
+Results from this code have also been used in many additional journal
 publications.  Our largest simulation to date is 4 eddy turnover
 times of decaying turbulence at $2048^3$.  We use MPI and allow
 for arbitrary 3D domain decomposition, (which includes slabs,
@@ -148,6 +148,46 @@ $\grad \Delta^{-1} \div (\hat\n - \hat \f) +  \nu \Delta \hat \uv$ (two loops, n
 \end{enumerate}
 
 
+\section{The Parallel FFT}
+
+The code uses the data transpose model to implement a parallel FFT.
+The code has a native data decomposition that can be slabs, pencils
+or cubes.  To implement the parallel FFT, the data is transposed if 
+necessary in order to perform on processor FFTs in each direction.
+The code can use many different FFT's, but we have found that 
+FFTW is usually the fastest.  We use the FFTW version 3 {\em guru} interface
+and precompute all the FFTW {\em plans}.
+
+At present we use our own transpose operator to prepare the data for
+the on-processor FFTs.  It uses non-blocking sends and receives and
+has the advantage that it can overlap communication with the data
+re-arrangement necessary to perform stride 1 FFTs.  For FFTW, the
+Georgia tech group has presented results [get ref] showing that for
+the data-transpose 3D parallel FFT (which means multiple 1D FFTs
+between each transpose), the best results are obtained if the code
+repacks the data so that FFTW is only asked to perform stride 1 FFTs.
+
+The transpose operation can also implemented using MPI's
+MPI\_Alltoallv(), called within subcommunicators.  
+We currently do not support this approach, but we have evaluated
+it on the Cray XT3 using Cray's MPI\_alltoallv().  
+If the MPI\_alltoallv() is used, the code must then, 
+after the blocking MPI\_alltoallv() has completed,
+repack the data for stride 1 FFTs.  In our tests, the
+MPI\_alltoallv() approach, for large problem sizes was 
+two times {\em slower} than using the codes internal send/recv
+transpose routines which effectively hide the cost of the
+data repacking stride 1 FFTs.
+
+As of this writing, FFTW version 3 does not include
+a parallel FFT for distributed memory architectures.
+(They did in version 2).  If they re-implement a distributed
+memory FFT in version 3, it would be good to test this.  
+One problem with using a package parallel FFT is that it
+makes it difficult to use the vorticity evaluation trick discussed in 
+Section~\ref{S:vtrick}, as this trick certain derivatives
+to be computed with intermediate products of the parallel FFT.
+
 
 
 \section{Complexity}
@@ -191,7 +231,7 @@ The total cost of doing the 3D FFT and 2 3D iFFTs is thus:
 
 
 \subsection{Vorticity Evaluation Trick}
-
+\label{S:vtrick}
 
 There is a trick one can use to eliminate one transpose.
 In Step 3 above, we only compute the second and third components
@@ -236,6 +276,7 @@ And of course there could be many other tricks I dont know about!
 
 
 \subsection{Code Specific Transpose Details}
+
 Our code actually allows for a full 3D data decomposition
 (not that useful for the full pseudo spectral code, but useful
 for some finite difference/spectral hybrids).  Because of this,

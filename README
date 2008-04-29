@@ -154,16 +154,15 @@ Here are some examples:
       % ./gridsetup.py 2 1 32 64 64 64 2 2 0
 
 
-For a grid N^3, N must be a power
-of 2,3,5, and N/nx, N/ny and N/nz must be an even integers.  There are
-some other restrictions because of how we wrote our transpose routines.
-gridsetup.py will issue warnings if they are violated, and, if the code
-is run it will print error messages and stop.
+For a grid N^3, N must be a power of 2,3,5, and N/nx, N/ny and N/nz
+must be an even integers.  There are some other restrictions because
+of how we wrote our transpose routines.  gridsetup.py will issue
+warnings if they are violated, and, if the code is run it will print
+error messages and stop.
 
-If you do not have python installed on your system, you can
-instead copy the file 'params.h.test' to params.h' and then
-edit params.h by hand.  By default, it is set up to run a 32^3
-simulation on 1 cpu.
+If you do not have python installed on your system, you can instead
+copy the file 'params.h.test' to params.h' and then edit params.h by
+hand.  By default, it is set up to run a 32^3 simulation on 1 cpu.
 
 NOTE:  The most efficient configuration for large processor counts
 will be with ny=1 and nx<nz.  For example, to run a 4096^3 simulation 
