@@ -540,6 +540,8 @@ if (my_pe==io_pe) then
             convert_opt=17 
 	 else if (carg(1:4)=="hpass") then
 	    convert_opt=18   
+	 else if (carg(1:11)=="coarsegrain") then
+	    convert_opt=19   
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abortdns("-cout unrecognized option")

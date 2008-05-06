@@ -805,9 +805,6 @@ end subroutine
 
 
 
-
-
-
 subroutine compute_expensive_pscalars(Q,np,grads,grads2,gradu,work,scalars,ns)
 !
 ! INPUT:  Q,np, gradu = (ux,vy,wz)
@@ -1321,3 +1318,68 @@ enddo
 
 end subroutine
 
+
+
+
+subroutine coarse_grain(p,pout,work,M)
+!
+!  pout = convolution of p with a hat function of size [-M,M]^3
+!
+use params
+use transpose
+real*8 p(nx,ny,nz)      ! original data
+real*8 pout(nx,ny,nz)   ! ouput (coarse grained version of p)
+real*8 work(nx,ny,nz)   ! work array
+
+integer n1,n1d,n2,n2d,n3,n3d
+
+call transpose_to_x(p,work,n1,n1d,n2,n2d,n3,n3d)
+call coarse_grain1d(work,n1,n1d,n2,n2d,n3,n3d,M)
+call transpose_from_x(work,pout,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_y(pout,work,n1,n1d,n2,n2d,n3,n3d)
+call coarse_grain1d(work,n1,n1d,n2,n2d,n3,n3d,M)
+call transpose_from_y(work,pout,n1,n1d,n2,n2d,n3,n3d)
+
+call transpose_to_z(pout,work,n1,n1d,n2,n2d,n3,n3d)
+call coarse_grain1d(work,n1,n1d,n2,n2d,n3,n3d,M)
+call transpose_from_z(work,pout,n1,n1d,n2,n2d,n3,n3d)
+
+
+end subroutine
+
+
+
+subroutine coarse_grain1d(p,n1,n1d,n2,n2d,n3,n3d,M)
+!
+!  overwrite p with convolution of p with a hat function of size [-M,M]
+!  along first dimension
+!
+use mpi
+use params
+implicit none
+! input
+integer :: n1,n1d,n2,n2d,n3,n3d
+real*8 :: p(n1d,n2d,n3d)
+integer :: M
+real*8 :: p1(n1)
+integer :: i,j,k,i2,i3
+
+do k=1,n3
+do j=1,n2
+   p1=0
+   do i=1,n1
+      do i2=i-M,i+M
+         ! example: n1=128       -1 = 127
+         !                        0 = 128
+         !                        1 = 1
+         !                        2 = 2
+         i3 = 1+mod(n1+i2-1,n1)       
+         p1(i)=p1(i)+p(i3,j,k)/n1
+      enddo
+   enddo
+   p(1:n1,j,k)=p1(:)
+enddo
+enddo
+
+end subroutine

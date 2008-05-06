@@ -43,6 +43,8 @@
 !  -cout dpdf     (17)   read in U,V,W, output delta-filtered U pdfs
 !  -cout hpass (18) read data, fft, high-pass filter, fft back.
 !
+!  -cout coarsegrain (19)  read data, coarse grain, output
+!
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
 !    tstart=4.000000000 edit below
@@ -67,6 +69,7 @@ use pdf
 use transpose , only : input1
 implicit none
 real*8,allocatable  :: Q(:,:,:,:)
+real*8,allocatable  :: Q2(:,:,:,:)
 real*8,allocatable  :: vor(:,:,:,:)
 real*8,save  :: work1(nx,ny,nz)
 real*8,save  :: work2(nx,ny,nz)
@@ -82,6 +85,8 @@ CPOINTER :: null=0,fidu,fid
 integer :: type_in,ntot,nzero,nerr, kshell_max,k2
 character(len=4) :: extension="uvwX"
 character(len=8) :: ext2,ext
+integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
+
 
 ! input file
 tstart=2.5
@@ -724,7 +729,7 @@ do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! high-pass filter
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (convert_opt==18) then  ! -cout hpass
+   if (convert_opt==18) then  ! -cout hpass
       if (w_spec) then
          ! -so (spectral output) uses spec_max to specify coefficients to write
          ! -cout trunc uses spec_max as a truncation parameter, so we cant
@@ -766,6 +771,36 @@ if (convert_opt==18) then  ! -cout hpass
       call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       ! output headerless data:
       ! call output_uvw(basename,time,Q,vor,work1,work2,2)
+   endif
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! coarse grain  coarsegrain
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   if (convert_opt==19) then  ! -cout hpass
+      ! read data, header type =1, or specified in input file
+      if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,vor,work1,work2)
+      endif
+
+      do j=1,size(Mval)
+         do n=1,3
+            ! call the truncation filter subroutine in fftops.F90
+            call coarse_grain(Q(1,1,1,n),Q2(1,1,1,n),work1,Mval(j) ) 
+         enddo
+         
+         ! give the output file a new name
+         write(message, '(i5)') 10000 + Mval(j)
+         basename=runname(1:len_trim(runname)) // "-cg"//message(2:5)//"."
+         
+         call output_uvw(basename,time2,Q2,vor,work1,work2,header_user)  
+         ! output headerless data:
+         ! call output_uvw(basename,time,Q,vor,work1,work2,2)
+      enddo
    endif
 
 
