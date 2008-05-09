@@ -6,32 +6,36 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 begin
   setfileoption("bin","ReadByteOrder","LittleEndian")
   path  = "../../Projects/KH/Boussinesq/np08rp08/"
+  path  = "../../Projects/Boussinesq/kd/kd40/Data/"
   data = cbinread(path+"all.pv2spec",-1,"double")
 ;  print(data)
   ndata1 = sizeof(data)
   ndata2 =ndata1/8. ; 8 bytes per double
   ndata = doubletoint(ndata2)
-  print(ndata)
+;  print(ndata)
   time =  (/data(0)/)
 ;  print(time)
   nr =  (/data(1)/)
   nri = doubletoint(nr)
 ;  print(nri)
-  nx = (/data(nri+2)/)
+  nx = (/data(2)/)
   nxi = doubletoint(nx)
 ;  print(nxi)
-  ny = (/data(nri+nxi+3)/)
+  ny = (/data(3)/)
   nyi = doubletoint(ny)
 ;  print(nyi)
-  nz = (/data(nri+nxi+nyi+4)/)
+  nz = (/data(4)/)
   nzi = doubletoint(nz)
 ;  print(nzi)
-  ndatapertime = nri+5+nxi+nyi+nzi
-;  print(ndatapertime)
+  iwave2d = (/data(5)/)
+  iwave2di = doubletoint(iwave2d)
+;  print(iwave2di)
+  ndatapertime = nri+6+nxi+nyi+nzi+iwave2di*nzi
+  print(ndatapertime)
   ntotaldata = ndata/ndatapertime ; This is the number of time
                                   ;snapshots that were read in
   nt = doubletoint(ntotaldata)
-;  print(ntotaldata)
+  print(ntotaldata)
 ;
 ;  Allocate some memory
 ;
@@ -69,32 +73,50 @@ begin
 ;  since its zero and causes trouble with the plotting
    rdimsm1 = (/nt-1,nri/)
    specarraym1 = new(rdimsm1,"double")
+   spec_r = (/data(6:nri+5)/)
+   specux = (/data(6+nri:5+nri+nxi)/)
+   specuy = (/data(6+nri+nxi:5+nri+nxi+nyi)/)
+   specuz = (/data(6+nri+nxi+nyi:5+nri+nxi+nyi+nzi)/)
+   do i = 1,nzi
+      spec_2d = (/data(6+i-1+nri+nxi+nyi+nzi+(i-1)*iwave2di:5+i-1+nri+nxi+nyi+nzi+i*iwave2di)/)
+   end do
 
-  nskp = 0
-  iterindex = 0
-  do while (nskp .lt. ndata) 
+
+   nskp = 0
+   iterindex = 0
+   do while (nskp .lt. ndata) 
      
      iterindex = iterindex + 1
-     print(iterindex)
+;     print(iterindex)
      timedata(iterindex-1) =  (/data(nskp + 0)/)
      print(timedata(iterindex-1))
      nr =  (/data(nskp+1)/)
      nri = doubletoint(nr)
      print(nri)
-     spec_r = (/data(nskp +2:nskp + nri + 1 )/)
-     nx = (/data(nskp +nri+2)/)
+     nx = (/data(nskp+2)/)
      nxi = doubletoint(nx)
      print(nxi)
-     specux=(/data(nskp+3+nri:nskp+2+nri+nxi)/)
-     ny = (/data(nskp + nri + nxi + 3)/)
+     ny = (/data(nskp+3)/)
      nyi = doubletoint(ny)
      print(nyi)
-     specuy=(/data(nskp+4+nri+nxi:nskp+3+nri+nxi+nyi)/)
-     nz = (/data(nskp + nri + nxi + nyi + 4)/)
+     nz = (/data(nskp+4)/)
      nzi = doubletoint(nz)
      print(nzi)
-     specuz=(/data(nskp+5+nri+nxi+nyi:nskp+4+nri+nxi+nyi+nzi)/)
+     iwave2d = (/data(nskp+5)/)
+     iwave2di = doubletoint(iwave2di)
+     print(iwave2di)
+     spec_r = (/data(nskp+6:nskp+nri+5)/)
+     print(spec_r(0))
+     specux = (/data(nskp+6+nri:nskp+5+nri+nxi)/)
+     specuy = (/data(nskp+6+nri+nxi:nskp+5+nri+nxi+nyi)/)
+     specuz = (/data(nskp+6+nri+nxi+nyi:nskp+5+nri+nxi+nyi+nzi)/)
+     do i = 1,nzi
+        spec_2d = (/data(nskp+6+nri+nxi+nyi+nzi+(i-1)*iwave2di:nskp+5+nri+nxi+nyi+nzi+i*iwave2di )/)
+     end do
+;     print(spec_2d(iwave2di-1))
+
      nskp = nskp + ndatapertime
+
 ; 
 ;    Since I suck at assigning values for multi-d arrays I brute force
 ;    it here.
