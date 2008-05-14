@@ -48,6 +48,8 @@ end
 
 % now lets repeat that, but this time merge all the PDFs
 pdf_list = zeros([npmax,maxbin]);
+bins_list = pdf_list;
+
 zerobin = 1 + (maxbin-1)/2;            % location of zero bin
 
 disp('summing into 1 PDF for each k...')
@@ -72,10 +74,7 @@ for t = times
       x1=zerobin-(n_bin-1)/2;
       x2=zerobin+(n_bin-1)/2;
       pdf_list(k,x1:x2) = pdf_list(k,x1:x2) + pdf(:)'/count;
-      if (n_bin == maxbin) 
-        bins_list=bins(:);
-      end
-
+      bins_list(k,x1:x2) = bins(:);
     end
     fclose(fid);
   end
@@ -89,7 +88,7 @@ figure(3); clf;
 for k=1:npmax
   pdf = pdf_list(k,:)';
   bin_size = bin_size_list(k);
-  bins = bins_list;
+  bins = bins_list(k,:);
   
   c1=sum(bin_size * pdf.*bins);
   c2=sum(bin_size * pdf.*(bins-c1).^2);
