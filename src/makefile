@@ -34,14 +34,20 @@ ifeq ($(UNAME),Linux)
 
 
    ifeq ($(ARCH),x86_64)
-      #VENDOR=PGIMPI
-      # needed if >2GB per process:   -DMALLOC_Q
-      #MPI= -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO 
-      #FFT = -I/home/mataylo/fftw/include -DUSE_FFTWGURU
-      #FFTLIB = -L/home/mataylo/fftw/lib  -lfftw3
-      VENDOR=INTELMPI
-      MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
-      MPILIB =  $(MPI_LD_FLAGS) -lmpi 	
+      # PGI or Intel:
+      ifeq ($(PGI),)
+         VENDOR=INTELMPI
+         MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
+         MPILIB =  $(MPI_LD_FLAGS) -lmpi 	
+      else
+         # PGI is defined:
+         VENDOR=PGIMPI
+         # needed if >2GB per process:   -DMALLOC_Q
+         MPI=  -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO 
+         #FFT = -I/home/mataylo/fftw/include -DUSE_FFTWGURU
+         #FFTLIB = -L/home/mataylo/fftw/lib  -lfftw3
+      endif 
+   
    endif
 
    ifeq ($(ARCH),ia64)
@@ -124,7 +130,9 @@ me=pmpi_wtime
    endif 
 
    ifeq ($(VENDOR),PGIMPI)
-   F90 = mpif90
+   # this usually means Cray XT3 system
+   #F90 = mpif90
+   F90 = ftn
    CC = mpicc
    FFLAGS =  -Mrecursive  -fast  $(MPI)  $(FFT) 
    LDFLAGS = $(FFTLIB)
