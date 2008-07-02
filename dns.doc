@@ -101,11 +101,7 @@ Running the code
    in init_grid.F90.  number 8 is the newest input file format, documented
    here.  The others should be considered obsolete.
 
-   line 2   equations. valid values:    ns_uvw
-                                        ns_psivor
-                                        shallow
-
-   line 3  header_user   User seletec snapshot file header type
+   line 2  header_user   User seletec snapshot file header type
                          The header can include:
                          1: time, x, y and z coordinate data
                          2: no headers, no periodic extension
@@ -113,6 +109,10 @@ Running the code
                          4: 4 byte header, FORTRAN style (for input only) 
                          5: time, Lz, x, y and z coordinate data
 
+
+   line 3   equations. valid values:    ns_uvw
+                                        ns_psivor
+                                        shallow
 
    line 4  initial condition
              KH-blob    initial velocity computed from a specified

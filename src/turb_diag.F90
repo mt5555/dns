@@ -246,7 +246,7 @@ if (diag_pdfs ==1 .or. (diag_pdfs==-1 .and. time > 2.3)  ) then
                     call abortdns("Error: kshell_max > number_of_cpdf_restart")
 
                write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,&
-               ' restart file binsize=',binsize
+               ' restart file binsize=',cpdf_restart_binsize(k)
                call print_message(message)
                call compute_pdf_scalar(work2,cpdf(k),cpdf_restart_binsize(k))
             else

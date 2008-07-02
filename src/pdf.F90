@@ -731,13 +731,14 @@ integer :: ndelta,k,i
 real*8 :: x,time
 
 ! read in the number of k-shell pdfs.
-call cread8(fid,time,1) ; kmax = x
+call cread8(fid,time,1) 
 call cread8(fid,x,1) ; kmax = x          ! number of PDFs
 call cread8(fid,x,1) ; ndelta = x        ! number of delta's for each PDF
-if (ndelta>1) &                           ! should be 1
+if (ndelta/=1) &                           ! should be 1
     call abortdns("Error reading restart CPDF: ndelta should be 1")
 
 
+print *,'reading CPDF binsizes'  
 allocate(cpdf_restart_binsize(kmax)) 
 do k=1,kmax
    do i=1,ndelta
@@ -745,6 +746,7 @@ do k=1,kmax
    enddo
    call cread8(fid,x,1);  ! read in a "0", unused field
    call cread8(fid,cpdf_restart_binsize(k),ndelta)
+   print *,'k=',k,' binsize=',cpdf_restart_binsize(k)
 enddo
 
 number_of_cpdf_restart=kmax

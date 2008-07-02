@@ -39,7 +39,7 @@ real*8 :: f_diss,param,fxx_diss
 ! determinisitic with E1=E2=.5
 if (forcing_type==1) call sforcing12(rhs,Qhat,f_diss,fxx_diss,0)
 
-! stochastic, wave numbers 1,2   input file name: 'iso12'
+! stochastic, wave numbers 1,2   input file name: 'iso12w'
 if (forcing_type==2) call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,0)
 
 ! determinisitic with Overholt and Pope spectrum   input file name: 'iso'
