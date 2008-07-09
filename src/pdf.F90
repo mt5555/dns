@@ -727,26 +727,37 @@ CPOINTER :: fid
 integer :: kmax
 
 ! local
-integer :: ndelta,k,i
+integer :: ndelta,k,i,n_bin
 real*8 :: x,time
 
 ! read in the number of k-shell pdfs.
 call cread8(fid,time,1) 
 call cread8(fid,x,1) ; kmax = x          ! number of PDFs
-call cread8(fid,x,1) ; ndelta = x        ! number of delta's for each PDF
-if (ndelta/=1) &                           ! should be 1
-    call abortdns("Error reading restart CPDF: ndelta should be 1")
 
 
 print *,'reading CPDF binsizes'  
+print *,'number of PDFs: ',kmax
+
 allocate(cpdf_restart_binsize(kmax)) 
 do k=1,kmax
+   call cread8(fid,x,1) ; ndelta = x        ! number of delta's for each PDF
+   if (ndelta/=1) &                           ! should be 1
+       call abortdns("Error reading restart CPDF: ndelta should be 1")
+
    do i=1,ndelta
       call cread8(fid,x,1); ! delta_val(i)  not used.
    enddo
    call cread8(fid,x,1);  ! read in a "0", unused field
+   if (x/=0) call abortdns("Error reading restart CPDF: 0 flag not correct")
    call cread8(fid,cpdf_restart_binsize(k),ndelta)
-   print *,'k=',k,' binsize=',cpdf_restart_binsize(k)
+   write(*,'(a,i4,a,e15.5)') 'k=',k,' binsize=',cpdf_restart_binsize(k)
+
+   ! read the pdf data
+   call cread8(fid,x,1) ; n_bin = x   ! number of bins
+   call cread8(fid,x,1) ;             ! not needed
+   do i=1,(2*n_bin+1)*ndelta
+      call cread8(fid,x,1) ; ! read pdf data
+   enddo
 enddo
 
 number_of_cpdf_restart=kmax

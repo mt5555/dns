@@ -647,6 +647,7 @@ real*8 costta, tta, tta_sgn, theta,  phi
 real*8,save :: h_angle,cos_h_angle,sin_h_angle
 character(len=80) :: message
 
+integer, save :: tau_output_count=0
 
 numb1=1
 numb = numb_in
@@ -861,8 +862,9 @@ e1=0
 e2=0
 do wn=numb1,numb
    ! check that helicity fix did not change energy:
-   if ( abs(QdotQ(wn) -  RdotR(wn) ) > 1e-6*QdotQ(wn) ) then
-       write(*,'(a,i3,3f12.8)') 'WARNING: Helicity Fix has changed energy: Q^2, QF^2  ',wn,QdotQ(wn),RdotR(wn)
+   if ( abs(QdotQ(wn) -  RdotR(wn) ) > (1e-30 + 1e-6*QdotQ(wn)) ) then
+       write(*,'(a,i3,3e15.8)') 'WARNING: Helicity Fix has changed energy: Q^2, QF^2  ',&
+       wn,QdotQ(wn),RdotR(wn)
    endif
    e1=e1 + QdotQf(wn)-QdotQ(wn)
    e2=e2 + QdotQ(wn)
@@ -876,8 +878,12 @@ else
    tau1 = 0
    tau2 = 0
 endif
+
+if (tau_output_count<1000) then
 if (io_pe.eq.my_pe) then
-   print *,'tau1,tau2',tau1,tau2
+   tau_output_count=tau_output_count+1
+   write(*,'(a,2e15.6)') 'tau1,tau2',tau1,tau2
+endif
 endif
 
 
