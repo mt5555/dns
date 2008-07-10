@@ -286,7 +286,7 @@ TURB_DIAG = pdf.o turb_diag.o isoave.o subcubes.o
 ASPECT_DIAG = aspect_diag.o isoave.o subcubes.o
 
 #diagnostics for 3d aspect ratio runs:
-SLOW_DIAG = slow_diag.o isoave.o subcubes.o
+SLOW_DIAG = pdf.o slow_diag.o isoave.o subcubes.o
 
 #diagnostics for compressible DNS runs:
 CDNS_DIAG = pdf.o cdns_diag.F90
@@ -305,7 +305,8 @@ MODEL_IBMGRID    = ns_ibm.o  ibm.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG
 MODEL_GHOST      = ns_ghost.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_CDNS       = cns.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(CDNS_DIAG)
 MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SPEC_SLOW  = ns_decomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC_SLOW  = ns_d) $(FILEIO)
+ecomp3.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_PENCIL = ns_xpencil.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_PENCIL2 = ns_xpencil2.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
