@@ -32,6 +32,14 @@ ifeq ($(UNAME),Linux)
    FFT = -DUSE_FFT99
    FFTLIB =
 
+   ifeq ($(ARCH),ppc64)
+      VENDOR=IBM
+      F90 = mpixlf90
+      CC=mpixlc -DF_NO_UNDERSCORE
+      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DMPI_HAS_REAL8,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I.
+      LDFLAGS = 
+      F77FIXED = -qfixed 
+   endif
 
    ifeq ($(ARCH),x86_64)
       # PGI or Intel:
@@ -168,6 +176,8 @@ me=pmpi_wtime
    FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)
    endif
+
+
 
 endif
 
