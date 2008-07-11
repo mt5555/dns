@@ -37,24 +37,25 @@ real*8,save  :: dxx(1) ! dummy varray
 character(len=80) message,sdata
 character(len=280) basename,fname,fnamewrite
 integer ierr,i,j,k,n,km,im,jm,icount,ictof,ivorsave,ntrunc
-integer icentroid,iscalars,i3dspec,i2dspec,ireaduvh
+integer icentroid,iscalars,i3dspec,i2dspec,ireaduvh,iwrite_factor
 real*8 :: tstart,tstop,tinc,time,time2,timescale,energyscale,f_k,epsil_f,timep
 real*8 :: u,v,w,x,y, n_r, spec_r, div_check
-real*8 :: kr,ke,ck,xfac,vor_slow,pe_slow,kev_slow,keh_slow,kew_slow,potens_slow
+real*8 :: kr,ke,ck,xfac,vor_slow,pe_slow,kev_slow,keh_slow,kew_slow, &
+          potens_slow,vert_en_slow
 integer ni,ns,nb
 
 
 ! input file
-basename="/home/wingate/Projects/KH/Boussinesq/128v2/n1f100_decay/n1f100"
+basename="/scratch2/wingate/128/kd40_new/kd40"
 if (my_pe==io_pe) print *,basename
-tstart=2.0
-tstop=2.0003
-tinc=.0001
+tstart=0.
+tstop=8.
+tinc=8.
 f_k = 24.
 epsil_f = .0253303064
 timescale = (epsil_f*(2.*3.141592*f_k)**2)**(.33333)
 energyscale = (epsil_f/(2.*3.141592*f_k))**(-.66666666)
-write(6,*) "timescale = ",timescale, "energyscale = ",energyscale
+!write(6,*) "timescale = ",timescale, "energyscale = ",energyscale
 ireaduvh = 1 ! =0 Do not read in the u,v,h fields
 icentroid=0 ! Compute the KE centroid? 0 = no, 1 = yes
 icount=0  ! A counter for averaging to compute time averages
@@ -68,6 +69,7 @@ i3dspec = 1 ! = 1 Read in and write out a plot for the 3d spectrum
             ! = 2 Compute the 2d spectrum from the 3d spectrum
 i2dspec = 0 ! = 1 Read in the 2d spectrum and plot it out
             ! = 0 Do nothing
+iwrite_factor = 4 ! write out a file a factor of N smaller. If 1 do nothing.
 call init_mpi       
 call init_mpi_comm3d()
 call init_model
@@ -93,7 +95,6 @@ Q=0
      open(57,file='vor_slow.txt')
      open(58,file='pe_slow.txt')
      open(59,file='potens_slow.txt')
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  Read in time dependent files
@@ -111,6 +112,7 @@ Q=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       write(sdata,'(f10.4)') 10000.0000 + time
       if(ireaduvh /= 0) then
+        if(my_pe == io_pe) write(6,*) "Reading in data"
          fname = basename(1:len_trim(basename)) // sdata(2:10) // ".u"
          if (my_pe==io_pe) then
             print *,'filename: ',fname(1:len_trim(fname))
@@ -162,14 +164,27 @@ Q=0
 !         Compute the slow variables for Ro -> 0
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!    Compute the slow variables by integrating u, v, and w in the vertical
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      Qslow = Q
+      call zaverage(Qslow(1,1,1,1),dx)
+      Qslow(:,:,:,1)=dx
+      call zaverage(Qslow(1,1,1,2),dx)
+      Qslow(:,:,:,2)=dx
+      call zaverage(Qslow(1,1,1,3),dx)
+      Qslow(:,:,:,3)=dx
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !        First compute the horizontally divergence free part to
 !        subtract from the velocity
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      call der(Q(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
-      call der(Q(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
+
+      call der(Qslow(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
+      call der(Qslow(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
       div = dx+dy
       call fft3d(div,work1)
       !
@@ -195,34 +210,36 @@ Q=0
       call der(div,dx,dxx,work1,DX_ONLY,1)
       call der(div,dy,dxx,work1,DX_ONLY,2)
       !
-      Qslow = 0.
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
-               Qslow(i,j,k,1) = Q(i,j,k,1) - dx(i,j,k)
-               Qslow(i,j,k,2) = Q(i,j,k,2) - dy(i,j,k)
-               Qslow(i,j,k,3) = Q(i,j,k,3)
-               Qslow(i,j,k,4) = Q(i,j,k,4)
+               Qslow(i,j,k,1) = Qslow(i,j,k,1) - dx(i,j,k)
+               Qslow(i,j,k,2) = Qslow(i,j,k,2) - dy(i,j,k)
             enddo
          enddo
       enddo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!    Compute the slow variables by integrating u, v, and w in the vertical
-!
+      if(my_pe==io_pe) write(6,*) "got the slow"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      call zaverage(Qslow(1,1,1,1),dx)
-      Qslow(:,:,:,1)=dx
-      call zaverage(Qslow(1,1,1,2),dx)
-      Qslow(:,:,:,2)=dx
-      call zaverage(Qslow(1,1,1,3),dx)
-      Qslow(:,:,:,3)=dx
+!
+!     Remember that Qslow(3) is the vertically averaged vertical velocity.
+!
+!     Now, since Qslow(4) = Q(4), that is, the buoyancy is not touched
+!     by the projection operator in this limit, we will store
+!     the vertical average of the total buoyancy in Qslow(4) since
+!     we need it for one of the important horizontal conservation laws.
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      Qslow(:,:,:,4) = 1. + bous*zcord(k)*Q(i,j,k,4)
+      call zaverage(Qslow(1,1,1,4),dx)
+      Qslow(:,:,:,4)=dx
+      if(my_pe==io_pe) write(6,*) "got the slow total buoyancy"
 
       potvor=0.
       div=0.
 
       ! compute potential vorticity, (pvtype=4) 
       call potential_vorticity(potvor,div,Q,work1,work2,4)
+      if(my_pe==io_pe) write(6,*) "potential vorticity"
 
 
       ! Compute the horizontal divergence of the slow variables
@@ -238,7 +255,7 @@ Q=0
             end if
          enddo
       enddo
-      write(6,*) "The horizontal divergence is  ",div_check
+      if(my_pe==io_pe) write(6,*) "The horizontal divergence is  ",div_check
 
 !     compute horizontal vorticity of slow variablles
       call der(Qslow(1,1,1,1),dy,dxx,work1,DX_ONLY,2)
@@ -275,27 +292,34 @@ Q=0
       keh_slow = 0.
       kev_slow = 0.
       vor_slow = 0.
+      vert_en_slow = 0.
       do j=ny1,ny2
          do i=nx1,nx2
             vor_slow = vor_slow + vor2d(i,j)**2
             keh_slow = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
             kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
+            vert_en_slow = vert_en_slow + Qslow(1,j,nz1,3)**3 + Qslow(i,j,nz1,4)**2
+      if (my_pe==io_pe) then
             write(6,*) "Vertical Velocity ",Q(i,j,nz1,3),Qslow(i,j,nz1,3)
+      end if
          enddo
       enddo
       keh_slow=.5*keh_slow/g_nx/g_ny
       kew_slow=.5*kev_slow/g_nx/g_ny
       vor_slow = .5*vor_slow/g_nx/g_ny
+      vert_en_slow = .5*vert_en_slow/g_nx/g_ny
       !
       !        Then the 3d quantities
       !
+      if (my_pe==io_pe) then
       write(6,*) "BOUS =",bous
+      end if
       potens_slow = 0.
       pe_slow=0.
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
-               pe_slow = pe_slow + (1. + bous*zcord(k)*Qslow(i,j,k,4))**2
+               pe_slow = pe_slow + Qslow(i,j,k,4)**2
                potens_slow = potens_slow + potvor(i,j,k)**2
             enddo
          enddo
@@ -303,6 +327,8 @@ Q=0
 
       pe_slow = .5*pe_slow/g_nz/g_nx/g_ny
       potens_slow = .5*potens_slow/g_nz/g_nx/g_ny
+
+      if(my_pe == io_pe) write(6,*) "potens_slow =",potens_slow
 
 
 #ifdef USE_MPI
@@ -315,6 +341,8 @@ Q=0
       xfac=pe_slow
       call mpi_allreduce(xfac,pe_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
       xfac=potens_slow
+      call mpi_allreduce(xfac,potens_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      xfac=vert_en_slow
       call mpi_allreduce(xfac,potens_slow,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
@@ -341,6 +369,7 @@ Q=0
          write(57,'(e14.6,2x,e14.6)') real(timep),vor_slow
          write(58,'(e14.6,2x,e14.6)') real(timep),pe_slow*energyscale
          write(59,'(e14.6,2x,e14.6)') real(timep),potens_slow
+         write(59,'(e14.6,2x,e14.6)') real(timep),vert_en_slow
       endif
       
       
