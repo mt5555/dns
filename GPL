@@ -1,3 +1,4 @@
+/*
 Copyright 2007.  Los Alamos National Security, LLC. This material was
 produced under U.S. Government contract DE-AC52-06NA25396 for Los
 Alamos National Laboratory (LANL), which is operated by Los Alamos
@@ -17,5 +18,6 @@ program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
 for more details.
+*/
 
 

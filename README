@@ -3,10 +3,14 @@
                  mataylo@sandia.gov
 
 ===================================================================
+README: updated 7/22/2008:  
+minor edits
+
 README: updated 1/20/2008:  
 
-We now support the exact dealiasing based on phase shifting and
-a spherical truncation.
+We now support the exact dealiasing based on phase shifting +
+spherical truncation.  To measure/test deasling error, see
+testing/dealias.sh.
 
 
 README: updated 8/16/2007:  
@@ -52,8 +56,10 @@ of side length 1 with no passive scalars or rotation.
 The deterministic low wave number forcing is a simplified
 version of Overholt and Pope, Comput. Fluids 27 1998, and
 is documented in detail in [1].  Some more, but incomplete documentation
-for this code are in the files:  pseudospectral.tex, rotation_doc/rotation.tex, 
-dns.doc
+for this code are in the files:  pseudospectral.tex and dns.doc
+Documentation for running the Boussinesq version is in 
+rotation_doc/rotation.tex. 
+
 
 
 The steps required to compile and run the code are:
