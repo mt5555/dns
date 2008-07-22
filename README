@@ -52,7 +52,8 @@ of side length 1 with no passive scalars or rotation.
 The deterministic low wave number forcing is a simplified
 version of Overholt and Pope, Comput. Fluids 27 1998, and
 is documented in detail in [1].  Some more, but incomplete documentation
-for this code is in the file "dns.doc" and rotation.tex.
+for this code are in the files:  pseudospectral.tex, rotation_doc/rotation.tex, 
+dns.doc
 
 
 The steps required to compile and run the code are:
