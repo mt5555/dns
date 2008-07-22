@@ -7,10 +7,10 @@ clear all;
 
 
 % base name. time will be appended for each file
-name = '/home/mataylo/tmp/hyp512';
+name = '/home/mataylo/hyp512';
 
 % merge these times:
-times = 2.7050:.0050:2.75;
+times = 2.3700:.0050:2.75;
 
 count = 0;
 maxbin = 0;
@@ -29,10 +29,11 @@ for t = times
 
     time=fread(fid,1,'float64');
     npmax=fread(fid,1,'float64');         
+    disp(sprintf('npmax = %i ',npmax))  
     for k=1:npmax
       [n_del,delta,bin_size,n_bin,n_call,bins,pdf]=read1pdf(fid);
       maxbin = max(maxbin,n_bin);
-
+      disp(sprintf('binsize(%i) = %e ',k,bin_size))
       if (count==1) 
         bin_size_list(k)=bin_size;
       else
