@@ -1,4 +1,23 @@
 *******************************************************************************
+7/22/2008
+
+NSF1:  first Tag of code for NSF petascale RFP:
+NSF2:  Tag of debugged dnsp code
+NSF3:  Tag dnsp + instrumented FFT and A2A overlaop 
+
+GPL1:  Tag of code before GPL branch   (7/22/2008)
+GPL1_branch:  branch at GPL1
+
+todo:
+  add GPL headers to GPL1_branch
+  port back to trunk
+
+
+
+
+
+
+*******************************************************************************
 9/6/2007
 balu's PDF idea
 running balu2.inp at 1024^2 on 64 blackrose nodes (256 cores)
