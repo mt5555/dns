@@ -9,19 +9,20 @@ GPL1:  Tag of code before GPL branch   (7/22/2008)
 
    GPL1_branch:     branch at GPL1
    GPL1_branch_tag1 tag after adding all GPL stuff
+   GPL1_branch_tag2 a few more edits, including #define TRUNC in params.F90
+   passes these tests:
+     ../testing/test3d_forcing.sh r
+     ../testing/test.sh 1r
 
-On trunc, I then ran:
-   cvs update -j GPL1 -j GPL1_branch_tag1  (BIG MISTAKE - deletes everyting
-                                            deleted from branch)
 
-   cd src ; cvs update -j GPL1 -j GPL1_branch_tag1  
-   
-   cvs tag GPL2
+On trunc, I then ran tried:
+   cvs update -j GPL1 -j GPL1_branch_tag1 src
+   BIG MISTAKE - deletes the analysis*F90 routines deleted in GPL1_branch
+   thus I gave up and added GPL headers to trunc by hand.
 
-GPL2:  Tag of code after merge back from GPL branch 7/23/2008
 
-THUS: for next merge from trunc into GPL1_branch, merge everything
-      on trunc *AFTER* GPL2 into GPL1_branch.
+
+
 
 
 
