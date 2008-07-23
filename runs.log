@@ -6,13 +6,22 @@ NSF2:  Tag of debugged dnsp code
 NSF3:  Tag dnsp + instrumented FFT and A2A overlaop 
 
 GPL1:  Tag of code before GPL branch   (7/22/2008)
-GPL1_branch:  branch at GPL1
 
-todo:
-  add GPL headers to GPL1_branch
-  port back to trunk
+   GPL1_branch:     branch at GPL1
+   GPL1_branch_tag1 tag after adding all GPL stuff
 
+On trunc, I then ran:
+   cvs update -j GPL1 -j GPL1_branch_tag1  (BIG MISTAKE - deletes everyting
+                                            deleted from branch)
 
+   cd src ; cvs update -j GPL1 -j GPL1_branch_tag1  
+   
+   cvs tag GPL2
+
+GPL2:  Tag of code after merge back from GPL branch 7/23/2008
+
+THUS: for next merge from trunc into GPL1_branch, merge everything
+      on trunc *AFTER* GPL2 into GPL1_branch.
 
 
 
