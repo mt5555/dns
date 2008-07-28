@@ -8,16 +8,17 @@ begin
 ;
 ; Read in the data file
 ;
+  nslice = 64
   setfileoption("bin","ReadByteOrder","LittleEndian")
-  path  = "../../Projects/KH/Boussinesq/B1/"
-  udata = cbinread(path+"all.u",-1,"double")
-  vdata = cbinread(path+"all.v",-1,"double")
-  pvdata = cbinread(path+"all.pv",-1,"double")
+  path  = "../../Projects/Boussinesq/kd/kd40/Data/"
+  udata = cbinread(path+"kd400032.0000.u",-1,"double")
+  vdata = cbinread(path+"kd400032.0000.v",-1,"double")
+  pvdata = cbinread(path+"kd400032.0000.pv",-1,"double")
 ;  print(data)
   ndata1 = sizeof(udata)
   ndata2 =ndata1/8. ; 8 bytes per double
   ndata = doubletoint(ndata2)
-  print(ndata)
+;  print(ndata)
    time = (/udata(0)/)
    print(time)
    nx = doubletoint((/udata(1)/))
@@ -36,9 +37,9 @@ begin
    zcoord = (/udata(4+nx+ny:3+nx+ny+nz)/)
    print(zcoord)
 ;
-; Declare a 2d array for u and v
+; Declare a 3d array for u and v and potens
 ;
-   slicedims = (/nx,ny/)
+   slicedims = (/nx,ny,nz/)
    uarray = new(slicedims,"double")
    varray = new(slicedims,"double")
    pvarray = new(slicedims,"double")
@@ -48,36 +49,61 @@ begin
    varray=0.
    pvarray = 0.
    navg = 2
-   do k=1,navg
-    do i=1,nx
-      do j=1,ny
-	icounter = icounter + 1
-  	uarray(i-1,j-1) = uarray(i-1,j-1) + (/udata(icounter)/)
-  	varray(i-1,j-1) = varray(i-1,j-1) + (/vdata(icounter)/)
-  	pvarray(i-1,j-1) = pvarray(i-1,j-1) + (/pvdata(icounter)/)
-      end do
-    end do
-    print(k)
+   do k=1,nz
+     do i=1,nx   
+       do j=1,ny
+	 icounter = icounter + 1
+   	 uarray(i-1,j-1,k-1) = (/udata(icounter)/)
+  	 varray(i-1,j-1,k-1) = (/vdata(icounter)/)
+  	 pvarray(i-1,j-1,k-1) = ((/pvdata(icounter)/)^2)/2
+       end do
+     end do
+;     print(k)
    end do
+;
+;  Reduce the number of grid points so as to see the vectors
+;
+  nx_small = (nx-1)/4
+  ny_small = (ny-1)/4
+  nz_small = (nz-1)/4
+  nslice_small = nz_small/2
+;
+; Declare a 2d array for u and v and potens
+;
+   slicedims2 = (/nx_small,ny_small/)
+   print(slicedims2)
+   u2d = new(slicedims2,"double")
+   v2d = new(slicedims2,"double")
+   potens2d = new(slicedims2,"double")
+
    do i=1,nx
-     do j=1,ny
-      uarray(i-1,j-1) = uarray(i-1,j-1)/navg
-      varray(i-1,j-1) = varray(i-1,j-1)/navg
-      pvarray(i-1,j-1) = pvarray(i-1,j-1)/navg
+     do j = 1,ny
+       u2d = uarray(i-1,j-1,nslice-1)
+       v2d = varray(i-1,j-1,nslice-1)
+       potens2d = pvarray(i-1,j-1,nslice-1)
      end do
    end do
 ;
-; Min Max of the data 
+; Min Max of the 2d data 
 ;
-  data_max = max(pvarray)
-  data_min = min(pvarray)
-  print(data_max)
-  print(data_min)
+  u_max = max(u2d)
+  u_min = min(u2d)
+  print(u_max)
+  print(u_min)
+  v_max = max(v2d)
+  v_min = min(v2d)
+  print(v_max)
+  print(v_min)
+  potens_max = max(pvarray)
+  potens_min = min(pvarray)
+  print(potens_max)
+  print(potens_min)
+;
 ;=================================================;
 ; PLOT 2
 ;=================================================;
-  wks  = gsn_open_wks("X11","vector")     ; open a ps file
-;  wks  = gsn_open_wks("eps","vector")     ; open a ps file
+;  wks  = gsn_open_wks("X11","vector")     ; open a ps file
+  wks  = gsn_open_wks("eps","vector")     ; open a ps file
   setvalues NhlGetWorkspaceObjectId()
   "wsMaximumSize": 33554432
   end setvalues  
@@ -88,54 +114,23 @@ begin
   res@lbTitleFontHeightF  = .007              ; controls the font size 
   res@lbOrientation =   "vertical"          ; vertical label bar
   res@gsnSpreadColors     = True          ; use full range of colormap
-<<<<<<< vector.ncl
-  res@gsnScalarContour    = True          ; contours desired
- 
-  res@cnLevelSelectionMode = "ManualLevels"     ; set manual contour levels
-  res@cnFillOn            = True          ; turn on color
-;  res@cnMinLevelValF       = -40.0               ; set min contour level
-;  res@cnMaxLevelValF       = 40.0                ; set max contour level
-;  res@cnLevelSpacingF      = 20.0               ; set contour spacing
-
-  res@vcRefMagnitudeF           = .020             ; define vector ref mag
-;  res@vcRefLengthF              = .10           ; define length of vec ref
-;  res@vcRefAnnoOrthogonalPosF   = -1.0            ; move ref vector
-; res@vcRefAnnoArrowLineColor   = "white"         ; change ref vector color
-;  res@vcRefAnnoArrowUseVecColor = False           ; don't use vec color for ref
-
-  res@vcLevelSelectionMode    = "ExplicitLevels"
-  res@vcLevels = (/2., 1., -1, -2/)
-  res@vcLevelSpacingF          = 10
-  res@vcMaxLevelValF          = 3.
-  res@vcMinLevelValF          =-3.
-;  res@vcGlyphStyle            = "CurlyVector"     ; turn on curley vectors
-  res@vcLineArrowColor        = "red"           ; change vector color
-;  res@vcLineArrowThicknessF   = .50               ; change vector thickness
-  res@vcVectorDrawOrder       = "PostDraw"        ; draw vectors last
-=======
-  res@vcMinFracLengthF     = 0.33
-  res@vcRefMagnitudeF     = 3.0
-  res@vcRefLengthF        = 3.0
-  res@vcLevelSelectionMode = "ManualLevels"
-;  res@vcLevelSelectionMode = "AutomaticLevels"
-  res@vcLevelSpacingF      = 2.0
-  res@vcMinLevelValF       = -3.
-  res@vcMaxLevelValF       = 3.
-   res@vcFillArrowsOn           = True   
-   res@vcMonoFillArrowFillColor = False ; in different colors
-   res@vcFillArrowEdgeColor     = 1     ; Draw the edges in black.
-   res@vcFillArrowWidthF        = 0.055 ; Make vectors thinner.
-;  res@vpWidthF            = 0.5           ; change aspect ratio of plot
-;  res@vpHeightF           = 0.3
-  plot1=gsn_vector(wks,uarray,varray,res)
+;  res@vcMinFracLengthF     = .30
+;  res@vcRefMagnitudeF     = .10
+;  res@vcRefLengthF        = .30
+;  res@vcLevelSelectionMode = "ManualLevels"
+  res@vcLevelSelectionMode = "AutomaticLevels"
+;  res@vcLevelSpacingF      = .20
+;  res@vcMinLevelValF       = -.5
+;  res@vcMaxLevelValF       = .5
+;   res@vcFillArrowsOn           = True   
+;   res@vcMonoFillArrowFillColor = False ; in different colors
+;   res@vcFillArrowEdgeColor     = 1     ; Draw the edges in black.
+;   res@vcFillArrowWidthF        = 0.055 ; Make vectors thinner.
+  res@vpWidthF            = 2.0           ; change aspect ratio of plot
+  res@vpHeightF           = 2.0
+  plot1=gsn_vector(wks,u2d,v2d,res)
 ;  plot=gsn_csm_vector_scalar(wks,uarray,varray,\
 ;                                    pvarray,res)
 
-; note that the default plot draw here still uses the long_name and
-; units of the variable as labels.
-
-; In this file, the coordinate variables of the data are listed as 
-; lat and long, but they are really just index points, which makes this
-; data suitable for plotting without a map.
   delete(wks)
   end

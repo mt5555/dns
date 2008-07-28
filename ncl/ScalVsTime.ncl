@@ -8,9 +8,9 @@ begin
 ;
 nx = 0
 fcor = 0
-f_k = 24
-epsil_f = .0253303064
-;epsil_f = 0.517275
+f_k = 3
+;epsil_f = .0253303064
+epsil_f = 0.517275
 timescale = (epsil_f*(2.*3.141592*f_k)^2)^(.33333)
 energyscale = (epsil_f/(2.*3.141592*f_k))^(-2./3.)
 ;timescale = (epsil_f*(f_k)^2)^(.33333)
@@ -38,9 +38,12 @@ print(timescale)
 ;  path  = "../../Projects/KH/Boussinesq/n21asp1/"
 ;  path  = "../../Projects/KH/Boussinesq/n21aspp1/"
 ;  path  = "../../Projects/KH/Boussinesq/n21aspp01/"
-  path  = "../../Projects/KH/Boussinesq/Bp01/"
+;  path  = "../../Projects/KH/Boussinesq/Bp01/"
+;  path  = "../../Projects/Boussinesq/512/rop005fr1/Data/"
+  path  = "../../Projects/Boussinesq/640/n1f1000/"
+  path  = "../../Projects/Boussinesq/128/rop05fr1kf2/Scalars/"
   pathwrite = path+"ke.txt"
-  griddata = cbinread(path+"Bp01.scalars-bous",-1,"double")
+  griddata = cbinread(path+"all.scalars-bous",-1,"double")
   ndata1 = sizeof(griddata)
   ndata2 =ndata1/8. ; 8 bytes per double
   ndata = doubletoint(ndata2)

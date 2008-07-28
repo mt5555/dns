@@ -8,12 +8,12 @@ begin
 ; Read in the kinetic energy spectrum
 ;
   setfileoption("bin","ReadByteOrder","LittleEndian")
-;  path  = "../../Projects/KH/Boussinesq/f21norot/hyper4/"
 ;  path  = "../../Projects/KH/Boussinesq/n21/"
 ;  path  = "../../Projects/KH/Boussinesq/n21/hyper4/"
 ;  path  = "../../Projects/KH/Boussinesq/r16A1/hyper4/"
-  path  = "../../Projects/KH/Boussinesq/B1/"
+;  path  = "../../Projects/KH/Boussinesq/B1/"
 ; path  = "../../Projects/KH/Boussinesq/low/"
+  path  = "../../Projects/Boussinesq/kd/kd40/Data/"
   data = cbinread(path+"all.spec",-1,"double")
 ;  print(data)
 ;

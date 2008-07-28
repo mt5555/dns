@@ -10,7 +10,7 @@ begin
 ;
 ; ivert=0 means horizontal slices, ivert=1 means vertical slices
   ivert = 0
-  nhslice = 64
+  nhslice = 118
   nvslice = 64
 ; ipotens = 0 means don't compute the potential enstrophy from the pv
   ipotens = 0
@@ -18,9 +18,10 @@ begin
 ; Read in the data
 ;
   setfileoption("bin","ReadByteOrder","LittleEndian")
-;  path  = "../../Projects/Boussinesq/128v2/n1f100/Data/"
-  path  = "../../Projects/Boussinesq/128/ro1fr1kf2/Data/"
-  data = cbinread(path+"ro1fr1kf20008.0000.u",-1,"double")
+;  path  = "../../Projects/KH/Boussinesq/128v2/n1f100/Data/"
+  path  = "../../Projects/Boussinesq/128/rop5fr1kf3/"
+;  data = cbinread(path+"rop05fr1kf20064.0000.t04.s001.000",-1,"double")
+  data = cbinread(path+"rop5fr1kf30064.0000.t04.s001.000",-1,"double")
   ndata1 = sizeof(data)
   ndata2 =ndata1/8. ; 8 bytes per double
   ndata = doubletoint(ndata2)
@@ -51,8 +52,6 @@ begin
 ; Declare a 2d array for contouring and analysis
 ;
    slicedims = (/nx,ny/)
-   contarraynew = new(slicedims,"double")
-   averagearraynew = new(slicedims,"double")
    contarray = new(slicedims,"double")
    averagearray = new(slicedims,"double")
    diffarray = new(slicedims,"double")
@@ -61,10 +60,12 @@ begin
 ;
    bigarray=0
 ;
+;  x runs fastest, y second fastest, z slowest.
+;
    icounter = 3+nx+ny+nz
    do k=1,nz
-    do i=1,nx
-      do j=1,ny
+    do j=1,ny
+      do i=1,nx
 	icounter = icounter + 1
            bigarray(i-1,j-1,k-1) = (/data(icounter)/)
       end do
@@ -75,18 +76,20 @@ begin
 ;
   if (ivert .eq. 0) then
 ;
-;    The following is for doing vertical averages
+;    The following is for doing horizontal averages
 ;
      contarray=0
      averagearray=0
-     navg = nz
-     do k=1,navg
+     do k=1,nz
       do i=1,nx
         do j=1,ny
         if (ipotens.eq.0) then
-    	  averagearray(i-1,j-1) = averagearray(i-1,j-1) + bigarray(i-1,j-1,k-1)
+;
+;         First coordinate will be the vertical on the plot
+;
+    	  averagearray(k-1,j-1) = averagearray(k-1,j-1) + bigarray(i-1,j-1,k-1)
         else
-    	  averagearray(i-1,j-1) = averagearray(i-1,j-1) + bigarray(i-1,j-1,k-1)*bigarray(i-1,j-1,k-1)/2.
+    	  averagearray(k-1,j-1) = averagearray(k-1,j-1) + bigarray(i-1,j-1,k-1)*bigarray(i-1,j-1,k-1)/2.
         end if          
         end do
       end do
@@ -94,9 +97,9 @@ begin
 ;
 ;    Normalize
 ;
-     do i=1,nx
+     do k=1,nz
        do j=1,ny
-        averagearray(i-1,j-1) = averagearray(i-1,j-1)/navg
+        averagearray(k-1,j-1) = averagearray(k-1,j-1)/nx
        end do
      end do
      print(min(averagearray))
@@ -105,12 +108,12 @@ begin
 ;    Pick out a slice
 ;
      contarray = 0.
-      do i=1,nx
+      do k=1,nz
         do j=1,ny
         if (ipotens.eq.0) then
-    	  contarray(i-1,j-1) = bigarray(i-1,j-1,nhslice-1)
+    	  contarray(k-1,j-1) = bigarray(nhslice-1,j-1,k-1)
         else
-    	  contarray(i-1,j-1) = bigarray(i-1,j-1,nhslice-1)*bigarray(i-1,j-1,nhslice-1)/2.
+    	  contarray(k-1,j-1) = bigarray(nhslice-1,j-1,k-1)*bigarray(nhslice-1,j-1,k-1)/2.
         end if
         end do
       end do
@@ -119,9 +122,9 @@ begin
 ;
 ;    See how much its different from the average
 ;
-      do i=1,nx
+      do k=1,nz
         do j=1,ny
-    	  diffarray(i-1,j-1) = contarray(i-1,j-1) - averagearray(i-1,j-1)
+    	  diffarray(k-1,j-1) = contarray(k-1,j-1) - averagearray(k-1,j-1)
         end do
       end do
      print(min(diffarray))
@@ -136,15 +139,15 @@ begin
      averagearray=0
      contarray=0
 ;
-;    Compute the horizontal average
+;    Compute the vertical average
 ;
      do i=1,nx
        do k=1,nz
          do j=1,ny
             if(ipotens.eq.0) then
-              averagearray(j-1,k-1) = averagearray(j-1,k-1) + bigarray(i-1,j-1,k-1)
+              averagearray(j-1,i-1) = averagearray(j-1,i-1) + bigarray(i-1,j-1,k-1)
             else
-              averagearray(j-1,k-1) = averagearray(j-1,k-1) + bigarray(i-1,j-1,k-1)*bigarray(i-1,j-1,k-1)/2.
+              averagearray(j-1,i-1) = averagearray(j-1,i-1) + bigarray(i-1,j-1,k-1)*bigarray(i-1,j-1,k-1)/2.
             end if
           end do
         end do
@@ -152,37 +155,30 @@ begin
 ;
 ;     Normalize
 ;
-      do k=1,nz
+      do i=1,nx
         do j=1,ny
-         averagearray(j-1,k-1) = averagearray(j-1,k-1)/nx
-         averagearraynew(k-1,j-1) = averagearray(j-1,k-1)/nx
+         averagearray(j-1,i-1) = averagearray(j-1,i-1)/nz
         end do
       end do
 ;
 ;     Pick out a slice to look at
 ;
-      do k=1,nz
+      do i=1,nx
         do j=1,ny
         if (ipotens.eq.0) then
-         contarray(j-1,k-1) = bigarray(nvslice-1,j-1,k-1)
+         contarray(j-1,i-1) = bigarray(i-1,j-1,nvslice-1)
         else
-         contarray(j-1,k-1) = bigarray(nvslice-1,j-1,k-1)*bigarray(nvslice-1,j-1,k-1)/2.
+         contarray(j-1,i-1) = bigarray(i-1,j-1,nvslice-1)*bigarray(i-1,j-1,nvslice-1)/2.
         end if
-        end do
-      end do
-
-      do k=1,nz
-        do j=1,ny
-         contarraynew(j-1,k-1) = contarray(k-1,j-1)
         end do
       end do
 ; 
 ;     Find out how far your snapshot is from the average
 ;
       diffarray=0
-      do k=1,nz
+      do i=1,nx
       do j=1,ny
-          diffarray(k-1,j-1) = contarray(j-1,k-1)-averagearray(j-1,k-1)
+          diffarray(j-1,i-1) = contarray(j-1,i-1)-averagearray(j-1,i-1)
       end do
       end do
 ;
@@ -190,20 +186,19 @@ begin
 ;
 ; Min Max of the data 
 ;
-  print(max(contarraynew))
-  print(min(contarraynew))
-  print(max(averagearraynew))
-  print(min(averagearraynew))
+  print(max(contarray))
+  print(min(contarray))
+  print(max(averagearray))
+  print(min(averagearray))
   print(max(diffarray))
   print(min(diffarray))
-
 ;=================================================;
 ; PLOT 1
 ;=================================================;
 ;  wks  = gsn_open_wks("X11","cont")     ; open a ps file
-  wks  = gsn_open_wks("x11","cont")     ; open a ps file for the snapshot
-  wks2  = gsn_open_wks("x11","contavg")     ; open a ps file for the average
-  wks3  = gsn_open_wks("x11","contdiff")     ; open a ps file for the difference
+  wks  = gsn_open_wks("eps","cont")     ; open a ps file for the snapshot
+  wks2  = gsn_open_wks("eps","contavg")     ; open a ps file for the average
+  wks3  = gsn_open_wks("eps","contdiff")     ; open a ps file for the difference
   setvalues NhlGetWorkspaceObjectId()
   "wsMaximumSize": 500000000
   end setvalues  
@@ -216,10 +211,10 @@ begin
 ;  res@cnLevelSelectMode   = "ExplicitLevels"
 ;  res@cnLevels            = (/-3.,-2.,-1.,1.,2.,3./)
 ;  The following is for setting manual levels
-  res@cnLevelSelectionMode = "ManualLevels"
-  res@cnLevelSpacingF     = .1
-  res@cnMinLevelValF      = -1.0
-  res@cnMaxLevelValF      = 1.0
+;  res@cnLevelSelectionMode = "ManualLevels"
+;  res@cnLevelSpacingF     = .1
+;  res@cnMinLevelValF      = -.4
+;  res@cnMaxLevelValF      = .4
   res@cnFillOn            = True          ; turn on color
   res@lbTitleFontHeightF  = .007              ; controls the font size 
   res@lbOrientation =   "vertical"          ; vertical label bar
