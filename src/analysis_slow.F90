@@ -250,7 +250,7 @@ Q=0
 !     we need it for one of the important horizontal conservation laws.
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      Qslow(:,:,:,4) = 1. + bous*zcord(k)*Q(i,j,k,4)
+      Qslow(:,:,:,4) = 1. + bous*zcord(k)+Q(i,j,k,4)
       call zaverage(Qslow(1,1,1,4),dx)
       Qslow(:,:,:,4)=dx
       if(my_pe==io_pe) write(6,*) "got the slow total buoyancy"
