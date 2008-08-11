@@ -341,7 +341,7 @@ run time  20min   22.8       66min         12.65          8.41    4.96
             intel compiler  PGI compiler    g95         intel on Thunderbird
               AMD Athlon    pentium M      2ghz powerPC   intel x86_64
               Linux FC4     Linux RHEL4    MAC OS10.4     Linux
-CPUS     =                                 1cpu  2cpu      1x1x64  2x1x64  4x1x32
+CPUS     =                                 1cpu  2cpu      1x1x32  2x1x32  4x1x32
 kmax*eta =                                .9626  same     .9990   SAME    SAME
 KE       =                               1.7197           1.6801 
 R_lambda =                                 58.4           61.47 
@@ -351,7 +351,10 @@ run time =                                14.5m   11.4m    .42m
 
 
 Other collected run times:
-2.4ghz Xeon Linux, ifort, 1 cpu: 13.81
+2.4ghz Xeon Linux, ifort, 1 cpu:  13.81
+2.4ghz quad core, DDR2-666, gfortran, 1 cores: 2.97
+2.4ghz quad core, DDR2-666, gfortran, 4 cores: 1.26min
+
 
 **************************************************************************
 
