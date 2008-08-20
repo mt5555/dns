@@ -221,7 +221,7 @@ real*8 :: dummy(1)
 integer :: pv_type, i, j, k, im, jm, km, ierr
 real*8 :: xw,xw2,u2,xw_viss,xfac, vx,wx,uy,wy,uz,vz,pe,totale
 real*8 :: pv,potens,pvqg,potensqg,pvro0,potensro0,pvfr0,potensfr0
-real*8 :: ke,pe_diss,ke_diss,h_diss,ens_diss,rwave,pv_diss,kappa
+real*8 :: ke,pe_diss,ke_diss,h_diss,ens_diss,rwave,pv_diss,kappa,ke_2
 !
 ! For debuging potential_vorticity
 !
@@ -494,6 +494,19 @@ enddo
 pvro0=pvro0/g_nx/g_ny/g_nz
 potensro0=potensro0/g_nx/g_ny/g_nz
 !
+! Compute a check on the total kinetic energy in physical space
+!
+ke_2 = 0.
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         ke_2 = ke_2 +Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2
+      enddo
+   enddo
+enddo
+! normalize:
+ke_2=ke_2/g_nx/g_ny/g_nz/2.
+!
 ! Compute the same things for Fr->0 PV
 !
 pv_type=5
@@ -522,7 +535,7 @@ ints_e(2)=pe
 ints_e(3)=ke_diss 
 ints_e(4)=pe_diss
 ints_e(5)=pv
-ints_e(6)=0
+ints_e(6)=ke_2
 ints_e(7)=potens
 ints_e(8)=potens_diss
 ints_e(9)=pvqg
@@ -544,7 +557,8 @@ nints_e=14
 
 
 if(my_pe==io_pe) then
-print *,'aspect_diag potens=',potens,potensqg,potensro0,potensfr0
+print *,'aspect_diag potens=',potens,potensqg,potensro0,potensfr0,ke,&
+      ke_2
 end if
 
 end subroutine compute_expensive_scalars
@@ -572,7 +586,8 @@ real*8  :: ints_e(*)
 
 ! local variables
 real*8,allocatable :: ints2(:)
-real*8 :: keh_slow, kev_slow, vor_slow, pe_slow,potens_slow
+real*8 :: keh_slow, kev_slow, vor_slow, pe_slow, potens_slow, &
+          vert_en_slow
 integer :: pv_type, i, j, k, im, jm, km, ierr
 real*8, save :: dxx(1),twopi,div_check
 twopi = 6.2831853071795864769d0
@@ -595,14 +610,26 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
 !         Compute the slow variables for Ro -> 0
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!    Compute the slow variables by integrating u, v, and w in the vertical
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      Qslow = Q
+      call zaverage(Qslow(1,1,1,1),dx)
+      Qslow(:,:,:,1)=dx
+      call zaverage(Qslow(1,1,1,2),dx)
+      Qslow(:,:,:,2)=dx
+      call zaverage(Qslow(1,1,1,3),dx)
+      Qslow(:,:,:,3)=dx
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!        First compute the horizontally divergence free part to
+!        Then compute the horizontally divergence free part to
 !        subtract from the velocity
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      call der(Q(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
-      call der(Q(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
+      call der(Qslow(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
+      call der(Qslow(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
 !
 !     q2 is the divergence
 !
@@ -610,14 +637,17 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       call fft3d(q2(:,:,:,1),work1)
       !
       !        Compute the inverse horizontal laplacian in 2 dimension
+      !        Note we only need to do this for nz1, but we do it 
+      !        for all of them anyway to make sure the 3d array is
+      !        filled with the vertically averaged 2d slices
       !
-      do k=nz1,nz2
+      do k = nz1,nz2
          do i=nx1,nx2
             do j=ny1,ny2
                jm=(jmcord(j))
                im=(imcord(i))
                if (im==0 .and. jm==0) then
-                  q2(i,j,k,1)=0
+                  q2(i,j,k,1)=0    ! div of the constant is 0.
                else
                   q2(i,j,k,1) = -q2(i,j,k,1)/((im**2+jm**2)*pi2_squared)
                endif
@@ -631,31 +661,33 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       call der(q2(:,:,:,1),dx,dxx,work1,DX_ONLY,1)
       call der(q2(:,:,:,1),dy,dxx,work1,DX_ONLY,2)
       !
-      Qslow = 0.
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
-               Qslow(i,j,k,1) = Q(i,j,k,1) - dx(i,j,k)
-               Qslow(i,j,k,2) = Q(i,j,k,2) - dy(i,j,k)
-               Qslow(i,j,k,3) = Q(i,j,k,3)
-               Qslow(i,j,k,4) = Q(i,j,k,4)
+               Qslow(i,j,k,1) = Qslow(i,j,k,1) - dx(i,j,k)
+               Qslow(i,j,k,2) = Qslow(i,j,k,2) - dy(i,j,k)
             enddo
          enddo
       enddo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
-!    Compute the slow variables by integrating u, v, and w in the vertical
-!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      call zaverage(Qslow(1,1,1,1),dx)
-      Qslow(:,:,:,1)=dx
-      call zaverage(Qslow(1,1,1,2),dx)
-      Qslow(:,:,:,2)=dx
-      call zaverage(Qslow(1,1,1,3),dx)
-      Qslow(:,:,:,3)=dx
-!     3 is for potential vorticity
+!
+!     Remember that Qslow(3) is the vertically averaged vertical velocity.
+!
+!     Now, since Qslow(4) = Q(4), that is, the buoyancy is not touched
+!     by the projection operator in this limit, we will store
+!     the vertical average of the total buoyancy in Qslow(4) since
+!     we need it for one of the important horizontal conservation laws.
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      Qslow(:,:,:,4) = 1. - bous*zcord(k)+Q(i,j,k,4)
+      call zaverage(Qslow(1,1,1,4),dx)
+      Qslow(:,:,:,4)=dx
+!
+!     
+!
+!     q2(3) is for potential vorticity
       q2(:,:,:,3)=0.
-!     1 is for the divergence
+!     q2(1) is for the divergence
       q2(:,:,:,1)=0.
 
       ! compute potential vorticity, (pvtype=4) 
@@ -663,7 +695,8 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       call potential_vorticity(q2(:,:,:,3),q2(:,:,:,1),Q,work1,dx,4)
 
 
-      ! Compute the horizontal divergence of the slow variables
+      ! Compute the horizontal divergence of the slow variables which
+      ! should be zero!
       
       div_check = -10000.
       call der(Qslow(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
@@ -676,7 +709,11 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
             end if
          enddo
       enddo
-if(my_pe==io_pe) write(6,*) "The horizontal divergence is  ",div_check
+!
+!     Checking the horizontal divergence, but just on one parallel
+!     processor.
+! 
+      if(my_pe==io_pe) write(6,*) "The horizontal divergence is  ",div_check
 
 !     compute horizontal vorticity of slow variablles
       call der(Qslow(1,1,1,1),dy,dxx,work1,DX_ONLY,2)
@@ -686,27 +723,25 @@ if(my_pe==io_pe) write(6,*) "The horizontal divergence is  ",div_check
             vor2d(i,j) = dx(i,j,nz1)-dy(i,j,nz1)
          enddo
       enddo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!         
-!         compute the slow conserved quantities
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !         First the 2D quantities
 !             
       keh_slow = 0.
       kev_slow = 0.
       vor_slow = 0.
+      vert_en_slow = 0.
       do j=ny1,ny2
          do i=nx1,nx2
             vor_slow = vor_slow + vor2d(i,j)**2
             keh_slow = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
             kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
+            vert_en_slow = vert_en_slow + Qslow(i,j,nz1,3)**2+Qslow(i,j,nz1,4)**2
          enddo
       enddo
       keh_slow=.5*keh_slow/g_nx/g_ny
       kev_slow=.5*kev_slow/g_nx/g_ny
       vor_slow = .5*vor_slow/g_nx/g_ny
+      vert_en_slow = .5*vert_en_slow/g_nx/g_ny
       !
       !        Then the 3d quantities
       !
@@ -717,7 +752,7 @@ if(my_pe==io_pe) write(6,*) "The horizontal divergence is  ",div_check
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
-               pe_slow = pe_slow + (1. + bous*zcord(k)*Qslow(i,j,k,4))**2
+               pe_slow =  pe_slow + Q(i,j,k,4)**2
                potens_slow = potens_slow + q2(i,j,k,3)**2
             enddo
          enddo
@@ -735,7 +770,8 @@ ints_e(2)=kev_slow
 ints_e(3)=pe_slow
 ints_e(4)=potens_slow
 ints_e(5)=vor_slow
-nints_e=5
+ints_e(6)=vert_en_slow
+nints_e=6
 
 
 ! global sum over all processors:
@@ -749,8 +785,9 @@ nints_e=5
 
 if(my_pe==io_pe) then
 
-   print *,'slow_diag keh_slow=',keh_slow
-   print *,'slow_diag potens_slow=',potens_slow
+   print *,'slow_diag keh_slow=',ints_e(1)
+   print *,'slow_diag potens_slow=',ints_e(4)
+   print *, 'slow_vert_en=',ints_e(6)
 
 end if
 
