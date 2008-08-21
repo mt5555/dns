@@ -15,7 +15,10 @@ timescale = (epsil_f*(2.*3.141592*f_k)^2)^(.33333)
 energyscale = (epsil_f/(2.*3.141592*f_k))^(-2./3.)
 ;timescale = (epsil_f*(f_k)^2)^(.33333)
 ;energyscale = (epsil_f/(f_k))^(-2./3.)
+timescale=1.
+energyscale=1.
 print(timescale)
+print(energyscale)
 ;
 ;**************************************************
 ; read in binary data
@@ -39,16 +42,19 @@ print(timescale)
 ;  path  = "../../Projects/KH/Boussinesq/n21aspp1/"
 ;  path  = "../../Projects/KH/Boussinesq/n21aspp01/"
 ;  path  = "../../Projects/KH/Boussinesq/Bp01/"
-;  path  = "../../Projects/Boussinesq/512/rop005fr1/Data/"
-  path  = "../../Projects/Boussinesq/640/n1f1000/"
-  path  = "../../Projects/Boussinesq/128/rop05fr1kf2/Scalars/"
+;  path  = "../../Projects/Boussinesq/640/n1f1000/"
+;  path  = "../../Projects/Boussinesq/128/rop05fr1kf2/Scalars/"
+;  path  = "../../Projects/Boussinesq/512/kf3/rop03fr1/Data/"
+;  path  = "../../Projects/Boussinesq/256/kf3/rop3fr1/Data/"
+;  path  = "../../Projects/Boussinesq/512/kf3/rop2fr1/Data/"
+  path  = "../../Projects/Boussinesq/256/kf3/ro1fr1/Data/"
   pathwrite = path+"ke.txt"
   griddata = cbinread(path+"all.scalars-bous",-1,"double")
   ndata1 = sizeof(griddata)
   ndata2 =ndata1/8. ; 8 bytes per double
   ndata = doubletoint(ndata2)
-  print(ndata)
-  print(griddata)
+;  print(ndata)
+;  print(griddata)
 ;
 ; Compute the total number of time increments in the data
 ;
@@ -184,7 +190,7 @@ f_k = 0
      toprint(:,1)=ke(:)
      opt = True
      opt@fout = path+"ke.txt"
-     write_matrix(toprint, "2e13.6", opt)
+     write_matrix(toprint, "2e25.12", opt)
 ;
 ;    Write out the potential energy
 ;
@@ -192,7 +198,7 @@ f_k = 0
      toprint(:,1)=pe(:)
      opt = True
      opt@fout = path+"pe.txt"
-     write_matrix(toprint, "2e13.6", opt)
+     write_matrix(toprint, "2e25.12", opt)
 ;
 ;    Write out the total energy
 ;
@@ -200,7 +206,7 @@ f_k = 0
      toprint(:,1)=pe(:) + ke(:)
      opt = True
      opt@fout = path+"tote.txt"
-     write_matrix(toprint, "2e13.6", opt)
+     write_matrix(toprint, "2e25.12", opt)
 ;
 ;    Write out the potential vorticity
 ;
@@ -208,7 +214,7 @@ f_k = 0
      toprint(:,1)=pv(:)
      opt = True
      opt@fout = path+"pv.txt"
-     write_matrix(toprint, "2e13.6", opt)
+     write_matrix(toprint, "2e25.12", opt)
 ;
 ;    Write out the potential enstrophy
 ;     
@@ -216,7 +222,7 @@ f_k = 0
      toprint(:,1)=potens(:)
      opt = True
      opt@fout = path+"potens.txt"
-     write_matrix(toprint, "2e13.6", opt)
+     write_matrix(toprint, "2e25.12", opt)
 ;
 ;    Write out the potential enstrophy dissipation
 ;     
