@@ -679,7 +679,7 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
 !     we need it for one of the important horizontal conservation laws.
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      Qslow(:,:,:,4) = Q(i,j,k,4)
+      Qslow(:,:,:,4) = Q(:,:,:,4)
       call zaverage(Qslow(1,1,1,4),dx)
       Qslow(:,:,:,4)=dx
 !
