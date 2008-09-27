@@ -188,6 +188,100 @@ makes it difficult to use the vorticity evaluation trick discussed in
 Section~\ref{S:vtrick}, as this trick certain derivatives
 to be computed with intermediate products of the parallel FFT.
 
+\section{The Parallel FFT (description 2}
+
+The code is written in Fortran 90.  The only libraries used are MPI
+and a single-processor real to half-complex FFT.  We usually use the
+open source FFTW package, except on some platforms where the vendor
+provided single-processor FFT is faster than FFTW.  The parallel FFT
+is implemented with the traditional data-transpose method, meaning
+that all FFTs are computed on-processor and the data must be
+transposed between different decompositions to allow for the FFTs to
+be computed in the x-direction, y-direction and then z-direction.  The
+code allows for arbitrarily sized pencil decompositions in each of the
+three directions.  For example, to compute the x-direction component
+of the 3D FFT, the $N\times N\times N$ computational domain is
+distributed amongst the processors so that each processor has the
+complete column of $N$ data points in the x direction.  In this
+x-pencil decomposition, there are $N \times N$ such columns, which are
+then equally distributed amongst the processors.  To compute the
+y-direction component of the 3D FFT, this data must be completely
+re-distributed (via message passing) so that each processor now
+contains a y-pencil (i.e. a few of the length $N$ columns of data in
+the y direction).  A second transpose from this y-pencil decomposition
+to a z-pencil decomposition is needed to arrange the data for the z
+direction component of the FFT, which completes the 3D FFT.  Grid
+space data is thus always stored in an x-pencil decomposition, and
+after taking the FFT the resulting Fourier coefficients are stored in
+the z-pencil decomposition.  The inverse FFT simply reverses this
+procedure.
+
+There are several choices in how one can implement this data-transpose
+operation.  If one sets up appropriate sub-communicators, the transpose
+can be implemented as a single call to MPI\_Alltoall() within the
+sub-communicators.  One must then compute the $N^2$ FFTs of length
+$N$, all on-processor, but with a large stride.  One can add an
+additional step and re-arrange the data within each processor to allow
+for stride 1 FFTs.  The stride 1 FFTs are significantly faster, but we have
+found the increase typically does not offset the cost of re-arranging the 
+data.
+
+To hide the cost of this data re-arranging, we have written a custom
+implementation of the MPI\_Alltoall(), using non-blocking
+point-to-point MPI messages.  Our custom implementation allows us to
+overlap the interprocessor communication with the on-processor data
+re-arrangement needed to allow for stride 1 FFTs.  The result is a
+transpose operation which is as fast as the MPI\_Alltoall() function,
+but no further data motion is required to compute stride 1 FFTs.
+Coupled with FFTW, this procedure results in an extremely efficient
+parallel 3D FFT.
+
+
+\subsection{MPI\_alltoallv() versues Point-to-Point  }
+
+
+We last studied this aspect of the parallel FFT in 2006, on a dual
+core XT3 (Redstorm, before its quad core upgrade).  We compared the
+performance of our DNS code transpose routine (DNS-T) and an
+MPI\_alltoall() based transpose (MPI-T).
+
+We first measured the performance for a mesh of $2048^3$ using 1024
+processors.  We ran this configuration using a slab decomposition,
+where only the z-direction is distributed among the processors.  We
+then measured the time needed to complete the transpose of the
+z-direction.  DNS-T required 0.41 seconds, while MPI-T was
+significantly slower, requiring 1.1 seconds, All of our current runs
+of the DNS code use resolutions and processor counts that allow for a
+slab decomposition where the DNS-T algorithm has a clear performance
+advantage over MPI-T.
+
+For the types of very high resolution runs on vary large systems that
+would be made possible by a DOE INCITE award, we will be required to
+use a pencil decomposition which requires two types of transposes.  We
+only have one comparison of DNS-T and MPI-T in this regime: a mesh of
+size $4096^3$, using 16384 processors.  For our test, each of the 4096
+x-y slabs are further divided into 4.  The result is each processor
+works with arrays of size 4096x1024x1.  The two types of transposes
+are the coarsely distributed y-direction (where the transpose consists
+of few messages of large blocks of data), and the finely distributed
+z-direction (where the transpose consists of many messages of small
+blocks of data).  For the z-direction transpose (many small messages),
+DNS-T outperformed MPI-T by a factor of 15 (1.14s verses 17.3s).  But
+in the y-direction (few large messages) MPI-T outperformed DNS-T by a
+factor of 2.8 ( 0.68s verses 0.24s).  As both transposes are required,
+this case again shows that DNS-T has a significant advantage over
+MPI-T.  However, the fact that there are regimes where MPI-T is faster
+show savings can be had by using a hybrid approach.  One should also
+benchmark other size pencil decompositions, for example where each
+processor works with arrays of size 4096x32x32, where both the y
+direction and z direction transposes are similar, and have
+intermediate numbers of messages and message size as compared to the
+two extreme cases benchmarked above.
+
+ 
+
+
+
 
 
 \section{Complexity}
