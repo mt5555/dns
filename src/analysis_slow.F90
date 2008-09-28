@@ -58,21 +58,24 @@ real*8,save  :: dxx(1) ! dummy varray
 character(len=80) message,sdata
 character(len=280) basename,fname,fnamewrite
 integer ierr,i,j,k,n,km,im,jm,icount,ictof,ivorsave,ntrunc
+integer jcount,kcount
 integer icentroid,iscalars,i3dspec,i2dspec,ireaduvh,iwrite_factor
 real*8 :: tstart,tstop,tinc,time,time2,timescale,energyscale,f_k,epsil_f,timep
 real*8 :: u,v,w,x,y, n_r, spec_r, div_check
 real*8 :: kr,ke,ck,xfac,vor_slow,pe_slow,kev_slow,keh_slow,kew_slow, &
-          potens_slow,vert_en_slow
+          potens_slow,vert_en_slow,keh
+real*8 :: uvel_min, uvel_max, vvel_min, vvel_max, uvel3_min, uvel3_max
+real*8, allocatable :: Q_small(:,:,:)
 integer ni,ns,nb
 
 
 ! input file
-basename="/scratch2/wingate/128/kd40_new/kd40"
+basename="/Users/wingate/Projects/Boussinesq/128/rop01fr1kf2/Data/rop01fr1kf2"
 if (my_pe==io_pe) print *,basename
-tstart=0.
-tstop=8.
-tinc=8.
-f_k = 24.
+tstart=64.
+tstop=64.
+tinc=1.
+f_k = 2.
 epsil_f = .0253303064
 timescale = (epsil_f*(2.*3.141592*f_k)**2)**(.33333)
 energyscale = (epsil_f/(2.*3.141592*f_k))**(-.66666666)
@@ -90,13 +93,27 @@ i3dspec = 1 ! = 1 Read in and write out a plot for the 3d spectrum
             ! = 2 Compute the 2d spectrum from the 3d spectrum
 i2dspec = 0 ! = 1 Read in the 2d spectrum and plot it out
             ! = 0 Do nothing
-iwrite_factor = 4 ! write out a file a factor of N smaller. If 1 do nothing.
+iwrite_factor = 4 ! write out a file a factor of N smaller. If 0 do nothing.
 call init_mpi       
 call init_mpi_comm3d()
 call init_model
 
 ! byte swap the input data:
 !call set_byteswap_input(1);
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Check to see make sure file writing will work
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+if(mod(nx-2,iwrite_factor).ne.0) then
+      if (my_pe==io_pe) then
+          write(6,*) "Cannot reduce the dimension: nx = ",nx," while iwrite_factor = ",iwrite_factor
+      endif
+      stop
+else
+      allocate(Q_small((nx-2)/iwrite_factor+2,(ny-2)/iwrite_factor+2,(nz-2)/iwrite_factor+2))
+end if
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -104,13 +121,13 @@ call init_model
 !  Further Initialization such as arrays and opening files
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 Q=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! File for the slow conserved quantities 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     open(54,file='keh.txt')
      open(55,file='keh_slow.txt')
      open(56,file='kev_slow.txt')
      open(57,file='vor_slow.txt')
@@ -143,6 +160,23 @@ Q=0
             fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".Fu"
             open(42,file=fnamewrite,status='unknown',action='write',form='unformatted')
             write(42) Q(nx1:nx2,ny1:ny2,nz1:nz2,1)
+         endif
+         if (iwrite_factor /= 0) then
+            fnamewrite = basename(1:len_trim(basename)) // sdata(2:10) // ".u_reduce"
+            icount = 0
+            do i = nx1,nx2,iwrite_factor
+               jcount = 0
+               icount = icount+1
+               do j = ny1,ny2,iwrite_factor
+                  kcount = 0
+                  jcount = jcount + 1
+                  do k = nz1,nz2,iwrite_factor
+                     kcount = kcount + 1
+                     Q_small(icount,jcount,kcount) = Q(i,j,k,1)
+                  enddo
+               enddo
+            enddo
+            call singlefile_io(time2,Q(1,1,1,1),fnamewrite,work1,work2,0,io_pe)
          endif
          
          fname = basename(1:len_trim(basename)) // sdata(2:10) // ".v"
@@ -231,14 +265,53 @@ Q=0
       call der(div,dx,dxx,work1,DX_ONLY,1)
       call der(div,dy,dxx,work1,DX_ONLY,2)
       !
-      do k=nz1,nz2
-         do j=ny1,ny2
-            do i=nx1,nx2
+      uvel_min = 0.
+      uvel_max = 0.
+      vvel_min = 0.
+      vvel_max = 0.
+      uvel3_min = 0.
+      uvel3_max = 0.
+      do j=ny1,ny2
+         do i=nx1,nx2
+            do k=nz1,nz2
+               if(Q(i,j,k,1) .le. uvel3_min) uvel3_min = Q(i,j,k,1) 
+               if(Q(i,j,k,1) .ge. uvel3_max) uvel3_max = Q(i,j,k,1) 
+               if(Qslow(i,j,k,1) .le. uvel_min) uvel_min = Qslow(i,j,k,1) 
+               if(Qslow(i,j,k,1) .ge. uvel_max) uvel_max = Qslow(i,j,k,1) 
+               if(Qslow(i,j,k,2) .le. vvel_min) vvel_min = Qslow(i,j,k,2) 
+               if(Qslow(i,j,k,2) .ge. vvel_max) vvel_max = Qslow(i,j,k,2) 
+            enddo
+            write(60,*) i,j,Qslow(i,j,nz1,1)
+            write(50,*) i,j,Qslow(i,j,nz1,2)
+         enddo
+         write(60,*)
+         write(50,*)
+      enddo
+      write(6,*) "uvel min = ",uvel_min
+      write(6,*) "uvel max = ",uvel_max
+      write(6,*) "uvel3 min = ",uvel3_min
+      write(6,*) "uvel3 max = ",uvel3_max
+      write(6,*) "vvel min = ",vvel_min
+      write(6,*) "vvel max = ",vvel_max
+
+
+      do j=ny1,ny2
+         do i=nx1,nx2
+            do k=nz1,nz2
                Qslow(i,j,k,1) = Qslow(i,j,k,1) - dx(i,j,k)
                Qslow(i,j,k,2) = Qslow(i,j,k,2) - dy(i,j,k)
             enddo
+            write(61,*) i,j,Qslow(i,j,nz1,1)
+            write(62,*) i,j,Q(i,j,nz1,1)
+            write(51,*) i,j,Qslow(i,j,nz1,2)
+            write(52,*) i,j,Q(i,j,nz1,2)
          enddo
+         write(61,*)
+         write(62,*)
+         write(51,*)
+         write(52,*)
       enddo
+
       if(my_pe==io_pe) write(6,*) "got the slow"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -250,7 +323,7 @@ Q=0
 !     we need it for one of the important horizontal conservation laws.
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      Qslow(:,:,:,4) = 1. + bous*zcord(k)+Q(i,j,k,4)
+      Qslow(:,:,:,4) = Q(:,:,:,4)
       call zaverage(Qslow(1,1,1,4),dx)
       Qslow(:,:,:,4)=dx
       if(my_pe==io_pe) write(6,*) "got the slow total buoyancy"
@@ -301,6 +374,9 @@ Q=0
 !            open(42,file=fnamewrite,status='unknown',action='write',form='unformatted')
 !            write(42) vor2d(nx1:nx2,ny1:ny2,nz1:nz2)
 !         endif
+!
+!  Compute some mins and maxes
+!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !         
@@ -309,7 +385,7 @@ Q=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !         First the 2D quantities
-!             
+!         
       keh_slow = 0.
       kev_slow = 0.
       vor_slow = 0.
@@ -319,28 +395,34 @@ Q=0
             vor_slow = vor_slow + vor2d(i,j)**2
             keh_slow = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
             kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
-            vert_en_slow = vert_en_slow + Qslow(1,j,nz1,3)**3 + Qslow(i,j,nz1,4)**2
-      if (my_pe==io_pe) then
-            write(6,*) "Vertical Velocity ",Q(i,j,nz1,3),Qslow(i,j,nz1,3)
-      end if
+            vert_en_slow = vert_en_slow + Qslow(1,j,nz1,3)**2 + Qslow(i,j,nz1,4)**2
          enddo
       enddo
-      keh_slow=.5*keh_slow/g_nx/g_ny
-      kew_slow=.5*kev_slow/g_nx/g_ny
-      vor_slow = .5*vor_slow/g_nx/g_ny
-      vert_en_slow = .5*vert_en_slow/g_nx/g_ny
+      keh_slow = keh_slow*.5/g_nx/g_ny
+      kev_slow = kev_slow*.5/g_nx/g_ny
+      vert_en_slow = vert_en_slow*.5/g_nx/g_ny
+      vor_slow = vor_slow*.5/g_nx/g_ny
+      keh = 0.
+      do k=nz1,nz2
+         do j=ny1,ny2
+            do i=nx1,nx2
+               keh = keh + (Q(i,j,k,1)**2 + Q(i,j,k,2)**2)
+            enddo
+         enddo
+      enddo
+      keh=.5*keh/g_nx/g_ny/g_nz
       !
       !        Then the 3d quantities
       !
       if (my_pe==io_pe) then
-      write(6,*) "BOUS =",bous
+      write(6,*) "BOUS =",bous, keh, keh_slow
       end if
       potens_slow = 0.
       pe_slow=0.
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
-               pe_slow = pe_slow + Qslow(i,j,k,4)**2
+               pe_slow = pe_slow + Q(i,j,k,4)**2
                potens_slow = potens_slow + potvor(i,j,k)**2
             enddo
          enddo
