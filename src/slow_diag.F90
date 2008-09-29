@@ -557,8 +557,7 @@ nints_e=14
 
 
 if(my_pe==io_pe) then
-print *,'aspect_diag potens=',potens,potensqg,potensro0,potensfr0,ke,&
-      ke_2
+print *,'slow_diag ke,ke2=',ints_e(1),ints_e(6)
 end if
 
 end subroutine compute_expensive_scalars
@@ -587,7 +586,7 @@ real*8  :: ints_e(*)
 ! local variables
 real*8,allocatable :: ints2(:)
 real*8 :: keh_slow, kev_slow, vor_slow, pe_slow, potens_slow, &
-          vert_en_slow
+          vert_en_slow,keh
 integer :: pv_type, i, j, k, im, jm, km, ierr
 real*8, save :: dxx(1),twopi,div_check
 twopi = 6.2831853071795864769d0
@@ -604,6 +603,20 @@ if (npassive==0) call abortdns("Error: slow_diag.F90: not coded for npassive==0"
 !if (mu_hyper_value/=0) call abortdns("Error: aspect_diag.F90: not coded for hyper viscosity")
 if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo viscosity")
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!     Compute the potential vorticity
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!     q2(4) is for potential vorticity
+      q2(:,:,:,4)=0.
+!     q2(1:3) is for the 3d vorticity
+      q2(:,:,:,1:3)=0.
+
+      ! compute potential vorticity, (pvtype=4) 
+      ! dx takes the role of work2
+      call potential_vorticity(q2(:,:,:,4),q2(:,:,:,1:3),Q,work1,dx,4)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -631,7 +644,7 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       call der(Qslow(1,1,1,1),dx,dxx,work1,DX_ONLY,1)
       call der(Qslow(1,1,1,2),dy,dxx,work1,DX_ONLY,2)
 !
-!     q2 is the divergence
+!     q2(1) is the divergence
 !
       q2(:,:,:,1) = dx+dy
       call fft3d(q2(:,:,:,1),work1)
@@ -682,17 +695,6 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       Qslow(:,:,:,4) = Q(:,:,:,4)
       call zaverage(Qslow(1,1,1,4),dx)
       Qslow(:,:,:,4)=dx
-!
-!     
-!
-!     q2(3) is for potential vorticity
-      q2(:,:,:,3)=0.
-!     q2(1) is for the divergence
-      q2(:,:,:,1)=0.
-
-      ! compute potential vorticity, (pvtype=4) 
-      ! dx takes the role of work2
-      call potential_vorticity(q2(:,:,:,3),q2(:,:,:,1),Q,work1,dx,4)
 
 
       ! Compute the horizontal divergence of the slow variables which
@@ -745,19 +747,22 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       !
       !        Then the 3d quantities
       !
-      ! potvor = q2(i,j,k,3)
+      ! potvor = q2(i,j,k,4)
       !
       potens_slow = 0.
       pe_slow=0.
+      keh = 0.
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
+               keh = keh + Q(i,j,k,1)**2 +Q(i,j,k,2)**2
                pe_slow =  pe_slow + Q(i,j,k,4)**2
-               potens_slow = potens_slow + q2(i,j,k,3)**2
+               potens_slow = potens_slow + q2(i,j,k,4)**2
             enddo
          enddo
       enddo
 
+      keh = .5*keh/g_nz/g_nx/g_ny
       pe_slow = .5*pe_slow/g_nz/g_nx/g_ny
       potens_slow = .5*potens_slow/g_nz/g_nx/g_ny
 
