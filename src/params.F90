@@ -614,7 +614,7 @@ endif
 ! kmax = 10
 ! kmax2 = 110    (instead of 128)
 !
-#undef TRUNC_SHELL
+#define TRUNC_SHELL
 #ifdef TRUNC_SHELL
 ! these formulas truncate at a complete k spectrum shell boundary k+.5
 dealias_sphere_kmax = floor(  (sqrt(2d0)*g_nmin - 1.5d0)/3 )

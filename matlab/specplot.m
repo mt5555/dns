@@ -8,7 +8,7 @@ movie=1;       % plot all the spectrum, pausing between each one
 movie_plot=0;  % create .ps out of all the spectra
 movie_times=[];% create .ps files out of only these times
                % if [], create .ps file out of every plot
-endian = 'b';  % default endian-ness of spec file
+endian = 'l';  % default endian-ness of spec file
 CK_orig=1.0;
 decay_scale=0;   % special scaling for 2048^3 decaying run
 tsave=[];
@@ -101,8 +101,8 @@ name = 'sc2048A0000.9500';
 namedir = '~/data/dns/sc2048A/';
 name = 'sc1024A';
 namedir = '~/data/dns/sc1024A/';
-name = 'eve';
-namedir = './';
+name = 'hyp512_30hbig';
+namedir = '~/';
 
 %name = 'dnsslav_hmin0000.0000';
 %namedir = '~/research.old/projects/bottleneck/';
@@ -172,8 +172,8 @@ end
 CK=CK_orig;
 j=0;
 
-count = 0
-countp = 0
+count = 0;
+countp = 0;
 while (time>=0 & time<=500)
 
   j=j+1;

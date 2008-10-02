@@ -57,7 +57,7 @@ echo "==============================================================="
 if ($1 == makeref) then
 
    ./gridsetup.py 1 1 1 32 32 32
-   make $code; rm -f $refout 
+   make -j2 $code; rm -f $refout 
    ./$code $opt   reference3d   | tee $refout
    ./$code $opt -s  reference3ds   | tee $refout
    ./$code $opt -zo  reference3dz   | tee $refout
@@ -85,7 +85,7 @@ if ($1 == 1) then
 
 echo "***********************************************************"
 echo "without restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 endif
 
@@ -95,14 +95,14 @@ if ($1 == r) then
 
 echo "***********************************************************"
 echo "with restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
 
 echo "***********************************************************"
 echo "with spectral restart:"
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -s -r  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -s -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
@@ -113,11 +113,11 @@ endif
 if ($1 == 2) then
 
 ./gridsetup.py 1 1 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 ./gridsetup.py 1 1 1 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -133,13 +133,13 @@ if ($1 == s) then
 echo "***********************************************************"
 echo "with 3 passive scalars"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt   reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; ./$code $opt   reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 echo "with 3 passive scalars and restart"
 ./gridsetup.py 1 1 1 32 32 32 2 2 0 0 0 0 6
-make $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r   reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; ./$code $opt -r   reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 endif
@@ -154,35 +154,35 @@ if ($1 == prbig) then
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 32 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 32 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 64 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 64 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 16 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 4 1 8 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 16 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 16 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 16 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 16 1 1 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 16 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 16 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
@@ -214,27 +214,27 @@ echo command line options:  $opt
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 1 1 4 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 1 2 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 1 32 32 32 2 2 0
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt   reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt   reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 2 32 32 32 2 3 4 4 3 2 
-make $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 

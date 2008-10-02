@@ -24,6 +24,13 @@ for more details.
                  mataylo@sandia.gov
 
 ===================================================================
+README: updated 9/26/2008:  
+
+Updated to note that for the pure x-y slab decompostion 
+for a problem of size N^3, NCPUS can be as large as N.
+(we used to have to switch to a pencil decomposition for 
+NCPUS>N/2 )
+
 README: updated 7/22/2008:  
 minor edits
 
@@ -181,9 +188,16 @@ Here are some examples:
       % cd dns/src
       % ./gridsetup.py 2 1 32 64 64 64 2 2 0
 
+      OR: 
+
+      % ./gridsetup.py 1 1 64 64 64 64 2 2 0
+
 
 For a grid N^3, N must be a power of 2,3,5, and N/nx, N/ny and N/nz
-must be an even integers.  There are some other restrictions because
+must be an even integers (with one exception for the case
+nx=1, ny=1, nz=N, which is allowed).  
+
+There are some other restrictions because
 of how we wrote our transpose routines.  gridsetup.py will issue
 warnings if they are violated, and, if the code is run it will print
 error messages and stop.
