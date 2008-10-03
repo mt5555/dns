@@ -626,6 +626,9 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
 !
 !    Compute the slow variables by integrating u, v, and w in the vertical
 !
+!
+!    NOTE: For pencil decompositions zaverage needs to be modified!
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       Qslow = Q
       call zaverage(Qslow(1,1,1,1),dx)
@@ -727,23 +730,33 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       enddo
 !
 !         First the 2D quantities
-!             
+!
+!         NOTE: We need to sum over the 3D arrays so that
+!               mpi_reduceall will give the correct result
+!               That is to say, all our arrays are 3D, but the 
+!               2D info is stored in each level. So we are doing
+!               more sums than is strictly computationally required.
+!
+!               To stress this point we have left the k variable as nz1.
+!
       keh_slow = 0.
       kev_slow = 0.
       vor_slow = 0.
       vert_en_slow = 0.
-      do j=ny1,ny2
-         do i=nx1,nx2
-            vor_slow = vor_slow + vor2d(i,j)**2
-            keh_slow = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
-            kev_slow = kev_slow + Qslow(i,j,nz1,3)**2
-            vert_en_slow = vert_en_slow + Qslow(i,j,nz1,3)**2+Qslow(i,j,nz1,4)**2
+      do k = nz1,nz2
+         do j=ny1,ny2
+            do i=nx1,nx2
+               vor_slow     = vor_slow + vor2d(i,j)**2
+               keh_slow     = keh_slow + (Qslow(i,j,nz1,1)**2+Qslow(i,j,nz1,2)**2)
+               kev_slow     = kev_slow + Qslow(i,j,nz1,3)**2
+               vert_en_slow = vert_en_slow + Qslow(i,j,nz1,3)**2+Qslow(i,j,nz1,4)**2
+            enddo
          enddo
       enddo
-      keh_slow=.5*keh_slow/g_nx/g_ny
-      kev_slow=.5*kev_slow/g_nx/g_ny
-      vor_slow = .5*vor_slow/g_nx/g_ny
-      vert_en_slow = .5*vert_en_slow/g_nx/g_ny
+      keh_slow     = .5*keh_slow/g_nx/g_ny/g_nz
+      kev_slow     = .5*kev_slow/g_nx/g_ny/g_nz
+      vor_slow     = .5*vor_slow/g_nx/g_ny/g_nz
+      vert_en_slow = .5*vert_en_slow/g_nx/g_ny/g_nz
       !
       !        Then the 3d quantities
       !
@@ -755,8 +768,8 @@ if (mu_hypo_value/=0) call abortdns("Error: slow_diag.F90: not coded for hypo vi
       do k=nz1,nz2
          do j=ny1,ny2
             do i=nx1,nx2
-               keh = keh + Q(i,j,k,1)**2 +Q(i,j,k,2)**2
-               pe_slow =  pe_slow + Q(i,j,k,4)**2
+               keh         = keh + Q(i,j,k,1)**2 +Q(i,j,k,2)**2
+               pe_slow     =  pe_slow + Q(i,j,k,4)**2
                potens_slow = potens_slow + q2(i,j,k,4)**2
             enddo
          enddo
