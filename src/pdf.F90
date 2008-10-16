@@ -1411,12 +1411,10 @@ else
 !  comptue PDF of hyper viscosity field
 !
    gradu=0
-
-   call hyperder(Q,gradu,work)
-   gradu(:,:,:,1)=Q(:,:,:,1)*gradu(:,:,:,1) + &
-        Q(:,:,:,2)*gradu(:,:,:,2) + &
-        Q(:,:,:,3)*gradu(:,:,:,3) 
-
+do n=1,3
+   call hyperder(Q(:,:,:,n),gradu(:,:,:,n),work)
+   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,n)*gradu(:,:,:,n) 
+enddo
 
    call compute_pdf_scalar(gradu,epsilon)
    call print_message("done with increment pdfs.")
