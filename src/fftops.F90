@@ -2928,8 +2928,8 @@ implicit none
 
 ! input
 real*8 work(nx,ny,nz)                ! Fourier data at time t
-real*8 Q(nx,ny,nz,3)                 ! grid data at time t
-real*8 nLaplace(nx,ny,nz,3)
+real*8 Q(nx,ny,nz)                 ! grid data at time t
+real*8 nLaplace(nx,ny,nz)
 
 !local
 real*8 xw,xw2,xw_viss
@@ -2942,9 +2942,9 @@ integer i,j,k,im,jm,km,n
 
 ! take FFT of q, store result in nlaplace
 nLaplace=q
-do n=1,3
-   call fft3d(nLaplace(:,:,:,n),work)
-enddo
+!do n=1,3
+   call fft3d(nLaplace(:,:,:),work)
+!enddo
 
 ! compute viscous term, store result in nlaplace
 do k=nz1,nz2
@@ -2972,21 +2972,20 @@ do k=nz1,nz2
             xw_viss=xw_viss + mu_hypo_value/xw
          endif
          
-         nLaplace(i,j,k,1)=xw_viss*nlaplace(i,j,k,1)
-         nLaplace(i,j,k,2)=xw_viss*nlaplace(i,j,k,2)
-         nLaplace(i,j,k,3)=xw_viss*nlaplace(i,j,k,3)
+         nLaplace(i,j,k)=xw_viss*nlaplace(i,j,k)
+ !        nLaplace(i,j,k,2)=xw_viss*nlaplace(i,j,k,2)
+ !        nLaplace(i,j,k,3)=xw_viss*nlaplace(i,j,k,3)
          
       enddo
    enddo
 enddo
 
 ! fft nlaplace back to grid point values
-do n=1,3
-   call ifft3d(nLaplace(:,:,:,n),work)
-enddo
+!do n=1,3
+   call ifft3d(nLaplace(:,:,:),work)
+!enddo
 
 
 end subroutine
-
 
 
