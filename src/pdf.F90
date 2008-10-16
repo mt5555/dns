@@ -1411,7 +1411,10 @@ else
 !  comptue PDF of hyper viscosity field
 !
    gradu=0
-do n=1,3
+   call hyperder(Q(:,:,:,1),gradu(:,:,:,1),work)
+   gradu(:,:,:,1)=Q(:,:,:,1)*gradu(:,:,:,1) 
+
+do n=2,3
    call hyperder(Q(:,:,:,n),gradu(:,:,:,n),work)
    gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,n)*gradu(:,:,:,n) 
 enddo
