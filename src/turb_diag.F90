@@ -294,13 +294,15 @@ if (diag_pdfs ==1 .or. (diag_pdfs==-1 .and. time > 2.3)  ) then
          write(message,'(a,i5)') "output_model(): Error opening .sf file errno=",ierr
          call abortdns(message)
       endif
-
-      write(message,'(f10.4)') 10000.0000 + time
-      message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".cores"
-      call copen(message,"w",fidcore,ierr)
-      if (ierr/=0) then
-         write(message,'(a,i5)') "output_model(): Error opening .cores file errno=",ierr
-         call abortdns(message)
+      
+      if (compute_cores) then
+         write(message,'(f10.4)') 10000.0000 + time
+         message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".cores"
+         call copen(message,"w",fidcore,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .cores file errno=",ierr
+            call abortdns(message)
+         endif
       endif
 
       if (compute_uvw_jpdfs) then

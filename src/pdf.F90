@@ -41,7 +41,7 @@ real*8 :: pscale=.0025           ! bin size for scalar increment
                                  ! for t-mix problem, scalar will 
                                  ! range from 0..1
 
-
+logical :: compute_cores = .false.
 real*8 :: core_data(g_nx,n_var)      ! used to take x direction cores thru data
 real*8 :: core_ddata(g_nx,3,n_var)   ! used to take x direction cores of derivativs
 integer :: core_num = 0              ! number of cores taken
@@ -637,7 +637,7 @@ if (structf_init==0) then
    call abortdns("Error: output_pdf() called, but structf module not initialized")
 endif
 
-
+if (compute_cores) then
 if (core_num>0 .and. fidcore/=0) then
    ! output cores:
    if (my_pe==io_pe) then
@@ -654,6 +654,7 @@ if (core_num>0 .and. fidcore/=0) then
       enddo
    endif
    core_num=0
+endif
 endif
 
 if (compute_uvw_pdfs) then
@@ -1007,17 +1008,19 @@ end subroutine
 
 
 
-subroutine compute_cores(pt,n1,n1d,n2,n2d,n3,n3d,core,n)
+subroutine extract_core(pt,n1,n1d,n2,n2d,n3,n3d,core,n)
 use params
 implicit none
 integer :: n1,n1d,n2,n2d,n3,n3d,n
 real*8 :: pt(n1d,n2d,n3d)
 real*8 :: core(n1)
-if (n1>g_nx) then
-   call abortdns("Error: compute_core() called on non traspose-x data?")
+if (compute_cores) then
+   if (n1>g_nx) then
+      call abortdns("Error: compute_core() called on non traspose-x data?")
+   endif
+   core(1:n1)=pt(1:n1,1,1)
+   core_num=max(core_num,n)
 endif
-core(1:n1)=pt(1:n1,1,1)
-core_num=max(core_num,n)
 end subroutine
 
 
@@ -1338,7 +1341,7 @@ if (compute_uvw_pdfs) then
 call print_message("computing x direction increment pdfs...")
 do n=1,3
    call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call compute_cores(gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d,core_data(1,n),n)
+   call extract_core(gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d,core_data(1,n),n)
 enddo
 call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
 if (compute_uvw_jpdfs) then
@@ -1366,36 +1369,63 @@ if (compute_uvw_jpdfs) then
 endif
 
 call print_message("computing eps pdfs...")
-gradu=0
-do n=1,3
-   ! u_x, u_y, u_z
-   call der(Q(1,1,1,1),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
-   gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
-
-   call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
-   call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,1),1)
 
 
+if (mu_hyper_value>0 .and. mu_hyper>=2 .and. hyper_implicit==0) then
+!
+!  comptue PDF of hyper viscosity field
+!
+   gradu=0
 
-   ! v_x, v_y, v_z
-   call der(Q(1,1,1,2),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
-   gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+   call hyperder(Q(1,1,1,1),gradu(1,1,1,1))
+   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,1)*gradu(:,:,:,1)	
 
-   call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
-   call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,2),2)
+   call hyperder(Q(1,1,1,2),gradu(1,1,1,2))
+   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,2)*gradu(:,:,:,2)
+
+   call hyperder(Q(1,1,1,3),gradu(1,1,1,3))
+   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,3)*gradu(:,:,:,3)
+
+   call compute_pdf_scalar(gradu,epsilon)
+   call print_message("done with increment pdfs.")
+
+else
+!
+!  comptue PDF of regular dissipation field
+!
+   gradu=0
+   do n=1,3
+      ! u_x, u_y, u_z
+      call der(Q(1,1,1,1),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+      gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+      
+      call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+      call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,1),1)
+      
+      
+      ! v_x, v_y, v_z
+      call der(Q(1,1,1,2),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+      gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+      
+      call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+      call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,2),2)
+      
+      
+      ! w_x, w_y, w_z
+      call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+      gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+      
+      call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+      call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,3),3)
+      
+   enddo
+   gradu(:,:,:,1)=mu*gradu(:,:,:,1); 
+   gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
+   
+   call compute_pdf_scalar(gradu,epsilon)
+endif
 
 
-   ! w_x, w_y, w_z
-   call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
-   gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
-
-   call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
-   call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,3),3)
-
-enddo
-gradu(:,:,:,1)=mu*gradu(:,:,:,1); 
-gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
-call compute_pdf_scalar(gradu,epsilon)
 call print_message("done with increment pdfs.")
 endif
 
@@ -1408,12 +1438,12 @@ if (compute_passive_pdfs) then
       call compute_pdf_scalar(Q(1,1,1,i),SCALARS(i-np1+1)) 
 
       call transpose_to_x(Q(1,1,1,i),gradu,n1,n1d,n2,n2d,n3,n3d)
-      call compute_cores(gradu,n1,n1d,n2,n2d,n3,n3d,core_data(1,i),i)
+      call extract_core(gradu,n1,n1d,n2,n2d,n3,n3d,core_data(1,i),i)
 
       do n=1,3
          call der(Q(1,1,1,i),gradu,dummy,gradu(1,1,1,2),DX_ONLY,n)
          call transpose_to_x(gradu,gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
-         call compute_cores(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,i),i)
+         call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,i),i)
       enddo
    enddo
    call print_message("done with passive scalar pdfs.")

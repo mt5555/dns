@@ -2910,3 +2910,87 @@ enddo
 
 p=work
 end subroutine
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  compute hyperviscous dissipation term
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine hyperder(Q,nLaplace)
+
+use params
+
+implicit none
+
+! input
+real*8 time
+integer compute_ints,rkstage
+
+! input, but data can be trashed if needed
+real*8 work(nx,ny,nz)                ! Fourier data at time t
+real*8 Q(nx,ny,nz,3)                 ! grid data at time t
+real*8 nLaplace(nx,ny,nz,3)
+
+!local
+real*8 xw,xw2,xw_viss
+integer i,j,k,im,jm,km,n
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! dissipation term
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! take FFT of q, store result in nlaplace
+nLaplace=q
+do n=1,3
+   call fft3d(nLaplace(:,:,:,n),work)
+enddo
+
+! compute viscous term, store result in nlaplace
+do k=nz1,nz2
+   km=kmcord(k)
+   if (km==g_nz/2) km=0
+   do j=ny1,ny2
+      jm=jmcord(j)
+      if (jm==g_ny/2) jm=0
+      do i=nx1,nx2
+         im=imcord(i)
+         if (im==g_nx/2) im=0
+         
+         xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+         xw_viss=mu*xw
+         if (mu_hyper>=2 ) then
+            xw2=(im*im*pi2_squared)
+            xw2=xw2+(jm*jm*pi2_squared)
+            xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
+            xw_viss=xw_viss + mu_hyper_value*(xw2/pi2_squared/k_Gt**2)**mu_hyper
+         endif
+         if (mu_hyper==0) then
+            xw_viss=xw_viss + mu_hyper_value
+         endif
+         if (mu_hypo==1 .and. xw>0) then
+            xw_viss=xw_viss + mu_hypo_value/xw
+         endif
+         
+         nLaplace(i,j,k,1)=xw_viss*nlaplace(i,j,k,1)
+         nLaplace(i,j,k,2)=xw_viss*nlaplace(i,j,k,2)
+         nLaplace(i,j,k,3)=xw_viss*nlaplace(i,j,k,3)
+         
+      enddo
+   enddo
+enddo
+
+! fft nlaplace back to grid point values
+do n=1,3
+   call ifft3d(nLaplace(:,:,:,n),work)
+enddo
+
+
+end subroutine
+
+
+
