@@ -1371,7 +1371,7 @@ endif
 call print_message("computing eps pdfs...")
 
 
-if (mu_hyper_value>0 .and. mu_hyper>=2 .and. hyper_implicit==0) then
+if (mu_hyper_value>0 .and. mu_hyper>=2) then
 !
 !  comptue PDF of hyper viscosity field
 !
