@@ -1420,7 +1420,6 @@ do n=2,3
 enddo
 
    call compute_pdf_scalar(gradu,epsilon)
-   call print_message("done with increment pdfs.")
 endif
 
 
