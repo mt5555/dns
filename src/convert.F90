@@ -677,7 +677,7 @@ do
 
 
       call print_message("computing velocity increment PDFs")
-      call compute_all_pdfs(Q,vor)
+      call compute_all_pdfs(Q,vor,work1)
 
       do n=2,2  !  n=1,2,3 loops over (u,v,w) velocity components
          write(message,'(a,i4)') 'computing fft3d of input: n=',n

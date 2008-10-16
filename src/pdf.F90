@@ -1313,7 +1313,7 @@ end subroutine
 
 
 
-subroutine compute_all_pdfs(Q,gradu)
+subroutine compute_all_pdfs(Q,gradu,work)
 !
 !  Compute the velocity increment PDFs 
 !  compute the epsilon PDF
@@ -1326,6 +1326,7 @@ implicit none
 integer :: ns
 real*8 Q(nx,ny,nz,n_var)    
 real*8 gradu(nx,ny,nz,3)    
+real*8 work(nx,ny,nz)
 
 !local
 integer n1,n1d,n2,n2d,n3,n3d,ierr
@@ -1371,25 +1372,7 @@ endif
 call print_message("computing eps pdfs...")
 
 
-if (mu_hyper_value>0 .and. mu_hyper>=2) then
-!
-!  comptue PDF of hyper viscosity field
-!
-   gradu=0
-
-   call hyperder(Q(1,1,1,1),gradu(1,1,1,1))
-   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,1)*gradu(:,:,:,1)	
-
-   call hyperder(Q(1,1,1,2),gradu(1,1,1,2))
-   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,2)*gradu(:,:,:,2)
-
-   call hyperder(Q(1,1,1,3),gradu(1,1,1,3))
-   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,3)*gradu(:,:,:,3)
-
-   call compute_pdf_scalar(gradu,epsilon)
-   call print_message("done with increment pdfs.")
-
-else
+if (compute_cores) then
 !
 !  comptue PDF of regular dissipation field
 !
@@ -1423,6 +1406,20 @@ else
    gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
    
    call compute_pdf_scalar(gradu,epsilon)
+else
+!
+!  comptue PDF of hyper viscosity field
+!
+   gradu=0
+
+   call hyperder(Q,gradu,work)
+   gradu(:,:,:,1)=Q(:,:,:,1)*gradu(:,:,:,1) + &
+        Q(:,:,:,2)*gradu(:,:,:,2) + &
+        Q(:,:,:,3)*gradu(:,:,:,3) 
+
+
+   call compute_pdf_scalar(gradu,epsilon)
+   call print_message("done with increment pdfs.")
 endif
 
 

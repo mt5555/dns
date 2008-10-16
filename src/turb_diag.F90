@@ -236,14 +236,14 @@ if (diag_pdfs ==1 .or. (diag_pdfs==-1 .and. time > 2.3)  ) then
       uscale = mx/1    
       epsscale=uscale
       ! comptue PDFs with a large binsize, just so we can get min/max
-      call compute_all_pdfs(Q,q1(1,1,1,1))
+      call compute_all_pdfs(Q,q1(1,1,1,1),work1)
       ! set binsize based on min/max, to get about 400 bins
       ! this will also erase all PDF data collected so far
       call set_velocity_increment_binsize(400)  
    endif
 
    call print_message("Computing velocity increment PDFs")
-   call compute_all_pdfs(Q,q1(1,1,1,1))
+   call compute_all_pdfs(Q,q1(1,1,1,1),work1)
 
    do n=2,2  !  n=1,2,3 loops over (u,v,w) velocity components
       q1(:,:,:,n)=Q(:,:,:,n)

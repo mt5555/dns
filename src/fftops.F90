@@ -2920,17 +2920,13 @@ end subroutine
 !  compute hyperviscous dissipation term
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine hyperder(Q,nLaplace)
+subroutine hyperder(Q,nLaplace,work)
 
 use params
 
 implicit none
 
 ! input
-real*8 time
-integer compute_ints,rkstage
-
-! input, but data can be trashed if needed
 real*8 work(nx,ny,nz)                ! Fourier data at time t
 real*8 Q(nx,ny,nz,3)                 ! grid data at time t
 real*8 nLaplace(nx,ny,nz,3)

@@ -244,7 +244,7 @@ do
       if (my_pe==io_pe) then
          print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
       endif
-      call compute_all_pdfs(Q,q1)
+      call compute_all_pdfs(Q,q1,q2)
 
       call output_pdf(time,fid,fid1,fid2,fid3,fidcore)
       if (my_pe==io_pe) call cclose(fid,ierr)

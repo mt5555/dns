@@ -162,7 +162,7 @@ endif
 #endif
 
 if (diag_pdfs==1) then
-   call compute_all_pdfs(Q,q1)
+   call compute_all_pdfs(Q,q1,work1)
 
    if (my_pe==io_pe) then
       write(message,'(f10.4)') 10000.0000 + time
