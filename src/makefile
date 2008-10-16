@@ -36,7 +36,7 @@ ifeq ($(UNAME),Linux)
       VENDOR=IBM
       F90 = mpixlf90
       CC=mpixlc -DF_NO_UNDERSCORE
-      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DMPI_HAS_REAL8,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I.
+      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I.
       LDFLAGS = 
       F77FIXED = -qfixed 
    endif

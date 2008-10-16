@@ -583,10 +583,13 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=0
+   spec_curl_diff=0
    do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_diff=spec_diff+spec_tmp
    enddo
+   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   spec_curl_diff=spec_curl_diff+spec_tmp   
 endif
 
 
@@ -701,11 +704,17 @@ enddo
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=-spec_diff
    spec_f=0
+   spec_curl_diff=-spec_curl_diff
+   spec_curl_f=0
    do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_diff=spec_diff+spec_tmp
       spec_f=spec_f+spec_tmp
    enddo
+   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   spec_curl_diff=spec_curl_diff+spec_tmp
+   spec_curl_f=spec_curl_f+spec_tmp
+
    ! spec_f = (for now) spectrum of advection + diffusion terms
 endif
 
@@ -754,10 +763,13 @@ endif
 ! of just the forcing terms.  
 if (compute_ints==1 .and. compute_transfer) then
    spec_f=-spec_f
+   spec_curl_f=-spec_curl_f
    do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_f=spec_f+spec_tmp
    enddo
+   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   spec_curl_f=spec_curl_f+spec_tmp
 endif
 
 
@@ -876,10 +888,14 @@ enddo
 ! compute spectrum of u dot RHS, store in spec_rhs
 if (compute_ints==1 .and. compute_transfer) then
    spec_rhs=0
+   spec_curl_rhs=0
    do n=1,ndim
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_rhs=spec_rhs+spec_tmp
    enddo
+   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   spec_curl_rhs=spec_curl_rhs+spec_tmp
+
    transfer_comp_time=time
 endif
 

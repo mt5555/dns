@@ -51,6 +51,7 @@ real*8,private ::  spec_z(0:g_nz/2,n_var)
 real*8,private ::  spec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  spec_r_new(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
+real*8,private ::  edot_curl_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  q2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
 real*8,private ::  time_old=-1
@@ -103,11 +104,14 @@ integer,private :: nbin=200
 real*8 ::  transfer_comp_time         ! time at which below terms evaluated at:
 
 real*8 ::  spec_diff(0:max(g_nx,g_ny,g_nz))  ! u dot diffusion term
+real*8 ::  spec_curl_diff(0:max(g_nx,g_ny,g_nz))  ! 2 curl(u) dot diffusion term
 real*8 ::  spec_diff_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_f(0:max(g_nx,g_ny,g_nz))     ! u dot forcing term
+real*8 ::  spec_curl_f(0:max(g_nx,g_ny,g_nz))     
 real*8 ::  spec_model(0:max(g_nx,g_ny,g_nz)) ! spectrum of div(tau) or smagorinsky term
 real*8 ::  spec_model_new(0:max(g_nx,g_ny,g_nz)) 
 real*8 ::  spec_rhs(0:max(g_nx,g_ny,g_nz))   ! transfer spec of u dot RHS
+real*8 ::  spec_curl_rhs(0:max(g_nx,g_ny,g_nz))   
 real*8 ::  spec_ens(0:max(g_nx,g_ny,g_nz))   ! enstropy spectrum
 real*8 ::  spec_ens2(0:max(g_nx,g_ny,g_nz))   ! enstropy spectrum
 
@@ -427,7 +431,7 @@ subroutine compute_Edotspec(time,Q,q1,work1,work2)
 !
 ! This routine assumes compute_spec was called at the end
 ! of the last time step.  so we have this data at time_old:
-! spec_r, spec_diff
+!    spec_r, spec_diff
 ! This routine will save this data, and compute new values
 ! of spec_r, spec_diff at the current time.  
 !
@@ -945,17 +949,17 @@ if (my_pe==io_pe) then
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') &
-      "transfer spec_write(): Error opening file errno=",ierr
+           "transfer spec_write(): Error opening file errno=",ierr
       call abortdns(message)
-      endif
+   endif
+   
+   if (equations==NS_UVW .or. equations==CNS) then
+      x=4                    ! number of spectrums in file for each time.  
+      call cwrite8(fid,x,1)
       
-      if (equations==NS_UVW .or. equations==CNS) then
-         x=4                    ! number of spectrums in file for each time.  
-         call cwrite8(fid,x,1)
-         
-                                ! d/dt total KE spectrum
-         call cwrite8(fid,.5*(time+time_old),1) 
-         x=1+iwave; call cwrite8(fid,x,1)
+      ! d/dt total KE spectrum
+      call cwrite8(fid,.5*(time+time_old),1) 
+      x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,edot_r,1+iwave)
       
       ! transfer function (only in NS case.  other cases spec_rhs is
@@ -965,7 +969,7 @@ if (my_pe==io_pe) then
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_r2,1+iwave)
       
-                                ! diffusion spectrum
+      ! diffusion spectrum
       call cwrite8(fid,transfer_comp_time,1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_diff,1+iwave)
@@ -974,8 +978,8 @@ if (my_pe==io_pe) then
       call cwrite8(fid,transfer_comp_time,1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_f,1+iwave)
-      endif
-      if (equations==SHALLOW) then
+   endif
+   if (equations==SHALLOW) then
       x=3   ! number of spectrums in file for each time.  
       call cwrite8(fid,x,1)
       
@@ -983,19 +987,19 @@ if (my_pe==io_pe) then
       call cwrite8(fid,.5*(time+time_old),1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,edot_r,1+iwave)
-
+      
       ! diffusion spectrum
       call cwrite8(fid,.5*(time+time_old),1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_diff,1+iwave)
-
+      
       ! div(tau) (or smag) spectrum
       call cwrite8(fid,.5*(time+time_old),1) 
       x=1+iwave; call cwrite8(fid,x,1)
       call cwrite8(fid,spec_model,1+iwave)
    endif
-
-
+   
+   
    call cclose(fid,ierr)
 #if 0
    write(*,'(a)') '    i      d(E_k)/dt       T      D'
@@ -1047,6 +1051,59 @@ if (my_pe==io_pe) then
    write(message,'(a,f10.4)') " KE transfer spectrum",time
    call plotascii(spec_r2,iwave,message(1:25),-ymax2,ymax2)
 #endif   
+
+
+
+
+
+
+   !
+   ! helicity flux spectra
+   ! 
+   write(message,'(f10.4)') 10000.0000 + time_initial
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+        // message(2:10) // ".specth"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') &
+           "transfer spec_write(): Error opening file errno=",ierr
+      call abortdns(message)
+   endif
+   
+   if (equations==NS_UVW .or. equations==CNS) then
+      x=4                    ! number of spectrums in file for each time.  
+      call cwrite8(fid,x,1)
+      
+      ! d/dt total Heicity spectrum
+      call cwrite8(fid,.5*(time+time_old),1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      
+      edot_curl_r = 0   ! this is not computed yet !!!!!!!!!!!!
+      call cwrite8(fid,edot_curl_r,1+iwave)
+      
+      ! transfer function (only in NS case.  other cases spec_rhs is
+      ! not computed and this is zero
+      spec_r2 = spec_curl_rhs - (spec_curl_diff+spec_curl_f)
+      call cwrite8(fid,transfer_comp_time,1)  
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_r2,1+iwave)
+      
+      ! diffusion spectrum
+      call cwrite8(fid,transfer_comp_time,1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_curl_diff,1+iwave)
+      
+      ! forcing spectrum
+      call cwrite8(fid,transfer_comp_time,1) 
+      x=1+iwave; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_curl_f,1+iwave)
+   endif
+   call cclose(fid,ierr)
+   
+   
+   
+
+
 
 endif
 end subroutine
@@ -1281,6 +1338,9 @@ end subroutine
 
 
 subroutine compute_spectrum_z_fft(p1,p2,spec)
+!
+!  compute power spectraum  E(k) = p1(k)*p2(k)
+!
 use params
 use mpi
 implicit none
@@ -1320,6 +1380,103 @@ do j=1,ny_2dz
          if (im==0) energy=energy/2
          energy=energy*p1(k,i,j)*p2(k,i,j)
          
+         spec(iw)=spec(iw)+energy
+         
+enddo
+enddo
+enddo
+
+
+#ifdef USE_MPI
+spec_r_in=spec
+call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+#endif
+
+! compute maximum wave number of complete spherical shell
+! max wave number in shell integer k = (Lz*im, Lz*jm, km)
+!
+! (k/Lz) = im < g_nx/2          k < Lz*g_nx/2
+! k = km < g_nz/2      
+!
+! 
+if (g_nz == 1)  then
+   iwave = min(g_nx/2,g_ny/2)
+else
+   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+endif
+
+
+! for all waves outside sphere, sum into one wave number:
+do i=iwave+2,iwave_max
+   spec(iwave+1)=spec(iwave+1)+spec(i)
+enddo
+iwave=iwave+1
+
+end subroutine
+
+
+
+
+subroutine compute_spectrum_curl_z_fft(p1,p2,spec)
+!
+!  compute power spectrum of   curl(p1) dot p2 + p1 dot curl(p2)
+!  in fourier space, this is the same as
+!     E(k) = 2 curl(p1(k)) dot p2(k)
+!
+use params
+use mpi
+implicit none
+integer :: ierr
+real*8 :: p1(g_nz2,nx_2dz,ny_2dz,3)
+real*8 :: p2(g_nz2,nx_2dz,ny_2dz,3)
+real*8 :: spec(0:max(g_nx,g_ny,g_nz))
+
+! local variables
+real*8 rwave
+real*8 :: spec_r_in(0:max(g_nx,g_ny,g_nz))
+real*8 :: energy,xfac,uy,vx,uz,wx,vz,wy
+integer i,j,k,jm,km,im,iwave_max,iw
+
+
+rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
+iwave_max=nint(rwave)
+if (iwave_max>max(g_nx,g_ny,g_nz)) then
+   call abortdns("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
+endif
+
+spec=0
+
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         rwave = im**2 + jm**2 + (km/Lz)**2
+         iw = nint(Lz*sqrt(rwave))
+         
+         xfac = 8
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+
+         vx = - pi2*im*p1(k,i+z_imsign(i),j,2)
+         wx = - pi2*im*p1(k,i+z_imsign(i),j,3)
+         uy = - pi2*jm*p1(k,i,j+z_jmsign(j),1)
+         wy = - pi2*jm*p1(k,i,j+z_jmsign(j),3)
+         uz =  - pi2*km*p1(k+z_kmsign(k),i,j,1)/Lz
+         vz =  - pi2*km*p1(k+z_kmsign(k),i,j,2)/Lz
+
+         ! note: the 2 here is because we have curl( p1 dot p2)
+         ! this routine is used to compute helicty flux.
+         ! as computed below, it assumes  H = (u dot curl(u)), 
+         ! if H = .5 (u dot curl(u)) we need to divide by 2 somewhere
+         energy =  2*xfac*&
+                    (p2(k,i,j,1)*(wy-vz) + &
+                     p2(k,i,j,2)*(uz-wx) + &
+                     p2(k,i,j,3)*(vx-uy)) 
+
          spec(iw)=spec(iw)+energy
          
 enddo

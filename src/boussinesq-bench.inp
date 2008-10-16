@@ -33,7 +33,7 @@ periodic     ! z bc
 0          ! diag_dt   (.scalars)
 0          ! model_dt   (.spec,.scalars-bous, .bisostr, .isostr)
 0          ! screen_dt (0 = disables, +ve = timesteps, -ve = time)
-0.0           ! output_dt  (field data, 0 = output disabled, except for custom out times)
+-10           ! output_dt  (field data, 0 = output disabled, except for custom out times)
 0             ! also output the vorticity
 0           ! n_output_custom  number of custom output times
 00.00       ! custom output times, one per line
