@@ -1,0 +1,104 @@
+\documentclass[pre,preprint,showpacs]{revtex4}
+% \documentclass{article}
+\usepackage{graphicx}
+\begin{document}
+\title{forcing}
+\author{Mark A. Taylor}
+
+
+\subsection{Deterministic forcing \label{forcing_det}}
+We make use of a determinisitc low wave number forcing, modeled after
+the schemes described in \cite{Kerr94,SVBSCC96,OvePop98}, where the
+energy in a few low wave numbers is relaxed back to a target spectrum.
+Here we instead relax the flow at each time step towards a configuratin
+with maximum helicity, as in \cite{Kurien04}, which is based on
+that first used in \cite{PolSht89}
+
+We force only those modes in the first wave number shell, 
+$\tilde {\bf u}_{\bf k}$ for $0.5 \le |{\bf k}| < 1.5$, 
+where $\tilde {\bf u}_{\bf k}$ is the $k$th Fourier coefficient of
+${\bf u}$.
+We define the energy in this shell in 
+the usual way:
+\begin{equation}
+E(1) = \sum_{0.5 \le |{\bf k}| < 1.5} \frac12 | \tilde {\bf u}_{\bf k} | ^2.
+\end{equation}
+Let ${\bf u'}$ denote the truncated ${\bf u}$,
+\begin{equation}
+ \tilde {\bf u'}_{\bf k} = \tilde {\bf u}_{\bf k}, \quad 0.5 \le |{\bf k}| <1.5,
+\qquad {\bf u'}_{\bf k}=0 \quad \text{otherwise}.
+\end{equation}
+The flow will be relaxed back to a field
+${\bf v}$, chosen so that 
+$| \tilde {\bf v}_{\bf k}| = |\tilde {\bf u}'_{\bf k}| $
+and the phases of $\tilde {\bf v}_{\bf k}$ are chosen so that $\bf v$ has
+maximum helicity, using the procedure from \cite{PolSht89}. 
+Note that $< {\bf u}' \cdot {\bf u}' > = < {\bf v} \cdot {\bf v} >  = 2 E(1)  $. 
+
+
+The simplest form of this forcing term would be
+\begin{equation}
+{\bf f} = \tau_1 ( {\bf v} -  {\bf u'} )
+\end{equation}
+and $\tau_1$ is chosen at each timestep in order to obtain a constant
+energy injection rate.  This forcing function has 
+the drawback that as ${\bf u}$ approaches maximal helicity, 
+${\bf v} -  {\bf u'}$ will approach zero, forcing 
+$\tau_1$ to approach infinity, creating a very short
+relaxation time scale which requires a very small time step
+to resolve.  We overcome this drawback
+by introducing an addition term,
+\begin{equation}
+{\bf f} = \tau_1 ( {\bf v} -  {\bf u'} )  + \tau_2 {\bf u'}.
+\end{equation}
+With this form, we can choose $\tau_1 = 1/\Delta t$, 
+the largest numerically stable
+value, and then take $\tau_2$ to insure a constant energy injection rate
+$<   {\bf u} \cdot {\bf f}  > $.
+Note that
+\begin{equation}
+<  {\bf u} \cdot {\bf f} > = \tau_1 < {\bf u'} \cdot {\bf v} >
+-  2 \tau_1 E(1)   + 2 \tau_2 E(1)
+\end{equation}
+so that $\tau_2$ is given by
+\begin{equation}
+2 \tau_2 E(1)  = < {\bf u} \cdot {\bf f} >  +  
+ \tau_1  \left( 2 E(1)    -    <  {\bf u'} \cdot {\bf v} >  \right ).
+\end{equation}
+Using the inequality
+\begin{equation}
+<  {\bf u'} \cdot {\bf v} > \le \left( <  {\bf u'} \cdot  {\bf u'} > 
+                                <   {\bf v} \cdot  {\bf v} > \right)^{1/2} = 2 E(1),
+\end{equation}
+we can see that $\tau_2>0$ and thus the forcing will always be the sum
+of a term $\tau_1 ( {\bf v} -  {\bf u'} )$, 
+which relaxes the solution towards a maximal helicity configuration, 
+and a term $ \tau_2 {\bf u'}$, 
+which increases the energy while preserving the phases.  This later
+term is most active only when the forced modes of ${\bf u}$ have 
+large helicity.  
+
+\begin{thebibliography}{99}
+
+\bibitem{SVBSCC96} K.R. Sreenivasan, S.I. Vainshtein, R. Bhiladvala, 
+I. SanGil, S. Chen and N. Cao, Phys. Rev. Lett., {\bf 77} pp. 1488--1491 
+(1996). 
+
+\bibitem{OvePop98}  M. R. Overholt and S. B. Pope,
+Comp. Fluids, {\bf 27} pp. 11--28 (1998).   
+
+\bibitem{Kerr94}  N. P. Sullivan, S. Mahalingam, R. M. Kerr,
+Phys. Fluids, {\bf 6} pp. 1612--1614 (1994).  
+
+\bibitem{Kurien04}  S. Kurien, M. A. Taylor, T. Matsumoto,
+{\it Cascade time scales for energy and helicity in homogeneous
+isotropic turbulence,}  Phys. Rev. E, {\bf 69} (2004) 
+
+\bibitem{PolSht89} W. Polifke and L. Shtilman, 
+{\it The dynamics of helical decaying turbulence},
+Phys. Fluids A, {\bf  1} pp. 2025­2033 (1989) 
+
+
+\end{thebibliography}
+
+\end{document}

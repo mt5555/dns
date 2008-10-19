@@ -139,7 +139,7 @@ except eof,e:
             res_last=k[0]
             count=0
         count=count+1
-        best=min(tsolve[k])   # time for 1 timesetp, seconds
+        best=min(tsolve[k])   # time for 1 timesetp, minutes
         print "ncpu%i(%i)=%i;  time%i(%i)=%e; %% (%2i,%i,%4i)  res/nz=%i "   %          (k[0],count,k[1],k[0],count,best,k[2],k[3],k[4],res_last/k[4])
         
     tbest={}
