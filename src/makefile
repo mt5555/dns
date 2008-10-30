@@ -85,7 +85,7 @@ ifeq ($(UNAME),Linux)
       MPILIB =  -lmpi
    endif
 
-   ifeq ($(HOST),sulaco)
+   ifeq ($(HOST),sahp9133.srn.sandia.gov)
       #VENDOR=GNU
       VENDOR=GNUMPI
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
