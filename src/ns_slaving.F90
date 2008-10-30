@@ -336,7 +336,8 @@ do j=1,ny_2dz
 			cf = (  840.0d0 - 42.0d0*ch**2 - 14.0d0*ch**3 - 3.0d0*ch**4  ) &
                 &   /5040.0d0 * delt			
                    else
-			cf = (  -4.0d0-3.0d0*ch - ch**2.0d0+exp_f*(4.0d0-ch)  )/ch/ch/ch*delt				  
+		!	cf = (  -4.0d0-3.0d0*ch - ch**2.0d0+exp_f*(4.0d0-ch)  )/ch/ch/ch*delt				  
+                      cf = (  -4.0d0/ch -3.0d0 - ch + exp_f*(4.0d0-ch)/ch  )/ch/ch*delt				  
                    endif
 
 				   		   
