@@ -65,6 +65,7 @@
 !  -cout hpass (18) read data, fft, high-pass filter, fft back.
 !
 !  -cout coarsegrain (19)  read data, coarse grain, output
+!  -cout dudx  (20)
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -78,7 +79,7 @@
 !             temp0000.5000.[uvw]
 !             temp0001.0000.[uvw]
 !
-!  to compile and run:   make analysis ; analysis
+!  to compile and run:   make convert ; convert
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 program convert
@@ -110,8 +111,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=2.5
-tstop=2.5
+tstart=2.6187
+tstop=10.0
 tinc=0.1
 
 
@@ -824,6 +825,22 @@ do
       enddo
    endif
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! output du/dx
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   if (convert_opt==20) then  ! -cout dudx
+      call input_uvw(time,Q,vor,work1,work2,header_user)
+      call print_message("computing vorticity magnitude...")
+      call der(Q(1,1,1,1),vor,work1,work2,DX_ONLY,1)
+
+      ! output vorticity magnitude
+      write(sdata,'(f10.4)') 10000.0000 + time
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dudx"
+      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+
+   endif
 
 
    if (tstart>=0) then
