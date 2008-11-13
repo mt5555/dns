@@ -830,7 +830,7 @@ do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==20) then  ! -cout dudx
       call input_uvw(time,Q,vor,work1,work2,header_user)
-      call print_message("computing vorticity magnitude...")
+      call print_message("computing du/dx...")
       call der(Q(1,1,1,1),vor,work1,work2,DX_ONLY,1)
 
       ! output vorticity magnitude
