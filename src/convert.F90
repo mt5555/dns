@@ -826,7 +826,7 @@ do
    endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! output du/dx
+! output du/dx and PDF of du/dx
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==20) then  ! -cout dudx
       call input_uvw(time,Q,vor,work1,work2,header_user)
@@ -840,6 +840,33 @@ do
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dudx"
       call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
 
+      number_of_cpdf = 1
+      compute_uvw_pdfs = .false.    ! velocity increment PDFs
+      compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
+      compute_passive_pdfs = .false.  ! passive scalar PDFs
+      call init_pdf_module()
+
+      ! compute epsilon, store in work1.  
+      call hyperder(Q,work1,work2)
+
+      call global_max_abs(work1,mx)
+      binsize = mx/100   ! should produce about 200 bins
+
+      ! compute PDF
+      call compute_pdf_scalar(work1,cpdf(1),binsize)
+      
+      write(sdata,'(f10.4)') 10000.0000 + time
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".dudxpdf"
+      call print_message(fname)
+      if (my_pe==io_pe) then
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .cpdf file errno=",ierr
+            call abortdns(message)
+         endif
+      endif
+
+      call output_pdf(time,NULL,NULL,NULL,fid,NULL)
    endif
 
 
