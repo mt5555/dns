@@ -856,8 +856,8 @@ do
       call init_pdf_module()
 
       ! compute epsilon, store in work1.  
-      call hyperder(Q,work1,work2)
-
+!      call hyperder(Q,work1,work2)
+      call coshder(Q,work1,work2)	
       call global_max_abs(work1,mx)
       binsize = mx/100   ! should produce about 200 bins
 

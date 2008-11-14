@@ -2970,7 +2970,7 @@ do k=nz1,nz2
             xw_viss=xw_viss + mu_hypo_value/xw
          endif
          
-         nLaplace(i,j,k)=xw_viss*nlaplace(i,j,k)
+         nLaplace(i,j,k)=xw_viss*nLaplace(i,j,k)
          
       enddo
    enddo
@@ -2978,6 +2978,146 @@ enddo
 
 ! fft nlaplace back to grid point values
    call ifft3d(nLaplace(:,:,:),work)
+
+end subroutine
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  compute coshicous dissipation term
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine coshder(Q,coshm1,work)
+
+use params
+
+implicit none
+
+! input
+real*8 work(nx,ny,nz)                ! Fourier data at time t
+real*8 Q(nx,ny,nz)                 ! grid data at time t
+real*8 coshm1(nx,ny,nz)
+
+!local
+real*8 xw,xw2,xw_viss
+integer i,j,k,im,jm,km,n
+real*8 kapac,k_Gc
+
+kapac=1/mu_hyper_value+1
+k_Gc=k_Gt/log( kapac+sqrt(kapac**2-1) )
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! dissipation term
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! take FFT of q, store result in coshm1
+coshm1=q
+   call fft3d(coshm1(:,:,:),work)
+
+! compute viscous term, store result in coshm1
+do k=nz1,nz2
+   km=kmcord(k)
+   if (km==g_nz/2) km=0
+   do j=ny1,ny2
+      jm=jmcord(j)
+      if (jm==g_ny/2) jm=0
+      do i=nx1,nx2
+         im=imcord(i)
+         if (im==g_nx/2) im=0
+         
+         xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+         xw_viss=mu*xw
+         if (mu_hyper>=2 ) then
+            xw2=(im*im*pi2_squared)
+            xw2=xw2+(jm*jm*pi2_squared)
+            xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
+            xw_viss=xw_viss + mu_hyper_value*(cosh(sqrt(xw2/pi2_squared/k_Gc**2))-1.)
+         endif
+         if (mu_hyper==0) then
+            xw_viss=xw_viss + mu_hyper_value
+         endif
+         if (mu_hypo==1 .and. xw>0) then
+            xw_viss=xw_viss + mu_hypo_value/xw
+         endif
+         
+         coshm1(i,j,k)=xw_viss*coshm1(i,j,k)
+         
+      enddo
+   enddo
+enddo
+
+! fft coshm1 back to grid point values
+   call ifft3d(coshm1(:,:,:),work)
+
+end subroutine
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!  compute longitudinal field
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine dudxnotused(Q,lgtd,work)
+
+use params
+
+implicit none
+
+! input
+real*8 work(nx,ny,nz)                ! Fourier data at time t
+real*8 Q(nx,ny,nz)                 ! grid data at time t
+real*8 lgtd(nx,ny,nz)
+
+!local
+real*8 xw,xw2,xw_viss
+integer i,j,k,im,jm,km,n
+real*8 kapac,k_Gc
+
+kapac=1/mu_hyper_value+1
+k_Gc=k_Gt/log( kapac+sqrt(kapac**2-1) )
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! dissipation term
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! take FFT of q, store result in coshm1
+coshm1=q
+   call fft3d(lgtd(:,:,:),work)
+
+! compute viscous term, store result in coshm1
+do k=nz1,nz2
+   km=kmcord(k)
+   if (km==g_nz/2) km=0
+   do j=ny1,ny2
+      jm=jmcord(j)
+      if (jm==g_ny/2) jm=0
+      do i=nx1,nx2
+         im=imcord(i)
+         if (im==g_nx/2) im=0
+         
+         xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+         xw_viss=mu*xw
+         if (mu_hyper>=2 ) then
+            xw2=(im*im*pi2_squared)
+            xw2=xw2+(jm*jm*pi2_squared)
+            xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
+            xw_viss=xw_viss + mu_hyper_value*(cosh(sqrt(xw2/pi2_squared/k_Gc**2))-1.)
+         endif
+         if (mu_hyper==0) then
+            xw_viss=xw_viss + mu_hyper_value
+         endif
+         if (mu_hypo==1 .and. xw>0) then
+            xw_viss=xw_viss + mu_hypo_value/xw
+         endif
+         
+         coshm1(i,j,k)=xw_viss*coshm1(i,j,k)
+         
+      enddo
+   enddo
+enddo
+
+! fft coshm1 back to grid point values
+   call ifft3d(coshm1(:,:,:),work)
 
 end subroutine
 

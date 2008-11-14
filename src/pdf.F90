@@ -1406,7 +1406,37 @@ if (compute_cores) then
    gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
    
    call compute_pdf_scalar(gradu,epsilon)
+   
+elseif(compute_cosh) ! compute PDF of coshicosity field
+
+   gradu=0
+   call coshder(Q(:,:,:,1),gradu(:,:,:,1),work)
+   gradu(:,:,:,1)=Q(:,:,:,1)*gradu(:,:,:,1) 
+
+do n=2,3
+   call coshder(Q(:,:,:,n),gradu(:,:,:,n),work)
+   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,n)*gradu(:,:,:,n) 
+enddo
+
+   call compute_pdf_scalar(gradu,epsilon)
+   
 else
+
+elseif(longitudinal_derivative) ! compute PDF of coshicosity field
+
+   gradu=0
+   call coshder(Q(:,:,:,1),gradu(:,:,:,1),work)
+!   gradu(:,:,:,1)=Q(:,:,:,1)*gradu(:,:,:,1) 
+
+!do n=2,3
+   call coshder(Q(:,:,:,n),gradu(:,:,:,n),work)
+!   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,n)*gradu(:,:,:,n) 
+!enddo
+
+   call compute_pdf_scalar(gradu,epsilon)
+   
+else
+
 !
 !  comptue PDF of hyper viscosity field
 !
