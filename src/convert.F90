@@ -831,25 +831,27 @@ do
    if (convert_opt==20) then  ! -cout dudx
       call input_uvw(time,Q,vor,work1,work2,header_user)
       call print_message("computing du/dx...")
-      call der(Q(1,1,1,1),vor,work1,work2,DX_ONLY,1)
+
 
       ! output vorticity magnitude
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dudx"
-      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
-
-      call der(Q(1,1,1,2),vor,work1,work2,DX_ONLY,2)
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dvdy"
-      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
 
       call der(Q(1,1,1,3),vor,work1,work2,DX_ONLY,3)
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dwdz"
       call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
 
 
-      number_of_cpdf = 1
+      call der(Q(1,1,1,2),vor,work1,work2,DX_ONLY,2)
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dvdy"
+      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+
+      call der(Q(1,1,1,1),vor,work1,work2,DX_ONLY,1)
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dudx"
+      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+
+
+      number_of_cpdf = 2
       compute_uvw_pdfs = .false.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
@@ -861,8 +863,18 @@ do
       call global_max_abs(work1,mx)
       binsize = mx/100   ! should produce about 200 bins
 
-      ! compute PDF
+      ! compute PDF of du/dx
+      call global_max_abs(work1,mx)  ! compute max, used to determine binsize
+      binsize = mx/100   ! should produce about 200 bins
       call compute_pdf_scalar(work1,cpdf(1),binsize)
+
+      ! compute PDF of epsilon
+      call hyperder(Q,work1,work2)   ! compute epsilon
+      call global_max_abs(work1,mx)  ! compute max, used to determine binsize
+      binsize = mx/100   ! should produce about 200 bins
+      call compute_pdf_scalar(work1,cpdf(2),binsize)
+
+
       
       write(sdata,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".dudxpdf"
