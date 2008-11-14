@@ -857,23 +857,23 @@ do
       compute_passive_pdfs = .false.  ! passive scalar PDFs
       call init_pdf_module()
 
-      ! compute epsilon, store in work1.  
-!      call hyperder(Q,work1,work2)
-      call coshder(Q,work1,work2)	
-      call global_max_abs(work1,mx)
-      binsize = mx/100   ! should produce about 200 bins
 
       ! compute PDF of du/dx
       call global_max_abs(work1,mx)  ! compute max, used to determine binsize
       binsize = mx/100   ! should produce about 200 bins
       call compute_pdf_scalar(work1,cpdf(1),binsize)
 
-      ! compute PDF of epsilon
-      call hyperder(Q,work1,work2)   ! compute epsilon
-      call global_max_abs(work1,mx)  ! compute max, used to determine binsize
-      binsize = mx/100   ! should produce about 200 bins
-      call compute_pdf_scalar(work1,cpdf(2),binsize)
 
+      ! compute epsilon, store in work1.  
+!      call hyperder(Q,work1,work2)
+      call coshder(Q,vor,work2)	
+      call global_max_abs(vor,mx)
+      binsize = mx/100   ! should produce about 200 bins
+      call compute_pdf_scalar(vor,cpdf(2),binsize)
+
+      ! output coshder field
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".coshder"
+      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
 
       
       write(sdata,'(f10.4)') 10000.0000 + time
