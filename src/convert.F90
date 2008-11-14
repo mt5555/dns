@@ -840,6 +840,15 @@ do
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dudx"
       call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
 
+      call der(Q(1,1,1,2),vor,work1,work2,DX_ONLY,2)
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dvdy"
+      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+
+      call der(Q(1,1,1,3),vor,work1,work2,DX_ONLY,3)
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dwdz"
+      call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
+
+
       number_of_cpdf = 1
       compute_uvw_pdfs = .false.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
