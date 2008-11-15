@@ -867,11 +867,11 @@ do
       ! compute epsilon, store in work1.  
 !      call hyperder(Q,work1,work2)
       call coshder(Q(1,1,1,1),vor,work2)	
-      work1=vor(:,:,:,1)
+      work1=vor(:,:,:,1)*Q(:,:,:,1)
       call coshder(Q(1,1,1,2),vor,work2)	
-      work1=work1+vor(:,:,:,1)
+      work1=work1+vor(:,:,:,1)*Q(:,:,:,2)
       call coshder(Q(1,1,1,3),vor,work2)	
-      vor(:,:,:,1)=work1+vor(:,:,:,1)
+      vor(:,:,:,1)=work1+vor(:,:,:,1)*Q(:,:,:,3)
       call global_max_abs(vor,mx)
       binsize = mx/100   ! should produce about 200 bins
       call compute_pdf_scalar(vor,cpdf(2),binsize)
