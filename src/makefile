@@ -130,8 +130,8 @@ me=pmpi_wtime
    # this usually means Cray XT3 system
    #F90 = mpif90
    F90 = ftn
-   CC = mpicc
-   FFLAGS =  -Mrecursive  -fast  $(MPI)  $(FFT) 
+   CC = cc
+   FFLAGS = -g -Mrecursive  -fast  $(MPI)  $(FFT) 
    LDFLAGS = $(FFTLIB)
    endif 
 

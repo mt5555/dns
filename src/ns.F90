@@ -588,7 +588,7 @@ if (compute_ints==1 .and. compute_transfer) then
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_diff=spec_diff+spec_tmp
    enddo
-   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   call compute_spectrum_curl_z_fft(Qhat,rhs,spec_tmp)
    spec_curl_diff=spec_curl_diff+spec_tmp   
 endif
 
@@ -711,7 +711,7 @@ if (compute_ints==1 .and. compute_transfer) then
       spec_diff=spec_diff+spec_tmp
       spec_f=spec_f+spec_tmp
    enddo
-   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   call compute_spectrum_curl_z_fft(Qhat,rhs,spec_tmp)
    spec_curl_diff=spec_curl_diff+spec_tmp
    spec_curl_f=spec_curl_f+spec_tmp
 
@@ -768,7 +768,7 @@ if (compute_ints==1 .and. compute_transfer) then
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_f=spec_f+spec_tmp
    enddo
-   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   call compute_spectrum_curl_z_fft(Qhat,rhs,spec_tmp)
    spec_curl_f=spec_curl_f+spec_tmp
 endif
 
@@ -893,7 +893,7 @@ if (compute_ints==1 .and. compute_transfer) then
       call compute_spectrum_z_fft(Qhat(1,1,1,n),rhs(1,1,1,n),spec_tmp)
       spec_rhs=spec_rhs+spec_tmp
    enddo
-   call compute_spectrum_curl_z_fft(Qhat(1,1,1,:),rhs(1,1,1,:),spec_tmp)
+   call compute_spectrum_curl_z_fft(Qhat,rhs,spec_tmp)
    spec_curl_rhs=spec_curl_rhs+spec_tmp
 
    transfer_comp_time=time
