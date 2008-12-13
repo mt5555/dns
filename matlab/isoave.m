@@ -12,15 +12,15 @@ ext='.isostr';
 %name='/home2/skurien/fractional_stats/sc1024A0001.4000.new'
 %nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-name='/netscratch/skurien/dns_data/sc1024a/sc1024A0002.4000.new'
-nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
+%name='/netscratch/skurien/dns_data/sc1024a/sc1024A0002.4000.new'
+%nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434
 
-name='/netscratch/skurien/dns_data/sc1024A/sc1024A-trunc0128.0002.0000.new'                
-nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434                
+%name='/netscratch/skurien/dns_data/sc1024A/sc1024A-trunc0128.0002.0000.new'                
+%nx=1024; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; % R_l=434                
       
 
-%name='/home/mataylo/data/dns/sc2048A/sc2048A0001.0000.new'
-%nx=2048; delx_over_eta=3.0; epsilon=4.0; teddy=.98; % R_l=434
+name='/home/mt/sc2048A0001.0000.new'
+nx=2048; delx_over_eta=3.0; epsilon=4.0; teddy=.98; % R_l=434
 
 %name='/home2/skurien/helicity_data/helical_forced/hel256_hpi2/hel256_hpi2_0005.8000.new'
 %nx=256; delx_over_eta=2.97; epsilon=2.72; teddy=1.24; % R_l=186
@@ -67,6 +67,7 @@ disp('7 = plot 4th order functions');
 disp('8 = plot helical structure functions');
 disp('9 = Mixed (anisotropic) structure functions');
 disp('10= Scaling of potential vorticity/velocity correlation');
+disp('11= Flatness D_llll / D_ll^2');
 
 in=input('Enter choice: ');
 
@@ -91,6 +92,9 @@ elseif (in==9)
 elseif (in==10)
    klaws=5
    check_isotropy=0;
+elseif (in==11)
+   klaws=6
+   check_isotropy=0;
 else
    klaws=1;
    check_isotropy=0;
@@ -107,7 +111,6 @@ if (in==6)
 else
   [y45,y415,y43,eps,h_eps,y215,y23]=compisoave(name,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,1);
 end
-
 return
 
 
