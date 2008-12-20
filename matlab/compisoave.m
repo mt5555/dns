@@ -743,6 +743,13 @@ u4ave=0*xx;
 u2ave=0*xx;
 fave=0*xx;
 
+i=1;
+x = r_val(:,i);                       % units of box length
+x_plot=x*nx*delx_over_eta;            % units of r/eta
+u4ave_noi=0*x_plot;
+u2ave_noi=0*x_plot;
+
+
 figure(1); ; subplot(1,1,1); clf
 figure(2); ; subplot(1,1,1); clf
 figure(3); ; subplot(1,1,1); clf
@@ -764,26 +771,16 @@ for i=1:ndir
   fint = spline(x,y4./y2.^2,xx);
   fave = fave + w(i)*fint;
   
-% $$$     figure(3);
-% $$$     x_plot=x*nx*delx_over_eta;            % units of r/eta
-% $$$     semilogx(x_plot,y4./y2.^2,['.',cdir(i)]); 
-% $$$     hold on 
+  if (i <= 3) 
+    % average over coordiante diretions
+    u2ave_noi = u2ave_noi+y2/3;
+    u4ave_noi = u4ave_noi+y4/3;
+    %figure(3)
+    %semilogx(x_plot,y4./(y2.^2),['.',cdir(i)],'MarkerSize',msize); 
+    %hold on;
+  end      
 
-  if (i==4)
-    figure(1);
-    x_plot=x*nx*delx_over_eta;            % units of r/eta
-    semilogx(x_plot,y2);
-    hold on
-    plot(xx_plot,y2int);
-
-    figure(2);
-    x_plot=x*nx*delx_over_eta;            % units of r/eta
-    semilogx(x_plot,y4);
-    hold on
-    plot(xx_plot,y4int);
-
-  end
-
+  
 end
 figure(2)
 plot(xx_plot,u4ave,'k','LineWidth',1.0); hold on;
@@ -792,7 +789,6 @@ ylabel(pname);
 xlabel('r/\eta');
 ax=axis;  axis([1,xmax,ax(3),ax(4)]);
 hold off;
-u2ave(1:10)
 
 figure(1);
 plot(xx_plot,u2ave,'k','LineWidth',1.0); hold on;
@@ -807,11 +803,13 @@ set(gca,'FontWeight','bold')
 set(gca,'FontSize',15)
 set(gca,'LineWidth',2.0)
 
-semilogx(xx_plot,fave,'k','LineWidth',2.0); hold on;
+%semilogx(xx_plot,fave,'k','LineWidth',2.0); hold on;
+%semilogx(xx_plot,u4ave./(u2ave.^2),'b','LineWidth',2.0); hold on;
+semilogx(x_plot,u4ave_noi./(u2ave_noi.^2),'bo-','LineWidth',2.0); hold on;
 title('D_{llll} / D_{ll}^2 ');
 %ylabel(pname);
 xlabel('r/\eta');
-ax=axis;  axis([1,xmax,0,10]);
+ax=axis;  axis([.9,xmax,2,9]);
 hold off;
 
 
