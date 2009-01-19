@@ -3051,3 +3051,137 @@ enddo
 
 end subroutine
 
+
+
+
+subroutine project_ch(Q,QR,QI,work,work2)
+!
+! Project onto the Craya-Herring modes
+!
+! Input: state vector Q:   4 components:  u,v,w,theta in GRID SPACE
+! output:     QR + i QI:   Coefficients of Craya-Herring expansion
+!                          in terms of phi_minus,phi_zero,phi_plus
+!                          3 components: a_minus,a_zero,a_plus
+!
+! Note 1: the Fourier expansion of the (i,j,k)
+! Craya-Herring eigenmode contains only wave number (i,j,k)
+! So the projection of a field onto the (i,j,k) eigenmode, when
+! computed in Fourier space, involves only wave numbers (i,j,k)
+!
+! Note 2: It does not make sense to convert "a_minus" for example, back to
+! sin/cos formulation since a_minus is not a Fourier coefficient
+!
+! (u,v,w,theta) = sum_K phi(K) exp( i K X - sigma(K)t )
+! phi(K) = a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + a_plus(K) phi_plus(K)
+!
+! Lets assume we are only interested in the phi_plus component,
+! so take a_minus=a_zero=0.  Then we have:
+! 
+! (u,v,w,theta) = sum_K a_plus(K) phi_plus(K) exp( i K X - sigma(K)t )
+!               
+! whas can be thought of as a Fourier series, with k'th Fourier mode:
+!                 a_plus(K) phi_plus(K) exp(-sigma(K) t)  
+!
+! Maybe we are more interested in this quantity than in the 
+! individual a_plus(K) coefficients?
+!               
+use params
+use mpi
+implicit none
+
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: QR(nx,ny,nz,n_var)  ! real part
+real*8 :: QI(nx,ny,nz,n_var)  ! imaginary part 
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+integer :: n,wn
+integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km
+real*8 :: xw2,xw,RR(n_var),II(n_var)
+character(len=80) :: message
+
+if (ndim /= 3) then
+   call abortdns("ERROR: project_ch requires ndim=3")
+endif
+call print_message('Computing Craya-Herring Projection')
+
+
+! take FFT, then convert to complex coefficients
+! real part is stored in Q array
+! complex part is stored in QI array
+do n = 1,n_var
+   write(message,*) 'converting gridspace to to complex modes, n=',n   
+   call print_message(message)
+   work=Q(:,:,:,n)
+   call fft3d(work,work2)          ! inplace FFT of work
+   call sincos_to_complex_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
+enddo
+
+
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+   ! note: wave number is (im,jm,km)
+   ! index into arrays is (i,j,k)
+   !
+   ! Mode:   (QR + i QI) exp( 2pi ( im*x +jm*y + km*z )  )
+   im=imcord_exp(i)
+   jm=jmcord_exp(j)
+   km=kmcord_exp(k)
+   RR = QR(i,j,k,:)
+   II = QI(i,j,k,:)
+
+
+   xw2=pi2_squared*(im**2 + jm**2 + km**2)
+   xw=sqrt(xw2)
+
+   ! Leslie's code goes here
+   ! compute sigma
+   ! overwrite QR,QI with a_plus, a_zero, a_minus
+   ! (u,v,w,theta)(k) =  a_minus(k) PHI_minus(k) 
+   !                    +a_zero(k)  PHI_zero(k) 
+   !                    +a_plus(k)  PHI_plus(k) 
+   !
+   ! overwrite QR,QI with:
+   ! a_minus = QR(:,:,:,1) + i QI(:,:,:,1)
+   ! a_zero  = QR(:,:,:,2) + i QI(:,:,:,2)
+   ! a_plus  = QR(:,:,:,3) + i QI(:,:,:,3)
+   
+
+enddo
+enddo
+enddo
+
+!
+!  The helicity adjustment above did not preserve the fact that
+!  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
+!  Reimpose this constraint:
+!
+!  NOTE: see Smith&Waleffe2002:  complex conjugate relations
+!  of these modes is not the same as Fourier modes
+!  a_zero(k) =  - CONJ( a_zero(-k)
+!  what about a_plus and a_minus?  
+do n=1,n_var
+   do k=nz1,nz2
+      do j=ny1,ny2
+         do i=nx1,nx2
+            i1=i; i2 = i1 + imsign(i)
+            j1=j; j2 = j1 + jmsign(j)
+            k1=k; k2 = k1 + kmsign(k)
+            QR(i2,j2,k2,n)  =  QR(i1,j1,k1,n)
+            QI(i2,j2,k2,n)  = -QI(i1,j1,k1,n)
+         enddo
+      enddo
+   enddo
+enddo
+
+! this probably makes no sense?
+! convert (QR,QI) back to sin/cos
+!do n = 1,3
+!   write(message,*) 'converting back to gridspace, n=',n   
+!   call print_message(message)
+!   call complex_to_sincos_field(Qout(1,1,1,n),QR(1,1,1,n),QI(1,1,1,n))
+!enddo
+
+
+end subroutine
