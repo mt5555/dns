@@ -3071,8 +3071,10 @@ subroutine project_ch(Q,QR,QI,work,work2)
 ! Note 2: It does not make sense to convert "a_minus" for example, back to
 ! sin/cos formulation since a_minus is not a Fourier coefficient
 !
-! (u,v,w,theta) = sum_K phi(K) exp( i K X - sigma(K)t )
+
+! (u,v,w,theta) = sum_K phi(K) exp( i K X - sigma(K)t ) 
 ! phi(K) = a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + a_plus(K) phi_plus(K)
+
 !
 ! Lets assume we are only interested in the phi_plus component,
 ! so take a_minus=a_zero=0.  Then we have:
@@ -3084,7 +3086,37 @@ subroutine project_ch(Q,QR,QI,work,work2)
 !
 ! Maybe we are more interested in this quantity than in the 
 ! individual a_plus(K) coefficients?
+
+
+! ***************SK's notes****************
+! Is this true?? 
+! (u,v,w,theta) = sum_K phi(K) exp( i K X - sigma(K)t ) 
+! phi(K) = a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + a_plus(K) phi_plus(K)
+
+! 
+! phi(K) is just the fourier transformed velocity/density vector:
+! phi(K) = (u_hat(K), v_hat(K), w_hat(K), theta_hat(K))
+! It can also be written as a linear combination of the eigenmodes:
+! phi(K) =  a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + 
+!		a_plus(K) phi_plus(K)
+
+! where  a_*(K) = complex_conjugate(phi_*(K))*(phi(K))
+! and the phi_*(K) are the linear engenmodes
 !               
+! For our purposes, we would like to compute (upto factors of 2):
+!
+! 1) Spectrum of total energy:  |phi(K)|^2 = |a_minus(K)|^2 + |a_plus(K)|^2 
+!					+ |a_zero|^2
+! 2) Spectrum of energy in the PV modes: E_pv(K) = |a_zero(K)|^2
+! 3) Spectrum of energy in the wave modes: E_wave(K) = |a_minus(K)|^2 + 
+!							|a_plus(K)|^2
+! 4) The spectrum of the vertical sheared horizontal modes (VSHM) that Leslie 
+!    has in her paper, for k_h = 0
+! 
+
+
+! *************end of SK's notes**********************
+
 use params
 use mpi
 implicit none
