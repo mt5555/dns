@@ -3385,3 +3385,76 @@ enddo
 
 
 end subroutine
+
+
+subroutine eigm(im,jm,km,xw,xwh,efreq,phimR,phimI))
+
+use params
+real*8: im,jm,km,xw,xwh,efreq
+real*8: phimR(n_var),phimI(n_var)
+real*8: dsq2,fac
+
+ dsq2 = sqrt(2.d0)
+
+      if (xwh .eq. 0.d0) then
+
+         phimR(1) = 0.5d0
+	 phimI(1) = -0.5d0
+         phimR(2) = 0.5d0
+	 phimI(2) = 0.5d0
+         phimR(3) = 0.0d0
+	 phimI(3) = 0.0d0
+         phimR(4) = 0.0
+	 phimI(4) = 0.0
+      else
+
+         fac = km/(dsq2*xwh*xw)
+         
+         phimR(1) = fac*im
+	 phimI(1) = -fac*jm*romega2/efreq	
+
+         phimR(2) = fac*jm
+         phimI(2) = fac*im*romega2/efreq)
+
+         phimR(3) = -xwh/(dsq2*xw)
+         phimI(3) = 0.0d0
+
+         phimR(4) = 0.0d0
+         phimI(4) = xwh*brunt/(dsq2*xw*efreq)
+      endif
+
+end subroutine
+
+subroutine eig0(im,jm,km,xw,xwh,efreq,phi0)
+
+use params
+real*8: im,jm,km,xw,xwh,xwh2,km2,efreq
+real*8: phi0(n_var)
+real*8: dsq2,fac
+
+
+if (xwh .eq. 0.d0) then
+
+         phi0(1) = 0.d0
+         phi0(2) = 0.d0
+         phi0(3) = 0.d0
+         phi0(4) = 1.d0
+
+      else
+
+         xwh2 = xwh**2
+         km2 = km**2
+
+         den = 1.d0/sqrt(brunt2*xwh2 + omsq*km2)
+
+         phi0(1) = den*brunt*jm
+
+         phi0(2) = -den*brunt*im
+
+         phi0(3) = 0.d0
+
+         phi0(4) = den*km*romega2
+
+      endif
+
+end subroutine
