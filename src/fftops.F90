@@ -3056,7 +3056,7 @@ end subroutine
 
 subroutine project_ch(Q,QR,QI,work,work2)
 !
-! Project onto the Craya-Herring modes
+! Project onto the Craya-Herring modes and compute the spectra
 !
 ! Input: state vector Q:   4 components:  u,v,w,theta in GRID SPACE
 ! output:     QR + i QI:   Coefficients of Craya-Herring expansion
@@ -3128,7 +3128,11 @@ real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer :: n,wn
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km
-real*8 :: xw2,xw,RR(n_var),II(n_var)
+real*8 :: xw2,xw,xwh2,xwh,RR(n_var),II(n_var)
+real*8 :: efreq(3)  !+,-,0 sigmas
+real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var), phi0I(n_var), phi0R(n_var)
+real*8 :: bmR, bmI, bpR, bpI, bp0
+
 character(len=80) :: message
 
 if (ndim /= 3) then
@@ -3138,7 +3142,7 @@ call print_message('Computing Craya-Herring Projection')
 
 
 ! take FFT, then convert to complex coefficients
-! real part is stored in Q array
+! real part is stored in QR array
 ! complex part is stored in QI array
 do n = 1,n_var
    write(message,*) 'converting gridspace to to complex modes, n=',n   
@@ -3156,7 +3160,7 @@ do i=nx1,nx2
    ! note: wave number is (im,jm,km)
    ! index into arrays is (i,j,k)
    !
-   ! Mode:   (QR + i QI) exp( 2pi ( im*x +jm*y + km*z )  )
+   ! Eigenmode:   (QR + i QI) exp( 2pi ( im*x +jm*y + km*z )  )
    im=imcord_exp(i)
    jm=jmcord_exp(j)
    km=kmcord_exp(k)
@@ -3166,6 +3170,8 @@ do i=nx1,nx2
 
    xw2=pi2_squared*(im**2 + jm**2 + km**2)
    xw=sqrt(xw2)
+   xwh2 = pi2_squared*(im**2 + jm**2) !horizontal wavenumber length	
+   xwh = sqrt(xwh2)	
 
    ! Leslie's code goes here
    ! compute sigma
@@ -3179,6 +3185,168 @@ do i=nx1,nx2
    ! a_zero  = QR(:,:,:,2) + i QI(:,:,:,2)
    ! a_plus  = QR(:,:,:,3) + i QI(:,:,:,3)
    
+
+      degen = 1.d0/sqrt(2.d0)
+
+! these are Leslie loops, need to insert proper facs and things into our loops;
+! need to be careful since we do not use complex vbls. 
+!     DO K=1,NZ
+!         RKZ2 = FAC2Z(K)
+!         RKZ = FACZ(K)
+
+!         DO J=1,NY
+!            RKY2 = FAC2Y(J)
+!            SUM2 = RKZ2 + RKY2
+!            RKY = FACY(J)
+
+!            DO I=1,NXHP
+
+!               RKX = FACX(I)
+!               RKX2 = FAC2X(I)
+!               RK2 = SUM2 + RKX2
+!               RKH2 = RKY2 + RKX2
+!               RKH = DSQRT(RKH2)
+!               RK = DSQRT(RK2)
+               
+c
+cc    calculate the a's
+c
+
+               if ((i .eq. 1) .and. (j .eq. 1) .and. (k .eq. 1)) then
+
+c
+cc special case of im=jm=km=0, no mean flows here
+c
+
+		bmR = 0.d0
+		bmI = 0.d0
+                bpR = 0.d0
+		bpI = 0.d0 
+                b0 = 0.d0
+
+C
+
+c
+cc special case of no stratification and km=0
+c
+! *********check BRUNT variable which is N  **************
+               elseif ((km .eq. 0.d0) .and. (brunt .eq. 0.d0)) then
+
+! sigmas are zero
+                  efreq = 0.d0
+
+! real and imaginary part of phi_m
+
+                  phimR(1) = 0.0
+		  phimI(1) = degen*jm/xwh
+                  phimR(2) = 0.0
+		  phimI(2) = -degen*im/xwh
+                  phimR(3) = -jm
+		  phimI(3) = 0.0
+                  phimR(4) = 0.0
+		  phimI(4) = 0.0	
+		  
+! phi_p = complex_conjugate(phi_m)
+
+		  phipR = phimR
+		  phipI = -phimI			  
+
+! phi_0 is real
+                  phi0(1) = 0.d0
+                  phi0(2) = 0.d0
+                  phi0(3) = 0.d0
+                  phi0(4) = 1.d0
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+                  
+                  bmR = emR*QR(i,j,k,:) + emI*QI(i,j,k,:)
+		  bmI = emR*QI(i,j,k,:) - emR*QI(i,j,k,:)
+
+                  bpR = epR*QR(i,j,k,:) + epI*QI(i,j,k,:) 
+		  bpI = epR*QI(i,j,k,:) - epR*QI(i,j,k,:)
+
+                  b0R = phi0*QR
+		  b0I = phi0*QI
+
+
+
+!c
+!cc  special case of kh= xwh = 0  (we treat this case separately to make
+!cc  sure xwh = 0.d0 and not something small, since the test in
+!cc  eigm and eig0 is for (xwh .eq. 0)
+!c
+
+               elseif ((i .eq. 1) .and. (j .eq. 1)) then
+
+                  km = 0.d0
+                  efreq = romega2  !!!what is romega2 in our code?!!!!
+
+! need to write a subroutine which returns phimR,phimI
+
+                  call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
+                  
+! phi_p = complex_conjugate(phi_m)
+
+		  phipR = phimR
+		  phipI = -phimI			  
+
+! need to write a subroutine which returns phi0
+		 call eig0(rkx,rky,rkz,rk,rkh,freq,phi0)
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+                  
+                  bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
+		  bmI = phimR*QI(i,j,k,:) - phimR*QI(i,j,k,:)
+
+                  bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
+		  bpI = phipR*QI(i,j,k,:) - phipR*QI(i,j,k,:)
+
+                  b0R = phi0*QR
+		  b0I = phi0*QI
+
+
+!c
+!cc all other cases
+!c
+
+               else
+
+!! CHECK brunt2 AND omsq VARIABLES !!!
+
+                  efreq = sqrt(xwh2*brunt2 + (km**2)*omsq)/rk
+
+                  call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
+
+                  
+! phi_p = complex_conjugate(phi_m)
+
+		  phipR = phimR
+		  phipI = -phimI			  
+
+                  call eig0(im,jm,km,xw,xwh,efreq,phi0)
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+                  
+                  bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
+		  bmI = phimR*QI(i,j,k,:) - phimR*QI(i,j,k,:)
+
+                  bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
+		  bpI = phipR*QI(i,j,k,:) - phipR*QI(i,j,k,:)
+
+                  b0R = phi0*QR
+		  b0I = phi0*QI
+
+                     
+
+               endif
+
+! now calculate the spectra: can we call an existing routine here?
+
+! total energy spectrum is 1/2(bm**2 + bp**2 + b0**2)
+! pv mode spectrum is 1/2(b0**2)
+! wave-mode spectrum is 1/2(bm**2 + bp**2)
+! kh=0 spectrum is...
+
 
 enddo
 enddo
