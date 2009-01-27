@@ -3133,7 +3133,7 @@ real*8 ::  spec_kh0(0:max(g_nx,g_ny,g_nz))
 real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
 integer :: n,wn
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km
-real*8 :: xw2,xw,xwh2,xwh,RR(n_var),II(n_var)
+real*8 :: xw2,xw,xwh2,xwh,iw,RR(n_var),II(n_var)
 real*8 :: efreq  !eigenfrequency sigma
 real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var), phi0I(n_var), phi0R(n_var)
 real*8 :: bmR, bmI, bpR, bpI, bp0,bm2,bp2,b02
@@ -3164,6 +3164,10 @@ romega2 = fcor
 brunt2 = brunt**2
 omsq = romega2**2
 
+spec_tot = 0
+spec_vort = 0
+spec_wave = 0
+spec_kh0 = 0
 
 do k=nz1,nz2
    do j=ny1,ny2
@@ -3181,7 +3185,7 @@ do k=nz1,nz2
          II = QI(i,j,k,:)
          
          xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
-         xw=nint(Lz*sqrt(xw2))
+         xw=(Lz*sqrt(xw2))
          xwh2 = pi2_squared*(im**2 + jm**2)
          xwh = sqrt(xwh2)	
          
@@ -3322,13 +3326,15 @@ do k=nz1,nz2
          bp2 = bpR**2 + bpI**2
          b02 = b0R**2 + b0I**2
 
+
+         iw=nint(Lz*sqrt(xw2))
          etot = 0.5*(bm2 + bp**2 + b0**2)
-         spec_tot(xw) = spec_tot + etot
+         spec_tot(iw) = spec_tot(iw) + etot
          evort = 0.5*(b0**2)
-         spec_vort(xw) = spec_vort + evort
+         spec_vort(iw) = spec_vort(iw) + evort
          ewave = etot - evort
-         spec_wave(xw) = spec_wave + ewave
-         spec_kh0 = spec_kh0 + ekh0
+         spec_wave(iw) = spec_wave(iw) + ewave
+         spec_kh0(iw) = spec_kh0(iw) + ekh0
 
 
 
