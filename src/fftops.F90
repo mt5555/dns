@@ -3126,12 +3126,19 @@ real*8 :: QR(nx,ny,nz,n_var)  ! real part
 real*8 :: QI(nx,ny,nz,n_var)  ! imaginary part 
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_vort(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_wave(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_kh0(0:max(g_nx,g_ny,g_nz))
+real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
 integer :: n,wn
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km
 real*8 :: xw2,xw,xwh2,xwh,RR(n_var),II(n_var)
-real*8 :: efreq(3)  !+,-,0 sigmas
+real*8 :: efreq  !eigenfrequency sigma
 real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var), phi0I(n_var), phi0R(n_var)
-real*8 :: bmR, bmI, bpR, bpI, bp0
+real*8 :: bmR, bmI, bpR, bpI, bp0,bm2,bp2,b02
+real*8 :: brunt,brunt2,
+real*8 :: romega2,omsq
 
 character(len=80) :: message
 
@@ -3152,205 +3159,195 @@ do n = 1,n_var
    call sincos_to_complex_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
 enddo
 
+brunt = bous
+romega2 = fcor
+brunt2 = brunt**2
+omsq = romega2**2
 
 
 do k=nz1,nz2
-do j=ny1,ny2
-do i=nx1,nx2
-   ! note: wave number is (im,jm,km)
-   ! index into arrays is (i,j,k)
-   !
-   ! Eigenmode:   (QR + i QI) exp( 2pi ( im*x +jm*y + km*z )  )
-   im=imcord_exp(i)
-   jm=jmcord_exp(j)
-   km=kmcord_exp(k)
-   RR = QR(i,j,k,:)
-   II = QI(i,j,k,:)
+   do j=ny1,ny2
+      do i=nx1,nx2
+! note: wave number is (im,jm,km)
+! index into arrays is (i,j,k)
+!
+! Eigenmode:   (QR + i QI) exp( 2pi ( im*x +jm*y + km*z )  )
+
+         im=imcord_exp(i)
+         jm=jmcord_exp(j)
+         km=kmcord_exp(k)
+         
+         RR = QR(i,j,k,:)
+         II = QI(i,j,k,:)
+         
+         xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
+         xw=nint(Lz*sqrt(xw2))
+         xwh2 = pi2_squared*(im**2 + jm**2)
+         xwh = sqrt(xwh2)	
+         
+
+         degen = 1.d0/sqrt(2.d0)
+
+!
+!    calculate the b's (a's in paper)
+!         
+         
+         if ((im==0) .and. (jm==0) .and. (km==0)) then
+
+!
+! special case of im=jm=km=0, no mean flows here
+!
+
+            bmR = 0
+            bmI = 0
+            bpR = 0
+            bpI = 0 
+            b0 = 0
 
 
-   xw2=pi2_squared*(im**2 + jm**2 + km**2)
-   xw=sqrt(xw2)
-   xwh2 = pi2_squared*(im**2 + jm**2) !horizontal wavenumber length	
-   xwh = sqrt(xwh2)	
+!
+! special case of no stratification and km=0
+!
 
-   ! Leslie's code goes here
-   ! compute sigma
-   ! overwrite QR,QI with a_plus, a_zero, a_minus
-   ! (u,v,w,theta)(k) =  a_minus(k) PHI_minus(k) 
-   !                    +a_zero(k)  PHI_zero(k) 
-   !                    +a_plus(k)  PHI_plus(k) 
-   !
-   ! overwrite QR,QI with:
-   ! a_minus = QR(:,:,:,1) + i QI(:,:,:,1)
-   ! a_zero  = QR(:,:,:,2) + i QI(:,:,:,2)
-   ! a_plus  = QR(:,:,:,3) + i QI(:,:,:,3)
-   
-
-      degen = 1.d0/sqrt(2.d0)
-
-! these are Leslie loops, need to insert proper facs and things into our loops;
-! need to be careful since we do not use complex vbls. 
-!     DO K=1,NZ
-!         RKZ2 = FAC2Z(K)
-!         RKZ = FACZ(K)
-
-!         DO J=1,NY
-!            RKY2 = FAC2Y(J)
-!            SUM2 = RKZ2 + RKY2
-!            RKY = FACY(J)
-
-!            DO I=1,NXHP
-
-!               RKX = FACX(I)
-!               RKX2 = FAC2X(I)
-!               RK2 = SUM2 + RKX2
-!               RKH2 = RKY2 + RKX2
-!               RKH = DSQRT(RKH2)
-!               RK = DSQRT(RK2)
-               
-c
-cc    calculate the a's
-c
-
-               if ((i .eq. 1) .and. (j .eq. 1) .and. (k .eq. 1)) then
-
-c
-cc special case of im=jm=km=0, no mean flows here
-c
-
-		bmR = 0.d0
-		bmI = 0.d0
-                bpR = 0.d0
-		bpI = 0.d0 
-                b0 = 0.d0
-
-C
-
-c
-cc special case of no stratification and km=0
-c
-! *********check BRUNT variable which is N  **************
-               elseif ((km .eq. 0.d0) .and. (brunt .eq. 0.d0)) then
+         elseif ((km==0) .and. (brunt==0)) then
 
 ! sigmas are zero
-                  efreq = 0.d0
+            efreq = 0
 
-! real and imaginary part of phi_m
+!real and imaginary part of phi_m
 
-                  phimR(1) = 0.0
-		  phimI(1) = degen*jm/xwh
-                  phimR(2) = 0.0
-		  phimI(2) = -degen*im/xwh
-                  phimR(3) = -jm
-		  phimI(3) = 0.0
-                  phimR(4) = 0.0
-		  phimI(4) = 0.0	
-		  
+            phimR(1) = 0.0
+            phimI(1) = degen*pi2*jm/xwh
+            phimR(2) = 0.0
+            phimI(2) = -degen*pi2*im/xwh
+            phimR(3) = -pi2*jm
+            phimI(3) = 0.0
+            phimR(4) = 0.0
+            phimI(4) = 0.0	
+
 ! phi_p = complex_conjugate(phi_m)
-
-		  phipR = phimR
-		  phipI = -phimI			  
+            phipR = phimR
+            phipI = -phimI			  
 
 ! phi_0 is real
-                  phi0(1) = 0.d0
-                  phi0(2) = 0.d0
-                  phi0(3) = 0.d0
-                  phi0(4) = 1.d0
+            phi0(1) = 0.d0
+            phi0(2) = 0.d0
+            phi0(3) = 0.d0
+            phi0(4) = 1.d0
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
-                  
-                  bmR = emR*QR(i,j,k,:) + emI*QI(i,j,k,:)
-		  bmI = emR*QI(i,j,k,:) - emR*QI(i,j,k,:)
 
-                  bpR = epR*QR(i,j,k,:) + epI*QI(i,j,k,:) 
-		  bpI = epR*QI(i,j,k,:) - epR*QI(i,j,k,:)
+            bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
+            bmI = phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:)
 
-                  b0R = phi0*QR
-		  b0I = phi0*QI
+            bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
+            bpI = phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:)
+
+            b0R = phi0*QR
+            b0I = phi0*QI
 
 
+!
+!  special case of kh= xwh = 0  (we treat this case separately to make
+!  sure xwh = 0.d0 and not something small, since the test in
+!  eigm and eig0 is for (xwh .eq. 0)
+!
 
-!c
-!cc  special case of kh= xwh = 0  (we treat this case separately to make
-!cc  sure xwh = 0.d0 and not something small, since the test in
-!cc  eigm and eig0 is for (xwh .eq. 0)
-!c
+         elseif ((im==0) .and. (jm==0)) then
 
-               elseif ((i .eq. 1) .and. (j .eq. 1)) then
+            xwh = 0.d0
+            efreq = romega2  
+            
+            call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
 
-                  km = 0.d0
-                  efreq = romega2  !!!what is romega2 in our code?!!!!
-
-! need to write a subroutine which returns phimR,phimI
-
-                  call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
-                  
 ! phi_p = complex_conjugate(phi_m)
 
-		  phipR = phimR
-		  phipI = -phimI			  
+            phipR = phimR
+            phipI = -phimI			  
 
-! need to write a subroutine which returns phi0
-		 call eig0(rkx,rky,rkz,rk,rkh,freq,phi0)
+            call eig0(im,jm,km,xw,xwh,efreq,phi0)
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
-                  
-                  bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
-		  bmI = phimR*QI(i,j,k,:) - phimR*QI(i,j,k,:)
 
-                  bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
-		  bpI = phipR*QI(i,j,k,:) - phipR*QI(i,j,k,:)
+            bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
+            bmI = phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:)
 
-                  b0R = phi0*QR
-		  b0I = phi0*QI
+            bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
+            bpI = phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:)
+
+            b0R = phi0*QR
+            b0I = phi0*QI
+
+            ekh0 = 0.5*(bm**2 + bp**2 + b0**2)
+!
+! all other cases
+!
+
+         else
 
 
-!c
-!cc all other cases
-!c
+            efreq = sqrt(xwh2*brunt2 + (km**2)*omsq)/xw
 
-               else
-
-!! CHECK brunt2 AND omsq VARIABLES !!!
-
-                  efreq = sqrt(xwh2*brunt2 + (km**2)*omsq)/rk
-
-                  call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
-
-                  
+            call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
+            
 ! phi_p = complex_conjugate(phi_m)
 
-		  phipR = phimR
-		  phipI = -phimI			  
+            phipR = phimR
+            phipI = -phimI			  
 
-                  call eig0(im,jm,km,xw,xwh,efreq,phi0)
+            call eig0(im,jm,km,xw,xwh,efreq,phi0)
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
-                  
-                  bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
-		  bmI = phimR*QI(i,j,k,:) - phimR*QI(i,j,k,:)
 
-                  bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
-		  bpI = phipR*QI(i,j,k,:) - phipR*QI(i,j,k,:)
+            bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
+            bmI = phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:)
 
-                  b0R = phi0*QR
-		  b0I = phi0*QI
+            bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
+            bpI = phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:)
 
-                     
+            b0R = phi0*QR
+            b0I = phi0*QI
 
-               endif
 
-! now calculate the spectra: can we call an existing routine here?
 
+         endif
+
+! now calculate the spectra: 
 ! total energy spectrum is 1/2(bm**2 + bp**2 + b0**2)
 ! pv mode spectrum is 1/2(b0**2)
 ! wave-mode spectrum is 1/2(bm**2 + bp**2)
-! kh=0 spectrum is...
+! kh=0 spectrum is computed at the end of kh==0 condition above
+
+         bm2 = bmR**2 + bmI**2
+         bp2 = bpR**2 + bpI**2
+         b02 = b0R**2 + b0I**2
+
+         etot = 0.5*(bm2 + bp**2 + b0**2)
+         spec_tot(xw) = spec_tot + etot
+         evort = 0.5*(b0**2)
+         spec_vort(xw) = spec_vort + evort
+         ewave = etot - evort
+         spec_wave(xw) = spec_wave + ewave
+         spec_kh0 = spec_kh0 + ekh0
 
 
+
+      enddo
+   enddo
 enddo
-enddo
-enddo
+
+!where is iwave_max defined? is it global?
+
+#ifdef USE_MPI
+spectrum_in=spec_tot
+call mpi_reduce(spectrum_in,spec_tot,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spectrum_in=spec_vort
+call mpi_reduce(spectrum_in,spec_vort,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spectrum_in=spec_wave
+call mpi_reduce(spectrum_in,spec_wave,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spectrum_in=spec_kh0
+call mpi_reduce(spectrum_in,spec_kh0,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
 
 !
 !  The helicity adjustment above did not preserve the fact that
@@ -3361,19 +3358,19 @@ enddo
 !  of these modes is not the same as Fourier modes
 !  a_zero(k) =  - CONJ( a_zero(-k)
 !  what about a_plus and a_minus?  
-do n=1,n_var
-   do k=nz1,nz2
-      do j=ny1,ny2
-         do i=nx1,nx2
-            i1=i; i2 = i1 + imsign(i)
-            j1=j; j2 = j1 + jmsign(j)
-            k1=k; k2 = k1 + kmsign(k)
-            QR(i2,j2,k2,n)  =  QR(i1,j1,k1,n)
-            QI(i2,j2,k2,n)  = -QI(i1,j1,k1,n)
-         enddo
-      enddo
-   enddo
-enddo
+!do n=1,n_var
+!   do k=nz1,nz2
+!      do j=ny1,ny2
+!         do i=nx1,nx2
+!            i1=i; i2 = i1 + imsign(i)
+!            j1=j; j2 = j1 + jmsign(j)
+!            k1=k; k2 = k1 + kmsign(k)
+!            QR(i2,j2,k2,n)  =  QR(i1,j1,k1,n)
+!            QI(i2,j2,k2,n)  = -QI(i1,j1,k1,n)
+!         enddo
+!      enddo
+!   enddo
+!enddo
 
 ! this probably makes no sense?
 ! convert (QR,QI) back to sin/cos
@@ -3393,10 +3390,13 @@ use params
 real*8: im,jm,km,xw,xwh,efreq
 real*8: phimR(n_var),phimI(n_var)
 real*8: dsq2,fac
+real*8: romega2,brunt
 
- dsq2 = sqrt(2.d0)
+dsq2 = sqrt(2.d0)
+brunt = bous
+romega2 = fcor
 
-      if (xwh .eq. 0.d0) then
+      if (xwh==0) then
 
          phimR(1) = 0.5d0
 	 phimI(1) = -0.5d0
@@ -3410,11 +3410,11 @@ real*8: dsq2,fac
 
          fac = km/(dsq2*xwh*xw)
          
-         phimR(1) = fac*im
-	 phimI(1) = -fac*jm*romega2/efreq	
+         phimR(1) = fac*pi2*im
+	 phimI(1) = -fac*pi2*jm*romega2/efreq	
 
-         phimR(2) = fac*jm
-         phimI(2) = fac*im*romega2/efreq)
+         phimR(2) = fac*pi2*jm
+         phimI(2) = fac*pi2*im*romega2/efreq)
 
          phimR(3) = -xwh/(dsq2*xw)
          phimI(3) = 0.0d0
@@ -3430,10 +3430,14 @@ subroutine eig0(im,jm,km,xw,xwh,efreq,phi0)
 use params
 real*8: im,jm,km,xw,xwh,xwh2,km2,efreq
 real*8: phi0(n_var)
-real*8: dsq2,fac
+real*8: den
+real*8: romega2,brunt
 
 
-if (xwh .eq. 0.d0) then
+brunt = bous
+romega2 = fcor
+
+if (xwh == 0) then
 
          phi0(1) = 0.d0
          phi0(2) = 0.d0
@@ -3447,13 +3451,13 @@ if (xwh .eq. 0.d0) then
 
          den = 1.d0/sqrt(brunt2*xwh2 + omsq*km2)
 
-         phi0(1) = den*brunt*jm
+         phi0(1) = den*brunt*pi2*jm
 
-         phi0(2) = -den*brunt*im
+         phi0(2) = -den*brunt*pi2*im
 
          phi0(3) = 0.d0
 
-         phi0(4) = den*km*romega2
+         phi0(4) = den*pi2*km*romega2
 
       endif
 
