@@ -3131,14 +3131,15 @@ real*8 ::  spec_vort(0:max(g_nx,g_ny,g_nz/Lz))
 real*8 ::  spec_wave(0:max(g_nx,g_ny,g_nz/Lz))
 real*8 ::  spec_kh0(0:max(g_nx,g_ny,g_nz/Lz))
 real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz/Lz))
-integer :: n,wn,iwave_max
+integer :: n,wn,iwave_max,degen
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km
 real*8 :: xw2,xw,xwh2,xwh,iw,RR(n_var),II(n_var)
 real*8 :: efreq  !eigenfrequency sigma
-real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var), phi0I(n_var), phi0R(n_var)
+real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var), phi0(n_var)
 real*8 :: bmR, bmI, bpR, bpI, bp0,bm2,bp2,b02
-real*8 :: brunt,brunt2,
+real*8 :: brunt,brunt2
 real*8 :: romega2,omsq
+real*8 :: etot,ewave,evort,ekh0
 
 character(len=80) :: message
 
