@@ -3126,12 +3126,12 @@ real*8 :: QR(nx,ny,nz,n_var)  ! real part
 real*8 :: QI(nx,ny,nz,n_var)  ! imaginary part 
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_vort(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_wave(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_kh0(0:max(g_nx,g_ny,g_nz))
-real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
-integer :: n,wn
+real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 ::  spec_vort(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 ::  spec_wave(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 ::  spec_kh0(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz/Lz))
+integer :: n,wn,iwave_max
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km
 real*8 :: xw2,xw,xwh2,xwh,iw,RR(n_var),II(n_var)
 real*8 :: efreq  !eigenfrequency sigma
@@ -3169,6 +3169,8 @@ spec_vort = 0
 spec_wave = 0
 spec_kh0 = 0
 
+iwave_max=nint(sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 ))
+
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
@@ -3185,7 +3187,7 @@ do k=nz1,nz2
          II = QI(i,j,k,:)
          
          xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
-         xw=(Lz*sqrt(xw2))
+         xw=sqrt(xw2)
          xwh2 = pi2_squared*(im**2 + jm**2)
          xwh = sqrt(xwh2)	
          
@@ -3327,8 +3329,8 @@ do k=nz1,nz2
          b02 = b0R**2 + b0I**2
 
 
-         iw=nint(Lz*sqrt(xw2))
-         etot = 0.5*(bm2 + bp**2 + b0**2)
+         iw=nint(sqrt(xw2))
+         etot = 0.5*(bm**2 + bp**2 + b0**2)
          spec_tot(iw) = spec_tot(iw) + etot
          evort = 0.5*(b0**2)
          spec_vort(iw) = spec_vort(iw) + evort
@@ -3342,8 +3344,6 @@ do k=nz1,nz2
    enddo
 enddo
 
-!where is iwave_max defined? is it global?
-
 #ifdef USE_MPI
 spectrum_in=spec_tot
 call mpi_reduce(spectrum_in,spec_tot,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
@@ -3354,37 +3354,7 @@ call mpi_reduce(spectrum_in,spec_wave,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3
 spectrum_in=spec_kh0
 call mpi_reduce(spectrum_in,spec_kh0,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
-
-!
-!  The helicity adjustment above did not preserve the fact that
-!  mode (l,m,n) needs to be the complex conjugate of mode (-l,-m,-n)
-!  Reimpose this constraint:
-!
-!  NOTE: see Smith&Waleffe2002:  complex conjugate relations
-!  of these modes is not the same as Fourier modes
-!  a_zero(k) =  - CONJ( a_zero(-k)
-!  what about a_plus and a_minus?  
-!do n=1,n_var
-!   do k=nz1,nz2
-!      do j=ny1,ny2
-!         do i=nx1,nx2
-!            i1=i; i2 = i1 + imsign(i)
-!            j1=j; j2 = j1 + jmsign(j)
-!            k1=k; k2 = k1 + kmsign(k)
-!            QR(i2,j2,k2,n)  =  QR(i1,j1,k1,n)
-!            QI(i2,j2,k2,n)  = -QI(i1,j1,k1,n)
-!         enddo
-!      enddo
-!   enddo
-!enddo
-
-! this probably makes no sense?
-! convert (QR,QI) back to sin/cos
-!do n = 1,3
-!   write(message,*) 'converting back to gridspace, n=',n   
-!   call print_message(message)
-!   call complex_to_sincos_field(Qout(1,1,1,n),QR(1,1,1,n),QI(1,1,1,n))
-!enddo
+#endif 
 
 
 end subroutine
