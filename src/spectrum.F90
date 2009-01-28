@@ -2444,7 +2444,7 @@ real*8 :: QI(nx,ny,nz,4)  ! imaginary part
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
-integer :: n,wn,iwave_max,degen
+integer :: n,wn,degen
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
 real*8 :: xw2,xw,xwh2,xwh,RR(4),II(4)
 real*8 :: efreq  !eigenfrequency sigma
@@ -2488,7 +2488,7 @@ spec_CR_vort = 0
 spec_CR_wave = 0
 spec_CR_kh0 = 0
 
-iwave_max=nint(sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 ))
+iwave=nint(Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 ))
 
 do k=nz1,nz2
    do j=ny1,ny2
@@ -2653,7 +2653,7 @@ do k=nz1,nz2
          b02 = b0R**2 + b0I**2
 
 
-         iw=nint(sqrt(xw2))
+         iw=nint(Lz*sqrt(xw2))
          etot = 0.5*(bm2 + bp2 + b02)
          spec_CR_tot(iw) = spec_CR_tot(iw) + etot
          evort = 0.5*(b02)
@@ -2670,13 +2670,13 @@ enddo
 
 #ifdef USE_MPI
 spectrum_in=spec_CR_tot
-call mpi_reduce(spectrum_in,spec_CR_tot,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_tot,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_vort
-call mpi_reduce(spectrum_in,spec_CR_vort,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_vort,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_wave
-call mpi_reduce(spectrum_in,spec_CR_wave,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_wave,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_kh0
-call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 #endif 
 
