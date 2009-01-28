@@ -52,12 +52,6 @@ use spectrum
 use sforcing
 implicit none
 
-! set this to 0 to use 1 cpu version.  
-! 1 cpu version uses significantly less memory then parallel version
-! but doesn't compute some scalars like helicity dissipation rate.
-integer :: always_use_parallel_code = 1;
-integer :: use_serial
-
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: QI(:,:,:,:)
 real*8,allocatable  :: QR(:,:,:,:)
@@ -75,13 +69,8 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
-real*8 ::  spec_tot(0:max(g_nx,g_ny,nint(g_nz/Lz)))
-real*8 ::  spec_vort(0:max(g_nx,g_ny,nint(g_nz/Lz)))
-real*8 ::  spec_wave(0:max(g_nx,g_ny,nint(g_nz/Lz)))
-real*8 :: spec_kh0(0:max(g_nx,g_ny,nint(g_nz/Lz)))
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
-logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs
 logical :: compute_hspec, compute_hfree
 logical :: read_uvw
 logical :: project_ch
@@ -103,11 +92,6 @@ call init_model
 !cd
 header_type=1; scale=1;           ! DNS standard data
 !header_type=4; scale=1/(2*pi)    ! for Takeshi's data
-compute_pdfs=.false.
-compute_cj=.false.
-compute_scalar=.false.
-compute_uvw=.false.
-str_type=0
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
@@ -143,43 +127,24 @@ if (scale/=1) then
 endif
 
 
-if (ncpus==1) then
-   use_serial=1;
-else
-   use_serial=0;
-endif
-if (always_use_parallel_code==1) use_serial=0;
-if (use_serial==1) then
-   call print_message("using serial version of isoave code")
-else
-   call print_message("using parallel version of isoave code")
-endif
-
 
 !call writepoints(); stop
 
 
-if (use_serial==1) then
-   allocate(Q(nx,ny,nz,n_var))
+allocate(Q(nx,ny,nz,n_var))
+allocate(q1(nx,ny,nz,n_var))
+allocate(q2(nx,ny,nz,n_var))
+allocate(work1(nx,ny,nz))
+allocate(work2(nx,ny,nz))
+if (nxdecomp*nydecomp*nzdecomp>1) then
+   allocate(q3(nx,ny,nz,n_var))
    allocate(work1(nx,ny,nz))
    allocate(work2(nx,ny,nz))
-else
-   ! parallel version requires extra data:
-   allocate(Q(nx,ny,nz,n_var))
-   allocate(q1(nx,ny,nz,n_var))
-   allocate(q2(nx,ny,nz,n_var))
-   allocate(work1(nx,ny,nz))
-   allocate(work2(nx,ny,nz))
-   if (nxdecomp*nydecomp*nzdecomp>1) then
-      allocate(q3(nx,ny,nz,n_var))
-      allocate(work1(nx,ny,nz))
-      allocate(work2(nx,ny,nz))
-      allocate(work3(nx,ny,nz))
-      allocate(work4(nx,ny,nz))
-   endif
+   allocate(work3(nx,ny,nz))
+   allocate(work4(nx,ny,nz))
 endif
 
-if (compute_cj .or. compute_hfree) then
+if (compute_hfree) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
 endif
 
@@ -187,11 +152,6 @@ endif
 !  if needed, initialize some constants.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Q=0
-
-if (use_serial==1) then
-   !  read in SK's data, and compute helical structure function
-   !call convert_sk(Q,work1,work2);  stop;
-endif
 
 ! run hfree test:  
 ! after code is debugged, remove this line and undefine TESTEXP in 
@@ -212,67 +172,11 @@ do
    endif
    
 
-   if (compute_pdfs) then
-      if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.sf"
-         print *,fname
-         call copen(fname,"w",fid,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)')"output_model(): Error opening .sf file errno=",ierr
-            call abortdns(message)
-         endif
-         
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.spdf"
-         print *,fname
-         call copen(fname,"w",fid2,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)')"output_model(): Error opening .spdf file errno=",ierr
-            call abortdns(message)
-         endif
-
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) //".new.cores"
-         print *,fname
-         call copen(fname,"w",fidcore,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)')&
-            "output_model(): Error opening .cores file errno=",ierr
-            call abortdns(message)
-         endif
-      endif
-      
-      if (.not. read_uvw) then
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
-         Q=Q*scale;
-	 read_uvw=.true.
-      endif
-      
-!      uscale=.01 / pi2               ! (del_u)              units:  m/s
-!      epsscale=.01 / pi2**(2./3.)    ! (mu*gradu**2)**1/3   units: 
-      if (my_pe==io_pe) then
-         print *,'PDF BINSIZE  (U,EPS):  ',uscale,epsscale
-      endif
-      call compute_all_pdfs(Q,q1,q2)
-
-      call output_pdf(time,fid,fid1,fid2,fid3,fidcore)
-      if (my_pe==io_pe) call cclose(fid,ierr)
-      if (my_pe==io_pe) call cclose(fid2,ierr)
-      if (my_pe==io_pe) call cclose(fidcore,ierr)
-   endif
-   
-   
-   
    if (compute_hspec) then
       
       if (.not. read_uvw) then	
-         if (use_serial==1) then
-            stop 'compute_hspec needs q1,q2 allocated'
-            call input_uvw(time,Q,dummy,work1,work2,header_type)
-            Q=Q*scale;
-         else
-            call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
-            Q=Q*scale;
-         endif
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
+         Q=Q*scale;
          read_uvw=.true.	
       endif
 
@@ -298,12 +202,8 @@ do
    
    if (compute_hfree) then
       if (.not. read_uvw) then	
-         if (use_serial==1) then
-            stop 'compute_hfree needs q1,q2 allocated'
-         else
-            call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-            Q=Q*scale;
-         endif
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         Q=Q*scale;
          read_uvw=.true.	
       endif
 
@@ -370,143 +270,15 @@ do
    endif
    
    
-   if (compute_uvw) then
+   if (project_ch) then
       if (.not. read_uvw) then	
-         if (use_serial==1) then
-            call input_uvw(time,Q,dummy,work1,work2,header_type)
-            Q=Q*scale;
-         else
-            call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-            Q=Q*scale;
-         endif
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         Q=Q*scale;
          read_uvw=.true.	
       endif
-      
-      do i=0,nxdecomp-1
-         do j=0,nydecomp-1
-            do k=0,nzdecomp-1  
-               
-               if (my_pe==io_pe) then
-                  write(sdata,'(f10.4)') 10000.0000 + time
-                  write(idata,'(i1)') str_type
-                  if (str_type==0) then
-                     fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isostr"
-                  else
-                     fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".isostr" // idata(1:1)
-                  endif
-                  if (nxdecomp*nydecomp*nzdecomp>1) then
-                     write(sdata,'(3i1)') i,j,k
-                     fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
-                  endif
-                  
-                  print *,fname
-               endif
-               
-               if (use_serial==1) then
-                  nxlen=nslabx/nxdecomp
-                  nylen=nslaby/nydecomp
-                  nzlen=nslabz/nzdecomp
-                  
-                  lx1=nx1 + i*nxlen     
-                  ly1=ny1 + j*nylen     
-                  lz1=nz1 + k*nzlen     
-                  
-                  lx2=lx1 + nxlen-1
-                  ly2=ly1 + nylen-1
-                  lz2=lz1 + nzlen-1
 
-! subcube version cannot run in parallel - it will abort
-                  call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
-               else
-                  if (nxdecomp*nydecomp*nzdecomp==1) then
-                     ! no subcubes:
-                     call isoavep(Q,q1,q1,q2,3,csig)
-                  else
-                     range(1,1)=dble(i)/nxdecomp
-                     range(1,2)=dble(i+1)/nxdecomp
-                     range(2,1)=dble(j)/nxdecomp
-                     range(2,2)=dble(j+1)/nxdecomp
-                     range(3,1)=dble(k)/nxdecomp
-                     range(3,2)=dble(k+1)/nxdecomp
-                     call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
-                  endif
-               endif
-               
-         
-         
-               if (my_pe==io_pe) then
-                  call copen(fname,"w",fid,ierr)
-                  if (ierr/=0) then
-                     write(message,'(a,i5)') "output_model(): Error opening .isostr file errno=",ierr
-                     call abortdns(message)
-                  endif
-                  call writeisoave(fid,time)
-                  call cclose(fid,ierr)
-               endif
-               
-            enddo
-         enddo
-      enddo
-      
-   endif
-   
-
-
-   
-   if (compute_cj) then
-      if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.isow2s2"
-         print *,fname
-      endif
-      
-      if (.not. read_uvw) then
-         call print_message("calling input_uvw")
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
-         Q=Q*scale;
-	 read_uvw=.true. ! dont set to .true.: we trash Q below:
-      endif
-      call print_message("calling compute_w2s2")
-      call compute_w2s2(Q,q1,q2,q3)
-      read_uvw=.false.  ! call to compute_w2s2 has trashed data in Q 
-      call print_message("calling isoavep")
-      call isoavep(Q,q1,q1,q2,2,csig)
-      
-      if (my_pe==io_pe) then
-         call copen(fname,"w",fid,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .isow2s2 file errno=",ierr
-            call abortdns(message)
-         endif
-         call writeisoave_w2s2(fid,time)
-         call cclose(fid,ierr)
-      endif
-   endif
-   
-   
-   if (compute_scalar) then
-      if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".new.iso1"
-         print *,fname
-      endif
-      
-      call singlefile_io(time,Q(1,1,1,1),fname,q1(1,1,1,1),q1(1,1,1,2),1,io_pe)
-      
-      call isoavep(Q,q1,q1,q2,1,csig)
-      if (my_pe==io_pe) then
-         call copen(fname,"w",fid,ierr)
-         if (ierr/=0) then
-            write(message,'(a,i5)') "output_model(): Error opening .iso1 file errno=",ierr
-            call abortdns(message)
-         endif
-         call writeisoave_scalar(fid,time)
-         call cclose(fid,ierr)
-      endif
-   endif
-
-   if (project_ch) then
-      call compute_project_ch(time,Q,QR,QI,work,work2)
+      call compute_project_ch(Q,q1,q2,work1,work2)
+      call output_project_ch(time,time)
    endif
       
 
@@ -648,57 +420,4 @@ print *,'writing out DNS format data'
 call dataio(time,Q,work1,work2,0)
 
 end subroutine
-
-subroutine compute_project_ch(time,Q,QR,QI,work,work2)
-
-use params
-implicit none
-real*8 :: Q(nx,ny,nz,n_var)
-real*8 :: QR(nx,ny,nz,n_var)  ! real part
-real*8 :: QI(nx,ny,nz,n_var)  ! imaginary part 
-real*8 :: spec_tot,spec_vort,spec_wave,spec_kh0
-
-real*8 :: time,time_file
-
-! local variables
-integer i,j,k,n
-integer :: ierr
-character,save :: access="0"
-
-real*8 :: x
-character(len=100) :: message
-CPOINTER fid
-
-
-
-call project_ch(Q,QR,QI,work,work2,spec_tot,spec_vort,spec_wave,spec_kh0)
-
-! append to output files, unless this is first call.
-if (access=="0" .or. time==time_file) then
-   access="w"
-else
-   access="a"
-endif
-
-if (my_pe==io_pe) then
-   write(message,'(f10.4)') 10000.0000 + time_file
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))// message(2:10) // ".spec_ch"
-   call copen(message,access,fid,ierr)
-   if (ierr/=0) then
-      write(message,'(a,i5)')"spec_ch: Error opening file errno=",ierr
-      call abortdns(message)
-   endif
-   call cwrite8(fid,time,1)
-   x=1+iwave; call cwrite8(fid,x,1)   
-   call cwrite8(fid,spec_tot,1+iwave)
-   call cwrite8(fid,spec_vort,1+iwave)
-   call cwrite8(fid,spec_wave,1+iwave)
-   call cwrite8(fid,spec_kh0,1+iwave)
-      
-endif
-
-
-
-end subroutine
-
 

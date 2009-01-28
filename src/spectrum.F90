@@ -56,6 +56,12 @@ real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  q2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
 real*8,private ::  time_old=-1
 
+! Craya-Herring mode spectra
+real*8 ::  spec_CR_tot(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_CR_vort(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_CR_wave(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_CR_kh0(0:max(g_nx,g_ny,g_nz))
+
 !helicity related spectra (sk)
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_helicity_rn(0:max(g_nx,g_ny,g_nz))
@@ -2355,5 +2361,460 @@ integer i,j,k,jm,km,im,iwave_max,n
 
 
 end subroutine
+
+
+
+
+
+
+
+
+
+
+subroutine compute_project_ch(Q,QR,QI,work,work2)
+!
+! Project onto the Craya-Herring modes and compute the spectra
+!
+! Input: state vector Q:   4 components:  u,v,w,theta in GRID SPACE
+! output:     QR + i QI:   Coefficients of Craya-Herring expansion
+!                          in terms of phi_minus,phi_zero,phi_plus
+!                          3 components: a_minus,a_zero,a_plus
+!
+! Note 1: the Fourier expansion of the (i,j,k)
+! Craya-Herring eigenmode contains only wave number (i,j,k)
+! So the projection of a field onto the (i,j,k) eigenmode, when
+! computed in Fourier space, involves only wave numbers (i,j,k)
+!
+! Note 2: It does not make sense to convert "a_minus" for example, back to
+! sin/cos formulation since a_minus is not a Fourier coefficient
+!
+
+! (u,v,w,theta) = sum_K phi(K) exp( i K X - sigma(K)t ) 
+! phi(K) = a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + a_plus(K) phi_plus(K)
+
+!
+! Lets assume we are only interested in the phi_plus component,
+! so take a_minus=a_zero=0.  Then we have:
+! 
+! (u,v,w,theta) = sum_K a_plus(K) phi_plus(K) exp( i K X - sigma(K)t )
+!               
+! whas can be thought of as a Fourier series, with k'th Fourier mode:
+!                 a_plus(K) phi_plus(K) exp(-sigma(K) t)  
+!
+! Maybe we are more interested in this quantity than in the 
+! individual a_plus(K) coefficients?
+
+
+! ***************SK's notes****************
+! Is this true?? 
+! (u,v,w,theta) = sum_K phi(K) exp( i K X - sigma(K)t ) 
+! phi(K) = a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + a_plus(K) phi_plus(K)
+
+! 
+! phi(K) is just the fourier transformed velocity/density vector:
+! phi(K) = (u_hat(K), v_hat(K), w_hat(K), theta_hat(K))
+! It can also be written as a linear combination of the eigenmodes:
+! phi(K) =  a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + 
+!		a_plus(K) phi_plus(K)
+
+! where  a_*(K) = complex_conjugate(phi_*(K))*(phi(K))
+! and the phi_*(K) are the linear engenmodes
+!               
+! For our purposes, we would like to compute (upto factors of 2):
+!
+! 1) Spectrum of total energy:  |phi(K)|^2 = |a_minus(K)|^2 + |a_plus(K)|^2 
+!					+ |a_zero|^2
+! 2) Spectrum of energy in the PV modes: E_pv(K) = |a_zero(K)|^2
+! 3) Spectrum of energy in the wave modes: E_wave(K) = |a_minus(K)|^2 + 
+!							|a_plus(K)|^2
+! 4) The spectrum of the vertical sheared horizontal modes (VSHM) that Leslie 
+!    has in her paper, for k_h = 0
+! 
+
+
+! *************end of SK's notes**********************
+
+use params
+use mpi
+implicit none
+
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: QR(nx,ny,nz,4)  ! real part
+real*8 :: QI(nx,ny,nz,4)  ! imaginary part 
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
+integer :: n,wn,iwave_max,degen
+integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
+real*8 :: xw2,xw,xwh2,xwh,RR(4),II(4)
+real*8 :: efreq  !eigenfrequency sigma
+real*8 :: phipR(4), phipI(4), phimR(4), phimI(4), phi0(4)
+real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
+real*8 :: brunt,brunt2
+real*8 :: romega2,omsq
+real*8 :: etot,ewave,evort,ekh0,ierr
+
+character(len=80) :: message
+
+if (ndim /= 3) then
+   call abortdns("ERROR: project_ch requires ndim=3")
+endif
+if (n_var < 4 ) then
+   call abortdns("ERROR: project_ch requires at least one tracer")
+endif
+call print_message('Computing Craya-Herring Projection')
+
+
+! take FFT, then convert to complex coefficients
+! real part is stored in QR array
+! complex part is stored in QI array
+do n = 1,4
+   write(message,*) 'converting gridspace to to complex modes, n=',n   
+   call print_message(message)
+   work=Q(:,:,:,n)
+   call fft3d(work,work2)          ! inplace FFT of work
+   call sincos_to_complex_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
+enddo
+
+!SK
+
+brunt = bous
+romega2 = fcor
+brunt2 = brunt**2
+omsq = romega2**2
+
+spec_CR_tot = 0
+spec_CR_vort = 0
+spec_CR_wave = 0
+spec_CR_kh0 = 0
+
+iwave_max=nint(sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 ))
+
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+! note: wave number is (im,jm,km)
+! index into arrays is (i,j,k)
+!
+! Eigenmode:   (QR + i QI) exp( 2pi ( im*x +jm*y + km*z )  )
+
+         im=imcord_exp(i)
+         jm=jmcord_exp(j)
+         km=kmcord_exp(k)
+         
+         RR = QR(i,j,k,:)
+         II = QI(i,j,k,:)
+         
+         xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
+         xw=sqrt(xw2)
+         xwh2 = pi2_squared*(im**2 + jm**2)
+         xwh = sqrt(xwh2)	
+         
+
+         degen = 1.d0/sqrt(2.d0)
+
+!
+!    calculate the b's (a's in paper)
+!         
+         
+         if ((im==0) .and. (jm==0) .and. (km==0)) then
+
+!
+! special case of im=jm=km=0, no mean flows here
+!
+
+            bmR = 0
+            bmI = 0
+            bpR = 0
+            bpI = 0 
+            b0R = 0
+            b0I = 0
+
+!
+! special case of no stratification and km=0
+!
+
+         elseif ((km==0) .and. (brunt==0)) then
+
+! sigmas are zero
+            efreq = 0
+
+!real and imaginary part of phi_m
+
+            phimR(1) = 0.0
+            phimI(1) = degen*pi2*jm/xwh
+            phimR(2) = 0.0
+            phimI(2) = -degen*pi2*im/xwh
+            phimR(3) = -pi2*jm
+            phimI(3) = 0.0
+            phimR(4) = 0.0
+            phimI(4) = 0.0	
+
+! phi_p = complex_conjugate(phi_m)
+            phipR = phimR
+            phipI = -phimI			  
+
+! phi_0 is real
+            phi0(1) = 0.d0
+            phi0(2) = 0.d0
+            phi0(3) = 0.d0
+            phi0(4) = 1.d0
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+
+            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
+            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
+
+            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:)) 
+            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
+
+            b0R = sum(phi0*QR(i,j,k,:))
+            b0I = sum(phi0*QI(i,j,k,:))
+
+
+!
+!  special case of kh= xwh = 0  (we treat this case separately to make
+!  sure xwh = 0.d0 and not something small, since the test in
+!  eigm and eig0 is for (xwh .eq. 0)
+!
+
+         elseif ((im==0) .and. (jm==0)) then
+
+            xwh = 0.d0
+            efreq = romega2  
+            
+            call eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
+
+! phi_p = complex_conjugate(phi_m)
+
+            phipR = phimR
+            phipI = -phimI			  
+
+            call eig0(im,jm,km,xw,xwh,efreq,phi0)
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+
+            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
+            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
+
+            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:))
+            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
+
+            b0R = sum(phi0*QR(i,j,k,:))
+            b0I = sum(phi0*QI(i,j,k,:))
+
+            
+            bm2 = bmR**2 + bmI**2
+            bp2 = bpR**2 + bpI**2
+            b02 = b0R**2 + b0I**2
+
+            ekh0 = 0.5*(bm2 + bp2 + b02)
+!
+! all other cases
+!
+
+         else
+
+
+            efreq = sqrt(xwh2*brunt2 + (km**2)*omsq)/xw
+
+            call eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
+            
+! phi_p = complex_conjugate(phi_m)
+
+            phipR = phimR
+            phipI = -phimI			  
+
+            call eig0(im,jm,km,xw,xwh,efreq,phi0)
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+
+            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
+            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
+
+            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:)) 
+            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
+
+            b0R = sum(phi0*QR(i,j,k,:))
+            b0I = sum(phi0*QI(i,j,k,:))
+
+
+
+         endif
+
+! now calculate the spectra: 
+! total energy spectrum is 1/2(bm**2 + bp**2 + b0**2)
+! pv mode spectrum is 1/2(b0**2)
+! wave-mode spectrum is 1/2(bm**2 + bp**2)
+! kh=0 spectrum is computed at the end of kh==0 condition above
+
+         bm2 = bmR**2 + bmI**2
+         bp2 = bpR**2 + bpI**2
+         b02 = b0R**2 + b0I**2
+
+
+         iw=nint(sqrt(xw2))
+         etot = 0.5*(bm2 + bp2 + b02)
+         spec_CR_tot(iw) = spec_CR_tot(iw) + etot
+         evort = 0.5*(b02)
+         spec_CR_vort(iw) = spec_CR_vort(iw) + evort
+         ewave = etot - evort
+         spec_CR_wave(iw) = spec_CR_wave(iw) + ewave
+         spec_CR_kh0(iw) = spec_CR_kh0(iw) + ekh0
+
+
+
+      enddo
+   enddo
+enddo
+
+#ifdef USE_MPI
+spectrum_in=spec_CR_tot
+call mpi_reduce(spectrum_in,spec_CR_tot,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spectrum_in=spec_CR_vort
+call mpi_reduce(spectrum_in,spec_CR_vort,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spectrum_in=spec_CR_wave
+call mpi_reduce(spectrum_in,spec_CR_wave,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spectrum_in=spec_CR_kh0
+call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+
+#endif 
+
+
+
+end subroutine
+
+
+subroutine eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
+
+use params
+integer :: im,jm,km
+real*8 :: xw,xwh,efreq
+real*8 :: phimR(4),phimI(4)
+real*8 :: dsq2,fac
+real*8 :: romega2,brunt
+
+
+dsq2 = sqrt(2.d0)
+brunt = bous
+romega2 = fcor
+
+      if (xwh==0) then
+
+         phimR(1) = 0.5d0
+	 phimI(1) = -0.5d0
+         phimR(2) = 0.5d0
+	 phimI(2) = 0.5d0
+         phimR(3) = 0.0d0
+	 phimI(3) = 0.0d0
+         phimR(4) = 0.0
+	 phimI(4) = 0.0
+      else
+
+         fac = km/(dsq2*xwh*xw)
+         
+         phimR(1) = fac*pi2*im
+	 phimI(1) = -fac*pi2*jm*romega2/efreq	
+
+         phimR(2) = fac*pi2*jm
+         phimI(2) = fac*pi2*im*romega2/efreq
+
+         phimR(3) = -xwh/(dsq2*xw)
+         phimI(3) = 0.0d0
+
+         phimR(4) = 0.0d0
+         phimI(4) = xwh*brunt/(dsq2*xw*efreq)
+      endif
+
+
+end subroutine
+
+subroutine eig0(im,jm,km,xw,xwh,efreq,phi0)
+
+use params
+integer :: im,jm,km
+real*8 :: xw,xwh,xwh2,km2,efreq
+real*8 :: phi0(4)
+real*8 :: den
+real*8 :: romega2,brunt,brunt2,omsq
+
+
+brunt = bous
+romega2 = fcor
+brunt2 = brunt**2
+omsq = romega2**2
+
+if (xwh == 0) then
+
+         phi0(1) = 0.d0
+         phi0(2) = 0.d0
+         phi0(3) = 0.d0
+         phi0(4) = 1.d0
+
+      else
+
+         xwh2 = xwh**2
+         km2 = km**2
+
+         den = 1.d0/sqrt(brunt2*xwh2 + omsq*km2)
+
+         phi0(1) = den*brunt*pi2*jm
+
+         phi0(2) = -den*brunt*pi2*im
+
+         phi0(3) = 0.d0
+
+         phi0(4) = den*pi2*km*romega2
+
+      endif
+
+end subroutine
+
+
+subroutine output_project_ch(time,time_file)
+
+use params
+implicit none
+real*8 :: time,time_file
+
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=100) :: message
+CPOINTER fid
+
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))// message(2:10) // ".spec_ch"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)')"spec_ch: Error opening file errno=",ierr
+      call abortdns(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)   
+   call cwrite8(fid,spec_CR_tot,1+iwave)
+   call cwrite8(fid,spec_CR_vort,1+iwave)
+   call cwrite8(fid,spec_CR_wave,1+iwave)
+   call cwrite8(fid,spec_CR_kh0,1+iwave)
+   call cclose(fid,ierr)
+endif
+
+
+end subroutine
+
+
+
 
 end module

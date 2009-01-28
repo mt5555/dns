@@ -2,9 +2,9 @@ analysis.o: macros.h params.o mpi.o fft_interface.o makefile
 analysis_isoave.o: macros.h params.o mpi.o isoave.o pdf.o spectrum.o makefile 
 analysis_isoave_mt.o: macros.h params.o mpi.o isoave.o pdf.o spectrum.o makefile 
 analysis_rms.o: macros.h params.o mpi.o fft_interface.o sforcing.o makefile 
-analysis_sk.o: macros.h params.o mpi.o isoave.o pdf.o spectrum.o sforcing.o makefile 
 analysis_slow.o: macros.h params.o mpi.o fft_interface.o makefile 
 analysis_spec2d.o: macros.h params.o mpi.o fft_interface.o makefile 
+analysis_spectral.o: macros.h params.o mpi.o isoave.o pdf.o spectrum.o sforcing.o makefile 
 aspect_diag.o: macros.h params.o spectrum.o isoave.o fft_interface.o mpi.o makefile 
 bc.o: macros.h params.o mpi.o ghost.o makefile 
 cases2v.o: macros.h params.o tracers.o ellipse.o bc.o makefile 
@@ -62,6 +62,4 @@ transpose.o: macros.h params.o mpi.o makefile
 turb_diag.o: macros.h params.o pdf.o spectrum.o isoave.o transpose.o sforcing.o fft_interface.o mpi.o makefile 
 udm_interface.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
 util.o: macros.h mpi.o params.o makefile 
-fbelimb.o: makefile 
 fft99.o: makefile 
-ludecb.o: makefile 
