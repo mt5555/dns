@@ -3054,7 +3054,7 @@ end subroutine
 
 
 
-subroutine project_ch(Q,QR,QI,work,work2)
+subroutine project_ch(Q,QR,QI,work,work2,spec_tot,spec_vort,spec_wave,spec_kh0)
 !
 ! Project onto the Craya-Herring modes and compute the spectra
 !
@@ -3126,17 +3126,17 @@ real*8 :: QR(nx,ny,nz,n_var)  ! real part
 real*8 :: QI(nx,ny,nz,n_var)  ! imaginary part 
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz/Lz))
-real*8 ::  spec_vort(0:max(g_nx,g_ny,g_nz/Lz))
-real*8 ::  spec_wave(0:max(g_nx,g_ny,g_nz/Lz))
-real*8 ::  spec_kh0(0:max(g_nx,g_ny,g_nz/Lz))
-real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 ::  spec_tot(0:max(g_nx,g_ny,nint(g_nz/Lz)))
+real*8 ::  spec_vort(0:max(g_nx,g_ny,nint(g_nz/Lz)))
+real*8 ::  spec_wave(0:max(g_nx,g_ny,nint(g_nz/Lz)))
+real*8 ::  spec_kh0(0:max(g_nx,g_ny,nint(g_nz/Lz)))
+real*8 :: spectrum_in(0:max(g_nx,g_ny,nint(g_nz/Lz)))
 integer :: n,wn,iwave_max,degen
-integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km
-real*8 :: xw2,xw,xwh2,xwh,iw,RR(n_var),II(n_var)
+integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
+real*8 :: xw2,xw,xwh2,xwh,RR(n_var),II(n_var)
 real*8 :: efreq  !eigenfrequency sigma
 real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var), phi0(n_var)
-real*8 :: bmR, bmI, bpR, bpI, bp0,bm2,bp2,b02
+real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
 real*8 :: brunt,brunt2
 real*8 :: romega2,omsq
 real*8 :: etot,ewave,evort,ekh0
@@ -3159,6 +3159,8 @@ do n = 1,n_var
    call fft3d(work,work2)          ! inplace FFT of work
    call sincos_to_complex_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
 enddo
+
+!SK
 
 brunt = bous
 romega2 = fcor
@@ -3209,8 +3211,8 @@ do k=nz1,nz2
             bmI = 0
             bpR = 0
             bpI = 0 
-            b0 = 0
-
+            b0R = 0
+            b0I = 0
 
 !
 ! special case of no stratification and km=0
@@ -3244,14 +3246,14 @@ do k=nz1,nz2
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
-            bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
-            bmI = phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:)
+            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
+            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
 
-            bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
-            bpI = phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:)
+            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:)) 
+            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
 
-            b0R = phi0*QR
-            b0I = phi0*QI
+            b0R = sum(phi0*QR(i,j,k,:))
+            b0I = sum(phi0*QI(i,j,k,:))
 
 
 !
@@ -3265,7 +3267,7 @@ do k=nz1,nz2
             xwh = 0.d0
             efreq = romega2  
             
-            call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
+            call eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
 
 ! phi_p = complex_conjugate(phi_m)
 
@@ -3276,16 +3278,21 @@ do k=nz1,nz2
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
-            bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
-            bmI = phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:)
+            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
+            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
 
-            bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
-            bpI = phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:)
+            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:))
+            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
 
-            b0R = phi0*QR
-            b0I = phi0*QI
+            b0R = sum(phi0*QR(i,j,k,:))
+            b0I = sum(phi0*QI(i,j,k,:))
 
-            ekh0 = 0.5*(bm**2 + bp**2 + b0**2)
+            
+            bm2 = bmR**2 + bmI**2
+            bp2 = bpR**2 + bpI**2
+            b02 = b0R**2 + b0I**2
+
+            ekh0 = 0.5*(bm2 + bp2 + b02)
 !
 ! all other cases
 !
@@ -3295,7 +3302,7 @@ do k=nz1,nz2
 
             efreq = sqrt(xwh2*brunt2 + (km**2)*omsq)/xw
 
-            call eigm_new(im,jm,km,xw,xwh,efreq,phimR,phimI)
+            call eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
             
 ! phi_p = complex_conjugate(phi_m)
 
@@ -3306,14 +3313,14 @@ do k=nz1,nz2
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
-            bmR = phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:)
-            bmI = phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:)
+            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
+            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
 
-            bpR = phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:) 
-            bpI = phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:)
+            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:)) 
+            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
 
-            b0R = phi0*QR
-            b0I = phi0*QI
+            b0R = sum(phi0*QR(i,j,k,:))
+            b0I = sum(phi0*QI(i,j,k,:))
 
 
 
@@ -3331,9 +3338,9 @@ do k=nz1,nz2
 
 
          iw=nint(sqrt(xw2))
-         etot = 0.5*(bm**2 + bp**2 + b0**2)
+         etot = 0.5*(bm2 + bp2 + b02)
          spec_tot(iw) = spec_tot(iw) + etot
-         evort = 0.5*(b0**2)
+         evort = 0.5*(b02)
          spec_vort(iw) = spec_vort(iw) + evort
          ewave = etot - evort
          spec_wave(iw) = spec_wave(iw) + ewave
@@ -3358,16 +3365,18 @@ call mpi_reduce(spectrum_in,spec_kh0,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d
 #endif 
 
 
+
 end subroutine
 
 
-subroutine eigm(im,jm,km,xw,xwh,efreq,phimR,phimI))
+subroutine eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
 
 use params
-real*8: im,jm,km,xw,xwh,efreq
-real*8: phimR(n_var),phimI(n_var)
-real*8: dsq2,fac
-real*8: romega2,brunt
+real*8 :: im,jm,km,xw,xwh,efreq
+real*8 :: phimR(n_var),phimI(n_var)
+real*8 :: dsq2,fac
+real*8 :: romega2,brunt
+
 
 dsq2 = sqrt(2.d0)
 brunt = bous
@@ -3391,7 +3400,7 @@ romega2 = fcor
 	 phimI(1) = -fac*pi2*jm*romega2/efreq	
 
          phimR(2) = fac*pi2*jm
-         phimI(2) = fac*pi2*im*romega2/efreq)
+         phimI(2) = fac*pi2*im*romega2/efreq
 
          phimR(3) = -xwh/(dsq2*xw)
          phimI(3) = 0.0d0
@@ -3400,15 +3409,16 @@ romega2 = fcor
          phimI(4) = xwh*brunt/(dsq2*xw*efreq)
       endif
 
+
 end subroutine
 
 subroutine eig0(im,jm,km,xw,xwh,efreq,phi0)
 
 use params
-real*8: im,jm,km,xw,xwh,xwh2,km2,efreq
-real*8: phi0(n_var)
-real*8: den
-real*8: romega2,brunt
+real*8 :: im,jm,km,xw,xwh,xwh2,km2,efreq
+real*8 :: phi0(n_var)
+real*8 :: den
+real*8 :: romega2,brunt
 
 
 brunt = bous

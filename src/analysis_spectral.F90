@@ -73,11 +73,16 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
+real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 ::  spec_vort(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 ::  spec_wave(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 :: spec_kh0(0:max(g_nx,g_ny,g_nz/Lz))
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs
 logical :: compute_hspec, compute_hfree
 logical :: read_uvw
+logical :: project_ch
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
 
 
@@ -101,9 +106,10 @@ compute_cj=.false.
 compute_scalar=.false.
 compute_uvw=.false.
 str_type=0
-compute_hspec=.true.
+compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
+project_ch=.true.               !Craya-Herring projection and spectra
 
 tstart=2.5
 tstop=2.5
@@ -497,6 +503,12 @@ do
       endif
    endif
 
+   if (project_ch) then
+      call compute_project_ch(time,Q,QR,QI,work,work2)
+   endif
+      
+
+
    ! reset our flag, so we will read in the nxt data set
    read_uvw=.false.   
 
@@ -510,7 +522,6 @@ enddo
 100 continue
 call close_mpi
 end program anal
-
 
 
 
@@ -600,9 +611,6 @@ character(len=280) basename,fname
 end subroutine
 
 
-
-
-
 subroutine convert_sk(Q,work1,work2)
 use params
 implicit none
@@ -638,3 +646,57 @@ print *,'writing out DNS format data'
 call dataio(time,Q,work1,work2,0)
 
 end subroutine
+
+subroutine compute_project_ch(time,Q,QR,QI,work,work2)
+
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: QR(nx,ny,nz,n_var)  ! real part
+real*8 :: QI(nx,ny,nz,n_var)  ! imaginary part 
+real*8 :: spec_tot,spec_vort,spec_wave,spec_kh0
+
+real*8 :: time,time_file
+
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=100) :: message
+CPOINTER fid
+
+#if 0
+
+call project_ch(Q,QR,QI,work,work2,spec_tot,spec_vort,spec_wave,spec_kh0)
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))// message(2:10) // ".spec_ch"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)')"spec_ch: Error opening file errno=",ierr
+      call abortdns(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave; call cwrite8(fid,x,1)   
+   call cwrite8(fid,spec_tot,1+iwave)
+   call cwrite8(fid,spec_vort,1+iwave)
+   call cwrite8(fid,spec_wave,1+iwave)
+   call cwrite8(fid,spec_kh0,1+iwave)
+      
+endif
+
+#endif
+
+end subroutine
+
+

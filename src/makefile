@@ -55,7 +55,6 @@ ifeq ($(UNAME),Linux)
          #FFT = -I/home/mataylo/fftw/include -DUSE_FFTWGURU
          #FFTLIB = -L/home/mataylo/fftw/lib  -lfftw3
       endif 
-   
    endif
 
    ifeq ($(ARCH),ia64)
@@ -63,6 +62,15 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DUSE_MPI  -DMPI_HAS_REAL8
       MPILIB = -lmpi
    endif
+
+
+   ifeq ($(HOST),localhost)
+      VENDOR=GNU
+      MPI = 
+      MPILIB =
+   endif
+
+
 
     ifeq ($(HOST),dosadi)
       VENDOR=GNUMPI
@@ -159,10 +167,19 @@ me=pmpi_wtime
    LDFLAGS = $(FFTLIB)
    endif
 
+
    ifeq ($(VENDOR),GNUMPI)
    F90 = mpif90
    CC=gcc
    FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
+   LDFLAGS = $(FFTLIB)
+   endif
+
+
+   ifeq ($(VENDOR),GNU)
+   F90 = f95
+   CC=gcc
+   FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)
    endif
 
@@ -383,8 +400,8 @@ analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 analysis_isoave:  analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_isoave analysis_isoave.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
-analysis_sk: analysis_sk.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
-	$(LINK) -o analysis_sk analysis_sk.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+analysis_spectral: analysis_spectral.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o analysis_spectral analysis_spectral.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 analysis_spec2d: analysis_spec2d.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_spec2d analysis_spec2d.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
@@ -394,7 +411,7 @@ clean:
 	rm -f temp* *.d *.o *.mod dns dnsb dnsslav dnsp dnss dnsa \
                             dnsgrid dnsghost dnsi dnsvor \
                             cdns dnsibm conv analysis_rms     \
-                            analysis_isoave analysis analysis_sk \
+                            analysis_isoave analysis analysis_spectral \
                             analysis_spec2d splitspec \
 			    convert	
 
