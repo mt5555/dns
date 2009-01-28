@@ -2449,7 +2449,6 @@ integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
 real*8 :: xw2,xw,xwh2,xwh,RR(4),II(4)
 real*8 :: efreq  !eigenfrequency sigma
 real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var),phi0(n_var)
-real*8 :: tempR(n_var),tempI(n_var)
 real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
 real*8 :: brunt,brunt2
 real*8 :: romega2,omsq
@@ -2666,16 +2665,13 @@ do k=nz1,nz2
          ! store a(k) phi_*(k) in (QR,QI)  for n=1,2,3
 
 #if 0
-         do n=1,3
-            tempR(n) = QR(i,j,k,n)
-            tempI(n) = QI(i,j,k,n)
-         enddo
-         QR(i,j,k,1) = bmR*tempR(1) - bmI*tempI(1)
-         QR(i,j,k,2) = bpR*tempR(2) - bpI*tempI(2)
-         QR(i,j,k,3) = b0R*tempR(3) - b0I*tempI(3)
-         QI(i,j,k,1) = bmR*tempI(1) + bmI*tempR(1)
-         QI(i,j,k,2) = bpR*tempI(2) + bpI*tempR(2)
-         QI(i,j,k,3) = b0R*tempI(3) + b0I*tempR(3)  
+
+         QR(i,j,k,1) = bmR*phimR - bmI*phimI
+         QR(i,j,k,2) = bpR*phipR - bpI*phipI
+         QR(i,j,k,3) = b0R*phi0
+         QI(i,j,k,1) = bmR*phimI + bmI*phimR
+         QI(i,j,k,2) = bpR*phipI + bpI*phipR
+         QI(i,j,k,3) = b0I*phi0
 #endif
 
       enddo
