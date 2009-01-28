@@ -59,6 +59,8 @@ integer :: always_use_parallel_code = 1;
 integer :: use_serial
 
 real*8,allocatable  :: Q(:,:,:,:)
+real*8,allocatable  :: QI(:,:,:,:)
+real*8,allocatable  :: QR(:,:,:,:)
 real*8,allocatable  :: q1(:,:,:,:)
 real*8,allocatable  :: q2(:,:,:,:)
 real*8,allocatable  :: q3(:,:,:,:)
@@ -73,10 +75,10 @@ integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
-real*8 ::  spec_tot(0:max(g_nx,g_ny,g_nz/Lz))
-real*8 ::  spec_vort(0:max(g_nx,g_ny,g_nz/Lz))
-real*8 ::  spec_wave(0:max(g_nx,g_ny,g_nz/Lz))
-real*8 :: spec_kh0(0:max(g_nx,g_ny,g_nz/Lz))
+real*8 ::  spec_tot(0:max(g_nx,g_ny,nint(g_nz/Lz)))
+real*8 ::  spec_vort(0:max(g_nx,g_ny,nint(g_nz/Lz)))
+real*8 ::  spec_wave(0:max(g_nx,g_ny,nint(g_nz/Lz)))
+real*8 :: spec_kh0(0:max(g_nx,g_ny,nint(g_nz/Lz)))
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs
@@ -667,7 +669,7 @@ real*8 :: x
 character(len=100) :: message
 CPOINTER fid
 
-#if 0
+
 
 call project_ch(Q,QR,QI,work,work2,spec_tot,spec_vort,spec_wave,spec_kh0)
 
@@ -695,7 +697,7 @@ if (my_pe==io_pe) then
       
 endif
 
-#endif
+
 
 end subroutine
 
