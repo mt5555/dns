@@ -177,7 +177,7 @@ me=pmpi_wtime
 
 
    ifeq ($(VENDOR),GNU)
-   F90 = f95
+   F90 = gfortran
    CC=gcc
    FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)
