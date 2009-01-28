@@ -277,7 +277,7 @@ LINK=$(F90) $(FFLAGS)
 #independent modules/routines (dont use any other modules):
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 #modules/routines which use OBJS1
-OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o spectrum.o ellipse.o 
+OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o spectrum.o ellipse.o pdf.o
 
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
@@ -286,16 +286,16 @@ FILEIO = fileio.o fileioc.o udm_interface.o
 OBJS3 = $(INITS) $(OPS) $(FILEIO)
 
 #diagnostics for 3d turbulence runs:
-TURB_DIAG = pdf.o turb_diag.o isoave.o subcubes.o
+TURB_DIAG = turb_diag.o isoave.o subcubes.o
 
 #diagnostics for 3d aspect ratio runs:
 ASPECT_DIAG = aspect_diag.o isoave.o subcubes.o
 
 #diagnostics for 3d aspect ratio runs:
-SLOW_DIAG = pdf.o slow_diag.o isoave.o subcubes.o
+SLOW_DIAG = slow_diag.o isoave.o subcubes.o
 
 #diagnostics for compressible DNS runs:
-CDNS_DIAG = pdf.o cdns_diag.F90
+CDNS_DIAG = cdns_diag.F90
 
 #diagnostics for VXPAIR runs:
 PSIVOR_DIAG = psivor_diag.o  
