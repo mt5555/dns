@@ -2662,8 +2662,7 @@ do k=nz1,nz2
          spec_CR_wave(iw) = spec_CR_wave(iw) + ewave
          spec_CR_kh0(iw) = spec_CR_kh0(iw) + ekh0
 
-
-
+         ! store a(k) phi_*(k) in (QR,QI)  for n=1,2,3
       enddo
    enddo
 enddo
@@ -2680,6 +2679,18 @@ call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,
 
 #endif 
 
+
+#if 0
+! convert 3 CH modes back to grid space
+! store in QR
+do n = 1,3
+   write(message,*) 'converting CH modes back to gridspace, n=',n   
+   call print_message(message)
+   call complex_to_sincos_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
+   QR(:,:,:,n)=work
+   call ifft3d(QR(1,1,1,n),work2)          ! inplace FFT of work
+enddo
+#endif
 
 
 end subroutine
