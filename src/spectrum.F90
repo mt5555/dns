@@ -2664,14 +2664,34 @@ do k=nz1,nz2
 
          ! store a(k) phi_*(k) in (QR,QI)  for n=1,2,3
 
+! for now, pretend QR and QI are (:,:,:,12) dimensional
 #if 0
+         QR(i,j,k,1) = bmR*phimR(1) - bmI*phimI(1)
+         QR(i,j,k,2) = bmR*phimR(2) - bmI*phimI(2)
+         QR(i,j,k,3) = bmR*phimR(3) - bmI*phimI(3)
+         QR(i,j,k,4) = bmR*phimR(4) - bmI*phimI(4)
+         QI(i,j,k,1) = bmR*phimI(1) + bmI*phimR(1)
+         QI(i,j,k,2) = bmR*phimI(2) + bmI*phimR(2)
+         QI(i,j,k,3) = bmR*phimI(3) + bmI*phimR(3)
+         QI(i,j,k,4) = bmR*phimI(4) + bmI*phimR(4)
 
-         QR(i,j,k,1) = bmR*phimR - bmI*phimI
-         QR(i,j,k,2) = bpR*phipR - bpI*phipI
-         QR(i,j,k,3) = b0R*phi0
-         QI(i,j,k,1) = bmR*phimI + bmI*phimR
-         QI(i,j,k,2) = bpR*phipI + bpI*phipR
-         QI(i,j,k,3) = b0I*phi0
+         QR(i,j,k,5) = bpR*phipR(1) - bpI*phipI(1)
+         QR(i,j,k,6) = bpR*phipR(2) - bpI*phipI(2)
+         QR(i,j,k,7) = bpR*phipR(3) - bpI*phipI(3)
+         QR(i,j,k,8) = bpR*phipR(4) - bpI*phipI(4)
+         QI(i,j,k,5) = bpR*phipI(1) + bpI*phipR(1)
+         QI(i,j,k,6) = bpR*phipI(2) + bpI*phipR(2)
+         QI(i,j,k,7) = bpR*phipI(3) + bpI*phipR(3)
+         QI(i,j,k,8) = bpR*phipI(4) + bpI*phipR(4)
+
+         QR(i,j,k,9) = b0R*phi0(1)
+         QR(i,j,k,10) = b0R*phi0(2) 
+         QR(i,j,k,11) = b0R*phi0(3)
+         QR(i,j,k,12) = b0R*phi0(4)
+         QI(i,j,k,9) = b0I*phi0(1)
+         QI(i,j,k,10) = b0I*phi0(2)
+         QI(i,j,k,11) = b0I*phi0(3)
+         QI(i,j,k,12) = b0I*phi0(4)
 #endif
 
       enddo
