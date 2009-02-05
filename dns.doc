@@ -164,7 +164,8 @@ Running the code
                              Deterministic forcing in wave numbers NN+/-8
                              peaked at wave number NN
 
-              sto_high_NN    where NN has to be 3,4,8,10,26 or 24 
+              sto_high_NN    where NN has to be 3,4,8,10,16,24,26,32 and 64
+                             (more can be added by editing init_grid.F90)
                              Stochastic forcing in wave numbers 
                                    NN +/- fparam1  (for fparam1, see below)
                              peaked at wave number NN

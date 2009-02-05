@@ -222,6 +222,50 @@ end subroutine
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
+! Compute 3D in-place iFFT of p
+! FFT taken along first direction
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subroutine ifft1_dim2(p,n1,n1d,n2,n2d,n3,n3d)
+integer n1,n1d,n2,n2d,n3,n3d
+real*8 p(n1d,n2d,n3d)
+real*8 w(n2*(n1+1))
+
+real*8 :: scale=1,tmx1,tmx2
+character(len=80) message_str
+integer index,i,j,k
+
+call wallclock(tmx1)
+if (tims(19)==0) ncalls(19)=0  ! timer was reset, so reset counter too
+
+if (n2==1) return
+ASSERT("ifft1: dimension too small ",n2+2<=n2d)
+call getindex(n2,index)
+
+j=0  ! j=number of fft's computed for each k
+do k=1,n3
+   do i=1,n1
+
+      ! move the last cosine mode back into correct location:
+      p(i,n2+1,k)=p(i,2,k)
+
+!      call fft991(p(i,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,&
+!          n1d,1,n2,1,1)
+
+   enddo
+   call fft991(p(1,1,k),w,fftdata(index)%trigs,fftdata(index)%ifax,&
+        n1d,1,n2,n1,1)
+enddo
+
+call wallclock(tmx2) 
+tims(19)=tims(19)+(tmx2-tmx1)          
+ncalls(19)=ncalls(19)+1
+end subroutine
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
 ! Compute 3D in-place FFT of p
 ! FFT taken along first direction
 !

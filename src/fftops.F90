@@ -892,9 +892,22 @@ f=fin
 call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+#ifdef SKIP_YTRAN
+if (nx1==1 .and. nz1==1 .and. ny1 == 1 .and. ny2==g_ny) then
+   ! ref decomposition includes full y-pencils, so we can just
+   ! call a stride=nx2 FFT.  
+   call ifft1_dim2(work,nx2,nx,ny2,ny,nz2,nz)
+else
+   call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+endif
+#else
+   call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+#endif
+
 
 call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
