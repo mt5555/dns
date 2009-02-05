@@ -4,21 +4,22 @@
 %########################################################################
 
 
-namedir ='/nh/u/skurien/projects/helicity/extract_helicity/';
-name = 'skhel512a0007.0000';
+namedir ='~kurien/INCITE_runs/SW02_tests/';
+name = 'bous128_Ro21Fr0.21_all';
 mu = 1e-4;
+
+%namedir ='~kurien/dns/src/';
+%name = 'temp_all';
+%mu = 1e-4;
 
 
 % plot all the spectrum:
-movie=0;
+movie=1;
 
 
 spec_r_save=[];
 spec_r_save_fac3=[];
 
-% note: endianopen() will notwork with .spec and  .hspec files
-%because first number is not necessaryly an integer 
-%pname = [strrep(name,'_','-'),'.hspec'];
 fid=fopen([namedir,name,'.spec_ch'],'r','l');
 
 
@@ -60,14 +61,14 @@ k = [0:n_r-1];
 if (movie)
 figure(1); % +, - and total helicity spectra
 loglog(k,spec_tot,'r'); hold on;
-loglog(k,spec_vort,'b'); hold on;
-loglog(k,spec_wave,'k'); hold on;
-loglog(k,spec_kh0,'c'); 
-%axis([1 100 1e-2 10]);
+%loglog(k,spec_vort,'b'); hold on;
+%loglog(k,spec_wave,'k'); hold on;
+loglog(k,abs(spec_kh0),'c');hold on; 
+axis([1 max(k) 1e-6 1]);
 grid
 legend('total','vortical','wave','kh=0')
-%hold off
-
+hold off
+pause
 end % end movie loop
 
 [time,count]=fread(fid,1,'float64');

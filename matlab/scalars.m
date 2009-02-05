@@ -88,6 +88,10 @@ nx=1024; f_k=0;fcor=0
 %fid = endianopen('/netscratch/skurien/dns_data/sc2048A/sc2048A.scalars','r')
 %nx=2048; f_k=0;fcor=0
 
+
+fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_0000.0000.scalars','r')
+nx=128; f_k=24;fcor=1.07;bous=107.08;
+
 nscalars=0;
 nscalars_e=0;
 time = 0.0;
@@ -224,7 +228,7 @@ lambda=sqrt( mu*(2*Euse/3) ./ (epsilon/15)  );
 eta = (mu^3 ./ abs(epsilon)).^(.25);
 
 epsilon_ke=-ke_diss_d;
-%epsilon_pe=-pe_diss;
+epsilon_pe=-pe_diss;
 lambda_ke=sqrt( mu*(2*ke/3) ./ (epsilon_ke/15)  );
 
 if (mu>0)
@@ -417,8 +421,8 @@ disp(sprintf('epsilon_pe (averaged over last half of data) = %f ',epsilon_pe));
 ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
 ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
 disp(sprintf('epsilon_f (averaged over last half of data) = %f ',ke_diss_f));
-Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * fcor);
-Fr = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * bous);
+Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (fcor);
+Fr = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (bous);
 disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
 disp(sprintf('Fr computed from epsilon_f = %f ',Fr));
 
