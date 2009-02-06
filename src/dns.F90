@@ -157,14 +157,18 @@ transpose_tot_ave=transpose_tot_ave/60
 transpose_tot_max=transpose_tot_max/60
 
 
+if (tims_max(24)>0) then
+   call print_message(" ")
+   write(message,'(a,2f12.5,a)') 'Time for single forward 3D FFT (SECONDS): ',tims_ave(24),tims_max(24)
+   call print_message(message)
+endif
 
 
-call print_message('CPU times (min):   (avg/max)')
+call print_message('CPU times           (MINUTES!):   (avg/max)')
 write(message,'(a,2f9.2,a)') 'initialization: ',tims_ave(1),tims_max(1)
 call print_message(message)
 write(message,'(a,2f9.2,a)') 'initial output: ',tims_ave(4),tims_max(4)
 call print_message(message)
-
 if (itime==0) itime=1
 write(message,'(a,2f9.2,a,2f10.5)') 'dns_solve:      ',tims_ave(2),tims_max(2),&
 '  per timestep: ',tims_ave(2)/itime,tims_max(2)/itime
@@ -383,9 +387,11 @@ do
    if (itime==0) then
       ! set all timers to zero so they dont include initialization
       ! except for tims(1) and tims(4) which time initializaiton stuff.  
+      ! and tims(24) which is timing a standalone 3D FFT
       tims(4) = tims(3)   ! tims(3) = total time in time_control(), tims(4)=time of first call to time_control()
       tims(2:3)=0
-      tims(5:ntimers)=0
+      tims(5:23)=0
+      tims(25:ntimers)=0
       call wallclock(tmx1)     ! start the main timer *AFTER* 1 complete time step:
    endif
 

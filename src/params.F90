@@ -493,7 +493,7 @@ real*8 :: ints(nints),maxs(nints)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-integer,parameter :: ntimers=23
+integer,parameter :: ntimers=24
 real*8 :: tims(ntimers)=0
 integer :: ncalls(ntimers)=0
 !  tims(1)    time for initialization
@@ -519,6 +519,7 @@ integer :: ncalls(ntimers)=0
 !  tims(21)    transpose_from_z_to_refyxz
 !  tims(22)    transpose_to_x_from_refyxz
 !  tims(23)    transpose_from_x_to_refyxz
+!  tims(24)    timing for single call to zx_fft3d_trashinput()
 !
 !
 

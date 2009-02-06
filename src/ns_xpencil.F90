@@ -61,6 +61,7 @@ real*8 :: rhsg(nx,ny,nz,n_var)
 
 logical,save :: firstcall=.true.
 integer n
+real*8 :: tmx1,tmx2
 
 
 if (firstcall) then
@@ -102,6 +103,13 @@ if (firstcall) then
    if (nx2==nx .and. nz1==1 .and. ny2==g_ny) then
       call print_message("Ref decomp is y-pencil decomp: skipping transpose_to_y calls")
    endif   
+
+   ! time the forward transform, just for benchmark purposes:
+   work=Q_grid(:,:,:,1)
+   call wallclock(tmx1)
+   call zx_fft3d_trashinput(work,work,work2)
+   call wallclock(tmx2)
+   tims(24)=tims(24)+(tmx2-tmx1)
 endif
 
 if (.not. data_x_pencils) then
