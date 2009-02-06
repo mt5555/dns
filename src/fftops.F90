@@ -792,13 +792,24 @@ n2d=nslabz
 n3=ny_2dx
 n3d=ny_2dx
 call fft1(f,n1,n1d,n2,n2d,n3,n3d)     
-call transpose_from_x(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-call fft1(f,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+if (nx2==nx .and. nz1==1 .and. ny2==g_ny) then
+   ! special case where ref decomp is y-pencils. (ny2==g_ny)
+   ! we also require NO padding in second dimension (nx2==nx)
+   ! and no front padding in z direction (nz1==1)
+   call transpose_from_x_to_refyxz(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call fft1(work,ny2,ny,nx2,nx,nz2,nz)
+   call transpose_to_z_from_refyxz(work,fout,n1,n1d,n2,n2d,n3,n3d)
+else
+   call transpose_from_x(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+   call fft1(f,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_z(work,fout,n1,n1d,n2,n2d,n3,n3d)
+endif
 
-call transpose_to_z(work,fout,n1,n1d,n2,n2d,n3,n3d)
+
+
 call fft1(fout,n1,n1d,n2,n2d,n3,n3d)
 
 
@@ -889,29 +900,41 @@ n3=ny_2dz
 n3d=ny_2dz
 
 f=fin
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-#ifdef SKIP_YTRAN
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+
+if (nx2==nx .and. nz1==1 .and. ny2==g_ny) then
+   ! special case where ref decomp is y-pencils. (ny2==g_ny)
+   ! we also require NO padding in second dimension (nx2==nx)
+   ! and no front padding in z direction (nz1==1)
+   call transpose_from_z_to_refyxz(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(work,ny2,ny,nx2,nx,nz2,nz)
+   call transpose_to_x_from_refyxz(work,f,n1,n1d,n2,n2d,n3,n3d)
+else
+   call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+endif
+
+call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+
+
+#if 0
 if (nx1==1 .and. nz1==1 .and. ny1 == 1 .and. ny2==g_ny) then
+   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
    ! ref decomposition includes full y-pencils, so we can just
    ! call a stride=nx2 FFT.  
    call ifft1_dim2(work,nx2,nx,ny2,ny,nz2,nz)
+
+   call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
 else
-   call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+   stop 'error: skip ytran'
 endif
-#else
-   call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-   call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 #endif
-
-
-call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-
 end
 
 
@@ -953,13 +976,22 @@ n3d=ny_2dz
 
 f=fin   
 call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
 
-call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
-call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+if (nx2==nx .and. nz1==1 .and. ny2==g_ny) then
+   ! special case where ref decomp is y-pencils. (ny2==g_ny)
+   ! we also require NO padding in second dimension (nx2==nx)
+   ! and no front padding in z direction (nz1==1)
+   call transpose_from_z_to_refyxz(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(work,ny2,ny,nx2,nx,nz2,nz)
+   call transpose_to_x_from_refyxz(work,f,n1,n1d,n2,n2d,n3,n3d)
+else
+   call transpose_from_z(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_y(work,f,n1,n1d,n2,n2d,n3,n3d)
+   call ifft1(f,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_from_y(f,work,n1,n1d,n2,n2d,n3,n3d)
+   call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
+endif
 
-call transpose_to_x(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 call mult_by_ik(f,fx,n1,n1d,n2,n2d,n3,n3d)       ! compute fx code
 call ifft1(fx,n1,n1d,n2,n2d,n3,n3d)                 ! compute fx code

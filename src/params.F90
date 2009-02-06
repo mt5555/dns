@@ -493,7 +493,7 @@ real*8 :: ints(nints),maxs(nints)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-integer,parameter :: ntimers=19
+integer,parameter :: ntimers=23
 real*8 :: tims(ntimers)=0
 integer :: ncalls(ntimers)=0
 !  tims(1)    time for initialization
@@ -515,6 +515,10 @@ integer :: ncalls(ntimers)=0
 !  tims(17)    ellipitical contours
 !  tims(18)    FFT
 !  tims(19)    iFFT
+!  tims(20)    transpose_to_z_from_refyxz
+!  tims(21)    transpose_from_z_to_refyxz
+!  tims(22)    transpose_to_x_from_refyxz
+!  tims(23)    transpose_from_x_to_refyxz
 !
 !
 

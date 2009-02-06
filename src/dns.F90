@@ -145,8 +145,8 @@ tims_max=tims_max/60
 tims_ave=tims_ave/60
 
 ! sum the total of all transposes
-transpose_tot_ave=sum(tims(6:11))
-transpose_tot_max=sum(tims(6:11))
+transpose_tot_ave=sum(tims(6:11))+sum(tims(20:23))
+transpose_tot_max=sum(tims(6:11))+sum(tims(20:23))
 #ifdef USE_MPI
    tmx1=sum(tims(6:11))
    call mpi_allreduce(tmx1,transpose_tot_max,1,MPI_REAL8,MPI_MAX,comm_3d,ierr) 
@@ -184,19 +184,28 @@ if (tims_max(13)>0) then
    write(message,'(a,2f9.2,a,f4.3,a)') '   ghost_update       ',tims_ave(13),tims_max(13)
    call print_message(message)
 endif
-if (maxval(tims_max(6:11))>0) then
+if (maxval(tims_max(6:11) + maxval(tims_max(20:23)))>0) then
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_z     ',tims_ave(6),tims_max(6)
+   call print_message(message)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_z_from_refyxz',tims_ave(20),tims_max(20)
    call print_message(message)
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_z   ',tims_ave(7),tims_max(7)
    call print_message(message)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_z_to_refyxz',tims_ave(21),tims_max(21)
+   call print_message(message)
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_x     ',tims_ave(8),tims_max(8)
    call print_message(message)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_x_from_refyxz',tims_ave(22),tims_max(22)
+   call print_message(message)
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_x   ',tims_ave(9),tims_max(9)
+   call print_message(message)
+   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_x_from_refyxz',tims_ave(23),tims_max(23)
    call print_message(message)
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_y     ',tims_ave(10),tims_max(10)
    call print_message(message)
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_y   ',tims_ave(11),tims_max(11)
    call print_message(message)
+
    write(message,'(a,2f9.4)')          '   traspose total     ',transpose_tot_ave,transpose_tot_max
    call print_message(message)
 endif

@@ -99,6 +99,9 @@ if (firstcall) then
 	use_vorticity3=.false.
 	call print_message("Disabling use_vorticity3 option since ncpu_y <> 1")
    endif	
+   if (nx2==nx .and. nz1==1 .and. ny2==g_ny) then
+      call print_message("Ref decomp is y-pencil decomp: skipping transpose_to_y calls")
+   endif   
 endif
 
 if (.not. data_x_pencils) then

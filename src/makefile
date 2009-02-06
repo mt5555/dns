@@ -75,8 +75,8 @@ ifeq ($(UNAME),Linux)
     ifeq ($(HOST),dosadi)
       VENDOR=GNUMPI
       MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
-      #FFT = -DUSE_FFTWGURU
-      #FFTLIB =  -lfftw3
+      FFT = -DUSE_FFTWGURU
+      FFTLIB =  -lfftw3
       #FFT = -DUSE_STK
       #FFTLIB = -Lstk -lstk
    endif
