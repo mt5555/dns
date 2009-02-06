@@ -157,26 +157,36 @@ echo "***********************************************************"
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
+echo "***********************************************************"
+./gridsetup.py 1 1 32 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 32 32 32 32 2 2 0
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 64 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
-
 echo "***********************************************************"
-./gridsetup.py 2 1 16 32 32 32 2 2 0
-make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
-../testing/check.sh $tmp $refout
-
-echo "***********************************************************"
-./gridsetup.py 4 1 8 32 32 32 2 2 0
-make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+./gridsetup.py 2 1 32 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 64 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 
 echo "***********************************************************"
-./gridsetup.py 1 1 16 32 32 32 2 2 0
+./gridsetup.py 2 1 16 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 4 1 8 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+
+echo "***********************************************************"
+./gridsetup.py 1 1 16 32 32 32 0 2 0
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 16 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
@@ -218,6 +228,11 @@ make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
+./gridsetup.py 1 1 2 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
 ./gridsetup.py 1 1 4 32 32 32 2 3 4 4 3 2 
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
@@ -230,6 +245,21 @@ make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d 
 echo "***********************************************************"
 ./gridsetup.py 2 1 1 32 32 32 2 2 0
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt   reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 2 1 1 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt   reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 2 1 2 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt   reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 2 1 2 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 4 ./$code $opt -nov3  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
 echo "***********************************************************"
