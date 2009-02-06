@@ -803,15 +803,15 @@ set(gca,'FontWeight','bold')
 set(gca,'FontSize',15)
 set(gca,'LineWidth',2.0)
 
-%semilogx(xx_plot,fave,'k','LineWidth',2.0); hold on;
-%semilogx(xx_plot,u4ave./(u2ave.^2),'b','LineWidth',2.0); hold on;
-semilogx(x_plot,u4ave_noi./(u2ave_noi.^2),'bo-','LineWidth',2.0); hold on;
+%semilogx(x_plot,u4ave_noi./(u2ave_noi.^2),'bo-','LineWidth',2.0); 
+%hold on;
+loglog(x_plot,u4ave_noi./(u2ave_noi.^2),'bo-','LineWidth',2.0); 
+hold on;
 title('D_{llll} / D_{ll}^2 ');
 %ylabel(pname);
 xlabel('r/\eta');
 ax=axis;  axis([.9,xmax,2,9]);
 hold off;
-
 
 end
 
