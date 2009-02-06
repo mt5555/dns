@@ -24,6 +24,14 @@ for more details.
                  mataylo@sandia.gov
 
 ===================================================================
+README: updated 2/5/2009:  
+
+Added new optimizations to dnsp code to skip
+on processor transpose_to/from_y operations. 
+To enable, padding must be "0 2 0" and ref decomp must be
+y-pencil, and use '-nov3' since vorticity3 trick ffts have not
+been updated to use the new transpose.
+
 README: updated 9/26/2008:  
 
 Updated to note that for the pure x-y slab decompostion 
@@ -165,10 +173,10 @@ I use a python script, 'gridsetup.py' which will create the
 needed 'params.h' file.   To run an N^3 problem, with a 
 domain decompostion of nx*ny*nz (so NCPUS=nx*ny*nz):
 
-      ./gridsetup.py  nx ny nz  N N N 2 2 0
+      ./gridsetup.py  nx ny nz  N N N 0 2 0
 
-(The 2,2,0 specifies how the arrays are padded in x,y,z directions.
-2,2,0 is optimal for the spectral method, but other values are needed
+(The 0,2,0 specifies how the arrays are padded in x,y,z directions.
+0,2,0 is optimal for the spectral method, but other values are needed
 if finite differences or hybrid options are enabled).
 
 
@@ -176,21 +184,21 @@ Here are some examples:
 
       A 32x32x32 grid, to run using just 1 cpu:
       % cd dns/src
-      % ./gridsetup.py 1 1 1 32 32 32 2 2 0
+      % ./gridsetup.py 1 1 1 32 32 32 0 2 0
 
       A 64x64x64 grid, on 4 cpu:
       (parallel decomposition: 1x1x4, so 4 hyperslabs in the z-direction)
       % cd dns/src
-      % ./gridsetup.py 1 1 4 64 64 64 2 2 0
+      % ./gridsetup.py 1 1 4 64 64 64 0 2 0
 
       A 64x64x64 grid, on 64 cpu:
       (parallel decomposition: 2x1x32, so a pensil decomposition)
       % cd dns/src
-      % ./gridsetup.py 2 1 32 64 64 64 2 2 0
+      % ./gridsetup.py 2 1 32 64 64 64 0 2 0
 
       OR: 
 
-      % ./gridsetup.py 1 1 64 64 64 64 2 2 0
+      % ./gridsetup.py 1 1 64 64 64 64 0 2 0
 
 
 For a grid N^3, N must be a power of 2,3,5, and N/nx, N/ny and N/nz
@@ -210,13 +218,13 @@ NOTE:  The most efficient configuration for large processor counts
 will be with ny=1 and nx<nz.  For example, to run a 4096^3 simulation 
 on 8192 processors, I would modify the instructions below to:
 
-./gridsetup.py 4 1 2048 4096 4096 4096 2 2 0
+./gridsetup.py 4 1 2048 4096 4096 4096 0 2 0
 Other possibilities which might be more efficient:
 (we need a performance model :-)
-./gridsetup.py 8 1 1024 4096 4096 4096 2 2 0
-./gridsetup.py 16 1 512 4096 4096 4096 2 2 0
-./gridsetup.py 32 1 256 4096 4096 4096 2 2 0
-./gridsetup.py 64 1 128 4096 4096 4096 2 2 0
+./gridsetup.py 8 1 1024 4096 4096 4096 0 2 0
+./gridsetup.py 16 1 512 4096 4096 4096 0 2 0
+./gridsetup.py 32 1 256 4096 4096 4096 0 2 0
+./gridsetup.py 64 1 128 4096 4096 4096 0 2 0
 
 
 
