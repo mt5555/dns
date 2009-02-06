@@ -29,8 +29,13 @@ README: updated 2/5/2009:
 Added new optimizations to dnsp code to skip
 on processor transpose_to/from_y operations. 
 To enable, padding must be "0 2 0" and ref decomp must be
-y-pencil, and use '-nov3' since vorticity3 trick ffts have not
-been updated to use the new transpose.
+y-pencil.  The vorticity3 trick uses some ffts with this optimization
+and some ffts without, so one should benchmark with and without "-nov3"
+To verify that this optimization is enabled, the code will
+print this message to stdout:
+
+"Ref decomp is y-pencil decomp: skipping transpose_to_y calls"
+
 
 README: updated 9/26/2008:  
 

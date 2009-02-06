@@ -374,13 +374,31 @@ And of course there could be many other tricks I dont know about!
 Our code actually allows for a full 3D data decomposition
 (not that useful for the full pseudo spectral code, but useful
 for some finite difference/spectral hybrids).  Because of this,
-the FFT involves two extra steps.  The code
-is defined to have a {\em reference} decomposition which
-can be slabs, pencils or cubes.  The actual FFT algorithm
+for some configurations the FFT involves two extra steps.  
+The code is defined to have a {\em reference} decomposition which
+can be slabs, pencils or cubes.  
+
+In the optimal case, if one is careful to choose an reference
+decomposition which contains complete y-pencils with appropriate
+padding (no padding in x direction, end padding of 2 in y-direction
+and no front padding in z direction), the FFT algorithm 
 (in the code, see the subroutines 
 \texttt{zx\_ifft3d()} and \texttt{zx\_fft3d()} in \texttt{fftops.F90} ) 
 looks like this:
+\begin{enumerate}
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the x-direction, on processor)
+\item Transpose from x-pencil to y-pencil decomposition 
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in the y-direction, on processor)
+\item Transpose from y-pencil to z-pencil decomposition
+\item Compute 1D FFT of $p$ ($N^2$ FFTs in z-direction, on processor)
+\end{enumerate}
+If the reference decomposition happens to be x-y slabs, then the first transpose
+(step 2 above) involves no communication. 
 
+
+If the reference decomposition is not set up for the 
+optimal case above, then
+the FFT algorithm reverts to this:
 \begin{enumerate}
 \item Compute 1D FFT of $p$ ($N^2$ FFTs in the x-direction, on processor)
 \item Transpose from x-pencil to reference decomposition 
@@ -390,19 +408,16 @@ looks like this:
 \item Transpose from reference to z-pencil decomposition
 \item Compute 1D FFT of $p$ ($N^2$ FFTs in z-direction, on processor)
 \end{enumerate}
-
-
-This algorithm contains two extra steps.  The most efficient
-configuration is if the reference decomposition happens to be x-y slabs.
-In that case, then the two extra steps (and the x-pencil transposes)
-are all done on-processor (simple memory copies).
-For performance at high resolution, one is usually required to
-use y-pencils to allow for more parallization.  
-If the reference decomposition is y-pencils, then again the
-two extra steps are on-processor memory copies with only 
-a small cost.  They also serve to arrange the data so all
-FFTs are done with a stride of 1 and thus their cost is offset
-by allowing for a more efficient FFT.
+This algorithm contains two extra steps.  For this less optimal case,
+the most efficient configuration is if the reference decomposition
+happens to be x-y slabs.  In that case, then the two extra steps (and
+the x-pencil transposes) are all done on-processor (simple memory
+copies).  For performance at high resolution, one is usually required
+to use y-pencils to allow for more parallization.  If the reference
+decomposition is y-pencils, then again the two extra steps are
+on-processor memory copies with only a small cost.  They also serve to
+arrange the data so all FFTs are done with a stride of 1 and thus
+their cost is offset by allowing for a more efficient FFT.
 
 Thus with our code, for efficiency, it is best to use a reference 
 decomposition of y-pencils (requiring two distributed tranposes for
