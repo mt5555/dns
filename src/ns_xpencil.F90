@@ -60,7 +60,7 @@ real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: rhsg(nx,ny,nz,n_var)
 
 logical,save :: firstcall=.true.
-integer n
+integer n, ierr
 real*8 :: tmx1,tmx2
 
 
