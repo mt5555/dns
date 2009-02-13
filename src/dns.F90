@@ -158,8 +158,9 @@ transpose_tot_max=transpose_tot_max/60
 
 
 if (tims_max(24)>0) then
+   ! all times are in minutes, but this one we output in seconds:
    call print_message(" ")
-   write(message,'(a,2f12.5,a)') 'avg/max time for forward 3D FFT (SECONDS): ',tims_ave(24),tims_max(24)
+   write(message,'(a,2f12.5,a)') 'avg/max time for forward 3D FFT (SECONDS): ',60*tims_ave(24),60*tims_max(24)
    call print_message(message)
 endif
 
