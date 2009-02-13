@@ -36,8 +36,8 @@ ifeq ($(UNAME),Linux)
       VENDOR=IBM
       F90 = mpixlf90
       CC=mpixlc -DF_NO_UNDERSCORE
-      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I.
-      LDFLAGS = 
+      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_FFTWGURU,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/soft/apps/fftw-3.1.2-double/include
+      LDFLAGS = -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
       F77FIXED = -qfixed 
    endif
 
@@ -69,8 +69,6 @@ ifeq ($(UNAME),Linux)
       MPI = 
       MPILIB =
    endif
-
-
 
     ifeq ($(HOST),dosadi)
       VENDOR=GNUMPI
@@ -106,16 +104,6 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
       MPILIB = $(MPI_LD_FLAGS) -lfmpich -lmpich -lgm -lpthread
    endif
-
-   ifeq ($(HOST),reddish)
-      VENDOR=PGI
-      MPI = -I/usr/pgi/linux86-64/5.2/include -DUSE_MPI -DMPI_HAS_REAL8
-      MPILIB=  -L/usr/pgi/linux86-64/5.2/lib -lfmpich -lmpich
-      #MPI = -I/usr/lib/mpi/mpi_pgi/include -DUSE_MPI -DMPI_HAS_REAL8 -Dmpi_wti\
-me=pmpi_wtime
-      #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi
-   endif
-
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9562/bin/lf95

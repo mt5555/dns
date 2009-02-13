@@ -107,6 +107,7 @@ if (firstcall) then
    ! time the forward transform, just for benchmark purposes:
    work=Q_grid(:,:,:,1)
    call zx_fft3d_trashinput(work,work,work2) ! make sure everything is resident
+   call mpi_barrier(comm_3d,ierr)
    call wallclock(tmx1)
    call zx_fft3d_trashinput(work,work,work2)
    call wallclock(tmx2)
