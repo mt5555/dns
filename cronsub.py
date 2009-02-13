@@ -54,6 +54,7 @@ user="mataylo"
 
 # are we on IRIX or OSF1?
 cmdstat = "bjobs -u all"
+jobopt = " < "
 (status,out) = commands.getstatusoutput("/bin/hostname")
 if (status==0):
     if (out=="qbfe1"):
@@ -70,6 +71,7 @@ if (status==0):
         path="cronqsc/"
     elif (out=="blogin2.sandia.gov"):
         bsub="/apps/torque/bin/qsub"
+        jobopt = " " 
         cmdstat = "/apps/torque/bin/qstat"
         path="crontbird/"
     else:	
@@ -87,7 +89,7 @@ else:
 
 (status,out) = commands.getstatusoutput(cmdstat)
 if (status!=0) & (status!=255):
-    print 'Error getting list of LSF jobs'
+    print 'Error getting list of queued jobs'
     sys.exit(1)
 
 # sometimes there are NO jobs in the system:
@@ -139,7 +141,7 @@ else:
                 jobname_running.append(out[0]);
 
 
-    print "current LSF jobs for user ",user
+    print "current queued jobs for user ",user
     if (len(jobname_running)==0):
         print "<none>"		
     for out in jobname_running:
@@ -153,7 +155,7 @@ print ' '
 cmd = "ls "+path+"*.job"
 (status,out) = commands.getstatusoutput(cmd)
 if (status!=0):
-    print 'Error: didn''t find any LSF scripts using: ',cmd
+    print 'Error: didn''t find any que scripts using: ',cmd
     sys.exit(1)
 vjobscript=split(out,"\n")
 
@@ -224,8 +226,8 @@ for jobscript in vjobscript:
 
     else:
         # submit job
-        jobcommand = bsub + jobcpus + " < " + jobscript
-        print "resub=" + str(fvalue)+" LSF job: "+jobcommand
+        jobcommand = bsub + jobcpus + jobopt + jobscript
+        print "resub=" + str(fvalue)+" que job: "+jobcommand
         if (submit):
             os.system(jobcommand)
         else:
