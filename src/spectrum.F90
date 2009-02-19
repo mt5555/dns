@@ -58,6 +58,7 @@ real*8,private ::  time_old=-1
 
 ! Craya-Herring mode spectra
 real*8 ::  spec_CR_tot(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_Q_tot(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_vort(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_wave(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_kh0(0:max(g_nx,g_ny,g_nz))
@@ -2406,10 +2407,6 @@ subroutine compute_project_ch(Q,QR,QI,work,work2)
 
 
 ! ***************SK's notes****************
-! Is this true?? 
-! (u,v,w,theta) = sum_K phi(K) exp( i K X - sigma(K)t ) 
-! phi(K) = a_minus(K) phi_minus(K) + a_zero(K) phi_zero(K) + a_plus(K) phi_plus(K)
-
 ! 
 ! phi(K) is just the fourier transformed velocity/density vector:
 ! phi(K) = (u_hat(K), v_hat(K), w_hat(K), theta_hat(K))
@@ -2448,11 +2445,11 @@ integer :: n,wn,degen
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
 real*8 :: xw2,xw,xwh2,xwh,RR(4),II(4)
 real*8 :: efreq  !eigenfrequency sigma
-real*8 :: phipR(4), phipI(4), phimR(4), phimI(4),phi0(4)
+real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var),phi0(n_var)
 real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
 real*8 :: brunt,brunt2
 real*8 :: romega2,omsq
-real*8 :: etot,ewave,evort,ekh0,ierr
+real*8 :: etot,etot_Q,ewave,evort,ekh0,ierr
 
 character(len=80) :: message
 
@@ -2484,6 +2481,7 @@ brunt2 = brunt**2
 omsq = romega2**2
 
 spec_CR_tot = 0
+spec_Q_tot = 0
 spec_CR_vort = 0
 spec_CR_wave = 0
 spec_CR_kh0 = 0
@@ -2542,9 +2540,9 @@ do k=nz1,nz2
 !real and imaginary part of phi_m
 
             phimR(1) = 0.0
-            phimI(1) = degen*pi2*jm/xwh
+            phimI(1) = -degen*pi2*jm/xwh
             phimR(2) = 0.0
-            phimI(2) = -degen*pi2*im/xwh
+            phimI(2) = degen*pi2*im/xwh
             phimR(3) = -pi2*jm
             phimI(3) = 0.0
             phimR(4) = 0.0
@@ -2562,14 +2560,14 @@ do k=nz1,nz2
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
-            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
-            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
+            bmR = sum(phimR*RR + phimI*II)
+            bmI = sum(phimR*II - phimI*RR)
 
-            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:)) 
-            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
+            bpR = sum(phipR*RR + phipI*II) 
+            bpI = sum(phipR*II - phipI*RR)
 
-            b0R = sum(phi0*QR(i,j,k,:))
-            b0I = sum(phi0*QI(i,j,k,:))
+            b0R = sum(phi0*RR)
+            b0I = sum(phi0*II)
 
 
 !
@@ -2590,18 +2588,19 @@ do k=nz1,nz2
             phipR = phimR
             phipI = -phimI			  
 
+	    
             call eig0(im,jm,km,xw,xwh,efreq,phi0)
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
-            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
-            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
+            bmR = sum(phimR*RR + phimI*II)
+            bmI = sum(phimR*II - phimI*RR)
 
-            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:))
-            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
+            bpR = sum(phipR*RR + phipI*II)
+            bpI = sum(phipR*II - phipI*RR)
 
-            b0R = sum(phi0*QR(i,j,k,:))
-            b0I = sum(phi0*QI(i,j,k,:))
+            b0R = sum(phi0*RR)
+            b0I = sum(phi0*II)
 
             
             bm2 = bmR**2 + bmI**2
@@ -2629,14 +2628,14 @@ do k=nz1,nz2
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
-            bmR = sum(phimR*QR(i,j,k,:) + phimI*QI(i,j,k,:))
-            bmI = sum(phimR*QI(i,j,k,:) - phimI*QR(i,j,k,:))
+            bmR = sum(phimR*RR + phimI*II)
+            bmI = sum(phimR*II - phimI*RR)
 
-            bpR = sum(phipR*QR(i,j,k,:) + phipI*QI(i,j,k,:)) 
-            bpI = sum(phipR*QI(i,j,k,:) - phipI*QR(i,j,k,:))
+            bpR = sum(phipR*RR + phipI*II) 
+            bpI = sum(phipR*II - phipI*RR)
 
-            b0R = sum(phi0*QR(i,j,k,:))
-            b0I = sum(phi0*QI(i,j,k,:))
+            b0R = sum(phi0*RR)
+            b0I = sum(phi0*II)
 
 
 
@@ -2651,11 +2650,14 @@ do k=nz1,nz2
          bm2 = bmR**2 + bmI**2
          bp2 = bpR**2 + bpI**2
          b02 = b0R**2 + b0I**2
-
+	 
+!	calculate the total energy from the QR, QI directly as a check
+	 etot_Q = 0.5*sum(RR**2 + II**2)
 
          iw=nint(Lz*sqrt(xw2))
          etot = 0.5*(bm2 + bp2 + b02)
          spec_CR_tot(iw) = spec_CR_tot(iw) + etot
+	 spec_Q_tot(iw) = spec_Q_tot(iw) + etot_Q
          evort = 0.5*(b02)
          spec_CR_vort(iw) = spec_CR_vort(iw) + evort
          ewave = etot - evort
@@ -2701,6 +2703,8 @@ enddo
 #ifdef USE_MPI
 spectrum_in=spec_CR_tot
 call mpi_reduce(spectrum_in,spec_CR_tot,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+spectrum_in=spec_Q_tot
+call mpi_reduce(spectrum_in,spec_Q_tot,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_vort
 call mpi_reduce(spectrum_in,spec_CR_vort,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_wave
@@ -2848,6 +2852,7 @@ if (my_pe==io_pe) then
    call cwrite8(fid,time,1)
    x=1+iwave; call cwrite8(fid,x,1)   
    call cwrite8(fid,spec_CR_tot,1+iwave)
+   call cwrite8(fid,spec_Q_tot,1+iwave)
    call cwrite8(fid,spec_CR_vort,1+iwave)
    call cwrite8(fid,spec_CR_wave,1+iwave)
    call cwrite8(fid,spec_CR_kh0,1+iwave)

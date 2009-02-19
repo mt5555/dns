@@ -40,7 +40,7 @@
 !             temp0000.5000.[uvw]
 !             temp0001.0000.[uvw]
 !
-!  to compile and run:   make analysis_sk ; analysis_sk
+!  to compile and run:   make analysis_spectral ; analysis_spectral
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 program anal
@@ -97,8 +97,8 @@ read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
 project_ch=.true.               !Craya-Herring projection and spectra
 
-tstart=2.5
-tstop=2.5
+tstart=0.0
+tstop=0.8
 tinc=0.1
 icount=0
 
