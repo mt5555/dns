@@ -29,7 +29,7 @@ subroutine rk4(time,Q_grid,Q,Q_tmp,Q_old,rhs,work1,work2)
 use params
 implicit none
 real*8 :: time
-complex*16 :: Q(p3_nx,p3_ny,p3_nz,n_var)
+complex*16 :: Q(p3_nz,p3_nx,p3_ny,n_var)
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
@@ -44,33 +44,34 @@ integer :: n
 if (firstcall) then
    firstcall=.false.
    if (smagorinsky>0) then
-      call abortdns("Error: ns3dspectral model does not yet support Smagorinsky")
+      call abortdns("Error: ns_p3dfft.F90 model does not yet support Smagorinsky")
    endif
-
    if (dealias==0) then
-      call abortdns("Error: using ns3dspectral model, which must be run dealiased")
+      call abortdns("Error: using ns_p3dfft.F90 model, which must be run dealiased")
    endif
    if (numerical_method/=FOURIER) then
-      call abortdns("Error: ns3dspectral model requires FFT method.")
+      call abortdns("Error: ns_p3dfft.F90 model requires FFT method.")
    endif
    if (equations/=NS_UVW) then
-      call print_message("Error: ns3dspectral model can only runs equations==NS_UVW")
-      call abortdns("initial conditions are probably incorrect.")
+      call abortdns("Error: ns_p3dfft.F90 model can only runs equations==NS_UVW")
    endif
-
    if (alpha_value/=0) then
       call abortdns("Error: alpha>0 but this is not the alpha model!")
    endif
-
    if (use_phaseshift) then
       if (npassive>0) call abortdns("Error: phaseshift not yet coded for passive scalars")
       allocate(q2(nx,ny,nz,ndim))
    endif
-   if (n_var<3) call abortdns("Error: ns_slaving requires n_var>=3")
+   if (n_var<3) call abortdns("Error: ns_p3dfft.F90 requires n_var>=3")
 
    ! intialize Q with Fourier Coefficients:
    do n=1,n_var
       call ftran_r2c(Q_grid(1,1,1,n),Q(1,1,1,n))
+      Q(:,:,:,n)=Q(:,:,:,n)/g_nx/g_ny/g_nz
+      ! call btran_c2r(Q(1,1,1,n),work1)
+      ! print *,'max error = ',maxval(&
+      ! abs( work1(nx1:nx2,ny1:ny2,nz1:nz2)-Q_grid(nx1:nx2,ny1:ny2,nz1:nz2,n) ) &
+      ! )
    enddo
 
 endif
@@ -87,9 +88,9 @@ use p3dfft
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
-complex*16 :: Q(p3_nx,p3_ny,p3_nz,n_var)
-complex*16 :: Q_tmp(p3_nx,p3_ny,p3_nz,n_var)
-complex*16 :: Q_old(p3_nx,p3_ny,p3_nz,n_var)
+complex*16 :: Q(p3_nz,p3_nx,p3_ny,n_var)
+complex*16 :: Q_tmp(p3_nz,p3_nx,p3_ny,n_var)
+complex*16 :: Q_old(p3_nz,p3_nx,p3_ny,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: q2(nx,ny,nz,ndim)  ! only allocated if phase shifting turned on
@@ -104,33 +105,22 @@ real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 
-
 ! stage 1
 call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,q2)
-
 do n=1,n_var
-   do k=1,p3_nz
    do j=1,p3_ny
    do i=1,p3_nx
-      if (hyper_implicit==2) then
-         ! todo: test this code.  integrating factor stuff from ns_slaving.F90 
-         !Q_old(i,j,k,n)=Q(i,j,k,n)
-         !Q(i,j,k,n)=exp_f*Q(i,j,k,n)+cf*rhs(i,j,k,n)                ! accumulate RHS
-         !Q_tmp(i,j,k,n)=exph_f*Q_old(i,j,k,n) + cc*rhs(i,j,k,n)      ! Euler timestep with dt=delt/2
-         !Qb_tmp(i,j,k,n)=Q_tmp(i,j,k,n)
-         !rhsb(i,j,k,n)=rhs(i,j,k,n)
-      else
-         Q_old(i,j,k,n)=Q(i,j,k,n)
-         Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6                ! accumulate RHS
-         Q_tmp(i,j,k,n)=Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2      ! Euler timestep with dt=delt/2
-      endif
+   do k=1,p3_nz
+      Q_old(k,i,j,n)=Q(k,i,j,n)
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6                ! accumulate RHS
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2      ! Euler timestep with dt=delt/2
    enddo
    enddo
    enddo
 enddo
 if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
-   call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
 
 
@@ -139,72 +129,55 @@ enddo
 ! stage 2
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,q2)
 do n=1,n_var
-   do k=1,p3_nz
    do j=1,p3_ny
    do i=1,p3_nx
-      if (hyper_implicit==2) then
-         !Q(i,j,k,n)=Q(i,j,k,n)+2*cf*rhs(i,j,k,n)             ! accumulate RHS
-         !Q_tmp(i,j,k,n)=exph_f*Q_old(i,j,k,n) + cc*rhs(i,j,k,n)! Euler timestep with dt=delt/2
-      else
-         Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3             ! accumulate RHS
-         Q_tmp(i,j,k,n)=Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2   ! Euler timestep with dt=delt/2
-      endif
+   do k=1,p3_nz
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3             ! accumulate RHS
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n) + delt*rhs(k,i,j,n)/2   ! Euler timestep with dt=delt/2
    enddo
    enddo
    enddo
 enddo
 if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
-   call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
-
 
 
 ! stage 3
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,q2)
 do n=1,n_var
-   do k=1,p3_nz
    do j=1,p3_ny
    do i=1,p3_nx
-      if (hyper_implicit==2) then
-         !Q(i,j,k,n)=Q(i,j,k,n)+2*cf*rhs(i,j,k,n)
-         !Q_tmp(i,j,k,n) = exph_f * Qb_tmp(i,j,k,n) + cc*( 2.0d0 * rhs(i,j,k,n) - &
-         !     &               rhsb(i,j,k,n) )
-      else
-         Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3               ! accumulate RHS
-         Q_tmp(i,j,k,n)=Q_old(i,j,k,n)+delt*rhs(i,j,k,n)      ! Euler timestep with dt=delt
-      endif
+   do k=1,p3_nz
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/3               ! accumulate RHS
+      Q_tmp(k,i,j,n)=Q_old(k,i,j,n)+delt*rhs(k,i,j,n)      ! Euler timestep with dt=delt
    enddo
    enddo
    enddo
 enddo
 if (hyper_implicit==1) call hyper_filter(Q_tmp,delt)
 do n=1,n_var
-   call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
 
 
 
 ! stage 4
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,q2)
-
-
 do n=1,n_var
-   do k=1,p3_nz
    do j=1,p3_ny
    do i=1,p3_nx
-      if (hyper_implicit==2) then
-         !Q(i,j,k,n)=Q(i,j,k,n)+cf*rhs(i,j,k,n)
-      else
-         Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6        ! final Euler timestep with delt
-      endif                                               ! RHS = weighted avarge of 4 RHS computed above
+   do k=1,p3_nz
+      Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6        ! final Euler timestep with delt
    enddo   
    enddo
    enddo
 enddo
 if (hyper_implicit==1) call hyper_filter(Q,delt)
+
 do n=1,n_var
-   call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
+   call btran_c2r(Q(1,1,1,n),Q_grid(1,1,1,n))
 enddo
 
 
@@ -264,11 +237,11 @@ real*8 time
 integer compute_ints,rkstage
 
 ! input, but data can be trashed if needed
-complex*16 Qhat(p3_nx,p3_ny,p3_nz,n_var)           ! Fourier data at time t
+complex*16 Qhat(p3_nz,p3_nx,p3_ny,n_var)           ! Fourier data at time t
 real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 
 ! output  (rhsg and rhs are overlapped in memory)
-complex*16 rhs(p3_nx,p3_ny,p3_nz,n_var)
+complex*16 rhs(p3_nz,p3_nx,p3_ny,n_var)
 real*8 rhsg(nx,ny,nz,n_var)    
 
 ! work/storage
@@ -276,7 +249,7 @@ real*8  :: q2(nx,ny,nz,ndim)  ! only allocated if use_phaseshift
                                   ! phase shifted vorticity 
 real*8 work(nx,ny,nz)
 ! actual dimension: nx,ny,nz, since sometimes used as work array
-complex*16 p(p3_nx,p3_ny,p3_nz)    
+complex*16 p(p3_nz,p3_nx,p3_ny)    
 
                                  
 
@@ -404,7 +377,7 @@ do i=nx1,nx2
    vor(3)=rhsg(i,j,k,3)
 
    vorave = vorave + vor(3)
-   !ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
+   ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
    
    helave = helave + Q(i,j,k,1)*vor(1) + & 
         Q(i,j,k,2)*vor(2) + & 
@@ -464,9 +437,9 @@ enddo
 ! back to spectral space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do n=1,3
-   call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
+   call ftran_r2c(Q(1,1,1,n),rhs(1,1,1,n))
 enddo
-
+rhs=rhs/g_nx/g_ny/g_nz
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -476,8 +449,8 @@ enddo
 if (use_phaseshift) then
    ! compute phaseshifted (u,v,w), store in Q()
    do n=1,3
-      call z_phaseshift(Qhat(1,1,1,n),1,work)  ! phaseshift Qhat
-      call z_ifft3d(Qhat(1,1,1,n),Q(1,1,1,n),work)
+      call p3_phaseshift(Qhat(1,1,1,n),1,work)  ! phaseshift Qhat
+      call btran_c2r(Qhat(1,1,1,n),Q(1,1,1,n))
    enddo
    ! compute phaseshifted vorticity, store in q2:
    call ns_vorticity(q2,Qhat,work,p)
@@ -498,13 +471,12 @@ if (use_phaseshift) then
 
    ! back spectral space
    do n=1,3
-      call z_fft3d_trashinput(Q(1,1,1,n),p,work)
-      call z_phaseshift(p,-1,work)             ! un-phaseshift p
-      rhs(:,:,:,n) = rhs(:,:,:,n) + p/2
-      call z_phaseshift(Qhat(1,1,1,n),-1,work) ! restore Qhat to unphaseshifted version
+      call ftran_r2c(Q(1,1,1,n),p)
+      call p3_phaseshift(p,-1,work)             ! un-phaseshift p
+      rhs(:,:,:,n) = rhs(:,:,:,n) + p/2/g_nx/g_ny/g_nz
+      call p3_phaseshift(Qhat(1,1,1,n),-1,work) ! restore Qhat to unphaseshifted version
    enddo
 endif
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -549,6 +521,12 @@ ens_diss4=0
 ens_diss6=0
 ens_alpha =0
 uxx2ave=0
+
+
+
+rhs=0
+return
+
 
 !   do k=1,p3_nz
 !   do j=1,p3_ny
@@ -611,19 +589,8 @@ do j=1,ny_2dz
                     (Qhat(i,j,k,1)*(wy-vz) + &
                      Qhat(i,j,k,2)*(uz-wx) + &
                      Qhat(i,j,k,3)*(vx-uy)) 
-               ! compute (1-alpha^2 k^2)^2  2*k^2 vor vor:   
-               
-               !compute enstrophy for alpha equations
-                  if(infinite_alpha==1) then
-                     ens_alpha = ens_alpha + xfac*xw*xw * &
-                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
-                  else                 
-                 ens_alpha = ens_alpha+ xfac*(1+ xw*alpha_value**2)**2 * &           
-                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)   
-                 endif
-                   ! incorrect if using hyperviscosity
-                 
-                  ens_diss2=ens_diss2 + 2*xfac*(mu*xw)*  &
+               ! incorrect if using hyperviscosity
+               ens_diss2=ens_diss2 + 2*xfac*(mu*xw)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
                   ens_diss4=ens_diss4 + 2*xfac*(mu*xw*xw)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)
@@ -754,14 +721,6 @@ do j=1,ny_2dz
             rhs(i,j,k,3)=0
          endif
 
-         if (alpha_B>0) then
-            ! apply H^{-1}
-            ! divide rhs(:,:,:,:) by  (1 + alpha_B**2(2*pi*k)**2)
-            rhs(i,j,k,1) = rhs(i,j,k,1)/(1+xw*alpha_B**2) 
-            rhs(i,j,k,2) = rhs(i,j,k,2)/(1+xw*alpha_B**2)
-            rhs(i,j,k,3) = rhs(i,j,k,3)/(1+xw*alpha_B**2)
-         endif
-
       enddo
    enddo
 enddo
@@ -847,8 +806,7 @@ if (compute_ints==1) then
    ints(4)=vorave/g_nx/g_ny/g_nz
    ints(5)=helave/g_nx/g_ny/g_nz
    ints(6)=ke        
-  ! ints(7)=ensave/g_nx/g_ny/g_nz
-   ints(7) = ens_alpha
+   ints(7)=ensave/g_nx/g_ny/g_nz
    ints(8)=a_diss    
    ints(9)=fxx_diss                     ! < u_xx,f>
    ints(10)=-ke_diss                 ! <u,u_xx>
@@ -889,10 +847,10 @@ end
 subroutine ns_vorticity(rhsg,Qhat,work,p)
 use params
 implicit none
-complex*16 Qhat(p3_nx,p3_ny,p3_nz,n_var)           ! Fourier data at time t
+complex*16 Qhat(p3_nz,p3_nx,p3_ny,n_var)           ! Fourier data at time t
 real*8 rhsg(nx,ny,nz,n_var)    
 real*8 work(nx,ny,nz)
-complex*16 p(p3_nx,p3_ny,p3_nz)    
+complex*16 p(p3_nz,p3_nx,p3_ny)    
 
 !local
 integer n,i,j,k
@@ -901,31 +859,30 @@ complex*16 im,km,jm
 
 
 do n=1,3
-   do k=1,g_nz
-      km=cmplx(0,p3_kmcord(k))
-      do j=1,ny_2dz
-         jm=cmplx(0,p3_jmcord(j))
-         do i=1,nx_2dz
-            im=cmplx(0,p3_imcord(i))
+   do j=1,p3_ny
+      jm=cmplx(0,p3_jmcord(j))
+      do i=1,p3_nx
+         im=cmplx(0,p3_imcord(i))
+         do k=1,p3_nz
+            km=cmplx(0,p3_kmcord(k))
             
             if (n==1) then
-               wy = - jm*Qhat(i,j,k,3)
-               vz =  - km*Qhat(i,j,k,2)/Lz
-               p(i,j,k) = pi2*(wy - vz)
+               wy =  jm*Qhat(k,i,j,3)
+               vz =   km*Qhat(k,i,j,2)/Lz
+               p(k,i,j) = pi2*(wy - vz)
             endif
             
             if (n==2) then
-               wx = - im*Qhat(i,j,k,3)
-               uz =  - km*Qhat(i,j,k,1)/Lz
-               p(i,j,k) = pi2*(uz - wx)
+               wx =  im*Qhat(k,i,j,3)
+               uz =   km*Qhat(k,i,j,1)/Lz
+               p(k,i,j) = pi2*(uz - wx)
             endif
             
             if (n==3) then
-               uy = - jm*Qhat(i,j,k,1)
-               vx = - im*Qhat(i,j,k,2)
-               p(i,j,k) = pi2*(vx - uy)
+               uy =  jm*Qhat(k,i,j,1)
+               vx =  im*Qhat(k,i,j,2)
+               p(k,i,j) = pi2*(vx - uy)
             endif
-            
          enddo
       enddo
    enddo

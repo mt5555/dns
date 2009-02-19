@@ -2958,6 +2958,20 @@ end subroutine
 
 
 
+subroutine p3_phaseshift(p,shift,work)
+!
+!   shift = 1   apply phaseshift of .5 delta_x
+!   shift =-1   apply phaseshift of -.5 delta_x  (inverse operation)
+!
+use params
+implicit none
+real*8 p(p3_nz,p3_nx,p3_ny)
+real*8 work(p3_nz,p3_nx,p3_ny)
+integer :: shift,i,j,k,im,jm,km
+real*8 a,b,hh
+
+call abortdns("p_phaseshift not yet coded.  use 'dns' model instead")
+end
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

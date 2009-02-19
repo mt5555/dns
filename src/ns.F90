@@ -73,7 +73,7 @@ if (firstcall) then
       if (npassive>0) call abortdns("Error: phaseshift not yet coded for passive scalars")
       allocate(q2(nx,ny,nz,ndim))
    endif
-   if (n_var<3) call abortdns("Error: ns_slaving requires n_var>=3")
+   if (n_var<3) call abortdns("Error: ns.F90 requires n_var>=3")
 
    ! intialize Q with Fourier Coefficients:
    call z_fft3d_nvar(Q_grid,Q,work1,work2) 
