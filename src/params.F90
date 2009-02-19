@@ -898,19 +898,19 @@ allocate(p3_kmcord(p3_nz))
 do i=1,p3_nx
    iw = p3_fstart(1)+i-1
    p3_imcord(i) = iw-1
-   if (iw > g_nx/2 ) p3_imcord(i) = g_nx-iw+1
+   if (iw > g_nx/2 ) p3_imcord(i) = -(g_nx-iw+1)
    !print *,i,p3_imcord(i)
 enddo
 do j=1,p3_ny
    jw = p3_fstart(2)+j-1
    p3_jmcord(j) = jw-1
-   if (jw > g_ny/2 ) p3_jmcord(j) = g_ny-jw+1
+   if (jw > g_ny/2 ) p3_jmcord(j) = -(g_ny-jw+1)
    !print *,j,p3_jmcord(j)
 enddo
 do k=1,p3_nz
    kw = p3_fstart(3)+k-1
    p3_kmcord(k) = kw-1
-   if (kw > g_nz/2 ) p3_kmcord(k) = g_nz-kw+1
+   if (kw > g_nz/2 ) p3_kmcord(k) = -(g_nz-kw+1)
    !print *,k,p3_kmcord(k)
 enddo
 

@@ -96,7 +96,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: q2(nx,ny,nz,ndim)  ! only allocated if phase shifting turned on
 
 ! overlapped in memory:  dont use both in the same n loop
-real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var)
+complex*16 :: rhs(p3_nx,p3_ny,p3_nz,n_var)
 real*8 :: rhsg(nx,ny,nz,n_var)
 
 
@@ -255,17 +255,17 @@ complex*16 p(p3_nx,p3_ny,p3_nz)
 
 !local
 
-real*8 xw,xw2,xfac,tmx1,tmx2,xw_viss
-real*8 uu,vv,ww,dummy
+real*8 xw,xw2,xfac,tmx1,tmx2,xw_viss,dummy
 integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,ens_alpha
 real*8 :: p_diss(n_var),pke(n_var)
 real*8 :: h_diss,hyper_scale(n_var,n_var),ens_diss2,ens_diss4,ens_diss6
-complex*16  :: ux,uy,uz,vx,vy,vz,wx,wy,wz
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3),xi
+complex*16 :: uu,vv,ww
+complex*16  :: ux,uy,uz,vx,vy,vz,wx,wy,wz
 
 
 
@@ -371,7 +371,6 @@ do i=nx1,nx2
    vor(1)=rhsg(i,j,k,1)
    vor(2)=rhsg(i,j,k,2)
    vor(3)=rhsg(i,j,k,3)
-
    vorave = vorave + vor(3)
    ensave = ensave + vor(1)**2 + vor(2)**2 + vor(3)**2
    
@@ -503,15 +502,19 @@ uxx2ave=0
 
 
 
-!   do k=1,p3_nz
-!   do j=1,p3_ny
-!   do i=1,p3_nx
+! note: we assume P3DFFT was compiled with STRIDE1 option.
+! that means 1st dimension is really Z direction
+!            2nd dimension is really X direction
+!            3nd dimension is really Y direction
+! X wave number im = p3_jmcord(j)
+! Y wave number jm = p3_kmcord(k)
+! Z wave number km = p3_imcord(i)
 do k=1,p3_nz
-   km=p3_kmcord(k)
+   jm=p3_kmcord(k)
    do j=1,p3_ny
-      jm=p3_jmcord(j)
+      im=p3_jmcord(j)
       do i=1,p3_nx
-         im=p3_imcord(i)
+         km=p3_imcord(i)
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
@@ -538,10 +541,7 @@ do k=1,p3_nz
 !                         = < u-hat*u-hat*( im**2 + jm**2 + km**2)
 
                xfac = 2
-               !xfac = 2*2*2
-               !if (km==0) xfac=xfac/2
-               !if (jm==0) xfac=xfac/2
-               ! if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
                
                u2=real( &
                     Qhat(i,j,k,1)*conjg(Qhat(i,j,k,1)) + &
@@ -553,6 +553,8 @@ do k=1,p3_nz
                ke_diss = ke_diss + xfac*xw_viss*u2
                uxx2ave = uxx2ave + xfac*xw*xw*u2
                
+#if 0
+               ! update these for complex*16
                ! u_x term
                vx = - pi2*cmplx(0,im)*Qhat(i,j,k,2)
                wx = - pi2*cmplx(0,im)*Qhat(i,j,k,3)
@@ -573,6 +575,7 @@ do k=1,p3_nz
                     ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)
                ens_diss6=ens_diss6 + 2*xfac*(mu*xw*(xw)**2)*  &
                     ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)      
+#endif
              endif           
 
       enddo
@@ -655,17 +658,24 @@ endif
 #endif
 
 !  make rhs div-free
+! note: we assume P3DFFT was compiled with STRIDE1 option.
+! that means 1st dimension is really Z direction
+!            2nd dimension is really X direction
+!            3nd dimension is really Y direction
+! X wave number im = p3_jmcord(j)
+! Y wave number jm = p3_kmcord(k)
+! Z wave number km = p3_imcord(i)
 do k=1,p3_nz
-   km=p3_kmcord(k)
+   jm=p3_kmcord(k)
    do j=1,p3_ny
-      jm=p3_jmcord(j)
+      im=p3_jmcord(j)
       do i=1,p3_nx
-         im=p3_imcord(i)
+         km=p3_imcord(i)
          
          ! compute the divergence
-         p(i,j,k)= - cmplx(0,im)*rhs(i,j,k,1) &
-              - cmplx(0,jm)*rhs(i,j,k,2) &
-              - cmplx(0,km)*rhs(i,j,k,3)/Lz
+         p(i,j,k)= cmplx(0,im)*rhs(i,j,k,1) &
+              + cmplx(0,jm)*rhs(i,j,k,2) &
+              + cmplx(0,km)*rhs(i,j,k,3)/Lz
 
          ! compute laplacian inverse
          xfac= (im*im +km*km/Lz/Lz + jm*jm)
@@ -675,18 +685,17 @@ do k=1,p3_nz
       enddo
    enddo
 enddo
-
 do k=1,p3_nz
-   km=p3_kmcord(k)
+   jm=p3_kmcord(k)
    do j=1,p3_ny
-      jm=p3_jmcord(j)
+      im=p3_jmcord(j)
       do i=1,p3_nx
-         im=p3_imcord(i)
+         km=p3_imcord(i)
          
          ! compute gradient  dp/dx
-         uu= - cmplx(0,im)*p(i,j,k) 
-         vv= - cmplx(0,jm)*p(i,j,k)
-         ww= - cmplx(0,km)*p(i,j,k)/Lz
+         uu= cmplx(0,im)*p(i,j,k) 
+         vv= cmplx(0,jm)*p(i,j,k)
+         ww= cmplx(0,km)*p(i,j,k)/Lz
          
          rhs(i,j,k,1)=rhs(i,j,k,1) - uu 
          rhs(i,j,k,2)=rhs(i,j,k,2) - vv 
@@ -718,12 +727,13 @@ do ns=np1,np2
    call z_fft3d_trashinput(Q,rhs(1,1,1,ns),work)
    stop 'error!!'
    ! de-alias, and store in RHS(:,:,:,ns)
-   do j=1,ny_2dz
-      jm=z_jmcord(j)
-      do i=1,nx_2dz
-         im=z_imcord(i)
-         do k=1,g_nz
-            km=z_kmcord(k)
+   do k=1,p3_nz
+      jm=p3_kmcord(k)
+      do j=1,p3_ny
+         im=p3_jmcord(j)
+         do i=1,p3_nx
+            km=p3_imcord(i)
+            
             if ( dealias_remove(abs(im),abs(jm),abs(km))) then
                rhs(i,j,k,ns)=0
             else
@@ -744,9 +754,7 @@ do ns=np1,np2
                if (passive_type(ns)==2) rhs(i,j,k,ns)=rhs(i,j,k,ns)+p(i,j,k)
             endif
             if (compute_ints==1) then
-               xfac = 2*2*2
-               if (km==0) xfac=xfac/2
-               if (jm==0) xfac=xfac/2
+               xfac = 2
                if (im==0) xfac=xfac/2
                u2=Qhat(i,j,k,ns)*Qhat(i,j,k,ns)
                pke(ns) = pke(ns) + .5*xfac*u2
@@ -831,18 +839,25 @@ complex*16 p(p3_nx,p3_ny,p3_nz)
 
 !local
 integer n,i,j,k
-real*8 ux,uy,uz,wx,wy,wz,vx,vy,vz,uu,vv,ww
+complex*16 ux,uy,uz,wx,wy,wz,vx,vy,vz
 complex*16 im,km,jm
 
+! note: we assume P3DFFT was compiled with STRIDE1 option.
+! that means 1st dimension is really Z direction
+!            2nd dimension is really X direction
+!            3nd dimension is really Y direction
+! X wave number im = p3_jmcord(j)
+! Y wave number jm = p3_kmcord(k)
+! Z wave number km = p3_imcord(i)
 
 do n=1,3
    do k=1,p3_nz
-      jm=cmplx(0,p3_kmcord(k))
+      jm=cmplx(0,p3_kmcord(k))   ! y derivative
       do j=1,p3_ny
-         im=cmplx(0,p3_jmcord(j))
-         do i=1,p3_nx
-            km=cmplx(0,p3_imcord(i))
-            
+         im=cmplx(0,p3_jmcord(j))   ! x deriviative 
+         do i=1,p3_nx  
+            km=cmplx(0,p3_imcord(i))  ! z deriviative
+
             if (n==1) then
                wy =  jm*Qhat(i,j,k,3)
                vz =   km*Qhat(i,j,k,2)/Lz

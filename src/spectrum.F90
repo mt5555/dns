@@ -2445,7 +2445,7 @@ integer :: n,wn,degen
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
 real*8 :: xw2,xw,xwh2,xwh,RR(4),II(4)
 real*8 :: efreq  !eigenfrequency sigma
-real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var),phi0(n_var)
+real*8 :: phipR(4), phipI(4), phimR(4), phimI(4),phi0(4)
 real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
 real*8 :: brunt,brunt2
 real*8 :: romega2,omsq
