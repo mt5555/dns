@@ -2505,13 +2505,11 @@ do k=nz1,nz2
          RR = QR(i,j,k,:)
          II = QI(i,j,k,:)
 
-	 etot_Q = 0.5*sum(RR(1:3)**2 + II(1:3)**2)
          xfac=64
          if (km==0) xfac=xfac/2
          if (jm==0) xfac=xfac/2
          if (im==0) xfac=xfac/2
 
-         tote2 = tote2 + xfac*etot_Q
          tote1 = tote1 + 0.5*sum( Q(i,j,k,1:3)**2 )
          
          xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
@@ -2663,18 +2661,21 @@ do k=nz1,nz2
          b02 = b0R**2 + b0I**2
 	 
 !	calculate the total energy from the QR, QI directly as a check
-	 etot_Q = 0.5*sum(RR**2 + II**2)
-
          iw=nint(Lz*sqrt(im**2 + jm**2 + (km/Lz)**2))
          iwave=max(iw,iwave)
+
+	 etot_Q = 0.5*sum(RR**2 + II**2)
+         tote2 = tote2 + xfac*etot_Q
+
          etot = 0.5*(bm2 + bp2 + b02)
-         spec_CR_tot(iw) = spec_CR_tot(iw) + etot
-	 spec_Q_tot(iw) = spec_Q_tot(iw) + etot_Q
+         spec_CR_tot(iw) = spec_CR_tot(iw) + xfac*etot
+	 spec_Q_tot(iw) = spec_Q_tot(iw) + xfac*etot_Q
+
          evort = 0.5*(b02)
-         spec_CR_vort(iw) = spec_CR_vort(iw) + evort
+         spec_CR_vort(iw) = spec_CR_vort(iw) + xfac*evort
          ewave = etot - evort
-         spec_CR_wave(iw) = spec_CR_wave(iw) + ewave
-         spec_CR_kh0(iw) = spec_CR_kh0(iw) + ekh0
+         spec_CR_wave(iw) = spec_CR_wave(iw) + xfac*ewave
+         spec_CR_kh0(iw) = spec_CR_kh0(iw) + xfac*ekh0
 
          ! store a(k) phi_*(k) in (QR,QI)  for n=1,2,3
 
