@@ -2486,10 +2486,10 @@ spec_CR_vort = 0
 spec_CR_wave = 0
 spec_CR_kh0 = 0
 
-iwave=nint(Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 ))
 
 tote1=0
 tote2=0
+iwave=0
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
@@ -2665,7 +2665,8 @@ do k=nz1,nz2
 !	calculate the total energy from the QR, QI directly as a check
 	 etot_Q = 0.5*sum(RR**2 + II**2)
 
-         iw=nint(Lz*sqrt(xw2))
+         iw=nint(Lz*sqrt(im**2 + jm**2 + (km/Lz)**2))
+         iwave=max(iw,iwave)
          etot = 0.5*(bm2 + bp2 + b02)
          spec_CR_tot(iw) = spec_CR_tot(iw) + etot
 	 spec_Q_tot(iw) = spec_Q_tot(iw) + etot_Q
@@ -2710,6 +2711,15 @@ do k=nz1,nz2
       enddo
    enddo
 enddo
+
+#ifdef USE_MPI
+i=iwave
+call mpi_reduce(i,iwave,1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
+#endif
+if (iwave > max(g_nx,g_ny,g_nz)) then
+   call abortdns("ERROR: spectra arrays dimensioned too small!")
+endif
+
 
 #ifdef USE_MPI
 spectrum_in=spec_CR_tot
