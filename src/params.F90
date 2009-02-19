@@ -590,7 +590,7 @@ integer :: fail=0
 integer :: dims(2)
 integer :: isize(3),fsize(3),p3_istart(3),p3_iend(3)
 integer :: p3_fstart(3),p3_fend(3)
-integer :: i,j,k
+integer :: i,j,k,iw,jw,kw
 
 g_nx2=g_nx+2
 g_ny2=g_ny+2
@@ -889,18 +889,29 @@ allocate(p3_imcord(p3_nx))
 allocate(p3_jmcord(p3_ny))
 allocate(p3_kmcord(p3_nz))
 
+!print *,'fourier space decomp'
+!do i=1,3
+!   print *,i,p3_fstart(i),p3_fend(i),fsize(i)
+!enddo
+
 ! initialize the wave numbers:
 do i=1,p3_nx
-   p3_imcord(i) = i-1
-   if (i > g_nx/2 ) p3_imcord(i) = g_nx-i+1
+   iw = p3_fstart(1)+i-1
+   p3_imcord(i) = iw-1
+   if (iw > g_nx/2 ) p3_imcord(i) = g_nx-iw+1
+   !print *,i,p3_imcord(i)
 enddo
 do j=1,p3_ny
-   p3_jmcord(j) = j-1
-   if (j > g_ny/2 ) p3_jmcord(j) = g_ny-j+1
+   jw = p3_fstart(2)+j-1
+   p3_jmcord(j) = jw-1
+   if (jw > g_ny/2 ) p3_jmcord(j) = g_ny-jw+1
+   !print *,j,p3_jmcord(j)
 enddo
 do k=1,p3_nz
-   p3_kmcord(k) = k-1
-   if (k > g_nz/2 ) p3_kmcord(k) = g_nz-k+1
+   kw = p3_fstart(3)+k-1
+   p3_kmcord(k) = kw-1
+   if (kw > g_nz/2 ) p3_kmcord(k) = g_nz-kw+1
+   !print *,k,p3_kmcord(k)
 enddo
 
 

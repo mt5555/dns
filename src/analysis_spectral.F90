@@ -276,6 +276,9 @@ do
          Q=Q*scale;
          read_uvw=.true.	
       endif
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,q1,work1,work2)
+      endif
 
       call compute_project_ch(Q,q1,q2,work1,work2)
       call output_project_ch(time,time)
@@ -420,4 +423,70 @@ print *,'writing out DNS format data'
 call dataio(time,Q,work1,work2,0)
 
 end subroutine
+
+
+
+subroutine print_stats(Q,div,work1,work2)
+use params
+use mpi
+implicit none
+real*8 :: Q(nx,ny,nz,3)
+
+
+real*8 :: div(nx,ny,nz,3)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: mx(3),mx2(3),divx,divi,ens,ke
+integer :: n,ierr,i,j,k
+character(len=280) :: message
+
+
+!call vorticity(div,Q,work1,work2)
+ens=0
+ke=0
+do n=1,3
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+!         ens=ens + div(i,j,k,n)**2
+         ke=ke+.5*Q(i,j,k,n)**2
+      enddo
+   enddo
+enddo
+enddo
+ens=ens/g_nx/g_ny/g_nz
+ke=ke/g_nx/g_ny/g_nz
+#ifdef USE_MPI
+   divi=ke
+   call mpi_allreduce(divi,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   divi=ens
+   call mpi_allreduce(divi,ens,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+
+
+
+write(message,'(a,3f18.14)') 'STATS:  KE = ',ke
+call print_message(message)
+
+
+do n=1,3
+   call global_max_abs(Q(1,1,1,n),mx(n))
+enddo 
+
+write(message,'(a,3f18.14)') 'STATS:  maxU = ',mx
+call print_message(message)
+
+call compute_div(Q,div,work1,work2,divx,divi)
+write(message,'(3(a,e12.5))') 'STATS:  max(div)=',divx
+call print_message(message)	
+
+
+!write(message,'(3(a,f18.12))') 'STATS:  enstrophy=',ens
+!call print_message(message)	
+
+
+
+
+end subroutine
+
 

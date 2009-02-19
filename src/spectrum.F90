@@ -2449,7 +2449,7 @@ real*8 :: phipR(n_var), phipI(n_var), phimR(n_var), phimI(n_var),phi0(n_var)
 real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
 real*8 :: brunt,brunt2
 real*8 :: romega2,omsq
-real*8 :: etot,etot_Q,ewave,evort,ekh0,ierr
+real*8 :: etot,etot_Q,ewave,evort,ekh0,ierr,tote1,tote2,xfac
 
 character(len=80) :: message
 
@@ -2488,6 +2488,8 @@ spec_CR_kh0 = 0
 
 iwave=nint(Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 ))
 
+tote1=0
+tote2=0
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
@@ -2502,6 +2504,15 @@ do k=nz1,nz2
          
          RR = QR(i,j,k,:)
          II = QI(i,j,k,:)
+
+	 etot_Q = 0.5*sum(RR(1:3)**2 + II(1:3)**2)
+         xfac=64
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+
+         tote2 = tote2 + xfac*etot_Q
+         tote1 = tote1 + 0.5*sum( Q(i,j,k,1:3)**2 )
          
          xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
          xw=sqrt(xw2)
@@ -2712,8 +2723,17 @@ call mpi_reduce(spectrum_in,spec_CR_wave,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d
 spectrum_in=spec_CR_kh0
 call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
+xfac = tote1
+call mpi_reduce(xfac,tote1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+xfac = tote2
+call mpi_reduce(xfac,tote2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif 
 
+tote1 = tote1/g_nx/g_ny/g_nz
+write(message,'(a,3f18.14)') 'KE computed in grid space: ',tote1
+call print_message(message)
+write(message,'(a,3f18.14)') 'KE computed from RR,II:    ',tote2
+call print_message(message)
 
 
 #if 0
