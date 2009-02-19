@@ -2741,9 +2741,9 @@ call mpi_reduce(xfac,tote2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif 
 
 tote1 = tote1/g_nx/g_ny/g_nz
-write(message,'(a,3f18.14)') 'KE computed in grid space: ',tote1
+write(message,'(a,3f18.14)') 'TOTE computed in grid space: ',tote1
 call print_message(message)
-write(message,'(a,3f18.14)') 'KE computed from RR,II:    ',tote2
+write(message,'(a,3f18.14)') 'TOTE computed from RR,II:    ',tote2
 call print_message(message)
 
 
