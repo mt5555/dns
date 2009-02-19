@@ -2510,7 +2510,7 @@ do k=nz1,nz2
          if (jm==0) xfac=xfac/2
          if (im==0) xfac=xfac/2
 
-         tote1 = tote1 + 0.5*sum( Q(i,j,k,1:3)**2 )
+         tote1 = tote1 + 0.5*sum( Q(i,j,k,1:4)**2 )
          
          xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
          xw=sqrt(xw2)
