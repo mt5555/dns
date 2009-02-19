@@ -49,6 +49,7 @@ def parse(file):
                 if (name[0:4] <>"/usr") and (name[0:4] <> "/opt") and \
                 (name[0:4] <> "mpif") and \
                 (name[0:5] <> "mpiof") and \
+                (name[0:6] <> "p3dfft") and \
                 (name[0:3] <> "UDM") :
                     if use:
                         name = name + ".o"

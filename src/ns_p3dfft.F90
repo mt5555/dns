@@ -837,11 +837,11 @@ complex*16 im,km,jm
 
 do n=1,3
    do k=1,p3_nz
-      km=cmplx(0,p3_kmcord(k))
+      jm=cmplx(0,p3_kmcord(k))
       do j=1,p3_ny
-         jm=cmplx(0,p3_jmcord(j))
+         im=cmplx(0,p3_jmcord(j))
          do i=1,p3_nx
-            im=cmplx(0,p3_imcord(i))
+            km=cmplx(0,p3_imcord(i))
             
             if (n==1) then
                wy =  jm*Qhat(i,j,k,3)

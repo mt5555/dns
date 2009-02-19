@@ -97,7 +97,7 @@ read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
 project_ch=.true.               !Craya-Herring projection and spectra
 
-tstart=0.0
+tstart=0.1
 tstop=0.8
 tinc=0.1
 icount=0

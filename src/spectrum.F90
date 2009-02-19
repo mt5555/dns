@@ -2677,6 +2677,13 @@ do k=nz1,nz2
          spec_CR_wave(iw) = spec_CR_wave(iw) + xfac*ewave
          spec_CR_kh0(iw) = spec_CR_kh0(iw) + xfac*ekh0
 
+         !if (abs(spec_CR_tot(iw)-spec_Q_tot(iw)) > 1e-10) then
+         !   print *,iw,spec_CR_tot(iw),spec_Q_tot(iw)
+         !   print *,i,j,k
+         !   print *,etot_Q, etot
+         !   print *,.5*bm2,.5*bp2,.5*b02
+         !endif
+
          ! store a(k) phi_*(k) in (QR,QI)  for n=1,2,3
 
 ! for now, pretend QR and QI are (:,:,:,12) dimensional

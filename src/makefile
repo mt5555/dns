@@ -36,8 +36,8 @@ ifeq ($(UNAME),Linux)
       VENDOR=IBM
       F90 = mpixlf90
       CC=mpixlc -DF_NO_UNDERSCORE
-      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I.
-      LDFLAGS = 
+      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_FFTWGURU,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/soft/apps/fftw-3.1.2-double/include
+      LDFLAGS = -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
       F77FIXED = -qfixed 
    endif
 
@@ -63,12 +63,12 @@ ifeq ($(UNAME),Linux)
       MPILIB = -lmpi
    endif
 
+
    ifeq ($(HOST),localhost)
       VENDOR=GNU
       MPI = 
-      MPILIB = 
+      MPILIB =
    endif
-
 
    ifeq ($(HOST),box286.cims.nyu.edu)
       VENDOR=GNU
@@ -83,14 +83,11 @@ ifeq ($(UNAME),Linux)
    endif
 
 
-
     ifeq ($(HOST),dosadi)
       VENDOR=GNUMPI
       MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
-      #FFT = -DUSE_FFTWGURU
-      #FFTLIB =  -lfftw3
-      #FFT = -DUSE_STK
-      #FFTLIB = -Lstk -lstk
+      FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
+      FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
    endif
 
    ifeq ($(HOST),serrano1)
@@ -109,8 +106,8 @@ ifeq ($(UNAME),Linux)
       #VENDOR=GNU
       VENDOR=GNUMPI
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
-      FFT = -DUSE_FFTWGURU
-      FFTLIB =  -lfftw3
+      FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
+      FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
    endif
 
    ifeq ($(HOST),pfe1.lanl.gov)
@@ -118,16 +115,6 @@ ifeq ($(UNAME),Linux)
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
       MPILIB = $(MPI_LD_FLAGS) -lfmpich -lmpich -lgm -lpthread
    endif
-
-   ifeq ($(HOST),reddish)
-      VENDOR=PGI
-      MPI = -I/usr/pgi/linux86-64/5.2/include -DUSE_MPI -DMPI_HAS_REAL8
-      MPILIB=  -L/usr/pgi/linux86-64/5.2/lib -lfmpich -lmpich
-      #MPI = -I/usr/lib/mpi/mpi_pgi/include -DUSE_MPI -DMPI_HAS_REAL8 -Dmpi_wti\
-me=pmpi_wtime
-      #MPILIB = -L/usr/lib/mpi/mpi_pgi/lib  -lfmpi -lmpi
-   endif
-
 
    ifeq ($(VENDOR),LAHEY)
    #F90 = /usr/local/lf9562/bin/lf95
@@ -173,7 +160,7 @@ me=pmpi_wtime
    endif
 
    ifeq ($(VENDOR),GNU)
-   F90 = mpif90
+   F90 = gfortran
    CC=gcc
    FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)
@@ -184,6 +171,14 @@ me=pmpi_wtime
    F90 = mpif90
    CC=gcc
    FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
+   LDFLAGS = $(FFTLIB)
+   endif
+
+
+   ifeq ($(VENDOR),GNU)
+   F90 = gfortran
+   CC=gcc
+   FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)
    endif
 
@@ -318,7 +313,7 @@ MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_PENCIL = ns_xpencil.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SPEC_PENCIL2 = ns_xpencil2.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC_P3DFFT = ns_p3dfft.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SCALE = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(ASPECT_DIAG)
 MODEL_SPEC_SL    = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(SLOW_DIAG)
 MODEL_SLAV       = ns_slaving.o dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
@@ -351,6 +346,8 @@ dnssl: $(MODEL_SPEC_SL)
 	$(LINK) -o dnssl $(MODEL_SPEC_SL) $(LDFLAGS) $(MPILIB)
 dnsp: $(MODEL_SPEC_PENCIL) 
 	$(LINK) -o dnsp $(MODEL_SPEC_PENCIL) $(LDFLAGS) $(MPILIB)
+dnsp3: $(MODEL_SPEC_P3DFFT) 
+	$(LINK) -o dnsp3 $(MODEL_SPEC_P3DFFT) $(LDFLAGS) $(MPILIB)
 dnsa:  $(MODEL_ALPHA) 
 	$(LINK) -o dnsa $(MODEL_ALPHA) $(LDFLAGS) $(MPILIB)
 dnsl:  $(MODEL_LERAY) 
