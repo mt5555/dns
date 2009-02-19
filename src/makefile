@@ -95,8 +95,8 @@ ifeq ($(UNAME),Linux)
       #VENDOR=GNU
       VENDOR=GNUMPI
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
-      FFT = -DUSE_FFTWGURU
-      FFTLIB =  -lfftw3
+      FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
+      FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
    endif
 
    ifeq ($(HOST),pfe1.lanl.gov)
@@ -302,7 +302,7 @@ MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_PENCIL = ns_xpencil.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SPEC_PENCIL2 = ns_xpencil2.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC_P3DFFT = ns_p3dfft.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SCALE = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(ASPECT_DIAG)
 MODEL_SPEC_SL    = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(SLOW_DIAG)
 MODEL_SLAV       = ns_slaving.o dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
@@ -335,6 +335,8 @@ dnssl: $(MODEL_SPEC_SL)
 	$(LINK) -o dnssl $(MODEL_SPEC_SL) $(LDFLAGS) $(MPILIB)
 dnsp: $(MODEL_SPEC_PENCIL) 
 	$(LINK) -o dnsp $(MODEL_SPEC_PENCIL) $(LDFLAGS) $(MPILIB)
+dnsp3: $(MODEL_SPEC_P3DFFT) 
+	$(LINK) -o dnsp3 $(MODEL_SPEC_P3DFFT) $(LDFLAGS) $(MPILIB)
 dnsa:  $(MODEL_ALPHA) 
 	$(LINK) -o dnsa $(MODEL_ALPHA) $(LDFLAGS) $(MPILIB)
 dnsl:  $(MODEL_LERAY) 

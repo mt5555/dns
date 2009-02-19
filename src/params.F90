@@ -335,6 +335,9 @@ integer,allocatable :: z_imsign(:),z_jmsign(:),z_kmsign(:)  ! fft modes local
 integer,allocatable :: x_imcord(:),X_jmcord(:),x_kmcord(:)  ! fft modes local
 integer,allocatable :: x_imsign(:),x_jmsign(:),x_kmsign(:)  ! fft modes local
 
+! fft modes, p3dfft
+integer, allocatable :: p3_imcord(:),p3_jmcord(:),p3_kmcord(:)
+
 ! sine modes, local 3D decomp:
 integer,allocatable :: y_imsine(:)  ! ny_2dz
 integer :: imsine(nxd)
@@ -538,6 +541,8 @@ integer :: nx_2dy=nslabx/ncpu_y       ! x-dim in y-pencil-decomposition
 integer :: ny_2dz=nslaby/ncpu_z       ! y-dim in z-pencil-decomposition 
 integer :: nx_2dz=nslabx              ! x-dim in z-pencil-decomposition 
 
+integer :: p3_nx, p3_ny, p3_nz        ! P3DFFT loop bounds
+
 integer :: io_pe
 integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
 integer :: initial_live_procs      ! total number of cpus
@@ -577,8 +582,15 @@ contains
 
 
 subroutine params_init
+#ifdef USE_P3DFFT
+use p3dfft
+#endif
 character(len=80) message
 integer :: fail=0
+integer :: dims(2)
+integer :: isize(3),fsize(3),p3_istart(3),p3_iend(3)
+integer :: p3_fstart(3),p3_fend(3)
+integer :: i,j,k
 
 g_nx2=g_nx+2
 g_ny2=g_ny+2
@@ -801,6 +813,104 @@ if ( nz2>nz) then
    call print_message("nz is too small. nz must be >=nz2")	
 endif
 
+#ifdef USE_P3DFFT
+! check that our reference decomposition matches the p3dfft gridspace
+! decomposition
+if (ncpu_x /= 1) then
+   fail=1
+   call print_message("P3DFFT requires nproc_z = 1")
+endif
+dims(1)=ncpu_y
+dims(2)=ncpu_z
+
+! set last arg to .true. to allow overwriting input for the
+! inverse FFT.  
+call p3dfft_setup(dims,g_nx,g_ny,g_nz,.false.)
+call get_dims(p3_istart,p3_iend,isize,1)
+call get_dims(p3_fstart,p3_fend,fsize,2)
+
+if ( isize(1)*isize(2)*real(isize(3),r8kind)  > nx*ny*real(nz,r8kind) ) then
+   fail=1
+   call print_message("P3DFFT error: z padding insufficient")
+endif
+if ( fsize(1)*fsize(2)*real(fsize(3),r8kind)  > nx*ny*real(nz,r8kind) ) then
+   fail=1
+   call print_message("P3DFFT error: z padding insufficient")
+endif
+
+if (nx1 /= 1 ) then
+   fail=1
+   call print_message("P3DFFT error: x front padding must be 0")
+endif
+if (ny1 /= 1 ) then
+   fail=1
+   call print_message("P3DFFT error: y front padding must be 0")
+endif
+if (nz1 /= 1 ) then
+   fail=1
+   call print_message("P3DFFT error: z front padding must be 0")
+endif
+if (nx2 /= isize(1) ) then
+   fail=1
+   call print_message("P3DFFT error: x ref decomp dimension does not match p3dfft")
+endif
+if (ny2 /= isize(2) ) then
+   fail=1
+   call print_message("P3DFFT error: y ref decomp dimension does not match p3dfft")
+endif
+if (nz2 /= isize(3) ) then
+   fail=1
+   call print_message("P3DFFT error: z ref decomp dimension does not match p3dfft")
+endif
+
+
+if (nx /= isize(1) ) then
+   fail=1
+   call print_message("P3DFFT error: x end padding must be 0")
+endif
+if (ny /= isize(2) ) then
+   fail=1
+   call print_message("P3DFFT error: y end padding must be 0")
+endif
+! we can have padding in z direction
+if (nz <  isize(3) ) then
+   fail=1
+   call print_message("P3DFFT error: z dimmension too small for p3dfft")
+endif
+
+
+! p3dfft Fourier space loop dimensions
+p3_nx = fsize(1)
+p3_ny = fsize(2)
+p3_nz = fsize(3)
+
+! p3dfft arrays:
+allocate(p3_imcord(p3_nx))
+allocate(p3_jmcord(p3_ny))
+allocate(p3_kmcord(p3_nz))
+
+! initialize the wave numbers:
+do i=1,p3_nx
+   p3_imcord(i) = i-1
+   if (i > g_nx/2 ) p3_imcord(i) = g_nx-i+1
+enddo
+do j=1,p3_ny
+   p3_jmcord(j) = j-1
+   if (j > g_ny/2 ) p3_jmcord(j) = g_ny-j+1
+enddo
+do k=1,p3_nz
+   p3_kmcord(k) = k-1
+   if (k > g_nz/2 ) p3_kmcord(k) = g_nz-k+1
+enddo
+
+
+
+#endif
+
+
+
+
+
 if (fail/=0) call abortdns("params.F90 dimension settings failure")
 
 allocate(g_xcord(g_nx+1))
@@ -828,10 +938,14 @@ allocate(x_kmsign(nz))
 
 allocate(y_imsine(nx_2dy))
 
+
+
 pi=1
 pi=4*atan(pi)
 pi2=2*pi
 pi2_squared=4*pi*pi
+
+
 
 end subroutine
 
