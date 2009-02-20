@@ -40,7 +40,11 @@ real*8, allocatable, save :: q2(:,:,:,:)
 logical,save :: firstcall=.true.
 integer :: n
 
-
+!
+! todo: check for hyperviscosity (implicit or explicit) STOP
+!       check for forcing STOP
+!       check for compute spectrum STOP
+!
 if (firstcall) then
    firstcall=.false.
    if (smagorinsky>0) then
@@ -68,7 +72,6 @@ if (firstcall) then
    do n=1,n_var
       call ftran_r2c(Q_grid(1,1,1,n),Q(1,1,1,n))
       Q(:,:,:,n)=Q(:,:,:,n)/g_nx/g_ny/g_nz
-
 !      call btran_c2r(Q(1,1,1,n),work1)
 !      print *,'max error = ',maxval(&
 !      abs( work1(nx1:nx2,ny1:ny2,nz1:nz2)-Q_grid(nx1:nx2,ny1:ny2,nz1:nz2,n) ) )
@@ -118,7 +121,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
+!if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
@@ -138,7 +141,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
+!if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
@@ -156,7 +159,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt)
+!if (hyper_implicit==1) call hyper_filter(Q_tmp,delt)
 do n=1,n_var
    call btran_c2r(Q_tmp(1,1,1,n),Q_grid(1,1,1,n))
 enddo
@@ -174,7 +177,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q,delt)
+!if (hyper_implicit==1) call hyper_filter(Q,delt)
 
 do n=1,n_var
    call btran_c2r(Q(1,1,1,n),Q_grid(1,1,1,n))
@@ -417,7 +420,6 @@ enddo
 do n=1,3
    call ftran_r2c(Q(1,1,1,n),rhs(1,1,1,n))
 enddo
-rhs=rhs/g_nx/g_ny/g_nz
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -451,10 +453,13 @@ if (use_phaseshift) then
    do n=1,3
       call ftran_r2c(Q(1,1,1,n),p)
       call p3_phaseshift(p,-1,work)             ! un-phaseshift p
-      rhs(:,:,:,n) = rhs(:,:,:,n) + p/2/g_nx/g_ny/g_nz
+      rhs(:,:,:,n) = rhs(:,:,:,n) + p/2
       call p3_phaseshift(Qhat(1,1,1,n),-1,work) ! restore Qhat to unphaseshifted version
    enddo
 endif
+
+! scaling needed for P3DFFT
+rhs=rhs/g_nx/g_ny/g_nz
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
