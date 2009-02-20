@@ -36,8 +36,8 @@ ifeq ($(UNAME),Linux)
       VENDOR=IBM
       F90 = mpixlf90
       CC=mpixlc -DF_NO_UNDERSCORE
-      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_FFTWGURU,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/soft/apps/fftw-3.1.2-double/include
-      LDFLAGS = -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
+      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT -DUSE_FFTWGURU,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/taylorm/p3dfft/include -I/soft/apps/fftw-3.1.2-double/include
+      LDFLAGS = -L/home/taylorm/p3dfft/lib -lp3dfft -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
       F77FIXED = -qfixed 
    endif
 
