@@ -277,6 +277,7 @@ LINK=$(F90) $(FFLAGS)
 OBJS1 = params.o util.o  fft99.o  mpi.o fft_interface.o lsftime.o
 #modules/routines which use OBJS1
 OBJS2 = transpose.o  solve.o ghost.o bc.o  sforcing.o spectrum.o ellipse.o pdf.o
+OBJSP2 = transpose.o  solve.o ghost.o bc.o  p3_forcing.o spectrum.o ellipse.o pdf.o
 
 #modules/routines which use OBJS1,2
 INITS  = init_mpi.o init_data.o init_grid.o cases2v.o cases3v.o 
@@ -313,7 +314,7 @@ MODEL_IMPULSE    = ns_impulse.o  dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SLOW  = ns_decomp3.o dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC       = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_PENCIL = ns_xpencil.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
-MODEL_SPEC_P3DFFT = ns_p3dfft.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)
+MODEL_SPEC_P3DFFT = ns_p3dfft.o dns.o  $(OBJS1) $(OBJSP2) $(OBJS3) $(TURB_DIAG)
 MODEL_SPEC_SCALE = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(ASPECT_DIAG)
 MODEL_SPEC_SL    = ns.o dns.o  $(OBJS1) $(OBJS2) $(OBJS3) $(SLOW_DIAG)
 MODEL_SLAV       = ns_slaving.o dns.o $(OBJS1) $(OBJS2) $(OBJS3) $(TURB_DIAG)

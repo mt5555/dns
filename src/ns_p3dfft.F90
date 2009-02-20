@@ -40,11 +40,6 @@ real*8, allocatable, save :: q2(:,:,:,:)
 logical,save :: firstcall=.true.
 integer :: n
 
-!
-! todo: check for hyperviscosity (implicit or explicit) STOP
-!       check for forcing STOP
-!       check for compute spectrum STOP
-!
 if (firstcall) then
    firstcall=.false.
    if (smagorinsky>0) then
@@ -67,6 +62,12 @@ if (firstcall) then
       allocate(q2(nx,ny,nz,ndim))
    endif
    if (n_var<3) call abortdns("Error: ns_p3dfft.F90 requires n_var>=3")
+   if (mu_hyper>=2) then
+      call abortdns("Error: ns_p3dfft.F90 model not yet coded for hyperviscosity")
+   endif
+   if (forcing_type>1) then
+      call abortdns("Error: ns_p3dfft.F90 model not yet coded for forcing types > 1")
+   endif
 
    ! intialize Q with Fourier Coefficients:
    do n=1,n_var
@@ -78,6 +79,7 @@ if (firstcall) then
    enddo
 
 endif
+
 
 call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old,work1,work2,q2)
 end
@@ -231,7 +233,7 @@ subroutine ns3d(rhs,rhsg,Qhat,Q,time,compute_ints,work,p,rkstage,q2)
 ! hel = u (w_y-v_z) + v (u_z - w_x)  + w (v_x - u_y)
 !
 use params
-use sforcing
+use p3_forcing
 use spectrum
 implicit none
 
@@ -266,8 +268,8 @@ real*8 :: p_diss(n_var),pke(n_var)
 real*8 :: h_diss,hyper_scale(n_var,n_var),ens_diss2,ens_diss4,ens_diss6
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
-real*8 :: vor(3),xi
-complex*16 :: uu,vv,ww
+real*8 :: vor(3),xi,uu,vv,ww
+complex*16 :: ptmp
 complex*16  :: ux,uy,uz,vx,vy,vz,wx,wy,wz
 
 
@@ -466,11 +468,13 @@ rhs=rhs/g_nx/g_ny/g_nz
 ! From this point on, Q() may be used as a work array
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#if 0
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  Transfer function diagnostics
 !  spec_diff:  spectrum of u dot (u cross omega) 
 !              (used as temporary storage for now)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#if 0
 if (compute_ints==1 .and. compute_transfer) then
    spec_diff=0
    spec_curl_diff=0
@@ -482,6 +486,7 @@ if (compute_ints==1 .and. compute_transfer) then
    spec_curl_diff=spec_curl_diff+spec_tmp   
 endif
 #endif
+
 
 #if 0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -558,29 +563,29 @@ do k=1,p3_nz
                ke_diss = ke_diss + xfac*xw_viss*u2
                uxx2ave = uxx2ave + xfac*xw*xw*u2
                
-#if 0
+
                ! update these for complex*16
                ! u_x term
-               vx = - pi2*cmplx(0,im)*Qhat(i,j,k,2)
-               wx = - pi2*cmplx(0,im)*Qhat(i,j,k,3)
-               uy = - pi2*cmplx(0,jm)*Qhat(i,j,k,1)
-               wy = - pi2*cmplx(0,jm)*Qhat(i,j,k,3)
-               uz =  - pi2*cmplx(0,km)*Qhat(i,j,k,1)/Lz
-               vz =  - pi2*cmplx(0,km)*Qhat(i,j,k,2)/Lz
+               vx =  pi2*cmplx(0,im)*Qhat(i,j,k,2)
+               wx =  pi2*cmplx(0,im)*Qhat(i,j,k,3)
+               uy =  pi2*cmplx(0,jm)*Qhat(i,j,k,1)
+               wy =  pi2*cmplx(0,jm)*Qhat(i,j,k,3)
+               uz =  pi2*cmplx(0,km)*Qhat(i,j,k,1)/Lz
+               vz =  pi2*cmplx(0,km)*Qhat(i,j,k,2)/Lz
                ! vorcity: ( (wy - vz), (uz - wx), (vx - uy) )
                ! compute 2*k^2 u vor:
                h_diss = h_diss + 2*xfac*mu*xw*&
-                    real(Qhat(i,j,k,1)*conjg(wy-vz) + &
+                    imag(Qhat(i,j,k,1)*conjg(wy-vz) + &
                      Qhat(i,j,k,2)*conjg(uz-wx) + &
                      Qhat(i,j,k,3)*conjg(vx-uy)) 
                ! incorrect if using hyperviscosity
                ens_diss2=ens_diss2 + 2*xfac*(mu*xw)*  &
-                       ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2) 
+                       (abs(wy-vz)**2 + abs(uz-wx)**2 + abs(vx-uy)**2) 
                ens_diss4=ens_diss4 + 2*xfac*(mu*xw*xw)*  &
-                    ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)
+                    (abs(wy-vz)**2 + abs(uz-wx)**2 + abs(vx-uy)**2)
                ens_diss6=ens_diss6 + 2*xfac*(mu*xw*(xw)**2)*  &
-                    ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)      
-#endif
+                    (abs(wy-vz)**2 + abs(uz-wx)**2 + abs(vx-uy)**2)      
+
              endif           
 
       enddo
@@ -616,31 +621,16 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in forcing to rhs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#if 0
-if (forcing_type>0) then
-   
+if (forcing_type==1) then
    if (rkstage==1) then
       ! initialize stochastic forcings during rkstage==1:
       f_diss_ave=0
-      
-      !   may trash Q (used as a work array)
-      !   call sforce_rkstage1_init(Q,Qhat,f_diss,fxx_diss,1)
-      
-      ! compute new forcing function for stochastic,
-      ! white in time forcing.  computed at beginning of each RK4 stage
-      if (forcing_type==2 .or. forcing_type==4) then
-         call sforcing_random12(rhs,Qhat,f_diss,fxx_diss,1)  
-      else if (forcing_type==8) then
-         ! trashes Q - used as work array
-         call stochastic_highwaveno(Q,Qhat,f_diss,fxx_diss,1)  
-      endif
    endif
-   
-   call sforce(rhs,Qhat,f_diss,fxx_diss)
+   call p3_sforce(rhs,Qhat,f_diss,fxx_diss)
    ! average over all 4 stages
    f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
 endif
-#endif
+
 
 #if 0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -677,34 +667,19 @@ do k=1,p3_nz
       do i=1,p3_nx
          km=p3_imcord(i)
          
-         ! compute the divergence
-         p(i,j,k)= cmplx(0,im)*rhs(i,j,k,1) &
-              + cmplx(0,jm)*rhs(i,j,k,2) &
-              + cmplx(0,km)*rhs(i,j,k,3)/Lz
-
-         ! compute laplacian inverse
+         ! compute laplacian inverse of the divergence
          xfac= (im*im +km*km/Lz/Lz + jm*jm)
          if (xfac/=0) xfac = -1/xfac
-         p(i,j,k)=xfac*p(i,j,k)
-         
-      enddo
-   enddo
-enddo
-do k=1,p3_nz
-   jm=p3_kmcord(k)
-   do j=1,p3_ny
-      im=p3_jmcord(j)
-      do i=1,p3_nx
-         km=p3_imcord(i)
-         
-         ! compute gradient  dp/dx
-         uu= cmplx(0,im)*p(i,j,k) 
-         vv= cmplx(0,jm)*p(i,j,k)
-         ww= cmplx(0,km)*p(i,j,k)/Lz
-         
-         rhs(i,j,k,1)=rhs(i,j,k,1) - uu 
-         rhs(i,j,k,2)=rhs(i,j,k,2) - vv 
-         rhs(i,j,k,3)=rhs(i,j,k,3) - ww 
+
+         ptmp = xfac*( cmplx(0,im)*rhs(i,j,k,1) &
+              + cmplx(0,jm)*rhs(i,j,k,2) &
+              + cmplx(0,km)*rhs(i,j,k,3)/Lz  )
+
+
+         ! add -grad(p) term to RHS
+         rhs(i,j,k,1)=rhs(i,j,k,1) - cmplx(0,im)*ptmp
+         rhs(i,j,k,2)=rhs(i,j,k,2) - cmplx(0,jm)*ptmp
+         rhs(i,j,k,3)=rhs(i,j,k,3) - cmplx(0,km)*ptmp/Lz
 
          ! dealias           
          if ( dealias_remove(abs(im),abs(jm),abs(km))) then

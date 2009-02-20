@@ -40,10 +40,11 @@ ns_ghost.o: macros.h params.o ghost.o sforcing.o fft_interface.o transpose.o mak
 ns_grid.o: macros.h params.o fft_interface.o makefile 
 ns_ibm.o: macros.h params.o ibm.o fft_interface.o makefile 
 ns_impulse.o: macros.h params.o fft_interface.o makefile 
-ns_p3dfft.o: macros.h params.o sforcing.o spectrum.o makefile 
+ns_p3dfft.o: macros.h params.o p3_forcing.o spectrum.o makefile 
 ns_psivor.o: macros.h params.o bc.o tracers.o ellipse.o fft_interface.o makefile 
 ns_slaving.o: macros.h params.o sforcing.o spectrum.o makefile 
 ns_xpencil.o: macros.h params.o transpose.o sforcing.o spectrum.o makefile 
+p3_forcing.o: macros.h params.o mpi.o makefile 
 params.o: macros.h params.h makefile 
 particles.o: macros.h params.o mpi.o ghost.o makefile 
 pdf.o: macros.h params.o mpi.o fft_interface.o transpose.o makefile 
@@ -53,7 +54,7 @@ shallow_diag.o: macros.h params.o spectrum.o makefile
 shallow.o: macros.h params.o fft_interface.o spectrum.o sforcing.o transpose.o makefile 
 slow_diag.o: macros.h params.o spectrum.o isoave.o fft_interface.o mpi.o makefile 
 solve.o: macros.h params.o ghost.o bc.o mpi.o makefile 
-spectrum.o: macros.h params.o sforcing.o mpi.o makefile 
+spectrum.o: macros.h params.o mpi.o makefile 
 splitspec.o: macros.h makefile 
 subcubes.o: macros.h params.o mpi.o makefile 
 test.o: macros.h params.o ghost.o transpose.o mpi.o fft_interface.o makefile 

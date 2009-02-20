@@ -24,6 +24,14 @@ for more details.
                  mataylo@sandia.gov
 
 ===================================================================
+README: updated 2/20/2009:  
+
+Added support for the SDSC P3DFFT parallel FFT library.  
+P3DFFT is up to 2x faster than the our internal transpose + FFTW code.  
+To use P3DFFT, build the "dnsp3" model.  
+This obsoletes are previous "dnsp" optimized model.  
+
+
 README: updated 2/5/2009:  
 
 Added new optimizations to dnsp code to skip
@@ -39,7 +47,7 @@ print this message to stdout:
 
 README: updated 9/26/2008:  
 
-Updated to note that for the pure x-y slab decompostion 
+Updated to note that for the pure x-y slab decomposition 
 for a problem of size N^3, NCPUS can be as large as N.
 (we used to have to switch to a pencil decomposition for 
 NCPUS>N/2 )
@@ -50,13 +58,13 @@ minor edits
 README: updated 1/20/2008:  
 
 We now support the exact dealiasing based on phase shifting +
-spherical truncation.  To measure/test deasling error, see
+spherical truncation.  To measure/test dealiasing error, see
 testing/dealias.sh.
 
 
 README: updated 8/16/2007:  
 
-For pencil decompostions, we now (8/15/2006) have a more efficient
+For pencil decompositions, we now (8/15/2006) have a more efficient
 model "dnsp" that should be used instead of "dns" (but dnsp does not
 yet allow for passive tracers) To compile, type "make dnsp" instead of
 "make dns", and the executable will be named "dnsp".
@@ -178,32 +186,36 @@ I use a python script, 'gridsetup.py' which will create the
 needed 'params.h' file.   To run an N^3 problem, with a 
 domain decompostion of nx*ny*nz (so NCPUS=nx*ny*nz):
 
-      ./gridsetup.py  nx ny nz  N N N 0 2 0
+      ./gridsetup.py  nx ny nz  N N N 0 0 2
 
-(The 0,2,0 specifies how the arrays are padded in x,y,z directions.
-0,2,0 is optimal for the spectral method, but other values are needed
-if finite differences or hybrid options are enabled).
+The 0,0,2 specifies how the arrays are padded in x,y,z directions.
+0,0,2 is required when using P3DFFT.  When using the internal 
+parallel fft, 2,0,0 is optimal.  P3DFFT requires that nx=1.  
+
 
 
 Here are some examples:
+For P3DFFT, which only supports slab and pencil decompositions:
 
       A 32x32x32 grid, to run using just 1 cpu:
       % cd dns/src
-      % ./gridsetup.py 1 1 1 32 32 32 0 2 0
+      % ./gridsetup.py 1 1 1 32 32 32 0 0 2
 
       A 64x64x64 grid, on 4 cpu:
       (parallel decomposition: 1x1x4, so 4 hyperslabs in the z-direction)
       % cd dns/src
-      % ./gridsetup.py 1 1 4 64 64 64 0 2 0
+      % ./gridsetup.py 1 1 4 64 64 64 0 0 2
 
       A 64x64x64 grid, on 64 cpu:
       (parallel decomposition: 2x1x32, so a pensil decomposition)
       % cd dns/src
-      % ./gridsetup.py 2 1 32 64 64 64 0 2 0
+      % ./gridsetup.py 1 2 32 64 64 64 0 0 2
 
-      OR: 
-
-      % ./gridsetup.py 1 1 64 64 64 64 0 2 0
+The DNS code's internal parallel FFT supports cube decompositions
+and also supports slab decompositions up to size N:
+      % ./gridsetup.py 1 1 4 64 64 64 2 0 0
+      % ./gridsetup.py 2 2 4 64 64 64 2 0 0
+      % ./gridsetup.py 1 1 64 64 64 64 2 0 0
 
 
 For a grid N^3, N must be a power of 2,3,5, and N/nx, N/ny and N/nz
@@ -223,13 +235,13 @@ NOTE:  The most efficient configuration for large processor counts
 will be with ny=1 and nx<nz.  For example, to run a 4096^3 simulation 
 on 8192 processors, I would modify the instructions below to:
 
-./gridsetup.py 4 1 2048 4096 4096 4096 0 2 0
+./gridsetup.py 1 4 2048 4096 4096 4096 0 0 2
 Other possibilities which might be more efficient:
 (we need a performance model :-)
-./gridsetup.py 8 1 1024 4096 4096 4096 0 2 0
-./gridsetup.py 16 1 512 4096 4096 4096 0 2 0
-./gridsetup.py 32 1 256 4096 4096 4096 0 2 0
-./gridsetup.py 64 1 128 4096 4096 4096 0 2 0
+./gridsetup.py 1 8 1024 4096 4096 4096 0 0 2
+./gridsetup.py 1 16 512 4096 4096 4096 0 0 2 
+./gridsetup.py 1 32 256 4096 4096 4096 0 0 2 
+./gridsetup.py 1 64 128 4096 4096 4096 0 0 2 
 
 
 
@@ -245,13 +257,26 @@ the makefile by default used the Intel F90 compiler, but you can edit
 the file and switch this to Lahey or PGI.  For the other systems, it
 uses the vendor supplied F90 compiler.
 
-To build the code on one of the above systems, just run:
+P3DFFT: For the best performance with high resolution runs on large
+processor counts, use the version of the code that used the SDSC
+p3dfft() parallel FFT.  Both P3DFFT and FFTW must be built and
+installed in advance.  Currently we require that P3DFFT be built
+double precision and with the -DSTRIDE1 option.  You also must also
+edit the makefile to build with -DUSE_P3DFFT -DUSE_FFTW and 
+configure appropriate include and lib paths.  Then:
 
       % cd dns/src
-      % make dnsp
+      % make dnsp3
 
+To use the DNS code's internal parallel FFT:
+(sometimes faster than dnsp3 for low-res slab decompositions)
 
+      % cd dns/src
+      % make dns
 
+There is also an optimized version, "dnsp", with much less communication
+but is limited to pencil decompositions.  But "dnsp" is no longer supported
+since "dnsp3" is faster.  
 
 
 Step 3.
@@ -288,7 +313,7 @@ Step 4.
 Run the code:
     To run the code on a single processor:
 
-        ./dnsp  -i forcing12-bench.inp output_name  
+        ./dnsp3  -i forcing12-bench.inp output_name  
 
     using the input file 'forcing12-bench.inp'.  This runs a triply 
     periodic forced turbulence problem.  The forcing is in
@@ -311,7 +336,7 @@ Run the code:
 
 
     For a parallel run:
-        mpirun -np X  ./dnsp -mio -i forcing12.inp output_name  
+        mpirun -np X  ./dnsp3 -mio -i forcing12.inp output_name  
 
     The "-mio" option will turn on MPI-IO.  Without MPI-IO, all output
     will be funneled through processor 0.  With MPI-IO, the code will
@@ -342,8 +367,8 @@ input file, with mu=.0014, "fft-sphere", and time=1.0.
 To run this test on 2 processors:
 cd src
 ./gridsetup.py 1 1 2 64 64 64 2 2 0
-make dnsp
-./dnsp -i forcing12.inp
+make dnsp3
+./dnsp3 -i forcing12.inp
 
 To run on more processors, see scripts/readme.job
 
@@ -361,7 +386,7 @@ R_lambda =61.47   62.22       59.7          58.4         62.22
 run time  20min   22.8       66min         12.65          8.41    4.96  
 
 
-
+2.4ghz quad core, DDR2-666, gfortran, 4 cores: 1.30min
 
 *** dnsp code w/ FFT99 ******************************************************
 
@@ -381,6 +406,17 @@ Other collected run times:
 2.4ghz Xeon Linux, ifort, 1 cpu:  13.81
 2.4ghz quad core, DDR2-666, gfortran, 1 cores: 2.97
 2.4ghz quad core, DDR2-666, gfortran, 4 cores: 1.26min
+
+
+*** dnsp3 code (P3DFFT) ************************************************
+2.4ghz quad core, DDR2-666, gfortran, 4 cores: 1.27min
+
+kmax*eta =  0.9641
+KE       =  1.6525
+R_lambda =  58.9
+d/dt vis =  -3.747
+d/dt f   =   4.122
+
 
 
 **************************************************************************

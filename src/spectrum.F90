@@ -22,7 +22,7 @@
 #include "macros.h"
 module spectrum
 use params
-use sforcing
+!use sforcing
 implicit none
 
 #if 0
