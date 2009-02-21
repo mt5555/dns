@@ -74,7 +74,7 @@ if (firstcall) then
    endif
 
    ! intialize Q with Fourier Coefficients:
-   call p3_fft3d_nvar(Q_grid,Q)
+   call p3_fft3d_nvar(Q_grid,Q,work1)
 endif
 call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old,work1,work2,q2)
 end
@@ -824,7 +824,6 @@ complex*16 im,km,jm
 ! X wave number im = p3_2mcord(j)
 ! Y wave number jm = p3_3mcord(k)
 ! Z wave number km = p3_1mcord(i)
-
 do n=1,3
    do k=1,p3_n3
       jm=cmplx(0,p3_3mcord(k))   ! y derivative
@@ -989,6 +988,28 @@ endif
 !   print *,my_pe,'kmcord; ',p3_3mcord
 
 if (fail/=0) call abortdns("p3dfft params init dimension settings failure")
+end subroutine
+
+
+subroutine p3_fft3d_nvar(Q_grid,Q,work1)
+! convinience function for routines which only know Qn
+! with dimensions nx,ny,nz
+!
+! input:  Q_grid:   state vector in grid space (nx,ny,nz) decomposition
+! output: Q         state vector in spectral space, z-pencil decomposition
+use params
+implicit none
+real*8 :: Q_grid(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+complex*16 :: Q(p3_n1,p3_n2,p3_n3,n_var)
+integer n
+do n=1,n_var
+   call ftran_r2c(Q_grid(1,1,1,n),Q(1,1,1,n))
+   Q(:,:,:,n)=Q(:,:,:,n)/g_nx/g_ny/g_nz
+!      call btran_c2r(Q(1,1,1,n),work1)
+!      print *,'max error = ',maxval(&
+!      abs( work1(nx1:nx2,ny1:ny2,nz1:nz2)-Q_grid(nx1:nx2,ny1:ny2,nz1:nz2,n) ) )
+enddo
 end subroutine
 
 
