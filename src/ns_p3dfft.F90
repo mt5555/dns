@@ -29,8 +29,8 @@ subroutine rk4(time,Q_grid,Q,Q_tmp,Q_old,rhs,work1,work2)
 use params
 implicit none
 real*8 :: time
-complex*16 :: Q(p3_nz,p3_nx,p3_ny,n_var)
-real*8 :: Q_grid(nx,ny,nz,n_var)
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Q_grid
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
@@ -42,9 +42,13 @@ integer :: n
 
 if (firstcall) then
    firstcall=.false.
+   call p3_params_init
    if (smagorinsky>0) then
       call abortdns("Error: ns_p3dfft.F90 model does not yet support Smagorinsky")
    endif
+#ifndef USE_P3DFFT
+   call abortdns("Error: ns_p3dfft.F90 model must be compiled with -DUSE_P3DFFT")
+#endif
    if (dealias==0) then
       call abortdns("Error: using ns_p3dfft.F90 model, which must be run dealiased")
    endif
@@ -70,17 +74,8 @@ if (firstcall) then
    endif
 
    ! intialize Q with Fourier Coefficients:
-   do n=1,n_var
-      call ftran_r2c(Q_grid(1,1,1,n),Q(1,1,1,n))
-      Q(:,:,:,n)=Q(:,:,:,n)/g_nx/g_ny/g_nz
-!      call btran_c2r(Q(1,1,1,n),work1)
-!      print *,'max error = ',maxval(&
-!      abs( work1(nx1:nx2,ny1:ny2,nz1:nz2)-Q_grid(nx1:nx2,ny1:ny2,nz1:nz2,n) ) )
-   enddo
-
+   call p3_fft3d_nvar(Q_grid,Q)
 endif
-
-
 call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old,work1,work2,q2)
 end
 
@@ -93,15 +88,15 @@ use p3dfft
 implicit none
 real*8 :: time
 real*8 :: Q_grid(nx,ny,nz,n_var)
-complex*16 :: Q(p3_nx,p3_ny,p3_nz,n_var)
-complex*16 :: Q_tmp(p3_nx,p3_ny,p3_nz,n_var)
-complex*16 :: Q_old(p3_nx,p3_ny,p3_nz,n_var)
+complex*16 :: Q(p3_n1,p3_n2,p3_n3,n_var)
+complex*16 :: Q_tmp(p3_n1,p3_n2,p3_n3,n_var)
+complex*16 :: Q_old(p3_n1,p3_n2,p3_n3,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: q2(nx,ny,nz,ndim)  ! only allocated if phase shifting turned on
 
 ! overlapped in memory:  dont use both in the same n loop
-complex*16 :: rhs(p3_nx,p3_ny,p3_nz,n_var)
+complex*16 :: rhs(p3_n1,p3_n2,p3_n3,n_var)
 real*8 :: rhsg(nx,ny,nz,n_var)
 
 
@@ -113,9 +108,9 @@ integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
 ! stage 1
 call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,q2)
 do n=1,n_var
-   do k=1,p3_nz
-   do j=1,p3_ny
-   do i=1,p3_nx
+   do k=1,p3_n3
+   do j=1,p3_n2
+   do i=1,p3_n1
       Q_old(i,j,k,n)=Q(i,j,k,n)
       Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6                ! accumulate RHS
       Q_tmp(i,j,k,n)=Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2      ! Euler timestep with dt=delt/2
@@ -134,9 +129,9 @@ enddo
 ! stage 2
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,q2)
 do n=1,n_var
-   do k=1,p3_nz
-   do j=1,p3_ny
-   do i=1,p3_nx
+   do k=1,p3_n3
+   do j=1,p3_n2
+   do i=1,p3_n1
       Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3             ! accumulate RHS
       Q_tmp(i,j,k,n)=Q_old(i,j,k,n) + delt*rhs(i,j,k,n)/2   ! Euler timestep with dt=delt/2
    enddo
@@ -152,9 +147,9 @@ enddo
 ! stage 3
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,q2)
 do n=1,n_var
-   do k=1,p3_nz
-   do j=1,p3_ny
-   do i=1,p3_nx
+   do k=1,p3_n3
+   do j=1,p3_n2
+   do i=1,p3_n1
       Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/3               ! accumulate RHS
       Q_tmp(i,j,k,n)=Q_old(i,j,k,n)+delt*rhs(i,j,k,n)      ! Euler timestep with dt=delt
    enddo
@@ -171,9 +166,9 @@ enddo
 ! stage 4
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,q2)
 do n=1,n_var
-   do k=1,p3_nz
-   do j=1,p3_ny
-   do i=1,p3_nx
+   do k=1,p3_n3
+   do j=1,p3_n2
+   do i=1,p3_n1
       Q(i,j,k,n)=Q(i,j,k,n)+delt*rhs(i,j,k,n)/6        ! final Euler timestep with delt
    enddo   
    enddo
@@ -242,11 +237,11 @@ real*8 time
 integer compute_ints,rkstage
 
 ! input, but Q can be overwritten if needed
-complex*16 Qhat(p3_nx,p3_ny,p3_nz,n_var)         ! Fourier data at time t
+complex*16 Qhat(p3_n1,p3_n2,p3_n3,n_var)         ! Fourier data at time t
 real*8 Q(nx,ny,nz,n_var)                         ! grid data at time t
 
 ! output  (rhsg and rhs are overlapped in memory)
-complex*16 rhs(p3_nx,p3_ny,p3_nz,n_var)
+complex*16 rhs(p3_n1,p3_n2,p3_n3,n_var)
 real*8 rhsg(nx,ny,nz,n_var)    
 
 ! work/storage
@@ -254,7 +249,7 @@ real*8  :: q2(nx,ny,nz,ndim)  ! only allocated if use_phaseshift
                                   ! phase shifted vorticity 
 real*8 work(nx,ny,nz)
 ! actual dimension: nx,ny,nz, since sometimes used as work array
-complex*16 p(p3_nx,p3_ny,p3_nz)    
+complex*16 p(p3_n1,p3_n2,p3_n3)    
 
                                  
 
@@ -516,15 +511,15 @@ uxx2ave=0
 ! that means 1st dimension is really Z direction
 !            2nd dimension is really X direction
 !            3nd dimension is really Y direction
-! X wave number im = p3_jmcord(j)
-! Y wave number jm = p3_kmcord(k)
-! Z wave number km = p3_imcord(i)
-do k=1,p3_nz
-   jm=p3_kmcord(k)
-   do j=1,p3_ny
-      im=p3_jmcord(j)
-      do i=1,p3_nx
-         km=p3_imcord(i)
+! X wave number im = p3_2mcord(j)
+! Y wave number jm = p3_3mcord(k)
+! Z wave number km = p3_1mcord(i)
+do k=1,p3_n3
+   jm=p3_3mcord(k)
+   do j=1,p3_n2
+      im=p3_2mcord(j)
+      do i=1,p3_n1
+         km=p3_1mcord(i)
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
@@ -657,15 +652,15 @@ endif
 ! that means 1st dimension is really Z direction
 !            2nd dimension is really X direction
 !            3nd dimension is really Y direction
-! X wave number im = p3_jmcord(j)
-! Y wave number jm = p3_kmcord(k)
-! Z wave number km = p3_imcord(i)
-do k=1,p3_nz
-   jm=p3_kmcord(k)
-   do j=1,p3_ny
-      im=p3_jmcord(j)
-      do i=1,p3_nx
-         km=p3_imcord(i)
+! X wave number im = p3_2mcord(j)
+! Y wave number jm = p3_3mcord(k)
+! Z wave number km = p3_1mcord(i)
+do k=1,p3_n3
+   jm=p3_3mcord(k)
+   do j=1,p3_n2
+      im=p3_2mcord(j)
+      do i=1,p3_n1
+         km=p3_1mcord(i)
          
          ! compute laplacian inverse of the divergence
          xfac= (im*im +km*km/Lz/Lz + jm*jm)
@@ -707,12 +702,12 @@ do ns=np1,np2
    call z_fft3d_trashinput(Q,rhs(1,1,1,ns),work)
    stop 'error!!'
    ! de-alias, and store in RHS(:,:,:,ns)
-   do k=1,p3_nz
-      jm=p3_kmcord(k)
-      do j=1,p3_ny
-         im=p3_jmcord(j)
-         do i=1,p3_nx
-            km=p3_imcord(i)
+   do k=1,p3_n3
+      jm=p3_3mcord(k)
+      do j=1,p3_n2
+         im=p3_2mcord(j)
+         do i=1,p3_n1
+            km=p3_1mcord(i)
             
             if ( dealias_remove(abs(im),abs(jm),abs(km))) then
                rhs(i,j,k,ns)=0
@@ -813,9 +808,9 @@ end
 subroutine ns_vorticity(rhsg,Qhat,p)
 use params
 implicit none
-complex*16 Qhat(p3_nx,p3_ny,p3_nz,n_var)           ! Fourier data at time t
+complex*16 Qhat(p3_n1,p3_n2,p3_n3,n_var)           ! Fourier data at time t
 real*8 rhsg(nx,ny,nz,n_var)    
-complex*16 p(p3_nx,p3_ny,p3_nz)    
+complex*16 p(p3_n1,p3_n2,p3_n3)    
 
 !local
 integer n,i,j,k
@@ -826,17 +821,18 @@ complex*16 im,km,jm
 ! that means 1st dimension is really Z direction
 !            2nd dimension is really X direction
 !            3nd dimension is really Y direction
-! X wave number im = p3_jmcord(j)
-! Y wave number jm = p3_kmcord(k)
-! Z wave number km = p3_imcord(i)
+! X wave number im = p3_2mcord(j)
+! Y wave number jm = p3_3mcord(k)
+! Z wave number km = p3_1mcord(i)
 
 do n=1,3
-   do k=1,p3_nz
-      jm=cmplx(0,p3_kmcord(k))   ! y derivative
-      do j=1,p3_ny
-         im=cmplx(0,p3_jmcord(j))   ! x deriviative 
-         do i=1,p3_nx  
-            km=cmplx(0,p3_imcord(i))  ! z deriviative
+   do k=1,p3_n3
+      jm=cmplx(0,p3_3mcord(k))   ! y derivative
+      do j=1,p3_n2
+         im=cmplx(0,p3_2mcord(j))   ! x deriviative 
+         do i=1,p3_n1  
+            km=cmplx(0,p3_1mcord(i))  ! z deriviative
+
 
             if (n==1) then
                wy =  jm*Qhat(i,j,k,3)
@@ -866,5 +862,133 @@ end subroutine ns_vorticity
 
 
 
+
+
+subroutine p3_params_init
+use params
+use p3dfft
+character(len=80) message
+integer :: fail=0
+integer :: dims(2)
+integer :: isize(3),fsize(3),p3_istart(3),p3_iend(3)
+integer :: p3_fstart(3),p3_fend(3)
+integer :: i,j,k,iw,jw,kw
+
+
+! check that our reference decomposition matches the p3dfft gridspace
+! decomposition
+if (ncpu_x /= 1) then
+   fail=1
+   call print_message("P3DFFT requires nproc_z = 1")
+endif
+if (ncpu_y > ncpu_z) then
+   fail=1
+   call print_message("P3DFFT requires ncpu_y < ncpu_z")
+endif
+dims(1)=ncpu_y
+dims(2)=ncpu_z
+
+! set last arg to .true. to allow overwriting input for the
+! inverse FFT.  
+call p3dfft_setup(dims,g_nx,g_ny,g_nz,.false.)
+call get_dims(p3_istart,p3_iend,isize,1)
+call get_dims(p3_fstart,p3_fend,fsize,2)
+
+
+if ( isize(1)*isize(2)*real(isize(3),r8kind)  > nx*ny*real(nz,r8kind) ) then
+   fail=1
+   call print_message("P3DFFT error: z padding insufficient")
+endif
+if ( 2*fsize(1)*fsize(2)*real(fsize(3),r8kind)  > nx*ny*real(nz,r8kind) ) then
+   fail=1
+   call print_message("P3DFFT error: z padding insufficient")
+endif
+
+if (nx1 /= 1 ) then
+   fail=1
+   call print_message("P3DFFT error: x front padding must be 0")
+endif
+if (ny1 /= 1 ) then
+   fail=1
+   call print_message("P3DFFT error: y front padding must be 0")
+endif
+if (nz1 /= 1 ) then
+   fail=1
+   call print_message("P3DFFT error: z front padding must be 0")
+endif
+if (nx2 /= isize(1) ) then
+   fail=1
+   call print_message("P3DFFT error: x ref decomp dimension does not match p3dfft")
+endif
+if (ny2 /= isize(2) ) then
+   fail=1
+   call print_message("P3DFFT error: y ref decomp dimension does not match p3dfft")
+endif
+if (nz2 /= isize(3) ) then
+   fail=1
+   call print_message("P3DFFT error: z ref decomp dimension does not match p3dfft")
+endif
+
+
+if (nx /= isize(1) ) then
+   fail=1
+   call print_message("P3DFFT error: x end padding must be 0")
+endif
+if (ny /= isize(2) ) then
+   fail=1
+   call print_message("P3DFFT error: y end padding must be 0")
+endif
+! we can have padding in z direction
+if (nz <  isize(3) ) then
+   fail=1
+   call print_message("P3DFFT error: z dimmension too small for p3dfft")
+endif
+
+
+! p3dfft Fourier space loop dimensions
+p3_n1 = fsize(1)
+p3_n2 = fsize(2)
+p3_n3 = fsize(3)
+
+! p3dfft arrays:
+allocate(p3_1mcord(p3_n1))
+allocate(p3_2mcord(p3_n2))
+allocate(p3_3mcord(p3_n3))
+
+
+! initialize the wave numbers:
+! note: we assume P3DFFT was compiled with STRIDE1 option.
+! that means 1st dimension is really Z direction
+!            2nd dimension is really X direction
+!            3nd dimension is really Y direction
+do i=1,p3_n1
+   iw = p3_fstart(1)+i-1
+   p3_1mcord(i) = iw-1
+   if (iw > g_nz/2 ) p3_1mcord(i) = -(g_nz-iw+1)
+   !print *,i,p3_1mcord(i)
+enddo
+do j=1,p3_n2
+   jw = p3_fstart(2)+j-1
+   p3_2mcord(j) = jw-1
+   if (jw > g_nx/2 ) p3_2mcord(j) = -(g_nx-jw+1)
+   !print *,j,p3_2mcord(j)
+enddo
+do k=1,p3_n3
+   kw = p3_fstart(3)+k-1
+   p3_3mcord(k) = kw-1
+   if (kw > g_ny/2 ) p3_3mcord(k) = -(g_ny-kw+1)
+   !print *,k,p3_3mcord(k)
+enddo
+if (io_pe==my_pe) then
+   write(*,'(a,3i6)') 'p3dfft local grid space dims:    ',isize
+   write(*,'(a,3i6)') 'p3dfft local fourier space dims: ',fsize
+endif
+! 32^3  y direction:  0..15,-16   0,1,2,3,4,5,6,7  8,9,10,11,12,13,14,15,-16
+!   print *,my_pe,'imcord; ',p3_1mcord
+!   print *,my_pe,'jmcord; ',p3_2mcord
+!   print *,my_pe,'kmcord; ',p3_3mcord
+
+if (fail/=0) call abortdns("p3dfft params init dimension settings failure")
+end subroutine
 
 

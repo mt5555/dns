@@ -53,8 +53,8 @@ subroutine p3_sforce(rhs,Qhat,f_diss,fxx_diss)
 !
 use params
 implicit none
-complex*16 :: Qhat(p3_nx,p3_ny,p3_nz,3)
-complex*16 :: rhs(p3_nx,p3_ny,p3_nz,3)
+complex*16 :: Qhat(p3_n1,p3_n2,p3_n3,3)
+complex*16 :: rhs(p3_n1,p3_n2,p3_n3,3)
 real*8 :: f_diss,param,fxx_diss
 
 ! determinisitic with E1=E2=.5
@@ -79,8 +79,8 @@ subroutine p3_forcing12(rhs,Qhat,f_diss,fxx_diss,model_spec)
 use params
 use mpi
 implicit none
-complex*16 :: Qhat(p3_nx,p3_ny,p3_nz,3)
-complex*16 :: rhs(p3_nx,p3_ny,p3_nz,3)
+complex*16 :: Qhat(p3_n1,p3_n2,p3_n3,3)
+complex*16 :: rhs(p3_n1,p3_n2,p3_n3,3)
 integer :: model_spec
 integer km,jm,im,i,j,k,n,wn,ierr,kfmax
 real*8 xw,xfac,f_diss,tauf,tau_inv,fxx_diss
@@ -145,15 +145,15 @@ if (g_u2xave==0) then
 ! that means 1st dimension is really Z direction
 !            2nd dimension is really X direction
 !            3nd dimension is really Y direction
-! X wave number im = p3_jmcord(j)
-! Y wave number jm = p3_kmcord(k)
-! Z wave number km = p3_imcord(i)
-do k=1,p3_nz
-   jm=p3_kmcord(k)
-   do j=1,p3_ny
-      im=p3_jmcord(j)
-      do i=1,p3_nx
-         km=p3_imcord(i)
+! X wave number im = p3_2mcord(j)
+! Y wave number jm = p3_3mcord(k)
+! Z wave number km = p3_1mcord(i)
+do k=1,p3_n1
+   jm=p3_3mcord(k)
+   do j=1,p3_n2
+      im=p3_2mcord(j)
+      do i=1,p3_n3
+         km=p3_1mcord(i)
          
             
             xw=(im*im + jm*jm + km*km)*pi2_squared
@@ -200,7 +200,7 @@ do wn=numb1,numb
       j=wnforcing(wn)%index(n,2)
       k=wnforcing(wn)%index(n,3)
       xfac=2
-      if (p3_imcord(i)==0) xfac=xfac/2
+      if (p3_1mcord(i)==0) xfac=xfac/2
       ener(wn)=ener(wn)+.5*xfac*real( &
            Qhat(i,j,k,1)*conjg(Qhat(i,j,k,1)) +&
            Qhat(i,j,k,2)*conjg(Qhat(i,j,k,2)) +&
@@ -238,10 +238,10 @@ do wn=numb1,numb
            Qhat(i,j,k,3)*conjg(Qhat(i,j,k,3)) )
 
       xfac=2
-      if (p3_imcord(i)==0) xfac=xfac/2
+      if (p3_1mcord(i)==0) xfac=xfac/2
       f_diss = f_diss + xfac*tauf*Q2
 
-      xw=-(p3_imcord(i)**2 + p3_jmcord(j)**2 + p3_kmcord(k)**2)*pi2_squared
+      xw=-(p3_1mcord(i)**2 + p3_2mcord(j)**2 + p3_3mcord(k)**2)*pi2_squared
       fxx_diss = fxx_diss + xfac*tauf*xw*Q2
 
    enddo
@@ -284,15 +284,15 @@ allocate(wnforcing(numb1:numb))
 ! that means 1st dimension is really Z direction
 !            2nd dimension is really X direction
 !            3nd dimension is really Y direction
-! X wave number im = p3_jmcord(j)
-! Y wave number jm = p3_kmcord(k)
-! Z wave number km = p3_imcord(i)
-   do k=1,p3_nz
-      jm=p3_kmcord(k)
-      do j=1,p3_ny
-         im=p3_jmcord(j)
-         do i=1,p3_nx
-            km=p3_imcord(i)
+! X wave number im = p3_2mcord(j)
+! Y wave number jm = p3_3mcord(k)
+! Z wave number km = p3_1mcord(i)
+   do k=1,p3_n3
+      jm=p3_3mcord(k)
+      do j=1,p3_n2
+         im=p3_2mcord(j)
+         do i=1,p3_n1
+            km=p3_1mcord(i)
             
             xw=sqrt(real(km**2+jm**2+im**2))
             do n=numb1,numb
@@ -313,12 +313,12 @@ allocate(wnforcing(numb1:numb))
    enddo
    
    ! store all the indexes
-   do k=1,p3_nz
-      jm=p3_kmcord(k)
-      do j=1,p3_ny
-         im=p3_jmcord(j)
-         do i=1,p3_nx
-            km=p3_imcord(i)
+   do k=1,p3_n3
+      jm=p3_3mcord(k)
+      do j=1,p3_n2
+         im=p3_2mcord(j)
+         do i=1,p3_n1
+            km=p3_1mcord(i)
 
             xw=sqrt(real(km**2+jm**2+im**2))
             do n=numb1,numb

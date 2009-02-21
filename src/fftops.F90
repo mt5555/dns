@@ -1238,6 +1238,27 @@ do n=1,n_var
 enddo
 end subroutine
 
+#ifdef USE_P3DFFT
+subroutine p3_fft3d_nvar(Q_grid,Q)
+! convinience function for routines which only know Qn
+! with dimensions nx,ny,nz
+!
+! input:  Q_grid:   state vector in grid space (nx,ny,nz) decomposition
+! output: Q         state vector in spectral space, z-pencil decomposition
+use params
+implicit none
+real*8 :: Q_grid(nx,ny,nz,n_var)
+complex*16 :: Q(p3_n1,p3_n2,p3_n3,n_var)
+integer n
+do n=1,n_var
+   call ftran_r2c(Q_grid(1,1,1,n),Q(1,1,1,n))
+   Q(:,:,:,n)=Q(:,:,:,n)/g_nx/g_ny/g_nz
+!      call btran_c2r(Q(1,1,1,n),work1)
+!      print *,'max error = ',maxval(&
+!      abs( work1(nx1:nx2,ny1:ny2,nz1:nz2)-Q_grid(nx1:nx2,ny1:ny2,nz1:nz2,n) ) )
+enddo
+end subroutine
+#endif
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2965,8 +2986,8 @@ subroutine p3_phaseshift(p,shift,work)
 !
 use params
 implicit none
-real*8 p(p3_nz,p3_nx,p3_ny)
-real*8 work(p3_nz,p3_nx,p3_ny)
+real*8 p(p3_n1,p3_n2,p3_n3)
+real*8 work(p3_n1,p3_n2,p3_n3)
 integer :: shift,i,j,k,im,jm,km
 real*8 a,b,hh
 

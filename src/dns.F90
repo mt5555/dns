@@ -59,7 +59,6 @@ logical :: power3
 ! initialize global constants:
 ints=0
 maxs=0
-
 #ifdef MALLOC_Q
 allocate(Q(nx,ny,nz,n_var))
 allocate(Qhat(nx,ny,nz,n_var))
@@ -155,7 +154,6 @@ transpose_tot_max=sum(tims(6:11))+sum(tims(20:23))
 #endif
 transpose_tot_ave=transpose_tot_ave/60
 transpose_tot_max=transpose_tot_max/60
-
 
 if (tims_max(24)>0) then
    ! all times are in minutes, but this one we output in seconds:
