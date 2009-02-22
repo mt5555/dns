@@ -51,9 +51,12 @@ and committed.
 test3d_forcing.sh   tests 3D forced isotropic turbulence run
                     models: dns, dnsgrid, dnsp  (passed as second argument)
 
+                    dnsp3 will not pass because iso12 forcing is different
+                    because fourier representation is different
+
 
 test3d.sh  tests 3D decaying isotropic turbulence run
-           models:  dns, dnsgrid
+           models:  dns, dnsgrid, dnsp3
            methods:  spectral
            dimensions:  lots
            tests several different dimension paddings

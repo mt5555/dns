@@ -223,6 +223,11 @@ echo command line options:  $opt
 
 
 echo "***********************************************************"
+./gridsetup.py 1 1 2 32 32 32 0 0 2
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
 ./gridsetup.py 1 1 2 32 32 32 2 2 0
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 2 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout

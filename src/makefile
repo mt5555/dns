@@ -88,6 +88,8 @@ ifeq ($(UNAME),Linux)
       MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
       FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
       FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
+      #FFT = -DUSE_FFT99 -DUSE_P3DFFT -I/contrib/p3dfft/include
+      #FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
    endif
 
    ifeq ($(HOST),serrano1)
