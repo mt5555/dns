@@ -538,19 +538,16 @@ integer :: ncalls(ntimers)=0
 !integer :: ncpu_x=1,ncpu_y=1,ncpu_z=1
 integer :: ny_2dx=nslaby/ncpu_x       ! y-dim in x-pencil-decomposition
 integer :: nx_2dy=nslabx/ncpu_y       ! x-dim in y-pencil-decomposition
-#undef TEST_NEW
-#ifdef TEST_NEW
-integer :: ny_2dz=nslaby              ! y-dim in z-pencil-decomposition 
-integer :: nx_2dz=nslabx/ncpu_z       ! x-dim in z-pencil-decomposition 
-#else
 integer :: ny_2dz=nslaby/ncpu_z       ! y-dim in z-pencil-decomposition 
 integer :: nx_2dz=nslabx              ! x-dim in z-pencil-decomposition 
-#endif
 
 integer :: p3_n1, p3_n2, p3_n3        ! P3DFFT loop bounds
 
 integer :: io_pe
-integer :: my_world_pe,my_pe,mpicoords(3),mpidims(3)
+integer :: my_pe,mpicoords(3)         ! processor IDs
+integer :: my_world_pe,mpidims(3)     ! used by init_mpi ONLY
+logical :: p3dfft_cartmap = .false.   ! try to mimic p3dfft cartesian map
+  
 integer :: initial_live_procs      ! total number of cpus
 integer :: ncpus                   ! number of cpus in cartesian communicator
 integer :: comm_3d                 ! the MPI cartesian communcator
@@ -680,6 +677,17 @@ dealias_23sphere_kmax2_1 = (dealias_23sphere_kmax-.5)**2  ! rounds to k^2 - k
 
 
 
+! z-pencil decomposition.  can be anything of the form
+!   nx_2dz=nslabx/z1         mod(nslabx,nx_2dz)==0
+!   ny_2dz=nslaby/z2         mod(nslaby,ny_2dz)==0
+! with z1*z2 = ncpu_z
+! usually nslaby will be larger than nslabx, except in P3DFFT case
+if (nslabx > nslaby ) then
+   ny_2dz=nslaby              ! y-dim in z-pencil-decomposition 
+   nx_2dz=nslabx/ncpu_z       ! x-dim in z-pencil-decomposition 
+endif
+
+
 
 ! for perfect load balancing in x,y or z pencil decomposition space,
 ! these values must divide with no remainder.
@@ -697,19 +705,18 @@ if (ncpu_y*nx_2dy<nslabx) then
    nx_2dy=nx_2dy + mod(nx_2dy,2)
    call print_message("*WARNING*:  transpose_to_y not perfectly load balanced")
 endif
-#ifdef TEST_NEW
-if (ncpu_z*nx_2dz<nslabx) then
+if ( mod(nslabx,nx_2dz)/=0 ) then
    nx_2dz=nx_2dz+1
    nx_2dz=nx_2dz + mod(nx_2dz,2)
    call print_message("*WARNING*:  transpose_to_z not perfectly load balanced")
 endif
-#else
-if (ncpu_z*ny_2dz<nslaby) then
+if ( mod(nslaby,ny_2dz)/=0 ) then
    ny_2dz=ny_2dz+1
    ny_2dz=ny_2dz + mod(ny_2dz,2)
    call print_message("*WARNING*:  transpose_to_z not perfectly load balanced")
 endif
-#endif
+
+
 
 
 

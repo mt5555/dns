@@ -866,6 +866,7 @@ end subroutine ns_vorticity
 subroutine p3_params_init
 use params
 use p3dfft
+implicit none
 character(len=80) message
 integer :: fail=0
 integer :: dims(2)
@@ -943,6 +944,47 @@ if (nz <  isize(3) ) then
    call print_message("P3DFFT error: z dimmension too small for p3dfft")
 endif
 
+#if 0
+do i=0,ncpu_x*ncpu_y*ncpu_z-1
+if (my_pe==i) then
+   write(*,'(i4,a,3i3,a,3i3)') my_pe," decomp=",my_x,my_y,my_z," p3=",&
+   (p3_istart(1)-1)/isize(1),&
+   (p3_istart(2)-1)/isize(2),&
+   (p3_istart(3)-1)/isize(3)
+endif
+call mpi_barrier(comm_3d,j)
+enddo
+#endif
+
+! check physical grid
+if ( nint(xcord(nx1)/delx) /= p3_istart(1)-1 ) then
+   write(*,'(a,4i3,2i5)') 'ERROR: x start index: ',my_pe,my_x,my_y,my_z,&
+        nint(xcord(nx1)/delx),p3_istart(1)-1
+   fail = 1
+endif
+if ( nint(xcord(nx2)/delx) /= p3_iend(1)-1 ) then
+   print *,'ERROR: x grid end ',nint(xcord(nx2)/delx),p3_iend(1)-1
+   fail = 1
+endif
+if ( nint(ycord(ny1)/dely) /= p3_istart(2)-1 ) then
+   write(*,'(a,4i3,2i5)') 'ERROR: y start index: ',my_pe,my_x,my_y,my_z,&
+        nint(ycord(ny1)/dely),p3_istart(2)-1
+   fail = 1
+endif
+if ( nint(ycord(ny2)/dely) /= p3_iend(2)-1 ) then
+   print *,'ERROR: y grid end ',nint(ycord(ny2)/dely),p3_iend(2)-1
+   fail = 1
+endif
+if ( nint(zcord(nz1)/delz) /= p3_istart(3)-1 ) then
+   write(*,'(a,4i3,2i5)') 'ERROR: z start index: ',my_pe,my_x,my_y,my_z,&
+        nint(zcord(nz1)/delz),p3_istart(3)-1
+   fail = 1
+endif
+if ( nint(zcord(nz2)/delz) /= p3_iend(3)-1 ) then
+   print *,'ERROR: z grid end ',nint(zcord(nz2)/delz),p3_iend(3)-1
+   fail = 1
+endif
+
 
 ! p3dfft Fourier space loop dimensions
 p3_n1 = fsize(1)
@@ -982,11 +1024,13 @@ if (io_pe==my_pe) then
    write(*,'(a,3i6)') 'p3dfft local grid space dims:    ',isize
    write(*,'(a,3i6)') 'p3dfft local fourier space dims: ',fsize
 endif
+
 ! 32^3  y direction:  0..15,-16   0,1,2,3,4,5,6,7  8,9,10,11,12,13,14,15,-16
 !   print *,my_pe,'imcord; ',p3_1mcord
 !   print *,my_pe,'jmcord; ',p3_2mcord
 !   print *,my_pe,'kmcord; ',p3_3mcord
 
+call mpi_barrier(comm_3d,i)
 if (fail/=0) call abortdns("p3dfft params init dimension settings failure")
 end subroutine
 
@@ -1002,7 +1046,7 @@ implicit none
 real*8 :: Q_grid(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 complex*16 :: Q(p3_n1,p3_n2,p3_n3,n_var)
-integer n
+integer n,im,jm,km,i,j,k
 do n=1,n_var
    call ftran_r2c(Q_grid(1,1,1,n),Q(1,1,1,n))
    Q(:,:,:,n)=Q(:,:,:,n)/g_nx/g_ny/g_nz
@@ -1010,6 +1054,35 @@ do n=1,n_var
 !      print *,'max error = ',maxval(&
 !      abs( work1(nx1:nx2,ny1:ny2,nz1:nz2)-Q_grid(nx1:nx2,ny1:ny2,nz1:nz2,n) ) )
 enddo
+
+#if 0
+! debug code: fft of sine(kx), print modes
+n=1
+do i=nx1,nx2
+do j=ny1,ny2
+do k=nz1,nz2
+   Q_grid(i,j,k,n) = sin( 5*pi2*zcord(k) ) 
+enddo
+enddo
+enddo
+call ftran_r2c(Q_grid(1,1,1,n),Q(1,1,1,n))
+Q(:,:,:,n)=Q(:,:,:,n)/g_nx/g_ny/g_nz
+
+do k=1,p3_n3
+   jm=p3_3mcord(k)   ! y derivative
+   do j=1,p3_n2
+      im=p3_2mcord(j)   ! x deriviative 
+      do i=1,p3_n1  
+         km=p3_1mcord(i)  ! z deriviative
+         
+         if (abs(Q(i,j,k,n)).gt.1e-8) then
+            write(*,'(3i5,2f20.10)') im,jm,km,real(Q(i,j,k,n)),imag(Q(i,j,k,n))
+         endif
+      enddo
+   enddo
+enddo
+stop
+#endif
 end subroutine
 
 

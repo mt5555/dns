@@ -47,7 +47,7 @@ character(len=4) :: extension="uvwX"
 CPOINTER :: fid
 integer ierr
 
-n=max(mpidims(1),mpidims(2),mpidims(3))
+n=max(ncpu_x,ncpu_y,ncpu_z)
 if (n<10) then
    n=5
 else if (n<100) then

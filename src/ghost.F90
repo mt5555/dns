@@ -166,9 +166,9 @@ endif
 dest_pe3(1)=x0
 dest_pe3(2)=my_y
 dest_pe3(3)=my_z
-call mpi_cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
+call cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
 dest_pe3(1)=x1
-call mpi_cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
+call cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
 #endif
 
 
@@ -376,9 +376,9 @@ endif
 dest_pe3(1)=my_x
 dest_pe3(2)=y0
 dest_pe3(3)=my_z
-call mpi_cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
+call cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
 dest_pe3(2)=y1
-call mpi_cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
+call cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
 #endif
 
 
@@ -575,9 +575,9 @@ endif
 dest_pe3(1)=my_x
 dest_pe3(2)=my_y
 dest_pe3(3)=z0
-call mpi_cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
+call cart_rank(comm_3d,dest_pe3,dest_pe0,ierr)
 dest_pe3(3)=z1
-call mpi_cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
+call cart_rank(comm_3d,dest_pe3,dest_pe1,ierr)
 #endif
 
 

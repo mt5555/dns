@@ -23,6 +23,7 @@
 
 
 module mpi
+implicit none
 #include "mpif.h"
 
 #ifndef MPI_HAS_REAL8
@@ -31,6 +32,12 @@ module mpi
    integer MPI_REAL4 
    parameter (MPI_REAL4=MPI_REAL)
 #endif
+
+
+contains
+
+
+
 
 
 end module
@@ -46,8 +53,6 @@ integer dummy_mpi_variable
 end module
 
 #endif
-
-
 
 
 

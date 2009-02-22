@@ -125,7 +125,7 @@ if (nio>1) then
       dest_pe3(1)=0
       dest_pe3(2)=0
       dest_pe3(3)=inc*(i/inc)
-      call mpi_cart_rank(comm_3d,dest_pe3,io_nodes(i),ierr)
+      call cart_rank(comm_3d,dest_pe3,io_nodes(i),ierr)
    enddo
    call mpi_barrier(comm_3d,ierr)
 !print *,'my_pe=',my_pe,' my_z=',my_z, 'my io_pe: ',io_nodes(my_z)
@@ -264,8 +264,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       dest_pe3(1)=my_x
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_to_z: MPI_cart_rank failure",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dz*nslabz*nx_2dz
       tag=my_z
@@ -422,8 +421,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       dest_pe3(1)=my_x
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_to_z: MPI_cart_rank failure",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dz*nslabz*nx_2dz
       tag=my_z
@@ -508,8 +506,8 @@ integer dest_pe3(3),tag
 #endif
 
 !
-! each cube is broken, along the y axis, into mpidims(3) slabs of
-! size ny_2dz = (ny2-ny1+1)/mpidims(3)
+! each cube is broken, along the y axis, into ncpu_z slabs of
+! size ny_2dz = (ny2-ny1+1)/ncpu_z
 !
 ! in the z direction, the dimension is nslabz = (nz2-nz1+1)
 
@@ -555,8 +553,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       dest_pe3(1)=my_x
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_from_z: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dz*nslabz*nx_2dz
       tag=my_z
@@ -633,8 +630,8 @@ integer dest_pe3(3),tag
 #endif
 
 !
-! each cube is broken, along the y axis, into mpidims(3) slabs of
-! size ny_2dz = (ny2-ny1+1)/mpidims(3)
+! each cube is broken, along the y axis, into ncpu_z slabs of
+! size ny_2dz = (ny2-ny1+1)/ncpu_z
 !
 ! in the z direction, the dimension is nslabz = (nz2-nz1+1)
 
@@ -680,8 +677,7 @@ do iproc2=0,ncpu_z-1  ! loop over each slab
       dest_pe3(1)=my_x
       dest_pe3(2)=my_y
       dest_pe3(3)=iproc
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_from_z: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dz*nslabz*nx_2dz
       tag=my_z
@@ -783,7 +779,7 @@ integer dest_pe3(3),tag
 call wallclock(tmx1)
 
 !
-! each cube is broken, along the z axis, into mpidims(1) slabs of
+! each cube is broken, along the z axis, into ncpu_x slabs of
 ! size ny_2dx
 !
 ! in the x direction, the dimension is nslabx = (nx2-nx1+1)
@@ -827,8 +823,7 @@ do iproc2=0,ncpu_x-1  ! loop over each slab
       dest_pe3(1)=iproc
       dest_pe3(2)=my_y
       dest_pe3(3)=my_z
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_to_x2: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dx*nslabx*nslabz      
       tag=my_x
@@ -909,7 +904,7 @@ integer dest_pe3(3),tag
 call wallclock(tmx1)
 
 !
-! each cube is broken, along the z axis, into mpidims(1) slabs of
+! each cube is broken, along the z axis, into ncpu_x slabs of
 ! size ny_2dx
 !
 ! in the x direction, the dimension is nslabx = (nx2-nx1+1)
@@ -953,8 +948,7 @@ do iproc2=0,ncpu_x-1  ! loop over each slab
       dest_pe3(1)=iproc
       dest_pe3(2)=my_y
       dest_pe3(3)=my_z
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_to_x2: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dx*nslabx*nslabz      
       tag=my_x
@@ -1035,7 +1029,7 @@ integer dest_pe3(3),tag
 call wallclock(tmx1)
 
 !
-! each cube is broken, along the z axis, into mpidims(1) slabs of
+! each cube is broken, along the z axis, into ncpu_x slabs of
 ! size ny_2dx
 !
 ! in the x direction, the dimension is nslabx = (nx2-nx1+1)
@@ -1076,8 +1070,7 @@ do iproc2=0,ncpu_x-1  ! loop over each slab
       dest_pe3(1)=iproc
       dest_pe3(2)=my_y
       dest_pe3(3)=my_z
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_from_x: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dx*nslabx*nslabz 
       tag=my_x
@@ -1155,7 +1148,7 @@ integer dest_pe3(3),tag
 call wallclock(tmx1)
 
 !
-! each cube is broken, along the z axis, into mpidims(1) slabs of
+! each cube is broken, along the z axis, into ncpu_x slabs of
 ! size ny_2dx
 !
 ! in the x direction, the dimension is nslabx = (nx2-nx1+1)
@@ -1196,8 +1189,7 @@ do iproc2=0,ncpu_x-1  ! loop over each slab
       dest_pe3(1)=iproc
       dest_pe3(2)=my_y
       dest_pe3(3)=my_z
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_from_x: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=ny_2dx*nslabx*nslabz 
       tag=my_x
@@ -1289,7 +1281,7 @@ call wallclock(tmx1)
 
 
 !
-! each cube is broken, along the x axis, into mpidims(2) slabs of
+! each cube is broken, along the x axis, into ncpu_y slabs of
 ! size nx_2dy
 !
 ! in the y direction, the dimension is nslaby = (ny2-ny1+1)
@@ -1332,8 +1324,7 @@ do iproc2=0,ncpu_y-1  ! loop over each slab
       dest_pe3(1)=my_x
       dest_pe3(2)=iproc
       dest_pe3(3)=my_z
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_to_y: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=nx_2dy*nslaby*nslabz
       tag=my_y
@@ -1411,7 +1402,7 @@ integer dest_pe3(3),tag
 call wallclock(tmx1)
 
 !
-! each cube is broken, along the x axis, into mpidims(2) slabs of
+! each cube is broken, along the x axis, into ncpu_y slabs of
 ! size nx_2dy
 !
 ! in the y direction, the dimension is nslaby = (ny2-ny1+1)
@@ -1454,8 +1445,7 @@ do iproc2=0,ncpu_y-1  ! loop over each slab
       dest_pe3(1)=my_x
       dest_pe3(2)=iproc
       dest_pe3(3)=my_z
-      call mpi_cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
-      ASSERT("transpose_from_y: MPI_cart_rank failure 1",ierr==0)
+      call cart_rank(comm_3d,dest_pe3,dest_pe,ierr)
 
       l=nx_2dy*nslaby*nslabz
       tag=my_y
@@ -1589,7 +1579,7 @@ do x_pe=0,ncpu_x-1
 
 #ifdef USE_MPI
    tag=1
-   call mpi_cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
+   call cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
 #else
    sending_pe=my_pe
 #endif
@@ -1779,7 +1769,7 @@ do x_pe=0,ncpu_x-1
 
 #ifdef USE_MPI
    tag=1
-   call mpi_cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
+   call cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
 #else
    sending_pe=my_pe
 #endif
@@ -1890,7 +1880,7 @@ do x_pe=0,ncpu_x-1
 
 #ifdef USE_MPI
    tag=1
-   call mpi_cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
+   call cart_rank(comm_3d,dest_pe3,sending_pe,ierr)
 #else
    sending_pe=my_pe
 #endif
@@ -2052,7 +2042,7 @@ do x_pe=0,ncpu_x-1
 
 #ifdef USE_MPI
    tag=1
-   call mpi_cart_rank(comm_3d,dest_pe3,destination_pe,ierr)
+   call cart_rank(comm_3d,dest_pe3,destination_pe,ierr)
 #else
    destination_pe=my_pe
 #endif
