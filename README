@@ -261,7 +261,7 @@ P3DFFT: For the best performance with high resolution runs on large
 processor counts, use the version of the code that used the SDSC
 p3dfft() parallel FFT.  Both P3DFFT and FFTW must be built and
 installed in advance.  Currently we require that P3DFFT be built
-double precision and with the -DSTRIDE1 option.  You also must also
+double precision and with the -DSTRIDE1 option.  You must also
 edit the makefile to build with -DUSE_P3DFFT -DUSE_FFTW and 
 configure appropriate include and lib paths.  Then:
 
@@ -269,14 +269,16 @@ configure appropriate include and lib paths.  Then:
       % make dnsp3
 
 To use the DNS code's internal parallel FFT:
-(sometimes faster than dnsp3 for low-res slab decompositions)
 
       % cd dns/src
       % make dns
 
-There is also an optimized version, "dnsp", with much less communication
-but is limited to pencil decompositions.  But "dnsp" is no longer supported
-since "dnsp3" is faster.  
+There is also an optimized version of dns, "dnsp", with uses the DNS code's 
+internal parallel FFT and is but limited to pencil decompositions like
+P3DFFT.  But "dnsp" is no longer supported since "dnsp3" is faster.  
+
+For low resolutions on moderate numbers of processors, there is almost
+no difference between dns, dnsp and dnsp3.
 
 
 Step 3.
@@ -409,7 +411,7 @@ Other collected run times:
 
 
 *** dnsp3 code (P3DFFT) ************************************************
-2.4ghz quad core, DDR2-666, gfortran, 4 cores: 1.27min
+2.4ghz quad core, DDR2-666, gfortran, 4 cores: 1.23min
 
 kmax*eta =  0.9641
 KE       =  1.6525
