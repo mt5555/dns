@@ -148,11 +148,11 @@ if (g_u2xave==0) then
 ! X wave number im = p3_2mcord(j)
 ! Y wave number jm = p3_3mcord(k)
 ! Z wave number km = p3_1mcord(i)
-do k=1,p3_n1
+do k=1,p3_n3
    jm=p3_3mcord(k)
    do j=1,p3_n2
       im=p3_2mcord(j)
-      do i=1,p3_n3
+      do i=1,p3_n1
          km=p3_1mcord(i)
          
             
