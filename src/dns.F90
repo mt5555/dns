@@ -190,16 +190,22 @@ endif
 if (maxval(tims_max(6:11) + maxval(tims_max(20:23)))>0) then
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_z     ',tims_ave(6),tims_max(6)
    call print_message(message)
-   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_z_from_refyxz',tims_ave(20),tims_max(20)
-   call print_message(message)
+   if (tims_max(20)>0) then
+      write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_z_from_refyxz',tims_ave(20),tims_max(20)
+      call print_message(message)
+   endif
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_z   ',tims_ave(7),tims_max(7)
    call print_message(message)
-   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_z_to_refyxz',tims_ave(21),tims_max(21)
-   call print_message(message)
+   if (tims_max(21)>0) then
+      write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_z_to_refyxz',tims_ave(21),tims_max(21)
+      call print_message(message)
+   endif
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_x     ',tims_ave(8),tims_max(8)
    call print_message(message)
-   write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_x_from_refyxz',tims_ave(22),tims_max(22)
-   call print_message(message)
+   if (tims_max(21)>0) then
+      write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_to_x_from_refyxz',tims_ave(22),tims_max(22)
+      call print_message(message)
+   endif
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_x   ',tims_ave(9),tims_max(9)
    call print_message(message)
    write(message,'(a,2f9.4,a,f4.3,a)') '   transpose_from_x_from_refyxz',tims_ave(23),tims_max(23)

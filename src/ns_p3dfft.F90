@@ -670,6 +670,7 @@ do k=1,p3_n3
               + cmplx(0,jm)*rhs(i,j,k,2) &
               + cmplx(0,km)*rhs(i,j,k,3)/Lz  )
 
+         p(i,j,k)=ptmp  ! save p, might be needed below for passive scalars
 
          ! add -grad(p) term to RHS
          rhs(i,j,k,1)=rhs(i,j,k,1) - cmplx(0,im)*ptmp
