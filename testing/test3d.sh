@@ -45,7 +45,7 @@ if (`uname` == Darwin) then
    set opt = "-b $opt"
 endif
 if (`arch` == x86_64) then
-   set MPIRUN =  "yod -VN -sz "
+#   set MPIRUN =  "yod -VN -sz "
 endif
 
 
@@ -153,6 +153,7 @@ if ($1 == prbig) then
    set opt = "-r $opt"
    echo USING RESTART
 
+
 echo "***********************************************************"
 ./gridsetup.py 1 1 32 32 32 32 2 2 0
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
@@ -174,6 +175,11 @@ echo "***********************************************************"
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 64 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 
+echo "***********************************************************"
+./gridsetup.py 1 4 16 32 32 32 0 0 2
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 64 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
 
 echo "***********************************************************"
 ./gridsetup.py 2 1 16 32 32 32 0 2 0
@@ -182,6 +188,21 @@ make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d
 
 echo "***********************************************************"
 ./gridsetup.py 4 1 8 32 32 32 0 2 0
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 1 4 8 32 32 32 0 0 2
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 1 8 4 32 32 32 0 0 2
+make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
+../testing/check.sh $tmp $refout
+
+echo "***********************************************************"
+./gridsetup.py 1 2 16 32 32 32 0 0 2
 make -j2 $code >& /dev/null ;  rm -f $tmp ; $MPIRUN 32 ./$code $opt  reference3d   >& $tmp 
 ../testing/check.sh $tmp $refout
 

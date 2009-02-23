@@ -675,17 +675,88 @@ dealias_23sphere_kmax2   = (dealias_23sphere_kmax+.5)**2  ! rounds to k^2 + k
 dealias_23sphere_kmax2_1 = (dealias_23sphere_kmax-.5)**2  ! rounds to k^2 - k
 
 
+write(message,'(a,3i6)') "x-pencil decomp array size: ",g_nx2,ny_2dx,nslabz
+call print_message(message)
+write(message,'(a,3i6)') "y-pencil decomp array size: ",nx_2dy,g_ny2,nslabz
+call print_message(message)
+write(message,'(a,3i6)') "z-pencil decomp array size: ",nx_2dz,ny_2dz,g_nz2  
+call print_message(message)
 
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  z-pencil decomposition tweaks
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
 ! z-pencil decomposition.  can be anything of the form
 !   nx_2dz=nslabx/z1         mod(nslabx,nx_2dz)==0
 !   ny_2dz=nslaby/z2         mod(nslaby,ny_2dz)==0
 ! with z1*z2 = ncpu_z
-! usually nslaby will be larger than nslabx, except in P3DFFT case
+!
+! default was to chop up y direction
+! usually nslaby will be larger than nslabx, except in P3DFFT case.  
+! so if nslabx > nslaby, then chop up the x direction:
 if (nslabx > nslaby ) then
    ny_2dz=nslaby              ! y-dim in z-pencil-decomposition 
    nx_2dz=nslabx/ncpu_z       ! x-dim in z-pencil-decomposition 
+   write(message,'(a,3i6)') "Modifying z-pencil decomp.  array size: ",nx_2dz,ny_2dz,g_nz2  
+   call print_message(message)
 endif
+
+!
+!
+! if z-pencil decomposition has y dimesnion of only 1, lets
+! double it.   (only transpose_to/from_z() routines have been 
+! modified to handle this)
+!
+! This allows us to run a 1x1xN decompostion for a N^3 grid
+! 
+! check: 
+!      ncpu_z = (nslabx/nx_2dz) * (nslaby/ny_2dz)
+! which means that:  nslabx, nslaby must be even
+!           
+! Does this code work in the non-perfect load balanced case?
+! Probably not - so lets check for that too.
+!
+if (ny_2dz == 1 .and. 2*ny_2dz <= nslaby .and. nx_2dz /= 1  ) then
+   ! double the size in y, half the size in x:
+   ny_2dz=2*ny_2dz
+   nx_2dz=nx_2dz/2
+
+   write(message,'(a,3i6)') "Modifying z-pencil decomp.  array size: ",nx_2dz,ny_2dz,g_nz2  
+   call print_message(message)
+
+   if (0/=mod(nslabx,nx_2dz)) then
+      fail=1
+      call print_message("Error: nslabx/nx_2dz problem");
+   endif
+   if (0/=mod(nslaby,ny_2dz)) then
+      fail=1
+      call print_message("Error: nslaby/ny_2dz problem");
+   endif
+   if (ncpu_z /= (nslabx/nx_2dz)*(nslaby/ny_2dz)) then
+      fail=1
+      call print_message("Strange error in tranpose_to_z setup - check!")
+   endif
+
+   ! also make sure we are perfectly load balanced:
+   ! we allow this, but it is not tested with this tweaked transpose_to/from_z
+   if (0/=mod(nslaby,ncpu_x)) then
+      fail=1
+      call print_message("Error: ncpu_x does not divide nslaby");
+   endif
+   if (0/=mod(nslabx,ncpu_y)) then
+      fail=1
+      call print_message("Error: ncpu_y does not divide nslabx");
+   endif
+   if (0/=mod(nslaby,ncpu_z)) then
+      fail=1
+      call print_message("Error:  ncpu_z does not divide nslaby");
+   endif
+endif
+
+
+
 
 
 
@@ -720,56 +791,6 @@ endif
 
 
 
-
-
-!
-!
-! if z-pencil decomposition has y dimesnion of only 1, lets
-! double it.   (only transpose_to/from_z() routines have been 
-! modified to handle this)
-!
-! This allows us to run a 1x1xN decompostion for a N^3 grid
-! 
-! check: 
-!      ncpu_z = (nslabx/nx_2dz) * (nslaby/ny_2dz)
-! which means that:  nslabx, nslaby must be even
-!           
-! Does this code work in the non-perfect load balanced case?
-! Probably not - so lets check for that too.
-!
-if (nslaby == ncpu_z) then
-   ! double the size in y, half the size in x:
-   ny_2dz=2*ny_2dz
-   nx_2dz=nx_2dz/2
-
-   if (0/=mod(nslabx,nx_2dz)) then
-      fail=1
-      call print_message("Error: nslabx/nx_2dz problem");
-   endif
-   if (0/=mod(nslaby,ny_2dz)) then
-      fail=1
-      call print_message("Error: nslaby/ny_2dz problem");
-   endif
-   if (ncpu_z /= (nslabx/nx_2dz)*(nslaby/ny_2dz)) then
-      fail=1
-      call print_message("Strange error in tranpose_to_z setup - check!")
-   endif
-
-   ! also make sure we are perfectly load balanced:
-   ! we allow this, but it is not tested with this tweaked transpose_to/from_z
-   if (0/=mod(nslaby,ncpu_x)) then
-      fail=1
-      call print_message("Error: ncpu_x does not divide nslaby");
-   endif
-   if (0/=mod(nslabx,ncpu_y)) then
-      fail=1
-      call print_message("Error: ncpu_y does not divide nslabx");
-   endif
-   if (0/=mod(nslaby,ncpu_z)) then
-      fail=1
-      call print_message("Error:  ncpu_z does not divide nslaby");
-   endif
-endif
 
 
 
