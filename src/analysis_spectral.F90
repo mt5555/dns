@@ -273,6 +273,7 @@ do
    if (project_ch) then
       if (.not. read_uvw) then	
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         call input_passive(runname,time,Q,work1,work2)
          Q=Q*scale;
          read_uvw=.true.	
       endif
