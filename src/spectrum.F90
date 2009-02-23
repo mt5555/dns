@@ -2443,13 +2443,13 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
 integer :: n,wn,degen
 integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
-real*8 :: xw2,xw,xwh2,xwh,RR(4),II(4)
+real*8 :: xw2,xw,xwh2,xwh,xim,xim2,xjm,xjm2,xkm,xkm2,RR(4),II(4)
 real*8 :: efreq  !eigenfrequency sigma
 real*8 :: phipR(4), phipI(4), phimR(4), phimI(4),phi0(4)
 real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
 real*8 :: brunt,brunt2
 real*8 :: romega2,omsq
-real*8 :: etot,etot_Q,ewave,evort,ekh0,ierr,tote1,tote2,xfac
+real*8 :: etot,etot_Q,ewave,evort,ekh0,ierr,tote1,tote2,tote3,ke1,xfac
 
 character(len=80) :: message
 
@@ -2489,6 +2489,8 @@ spec_CR_kh0 = 0
 
 tote1=0
 tote2=0
+tote3=0
+ke1=0
 iwave=0
 do k=nz1,nz2
    do j=ny1,ny2
@@ -2504,6 +2506,9 @@ do k=nz1,nz2
          
          RR = QR(i,j,k,:)
          II = QI(i,j,k,:)
+	
+!	RR = 1.0
+!	II = 0
 
          xfac=64
          if (km==0) xfac=xfac/2
@@ -2511,12 +2516,19 @@ do k=nz1,nz2
          if (im==0) xfac=xfac/2
 
          tote1 = tote1 + 0.5*sum( Q(i,j,k,:)**2 )
+	 ke1 = ke1 + 0.5*sum(Q(i,j,k,1:3)**2)
          
          xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
          xw=sqrt(xw2)
          xwh2 = pi2_squared*(im**2 + jm**2)
          xwh = sqrt(xwh2)	
-         
+	 xim = pi2*im
+	 xim2 = xim**2
+	 xjm = pi2*jm
+	 xjm2 = xjm**2
+	 xkm = pi2*km/Lz
+	 xkm2 = xkm**2         
+
 
          degen = 1.d0/sqrt(2.d0)
 
@@ -2549,10 +2561,10 @@ do k=nz1,nz2
 !real and imaginary part of phi_m
 
             phimR(1) = 0.0
-            phimI(1) = -degen*pi2*jm/xwh
+            phimI(1) = -degen*xjm/xwh
             phimR(2) = 0.0
-            phimI(2) = degen*pi2*im/xwh
-            phimR(3) = -pi2*jm
+            phimI(2) = degen*xim/xwh
+            phimR(3) = -xjm
             phimI(3) = 0.0
             phimR(4) = 0.0
             phimI(4) = 0.0	
@@ -2590,7 +2602,7 @@ do k=nz1,nz2
             xwh = 0.d0
             efreq = romega2  
             
-            call eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
+            call eigm(xim,xjm,xkm,xw,xwh,efreq,phimR,phimI)
 
 ! phi_p = complex_conjugate(phi_m)
 
@@ -2598,7 +2610,7 @@ do k=nz1,nz2
             phipI = -phimI			  
 
 	    
-            call eig0(im,jm,km,xw,xwh,efreq,phi0)
+            call eig0(xim,xjm,xkm,xw,xwh,efreq,phi0)
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
@@ -2624,16 +2636,16 @@ do k=nz1,nz2
          else
 
 
-            efreq = sqrt(xwh2*brunt2 + (km**2)*omsq)/xw
+            efreq = sqrt(xwh2*brunt2 + xkm2*omsq)/xw
 
-            call eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
+            call eigm(xim,xjm,xkm,xw,xwh,efreq,phimR,phimI)
             
 ! phi_p = complex_conjugate(phi_m)
 
             phipR = phimR
             phipI = -phimI			  
 
-            call eig0(im,jm,km,xw,xwh,efreq,phi0)
+            call eig0(xim,xjm,xkm,xw,xwh,efreq,phi0)
 
 ! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
 
@@ -2665,9 +2677,12 @@ do k=nz1,nz2
          iwave=max(iw,iwave)
 
 	 etot_Q = 0.5*sum(RR**2 + II**2)
-         tote2 = tote2 + xfac*etot_Q
-
          etot = 0.5*(bm2 + bp2 + b02)
+
+         tote2 = tote2 + xfac*etot_Q
+	 tote3 = tote3 + xfac*etot	 
+
+
          spec_CR_tot(iw) = spec_CR_tot(iw) + xfac*etot
 	 spec_Q_tot(iw) = spec_Q_tot(iw) + xfac*etot_Q
 
@@ -2743,16 +2758,23 @@ call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,
 
 xfac = tote1
 call mpi_reduce(xfac,tote1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+xfac = ke1
+call mpi_reduce(xfac,ke1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 xfac = tote2
 call mpi_reduce(xfac,tote2,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+xfac = tote3
+call mpi_reduce(xfac,tote3,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif 
 
 tote1 = tote1/g_nx/g_ny/g_nz
 write(message,'(a,3f18.14)') 'TOTE computed in grid space: ',tote1
+ke1 = ke1/g_nx/g_ny/g_nz
+write(message,'(a,3f18.14)') 'KE computed in grid space: ',ke1
 call print_message(message)
 write(message,'(a,3f18.14)') 'TOTE computed from RR,II:    ',tote2
 call print_message(message)
-
+write(message,'(a,3f18.14)') 'TOTE computed from projected modes:    ',tote3
+call print_message(message)
 
 #if 0
 ! convert 3 CH modes back to grid space
@@ -2770,10 +2792,10 @@ enddo
 end subroutine
 
 
-subroutine eigm(im,jm,km,xw,xwh,efreq,phimR,phimI)
+subroutine eigm(xim,xjm,xkm,xw,xwh,efreq,phimR,phimI)
 
 use params
-integer :: im,jm,km
+real*8 :: xim,xjm,xkm
 real*8 :: xw,xwh,efreq
 real*8 :: phimR(4),phimI(4)
 real*8 :: dsq2,fac
@@ -2796,13 +2818,13 @@ romega2 = fcor
 	 phimI(4) = 0.0
       else
 
-         fac = km/(dsq2*xwh*xw)
+         fac = xkm/(dsq2*xwh*xw)
          
-         phimR(1) = fac*pi2*im
-	 phimI(1) = -fac*pi2*jm*romega2/efreq	
+         phimR(1) = fac*xim
+	 phimI(1) = -fac*xjm*romega2/efreq	
 
-         phimR(2) = fac*pi2*jm
-         phimI(2) = fac*pi2*im*romega2/efreq
+         phimR(2) = fac*xjm
+         phimI(2) = fac*xim*romega2/efreq
 
          phimR(3) = -xwh/(dsq2*xw)
          phimI(3) = 0.0d0
@@ -2814,11 +2836,11 @@ romega2 = fcor
 
 end subroutine
 
-subroutine eig0(im,jm,km,xw,xwh,efreq,phi0)
+subroutine eig0(xim,xjm,xkm,xw,xwh,efreq,phi0)
 
 use params
-integer :: im,jm,km
-real*8 :: xw,xwh,xwh2,km2,efreq
+real*8 :: xim,xjm,xkm
+real*8 :: xw,xwh,xwh2,xkm2,efreq
 real*8 :: phi0(4)
 real*8 :: den
 real*8 :: romega2,brunt,brunt2,omsq
@@ -2839,17 +2861,17 @@ if (xwh == 0) then
       else
 
          xwh2 = xwh**2
-         km2 = km**2
+         xkm2 = xkm**2
 
-         den = 1.d0/sqrt(brunt2*xwh2 + omsq*km2)
+         den = 1.d0/sqrt(brunt2*xwh2 + omsq*xkm2)
 
-         phi0(1) = den*brunt*pi2*jm
+         phi0(1) = den*brunt*xjm
 
-         phi0(2) = -den*brunt*pi2*im
+         phi0(2) = -den*brunt*xim
 
          phi0(3) = 0.d0
 
-         phi0(4) = den*pi2*km*romega2
+         phi0(4) = den*xkm*romega2
 
       endif
 
