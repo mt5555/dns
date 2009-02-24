@@ -9,10 +9,10 @@ to remove all data unneeded files created by running tests:
 cd dns/testing
 make clean
 
-
 All of these tests are only a few timesteps, and then they
 use the check.sh script to make sure the min and max
 of u,v,w,ke,Ea and w_xx have not changed.
+
 
 The turbulence tests use random initial conditions, and thus
 if anything changes (compiler or hardware) they will produce
@@ -53,14 +53,13 @@ and committed.
 =====================================================================
 
 test3d_forcing.sh   tests 3D forced isotropic turbulence run
-                    models: dns, dnsgrid, dnsp  (passed as second argument)
+                    models: dns, dnsp  (passed as second argument)
 
                     dnsp3 will not pass because iso12 forcing is different
-                    because fourier representation is different
-
+                    with dnsp3 because fourier representation is different
 
 test3d.sh  tests 3D decaying isotropic turbulence run
-           models:  dns, dnsgrid, dnsp3
+           models:  dns, dnsgrid, dnsp, dnsp3
            methods:  spectral
            dimensions:  lots
            tests several different dimension paddings
