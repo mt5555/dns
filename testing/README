@@ -5,6 +5,10 @@ cd dns/src
 ../testing/test3d.sh r         # run the restart test
 ../testing/test3d.sh makeref   # generate new reference output
 
+to remove all data unneeded files created by running tests:
+cd dns/testing
+make clean
+
 
 All of these tests are only a few timesteps, and then they
 use the check.sh script to make sure the min and max

@@ -152,7 +152,7 @@ fftdata(index)%stride=stride
 fftdata(index)%direction=direction
 
 call print_message('Starting FFTW_MEASURE:')
-write(message,'(a,i6,i3,i12,i3)') 'size, direction, howmany, stride=',n,direction,howmany,stride
+write(message,'(a,i6,i3,i12,i6)') 'size, direction, howmany, stride=',n,direction,howmany,stride
 call print_message(message)
 
 

@@ -1,0 +1,77 @@
+#!/bin/tcsh 
+#
+#  ./benchbgp.job [buildonly,nobuild]
+# 
+# default (no options): 
+#    builds executable, 
+#    submits job 
+#
+#
+set NTIME = 40
+set name = bench
+
+#set N = 512
+set N = 2048 
+#set N = 3072
+
+if ( $N == 512 ) then
+  set NNODES = 512
+  set BGPQUE = prod-devel
+  #set NCPUX = 8 ;  set NCPUZ = 256
+  set NCPUX = 16 ;  set NCPUZ = 128
+endif
+if ( $N == 2048 ) then
+  set NNODES = 8192
+  set BGPQUE = prod
+#  set NCPUX = 128 ;   set NCPUZ = 256
+#  set NCPUX = 64 ;   set NCPUZ = 512
+  set NCPUX = 32 ;   set NCPUZ = 1024
+endif
+if ( $N == 3072 ) then
+  set NNODES = 8192
+  set BGPQUE = prod
+#  set NCPUX = 128 ;   set NCPUZ = 256
+#  set NCPUX = 64 ;   set NCPUZ = 512
+#  set NCPUX = 32 ;   set NCPUZ = 1024
+endif
+
+
+
+
+set WDIR=~/scratch1/bench
+set SRC = ~/codes/dns/src
+mkdir $WDIR
+set EXE1=dnsp-$N-$NCPUX-$NCPUZ
+set EXE2=dnsp2-$N-$NCPUX-$NCPUZ
+set EXE3=dnsp3-$N-$NCPUX-$NCPUZ
+
+if ( $1 == nobuild ) then
+else
+  cd $SRC
+  #./gridsetup.py $NCPUX 1 $NCPUZ $N $N $N 0 2 0
+  #make -j3 dnsp
+  #mv -f dnsp $WDIR/$EXE2
+
+  #./gridsetup.py $NCPUX 1 $NCPUZ $N $N $N 2 0 0
+  #make -j3 dnsp
+  #mv -f dnsp $WDIR/$EXE1
+
+  ./gridsetup.py 1 $NCPUX $NCPUZ $N $N $N 0 0 2
+  make -j3 dnsp3
+  mv -f dnsp3 $WDIR/$EXE3
+
+if ( $1 == buildonly ) then
+   exit
+endif
+
+cd $WDIR
+
+qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn $EXE3  bench3a -i $SRC/forcing12-bench.inp
+#qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn $EXE3  bench3b -i $SRC/forcing12-bench.inp
+
+#qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn $EXE1  bench1a -i $SRC/forcing12-bench.inp
+#qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn $EXE1  bench1b -i $SRC/forcing12-bench.inp
+
+#qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn $EXE2  bench2a -i $SRC/forcing12-bench.inp
+#qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn $EXE2 bench2b -i $SRC/forcing12-bench.inp
+
