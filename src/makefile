@@ -91,7 +91,7 @@ ifeq ($(UNAME),Linux)
    ifeq ($(HOST),mauler.cims.nyu.edu)
       VENDOR=GNU
       MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
-      MPILIB =
+      MPILIB = 
    endif
 
 
@@ -174,7 +174,7 @@ ifeq ($(UNAME),Linux)
    endif
 
    ifeq ($(VENDOR),GNU)
-   F90 = gfortran
+   F90 = mpif90
    CC=gcc
    FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)
@@ -188,13 +188,6 @@ ifeq ($(UNAME),Linux)
    LDFLAGS = $(FFTLIB)
    endif
 
-
-   ifeq ($(VENDOR),GNU)
-   F90 = gfortran
-   CC=gcc
-   FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 -I/usr/include $(FFT)  
-   LDFLAGS = $(FFTLIB)
-   endif
 
 
 

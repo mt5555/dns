@@ -2507,9 +2507,6 @@ do k=nz1,nz2
          RR = QR(i,j,k,:)
          II = QI(i,j,k,:)
 	
-!	RR = 1.0
-!	II = 0
-
          xfac=64
          if (km==0) xfac=xfac/2
          if (jm==0) xfac=xfac/2
