@@ -1371,7 +1371,7 @@ if (io_read==1) then
       if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
          ! we can only upsample low-res data.
          ! to run with high-res data, output a trucated form.  
-         call print_message("Error: spectral input requires downsampling to lower resolution")
+         call print_message("Error: input file requires downsampling")
          call print_message("Input routines can only upsample.") 
          call print_message("Output routines can only downsample.") 
          call print_message("Run code at higher resolution, calling Output to downsample")
@@ -1397,9 +1397,9 @@ else
       write(*,'(a,3f5.0)') 'number of real coefficients: ',xnx,xny,xnz
       if (xnx>g_nx .or. xny>g_ny .or. xnz>g_nz) then
          ! we can only downsample to lower res data on output.
-         call print_message("Error: spectral output requires zero padding") 
+         call print_message("Error: output would require upsampling")
+         call print_message("Input routines can only upsample.") 
          call print_message("Output routines can only downsample.") 
-         call print_message("Input routines can input this data directly")
          call abortdns("error in header1_io")
       endif
    else
