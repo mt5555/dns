@@ -6,7 +6,7 @@
 
 namedir ='~kurien/INCITE_runs/SW02_tests/';
 name = 'bous128_Ro21Fr0.21_all';
-mu = 1e-4;
+
 
 %namedir ='~kurien/dns/src/';
 %name = 'temp_all';
@@ -24,6 +24,7 @@ fid=fopen([namedir,name,'.spec_ch'],'r','l');
 
 
 spec_tot = [];
+spec_Q_tot = [];
 spec_wave = [];
 spec_vort = [];
 spec_kh0 = [];
@@ -38,6 +39,7 @@ end
 time
   n_r=fread(fid,1,'float64');
   spec_tot=fread(fid,n_r,'float64');
+  spec_Q_tot=fread(fid,n_r,'float64');
   spec_vort=fread(fid,n_r,'float64');
   spec_wave=fread(fid,n_r,'float64');
   spec_kh0=fread(fid,n_r,'float64');
@@ -61,10 +63,12 @@ k = [0:n_r-1];
 if (movie)
 figure(1); % +, - and total helicity spectra
 loglog(k,spec_tot,'r'); hold on;
-%loglog(k,spec_vort,'b'); hold on;
-%loglog(k,spec_wave,'k'); hold on;
-loglog(k,abs(spec_kh0),'c');hold on; 
-axis([1 max(k) 1e-6 1]);
+%loglog(k,spec_Q_tot,'bo'); hold on;
+%loglog(k,spec_tot./spec_Q_tot,'ko');hold on;
+loglog(k,spec_vort,'b'); hold on;
+loglog(k,spec_wave,'k'); hold on;
+loglog(k,spec_kh0,'c');hold on; 
+axis([1 1000 1e-6 1]);
 grid
 legend('total','vortical','wave','kh=0')
 hold off

@@ -145,6 +145,8 @@ namedir = '~/';
 %name = 'TG2560000.0000';
 %namedir = '/home/mataylo/';
 
+name = 'bous128_Ro21Fr0.21_0000.0000';
+namedir ='/home/kurien/INCITE_runs/SW02_tests/';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -174,7 +176,7 @@ j=0;
 
 count = 0;
 countp = 0;
-while (time>=0 & time<=500)
+while (time>=0 & time<=1)
 
   j=j+1;
   n_r=fread(fid,1,'float64');
@@ -253,7 +255,7 @@ while (time>=0 & time<=500)
   end 
 
   if (movie==1)  
-  figure(1);
+  figure(10);
   if (n_z==1) 
     %subplot(2,1,1);
     subplot(1,1,1);
@@ -266,7 +268,7 @@ while (time>=0 & time<=500)
 %    hold off;
   else
     %spherical wave number
-    figure(1)
+    figure(10)
     subplot(1,1,1);
 
     stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
@@ -516,7 +518,7 @@ while (time>=0 & time<=500)
   if (movie_plot==1)  
   if (isempty(movie_times) |  1==max(abs(time-movie_times)<.001) )    
     disp('making ps files ...' )
-    figure(1)
+    figure(10)
     print ('-depsc',sprintf('%s_%.2f.eps',name,time))
     if (num_spect>0) 
       figure(2)
@@ -575,7 +577,7 @@ return
 
 
 if (length(spec_r_save>1) )
-figure(1); clf;
+figure(10); clf;
 loglog53(n_r,spec_r_save,'KE spectrum',CK,5);
 print -djpeg -r72 spec.jpg
 print -depsc -r600 spec.ps

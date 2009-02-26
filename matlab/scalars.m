@@ -89,7 +89,7 @@ nx=1024; f_k=0;fcor=0
 %nx=2048; f_k=0;fcor=0
 
 
-fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_0000.0000.scalars','r')
+fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars','r')
 nx=128; f_k=24;fcor=1.07;bous=107.08;
 
 nscalars=0;
@@ -179,7 +179,7 @@ maxvor=maxs(5,:);
 time_after=maxs(6,:);
 time=maxs(7,:);
 if (nints >=15)
-pe = ints(15,:)
+pe = ints(15,:);
 pe_diss = ints(16,:);
 end
 
@@ -209,7 +209,7 @@ for i=2:l
     j=j+1;
     time_2(j) = .5*(time(i)+time(i-1));
     ke_diss_tot(j)=(ke(i)-ke(i-1))./(time(i)-time(i-1));
-    %pe_diss_tot(j)=(pe(i)-pe(i-1))./(time(i)-time(i-1));
+    pe_diss_tot(j)=(pe(i)-pe(i-1))./(time(i)-time(i-1));
     Ea_diss_tot(j)=(Ea(i)-Ea(i-1))./(time(i)-time(i-1));
     h_diss_tot(j)=(hel(i)-hel(i-1))./(time(i)-time(i-1));
     ke_diss_tot2(j)=.5*(ke_diss_d(i)+ke_diss_d(i-1)) + ...
@@ -273,14 +273,19 @@ end
 
 figure(5)
 hold on
-plot(time,ke,'k')
-%plot(time,pe,'r')
-%plot(time,ke+pe,'b')
+ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
+ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
+timen = time*(ke_diss_f*(2*pi*f_k)^2)^(1/3);
+ken = ke*((ke_diss_f/(2*pi*f_k))^(-2/3));
+pen = pe*((ke_diss_f/(2*pi*f_k))^(-2/3));
+plot(timen,ken,'k')
+plot(timen,pen,'r')
+plot(timen,ke+pe,'b')
 %plot(time_2,ke_diss_tot,'r')
 %plot(time,hel,'g')
 title('KE: black, PE: red, Etot: blue');
 hold off
-xlabel('time')
+xlabel('time t(\varepsilon_f k_f^2)^(1/3)')
 
 % look at dissipations seperatly
 figure(6)
@@ -374,7 +379,7 @@ disp(sprintf('ke (average over last half of data) = %f ',ke));
 
 % averge Smith's R0 to a number
 if (f_k>0) 
-  R0 = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (.5 * fcor);
+  R0 = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (fcor);
   R0 = R0(ceil(length(R0)/2):length(R0));
   R0 = sum(R0)/length(R0);
   disp(sprintf('Smith''s R0 (average over last half of data) = %f ',R0));
@@ -418,8 +423,7 @@ epsilon_pe = epsilon_pe(ceil(length(epsilon_pe)/2):length(epsilon_pe));
 epsilon_pe = sum(epsilon_pe)/length(epsilon_pe);
 disp(sprintf('epsilon_pe (averaged over last half of data) = %f ',epsilon_pe));
 
-ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
-ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
+
 disp(sprintf('epsilon_f (averaged over last half of data) = %f ',ke_diss_f));
 Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (fcor);
 Fr = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (bous);
