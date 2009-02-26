@@ -2495,6 +2495,7 @@ iwave=0
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
+	ekh0 = 0
 ! note: wave number is (im,jm,km)
 ! index into arrays is (i,j,k)
 !
