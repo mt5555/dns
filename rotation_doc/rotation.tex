@@ -590,6 +590,87 @@ Forcing is
 sto_high_24.
 \end{verbatim}
 
+\section{Test of projection routines in unit aspect ratio.  March 4, 2009}
+The projection of the boussinesq data onto the Craya-Herring normal
+modes is in spectrum.F90 in the compute\_project\_ch subroutine. This
+routine is called from analysis\_spectral.F90 and decomposes a given
+snapshot (gridspace) into its two wave and one vortical mode (SW02) in fourier space and computes the power spectra of those modes.
+
+\subsection{Case SW02: $128^3$ gridpoints, $N/f = 100$, $Fr = 0.21$, $Ro = 21$} 
+Figure \ref{NF100_time} shows the time evolution of the kinetic energy of the flow with the same non-linear time and energy units used in SW02 namely:
+$$T = t(\varepsilon_f k_f^2)^{1/3}$$
+$$energy = E(\varepsilon_f/k_f)^{-2/3}$$
+This case was run upto about T = 1500 in these units. Note that SW02
+runs this case upto T=2200 (not shown in their Fig. 4) and plots their
+spectra at T=2200. Comparing Fig. \ref{NF100_time} and the $N/f = 100$
+curve of SW02 Fig. 4 upto time T = 800 (the maximum time-scale in
+SW02) we notice slight differences which can probably be attributed to
+the slight difference in our peak forcing wavenumbers (ours is
+$k_f=24$, vs. SW02 $k_f=20$) and the fact that our $\epsilon_f \simeq
+0.5$ whereas SW02 fixed theirs at $\epsilon_f = 1$. But the overall
+shape of the curve, the time at which it starts to grow after an
+initial equilibrium ($\approx T = 200$) is the same.
+\begin{figure}[ht]
+\centering
+  \includegraphics[scale = 0.7]{Comp_SW02_fig4_Nf100}
+\caption{Evolution in time of the kinetic energy. To be compared with $N/f = 100$ curve in Figure 4 of SW02.\label{NF100_time}}
+\end{figure}
+
+The energy spectra of the total energy as well as the wave, vortical
+and $k_h=0$ VSHF modes is given in Fig. \ref{NF100_spec}. This is
+computed at our latest time of $T=1500$, to be compared with the SW02
+Fig. 5 computed at T = 2200. The differences can probably be
+attributed both to the later time of SW02 and the slight differences
+in our forcing wavenumber, energy input rate $\epsilon_f$. But the
+qualitative agreement is good. The $k_h = 0$ VSHF modes carry most of
+the energy in the peak low-wavenumbers. We show in addition the wave
+and vortical modes which SW02 does not show. We do not show the
+potential energy spectrum which SW02 does show. An unexplained
+difference is the 'peaky' nature of the low-mode energy distribution
+($5< k < 10$) in SW02 Fig. 5. This does not appear in our runs.
+\begin{figure}[ht]
+\centering
+  \includegraphics[scale = 0.7]{Comp_SW02_fig5}
+\caption{Total energy and the projected wave, vortical and $k_h=0$ spectral distributions. To be compared with Figure 5 of SW02. \label{NF100_spec}}
+\end{figure}
+
+\subsection{Case SW02: $128^3$ gridpoints, $N/f = 10$, $Fr = 0.21$, $Ro = 2.1$}
+Figure \ref{NF10_time} shows the time evolution of the kinetic energy
+of the flow with the same non-linear time and energy units used in
+SW02. This case was run upto about T = 690 in those units. Note that SW02
+runs this case upto T=605. Comparing Fig. \ref{NF10_time} and the $N/f = 10$
+curve of SW02 Fig. 4 upto time T = 605 (the maximum time-scale in
+SW02) we notice slight differences which can probably be attributed to
+the fact that our $\epsilon_f \simeq
+0.5$ whereas SW02 fixed theirs at $\epsilon_f = 1$. But the overall
+shape of the curve, the time at which it starts to grow after an
+initial equilibrium ($\approx T = 200$) is the same.
+\begin{figure}[ht]
+\centering
+  \includegraphics[scale = 0.7]{Comp_SW02_fig4_Nf10}
+\caption{Evolution in time of the kinetic energy. To be compared with $N/f = 10$ curve in Figure 4 of SW02. \label{NF10_time}}
+\end{figure}
+
+The energy spectra of the total energy for this run as well as the
+wave, vortical and $k_h=0$ VSHF modes is given in Fig.
+\ref{NF10_spec}. This is computed at our latest time of $T=690$, to be
+compared with the SW02 Fig. 9 computed at T = 605. The differences can
+probably be attributed both to the slightly earlier time of SW02 and
+the slight differences in our energy input rate $\epsilon_f$. The
+qualitative agreement is good. An unexplained difference is the
+'peaky' nature of the low-mode energy distribution ($5< k < 10$) in
+SW02 Fig. 5. This does not appear in our runs.  The $k_h = 0$ VSHF
+modes carry most of the energy in the peak low-wavenumbers. The PV
+(vortical) mode spectra also agree well in that they do not contribute
+to the most energetic low wave numvers.  We also show in addition the
+wave modes which SW02 does not show. We do not show the potential
+energy spectrum which SW02 does show.
+\begin{figure}[ht]
+\centering 
+ \includegraphics[scale = 0.7]{Comp_SW02_fig9}
+\caption{Total energy and the projected wave, vortical and $k_h=0$ spectral distributions. To be compared with Figure 9 of SW02. \label{NF10_spec}}
+\end{figure}
+
 
 \section{Bousinesq scalars we're interested in computing}
 
