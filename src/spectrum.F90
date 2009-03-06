@@ -138,11 +138,10 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 !local
-integer :: iwave_max,i,n,j
+integer :: i,n,j
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 
-iwave_max=max(g_nx,g_ny,g_nz)
 spec_r=0
 spec_diff=0
 spec_r2=0
@@ -169,12 +168,12 @@ enddo
 ! passive scalars:
 do n=np1,np2
    call compute_spectrum(q1(1,1,1,n),work1,work2,spec_r(0,n),spec_r2,&
-       spec_x(0,n),spec_y(0,n),spec_z(0,n),iwave_max,1)
+       spec_x(0,n),spec_y(0,n),spec_z(0,n),1)
    spec_r(:,n)=.5*spec_r(:,n)
 enddo
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,1)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),1)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
    ! for now, use the value computed in RHS
    ! spec_diff=spec_diff + spec_d2
@@ -214,14 +213,13 @@ real*8 pv(nx,ny,nz)  ! used for potential vorticity
 real*8 pv2(nx,ny,nz)  ! used for potential enstrophy
 
 !local
-integer :: iwave_max,n,pv_type, i,j,k,iw
+integer :: n,pv_type, i,j,k,iw
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 :: rwave,xfac
 !
 ! use the full pv
 !
 pv_type = 1
-iwave_max=max(g_nx,g_ny,g_nz)
 !bw
 !bw For potential enstrophy Q = q^2/2
 !bw
@@ -246,7 +244,7 @@ call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
 call fft3d(work1,q1)
 
 call compute_spectrum(work1,q2,q3,q2spec_r,spec_r2,&
-     q2spec_x,q2spec_y,q2spec_z,iwave_max,1)
+     q2spec_x,q2spec_y,q2spec_z,1)
 
 !bw computing pv is complicated so set all those to zero for the moment
 q2spec_r=.5*q2spec_r
@@ -254,8 +252,7 @@ q2spec_x=.5*q2spec_x
 q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
-iwave_max=max(g_nx,g_ny,g_nz)
-call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,iwave_max,1)
+call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,1)
 
 
 end subroutine
@@ -273,14 +270,11 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 !local
-integer :: iwave_max,i
+integer i
 
-iwave_max=max(g_nx,g_ny)
 spec_r_2d=0
-
-
 do i=1,n_var
-   call compute_spectrum_2d(Q(1,1,1,i),work1,work2,spec_r_2d(0,0,i),iwave_max,0)
+   call compute_spectrum_2d(Q(1,1,1,i),work1,work2,spec_r_2d(0,0,i),0)
 enddo
 
 spec_r_2d=spec_r_2d/2
@@ -304,11 +298,10 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 !local
-integer :: iwave_max,i
+integer :: i
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 
-iwave_max=max(g_nx,g_ny,g_nz)
 spec_r=0
 spec_r2=0
 spec_d2=0
@@ -333,7 +326,7 @@ q1(:,:,:,3)=(Q(:,:,:,3))
 !  PE part
 !
 call compute_spectrum(q1(1,1,1,3),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,0)
+       spec_x(0,1),spec_y(0,1),spec_z(0,1),0)
 spec_r(:,1)=spec_r(:,1)+.5*grav*spec_r2
 spec_r(0,1)=spec_r(0,1) - .5*grav*H0**2
 
@@ -343,7 +336,7 @@ spec_r(0,1)=spec_r(0,1) - .5*grav*H0**2
 !
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,0)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),0)
    spec_r(:,1)=spec_r(:,1)+.5*spec_r2
 enddo
 spec_x=.5*spec_x
@@ -371,16 +364,11 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 !local
-integer :: iwave_max,i
+integer :: i
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 
-iwave_max=max(g_nx,g_ny,g_nz)
 spec_r_new=0
-
-
-
-
 spec_r2=0
 spec_d2=0
 spec_x=0
@@ -404,7 +392,7 @@ q1(:,:,:,3)=(Q(:,:,:,3))
 !  PE part
 !
 call compute_spectrum(q1(1,1,1,3),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,1),spec_y(0,1),spec_z(0,1),iwave_max,0)
+       spec_x(0,1),spec_y(0,1),spec_z(0,1),0)
 spec_r_new=spec_r_new+.5*grav*spec_r2
 spec_r_new(0)=spec_r_new(0) - .5*grav*H0**2
 
@@ -414,7 +402,7 @@ spec_r_new(0)=spec_r_new(0) - .5*grav*H0**2
 !
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,0)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),0)
    spec_r_new=spec_r_new+.5*spec_r2
 enddo
 
@@ -454,7 +442,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: time
 
 !local
-integer :: iwave_max,i
+integer :: i
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_d2(0:max(g_nx,g_ny,g_nz))
 character(len=100) :: message
@@ -479,7 +467,6 @@ print *,'**************************************'
 !
 
 
-iwave_max=max(g_nx,g_ny,g_nz)
 spec_r_new=0
 spec_diff_new=0
 
@@ -495,7 +482,7 @@ q1=Q
 ! compute spectrum in spec_r
 do i=1,ndim
    call compute_spectrum(q1(1,1,1,i),work1,work2,spec_r2,spec_d2,&
-       spec_x(0,i),spec_y(0,i),spec_z(0,i),iwave_max,0)
+       spec_x(0,i),spec_y(0,i),spec_z(0,i),0)
    spec_r_new=spec_r_new+.5*spec_r2
    ! for now, use the value computed in RHS
    ! spec_diff_new=spec_diff_new + spec_d2  
@@ -1125,9 +1112,8 @@ end subroutine
 
 
 subroutine compute_spectrum(pin,p,work,spectrum,spec_d,spectrum_x,spectrum_y,&
-   spectrum_z,iwave_max,skip_fft)
+   spectrum_z,skip_fft)
 !
-!  INPUT:  iwave_max:  size of spectrum()
 !  OUTPUT: iwave:      number of coefficients returned in spectrum()
 !          spectrum()  spherical wave number spectrum
 !          spec_d()    spherical wave number spectrum of diffusion term
@@ -1145,8 +1131,8 @@ integer :: iwave_max,ierr,skip_fft
 real*8 :: pin(nx,ny,nz)
 real*8 :: work(nx,ny,nz)
 real*8 :: p(nx,ny,nz)
-real*8 :: spectrum(0:iwave_max)
-real*8 :: spec_d(0:iwave_max)
+real*8 :: spectrum(0:max(g_nx,g_ny,g_nz))
+real*8 :: spec_d(0:max(g_nx,g_ny,g_nz))
 real*8 :: spectrum_x(0:g_nx/2)
 real*8 :: spectrum_y(0:g_ny/2)
 real*8 :: spectrum_z(0:g_nz/2)
@@ -1157,12 +1143,14 @@ real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
 real*8 :: energy,denergy,xfac,xw
 integer i,j,k,iw
 
+! dimension of spectra arrays:
+iwave_max=max(g_nx,g_ny,g_nz)
 
+! max wave number computed below:
 rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 if (nint(rwave)>iwave_max) then
    call abortdns("compute_spectrum: called with insufficient storage for spectrum()")
 endif
-iwave_max=nint(rwave)
 
 
 p=pin
@@ -1254,7 +1242,7 @@ end subroutine
 
 
 
-subroutine compute_spectrum_2d(pin,p,work,spectrum,iwave_max,skip_fft)
+subroutine compute_spectrum_2d(pin,p,work,spectrum,skip_fft)
 !
 !  INPUT:  iwave_max:  size of spectrum()
 !  OUTPUT: iwave:      number of coefficients returned in spectrum()
@@ -1280,11 +1268,13 @@ real*8 :: spectrum_in(0:max(g_nx,g_ny),0:g_nz/2)
 real*8 :: energy,denergy,xfac,xw
 integer ::  i,j,k,n,km
 
+iwave_max = max(g_nx,g_ny)  ! maximum dimension of spectra arrays
+
+! max wave number computed below
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 )
 if (nint(rwave)>iwave_max) then
    call abortdns("compute_spectrum_2d: called with insufficient storage for spectrum()")
 endif
-iwave_max=nint(rwave)
 
 
 p=pin
@@ -1318,7 +1308,7 @@ enddo
 
 #ifdef USE_MPI
 spectrum_in=spectrum
-n=(1+max(g_nx,g_ny))*(1+g_nz/2)
+n=(1+iwave_max)*(1+g_nz/2)
 call mpi_reduce(spectrum_in,spectrum,n,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 #endif
 
