@@ -103,8 +103,8 @@ real*8,private ::  bspec_z(0:g_nz/2,n_var)
 real*8,private ::  bspec_r(0:max(g_nx,g_ny,g_nz))
 
 
-integer,private :: iwave=-1
-integer,private :: iwave_2d=-1
+integer,private :: iwave_3d=-1          ! maximum wave number for 3D spectra
+integer,private :: iwave_2d=-1       ! maximum wave number for 2D spectra
 integer,private :: nbin=200
 
 
@@ -254,7 +254,7 @@ q2spec_x=.5*q2spec_x
 q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
-
+iwave_max=max(g_nx,g_ny,g_nz)
 call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,iwave_max,1)
 
 
@@ -420,7 +420,7 @@ enddo
 
 ! compute time rate of change in edot_r()
 if (time-time_old > 0) then
-   do i=0,iwave
+   do i=i,iwave_3d
       edot_r(i)=(spec_r_new(i)-spec_r(i,1) ) / (time-time_old)
    enddo
 endif
@@ -504,7 +504,7 @@ enddo
 
 ! compute time rate of change in edot_r()
 if (time-time_old > 0) then
-   do i=0,iwave
+   do i=i,iwave_3d
       edot_r(i)=(spec_r_new(i)-spec_r(i,1) ) / (time-time_old)
    enddo
 endif
@@ -543,9 +543,9 @@ endif
 
 ! If we are also computing 2d spectrum, dont bother to plot
 ! 3D spectrum 
-if (iwave_2d <= iwave ) then
+if (iwave_2d <= iwave_3d ) then
    write(message,'(a,f10.4)') " Energy Spectrum t=",time
-   call logplotascii(spec_r(0,1),iwave,trim(message))
+   call logplotascii(spec_r(0,1),iwave_3d,trim(message))
    !call logplotascii(spec_x,g_nx/2,message)
    !call logplotascii(spec_y,g_ny/2,message)
    !call logplotascii(spec_z,g_nz/2,message)
@@ -564,8 +564,8 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
-   x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_r(0,1),1+iwave)
+   x=1+iwave_3d; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_r(0,1),1+iwave_3d)
    x=1+g_nx/2; call cwrite8(fid,x,1)
    do i=1,3
       call cwrite8(fid,spec_x(0,i),1+g_nx/2)
@@ -591,9 +591,9 @@ if (my_pe==io_pe) then
    x=npassive; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
 
-   x=1+iwave; call cwrite8(fid,x,1)
+   x=1+iwave_3d; call cwrite8(fid,x,1)
    do i=np1,np2
-      call cwrite8(fid,spec_r(0,i),1+iwave) 
+      call cwrite8(fid,spec_r(0,i),1+iwave_3d) 
    enddo
 
    x=1+g_nx/2; call cwrite8(fid,x,1)
@@ -649,9 +649,9 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
-   x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_helicity_rn,1+iwave)
-   call cwrite8(fid,spec_helicity_rp,1+iwave)
+   x=1+iwave_3d; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_helicity_rn,1+iwave_3d)
+   call cwrite8(fid,spec_helicity_rp,1+iwave_3d)
    call cclose(fid,ierr)
 
 
@@ -663,8 +663,8 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
-   x=1+iwave; call cwrite8(fid,x,1)
-   call cwrite8(fid,spec_kEk,1+iwave)
+   x=1+iwave_3d; call cwrite8(fid,x,1)
+   call cwrite8(fid,spec_kEk,1+iwave_3d)
    call cclose(fid,ierr)
 
 
@@ -678,7 +678,7 @@ if (my_pe==io_pe) then
    x=g_nx/2; call cwrite8(fid,x,1)
    x=g_ny/2; call cwrite8(fid,x,1)
    x=g_nz/2; call cwrite8(fid,x,1)
-   x=1+iwave; call cwrite8(fid,x,1)
+   x=1+iwave_3d; call cwrite8(fid,x,1)
    call cwrite8(fid,time,1)
    do i=1,3
       call cwrite8(fid,cospec_x(0,i),g_nx/2+1)
@@ -690,7 +690,7 @@ if (my_pe==io_pe) then
       call cwrite8(fid,cospec_z(0,i),g_nz/2+1)
    enddo
    do i=1,3
-      call cwrite8(fid,cospec_r(0,i),1+iwave)
+      call cwrite8(fid,cospec_r(0,i),1+iwave_3d)
    enddo
 
 
@@ -798,39 +798,39 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
-   x=1+iwave; call cwrite8(fid,x,1)   
-   call cwrite8(fid,spec_helicity_rn,1+iwave)
-   call cwrite8(fid,spec_helicity_rp,1+iwave)
-   call cwrite8(fid,spec_meanhe,1+iwave)
-   call cwrite8(fid,spec_varhe,1+iwave)
-   call cwrite8(fid,spec_E,1+iwave)
-   call cwrite8(fid,spec_kEk,1+iwave)
-   call cwrite8(fid,spec_meanE,1+iwave)
-   call cwrite8(fid,spec_varE,1+iwave)
+   x=1+iwave_3d; call cwrite8(fid,x,1)   
+   call cwrite8(fid,spec_helicity_rn,1+iwave_3d)
+   call cwrite8(fid,spec_helicity_rp,1+iwave_3d)
+   call cwrite8(fid,spec_meanhe,1+iwave_3d)
+   call cwrite8(fid,spec_varhe,1+iwave_3d)
+   call cwrite8(fid,spec_E,1+iwave_3d)
+   call cwrite8(fid,spec_kEk,1+iwave_3d)
+   call cwrite8(fid,spec_meanE,1+iwave_3d)
+   call cwrite8(fid,spec_varE,1+iwave_3d)
 
    ! these quantities are disabled; see corresponding code in compute_hfree_spec
 #if 0
-   call cwrite8(fid,E33,1+iwave)
-   call cwrite8(fid,II2sq,1+iwave)
-   call cwrite8(fid,RRsq,1+iwave)
-   call cwrite8(fid,I2I3,1+iwave)
-   call cwrite8(fid,R2I3,1+iwave)
-   call cwrite8(fid,par,1+iwave)
+   call cwrite8(fid,E33,1+iwave_3d)
+   call cwrite8(fid,II2sq,1+iwave_3d)
+   call cwrite8(fid,RRsq,1+iwave_3d)
+   call cwrite8(fid,I2I3,1+iwave_3d)
+   call cwrite8(fid,R2I3,1+iwave_3d)
+   call cwrite8(fid,par,1+iwave_3d)
 #endif
 
-   call cwrite8(fid,rhel_spec_n,1+iwave)
-   call cwrite8(fid,rhel_spec_p,1+iwave)
-   call cwrite8(fid,rhel_rms_spec,1+iwave)
-   call cwrite8(fid,cos_tta_spec_n,1+iwave)
-   call cwrite8(fid,cos_tta_spec_p,1+iwave)
+   call cwrite8(fid,rhel_spec_n,1+iwave_3d)
+   call cwrite8(fid,rhel_spec_p,1+iwave_3d)
+   call cwrite8(fid,rhel_rms_spec,1+iwave_3d)
+   call cwrite8(fid,cos_tta_spec_n,1+iwave_3d)
+   call cwrite8(fid,cos_tta_spec_p,1+iwave_3d)
 
    x=nbin
    call cwrite8(fid,x,1)
-   do i=1,1+iwave
+   do i=1,1+iwave_3d
       tmp_pdf=costta_pdf(i-1,:)
       call cwrite8(fid,tmp_pdf,nbin)
    enddo
-   do i=1,1+iwave
+   do i=1,1+iwave_3d
       tmp_pdf=rhel_pdf(i-1,:)
       call cwrite8(fid,tmp_pdf,nbin)
    enddo   
@@ -877,7 +877,7 @@ endif
 ! Don't plot the potential enstrophy spectrum at all
 ! If we are also computing 2d spectrum, dont bother to plot
 ! 3D spectrum 
-!if (iwave_2d <= iwave ) then
+!if (iwave_2d <= iwave_3d ) then
 !   write(message,'(a,f10.4)') " Energy Spectrum t=",time
 !   call logplotascii(spec_r(0,1),iwave,message(1:25))
 !   !call logplotascii(spec_x,g_nx/2,message)
@@ -894,12 +894,12 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
-   x=1+iwave; call cwrite8(fid,x,1)
+   x=1+iwave_3d; call cwrite8(fid,x,1)
    x=1+g_nx/2; call cwrite8(fid,x,1)
    x=1+g_ny/2; call cwrite8(fid,x,1)	 
    x=1+g_nz/2; call cwrite8(fid,x,1)	 
    x=1+iwave_2d; call cwrite8(fid,x,1)	
-   call cwrite8(fid,q2spec_r,1+iwave)
+   call cwrite8(fid,q2spec_r,1+iwave_3d)
    call cwrite8(fid,q2spec_x,1+g_nx/2)
    call cwrite8(fid,q2spec_y,1+g_ny/2)
    call cwrite8(fid,q2spec_z,1+g_nz/2)
@@ -967,25 +967,25 @@ if (my_pe==io_pe) then
       
       ! d/dt total KE spectrum
       call cwrite8(fid,.5*(time+time_old),1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,edot_r,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,edot_r,1+iwave_3d)
       
       ! transfer function (only in NS case.  other cases spec_rhs is
       ! not computed and this is garbage.
       spec_r2 = spec_rhs - (spec_diff+spec_f)
       call cwrite8(fid,transfer_comp_time,1)  
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_r2,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_r2,1+iwave_3d)
       
       ! diffusion spectrum
       call cwrite8(fid,transfer_comp_time,1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_diff,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_diff,1+iwave_3d)
       
       ! forcing spectrum
       call cwrite8(fid,transfer_comp_time,1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_f,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_f,1+iwave_3d)
    endif
    if (equations==SHALLOW) then
       x=3   ! number of spectrums in file for each time.  
@@ -993,18 +993,18 @@ if (my_pe==io_pe) then
       
       ! e-dot
       call cwrite8(fid,.5*(time+time_old),1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,edot_r,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,edot_r,1+iwave_3d)
       
       ! diffusion spectrum
       call cwrite8(fid,.5*(time+time_old),1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_diff,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_diff,1+iwave_3d)
       
       ! div(tau) (or smag) spectrum
       call cwrite8(fid,.5*(time+time_old),1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_model,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_model,1+iwave_3d)
    endif
    
    
@@ -1084,27 +1084,27 @@ if (my_pe==io_pe) then
       
       ! d/dt total Heicity spectrum
       call cwrite8(fid,.5*(time+time_old),1) 
-      x=1+iwave; call cwrite8(fid,x,1)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
       
       edot_curl_r = 0   ! this is not computed yet !!!!!!!!!!!!
-      call cwrite8(fid,edot_curl_r,1+iwave)
+      call cwrite8(fid,edot_curl_r,1+iwave_3d)
       
       ! transfer function (only in NS case.  other cases spec_rhs is
       ! not computed and this is zero
       spec_r2 = spec_curl_rhs - (spec_curl_diff+spec_curl_f)
       call cwrite8(fid,transfer_comp_time,1)  
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_r2,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_r2,1+iwave_3d)
       
       ! diffusion spectrum
       call cwrite8(fid,transfer_comp_time,1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_curl_diff,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_curl_diff,1+iwave_3d)
       
       ! forcing spectrum
       call cwrite8(fid,transfer_comp_time,1) 
-      x=1+iwave; call cwrite8(fid,x,1)
-      call cwrite8(fid,spec_curl_f,1+iwave)
+      x=1+iwave_3d; call cwrite8(fid,x,1)
+      call cwrite8(fid,spec_curl_f,1+iwave_3d)
    endif
    call cclose(fid,ierr)
    
@@ -1160,7 +1160,7 @@ integer i,j,k,iw
 
 rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 if (nint(rwave)>iwave_max) then
-   call abortdns("compute_spectrum: called with insufficient storege for spectrum()")
+   call abortdns("compute_spectrum: called with insufficient storage for spectrum()")
 endif
 iwave_max=nint(rwave)
 
@@ -1231,17 +1231,17 @@ call mpi_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,i
 !
 ! 
 if (g_nz == 1)  then
-   iwave = min(g_nx/2,g_ny/2)
+   iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
 
 ! for all waves outside sphere, sum into one wave number:
-do i=iwave+2,iwave_max
-   spectrum(iwave+1)=spectrum(iwave+1)+spectrum(i)
-   spec_d(iwave+1)=spec_d(iwave+1)+spec_d(i)
+do i=iwave_3d+2,iwave_max
+   spectrum(iwave_3d+1)=spectrum(iwave_3d+1)+spectrum(i)
+   spec_d(iwave_3d+1)=spec_d(iwave_3d+1)+spec_d(i)
 enddo
-iwave=iwave+1
+iwave_3d=iwave_3d+1
 
 
 
@@ -1282,7 +1282,7 @@ integer ::  i,j,k,n,km
 
 rwave=sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 )
 if (nint(rwave)>iwave_max) then
-   call abortdns("compute_spectrum_2d: called with insufficient storege for spectrum()")
+   call abortdns("compute_spectrum_2d: called with insufficient storage for spectrum()")
 endif
 iwave_max=nint(rwave)
 
@@ -1408,17 +1408,17 @@ call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 !
 ! 
 if (g_nz == 1)  then
-   iwave = min(g_nx/2,g_ny/2)
+   iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
 
 
 ! for all waves outside sphere, sum into one wave number:
-do i=iwave+2,iwave_max
-   spec(iwave+1)=spec(iwave+1)+spec(i)
+do i=iwave_3d+2,iwave_max
+   spec(iwave_3d+1)=spec(iwave_3d+1)+spec(i)
 enddo
-iwave=iwave+1
+iwave_3d=iwave_3d+1
 
 end subroutine
 
@@ -1505,17 +1505,17 @@ call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 !
 ! 
 if (g_nz == 1)  then
-   iwave = min(g_nx/2,g_ny/2)
+   iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
 
 
 ! for all waves outside sphere, sum into one wave number:
-do i=iwave+2,iwave_max
-   spec(iwave+1)=spec(iwave+1)+spec(i)
+do i=iwave_3d+2,iwave_max
+   spec(iwave_3d+1)=spec(iwave_3d+1)+spec(i)
 enddo
-iwave=iwave+1
+iwave_3d=iwave_3d+1
 
 end subroutine
 
@@ -1578,17 +1578,17 @@ call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 !max wave number in sphere.
 if (g_nz == 1)  then
-   iwave = min(g_nx/2,g_ny/2)
+   iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
 
 
 ! for all waves outside sphere, sum into one wave number:
-do i=iwave+2,iwave_max
-   spec(iwave+1)=spec(iwave+1)+spec(i)
+do i=iwave_3d+2,iwave_max
+   spec(iwave_3d+1)=spec(iwave_3d+1)+spec(i)
 enddo
-iwave=iwave+1
+iwave_3d=iwave_3d+1
 
 end subroutine
 
@@ -1756,25 +1756,25 @@ endif
 !
 ! 
 if (g_nz == 1)  then
-   iwave = min(g_nx/2,g_ny/2)
+   iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
 
 
 ! for all waves outside sphere, sum into one wave number:
-do i=iwave+2,iwave_max
-   spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
-   spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
-   cospec_r(iwave+1,1:ndim)=cospec_r(iwave+1,1:ndim)+cospec_r(i,1:ndim)
-   spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
+do i=iwave_3d+2,iwave_max
+   spec_helicity_rp(iwave_3d+1)=spec_helicity_rp(iwave_3d+1)+spec_helicity_rp(i)
+   spec_helicity_rn(iwave_3d+1)=spec_helicity_rn(iwave_3d+1)+spec_helicity_rn(i)
+   cospec_r(iwave_3d+1,1:ndim)=cospec_r(iwave_3d+1,1:ndim)+cospec_r(i,1:ndim)
+   spec_kEk(iwave_3d+1)=spec_kEk(iwave_3d+1)+spec_kEk(i)
 
 enddo
-iwave=iwave+1
+iwave_3d=iwave_3d+1
 
 if (my_pe==io_pe) then
    heltot=0
-   do i=0,iwave
+   do i=i,iwave_3d
       heltot=heltot+spec_helicity_rp(i)+spec_helicity_rn(i)
    enddo
    print *,'total helicity: ',heltot
@@ -2263,38 +2263,38 @@ endif
 
 ! maximum wave number for spherical shells:
 if (g_nz == 1)  then
-   iwave = min(g_nx/2,g_ny/2)
+   iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
 endif
 
-! for all waves outside sphere, sum into one wave number, iwave+1:
-do i=iwave+2,iwave_max
-   spec_helicity_rp(iwave+1)=spec_helicity_rp(iwave+1)+spec_helicity_rp(i)
-   spec_helicity_rn(iwave+1)=spec_helicity_rn(iwave+1)+spec_helicity_rn(i)
-   spec_meanhe(iwave+1)=spec_meanhe(iwave+1)+spec_meanhe(i)
-   spec_varhe(iwave+1)=spec_varhe(iwave+1)+spec_varhe(i)
-   spec_E(iwave+1)=spec_E(iwave+1)+spec_E(i)  
-   spec_kEk(iwave+1)=spec_kEk(iwave+1)+spec_kEk(i)
-   spec_varE(iwave+1)=spec_varE(iwave+1)+spec_varE(i)
-   E33(iwave+1)=E33(iwave+1)+E33(i)
-   II2sq(iwave+1)=II2sq(iwave+1)+II2sq(i)
-   RRsq(iwave+1)=RRsq(iwave+1)+ RRsq(i)
-   I2I3(iwave+1)=I2I3(iwave+1)+I2I3(i)
-   R2I3(iwave+1)=R2I3(iwave+1)+R2I3(i)
-   par(iwave+1)=par(iwave+1)+par(i)		   
-   cos_tta_spec_n(iwave+1) = cos_tta_spec_n(iwave+1) + cos_tta_spec_n(i)
-   cos_tta_spec_p(iwave+1) = cos_tta_spec_p(iwave+1) + cos_tta_spec_p(i)
-   rhel_spec_n(iwave+1) = rhel_spec_n(iwave+1) + rhel_spec_n(i)
-   rhel_spec_p(iwave+1) = rhel_spec_p(iwave+1) + rhel_spec_p(i)
-   rhel_rms_spec(iwave+1) = rhel_rms_spec(iwave+1) + rhel_rms_spec(i)
-   costta_pdf(iwave+1,:) = costta_pdf(iwave+1,:) + costta_pdf(i,:)
-   rhel_pdf(iwave+1,:) = rhel_pdf(iwave+1,:) + rhel_pdf(i,:)
+! for all waves outside sphere, sum into one wave number, iwave_3d+1:
+do i=iwave_3d+2,iwave_max
+   spec_helicity_rp(iwave_3d+1)=spec_helicity_rp(iwave_3d+1)+spec_helicity_rp(i)
+   spec_helicity_rn(iwave_3d+1)=spec_helicity_rn(iwave_3d+1)+spec_helicity_rn(i)
+   spec_meanhe(iwave_3d+1)=spec_meanhe(iwave_3d+1)+spec_meanhe(i)
+   spec_varhe(iwave_3d+1)=spec_varhe(iwave_3d+1)+spec_varhe(i)
+   spec_E(iwave_3d+1)=spec_E(iwave_3d+1)+spec_E(i)  
+   spec_kEk(iwave_3d+1)=spec_kEk(iwave_3d+1)+spec_kEk(i)
+   spec_varE(iwave_3d+1)=spec_varE(iwave_3d+1)+spec_varE(i)
+   E33(iwave_3d+1)=E33(iwave_3d+1)+E33(i)
+   II2sq(iwave_3d+1)=II2sq(iwave_3d+1)+II2sq(i)
+   RRsq(iwave_3d+1)=RRsq(iwave_3d+1)+ RRsq(i)
+   I2I3(iwave_3d+1)=I2I3(iwave_3d+1)+I2I3(i)
+   R2I3(iwave_3d+1)=R2I3(iwave_3d+1)+R2I3(i)
+   par(iwave_3d+1)=par(iwave_3d+1)+par(i)		   
+   cos_tta_spec_n(iwave_3d+1) = cos_tta_spec_n(iwave_3d+1) + cos_tta_spec_n(i)
+   cos_tta_spec_p(iwave_3d+1) = cos_tta_spec_p(iwave_3d+1) + cos_tta_spec_p(i)
+   rhel_spec_n(iwave_3d+1) = rhel_spec_n(iwave_3d+1) + rhel_spec_n(i)
+   rhel_spec_p(iwave_3d+1) = rhel_spec_p(iwave_3d+1) + rhel_spec_p(i)
+   rhel_rms_spec(iwave_3d+1) = rhel_rms_spec(iwave_3d+1) + rhel_rms_spec(i)
+   costta_pdf(iwave_3d+1,:) = costta_pdf(iwave_3d+1,:) + costta_pdf(i,:)
+   rhel_pdf(iwave_3d+1,:) = rhel_pdf(iwave_3d+1,:) + rhel_pdf(i,:)
 
 enddo
 
-!average costta and other mean values over sphere (exclude iwave=0)
-do i = 1,iwave+1
+!average costta and other mean values over sphere (exclude iwave_3d=0)
+do i = 1,iwave_3d+1
 cos_tta_spec_n(i) = cos_tta_spec_n(i)/countn(i)
 cos_tta_spec_p(i) = cos_tta_spec_p(i)/countp(i)
 spec_meanhe(i) = (spec_meanhe(i)/pcount(i))
@@ -2311,18 +2311,18 @@ spec_varE(i) = (spec_varE(i)/pcount(i))
 enddo
 
 !compute pdfs from histograms (exclude iwave = 0)
-do i = 1,iwave+1
+do i = 1,iwave_3d+1
 if (sum(rhel_pdf(i,:)) > 0.0) rhel_pdf(i,:) = rhel_pdf(i,:)/sum(rhel_pdf(i,:))
 
 if (sum(costta_pdf(i,:)) > 0.0) costta_pdf(i,:) = costta_pdf(i,:)/sum(costta_pdf(i,:))
 
 enddo
 
-iwave=iwave+1
+iwave_3d=iwave_3d+1
 
 if (my_pe==io_pe) then
    heltot=0
-   do i=0,iwave
+   do i=i,iwave_3d
       heltot=heltot+spec_helicity_rp(i)+spec_helicity_rn(i)
    enddo
    print *,'total helicity: ',heltot
@@ -2489,9 +2489,9 @@ spec_CR_kh0 = 0
 
 tote1=0
 tote2=0
+iwave_3d=0
 tote3=0
 ke1=0
-iwave=0
 do k=nz1,nz2
    do j=ny1,ny2
       do i=nx1,nx2
@@ -2672,7 +2672,7 @@ do k=nz1,nz2
 	 
 !	calculate the total energy from the QR, QI directly as a check
          iw=nint(Lz*sqrt(im**2 + jm**2 + (km/Lz)**2))
-         iwave=max(iw,iwave)
+         iwave_3d=max(iw,iwave_3d)
 
 	 etot_Q = 0.5*sum(RR**2 + II**2)
          etot = 0.5*(bm2 + bp2 + b02)
@@ -2734,25 +2734,25 @@ do k=nz1,nz2
 enddo
 
 #ifdef USE_MPI
-i=iwave
-call mpi_reduce(i,iwave,1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
+i=iwave_3d
+call mpi_reduce(i,iwave_3d,1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
 #endif
-if (iwave > max(g_nx,g_ny,g_nz)) then
+if (iwave_3d > max(g_nx,g_ny,g_nz)) then
    call abortdns("ERROR: spectra arrays dimensioned too small!")
 endif
 
 
 #ifdef USE_MPI
 spectrum_in=spec_CR_tot
-call mpi_reduce(spectrum_in,spec_CR_tot,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_tot,1+iwave_3d,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_Q_tot
-call mpi_reduce(spectrum_in,spec_Q_tot,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_Q_tot,1+iwave_3d,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_vort
-call mpi_reduce(spectrum_in,spec_CR_vort,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_vort,1+iwave_3d,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_wave
-call mpi_reduce(spectrum_in,spec_CR_wave,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_wave,1+iwave_3d,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 spectrum_in=spec_CR_kh0
-call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_reduce(spectrum_in,spec_CR_kh0,1+iwave_3d,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 
 xfac = tote1
 call mpi_reduce(xfac,tote1,1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
@@ -2908,12 +2908,12 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
-   x=1+iwave; call cwrite8(fid,x,1)   
-   call cwrite8(fid,spec_CR_tot,1+iwave)
-   call cwrite8(fid,spec_Q_tot,1+iwave)
-   call cwrite8(fid,spec_CR_vort,1+iwave)
-   call cwrite8(fid,spec_CR_wave,1+iwave)
-   call cwrite8(fid,spec_CR_kh0,1+iwave)
+   x=1+iwave_3d; call cwrite8(fid,x,1)   
+   call cwrite8(fid,spec_CR_tot,1+iwave_3d)
+   call cwrite8(fid,spec_Q_tot,1+iwave_3d)
+   call cwrite8(fid,spec_CR_vort,1+iwave_3d)
+   call cwrite8(fid,spec_CR_wave,1+iwave_3d)
+   call cwrite8(fid,spec_CR_kh0,1+iwave_3d)
    call cclose(fid,ierr)
 endif
 
