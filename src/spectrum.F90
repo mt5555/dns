@@ -2725,7 +2725,7 @@ enddo
 
 #ifdef USE_MPI
 i=iwave_3d
-call mpi_reduce(i,iwave_3d,1,MPI_INTEGER,MPI_MAX,io_pe,comm_3d,ierr)
+call mpi_allreduce(i,iwave_3d,1,MPI_INTEGER,MPI_MAX,comm_3d,ierr)
 #endif
 if (iwave_3d > max(g_nx,g_ny,g_nz)) then
    call abortdns("ERROR: spectra arrays dimensioned too small!")
