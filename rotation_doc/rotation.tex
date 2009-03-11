@@ -596,8 +596,29 @@ modes is in spectrum.F90 in the compute\_project\_ch subroutine. This
 routine is called from analysis\_spectral.F90 and decomposes a given
 snapshot (gridspace) into its two wave and one vortical mode (SW02) in fourier space and computes the power spectra of those modes.
 
+\subsection{Case SW02: $128^3 gridpoints, $N/f \rightarrow \infty, $Fr = 0.21$, $Ro \rightarrow \infty}
+Figure \ref{Froude_time} shows the time evolution of the kinetic energy of the flow with the same nondimensional time and energy units used in SW02 namely:
+$$T = t(\varepsilon_f k_f^2)^{1/3}$$
+$$energy = E(\varepsilon_f/k_f)^{-2/3}$$
+This case was run upto T = 690 in these units. This figure should be compared with Fig. 1 in SW02 for the $Fr = 0.21$, $k_f = 24$ case.
+\begin{figure}[ht]
+\centering
+  \includegraphics[scale = 0.5]{Comp_SW02_fig1_Fr0.21_kf24}
+\caption{Evolution in time of the kinetic energy. To be compared with $Fr = 0.21$, $k_f = 24$ curve in Figure 1 of SW02.\label{Froude_time}}
+\end{figure}
+
+The figure \ref{Froude_spec} shows the total and projected spectra for
+this case at T=690, to be compared with SW02, Fig. 2. Note that SW02
+ran this case upto T=900 and plot their spectra at that time. The total and $k_h=0$ agree very well qualitatively.
+\begin{figure}[ht]
+\centering
+  \includegraphics[scale = 0.7]{Comp_SW02_fig2}
+  \caption{Total energy and the projected wave, vortical and $k_h=0$
+    spectral distributions at T = 690. To be compared with Figure 2 of
+    SW02. \label{Froude_spec}}
+
 \subsection{Case SW02: $128^3$ gridpoints, $N/f = 100$, $Fr = 0.21$, $Ro = 21$} 
-Figure \ref{NF100_time} shows the time evolution of the kinetic energy of the flow with the same non-linear time and energy units used in SW02 namely:
+Figure \ref{NF100_time} shows the time evolution of the kinetic energy of the flow with the same non-dimensional time and energy units used in SW02 namely:
 $$T = t(\varepsilon_f k_f^2)^{1/3}$$
 $$energy = E(\varepsilon_f/k_f)^{-2/3}$$
 This case was run upto T = 1151 in these units. Note that SW02
