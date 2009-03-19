@@ -312,7 +312,7 @@ if (doit_screen) then
       ! epsilon = delke_tot
       eta = (mu**3 / epsilon)**.25
       write(message,'(a,3f13.4)') 'mesh spacing/eta: ',&
-           delx/eta,dely/eta,delz/eta
+           delx/eta,dely/eta,Lz*delz/eta
       call print_message(message)	
       write(message,'(a,3f13.4)') 'kmax*eta: ',xkmax*eta
       call print_message(message)	

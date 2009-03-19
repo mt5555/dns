@@ -435,7 +435,7 @@ do k=nz1,nz2
       jm=abs(jmcord(j))
       do i=nx1,nx2
          im=abs(imcord(i))
-         xw=im**2 + jm**2 + km**2
+         xw=im**2 + jm**2 + (km/Lz)**2
          if (dealias_remove(im,jm,km)) xw=0
          maxw=max(maxw,xw)
       enddo
