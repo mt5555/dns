@@ -81,16 +81,35 @@ fid2=-1;
 fid = endianopen('~/research.old/projects/bottleneck/invsc256_maxh0000.0000.scalars','r');
 nx=256;f_k = 0; fcor=0;
 
-fid = endianopen('/netscratch/skurien/dns_data/sc1024A/sc1024A.scalars','r')
-nx=1024; f_k=0;fcor=0
+%fid = endianopen('/netscratch/skurien/dns_data/sc1024A/sc1024A.scalars','r')
+%nx=1024; f_k=0;fcor=0
 
 
 %fid = endianopen('/netscratch/skurien/dns_data/sc2048A/sc2048A.scalars','r')
 %nx=2048; f_k=0;fcor=0
 
 
-fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars','r')
+fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21/bous128_Ro21Fr0.21_all.scalars','r')
 nx=128; f_k=24;fcor=1.07;bous=107.08;
+
+%fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro2.1Fr0.21/bous128_Ro2.1Fr0.21_all.scalars','r')
+%nx=128; f_k=24;fcor=10.7;bous=107.08;
+
+fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Fr0.21/bous128_Fr0.21_all.scalars','r')
+nx=128; f_k=24;fcor=0;bous=107.08;
+
+%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/RSSlowres_all.scalars','r')
+%nx=400; f_k=4;fcor=136.2;bous=136.2;
+
+fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/highres/RSShighres_all.scalars','r')
+nx=500; f_k=4;fcor=136.2;bous=136.2;
+
+%fid = endianopen('~/projects/lowaspectNS/delta0.1/delta0.10000.0000.scalars','r')
+%nx=120; f_k=4;fcor=0;bous=0;
+
+%fid = endianopen('~/projects/lowaspectNS/delta1.0/delta1.0_0000.0000.scalars','r')
+%nx=200; f_k=4;fcor=0;bous=0;
+
 
 nscalars=0;
 nscalars_e=0;
@@ -271,6 +290,7 @@ if (nx>0)
   print -djpeg -r72 kmaxeta.jpg
 end
 
+%plot energies as a function of nonlinear times (SW02 paper)
 figure(5)
 hold on
 ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
@@ -280,12 +300,13 @@ ken = ke*((ke_diss_f/(2*pi*f_k))^(-2/3));
 pen = pe*((ke_diss_f/(2*pi*f_k))^(-2/3));
 plot(timen,ken,'k')
 plot(timen,pen,'r')
-plot(timen,ke+pe,'b')
+plot(timen,ken+pen,'b')
 %plot(time_2,ke_diss_tot,'r')
 %plot(time,hel,'g')
 title('KE: black, PE: red, Etot: blue');
 hold off
-xlabel('time t(\varepsilon_f k_f^2)^(1/3)')
+xlabel('time t(\epsilon_f k_f^2)^{1/3}')
+ylabel('E(\epsilon_f/k_f)^{-2/3}')
 
 % look at dissipations seperatly
 figure(6)
@@ -334,13 +355,13 @@ print -djpeg -r72 vor.jpg
 %plot helicity, enstrophy and ratio H/W
 figure(10)
 subplot(3,1,1);
-plot(time,abs(hel),'r');
+plot(timen,hel,'r');grid on;
 ylabel('H');
 subplot(3,1,2);
-plot(time,ens,'b');
+plot(timen,ens,'b');grid on;
 ylabel('W');
 subplot(3,1,3);
-plot(time,abs(hel)./ens,'k');
+plot(timen,hel./ens,'k');grid on;
 ylabel('H/W');
 
 

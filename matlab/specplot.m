@@ -28,52 +28,7 @@ mu = 1;
 %  tsave=[0 .41 .7 1.0  1.3  1.6 ];
 
 
-%name = 'qg64hyper_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/';
 
-%name = 'qg64hyper_all';
-%namedir = ['/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/' ...
-%           'qg/qg64/sto_high_4/hyper_nu/bous500/'];
-
-%name = 'qg64hyper_all';
-%namedir = ['/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/' ...
-%           'qg/qg64/sto_high_4/hyper_nu/bous1000/'];
-
-%name = 'qg128sph_all';
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
-%           'qg/qg128/sphere_visc/'];
-
-%name = 'qg128slab_all';
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
-%           'qg/qg128/slab_visc/'];
-
-%name = 'qg128_fftsph_all'; ...
-%                   
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
-%           ...      
-%           'qg/qg128/sphere_dealias/']; ...
-                   
-%name = 'qg128_nhyper_all'; 
-%namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/low4/' ...
-%           ...
-%           'qg/qg128/no_hyper/']; ...
-       
-
-%name = 'qg256hyper_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
-
-%name = 'qg256hyper0000.0000';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu15/';
-
-%name = 'qg256hyper_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg256/bous500/hyper_nu2.5/';
-
-
-%name = 'qg256hyper_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 %name = 'qg512hyper_all';
 %namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/';
@@ -104,38 +59,6 @@ namedir = '~/data/dns/sc1024A/';
 name = 'hyp512_30hbig';
 namedir = '~/';
 
-%name = 'dnsslav_hmin0000.0000';
-%namedir = '~/research.old/projects/bottleneck/';
-
-%name = 'invsc256_all';
-%name = 'invsc64_maxh0000.0000';
-%name = 'n64_all';
-%name = 'invsc256_maxh0000.0000';
-%name = 'invsc256_minh0000.0000';
-%namedir = '~/research.old/projects/bottleneck/';
-
-%name = 'invsc64_minh_phase0000.0000';
-%namedir = '~/research.old/projects/bottleneck/n64/fft-phase/';
-
-%name = 'invsc64_minh_23sph0000.0000';
-%namedir = '~/research.old/projects/bottleneck/n64/fft-23sphere/';
-
-%name = 'dns_23sph0000.0000';
-%name = 'dns_phase0000.0000';
-%namedir = '~/research.old/projects/bottleneck/n32/';
-
-%name = 'n256_f2000n5_all';
-%name = 'n256_f1000n5_all';
-%name = 'n256high_f1000n5_all';
-%name = 'n256high_f2000n5_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/';
-
-%name = 'n256_f5n1000_all';
-%name = 'n256_f5n2000_all';
-%name = 'n256high_f5n1000_all';
-%name = 'n256high_f5n2000_all';
-%namedir = '/nh/u/skurien/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/';
-
 %name = 'balu_b0000.0000';
 %namedir = '/home/mataylo/scratch3/dns/';
 
@@ -147,6 +70,22 @@ namedir = '~/';
 
 name = 'bous128_Ro21Fr0.21_0000.0000';
 namedir ='/home/kurien/INCITE_runs/SW02_tests/';
+
+name = 'RSShighres_all';
+namedir = '/home/kurien/INCITE_runs/RemSukSmi09_tests/highres/';
+
+%name = 'lowaspectNS0000.0000';
+%namedir ='/home/kurien/projects/lowaspectNS/';
+
+%name = 'delta0.10000.0000';
+%namedir ='/home/kurien/projects/lowaspectNS/delta0.1/';
+
+%name = 'delta0.5__0000.0000';
+%namedir ='/home/kurien/projects/lowaspectNS/delta0.5/';
+
+%name = 'delta1.0__0000.0000';
+%namedir ='/home/kurien/projects/lowaspectNS/delta1.0/';
+
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -176,7 +115,7 @@ j=0;
 
 count = 0;
 countp = 0;
-while (time>=0 & time<=1)
+while (time>=0 & time<=999)
 
   j=j+1;
   n_r=fread(fid,1,'float64');
@@ -265,20 +204,18 @@ while (time>=0 & time<=1)
 %    loglog53(n_x,spec_ux,' ',1);
 %    hold on;
 %    loglog53(n_y,spec_vy,' ',1);
-%    hold off;
+% hold off;
   else
     %spherical wave number
     figure(10)
     subplot(1,1,1);
-
-    stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
-%    loglog((0:n_r-1),spec_r','b', 'linewidth',1); hold on; 
-%    title(stitle);
-    loglog53(n_r-1,spec_r,stitle,CK);     %default, with k^-5/3 line
-%    loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
-        
-
-    %        stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
+    stitle=sprintf('shell-averaged kinetic energy spectrum t=%8.4f',time);
+    loglog53(n_r-1,spec_r,stitle,CK,6);     %default, with k^-5/3 line
+%    loglog((0:n_r-1), spec_r,'b');
+pause
+%  loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
+       
+%    stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
 %    loglog((0:n_r-1),spec_r.*[0:n_r-1]'.^(5/3),'b', 'linewidth',1.5); hold off;      
     
     %spec_r=spec_r./fac3;
@@ -287,23 +224,24 @@ while (time>=0 & time<=1)
 
     
     % longitudinal spectraum
-%    figure(4);title('longitudinal 1D spectrum');
-%    subplot(2,1,1);
-%    loglog53(n_x,spec_ux,' ',CK*18/55);     hold off;
-%    loglog53(n_y,spec_vy,' ',CK*18/55);     hold on;
-%    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55);     hold on;
-%    hold off;
+    figure(4);title('longitudinal 1D spectrum');
+    subplot(1,1,1);
+    loglog53(n_x,spec_ux,' ',CK*18/55,6);     hold on;
+    loglog53(n_y,spec_vy,' ',CK*18/55,6);     hold on;
+    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55,6);     hold on;
+   hold off;
     
 %    % transverse spectraum
 %    subplot(2,1,2);
 %    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
-%   loglog53(n_x,spec_uz,' ',CK*18/55);     hold off;
+%   loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
 %    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
-%    loglog53(n_y,spec_vz,' ',CK*18/55);     hold off;
+%    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
 %    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
 %    hold off;
-%     title('longitudinal 1D spectra of kinetic energy');
+%
+title('longitudinal 1D spectra of kinetic energy');
 
   end
   end
@@ -411,6 +349,7 @@ while (time>=0 & time<=1)
      loglog53(np_r,pspec_r,ts,1.0,3); hold on;
      axis([1 100 1e-6 1]);
 
+% figure with total passive scalar spectrum and the plane-averaged ones.    
      figure(9);hold off
      loglog53(np_r,pspec_r,ts,1.0,6); hold on;
      np_x=fread(fidp,1,'float64');
@@ -560,6 +499,7 @@ fclose(fid);
 if (fidt>0) fclose(fidt); end;
 
 %time averaged spectra
+if (count > 0)
 spec_r_ave = spec_r_ave/count;
 pspec_r_ave = pspec_r_ave/countp;
 figure(10)
@@ -567,13 +507,9 @@ loglog53(n_r-1,spec_r_ave, stitle,CK); hold on;
 if (fidp>-1); 
   loglog53(np_r,pspec_r_ave,'',1.0,3); hold off;
 end
-
+end
 
 return
-
-
-
-
 
 
 if (length(spec_r_save>1) )

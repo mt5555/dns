@@ -3,15 +3,18 @@
 %#  plot of Craya-Herring projection spectra from *.spec_ch
 %########################################################################
 
+namedir ='~kurien/INCITE_runs/SW02_tests/bous128_Fr0.21/';
+name = 'bous128_Fr0.21_all';
 
-namedir ='~kurien/INCITE_runs/SW02_tests/';
-name = 'bous128_Ro21Fr0.21_all';
+%namedir ='~kurien/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21/';
+%name = 'bous128_Ro21Fr0.21_all';
+
+%namedir ='~kurien/INCITE_runs/SW02_tests/bous128_Ro2.1Fr0.21/';
+%name = 'bous128_Ro2.1Fr0.21_all';
 
 
-%namedir ='~kurien/dns/src/';
-%name = 'temp_all';
-%mu = 1e-4;
-
+%namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/';
+%name = 'RSSlowres_all';
 
 % plot all the spectrum:
 movie=1;
