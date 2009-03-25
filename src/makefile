@@ -95,6 +95,14 @@ ifeq ($(UNAME),Linux)
    endif
 
 
+   ifeq ($(HOST),brawler.cims.nyu.edu)
+      VENDOR=GNU
+      MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
+      MPILIB = 
+   endif
+
+
+
     ifeq ($(HOST),dosadi)
       VENDOR=GNUMPI
       MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO

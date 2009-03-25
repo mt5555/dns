@@ -98,11 +98,14 @@ nx=128; f_k=24;fcor=1.07;bous=107.08;
 fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Fr0.21/bous128_Fr0.21_all.scalars','r')
 nx=128; f_k=24;fcor=0;bous=107.08;
 
-%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/RSSlowres_all.scalars','r')
-%nx=400; f_k=4;fcor=136.2;bous=136.2;
+fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/RSSlowres0000.0000.scalars','r')
+nx=400; f_k=4;fcor=136.2;bous=136.2;
 
-fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/highres/RSShighres_all.scalars','r')
-nx=500; f_k=4;fcor=136.2;bous=136.2;
+%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/highres/RSShighres_all.scalars','r')
+%nx=500; f_k=4;fcor=136.2;bous=136.2;
+
+%fid = endianopen('~/projects/bous640runs/qg640_b3000_all.scalars','r')
+%nx=640; f_k=4;fcor=3000;bous=3000;
 
 %fid = endianopen('~/projects/lowaspectNS/delta0.1/delta0.10000.0000.scalars','r')
 %nx=120; f_k=4;fcor=0;bous=0;
@@ -291,14 +294,16 @@ if (nx>0)
 end
 
 %plot energies as a function of nonlinear times (SW02 paper)
-figure(5)
+figure(5); clf
 hold on
 ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
 ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
-timen = time*(ke_diss_f*(2*pi*f_k)^2)^(1/3);
-ken = ke*((ke_diss_f/(2*pi*f_k))^(-2/3));
-pen = pe*((ke_diss_f/(2*pi*f_k))^(-2/3));
-plot(timen,ken,'k')
+tn = (ke_diss_f*(2*pi*f_k)^2)^(1/3); %(fcor + bous)/2/pi; 
+en = ((ke_diss_f/(2*pi*f_k))^(-2/3));
+timen = time*tn;
+ken = ke*en;
+pen = pe*en;
+plot(timen,ken,'ko-')
 plot(timen,pen,'r')
 plot(timen,ken+pen,'b')
 %plot(time_2,ke_diss_tot,'r')

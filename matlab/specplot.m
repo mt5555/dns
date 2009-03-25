@@ -77,8 +77,8 @@ namedir = '/home/kurien/INCITE_runs/RemSukSmi09_tests/highres/';
 %name = 'lowaspectNS0000.0000';
 %namedir ='/home/kurien/projects/lowaspectNS/';
 
-%name = 'delta0.10000.0000';
-%namedir ='/home/kurien/projects/lowaspectNS/delta0.1/';
+name = 'delta0.10000.0000';
+namedir ='/home/kurien/projects/lowaspectNS/delta0.1/';
 
 %name = 'delta0.5__0000.0000';
 %namedir ='/home/kurien/projects/lowaspectNS/delta0.5/';

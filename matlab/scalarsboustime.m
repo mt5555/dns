@@ -61,6 +61,9 @@ fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg640/q
 
 fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars-bous','r')
 
+fid=endianopen('~/projects/bous640runs/qg640_b3000_all.scalars-bous','r');
+
+
 nscalars=0;
 ints=[];
 time=[];
