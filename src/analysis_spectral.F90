@@ -100,9 +100,9 @@ compute_hfree=.false.		!extracting helicity-free modes
 project_ch=.true.               !Craya-Herring projection and spectra
 
 
-tstart=33.0
-tstop=48.0
-tinc=3.0
+tstart=0.0
+tstop=5.5
+tinc=0.5
 
 icount=0
 
@@ -113,7 +113,7 @@ nzdecomp=1
 
 
 ! to read times from  file times.dat:
-tstart=-1; tinc=0; tname="times.dat"
+! tstart=-1; tinc=0; tname="times.dat"
 
 
 ! these lines are modifed by some sed scripts for automatic running
