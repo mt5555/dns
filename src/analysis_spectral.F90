@@ -25,8 +25,10 @@
 ! compute structure functions for many different directions
 ! in the periodic cube.
 !
-! also computes helical modes, distribution of helicity angle,  
-! and spectra without helical modes
+! computes helical modes, distribution of helicity angle,  
+! and spectra without helical modes 
+!
+! computes spectra of Craya-Herring projection modes (project_ch)
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -111,7 +113,7 @@ nzdecomp=1
 
 
 ! to read times from  file times.dat:
-! tstart=-1; tinc=0; tname="times.dat"
+tstart=-1; tinc=0; tname="times.dat"
 
 
 ! these lines are modifed by some sed scripts for automatic running
@@ -172,7 +174,6 @@ do
       if (icount==1)  open(83,file=fname)
       read(83,*,err=100,end=100) time
    endif
-   
 
    if (compute_hspec) then
       

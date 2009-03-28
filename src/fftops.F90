@@ -2207,8 +2207,8 @@ if (dealias==1 .or. dealias==0) then
 ! uncomment next 4 lines use Energy scaling based on spherical shell
 ! contained inside 2/3 dealiased cube:
     shell_type=1
-    kstart2=(g_nx/3 - 1 )**2
-    kstop2=(g_nx/3)**2
+    kstart2=nint(((g_nz/3 - 1 )**2)/Lz/Lz)
+    kstop2=nint(((g_nz/3)**2)/Lz/Lz)
 !   print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
 
 else if (dealias==2) then
