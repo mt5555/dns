@@ -1180,7 +1180,7 @@ integer :: new_f
 real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
 real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
 integer km,jm,im,i,j,k,n,ierr,ntest,wn,wn2,ii
-real*8 xfac,f_diss,fsum,fxx_diss,vor(3),ux,uy,uz,wx,wy,wz,vx,vy,vz,xw
+real*8 xfac,f_diss,fsum,fxx_diss,vor(3),ux,uy,uz,wx,wy,wz,vx,vy,vz,xw,wnx
 real*8,save,allocatable :: fhat(:,:,:,:)
 
 
@@ -1294,7 +1294,10 @@ if (new_f==1) then
          do k=1,g_nz
             km=z_kmcord(k)
             wn2=(im*im+jm*jm+km*km/Lz/Lz)
-            wn=Lz*sqrt(real(wn2))
+            wn = Lz*sqrt(real(wn2))
+            wnx = sqrt(real(wn2))
+            ! we uses FAT SHELLS for the test, but the true wave number wnx
+            ! for normalizations below
             if (numb1 <= wn .and. wn <= numb .and. delt>0) then
                
                xfac=8
@@ -1319,7 +1322,7 @@ if (new_f==1) then
                   ! scale out various shell factors:
                   vor=vor/sqrt(xfac*numk(wn)*3.0)
                   ! undo curl scaling:  (2/3) wn**2
-                  vor = vor * sqrt(1.5)/ wn
+                  vor = vor * sqrt(1.5)/ wnx
                   ! vorticity now scaled so that E(wn)=1
                else
                   vor(1) = uy
@@ -1328,7 +1331,7 @@ if (new_f==1) then
                   ! scale out various shell factors:
                   vor=vor/sqrt(xfac*numk(wn)*2.0)
                   ! undo gradient scaling: should be .5 wn**2
-                  vor = vor * sqrt(2.) /  wn
+                  vor = vor * sqrt(2.) /  wnx
                   ! vorticity now scaled so that E(wn)=1
                endif
 
