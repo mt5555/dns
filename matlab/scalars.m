@@ -114,6 +114,10 @@ nx=400; f_k=4;fcor=136.2;bous=136.2;
 %nx=200; f_k=4;fcor=0;bous=0;
 
 
+fid = endianopen('~/codes/dns/src/temp0000.0000.scalars','r')
+nx=200; f_k=4;fcor=136.2; LZ = 1/5; bous=136.2/LZ;
+
+
 nscalars=0;
 nscalars_e=0;
 time = 0.0;
@@ -290,20 +294,20 @@ if (nx>0)
   plot(time,eta* nx*pi*2*sqrt(2)/3 )
   title('k_{nmax} \eta')
   xlabel('time')
-  print -djpeg -r72 kmaxeta.jpg
+  %print -djpeg -r72 kmaxeta.jpg
 end
 
 %plot energies as a function of nonlinear times (SW02 paper)
 figure(5); clf
-hold on
-ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
-ke_diss_f = sum(ke_diss_f)/length(ke_diss_f);
-tn = (ke_diss_f*(2*pi*f_k)^2)^(1/3); %(fcor + bous)/2/pi; 
-en = ((ke_diss_f/(2*pi*f_k))^(-2/3));
+ke_diss_f_ave = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
+ke_diss_f_ave = sum(ke_diss_f_ave)/length(ke_diss_f_ave);
+tn = (ke_diss_f_ave*(2*pi*f_k)^2)^(1/3); %(fcor + bous)/2/pi; 
+en = ((ke_diss_f_ave/(2*pi*f_k))^(-2/3));
 timen = time*tn;
 ken = ke*en;
 pen = pe*en;
 plot(timen,ken,'ko-')
+hold on
 plot(timen,pen,'r')
 plot(timen,ken+pen,'b')
 %plot(time_2,ke_diss_tot,'r')
@@ -312,6 +316,8 @@ title('KE: black, PE: red, Etot: blue');
 hold off
 xlabel('time t(\epsilon_f k_f^2)^{1/3}')
 ylabel('E(\epsilon_f/k_f)^{-2/3}')
+
+
 
 % look at dissipations seperatly
 figure(6)
@@ -332,8 +338,8 @@ xlabel('time')
 % look at dissipations seperatly
 figure(7)
 %clf
-hold on
 plot(time_2,ke_diss_tot2-ke_diss_tot,'k')
+hold on
 title(' (F+D) - d(KE)/dt');
 hold off
 xlabel('time')
@@ -355,7 +361,7 @@ plot(time,maxvor,'r'); hold on;
 %axis([0,1,0,5000]);
 title('maximum vorticity component')
 xlabel('time');
-print -djpeg -r72 vor.jpg
+%print -djpeg -r72 vor.jpg
 
 %plot helicity, enstrophy and ratio H/W
 figure(10)
@@ -403,15 +409,6 @@ disp(sprintf('ke (average over last half of data) = %f ',ke));
 
 %disp(sprintf('Total energy (average over last half of data) = %f ',ke+pe));
 
-% averge Smith's R0 to a number
-if (f_k>0) 
-  R0 = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (fcor);
-  R0 = R0(ceil(length(R0)/2):length(R0));
-  R0 = sum(R0)/length(R0);
-  disp(sprintf('Smith''s R0 (average over last half of data) = %f ',R0));
-end
-
-
 if (mu>0) 
   % averge eta to a number
   eta = eta(ceil(length(eta)/2):length(eta));
@@ -450,12 +447,21 @@ epsilon_pe = sum(epsilon_pe)/length(epsilon_pe);
 disp(sprintf('epsilon_pe (averaged over last half of data) = %f ',epsilon_pe));
 
 
+ke_diss_f = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
+ke_diss_f = sum(ke_diss_f_ave)/length(ke_diss_f_ave);
 disp(sprintf('epsilon_f (averaged over last half of data) = %f ',ke_diss_f));
 Ro = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (fcor);
 Fr = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (bous);
 disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
 disp(sprintf('Fr computed from epsilon_f = %f ',Fr));
 
+U = ( ke_diss_f / (2*pi*f_k) ).^(1/3);
+L = 1/(2*pi*f_k);
+H = LZ*L;
+Ro = U/(fcor*L);
+Fr = U/(bous*H);
+disp(sprintf('Ro computed from LZ & epsilon_f = %f ',Ro));
+disp(sprintf('Fr computed from LZ & epsilon_f = %f ',Fr));
 
 
 ke_diss_tot = ke_diss_tot(ceil(length(ke_diss_tot)/2):length(ke_diss_tot));
