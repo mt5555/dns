@@ -1248,8 +1248,11 @@ if (0==init_sforcing) then
             im=z_imcord(i)
             do k=1,g_nz
                km=z_kmcord(k)
-               wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
-               if (wn<=numb .and. wn>=1) numk(wn)=numk(wn)+1
+               ! use "fat shells":
+               wn=Lz*sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
+               ! use "thin shells":
+               ! wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
+               if (wn<=numb .and. wn>=numb1) numk(wn)=numk(wn)+1
             enddo
          enddo
       enddo

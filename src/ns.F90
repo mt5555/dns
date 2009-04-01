@@ -40,7 +40,6 @@ real*8, allocatable, save :: q2(:,:,:,:)
 logical,save :: firstcall=.true.
 integer :: n
 
-
 if (firstcall) then
    firstcall=.false.
    if (smagorinsky>0) then
@@ -106,7 +105,6 @@ real*8 :: rhsg(nx,ny,nz,n_var)
 real*8 :: ke_old,time_old,vel
 integer i,j,k,n,ierr
 integer n1,n1d,n2,n2d,n3,n3d,im,jm,km
-
 
 ! stage 1
 call ns3D(rhs,rhsg,Q,Q_grid,time,1,work,work2,1,q2)
@@ -208,7 +206,6 @@ if (hyper_implicit==1) call hyper_filter(Q,delt)
 do n=1,n_var
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-
 
 time = time + delt
 ! compute max U  
@@ -601,8 +598,10 @@ if (mu_hyper_value>0 .and. mu_hyper>=2 .and. hyper_implicit==0) then
    ! compute hyper viscosity scaling based on energy in last shell:
    ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
    call ke_shell_z(Qhat,hyper_scale)
+   if (my_pe == io_pe ) then
+   !   write(*,'(a,3e20.10)') 'hyper_scale: ',hyper_scale(1:3,1)
+   endif
 endif
-
 
 ke=0
 ux2ave=0
@@ -658,6 +657,8 @@ do j=1,ny_2dz
                ke_diss = ke_diss + xfac*xw_viss*u2
                uxx2ave = uxx2ave + xfac*xw*xw*u2
                
+!               if (xw_viss*u2 > 3e-2) print *,im,jm,km,xw_viss*u2,ke_diss
+
                ! u_x term
                vx = - pi2*im*Qhat(k,i+z_imsign(i),j,2)
                wx = - pi2*im*Qhat(k,i+z_imsign(i),j,3)
@@ -933,7 +934,6 @@ if (forcing_type==2 .or. forcing_type==4 .or. forcing_type==8) then
    ! after a few stages, u & f very correlated, <u,f>=large.  
    ints(3)=f_diss_ave
 endif
-
 
 call wallclock(tmx2)
 tims(5)=tims(5)+(tmx2-tmx1)

@@ -2191,6 +2191,14 @@ real*8 hscale(n_var,n_var)
 real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,xw2,cfl
 integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start,shell_type
 
+if (delt==0 .and. hyper_implicit==0) then
+   ! with delt=0, CFL restriction is not active and we can get vary large
+   ! values which screw up the diagnostics output (but since delt=0, have
+   ! no impact on results).  so just disable for delt=0
+   hscale=0
+   return
+endif
+
 !
 !  shell_type = 1     use spherical shell of thickness 1 wave number   
 !               2     use slabs of thickness 1 wave number
@@ -2206,9 +2214,15 @@ if (dealias==1 .or. dealias==0) then
 
 ! uncomment next 4 lines use Energy scaling based on spherical shell
 ! contained inside 2/3 dealiased cube:
+!    shell_type=1
+!    kstart2=(g_nx/3 - 1 )**2
+!    kstop2=(g_nx/3)**2
+
     shell_type=1
-    kstart2=nint(((g_nz/3 - 1 )/Lz)**2)
-    kstop2=nint(((g_nz/3)/Lz)**2)
+    kstart2=nint( (g_nz/3 - 1 )**2 )
+    kstop2=nint ( (g_nz/3)**2 )
+    kstart2=kstart2/(Lz*Lz)
+    kstop2=kstop2/(Lz*Lz)
    print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
 
 else if (dealias==2) then
@@ -2564,9 +2578,6 @@ do j=1,ny_2dz
          enddo
 
          do n=np1,np2
-            xw2=hyper_scale(1,n)*(im*im*pi2_squared)
-            xw2=xw2+hyper_scale(2,n)*(jm*jm*pi2_squared)
-            xw2=xw2+hyper_scale(3,n)*(km*km*pi2_squared/(Lz*Lz))
             ke0(n)=ke0(n)+.5*xfac*Qhat(k,i,j,n)**2
             Qhat(k,i,j,n)  = Qhat(k,i,j,n) / ( 1+dt*mu_hyper_value*xw2**mu_hyper )
             ke1(n)=ke1(n)+.5*xfac*Qhat(k,i,j,n)**2
@@ -2575,9 +2586,8 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
-do n=1,n_var
-!   print *,n,ke0(n),ke1(n)
-enddo
+print *,n,sum(ke1(1:3)-ke0(1:3))/delt
+
 
 
 
