@@ -1188,6 +1188,7 @@ real*8 ener(512),ener2(512),ener_test(512),ffnorm
 integer,save :: numk(512),numk2(512)
 real*8,save :: ener_target(512)
 integer,save :: fwidth
+integer :: count
 
 if (0==init_sforcing) then
    init_sforcing=1
@@ -1260,6 +1261,17 @@ if (0==init_sforcing) then
       numk2=numk
       call mpi_allreduce(numk2,numk,numb,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif      
+   endif
+   
+   ! print all wave numbers being forced:
+   if (io_pe .eq. my_pe) then
+      print *,'Stochastic forcing'
+      print *,'wave#    # modes forced'
+      do i=1,512
+         if (numk(i)>0) then
+            write(*,'(i4,i15)') i,numk(i)
+         endif
+      enddo
    endif
 endif
 

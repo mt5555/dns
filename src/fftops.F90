@@ -2219,10 +2219,10 @@ if (dealias==1 .or. dealias==0) then
 !    kstop2=(g_nx/3)**2
 
     shell_type=1
-    kstart2= (g_nz/3 - 1 )**2 
+    kstart2= (g_nz/3 - 1 )**2   
     kstop2=  (g_nz/3)**2 
-    kstart2=kstart2/(Lz*Lz)
-    kstop2=kstop2/(Lz*Lz)
+    kstart2=nint(kstart2/(Lz*Lz))
+    kstop2=nint(kstop2/(Lz*Lz))
     if (io_pe .eq. my_pe) then
        print *,'using hyper viscosity energy scaling based on shell: ',sqrt(real(kstart2)),sqrt(real(kstop2))
     endif
