@@ -1281,8 +1281,8 @@ if (new_f==1) then
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
-            wn2=im*im+jm*jm+km*km/Lz/Lz
-            wn=sqrt(real(wn2))
+            wn2=(im*im+jm*jm+km*km/Lz/Lz)
+            wn=Lz*sqrt(real(wn2))
             if (numb1 <= wn .and. wn <= numb .and. delt>0) then
                
                xfac=8

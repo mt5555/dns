@@ -695,7 +695,6 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  spec_tmp:  spectrum of u dot (u cross omega + grad(pi) + diffusion) 
 !  since spectrum of u dot grad(pi) is zero, we can now take the

@@ -2587,7 +2587,7 @@ do j=1,ny_2dz
       enddo
    enddo
 enddo
-print *,n,sum(ke1(1:3)-ke0(1:3))/delt
+!print *,n,sum(ke1(1:3)-ke0(1:3))/delt
 
 
 
