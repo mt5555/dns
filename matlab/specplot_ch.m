@@ -12,12 +12,20 @@ name = 'bous128_Fr0.21_all';
 %namedir ='~kurien/INCITE_runs/SW02_tests/bous128_Ro2.1Fr0.21/';
 %name = 'bous128_Ro2.1Fr0.21_all';
 
+%namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/lowres/mauler/f136b681/';
+%name = 'bous200Lz0.2_all';
 
-%namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/lowres/';
-%name = 'RSSlowres_all';
+%namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/lowres/mauler/f27b136/';
+%name = 'bous200Lz0.2_all';
 
-namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/highres/';
-name = 'RSShighres_all';
+namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/lowres/';
+%name = 'lowres1_all';
+%name = 'lowres2_all';
+name = 'lowres3_all';
+
+
+%namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/highres/';
+%name = 'RSShighres_all';
 
 % plot all the spectrum:
 movie=1;
@@ -78,7 +86,7 @@ els = (1/4)^(-2/3);
 plot(time*tsk/tls, te*esk/els,'kx'); hold on;
 plot(time*tsk/tls, tvort*esk/els,'b.'); hold on;
 plot(time*tsk/tls, twave*esk/els,'ro'); hold on;
-legend('total','vortica','wave');
+legend('total','vortical','wave');
 
 end % end movie loop
 

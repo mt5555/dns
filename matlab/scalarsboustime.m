@@ -63,6 +63,7 @@ fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars-bous',
 
 fid=endianopen('~/projects/bous640runs/qg640_b3000_all.scalars-bous','r');
 
+fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/mauler/f27b136/bous200Lz0.2_all.scalars-bous','r')
 
 nscalars=0;
 ints=[];
