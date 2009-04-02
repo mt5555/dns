@@ -19,9 +19,9 @@ name = 'bous128_Fr0.21_all';
 %name = 'bous200Lz0.2_all';
 
 namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/lowres/';
-%name = 'lowres1_all';
+name = 'lowres1_all';
 %name = 'lowres2_all';
-name = 'lowres3_all';
+%name = 'lowres3_all';
 
 
 %namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/highres/';
