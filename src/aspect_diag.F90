@@ -217,7 +217,7 @@ twopi = 6.2831853071795864769d0
 !
 if (npassive==0) call abortdns("Error: aspect_diag.F90: not coded for npassive==0")
 !if (mu_hyper_value/=0) call abortdns("Error: aspect_diag.F90: not coded for hyper viscosity")
-if (mu_hypo_value/=0) call abortdns("Error: aspect_diag.F90: not coded for hypo viscosity")
+!if (mu_hypo_value/=0) call abortdns("Error: aspect_diag.F90: not coded for hypo viscosity")
 
 ! viscosity of theta:
 kappa = mu/schmidt(np1)

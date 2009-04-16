@@ -101,8 +101,8 @@ project_ch=.true.               !Craya-Herring projection and spectra
 
 
 tstart=0.0
-tstop=5.5
-tinc=0.5
+tstop=10.0
+tinc=0.2
 
 icount=0
 
