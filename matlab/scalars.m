@@ -403,13 +403,13 @@ disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
 disp(sprintf('Fr computed from epsilon_f = %f ',Fr));
 
 U = ( ke_diss_f / (2*pi*f_k) ).^(1/3);
-%lowres1
+%scales1
 %L = 1/(f_k);
 %H = LZ*L;
-%lowres2;
+%scales2; This choice is probably the correct one for the lengthscales
 L = 1/(2*pi*f_k);
 H = LZ*L;
-%lowres3;
+%scales3;
 %H = 1/(2*pi*f_k); 
 %L = H/LZ;
 
