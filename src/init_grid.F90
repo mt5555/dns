@@ -839,7 +839,7 @@ call print_message(message)
 
 endif
 
-if (mu_hypo>0) then
+if (mu_hypo/=-1) then
    write(message,'(a,e10.4)') 'Hypo diffusion coefficient mu=',mu_hypo_value
    call print_message(message)
 
@@ -2653,6 +2653,9 @@ if (sdata=='none') then
 else if (sdata=='hypo2') then
    mu_hypo=1
    mu_hypo_value = rvalue
+else if (sdata=='hypo0') then
+   mu_hypo=0
+   mu_hypo_value = rvalue
 else 
    call abortdns("non supported hypo viscosity type")
 endif
@@ -2991,6 +2994,9 @@ if (sdata=='none') then
    ! do nothing
 else if (sdata=='hypo2') then
    mu_hypo=1
+   mu_hypo_value = rvalue
+else if (sdata=='hypo0') then
+   mu_hypo=0
    mu_hypo_value = rvalue
 else 
    call abortdns("non supported hypo viscosity type")
