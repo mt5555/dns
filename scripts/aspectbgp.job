@@ -2,22 +2,26 @@
 #
 #  ./aspectbgp.job  
 # 
+# number of minutes:
 set NTIME = 40
+set ACC = CCESDev
+# use "prod" for more than 512 nodes or more than 1h
+#set BGPQUE = prod-devel
+set BGPQUE = prod
+
 set name = aspect
-
-set BGPQUE = prod-devel
-set NNODES = 512
-
-#set NNODES = 2048
-#set BGPQUE = prod
-
 # resolution:
 set N = 400
 set NZ = 80
 
 # processors:
-set NCPUX = 16
-set NCPUZ = 16
+set NCPUX = 200
+set NCPUZ = 40
+set NNODES = $NCPUX
+@ NNODES *= $NCPUZ
+@ NNODES /= 4
+echo using $NNODES nodes
+
 
 
 set WDIR=~/scratch1/aspect
@@ -26,9 +30,10 @@ mkdir $WDIR
 
 cd $SRC
 ./gridsetup.py $NCPUX 1 $NCPUZ $N $N $NZ 0 0 2 0 0 0 4 
-make -j3 dnsb ; cp -f dnsb $WDIR
+make -j3 dnsb ; \cp -f dnsb $WDIR/dnsb-$NNODES
 
 
 cd $WDIR
-qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn dnsb  aspect -i $SRC/aspect.inp
+qsub -A $ACC -q $BGPQUE -t $NTIME -n $NNODES  \
+--mode vn dnsb-$NNODES  aspect -i $SRC/aspect.inp
 
