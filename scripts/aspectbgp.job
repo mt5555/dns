@@ -1,0 +1,34 @@
+#!/bin/tcsh 
+#
+#  ./aspectbgp.job  
+# 
+set NTIME = 40
+set name = aspect
+
+set BGPQUE = prod-devel
+set NNODES = 512
+
+#set NNODES = 2048
+#set BGPQUE = prod
+
+# resolution:
+set N = 400
+set NZ = 80
+
+# processors:
+set NCPUX = 16
+set NCPUZ = 16
+
+
+set WDIR=~/scratch1/aspect
+set SRC = ~/codes/dns/src
+mkdir $WDIR
+
+cd $SRC
+./gridsetup.py $NCPUX 1 $NCPUZ $N $N $NZ 0 0 2 0 0 0 4 
+make -j3 dnsb ; cp -f dnsb $WDIR
+
+
+cd $WDIR
+qsub -q $BGPQUE -t $NTIME -n $NNODES --mode vn dnsb  aspect -i $SRC/aspect.inp
+
