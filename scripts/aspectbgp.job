@@ -3,8 +3,9 @@
 #  ./aspectbgp.job  
 # 
 # number of minutes:
-set NTIME = 40
+set NTIME = 360
 set ACC = CCESDev
+#set ACC = MultiscaleCoupTurb
 # use "prod" for more than 512 nodes or more than 1h
 #set BGPQUE = prod-devel
 set BGPQUE = prod
@@ -15,7 +16,7 @@ set N = 400
 set NZ = 80
 
 # processors:
-set NCPUX = 200
+set NCPUX = 100
 set NCPUZ = 40
 set NNODES = $NCPUX
 @ NNODES *= $NCPUZ
