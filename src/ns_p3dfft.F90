@@ -535,6 +535,10 @@ do k=1,p3_n3
             if (mu_hypo==1 .and. xw>0) then
                xw_viss=xw_viss + mu_hypo_value/xw
             endif
+            if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5 ) then
+               xw_viss=xw_viss + mu_hypo_value
+            endif
+
 
             rhs(i,j,k,1)=rhs(i,j,k,1) - xw_viss*Qhat(i,j,k,1)
             rhs(i,j,k,2)=rhs(i,j,k,2) - xw_viss*Qhat(i,j,k,2)
@@ -726,6 +730,13 @@ do ns=np1,np2
                if (mu_hyper==0) then
                   xw_viss=xw_viss + mu_hyper_value
                endif
+               if (mu_hypo==1 .and. xw>0) then
+                  xw_viss=xw_viss + mu_hypo_value/xw
+               endif
+               if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5 ) then
+                  xw_viss=xw_viss + mu_hypo_value
+               endif
+
                rhs(i,j,k,ns)=rhs(i,j,k,ns) - xw_viss*Qhat(i,j,k,ns)
                if (passive_type(ns)==2) rhs(i,j,k,ns)=rhs(i,j,k,ns)+p(i,j,k)
             endif
