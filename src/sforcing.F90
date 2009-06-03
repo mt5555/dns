@@ -1177,8 +1177,8 @@ use params
 use mpi
 implicit none
 integer :: new_f
-real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,3) 
-real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,3) 
+real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var) 
+real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var) 
 integer km,jm,im,i,j,k,n,ierr,ntest,wn,wn2,ii
 real*8 xfac,f_diss,fsum,fxx_diss,vor(3),ux,uy,uz,wx,wy,wz,vx,vy,vz,xw,wnx
 real*8,save,allocatable :: fhat(:,:,:,:)
@@ -1216,8 +1216,12 @@ if (0==init_sforcing) then
       write(*,'(a,i3,a,i2)') 'Forcing wave numbers: ',forcing_peak_waveno,'+/-',fwidth
       write(*,'(a,f8.4)') 'sqrt( <f,f> ) = ',ffval
    endif
-
-   allocate(fhat(g_nz2,nx_2dz,ny_2dz,3))
+   
+   if (force_theta) then
+      allocate(fhat(g_nz2,nx_2dz,ny_2dz,4))
+   else
+      allocate(fhat(g_nz2,nx_2dz,ny_2dz,3))
+   endif
    numb1=max(forcing_peak_waveno-fwidth,1)
    numb=forcing_peak_waveno+fwidth
    ener_target=0
