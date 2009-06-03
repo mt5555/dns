@@ -1364,9 +1364,9 @@ if (new_f==1) then
 
 
    ! compute forcing function fhat:
-   if (force_theta) then
+   if (force_theta .and. npassive>0) then
    call gaussian(rhs,g_nz2*nx_2dz*ny_2dz)
-   do n=np1,np1
+   n=np1
    do j=1,ny_2dz
       jm=z_jmcord(j)
       do i=1,nx_2dz
@@ -1392,7 +1392,6 @@ if (new_f==1) then
             endif
          enddo
       enddo
-   enddo
    enddo
    endif
 
@@ -1448,8 +1447,8 @@ do j=1,ny_2dz
 enddo
 enddo
 
-if (force_theta) then
-do n=np1,np1
+if (force_theta .and. npassive>0) then
+n=np1
 do j=1,ny_2dz
    jm=z_jmcord(j)
    do i=1,nx_2dz
@@ -1470,7 +1469,6 @@ do j=1,ny_2dz
          fxx_diss = fxx_diss + xfac*xw*fsum
       enddo
    enddo
-enddo
 enddo
 endif
 
