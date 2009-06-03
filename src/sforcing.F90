@@ -1351,6 +1351,38 @@ if (new_f==1) then
       enddo
    enddo
 
+
+   ! compute forcing function fhat:
+   if (force_theta) then
+   call gaussian(rhs,g_nz2*nx_2dz*ny_2dz)
+   do n=np1,np1
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nx_2dz
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            wn2=(im*im+jm*jm+km*km/Lz/Lz)
+            wn = Lz*sqrt(real(wn2))
+            wnx = sqrt(real(wn2))
+            ! we uses FAT SHELLS for the test, but the true wave number wnx
+            ! for normalizations below
+            if (numb1 <= wn .and. wn <= numb .and. delt>0) then
+               
+               xfac=8
+               if (km==0) xfac=xfac/2
+               if (jm==0) xfac=xfac/2
+               if (im==0) xfac=xfac/2
+
+               fhat(k,i,j,n)=rhs(k,i,j,1)*sqrt(ener_target(wn)/delt)
+               ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
+            endif
+         enddo
+      enddo
+   enddo
+   enddo
+   endif
+
    if (ntest>1) then
       if (io_pe==my_pe) print *,"iter=",ii,numb1,numb,sum(ener(numb1:numb))
 #ifdef USE_MPI
@@ -1402,6 +1434,32 @@ do j=1,ny_2dz
    enddo
 enddo
 enddo
+
+if (force_theta) then
+do n=np1,np1
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+
+         rhs(k,i,j,n)=rhs(k,i,j,n) + fhat(k,i,j,n)
+         
+         xfac=8
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+         fsum= Qhat(k,i,j,n)*fhat(k,i,j,n)
+         
+         f_diss = f_diss + xfac*fsum
+         xw=-(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+         fxx_diss = fxx_diss + xfac*xw*fsum
+      enddo
+   enddo
+enddo
+enddo
+endif
 
 
 #if 0

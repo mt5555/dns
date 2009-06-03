@@ -169,6 +169,7 @@ real*8  :: pi,pi2,pi2_squared
 real*8  :: grav=0  
 real*8  :: fcor=0                ! rotation in z-axis 
 real*8  :: bous=0                ! bousenesque paramter
+logical :: force_theta = .false.  ! enable forcing of theta (1st passive scalar)
 integer :: diag_struct=0         ! compute structure funtions on the fly
 integer :: diag_pdfs=0           ! 0  disabled
                                  ! 1  compute pdfs on the fly
