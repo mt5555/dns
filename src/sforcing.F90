@@ -1387,7 +1387,7 @@ if (new_f==1) then
 
                vor = rhs(k,i,j,1)
                vor=vor/sqrt(xfac*numk(wn)* nf_comp )
-               vor=vor*sqrt(ener_target(wn)/delt)
+               fhat(k,i,j,n)=vor*sqrt(ener_target(wn)/delt)
                ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
             endif
          enddo
