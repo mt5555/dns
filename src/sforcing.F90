@@ -1388,6 +1388,8 @@ if (new_f==1) then
                ux=ux/sqrt(xfac*numk(wn)* nf_comp )
                fhat(k,i,j,n)=ux*sqrt(ener_target(wn)/delt)
                ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
+            else
+               fhat(i,i,j,n)=0
             endif
          enddo
       enddo
