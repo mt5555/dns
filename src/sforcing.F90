@@ -1266,6 +1266,11 @@ if (0==init_sforcing) then
    ! print all wave numbers being forced:
    if (io_pe .eq. my_pe) then
       print *,'Stochastic forcing'
+      if (force_theta) then
+         print *,'Forcing u,v,w and theta'
+      else
+         print *,'Forcing u,v,w only'
+      endif
       print *,'wave#    # modes forced'
       do i=1,512
          if (numk(i)>0) then
