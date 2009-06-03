@@ -1218,57 +1218,56 @@ if (0==init_sforcing) then
    endif
 
    allocate(fhat(g_nz2,nx_2dz,ny_2dz,3))
-   if (forcing_type==8) then
-      numb1=max(forcing_peak_waveno-fwidth,1)
-      numb=forcing_peak_waveno+fwidth
-      ener_target=0
-      do wn=numb1,numb
-         ! note: my wave numbers have an extra 2pi.
-         if (fparam1<0) then
-            if(infinite_alpha==1) then
-               ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
-            else
-               ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
-            endif
-            ! original forcing function. I'm not sure if <f,f>=ffval  
-            !ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)    
+   numb1=max(forcing_peak_waveno-fwidth,1)
+   numb=forcing_peak_waveno+fwidth
+   ener_target=0
+   do wn=numb1,numb
+      ! note: my wave numbers have an extra 2pi.
+      if (fparam1<0) then
+         if(infinite_alpha==1) then
+            ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
          else
-            ! Smith & Waleffe: F(k) = eps_f exp( -.5 (k-k0)**2 )  /  sqrt(2pi)
-            ! this is the power spectrum of the forcing function f(k)
-            ! .5 f(k)^2 = F(k)
-            ! which gives:    <f,f> = 2 sum(F(k)) = 2 eps_f
-            ! so that d/dt(KE) = <u,f> = .5 <f,f> = eps_f
-            !
-            ! However, below I defined the energy in the forcing term as f^2
-            ! (not .5 f^2), so that f(k)^2 = F(k)
-            ! This is normalized so that <f,f> = sum(F(k)) = ffval
-            ! and thus eps_f = <u,f> = .5 <f,f> = .5 ffval
-            !
-            ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
+            ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)
          endif
-      enddo
-
-      ! compute number of coefficients in each band
-      numk=0
-      do j=1,ny_2dz
-         jm=z_jmcord(j)
-         do i=1,nx_2dz
-            im=z_imcord(i)
-            do k=1,g_nz
-               km=z_kmcord(k)
-               ! use "fat shells":
-               wn=Lz*sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
-               ! use "thin shells":
-               ! wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
-               if (wn<=numb .and. wn>=numb1) numk(wn)=numk(wn)+1
-            enddo
+         ! original forcing function. I'm not sure if <f,f>=ffval  
+         !ener_target(wn)=ffval*exp(-.5*(wn-forcing_peak_waveno)**2)/sqrt(2*pi)    
+      else
+         ! Smith & Waleffe: F(k) = eps_f exp( -.5 (k-k0)**2 )  /  sqrt(2pi)
+         ! this is the power spectrum of the forcing function f(k)
+         ! .5 f(k)^2 = F(k)
+         ! which gives:    <f,f> = 2 sum(F(k)) = 2 eps_f
+         ! so that d/dt(KE) = <u,f> = .5 <f,f> = eps_f
+         !
+         ! However, below I defined the energy in the forcing term as f^2
+         ! (not .5 f^2), so that f(k)^2 = F(k)
+         ! This is normalized so that <f,f> = sum(F(k)) = ffval
+         ! and thus eps_f = <u,f> = .5 <f,f> = .5 ffval
+         !
+         ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
+      endif
+   enddo
+   
+   ! compute number of coefficients in each band
+   numk=0
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nx_2dz
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            ! use "fat shells":
+            wn=Lz*sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
+            ! use "thin shells":
+            ! wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
+            if (wn<=numb .and. wn>=numb1) numk(wn)=numk(wn)+1
          enddo
       enddo
+   enddo
 #ifdef USE_MPI
-      numk2=numk
-      call mpi_allreduce(numk2,numk,numb,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
+   numk2=numk
+   call mpi_allreduce(numk2,numk,numb,MPI_INTEGER,MPI_SUM,comm_3d,ierr)
 #endif      
-   endif
+   
    
    ! print all wave numbers being forced:
    if (io_pe .eq. my_pe) then
