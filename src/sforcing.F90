@@ -1187,11 +1187,18 @@ real*8,save,allocatable :: fhat(:,:,:,:)
 real*8 ener(512),ener2(512),ener_test(512),ffnorm
 integer,save :: numk(512),numk2(512)
 real*8,save :: ener_target(512)
-integer,save :: fwidth
+integer,save :: fwidth, nf_comp
 integer :: count
 
 if (0==init_sforcing) then
    init_sforcing=1
+
+   if (ndim==3) then
+      nf_comp = 3
+      if (force_theta) nf_comp=4
+   else
+      nf_comp = 2
+   endif
 
    ! set the width of the forcing.  If fparam1==0, we use the 
    ! default (fwidth=8).  To get fwidth=0, specify in the input 
@@ -1325,7 +1332,7 @@ if (new_f==1) then
                   vor(2) = uz - wx 
                   vor(3) = vx - uy
                   ! scale out various shell factors:
-                  vor=vor/sqrt(xfac*numk(wn)*3.0)
+                  vor=vor/sqrt(xfac*numk(wn)*nf_comp)
                   ! undo curl scaling:  (2/3) wn**2
                   vor = vor * sqrt(1.5)/ wnx
                   ! vorticity now scaled so that E(wn)=1
@@ -1334,7 +1341,7 @@ if (new_f==1) then
                   vor(2) = -ux
                   vor(3) = 0
                   ! scale out various shell factors:
-                  vor=vor/sqrt(xfac*numk(wn)*2.0)
+                  vor=vor/sqrt(xfac*numk(wn)*nf_comp)
                   ! undo gradient scaling: should be .5 wn**2
                   vor = vor * sqrt(2.) /  wnx
                   ! vorticity now scaled so that E(wn)=1
@@ -1344,7 +1351,6 @@ if (new_f==1) then
                do n=1,3
                   vor(n)=vor(n)*sqrt(ener_target(wn)/delt)
                   fhat(k,i,j,n)=vor(n)
-!                  fhat(k,i,j,n)=rhs(k,i,j,n)/sqrt(xfac*numk(wn)*3.0)
                   ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
                enddo
             else
@@ -1379,7 +1385,9 @@ if (new_f==1) then
                if (jm==0) xfac=xfac/2
                if (im==0) xfac=xfac/2
 
-               fhat(k,i,j,n)=rhs(k,i,j,1)*sqrt(ener_target(wn)/delt)
+               vor = rhs(k,i,j,1)
+               vor=vor/sqrt(xfac*numk(wn)* nf_comp )
+               vor=vor*sqrt(ener_target(wn)/delt)
                ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
             endif
          enddo
