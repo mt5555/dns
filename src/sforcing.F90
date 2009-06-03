@@ -1385,9 +1385,9 @@ if (new_f==1) then
                if (jm==0) xfac=xfac/2
                if (im==0) xfac=xfac/2
 
-               vor = rhs(k,i,j,1)
-               vor=vor/sqrt(xfac*numk(wn)* nf_comp )
-               fhat(k,i,j,n)=vor*sqrt(ener_target(wn)/delt)
+               ux = rhs(k,i,j,1)
+               ux=ux/sqrt(xfac*numk(wn)* nf_comp )
+               fhat(k,i,j,n)=ux*sqrt(ener_target(wn)/delt)
                ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
             endif
          enddo
