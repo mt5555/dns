@@ -529,6 +529,14 @@ enddo
 do n=1,3
    call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
 enddo
+#undef TESTPFFT
+#ifdef TESTPFFT
+do ns=np1,np2
+   ! FFT from rhsg -> rhs, using Q as a work array.  
+   Q(:,:,:,1)=rhsg(:,:,:,ns)
+   call z_fft3d_trashinput(Q,rhs(1,1,1,ns),work)
+enddo
+#endif
 
 
 
@@ -843,9 +851,11 @@ enddo
 pke=0
 p_diss=0               
 do ns=np1,np2
+#ifndef TESTPFFT
    ! FFT from rhsg -> rhs  
    Q(:,:,:,1)=rhsg(:,:,:,ns)
    call z_fft3d_trashinput(Q,rhs(1,1,1,ns),work)
+#endif
 
    ! de-alias, and store in RHS(:,:,:,ns)
    do j=1,ny_2dz
