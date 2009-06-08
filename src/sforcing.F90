@@ -1181,6 +1181,7 @@ real*8 :: Qhat(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var) 
 integer km,jm,im,i,j,k,n,ierr,ntest,wn,wn2,ii
 real*8 xfac,f_diss,fsum,fxx_diss,vor(3),ux,uy,uz,wx,wy,wz,vx,vy,vz,xw,wnx
+real*8  :: f_diss_pe, f_diss_ke_global, f_diss_pe_global
 real*8,save,allocatable :: fhat(:,:,:,:)
 
 
@@ -1452,6 +1453,7 @@ do j=1,ny_2dz
 enddo
 enddo
 
+f_diss_pe=0
 if (force_theta .and. npassive>0) then
 n=np1
 do j=1,ny_2dz
@@ -1469,7 +1471,7 @@ do j=1,ny_2dz
          if (im==0) xfac=xfac/2
          fsum= Qhat(k,i,j,n)*fhat(k,i,j,n)
          
-         f_diss = f_diss + xfac*fsum
+         f_diss_pe = f_diss_pe + xfac*fsum
          xw=-(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
          fxx_diss = fxx_diss + xfac*xw*fsum
       enddo
@@ -1485,6 +1487,15 @@ if (io_pe==my_pe) then
 endif
 #endif
 
+#if 0
+call mpi_allreduce(f_diss,f_diss_ke_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+call mpi_allreduce(f_diss_pe,f_diss_pe_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+if (io_pe==my_pe) then
+   print *,'eps_f  ke,pe:  ',f_diss_ke_global,f_diss_pe_global
+endif
+#endif
+
+f_diss = f_diss + f_diss_pe
 
 end subroutine 
    
