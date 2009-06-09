@@ -1394,7 +1394,7 @@ if (new_f==1) then
                fhat(k,i,j,n)=ux*sqrt(ener_target(wn)/delt)
                ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
             else
-               fhat(i,i,j,n)=0
+               fhat(k,i,j,n)=0
             endif
          enddo
       enddo
@@ -1487,7 +1487,7 @@ if (io_pe==my_pe) then
 endif
 #endif
 
-#if 0
+#if 1
 call mpi_allreduce(f_diss,f_diss_ke_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 call mpi_allreduce(f_diss_pe,f_diss_pe_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 if (io_pe==my_pe) then
