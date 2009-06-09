@@ -750,6 +750,7 @@ if (input_npassive>0) then
 endif
 
 call mpi_bcast(forcing_type,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
+call mpi_bcast(force_theta,1,MPI_LOGICAL,io_pe,comm_3d ,ierr)
 call mpi_bcast(forcing_peak_waveno,1,MPI_INTEGER,io_pe,comm_3d ,ierr)
 call mpi_bcast(ffval,1,MPI_REAL8,io_pe,comm_3d ,ierr)
 call mpi_bcast(fparam1,1,MPI_REAL8,io_pe,comm_3d ,ierr)

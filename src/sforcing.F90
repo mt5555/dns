@@ -1395,7 +1395,6 @@ if (new_f==1) then
                ux=ux/sqrt(xfac*numk(wn)* nf_comp )
                fhat(k,i,j,n)=ux*sqrt(ener_target(wn)/delt)
                ener_pe(wn)=ener_pe(wn)+xfac*fhat(k,i,j,n)**2
-               print *,wn,ener_pe(wn)
             else
                fhat(k,i,j,n)=0
             endif
