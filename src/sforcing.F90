@@ -1185,7 +1185,7 @@ real*8  :: f_diss_pe, f_diss_ke_global, f_diss_pe_global
 real*8,save,allocatable :: fhat(:,:,:,:)
 
 
-real*8 ener(512),ener2(512),ener_test(512),ffnorm
+real*8 ener(512),ener2(512),ener_test(512),ffnorm,ener_pe(512),ener_test_pe(512)
 integer,save :: numk(512),numk2(512)
 real*8,save :: ener_target(512)
 integer,save :: fwidth, nf_comp
@@ -1369,6 +1369,7 @@ if (new_f==1) then
 
    ! compute forcing function fhat:
    if (force_theta .and. npassive>0) then
+   ener_pe=0
    call gaussian(rhs,g_nz2*nx_2dz*ny_2dz)
    n=np1
    do j=1,ny_2dz
@@ -1392,7 +1393,7 @@ if (new_f==1) then
                ux = rhs(k,i,j,1)
                ux=ux/sqrt(xfac*numk(wn)* nf_comp )
                fhat(k,i,j,n)=ux*sqrt(ener_target(wn)/delt)
-               ener(wn)=ener(wn)+xfac*fhat(k,i,j,n)**2
+               ener_pe(wn)=ener_pe(wn)+xfac*fhat(k,i,j,n)**2
             else
                fhat(k,i,j,n)=0
             endif
@@ -1406,16 +1407,20 @@ if (new_f==1) then
 #ifdef USE_MPI
       ener2=ener
       call mpi_allreduce(ener2,ener,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+      ener2=ener_pe
+      call mpi_allreduce(ener2,ener_pe,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif      
       ener_test=ener_test+ener/ntest
+      ener_test_pe=ener_test_pe+ener_pe/ntest
    endif
    enddo
 
    if (ntest>1) then
    if (io_pe==my_pe) then
       print *,'forcing:  ',sum(ener_test(numb1:numb))
+      print *,'k,ener_target,ener_ke,ener_pe'
       do n=numb1,numb
-         print *,n,numk(n),ener_test(n),ener_target(n)
+         print *,n,numk(n),ener_target(n),ener_test(n),ener_test_pe(n)
       enddo
    endif
    stop
