@@ -1293,11 +1293,12 @@ endif
 
 
 
-! ntest=100; delt=1.0  ! set > 1 to run some stats tests
-ntest=1
+ ntest=10; delt=1.0  ! set > 1 to run some stats tests
+!ntest=1
 if (new_f==1) then
    ener2=0
    ener_test=0
+   ener_test_pe=0
    do ii=1,ntest
 
    ! compute forcing function fhat:
@@ -1394,6 +1395,7 @@ if (new_f==1) then
                ux=ux/sqrt(xfac*numk(wn)* nf_comp )
                fhat(k,i,j,n)=ux*sqrt(ener_target(wn)/delt)
                ener_pe(wn)=ener_pe(wn)+xfac*fhat(k,i,j,n)**2
+               print *,wn,ener_pe(wn)
             else
                fhat(k,i,j,n)=0
             endif
