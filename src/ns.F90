@@ -284,7 +284,7 @@ real*8 p(g_nz2,nx_2dz,ny_2dz)
 real*8 xw,xw2,xfac,tmx1,tmx2,xw_viss
 real*8 uu,vv,ww,dummy
 integer n,i,j,k,im,km,jm,ns
-integer n1,n1d,n2,n2d,n3,n3d
+integer n1,n1d,n2,n2d,n3,n3d,xwi
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,ens_alpha
 real*8 :: p_diss(n_var),pke(n_var)
 real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(n_var,n_var),ens_diss2,ens_diss4,ens_diss6
@@ -628,6 +628,10 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+
+            ! fat-shell integer wave nubmer:
+            xwi=Lz*sqrt(im*im + jm*jm + km*km/Lz/Lz)
+
             xw_viss=mu*xw
             if (mu_hyper>=2 .and. hyper_implicit==0 ) then
                xw2=hyper_scale(1,1)*(im*im*pi2_squared)
@@ -641,7 +645,8 @@ do j=1,ny_2dz
             if (mu_hypo==1 .and. xw>0) then
                xw_viss=xw_viss + mu_hypo_value/xw
             endif
-            if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5 ) then
+!            if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5 ) then
+            if (mu_hypo==0 .and. xwi < 2.5 ) then
                xw_viss=xw_viss + mu_hypo_value
             endif
 

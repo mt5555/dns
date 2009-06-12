@@ -4,7 +4,7 @@ ns_uvw       ! equations
 zero        ! initial condition:  KH-blob, KH-anal, iso12
 0           ! init condition subtype
 sto_high_t4  ! forcing:  none, iso, iso12, iso12w, iso23w
-2.0 1       ! forcing parameters (not used for iso12, n.n=f^2, n width of gaussian)
+1.0 1       ! forcing parameters (not used for iso12, n.n=f^2, n width of gaussian)
 value        ! viscosity type  (value, smallest, kediff, Re)
 0e-5        ! viscosity coefficient.  (300)
 hyper16_imp   ! hyper16      ! hyper16_imp ! hyper vis
