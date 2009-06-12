@@ -630,7 +630,7 @@ do j=1,ny_2dz
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
 
             ! fat-shell integer wave nubmer:
-            xwi=Lz*sqrt(im*im + jm*jm + km*km/Lz/Lz)
+            ! xwi= Lz*sqrt(im*im + jm*jm + km*km/Lz/Lz)
 
             xw_viss=mu*xw
             if (mu_hyper>=2 .and. hyper_implicit==0 ) then
@@ -645,8 +645,8 @@ do j=1,ny_2dz
             if (mu_hypo==1 .and. xw>0) then
                xw_viss=xw_viss + mu_hypo_value/xw
             endif
-!            if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5 ) then
-            if (mu_hypo==0 .and. xwi < 2.5 ) then
+!            if (mu_hypo==0 .and. xwi < 2.5 ) then
+            if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5/Lz/Lz ) then
                xw_viss=xw_viss + mu_hypo_value
             endif
 
