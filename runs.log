@@ -1,3 +1,73 @@
+Tags:  (see below for more details)
+
+NSF1:  first Tag of code for NSF petascale RFP:
+NSF2:  Tag of debugged dnsp code
+NSF3:  Tag dnsp + instrumented FFT and A2A overlaop 
+
+GPL1:  Tag of code before GPL branch   (7/22/2008)
+
+
+==========================================================================
+2/13/2009
+
+ANL Intrepid dns x-pencil vs. p3dfft timings.
+
+
+dnsp    original x-pencil code
+dnsp2   x-pencil code with optimization to remove y-transposes
+dnsp3:  code use P3DFFT
+
+
+dnsp                per timestep
+512^3 (8x1x256)      0.02036 min     
+
+dnsp2               per timestep
+512^3 (8x1x256)      0.02020 min     
+2048^3 (32x1x1024)   0.20168
+2048^3 (128x1x256)   0.18770
+
+dnsp3            
+512^3 (1x8x256)      0.01794 min  
+2048^3 (1x32x1024)    0.12643
+2048^3 (1x64x512)     0.12675     
+2048^3 (1x128x256)  
+
+
+
+
+TIMING JUST THE FORWARD TRANSFROM
+Mark Straka's timings:
+out.4x1024.2048_NEW_ESSL.output: proc_id, cpu time per loop 0 0.98941431058823536
+out.4x1024.2048_NEW_FFTW.output: proc_id, cpu time per loop 0 1.34859306352939257
+
+My best ESSL time translates (dividing by 8, assuming perfect scaling :)) to a 
+time for 32k procs of about 0.125s.  (0.1686 for FFTW)
+
+My timings:
+
+2048^3 1K nodes 8K cores
+p3dfft 4-1024   2.895       foward & back
+p3dfft 4-1024   1.249       forward only
+
+
+2048^3 8K nodes 32K cores
+p3dfft 128-256           0.5517  0.5497     (ERROR! timing *both* directions)
+p3dfft  64-512           0.3704  0.3705     (ERROR! timing *both* directions)
+p3dfft  32-1024          0.1855  0.1860     (fixed, timing only forward tnfrm)
+
+dnsp2 128-1-256        0.3956  0.4093
+dnsp2 64-1-512         hung
+dnsp2 32-1-1024        0.6754  0.6723
+
+why does that one hang? scaled down version:
+on each proc:  32x2048x4
+64^3 
+dnsp2: 2x1x16
+
+
+
+
+
 *******************************************************************************
 7/22/2008
 
