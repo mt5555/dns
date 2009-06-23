@@ -1493,7 +1493,7 @@ if (io_pe==my_pe) then
 endif
 #endif
 
-#if 1
+#if 0
 call mpi_allreduce(f_diss,f_diss_ke_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 call mpi_allreduce(f_diss_pe,f_diss_pe_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 if (io_pe==my_pe) then

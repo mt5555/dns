@@ -529,7 +529,7 @@ enddo
 do n=1,3
    call z_fft3d_trashinput(Q(1,1,1,n),rhs(1,1,1,n),work)
 enddo
-#undef TESTPFFT
+#define TESTPFFT
 #ifdef TESTPFFT
 do ns=np1,np2
    ! FFT from rhsg -> rhs, using Q as a work array.  
@@ -889,7 +889,7 @@ do ns=np1,np2
                if (mu_hypo==1 .and. xw>0) then
                   xw_viss=xw_viss + mu_hypo_value/xw
                endif
-               if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5 ) then
+               if (mu_hypo==0 .and. xw < pi2_squared*2.5*2.5/Lz/Lz ) then
                   xw_viss=xw_viss + mu_hypo_value
                endif
 

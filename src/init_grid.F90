@@ -2645,6 +2645,7 @@ else if (sdata=='hyper16_imp') then
    mu_hyper=8
    mu_hyper_value = rvalue
 else 
+   print *,'value = >>',sdata,'<<'
    call abortdns("non supported hyper viscosity type")
 endif
 
