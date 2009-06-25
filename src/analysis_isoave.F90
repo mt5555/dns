@@ -49,11 +49,8 @@ use pdf
 use spectrum
 implicit none
 
-! set this to 0 to use 1 cpu version.  
-! 1 cpu version uses significantly less memory then parallel version
-! but doesn't compute some scalars like helicity dissipation rate.
-integer :: always_use_parallel_code = 1;
-integer :: use_serial
+! set this to 1 to use serial version, used for debugging
+integer :: use_serial = 0 
 
 real*8,allocatable  :: Q(:,:,:,:)
 real*8,allocatable  :: q1(:,:,:,:)
@@ -133,12 +130,6 @@ if (scale/=1) then
 endif
 
 
-if (ncpus==1) then
-   use_serial=1;
-else
-   use_serial=0;
-endif
-if (always_use_parallel_code==1) use_serial=0;
 if (use_serial==1) then
    call print_message("using serial version of isoave code")
 else
@@ -362,15 +353,10 @@ do
 
    if (compute_uq) then
       if (.not. read_uvw) then	
-      if (use_serial==1) then
-         call input_uvw(time,Q,dummy,work1,work2,header_type)
-         Q=Q*scale;
-      else
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         input_passive(runname,time,Q,work1,work2)	
+         call input_passive(runname,time,Q,work1,work2)	
          Q=Q*scale;
-      endif
-      read_uvw=.true.	
+         read_uvw=.true.	
       endif
 
       call compute_div(Q,q1(1,1,1,1),q1(1,1,1,2),q1(1,1,1,3),divx,divi)
@@ -378,35 +364,25 @@ do
       call print_message(message)	
 
       
-      do i=0,nxdecomp-1
-      do j=0,nydecomp-1
-      do k=0,nzdecomp-1  
-
-         if (my_pe==io_pe) then
-            write(sdata,'(f10.4)') 10000.0000 + time
-            write(idata,'(i1)') str_type
-            if (str_type==0) then
-               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr"
-            endif
-            print *,fname
+      if (my_pe==io_pe) then
+         write(sdata,'(f10.4)') 10000.0000 + time
+         write(idata,'(i1)') str_type
+         if (str_type==0) then
+            fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr"
          endif
-         
-         if (nxdecomp*nydecomp*nzdecomp==1) then
-            ! no subcubes:
-            pv_type=1
-            if (npassive==1) stype=4; ! structure functions of u,v,w and PV
-            
-            ! compute pv in work1, vorticity in q1
-            call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
-            work2 = Q(:,:,:,4)  ! make a copy
-            Q(:,:,:,4) = work1  ! overwrite 4'th component with PV
-            
-            
-            call isoavep(Q,q1,q1,q2,stype,csig)
-         endif
-         
+         print *,fname
+      endif
       
+      pv_type=1
+      if (npassive==1) stype=4; ! structure functions of u,v,w and PV
       
+      ! compute pv in work1, vorticity in q1
+      call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
+      work2 = Q(:,:,:,4)  ! make a copy
+      Q(:,:,:,4) = work1  ! overwrite 4'th component with PV
+      
+      call isoavep(Q,q1,q1,q2,stype,csig)
+      Q(:,:,:,4) = work2  ! restore      
       
       if (my_pe==io_pe) then
          call copen(fname,"w",fid,ierr)
@@ -416,16 +392,8 @@ do
          endif
          call writeisoave2(fid,time,ints_e(8),1)
          call cclose(fid,ierr)
-         
-         Q(:,:,:,4) = work2  ! restore
       endif
-      
-   enddo
-enddo
-enddo
-
-endif
-
+   endif
 
 
    if (compute_cj) then
