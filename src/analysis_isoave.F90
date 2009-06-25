@@ -96,13 +96,14 @@ header_type=1; scale=1;
 compute_pdfs=.false.
 compute_cj=.false.
 compute_scalar=.false.
-compute_uvw=.true.	!computes structure functions (long, trans, mixed)
+compute_uvw=.false.	!computes structure functions (long, trans, mixed)
+compute_uq=.true.       !computes potential vorticity/u correlations
 compute_hspec=.false.
 read_uvw=.false.
 
 
-tstart=2.4
-tstop=2.5
+tstart=0.0
+tstop=10.0
 tinc=0.1
 icount=0
 
@@ -149,16 +150,16 @@ endif
 
 
 if (use_serial==1) then
-   allocate(Q(nx,ny,nz,ndim))
+   allocate(Q(nx,ny,nz,n_var))
    allocate(work1(nx,ny,nz))
    allocate(work2(nx,ny,nz))
 else
    ! parallel version requires extra data:
-   allocate(Q(nx,ny,nz,ndim))
-   allocate(q1(nx,ny,nz,ndim))
-   allocate(q2(nx,ny,nz,ndim))
+   allocate(Q(nx,ny,nz,n_var))
+   allocate(q1(nx,ny,nz,n_var))
+   allocate(q2(nx,ny,nz,n_var))
    if (nxdecomp*nydecomp*nzdecomp>1) then
-      allocate(q3(nx,ny,nz,ndim))
+      allocate(q3(nx,ny,nz,n_var))
       allocate(work1(nx,ny,nz))
       allocate(work2(nx,ny,nz))
       allocate(work3(nx,ny,nz))
@@ -357,6 +358,101 @@ do
 
    endif
 
+
+
+   if (compute_uq) then
+      if (.not. read_uvw) then	
+      if (use_serial==1) then
+         call input_uvw(time,Q,dummy,work1,work2,header_type)
+         Q=Q*scale;
+      else
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)	
+         Q=Q*scale;
+      endif
+      read_uvw=.true.	
+      endif
+
+      call compute_div(Q,q1(1,1,1,1),q1(1,1,1,2),q1(1,1,1,3),divx,divi)
+      write(message,'(3(a,e12.5))') 'max(div)=',divx
+      call print_message(message)	
+
+      
+      do i=0,nxdecomp-1
+      do j=0,nydecomp-1
+      do k=0,nzdecomp-1  
+
+         if (my_pe==io_pe) then
+            write(sdata,'(f10.4)') 10000.0000 + time
+            write(idata,'(i1)') str_type
+            if (str_type==0) then
+               fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr"
+            endif
+            if (nxdecomp*nydecomp*nzdecomp>1) then
+               write(sdata,'(3i1)') i,j,k
+               fname=fname(1:len_trim(fname)) // "_" // sdata(1:3)
+               fname_ux=fname_ux(1:len_trim(fname)) // "_" // sdata(1:3)
+            endif
+            print *,fname
+         endif
+         
+         if (use_serial==1) then
+            nxlen=nslabx/nxdecomp
+            nylen=nslaby/nydecomp
+            nzlen=nslabz/nzdecomp
+            
+            lx1=nx1 + i*nxlen     
+            ly1=ny1 + j*nylen     
+            lz1=nz1 + k*nzlen     
+            
+            lx2=lx1 + nxlen-1
+            ly2=ly1 + nylen-1
+            lz2=lz1 + nzlen-1
+            
+            ! subcube version cannot run in parallel - it will abort
+            call isoave1(Q,work1,work2,lx1,lx2,ly1,ly2,lz1,lz2)
+         else
+            if (nxdecomp*nydecomp*nzdecomp==1) then
+               ! no subcubes:
+               pv_type=1
+               if (npassive==1) stype=4; ! structure functions of u,v,w and PV
+   
+               ! compute pv in work1, vorticity in q1
+               call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
+               work2 = Q(:,:,:,4)  ! make a copy
+               Q(:,:,:,4) = work1  ! overwrite 4'th component with PV
+    
+
+               call isoavep(Q,q1,q1,q2,stype,csig)
+            else
+               range(1,1)=dble(i)/nxdecomp
+               range(1,2)=dble(i+1)/nxdecomp
+               range(2,1)=dble(j)/nxdecomp
+               range(2,2)=dble(j+1)/nxdecomp
+               range(3,1)=dble(k)/nxdecomp
+               range(3,2)=dble(k+1)/nxdecomp
+               call isoavep_subcube(Q,q1,q2,q3,range,work1,work2,work3,work4)
+            endif
+         endif
+      
+         
+         
+         if (my_pe==io_pe) then
+            call copen(fname,"w",fid,ierr)
+            if (ierr/=0) then
+               write(message,'(a,i5)') "output_model(): Error opening .bisostr file errno=",ierr
+               call abortdns(message)
+            endif
+            call writeisoave2(fid,time,ints_e(8),1)
+            call cclose(fid,ierr)
+
+            Q(:,:,:,4) = work2  ! restore
+         endif
+         
+      enddo
+      enddo
+      enddo
+
+   endif
 
 
 
