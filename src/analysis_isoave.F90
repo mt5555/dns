@@ -69,8 +69,10 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale,divx,divi
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
-logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec
+logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec,compute_uq
 logical :: read_uvw
+integer :: pv_type,stype
+
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
 
 
@@ -372,17 +374,16 @@ do
          endif
          print *,fname
       endif
-      
       pv_type=1
       if (npassive==1) stype=4; ! structure functions of u,v,w and PV
       
       ! compute pv in work1, vorticity in q1
       call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
-      work2 = Q(:,:,:,4)  ! make a copy
-      Q(:,:,:,4) = work1  ! overwrite 4'th component with PV
+      work2 = Q(:,:,:,np1)  ! make a copy
+      Q(:,:,:,np1) = work1  ! overwrite 4'th component with PV
       
       call isoavep(Q,q1,q1,q2,stype,csig)
-      Q(:,:,:,4) = work2  ! restore      
+      Q(:,:,:,np1) = work2  ! restore      
       
       if (my_pe==io_pe) then
          call copen(fname,"w",fid,ierr)
@@ -390,7 +391,7 @@ do
             write(message,'(a,i5)') "output_model(): Error opening .bisostr file errno=",ierr
             call abortdns(message)
          endif
-         call writeisoave2(fid,time,ints_e(8),1)
+         call writeisoave(fid,time)
          call cclose(fid,ierr)
       endif
    endif
