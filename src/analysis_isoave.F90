@@ -53,6 +53,7 @@ implicit none
 integer :: use_serial = 0 
 
 real*8,allocatable  :: Q(:,:,:,:)
+real*8,allocatable  :: Qhat(:,:,:,:)
 real*8,allocatable  :: q1(:,:,:,:)
 real*8,allocatable  :: q2(:,:,:,:)
 real*8,allocatable  :: q3(:,:,:,:)
@@ -72,6 +73,8 @@ integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec,compute_uq
 logical :: read_uvw
 integer :: pv_type,stype
+integer :: nints_e
+real*8 :: ints_e(*)
 
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
 
@@ -160,6 +163,11 @@ endif
 
 if (compute_cj) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
+endif
+
+if (compute_uq) then
+   if (.not. allocated(Qhat))  allocate(Qhat(g_nz2,nx_2dz,ny_2dz,n_var))
+   if (.not. allocated(q3))  allocate(q3(nx,ny,nz,n_var))
 endif
 
 
@@ -393,6 +401,11 @@ do
          call writeisoave(fid,time)
 	 ! add the enstrophy dissipation (stored in position 8) 
          ! to the structure function file
+         
+	 call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
+	 if (my_pe==io_pe) then
+            print *,'Q_eps',ints_e(8)
+	 endif
          call writeisoave2(fid,time,ints_e(8),1)
          call cclose(fid,ierr)
       endif
