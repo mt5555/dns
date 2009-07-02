@@ -73,7 +73,7 @@ integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec,compute_uq
 logical :: read_uvw
 integer :: pv_type,stype
-integer :: nints_e
+integer :: nints_e=14
 real*8 :: ints_e(14)
 
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
@@ -383,6 +383,15 @@ do
       pv_type=1
       if (npassive==1) stype=4; ! structure functions of u,v,w and PV
       
+
+      ! compute the enstrophy dissipation (stored in ints_e(8)
+      do n=1,n_var
+         work1=Q(:,:,:,n)
+         call z_fft3d_trashinput(work1,Qhat(1,1,1,n),work2)
+      enddo
+      call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
+
+
       ! compute pv in work1, vorticity in q1
       call potential_vorticity(work1,work2,Q,q1(:,:,:,1),q1(:,:,:,1),pv_type)
       work2 = Q(:,:,:,np1)  ! make a copy
@@ -393,19 +402,14 @@ do
       Q(:,:,:,np1) = work2  ! restore      
       
       if (my_pe==io_pe) then
+         print *,'Q_eps',ints_e(8)
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .bisostr file errno=",ierr
             call abortdns(message)
          endif
-         call writeisoave(fid,time)
 	 ! add the enstrophy dissipation (stored in position 8) 
          ! to the structure function file
-         
-	 call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
-	 if (my_pe==io_pe) then
-            print *,'Q_eps',ints_e(8)
-	 endif
          call writeisoave2(fid,time,ints_e(8),1)
          call cclose(fid,ierr)
       endif
