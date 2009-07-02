@@ -74,7 +74,7 @@ logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec,com
 logical :: read_uvw
 integer :: pv_type,stype
 integer :: nints_e
-real*8 :: ints_e(*)
+real*8 :: ints_e(14)
 
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
 
@@ -104,7 +104,7 @@ compute_hspec=.false.
 read_uvw=.false.
 
 
-tstart=.1
+tstart=0.1
 tstop=4.7
 tinc=0.1
 icount=0
