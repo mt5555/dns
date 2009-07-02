@@ -380,7 +380,7 @@ do
       if (npassive==1) stype=4; ! structure functions of u,v,w and PV
       
       ! compute pv in work1, vorticity in q1
-      call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
+      call potential_vorticity(work1,work2,Q,q1(:,:,:,1),q1(:,:,:,1),pv_type)
       work2 = Q(:,:,:,np1)  ! make a copy
       Q(:,:,:,np1) = work1  ! overwrite 4'th component with PV
       
