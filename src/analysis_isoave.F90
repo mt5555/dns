@@ -101,8 +101,8 @@ compute_hspec=.false.
 read_uvw=.false.
 
 
-tstart=0.0
-tstop=10.0
+tstart=.1
+tstop=4.7
 tinc=0.1
 icount=0
 
@@ -379,6 +379,7 @@ do
       call potential_vorticity(work1,work2,Q,q1(:,:,:,1),q1(:,:,:,1),pv_type)
       work2 = Q(:,:,:,np1)  ! make a copy
       Q(:,:,:,np1) = work1  ! overwrite 4'th component with PV
+
       
       call isoavep(Q,q1,q1,q2,stype,csig)
       Q(:,:,:,np1) = work2  ! restore      
@@ -390,6 +391,9 @@ do
             call abortdns(message)
          endif
          call writeisoave(fid,time)
+	 ! add the enstrophy dissipation (stored in position 8) 
+         ! to the structure function file
+         call writeisoave2(fid,time,ints_e(8),1)
          call cclose(fid,ierr)
       endif
    endif
