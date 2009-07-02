@@ -141,22 +141,18 @@ endif
 
 !call writepoints(); stop
 
+allocate(work1(nx,ny,nz))
+allocate(work2(nx,ny,nz))
 
 if (use_serial==1) then
    allocate(Q(nx,ny,nz,n_var))
-   allocate(work1(nx,ny,nz))
-   allocate(work2(nx,ny,nz))
 else
    ! parallel version requires extra data:
    allocate(Q(nx,ny,nz,n_var))
    allocate(q1(nx,ny,nz,n_var))
    allocate(q2(nx,ny,nz,n_var))
-   allocate(work1(nx,ny,nz))
-   allocate(work2(nx,ny,nz))
    if (nxdecomp*nydecomp*nzdecomp>1) then
       allocate(q3(nx,ny,nz,n_var))
-      allocate(work1(nx,ny,nz))
-      allocate(work2(nx,ny,nz))
       allocate(work3(nx,ny,nz))
       allocate(work4(nx,ny,nz))
    endif
