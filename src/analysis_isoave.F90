@@ -372,14 +372,6 @@ do
       call print_message(message)	
 
       
-      if (my_pe==io_pe) then
-         write(sdata,'(f10.4)') 10000.0000 + time
-         write(idata,'(i1)') str_type
-         if (str_type==0) then
-            fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr"
-         endif
-         print *,fname
-      endif
       pv_type=1
       if (npassive==1) stype=4; ! structure functions of u,v,w and PV
       
@@ -392,17 +384,21 @@ do
       call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
 
 
-      ! compute pv in work1, vorticity in q1
-      call potential_vorticity(work1,work2,Q,q1(:,:,:,1),q1(:,:,:,1),pv_type)
-      work2 = Q(:,:,:,np1)  ! make a copy
-      Q(:,:,:,np1) = work1  ! overwrite 4'th component with PV
-
-      
+      ! compute pv in q1(:,:,:,1), vorticity in q2(:,:,:,1:3)
+      call potential_vorticity(q1,q2,Q,work1,work2,pv_type)
+      work2 = Q(:,:,:,np1)        ! make a copy of theta
+      Q(:,:,:,np1) = q1(:,:,:,1)  ! overwrite 4'th component of Q with PV
       call isoavep(Q,q1,q1,q2,stype,csig)
-      Q(:,:,:,np1) = work2  ! restore      
+      Q(:,:,:,np1) = work2  ! restore theta
+     
       
       if (my_pe==io_pe) then
          print *,'Q_eps',ints_e(8)
+
+         write(sdata,'(f10.4)') 10000.0000 + time
+         write(idata,'(i1)') str_type
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr"
+         print *,fname
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then
             write(message,'(a,i5)') "output_model(): Error opening .bisostr file errno=",ierr
