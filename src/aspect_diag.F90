@@ -115,7 +115,7 @@ endif
 !
 ! the "expensive" scalars
 !bw compute scalars as a function of time, and output to a file
-call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
+call compute_expensive_scalars_aspect(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
 if (nints_e > nints_e_max) call abortdns("Error: aspec_diag.F90: nints_e_max too small")
 
 
@@ -177,7 +177,7 @@ end subroutine
 
 
 
-subroutine compute_expensive_scalars(Q,Qhat,vor,potensdiss_mu, &
+subroutine compute_expensive_scalars_aspect(Q,Qhat,vor,potensdiss_mu, &
       potensdiss_kappa,potvor,theta_z,nints_e,ints_e) 
 use params
 use fft_interface
@@ -529,5 +529,5 @@ nints_e=14
 !print *,'aspect_diag potens=',potens,potensqg,potensro0,potensfr0
 !print *,'aspect_diag potens_diss=',potens_diss
 
-end subroutine compute_expensive_scalars
+end subroutine compute_expensive_scalars_aspect
 

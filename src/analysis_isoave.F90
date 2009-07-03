@@ -381,7 +381,7 @@ do
          work1=Q(:,:,:,n)
          call z_fft3d_trashinput(work1,Qhat(1,1,1,n),work2)
       enddo
-      call compute_expensive_scalars(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
+      call compute_expensive_scalars_aspect(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
 
 
       ! compute pv in q1(:,:,:,1), vorticity in q2(:,:,:,1:3)
