@@ -704,10 +704,93 @@ do not show the potential energy spectrum which SW02 does show.
    Fig. 9 of SW02. \label{NF10_spec}}
 \end{figure}
 
-\section{Test of projection routine and non-unit aspect ratio. July 9, 2009. SK}
-We are trying to recover Figures 1 and 2 in Remmel, Sukhatme and Smith, 2009. 
+\section{Test of projection routines and non-unit aspect ratio. July 9, 2009. SK}
+We are trying to recover Figure 1 (dashed line) and Figure 2 in
+Remmel, Sukhatme and Smith, 2009.  Since our domain parameters our
+different from those in Remmel et al 2009, we had to define the
+appropriate scales as follows:
 
-insert document here.
+\subsection{Scales}
+\begin{table}[ht]
+\begin{tabular}{lll}
+\hline\\
+Parameter & RSS09 & Sandia-LANL code\\
+\hline\\
+aspect ratio $Lz$ & 0.2 & 0.2\\
+dimension ($L_x \times L_y\times L_z$) & $10\pi \times 10\pi \times 2\pi $ & $1  \times 1 \times Lz$ \\  
+resolution ($N_x \times N_y \times N_z$) & $80 \times 400 \times 400$ & $80 \times 400 \times 400$ \\
+$\Delta k_x \times \Delta k_y \times \Delta k_z = \frac{2\pi}{L_x} \times \frac{2\pi}{L_y} \times \frac{2\pi}{L_z}$ & 
+$0.2 \times 0.2 \times 1$ & $2\pi \times 2\pi \times 10\pi$  \\
+energy input rate $\epsilon_f$ & 1 & 1 \\
+smallest 3D $k$-shell &  $\Delta k = \Delta k_z = 1$ & $\Delta k = \Delta k_z = 10\pi$\\  
+forcing shell $k_f = 4$ & $k_f = 4\times \Delta k_z = 4$ & $k_f = 4 \times \Delta k_z = 4\times 10\pi$\\
+damped modes (fat shells) & $k \leq 2.5$ & $k \leq 2.5\times 10\pi $ \\
+\hline
+\end{tabular}
+\end{table}
+
+With the above definitions, the various scales and $Ro$ and $Fr$ are
+defined for each of the two simulations:
+\begin{itemize}
+\item typical velocity based on energy input rate and forcing scale
+  (which by choice is the same as the {\it vertical scale}) $U =
+  ({\epsilon_f}{H})^{1/3} = (\epsilon_f/k_f)^{1/3}$
+\item typical vertical length scale $H = 1/k_f$; 
+\item typical horizontal length scale $L = H/Lz = 1/(Lz k_f)$;
+\item $Ro = \frac{U}{Lf} = 0.05 \implies f = \frac{U}{L Ro}$;
+\item $Fr = \frac{U}{HN} = 0.05 \implies N = \frac{U}{H Fr}$;
+\item Nonlinear time $\tau = (\epsilon_f k_f^2)^{(-1/3)}$. We will use subscript $RSS$ or $S-L$ to denote the RSS09 or Sandia-LANL timescales respectively.
+\item Energy scale ${\cal E} = (\epsilon_f /k_f)^{(2/3)}$. Again the corresponding subscripts will be used.
+\end{itemize}
+
+RSS09 forces the eigenmodes randomly at each time-step. Sandia-LANL
+code forces $u,v,w$ and $\theta$ randomly at each time-step. These
+should be equivalent.
+
+Remmel et al have a uniform drag added to the rhs of the equations, 
+$-0.1 b$ where $b$ is any
+of $u,v,w,\theta$, for all modes $k < 2.5$. In order to choose the
+corresponding factor for the Sandia-LANL simulation we note that the
+drag coefficient $d_r = 0.1$ has units of $T^{-1}$. Assuming the
+non-dimensional product $\tau d_r$, should be the same in each of our
+simulations we can determine $d_r$ for the Sandia-LANL code. 
+
+In the RSS09 simulation, $\tau d_r \simeq 25$, and
+therefore for the Sandia-LANL code the corresponding 
+\begin{itemize}
+\item $d_r = 25/\tau = 1$.
+\end{itemize}
+In order to get RSS09's dimensional time, we rescale our time by
+$\tau_{RSS}/\tau_{S-L}$. In order to get RSS09's dimensional energy,
+we rescale our energy by ${\cal E}_{RSS}/{\cal E}_{S-L}$.
+
+\subsection{Results}
+Unless otherwise stated, all the scalings are as defined above for the
+Sandia-LANL domain convention. The input file is:
+
+\begin{verbatim}
+input file here
+
+\end{verbatim}
+
+
+Figure \ref{Fig1_H} is to be compared with RSS09 Fig. 1. 
+\begin{figure}[ht]
+\centering
+\includegraphics[scale = .7]{RSS09_Fig1_UH}
+\caption{The time has been rescaled by $\tau_{RSS}/\tau_{S-L}$ and the energy has been rescaled by ${\cal E}_{RSS}/{\cal E}_{S-L}$. }
+\label{Fig1_H}
+\end{figure}
+
+
+Figure \ref{Fig2_H} is to be compared with RSS09 Fig. 2.
+\begin{figure}[ht]
+\centering
+\includegraphics[scale = .7]{RSS09_Fig2_UH}
+\caption{Total, wave and vortical energy spectra at rescaled time = 30.}
+\label{Fig2_H}
+\end{figure}
+
 
 \section{Bousinesq scalars we're interested in computing}
 
