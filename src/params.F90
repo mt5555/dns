@@ -907,20 +907,38 @@ integer :: im,jm,km
 ASSERT("dealias_remove: im >= 0 failed",im>=0)
 ASSERT("dealias_remove: jm >= 0 failed",jm>=0)
 ASSERT("dealias_remove: km >= 0 failed",km>=0)
-if (dealias==1) then
-   dealias_remove = ( (3*km>=g_nz)  .or.  (3*jm>=g_ny)  .or. (3*im>=g_nx) )
-else if (dealias==2) then
+
+if (Lz .eq. 1) then
+   if (dealias==1) then
+      dealias_remove = ( (3*km>=g_nz)  .or.  (3*jm>=g_ny)  .or. (3*im>=g_nx) )
+   else if (dealias==2) then
 #ifdef TRUNC_SHELL
-   dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
+      dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_sphere_kmax2 )
 #else
-   dealias_remove = ( ( im**2 + jm**2 + km**2 ) >= dealias_sphere_kmax2 )
+      dealias_remove = ( ( im**2 + jm**2 + km**2 ) >= dealias_sphere_kmax2 )
 #endif
-else if (dealias==3) then
-   dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_23sphere_kmax2 )
+   else if (dealias==3) then
+      dealias_remove = ( ( im**2 + jm**2 + km**2 ) > dealias_23sphere_kmax2 )
+   else
+      dealias_remove = .false.
+   endif
 else
-   dealias_remove = .false.
+   if (dealias==1) then
+      dealias_remove = ( (3*km>=g_nz)  .or.  (3*jm>=g_ny)  .or. (3*im>=g_nx) )
+   else if (dealias==2) then
+#ifdef TRUNC_SHELL
+      dealias_remove = (( (im**2 + jm**2)*Lz**2 + km**2 ) > dealias_sphere_kmax2 )
+#else
+      dealias_remove = (( (im**2 + jm**2)*Lz**2 + km**2 ) >= dealias_sphere_kmax2 )
+#endif
+   else if (dealias==3) then
+      dealias_remove = ( ( (im**2 + jm**2)*Lz**2 + km**2 ) > dealias_23sphere_kmax2 )
+   else
+      dealias_remove = .false.
+   endif
 endif
-   
+
+  
 end function
 
                       
