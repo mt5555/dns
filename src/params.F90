@@ -909,6 +909,8 @@ ASSERT("dealias_remove: jm >= 0 failed",jm>=0)
 ASSERT("dealias_remove: km >= 0 failed",km>=0)
 
 if (Lz .eq. 1) then
+   ! keep LZ out of this loop so everything is done with integer
+   ! arithmetic
    if (dealias==1) then
       dealias_remove = ( (3*km>=g_nz)  .or.  (3*jm>=g_ny)  .or. (3*im>=g_nx) )
    else if (dealias==2) then
