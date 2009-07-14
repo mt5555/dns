@@ -2560,6 +2560,10 @@ else if (sdata=='sto_high_t4') then
    forcing_peak_waveno=4
    forcing_type=8
    force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
+else if (sdata=='sto_high_t10') then
+   forcing_peak_waveno=10
+   forcing_type=8
+   force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
 else if (sdata=='sto_high_32') then
    forcing_peak_waveno=32
    forcing_type=8
@@ -2982,7 +2986,6 @@ else if (sdata=='hyperN') then
    mu_hyper = mu_hyper/2   ! divide by two because we compute (k^2)^mu_hyper
 !   mu_hyper_value = rvalue*(pi2 * k_Gt)**(-2*mu_hyper)
    mu_hyper_value = rvalue
-
 else if (sdata=='hyper16_imp') then
    hyper_implicit=1
    mu_hyper=8
