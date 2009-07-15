@@ -769,7 +769,48 @@ Unless otherwise stated, all the scalings are as defined above for the
 Sandia-LANL domain convention. The input file is:
 
 \begin{verbatim}
-input file here
+
+8            ! input file type
+1             ! file I/O header type   1-5
+ns_uvw       ! equations
+zero        ! initial condition:  KH-blob, KH-anal, iso12
+0           ! init condition subtype
+sto_high_t4  ! forcing:  none, iso, iso12, iso12w, iso23w
+2.0 1       ! forcing parameters (not used for iso12, n.n=f^2, n width of gaussian)
+value        ! viscosity type  (value, smallest, kediff, Re)
+0e-5        ! viscosity coefficient.  (300)
+hyper16_imp   ! hyper16      ! hyper16_imp ! hyper vis
+2.500         ! hyper vis value
+hypo0        ! hypo vis
+1          ! hypo vis value
+100          ! fcor  rotation
+0.2        ! Z sscaling  (aspect ratio)
+500.0            ! Bous. parameter  
+0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
+.0            ! smagorinsky
+1             ! max number of schmidt numbers for passive scalars
+1. 4            ! schmidt number = nu/kappa, ratio of viscous coeffs, type
+0            ! compute_structure functions (set to 1 to compute strfns)
+0            ! compute pdf functions
+fft-dealias  ! derivative method  (fft, fft-dealias, fft-sphere, 4th)
+periodic     ! x bc  (periodic, no-slip)
+periodic     ! y bc
+periodic     ! z bc
+5          ! time to run
+1.5          ! adv cfl  (0 = disabled, use min_dt) .8
+0.25           ! vis cfl  (0 = disabled, use min_dt) .01
+0.000010             ! min_dt
+.1             ! max_dt
+0.0          ! restart_dt  (0 = restart output disabled)
+.1          ! diag_dt   (.scalars)
+.1            ! model_dt   (.spec,.scalars-bous, .bisostr, .isostr)
+-50          ! screen_dt (0 = disables, +ve = timesteps, -ve = time)
+.2          ! output_dt  (field data, 0 = output disabled, except for custom out times)
+0             ! also output the vorticity
+0           ! n_output_custom  number of custom output times
+00.00       ! custom output times, one per line
+
+
 
 \end{verbatim}
 
@@ -778,8 +819,7 @@ Figure \ref{Fig1_H} is to be compared with RSS09 Fig. 1.
 \begin{figure}[ht]
 \centering
 \includegraphics[scale = .7]{RSS09_Fig1_UH}
-\caption{The time has been rescaled by $\tau_{RSS}/\tau_{S-L}$ and the energy has been rescaled by ${\cal E}_{RSS}/{\cal E}_{S-L}$. }
-\label{Fig1_H}
+\caption{The time has been rescaled by $\tau_{RSS}/\tau_{S-L}$ and the energy has been rescaled by ${\cal E}_{RSS}/{\cal E}_{S-L}$. \label{Fig1_H}}
 \end{figure}
 
 
@@ -787,8 +827,7 @@ Figure \ref{Fig2_H} is to be compared with RSS09 Fig. 2.
 \begin{figure}[ht]
 \centering
 \includegraphics[scale = .7]{RSS09_Fig2_UH}
-\caption{Total, wave and vortical energy spectra at rescaled time = 30.}
-\label{Fig2_H}
+\caption{Total, wave and vortical energy spectra at rescaled time = 30.\label{Fig2_H}}
 \end{figure}
 
 
