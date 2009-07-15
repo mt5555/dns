@@ -9,7 +9,7 @@ clear all;
 % defaults:
 nx=0;
 fcor=0;
-f_k=0;
+f_k=4;
 
 fid2=-1;
 
@@ -62,8 +62,14 @@ fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg640/q
 fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars-bous','r')
 
 fid=endianopen('~/projects/bous640runs/qg640_b3000_all.scalars-bous','r');
+fid=endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bous','r');
+fid=endianopen('~/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars-bous','r');
+fid=endianopen('~/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
 
-fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/mauler/f27b136/bous200Lz0.2_all.scalars-bous','r')
+fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n256_Ro1Fr0.01_all.scalars-bous','r')
+%fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars-bous','r')
+
+fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars-bous','r')
 
 nscalars=0;
 ints=[];
@@ -122,16 +128,18 @@ title('PV');
 hold off
 
 figure(3)
-subplot(2,1,2);
+subplot(1,1,1);
 %clf
 plot(time,potens,'b','Linewidth',2);hold on;
 plot(time,potens_qg,'ro','Markersize',6);
-%plot(time,potens_ro0fr1,'r.-');
-%plot(time,potens_ro1fr0,'k-');
-%title('Potential enstrophy: (blue: Total); (red o QG); (red.-: Ro->0,Fr1); (black: Ro1, Fr->0)');
+plot(time,potens_ro0fr1,'r.-','Markersize',6);
+plot(time,potens_ro1fr0,'ko','Markersize',6);
+title('Potential enstrophy: (blue: Total); (red o QG); (red.-: Ro->0,Fr1); (black: Ro1, Fr->0)');
 legend('$Q$','$Q_{qg}$','$Q_{q\sim f \partial_z \rho}$', '$Q_{q\sim N \omega_3}$');
 
-figure(4)
+%check that dissipation matches dQ/dt for decaying case
+if(0)
+figure(4) 
 clf
 hold on
 dt = diff(time);
@@ -143,6 +151,7 @@ mean_forc = mean((dqdt + potens_diss(1:length(time)-1)))
 legend('\Delta Q/\Delta t', 'potens\_diss','difference');
 grid on;
 title('potential enstrophy dissipation rate dQ/dt check')
+end
 
 print -depsc bous-scalars.ps
 

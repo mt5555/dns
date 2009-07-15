@@ -1,10 +1,14 @@
 clear
 %name = 'all'
+name = 'n640_fcor3000bous14_all'
+%name = 'n640_fcor14bous3000_all'
+%name = 'n640_bous3000_all'
 %name = 'qg640_b3000_all'
+name = 'n256_Ro1Fr0.01_all'
 %name= 'n512_f2000b20_all';
 %name = 'qg512hyper0002.9619'
 %name = 'qg512hyper_all';
-name = 'qg512_b2000_all';
+%name = 'qg512_b2000_all';
 %name = 'qg256hyper_all';
 %name = 'qg64hyper_all';
 %name = 'n256_f1000n5_all';
@@ -37,7 +41,7 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 %namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg512/bous1000/'];             
-namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/';
+%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/';
 %namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
 %namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/';
 %namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
@@ -52,10 +56,14 @@ namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous20
 %namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg128/no_hyper/'];
 
+%namedir = '~/INCITE_runs/Intrepid/qg/';
+%namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';
+%namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
+namedir = '~/INCITE_runs/Intrepid/bous_NSvisc/';
 
 asciprint = 0 % if == 1 print out the data to asci files
 
-fid=fopen([namedir,name,'.spec2d'],'r');
+fid=fopen([namedir,name,'.spec2d'],'r','b');  %use 'b' for 
 if (fid<0) 
   'Error opening file',[namedir,name]
   return
@@ -148,12 +156,12 @@ if (1)
   loglog53(numkh,specuh'+specvh','E_h(kh)',2.0,6);%hold on;
 %  figure(4)
 %  loglog53(numkh,specwh','E_z(kh)',2.0,6);%hold on;
-%  figure(5)
-%  loglog53(numkh,specth','P(kh)',2.0,6);%hold on;
+  figure(5)
+  loglog53(numkh,specth','P(kh)',2.0,6);%hold on;
 
   %plot the kh-averaged spectra
-%  figure(6)
-%  loglog53(numkz,specuz+specvz,'E_h(kz)',2.0,6);%hold on;
+  figure(6)
+  loglog53(numkz,specuz+specvz,'E_h(kz)',2.0,6);%hold on;
 %  figure(7)
 %  loglog53(numkz,specwz,'E_z(kz)',2.0,6);%hold on;
   figure(8)

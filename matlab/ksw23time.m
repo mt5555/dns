@@ -30,6 +30,12 @@ pname='qg256hyper'
 times=[0:.1:3.3];
 nx=256;
 
+name = '~/INCITE_runs/Intrepid/bous_NSvisc/'
+pname='n256_Ro1Fr0.01_'
+%pname='n512_Ro1Fr0.01_'
+times=[4.8:.1:5.5];
+nx=256;
+
 
 %nx = 256;
 
@@ -120,7 +126,7 @@ ppname = [pname,tstr(2:10),ext]
     eta_l = (mu^3 / eps_l)^.25;
     delx_over_eta_l=(1/nx)/eta_l;
 
-    Q_eps_l    
+    Q_eps_l   
     for dir=1:ndir
       x=r_val(:,dir)/nx;               % box length
       y=Dl(:,dir,1)./(Q_eps_l*x);               % for forced data
@@ -143,19 +149,30 @@ y23_iso_ave=y23_iso_ave/ll;
 scale = 1;  % scale = 2/3 if normalizing by prefactor as well
 
 
-figure(6); clf
+figure(6);
 scale = 1; % scale = 2/3 to scale out
-for i=[1:73]
+for i=[1:ndir]
 semilogx(xx_plot,(y23_ave(:,i))/scale,'k:','LineWidth',1.0); hold on
 %pause
 end
 semilogx(xx_plot,y23_iso_ave/scale,'k','LineWidth',2.0); hold on
 %axis([1 1000 -0.05 0.15])
 x=1:1000; plot(x,(2/3)*x./x/scale,'k');
-hold off;
+hold on;
 title('  (2/3 law) Ensemble averaged');
 ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
+
+figure(8);
+scale = 1; % scale = 2/3 to scale out
+loglog(xx_plot,abs(y23_iso_ave.*xx_plot')/scale,'k','LineWidth',2.0); hold on
+%axis([1 1000 -0.05 0.15])
+hold on;
+title('  (2/3 law) Ensemble averaged');
+ylabel(ppname);
+xlabel('r/\eta','FontSize',16);
+
+
 
 %print -dpsc k215mean.ps
 

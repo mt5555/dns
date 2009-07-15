@@ -13,6 +13,7 @@ CK_orig=1.0;
 decay_scale=0;   % special scaling for 2048^3 decaying run
 tsave=[];
 mu = 1;
+Lz = 1; %default is aspect ratio =1
 
 %name='decay2048-ave64.-new.0000.4026';
 %name='temp0000.0000';
@@ -45,19 +46,20 @@ mu = 1;
 %namedir = ['/research/skurien/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg640/'];                    
  
-       
-       
+name = 'n640_bous3000_all';
+namedir = '~/INCITE_runs/Intrepid/qg/';             
+    
+name = 'n640_fcor14bous3000_all';
+namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';  
 
-%name = 'n512_f2000b20_all';
-%namedir = '/research/skurien/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
+name = 'n640_fcor3000bous14_all';
+namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';  
 
 
-name = 'sc2048A0000.9500';
-namedir = '~/data/dns/sc2048A/';
-name = 'sc1024A';
-namedir = '~/data/dns/sc1024A/';
-name = 'hyp512_30hbig';
-namedir = '~/';
+%name = 'sc2048A0000.9500';
+%namedir = '~/data/dns/sc2048A/';
+%name = 'sc1024A';
+%namedir = '~/data/dns/sc1024A/';
 
 %name = 'balu_b0000.0000';
 %namedir = '/home/mataylo/scratch3/dns/';
@@ -68,23 +70,20 @@ namedir = '~/';
 %name = 'TG2560000.0000';
 %namedir = '/home/mataylo/';
 
-name = 'bous128_Ro21Fr0.21_0000.0000';
-namedir ='/home/kurien/INCITE_runs/SW02_tests/';
+%name = 'bous128_Ro21Fr0.21_0000.0000';
+%namedir ='/home/kurien/INCITE_runs/SW02_tests/';
 
-name = 'RSShighres_all';
-namedir = '/home/kurien/INCITE_runs/RemSukSmi09_tests/highres/';
 
-%name = 'lowaspectNS0000.0000';
-%namedir ='/home/kurien/projects/lowaspectNS/';
+%name = 'n64_d1_0000.0000'; Lz = 1;
+%name = 'n128_d0.5_0000.0000'; Lz = 0.5;
+%name = 'n256_d0.25_0000.0000'; Lz = 0.25;
+name = 'n512_d0.125_0000.0000'; Lz = 0.125;
+namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/';
+%namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/fft_sphere/';
 
-name = 'delta0.10000.0000';
-namedir ='/home/kurien/projects/lowaspectNS/delta0.1/';
-
-%name = 'delta0.5__0000.0000';
-%namedir ='/home/kurien/projects/lowaspectNS/delta0.5/';
-
-%name = 'delta1.0__0000.0000';
-%namedir ='/home/kurien/projects/lowaspectNS/delta1.0/';
+%name = 'n256_Ro1Fr0.01_all';
+%name = 'n512_Ro1Fr0.01_all';
+%namedir ='/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/';
 
 
 spec_r_save=[];
@@ -93,7 +92,7 @@ spec_r_save_fac3=[];
 % note: endianopen() will notwork with .spec and .hspec files
 %because first number is not necessaryly an integer 
 [namedir,name]
-fid=fopen([namedir,name,'.spec'],'r',endian);
+fid=fopen([namedir,name,'.spec'],'r', 'b') %b for data from Intrepid
 fidt=endianopen([namedir,name,'.spect'],'r');
 fidp=endianopen([namedir,name,'.pspec'],'r');  
 fidco=endianopen([namedir,name,'.cospec'],'r');  
@@ -210,9 +209,12 @@ while (time>=0 & time<=999)
     figure(10)
     subplot(1,1,1);
     stitle=sprintf('shell-averaged kinetic energy spectrum t=%8.4f',time);
-    loglog53(n_r-1,spec_r,stitle,CK,6);     %default, with k^-5/3 line
-%    loglog((0:n_r-1), spec_r,'b');
-pause
+
+      loglog53(n_r-1,spec_r,stitle,CK,4);     %default, with k^-5/3 line
+      
+  axis([1 1000 1e-10 1]); %hold on;
+    %    loglog((0:n_r-1), spec_r,'b');
+%pause
 %  loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
        
 %    stitle=sprintf('Kinetic energy shell-averaged spectrum t=%8.4f',time);
@@ -225,11 +227,17 @@ pause
     
     % longitudinal spectraum
     figure(4);title('longitudinal 1D spectrum');
-    subplot(1,1,1);
+    subplot(1,1,1);    
+    if (Lz < 1) 
+    loglog((0:(n_x-1)),spec_ux'/2/pi','b');hold on;
+    loglog((0:(n_y-1)),spec_vy'/2/pi,'b');hold on;
+    loglog((0:1/Lz:(n_z-1)/Lz),spec_wz*Lz/2/pi','b'); hold off;
+    else
     loglog53(n_x,spec_ux,' ',CK*18/55,6);     hold on;
     loglog53(n_y,spec_vy,' ',CK*18/55,6);     hold on;
     loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55,6);     hold on;
-   hold off;
+    end
+    hold off;
     
 %    % transverse spectraum
 %    subplot(2,1,2);
@@ -311,8 +319,9 @@ title('longitudinal 1D spectra of kinetic energy');
 %           spec_tot,'b');hold on;
 % title(sprintf('T_k (black)    D_k (red)    M_k(cyan)   dEk/dt(blue)      time = %f ',time));
 
-  semilogx(x,spec_transfer,'k');
+  semilogx(x,spec_transfer,'k');hold on;
   title(sprintf('T_k (black) time = %f ',time));
+  grid on;
   subplot(2,1,2)
   %semilogx(x,spec_transfer+spec_diff+spec_f,x,spec_tot,'o');
   flux=0*spec_transfer;
@@ -320,7 +329,7 @@ title('longitudinal 1D spectra of kinetic energy');
      flux(i)=-sum(spec_transfer(1:i)); 
   end      
   semilogx(x,flux); hold off;
-  grid;
+  grid on;
   title(sprintf('E Flux'));
   end
 

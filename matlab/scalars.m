@@ -24,43 +24,71 @@ fid2=-1;
 %nx=2048; f_k=0;fcor=0
 
 
-fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21/bous128_Ro21Fr0.21_all.scalars','r')
+%fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21/bous128_Ro21Fr0.21_all.scalars','r')
 nx=128; f_k=24;fcor=1.07;bous=107.08;
 
 %fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro2.1Fr0.21/bous128_Ro2.1Fr0.21_all.scalars','r')
 %nx=128; f_k=24;fcor=10.7;bous=107.08;
 
-fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Fr0.21/bous128_Fr0.21_all.scalars','r')
-nx=128; f_k=24;fcor=0;bous=107.08;
+%fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Fr0.21/bous128_Fr0.21_all.scalars','r')
+%nx=128; f_k=24;fcor=0;bous=107.08;
 
-fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/RSSlowres0000.0000.scalars','r')
-nx=400; f_k=4;fcor=136.2;bous=136.2;
+%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/RSSlowres0000.0000.scalars','r')
+%nx=400; f_k=4;fcor=136.2;bous=136.2;
 
-fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/lowres10000.0000.scalars','r')
-nx=200; f_k=4;fcor=21.68;bous=108.4;LZ=0.2;
+%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/lowres10000.0000.scalars','r')
+%nx=200; f_k=4;fcor=21.68;bous=108.4;LZ=0.2;
 
-fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/lowres20000.0000.scalars','r')
-nx=200; f_k=4;fcor=136;bous=681;LZ=0.2;
+%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/lowres20000.0000.scalars','r')
+%nx=200; f_k=4;fcor=136;bous=681;LZ=0.2;
+
+%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/l400_d0.1_0000.0000.scalars','r')
+%nx=400; f_k=4;fcor=136;bous=681;LZ=0.2;
 
 %fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/lowres30000.0000.scalars','r')
 %nx=200; f_k=4;fcor=27.2;bous=136;LZ=0.2;
 
+%fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/lowres/l3_400d0.1_0000.0000.scalars','r')
+%nx=400; f_k=4;fcor=27.2;bous=136;LZ=0.2;
+
+
 
 %fid = endianopen('~/INCITE_runs/RemSukSmi09_tests/highres/RSShighres_all.scalars','r')
-%nx=500; f_k=4;fcor=136.2;bous=136.2;
+%nx=500; f_k=4;fcor=136.2;bous=13; LZ=0.2
 
-%fid = endianopen('~/projects/bous640runs/qg640_b3000_all.scalars','r')
+%fid = endianopen('~/INCITE_runs/Intrepid/RSS09_tests/aspect/aspect_newUd1_0000.0000.scalars','r')
+%fid = endianopen('~/INCITE_runs/Intrepid/aspect/aspect0.2d100000.0000.scalars','r')
+%nx=400; f_k=4;fcor=100;bous=500;LZ=0.2;
+
+%fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_NS/n256_d1_0000.0000.scalars','r')
+%nx=256; f_k=4;fcor=0;bous=0;LZ=1.0;
+%fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_NS/n256_d0.5_0000.0000.scalars','r')
+%nx=512; f_k=4;fcor=0;bous=0;LZ=0.5;
+
+%fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_NS/n256_d1_0000.0000.scalars','r')
+%nx=256; f_k=4;fcor=0;bous=0;LZ=1.0;
+%fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_NS/n256_d0.5_0000.0000.scalars','r')
+%nx=512; f_k=4;fcor=0;bous=0;LZ=0.5;
+%fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_NS/n256_d0.25_all.scalars','r')
+%nx=1024; f_k=4;fcor=0;bous=0;LZ=0.25;
+
+fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars', 'r')
+nx=1600; f_k=10;fcor=185;bous=925;LZ=0.2;
+
+
+
+%fid = endianopen('/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/n256_Ro1Fr0.01_all.scalars','r')
+%nx=256; f_k = 4; fcor=8.58; bous = 858; LZ = 1.0;
+
+
+%fid = endianopen('/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars','r')
+%nx=512; f_k = 4; fcor=8.58; bous = 858; LZ = 1.0;
+
+
+%fid = endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars','r')
 %nx=640; f_k=4;fcor=3000;bous=3000;
-
-%fid = endianopen('~/projects/lowaspectNS/delta0.1/delta0.10000.0000.scalars','r')
-%nx=120; f_k=4;fcor=0;bous=0;
-
-%fid = endianopen('~/projects/lowaspectNS/delta1.0/delta1.0_0000.0000.scalars','r')
-%nx=200; f_k=4;fcor=0;bous=0;
-
-
-%fid = endianopen('~/codes/dns/src/temp0000.0000.scalars','r')
-%nx=200; f_k=4;fcor=136.2; LZ = 1/5; bous=136.2/LZ;
+%fid = endianopen('~/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars','r')
+%nx=640; f_k=4;fcor=3000;bous=14; LZ=1.0;
 
 
 nscalars=0;
@@ -238,12 +266,12 @@ if (nx>0)
   figure(4); subplot(1,1,1)
   plot(time,eta* nx*pi*2*sqrt(2)/3 )
   title('k_{nmax} \eta')
-  xlabel('time')
+  xlabel('time');hold on;
   %print -djpeg -r72 kmaxeta.jpg
 end
 
 %plot energies as a function of nonlinear times (SW02 paper)
-figure(5); clf
+figure(5); 
 ke_diss_f_ave = ke_diss_f(ceil(length(ke_diss_f)/2):length(ke_diss_f));
 ke_diss_f_ave = sum(ke_diss_f_ave)/length(ke_diss_f_ave);
 tn = (ke_diss_f_ave*(2*pi*f_k)^2)^(1/3); %(fcor + bous)/2/pi; 
@@ -260,7 +288,7 @@ plot(timen,ken+pen,'b')
 %plot(time_2,ke_diss_tot,'r')
 %plot(time,hel,'g')
 title('KE: black, PE: red, Etot: blue');
-hold off
+%hold off
 xlabel('time t(\epsilon_f k_f^2)^{1/3}')
 ylabel('E(\epsilon_f/k_f)^{-2/3}')
 
@@ -402,17 +430,9 @@ Fr = (ke_diss_f * (2*pi*f_k)^2 ).^(1/3) / (bous);
 disp(sprintf('Ro computed from epsilon_f = %f ',Ro));
 disp(sprintf('Fr computed from epsilon_f = %f ',Fr));
 
-U = ( ke_diss_f / (2*pi*f_k) ).^(1/3);
-%scales1
-%L = 1/(f_k);
-%H = LZ*L;
-%scales2; This choice is probably the correct one for the lengthscales
+U = ( ke_diss_f / (f_k*(1/LZ)*2*pi) ).^(1/3);
 L = 1/(2*pi*f_k);
 H = LZ*L;
-%scales3;
-%H = 1/(2*pi*f_k); 
-%L = H/LZ;
-
 Ro = U/(fcor*L);
 Fr = U/(bous*H);
 disp(sprintf('Ro computed from LZ & epsilon_f = %f ',Ro));
