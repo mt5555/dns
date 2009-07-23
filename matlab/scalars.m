@@ -81,8 +81,8 @@ nx=1600; f_k=10;fcor=185;bous=925;LZ=0.2;
 %nx=256; f_k = 4; fcor=8.58; bous = 858; LZ = 1.0;
 
 
-%fid = endianopen('/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars','r')
-%nx=512; f_k = 4; fcor=8.58; bous = 858; LZ = 1.0;
+fid = endianopen('/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars','r')
+nx=512; f_k = 4; fcor=8.58; bous = 858; LZ = 1.0;
 
 
 %fid = endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars','r')

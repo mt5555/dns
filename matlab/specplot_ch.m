@@ -41,7 +41,7 @@ name = 'aspect_newUd1_all';
 namedir ='~kurien/INCITE_runs/Intrepid/lowaspect_bous/';
 %namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/nodamp/';
 %namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/hyper4/';
-%namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/shift_force/';
+namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/shift_force/';
 name = 'n1600_d0.2_Ro0.05_all';  
 Lz=0.2;epsf=1;kf = 10;
 
@@ -81,7 +81,7 @@ k = [0:n_r-1];
 
 if (movie)
 %pause
-exp = 0;
+exp = 5/3;
 figure(1); % +, - and total and projected energy spectra
 loglog(k,spec_tot.*k'.^exp,'k'); hold on;
 %loglog(k,spec_Q_tot,'bo'); hold on;
@@ -103,6 +103,8 @@ tsk = (epsf*(2*pi*kf/Lz)^2)^(1/3);
 tls = (epsf*(kf^2))^(1/3);
 esk = (epsf/(2*pi*kf/Lz))^(-2/3);
 els = (epsf/kf)^(-2/3);
+esk/els
+tsk/tls
 plot(time*tsk/tls, te*esk/els,'kx'); hold on;
 plot(time*tsk/tls, tvort*esk/els,'b.'); hold on;
 plot(time*tsk/tls, twave*esk/els,'ro'); hold on;

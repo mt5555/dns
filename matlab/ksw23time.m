@@ -31,10 +31,10 @@ times=[0:.1:3.3];
 nx=256;
 
 name = '~/INCITE_runs/Intrepid/bous_NSvisc/'
-pname='n256_Ro1Fr0.01_'
-%pname='n512_Ro1Fr0.01_'
-times=[4.8:.1:5.5];
-nx=256;
+%pname='n256_Ro1Fr0.01_'
+pname='n512_Ro1Fr0.01_'
+times=[2.5:.1:4.8];
+nx=512;
 
 
 %nx = 256;
@@ -44,7 +44,7 @@ nx=256;
 
 
 
-delx_over_eta=1; epsilon=1; h_epsilon=1;Q_eps_l=1,  
+delx_over_eta=1; epsilon=1; h_epsilon=1;Q_eps_l=1;  
 teddy=1;
 
 ndir_use=73;
@@ -162,6 +162,7 @@ hold on;
 title('  (2/3 law) Ensemble averaged');
 ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
+
 
 figure(8);
 scale = 1; % scale = 2/3 to scale out

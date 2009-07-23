@@ -1,3 +1,4 @@
+
 %
 %########################################################################
 %#  plot of DNS spectrum output file
@@ -74,16 +75,17 @@ namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
 %namedir ='/home/kurien/INCITE_runs/SW02_tests/';
 
 
-%name = 'n64_d1_0000.0000'; Lz = 1;
+name = 'n64_d1_0000.0000'; Lz = 1;
 %name = 'n128_d0.5_0000.0000'; Lz = 0.5;
 %name = 'n256_d0.25_0000.0000'; Lz = 0.25;
 name = 'n512_d0.125_0000.0000'; Lz = 0.125;
+name = 'n1024_d1by16_0000.0000'; Lz = 1/16;
 namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/';
 %namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/fft_sphere/';
 
 %name = 'n256_Ro1Fr0.01_all';
-%name = 'n512_Ro1Fr0.01_all';
-%namedir ='/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/';
+name = 'n512_Ro1Fr0.01_all';
+namedir ='/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/';
 
 
 spec_r_save=[];
@@ -192,7 +194,9 @@ while (time>=0 & time<=999)
      spec_r_save_fac3=[spec_r_save_fac3, spec_r./fac3];
   end 
 
+
   if (movie==1)  
+     
   figure(10);
   if (n_z==1) 
     %subplot(2,1,1);
@@ -212,7 +216,7 @@ while (time>=0 & time<=999)
 
       loglog53(n_r-1,spec_r,stitle,CK,4);     %default, with k^-5/3 line
       
-  axis([1 1000 1e-10 1]); %hold on;
+  axis([1 1000 1e-10 1]); hold on;
     %    loglog((0:n_r-1), spec_r,'b');
 %pause
 %  loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
@@ -222,7 +226,7 @@ while (time>=0 & time<=999)
     
     %spec_r=spec_r./fac3;
     %loglog53(n_r-1,spec_r,stitle,CK); hold on;
-    
+
 
     
     % longitudinal spectraum
@@ -237,8 +241,8 @@ while (time>=0 & time<=999)
     loglog53(n_y,spec_vy,' ',CK*18/55,6);     hold on;
     loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55,6);     hold on;
     end
-    hold off;
-    
+    hold on;
+    end
 %    % transverse spectraum
 %    subplot(2,1,2);
 %    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
@@ -250,8 +254,8 @@ while (time>=0 & time<=999)
 %    hold off;
 %
 title('longitudinal 1D spectra of kinetic energy');
-
-  end
+  
+  
   end
 
   

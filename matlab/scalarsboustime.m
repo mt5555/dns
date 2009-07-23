@@ -14,60 +14,18 @@ f_k=4;
 fid2=-1;
 
 
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/qg64hyper_all.scalars-bous','r');
-%fid=endianopen(['~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg64/' ...
-%                'sto_high_4/hyper_nu/bous500/qg64hyper_all.scalars-bous'],'r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous1000/qg64hyper_all.scalars-bous','r');
-
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg64/iso12w/qg64_iso12w_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous100/qg64_sto16_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg64/sto_high_16/bous200/qg64_200all.scalars-bous','r');
-
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg128/sphere_visc/qg128sph_all.scalars-bous','r');
-%fid=endianopen(['~/research.old/projects/pv/data_analysis/' ...
-%                'lowforc/low4/qg/qg128/slab_visc/qg128slab_all.scalars-bous'],'r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg128/sphere_dealias/qg128_fftsph_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg128/no_hyper/qg128_nhyper_all.scalars-bous','r');
-
-
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous500/qg256hyper_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/qg256hyper_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/qg256hyper_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/qg256hyper_all.scalars-bous','r');
-
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/qg512_b1000_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/new_data/qg512_b1000_newdata_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous1000/hyper4/qg512hyper4_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/qg512_b2000_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/qg512hyper_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/n512_f2000b20_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous200/n512_f2000b200_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/n512_f20b2000_all.scalars-bous','r');
-%fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor200_bous2000/n512_f200b2000_all.scalars-bous','r');
 
 fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg640/qg640_b3000_all.scalars-bous','r');
 
-
-%fid = endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256_f2000n5_all.scalars-bous','r');
-%fid = endianopen(['~/research.old/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
-%                  'n256/n256_f1000n5_all.scalars-bous'],'r');
-%fid = endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/n256/n256_f5n2000_all.scalars-bous','r');
-%fid = endianopen(['~/research.old/projects/pv/data_analysis/lowforc/low4/Ro1Fr0/' ...
-%                  'n256/n256_f5n1000_all.scalars-bous'],'r');
-
-%fid = endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/n256/n256high_f2000n5_all.scalars-bous','r');
-%fid = endianopen(['~/research.old/projects/pv/data_analysis/lowforc/low4/Ro0Fr1/' ...
-%                  'n256/n256high_f1000n5_all.scalars-bous'],'r');
-
 fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars-bous','r')
 
-fid=endianopen('~/projects/bous640runs/qg640_b3000_all.scalars-bous','r');
-fid=endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bous','r');
-fid=endianopen('~/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars-bous','r');
-fid=endianopen('~/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
 
-fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n256_Ro1Fr0.01_all.scalars-bous','r')
-%fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars-bous','r')
+%fid=endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bous','r');
+%%fid=endianopen('~/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars-bous','r');
+%fid=endianopen('~/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
+
+%fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n256_Ro1Fr0.01_all.scalars-bous','r')
+fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars-bous','r')
 
 fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars-bous','r')
 

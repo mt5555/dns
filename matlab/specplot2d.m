@@ -1,10 +1,8 @@
 clear
 %name = 'all'
-name = 'n640_fcor3000bous14_all'
-%name = 'n640_fcor14bous3000_all'
-%name = 'n640_bous3000_all'
 %name = 'qg640_b3000_all'
-name = 'n256_Ro1Fr0.01_all'
+%name = 'n256_Ro1Fr0.01_all'
+name = 'n512_Ro1Fr0.01_all'
 %name= 'n512_f2000b20_all';
 %name = 'qg512hyper0002.9619'
 %name = 'qg512hyper_all';
@@ -56,6 +54,10 @@ epsilon=.41;
 %namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
 %           'low4/qg/qg128/no_hyper/'];
 
+
+%name = 'n640_fcor3000bous14_all'
+%name = 'n640_fcor14bous3000_all'
+%name = 'n640_bous3000_all'
 %namedir = '~/INCITE_runs/Intrepid/qg/';
 %namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';
 %namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
