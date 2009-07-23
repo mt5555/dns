@@ -104,7 +104,7 @@ compute_hspec=.false.
 read_uvw=.false.
 
 
-tstart=2.6
+tstart=4.0
 tstop=4.7
 tinc=0.1
 icount=0
