@@ -6,7 +6,6 @@ pseudtospectral.tex:
 code
    run README problem with -.5 CFL
 
-
 DNS code:  1024^3 with pfmon on 16 cpus?
            measure flops on laptop + FC6?
            check performance with: A2AOVERLAP, STK
@@ -17,14 +16,11 @@ DNS code:  1024^3 with pfmon on 16 cpus?
 benchmark:  
   http://people.inf.ethz.ch/arbenz/book/Chapter5/wpp3DFFT.c
 
-
 dnsp    test output - make sure it is in correct format
                       (via restart?)
 port ns_vorticity3 to ns.F90 model (since it will save 1 z transpose)
 
 move scaling notes from runs.doc to here?
-
-
 **********************************************************************************
 0 BUG:  Energy, when computed in spectral space: the cos(N/2) mode
         is weighted to heavily.  Not a problem for any dealiased case
