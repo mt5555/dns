@@ -287,10 +287,11 @@ integer n,i,j,k,im,km,jm,ns
 integer n1,n1d,n2,n2d,n3,n3d,xwi
 real*8 :: ke,uxx2ave,ux2ave,ensave,vorave,helave,maxvor,ke_diss,u2,ens_alpha
 real*8 :: p_diss(n_var),pke(n_var)
-real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,hyper_scale(n_var,n_var),ens_diss2,ens_diss4,ens_diss6
+real*8 :: h_diss,ux,uy,uz,vx,vy,vz,wx,wy,wz,ens_diss2,ens_diss4,ens_diss6
 real*8 :: f_diss=0,a_diss=0,fxx_diss=0
 real*8,save :: f_diss_ave
 real*8 :: vor(3),xi
+real*8 :: hyper_scale(n_var,n_var)
 #ifdef ALPHA_MODEL
 real*8,save :: gradu(nx,ny,nz,n_var)
 real*8,save :: gradv(nx,ny,nz,n_var)
@@ -602,13 +603,14 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (mu_hyper_value>0 .and. mu_hyper>=2 .and. hyper_implicit==0) then
+if (mu_hyper_value>0 .and. mu_hyper>0 .and. hyper_implicit==0) then
    ! compute hyper viscosity scaling based on energy in last shell:
    ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
    call ke_shell_z(Qhat,hyper_scale)
    if (my_pe == io_pe ) then
-   !   write(*,'(a,3e20.10)') 'hyper_scale: ',hyper_scale(1:3,1)
+   !   write(*,'(a,3e20.10)') 'hyper_scale: ',hyper_Escale(1:3,1)
    endif
+   mu_scale = mu_hyper_value*sum(hyper_scale(1:3,1))/3
 endif
 
 ke=0
@@ -633,7 +635,7 @@ do j=1,ny_2dz
             ! xwi= Lz*sqrt(im*im + jm*jm + km*km/Lz/Lz)
 
             xw_viss=mu*xw
-            if (mu_hyper>=2 .and. hyper_implicit==0 ) then
+            if (mu_hyper>=1 .and. hyper_implicit==0 ) then
                xw2=hyper_scale(1,1)*(im*im*pi2_squared)
                xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
                xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
@@ -875,7 +877,7 @@ do ns=np1,np2
                xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
                ! add in hyper viscosity, if used:
-               if (mu_hyper>=2 .and. hyper_implicit==0 ) then
+               if (mu_hyper>=1 .and. hyper_implicit==0 ) then
 	          xw2=hyper_scale(1,ns)*(im*im*pi2_squared)
                   xw2=xw2+hyper_scale(2,ns)*(jm*jm*pi2_squared)
                   xw2=xw2+hyper_scale(3,ns)*(km*km*pi2_squared/(Lz*Lz))

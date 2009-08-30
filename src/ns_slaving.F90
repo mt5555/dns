@@ -144,7 +144,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 ) then
+            if (mu_hyper>=1 ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -205,7 +205,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2) then
+            if (mu_hyper>=1) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -259,7 +259,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 ) then
+            if (mu_hyper>=1 ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -314,7 +314,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2 ) then
+            if (mu_hyper>=1 ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -585,7 +585,7 @@ do j=1,ny_2dz
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             xw_viss=mu*xw
-            if (mu_hyper>=2  ) then
+            if (mu_hyper>=1  ) then
                xw2=(im*im*pi2_squared)
                xw2=xw2+(jm*jm*pi2_squared)
                xw2=xw2+(km*km*pi2_squared/(Lz*Lz))

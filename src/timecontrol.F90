@@ -39,7 +39,7 @@ integer i,j,k,n
 character(len=80) message
 character(len=80) fname
 real*8 remainder, time_target,psmax,mumax, umax,time_next,cfl_used_adv,cfl_used_vis,mx,mn
-real*8 :: cfl_used_psvis
+real*8 :: cfl_used_psvis,mu2
 real*8 tmx1,tmx2,del,lambda,H,ke_diss,epsilon,ens_diss,xtmp
 logical,external :: check_time
 logical :: doit_output,doit_diag,doit_restart,doit_screen,doit_model
@@ -253,7 +253,7 @@ if (doit_screen) then
            ' cfl_vis=',cfl_used_vis,' cfl_passive_vis=',cfl_used_psvis
    call print_message(message)	
 
-   if (mu_hyper_value>0 .and. mu_hyper>=2 ) then
+   if (mu_hyper_value>0 .and. mu_hyper>0 ) then
       write(message,'(a,3e12.4)') 'hyper-viscosity cfl: ',&
            max_hyper
       call print_message(message)
@@ -290,27 +290,30 @@ if (doit_screen) then
    !         KE        m^2/s^2
    !         mu        m^2/s
    !
-   if (mu>0 .and. ndim>2 .and. ke_diss<0) then
+   mu2 = mu  ! regular, fixed viscosity
+   if (mu_hyper == 1 .and. mu==0) mu2 = mu_scale     ! E(k) scaled viscosity
+
+   if (mu2>0 .and. ndim>2 .and. ke_diss<0) then
 !      lambda=sqrt(  5*(2*ints(6))/ints(2)  )
 
 !      epsilon=-ke_diss
       if (infinite_alpha==0) then
-         epsilon=-(  ke_diss-mu*alpha_value**2*ints(1) )
+         epsilon=-(  ke_diss-mu2*alpha_value**2*ints(1) )
       else
-         epsilon=-(  -mu*ints(1)  )
+         epsilon=-(  -mu2*ints(1)  )
       endif
-      lambda=sqrt( mu*(2*ea1/ndim) / (epsilon/15) )
+      lambda=sqrt( mu2*(2*ea1/ndim) / (epsilon/15) )
 
 
-      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ea1/ndim)/mu, &
-           '  R=',1/mu,' lambda=',lambda
+      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ea1/ndim)/mu2, &
+           '  R=',1/mu2,' lambda=',lambda
       call print_message(message)	
       
       
       ! K. microscale
       ! eta = (mu^3/epsilon)^.25
       ! epsilon = delke_tot
-      eta = (mu**3 / epsilon)**.25
+      eta = (mu2**3 / epsilon)**.25
       write(message,'(a,3f13.4)') 'mesh spacing/eta: ',&
            delx/eta,dely/eta,Lz*delz/eta
       call print_message(message)	

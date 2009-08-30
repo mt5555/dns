@@ -2622,6 +2622,9 @@ if (sdata=='none') then
 else if (sdata=='hyper0') then
    mu_hyper=0
    mu_hyper_value = rvalue
+else if (sdata=='hyper2') then
+   mu_hyper=1
+   mu_hyper_value = rvalue
 else if (sdata=='hyper4') then
    mu_hyper=2
    mu_hyper_value = rvalue
@@ -2962,6 +2965,9 @@ if (sdata=='none') then
    ! do nothing
 else if (sdata=='hyper0') then
    mu_hyper=0
+   mu_hyper_value = rvalue
+else if (sdata=='hyper2') then
+   mu_hyper=1
    mu_hyper_value = rvalue
 else if (sdata=='hyper4') then
    mu_hyper=2

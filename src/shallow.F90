@@ -430,10 +430,11 @@ do j=ny1,ny2
       gradv(i,j,2)=xfac*Qhat(i,j,2)
       
       ! -laplacian**4 
-      xfac=-(xfac**mu_hyper)
-      gradu(i,j,1)=xfac*Qhat(i,j,1)
-      gradu(i,j,2)=xfac*Qhat(i,j,2)
-      
+      if (mu_hyper>0) then
+         xfac=-(xfac**mu_hyper)
+         gradu(i,j,1)=xfac*Qhat(i,j,1)
+         gradu(i,j,2)=xfac*Qhat(i,j,2)
+      endif
    enddo
 enddo
 

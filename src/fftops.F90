@@ -2546,7 +2546,7 @@ integer i,j,k,im,jm,km,n,xfac
 real*8 ke0(n_var)
 real*8 ke1(n_var)
 
-if (mu_hyper<2) return
+if (mu_hyper<1) return
 if (hyper_implicit /= 1 ) return
 
 ! compute hyper viscosity scaling based on energy in last shell:
@@ -3025,10 +3025,11 @@ do k=nz1,nz2
       do i=nx1,nx2
          im=imcord(i)
          if (im==g_nx/2) im=0
+
          
          xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
          xw_viss=mu*xw
-         if (mu_hyper>=2 ) then
+         if (mu_hyper>=1 ) then
             xw2=(im*im*pi2_squared)
             xw2=xw2+(jm*jm*pi2_squared)
             xw2=xw2+(km*km*pi2_squared/(Lz*Lz))
@@ -3098,7 +3099,7 @@ do k=nz1,nz2
          
          xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
          xw_viss=mu*xw
-         if (mu_hyper>=2 ) then
+         if (mu_hyper>=1 ) then
             xw2=(im*im*pi2_squared)
             xw2=xw2+(jm*jm*pi2_squared)
             xw2=xw2+(km*km*pi2_squared/(Lz*Lz))

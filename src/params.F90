@@ -46,12 +46,14 @@
 module params
 
 implicit none
+#include "params.h"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! constants
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0               !viscosity
-integer :: mu_hyper=1         !viscosity = (del**2)**mu_hyper
+real*8  :: mu_scale=0         ! E(kmax) scaled mu
+integer :: mu_hyper=-1         !viscosity = (del**2)**mu_hyper
 integer :: hyper_implicit=0   ! 1 = time-split, implicit hyper viscosity
 real*8  :: mu_hyper_value=0   ! hyper viscosity value
 real*8  :: k_Gt=0             ! JZ hyper viscosity scaling parameter
@@ -217,7 +219,6 @@ integer :: header_user=1    ! I/O header type from input file
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! mesh dimensions on a single processor
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#include "params.h"
 !integer,parameter :: n_var=3                  ! number of prognostic variables
 !integer,parameter :: nxd=18,nyd=18,nzd=18         ! dimension of grid & data
 !integer,parameter :: nx1=1,nx2=16              ! upper and lower bounds of non-ghost data
@@ -942,8 +943,6 @@ endif
 
   
 end function
-
-                      
 
 end ! module mod_params
 
