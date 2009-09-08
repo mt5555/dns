@@ -66,7 +66,8 @@
 !
 !  -cout coarsegrain (19)  read data, coarse grain, output
 !  -cout dudx  (20)
-!  -cout ehor  (21)
+!  -cout ehor  (21)    horizontal energy field
+!  -cout potens (22)   potential enstrophy field
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -896,6 +897,10 @@ do
       call output_pdf(time,NULL,NULL,NULL,fid,NULL)
    endif
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Write out horizontal velocity field in physical space
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
    if (convert_opt==21) then  ! -cout ehor
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
       call input_uvw(time,Q,vor,work1,work2,header_user)
@@ -913,6 +918,30 @@ do
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".ehor"
+      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
+   endif
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Write out potential enstrophy field
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   if (convert_opt==22) then  ! -cout potens
+      write(message,'(f10.4)') 10000.0000 + time
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+           // message(2:10) // '.pv'
+      call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
+      call print_message("computing potential enstrophy...")	
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         work1(i,j,k)=0.5*(Q(i,j,k,1)**2)
+      enddo
+      enddo
+      enddo
+
+      write(message,'(f10.4)') 10000.0000 + time
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+           // message(2:10) // '.pv2'
+      call print_message(fname)
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
    endif
 
