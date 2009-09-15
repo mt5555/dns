@@ -839,11 +839,11 @@ do j=1,ny_2dz
          if (alpha_B>0) then
             ! apply H^{-1}
             ! divide rhs(:,:,:,:) by  (1 + alpha_B**2(2*pi*k)**2)
+            xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
             rhs(k,i,j,1) = rhs(k,i,j,1)/(1+xw*alpha_B**2) 
             rhs(k,i,j,2) = rhs(k,i,j,2)/(1+xw*alpha_B**2)
             rhs(k,i,j,3) = rhs(k,i,j,3)/(1+xw*alpha_B**2)
          endif
-
       enddo
    enddo
 enddo
