@@ -113,7 +113,7 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      if (hyper_implicit==2) then
+      if (hyper_type==2) then
          !Q_old(k,i,j,n)=Q(k,i,j,n)
          !Q(k,i,j,n)=exp_f*Q(k,i,j,n)+cf*rhs(k,i,j,n)                ! accumulate RHS
          !Q_tmp(k,i,j,n)=exph_f*Q_old(k,i,j,n) + cc*rhs(k,i,j,n)      ! Euler timestep with dt=delt/2
@@ -128,7 +128,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
+if (hyper_type==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -142,7 +142,7 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      if (hyper_implicit==2) then
+      if (hyper_type==2) then
          !Q(k,i,j,n)=Q(k,i,j,n)+2*cf*rhs(k,i,j,n)             ! accumulate RHS
          !Q_tmp(k,i,j,n)=exph_f*Q_old(k,i,j,n) + cc*rhs(k,i,j,n)! Euler timestep with dt=delt/2
       else
@@ -153,7 +153,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt/2)
+if (hyper_type==1) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -166,7 +166,7 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      if (hyper_implicit==2) then
+      if (hyper_type==2) then
          !Q(k,i,j,n)=Q(k,i,j,n)+2*cf*rhs(k,i,j,n)
          !Q_tmp(k,i,j,n) = exph_f * Qb_tmp(k,i,j,n) + cc*( 2.0d0 * rhs(k,i,j,n) - &
          !     &               rhsb(k,i,j,n) )
@@ -178,7 +178,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q_tmp,delt)
+if (hyper_type==1) call hyper_filter(Q_tmp,delt)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -193,7 +193,7 @@ do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
    do k=1,g_nz
-      if (hyper_implicit==2) then
+      if (hyper_type==2) then
          !Q(k,i,j,n)=Q(k,i,j,n)+cf*rhs(k,i,j,n)
       else
          Q(k,i,j,n)=Q(k,i,j,n)+delt*rhs(k,i,j,n)/6        ! final Euler timestep with delt
@@ -202,7 +202,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_implicit==1) call hyper_filter(Q,delt)
+if (hyper_type==1) call hyper_filter(Q,delt)
 do n=1,n_var
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -603,14 +603,19 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! add in diffusion term
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (mu_hyper_value>0 .and. mu_hyper>0 .and. hyper_implicit==0) then
+if (mu_hyper_value>0 .and. mu_hyper>0 .and. hyper_type==0) then
    ! compute hyper viscosity scaling based on energy in last shell:
    ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
    call ke_shell_z(Qhat,hyper_scale)
    if (my_pe == io_pe ) then
    !   write(*,'(a,3e20.10)') 'hyper_scale: ',hyper_Escale(1:3,1)
    endif
+   ! save final value for diagnostics
    mu_scale = mu_hyper_value*sum(hyper_scale(1:3,1))/3
+else
+   hyper_scale=1  ! dont scale hyper viscosity, use value in input file
+   ! save final value for diagnostics
+   mu_scale = mu_hyper_value
 endif
 
 ke=0
@@ -635,7 +640,7 @@ do j=1,ny_2dz
             ! xwi= Lz*sqrt(im*im + jm*jm + km*km/Lz/Lz)
 
             xw_viss=mu*xw
-            if (mu_hyper>=1 .and. hyper_implicit==0 ) then
+            if (mu_hyper>=1 .and. (hyper_type==0 .or. hyper_type==3) ) then
                xw2=hyper_scale(1,1)*(im*im*pi2_squared)
                xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
                xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
@@ -877,7 +882,7 @@ do ns=np1,np2
                xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
                ! add in hyper viscosity, if used:
-               if (mu_hyper>=1 .and. hyper_implicit==0 ) then
+               if (mu_hyper>=1 .and. (hyper_type==0 .or. hyper_type==3) ) then
 	          xw2=hyper_scale(1,ns)*(im*im*pi2_squared)
                   xw2=xw2+hyper_scale(2,ns)*(jm*jm*pi2_squared)
                   xw2=xw2+hyper_scale(3,ns)*(km*km*pi2_squared/(Lz*Lz))

@@ -21,12 +21,12 @@ USE_ALPHA = -DALPHA_MODEL
 USE_LERAY = -DALPHA_MODEL -DLERAY_MODEL
 
 ifeq ($(UNAME),Linux)
-   VENDOR=LAHEY
+   #VENDOR=LAHEY
    #VENDOR=PGI
    #VENDOR=PGIMPI
    #VENDOR=INTEL
    #VENDOR=INTELMPI
-   #VENDOR=GNU
+   VENDOR=GNU
    #VENDOR=GNUMPI
 
    FFT = -DUSE_FFT99
@@ -189,7 +189,7 @@ ifeq ($(UNAME),Linux)
    endif
 
    ifeq ($(VENDOR),GNU)
-   F90 = mpif90
+   F90 = gfortran
    CC=gcc
    FFLAGS =  -DGFORTRAN -O2  -ffixed-line-length-132 $(MPI) -I/usr/include $(FFT)  
    LDFLAGS = $(FFTLIB)

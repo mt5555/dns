@@ -54,7 +54,11 @@ implicit none
 real*8  :: mu=0               !viscosity
 real*8  :: mu_scale=0         ! E(kmax) scaled mu
 integer :: mu_hyper=-1         !viscosity = (del**2)**mu_hyper
-integer :: hyper_implicit=0   ! 1 = time-split, implicit hyper viscosity
+integer :: hyper_type=0       ! 0 = explicit, E(kmax) scaled
+                              ! 1 = time-split implicit  E(kmax) scaled
+                              ! 2 = use integrating factor
+                              ! 3 = user specified value
+
 real*8  :: mu_hyper_value=0   ! hyper viscosity value
 real*8  :: k_Gt=0             ! JZ hyper viscosity scaling parameter
 real*8  :: max_hyper          ! some diagnostics

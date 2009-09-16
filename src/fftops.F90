@@ -2192,7 +2192,7 @@ real*8 hscale(n_var,n_var)
 real*8 :: ke(3),ke2(3),xw,u2,xfac,ierr,xw2,cfl
 integer :: im,jm,km,i,j,k,n,km_start,jm_start,im_start,shell_type
 
-if (delt==0 .and. hyper_implicit==0) then
+if (delt==0 .and. hyper_type==0) then
    ! with delt=0, CFL restriction is not active and we can get vary large
    ! values which screw up the diagnostics output (but since delt=0, have
    ! no impact on results).  so just disable for delt=0
@@ -2339,7 +2339,7 @@ xw2=mu_hyper_value*xw2**mu_hyper
 
 
 ! only enforce viscous CFL for explict viscosity:
-if (delt*xw2>cfl .and. hyper_implicit==0) then
+if (delt*xw2>cfl .and. hyper_type==0) then
    !      if (my_pe==io_pe) then
    !         print *,'delt = ', delt
    !         print *,'mu_hyper_value = ', mu_hyper_value
@@ -2448,7 +2448,7 @@ do n=np1,np2
    xw2=mu_hyper_value*xw2**mu_hyper
 
    ! enforce CFL only for explicit hyper viscosity
-   if (delt*xw2>cfl .and. hyper_implicit==0) then   
+   if (delt*xw2>cfl .and. hyper_type==0) then   
       !        if(my_pe==io_pe) then
       !            print *,'warning: scalar hyper viscosity CFL: ',delt*xw2
       !         endif
@@ -2547,7 +2547,7 @@ real*8 ke0(n_var)
 real*8 ke1(n_var)
 
 if (mu_hyper<1) return
-if (hyper_implicit /= 1 ) return
+if (hyper_type /= 1 ) return
 
 ! compute hyper viscosity scaling based on energy in last shell:
 ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
