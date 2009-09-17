@@ -297,7 +297,7 @@ do i=nx1,nx2
    kh = (im**2 + jm**2)
    kh = sqrt(kh)
 
-   if ( abs(km*theta) <= 1d-10*abs(PV) ) then
+   if (abs(km*theta) <= 1d-10*abs(PV) ) then
       q3(i,j,k,1)=0
    else
       q3(i,j,k,1) = PV / (km*theta)

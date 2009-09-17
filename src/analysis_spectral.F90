@@ -97,8 +97,8 @@ header_type=1; scale=1;           ! DNS standard data
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
-project_ch=.true.               !Craya-Herring projection and spectra
-
+project_ch=.false.               !Craya-Herring projection and spectra
+compute_p2spec = .true.	         !potential enstrophy spectra *.p2spec
 
 tstart=0.0
 tstop=10.0
@@ -148,9 +148,16 @@ if (nxdecomp*nydecomp*nzdecomp>1) then
    allocate(work4(nx,ny,nz))
 endif
 
+
 if (compute_hfree) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
 endif
+
+
+if (compute_pv2spec) then
+   if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
+endif
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -287,7 +294,25 @@ do
       call compute_project_ch(Q,q1,q2,work1,work2)
       call output_project_ch(time,time)
    endif
+
+   
+   if (compute_pv2spec) then
+      if (.not. read_uvw) then	
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         call input_passive(runname,time,Q,work1,work2)
+         Q=Q*scale;
+         read_uvw=.true.	
+      endif
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,q1,work1,work2)
+      endif
+
+      call compute_pv2_spec(time,Q,q1,q2,q3,work1,work2)
+      call output_pv2_spec(time,time)
+   endif
       
+
+
 
 
    ! reset our flag, so we will read in the nxt data set
