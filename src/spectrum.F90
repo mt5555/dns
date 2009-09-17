@@ -234,24 +234,29 @@ real*8 :: rwave,xfac, theta,uh,PV,kh
 ! use the full pv
 !
 pv_type = 1
-!bw
-!bw For potential enstrophy Q = q^2/2
-!bw
+
 q2spec_r=0
 q2spec_x=0
 q2spec_y=0
 q2spec_z=0
 q2spec_r_2d=0
+norm1spec_r=0
+norm1spec_x=0
+norm1spec_y=0
+norm1spec_z=0
+norm1spec_r_2d=0
+norm2spec_r=0
+norm2spec_x=0
+norm2spec_y=0
+norm2spec_z=0
+norm2spec_r_2d=0
+
+
 
 ! 
 !   pv =  (vorticity + f) dot grad rho
 !   Q = pv^2/2 
 !
-!bw   Compute the vorticity and the potential vorticity
-!bw
-!bw
-!bw I probably don't have the work arrays correct in these calls.
-!bw
 ! compute pv in work1, vorticity in q1
 call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
 
@@ -266,7 +271,7 @@ q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
 call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,1)
-
+q2spec_r_2d = .5*q2spec_r
 
 ! compute FFT of Q (u,v,w,theta) in q2
 q2=Q
@@ -290,7 +295,7 @@ do i=nx1,nx2
    im=abs(imcord(i))
    km=abs(kmcord(k))
 
-   ! for nice looking formulas:
+   ! formulas for normalized linear PV:
    PV = work1(i,j,k,1)
    theta = q2(i,j,k,np1)
    uh = sqrt(q2(i,j,k,1)**2 + q2(i,j,k,2)**2)
@@ -312,7 +317,7 @@ enddo
 enddo
 enddo
 
-! now compute the spectra of these normalized PV quantities:
+! now compute the spectra of the normalized PV quantities:
 call compute_spectrum(q3(1,1,1,1),work1,work2,norm1spec_r,spec_r2,&
      norm1spec_x,norm1spec_y,norm1spec_z,1)
 
@@ -324,7 +329,8 @@ norm1spec_z=.5*norm1spec_z
 
 call compute_spectrum_2d(q3(1,1,1,1),q1,q2,norm1spec_r_2d,1)
 
-! now compute the spectra of these quantities:
+norm1spec_r_2d = .5*norm1spec_r_2d
+
 call compute_spectrum(q3(1,1,1,2),work1,work2,norm2spec_r,spec_r2,&
      norm2spec_x,norm2spec_y,norm2spec_z,1)
 
@@ -335,6 +341,7 @@ norm2spec_z=.5*norm2spec_z
 
 call compute_spectrum_2d(q3(1,1,1,2),q1,q2,norm2spec_r_2d,1)
 
+norm2spec_r_2d = .5*norm2spec_r_2d
 
 end subroutine
 
