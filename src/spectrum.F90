@@ -54,6 +54,8 @@ real*8,private ::  edot_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  edot_curl_r(0:max(g_nx,g_ny,g_nz))
 real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  q2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
+real*8,private ::  norm1spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
+real*8,private ::  norm2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
 real*8,private ::  time_old=-1
 
 ! Craya-Herring mode spectra
@@ -93,10 +95,22 @@ real*8,private ::  cospec_r(0:max(g_nx,g_ny,g_nz),n_var)
 real*8,private ::  cospec_x(0:g_nx/2,n_var)   
 real*8,private ::  cospec_y(0:g_ny/2,n_var)
 real*8,private ::  cospec_z(0:g_nz/2,n_var)
+
 real*8,private ::  q2spec_x(0:g_nx/2)
 real*8,private ::  q2spec_y(0:g_ny/2)
 real*8,private ::  q2spec_z(0:g_nz/2)
 real*8,private ::  q2spec_r(0:max(g_nx,g_ny,g_nz))
+
+real*8,private ::  norm1spec_x(0:g_nx/2)
+real*8,private ::  norm1spec_y(0:g_ny/2)
+real*8,private ::  norm1spec_z(0:g_nz/2)
+real*8,private ::  norm1spec_r(0:max(g_nx,g_ny,g_nz))
+
+real*8,private ::  norm2spec_x(0:g_nx/2)
+real*8,private ::  norm2spec_y(0:g_ny/2)
+real*8,private ::  norm2spec_z(0:g_nz/2)
+real*8,private ::  norm2spec_r(0:max(g_nx,g_ny,g_nz))
+
 real*8,private ::  bspec_x(0:g_nx/2,n_var)
 real*8,private ::  bspec_y(0:g_ny/2,n_var)
 real*8,private ::  bspec_z(0:g_nz/2,n_var)
@@ -209,13 +223,13 @@ real*8 :: q3(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: time, pv2energy
-real*8 pv(nx,ny,nz)  ! used for potential vorticity
-real*8 pv2(nx,ny,nz)  ! used for potential enstrophy
 
 !local
-integer :: n,pv_type, i,j,k,iw
+integer :: n,pv_type, i,j,k,iw,im,jm,km
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
-real*8 :: rwave,xfac
+real*8 :: rwave,xfac, theta,uh,PV,kh
+
+
 !
 ! use the full pv
 !
@@ -241,18 +255,85 @@ q2spec_r_2d=0
 ! compute pv in work1, vorticity in q1
 call potential_vorticity(work1,q1,Q,q2,q3,pv_type)
 
-call fft3d(work1,q1)
+call fft3d(work1,q3)
 
 call compute_spectrum(work1,q2,q3,q2spec_r,spec_r2,&
      q2spec_x,q2spec_y,q2spec_z,1)
 
-!bw computing pv is complicated so set all those to zero for the moment
 q2spec_r=.5*q2spec_r
 q2spec_x=.5*q2spec_x
 q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
 call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,1)
+
+
+! compute FFT of Q (u,v,w,theta) in q2
+q2=Q
+do n=1,n_var
+   call fft3d(q2(1,1,1,n),q3)
+enddo
+
+! work1(:,:,:) = PV(k)
+! q2(:,:,:,1:3) = u,v,w (k)
+! q2(:,:,:,4) = theta(k)
+
+! Compute:
+! q3(:,:,:,1) = |PV|/|k_z theta|  
+! q3(:,:,:,2) = |PV|/|k_h u_h| 
+
+do k=nz1,nz2
+do j=ny1,ny2
+do i=nx1,nx2
+
+   jm=abs(jmcord(j))
+   im=abs(imcord(i))
+   km=abs(kmcord(k))
+
+   ! for nice looking formulas:
+   PV = work1(i,j,k,1)
+   theta = q2(i,j,k,np1)
+   uh = sqrt(q2(i,j,k,1)**2 + q2(i,j,k,2)**2)
+   kh = (im**2 + jm**2)
+   kh = sqrt(kh)
+
+   if ( abs(km*theta) <= 1d-10*abs(PV) ) then
+      q3(i,j,k,1)=0
+   else
+      q3(i,j,k,1) = PV / (km*theta)
+   endif
+   if ( (kh*uh) <= 1d-10*abs(PV)  ) then
+      q3(i,j,k,2)=0
+   else
+      q3(i,j,k,2) = PV / (kh*uh)
+   endif
+   
+enddo
+enddo
+enddo
+
+! now compute the spectra of these normalized PV quantities:
+call compute_spectrum(q3(1,1,1,1),work1,work2,norm1spec_r,spec_r2,&
+     norm1spec_x,norm1spec_y,norm1spec_z,1)
+
+
+norm1spec_r=.5*norm1spec_r
+norm1spec_x=.5*norm1spec_x
+norm1spec_y=.5*norm1spec_y
+norm1spec_z=.5*norm1spec_z
+
+call compute_spectrum_2d(q3(1,1,1,1),q1,q2,norm1spec_r_2d,1)
+
+! now compute the spectra of these quantities:
+call compute_spectrum(q3(1,1,1,2),work1,work2,norm2spec_r,spec_r2,&
+     norm2spec_x,norm2spec_y,norm2spec_z,1)
+
+norm2spec_r=.5*norm2spec_r
+norm2spec_x=.5*norm2spec_x
+norm2spec_y=.5*norm2spec_y
+norm2spec_z=.5*norm2spec_z
+
+call compute_spectrum_2d(q3(1,1,1,2),q1,q2,norm2spec_r_2d,1)
 
 
 end subroutine
@@ -893,6 +974,22 @@ if (my_pe==io_pe) then
    do k=0,g_nz/2
       call cwrite8(fid,q2spec_r_2d(0,k),1+iwave_2d)
    enddo
+   call cwrite8(fid,norm1spec_r,1+iwave_3d)
+   call cwrite8(fid,norm1spec_x,1+g_nx/2)
+   call cwrite8(fid,norm1spec_y,1+g_ny/2)
+   call cwrite8(fid,norm1spec_z,1+g_nz/2)
+   do k=0,g_nz/2
+      call cwrite8(fid,norm1spec_r_2d(0,k),1+iwave_2d)
+   enddo
+   call cwrite8(fid,norm2spec_r,1+iwave_3d)
+   call cwrite8(fid,norm2spec_x,1+g_nx/2)
+   call cwrite8(fid,norm2spec_y,1+g_ny/2)
+   call cwrite8(fid,norm2spec_z,1+g_nz/2)
+   do k=0,g_nz/2
+      call cwrite8(fid,norm2spec_r_2d(0,k),1+iwave_2d)
+   enddo
+
+
    call cclose(fid,ierr)
 
 endif
