@@ -271,12 +271,12 @@ q2spec_y=.5*q2spec_y
 q2spec_z=.5*q2spec_z
 
 call compute_spectrum_2d(work1,q1,q2,q2spec_r_2d,1)
-q2spec_r_2d = .5*q2spec_r
+q2spec_r_2d = .5*q2spec_r_2d
 
 ! compute FFT of Q (u,v,w,theta) in q2
 q2=Q
 do n=1,n_var
-   call fft3d(q2(1,1,1,n),q3)
+   call fft3d(q2(1,1,1,n),q3)  ! q3 used as work array
 enddo
 
 ! work1(:,:,:) = PV(k)
@@ -296,8 +296,8 @@ do i=nx1,nx2
    km=abs(kmcord(k))
 
    ! formulas for normalized linear PV:
-   PV = work1(i,j,k,1)
-   theta = q2(i,j,k,np1)
+   PV = work1(i,j,k)
+   theta = q2(i,j,k,np1)  ! np1=index of first scalar.  
    uh = sqrt(q2(i,j,k,1)**2 + q2(i,j,k,2)**2)
    kh = (im**2 + jm**2)
    kh = sqrt(kh)
@@ -981,6 +981,24 @@ if (my_pe==io_pe) then
    do k=0,g_nz/2
       call cwrite8(fid,q2spec_r_2d(0,k),1+iwave_2d)
    enddo
+   call cclose(fid,ierr)
+
+
+
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".normspec"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+      write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
+      call abortdns(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=1+iwave_3d; call cwrite8(fid,x,1)
+   x=1+g_nx/2; call cwrite8(fid,x,1)
+   x=1+g_ny/2; call cwrite8(fid,x,1)	 
+   x=1+g_nz/2; call cwrite8(fid,x,1)	 
+   x=1+iwave_2d; call cwrite8(fid,x,1)	
+
    call cwrite8(fid,norm1spec_r,1+iwave_3d)
    call cwrite8(fid,norm1spec_x,1+g_nx/2)
    call cwrite8(fid,norm1spec_y,1+g_ny/2)
@@ -995,8 +1013,6 @@ if (my_pe==io_pe) then
    do k=0,g_nz/2
       call cwrite8(fid,norm2spec_r_2d(0,k),1+iwave_2d)
    enddo
-
-
    call cclose(fid,ierr)
 
 endif
