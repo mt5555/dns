@@ -30,7 +30,8 @@ pname='qg256hyper'
 times=[0:.1:3.3];
 nx=256;
 
-name = '~/INCITE_runs/Intrepid/bous_NSvisc/'
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/'
+%name = '~/INCITE_runs/Intrepid/bous_NSvisc/'
 %pname='n256_Ro1Fr0.01_'
 pname='n512_Ro1Fr0.01_'
 times=[2.5:.1:4.8];

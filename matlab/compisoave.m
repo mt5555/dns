@@ -257,9 +257,9 @@ for i=1:ndir
   yyave2=yyave2+w(i)*spline(x,y2,xx);
   
   y1=-.5*(SP2_ltt(:,i)+SP1_ltt(:,i))./(x*epsilon);
-  pave=pave++w(i)*spline(x,y1,xx);
+  pave=pave+w(i)*spline(x,y1,xx);
   y1=-.5*(SN2_ltt(:,i)+SN1_ltt(:,i))./(x*epsilon);
-  nave=nave++w(i)*spline(x,y1,xx);
+  nave=nave+w(i)*spline(x,y1,xx);
   
 
 end
