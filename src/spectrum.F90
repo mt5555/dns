@@ -101,16 +101,6 @@ real*8,private ::  q2spec_y(0:g_ny/2)
 real*8,private ::  q2spec_z(0:g_nz/2)
 real*8,private ::  q2spec_r(0:max(g_nx,g_ny,g_nz))
 
-real*8,private ::  norm1spec_x(0:g_nx/2)
-real*8,private ::  norm1spec_y(0:g_ny/2)
-real*8,private ::  norm1spec_z(0:g_nz/2)
-real*8,private ::  norm1spec_r(0:max(g_nx,g_ny,g_nz))
-
-real*8,private ::  norm2spec_x(0:g_nx/2)
-real*8,private ::  norm2spec_y(0:g_ny/2)
-real*8,private ::  norm2spec_z(0:g_nz/2)
-real*8,private ::  norm2spec_r(0:max(g_nx,g_ny,g_nz))
-
 real*8,private ::  bspec_x(0:g_nx/2,n_var)
 real*8,private ::  bspec_y(0:g_ny/2,n_var)
 real*8,private ::  bspec_z(0:g_nz/2,n_var)
@@ -227,7 +217,7 @@ real*8 :: time, pv2energy
 !local
 integer :: n,pv_type, i,j,k,iw,im,jm,km
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
-real*8 :: rwave,xfac, theta,uh,PV,kh
+real*8 :: rwave,xfac, theta,uh,kh
 
 
 !
@@ -240,15 +230,7 @@ q2spec_x=0
 q2spec_y=0
 q2spec_z=0
 q2spec_r_2d=0
-norm1spec_r=0
-norm1spec_x=0
-norm1spec_y=0
-norm1spec_z=0
 norm1spec_r_2d=0
-norm2spec_r=0
-norm2spec_x=0
-norm2spec_y=0
-norm2spec_z=0
 norm2spec_r_2d=0
 
 
@@ -295,56 +277,31 @@ do i=nx1,nx2
    im=abs(imcord(i))
    km=abs(kmcord(k))
 
-   ! formulas for normalized linear PV:
-   PV = work1(i,j,k)
+   ! formulas for linear PV:
    theta = q2(i,j,k,np1)  ! np1=index of first scalar.  
    uh = sqrt(q2(i,j,k,1)**2 + q2(i,j,k,2)**2)
    kh = (im**2 + jm**2)
    kh = sqrt(kh)
 
-   if (abs(km*theta) <= 1d-10*abs(PV) ) then
-      q3(i,j,k,1)=0
-   else
-      q3(i,j,k,1) = PV / (km*theta)
-   endif
-   if ( (kh*uh) <= 1d-10*abs(PV)  ) then
-      q3(i,j,k,2)=0
-   else
-      q3(i,j,k,2) = PV / (kh*uh)
-   endif
+      q3(i,j,k,1) = (km*theta)
+      q3(i,j,k,2) = (kh*uh)
+
    
 enddo
 enddo
 enddo
 
 ! now compute the spectra of the normalized PV quantities:
-call compute_spectrum(q3(1,1,1,1),work1,work2,norm1spec_r,spec_r2,&
-     norm1spec_x,norm1spec_y,norm1spec_z,1)
-
-
-norm1spec_r=.5*norm1spec_r
-norm1spec_x=.5*norm1spec_x
-norm1spec_y=.5*norm1spec_y
-norm1spec_z=.5*norm1spec_z
 
 call compute_spectrum_2d(q3(1,1,1,1),q1,q2,norm1spec_r_2d,1)
 
 norm1spec_r_2d = .5*norm1spec_r_2d
-
-call compute_spectrum(q3(1,1,1,2),work1,work2,norm2spec_r,spec_r2,&
-     norm2spec_x,norm2spec_y,norm2spec_z,1)
-
-norm2spec_r=.5*norm2spec_r
-norm2spec_x=.5*norm2spec_x
-norm2spec_y=.5*norm2spec_y
-norm2spec_z=.5*norm2spec_z
 
 call compute_spectrum_2d(q3(1,1,1,2),q1,q2,norm2spec_r_2d,1)
 
 norm2spec_r_2d = .5*norm2spec_r_2d
 
 end subroutine
-
 
 
 
@@ -984,34 +941,23 @@ if (my_pe==io_pe) then
    call cclose(fid,ierr)
 
 
-
    write(message,'(f10.4)') 10000.0000 + time_file
-   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".normspec"
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".normpvspec"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
       write(message,'(a,i5)') "spec_write(): Error opening file errno=",ierr
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
-   x=1+iwave_3d; call cwrite8(fid,x,1)
-   x=1+g_nx/2; call cwrite8(fid,x,1)
-   x=1+g_ny/2; call cwrite8(fid,x,1)	 
-   x=1+g_nz/2; call cwrite8(fid,x,1)	 
    x=1+iwave_2d; call cwrite8(fid,x,1)	
-
-   call cwrite8(fid,norm1spec_r,1+iwave_3d)
-   call cwrite8(fid,norm1spec_x,1+g_nx/2)
-   call cwrite8(fid,norm1spec_y,1+g_ny/2)
-   call cwrite8(fid,norm1spec_z,1+g_nz/2)
    do k=0,g_nz/2
       call cwrite8(fid,norm1spec_r_2d(0,k),1+iwave_2d)
    enddo
-   call cwrite8(fid,norm2spec_r,1+iwave_3d)
-   call cwrite8(fid,norm2spec_x,1+g_nx/2)
-   call cwrite8(fid,norm2spec_y,1+g_ny/2)
-   call cwrite8(fid,norm2spec_z,1+g_nz/2)
    do k=0,g_nz/2
       call cwrite8(fid,norm2spec_r_2d(0,k),1+iwave_2d)
+   enddo
+   do k=0,g_nz/2
+      call cwrite8(fid,q2spec_r_2d(0,k),1+iwave_2d)
    enddo
    call cclose(fid,ierr)
 
