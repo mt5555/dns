@@ -1,31 +1,9 @@
 clear
-%name = 'all'
-%name = 'qg640_b3000_all'
-%name = 'n256_Ro1Fr0.01_all'
-name = 'n512_Ro1Fr0.01_all'
-%name= 'n512_f2000b20_all';
-%name = 'qg512hyper0002.9619'
-%name = 'qg512hyper_all';
-%name = 'qg512_b2000_all';
-%name = 'qg256hyper_all';
-%name = 'qg64hyper_all';
-%name = 'n256_f1000n5_all';
-%name = 'n256_f2000n5_all';
-%name = 'n256_f5n1000_all';
-%name = 'n256_f5n2000_all';
-%name = 'n256high_f2000n5_all';
-%name = 'n256high_f1000n5_all'
-%name = 'n256high_f5n2000_all';
-%name = 'n256high_f5n1000_all';
-%name = 'qg128slab_all';
-%name = 'qg128sph_all';
-%name = 'qg128_nhyper_all';
-
 
 epsilon=.41;
 %CK=1.5*epsilon^(2/3);
 %namedir = '/home/wingate/data1/Rotation/r16c/';
-%namedir = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous1000/hyper_nu2.5/';
+
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg64/sto_high_4/hyper_nu/bous100/';
 %namedir = ['~/projects/pv/data_analysis/lowforc/low4/qg/qg64/' ...
 %           'sto_high_4/hyper_nu/bous500/'];
@@ -37,31 +15,15 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous1000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/bous2000/';
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
-%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
-%           'low4/qg/qg512/bous1000/'];             
-%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/bous2000/correct_hyper/';
-%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor2000_bous20/';
-%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg512/fcor20_bous2000/';
-%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
-%           'low4/qg/qg128/sphere_visc/'];
-
-%namedir = '~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg640/';
-
-
-%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
-%           'low4/qg/qg128/slab_visc/'];
-
-%namedir = ['~/research.old/projects/pv/data_analysis/lowforc/' ...
-%           'low4/qg/qg128/no_hyper/'];
 
 
 %name = 'n640_fcor3000bous14_all'
-%name = 'n640_fcor14bous3000_all'
+name = 'n640_fcor14bous3000_all'
 %name = 'n640_bous3000_all'
 %namedir = '~/INCITE_runs/Intrepid/qg/';
-%namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';
+namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';
 %namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
-namedir = '~/INCITE_runs/Intrepid/bous_NSvisc/';
+%namedir = '~/INCITE_runs/Intrepid/bous_NSvisc/';
 
 asciprint = 0 % if == 1 print out the data to asci files
 

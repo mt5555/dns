@@ -33,17 +33,20 @@ namedir ='~kurien/INCITE_runs/Intrepid/RSS09_tests/aspect/';
 %name = 'aspectd1_all';
 %name = 'aspectd10_all';
 %name = 'aspect_newU_all';
-name = 'aspect_newUd1_all';
+name = 'aspect_newUd1_all';  %this is the run that matches RemSukSmi09 upto the correct damping
+Lz=0.2;epsf=1;kf = 4;
 
 %namedir ='~/INCITE_runs/Intrepid/RSS09_tests/uvwforce/';
 %name = 'rssuvw_all';
 
-namedir ='~kurien/INCITE_runs/Intrepid/lowaspect_bous/';
+%namedir ='~kurien/INCITE_runs/Intrepid/lowaspect_bous/';
 %namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/nodamp/';
-%namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/hyper4/';
-namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/shift_force/';
-name = 'n1600_d0.2_Ro0.05_all';  
-Lz=0.2;epsf=1;kf = 10;
+namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/hyper4/';
+%namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/shift_force/';
+%name = 'n1600_d0.2_Ro0.05_all';  
+%Lz=0.2;epsf=1;kf = 10;
+name = 'n1600_d0.2_Ro0.05hy4_0002.8500';
+Lz=0.2;epsf=1;kf = 4;
 
 % plot all the spectrum:
 movie=1;
@@ -81,7 +84,7 @@ k = [0:n_r-1];
 
 if (movie)
 %pause
-exp = 5/3;
+exp = 0;
 figure(1); % +, - and total and projected energy spectra
 loglog(k,spec_tot.*k'.^exp,'k'); hold on;
 %loglog(k,spec_Q_tot,'bo'); hold on;

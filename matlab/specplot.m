@@ -75,17 +75,19 @@ namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
 %namedir ='/home/kurien/INCITE_runs/SW02_tests/';
 
 
-name = 'n64_d1_0000.0000'; Lz = 1;
-%name = 'n128_d0.5_0000.0000'; Lz = 0.5;
-%name = 'n256_d0.25_0000.0000'; Lz = 0.25;
-name = 'n512_d0.125_0000.0000'; Lz = 0.125;
-name = 'n1024_d1by16_0000.0000'; Lz = 1/16;
 namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/';
 %namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/fft_sphere/';
+%name = 'n64_d1_0000.0000'; Lz = 1;
+name = 'n128_d0.5_0000.0000'; Lz = 1/2;
+%name = 'n256_d0.25_0000.0000'; Lz = 1/4;
+%name = 'n512_d0.125_0000.0000'; Lz = 1/8;
+%name = 'n512_d1by16_0000.0000'; Lz = 1/16;
+%name = 'n512_d0.5_all'; Lz = 1/2;
+
 
 %name = 'n256_Ro1Fr0.01_all';
-name = 'n512_Ro1Fr0.01_all';
-namedir ='/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/';
+%name = 'n512_Ro1Fr0.01_all';
+%namedir ='/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/';
 
 
 spec_r_save=[];
@@ -213,9 +215,7 @@ while (time>=0 & time<=999)
     figure(10)
     subplot(1,1,1);
     stitle=sprintf('shell-averaged kinetic energy spectrum t=%8.4f',time);
-
       loglog53(n_r-1,spec_r,stitle,CK,4);     %default, with k^-5/3 line
-      
   axis([1 1000 1e-10 1]); hold on;
     %    loglog((0:n_r-1), spec_r,'b');
 %pause
@@ -233,13 +233,16 @@ while (time>=0 & time<=999)
     figure(4);title('longitudinal 1D spectrum');
     subplot(1,1,1);    
     if (Lz < 1) 
-    loglog((0:(n_x-1)),spec_ux'/2/pi','b');hold on;
-    loglog((0:(n_y-1)),spec_vy'/2/pi,'b');hold on;
-    loglog((0:1/Lz:(n_z-1)/Lz),spec_wz*Lz/2/pi','b'); hold off;
+    loglog((0:(n_x-1)),spec_ux','b');hold on;
+    loglog((0:(n_y-1)),spec_vy','b');hold on;
+    loglog((0:1/Lz:(n_z-1)/Lz),spec_wz'*Lz,'b'); hold off;
     else
-    loglog53(n_x,spec_ux,' ',CK*18/55,6);     hold on;
-    loglog53(n_y,spec_vy,' ',CK*18/55,6);     hold on;
-    loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55,6);     hold on;
+    %loglog53(n_x,spec_ux,' ',CK*18/55,6);     hold on;
+    %loglog53(n_y,spec_vy,' ',CK*18/55,6);     hold on;
+    %loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55,6);     hold on;
+    loglog((0:(n_x-1)),spec_ux','b');hold on;
+    loglog((0:(n_y-1)),spec_vy','b');hold on;
+    loglog((0:(n_z-1)),spec_wz,'b'); hold off;
     end
     hold on;
     end

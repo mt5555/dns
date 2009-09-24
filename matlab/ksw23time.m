@@ -26,19 +26,19 @@ eta = 1/(nx*delx_over_eta);
 %nx=64;
 
 name = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/'
-pname='qg256hyper'
-times=[0:.1:3.3];
-nx=256;
+%pname='qg256hyper'
+%times=[0:.1:3.3];
+%nx=256;
 
 name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/'
 %name = '~/INCITE_runs/Intrepid/bous_NSvisc/'
 %pname='n256_Ro1Fr0.01_'
+%times=[1:.1:1.9];
+%nx = 256;
 pname='n512_Ro1Fr0.01_'
-times=[2.5:.1:4.8];
+times=[.1:.1:4.8];
 nx=512;
 
-
-%nx = 256;
 
 %check this subroutine, for now set averages to 1
 %[avg_eps, avg_heps, avg_delx_over_eta] = ensemble_avg_params(name,ext,times)
@@ -113,7 +113,7 @@ ppname = [pname,tstr(2:10),ext]
       [y45,y415,y43,epsl,h_eps,y215,y23]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
       
       y23_iso_ave=y23_iso_ave+y23';  %accumulate the angle averaged y23 from each frame
-      
+    figure(10); plot(k*.1,max(y23),'*');hold on;
     end    
 
 
@@ -143,7 +143,7 @@ ppname = [pname,tstr(2:10),ext]
 end
 
 times=times_plot;
-ll=length(times)
+ll=length(times);
 y23_ave=y23_ave/ll;
 y23_iso_ave=y23_iso_ave/ll;
 

@@ -20,14 +20,14 @@ fid=endianopen('~/research.old/projects/pv/data_analysis/lowforc/low4/qg/qg640/q
 fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars-bous','r')
 
 
-%fid=endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bous','r');
-%%fid=endianopen('~/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars-bous','r');
-%fid=endianopen('~/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
+fid=endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bous','r');
+fid=endianopen('~/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars-bous','r');
+fid=endianopen('~/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
 
 %fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n256_Ro1Fr0.01_all.scalars-bous','r')
-fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars-bous','r')
+%fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars-bous','r')
 
-fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars-bous','r')
+%fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars-bous','r')
 
 nscalars=0;
 ints=[];
@@ -89,10 +89,10 @@ figure(3)
 subplot(1,1,1);
 %clf
 plot(time,potens,'b','Linewidth',2);hold on;
-plot(time,potens_qg,'ro','Markersize',6);
-plot(time,potens_ro0fr1,'r.-','Markersize',6);
-plot(time,potens_ro1fr0,'ko','Markersize',6);
-title('Potential enstrophy: (blue: Total); (red o QG); (red.-: Ro->0,Fr1); (black: Ro1, Fr->0)');
+plot(time,potens_qg,'r--','Markersize',6);
+plot(time,potens_ro0fr1,'ro','Markersize',6);
+plot(time,potens_ro1fr0,'k*','Markersize',6);
+title('Potential enstrophy: (blue: Total); (red -- QG); (red o: Ro->0,Fr1); (black *: Ro1, Fr->0)');
 legend('$Q$','$Q_{qg}$','$Q_{q\sim f \partial_z \rho}$', '$Q_{q\sim N \omega_3}$');
 
 %check that dissipation matches dQ/dt for decaying case
