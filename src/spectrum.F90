@@ -212,7 +212,7 @@ real*8 :: q2(nx,ny,nz,n_var)
 real*8 :: q3(nx,ny,nz,n_var) 
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
-real*8 :: time, pv2energy
+real*8 :: time
 
 !local
 integer :: n,pv_type, i,j,k,iw,im,jm,km
@@ -266,8 +266,8 @@ enddo
 ! q2(:,:,:,4) = theta(k)
 
 ! Compute:
-! q3(:,:,:,1) = |PV|/|k_z theta|  
-! q3(:,:,:,2) = |PV|/|k_h u_h| 
+! q3(:,:,:,1) = |k_z theta|  
+! q3(:,:,:,2) = |k_h u_h| 
 
 do k=nz1,nz2
 do j=ny1,ny2
@@ -283,8 +283,8 @@ do i=nx1,nx2
    kh = (im**2 + jm**2)
    kh = sqrt(kh)
 
-      q3(i,j,k,1) = (km*theta)
-      q3(i,j,k,2) = (kh*uh)
+      q3(i,j,k,1) = km*theta
+      q3(i,j,k,2) = kh*uh
 
    
 enddo
@@ -949,6 +949,7 @@ if (my_pe==io_pe) then
       call abortdns(message)
    endif
    call cwrite8(fid,time,1)
+   x=1+g_nz/2; call cwrite8(fid,x,1)
    x=1+iwave_2d; call cwrite8(fid,x,1)	
    do k=0,g_nz/2
       call cwrite8(fid,norm1spec_r_2d(0,k),1+iwave_2d)

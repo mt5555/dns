@@ -73,7 +73,7 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
-logical :: compute_hspec, compute_hfree
+logical :: compute_hspec, compute_hfree, compute_pv2spec
 logical :: read_uvw
 logical :: project_ch
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
@@ -98,11 +98,11 @@ compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
 project_ch=.false.               !Craya-Herring projection and spectra
-compute_p2spec = .true.	         !potential enstrophy spectra *.p2spec
+compute_pv2spec = .true.	         !potential enstrophy spectra .p2spec,.normspec
 
 tstart=0.0
-tstop=10.0
-tinc=0.2
+tstop=1.8
+tinc=0.1
 
 icount=0
 
@@ -155,7 +155,7 @@ endif
 
 
 if (compute_pv2spec) then
-   if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
+   if (.not. allocated(q3))  allocate(q3(nx,ny,nz,n_var))
 endif
 
 

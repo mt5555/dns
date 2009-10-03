@@ -567,6 +567,8 @@ if (my_pe==io_pe) then
 	    convert_opt=20
 	 else if (carg(1:11)=="ehor") then
 	    convert_opt=21
+	 else if (carg(1:11)=="potens") then
+	    convert_opt=22
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abortdns("-cout unrecognized option")

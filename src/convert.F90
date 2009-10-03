@@ -113,8 +113,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=0.1
-tstop=0.1
+tstart=2.8
+tstop=2.8
 tinc=0.1
 
 
@@ -188,9 +188,9 @@ do
          ! dont clobber input file!
          basename=runname(1:len_trim(runname)) // "-new."
       endif
-      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
+!      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       ! output headerless data:
-      ! call output_uvw(basename,time,Q,vor,work1,work2,2)
+       call output_uvw(basename,time,Q,vor,work1,work2,2)
 
    endif
 
