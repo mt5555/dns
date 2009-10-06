@@ -1,4 +1,30 @@
 =================================================================
+August 2009: code has moved to subverion respository at
+myversioncontrol.com
+=================================================================
+
+Intial setup (done once per machine):
+
+svn --username skurien checkout  \
+https://dns.myversioncontrol.com/subversion/dns/trunk dns
+
+If you institution uses a firewall, you will need to add
+(example for Sandia) edit the file ~/.subversion/servers
+
+[global]
+http-proxy-exceptions = localhost, *.sandia.gov
+http-proxy-host = wwwproxy.sandia.gov
+http-proxy-port = 8080
+
+
+
+
+
+
+
+
+
+=================================================================
 Initial Setup
 =================================================================
 Check that you can login to the CVS server by running:
