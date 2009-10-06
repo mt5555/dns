@@ -217,7 +217,7 @@ real*8 :: time
 !local
 integer :: n,pv_type, i,j,k,iw,im,jm,km
 real*8 ::  spec_r2(0:max(g_nx,g_ny,g_nz))
-real*8 :: rwave,xfac, theta,uh,kh
+real*8 :: rwave,xfac, theta,uh,kh,kz
 
 
 !
@@ -281,9 +281,10 @@ do i=nx1,nx2
    theta = q2(i,j,k,np1)  ! np1=index of first scalar.  
    uh = sqrt(q2(i,j,k,1)**2 + q2(i,j,k,2)**2)
    kh = (im**2 + jm**2)
-   kh = sqrt(kh)
+   kh = pi2*sqrt(kh)
+   kz = pi2*km/Lz
 
-      q3(i,j,k,1) = km*theta
+      q3(i,j,k,1) = kz*theta
       q3(i,j,k,2) = kh*uh
 
    
