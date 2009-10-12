@@ -1,6 +1,6 @@
 clear
 
-name = 'n640_bous3000_0006.0000'
+name = 'n640_bous3000_all'
 namedir = '~/INCITE_runs/Intrepid/qg/';
 
 
@@ -12,7 +12,7 @@ if (fid<0)
   return
 end
 
-  %read norm1spec = 0.5*|kz*theta|^2, and norm2psec = 0.5*|kh*uh|^2
+%read 0.5*|kz*theta|^2, 0.5*|kh*uh|^2 and potential enstrophy
 
 time=0;
 j = 0; %(count for time average)
@@ -68,65 +68,62 @@ end
 
 end
 
-  % kz-averaged 2d spectra (remaining array is function of kh)
-%  n1spec = sum(norm1spec_r_2d,1);
-  
-  %kh-averaged 1d spectra (remaining array is function of kz)
-%  n2spec = sum(norm2spec_r_2d,2);
 
 if(1)
 
-  %plot norm1spec(:,kh) for various kh and norm1spec(kz,:) for various kh
+  %plot pv2(;,kh)/kztheta(:,kh) for various kh and pv2(kz,;)/khuh(kz,:) for various kz
   figure(1);hold off;
   subplot(2,1,1);
   kz = (1:numkz)-1
   kh = (1:numkh)-1
   xlabel('k_z')
-  loglog(kz,pv2_2d(:,3)./kztheta_2d(:,3));hold on;pause
-  loglog(kz,pv2_2d(:,5)./kztheta_2d(:,5));hold on;pause
-  loglog(kz,pv2_2d(:,11)./kztheta_2d(:,11));hold on;pause
-  loglog(kz,pv2_2d(:,21)./kztheta_2d(:,21));hold on;pause
-  loglog(kz,pv2_2d(:,31)./kztheta_2d(:,31));hold on;pause
-  loglog(kz,pv2_2d(:,41)./kztheta_2d(:,41));hold on;pause
-  loglog(kz,pv2_2d(:,51)./kztheta_2d(:,51));hold on;pause
-  loglog(kz,pv2_2d(:,61)./kztheta_2d(:,61));hold on;
+  loglog(kz,sqrt(pv2_2d(:,3)./kztheta_2d(:,3)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,5)./kztheta_2d(:,5)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,11)./kztheta_2d(:,11)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,21)./kztheta_2d(:,21)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,31)./kztheta_2d(:,31)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,41)./kztheta_2d(:,41)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,51)./kztheta_2d(:,51)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,61)./kztheta_2d(:,61)));hold on;
   xlabel('k_z')
+  ylabel('(q^2(k_z,k_h)/(k_z*\theta(k_z,k_h))^2)^{1/2}')
   
+
   subplot(2,1,2)
   xlabel('k_h') 
-  loglog(kh,pv2_2d(3,:)./kztheta_2d(3,:));hold on;pause
-  loglog(kh,pv2_2d(5,:)./kztheta_2d(5,:));hold on;pause
-  loglog(kh,pv2_2d(11,:)./kztheta_2d(11,:));hold on;pause
-  loglog(kh,pv2_2d(21,:)./kztheta_2d(21,:));hold on;pause
-  loglog(kh,pv2_2d(31,:)./kztheta_2d(31,:));hold on;pause
-  loglog(kh,pv2_2d(41,:)./kztheta_2d(41,:));hold on;pause
-  loglog(kh,pv2_2d(51,:)./kztheta_2d(51,:));hold on;pause
-  loglog(kh,pv2_2d(61,:)./kztheta_2d(61,:));hold on;
+  loglog(kh,sqrt(pv2_2d(3,:)./kztheta_2d(3,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(5,:)./kztheta_2d(5,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(11,:)./kztheta_2d(11,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(21,:)./kztheta_2d(21,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(31,:)./kztheta_2d(31,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(41,:)./kztheta_2d(41,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(51,:)./kztheta_2d(51,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(61,:)./kztheta_2d(61,:)));hold on;
     xlabel('k_h') 
   
   %plot norm2spec(kz,:) for various kh/kz and kz/kh 
   figure(2);hold off;
   subplot(2,1,1)
-  loglog(kz./2,norm2_2d(:,3));hold on;pause
-  loglog(kz./4,norm2_2d(:,5));hold on;pause
-  loglog(kz./10,norm2_2d(:,11));hold on;pause
-  loglog(kz./20,norm2_2d(:,21));hold on;pause
-  loglog(kz./30,norm2_2d(:,31));hold on;pause
-  loglog(kz./40,norm2_2d(:,41));hold on;pause
-  loglog(kz./50,norm2_2d(:,51));hold on;pause
-  loglog(kz./60,norm2_2d(:,61));hold on;
-  xlabel('\kappa_z/k_h');
+  loglog(kz,sqrt(pv2_2d(:,3)./khuh_2d(:,3)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,5)./khuh_2d(:,5)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,11)./khuh_2d(:,11)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,21)./khuh_2d(:,21)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,31)./khuh_2d(:,31)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,41)./khuh_2d(:,41)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,51)./khuh_2d(:,51)));hold on;pause
+  loglog(kz,sqrt(pv2_2d(:,61)./khuh_2d(:,61)));hold on;
+  xlabel('k_z');
   
   subplot(2,1,2)
-  loglog(2./kh,norm2_2d(3,:)');hold on;pause
-  loglog(4./kh,norm2_2d(5,:)');hold on;pause
-  loglog(10./kh,norm2_2d(11,:)');hold on;pause
-  loglog(20./kh,norm2_2d(21,:)');hold on;pause
-  loglog(30./kh,norm2_2d(31,:)');hold on;pause
-  loglog(40./kh,norm2_2d(41,:)');hold on;pause
-  loglog(50./kh,norm2_2d(51,:)');hold on;pause
-  loglog(60./kh,norm2_2d(61,:)');hold on;
-  xlabel('\kappa_z/k_h');
+  loglog(kh,sqrt(pv2_2d(3,:)./khuh_2d(3,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(5,:)./khuh_2d(5,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(11,:)./khuh_2d(11,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(21,:)./khuh_2d(21,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(31,:)./khuh_2d(31,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(41,:)./khuh_2d(41,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(51,:)./khuh_2d(51,:)));hold on;pause
+  loglog(kh,sqrt(pv2_2d(61,:)./khuh_2d(61,:)));hold on;
+  xlabel('k_h');
   
   
   
