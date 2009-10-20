@@ -18,10 +18,10 @@ epsilon=.41;
 
 
 %name = 'n640_fcor3000bous14_all'
-name = 'n640_fcor14bous3000_all'
-%name = 'n640_bous3000_all'
-%namedir = '~/INCITE_runs/Intrepid/qg/';
-namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';
+%name = 'n640_fcor14bous3000_all'
+name = 'n640_bous3000_all'
+namedir = '~/INCITE_runs/Intrepid/qg/';
+%namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';
 %namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
 %namedir = '~/INCITE_runs/Intrepid/bous_NSvisc/';
 

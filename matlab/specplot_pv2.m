@@ -33,7 +33,7 @@ numk= fread(fid0,1,'float64');
   numkz=fread(fid0,1,'float64');
   numkh=fread(fid0,1,'float64');
 
-    
+%disp(sprintf('time=%f  k=%f  kx=%f  ky=%f  kz=%f  kh=%f',time,numk,numkx,numky,numkz,numkh));    
   q2_r = fread(fid0,numk,'float64') ;
 q2_x = fread(fid0,numkx,'float64');
 q2_y = fread(fid0,numky,'float64');
@@ -105,62 +105,27 @@ if(1)
 
   %plot pv2(;,kh)/kztheta(:,kh) for various kh and pv2(kz,;)/khuh(kz,:) for various kz
   figure(1);hold off;
-  subplot(2,1,1);
+  subplot(1,1,1);
   kz = (1:numkz)-1;
   kh = (1:numkh)-1;
-  xlabel('k_z')
-  axis([1 1000 2000 5000]);
-  semilogx(kz,sqrt(pv2_2d(:,3)./kztheta_2d(:,3)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,5)./kztheta_2d(:,5)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,11)./kztheta_2d(:,11)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,21)./kztheta_2d(:,21)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,31)./kztheta_2d(:,31)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,41)./kztheta_2d(:,41)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,51)./kztheta_2d(:,51)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,61)./kztheta_2d(:,61)));hold on;
-  xlabel('k_z')
-  ylabel('(q^2(k_z,k_h)/(k_z \theta(k_z,k_h))^2)^{1/2}')
-  
-
-  subplot(2,1,2)
-  xlabel('k_h') 
-  axis([1 1000 2000 5000]);
-  semilogx(kh,sqrt(pv2_2d(3,:)./kztheta_2d(3,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(5,:)./kztheta_2d(5,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(11,:)./kztheta_2d(11,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(21,:)./kztheta_2d(21,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(31,:)./kztheta_2d(31,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(41,:)./kztheta_2d(41,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(51,:)./kztheta_2d(51,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(61,:)./kztheta_2d(61,:)));hold on;
-    xlabel('k_h') 
-    ylabel('(q^2(k_z,k_h)/(k_z \theta(k_z,k_h))^2)^{1/2}')
-
-  %plot norm2spec(kz,:) for various kh/kz and kz/kh 
-  figure(2);hold off;
-  subplot(2,1,1)
-  semilogx(kz,sqrt(pv2_2d(:,3)./khuh_2d(:,3)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,5)./khuh_2d(:,5)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,11)./khuh_2d(:,11)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,21)./khuh_2d(:,21)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,31)./khuh_2d(:,31)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,41)./khuh_2d(:,41)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,51)./khuh_2d(:,51)));hold on;pause
-  semilogx(kz,sqrt(pv2_2d(:,61)./khuh_2d(:,61)));hold on;
   xlabel('k_z');
-  ylabel('(q^2(k_z,k_h)/(k_h u_h(k_z,k_h))^2)^{1/2}')
+  khvals = [1,2,3,4,5,11]
+  for i = 1:length(khvals)
+  loglog(kz,sqrt(pv2_2d(:,khvals(i))./kztheta_2d(:,khvals(i))),'-');hold on;pause;
+  end
+  xlabel('k_z')
+  ylabel('(|q(k_z,k_h)|^2/|k_z \theta(k_z,k_h)|^2)^{1/2}')
   
-  subplot(2,1,2)
-  semilogx(kh,sqrt(pv2_2d(3,:)./khuh_2d(3,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(5,:)./khuh_2d(5,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(11,:)./khuh_2d(11,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(21,:)./khuh_2d(21,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(31,:)./khuh_2d(31,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(41,:)./khuh_2d(41,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(51,:)./khuh_2d(51,:)));hold on;pause
-  semilogx(kh,sqrt(pv2_2d(61,:)./khuh_2d(61,:)));hold on;
-  xlabel('k_h');
-  ylabel('(q^2(k_z,k_h)/(k_h u_h(k_z,k_h))^2)^{1/2}')  
+
+  %plot q2/khuh(kz,:) for various kz 
+   figure(2);hold off;
+  subplot(1,1,1)
+  kzvals = [1,2,3,4,5,11]
+  for i = 1:length(kzvals)
+  loglog(kh,sqrt(pv2_2d(kzvals(i),:)./khuh_2d(kzvals(i),:)),'-');hold on;pause;
+  end
+    xlabel('k_h');
+  ylabel('(|q(k_z,k_h)|^2/|k_h u_h(k_z,k_h)|^2)^{1/2}')  
   
 %pv2spectra
    figure(3);hold off;
