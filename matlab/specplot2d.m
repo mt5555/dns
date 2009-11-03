@@ -17,13 +17,15 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 
-%name = 'n640_fcor3000bous14_all'
-%name = 'n640_fcor14bous3000_all'
-name = 'n640_bous3000_all'
-namedir = '~/INCITE_runs/Intrepid/qg/';
-%namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';
-%namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
-%namedir = '~/INCITE_runs/Intrepid/bous_NSvisc/';
+%name = 'n640_fcor3000bous14_all';
+%name = 'n640_fcor14bous3000_all';
+%name = 'n640_bous3000_all';
+name = 'n512_Ro1Fr0.01_all';
+
+%namedir = '~/projects/INCITE_runs/Intrepid/qg/';
+%namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
+%namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
+namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/';
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -89,29 +91,26 @@ while (time < 35)
 
 if(1)
   %plot E_h(0,kh)
+  kz = (1:numkz)-1;
+  kh = (1:numkh)-1;
   figure(1);hold off;
-  %loglog53(numkh,spec2d_u(1,:)'+spec2d_v(1,:)','',2.0,6);hold on;%pause
-  %loglog53(numkh,spec2d_u(3,:)'+spec2d_v(3,:)','',2.0,6);hold on;%pause
-  %loglog53(numkh,spec2d_u(5,:)'+spec2d_v(5,:)','',2.0,6);hold on;%pause
-  loglog53(numkh,spec2d_u(11,:)'+spec2d_v(11,:)','',2.0,6);hold on;%pause
-  loglog53(numkh,spec2d_u(21,:)'+spec2d_v(21,:)','',2.0,6);hold on;%pause
-  loglog53(numkh,spec2d_u(31,:)'+spec2d_v(31,:)','',2.0,6);hold on;%pause
-  loglog53(numkh,spec2d_u(41,:)'+spec2d_v(41,:)','',2.0,6);hold on;%pause
-  loglog53(numkh,spec2d_u(51,:)'+spec2d_v(51,:)','',2.0,6);hold on;%pause
-  loglog53(numkh,spec2d_u(61,:)'+spec2d_v(61,:)','E_h((10, 20, 30, 40,50,60),kh)',2.0,6);hold on;
+  expo = 4.5 ; %0 for no compensation
+  kzvals = [1,3,5,11,21,31];
+  for i = 1:length(kzvals)
+  loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^(expo)));hold on;%pause
+  end  
+ 
 
   %plot P(kz,0)
   figure(2);hold off;
-  %loglog53(numkz,spec2d_t(:,1),'',2.0,6);hold on; %pause
-  %loglog53(numkz,spec2d_t(:,3),'',2.0,6);hold on; %pause
-  %loglog53(numkz,spec2d_t(:,6),'',2.0,6);hold on; %pause
-  loglog53(numkz,spec2d_t(:,11),'',2.0,6);hold on; %pause
-  loglog53(numkz,spec2d_t(:,21),'',2.0,6);hold on; %pause
-  loglog53(numkz,spec2d_t(:,31),'',2.0,6);hold on; %pause
-  loglog53(numkz,spec2d_t(:,41),'',2.0,6);hold on; %pause
-  loglog53(numkz,spec2d_t(:,51),'',2.0,6);hold on; %pause
-  loglog53(numkz,spec2d_t(:,61),'P(kz,(10,20,30,40,50))',2.0,6);hold on;
-  axis([1 128 1e-12 1e-4]) ;
+  expo = 5;
+  khvals = [1,3,5,11,21,31];
+  for i = 1:length(khvals)
+  loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo)));hold on;%pause
+  end
+  ylabel('P(:,[1,3,5,11,21,31,41,51])');  
+  xlabel('kz');
+
 end
 
 if (1)
@@ -187,36 +186,20 @@ spec2d_t_ave = spec2d_t_ave/j;
 spec2d_Eh_ave = spec2d_Eh_ave/j;
 
 %plot time avg spectra
-%figure(9)
-%loglog53(numkz,spectz_ave,'time-average P(kz)',2.0,6);hold
-%loglog53(numkz,spec2d_Eh_ave,'',2.0,6);
 
 figure(10);hold off;
-%  loglog53(numkz,spec2d_t_ave(:,1),'',2.0,6);hold on;%pause
-%  loglog53(numkz,spec2d_t_ave(:,3),'',2.0,6);hold on;%pause  
-%  loglog53(numkz,spec2d_t_ave(:,6),'',2.0,6);hold on;%pause
-  loglog53(numkz,spec2d_t_ave(:,11),'',2.0,6);hold on;%pause
-    loglog53(numkz,spec2d_t_ave(:,21),'',2.0,6);hold on;%pause    
-  loglog53(numkz,spec2d_t_ave(:,31),'',2.0,6);hold on;%pause
-  loglog53(numkz,spec2d_t_ave(:,41),'',2.0,6);hold on;%pause
-  loglog53(numkz,spec2d_t_ave(:,51),'',2.0,6);hold on;%pause
-  loglog53(numkz,spec2d_t_ave(:,61),'',2.0,6);hold on;%pause
-%    loglog53(numkz,spec2d_t_ave(:,151),'',2.0,6);hold on;%pause
-%  loglog53(numkz,spec2d_t_ave(:,181),'P(kz,(0,10,20,30,40,50))',2.0,6);hold on;
-   %axis([1 128 1e-12 1e-4]) ;
+expo = 5;
+for i = 1:length(khvals) 
+loglog(kz,spec2d_t_ave(:,khvals(i)).*(kz'.^expo));hold on;%pause
+end 
 title('Time avg P(kh,kz)')
    
 figure(11);hold off;
-%loglog53(numkh,spec2d_Eh_ave(1,:)','',2.0,6);hold on;%pause
-%loglog53(numkh,spec2d_Eh_ave(3,:)','',2.0,6);hold on;%pause  
-%loglog53(numkh,spec2d_Eh_ave(6,:)','',2.0,6);hold on;%pause  
-loglog53(numkh,spec2d_Eh_ave(11,:)','',2.0,6);hold on;%pause  
-loglog53(numkh,spec2d_Eh_ave(21,:)','',2.0,6);hold on;%pause  
-loglog53(numkh,spec2d_Eh_ave(31,:)','',2.0,6);hold on;%pause  
-loglog53(numkh,spec2d_Eh_ave(41,:)','',2.0,6);hold on;%pause  
-loglog53(numkh,spec2d_Eh_ave(51,:)','',2.0,6);hold on;%pause  
-loglog53(numkh,spec2d_Eh_ave(61,:)','E_h((2,5,10,20,30,40),kz), time-avg',2.0,6);hold on;%pause  
-title('Time avg Eh(kh,kz)')
+expo = 4.5;
+for i = 1:length(kzvals) 
+loglog(kh,spec2d_Eh_ave(kzvals(i),:).*(kh.^expo));hold on;%pause
+end 
+title('Time avg E_h(kh,kz)')
 
 %normalize x-axis by ratio kz or kh as necessary
 figure(12)
