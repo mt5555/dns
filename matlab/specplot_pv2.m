@@ -1,7 +1,7 @@
 clear
 
 name = 'n640_bous3000_all'
-namedir = '~/INCITE_runs/Intrepid/qg/';
+namedir = '~/projects/INCITE_runs/Intrepid/qg/';
 
 
 asciprint = 0 % if == 1 print out the data to asci files
@@ -97,7 +97,30 @@ size(s)
         pv2_2d(kz,:) = s';
 end
 
+% normalized quantities
+qnorm1 = sqrt(pv2_2d./kztheta_2d);
+qnorm2 = sqrt(pv2_2d./khuh_2d);
+
+% time accumulate   
+   if(1)
+ if (time > 3.0 & time < 6.5)
+    if (j==0) 
+        qnorm1_ave = sqrt(pv2_2d./kztheta_2d);
+        qnorm2_ave = sqrt(pv2_2d./khuh_2d);
+        j = j+1;
+    else
+        qnorm1_ave = qnorm1_ave + sqrt(pv2_2d./kztheta_2d);
+        qnorm2_ave = qnorm2_ave + sqrt(pv2_2d./khuh_2d);
+        j = j+1;
+        
+    end
+ end
+ end 
 end
+
+%time average
+qnorm1_ave = qnorm1_ave/j;
+qnorm2_ave = qnorm2_ave/j;
 
 end
 
@@ -109,30 +132,50 @@ if(1)
   kz = (1:numkz)-1;
   kh = (1:numkh)-1;
   xlabel('k_z');
-  khvals = [1,2,3,4,5,11]
+  khvals = [1,2,3,4,5,11,21]
   for i = 1:length(khvals)
-  loglog(kz,sqrt(pv2_2d(:,khvals(i))./kztheta_2d(:,khvals(i))),'-');hold on;pause;
+  loglog(kz,qnorm1(:,khvals(i)),'-','Linewidth',1.5);hold on;pause;
   end
+  set(gca,'fontsize',16);    
   xlabel('k_z')
-  ylabel('(|q(k_z,k_h)|^2/|k_z \theta(k_z,k_h)|^2)^{1/2}')
+  ylabel('(|q(k)|^2/|k_z \theta(k)|^2)^{1/2}')
   
 
   %plot q2/khuh(kz,:) for various kz 
    figure(2);hold off;
   subplot(1,1,1)
-  kzvals = [1,2,3,4,5,11]
+  kzvals = [1,2,3,4,5,11,21]
   for i = 1:length(kzvals)
-  loglog(kh,sqrt(pv2_2d(kzvals(i),:)./khuh_2d(kzvals(i),:)),'-');hold on;pause;
+  loglog(kh,qnorm2(kzvals(i),:),'-','Linewidth',1.5);hold on;pause;
   end
+    set(gca,'fontsize',16);  
     xlabel('k_h');
-  ylabel('(|q(k_z,k_h)|^2/|k_h u_h(k_z,k_h)|^2)^{1/2}')  
+  ylabel('(|q(k)|^2/|k_h u_h(k)|^2)^{1/2}')  
   
+  % time average norm spectra
+  figure(3);hold off
+  for i = 1:length(khvals)
+    loglog(kz,qnorm1_ave(:,khvals(i)),'-','Linewidth',1.5);hold on;pause;
+  end
+    set(gca,'fontsize',16);
+  xlabel('k_z')
+  ylabel('(|q(k)|^2/|k_z \theta(k)|^2)^{1/2}')
+  
+  figure(4);hold off
+  for i = 1:length(kzvals)
+    loglog(kh,qnorm2_ave(kzvals(i),:),'-','Linewidth',1.5);hold on;pause;
+  end
+      set(gca,'fontsize',16);  
+    xlabel('k_h');
+  ylabel('(|q(k)|^2/|k_h u_h(k)|^2)^{1/2}','-','Linewidth',1.5)  
 %pv2spectra
-   figure(3);hold off;
+   figure(5);hold off;
    k = (1:numk)-1;
    loglog(k,q2_r);  
   
+
 end
+
 
 
 
