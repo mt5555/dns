@@ -85,10 +85,10 @@ name = 'n128_d0.5_0000.0000'; Lz = 1/2;
 %name = 'n512_d0.5_all'; Lz = 1/2;
 
 
+namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/';
 %name = 'n256_Ro1Fr0.01_all';
 %name = 'n512_Ro1Fr0.01_all';
-%namedir ='/home/kurien/INCITE_runs/Intrepid/bous_NSvisc/';
-
+name = 'n1024_Ro1Fr0.01_all';
 
 spec_r_save=[];
 spec_r_save_fac3=[];

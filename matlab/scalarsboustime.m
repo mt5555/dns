@@ -24,8 +24,11 @@ fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bou
 fid=endianopen('~/projects/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars-bous','r');
 %fid=endianopen('~/projects/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
 
-%fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n256_Ro1Fr0.01_all.scalars-bous','r')
-%fid = endianopen('~/INCITE_runs/Intrepid/bous_NSvisc/n512_Ro1Fr0.01_all.scalars-bous','r')
+fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/n256_Ro1Fr0.01_all.scalars-bous','r')
+fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n512_Ro1Fr0.01_all.scalars-bous','r')
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n1024_Ro1Fr0.01_all.scalars-bous','r')
+
+fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_Ro1Fr0.002_all.scalars-bous','r')
 
 %fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars-bous','r')
 

@@ -44,11 +44,11 @@ Lz=0.2;epsf=1;kf = 4;
 %namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/hyper4/';
 %namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/shift_force/';
 namedir = '~kurien/INCITE_runs/Intrepid/lowaspect_bous/hyper2/';
-%name = 'n1600_d0.2_Ro0.05_all';  
+name = 'n1600_d0.2_Ro0.05_all';  
 %Lz=0.2;epsf=1;kf = 10;
 %name = 'n1600_d0.2_Ro0.05hy4_0002.8500';
 %Lz=0.2;epsf=1;kf = 4;
-name = 'n2048_d0.25_Ro0.05hy2_all';
+%name = 'n2048_d0.25_Ro0.05hy2_all';
 Lz=0.25;epsf=1;kf = 4;
 
 % plot all the spectrum:

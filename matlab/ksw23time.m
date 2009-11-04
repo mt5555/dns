@@ -31,13 +31,16 @@ name = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/'
 %nx=256;
 
 name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/'
-%name = '~/INCITE_runs/Intrepid/bous_NSvisc/'
-%pname='n256_Ro1Fr0.01_'
-%times=[1:.1:1.9];
-%nx = 256;
-pname='n512_Ro1Fr0.01_'
-times=[.1:.1:4.8];
-nx=512;
+pname='n256_Ro1Fr0.01_'
+times=[1:.1:1.9];
+nx = 256;
+%pname='n512_Ro1Fr0.01_'
+%times=[.1:.1:2.8];
+%nx=512;
+%pname='n1024_Ro1Fr0.01_'
+%times=[.1:.1:2.9];
+%nx=1024;
+
 
 
 %check this subroutine, for now set averages to 1
