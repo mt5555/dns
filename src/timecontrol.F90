@@ -291,7 +291,8 @@ if (doit_screen) then
    !         mu        m^2/s
    !
    mu2 = mu  ! regular, fixed viscosity
-   if (mu_hyper == 1 .and. mu==0) mu2 = mu_scale     ! E(k) scaled viscosity
+!   if (mu_hyper == 1 .and. mu==0) mu2 = mu_scale     ! E(k) scaled viscosity
+    if (mu==0 .and. mu_hyper_value > 0) mu2 = mu_scale     ! E(k) scaled viscosity
 
    if (mu2>0 .and. ndim>2 .and. ke_diss<0) then
 !      lambda=sqrt(  5*(2*ints(6))/ints(2)  )
@@ -305,9 +306,10 @@ if (doit_screen) then
       lambda=sqrt( mu2*(2*ea1/ndim) / (epsilon/15) )
 
 
-      write(message,'(3(a,f12.5))') 'R_lambda=',lambda*sqrt(2*ea1/ndim)/mu2, &
-           '  R=',1/mu2,' lambda=',lambda
-      call print_message(message)	
+      write(message,'((a,f12.5),(a,e10.3),(a,f12.5))') &
+           'R_lambda=',lambda*sqrt(2*ea1/ndim)/mu2, 'mu=',mu2, 'lambda=',lambda
+      
+      call print_message(message)
       
       
       ! K. microscale

@@ -2262,7 +2262,14 @@ if (do_mpi_io) then
    else
       call mpi_file_read(fid,buf,len,MPI_REAL8,statuses,ierr)
    endif
-   if (ierr==0) ierr=len  ! return length read, if OK
+
+   if (ierr==0) then 
+      ierr=len  ! return length read, if OK
+   else 
+      call abortdns("mpi_file_read(): incorrect number of elements")
+   endif
+
+
 #else
    call abortdns("MPI_IO support not compiled in")	
 #endif
