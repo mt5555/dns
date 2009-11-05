@@ -2553,6 +2553,9 @@ if (hyper_type /= 1 ) return
 ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
 call ke_shell_z(Qhat,hyper_scale)
 
+! save final value for diagnostics
+mu_scale = mu_hyper_value*sum(hyper_scale(1:3,1))/3
+
 
 ke0=0
 ke1=0

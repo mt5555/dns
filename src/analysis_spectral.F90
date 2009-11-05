@@ -62,8 +62,6 @@ real*8,allocatable  :: q2(:,:,:,:)
 real*8,allocatable  :: q3(:,:,:,:)
 real*8,allocatable   :: work1(:,:,:)
 real*8,allocatable   :: work2(:,:,:)
-real*8,allocatable  :: work3(:,:,:)
-real*8,allocatable  :: work4(:,:,:)
 
 character(len=80) message,sdata,idata
 character(len=280) basename,fname,tname
@@ -142,18 +140,10 @@ allocate(work1(nx,ny,nz))
 allocate(work2(nx,ny,nz))
 if (nxdecomp*nydecomp*nzdecomp>1) then
    allocate(q3(nx,ny,nz,n_var))
-   allocate(work1(nx,ny,nz))
-   allocate(work2(nx,ny,nz))
-   allocate(work3(nx,ny,nz))
-   allocate(work4(nx,ny,nz))
 endif
-
-
 if (compute_hfree) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,ndim))
 endif
-
-
 if (compute_pv2spec) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,n_var))
 endif
