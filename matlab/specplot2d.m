@@ -19,6 +19,7 @@ epsilon=.41;
 
 namedir = '~/projects/INCITE_runs/Intrepid/qg/';
 name = 'n640_bous3000_all';
+kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
 %name = 'n640_fcor14bous3000_all';
@@ -99,18 +100,18 @@ if(1)
   kh = (1:numkh)-1;
   figure(1);hold off;
   expo = 5 ; %0 for no compensation
-  kzvals = [1,3,5,11,21,31];
+  kzvals = [1,2,3,4,5,11,21,31];
   for i = 1:length(kzvals)
-  loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^(expo)./log(kh')));hold on;%pause
+  loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^(expo).*(log(kh')).^(1/expo)));hold on;%pause
   end  
  
 
   %plot P(kz,0)
   figure(2);hold off;
   expo = 5;
-  khvals = [1,3,5,11,21,31];
+  khvals = [1,2,3,4,5,11,21,31];
   for i = 1:length(khvals)
-  loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo)./log(kz')));hold on;%pause
+  loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo).*(log(kz')).^(1/expo)));hold on;%pause
   end
   ylabel('P(:,[1,3,5,11,21,31,41,51])');  
   xlabel('kz');
@@ -194,7 +195,7 @@ spec2d_Eh_ave = spec2d_Eh_ave/j;
 figure(10);hold off;
 expo = 5;
 for i = 1:length(khvals) 
-loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)./log(kz')));hold on;%pause
+loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo).*(log(kz')).^(1/expo)));hold on;%pause
 end 
 set(gca,'fontsize',16)
 title('Time avg')
@@ -202,9 +203,9 @@ ylabel('P(k_h,k_z)');
 xlabel('k_z')
    
 figure(11);hold off;
-expo = 5;
+expo = 4.5;
 for i = 1:length(kzvals) 
-loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)./log(kh)));hold on;%pause
+loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo).*(log(kh)).^(1/expo)));hold on;%pause
 end 
 title('Time avg E_h(kh,kz)')
 
