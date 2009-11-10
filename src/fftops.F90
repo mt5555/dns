@@ -2554,7 +2554,11 @@ if (hyper_type /= 1 ) return
 call ke_shell_z(Qhat,hyper_scale)
 
 ! save final value for diagnostics
-mu_scale = mu_hyper_value*sum(hyper_scale(1:3,1))/3
+! this should be the value we could use for a fixed hyperviscosity
+! coefficient:
+!
+!   mu_scale k^my_hyper  =  mu_hyper_value (hyper_scale*k^2)^my_hyper
+mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
 
 
 ke0=0

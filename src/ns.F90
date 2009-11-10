@@ -611,10 +611,14 @@ if (mu_hyper_value>0 .and. mu_hyper>0 .and. hyper_type==0) then
    !   write(*,'(a,3e20.10)') 'hyper_scale: ',hyper_Escale(1:3,1)
    endif
    ! save final value for diagnostics
-   mu_scale = mu_hyper_value*sum(hyper_scale(1:3,1))/3
-else
+   ! this should be the value we could use for a fixed hyperviscosity
+   ! coefficient:
+   !
+   !   mu_scale k^my_hyper  =  mu_hyper_value (hyper_scale*k^2)^my_hyper
+   mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
+endif
+if (hyper_type==3) then
    hyper_scale=1  ! dont scale hyper viscosity, use value in input file
-   ! save final value for diagnostics
    mu_scale = mu_hyper_value
 endif
 
