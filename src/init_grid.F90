@@ -3007,7 +3007,7 @@ else if (sdata=='hyper16_imp') then
    hyper_type=1
    mu_hyper=8
    mu_hyper_value = rvalue
-else if (sdata=='hyper16_fixed') then
+else if (sdata=='hyper16_fix') then
    hyper_type=3  ! fixed viscosity coefficient set by user
    mu_hyper=8    ! laplacian^8   grad^16
    mu_hyper_value = rvalue
@@ -3360,7 +3360,7 @@ else if (sdata=='hyper16_imp') then
    hyper_type=1
    mu_hyper=8
    mu_hyper_value = rvalue
-else if (sdata=='hyper16_fixed') then
+else if (sdata=='hyper16_fix') then
    hyper_type=3  ! fixed viscosity coefficient set by user
    mu_hyper=8    ! laplacian^8   grad^16
    mu_hyper_value = rvalue
