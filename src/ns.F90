@@ -620,7 +620,7 @@ if (mu_hyper_value>0 .and. mu_hyper>0 .and. hyper_type==0) then
       mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
    endif
 endif
-if (hyper_type==3) then
+if (hyper_type==4) then
    hyper_scale=1  ! dont scale hyper viscosity, use value in input file
    mu_scale = mu_hyper_value
 endif
