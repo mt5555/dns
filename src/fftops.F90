@@ -2559,7 +2559,9 @@ call ke_shell_z(Qhat,hyper_scale)
 !
 !   mu_scale (k^2)^mu_hyper  =  mu_hyper_value(hyper_scale^(1/mu_hyper)) (k^2)^(mu_hyper)
 mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
-mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+if (np1>=4) then
+   mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+endif
 
 
 
