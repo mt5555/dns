@@ -3333,7 +3333,7 @@ else if (sdata=='hyper4') then
    mu_hyper=2
    mu_hyper_value = rvalue
 else if (sdata=='hyper4_fixed') then
-   hyper_type=3  ! fixed viscosity coefficient set by user
+   hyper_type=4  ! fixed viscosity coefficient set by user
    mu_hyper=2    ! laplacian^2   grad^4
    mu_hyper_value = rvalue
 else if (sdata=='hyper6') then
