@@ -615,7 +615,8 @@ if (mu_hyper_value>0 .and. mu_hyper>0 .and. hyper_type==0) then
    ! coefficient:
    !
    !   mu_scale k^my_hyper  =  mu_hyper_value (hyper_scale*k^2)^my_hyper
-   mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**(1d0/mu_hyper)
+   mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
+   mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
 endif
 if (hyper_type==3) then
    hyper_scale=1  ! dont scale hyper viscosity, use value in input file

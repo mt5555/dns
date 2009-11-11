@@ -53,6 +53,7 @@ implicit none
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 real*8  :: mu=0               !viscosity
 real*8  :: mu_scale=0         ! E(kmax) scaled mu
+real*8  :: mu_scale_theta=0   ! E(kmax) scaled mu, on theta
 integer :: mu_hyper=-1         !viscosity = (del**2)**mu_hyper
 integer :: hyper_type=0       ! 0 = explicit, E(kmax) scaled
                               ! 1 = time-split implicit  E(kmax) scaled

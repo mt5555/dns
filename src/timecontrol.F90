@@ -308,8 +308,11 @@ if (doit_screen) then
 
       write(message,'((a,f12.5),(a,e10.3),(a,f12.5))') &
            'R_lambda=',lambda*sqrt(2*ea1/ndim)/mu2, '    mu=',mu2, '    lambda=',lambda
-      
       call print_message(message)
+      if (np1>=4) then
+         write(message,'(a,e10.3)') 'mu_theta=',mu_scale_theta
+         call print_message(message)
+      endif
       
       
       ! K. microscale
