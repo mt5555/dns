@@ -128,7 +128,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_type==1) call hyper_filter(Q_tmp,delt/2)
+if (hyper_type==1 .or. hyper_type==3) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -153,7 +153,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_type==1) call hyper_filter(Q_tmp,delt/2)
+if (hyper_type==1  .or. hyper_type==3) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -178,7 +178,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_type==1) call hyper_filter(Q_tmp,delt)
+if (hyper_type==1  .or. hyper_type==3) call hyper_filter(Q_tmp,delt)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -202,7 +202,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
-if (hyper_type==1) call hyper_filter(Q,delt)
+if (hyper_type==1  .or. hyper_type==3) call hyper_filter(Q,delt)
 do n=1,n_var
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
@@ -647,7 +647,7 @@ do j=1,ny_2dz
             ! xwi= Lz*sqrt(im*im + jm*jm + km*km/Lz/Lz)
 
             xw_viss=mu*xw
-            if (mu_hyper>=1 .and. (hyper_type==0 .or. hyper_type==3) ) then
+            if (mu_hyper>=1 .and. (hyper_type==0) ) then
                xw2=hyper_scale(1,1)*(im*im*pi2_squared)
                xw2=xw2+hyper_scale(2,1)*(jm*jm*pi2_squared)
                xw2=xw2+hyper_scale(3,1)*(km*km*pi2_squared/(Lz*Lz))
@@ -889,7 +889,7 @@ do ns=np1,np2
                xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
                xw_viss=xw*mu/schmidt(ns)
                ! add in hyper viscosity, if used:
-               if (mu_hyper>=1 .and. (hyper_type==0 .or. hyper_type==3) ) then
+               if (mu_hyper>=1 .and. (hyper_type==0 ) ) then
 	          xw2=hyper_scale(1,ns)*(im*im*pi2_squared)
                   xw2=xw2+hyper_scale(2,ns)*(jm*jm*pi2_squared)
                   xw2=xw2+hyper_scale(3,ns)*(km*km*pi2_squared/(Lz*Lz))

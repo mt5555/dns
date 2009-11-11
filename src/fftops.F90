@@ -2547,22 +2547,24 @@ real*8 ke0(n_var)
 real*8 ke1(n_var)
 
 if (mu_hyper<1) return
-if (hyper_type /= 1 ) return
-
-! compute hyper viscosity scaling based on energy in last shell:
-! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
-call ke_shell_z(Qhat,hyper_scale)
-
-! save final value for diagnostics
-! this should be the value we could use for a fixed hyperviscosity
-! coefficient:
-!
-!   mu_scale (k^2)^mu_hyper  =  mu_hyper_value(hyper_scale^(1/mu_hyper)) (k^2)^(mu_hyper)
-mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
-if (np1>=4) then
-   mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+if (hyper_type == 1 ) then
+   ! compute hyper viscosity scaling based on energy in last shell:
+   ! print *,'calling ke_shell  Q=',(qhat(1,1,1,1:3))
+   call ke_shell_z(Qhat,hyper_scale)
+   
+   ! save final value for diagnostics
+   ! this should be the value we could use for a fixed hyperviscosity
+   ! coefficient:
+   !
+   !   mu_scale (k^2)^mu_hyper  =  mu_hyper_value(hyper_scale^(1/mu_hyper)) (k^2)^(mu_hyper)
+   mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
+   if (np1>=4) then
+      mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+   endif
+else
+   hyper_scale=1  ! dont scale hyper viscosity, use value in input file
+   mu_scale = mu_hyper_value
 endif
-
 
 
 ke0=0
