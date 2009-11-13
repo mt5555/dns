@@ -30,17 +30,21 @@ name = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/'
 %times=[0:.1:3.3];
 %nx=256;
 
-name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/'
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/'
 pname='n256_Ro1Fr0.01_'
 times=[1:.1:1.9];
 nx = 256;
 %pname='n512_Ro1Fr0.01_'
-%times=[.1:.1:2.8];
+%times=[1:.1:2.8];
 %nx=512;
 %pname='n1024_Ro1Fr0.01_'
-%times=[.1:.1:2.9];
+%times=[1:.1:2.9];
 %nx=1024;
 
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/'
+pname='n1024_Ro1Fr0.002_'
+times=[1.2:.1:2.9];
+nx=1024;
 
 
 %check this subroutine, for now set averages to 1
@@ -117,6 +121,7 @@ ppname = [pname,tstr(2:10),ext]
       
       y23_iso_ave=y23_iso_ave+y23';  %accumulate the angle averaged y23 from each frame
     figure(10); plot(k*.1,max(y23),'*');hold on;
+    plot(k*.1,2/3,'-');hold on; %2/3 line
     end    
 
 
