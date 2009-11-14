@@ -2564,7 +2564,10 @@ if (hyper_type == 1 ) then
 else
    hyper_scale=1  ! dont scale hyper viscosity, use value in input file
    mu_scale = mu_hyper_value
-endif
+   if (np1>=4) then
+      mu_scale_theta = mu_scale/schmidt(np1)
+   endif
+ endif
 
 
 ke0=0

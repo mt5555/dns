@@ -98,8 +98,8 @@ compute_hfree=.false.		!extracting helicity-free modes
 project_ch=.true.               !Craya-Herring projection and spectra
 compute_pv2spec = .false.	         !potential enstrophy spectra .pv2spec,.normpvspec
 
-tstart=0.0
-tstop=2.1
+tstart=0.8
+tstop=3.0
 tinc=0.2
 
 icount=0
