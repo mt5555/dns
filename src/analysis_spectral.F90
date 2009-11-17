@@ -71,7 +71,7 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
-logical :: compute_hspec, compute_hfree, compute_pv2spec
+logical :: compute_hspec, compute_hfree, compute_pv2spec, compute_pv2HA
 logical :: read_uvw
 logical :: project_ch
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
@@ -95,8 +95,10 @@ header_type=1; scale=1;           ! DNS standard data
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
-project_ch=.true.               !Craya-Herring projection and spectra
-compute_pv2spec = .false.	         !potential enstrophy spectra .pv2spec,.normpvspec
+project_ch=.false.         !Craya-Herring projection and spectra
+compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
+compute_pv2HA = .true.    !compute Hussein Aluie's potential enstrophy spectra
+
 
 tstart=0.8
 tstop=3.0
@@ -299,6 +301,21 @@ do
 
       call compute_pv2_spec(time,Q,q1,q2,q3,work1,work2)
       call output_pv2_spec(time,time)
+   endif
+
+   
+   if (compute_pv2HA) then
+      if (.not. read_uvw) then	
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         call input_passive(runname,time,Q,work1,work2)
+         Q=Q*scale;
+         read_uvw=.true.	
+      endif
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,q1,work1,work2)
+      endif
+
+      call compute_pv2_HA(Q,q1,work1,work2)
    endif
       
 

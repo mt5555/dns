@@ -2265,7 +2265,7 @@ do j=1,ny_2dz
          endif
          if (shell_type==1) then
             xw = jm*jm + im*im + km*km/(Lz*Lz) 
-            if (kstart2 < xw  .and. xw <= kstop2) then
+            if (kstart2 <= xw  .and. xw <= kstop2) then
                ke(1) = ke(1) + .5*xfac*u2
             endif
          endif

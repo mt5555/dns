@@ -292,7 +292,7 @@ enddo
 enddo
 enddo
 
-! now compute the spectra of the normalized PV quantities:
+! now compute the spectra of the linear quantities kz*theta and kh*uh:
 
 call compute_spectrum_2d(q3(1,1,1,1),q1,q2,norm1spec_r_2d,1)
 
@@ -304,6 +304,116 @@ norm2spec_r_2d = .5*norm2spec_r_2d
 
 end subroutine
 
+
+
+
+!==================================================================================================\
+
+subroutine compute_pv2_HA(Q,q1,work1,work2) 
+use params 
+use mpi
+implicit none 
+real*8 :: Q(nx,ny,nz,n_var) ! (u,v,w,theta) 
+real*8 :: q1(nx,ny,nz,n_var) ! used as an alias to Q 
+real*8 :: vort_array(nx,ny,nz,3) 
+real*8 :: PV_array(nx,ny,nz) 
+real*8 :: work1(nx,ny,nz) 
+real*8 :: work2(nx,ny,nz) 
+real*8 :: kx(nx,ny,nz)
+real*8 :: ky(nx,ny,nz) 
+real*8 :: kz(nx,ny,nz) 
+real*8 :: k2_HA(nx,ny,nz) 
+real*8 :: Gkernel(nx,ny,nz) !Gkernel is the coarse-graning kernel/low 
+                            ! wavenumber cut-off
+
+real*8,dimension (max(g_nx,g_ny,g_nz)) :: spectrum_pv2,spectrum_tmp
+real*8 :: realnumber 
+integer :: i, Kfltr 
+integer :: ierr
+integer :: pv_type
+
+if(my_pe.eq.io_pe)write(*,*)'spectrum_tmp=0' 
+spectrum_tmp = 0
+
+if(my_pe.eq.io_pe)write(*,*)'spectrum_pv2=0' 
+spectrum_pv2 = 0
+if(my_pe.eq.io_pe)write(*,*)'kx=0' 
+kx=0 
+!ky=0 
+!kz=0
+if(my_pe.eq.io_pe)write(*,*)'k2_HA=0' 
+k2_HA=0
+
+if(my_pe.eq.io_pe)write(*,*)'about to set up wavenumber grid' 
+
+!----Define wavenumber coordinates----------------             
+!call wavenumber(kx,ky,kz,k2)
+
+do Kfltr=1,max(g_nx,g_ny,g_nz)
+!----Define K-filters-----------------------------                             
+        Gkernel=0 
+        !  where(sqrt(k2).lt.Kfltr)
+        Gkernel=1.0 
+        !  endwhere 
+!----move fields to Fourier space-----------------
+        q1 = Q 
+        i=1
+        do i=1,n_var
+        call fft3d(q1(:,:,:,i),work1)
+        enddo
+!----Coarse-grain fields -------------------------
+        do i=1,n_var
+        q1(:,:,:,i) = Gkernel*q1(:,:,:,i)
+        enddo
+!----move fields to physical space-----------------
+        do i=1,n_var
+        call ifft3d(q1(:,:,:,i),work1)
+        enddo 
+
+if(my_pe.eq.io_pe)write(*,*)'about to calculate potential vorticity' 
+!----calculate potential vorticity----------------- 
+!  pv = (vorticity + f) dot grad rho
+
+pv_type = 1 ! use the full pv 
+! compute pv in PV_array, vorticity in vort_array 
+!call potential_vorticity(PV_array,vort_array,q1,work1,work2,pv_type)
+
+!----calculate potential enstrophy in physical space-----------------
+PV_array = PV_array**2/2.0
+if(my_pe.eq.io_pe)write(*,*)'about to global average potential enstrophy' 
+!----calculate global average potential enstrophy----------------- 
+realnumber = 0 
+realnumber = sum(PV_array(nx1:nx2,ny1:ny2,nz1:nz2) )/(1.0*g_nx*g_ny*g_nz) 
+
+#ifdef USE_MPI 
+call mpi_reduce(realnumber,spectrum_tmp(Kfltr),1,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
+call mpi_bcast(spectrum_tmp(Kfltr),1,MPI_REAL8,io_pe,comm_3d,ierr)
+#endif 
+
+!spectrum_tmp is the integral of the PV2 spectrum
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+enddo !Kfltr=1,max(g_nx,g_ny,g_nz)
+
+!----calculate potential enstrophy spectrum----------------------------------- 
+spectrum_pv2 = 0 
+do Kfltr=1,max(g_nx,g_ny,g_nz)-1 
+spectrum_pv2(Kfltr) = spectrum_tmp(Kfltr+1) - spectrum_tmp(Kfltr) !take derivative 
+enddo
+
+!----output potential enstrophy spectrum--------------------------
+        if(my_pe.eq.io_pe)then
+       open(35,file='spectrum_PV2.dat',status='unknown',form='formatted')                           
+             do Kfltr=1,max(g_nx,g_ny,g_nz)
+           write(35,120) Kfltr,spectrum_pv2(Kfltr)                                                  
+         enddo
+           close(35)                                                                                
+        endif !my_pe.eq.io_pe 
+120 format(1x,i5,6(1x,e13.6)) !realformat descriptor
+!-------------------------------------------------------------------------
+return 
+end subroutine !compute_pv2_HA
 
 
 subroutine compute_spec_2d(time,Q,q1,work1,work2)
