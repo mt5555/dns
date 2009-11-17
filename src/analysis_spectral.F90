@@ -99,8 +99,12 @@ project_ch=.false.         !Craya-Herring projection and spectra
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .true.    !compute Hussein Aluie's potential enstrophy spectra
 
+<<<<<<< .mine
+tstart=0.0
+=======
 
 tstart=0.8
+>>>>>>> .r2467
 tstop=3.0
 tinc=0.2
 
