@@ -165,9 +165,9 @@ if(1)
   for i = 1:length(kzvals)
     loglog(kh,qnorm2_ave(kzvals(i),:),'-','Linewidth',1.5);hold on;pause;
   end
-      set(gca,'fontsize',16);  
-    xlabel('k_h');
-  ylabel('(|q(k)|^2/|k_h u_h(k)|^2)^{1/2}','-','Linewidth',1.5)  
+  set(gca,'fontsize',16);  
+  xlabel('k_h');
+  ylabel('(|q(k)|^2/|k_h u_h(k)|^2)^{1/2}');  
 %pv2spectra
    figure(5);hold off;
    k = (1:numk)-1;

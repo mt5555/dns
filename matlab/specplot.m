@@ -78,17 +78,21 @@ namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
 namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/';
 %namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/fft_sphere/';
 %name = 'n64_d1_0000.0000'; Lz = 1;
-name = 'n128_d0.5_0000.0000'; Lz = 1/2;
+%name = 'n128_d0.5_0000.0000'; Lz = 1/2;
 %name = 'n256_d0.25_0000.0000'; Lz = 1/4;
 %name = 'n512_d0.125_0000.0000'; Lz = 1/8;
 %name = 'n512_d1by16_0000.0000'; Lz = 1/16;
 %name = 'n512_d0.5_all'; Lz = 1/2;
 
 
-namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/';
+namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/';
 %name = 'n256_Ro1Fr0.01_all';
 %name = 'n512_Ro1Fr0.01_all';
 name = 'n1024_Ro1Fr0.01_all';
+
+namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/';
+name = 'n1024_Ro1Fr0.002_all';
+
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -216,7 +220,7 @@ while (time>=0 & time<=999)
     subplot(1,1,1);
     stitle=sprintf('shell-averaged kinetic energy spectrum t=%8.4f',time);
       loglog53(n_r-1,spec_r,stitle,CK,4);     %default, with k^-5/3 line
-  axis([1 1000 1e-10 1]); hold on;
+  %axis([1 1000 1e-10 1]); hold on;
     %    loglog((0:n_r-1), spec_r,'b');
 %pause
 %  loglog53(n_r-1,spec_r,stitle,1e-7,7); % for equiparition, with k^2 line
@@ -240,11 +244,11 @@ while (time>=0 & time<=999)
     %loglog53(n_x,spec_ux,' ',CK*18/55,6);     hold on;
     %loglog53(n_y,spec_vy,' ',CK*18/55,6);     hold on;
     %loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55,6);     hold on;
-    loglog((0:(n_x-1)),spec_ux','b');hold on;
-    loglog((0:(n_y-1)),spec_vy','b');hold on;
-    loglog((0:(n_z-1)),spec_wz,'b'); hold off;
+    loglog((0:(n_x-1)),spec_ux','b');%hold on;
+    loglog((0:(n_y-1)),spec_vy','b');%hold on;
+    loglog((0:(n_z-1)),spec_wz,'b'); %hold off;
     end
-    hold on;
+    %hold on;
     end
 %    % transverse spectraum
 %    subplot(2,1,2);
@@ -518,7 +522,7 @@ if (fidt>0) fclose(fidt); end;
 if (count > 0)
 spec_r_ave = spec_r_ave/count;
 pspec_r_ave = pspec_r_ave/countp;
-figure(10)
+figure(12)
 loglog53(n_r-1,spec_r_ave, stitle,CK); hold on; 
 if (fidp>-1); 
   loglog53(np_r,pspec_r_ave,'',1.0,3); hold off;

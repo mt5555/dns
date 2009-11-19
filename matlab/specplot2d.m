@@ -30,7 +30,8 @@ kf=4;
 %namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/';
 %name = 'n512_Ro1Fr0.01_all';
 
-
+namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/';
+name = 'n1024_Ro1Fr0.002_all';
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -102,7 +103,10 @@ if(1)
   expo = 5 ; %0 for no compensation
   kzvals = [1,2,3,4,5,11,21,31];
   for i = 1:length(kzvals)
-  loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^(expo).*(log(kh')).^(1/expo)));hold on;%pause
+  %with log-correction    
+  %loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^(expo).*(log(kh')).^(1/expo)));hold on;%pause
+  % without log-correction  
+  loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^expo));hold on;%pause
   end  
  
 
@@ -111,7 +115,9 @@ if(1)
   expo = 5;
   khvals = [1,2,3,4,5,11,21,31];
   for i = 1:length(khvals)
-  loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo).*(log(kz')).^(1/expo)));hold on;%pause
+  %loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo).*(log(kz')).^(1/expo)));hold on;%pause
+  loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo)));hold on;%pause
+
   end
   ylabel('P(:,[1,3,5,11,21,31,41,51])');  
   xlabel('kz');
@@ -195,7 +201,8 @@ spec2d_Eh_ave = spec2d_Eh_ave/j;
 figure(10);hold off;
 expo = 5;
 for i = 1:length(khvals) 
-loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo).*(log(kz')).^(1/expo)));hold on;%pause
+%loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo).*(log(kz')).^(1/expo)));hold on;%pause
+loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause
 end 
 set(gca,'fontsize',16)
 title('Time avg')
@@ -203,9 +210,10 @@ ylabel('P(k_h,k_z)');
 xlabel('k_z')
    
 figure(11);hold off;
-expo = 4.5;
+expo = 5;
 for i = 1:length(kzvals) 
-loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo).*(log(kh)).^(1/expo)));hold on;%pause
+%loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo).*(log(kh)).^(1/expo)));hold on;%pause
+loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
 end 
 title('Time avg E_h(kh,kz)')
 

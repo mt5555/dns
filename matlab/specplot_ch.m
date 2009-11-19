@@ -51,6 +51,12 @@ name = 'n1600_d0.2_Ro0.05_all';
 %name = 'n2048_d0.25_Ro0.05hy2_all';
 Lz=0.25;epsf=1;kf = 4;
 
+namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/grid_convergence/';
+name = 'n1024_d0.25_Ro0.05_all';
+Lz=0.25;epsf=1;kf = 4;
+%name = 'n512_d0.25_Ro0.05_all';
+%Lz=0.25;epsf=1;kf=4;
+
 % plot all the spectrum:
 movie=1;
 
@@ -99,7 +105,7 @@ axis([1 1000 1e-6 1]);
 grid
 legend('total','vortical','wave')
 hold off
-%pause
+pause
 
 figure(2) ;
 te = sum(spec_tot);

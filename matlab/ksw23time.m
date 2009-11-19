@@ -37,13 +37,14 @@ nx = 256;
 %pname='n512_Ro1Fr0.01_'
 %times=[1:.1:2.8];
 %nx=512;
-%pname='n1024_Ro1Fr0.01_'
-%times=[1:.1:2.9];
-%nx=1024;
+pname='n1024_Ro1Fr0.01_'
+times=[3:.1:4.5];
+nx=1024;
+
 
 name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/'
 pname='n1024_Ro1Fr0.002_'
-times=[1.2:.1:2.9];
+times=[3:.1:4.5];
 nx=1024;
 
 
@@ -120,7 +121,8 @@ ppname = [pname,tstr(2:10),ext]
       [y45,y415,y43,epsl,h_eps,y215,y23]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
       
       y23_iso_ave=y23_iso_ave+y23';  %accumulate the angle averaged y23 from each frame
-    figure(10); plot(k*.1,max(y23),'*');hold on;
+    figure(10); 
+    plot(t,max(y23),'*');hold on;
     plot(k*.1,2/3,'-');hold on; %2/3 line
     end    
 
