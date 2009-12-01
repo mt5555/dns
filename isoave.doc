@@ -1,0 +1,119 @@
+Instructions on running the DNS code's multiple angle structure
+function analsys package
+
+
+Step 1. prepair the data
+
+For data that was not produced by the dns code, we need to extract
+each velocity component for each snapshot.  The DNS code also needs
+the filenames to be in the form:   nameXXXX.XXXX.[uvw], where
+the components are .u, ,v and .w, and the time is given by XXXX.XXXX.
+
+Example used here from Mark Peterson:
+
+64^3 data with 216 byte header, followed by density, velocity and other
+fields:
+  rstrt.0030.bin
+
+# remove header and density:  (64^3 = 2097152 bytes)
+tail -c +217 rstrt.0030.bin  > temp.bin
+tail -c +2097153 temp.bin > temp2.bin           
+
+# extract u
+head -c 2097152 temp2.bin > rstrt0030.0000.u
+
+# remove u, extract v
+tail -c +2097153 temp2.bin > temp3.bin
+head -c 2097152 temp3.bin > rstrt0030.0000.v
+
+# remove v, extract w
+tail -c +2097153 temp3.bin > temp4.bin
+head -c 2097152 temp4.bin > rstrt0030.0000.w
+
+
+Step 1.  Build the code
+
+edit dns/src/analysis_isoave.F90
+Near the top of the file, make sure: 
+    header_type=2
+    compute_uvw = .true.  
+    tstart = 30
+    tstop = 30
+
+
+% cd dns/src
+% ./gridsetup.py 1 1 2 64 64 64 2 2 0
+% make analysis_isoave
+
+
+Step 3.  Run the code:
+
+mpirun -np 2 ./analysis_isaove -d /tmp -i  forcing12.inp  rstrt
+
+the "-d /tmp" option specifies the directory where to read and write 
+the data files.  If ommitted, it will use the  current working directory.  
+
+"-i forcing12.inp" specifies the input file.  For data produced by
+the dns code, you should use the input file used to produce the data.
+In this example, we just use one of the included dns input files, 
+forcing12.inp
+
+"rstrt" is the name of the run.  
+The code will read in /tmp/rstrt0030.0000.[uvw] and output
+/tmp/rstrt0030.0000.new.isostr
+
+
+Note: the output file contains epsilon, nu and KE.  These will
+be computed from the value of "nu" in the forcing12.inp file.
+They are used to scale the various structure functions.  
+If you need the precise scaling correct, you need to put the correct
+value of "nu" in forcing12.inp.  Also note that the DNS code is
+assumes a box of length 1 ( other codes often assume 2pi), and
+thus nu must be scaled accordingly.  
+
+Step 4. Plot the structure functions
+
+% cd dns/matlab
+edit "isoave.m" and edit the line of code that specifies the
+filename to look lilke this:
+
+name='/tmp/rstrt0030.0000.new'
+nx=64; delx_over_eta=2.95; epsilon=3.57; teddy=1.05; 
+(the numbers mostly ignored so you can use any value)
+
+
+figure 1:   4/5'ths law showing all 73 directions and the angle average.
+figure 2:   4/15'th law
+figure 3    4/3 law
+figure 12, 13    even more esoteric structure functions
+
+Note, since epsilon is incorrect in the output, the plots do not
+fix within the axis.   You can either rerun analysis_isoave
+with the correct viscosity in the input file, or just edit
+compisoave.m and comment on the axis setting calls.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
