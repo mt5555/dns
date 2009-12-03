@@ -93,6 +93,9 @@ name = 'n1024_Ro1Fr0.01_all';
 namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/';
 name = 'n1024_Ro1Fr0.002_all';
 
+namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/';
+name = 'n1024_Ro1Fr0.002_0000.0000';
+
 
 spec_r_save=[];
 spec_r_save_fac3=[];

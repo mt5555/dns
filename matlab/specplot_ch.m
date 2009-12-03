@@ -101,6 +101,8 @@ loglog(k,spec_tot.*k'.^exp,'k'); hold on;
 loglog(k,spec_vort.*k'.^exp,'b'); hold on;
 loglog(k,spec_wave.*k'.^exp,'r'); hold on;
 %loglog(k,spec_kh0,'c');hold on; 
+stitle = sprintf('t = %8.4f',time);
+title(stitle);
 axis([1 1000 1e-6 1]);
 grid
 legend('total','vortical','wave')

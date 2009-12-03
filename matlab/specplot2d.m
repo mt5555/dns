@@ -17,12 +17,12 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 
-namedir = '~/projects/INCITE_runs/Intrepid/qg/';
-name = 'n640_bous3000_all';
-kf=4;
+%namedir = '~/projects/INCITE_runs/Intrepid/qg/';
+%name = 'n640_bous3000_all';
+%kf=4;
 
-%namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
-%name = 'n640_fcor14bous3000_all';
+namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
+name = 'n640_fcor14bous3000_all';
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
 %name = 'n640_fcor3000bous14_all';
@@ -30,8 +30,8 @@ kf=4;
 %namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/';
 %name = 'n512_Ro1Fr0.01_all';
 
-namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/';
-name = 'n1024_Ro1Fr0.002_all';
+%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/';
+%name = 'n1024_Ro1Fr0.002_all';
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -95,32 +95,50 @@ while (time < 35)
   specwz = sum(spec2d_w,2);
   spectz = sum(spec2d_t,2);
 
-if(1)
-  %plot E_h(0,kh)
+  expo = 0 ; %0 for no compensation of spectra
+
   kz = (1:numkz)-1;
   kh = (1:numkh)-1;
-  figure(1);hold off;
-  expo = 5 ; %0 for no compensation
-  kzvals = [1,2,3,4,5,11,21,31];
+  kzvals = [1,2,3,4,5,11,21,31,41,51,100];
+  khvals = [1,2,3,4,5,11,21,31];
+
+  
+if(1)
+  %plot E_h(kh,kz) and P(kh,kz) as a function of kh for various kz
+  figure(1);
+  set(gca,'fontsize',16);
+  subplot(2,1,1);hold off;
+  subplot(2,1,2); hold off;
   for i = 1:length(kzvals)
   %with log-correction    
   %loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^(expo).*(log(kh')).^(1/expo)));hold on;%pause
   % without log-correction  
-  loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^expo));hold on;%pause
+  subplot(2,1,1); 
+  loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^expo)); hold on;%pause
+  ylabel('E_h(k_h,k_z)')
+  subplot(2,1,2); 
+  loglog(kh,spec2d_t(kzvals(i),:)'.*(kh'.^expo));hold on;%pause
+  ylabel('P(k_h,k_z)')
+  figure(1); xlabel('k_h')
   end  
  
 
-  %plot P(kz,0)
-  figure(2);hold off;
-  expo = 5;
-  khvals = [1,2,3,4,5,11,21,31];
+  %plot E_h(kh,kz) and P(kh,kz) as a function of kz for various kh
+  figure(2);
+  set(gca,'fontsize',16);
+  subplot(2,1,1); hold off;
+  subplot(2,1,2); hold off;
   for i = 1:length(khvals)
   %loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo).*(log(kz')).^(1/expo)));hold on;%pause
+  subplot(2,1,1)
+  loglog(kz,(spec2d_u(:,khvals(i))+spec2d_v(:,khvals(i))).*(kz'.^(expo)));hold on;%pause
+  ylabel('E_h(k_h,k_z)')
+  subplot(2,1,2)
   loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo)));hold on;%pause
-
+  ylabel('P(k_h,k_z)')
+  figure(2); xlabel('k_z')
   end
-  ylabel('P(:,[1,3,5,11,21,31,41,51])');  
-  xlabel('kz');
+  
 
 end
 
@@ -136,8 +154,8 @@ if (1)
   %plot the kh-averaged spectra
   figure(6)
   loglog53(numkz,specuz+specvz,'E_h(kz)',2.0,6);%hold on;
-%  figure(7)
-%  loglog53(numkz,specwz,'E_z(kz)',2.0,6);%hold on;
+  figure(7)
+  loglog53(numkz,specwz,'E_z(kz)',2.0,6);%hold on;
   figure(8)
   loglog53(numkz,spectz,'P(kz)',2.0,6);%hold on;
 end
@@ -180,11 +198,21 @@ end
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
+        specEh_kzave = specuz + specvz; %avg over kz
+        specP_kzave = spectz            %avg over kz
+        specEh_khave = specuh + specvh; %avg over kh
+        specP_khave = specth;           %avg over kh
+
+        
         spectz_ave = spectz;
         j = j+1;
     else
         spec2d_t_ave = spec2d_t_ave + spec2d_t;
         spec2d_Eh_ave = spec2d_Eh_ave + spec2d_u + spec2d_v;
+        specEh_kzave = specEh_kzave + specuz + specvz;
+        specP_kzave = specP_kzave+ spectz
+        specEh_khave = specEh_khave + specuh + specvh;
+        specP_khave = specP_khave + specth;
         spectz_ave = spectz_ave + spectz;
         
         j = j + 1;
@@ -195,30 +223,72 @@ end
 spectz_ave = spectz_ave/j;
 spec2d_t_ave = spec2d_t_ave/j;
 spec2d_Eh_ave = spec2d_Eh_ave/j;
+specEh_kzave = specEh_kzave/j;
+specP_kzave = specP_kzave/j;
+specEh_khave = specEh_khave/j;
+specP_khave = specP_khave/j;
 
 %plot time avg spectra
 
 figure(10);hold off;
-expo = 5;
-for i = 1:length(khvals) 
+set(gca,'fontsize',16);
+subplot(2,1,1);hold off;
+subplot(2,1,2); hold off;
+for i = 1:length(khvals)     
 %loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo).*(log(kz')).^(1/expo)));hold on;%pause
+subplot(2,1,1)
+loglog(kz,spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause
+ylabel('E_h(kh,kz)')
+subplot(2,1,2)
 loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause
-end 
-set(gca,'fontsize',16)
-title('Time avg')
 ylabel('P(k_h,k_z)');
-xlabel('k_z')
+end
+figure(10);
+title('Time avg');
+xlabel('k_z');
    
 figure(11);hold off;
-expo = 5;
+subplot(2,1,1);set(gca,'fontsize',16); hold off;
+subplot(2,1,2);set(gca,'fontsize',16); hold off;
 for i = 1:length(kzvals) 
 %loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo).*(log(kh)).^(1/expo)));hold on;%pause
+subplot(2,1,1)
 loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
-end 
-title('Time avg E_h(kh,kz)')
+ylabel('E_h(k_h,k_z)')
+subplot(2,1,2)
+loglog(kh,spec2d_t_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
+ylabel('P(k_h,k_z)');
+end
+figure(11);
+xlabel('k_h')
+
+figure(12);hold off; 
+subplot(2,1,1);hold off;
+loglog(kz,specEh_khave.*((kz'.^expo)));hold on;%pause
+set(gca,'fontsize',16)
+ylabel('E_h(k_z)');
+subplot(2,1,2);hold off;
+loglog(kz,specP_khave.*((kz'.^expo)));hold on;%pause
+set(gca,'fontsize',16)
+ylabel('P(k_z)');
+xlabel('k_z');
+figure(12);subplot(2,1,2);title('time ave');
+
+figure(13); hold off;
+subplot(2,1,1);hold off;
+loglog(kh,specEh_kzave.*((kh.^expo)));hold on;%pause
+set(gca,'fontsize',16)
+ylabel('E_h(k_h)');
+loglog(kh,specP_kzave.*((kh.^expo)));hold on;%pause
+set(gca,'fontsize',16)
+ylabel('P(k_h)');
+xlabel('k_h')
+figure(13);subplot(2,1,1); title('Time ave')
+
+
 
 %normalize x-axis by ratio kz or kh as necessary
-figure(12)
+figure(20)
 for i = 1:length(khvals)
 loglog(kz/khvals(i),spec2d_t_ave(:,khvals(i)));hold on;%pause
 xlabel('$kz/kh$')
@@ -226,7 +296,7 @@ ylabel('$P(k_h,k_z)$')
 title('P(kh,kz) vs. kz/kh')
 end
 
-figure(13)
+figure(21)
 for i = 1:length(kzvals)
 loglog(kh/kzvals(i),spec2d_Eh_ave(kzvals(i),:));hold on;%pause
 xlabel('$kh/kz$')
