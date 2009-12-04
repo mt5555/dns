@@ -30,12 +30,12 @@ name = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/'
 %times=[0:.1:3.3];
 %nx=256;
 
-name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/'
-pname='n256_Ro1Fr0.01_'
-times=[1:.1:1.9];
-nx = 256;
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/'
+%pname='n256_Ro1Fr0.01_'
+%times=[.1:.1:3.9];
+%nx = 256;
 %pname='n512_Ro1Fr0.01_'
-%times=[1:.1:2.8];
+%times=[.1:.1:5.0];
 %nx=512;
 pname='n1024_Ro1Fr0.01_'
 times=[3:.1:4.5];
@@ -44,7 +44,7 @@ nx=1024;
 
 name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/'
 pname='n1024_Ro1Fr0.002_'
-times=[3:.1:4.5];
+times=[.1:.1:3.8];
 nx=1024;
 
 
@@ -121,9 +121,8 @@ ppname = [pname,tstr(2:10),ext]
       [y45,y415,y43,epsl,h_eps,y215,y23]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
       
       y23_iso_ave=y23_iso_ave+y23';  %accumulate the angle averaged y23 from each frame
-    figure(10); 
-    plot(t,max(y23),'*');hold on;
-    plot(k*.1,2/3,'-');hold on; %2/3 line
+<<<<<<< .mine
+    peak(k) = max(y23);  %peak values of angle-average
     end    
 
 
@@ -185,6 +184,8 @@ ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
 
 
+figure(10); plot(times,peak,'-');hold on;
+plot(times,2/3.*times./times,'--');hold on; %2/3 line
 
 %print -dpsc k215mean.ps
 

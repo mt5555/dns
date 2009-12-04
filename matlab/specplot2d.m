@@ -17,12 +17,12 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 
-%namedir = '~/projects/INCITE_runs/Intrepid/qg/';
-%name = 'n640_bous3000_all';
-%kf=4;
+namedir = '~/projects/INCITE_runs/Intrepid/qg/';
+name = 'n640_bous3000_all';
+kf=4;
 
-namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
-name = 'n640_fcor14bous3000_all';
+%namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
+%name = 'n640_fcor14bous3000_all';
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
 %name = 'n640_fcor3000bous14_all';
@@ -198,58 +198,55 @@ end
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
-        specEh_kzave = specuz + specvz; %avg over kz
-        specP_kzave = spectz            %avg over kz
-        specEh_khave = specuh + specvh; %avg over kh
-        specP_khave = specth;           %avg over kh
-
-        
-        spectz_ave = spectz;
+        specEhkz_ave = specuz + specvz; %avg over kh
+        specPkz_ave = spectz;           %avg over kh
+        specEhkh_ave = specuh + specvh; %avg over kz
+        specPkh_ave = specth;           %avg over kz        
         j = j+1;
     else
         spec2d_t_ave = spec2d_t_ave + spec2d_t;
         spec2d_Eh_ave = spec2d_Eh_ave + spec2d_u + spec2d_v;
-        specEh_kzave = specEh_kzave + specuz + specvz;
-        specP_kzave = specP_kzave+ spectz
-        specEh_khave = specEh_khave + specuh + specvh;
-        specP_khave = specP_khave + specth;
-        spectz_ave = spectz_ave + spectz;
+        specEhkz_ave = specEhkz_ave + specuz + specvz;
+        specPkz_ave = specPkz_ave+ spectz;
+        specEhkh_ave = specEhkh_ave + specuh + specvh;
+        specPkh_ave = specPkh_ave + specth;
         
         j = j + 1;
     end
  end
  end 
 end
-spectz_ave = spectz_ave/j;
 spec2d_t_ave = spec2d_t_ave/j;
 spec2d_Eh_ave = spec2d_Eh_ave/j;
-specEh_kzave = specEh_kzave/j;
-specP_kzave = specP_kzave/j;
-specEh_khave = specEh_khave/j;
-specP_khave = specP_khave/j;
+specEhkz_ave = specEhkz_ave/j;
+specPkz_ave = specPkz_ave/j;
+specEhkh_ave = specEhkh_ave/j;
+specPkh_ave = specPkh_ave/j;
 
 %plot time avg spectra
 
 figure(10);hold off;
-set(gca,'fontsize',16);
 subplot(2,1,1);hold off;
 subplot(2,1,2); hold off;
 for i = 1:length(khvals)     
 %loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo).*(log(kz')).^(1/expo)));hold on;%pause
-subplot(2,1,1)
-loglog(kz,spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause
-ylabel('E_h(kh,kz)')
+subplot(2,1,1) 
+%axis([1 640/3 1e-10 1])
+set(gca,'fontsize',17);
+loglog(kz,spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
+ylabel('E_h(k_h,k_z)')
 subplot(2,1,2)
-loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause
+%axis([1 640/3 1e-10 1])
+set(gca,'fontsize',17);
+loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
 ylabel('P(k_h,k_z)');
 end
-figure(10);
-title('Time avg');
+figure(10);subplot(2,1,2)
 xlabel('k_z');
    
 figure(11);hold off;
-subplot(2,1,1);set(gca,'fontsize',16); hold off;
-subplot(2,1,2);set(gca,'fontsize',16); hold off;
+subplot(2,1,1);set(gca,'fontsize',17); hold off;
+subplot(2,1,2);set(gca,'fontsize',17); hold off;
 for i = 1:length(kzvals) 
 %loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo).*(log(kh)).^(1/expo)));hold on;%pause
 subplot(2,1,1)
@@ -264,25 +261,26 @@ xlabel('k_h')
 
 figure(12);hold off; 
 subplot(2,1,1);hold off;
-loglog(kz,specEh_khave.*((kz'.^expo)));hold on;%pause
-set(gca,'fontsize',16)
-ylabel('E_h(k_z)');
+loglog(kh,specEhkh_ave.*((kh.^expo)));hold on;%pause
+set(gca,'fontsize',17)
+ylabel('E_h(k_h)');
 subplot(2,1,2);hold off;
-loglog(kz,specP_khave.*((kz'.^expo)));hold on;%pause
-set(gca,'fontsize',16)
-ylabel('P(k_z)');
-xlabel('k_z');
+loglog(kh,specPkh_ave.*((kh.^expo)));hold on;%pause
+set(gca,'fontsize',17)
+ylabel('P(k_h)');
+xlabel('k_h');
 figure(12);subplot(2,1,2);title('time ave');
 
 figure(13); hold off;
 subplot(2,1,1);hold off;
-loglog(kh,specEh_kzave.*((kh.^expo)));hold on;%pause
-set(gca,'fontsize',16)
-ylabel('E_h(k_h)');
-loglog(kh,specP_kzave.*((kh.^expo)));hold on;%pause
-set(gca,'fontsize',16)
-ylabel('P(k_h)');
-xlabel('k_h')
+loglog(kz,specEhkz_ave.*((kz'.^expo)));hold on;%pause
+set(gca,'fontsize',17)
+ylabel('E_h(k_z)');
+subplot(2,1,2);hold off;
+loglog(kz,specPkz_ave.*((kz'.^expo)));hold on;%pause
+set(gca,'fontsize',17)
+ylabel('P(k_z)');
+xlabel('k_z')
 figure(13);subplot(2,1,1); title('Time ave')
 
 
