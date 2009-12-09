@@ -13,7 +13,7 @@ name = 'bous128_Fr0.21_all';
 %name = 'bous128_Ro21Fr0.21_all';
 
 %namedir ='~kurien/INCITE_runs/SW02_tests/bous128_Ro2.1Fr0.21/';
-%name = 'bous128_Ro2.1Fr0.21_all';
+%name = 'bous128_Ro2.1Fr0.21_all'; 
 
 %namedir ='~kurien/INCITE_runs/RemSukSmi09_tests/lowres/mauler/f136b681/';
 %name = 'bous200Lz0.2_all';
@@ -63,6 +63,12 @@ name = 'n1024_d0.25_Ro0.05_all';
 Lz=0.25;epsf=1;kf = 4;
 %name = 'n512_d0.25_Ro0.05_all';
 %Lz=0.25;epsf=1;kf=4;
+
+namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/LOWRES/';
+name = 'n512_d0.25_Ro0.05_all';
+Lz=0.25;epsf=1;kf = 4;
+
+
 
 
 % plot all the spectrum:

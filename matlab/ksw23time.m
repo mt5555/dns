@@ -42,9 +42,24 @@ times=[3:.1:4.5];
 nx=1024;
 
 
-name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/'
+nx=1024;name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/'
 pname='n1024_Ro1Fr0.002_'
-times=[.1:.1:3.8];
+times=[2.6:.1:3.5];
+nx=1024;
+
+%nx=1024;name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/'
+%pname='n1024_Ro1Fr0.002_'
+%times=[.1:.1:.9];
+%nx=1024;
+
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/'
+%pname='n1024_Ro1Fr0.002_'
+%times=[1.4:.1:2.3];
+%nx=1024;
+
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/'
+pname='n1024_Ro1Fr0.002_'
+times=[2.8:.1:3.6];
 nx=1024;
 
 
@@ -121,7 +136,6 @@ ppname = [pname,tstr(2:10),ext]
       [y45,y415,y43,epsl,h_eps,y215,y23]=compisoave(fname,ext,xx,ndir_use,klaws,plot_posneg,check_isotropy,0);
       
       y23_iso_ave=y23_iso_ave+y23';  %accumulate the angle averaged y23 from each frame
-<<<<<<< .mine
     peak(k) = max(y23);  %peak values of angle-average
     end    
 
@@ -165,7 +179,7 @@ for i=[1:ndir]
 semilogx(xx_plot,(y23_ave(:,i))/scale,'k:','LineWidth',1.0); hold on
 %pause
 end
-semilogx(xx_plot,y23_iso_ave/scale,'k','LineWidth',2.0); hold on
+semilogx(xx_plot,y23_iso_ave/scale,'r','LineWidth',2.0); hold on
 %axis([1 1000 -0.05 0.15])
 x=1:1000; plot(x,(2/3)*x./x/scale,'k');
 hold on;
