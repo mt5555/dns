@@ -64,11 +64,22 @@ Lz=0.25;epsf=1;kf = 4;
 %name = 'n512_d0.25_Ro0.05_all';
 %Lz=0.25;epsf=1;kf=4;
 
-namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/LOWRES/';
-name = 'n512_d0.25_Ro0.05_all';
+<<<<<<< .mine
+namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_nodamp/';
+name = 'n1024_d0.25_Ro0.05_all';
 Lz=0.25;epsf=1;kf = 4;
 
+%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_shiftforce/';
+%name = 'n1024_d0.25_Ro0.05_all';
+%Lz=0.25;epsf=1;kf = 4;
 
+namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_hyper2/';
+name = 'n1024_d0.25_Ro0.05_all';
+Lz=0.25;epsf=1;kf = 4;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/LOWRES/';
+%name = 'n512_d0.25_Ro0.05_all';
+%Lz=0.25;epsf=1;kf = 4;
 
 
 % plot all the spectrum:
