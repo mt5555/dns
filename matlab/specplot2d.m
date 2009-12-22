@@ -1,5 +1,7 @@
 clear
 
+forpaper = 1; % generate plots for paper
+
 epsilon=.41;
 %CK=1.5*epsilon^(2/3);
 %namedir = '/home/wingate/data1/Rotation/r16c/';
@@ -102,17 +104,14 @@ while (time < 35)
   kzvals = [1,2,3,4,5,11,21,31,41,51,100];
   khvals = [1,2,3,4,5,11,21,31];
 
-  
-if(1)
+  %plot movie of spectra evolving in time
+if(0)
   %plot E_h(kh,kz) and P(kh,kz) as a function of kh for various kz
   figure(1);
   set(gca,'fontsize',16);
   subplot(2,1,1);hold off;
   subplot(2,1,2); hold off;
   for i = 1:length(kzvals)
-  %with log-correction    
-  %loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^(expo).*(log(kh')).^(1/expo)));hold on;%pause
-  % without log-correction  
   subplot(2,1,1); 
   loglog(kh,(spec2d_u(kzvals(i),:)'+spec2d_v(kzvals(i),:)').*(kh'.^expo)); hold on;%pause
   ylabel('E_h(k_h,k_z)')
@@ -129,7 +128,6 @@ if(1)
   subplot(2,1,1); hold off;
   subplot(2,1,2); hold off;
   for i = 1:length(khvals)
-  %loglog(kz,spec2d_t(:,khvals(i)).*(kz'.^(expo).*(log(kz')).^(1/expo)));hold on;%pause
   subplot(2,1,1)
   loglog(kz,(spec2d_u(:,khvals(i))+spec2d_v(:,khvals(i))).*(kz'.^(expo)));hold on;%pause
   ylabel('E_h(k_h,k_z)')
@@ -142,7 +140,7 @@ if(1)
 
 end
 
-if (1)
+if (0)
   %plot the kz-averaged spectra
   figure(3)
   loglog53(numkh,specuh'+specvh','E_h(kh)',2.0,6);%hold on;
@@ -194,7 +192,7 @@ end
  
  %time average of spectra
  if(1)
- if (time > 3.0 & time < 6.5)
+ if (time > 3.0 & time < 7.6)
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
@@ -229,14 +227,13 @@ figure(10);hold off;
 subplot(2,1,1);hold off;
 subplot(2,1,2); hold off;
 for i = 1:length(khvals)     
-%loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo).*(log(kz')).^(1/expo)));hold on;%pause
 subplot(2,1,1) 
-%axis([1 640/3 1e-10 1])
+axis([1 640/3 1e-10 1])
 set(gca,'fontsize',17);
 loglog(kz,spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
 ylabel('E_h(k_h,k_z)')
 subplot(2,1,2)
-%axis([1 640/3 1e-10 1])
+axis([1 640/3 1e-10 1])
 set(gca,'fontsize',17);
 loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
 ylabel('P(k_h,k_z)');
@@ -248,7 +245,6 @@ figure(11);hold off;
 subplot(2,1,1);set(gca,'fontsize',17); hold off;
 subplot(2,1,2);set(gca,'fontsize',17); hold off;
 for i = 1:length(kzvals) 
-%loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo).*(log(kh)).^(1/expo)));hold on;%pause
 subplot(2,1,1)
 loglog(kh,spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
 ylabel('E_h(k_h,k_z)')
@@ -269,7 +265,7 @@ loglog(kh,specPkh_ave.*((kh.^expo)));hold on;%pause
 set(gca,'fontsize',17)
 ylabel('P(k_h)');
 xlabel('k_h');
-figure(12);subplot(2,1,2);title('time ave');
+figure(12);subplot(2,1,1);title('time ave');
 
 figure(13); hold off;
 subplot(2,1,1);hold off;
@@ -304,3 +300,42 @@ title('Eh(kh,kz) vs. kh/kz')
 end
 
 
+if (forpaper == 1) 
+ 
+figure(30);hold off;
+for i = 1:length(khvals)     
+axis([1 640/3 1e-10 10])
+set(gca,'fontsize',17);
+loglog(kz,100*spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
+loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
+legend('E_h(k_h,k_z) (\times 100)','P(k_h,k_z)');
+end
+xlabel('k_z');
+   
+figure(31);hold off;
+for i = 1:length(kzvals) 
+axis([1 640/3 1e-10 10])
+set(gca,'fontsize',17);
+loglog(kh,100*spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
+loglog(kh,spec2d_t_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
+legend('E_h(k_h,k_z) (\times 100)','P(k_h,k_z)');
+end
+xlabel('k_h')
+
+figure(32);hold off; 
+axis([1 640/3 1e-10 10])
+set(gca,'fontsize',17)
+loglog(kh,100*specEhkh_ave.*((kh.^expo)));hold on;%pause
+loglog(kh,specPkh_ave.*((kh.^expo)));hold on;%pause
+legend('E_h(k_h) (\times 100)','P(k_h)');
+xlabel('k_h');
+
+
+figure(33); hold off;
+axis([1 640/3 1e-10 10])
+set(gca,'fontsize',17)
+loglog(kz,100*specEhkz_ave.*((kz'.^expo)));hold on;%pause
+loglog(kz,specPkz_ave.*((kz'.^expo)));hold on;%pause
+legend('E_h(k_z) (\times 100)','P(k_z)');
+xlabel('k_z')
+end

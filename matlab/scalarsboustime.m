@@ -30,10 +30,12 @@ fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n1024_Ro
 
 fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
-%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/n1024_Ro1Fr0.002_all.scalars-bous','r')
-fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/n1024_Ro1Fr0.002_nu.5e-5_all.scalars-bous','r')
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/n1024_Ro1Fr0.002_nu.5e-5_all.scalars-bous','r')
 
+fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_all.scalars-bous','r')
+
+%fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/n1024_Ro0.002Fr1_all.scalars-bous','r')
 
 %fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars-bous','r')
 
@@ -98,7 +100,7 @@ subplot(1,1,1);
 %clf
 plot(time,potens,'b','Linewidth',2);hold on;
 %plot(time,potens_qg,'r--','Markersize',6);
-%plot(time,potens_ro0fr1,'ro','Markersize',6);
+plot(time,potens_ro0fr1,'ro','Markersize',6);
 plot(time,potens_ro1fr0,'k*','Markersize',6);
 title('Potential enstrophy: (blue: Total); (red -- QG); (red o: Ro->0,Fr1); (black *: Ro1, Fr->0)');
 %legend('$Q$','$Q_{qg}$','$Q_{q\sim f \partial_z \rho}$', '$Q_{q\sim N \omega_3}$');
