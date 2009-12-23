@@ -1,6 +1,7 @@
 clear
 
 forpaper = 1; % generate plots for paper
+totals = 1; %general plots about total energies
 
 epsilon=.41;
 %CK=1.5*epsilon^(2/3);
@@ -25,9 +26,11 @@ kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
 %name = 'n640_fcor14bous3000_all';
+%kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
 %name = 'n640_fcor3000bous14_all';
+%kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/';
 %name = 'n512_Ro1Fr0.01_all';
@@ -304,38 +307,94 @@ if (forpaper == 1)
  
 figure(30);hold off;
 for i = 1:length(khvals)     
-axis([1 640/3 1e-10 10])
+axis([1 640/3 1e-10 10^5])
 set(gca,'fontsize',17);
-loglog(kz,100*spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
-loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
-legend('E_h(k_h,k_z) (\times 100)','P(k_h,k_z)');
+loglog(kz,10e4*spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
+loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)),'r--');hold on;pause;
+legend('E_h(k_h,k_z) \times 10^4','P(k_h,k_z)');
+x = 5:40;
+y = x.^(-5);
+plot(x,y,'b');
+xx = 10:80;
+yy = 10^5*xx.^(-3);
+plot(xx,yy,'r');
 end
 xlabel('k_z');
    
 figure(31);hold off;
 for i = 1:length(kzvals) 
-axis([1 640/3 1e-10 10])
+axis([1 640/3 1e-15 10^5])
 set(gca,'fontsize',17);
-loglog(kh,100*spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
-loglog(kh,spec2d_t_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
-legend('E_h(k_h,k_z) (\times 100)','P(k_h,k_z)');
+loglog(kh,10e4*spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
+loglog(kh,spec2d_t_ave(kzvals(i),:).*((kh.^expo)),'r--');hold on;%pause
+legend('E_h(k_h,k_z) \times 10^4','P(k_h,k_z)');
+x = 5:40;
+y = 10^5*x.^(-4.5);
+plot(x,y,'b');
+xx = 10:80;
+yy = xx.^(-2);
+plot(xx,yy,'r');
 end
 xlabel('k_h')
 
 figure(32);hold off; 
-axis([1 640/3 1e-10 10])
+axis([1 640/3 1e-20 10])
 set(gca,'fontsize',17)
-loglog(kh,100*specEhkh_ave.*((kh.^expo)));hold on;%pause
-loglog(kh,specPkh_ave.*((kh.^expo)));hold on;%pause
-legend('E_h(k_h) (\times 100)','P(k_h)');
+loglog(kh,specEhkh_ave.*((kh.^expo)));hold on;%pause
+loglog(kh,specPkh_ave.*((kh.^expo)),'r--');hold on;%pause
+legend('E_h(k_h)','P(k_h)');
+x = 5:40;
+y = x.^(-1);
+plot(x,y,'k');
+xx = 10:80;
+yy = xx.^(-4/3);
+plot(xx,yy,'r');
 xlabel('k_h');
 
 
 figure(33); hold off;
 axis([1 640/3 1e-10 10])
 set(gca,'fontsize',17)
-loglog(kz,100*specEhkz_ave.*((kz'.^expo)));hold on;%pause
-loglog(kz,specPkz_ave.*((kz'.^expo)));hold on;%pause
-legend('E_h(k_z) (\times 100)','P(k_z)');
+loglog(kz,specEhkz_ave.*((kz'.^expo)));hold on;%pause
+loglog(kz,specPkz_ave.*((kz'.^expo)),'r--');hold on;%pause
+legend('E_h(k_z)','P(k_z)');
+x = 5:40;
+y = x.^(-1);
+plot(x,y,'k');
+xx = 10:80;
+yy = xx.^(-4/3);
+plot(xx,yy,'r');
 xlabel('k_z')
+end
+
+
+if (totals == 1)
+
+figure(42);hold off; 
+axis([1 640/3 1e-20 10])
+set(gca,'fontsize',17)
+loglog(kh,(specEhkh_ave+specPkh_ave).*((kh.^expo)));hold on;%pause
+legend('E_h(k_h)+P(k_h)');
+x = 5:40;
+y = x.^(-1);
+plot(x,y,'k');
+xx = 10:80;
+yy = xx.^(-4/3);
+plot(xx,yy,'r');
+xlabel('k_h');
+
+
+figure(43); hold off;
+axis([1 640/3 1e-10 10])
+set(gca,'fontsize',17)
+loglog(kz,(specEhkz_ave + specPkz_ave).*((kz'.^expo)));hold on;%pause
+legend('E_h(k_z)+P(k_z)');
+x = 5:40;
+y = x.^(-1);
+plot(x,y,'k');
+xx = 10:80;
+yy = xx.^(-4/3);
+plot(xx,yy,'r');
+xlabel('k_z')  
+    
 end
