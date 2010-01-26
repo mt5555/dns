@@ -41,13 +41,13 @@ ifeq ($(UNAME),Linux)
 #
 # P3DFFT, with DNS internal FFT using fft99 (to save fftw initialization costs)
 #
-      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT -DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/taylorm/p3dfft/include 
+      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT, -DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/taylorm/p3dfft/include 
       LDFLAGS = -L/home/taylorm/p3dfft/lib -lp3dfft -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
 
 #
 # P3DFFT, with DNS internal FFT using fftw
 #
-#      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT -DUSE_FFTWGURU,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/taylorm/p3dfft/include -I/soft/apps/fftw-3.1.2-double/include
+#      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT, -DUSE_FFTWGURU,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/taylorm/p3dfft/include -I/soft/apps/fftw-3.1.2-double/include
 #      LDFLAGS = -L/home/taylorm/p3dfft/lib -lp3dfft -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
 
 
@@ -263,7 +263,7 @@ ifeq ($(UNAME),AIX)
    CC = cc -DF_NO_UNDERSCORE
 
    USE_ALPHA = -WF,"-DALPHA_MODEL"
-   USE_LERAY = -WF,"-DALPHA_MODEL -DLERAY_MODEL"
+   USE_LERAY = -WF,"-DALPHA_MODEL, -DLERAY_MODEL"
 endif
 
 
