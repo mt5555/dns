@@ -68,7 +68,8 @@
 !  -cout dudx  (20)
 !  -cout ehor  (21)    horizontal energy field
 !  -cout potens (22)   potential enstrophy field
-!
+!  -cout pe (23) potential energy field
+
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
 !    tstart=4.000000000 edit below
@@ -113,8 +114,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=2.8
-tstop=2.8
+tstart=7.2
+tstop=7.6
 tinc=0.1
 
 
@@ -942,6 +943,32 @@ do
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // message(2:10) // '.pv2'
       call print_message(fname)
+      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
+   endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Write out potential energy field in physical space
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+   if (convert_opt==23) then  ! -cout pe
+      ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
+      call input_uvw(time,Q,vor,work1,work2,header_user)
+      call input_passive(runname, time, Q, work1, work2)
+!      do i=1,ndim
+!         call print_max(Q(1,1,1,i),i)
+!      enddo
+      call print_message("computing potential energy...")
+      do k=nz1,nz2
+      do j=ny1,ny2
+      do i=nx1,nx2
+         work1(i,j,k)=0.5*(Q(i,j,k,nvar)**2)
+      enddo
+      enddo
+      enddo
+      write(sdata,'(f10.4)') 10000.0000 + time
+      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".pe"
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
    endif
 
