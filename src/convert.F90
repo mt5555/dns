@@ -114,8 +114,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=7.2
-tstop=7.6
+tstart=6.0
+tstop=6.4
 tinc=0.1
 
 
@@ -962,7 +962,7 @@ do
       do k=nz1,nz2
       do j=ny1,ny2
       do i=nx1,nx2
-         work1(i,j,k)=0.5*(Q(i,j,k,nvar)**2)
+         work1(i,j,k)=0.5*(Q(i,j,k,4)**2)
       enddo
       enddo
       enddo
