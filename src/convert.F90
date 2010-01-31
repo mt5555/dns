@@ -962,7 +962,7 @@ do
       do k=nz1,nz2
       do j=ny1,ny2
       do i=nx1,nx2
-         work1(i,j,k)=0.5*(Q(i,j,k,4)**2)
+         work1(i,j,k)=0.5*(Q(i,j,k,np1)**2)
       enddo
       enddo
       enddo
