@@ -42,34 +42,45 @@ times=[3:.1:4.5];
 nx=1024;
 
 
-nx=1024;name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/'
-pname='n1024_Ro1Fr0.002_'
-times=[2.6:.1:3.5];
-nx=1024;
+%nx=1024;name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/'
+%pname='n1024_Ro1Fr0.002_'
+%times=[2.6:.1:3.5];
+%nx=1024;
 
 %nx=1024;name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/'
 %pname='n1024_Ro1Fr0.002_'
 %times=[.1:.1:.9];
 %nx=1024;
 
-%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/'
-%pname='n1024_Ro1Fr0.002_'
-%times=[1.4:.1:2.3];
-%nx=1024;
-
-name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/'
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/'
 pname='n1024_Ro1Fr0.002_'
-times=[2.7:.1:3.6];
+times=[1.4:.1:2.3];
 nx=1024;
 
-%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/'
-%pname='n1024_Ro1Fr0.001_'
-%times=[.1:.1:1];
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/'
+%pname='n1024_Ro1Fr0.002_'
+%times=[2.7:.1:3.6];
 %nx=1024;
+
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/'
+pname='n1024_Ro1Fr0.001_'
+%times=[.1:.1:1.5];
+times=[1.1:.1:2.0];
+nx=1024;
 
 %name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/'
 %pname='n1024_Ro0.002Fr1_'
-%times=[1.5:.1:3.1];
+%times=[.1:.1:3.1];
+%nx=1024;
+
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.5e-5/'
+%pname='n1024_Ro0.002Fr1_'
+%times=[.1:.1:2.1];
+%nx=1024;
+
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr1/n1024_nu.5e-5/'
+%pname='n1024_Ro0.001Fr1_'
+%times=[.1:.1:1.0];
 %nx=1024;
 
 
@@ -200,7 +211,7 @@ xlabel('r/\eta','FontSize',16);
 
 figure(8);
 scale = 1; % scale = 2/3 to scale out
-loglog(xx_plot,abs(y23_iso_ave.*xx_plot')/scale,'k','LineWidth',2.0); hold on
+loglog(xx_plot,abs(y23_iso_ave.*xx_plot')/scale,'r','LineWidth',2.0); hold on
 %axis([1 1000 -0.05 0.15])
 hold on;
 title('  (2/3 law) Ensemble averaged');

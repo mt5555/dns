@@ -29,13 +29,15 @@ fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n512_Ro1
 fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n1024_Ro1Fr0.01_all.scalars-bous','r')
 
 fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
-%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
+fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/n1024_Ro1Fr0.002_nu.5e-5_all.scalars-bous','r')
 
-fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_all.scalars-bous','r')
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_all.scalars-bous','r')
 
-%fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/n1024_Ro0.002Fr1_all.scalars-bous','r')
+fid=endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/n1024_Ro0.002Fr1_all.scalars-bous','r')
+
+%fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr1/n1024_nu.5e-5/n1024_Ro0.001Fr1_all.scalars-bous','r')
 
 %fid = endianopen('~/INCITE_runs/Intrepid/lowaspect_bous/shift_force/n1600_d0.2_Ro0.05_all.scalars-bous','r')
 

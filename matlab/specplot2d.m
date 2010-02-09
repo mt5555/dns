@@ -32,11 +32,19 @@ kf=4;
 %name = 'n640_fcor3000bous14_all';
 %kf=4;
 
-%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/';
-%name = 'n512_Ro1Fr0.01_all';
+namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/';
+name = 'n512_Ro1Fr0.01_all';
 
-%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/';
-%name = 'n1024_Ro1Fr0.002_all';
+namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/';
+name = 'n1024_Ro1Fr0.002_all';
+kf=4;
+
+namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/';
+name = 'n1024_Ro1Fr0.002_all';
+
+namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/';
+name = 'n1024_Ro1Fr0.001_all';
+kf=4;
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -195,7 +203,7 @@ end
  
  %time average of spectra
  if(1)
- if (time > 3.0 & time < 7.6)
+ if (time > 1.4 & time < 7.6)
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
