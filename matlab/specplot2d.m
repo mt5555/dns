@@ -46,6 +46,10 @@ namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/
 name = 'n1024_Ro1Fr0.001_all';
 kf=4;
 
+namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/';
+name = 'n1024_Ro0.002Fr1_all';
+kf=4;
+
 asciprint = 0 % if == 1 print out the data to asci files
 
 fid=fopen([namedir,name,'.spec2d'],'r','b');  %use 'b' for 

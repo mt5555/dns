@@ -100,6 +100,18 @@ Lz=0.25;epsf=1;kf = 4;
 %name = 'n2048_d0.25_Ro0.05_all';
 %Lz=0.25;epsf=1;kf = 4;
 
+namedir ='~/projects/INCITE_runs/Intrepid/qg/';
+name = 'n640_bous3000_all';
+Lz=1;epsf=0.5;kf = 4;
+
+namedir ='~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
+name = 'n640_fcor14bous3000_all';
+Lz=1;epsf=0.5;kf = 4;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
+%name = 'n640_fcor3000bous14_all';
+%Lz=1;epsf=0.5;kf = 4;
+
 
 
 
@@ -141,19 +153,21 @@ if (movie)
 %pause
 exp = 0;  %compensation of exponent for spectral scaling, 0 for none
 figure(1); % +, - and total and projected energy spectra
-loglog(k,spec_tot.*k'.^exp,'k'); hold on;
+set(gca,'fontsize',16);
+loglog(k,spec_tot.*k'.^exp,'k','Linewidth',2); hold on;
 %loglog(k,spec_Q_tot,'bo'); hold on;
-%loglog(k,spec_tot./spec_Q_tot,'ko');hold on;
-loglog(k,spec_vort.*k'.^exp,'b'); hold on;
-loglog(k,spec_wave.*k'.^exp,'r'); hold on;
-%loglog(k,spec_kh0,'c');hold on; 
+%loglog(k,spec_tot./spec_Q_tot,'ko','Linewidth',2);hold on;
+loglog(k,spec_vort.*k'.^exp,'b--','Linewidth',2); hold on;
+loglog(k,spec_wave.*k'.^exp,'r-.','Linewidth',2); hold on;
+loglog(k,spec_kh0,'c');hold on; 
 stitle = sprintf('t = %8.4f',time);
 title(stitle);
 axis([1 1000 1e-6 1]);
 grid
 legend('total','vortical','wave')
+xlabel('k');
 hold off
-pause
+%   pause
 
 figure(2) ;
 te = sum(spec_tot);

@@ -88,8 +88,8 @@ fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/n1024_Ro1Fr0.01_al
 nx=1024; f_k = 4; fcor=8.58; bous = 858; LZ = 1.0;
 
 
-%fid = endianopen('~/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars','r')
-%nx=640; f_k=4;fcor=3000;bous=3000;LZ=1.0;
+fid = endianopen('~/projects/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars','r')
+nx=640; f_k=4;fcor=3000;bous=3000;LZ=1.0;
 
 %fid = endianopen('~/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars','r')
 %nx=640; f_k=4;fcor=14;bous=3000; LZ=1.0;
