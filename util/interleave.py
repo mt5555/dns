@@ -21,6 +21,7 @@ while 1:
     if (data == '' ):
         print 'hit EOF. stopping'
         print 'processed N=%i numbers from each file' %i
+        fi.close() 
         sys.exit(0)
     fi.write(data)
     data = fv.read(8)
