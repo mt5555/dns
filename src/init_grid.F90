@@ -569,7 +569,7 @@ if (my_pe==io_pe) then
 	    convert_opt=21
 	 else if (carg(1:11)=="potens") then
 	    convert_opt=22
-	 else if (carg(1:11)=="potens") then
+	 else if (carg(1:11)=="pe") then
 	    convert_opt=23
          else
             print *,'cout option: ',carg(1:len_trim(carg))
@@ -2660,9 +2660,17 @@ else if (sdata=='hyper16') then
 else if (sdata=='hyperN') then
    mu_hyper = mu_hyper/2   ! divide by two because we compute (k^2)^mu_hyper
    mu_hyper_value = rvalue
+else if (sdata=='hyper2_imp') then
+   hyper_type=1
+   mu_hyper=1
+   mu_hyper_value = rvalue
 else if (sdata=='hyper16_imp') then
    hyper_type=1
    mu_hyper=8
+   mu_hyper_value = rvalue
+else if (sdata=='hyper2_fix') then
+   hyper_type=3  ! fixed viscosity coefficient set by user
+   mu_hyper=1    ! laplacian^8   grad^16
    mu_hyper_value = rvalue
 else if (sdata=='hyper16_fix') then
    hyper_type=3  ! fixed viscosity coefficient set by user
@@ -3020,6 +3028,10 @@ else if (sdata=='hyper16') then
 else if (sdata=='hyperN') then
    mu_hyper = mu_hyper/2   ! divide by two because we compute (k^2)^mu_hyper
 !   mu_hyper_value = rvalue*(pi2 * k_Gt)**(-2*mu_hyper)
+   mu_hyper_value = rvalue
+else if (sdata=='hyper2_imp') then
+   hyper_type=1
+   mu_hyper=1
    mu_hyper_value = rvalue
 else if (sdata=='hyper16_imp') then
    hyper_type=1
@@ -3389,6 +3401,10 @@ else if (sdata=='hyper16') then
 else if (sdata=='hyperN') then
    mu_hyper = mu_hyper/2   ! divide by two because we compute (k^2)^mu_hyper
 !   mu_hyper_value = rvalue*(pi2 * k_Gt)**(-2*mu_hyper)
+   mu_hyper_value = rvalue
+else if (sdata=='hyper2_imp') then
+   hyper_type=1
+   mu_hyper=1
    mu_hyper_value = rvalue
 else if (sdata=='hyper16_imp') then
    hyper_type=1

@@ -104,8 +104,8 @@ compute_hspec=.false.
 read_uvw=.false.
 
 
-tstart=0.0
-tstop=1.4
+tstart=2.3
+tstop=3.0
 tinc=0.1
 icount=0
 
@@ -371,8 +371,10 @@ do
       write(message,'(3(a,e12.5))') 'max(div)=',divx
       call print_message(message)	
 
-      
-      pv_type=1
+      !pv_type is set be either the total or the linear pieces)
+      !(pv_type 1 = total; 3 = QG; 4 = Ro ->0; 5 = Fr -> 0)
+      !note that the file extension below becomes .bisostr_pvn where n is the pv_type
+      pv_type=5  
       if (npassive==1) stype=4; ! structure functions of u,v,w and PV
       
 
@@ -397,7 +399,7 @@ do
 
          write(sdata,'(f10.4)') 10000.0000 + time
          write(idata,'(i1)') str_type
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr"
+         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr_pv5"
          print *,fname
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then

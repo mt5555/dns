@@ -114,8 +114,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=6.0
-tstop=6.4
+tstart=2.2
+tstop=2.4
 tinc=0.1
 
 
@@ -203,7 +203,10 @@ do
          call print_message("computing vorticity...")
          call vorticity(vor,Q,work1,work2)
          call print_message("output vorticity...")
-         call output_uvw(basename,time,vor,Q,work1,work2,header_user)
+         ! call output_uvw(basename,time,vor,Q,work1,work2,header_user)
+	 ! output headerless
+         call output_uvw(basename,time,vor,Q,work1,work2,2)
+	 
       endif
       if (ndim==2) then
          call print_message("computing 2D vorticity...")
@@ -345,7 +348,7 @@ do
 
    if (convert_opt==6) then  ! -cout passive
       schmidt_in=1.0
-      type_in=0
+      type_in=4
       write(message,'(f10.4)') 10000.0000 + time
       write(ext,'(f8.3)') 1000 + schmidt_in
       write(ext2,'(i3)') 100+type_in
