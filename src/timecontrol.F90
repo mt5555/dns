@@ -132,7 +132,11 @@ endif
 
 if (mu>0) delt = min(delt,cfl_vis/mumax)       ! viscous CFL
 if (psmax>0) delt = min(delt,cfl_vis/psmax)    ! viscous CFL for passive scalars
-if (bous+fcor > 0 ) delt = min(delt,.2*pi/(bous+fcor))  ! intertial gravity wave CFL
+!if (bous+fcor > 0 ) delt = min(delt,.2*pi/(bous+fcor))  ! intertial gravity	
+							  ! wave CFL, 10 delt/period  
+if (bous+fcor > 0 ) delt = min(delt,.4*pi/(bous+fcor))  ! intertial gravity
+                                                        ! wave CFL, 5 delt/period
+			
 
 delt = max(delt,delt_min)
 delt = min(delt,delt_max)

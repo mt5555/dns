@@ -100,7 +100,7 @@ compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 
 
-tstart=1.6
+tstart=0.0
 tstop=6.0
 tinc=.1
 
