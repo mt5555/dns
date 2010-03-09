@@ -491,6 +491,15 @@ elseif (pv_type == 7) then
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
    pv = pv + (d1/Lz)*(vor(:,:,:,3)+fcor)
 
+elseif (pv_type == 8) then
+!
+! pv = omega_3 dot (d theta / dz) + fcor *(d theta / d z) - bous*omega_3
+!
+
+!compute (d theta/ d z)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
+   pv = (d1/Lz)*(vor(:,:,:,3)+fcor) - bous*vor(:,:,:,3)
+   
 endif
 
 

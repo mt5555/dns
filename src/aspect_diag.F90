@@ -199,7 +199,7 @@ real*8 :: enstr_diss, potens_diss, potens_diss_kappa, potens_diss_mu
 real*8 :: dummy(1)
 integer :: pv_type, i, j, k, im, jm, km, ierr
 real*8 :: xw,xw2,u2,xw_viss,xfac, vx,wx,uy,wy,uz,vz,pe,totale
-real*8 :: pv,potens,pvqg,potensqg,pvro0,potensro0,pvfr0,potensfr0
+real*8 :: pv,potens,pvqg,potensqg,pvro0,potensro0,pvfr0,potensfr0,pvLz,potensLz
 real*8 :: ke,pe_diss,ke_diss,h_diss,ens_diss,rwave,pv_diss,kappa
 !
 ! For debuging potential_vorticity
@@ -492,6 +492,28 @@ pvfr0=pvfr0/g_nx/g_ny/g_nz
 potensfr0=potensfr0/g_nx/g_ny/g_nz
 
 !
+! Compute the aspect ratio dependent piece for non-unit aspect ratio PV
+!q= omega_3 * d theta /d z + f * d theta /d z - N*omega_3
+!Q = 0.5*q*q
+pv_type = 8
+call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
+pvLz=0
+potensLz=0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+         pvLz = pvLz + potvor(i,j,k)
+         potensLz = potensLz + (potvor(i,j,k)*potvor(i,j,k)*.5)
+      enddo
+   enddo
+enddo
+! normalize:
+pvLz=pvLz/g_nx/g_ny/g_nz
+potensLz=potensLz/g_nx/g_ny/g_nz
+
+
+
+!
 !
 !always set pv_type = 1 after
 pv_type=1
@@ -510,7 +532,9 @@ ints_e(11)=pvro0
 ints_e(12)=potensro0
 ints_e(13)=pvfr0
 ints_e(14)=potensfr0
-nints_e=14
+ints_e(15)=pvLz
+ints_e(16)=potensLz
+nints_e=16
 
 
 ! global sum over all processors:
