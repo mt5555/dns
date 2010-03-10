@@ -99,7 +99,7 @@ header_type=1; scale=1;           ! DNS standard data
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
-project_ch=.true.         !Craya-Herring projection and spectra
+project_ch=.false.         !Craya-Herring projection and spectra
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .true. !compute .scalars-bous files
@@ -155,6 +155,7 @@ if (compute_pv2spec) then
 endif
 if (compute_scalarsbous) then
    if (.not. allocated(Qhat))  allocate(Qhat(g_nz2,nx_2dz,ny_2dz,n_var))
+   if (.not. allocated(q3))  allocate(q3(nx,ny,nz,n_var))
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
