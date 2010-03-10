@@ -289,7 +289,7 @@ ken = ke*en/el;
 pen = pe*en/el;
 plot(timen,ken,'k')
 hold on
-plot(timen,pen,'r')
+plot(timen,pen,'ro')
 plot(timen,ken+pen,'b')
 %plot(time_2,ke_diss_tot,'r')
 %plot(time,hel,'g')

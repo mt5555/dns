@@ -7,7 +7,8 @@ mu=0;
 ke=0;
 nx=1;
 delx_over_eta=1;
-ext='.bisostr';
+%ext='.bisostr_pv5'; 
+ext = '.bisostr';
 eta = 1/(nx*delx_over_eta);
 
 %name = '~/projects/pv/data_analysis/lowforc/qg';
@@ -57,16 +58,16 @@ pname='n1024_Ro1Fr0.002_'
 times=[1.4:.1:2.3];
 nx=1024;
 
-%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/'
-%pname='n1024_Ro1Fr0.002_'
-%times=[2.7:.1:3.6];
-%nx=1024;
-
-name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/'
-pname='n1024_Ro1Fr0.001_'
-times=[.1:.1:2.2];
-times=[1.6:.1:2.2];
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/'
+pname='n1024_Ro1Fr0.002_'
+times=[2.7:.1:3.6];
 nx=1024;
+
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/'
+%pname='n1024_Ro1Fr0.001_'
+%times=[.1:.1:2.2];
+%times=[1.6:.1:2.2];
+%nx=1024;
 
 %name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/'
 %pname='n1024_Ro0.002Fr1_'
@@ -219,7 +220,7 @@ ylabel(ppname);
 xlabel('r/\eta','FontSize',16);
 
 
-figure(10); plot(times,peak,'-');hold on;
+figure(10); plot(times,peak,'bo');hold on;
 plot(times,2/3.*times./times,'--');hold on; %2/3 line
 
 %print -dpsc k215mean.ps

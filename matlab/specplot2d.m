@@ -20,35 +20,47 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 
-namedir = '~/projects/INCITE_runs/Intrepid/qg/';
-name = 'n640_bous3000_all';
-kf=4;
-
-%namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
-%name = 'n640_fcor14bous3000_all';
+%namedir = '~/projects/INCITE_runs/Intrepid/qg/';
+%ame = 'n640_bous3000_all';
 %kf=4;
+
+namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
+name = 'n640_fcor14bous3000_all';
+kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
 %name = 'n640_fcor3000bous14_all';
 %kf=4;
 
-namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/';
-name = 'n512_Ro1Fr0.01_all';
+%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/';
+%name = 'n512_Ro1Fr0.01_all';
 
-namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/';
-name = 'n1024_Ro1Fr0.002_all';
-kf=4;
+%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/';
+%name = 'n1024_Ro1Fr0.002_all';
+%kf=4;
 
-namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/';
-name = 'n1024_Ro1Fr0.002_all';
+%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/';
+%name = 'n1024_Ro1Fr0.002_all';
 
 namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/';
 name = 'n1024_Ro1Fr0.001_all';
 kf=4;
 
-namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/';
-name = 'n1024_Ro0.002Fr1_all';
-kf=4;
+%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/';
+%name = 'n1024_Ro0.002Fr1_all';
+%kf=4;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/LOWRES/sto_high_t4/';
+%name = 'n512_d0.25_Ro0.05_all';
+%kf=4;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_nodamp/';
+%name = 'n1024_d0.25_Ro0.05_all';
+%kf=4;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
+%name = 'n2048_d0.25_Ro0.05_0000.0000';
+%kf=4;
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -116,8 +128,8 @@ while (time < 35)
 
   kz = (1:numkz)-1;
   kh = (1:numkh)-1;
-  kzvals = [1,2,3,4,5,11,21,31,41,51,100];
-  khvals = [1,2,3,4,5,11,21,31];
+  kzvals = [1,2,3,4,5,11,21,31,41,51];
+  khvals = [1,2,3,4,5,11,21,31,41,51];
 
   %plot movie of spectra evolving in time
 if(0)
@@ -207,21 +219,26 @@ end
  
  %time average of spectra
  if(1)
- if (time > 1.4 & time < 7.6)
+ if (time > 1 & time < 5)
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
+        spec2d_Ev_ave = spec2d_w;
         specEhkz_ave = specuz + specvz; %avg over kh
+        specEvkz_ave = specwz + specwz;
         specPkz_ave = spectz;           %avg over kh
         specEhkh_ave = specuh + specvh; %avg over kz
+        specEvkh_ave = specwh;
         specPkh_ave = specth;           %avg over kz        
         j = j+1;
     else
         spec2d_t_ave = spec2d_t_ave + spec2d_t;
         spec2d_Eh_ave = spec2d_Eh_ave + spec2d_u + spec2d_v;
         specEhkz_ave = specEhkz_ave + specuz + specvz;
+        spec2d_Ev_ave = spec2d_Ev_ave + spec2d_w;
         specPkz_ave = specPkz_ave+ spectz;
         specEhkh_ave = specEhkh_ave + specuh + specvh;
+        specEvkh_ave = specEvkh_ave + specwh;
         specPkh_ave = specPkh_ave + specth;
         
         j = j + 1;
@@ -232,8 +249,10 @@ end
 spec2d_t_ave = spec2d_t_ave/j;
 spec2d_Eh_ave = spec2d_Eh_ave/j;
 specEhkz_ave = specEhkz_ave/j;
+specEvkz_ave = specEvkz_ave/j;
 specPkz_ave = specPkz_ave/j;
 specEhkh_ave = specEhkh_ave/j;
+specEvkh_ave = specEvkh_ave/j;
 specPkh_ave = specPkh_ave/j;
 
 %plot time avg spectra
@@ -256,7 +275,7 @@ end
 figure(10);subplot(2,1,2)
 xlabel('k_z');
    
-figure(11);hold off;
+figure(11);hold off; 
 subplot(2,1,1);set(gca,'fontsize',17); hold off;
 subplot(2,1,2);set(gca,'fontsize',17); hold off;
 for i = 1:length(kzvals) 
@@ -294,6 +313,18 @@ ylabel('P(k_z)');
 xlabel('k_z')
 figure(13);subplot(2,1,1); title('Time ave')
 
+figure(14); hold off;
+subplot(2,1,1);hold off;
+loglog(kz,specEvkz_ave.*((kz'.^expo)));hold on;%pause
+set(gca,'fontsize',17)
+ylabel('E_v(k_z)');
+xlabel('k_z');
+title('Time ave');
+subplot(2,1,2);hold off;
+loglog(kh,specEvkh_ave.*((kh.^expo)));hold on;%pause
+set(gca,'fontsize',17);
+ylabel('E_v(k_h)');
+xlabel('k_h');
 
 
 %normalize x-axis by ratio kz or kh as necessary
