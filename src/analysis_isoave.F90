@@ -73,8 +73,8 @@ integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 logical :: compute_cj,compute_scalar, compute_uvw,compute_pdfs,compute_hspec,compute_uq
 logical :: read_uvw
 integer :: pv_type,stype
-integer :: nints_e=14
-real*8 :: ints_e(14)
+integer :: nints_e=16
+real*8 :: ints_e(16)
 
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
 

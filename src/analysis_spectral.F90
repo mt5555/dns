@@ -55,6 +55,7 @@ use sforcing
 implicit none
 
 real*8,allocatable  :: Q(:,:,:,:)
+real*8,allocatable  :: Qhat(:,:,:,:)
 real*8,allocatable  :: QI(:,:,:,:)
 real*8,allocatable  :: QR(:,:,:,:)
 real*8,allocatable  :: q1(:,:,:,:)
@@ -71,7 +72,10 @@ real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,range(3,2),dummy,scale
 integer :: lx1,lx2,ly1,ly2,lz1,lz2,nxlen,nylen,nzlen
 integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
+integer :: nints_e=16
+real*8  :: ints_e(16)
 logical :: compute_hspec, compute_hfree, compute_pv2spec, compute_pv2HA
+logical :: compute_scalarsbous
 logical :: read_uvw
 logical :: project_ch
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
@@ -149,7 +153,9 @@ endif
 if (compute_pv2spec) then
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,n_var))
 endif
-
+if (compute_scalarsbous) then
+   if (.not. allocated(Qhat))  allocate(Qhat(g_nz2,nx_2dz,ny_2dz,n_var))
+endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  if needed, initialize some constants.
@@ -314,7 +320,7 @@ do
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,q1,work1,work2)
       endif
-
+      
       call compute_pv2_HA(Q,q1,work1,work2)
    endif
       
@@ -347,7 +353,7 @@ do
          call cwrite8(fid,ints_e,nints_e)
          call cclose(fid,ierr)
       endif
-      
+   endif
       
       
 
