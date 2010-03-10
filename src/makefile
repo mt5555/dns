@@ -424,8 +424,8 @@ analysis_rms:  analysis_rms.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 analysis_isoave:  analysis_isoave.o $(ASPECT_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_isoave analysis_isoave.o $(ASPECT_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
-analysis_spectral: analysis_spectral.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
-	$(LINK) -o analysis_spectral analysis_spectral.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
+analysis_spectral: analysis_spectral.o $(ASPECT_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
+	$(LINK) -o analysis_spectral analysis_spectral.o  $(ASPECT_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
 
 analysis_spec2d: analysis_spec2d.o $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3)
 	$(LINK) -o analysis_spec2d analysis_spec2d.o  $(TURB_DIAG) $(OBJS1) $(OBJS2) $(OBJS3) $(LDFLAGS) $(MPILIB)
