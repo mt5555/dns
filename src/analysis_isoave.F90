@@ -105,7 +105,7 @@ read_uvw=.false.
 
 
 tstart=2.6
-tstop=4.0
+tstop=3.6
 tinc=0.1
 icount=0
 
@@ -400,6 +400,7 @@ do
          write(sdata,'(f10.4)') 10000.0000 + time
          write(idata,'(i1)') str_type
          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr"
+!         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".bisostr_pv5"
          print *,fname
          call copen(fname,"w",fid,ierr)
          if (ierr/=0) then

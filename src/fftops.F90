@@ -387,6 +387,7 @@ integer pv_type
 !bw  iv        5   q = -bous omega_3		(Fr->0, Ro=1)
 !bw  v         6   q = bous omega_3 + omega_i diff_i theta 
 !bw  vi        7   q = fcor d theta / d z + omega_i diff_i theta
+!Lz \neq 1     8   q = (d u/d z)*(d theta/ d y) - (d v/d z) * (d theta/d x) + omega_3 * d theta / d z + fcor * d theta / d z - bous *omega_3  
 
 ! local variables
 integer i,j,k,n
@@ -493,12 +494,27 @@ elseif (pv_type == 7) then
 
 elseif (pv_type == 8) then
 !
-! pv = omega_3 dot (d theta / dz) + fcor *(d theta / d z) - bous*omega_3
+! pv = (d u / d z) * (d theta / d y) - (d v / d z)*(d theta / d x) + omega_3 * (d theta / dz) + fcor *(d theta / d z) - bous*omega_3
 !
 
-!compute (d theta/ d z)
+!compute (d u /d z)
+   call der(u(1,1,1,1),d1,dummy,work,DX_ONLY,3)
+   pv = d1/Lz
+!compute (d theta/ d y)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,2)
+   pv = pv*d1   
+
+!compute (d v/ d z)
+   call der(u(1,1,1,2),d1,dummy,work,DX_ONLY,3)
+!store dv/dz in first component of vorticity
+   vor(:,:,:,1) = d1/Lz;
+!compute (d theta/ d x)
+   call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,1)
+   pv = pv - vor(:,:,:,1)*d1   
+
+!compute (d theta/dz)
    call der(u(1,1,1,np1),d1,dummy,work,DX_ONLY,3)
-   pv = (d1/Lz)*(vor(:,:,:,3)+fcor) - bous*vor(:,:,:,3)
+   pv = pv + (d1/Lz)*(vor(:,:,:,3)+fcor) - bous*vor(:,:,:,3)
    
 endif
 

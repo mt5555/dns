@@ -132,11 +132,14 @@ endif
 
 if (mu>0) delt = min(delt,cfl_vis/mumax)       ! viscous CFL
 if (psmax>0) delt = min(delt,cfl_vis/psmax)    ! viscous CFL for passive scalars
-!if (bous+fcor > 0 ) delt = min(delt,.2*pi/(bous+fcor))  ! intertial gravity	
+if (bous+fcor > 0 ) delt = min(delt,.2*pi/(bous+fcor))  ! inertia gravity	
+							  ! wave CFL, 5 delt/period  
+!if (bous+fcor > 0 ) delt = min(delt,.4*pi/(bous+fcor))  ! inertia gravity
+                                                        ! wave CFL, 2.5	delt/period
+!if (bous+fcor > 0 ) delt = min(delt,.3*pi/(bous+fcor))  ! inertia gravity
+                                                        ! wave CFL, 3.33 delt/period
+!if (bous+fcor > 0 ) delt = min(delt,.1*pi/(bous+fcor))  ! inertia gravity	
 							  ! wave CFL, 10 delt/period  
-if (bous+fcor > 0 ) delt = min(delt,.4*pi/(bous+fcor))  ! intertial gravity
-                                                        ! wave CFL, 5 delt/period
-			
 
 delt = max(delt,delt_min)
 delt = min(delt,delt_max)
@@ -299,6 +302,7 @@ if (doit_screen) then
     if (mu==0 .and. mu_hyper_value > 0) mu2 = mu_scale     ! E(k) scaled viscosity
 
    if (mu2>0 .and. ndim>2 .and. ke_diss<0) then
+!   if (mu2>0 .and. ndim>2) then
 !      lambda=sqrt(  5*(2*ints(6))/ints(2)  )
 
 !      epsilon=-ke_diss
