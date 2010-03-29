@@ -31,7 +31,7 @@ name = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/'
 %times=[0:.1:3.3];
 %nx=256;
 
-%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/'
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/'
 %pname='n256_Ro1Fr0.01_'
 %times=[.1:.1:3.9];
 %nx = 256;
@@ -39,7 +39,7 @@ name = '~/projects/pv/data_analysis/lowforc/low4/qg256/bous2000/'
 %times=[.1:.1:5.0];
 %nx=512;
 pname='n1024_Ro1Fr0.01_'
-times=[3:.1:4.5];
+times=[1:.1:2.9];
 nx=1024;
 
 
@@ -53,21 +53,21 @@ nx=1024;
 %times=[.1:.1:.9];
 %nx=1024;
 
-name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/'
-pname='n1024_Ro1Fr0.002_'
-times=[1.4:.1:2.3];
-nx=1024;
-
-name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/'
-pname='n1024_Ro1Fr0.002_'
-times=[2.7:.1:3.6];
-nx=1024;
-
-%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/'
-%pname='n1024_Ro1Fr0.001_'
-%times=[.1:.1:2.2];
-%times=[1.6:.1:2.2];
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/'
+%pname='n1024_Ro1Fr0.002_'
+%times=[1.4:.1:2.3];
 %nx=1024;
+
+%name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/'
+%pname='n1024_Ro1Fr0.002_'
+%times=[2.7:.1:3.6];
+%nx=1024;
+
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/'
+pname='n1024_Ro1Fr0.001_'
+times=[.1:.1:3.5];
+%times=[2.0:.1:3.5];
+nx=1024;
 
 %name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/'
 %pname='n1024_Ro0.002Fr1_'
@@ -81,7 +81,8 @@ nx=1024;
 
 %name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr1/n1024_nu.5e-5/'
 %pname='n1024_Ro0.001Fr1_'
-%times=[.1:.1:1.0];
+%times=[.1:.1:3.0];
+%times=[2.0:.1:3.0];
 %nx=1024;
 
 
@@ -222,6 +223,6 @@ xlabel('r/\eta','FontSize',16);
 
 figure(10); plot(times,peak,'bo');hold on;
 plot(times,2/3.*times./times,'--');hold on; %2/3 line
-
+%clear peak
 %print -dpsc k215mean.ps
 
