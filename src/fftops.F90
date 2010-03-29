@@ -494,7 +494,8 @@ elseif (pv_type == 7) then
 
 elseif (pv_type == 8) then
 !
-! pv = (d u / d z) * (d theta / d y) - (d v / d z)*(d theta / d x) + omega_3 * (d theta / dz) + fcor *(d theta / d z) - bous*omega_3
+! pv = (d u / d z) * (d theta / d y) - (d v / d z)*(d theta / d x) 
+!       + omega_3 * (d theta / dz) + fcor *(d theta / d z) - bous*omega_3
 !
 
 !compute (d u /d z)

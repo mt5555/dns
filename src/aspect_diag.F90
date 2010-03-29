@@ -493,7 +493,8 @@ potensfr0=potensfr0/g_nx/g_ny/g_nz
 
 !
 ! Compute the aspect ratio dependent piece for non-unit aspect ratio PV
-!q = omega_3 * d theta /d z + f * d theta /d z - N*omega_3
+!q = (d u / d z) * (d theta / d y) - (d v / d z)*(d theta / d x) 
+!    + omega_3 * (d theta /d z) + f * d theta /d z - N*omega_3
 !Q = 0.5*q*q
 pv_type = 8
 call potential_vorticity(potvor,vor,Q,potensdiss_mu,potensdiss_kappa,pv_type)
