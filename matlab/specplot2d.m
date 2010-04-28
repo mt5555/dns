@@ -58,9 +58,21 @@ kf=4;
 %name = 'n1024_d0.25_Ro0.05_all';
 %kf=4;
 
-%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
-%name = 'n2048_d0.25_Ro0.05_0000.0000';
+namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
+name = 'n2048_d0.25_Ro0.05_all';
+kf=4;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/';
+%name = 'n2048_d0.25_Ro0.01_all';
 %kf=4;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.005_nodamp/';
+%name = 'n2048_d0.25_Ro0.005_all';
+%kf=4;
+
+namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
+name = 'n2048_d0.25_Ro0.002_all';
+kf=4;
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -219,7 +231,7 @@ end
  
  %time average of spectra
  if(1)
- if (time > 1 & time < 5)
+ if (time > 3 & time < 5)
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
@@ -383,8 +395,8 @@ xlabel('k_h')
 figure(32);hold off; 
 axis([1 640/3 1e-20 10])
 set(gca,'fontsize',17)
-loglog(kh,specEhkh_ave.*((kh.^expo)));hold on;%pause
-loglog(kh,specPkh_ave.*((kh.^expo)),'r--');hold on;%pause
+loglog(kh,specEhkh_ave.*((kh.^expo)),'Linewidth',2);hold on;%pause
+loglog(kh,specPkh_ave.*((kh.^expo)),'r--','Linewidth',2);hold on;%pause
 legend('E_h(k_h)','P(k_h)');
 x = 5:40;
 y = x.^(-1);
@@ -398,8 +410,8 @@ xlabel('k_h');
 figure(33); hold off;
 axis([1 640/3 1e-10 10])
 set(gca,'fontsize',17)
-loglog(kz,specEhkz_ave.*((kz'.^expo)));hold on;%pause
-loglog(kz,specPkz_ave.*((kz'.^expo)),'r--');hold on;%pause
+loglog(kz,specEhkz_ave.*((kz'.^expo)),'Linewidth',2);hold on;%pause
+loglog(kz,specPkz_ave.*((kz'.^expo)),'r--','Linewidth',2);hold on;%pause
 legend('E_h(k_z)','P(k_z)');
 x = 5:40;
 y = x.^(-1);

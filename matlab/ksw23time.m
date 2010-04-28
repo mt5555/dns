@@ -65,8 +65,8 @@ nx=1024;
 
 name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/'
 pname='n1024_Ro1Fr0.001_'
-times=[.1:.1:3.5];
-%times=[2.0:.1:3.5];
+%times=[.1:.1:3.5];
+times=[2.0:.1:3.5];
 nx=1024;
 
 %name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/'
@@ -84,6 +84,12 @@ nx=1024;
 %times=[.1:.1:3.0];
 %times=[2.0:.1:3.0];
 %nx=1024;
+
+name = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr0.002/'
+pname='n1024_Ro0.002Fr0.002_'
+%times=[.1:.1:2.5];
+times=[1.5:.1:3.0];
+nx=1024;
 
 
 %check this subroutine, for now set averages to 1

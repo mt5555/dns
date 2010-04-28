@@ -9,6 +9,7 @@ clear all;
 % defaults:
 nx=0;
 fcor=0;
+bous=0;
 f_k=4;
 
 fid2=-1;
@@ -32,19 +33,22 @@ fid2=-1;
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/n1024_Ro1Fr0.002_all.scalars-bous','r')
-%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/n1024_Ro1Fr0.002_nu.5e-5_all.scalars-bous','r')
+fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/n1024_Ro1Fr0.002_nu.5e-5_all.scalars-bous','r')
 
-fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_all.scalars-bous','r')
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_0003.6000.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_0003.7000.scalars-bous','r')
 %nx=1024;ny=1024;nz=1024;
 
 %fid=endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/n1024_Ro0.002Fr1_all.scalars-bous','r')
 
-fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr1/n1024_nu.5e-5/n1024_Ro0.001Fr1_all.scalars-bous','r')
+%fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr1/n1024_nu.5e-5/n1024_Ro0.001Fr1_all.scalars-bous','r')
 %nx=1024;ny=1024;nz=1024;
 
+
 %fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr0.002/n1024_Ro0.002Fr0.002_all.scalars-bous','r')
+%fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr0.002/n1024_Ro0.002Fr0.002_old_all.scalars-bous','r')
+%fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr0.002/n1024_Ro0.002Fr0.002_new_all.scalars-bous','r')
 %nx=1024;ny=1024;nz=1024;
 
 %fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr0.001/n1024_Ro0.001Fr0.001_all_old.scalars-bous','r')
@@ -63,6 +67,7 @@ fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr1/n1024_nu
 
 %fid =endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_nodamp/n1024_d0.25_Ro0.05_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_nodamp/n1024_d0.25_Ro0.05_-newall.scalars-bous','r')
+fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.002_nodamp/n1024_d0.25_Ro0.002_all.scalars-bous','r')
 %nx=1024;ny=1024;nz=256;
 
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/n2048_d0.25_Ro0.05_all.scalars-bous','r')
@@ -70,7 +75,7 @@ fid =endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.001Fr1/n1024_nu
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/n2048_d0.25_Ro0.01_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/n2048_d0.25_Ro0.01_new2_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.005_nodamp/n2048_d0.25_Ro0.005_all.scalars-bous','r')
-%fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/n2048_d0.25_Ro0.002_all.scalars-bous','r')
+fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/n2048_d0.25_Ro0.002_all.scalars-bous','r')
 %nx=2048;ny=2048;nz=512;
 
 
@@ -141,10 +146,14 @@ title('PV');
 figure(5)
 size=1; % nx*ny*nz;
 subplot(1,1,1);
+set(gca,'fontsize',16);
 %clf
+tscale=1;
+%if (max(fcor,bous) ~=0) then
+%    tscale = max(fcor,bous);
 plot(time,potens/size,'b-','Linewidth',2);hold on;
 plot(time,potens_qg/size,'r--','Markersize',6);
-plot(time,potens_ro0fr1/size,'r*','Markersize',6);
+plot(time,potens_ro0fr1/size,'ro','Markersize',6);
 plot(time,potens_ro1fr0/size,'k*','Markersize',6);
 if (length(potens_Lz) > 1)
 plot(time,potens_Lz/size,'rx','Markersize',10);
@@ -154,6 +163,7 @@ legend('Q', 'Q_{qg}','0.5 |f \partial_z \rho |^2', '0.5 |N \omega_3|^2','Q_{Lz}'
 else
 legend('Q', 'Q_{qg}','0.5 |f \partial_z \rho |', '0.5 |N \omega_3|^2')
 end
+xlabel('time t')
 
 %check that dissipation matches dQ/dt for decaying case
 if(0)
