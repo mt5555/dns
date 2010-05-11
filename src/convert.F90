@@ -994,6 +994,7 @@ do
       call compute_project_CHfield(Q,Q2,work1,work2)	
 
 ! check energy of wave field
+      dummy=0
       do n = 1,n_var
          do k=nz1,nz2
             do j=ny1,ny2
@@ -1005,6 +1006,7 @@ do
       enddo
 
 ! check energy of vortical field
+      dummy=0
       do n = 1,n_var
          do k=nz1,nz2
             do j=ny1,ny2
