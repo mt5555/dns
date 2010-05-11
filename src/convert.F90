@@ -993,6 +993,28 @@ do
       call print_message("computing wave and vortical projected fields ...")
       call compute_project_CHfield(Q,Q2,work1,work2)	
 
+! check energy of wave field
+      do n = 1,n_var
+         do k=nz1,nz2
+            do j=ny1,ny2
+               do i=nx1,nx2
+                  dummy= dummy+0.5*(Q(i,j,k,n)**2)
+               enddo
+            enddo
+         enddo
+      enddo
+
+! check energy of vortical field
+      do n = 1,n_var
+         do k=nz1,nz2
+            do j=ny1,ny2
+               do i=nx1,nx2
+                  dummy= dummy+0.5*(Q2(i,j,k,n)**2)
+               enddo
+            enddo
+         enddo
+      enddo
+
 #if 0
 !SK I don't think I have the data write correct
       write(sdata,'(f10.4)') 10000.0000 + time

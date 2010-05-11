@@ -3366,11 +3366,11 @@ enddo
 ! convert wave modes back to grid space
 ! store in Q
 do n = 1,n_var
-   write(message,*) 'converting CH modes back to gridspace, n=',n   
+   write(message,*) 'converting CH wave modes back to gridspace, n=',n   
    call print_message(message)
    call complex_to_sincos_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
    Q(:,:,:,n)=work
-   call ifft3d(Q(1,1,1,n),work2)          ! inplace FFT of work2
+   call ifft3d(Q(1,1,1,n),work2)          ! inplace FFT of Q
 enddo
 
 
@@ -3378,11 +3378,11 @@ enddo
 ! convert vortical modes back to grid space
 ! store in QR
 do n = 1,n_var
-   write(message,*) 'converting CH modes back to gridspace, n=',n   
+   write(message,*) 'converting CH vortical modes back to gridspace, n=',n   
    call print_message(message)
    call complex_to_sincos_field(work,QRR(1,1,1,n),QII(1,1,1,n))  ! convert 
    QR(:,:,:,n)=work
-   call ifft3d(QR(1,1,1,n),work2)          ! inplace FFT of work2
+   call ifft3d(QR(1,1,1,n),work2)          ! inplace FFT of QR
 enddo
 
 
