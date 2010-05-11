@@ -105,7 +105,7 @@ character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
 real*8 :: tstart,tstop,tinc,time,time2
 real*8 :: u,v,w,x,y
-real*8 :: kr,ke,ck,xfac,dummy
+real*8 :: kr,ke,ck,xfac,dummy,xtmp
 real*8 :: schmidt_in,mn,mx,a0,a1
 real*8 :: xwerr(1000),xw,binsize
 CPOINTER :: null=0,fidu,fid
@@ -1004,6 +1004,14 @@ do
             enddo
          enddo
       enddo
+#ifdef USE_MPI
+      xtmp = dummy
+      call mpi_allreduce(xtmp,dummy,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+      dummy=dummy/g_nx/g_ny/g_nz
+      write(message,'(a,e15.8)') "grid space energy in wave field = ",dummy
+      call print_message(message)
+
 
 ! check energy of vortical field
       dummy=0
@@ -1016,6 +1024,15 @@ do
             enddo
          enddo
       enddo
+#ifdef USE_MPI
+      xtmp = dummy
+      call mpi_allreduce(xtmp,dummy,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+#endif
+      dummy=dummy/g_nx/g_ny/g_nz
+      write(message,'(a,e15.8)') "grid space energy in vortical field = ",dummy
+      call print_message(message)
+
+
 
 #if 0
 !SK I don't think I have the data write correct
