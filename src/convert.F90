@@ -69,6 +69,8 @@
 !  -cout ehor  (21)    horizontal energy field
 !  -cout potens (22)   potential enstrophy field
 !  -cout pe (23) potential energy field
+!  -cout CH_decomp (24) write wave modes and vortical modes field
+! 
 
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -974,6 +976,44 @@ do
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".pe"
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
    endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Write out wave modes field and vortical modes field in physical space
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+   if (convert_opt==24) then  ! -cout CH_decomp
+      call input_uvw(time,Q,vor,work1,work2,header_user)
+      call input_passive(runname, time, Q, work1, work2)
+      if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
+
+!      do i=1,ndim
+!         call print_max(Q(1,1,1,i),i)
+!      enddo
+      call print_message("computing wave and vortical projected fields ...")
+      call compute_project_CHfield(Q,Q2,work1,work2)	
+
+#if 0
+!SK I don't think I have the data write correct
+      write(sdata,'(f10.4)') 10000.0000 + time
+      basename=runname(1:len_trim(runname)) // "-wave."
+      call output_uvw(basename,time,Q,vor,work1,work2,2)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
+          // '-wave'
+      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+
+      write(sdata,'(f10.4)') 10000.0000 + time
+      basename=runname(1:len_trim(runname)) // "-vort."
+      call output_uvw(basename,time,Q2,vor,work1,work2,2) 
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
+          // '-vort'
+      call singlefile_io3(time,Q2,fname,work1,work2,0,io_pe,.false.,2)
+#endif
+
+   endif
+
 
 
    if (tstart>=0) then
