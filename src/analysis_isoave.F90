@@ -105,7 +105,7 @@ read_uvw=.false.
 
 
 tstart=2.6
-tstop=3.6
+tstop=6.0
 tinc=0.1
 icount=0
 

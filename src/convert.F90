@@ -116,8 +116,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=2.2
-tstop=2.4
+tstart=4.72
+tstop=10.00
 tinc=0.1
 
 
@@ -904,7 +904,7 @@ do
    endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Write out horizontal velocity field in physical space
+! Write out headerless horizontal velocity field in physical space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
    if (convert_opt==21) then  ! -cout ehor
@@ -928,13 +928,17 @@ do
    endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Write out potential enstrophy field
+! Write out headerless potential vorticity and potential enstrophy field
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==22) then  ! -cout potens
       write(message,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // message(2:10) // '.pv'
       call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+           // message(2:10) // '.potvor'
+      call print_message("writing headerless potential vorticity...")
+      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
       call print_message("computing potential enstrophy...")	
       do k=nz1,nz2
       do j=ny1,ny2
@@ -953,7 +957,7 @@ do
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Write out potential energy field in physical space
+! Write out headerless potential energy field in physical space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
    if (convert_opt==23) then  ! -cout pe
@@ -1032,10 +1036,6 @@ do
       write(message,'(a,e15.8)') "grid space energy in vortical field = ",dummy
       call print_message(message)
 
-
-
-#if 0
-!SK I don't think I have the data write correct
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=runname(1:len_trim(runname)) // "-wave."
       call output_uvw(basename,time,Q,vor,work1,work2,2)
@@ -1051,7 +1051,6 @@ do
            // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
           // '-vort'
       call singlefile_io3(time,Q2,fname,work1,work2,0,io_pe,.false.,2)
-#endif
 
    endif
 

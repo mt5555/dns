@@ -3332,7 +3332,6 @@ do k=nz1,nz2
             
          endif
 
-#if 0
          ! store wavemodes
 
          QR(i,j,k,1) = bmR*phimR(1) - bmI*phimI(1)+ bpR*phipR(1) - bpI*phipI(1)
@@ -3345,7 +3344,7 @@ do k=nz1,nz2
          QI(i,j,k,4) = bmR*phimI(4) + bmI*phimR(4)+ bpR*phipI(4) + bpI*phipR(4)
          
          
-! store vortical modes 
+	 ! store vortical modes 
          QRR(i,j,k,1) = b0R*phi0(1)
          QRR(i,j,k,2) = b0R*phi0(2) 
          QRR(i,j,k,3) = b0R*phi0(3)
@@ -3354,9 +3353,6 @@ do k=nz1,nz2
          QII(i,j,k,2) = b0I*phi0(2)
          QII(i,j,k,3) = b0I*phi0(3)
          QII(i,j,k,4) = b0I*phi0(4)
-
-#endif
-
 
 
       enddo
