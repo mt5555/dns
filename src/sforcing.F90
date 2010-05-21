@@ -1201,12 +1201,19 @@ if (0==init_sforcing) then
       nf_comp = 2
    endif
 
+   ! only force waves in z with mod(kz,kzmod)==0)
+   ! default = 1, NO EFFECT.
+   kzmod = 1
+
    ! set the width of the forcing.  If fparam1==0, we use the 
    ! default (fwidth=8).  To get fwidth=0, specify in the input 
    ! file fparam1=.1  (non zero, but will round to zero below)
    if (fparam1==0) then
       ! default is +/- 8  
       fwidth=8
+   if (fparam1>10000) then
+      fwidth=fparam1-10000
+      kzmod = 4
    else
       ! otherwise, it was specified in the input file:
       ! fparam1 < 0   means use older forcing function
@@ -1248,7 +1255,7 @@ if (0==init_sforcing) then
          ! This is normalized so that <f,f> = sum(F(k)) = ffval
          ! and thus eps_f = <u,f> = .5 <f,f> = .5 ffval
          !
-         ener_target(wn)=ffval*exp(-2*pi*pi*(wn-forcing_peak_waveno)**2)
+         ener_target(wn)=ffval*exp((-2*pi*pi/(kzmod*kzmod))*(wn-forcing_peak_waveno)**2)
       endif
    enddo
    
@@ -1260,11 +1267,12 @@ if (0==init_sforcing) then
          im=z_imcord(i)
          do k=1,g_nz
             km=z_kmcord(k)
+
             ! use "fat shells":
             wn=Lz*sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
             ! use "thin shells":
             ! wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
-            if (wn<=numb .and. wn>=numb1) numk(wn)=numk(wn)+1
+            if (wn<=numb .and. wn>=numb1 .and. mod(abs(km),kzmod)==0) numk(wn)=numk(wn)+1
          enddo
       enddo
    enddo
@@ -1315,7 +1323,7 @@ if (new_f==1) then
             wnx = sqrt(real(wn2))
             ! we uses FAT SHELLS for the test, but the true wave number wnx
             ! for normalizations below
-            if (numb1 <= wn .and. wn <= numb .and. delt>0) then
+            if (numb1 <= wn .and. wn <= numb .and. delt>0 .and. mod(abs(km),kzmod)==0) then
                
                xfac=8
                if (km==0) xfac=xfac/2
@@ -1384,7 +1392,7 @@ if (new_f==1) then
             wnx = sqrt(real(wn2))
             ! we uses FAT SHELLS for the test, but the true wave number wnx
             ! for normalizations below
-            if (numb1 <= wn .and. wn <= numb .and. delt>0) then
+            if (numb1 <= wn .and. wn <= numb .and. delt>0 .and. mod(abs(km),kzmod)==0) then
                
                xfac=8
                if (km==0) xfac=xfac/2
