@@ -1189,7 +1189,7 @@ real*8 ener(512),ener2(512),ener_test(512),ffnorm,ener_pe(512),ener_test_pe(512)
 integer,save :: numk(512),numk2(512)
 real*8,save :: ener_target(512)
 integer,save :: fwidth, nf_comp
-integer :: count
+integer :: count, kzmod
 
 if (0==init_sforcing) then
    init_sforcing=1
