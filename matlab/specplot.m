@@ -51,10 +51,10 @@ name = 'n640_bous3000_all';
 namedir = '~/INCITE_runs/Intrepid/qg/';             
     
 name = 'n640_fcor14bous3000_all';
-namedir = '~/INCITE_runs/Intrepid/Ro1Fr0/';  
+namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';  
 
-name = 'n640_fcor3000bous14_all';
-namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';  
+%name = 'n640_fcor3000bous14_all';
+%namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';  
 
 
 %name = 'sc2048A0000.9500';
@@ -75,7 +75,7 @@ namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';
 %namedir ='/home/kurien/INCITE_runs/SW02_tests/';
 
 
-namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/';
+%namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/';
 %namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/fft_sphere/';
 %name = 'n64_d1_0000.0000'; Lz = 1;
 %name = 'n128_d0.5_0000.0000'; Lz = 1/2;
@@ -85,17 +85,19 @@ namedir ='/home/kurien/INCITE_runs/Intrepid/lowaspect_NS/';
 %name = 'n512_d0.5_all'; Lz = 1/2;
 
 
-namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/';
+%namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/';
 %name = 'n256_Ro1Fr0.01_all';
 %name = 'n512_Ro1Fr0.01_all';
-name = 'n1024_Ro1Fr0.01_all';
+%name = 'n1024_Ro1Fr0.01_all';
 
-namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/';
-name = 'n1024_Ro1Fr0.002_all';
+%namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/';
+%name = 'n1024_Ro1Fr0.002_all';
 
-namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/';
-name = 'n1024_Ro1Fr0.002_0000.0000';
+%namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/';
+%name = 'n1024_Ro1Fr0.002_0000.0000';
 
+namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/';
+name = 'n1024_Ro1Fr0.002_0002.7000';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
@@ -238,32 +240,42 @@ while (time>=0 & time<=999)
     
     % longitudinal spectraum
     figure(4);title('longitudinal 1D spectrum');
-    subplot(1,1,1);    
+    subplot(2,1,1);    
     if (Lz < 1) 
     loglog((0:(n_x-1)),spec_ux','b');hold on;
     loglog((0:(n_y-1)),spec_vy','b');hold on;
-    loglog((0:1/Lz:(n_z-1)/Lz),spec_wz'*Lz,'b'); hold off;
+    loglog((0:1/Lz:(n_z-1)/Lz),spec_wz'*Lz,'b'); hold on;
     else
     %loglog53(n_x,spec_ux,' ',CK*18/55,6);     hold on;
     %loglog53(n_y,spec_vy,' ',CK*18/55,6);     hold on;
     %loglog53(n_z,spec_wz,'longitudinal 1D spectrum',CK*18/55,6);     hold on;
-    loglog((0:(n_x-1)),spec_ux','b');%hold on;
-    loglog((0:(n_y-1)),spec_vy','b');%hold on;
-    loglog((0:(n_z-1)),spec_wz,'b'); %hold off;
+    loglog((0:(n_x-1)),spec_ux','b');hold on;
+    loglog((0:(n_y-1)),spec_vy','r');hold on;
+    loglog((0:(n_z-1)),spec_wz,'k'); hold off;
     end
     %hold on;
-    end
+  end
+    title('longitudinal 1D spectral of kinetic energy');
 %    % transverse spectraum
-%    subplot(2,1,2);
-%    loglog53(n_x,spec_uy,' ',CK*18/55);     hold on;
-%   loglog53(n_x,spec_uz,' ',CK*18/55);     hold on;
-%    loglog53(n_y,spec_vx,' ',CK*18/55);     hold on;
-%    loglog53(n_y,spec_vz,' ',CK*18/55);     hold on;
-%    loglog53(n_z,spec_wx,' ',CK*18/55);     hold on;
-%    loglog53(n_z,spec_wy,'transverse 1D spectrum',CK*18/55);     
-%    hold off;
+    subplot(2,1,2);
+%    loglog53(n_y,spec_uy,' ',CK*18/55);     hold on;
+    loglog((0:n_y-1),spec_uy,'b');     hold on;
+%    loglog53((0:(n_z-1)),spec_uz,'b');     hold on;
+    loglog((0:(n_z-1)),spec_uz,'bx');     hold on;
+%    loglog53(n_x,spec_vx,' ',CK*18/55);     hold on;
+   loglog((0:n_x-1),spec_vx,'r');     hold on;
+
+%    loglog53(n_z,spec_vz,' ',CK*18/55);     hold on;
+   loglog((0:n_z-1),spec_vz,'rx');     hold on;
+
+%    loglog53(n_x,spec_wx','r',' ',CK*18/55);     hold on;
+   loglog((0:n_x-1),spec_wx,'k');     hold on;
+
+%    loglog53(n_y,spec_wy','r','transverse 1D spectrum',CK*18/55);     
+  loglog((0:n_y-1),spec_wy,'k');     
+    hold off;
 %
-title('longitudinal 1D spectra of kinetic energy');
+title('transverse 1D spectra of kinetic energy');
   
   
   end

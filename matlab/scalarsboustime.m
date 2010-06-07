@@ -26,6 +26,11 @@ fid2=-1;
 %fid=endianopen('~/projects/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
 %nx=640;ny=640;nz=640;
 
+fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256/n256_Ro0.01_all.scalars-bous','r');
+%fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/n256_Ro0.01_all.scalars-bous','r');
+fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/n256_Ro0.01_2_all.scalars-bous','r');
+fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_thinshell16force/n256_Ro0.01_all.scalars-bous','r');
+
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n256_Ro1Fr0.01_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n512_Ro1Fr0.01_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n1024_Ro1Fr0.01_all.scalars-bous','r')
@@ -33,7 +38,7 @@ fid2=-1;
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.2e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/n1024_Ro1Fr0.002_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.7e-5/n1024_Ro1Fr0.002_all.scalars-bous','r')
-fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/n1024_Ro1Fr0.002_nu.5e-5_all.scalars-bous','r')
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/n1024_Ro1Fr0.002_nu.5e-5_all.scalars-bous','r')
 
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/n1024_Ro1Fr0.001_0003.6000.scalars-bous','r')
@@ -154,7 +159,7 @@ tscale=1;
 plot(time,potens/size,'b-','Linewidth',2);hold on;
 plot(time,potens_qg/size,'r--','Markersize',6);
 plot(time,potens_ro0fr1/size,'ro','Markersize',6);
-plot(time,potens_ro1fr0/size,'k*','Markersize',6);
+plot(time,potens_ro1fr0/size,'k*','Markersize',10);
 if (length(potens_Lz) > 1)
 plot(time,potens_Lz/size,'rx','Markersize',10);
 legend('Q', 'Q_{qg}','0.5 |f \partial_z \rho |^2', '0.5 |N \omega_3|^2','Q_{Lz}')

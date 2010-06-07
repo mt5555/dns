@@ -2,6 +2,8 @@ clear
 
 forpaper = 1; % generate plots for paper
 totals = 1; %general plots about total energies
+scales = 1; %general plots showing evolution of correlation lengths
+Lz = 1; %default
 
 epsilon=.41;
 %CK=1.5*epsilon^(2/3);
@@ -48,31 +50,31 @@ kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/';
 %name = 'n1024_Ro0.002Fr1_all';
-%kf=4;
+%kf=4; 
 
 %namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/LOWRES/sto_high_t4/';
 %name = 'n512_d0.25_Ro0.05_all';
-%kf=4;
+%kf=4; Lz = 0.25;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_nodamp/';
 %name = 'n1024_d0.25_Ro0.05_all';
-%kf=4;
+%kf=4; Lz = 0.25;
 
 namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
 name = 'n2048_d0.25_Ro0.05_all';
-kf=4;
+kf=4; Lz = 0.25;
 
-%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/';
-%name = 'n2048_d0.25_Ro0.01_all';
-%kf=4;
+namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/';
+name = 'n2048_d0.25_Ro0.01_all';
+kf=4; Lz = 0.25;
 
-%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.005_nodamp/';
-%name = 'n2048_d0.25_Ro0.005_all';
-%kf=4;
+namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.005_nodamp/';
+name = 'n2048_d0.25_Ro0.005_all';
+kf=4; Lz = 0.25;
 
 namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
 name = 'n2048_d0.25_Ro0.002_all';
-kf=4;
+kf=4; Lz = 0.25;
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -229,9 +231,35 @@ end
 % disp('pause') 
 % pause
  
+% compute vertical and horizontal length scales and plot
+if (scales == 1)
+n = 1;
+Eh = sum(specuh + specvh);
+khEh = sum((2*pi*kh).^(1/n).*(specuh + specvh));
+kzEh = sum((2*pi*kz/Lz).^(1/n)*(specuz + specvz));
+H = (Eh/kzEh)^n
+L = (Eh/khEh)^n
+delta = H/L
+figure(7)
+plot(time, H, 'x'); hold on;
+set(gca,'fontsize',16);
+xlabel('time');
+ylabel('internal vertical scale H');
+figure(8)
+plot(time, L, 'o'); hold on;
+set(gca,'fontsize',16);
+xlabel('time');
+ylabel('internal horizontal scale, L');
+figure(9)
+plot(time, delta, '*'); hold on;
+set(gca,'fontsize',16);
+xlabel('time');
+ylabel('internal scale aspect ratio, H/L');
+end
+
  %time average of spectra
  if(1)
- if (time > 3 & time < 5)
+ if (time > 2.1 & time <= 5)
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
@@ -276,12 +304,12 @@ for i = 1:length(khvals)
 subplot(2,1,1) 
 axis([1 640/3 1e-10 1])
 set(gca,'fontsize',17);
-loglog(kz,spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
+loglog(kz,spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause;
 ylabel('E_h(k_h,k_z)')
 subplot(2,1,2)
 axis([1 640/3 1e-10 1])
 set(gca,'fontsize',17);
-loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
+loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause;
 ylabel('P(k_h,k_z)');
 end
 figure(10);subplot(2,1,2)
@@ -364,8 +392,8 @@ figure(30);hold off;
 for i = 1:length(khvals)     
 axis([1 640/3 1e-10 10^5])
 set(gca,'fontsize',17);
-loglog(kz,10e4*spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;pause;
-loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)),'r--');hold on;pause;
+loglog(kz,10e4*spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause;
+loglog(kz,spec2d_t_ave(:,khvals(i)).*((kz'.^expo)),'r--');hold on;%pause;
 legend('E_h(k_h,k_z) \times 10^4','P(k_h,k_z)');
 x = 5:40;
 y = x.^(-5);

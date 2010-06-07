@@ -121,7 +121,7 @@ Lz=0.25;epsf=1;kf = 4;
 
 namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
 name = 'n2048_d0.25_Ro0.002_all';
-Lz=0.25;epsf=1;kf = 4;fcor=2702.6;bous=10810.3
+%Lz=0.25;epsf=1;kf = 4;fcor=2702.6;bous=10810.3
 
 %namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/LOWRES/sto_high_t32/';
 %name = 'n512_d0.25_Ro0.05_all';
@@ -138,6 +138,23 @@ Lz=0.25;epsf=1;kf = 4;fcor=2702.6;bous=10810.3
 %namedir ='~/projects/INCITE_runs/Intrepid/qg/';
 %name = 'n640_bous3000_all';
 %Lz=1;epsf=0.5;kf = 4;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/qg/n256/';
+%name = 'n256_Ro0.01_all';
+%Lz=1;epsf=1;kf = 4;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/';
+%name = 'n256_Ro0.01_all';
+%Lz=1;epsf=1;kf = 16;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/';
+%name = 'n256_Ro0.01_2_all';
+%Lz=1;epsf=1;kf = 16;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/qg/n256_thinshell16force/';
+%name = 'n256_Ro0.01_all';
+%Lz=1;epsf=1;kf = 16;
+
 
 %namedir ='~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
 %name = 'n640_fcor14bous3000_all';
