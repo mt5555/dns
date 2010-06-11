@@ -293,6 +293,7 @@ do
       endif
 
       call compute_project_CH_Eh(Q,q1,q2,work,work2)
+      call compute_spec_2d(time,Q,q1,work1,work2)
       call output_2d_chEh(time,time)	
    endif
 

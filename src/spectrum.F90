@@ -56,6 +56,7 @@ real*8,private ::  spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 real*8,private ::  q2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
 real*8,private ::  norm1spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
 real*8,private ::  norm2spec_r_2d(0:max(g_nx,g_ny),0:g_nz/2)
+
 real*8,private ::  time_old=-1
 
 ! Craya-Herring mode spectra
@@ -64,6 +65,8 @@ real*8 ::  spec_Q_tot(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_vort(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_wave(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_kh0(0:max(g_nx,g_ny,g_nz))
+real*8 ::  spec_chEh_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
+
 
 !helicity related spectra (sk)
 real*8,private ::  spec_helicity_rp(0:max(g_nx,g_ny,g_nz))
@@ -3695,7 +3698,7 @@ do k=nz1,nz2
    enddo
 enddo
 
-!store the u wave modes in Q(:,1) and v wave modes in Q(:,2), 
+!store the u wave modes in Q(:,1) and v wave modes in Q(:,2); 
 !store the u vortical modes in Q(:,3) and v vortical modes in Q(:,4)
 
 ! convert wave modes back to sincos
@@ -3711,13 +3714,14 @@ enddo
 ! convert vortical modes back to sincos
 ! store in QR
 do n = 1,n_var
-   write(message,*) 'converting CH vortical modes back to gridspace, n=',n   
+   write(message,*) 'converting CH vortical modes back to sincos, n=',n   
    call print_message(message)
    call complex_to_sincos_field(work,QRR(1,1,1,n),QII(1,1,1,n))  ! convert 
    QR(:,:,:,n)=work
 enddo
-   Q(:,:,:,3) = QR(:,:,:,1)
-   Q(:,:,:,4) = QR(:,:,:,2)
+Q(:,:,:,3) = QR(:,:,:,1)
+Q(:,:,:,4) = QR(:,:,:,2)
+
 
 end subroutine compute_project_CH_Eh
 
