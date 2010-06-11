@@ -2575,6 +2575,10 @@ else if (sdata=='sto_high_t10') then
    forcing_peak_waveno=10
    forcing_type=8
    force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
+else if (sdata=='sto_high_t16') then
+   forcing_peak_waveno=16
+   forcing_type=8
+   force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
 else if (sdata=='sto_high_32') then
    forcing_peak_waveno=32
    forcing_type=8
@@ -2939,6 +2943,10 @@ else if (sdata=='sto_high_t4') then
    force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
 else if (sdata=='sto_high_t10') then
    forcing_peak_waveno=10
+   forcing_type=8
+   force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
+else if (sdata=='sto_high_t16') then
+   forcing_peak_waveno=16
    forcing_type=8
    force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
 else if (sdata=='sto_high_32') then
@@ -3308,6 +3316,10 @@ else if (sdata=='sto_high_t4') then
    force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
 else if (sdata=='sto_high_t10') then
    forcing_peak_waveno=10
+   forcing_type=8
+   force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
+else if (sdata=='sto_high_t16') then
+   forcing_peak_waveno=16
    forcing_type=8
    force_theta=.true.  ! enable stochastic forcing on THETA (first passive tracer)
 else if (sdata=='sto_high_32') then

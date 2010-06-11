@@ -104,9 +104,9 @@ compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
 
-tstart=4.56
+tstart=4.0
 tstop=6.0
-tinc=.04
+tinc=.1
 
 icount=0
 

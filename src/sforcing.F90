@@ -1189,7 +1189,8 @@ real*8 ener(512),ener2(512),ener_test(512),ffnorm,ener_pe(512),ener_test_pe(512)
 integer,save :: numk(512),numk2(512)
 real*8,save :: ener_target(512)
 integer,save :: fwidth, nf_comp
-integer :: count, kzmod
+integer :: count 
+integer,save :: kzmod
 
 if (0==init_sforcing) then
    init_sforcing=1
@@ -1211,7 +1212,7 @@ if (0==init_sforcing) then
    if (fparam1==0) then
       ! default is +/- 8  
       fwidth=8
-   if (fparam1>10000) then
+   elseif (fparam1>10000) then
       fwidth=fparam1-10000
       kzmod = 4
    else
@@ -1233,6 +1234,7 @@ if (0==init_sforcing) then
    numb1=max(forcing_peak_waveno-fwidth,1)
    numb=forcing_peak_waveno+fwidth
    ener_target=0
+!   print *,'kzmod = ',kzmod
    do wn=numb1,numb
       ! note: my wave numbers have an extra 2pi.
       if (fparam1<0) then
@@ -1273,8 +1275,9 @@ if (0==init_sforcing) then
             ! use "thin shells":
             ! wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
             if (wn<=numb .and. wn>=numb1 .and. mod(abs(km),kzmod)==0) then 
-	    numk(wn)=numk(wn)+1
-	    print *,'Forcing wavenumbers in skewed forcing:',im, jm, km 
+               numk(wn)=numk(wn)+1
+               print *,'Forcing wavenumbers in skewed forcing:',im, jm, km 
+            endif
          enddo
       enddo
    enddo

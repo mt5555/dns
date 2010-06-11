@@ -70,7 +70,7 @@
 !  -cout potens (22)   potential enstrophy field
 !  -cout pe (23) potential energy field
 !  -cout CH_decomp (24) write wave modes and vortical modes field
-! 
+!  -cout potvor (25) compute PV on input file and write PV field
 
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -116,8 +116,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=4.72
-tstop=10.00
+tstart=3.8
+tstop=5
 tinc=0.1
 
 
@@ -987,6 +987,8 @@ do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
    if (convert_opt==24) then  ! -cout CH_decomp
+      schmidt_in=1.0
+      type_in=4
       call input_uvw(time,Q,vor,work1,work2,header_user)
       call input_passive(runname, time, Q, work1, work2)
       if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
@@ -1037,23 +1039,27 @@ do
       call print_message(message)
 
       write(sdata,'(f10.4)') 10000.0000 + time
+      write(ext,'(f8.3)') 1000 + schmidt_in
+      write(ext2,'(i3)') 100+type_in
+
+!     write out headerless wave component u,v,w,t fields
       basename=runname(1:len_trim(runname)) // "-wave."
       call output_uvw(basename,time,Q,vor,work1,work2,2)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
+           // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
           // '-wave'
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
-
       write(sdata,'(f10.4)') 10000.0000 + time
+
+!     write out headerless vortical component u,v,w,t fields
       basename=runname(1:len_trim(runname)) // "-vort."
       call output_uvw(basename,time,Q2,vor,work1,work2,2) 
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
+           // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
           // '-vort'
       call singlefile_io3(time,Q2,fname,work1,work2,0,io_pe,.false.,2)
 
    endif
-
 
 
    if (tstart>=0) then
