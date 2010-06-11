@@ -881,8 +881,8 @@ if (my_pe==io_pe) then
    message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec2d"
    call copen(message,access,fid,ierr)
    if (ierr/=0) then
-      write(message,'(a,i5)') "output_2d_spec(): Error opening file errno=",ierr
-      call abortdns(message)
+   write(message,'(a,i5)') "output_2d_spec(): Error opening file errno=",ierr
+   call abortdns(message)
    endif
    call cwrite8(fid,time,1)
    x=n_var; call cwrite8(fid,x,1)  
@@ -903,6 +903,65 @@ if (my_pe==io_pe) then
 endif
 end subroutine
 
+
+subroutine output_2d_chEh(time,time_file)
+use params
+implicit none
+real*8 :: time,time_file
+
+! local variables
+integer i,j,k,n
+integer :: ierr
+character,save :: access="0"
+
+real*8 :: x
+character(len=80) :: message
+CPOINTER fid
+
+if (iwave_2d<0) then
+   ! no spectrum was computed
+   call print_message("Warning: output_2d_chEh() called, but no 2d spectra was computed")
+   return
+endif
+
+write(message,'(a,f10.4)') " 2D Spectrum t=",time
+call logplotascii(spec_r_2d(0,:,1),iwave_2d,message(1:25))
+
+
+! append to output files, unless this is first call.
+if (access=="0" .or. time==time_file) then
+   access="w"
+else
+   access="a"
+endif
+
+
+if (my_pe==io_pe) then
+   write(message,'(f10.4)') 10000.0000 + time_file
+   message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // message(2:10) // ".spec_ch2d"
+   call copen(message,access,fid,ierr)
+   if (ierr/=0) then
+   write(message,'(a,i5)') "output_2d_spec(): Error opening file errno=",ierr
+   call abortdns(message)
+   endif
+   call cwrite8(fid,time,1)
+   x=n_var; call cwrite8(fid,x,1)  
+   x=1+iwave_2d; call cwrite8(fid,x,1)  
+   x=1+g_nz/2; call cwrite8(fid,x,1)
+   do i=1,n_var
+   do k=0,g_nz/2
+      call cwrite8(fid,spec_r_2d(0,k,i),1+iwave_2d)
+   enddo
+   enddo
+   call cclose(fid,ierr)
+
+!   if (npassive>0) then
+!      call abortdns("Error: ouput of 2d spectrum for scalers not coded")
+!      ! add spectrum of scalars
+!   endif
+
+endif
+end subroutine
 
 
 
@@ -2537,7 +2596,7 @@ subroutine compute_project_ch(Q,QR,QI,work,work2)
 ! Project onto the Craya-Herring modes and compute the spectra
 !
 ! Input: state vector Q:   4 components:  u,v,w,theta in GRID SPACE
-! output:     QR + i QI:   Coefficients of Craya-Herring expansion
+! output:                  spectra of Craya-Herring expansion
 !                          in terms of phi_minus,phi_zero,phi_plus
 !                          3 components: a_minus,a_zero,a_plus
 !
@@ -2857,29 +2916,6 @@ do k=nz1,nz2
          !   print *,.5*bm2,.5*bp2,.5*b02
          !endif
 
-! store a(k) phi_*(k) in (QR,QI)  for n=1,2,3,4
-
-! for now, pretend QR and QI are (:,:,:,12) dimensional
-#if 0
-         QR(i,j,k,1) = bmR*phimR(1) - bmI*phimI(1)+ bpR*phipR(1) - bpI*phipI(1)
-         QR(i,j,k,2) = bmR*phimR(2) - bmI*phimI(2)+ bpR*phipR(2) - bpI*phipI(2)
-         QR(i,j,k,3) = bmR*phimR(3) - bmI*phimI(3)+ bpR*phipR(3) - bpI*phipI(3)
-         QR(i,j,k,4) = bmR*phimR(4) - bmI*phimI(4)+ bpR*phipR(4) - bpI*phipI(4)
-         QI(i,j,k,1) = bmR*phimI(1) + bmI*phimR(1)+ bpR*phipI(1) + bpI*phipR(1)
-         QI(i,j,k,2) = bmR*phimI(2) + bmI*phimR(2)+ bpR*phipI(2) + bpI*phipR(2)
-         QI(i,j,k,3) = bmR*phimI(3) + bmI*phimR(3)+ bpR*phipI(3) + bpI*phipR(3)
-         QI(i,j,k,4) = bmR*phimI(4) + bmI*phimR(4)+ bpR*phipI(4) + bpI*phipR(4)
-
-         QR(i,j,k,9) = b0R*phi0(1)
-         QR(i,j,k,10) = b0R*phi0(2) 
-         QR(i,j,k,11) = b0R*phi0(3)
-         QR(i,j,k,12) = b0R*phi0(4)
-         QI(i,j,k,9) = b0I*phi0(1)
-         QI(i,j,k,10) = b0I*phi0(2)
-         QI(i,j,k,11) = b0I*phi0(3)
-         QI(i,j,k,12) = b0I*phi0(4)
-#endif
-
       enddo
    enddo
 enddo
@@ -2924,19 +2960,6 @@ write(message,'(a,3f18.14)') 'TOTE computed from RR,II:    ',tote2
 call print_message(message)
 write(message,'(a,3f18.14)') 'TOTE computed from projected modes:    ',tote3
 call print_message(message)
-
-#if 0
-! convert 3 CH modes back to grid space
-! store in QR
-do n = 1,3
-   write(message,*) 'converting CH modes back to gridspace, n=',n   
-   call print_message(message)
-   call complex_to_sincos_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
-   QR(:,:,:,n)=work
-   call ifft3d(QR(1,1,1,n),work2)          ! inplace FFT of work
-enddo
-#endif
-
 
 end subroutine
 
@@ -3382,10 +3405,321 @@ do n = 1,n_var
 enddo
 
 
-
-
 end subroutine compute_project_CHfield
 
+subroutine compute_project_CH_Eh(Q,QR,work,work2)
+!
+! Project onto the Craya-Herring modes and compute the wave and vortical 
+! 2d spectra of horizontal kinetic energy
+!
+! Input: state vector Q:   4 components:  u,v,w,theta in GRID SPACE
+! 
+! output:         Q: wave modes field in grid space
+! output:         QR: vortical modes field in grid space
+!-------------------- 
+! phi(K) is the fourier transformed velocity/density vector:
+! phi(K) = (u_hat(K), v_hat(K), w_hat(K), theta_hat(K))
+! It can also be written as a linear combination of the eigenmodes:
+! phi(K) =  b_minus(K) phi_minus(K) + b_zero(K) phi_zero(K) + 
+!		b_plus(K) phi_plus(K)
+
+! where  a_*(K) = complex_conjugate(phi_*(K))*(phi(K))
+! and the phi_*(K) are the linear engenmodes
+!               
+! For our purposes, we would like to compute :
+! 0) fourier transform Q to get phi(K)
+! 1) phi_w(K) = b_minus(K) phi_minus(K) + b_plus(K) phi_plus(K)
+!    inverse transform phi_w(K) back to physical space and write out field
+! 2) phi_v(K) = b_zero(K) phi_0(K)
+!    inverse transform phi_w(K) back to physical space and write out field
+! 3) phi_kh0(K) for the VSHF and inverse transform back to physical space 
+! and write out field 
+!----------------------------------
+
+
+use params
+use mpi
+implicit none
+
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: QR(nx,ny,nz,n_var)  ! real part
+real*8 :: QI(nx,ny,nz,n_var)  ! imaginary part 
+real*8 :: QRR(nx,ny,nz,n_var) ! extra for vortical modes
+real*8 :: QII(nx,ny,nz,n_var) ! extra for vortical modes
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: spectrum_in(0:max(g_nx,g_ny,g_nz))
+integer :: n,wn,degen,mode
+integer :: i,j,k,i1,i2,j1,j2,k1,k2,im,jm,km,iw
+real*8 :: xw2,xw,xwh2,xwh,xim,xim2,xjm,xjm2,xkm,xkm2,RR(4),II(4)
+real*8 :: efreq  !eigenfrequency sigma
+real*8 :: phipR(4), phipI(4), phimR(4), phimI(4),phi0(4)
+real*8 :: bmR,bmI,bpR,bpI,b0R,b0I,bm2,bp2,b02
+real*8 :: brunt,brunt2
+real*8 :: romega2,omsq
+real*8 :: etot,etot_Q,ewave,evort,ekh0,ierr,tote1,tote2,tote3,ke1,xfac
+
+character(len=80) :: message
+
+if (ndim /= 3) then
+   call abortdns("ERROR: project_CHfield requires ndim=3")
+endif
+if (n_var < 4 ) then
+   call abortdns("ERROR: project_CHfield requires at least one tracer")
+endif
+call print_message('Computing Craya-Herring Projection')
+
+
+! take FFT, then convert to complex coefficients
+! real part is stored in QR array
+! complex part is stored in QI array
+do n = 1,4
+   write(message,*) 'converting gridspace to to complex modes, n=',n   
+   call print_message(message)
+   work=Q(:,:,:,n)
+   call fft3d(work,work2)          ! inplace FFT of work
+   call sincos_to_complex_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
+enddo
+
+!SK
+
+brunt = bous
+romega2 = fcor
+brunt2 = brunt**2
+omsq = romega2**2
+
+spec_CR_tot = 0
+spec_Q_tot = 0
+spec_CR_vort = 0
+spec_CR_wave = 0
+spec_CR_kh0 = 0
+
+
+tote1=0
+tote2=0
+iwave_3d=0
+tote3=0
+ke1=0
+do k=nz1,nz2
+   do j=ny1,ny2
+      do i=nx1,nx2
+	ekh0 = 0
+! note: wave number is (im,jm,km)
+! index into arrays is (i,j,k)
+!
+! Eigenmode:   (QR + i QI) exp( 2pi ( im*x +jm*y + km*z )  )
+
+         im=imcord_exp(i)
+         jm=jmcord_exp(j)
+         km=kmcord_exp(k)
+         
+         RR = QR(i,j,k,:)
+         II = QI(i,j,k,:)
+	
+         xfac=64
+         if (km==0) xfac=xfac/2
+         if (jm==0) xfac=xfac/2
+         if (im==0) xfac=xfac/2
+
+         tote1 = tote1 + 0.5*sum( Q(i,j,k,:)**2 )
+	 ke1 = ke1 + 0.5*sum(Q(i,j,k,1:3)**2)
+         
+         xw2=pi2_squared*(im**2 + jm**2 + (km/Lz)**2)
+         xw=sqrt(xw2)
+         xwh2 = pi2_squared*(im**2 + jm**2)
+         xwh = sqrt(xwh2)	
+	 xim = pi2*im
+	 xim2 = xim**2
+	 xjm = pi2*jm
+	 xjm2 = xjm**2
+	 xkm = pi2*km/Lz
+	 xkm2 = xkm**2         
+
+
+         degen = 1.d0/sqrt(2.d0)
+
+!
+!    calculate the b's (a's in SW02 paper)
+!         
+         
+         if ((im==0) .and. (jm==0) .and. (km==0)) then
+
+!
+! special case of im=jm=km=0, no mean flows here
+!
+
+            bmR = 0
+            bmI = 0
+            bpR = 0
+            bpI = 0 
+            b0R = 0
+            b0I = 0
+
+!
+! special case of no stratification and km=0
+!
+
+         elseif ((km==0) .and. (brunt==0)) then
+
+! sigmas are zero
+            efreq = 0
+
+!real and imaginary part of phi_m
+
+            phimR(1) = 0.0
+            phimI(1) = -degen*xjm/xwh
+            phimR(2) = 0.0
+            phimI(2) = degen*xim/xwh
+            phimR(3) = -xjm
+            phimI(3) = 0.0
+            phimR(4) = 0.0
+            phimI(4) = 0.0	
+
+! phi_p = complex_conjugate(phi_m)
+            phipR = phimR
+            phipI = -phimI			  
+
+! phi_0 is real
+            phi0(1) = 0.d0
+            phi0(2) = 0.d0
+            phi0(3) = 0.d0
+            phi0(4) = 1.d0
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+
+            bmR = sum(phimR*RR + phimI*II)
+            bmI = sum(phimR*II - phimI*RR)
+
+            bpR = sum(phipR*RR + phipI*II) 
+            bpI = sum(phipR*II - phipI*RR)
+
+            b0R = sum(phi0*RR)
+            b0I = sum(phi0*II)
+
+
+!
+!  special case of kh= xwh = 0  (we treat this case separately to make
+!  sure xwh = 0.d0 and not something small, since the test in
+!  eigm and eig0 is for (xwh .eq. 0)
+!
+
+         elseif ((im==0) .and. (jm==0)) then
+
+            xwh = 0.d0
+            efreq = romega2  
+            
+            call eigm(xim,xjm,xkm,xw,xwh,efreq,phimR,phimI)
+
+! phi_p = complex_conjugate(phi_m)
+
+            phipR = phimR
+            phipI = -phimI			  
+
+	    
+            call eig0(xim,xjm,xkm,xw,xwh,efreq,phi0)
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+
+            bmR = sum(phimR*RR + phimI*II)
+            bmI = sum(phimR*II - phimI*RR)
+
+            bpR = sum(phipR*RR + phipI*II)
+            bpI = sum(phipR*II - phipI*RR)
+
+            b0R = sum(phi0*RR)
+            b0I = sum(phi0*II)
+
+            
+            bm2 = bmR**2 + bmI**2
+            bp2 = bpR**2 + bpI**2
+            b02 = b0R**2 + b0I**2
+
+            ekh0 = 0.5*(bm2 + bp2 + b02)
+!
+! all other cases
+!
+
+         else
+
+
+            efreq = sqrt(xwh2*brunt2 + xkm2*omsq)/xw
+
+            call eigm(xim,xjm,xkm,xw,xwh,efreq,phimR,phimI)
+            
+! phi_p = complex_conjugate(phi_m)
+
+            phipR = phimR
+            phipI = -phimI			  
+
+            call eig0(xim,xjm,xkm,xw,xwh,efreq,phi0)
+
+! compute real and imaginary parts of coeffients bm, bp and b0 (a's in paper)
+
+            bmR = sum(phimR*RR + phimI*II)
+            bmI = sum(phimR*II - phimI*RR)
+
+            bpR = sum(phipR*RR + phipI*II) 
+            bpI = sum(phipR*II - phipI*RR)
+
+            b0R = sum(phi0*RR)
+            b0I = sum(phi0*II)
+
+            
+            
+         endif
+
+         ! store wavemodes
+
+         QR(i,j,k,1) = bmR*phimR(1) - bmI*phimI(1)+ bpR*phipR(1) - bpI*phipI(1)
+         QR(i,j,k,2) = bmR*phimR(2) - bmI*phimI(2)+ bpR*phipR(2) - bpI*phipI(2)
+         QR(i,j,k,3) = bmR*phimR(3) - bmI*phimI(3)+ bpR*phipR(3) - bpI*phipI(3)
+         QR(i,j,k,4) = bmR*phimR(4) - bmI*phimI(4)+ bpR*phipR(4) - bpI*phipI(4)
+         QI(i,j,k,1) = bmR*phimI(1) + bmI*phimR(1)+ bpR*phipI(1) + bpI*phipR(1)
+         QI(i,j,k,2) = bmR*phimI(2) + bmI*phimR(2)+ bpR*phipI(2) + bpI*phipR(2)
+         QI(i,j,k,3) = bmR*phimI(3) + bmI*phimR(3)+ bpR*phipI(3) + bpI*phipR(3)
+         QI(i,j,k,4) = bmR*phimI(4) + bmI*phimR(4)+ bpR*phipI(4) + bpI*phipR(4)
+         
+         
+	 ! store vortical modes 
+         QRR(i,j,k,1) = b0R*phi0(1)
+         QRR(i,j,k,2) = b0R*phi0(2) 
+         QRR(i,j,k,3) = b0R*phi0(3)
+         QRR(i,j,k,4) = b0R*phi0(4)
+         QII(i,j,k,1) = b0I*phi0(1)
+         QII(i,j,k,2) = b0I*phi0(2)
+         QII(i,j,k,3) = b0I*phi0(3)
+         QII(i,j,k,4) = b0I*phi0(4)
+
+
+      enddo
+   enddo
+enddo
+
+!store the u wave modes in Q(:,1) and v wave modes in Q(:,2), 
+!store the u vortical modes in Q(:,3) and v vortical modes in Q(:,4)
+
+! convert wave modes back to sincos
+! store in Q
+do n = 1,n_var
+   write(message,*) 'converting CH wave modes back to sincos, n=',n   
+   call print_message(message)
+   call complex_to_sincos_field(work,QR(1,1,1,n),QI(1,1,1,n))  ! convert 
+   Q(:,:,:,n) = work	
+enddo
+
+
+! convert vortical modes back to sincos
+! store in QR
+do n = 1,n_var
+   write(message,*) 'converting CH vortical modes back to gridspace, n=',n   
+   call print_message(message)
+   call complex_to_sincos_field(work,QRR(1,1,1,n),QII(1,1,1,n))  ! convert 
+   QR(:,:,:,n)=work
+enddo
+   Q(:,:,:,3) = QR(:,:,:,1)
+   Q(:,:,:,4) = QR(:,:,:,2)
+
+end subroutine compute_project_CH_Eh
 
 
 end module

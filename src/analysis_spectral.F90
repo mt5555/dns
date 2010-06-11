@@ -75,9 +75,9 @@ integer :: nxdecomp,nydecomp,nzdecomp,csig,header_type
 integer :: nints_e=16
 real*8  :: ints_e(16)
 logical :: compute_hspec, compute_hfree, compute_pv2spec, compute_pv2HA
-logical :: compute_scalarsbous
+logical :: compute_scalarsbous, compute_bousscales
 logical :: read_uvw
-logical :: project_ch
+logical :: project_ch, project_ch_Eh
 CPOINTER :: fid,fid1,fid2,fidcore,fid3
 
 
@@ -100,9 +100,11 @@ compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
 project_ch=.true.         !Craya-Herring projection and spectra
+project_ch_Eh=.true.      !Craya-Herring 2d spectra of E_h
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
+compute_bousscales = .false. !compute internal lengthscales and nondim params
 
 tstart=4.0
 tstop=6.0
@@ -279,6 +281,22 @@ do
    endif
    
    
+   if (project_ch_Eh) then
+      if (.not. read_uvw) then	
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         call input_passive(runname,time,Q,work1,work2)
+         Q=Q*scale;
+         read_uvw=.true.	
+      endif
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,q1,work1,work2)
+      endif
+
+      call compute_project_CH_Eh(Q,q1,q2,work,work2)
+      call output_2d_chEh(time,time)	
+   endif
+
+   
    if (project_ch) then
       if (.not. read_uvw) then	
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
@@ -356,7 +374,37 @@ do
       endif
    endif
       
+   if (compute_bousscales) then
+      if (.not. read_uvw) then 
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         call input_passive(runname,time,Q,work1,work2)
+         Q=Q*scale;
+         read_uvw=.true.
+      endif
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,q1,work1,work2)
+      endif
       
+      call compute_scales(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
+
+! output post-processing .bous-scales file
+      if (my_pe==io_pe) then
+         write(message,'(f10.4)') 10000.0000 + time
+         message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))// message(2:10) // ".bous-scales"
+         call copen(message,"w",fid,ierr)
+         write(6,*) "Opening bous-scales file"
+         if (ierr/=0) then
+            write(message,'(a,i5)') "diag_output(): Error opening new .bous-scales file errno=",ierr
+            call abortdns(message)
+         endif
+         x=nints_e; call cwrite8(fid,x,1)
+         call cwrite8(fid,time,1)
+         call cwrite8(fid,ints_e,nints_e)
+         call cclose(fid,ierr)
+      endif
+   endif
+   
+
 
    ! reset our flag, so we will read in the nxt data set
    read_uvw=.false.   

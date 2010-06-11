@@ -1052,7 +1052,7 @@ do
       write(sdata,'(f10.4)') 10000.0000 + time
 
 !     write out headerless vortical component u,v,w,t fields
-      basename=runname(1:len_trim(runname)) // "-vort."
+      basename=runname(1:len_trim(runname)) // '-vort.'
       call output_uvw(basename,time,Q2,vor,work1,work2,2) 
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
