@@ -65,7 +65,6 @@ real*8 ::  spec_Q_tot(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_vort(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_wave(0:max(g_nx,g_ny,g_nz))
 real*8 ::  spec_CR_kh0(0:max(g_nx,g_ny,g_nz))
-real*8 ::  spec_chEh_r_2d(0:max(g_nx,g_ny),0:g_nz/2,n_var)
 
 
 !helicity related spectra (sk)
@@ -442,6 +441,28 @@ spec_r_2d=spec_r_2d/2
 
 end subroutine
 
+subroutine compute_spec_ch2d(time,Q,q1,work1,work2)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)   ! (u,v,w)
+real*8 :: q1(nx,ny,nz,n_var) 
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: time
+
+!local
+integer i
+
+spec_r_2d=0
+do i=1,n_var
+   call compute_spectrum_2d(Q(1,1,1,i),work1,work2,spec_r_2d(0,0,i),1)
+enddo
+
+spec_r_2d=spec_r_2d/2
+
+
+
+end subroutine
 
 
 
@@ -3671,7 +3692,7 @@ do k=nz1,nz2
             
          endif
 
-         ! store wavemodes
+         ! store reconstructed wavemodes in QR and QI
 
          QR(i,j,k,1) = bmR*phimR(1) - bmI*phimI(1)+ bpR*phipR(1) - bpI*phipI(1)
          QR(i,j,k,2) = bmR*phimR(2) - bmI*phimI(2)+ bpR*phipR(2) - bpI*phipI(2)
@@ -3683,7 +3704,7 @@ do k=nz1,nz2
          QI(i,j,k,4) = bmR*phimI(4) + bmI*phimR(4)+ bpR*phipI(4) + bpI*phipR(4)
          
          
-	 ! store vortical modes 
+	 ! store reconstructed vortical modes in QRR and QII
          QRR(i,j,k,1) = b0R*phi0(1)
          QRR(i,j,k,2) = b0R*phi0(2) 
          QRR(i,j,k,3) = b0R*phi0(3)
@@ -3719,6 +3740,9 @@ do n = 1,n_var
    call complex_to_sincos_field(work,QRR(1,1,1,n),QII(1,1,1,n))  ! convert 
    QR(:,:,:,n)=work
 enddo
+
+!since we only want the horizontal kinetic energy, store the vortical modes 
+!in Q(:,3) and Q(:,4) 
 Q(:,:,:,3) = QR(:,:,:,1)
 Q(:,:,:,4) = QR(:,:,:,2)
 
