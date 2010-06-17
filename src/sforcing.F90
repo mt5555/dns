@@ -1276,7 +1276,7 @@ if (0==init_sforcing) then
             ! wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
             if (wn<=numb .and. wn>=numb1 .and. mod(abs(km),kzmod)==0) then 
                numk(wn)=numk(wn)+1
-               print *,'Forcing wavenumbers in skewed forcing:',im, jm, km 
+!               print *,'Forcing wavenumbers in skewed forcing:',im, jm, km 
             endif
          enddo
       enddo

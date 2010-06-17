@@ -29,6 +29,7 @@
 ! and spectra without helical modes 
 !
 ! computes spectra of Craya-Herring projection modes (project_ch)
+! compute spectra of CH modes of horizontal kinetic energy (project_ch_Eh)
 !
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -99,15 +100,15 @@ header_type=1; scale=1;           ! DNS standard data
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
-project_ch=.true.         !Craya-Herring projection and spectra
+project_ch=.false.         !Craya-Herring projection and spectra
 project_ch_Eh=.true.      !Craya-Herring 2d spectra of E_h
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
 compute_bousscales = .false. !compute internal lengthscales and nondim params
 
-tstart=4.0
-tstop=6.0
+tstart=0.0
+tstop=6.00
 tinc=.1
 
 icount=0
@@ -292,8 +293,8 @@ do
          call print_stats(Q,q1,work1,work2)
       endif
 
-      call compute_project_CH_Eh(Q,q1,q2,work,work2)
-      call compute_spec_2d(time,Q,q1,work1,work2)
+      call compute_project_CH_Eh(Q,q1,work1,work2)
+      call compute_spec_ch2d(time,Q,q1,work1,work2)
       call output_2d_chEh(time,time)	
    endif
 
@@ -375,37 +376,6 @@ do
       endif
    endif
       
-   if (compute_bousscales) then
-      if (.not. read_uvw) then 
-         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
-         Q=Q*scale;
-         read_uvw=.true.
-      endif
-      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
-         call print_stats(Q,q1,work1,work2)
-      endif
-      
-      call compute_scales(Q,Qhat,q1,q2,q3,work1,work2,nints_e,ints_e)
-
-! output post-processing .bous-scales file
-      if (my_pe==io_pe) then
-         write(message,'(f10.4)') 10000.0000 + time
-         message = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))// message(2:10) // ".bous-scales"
-         call copen(message,"w",fid,ierr)
-         write(6,*) "Opening bous-scales file"
-         if (ierr/=0) then
-            write(message,'(a,i5)') "diag_output(): Error opening new .bous-scales file errno=",ierr
-            call abortdns(message)
-         endif
-         x=nints_e; call cwrite8(fid,x,1)
-         call cwrite8(fid,time,1)
-         call cwrite8(fid,ints_e,nints_e)
-         call cclose(fid,ierr)
-      endif
-   endif
-   
-
 
    ! reset our flag, so we will read in the nxt data set
    read_uvw=.false.   
