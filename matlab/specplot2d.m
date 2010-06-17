@@ -22,13 +22,13 @@ epsilon=.41;
 %namedir = '~/projects/pv/data_analysis/lowforc/low4/qg/qg256/fcor2000_bous1000/';
 
 
-%namedir = '~/projects/INCITE_runs/Intrepid/qg/';
-%ame = 'n640_bous3000_all';
-%kf=4;
-
-namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
-name = 'n640_fcor14bous3000_all';
+namedir = '~/projects/INCITE_runs/Intrepid/qg/';
+name = 'n640_bous3000_all';
 kf=4;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
+%name = 'n640_fcor14bous3000_all';
+%kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
 %name = 'n640_fcor3000bous14_all';
@@ -44,9 +44,9 @@ kf=4;
 %namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/';
 %name = 'n1024_Ro1Fr0.002_all';
 
-namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/';
-name = 'n1024_Ro1Fr0.001_all';
-kf=4;
+%namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/';
+%name = 'n1024_Ro1Fr0.001_all';
+%kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro0.002Fr1/n1024_nu.7e-5/';
 %name = 'n1024_Ro0.002Fr1_all';
@@ -60,17 +60,17 @@ kf=4;
 %name = 'n1024_d0.25_Ro0.05_all';
 %kf=4; Lz = 0.25;
 
-namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
-name = 'n2048_d0.25_Ro0.05_all';
-kf=4; Lz = 0.25;
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
+%name = 'n2048_d0.25_Ro0.05_all';
+%kf=4; Lz = 0.25;
 
-namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/';
-name = 'n2048_d0.25_Ro0.01_all';
-kf=4; Lz = 0.25;
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/';
+%name = 'n2048_d0.25_Ro0.01_all';
+%kf=4; Lz = 0.25;
 
-namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.005_nodamp/';
-name = 'n2048_d0.25_Ro0.005_all';
-kf=4; Lz = 0.25;
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.005_nodamp/';
+%name = 'n2048_d0.25_Ro0.005_all';
+%kf=4; Lz = 0.25;
 
 namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
 name = 'n2048_d0.25_Ro0.002_all';
@@ -87,7 +87,7 @@ end
 
 time=0;
 j = 0; %(count for time average)
-while (time < 35)
+while (time < 10000)
   [time,count]=fread(fid,1,'float64');
   if (count ~= 1) 
     disp('EOF reached.  stopping')
@@ -181,7 +181,7 @@ if(0)
 
 end
 
-if (0)
+if (1)
   %plot the kz-averaged spectra
   figure(3)
   loglog53(numkh,specuh'+specvh','E_h(kh)',2.0,6);%hold on;
@@ -233,7 +233,7 @@ end
  
 % compute vertical and horizontal length scales and plot
 if (scales == 1)
-n = 1;
+n = 2;
 Eh = sum(specuh + specvh);
 khEh = sum((2*pi*kh).^(1/n).*(specuh + specvh));
 kzEh = sum((2*pi*kz/Lz).^(1/n)*(specuz + specvz));
@@ -258,7 +258,7 @@ ylabel('internal scale aspect ratio, H/L');
 end
 
  %time average of spectra
- if(1)
+ if(0)
  if (time > 2.1 & time <= 5)
     if (j==0) 
         spec2d_t_ave = spec2d_t;

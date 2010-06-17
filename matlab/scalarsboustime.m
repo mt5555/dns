@@ -21,15 +21,15 @@ fid2=-1;
 %fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21_all.scalars-bous','r')
 
 
-%fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bous','r');
+fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars-bous','r');
 %fid=endianopen('~/projects/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars-bous','r');
 %fid=endianopen('~/projects/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars-bous','r');
 %nx=640;ny=640;nz=640;
 
-fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256/n256_Ro0.01_all.scalars-bous','r');
+%fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256/n256_Ro0.01_all.scalars-bous','r');
 %fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/n256_Ro0.01_all.scalars-bous','r');
-fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/n256_Ro0.01_2_all.scalars-bous','r');
-fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_thinshell16force/n256_Ro0.01_all.scalars-bous','r');
+%fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/n256_Ro0.01_2_all.scalars-bous','r');
+%fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_thinshell16force/n256_Ro0.01_all.scalars-bous','r');
 
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n256_Ro1Fr0.01_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/n512_Ro1Fr0.01_all.scalars-bous','r')
@@ -72,7 +72,7 @@ fid=endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_thinshell16force/n256_Ro
 
 %fid =endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_nodamp/n1024_d0.25_Ro0.05_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_nodamp/n1024_d0.25_Ro0.05_-newall.scalars-bous','r')
-fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.002_nodamp/n1024_d0.25_Ro0.002_all.scalars-bous','r')
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.002_nodamp/n1024_d0.25_Ro0.002_all.scalars-bous','r')
 %nx=1024;ny=1024;nz=256;
 
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/n2048_d0.25_Ro0.05_all.scalars-bous','r')
@@ -80,7 +80,7 @@ fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/n2048_d0.25_Ro0.01_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/n2048_d0.25_Ro0.01_new2_all.scalars-bous','r')
 %fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.005_nodamp/n2048_d0.25_Ro0.005_all.scalars-bous','r')
-fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/n2048_d0.25_Ro0.002_all.scalars-bous','r')
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/n2048_d0.25_Ro0.002_all.scalars-bous','r')
 %nx=2048;ny=2048;nz=512;
 
 
@@ -162,11 +162,11 @@ plot(time,potens_ro0fr1/size,'ro','Markersize',6);
 plot(time,potens_ro1fr0/size,'k*','Markersize',10);
 if (length(potens_Lz) > 1)
 plot(time,potens_Lz/size,'rx','Markersize',10);
-legend('Q', 'Q_{qg}','0.5 |f \partial_z \rho |^2', '0.5 |N \omega_3|^2','Q_{Lz}')
+legend('Q', 'Q_{[\epsilon\delta,\delta]}','0.5 |f \partial_z \rho |^2', '0.5 |N \omega_3|^2','Q_{[\epsilon\delta]}')
 %title('Potential enstrophy: (blue: Total); (red -- QG); (red o: Ro->0,Fr1); (black *: Ro1, Fr->0)');
 %legend('$Q$','$Q_{qg}$','$Q_{q\sim f \partial_z \rho}$', '$Q_{q\sim N \omega_3}$');
 else
-legend('Q', 'Q_{qg}','0.5 |f \partial_z \rho |', '0.5 |N \omega_3|^2')
+legend('Q', 'Q_{[\epsilon\delta]}','0.5 |f \partial_z \rho |', '0.5 |N \omega_3|^2')
 end
 xlabel('time t')
 
