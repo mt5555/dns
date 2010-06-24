@@ -36,6 +36,7 @@ integer :: i,j,k,n
 
 Q=0
 
+
 if (init_cond_subtype==1) then
 do k=1,nz
 do j=1,ny
@@ -50,9 +51,22 @@ enddo
 endif
 
 
+if (init_cond_subtype==2) then
+do k=1,nz
+do j=1,ny
+do i=1,nx
+   do n=1,n_var
+      Q(i,j,k,n)=0.1
+   enddo
+enddo
+enddo
+enddo
+endif
+
+print *,'Q(1,1,1,1) = ',Q(1,1,1,1)
+print *,'Q(2,2,2,2) = ',Q(2,2,2,2)
+
 end subroutine
-
-
 
 
 subroutine init_data_kh(Q,q1,work1,work2)
