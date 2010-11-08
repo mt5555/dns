@@ -33,7 +33,7 @@ real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 integer :: i,j,k,n
-
+real*8 :: rn
 Q=0
 
 
@@ -56,7 +56,9 @@ do k=1,nz
 do j=1,ny
 do i=1,nx
    do n=1,n_var
-      Q(i,j,k,n)=0.1
+      call random_number(harvest=rn)
+!      print *,'random number = ',rn
+      Q(i,j,k,n)=rn*0.001
    enddo
 enddo
 enddo
