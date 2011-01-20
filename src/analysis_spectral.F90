@@ -100,15 +100,15 @@ header_type=1; scale=1;           ! DNS standard data
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
-project_ch=.true.         !Craya-Herring projection and spectra
-project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h
+project_ch=.false.         !Craya-Herring projection and spectra
+project_ch_Eh=.true.      !Craya-Herring 2d spectra of E_h
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
 
 
-tstart=0.0
-tstop=6.0
+tstart=4.9
+tstop=10.0
 tinc=0.1
 
 icount=0
