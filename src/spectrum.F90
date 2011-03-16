@@ -2748,8 +2748,8 @@ do k=nz1,nz2
          jm=jmcord_exp(j)
          km=kmcord_exp(k)
          
-         RR = QR(i,j,k,:)
-         II = QI(i,j,k,:)
+         RR = QR(i,j,k,1:4)
+         II = QI(i,j,k,1:4)
 	
          xfac=64
          if (km==0) xfac=xfac/2
@@ -3224,8 +3224,8 @@ do k=nz1,nz2
          jm=jmcord_exp(j)
          km=kmcord_exp(k)
          
-         RR = QR(i,j,k,:)
-         II = QI(i,j,k,:)
+         RR = QR(i,j,k,1:4)
+         II = QI(i,j,k,1:4)
 	
          xfac=64
          if (km==0) xfac=xfac/2
@@ -3537,8 +3537,8 @@ do k=nz1,nz2
          jm=jmcord_exp(j)
          km=kmcord_exp(k)
          
-         RR = QR(i,j,k,:)
-         II = QI(i,j,k,:)
+         RR = QR(i,j,k,1:4)
+         II = QI(i,j,k,1:4)
 	
          xfac=64
          if (km==0) xfac=xfac/2

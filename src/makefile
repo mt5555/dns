@@ -128,8 +128,8 @@ ifeq ($(UNAME),Linux)
       #VENDOR=GNU
       VENDOR=GNUMPI
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
-      FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
-      FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
+      #FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
+      #FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
    endif
    ifeq ($(HOST),s888589.srn.sandia.gov)
       #VENDOR=GNU
