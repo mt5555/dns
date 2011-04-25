@@ -128,8 +128,8 @@ ifeq ($(UNAME),Linux)
       #VENDOR=GNU
       VENDOR=GNUMPI
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8
-      #FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
-      #FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
+      FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
+      FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
    endif
    ifeq ($(HOST),s888589.srn.sandia.gov)
       #VENDOR=GNU
@@ -141,6 +141,12 @@ ifeq ($(UNAME),Linux)
 
    ifeq ($(HOST),pfe1.lanl.gov)
       VENDOR=INTEL
+      MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
+      MPILIB = $(MPI_LD_FLAGS) -lfmpich -lmpich -lgm -lpthread
+   endif
+
+   ifeq ( $(HOST),lo1-fe || $(HOST),lo2-fe )
+      VENDOR=INTELMPI
       MPI = -DNDEBUG -DUSE_MPI -DMPI_HAS_REAL8 $(MPI_COMPILE_FLAGS)
       MPILIB = $(MPI_LD_FLAGS) -lfmpich -lmpich -lgm -lpthread
    endif
