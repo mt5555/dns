@@ -63,10 +63,11 @@ do i=1,nx
 enddo
 enddo
 enddo
+!print *,'Q(1,1,1,1) = ',Q(1,1,1,1)
+!print *,'Q(2,2,2,2) = ',Q(2,2,2,2)
 endif
 
-print *,'Q(1,1,1,1) = ',Q(1,1,1,1)
-print *,'Q(2,2,2,2) = ',Q(2,2,2,2)
+
 
 end subroutine
 

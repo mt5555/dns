@@ -116,8 +116,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=7.6
-tstop=7.6
+tstart=3.6
+tstop=3.6
 tinc=0.1
 
 
