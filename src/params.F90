@@ -683,6 +683,11 @@ dealias_23sphere_kmax = floor ( (g_nmin-1.5d0)/3 )
 dealias_23sphere_kmax2   = (dealias_23sphere_kmax+.5)**2  ! rounds to k^2 + k
 dealias_23sphere_kmax2_1 = (dealias_23sphere_kmax-.5)**2  ! rounds to k^2 - k
 
+dealias_23_kmax2 = (g_nmin*g_nmin)/9
+dealias_23_kmax = sqrt(real(dealias_23_kmax2))
+dealias_23_kmax2_1 = floor( (dealias_23_kmax-1)**2 )
+
+
 
 write(message,'(a,3i6)') "x-pencil decomp array size: ",g_nx2,ny_2dx,nslabz
 call print_message(message)
