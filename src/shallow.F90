@@ -349,7 +349,7 @@ if (alpha_value>0) then
          enddo
          enddo
          call fft3d(divtau(1,1,n),work)
-         call compute_spectrum_fft(Qhat(1,1,n),divtau(1,1,n),io_pe,spec_tmp)
+         call compute_spectrum_fft(Qhat(1,1,n),divtau(1,1,n),spec_tmp)
          spec_model=spec_model + spec_tmp
       enddo
    endif
@@ -385,7 +385,7 @@ if (smagorinsky>0) then
       do n=1,2
          divtau(:,:,n)=divtau(:,:,n)*Q(:,:,3)
          call fft3d(divtau(1,1,n),work)
-         call compute_spectrum_fft(Qhat(1,1,n),divtau(1,1,n),io_pe,spec_tmp)
+         call compute_spectrum_fft(Qhat(1,1,n),divtau(1,1,n),spec_tmp)
          spec_model=spec_model + spec_tmp
       enddo
    endif
@@ -490,7 +490,7 @@ if (compute_ints==1) then
                work(i,j)=sqrt(xfac)*Qhat(i,j,n)
             enddo
          enddo
-         call compute_spectrum_fft(work,work,io_pe,spec_tmp)
+         call compute_spectrum_fft(work,work,spec_tmp)
          spec_diff=spec_diff - mu_hyper_value*hyper_scale*spec_tmp
       enddo
 
