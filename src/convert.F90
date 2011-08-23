@@ -769,7 +769,11 @@ do
 
       ! read data, header type =1, or specified in input file
       time2=time
-      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+!     DNS-headered data input
+!     call input_uvw(time2,Q,vor,work1,work2,header_user)  
+!     headerless data input
+      call input_uvw(time2,Q,vor,work1,work2,2)  
+      
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
@@ -798,9 +802,10 @@ do
       write(message, '(i5)') 10000 + spec_max
       basename=runname(1:len_trim(runname)) // "-hpass"//message(2:5)//"."
 
-      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
-      ! output headerless data:
-      ! call output_uvw(basename,time,Q,vor,work1,work2,2)
+      !output headered data:
+      !call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
+      !output headerless data:
+      call output_uvw(basename,time,Q,vor,work1,work2,2)
    endif
 
 
