@@ -1916,7 +1916,7 @@ real*8 xfac
          jm=abs(jmcord(j))
          do i=nx1,nx2
             im=abs(imcord(i))
-            if ((im**2 + jm**2 + km**2 ) > spec_max**2) then 
+            if ((im**2 + jm**2 + (km/Lz)**2 ) > spec_max**2) then 
                p(i,j,k)=0
             endif
          enddo
@@ -1943,7 +1943,7 @@ real*8 xfac
          jm=abs(jmcord(j))                                                      
          do i=nx1,nx2                                                           
             im=abs(imcord(i))                                                   
-            if ((im**2 + jm**2 + km**2 ) < spec_max**2) then                    
+            if ((im**2 + jm**2 + (km/Lz)**2 ) < spec_max**2) then                    
                p(i,j,k)=0                                                       
             endif                                                               
          enddo                                                                  
