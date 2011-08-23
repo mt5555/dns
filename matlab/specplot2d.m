@@ -1,7 +1,7 @@
 clear
 
 forpaper = 1; % generate plots for paper
-totals = 0f; %general plots about total energies
+totals = 0; %general plots about total energies
 scales = 0; %general plots showing evolution of correlation lengths
 Lz = 1; %default
 
@@ -26,17 +26,23 @@ namedir = '~/projects/INCITE_runs/Intrepid/qg/';
 name = 'n640_bous3000_all';
 kf=4;
 
-namedir = '~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/';
-name = 'n256_Ro0.01_all';
-kf=16;
+%namedir = '~/projects/INCITE_runs/Intrepid/Ro0.0091Fr0.00227/';
+%name = 'n640_Ro0.0091Fr0.00227_all';
+%kf=4;
+
+
+
+%namedir = '~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/';
+%name = 'n256_Ro0.01_all';
+%kf=16;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
 %name = 'n640_fcor14bous3000_all';
 %kf=4;
 
-namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
-name = 'n640_fcor3000bous14_all';
-kf=4;
+%namedir = '~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
+%name = 'n640_fcor3000bous14_all';
+%kf=4;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.01/';
 %name = 'n512_Ro1Fr0.01_all';
@@ -76,9 +82,17 @@ kf=4;
 %name = 'n2048_d0.25_Ro0.005_all';
 %kf=4; Lz = 0.25;
 
-namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
-name = 'n2048_d0.25_Ro0.002_all';
-kf=4; Lz = 0.25;
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
+%name = 'n2048_d0.25_Ro0.002_all';
+%kf=4; Lz = 0.25;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.125_Ro0.005_nodamp/';
+%name = 'n2048_d0.125_Ro0.005_all';
+%kf=4; Lz = 0.125;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.125_Ro0.002_nodamp/';
+%name = 'n2048_d0.125_Ro0.002_all';
+%kf=4; Lz = 0.125;
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -263,7 +277,7 @@ end
 
  %time average of spectra
  if(1)
- if (time > 2.1 & time <= 5)
+ if (time > 2 & time <= 6.4)
     if (j==0) 
         spec2d_t_ave = spec2d_t;
         spec2d_Eh_ave = spec2d_u + spec2d_v;
@@ -396,9 +410,10 @@ figure(30);hold off;
 for i = 1:length(khvals)     
 axis([1 640/3 1e-10 10^5])
 set(gca,'fontsize',17);
-loglog(kz/Lz,10e4*Lz*spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause;
-loglog(kz/Lz,Lz*spec2d_t_ave(:,khvals(i)).*((kz'.^expo)),'r--');hold on;%pause;
-legend('E_h(k_h,k_z) \times 10^5','P(k_h,k_z)');
+loglog(kz/Lz,10^0*Lz*spec2d_Eh_ave(:,khvals(i)).*((kz'.^expo)));hold on;%pause;
+%loglog(kz/Lz,Lz*spec2d_t_ave(:,khvals(i)).*((kz'.^expo)),'r--');hold on;%pause;
+%legend('E_h(k_h,k_z) \time 10^5','P(k_h,k_z)');
+legend('E_h(k_h,k_z)');
 x = 5:40;
 y = x.^(-5);
 plot(x,y,'b');
@@ -412,9 +427,10 @@ figure(31);hold off;
 for i = 1:length(kzvals) 
 axis([1 640/3 1e-15 10^5])
 set(gca,'fontsize',17);
-loglog(kh,10e4*spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
-loglog(kh,spec2d_t_ave(kzvals(i),:).*((kh.^expo)),'r--');hold on;%pause
-legend('E_h(k_h,k_z) \times 10^5','P(k_h,k_z)');
+loglog(kh,10^0*spec2d_Eh_ave(kzvals(i),:).*((kh.^expo)));hold on;%pause
+%loglog(kh,spec2d_t_ave(kzvals(i),:).*((kh.^expo)),'r--');hold on;%pause
+%legend('E_h(k_h,k_z) \times 10^5','P(k_h,k_z)');
+legend('E_h(k_h,k_z)');
 x = 5:40;
 y = 10^5*x.^(-4.5);
 plot(x,y,'b');
@@ -428,8 +444,10 @@ figure(32);hold off;
 axis([1 640/3 1e-20 10])
 set(gca,'fontsize',17)
 loglog(kh,specEhkh_ave.*((kh.^expo)),'Linewidth',2);hold on;%pause
+loglog(kh,specEvkh_ave.*((kh.^expo)),'k.-','Linewidth',2);hold on;%pause
 loglog(kh,specPkh_ave.*((kh.^expo)),'r--','Linewidth',2);hold on;%pause
-legend('E_h(k_h)','P(k_h)');
+legend('E_h(k_h)','E_v(k_h)','P(k_h)');
+%legend('E_h(k_h)');
 x = 5:40;
 y = x.^(-1);
 plot(x,y,'k');
@@ -443,8 +461,10 @@ figure(33); hold off;
 axis([1 640/3 1e-10 10])
 set(gca,'fontsize',17)
 loglog(kz/Lz,Lz*specEhkz_ave.*((kz'.^expo)),'Linewidth',2);hold on;%pause
+loglog(kz/Lz,Lz*specEvkz_ave.*((kz'.^expo)),'k.-','Linewidth',2);hold on;%pause
 loglog(kz/Lz,Lz*specPkz_ave.*((kz'.^expo)),'r--','Linewidth',2);hold on;%pause
-legend('E_h(k_z)','P(k_z)');
+legend('E_h(k_z)','E_v(k_z)','P(k_z)');
+%legend('E_h(k_z)');
 x = 5:40;
 y = x.^(-1);
 plot(x,y,'k');
@@ -452,6 +472,8 @@ xx = 10:80;
 yy = xx.^(-4/3);
 plot(xx,yy,'r');
 xlabel('k_z')
+
+
 end
 
 

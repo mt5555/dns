@@ -25,7 +25,7 @@ fid2=-1;
 
 
 %fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro21Fr0.21/bous128_Ro21Fr0.21_all.scalars','r')
-nx=128; f_k=24;fcor=1.07;bous=107.08;
+%nx=128; f_k=24;fcor=1.07;bous=107.08;
 
 %fid = endianopen('~/INCITE_runs/SW02_tests/bous128_Ro2.1Fr0.21/bous128_Ro2.1Fr0.21_all.scalars','r')
 %nx=128; f_k=24;fcor=10.7;bous=107.08;
@@ -91,10 +91,21 @@ nx=1024; f_k = 4; fcor=8.58; bous = 858; LZ = 1.0;
 fid = endianopen('~/projects/INCITE_runs/Intrepid/qg/n640_bous3000_all.scalars','r')
 nx=640; f_k=4;fcor=3000;bous=3000;LZ=1.0;
 
-fid = endianopen('~/projects/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars','r')
-nx=640; f_k=4;fcor=14;bous=3000; LZ=1.0;
+fid = endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/n256_Ro0.01_2_all.scalars','r')
+nx=256; f_k=16;fcor=2162;bous=2162;LZ=1.0;
+
+fid = endianopen('~/projects/INCITE_runs/Intrepid/qg/n256_fsf_initnoise/n256_Ro0.01_0000.0000.scalars','r')
+nx=256; f_k=16;fcor=1716;bous=1716;LZ=1.0;
+
+%fid = endianopen('~/projects/INCITE_runs/Intrepid/Ro1Fr0/n640_fcor14bous3000_all.scalars','r')
+%nx=640; f_k=4;fcor=14;bous=3000; LZ=1.0;
+
+
 %fid = endianopen('~/INCITE_runs/Intrepid/Ro0Fr1/n640_fcor3000bous14_all.scalars','r')
 %nx=640; f_k=4;fcor=3000;bous=14; LZ=1.0;
+
+fid = endianopen('~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.125_Ro0.005_nodamp/n2048_d0.125_Ro0.005_all.scalars','r')
+nx=2048; f_k=4;fcor=858.012;bous=6964.094; LZ=0.125;
 
 
 nscalars=0;

@@ -2,21 +2,41 @@ clear
 
 forpaper = 0; % generate plots for paper
 totals = 0; %general plots about total energies
-scales = 1; %general plots showing evolution of correlation lengths
+wscales = 1; % plots showing evolution of wave correlation lengths
+vscales = 0; % plots showing evolution of vortical correlation lengths
+wcentroid = 1; % plots showing evolution of wave spectrum centroid
+vcentroid = 0; % plots showing evolution of vortical spectrum centroid
 Lz = 1; %default
+epsf = 1; %default
 
 
-namedir = '~/projects/INCITE_runs/Intrepid/qg/';
-name = 'n640_bous3000_all';
-kf=4; Lz = 1;
+%namedir = '~/projects/INCITE_runs/Intrepid/qg/';
+%name = 'n640_bous3000_all';
+%kf=4; Lz = 1; epsf = 0.5; fcor=3000; bous = 3000;
+
+namedir = '~/projects/INCITE_runs/Intrepid/Ro0.0091Fr0.00227/';
+name = 'n640_Ro0.0091Fr0.00227_all';
+kf=4; Lz = 1; epsf = 0.5; fcor = 750; bous = 3000;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/Ro0.016Fr0.002/';
+%name = 'n512_Ro0.016Fr0.002_all';
+%kf=4; Lz = 1; epsf=1.0; fcor = 536.26; bous = 4290.06;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/qg/n256_thinshell16force/';
+%name = 'n256_Ro0.01_all';
+%kf=16; Lz = 1;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/qg/n256_fatshellforce/';
 %name = 'n256_Ro0.01_2_all';
 %kf=16; Lz = 1;
 
-namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
-name = 'n2048_d0.25_Ro0.05_all';
-kf=4; Lz = 0.25;
+%namedir = '~/projects/INCITE_runs/Intrepid/qg/n256_fsf_initnoise/';
+%name = 'n256_Ro0.01_all';
+%kf=16; Lz = 1;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
+%name = 'n2048_d0.25_Ro0.05_all';
+%kf=4; Lz = 0.25;
 
 %namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.01_nodamp/';
 %name = 'n2048_d0.25_Ro0.01_all';
@@ -26,9 +46,25 @@ kf=4; Lz = 0.25;
 %name = 'n2048_d0.25_Ro0.005_all';
 %kf=4; Lz = 0.25;
 
-namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
-name = 'n2048_d0.25_Ro0.002_all';
-kf=4; Lz = 0.25;
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
+%name = 'n2048_d0.25_Ro0.002_all';
+%kf=4; Lz = 0.25; fcor = 2702.57; bous = 10810.27;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
+%name = 'n2048_d0.25_Ro0.002_allnew';
+%kf=4; Lz = 0.25;epsf=1.0; fcor = 2702.57; bous = 10810.27;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.125_Ro0.005_nodamp/';
+%name = 'n2048_d0.125_Ro0.005_all';fcor = 1702.51; bous = 27240.175;
+%kf=4; Lz = 0.125; 
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.125_Ro0.002_nodamp/';
+%name = 'n2048_d0.125_Ro0.002_all';
+%kf=4; Lz = 0.125; epsf = 1.0; fcor = 2145.03; bous = 17160.23;
+
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.0625_Ro0.002_nodamp/';
+%name = 'n2048_d0.0625_Ro0.002_all';
+%kf=4; Lz = 0.0625; 
 
 asciprint = 0 % if == 1 print out the data to asci files
 
@@ -41,7 +77,7 @@ end
 
 time=0;
 j = 0; %(count for time average)
-while (time < 35)
+while (time < 25)
   [time,count]=fread(fid,1,'float64');
   if (count ~= 1) 
     disp('EOF reached.  stopping')
@@ -136,26 +172,22 @@ if(0)
 end
 
 if (1)
-  %plot the kz-averaged spectra
+  %plot the kz- and kh- averaged wave spectra
   figure(3)
   %loglog53(numkh,specuwave_h'+specvwave_h','E^{\pm}_h(kh)',2.0,6);%hold on;
-  loglog(kh,specuwave_h'+specvwave_h');
-  ylabel('E^{\pm}_h(kh)');
-  xlabel('k_h');
-  figure(5)
-  loglog(kh,specuvort_h'+specvvort_h');
-  ylabel('E^0_h(kh)');%hold on;
-  xlabel('k_h');
-  
-  %plot the kh-averaged spectra
+  loglog(kh,specuwave_h'+specvwave_h','Linewidth',2);hold on;
+  loglog(kz/Lz,(specuwave_z+specvwave_z)*Lz,'--','Linewidth',2);hold on;
+  set(gca,'fontsize',18);
+  legend('E^{\pm}_h(k_h)','E^{\pm}_h(k_z)');
+  xlabel('k_h,k_z');
+  hold off
+  %plot the kz- and kh- averaged vortical spectra
   figure(6)
-  loglog(kz/Lz,(specuwave_z+specvwave_z)*Lz);
-  ylabel('E^{\pm}_h(kz)');
-  xlabel('k_z')
-  figure(7)
-  loglog(kz/Lz,(specuvort_z + specvvort_z)*Lz);
-  ylabel('E^0_h(kz)');
-  xlabel('k_z')
+  loglog(kh,(specuvort_h+ specuvort_h));hold on;
+  loglog(kz/Lz,(specuvort_z+specvvort_z)*Lz,'--');hold on;
+  set(gca,'fontsize',16);
+  legend('E^{0}_h(k_h)','E^{0}_h(k_z)');
+  hold off
 end
   
   if (asciprint == 1)
@@ -191,44 +223,76 @@ end
 % pause
  
 
-% compute vertical and horizontal length scales of wave velocity and plot
-if (scales == 1)
+% compute centroid of wave spectra and plot
+if (wcentroid == 1)
 n = 1;
 Ehkh_wave = sum(specuwave_h + specvwave_h);
 Ehkz_wave = sum(specuwave_z + specvwave_z);
 khEh = sum((2*pi*kh).^(1/n).*(specuwave_h + specvwave_h));
-%khEh = sum((kh).^(1/n).*(specuwave_h + specvwave_h));
 kzEh = sum((2*pi*kz/Lz).^(1/n)*(specuwave_z + specvwave_z));
-%kzEh = sum((kz/Lz).^(1/n)*(specuwave_z + specvwave_z));
 kH = (kzEh/Ehkz_wave)^n
 kL = (khEh/Ehkh_wave)^n
-H = 2*pi/kH;
-L = 2*pi/kL;
+kHnum = kH/2/pi; %centroid wavenumber in units of 2*pi
+kLnum = kL/2/pi; %centroid wavenumber in units of 2*pi
+tsk = (epsf*(2*pi*kf/Lz)^2)^(1/3); %nonlinear timescale
+tfastN = 1/bous;
+tfastf=1/fcor;
+figure(5)
+plot(time, kHnum, '*');hold on;
+set(gca,'fontsize',18);
+xlabel('time');
+ylabel('centroid k_H (units of 2\pi)');
+figure(7);
+plot(time,kLnum,'*');hold on;
+set(gca,'fontsize',18);
+xlabel('time');
+ylabel('centroid k_L (units of 2\pi)');
+figure(8)
+plot(time,kL/kH,'*');hold on;
+set(gca,'fontsize',18);
+xlabel('time');
+ylabel('k_L/k_H');
+
+% compute vertical and horizontal length scales of wave velocity and plot
+H = 2*pi/kH; %physical scale corresponding to vertical centroid
+L = 2*pi/kL; %physical scale corresponding to horizontal centroid
 delta = H/L
+
 figure(20)
 plot(time, H, 'x'); hold on;
-set(gca,'fontsize',16);
+set(gca,'fontsize',18);
 xlabel('time');
-ylabel('internal vertical scale H (wave)');
+ylabel('H_p');
 figure(21)
 plot(time, L, 'o'); hold on;
-set(gca,'fontsize',16);
+set(gca,'fontsize',18);
 xlabel('time');
-ylabel('internal horizontal scale L (wave)');
+ylabel('L_p');
 figure(22)
 plot(time, delta, '*'); hold on;
-set(gca,'fontsize',16);
+set(gca,'fontsize',18);
 xlabel('time');
-ylabel('internal scale aspect ratio H/L (wave)');
-figure(23)
-plot(time,Lz/H, 'd'); hold on;
-set(gca,'fontsize',16);
-xlabel('time');
-ylabel('\delta/H');
+ylabel('\delta_p');
+figure(23) %time non-dimensionalized by nonlinear frequency
+plot(time*tsk,H/Lz, '*'); hold on;
+set(gca,'fontsize',18);
+xlabel('\tau_{nl}');
+ylabel('H_p/H');
+figure(24)%time non-dimensionalized by bous
+plot(time/tfastN,H/Lz, '*'); hold on;
+set(gca,'fontsize',18);
+xlabel('\tau_N');
+ylabel('H_p/H');
+figure(25)%time non-dimensionalized by fcor
+plot(time/tfastf,H/Lz, '*'); hold on;
+set(gca,'fontsize',18);
+xlabel('\tau_f');
+ylabel('H_p/H');
+
 end
 
 % compute vertical and horizontal length scales of vortical velocity and plot
-if (scales == 1)
+if (vscales == 1)
 n = 1;
 Ehkh_vort = sum(specuvort_h + specvvort_h);
 Ehkz_vort = sum(specuvort_z + specvvort_z);
@@ -255,12 +319,12 @@ set(gca,'fontsize',16);
 xlabel('time');
 ylabel('internal scale aspect ratio, H/L (vortical)');
 figure(27)
-plot(time,Lz/H, 'd'); hold on;
+plot(time,H/Lz, 'd'); hold on;
 set(gca,'fontsize',16);
 xlabel('time');
-ylabel('\delta/H (vortical)');
+ylabel('H/Lz (vortical)');
 end
-
+end
 
 
  %time average of spectra
@@ -290,7 +354,6 @@ end
     end
  end
  end 
-end
 if(0)
 spec2d_t_ave = spec2d_t_ave/j;
 spec2d_Eh_ave = spec2d_Eh_ave/j;

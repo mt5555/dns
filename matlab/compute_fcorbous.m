@@ -9,8 +9,9 @@ U = (epsf/k_f)^(1/3);
 H = 1/k_f;
 L = H/Lz;
 
-fcor = U/L/Ro;
 bous = U/H/Fr;
+fcor = U/L/Ro;
 
-disp(sprintf('fcor = %f', fcor));
 disp(sprintf('bous = %f', bous));
+disp(sprintf('fcor = %f', fcor));
+disp(sprintf('delt = %f', 0.2*pi/(bous+fcor)));

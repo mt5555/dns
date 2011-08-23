@@ -54,9 +54,9 @@ Lz=0.2;epsf=1;kf = 4;
 %name = 'n1600_d0.2_Ro0.05_all';  
 %Lz=0.2;epsf=1;kf = 10;
 
-namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/hyper2/';
-name = 'n2048_d0.25_Ro0.05hy2_all';
-Lz=0.25;epsf=1;kf = 4;
+%namedir = '~/projects/INCITE_runs/Intrepid/lowaspect_bous/hyper2/';
+%name = 'n2048_d0.25_Ro0.05hy2_all';
+%Lz=0.25;epsf=1;kf = 4;
 
 
 %namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/grid_convergence/';
@@ -69,13 +69,14 @@ Lz=0.25;epsf=1;kf = 4;
 %name = 'n1024_d0.25_Ro0.05_all';
 %Lz=0.25;epsf=1;kf = 4;
 
-%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_shiftforce/';
+%namedir
+%='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_shiftforce/';
 %name = 'n1024_d0.25_Ro0.05_all';
 %Lz=0.25;epsf=1;kf = 4;
 
-namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_hyper2/';
-name = 'n1024_d0.25_Ro0.05_all';
-Lz=0.25;epsf=1;kf = 4;
+%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_hyper2/';
+%name = 'n1024_d0.25_Ro0.05_all';
+%Lz=0.25;epsf=1;kf = 4;
 
 %namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.05_LONGRUN/';
 %name = 'n1024_d0.25_Ro0.05_all';
@@ -102,9 +103,9 @@ Lz=0.25;epsf=1;kf = 4;
 %name = 'n1024_d0.25_Ro0.05_all';
 %Lz=0.25;epsf=1;kf = 4;
 
-namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.002_nodamp/';
-name = 'n1024_d0.25_Ro0.002_all';
-Lz=0.25;epsf=1;kf = 4;
+%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n1024_d0.25_Ro0.002_nodamp/';
+%name = 'n1024_d0.25_Ro0.002_all';
+%Lz=0.25;epsf=1;kf = 4;
 
 
 %namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.05_nodamp/';
@@ -121,7 +122,20 @@ Lz=0.25;epsf=1;kf = 4;
 
 namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.25_Ro0.002_nodamp/';
 name = 'n2048_d0.25_Ro0.002_all';
-%Lz=0.25;epsf=1;kf = 4;fcor=2702.6;bous=10810.3
+Lz=0.25;epsf=1;kf = 4;fcor=2702.6;bous=10810.3
+
+%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.125_Ro0.005_nodamp/';
+%name = 'n2048_d0.125_Ro0.005_all';
+%Lz=0.125; kf = 4;fcor=858.012;bous=6964.094;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.125_Ro0.002_nodamp/';
+%name = 'n2048_d0.125_Ro0.002_all';
+%Lz=0.125; epsf=1;kf = 4; fcor = 2145.03; bous = 17160.23;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/n2048_d0.0625_Ro0.002_nodamp/';
+%name = 'n2048_d0.0625_Ro0.002_all';
+%Lz=0.0625; kf = 4; fcor = 1702.51; bous = 27240.175;
+
 
 %namedir ='~/projects/INCITE_runs/Intrepid/lowaspect_bous/LOWRES/sto_high_t32/';
 %name = 'n512_d0.25_Ro0.05_all';
@@ -137,7 +151,7 @@ name = 'n2048_d0.25_Ro0.002_all';
 
 %namedir ='~/projects/INCITE_runs/Intrepid/qg/';
 %name = 'n640_bous3000_all';
-%Lz=1;epsf=0.5;kf = 4;
+%Lz=1;epsf=0.5;kf = 4;bous=3000;
 
 %namedir ='~/projects/INCITE_runs/Intrepid/qg/n256/';
 %name = 'n256_Ro0.01_all';
@@ -163,6 +177,18 @@ name = 'n2048_d0.25_Ro0.002_all';
 %namedir ='~/projects/INCITE_runs/Intrepid/Ro0Fr1/';
 %name = 'n640_fcor3000bous14_all';
 %Lz=1;epsf=0.5;kf = 4;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/Ro0.0091Fr0.00227/';
+%name = 'n640_Ro0.0091Fr0.00227_all';
+%Lz=1;epsf=0.5;kf = 4;fcor=750; bous = 3000;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/Ro0.016Fr0.002/';
+%name = 'n512_Ro0.016Fr0.002_all';
+%Lz=1;epsf=1;kf = 4;fcor=536.25; bous=4290.05;
+
+%namedir ='~/projects/INCITE_runs/Intrepid/Ro0.032Fr0.002/';
+%name = 'n512_Ro0.032Fr0.002_all';
+%Lz=1;epsf=1;kf = 4;fcor=268.13; bous=4290.05;
 
 %namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.001/n1024_nu.5e-5/';
 %name = 'n1024_Ro1Fr0.001_all';
@@ -218,15 +244,16 @@ expv = 0;%3;  %compensation of exponent for spectral scaling, 0 for none
 expw = 0; %5/3;
 figure(1); % +, - and total and projected energy spectra
 set(gca,'fontsize',16);
-loglog(k,spec_tot.*k'.^exp,'k','Linewidth',2); hold on;
+loglog(k/Lz,spec_tot.*k'.^exp,'k','Linewidth',2); hold on;
 %loglog(k,spec_Q_tot,'bo'); hold on;
 %loglog(k,spec_tot./spec_Q_tot,'ko','Linewidth',2);hold on;
-loglog(k,spec_vort.*k'.^expv,'b--','Linewidth',2); hold on;
-loglog(k,spec_wave.*k'.^expv,'r-.','Linewidth',2); hold on;
-loglog(k,spec_kh0,'c');hold on; 
+loglog(k/Lz,spec_vort.*k'.^expv,'b--','Linewidth',2); hold on;
+loglog(k/Lz,spec_wave.*k'.^expv,'r-.','Linewidth',2); hold on;
+loglog(k/Lz,spec_kh0,'c');%hold on; 
 stitle = sprintf('t = %8.4f',time);
 title(stitle);
-axis([1 1000 1e-6 1]);
+%axis([1 1000 1e-6 1]);
+axis([1 10^3 10^-8 1]);
 grid on;
 legend('total','vortical','wave', 'k_h = 0')
 xlabel('k');
@@ -237,7 +264,9 @@ figure(2) ;
 te = sum(spec_tot);
 tvort = sum(spec_vort);
 twave = sum(spec_wave);
+tkh0 = sum(spec_kh0);
 tsk = (epsf*(2*pi*kf/Lz)^2)^(1/3);
+tfast = 1/bous;
 tls = (epsf*(kf^2))^(1/3);
 esk = (epsf/(2*pi*kf/Lz))^(-2/3);
 els = (epsf/kf)^(-2/3);
@@ -250,9 +279,65 @@ tscale=1;
 plot(time*tscale, te*escale,'kx','Markersize',7); hold on;
 plot(time*tscale, tvort*escale,'b*','Markersize',7); hold on;
 plot(time*tscale, twave*escale,'ro','Markersize',7); hold on;
-set(gca,'fontsize',16);
+%plot(time*tscale, tkh0*escale,'kd','Markersize',7);hold on;
+set(gca,'fontsize',18);
 xlabel('time t');
-legend('total','vortical','wave');
+ylabel('energy');
+legend('total','vortical','wave'); %,'k_h=0');
+
+figure(3); %spectral ratios
+set(gca,'fontsize',16);
+loglog(k/Lz,spec_vort./spec_tot,'Linewidth',2); hold on;
+loglog(k/Lz,spec_wave./spec_tot,'r-.','Linewidth',2); hold on;
+legend('vortical/total','wave/total')
+set(gca,'fontsize',18);
+grid on;
+xlabel('k');
+hold off;
+
+figure(4); %spectral ratios at k_f*10 as a function of time
+set(gca,'fontsize',16);
+kval = kf*10;
+%plot(time,spec_vort(kval)./spec_tot(kval),'k*','Markersize',7); hold on;
+plot(time,spec_wave(kval)./spec_tot(kval),'ko','Markersize',7); hold on;
+set(gca,'fontsize',18);
+grid on;
+xlabel('time t');
+ylabel('E^{\pm}(k=10k_f)/E(k=10k_f)');
+
+
+figure(5); %spectral ratios at for energy between k_l and k_r as a function of time 
+set(gca,'fontsize',16);
+kl = kf+10;
+%kr = kf*50;
+plot(time*tsk,sum(spec_wave(kl:length(spec_wave)))./sum(spec_tot(kl:length(spec_wave))),'k*','Markersize',7); hold on;
+set(gca,'fontsize',18);
+grid on;
+xlabel('\tau_{nl}');
+ylabel('E^{\pm}(k > 5k_f)/E(k > 5k_f)');
+
+figure(6); %spectral ratios with time non-dimensionalized by bous
+set(gca,'fontsize',16);
+kl = kf+10;
+%kr = kf*50;
+plot(time*bous,sum(spec_wave(kl:length(spec_wave)))./sum(spec_tot(kl:length(spec_wave))),'k*','Markersize',7); hold on;
+set(gca,'fontsize',18);
+grid on;
+xlabel('\tau_N');
+ylabel('E^{\pm}(k > 5k_f)/E(k > 5k_f)');
+
+
+figure(7); %spectral ratios with time non-dimensionalized by fcor
+set(gca,'fontsize',16);
+kl = kf+10;
+%kr = kf*50;
+plot(time*fcor,sum(spec_wave(kl:length(spec_wave)))./sum(spec_tot(kl:length(spec_wave))),'k*','Markersize',7); hold on;
+set(gca,'fontsize',18);
+grid on;
+xlabel('\tau_f');
+ylabel('E^{\pm}(k > 5k_f)/E(k > 5k_f)');
+
+
 
 end % end movie loop
 

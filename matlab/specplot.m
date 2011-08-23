@@ -56,6 +56,9 @@ namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
 %name = 'n640_fcor3000bous14_all';
 %namedir = '~/INCITE_runs/Intrepid/Ro0Fr1/';  
 
+name = 'n640_Ro0.0091Fr0.00227_all';
+namedir = '~/projects/INCITE_runs/Intrepid/Ro0.0091Fr0.00227/';  
+
 
 %name = 'sc2048A0000.9500';
 %namedir = '~/data/dns/sc2048A/';
@@ -96,8 +99,8 @@ namedir = '~/projects/INCITE_runs/Intrepid/Ro1Fr0/';
 %namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.1e-4/';
 %name = 'n1024_Ro1Fr0.002_0000.0000';
 
-namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/';
-name = 'n1024_Ro1Fr0.002_0002.7000';
+%namedir ='~/projects/INCITE_runs/Intrepid/bous_NSvisc/Ro1Fr0.002/n1024_nu.5e-5/';
+%name = 'n1024_Ro1Fr0.002_0002.7000';
 
 spec_r_save=[];
 spec_r_save_fac3=[];
