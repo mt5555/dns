@@ -100,8 +100,11 @@ header_type=1; scale=1;           ! DNS standard data
 compute_hspec=.false.
 read_uvw=.false.
 compute_hfree=.false.		!extracting helicity-free modes
+!!!BUG note: at the moment we cannot set project_ch, project_ch_Eh and!!! 
+!!! project_ch_Ewt == .true. together, need to do those one at a time !!!
 project_ch=.false.         !Craya-Herring projection and spectra
-project_ch_Eh=.true.      !Craya-Herring 2d spectra of E_h
+project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h
+project_ch_Ewt=.true.     !Craya-Herring 2d spectra of E_w and E_t
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
@@ -280,7 +283,22 @@ do
       call compute_hfree_spec(Q,q1,q2,q3)
       call output_hfree_spec(time,time)
    endif
-   
+ 
+if (project_ch_Ewt) then
+      if (.not. read_uvw) then	
+         call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
+         call input_passive(runname,time,Q,work1,work2)
+         Q=Q*scale;
+         read_uvw=.true.	
+      endif
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,q1,work1,work2)
+      endif
+
+      call compute_project_CH_Ewt(Q,q1,work1,work2)
+      call compute_spec_ch2d(time,Q,q1,work1,work2)
+      call output_2d_chEwt(time,time)	
+   endif  
    
    if (project_ch_Eh) then
       if (.not. read_uvw) then	
