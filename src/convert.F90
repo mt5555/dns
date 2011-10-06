@@ -116,8 +116,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=1.2
-tstop=1.2
+tstart=5.0
+tstop=5.0
 tinc=0.1
 
 
@@ -1048,20 +1048,18 @@ do
       write(ext2,'(i3)') 100+type_in
 
 !     write out headerless wave component u,v,w,t fields
-      basename=runname(1:len_trim(runname)) // "-wave."
+      basename=runname(1:len_trim(runname)) // 'wave_'
       call output_uvw(basename,time,Q,vor,work1,work2,2)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-           // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
-          // '-wave'
+           //'wave_'// sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
       write(sdata,'(f10.4)') 10000.0000 + time
 
 !     write out headerless vortical component u,v,w,t fields
-      basename=runname(1:len_trim(runname)) // '-vort.'
+      basename=runname(1:len_trim(runname)) // 'vort_'
       call output_uvw(basename,time,Q2,vor,work1,work2,2) 
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-           // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
-          // '-vort'
+           // 'vort_' // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) 
       call singlefile_io3(time,Q2,fname,work1,work2,0,io_pe,.false.,2)
 
    endif
