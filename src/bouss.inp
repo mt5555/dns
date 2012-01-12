@@ -12,7 +12,7 @@ hyper16_imp ! hyper vis
 none        ! hypo vis
 0.0         ! hypo vis value
 2000.          ! fcor  rotation
-1.0e-3        ! Z sscaling  (aspect ratio)
+1.0        ! Z sscaling  (aspect ratio)
 2000.            ! Bous. parameter  Fr = (.5*(2pi24)^2)^(1/3)/107.08=.21
 0e0           ! alpha (for NS-alpha model).  alpha>1 is in units of delx
 .0            ! smagorinsky
