@@ -645,7 +645,6 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
             xw=(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
-
             ! fat-shell integer wave nubmer:
             ! xwi= Lz*sqrt(im*im + jm*jm + km*km/Lz/Lz)
 
@@ -670,6 +669,13 @@ do j=1,ny_2dz
             rhs(k,i,j,1)=rhs(k,i,j,1) - xw_viss*Qhat(k,i,j,1)
             rhs(k,i,j,2)=rhs(k,i,j,2) - xw_viss*Qhat(k,i,j,2)
             rhs(k,i,j,3)=rhs(k,i,j,3) - xw_viss*Qhat(k,i,j,3)
+
+#ifdef BALU_MOD	    
+            if(im==0.and.jm==0.and.km==1) then
+               rhs(k,i,j,1)=rhs(k,i,j,1) + uz
+            endif
+            if(km==0) xw_viss=xw_viss+rylgh
+#endif
 
 
             if (compute_ints==1) then

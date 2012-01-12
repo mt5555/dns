@@ -83,6 +83,7 @@ else
    if (init_cond==10) call init_3d_rot(Q,Qhat,work1,work2,1)            ! 3d_rot 
    if (init_cond==11) call init_TG(Q,Qhat,work1,work2)                  ! Taylor Green
    if (init_cond==12) call init_EDQMN(Q,Qhat,work1,work2)                  !
+   if (init_cond==13) call init_thrmlwnd(Q,Qhat,work1,work2)                  !
 
    if (npassive>0) then
       call init_passive_scalars(1,Q,Qhat,work1,work2)
@@ -708,3 +709,80 @@ enddo
    call mpi_allreduce(enerb_work,enerb,NUMBANDS,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 end subroutine
+
+subroutine init_tw(init,Q,Qhat,work1,work2)
+!
+! low wave number, quasi isotropic initial condition
+!
+! init=0    initialize schmidt number only
+! init=1    initialize schmidt number and passive scalar data
+!
+!
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,n_var)
+real*8 :: Qhat(nx,ny,nz,n_var)
+real*8 :: work1(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+real*8 :: xfac,mn,mx,ke_percent
+integer :: n,k,i,j,im,jm,km,init,count,iter,n1
+character(len=80) :: message
+
+
+if (my_pe==io_pe) then
+   print *,"Baroclinic Instability"
+endif
+
+
+do j=1,ny_2dz
+   jm=z_jmcord(j)
+   do i=1,nx_2dz
+      im=z_imcord(i)
+      do k=1,g_nz
+         km=z_kmcord(k)
+         if(im==0.and.jm==1.and.km==1) Qhat(k,i,j,1)=1
+         if(im==0.and.jm==2.and.km==2) Qhat(k,i,j,4)=-bous
+      enddo
+   enddo
+enddo
+
+Q=Qhat
+call ifft3d(Q(1,1,1,1),work1) 
+call ifft3d(Q(1,1,1,4),work1) 
+
+end subroutine init_tw
+
+subroutine init_thrmlwnd(Q,PSI,work,work2)
+use params
+implicit none
+real*8 :: Q(nx,ny,nz,4)
+real*8 :: PSI(nx,ny,nz,4)
+real*8 :: work(nx,ny,nz)
+real*8 :: work2(nx,ny,nz)
+
+! local variables
+integer :: i,j,k
+real*8 :: x,y,z
+
+
+do k=nz1,nz2
+   z=zcord(k)
+   do j=ny1,ny2
+      y=ycord(j)
+      do i=nx1,nx2
+         x=xcord(i)
+
+         ! (x,y,z) is the coordinate of the point (i,j,k)
+         ! u velocity:
+         Q(i,j,k,1) =  sin(pi2*y) * sin(pi2*z)
+         ! v velocity:
+         Q(i,j,k,2) =  0
+         ! w velocity:
+         Q(i,j,k,3) =  0
+         ! theta
+         Q(i,j,k,4) =  -bous*cos(pi2*y) * cos(pi2*z)
+
+      enddo
+   enddo
+enddo
+end subroutine init_thrmlwnd

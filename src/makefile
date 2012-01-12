@@ -190,7 +190,7 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),INTELMPI)
    F90 = mpif90
    CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib  -O1  $(MPI) $(FFT) 
+   FFLAGS =  -auto -w90  -Vaxlib  -g  $(MPI) $(FFT) 
    LDFLAGS = $(FFTLIB)
    endif
 
