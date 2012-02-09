@@ -30,7 +30,9 @@
 !
 ! computes spectra of Craya-Herring projection modes (project_ch)
 ! compute spectra of CH modes of horizontal kinetic energy (project_ch_Eh)
-!
+! compute spectra of CH modes minus kh-0 (project_minuskh0_Eh)
+! compute spectra of CH modes of vertical kinetic energy and potential energy (project_ch_Ewt)
+
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
 !    tstart=0
@@ -103,17 +105,19 @@ compute_hfree=.false.		!extracting helicity-free modes
 
 !!!BUG note: at the moment we cannot set project_ch, project_ch_Eh and 
 !!! project_ch_Ewt == .true. together, need to do those one at a time 
-project_ch=.false.         !Craya-Herring projection and spectra
-project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h (horizontal velocity)
-project_minuskh0_Eh=.true. !Craya-Herring 2d spectra of E_h w/out kh0 contribution
+project_ch=.true.         !Craya-Herring projection and spectra
+project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h (horizontal
+			   !kinetic energy)
+project_minuskh0_Eh=.false. !Craya-Herring 2d spectra of E_h w/out kh0 contribution
 project_ch_Ewt=.false.     !Craya-Herring 2d spectra of E_w and E_t (vertical
-			  !velocity and temperature)
+			  !kinetic energy  and potential energy)
+
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
 
 
-tstart=0.0
+tstart=12.9
 tstop=20.0
 tinc=0.1
 
