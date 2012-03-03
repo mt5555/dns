@@ -4509,13 +4509,17 @@ do n = 1,n_var
    QR(:,:,:,n)=work
 enddo
 
-!since we only want the vertical and scalar energies, store the vortical mode 
-!energies in Q(:,3) and Q(:,4) 
+!since we only want the vertical and scalar energies, store their vortical modes 
+!in Q(:,3) and Q(:,4) 
+Q(:,:,:,1) = Q(:,:,:,3)
+Q(:,:,:,2) = Q(:,:,:,4)
 Q(:,:,:,3) = QR(:,:,:,3)
 Q(:,:,:,4) = QR(:,:,:,4)
 
+! Finally (Q(:,1) has w_wave, Q(:,2) has t_wave, Q(:,3) has w_vort, and Q(:,4) has t_vort)
 
 end subroutine compute_project_CH_Ewt
+
 
 
 end module
