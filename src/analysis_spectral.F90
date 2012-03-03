@@ -105,11 +105,11 @@ compute_hfree=.false.		!extracting helicity-free modes
 
 !!!BUG note: at the moment we cannot set project_ch, project_ch_Eh and 
 !!! project_ch_Ewt == .true. together, need to do those one at a time 
-project_ch=.true.         !Craya-Herring projection and spectra
+project_ch=.false.         !Craya-Herring projection and spectra
 project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h (horizontal
 			   !kinetic energy)
 project_minuskh0_Eh=.false. !Craya-Herring 2d spectra of E_h w/out kh0 contribution
-project_ch_Ewt=.false.     !Craya-Herring 2d spectra of E_w and E_t (vertical
+project_ch_Ewt=.true.     !Craya-Herring 2d spectra of E_w and E_t (vertical
 			  !kinetic energy  and potential energy)
 
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
@@ -117,7 +117,7 @@ compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
 
 
-tstart=12.9
+tstart=0.0
 tstop=20.0
 tinc=0.1
 
