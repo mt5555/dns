@@ -41,8 +41,11 @@ ifeq ($(UNAME),Linux)
 #
 # P3DFFT, with DNS internal FFT using fft99 (to save fftw initialization costs)
 #
-      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/taylorm/p3dfft/include 
-      LDFLAGS = -L/home/taylorm/p3dfft/lib -lp3dfft -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
+#      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/taylorm/p3dfft/include 
+#      LDFLAGS = -L/home/taylorm/p3dfft/lib -lp3dfft -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
+
+      FFLAGS = -WF,"-DNDEBUG,-DUSE_MPI,-DUSE_MPI_IO,-DMPI_HAS_REAL8,-DUSE_P3DFFT,-DUSE_FFT99,-Dflush=flush_,-DF_NO_UNDERSCORE"  -qsuffix=cpp=F90   -O2 -qmaxmem=-1 -qstrict -I. -I/home/kurien/p3dfft/include 
+      LDFLAGS = -L/home/kurien/p3dfft/lib -lp3dfft -L/soft/apps/fftw-3.1.2-double/lib -lfftw3 
 
 #
 # P3DFFT, with DNS internal FFT using fftw
@@ -190,7 +193,7 @@ ifeq ($(UNAME),Linux)
    ifeq ($(VENDOR),INTELMPI)
    F90 = mpif90
    CC=gcc
-   FFLAGS =  -auto -w90  -Vaxlib  -g  $(MPI) $(FFT) 
+   FFLAGS =  -auto -w90  -Vaxlib  -O1  $(MPI) $(FFT) 
    LDFLAGS = $(FFTLIB)
    endif
 
