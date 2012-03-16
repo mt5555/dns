@@ -53,7 +53,8 @@
 !  -cout iotest(10) ?
 !  -cout stats (11) read data, print some stats
 !  -cout uwbar (12) ?
-!  -cout trunc (13) read data, fft, truncate, fft back.
+!  -cout trunc (13) read data, fft, truncate, fft back. (Only does uvw truncation)
+
 !
 ! option used to check aliasing error:   
 !  -cout nlout (14) compute random U,V,UV.  output U,V,UV
@@ -70,7 +71,7 @@
 !  -cout potens (22)   potential enstrophy field
 !  -cout pe (23) potential energy field
 !  -cout CH_decomp (24) write wave modes and vortical modes field
-!  -cout potvor (25) compute PV on input file and write PV field
+!  -cout trunct (25) read scalar, fft, truncate fft back
 
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -116,8 +117,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=2.4
-tstop=2.7
+tstart=0.0
+tstop=20
 tinc=0.1
 
 
@@ -372,6 +373,8 @@ do
       call print_message(fname)
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
    endif
+
+
    if (convert_opt==7) then  ! -cout gradu
       ! compute <gradu> for all subcubes, output in asci file
       call input_uvw(time,Q,vor,work1,work2,header_user)
@@ -1063,6 +1066,53 @@ do
       call singlefile_io3(time,Q2,fname,work1,work2,0,io_pe,.false.,2)
 
    endif
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Low-pass filter or truncation for scalar field 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+   if (convert_opt==25) then  ! -cout trunct
+      if (w_spec) then
+         ! -so (spectral output) uses spec_max to specify coefficients to write
+         ! -cout trunc uses spec_max as a truncation parameter, so we cant
+         ! use both of these together 
+         call abortdns("-cout trunc option cant be used with spectral output")
+      endif
+
+      ! read data, header type =1, or specified in input file
+      time2=time
+      call input_passive(runname, time2, Q, work1, work2)
+       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,vor,work1,work2)
+      endif
+
+      ! compute the FFT
+         write(message,'(a,i4)') 'w_spec fft3d: n=',4
+         call print_message(message)
+         call fft3d(Q(1,1,1,4),work1)
+
+      ! apply Filter
+         ! call the truncation filter subroutine in fftops.F90
+         call fft_filter_trunc(Q(1,1,1,4)) 
+     
+      ! compute iFFT
+         write(message,'(a,i4)') 'w_spec ifft3d: n=',4
+         call print_message(message)
+         call ifft3d(Q(1,1,1,4),work1)
+
+      ! give the output file a new name
+      write(message, '(i5)') 10000 + spec_max
+      write(sdata,'(f10.4)') 10000.0000 + time
+      write(ext,'(f8.3)') 1000 + schmidt_in
+      write(ext2,'(i3)') 100+type_in
+
+
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+           //'-trunc'//message(2:5)//sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
+      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,1)
+    endif
+
+
 
 
    if (tstart>=0) then

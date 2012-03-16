@@ -105,7 +105,7 @@ compute_hfree=.false.		!extracting helicity-free modes
 
 !!!BUG note: at the moment we cannot set project_ch, project_ch_Eh and 
 !!! project_ch_Ewt == .true. together, need to do those one at a time 
-project_ch=.false.         !Craya-Herring projection and spectra
+project_ch=.true.         !Craya-Herring projection and spectra
 project_ch_Eh=.true.      !Craya-Herring 2d spectra of E_h (horizontal
 			   !kinetic energy)
 project_minuskh0_Eh=.false. !Craya-Herring 2d spectra of E_h w/out kh0 contribution
@@ -117,7 +117,7 @@ compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 compute_scalarsbous = .false. !compute .scalars-bous files
 
 
-tstart=2.4
+tstart=0.0
 tstop=2.7
 tinc=0.1
 
@@ -306,6 +306,7 @@ if (project_ch_Ewt) then
       call compute_project_CH_Ewt(q2,q1,work1,work2)
       call compute_spec_ch2d(time,q2,q1,work1,work2)
       call output_2d_chEwt(time,time)	
+      Q=q2  !set Q back to input
    endif  
 
    if (project_minuskh0_Eh) then
@@ -323,6 +324,7 @@ if (project_ch_Ewt) then
       call compute_project_minuskh0_Eh(q2,q1,work1,work2)
       call compute_spec_ch2d(time,q2,q1,work1,work2)
       call output_2d_minuskh0_Eh(time,time)	
+      Q=q2  !set Q back to input 
    endif
 
    
@@ -341,6 +343,7 @@ if (project_ch_Ewt) then
       call compute_project_CH_Eh(q2,q1,work1,work2)
       call compute_spec_ch2d(time,q2,q1,work1,work2)
       call output_2d_chEh(time,time)	
+      Q=q2  !set Q back to input
    endif
 
 
