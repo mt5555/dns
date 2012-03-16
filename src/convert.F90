@@ -986,7 +986,7 @@ do
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".pe"
-      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
+      call singlefile_io3(time,work1,fname,Q(1,1,1,np1),work2,0,io_pe,.false.,2)
    endif
 
 
@@ -1055,7 +1055,7 @@ do
       call output_uvw(basename,time,Q,vor,work1,work2,2)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            //'wave_'// sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
-      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
+      call singlefile_io3(time,Q(1,1,1,np1),fname,work1,work2,0,io_pe,.false.,2)
       write(sdata,'(f10.4)') 10000.0000 + time
 
 !     write out headerless vortical component u,v,w,t fields
@@ -1063,7 +1063,7 @@ do
       call output_uvw(basename,time,Q2,vor,work1,work2,2) 
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // 'vort_' // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) 
-      call singlefile_io3(time,Q2,fname,work1,work2,0,io_pe,.false.,2)
+      call singlefile_io3(time,Q2(1,1,1,np1),fname,work1,work2,0,io_pe,.false.,2)
 
    endif
 
@@ -1076,7 +1076,7 @@ do
          ! -so (spectral output) uses spec_max to specify coefficients to write
          ! -cout trunc uses spec_max as a truncation parameter, so we cant
          ! use both of these together 
-         call abortdns("-cout trunc option cant be used with spectral output")
+         call abortdns("-cout trunct option cant be used with spectral output")
       endif
 
       ! read data, header type =1, or specified in input file
@@ -1087,18 +1087,18 @@ do
       endif
 
       ! compute the FFT
-         write(message,'(a,i4)') 'w_spec fft3d: n=',4
+         write(message,'(a,i4)') 'w_spec fft3d: n=',np1
          call print_message(message)
-         call fft3d(Q(1,1,1,4),work1)
+         call fft3d(Q(1,1,1,np1),work1)
 
       ! apply Filter
          ! call the truncation filter subroutine in fftops.F90
-         call fft_filter_trunc(Q(1,1,1,4)) 
+         call fft_filter_trunc(Q(1,1,1,np1)) 
      
       ! compute iFFT
-         write(message,'(a,i4)') 'w_spec ifft3d: n=',4
+         write(message,'(a,i4)') 'w_spec ifft3d: n=',np1
          call print_message(message)
-         call ifft3d(Q(1,1,1,4),work1)
+         call ifft3d(Q(1,1,1,np1),work1)
 
       ! give the output file a new name
       write(message, '(i5)') 10000 + spec_max
@@ -1109,7 +1109,7 @@ do
 
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            //'-trunc'//message(2:5)//sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
-      call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,1)
+      call singlefile_io3(time,Q(1,1,1,np1),fname,work1,work2,0,io_pe,.false.,1)
     endif
 
 
