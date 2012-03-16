@@ -306,7 +306,6 @@ if (project_ch_Ewt) then
       call compute_project_CH_Ewt(q2,q1,work1,work2)
       call compute_spec_ch2d(time,q2,q1,work1,work2)
       call output_2d_chEwt(time,time)	
-      Q=q2  !set Q back to input
    endif  
 
    if (project_minuskh0_Eh) then
@@ -324,7 +323,6 @@ if (project_ch_Ewt) then
       call compute_project_minuskh0_Eh(q2,q1,work1,work2)
       call compute_spec_ch2d(time,q2,q1,work1,work2)
       call output_2d_minuskh0_Eh(time,time)	
-      Q=q2  !set Q back to input 
    endif
 
    
@@ -339,11 +337,10 @@ if (project_ch_Ewt) then
          call print_stats(Q,q1,work1,work2)
       endif
 
-      q2=Q  ! compute_project_CH_Eh overwright input, so make a copy of Q first
+      q2=Q  ! compute_project_CH_Eh will overwright input, so make a copy of Q first   
       call compute_project_CH_Eh(q2,q1,work1,work2)
       call compute_spec_ch2d(time,q2,q1,work1,work2)
       call output_2d_chEh(time,time)	
-      Q=q2  !set Q back to input
    endif
 
 
