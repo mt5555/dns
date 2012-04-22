@@ -573,6 +573,8 @@ if (my_pe==io_pe) then
 	    convert_opt=23
 	 else if (carg(1:11)=="CH_decomp") then
 	    convert_opt=24
+	 else if (carg(1:6)=="ttrunc") then
+            convert_opt=25	          
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abortdns("-cout unrecognized option")

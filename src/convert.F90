@@ -71,7 +71,7 @@
 !  -cout potens (22)   potential enstrophy field
 !  -cout pe (23) potential energy field
 !  -cout CH_decomp (24) write wave modes and vortical modes field
-!  -cout trunct (25) read scalar, fft, truncate fft back
+!  -cout ttrunc (25) read scalar, fft, truncate fft back
 
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -118,12 +118,12 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 ! input file
 tstart=0.0
-tstop=20
+tstop=0.3
 tinc=0.1
 
 
 ! to read times from  file times.dat:
-!  tstart=-1; tinc=0; tname="times.dat"
+  tstart=-1; tinc=0; tname="times.dat"
 
 ! these lines are modifed by some sed scripts for automatic running
 ! of this code by putting in new values of tstart, tstop, tinc,
@@ -176,7 +176,7 @@ do
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
-
+      
       ! just reoutput the variables:
       if (w_spec) then
          do n=1,3
@@ -195,160 +195,163 @@ do
 !      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       ! output headerless data:
        call output_uvw(basename,time,Q,vor,work1,work2,2)
+       
+    endif
 
-   endif
+    if (convert_opt==1) then  ! -cout vor
+       call input_uvw(time,Q,vor,work1,work2,header_user)
+       ! outputing vorticity
+       if (ndim==3) then
+          basename=runname(1:len_trim(runname)) // "-vor."
+          call print_message("computing vorticity...")
+          call vorticity(vor,Q,work1,work2)
+          call print_message("output vorticity...")
+          ! call output_uvw(basename,time,vor,Q,work1,work2,header_user)
+          ! output headerless
+          call output_uvw(basename,time,vor,Q,work1,work2,2)
+          
+       endif
+       if (ndim==2) then
+          call print_message("computing 2D vorticity...")
+          call vorticity2d(vor,Q,work1,work2)
+          write(sdata,'(f10.4)') 10000.0000 + time
+          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vor"
+          call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
+          
+          ! compute the v vorticity, in vor(:,:,:,2)
+          if (alpha_value>0) then
+             call print_message("computing 2D v vorticity...")
+             vor(:,:,:,2)=vor(:,:,:,1)
+             call v_vorticity2d(vor(1,1,1,2),work1)
+             fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vvor"
+             call singlefile_io3(time,vor(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_user)
+          endif
+          
+          ! compute the stream function, stored in vor(:,:,:,2)
+          call print_message("computing 2D stream function...")
+          vor(:,:,:,2)=vor(:,:,:,1)
+          call fft3d(vor(1,1,1,2),work1)
+          a0=0; a1=-1
+          call fft_laplace_inverse(vor(1,1,1,2),a0,a1)
+          call ifft3d(vor(1,1,1,2),work1)
+          
+          fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".psi"
+          call singlefile_io3(time,vor(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_user)
+       endif
 
-   if (convert_opt==1) then  ! -cout vor
-      call input_uvw(time,Q,vor,work1,work2,header_user)
-      ! outputing vorticity
-      if (ndim==3) then
-         basename=runname(1:len_trim(runname)) // "-vor."
-         call print_message("computing vorticity...")
-         call vorticity(vor,Q,work1,work2)
-         call print_message("output vorticity...")
-         ! call output_uvw(basename,time,vor,Q,work1,work2,header_user)
-	 ! output headerless
-         call output_uvw(basename,time,vor,Q,work1,work2,2)
-	 
-      endif
-      if (ndim==2) then
-         call print_message("computing 2D vorticity...")
-         call vorticity2d(vor,Q,work1,work2)
-         write(sdata,'(f10.4)') 10000.0000 + time
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vor"
-         call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,header_user)
+       
+       
+    endif
+    
+    if (convert_opt==2) then  ! -cout vorm
+       call input_uvw(time,Q,vor,work1,work2,header_user)
+       call print_message("computing vorticity magnitude...")
+       call vorticity(vor,Q,work1,work2)
+       do k=nz1,nz2
+          do j=ny1,ny2
+             do i=nx1,nx2
+                work1(i,j,k)=sqrt(vor(i,j,k,1)**2+vor(i,j,k,2)**2+vor(i,j,k,3)**2)
+             enddo
+          enddo
+       enddo
+       ! output vorticity magnitude
+       output_size=4
+       write(sdata,'(f10.4)') 10000.0000 + time
+       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+       
+       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorm"
+       call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,2)
+       !      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorme"
+       !      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,3)
+       
+    endif
 
-         ! compute the v vorticity, in vor(:,:,:,2)
-         if (alpha_value>0) then
-            call print_message("computing 2D v vorticity...")
-            vor(:,:,:,2)=vor(:,:,:,1)
-            call v_vorticity2d(vor(1,1,1,2),work1)
-            fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".vvor"
-            call singlefile_io3(time,vor(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_user)
-         endif
+    if (convert_opt==3) then  ! -cout norm2
+       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
+       call input_uvw(time,Q,vor,work1,work2,header_user)
+       do i=1,ndim
+          call print_max(Q(1,1,1,i),i)
+       enddo
+       call print_message("computing norm squared...")
+       do k=nz1,nz2
+          do j=ny1,ny2
+             do i=nx1,nx2
+                work1(i,j,k)=Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2
+             enddo
+          enddo
+       enddo
+       call print_message("outputting norm squared as REAL*4...")
+       output_size=4
+       write(sdata,'(f10.4)') 10000.0000 + time
+       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2"
+       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
+       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2e"
+       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
+    endif
 
-         ! compute the stream function, stored in vor(:,:,:,2)
-         call print_message("computing 2D stream function...")
-         vor(:,:,:,2)=vor(:,:,:,1)
-         call fft3d(vor(1,1,1,2),work1)
-         a0=0; a1=-1
-         call fft_laplace_inverse(vor(1,1,1,2),a0,a1)
-         call ifft3d(vor(1,1,1,2),work1)
-
-         fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".psi"
-         call singlefile_io3(time,vor(1,1,1,2),fname,work1,work2,0,io_pe,.false.,header_user)
-      endif
-
-
-
-   endif
-
-   if (convert_opt==2) then  ! -cout vorm
-      call input_uvw(time,Q,vor,work1,work2,header_user)
-      call print_message("computing vorticity magnitude...")
-      call vorticity(vor,Q,work1,work2)
-      do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         work1(i,j,k)=sqrt(vor(i,j,k,1)**2+vor(i,j,k,2)**2+vor(i,j,k,3)**2)
-      enddo
-      enddo
-      enddo
-      ! output vorticity magnitude
-      output_size=4
-      write(sdata,'(f10.4)') 10000.0000 + time
-      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorm"
-      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,2)
-!      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".vorme"
-!      call singlefile_io3(time,work1,fname,vor,work2,0,io_pe,.false.,3)
-
-   endif
-   if (convert_opt==3) then  ! -cout norm2
-      ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2,header_user)
-      do i=1,ndim
-         call print_max(Q(1,1,1,i),i)
-      enddo
-      call print_message("computing norm squared...")
-      do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         work1(i,j,k)=Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2
-      enddo
-      enddo
-      enddo
-      call print_message("outputting norm squared as REAL*4...")
-      output_size=4
-      write(sdata,'(f10.4)') 10000.0000 + time
-      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2"
-      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norm2e"
+    if (convert_opt==4) then  ! -cout 4uvw
+       ! 2048^3 needs 192GB storage.  can run on 128 cpus.
+       !  can run on 64 cpus, if running 2 jobs per node.
+       ! this could will output 1 field at a time.  only needs 3 arrays.
+       write(sdata,'(f10.4)') 10000.0000 + time
+       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+       
+       do i=1,3  ! use this to loop over .u,.v,.w
+          fname = basename(1:len_trim(basename)) // sdata(2:10) // &
+               "." // extension(i:i)
+          call print_message("input file:")	
+          call print_message(fname(1:len_trim(fname)))
+          call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,r_spec,header_user)
+          call print_max(Q,i)
+          
+          if (w_spec) then
+             write(message,'(a,i4)') 'w_spec fft3d: n=',i
+             call print_message(message)
+             call fft3d(Q(1,1,1,1),work1)
+             fname = basename(1:len_trim(basename)) // sdata(2:10) // &
+                  "." // extension(i:i) // "s"
+          else
+             fname = basename(1:len_trim(basename)) // "-new" // sdata(2:10) // &
+                  "." // extension(i:i)
+          endif
+          call print_message(fname(1:len_trim(fname)))
+          
+          if (w_spec .or. r_spec) then
+             ! converting to/from spectral, keep same headers
+             call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,header_user)
+          else
+             ! assume we are just converting to headerless brick-of-floats
+             call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,2)
+          endif
+       enddo
+    endif
+    
+    if (convert_opt==5) then  ! -cout norm
+       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
+       call input_uvw(time,Q,vor,work1,work2,header_user)
+       do i=1,ndim
+          call print_max(Q(1,1,1,i),i)
+       enddo
+       call print_message("computing norm squared...")
+       do k=nz1,nz2
+          do j=ny1,ny2
+             do i=nx1,nx2
+                work1(i,j,k)=sqrt(Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2)
+             enddo
+          enddo
+       enddo
+       call print_message("outputting norm squared as REAL*4...")
+       output_size=4
+       write(sdata,'(f10.4)') 10000.0000 + time
+       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
+       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norms"
+       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
+       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".normse"
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
    endif
-   if (convert_opt==4) then  ! -cout 4uvw
-      ! 2048^3 needs 192GB storage.  can run on 128 cpus.
-      !  can run on 64 cpus, if running 2 jobs per node.
-      ! this could will output 1 field at a time.  only needs 3 arrays.
-      write(sdata,'(f10.4)') 10000.0000 + time
-      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-
-      do i=1,3  ! use this to loop over .u,.v,.w
-         fname = basename(1:len_trim(basename)) // sdata(2:10) // &
-                 "." // extension(i:i)
-         call print_message("input file:")	
-	 call print_message(fname(1:len_trim(fname)))
-         call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,r_spec,header_user)
-         call print_max(Q,i)
-
-         if (w_spec) then
-            write(message,'(a,i4)') 'w_spec fft3d: n=',i
-            call print_message(message)
-            call fft3d(Q(1,1,1,1),work1)
-            fname = basename(1:len_trim(basename)) // sdata(2:10) // &
-                 "." // extension(i:i) // "s"
-         else
-            fname = basename(1:len_trim(basename)) // "-new" // sdata(2:10) // &
-                 "." // extension(i:i)
-         endif
-         call print_message(fname(1:len_trim(fname)))
-
-         if (w_spec .or. r_spec) then
-            ! converting to/from spectral, keep same headers
-            call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,header_user)
-         else
-            ! assume we are just converting to headerless brick-of-floats
-            call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,w_spec,2)
-         endif
-      enddo	
-   endif
-   if (convert_opt==5) then  ! -cout norm
-      ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2,header_user)
-      do i=1,ndim
-         call print_max(Q(1,1,1,i),i)
-      enddo
-      call print_message("computing norm squared...")
-      do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         work1(i,j,k)=sqrt(Q(i,j,k,1)**2+Q(i,j,k,2)**2+Q(i,j,k,3)**2)
-      enddo
-      enddo
-      enddo
-      call print_message("outputting norm squared as REAL*4...")
-      output_size=4
-      write(sdata,'(f10.4)') 10000.0000 + time
-      basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".norms"
-      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
-      fname = basename(1:len_trim(basename)) // sdata(2:10) // ".normse"
-      call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,3)
-   endif
-
-
+   
+   
    if (convert_opt==6) then  ! -cout passive
       schmidt_in=1.0
       type_in=4
@@ -365,15 +368,15 @@ do
       call global_max(Q,mx)
       write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
       call print_message(message)	
-
+      
       write(message,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
-          // '-raw'
+           // '-raw'
       call print_message(fname)
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
    endif
-
+   
 
    if (convert_opt==7) then  ! -cout gradu
       ! compute <gradu> for all subcubes, output in asci file
@@ -381,6 +384,7 @@ do
       call print_message("computing gradu ")
       call gradu_stats(time,Q,vor,work1,work2)
    endif
+   
    if (convert_opt==8) then  ! -cout extract_subcube
       ! read asci file for list of subcubes to extractg
       ! rotate (if necessary) to align gradient with x axis
@@ -389,23 +393,24 @@ do
       call print_message("extracting subcubes ")
       call gradu_rotate_subcubes(time,Q,vor,work1,work2)
    endif
+   
    if (convert_opt==9) then  ! -cout spec_window  
       ! read input data, detrend, window, output spectrum and cospectrum
       !call input_uvw(time,Q,vor,work1,work2,header_user) ! DNS default headers
       call input_uvw(time,Q,vor,work1,work2,2) ! no headers
       call print_message("computing spectrum ")
-
+      
       ! compute U using random vorticity: (for testing)
       ! call ranvor(Q,vor,work1,work2,1)
-
-!      do n=1,3
-!         call detrend_data(Q(1,1,1,n),0)
-!      enddo
+      
+      !      do n=1,3
+      !         call detrend_data(Q(1,1,1,n),0)
+      !      enddo
       call compute_spec(time,Q,vor,work1,work2)
       call output_spec(time,time)
       call output_helicity_spec(time,time) 
    endif
-
+   
    if (convert_opt==10) then ! -cout iotest
       ! i/o performance
       write(message,*) 'computing random data'
@@ -418,22 +423,22 @@ do
       call print_message('performing io test')
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // ".u"
-
+      
       ! stripe, num_cpus, 
-
+      
       if (ncpu_z<16) then  ! only run these tests when debugging:
-      if (ncpu_z>=4) then
-         call iotest(1,2,fname,Q,work1,work2)
-         call iotest(2,2,fname,Q,work1,work2)
-         call iotest(4,2,fname,Q,work1,work2)
+         if (ncpu_z>=4) then
+            call iotest(1,2,fname,Q,work1,work2)
+            call iotest(2,2,fname,Q,work1,work2)
+            call iotest(4,2,fname,Q,work1,work2)
+         endif
+         if (ncpu_z>=8) then
+            call iotest(1,4,fname,Q,work1,work2)
+            call iotest(2,4,fname,Q,work1,work2)
+            call iotest(4,4,fname,Q,work1,work2)
+         endif
       endif
-      if (ncpu_z>=8) then
-         call iotest(1,4,fname,Q,work1,work2)
-         call iotest(2,4,fname,Q,work1,work2)
-         call iotest(4,4,fname,Q,work1,work2)
-      endif
-      endif
-
+      
       if (ncpu_z>=16) then
          call iotest(2,8,fname,Q,work1,work2)
          call iotest(4,8,fname,Q,work1,work2)
@@ -459,8 +464,8 @@ do
          call iotest(32,128,fname,Q,work1,work2)
          call iotest(64,128,fname,Q,work1,work2)
       endif
-
-
+      
+      
    endif
 
 
@@ -468,39 +473,39 @@ do
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
       if (r_compressed) then
-!         skip this.  reader will print stats, and div(u)=0
-!         call print_stats(Q,vor,work1,work2)
+         !         skip this.  reader will print stats, and div(u)=0
+         !         call print_stats(Q,vor,work1,work2)
       else
          call print_stats(Q,vor,work1,work2)
       endif
    endif
-
-
+   
+   
    if (convert_opt==12) then ! -cout uwbar  
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
       call print_stats(Q,vor,work1,work2)
       ! compute the vorticity, store in vor(:,:,:,1)
       call vorticity2d(vor,Q,work1,work2)
-
+      
       call print_message("computing uwbar...")
       ! overwrite Q with bar(u vor) - bar(u) bar(vor)
       call uw_filter(Q,vor(1,1,1,1),vor(1,1,1,2),work1,work2)
-
+      
       call print_message("outputing uwbar...")
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-          // sdata(2:10) // ".kct" 
+           // sdata(2:10) // ".kct" 
       call singlefile_io3(time,Q(1,1,1,1),basename,work1,work2,0,io_pe,.false.,header_user)
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-          // sdata(2:10) // ".ct" 
+           // sdata(2:10) // ".ct" 
       call singlefile_io3(time,Q(1,1,1,2),basename,work1,work2,0,io_pe,.false.,header_user)
    endif
-
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Low-pass filter or truncation
+   ! Low-pass filter or truncation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+   
    if (convert_opt==13) then  ! -cout trunc
       if (w_spec) then
          ! -so (spectral output) uses spec_max to specify coefficients to write
@@ -508,50 +513,49 @@ do
          ! use both of these together 
          call abortdns("-cout trunc option cant be used with spectral output")
       endif
-
+      
       ! read data, header type =1, or specified in input file
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
-
+      
       ! compute the FFT
       do n=1,3
          write(message,'(a,i4)') 'w_spec fft3d: n=',n
          call print_message(message)
          call fft3d(Q(1,1,1,n),work1)
       enddo
-
+      
       ! apply Filter
       do n=1,3
          ! call the truncation filter subroutine in fftops.F90
          call fft_filter_trunc(Q(1,1,1,n)) 
       enddo
-     
+      
       ! compute iFFT
       do n=1,3
          write(message,'(a,i4)') 'w_spec ifft3d: n=',n
          call print_message(message)
          call ifft3d(Q(1,1,1,n),work1)
       enddo
-
+      
       ! give the output file a new name
       write(message, '(i5)') 10000 + spec_max
-      basename=runname(1:len_trim(runname)) // "-trunc"//message(2:5)//"."
-
+      basename=runname(1:len_trim(runname)) // "trunc"//message(2:5)//"_"
+      
       call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       ! output headerless data:
       ! call output_uvw(basename,time,Q,vor,work1,work2,2)
    endif
-
-
-
+   
+   
    if (convert_opt==14) then  ! -cout nlin
       time2=0
       w_spec = .true.
       basename=runname(1:len_trim(runname))
-
+      
       ! compute two random fields
       call input1(Q(1,1,1,1),work2,work1,null,io_pe,.true.,-1)  
       call input1(Q(1,1,1,2),work2,work1,null,io_pe,.true.,-1)  
@@ -561,19 +565,20 @@ do
       enddo
       ntot=0
       do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         if (dealias_remove( abs(imcord(i)),abs(jmcord(j)), abs(kmcord(k))  )) then
-         else
-            ntot=ntot+1
-         endif
-      enddo
-      enddo
+         do j=ny1,ny2
+            do i=nx1,nx2
+               if (dealias_remove( abs(imcord(i)),abs(jmcord(j)), abs(kmcord(k))  )) then
+               else
+                  ntot=ntot+1
+               endif
+            enddo
+         enddo
       enddo
       spec_max = g_nx  ! entire field, even if user specified spec_max on command line
       call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       print *,'number of retained modes: ',ntot
    endif
+
    if (convert_opt==15) then  ! -cout nlout
       time2=0
       r_spec = .true.
@@ -582,7 +587,7 @@ do
       Q(:,:,:,3)=Q(:,:,:,1)*Q(:,:,:,2)
       call fft3d(Q(1,1,1,3),work1)
       vor(:,:,:,3)=Q(:,:,:,3)  ! save "exact" solution
-
+      
       ! read in dealiased solution (again)
       call input_uvw(time2,Q,vor,work1,work2,header_user)   
       call fft3d(Q(1,1,1,3),work1)
@@ -593,25 +598,25 @@ do
       mx=0
       xwerr=0
       do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         ntot=ntot+1
-         if (abs(Q(i,j,k,3))<1e-12) then
-            nzero=nzero+1
-         else
-            a0 = abs(Q(i,j,k,3)-vor(i,j,k,3))
-            mx=max(mx,a0)
-            if (a0>1e-12) then
-               nerr=nerr+1
-               xw=sqrt(real(imcord(i)**2+jmcord(j)**2+kmcord(k)**2))
-               xwerr(int(xw))=max(xwerr(int(xw)),a0)
-               write(*,'(f6.2,3i4,3e16.7)') xw,&
-                   imcord(i),jmcord(j),kmcord(k),&
-                    Q(i,j,k,3),vor(i,j,k,3),a0
-            endif
-         endif
-      enddo
-      enddo
+         do j=ny1,ny2
+            do i=nx1,nx2
+               ntot=ntot+1
+               if (abs(Q(i,j,k,3))<1e-12) then
+                  nzero=nzero+1
+               else
+                  a0 = abs(Q(i,j,k,3)-vor(i,j,k,3))
+                  mx=max(mx,a0)
+                  if (a0>1e-12) then
+                     nerr=nerr+1
+                     xw=sqrt(real(imcord(i)**2+jmcord(j)**2+kmcord(k)**2))
+                     xwerr(int(xw))=max(xwerr(int(xw)),a0)
+                     write(*,'(f6.2,3i4,3e16.7)') xw,&
+                          imcord(i),jmcord(j),kmcord(k),&
+                          Q(i,j,k,3),vor(i,j,k,3),a0
+                  endif
+               endif
+            enddo
+         enddo
       enddo
       do i=1,1000
          if (xwerr(i)/=0) then
@@ -622,10 +627,10 @@ do
       print *,'number of non-zero modes:      ',ntot-nzero
       print *,'max error over non-zero modes: ',mx
    endif
-
-
+   
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  output delta-filtered u velocity component
+   !  output delta-filtered u velocity component
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==16) then  ! -cout dfilter
       ! read data, header type =1, or specified in input file
@@ -634,18 +639,18 @@ do
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
-
+      
       do n=2,2  !  n=1,2,3 loops over (u,v,w) velocity components
          write(message,'(a,i4)') 'computing fft3d of input: n=',n
          call print_message(message)
          call fft3d(Q(1,1,1,n),work1)
-
+         
          ! compute delta-filtered component, store in "vor()" array
          do k=1,g_nmin/3
             vor(:,:,:,n)=Q(:,:,:,n)
             call fft_filter_shell(vor(1,1,1,n),k) 
             call ifft3d(vor(1,1,1,n),work1)
-
+            
             write(message,'(a,i4)') 'outputting delta filtered u for kshell=',k
             call print_message(message)
             
@@ -655,77 +660,77 @@ do
                  // sdata(2:10) // ".k" // sdata2(2:5)
             ! call singlefile_io3(time,vor(1,1,1,n),basename,work1,work2,0,io_pe,.false.,header_user)
             call singlefile_io3(time,vor(1,1,1,n),basename,work1,work2,0,io_pe,.false.,2)
-
+            
          enddo
       enddo
    endif
-
-
+   
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  output PDFs of delta-filtered u velocity component
+   !  output PDFs of delta-filtered u velocity component
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==17) then  ! -cout dpdf
       ! number of kshells:  
       kshell_max = nint(dealias_sphere_kmax)
-
-
+      
+      
       ! tell PDF module what we will be computing: 
       number_of_cpdf = 2*kshell_max  
       compute_uvw_pdfs = .true.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
-
+      
       ! read data, header type =1, or specified in input file
       time2=time
       call input_uvw(time2,Q,vor,work1,work2,header_user)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
-
+      
       call global_max_abs(Q(1,1,1,1),mx)  ! max of abs(U) component
       uscale = mx/100     ! binsize for velocity increment PDFs
       epsscale = uscale   ! binsize for epsilon
       call init_pdf_module()
-
-
+      
+      
       call print_message("computing velocity increment PDFs")
       call compute_all_pdfs(Q,vor,work1)
-
+      
       do n=2,2  !  n=1,2,3 loops over (u,v,w) velocity components
          write(message,'(a,i4)') 'computing fft3d of input: n=',n
          call print_message(message)
          call fft3d(Q(1,1,1,n),work1)
-
+         
          ! compute delta-filtered component, store in "vor()" array
          do k=1,kshell_max
             k2=kshell_max+k
-
+            
             work2 = Q(:,:,:,n)
             call fft_filter_shell(work2,k)
             call ifft3d(work2,work1)
-
+            
             ! compute PDFs
             call global_max_abs(work2,mx)
             binsize = mx/100   ! should produce about 200 bins
-
+            
             write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
             call print_message(message)
             call compute_pdf_scalar(work2,cpdf(k),binsize)
-
-
+            
+            
             work2 = Q(:,:,:,n)
             call fft_filter_shell1(work2,k)
             call ifft3d(work2,work1)
-
+            
             ! compute PDFs
             call global_max_abs(work2,mx)
             binsize = mx/100   ! should produce about 200 bins
-
+            
             write(message,'(a,i4,a,e10.3,a,e10.3)') 'PDF simplified delta filtered k=',k,' max|u|=',mx,' binsize=',binsize
             call print_message(message)
             call compute_pdf_scalar(work2,cpdf(k2),binsize)
 
-
+            
          enddo
       enddo
       !
@@ -741,7 +746,7 @@ do
             call abortdns(message)
          endif
       endif
-
+      
       write(sdata,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".sf"
       call print_message(fname)
@@ -753,14 +758,14 @@ do
          endif
       endif
       call output_pdf(time,fidu,NULL,NULL,fid,NULL)
-
+      
       if (my_pe==io_pe) call cclose(fid,ierr)
       if (my_pe==io_pe) call cclose(fidu,ierr)
-
+      
    endif
-
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! high-pass filter
+   ! high-pass filter
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==18) then  ! -cout hpass
       if (w_spec) then
@@ -769,52 +774,52 @@ do
          ! use both of these together 
          call abortdns("-cout hpass option cant be used with spectral output")
       endif
-
+      
       ! read data, header type =1, or specified in input file
       time2=time
-!     DNS-headered data input
-!     call input_uvw(time2,Q,vor,work1,work2,header_user)  
-!     headerless data input
+      !     DNS-headered data input
+      !     call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      !     headerless data input
       call input_uvw(time2,Q,vor,work1,work2,2)  
       
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
-
+      
       ! compute the FFT
       do n=1,3
          write(message,'(a,i4)') 'w_spec fft3d: n=',n
          call print_message(message)
          call fft3d(Q(1,1,1,n),work1)
       enddo
-
+      
       ! apply Filter
       do n=1,3
          ! call the truncation filter subroutine in fftops.F90
          call fft_filter_hpass(Q(1,1,1,n)) 
       enddo
-     
+      
       ! compute iFFT
       do n=1,3
          write(message,'(a,i4)') 'w_spec ifft3d: n=',n
          call print_message(message)
          call ifft3d(Q(1,1,1,n),work1)
       enddo
-
+      
       ! give the output file a new name
       write(message, '(i5)') 10000 + spec_max
       basename=runname(1:len_trim(runname)) // "-hpass"//message(2:5)//"."
-
+      
       !output headered data:
       !call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       !output headerless data:
       call output_uvw(basename,time,Q,vor,work1,work2,2)
    endif
-
-
-
+   
+   
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! coarse grain  coarsegrain
+   ! coarse grain  coarsegrain
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==19) then  ! -cout hpass
       ! read data, header type =1, or specified in input file
@@ -824,7 +829,7 @@ do
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
-
+      
       do j=1,size(Mval)
          do n=1,3
             ! call the truncation filter subroutine in fftops.F90
@@ -840,48 +845,48 @@ do
          ! call output_uvw(basename,time,Q,vor,work1,work2,2)
       enddo
    endif
-
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! output du/dx and PDF of du/dx
+   ! output du/dx and PDF of du/dx
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==20) then  ! -cout dudx
       call input_uvw(time,Q,vor,work1,work2,header_user)
       call print_message("computing du/dx...")
-
-
+      
+      
       ! output vorticity magnitude
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
-
+      
       call der(Q(1,1,1,3),vor,work1,work2,DX_ONLY,3)
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dwdz"
       call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
-
-
+      
+      
       call der(Q(1,1,1,2),vor,work1,work2,DX_ONLY,2)
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dvdy"
       call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
-
+      
       call der(Q(1,1,1,1),vor,work1,work2,DX_ONLY,1)
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".dudx"
       call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
-
-
+      
+      
       number_of_cpdf = 2
       compute_uvw_pdfs = .false.    ! velocity increment PDFs
       compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
       compute_passive_pdfs = .false.  ! passive scalar PDFs
       call init_pdf_module()
-
-
+      
+      
       ! compute PDF of du/dx
       call global_max_abs(work1,mx)  ! compute max, used to determine binsize
       binsize = mx/100   ! should produce about 200 bins
       call compute_pdf_scalar(work1,cpdf(1),binsize)
-
-
+      
+      
       ! compute epsilon, store in work1.  
-!      call hyperder(Q,work1,work2)
+      !      call hyperder(Q,work1,work2)
       call coshder(Q(1,1,1,1),vor,work2)	
       work1=vor(:,:,:,1)*Q(:,:,:,1)
       call coshder(Q(1,1,1,2),vor,work2)	
@@ -891,11 +896,11 @@ do
       call global_max_abs(vor,mx)
       binsize = mx/100   ! should produce about 200 bins
       call compute_pdf_scalar(vor,cpdf(2),binsize)
-
+      
       ! output coshder field
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".coshder"
       call singlefile_io3(time,vor,fname,work1,work2,0,io_pe,.false.,2)
-
+      
       
       write(sdata,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".dudxpdf"
@@ -907,14 +912,14 @@ do
             call abortdns(message)
          endif
       endif
-
+      
       call output_pdf(time,NULL,NULL,NULL,fid,NULL)
    endif
-
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Write out headerless horizontal velocity field in physical space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+   
    if (convert_opt==21) then  ! -cout ehor
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
       call input_uvw(time,Q,vor,work1,work2,header_user)
@@ -923,20 +928,20 @@ do
       enddo
       call print_message("computing horizontal energy...")
       do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         work1(i,j,k)=0.5*(Q(i,j,k,1)**2+Q(i,j,k,2)**2)
-      enddo
-      enddo
+         do j=ny1,ny2
+            do i=nx1,nx2
+               work1(i,j,k)=0.5*(Q(i,j,k,1)**2+Q(i,j,k,2)**2)
+            enddo
+         enddo
       enddo
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".ehor"
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
    endif
-
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Write out headerless potential vorticity and potential enstrophy field
+   ! Write out headerless potential vorticity and potential enstrophy field
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==22) then  ! -cout potens
       write(message,'(f10.4)') 10000.0000 + time
@@ -949,65 +954,65 @@ do
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
       call print_message("computing potential enstrophy...")	
       do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         work1(i,j,k)=0.5*(Q(i,j,k,1)**2)
+         do j=ny1,ny2
+            do i=nx1,nx2
+               work1(i,j,k)=0.5*(Q(i,j,k,1)**2)
+            enddo
+         enddo
       enddo
-      enddo
-      enddo
-
+      
       write(message,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // message(2:10) // '.pv2'
       call print_message(fname)
       call singlefile_io3(time,work1,fname,Q,work2,0,io_pe,.false.,2)
    endif
-
-
+   
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Write out headerless potential energy field in physical space
+   ! Write out headerless potential energy field in physical space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+   
    if (convert_opt==23) then  ! -cout pe
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
       call input_uvw(time,Q,vor,work1,work2,header_user)
       call input_passive(runname, time, Q, work1, work2)
-!      do i=1,ndim
-!         call print_max(Q(1,1,1,i),i)
-!      enddo
+      !      do i=1,ndim
+      !         call print_max(Q(1,1,1,i),i)
+      !      enddo
       call print_message("computing potential energy...")
       do k=nz1,nz2
-      do j=ny1,ny2
-      do i=nx1,nx2
-         work1(i,j,k)=0.5*(Q(i,j,k,np1)**2)
-      enddo
-      enddo
+         do j=ny1,ny2
+            do i=nx1,nx2
+               work1(i,j,k)=0.5*(Q(i,j,k,np1)**2)
+            enddo
+         enddo
       enddo
       write(sdata,'(f10.4)') 10000.0000 + time
       basename=rundir(1:len_trim(rundir)) // runname(1:len_trim(runname))
       fname = basename(1:len_trim(basename)) // sdata(2:10) // ".pe"
       call singlefile_io3(time,work1,fname,Q(1,1,1,np1),work2,0,io_pe,.false.,2)
    endif
-
-
+   
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Write out wave modes field and vortical modes field in physical space
+   ! Write out wave modes field and vortical modes field in physical space
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+   
    if (convert_opt==24) then  ! -cout CH_decomp
       schmidt_in=1.0
       type_in=4
       call input_uvw(time,Q,vor,work1,work2,header_user)
       call input_passive(runname, time, Q, work1, work2)
       if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
-
-!      do i=1,ndim
-!         call print_max(Q(1,1,1,i),i)
-!      enddo
+      
+      !      do i=1,ndim
+      !         call print_max(Q(1,1,1,i),i)
+      !      enddo
       call print_message("computing wave and vortical projected fields ...")
       call compute_project_CHfield(Q,Q2,work1,work2)	
-
-! check energy of wave field
+      
+      ! check energy of wave field
       dummy=0
       do n = 1,n_var
          do k=nz1,nz2
@@ -1025,9 +1030,9 @@ do
       dummy=dummy/g_nx/g_ny/g_nz
       write(message,'(a,e15.8)') "grid space energy in wave field = ",dummy
       call print_message(message)
-
-
-! check energy of vortical field
+      
+      
+      ! check energy of vortical field
       dummy=0
       do n = 1,n_var
          do k=nz1,nz2
@@ -1045,76 +1050,76 @@ do
       dummy=dummy/g_nx/g_ny/g_nz
       write(message,'(a,e15.8)') "grid space energy in vortical field = ",dummy
       call print_message(message)
-
+      
       write(sdata,'(f10.4)') 10000.0000 + time
       write(ext,'(f8.3)') 1000 + schmidt_in
       write(ext2,'(i3)') 100+type_in
-
-!     write out headerless wave component u,v,w,t fields
+      
+      !     write out headerless wave component u,v,w,t fields
       basename=runname(1:len_trim(runname)) // 'wave_'
       call output_uvw(basename,time,Q,vor,work1,work2,2)
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            //'wave_'// sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
       call singlefile_io3(time,Q(1,1,1,np1),fname,work1,work2,0,io_pe,.false.,2)
       write(sdata,'(f10.4)') 10000.0000 + time
-
-!     write out headerless vortical component u,v,w,t fields
+      
+      !     write out headerless vortical component u,v,w,t fields
       basename=runname(1:len_trim(runname)) // 'vort_'
       call output_uvw(basename,time,Q2,vor,work1,work2,2) 
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
            // 'vort_' // sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) 
       call singlefile_io3(time,Q2(1,1,1,np1),fname,work1,work2,0,io_pe,.false.,2)
-
+      
    endif
-
+   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Low-pass filter or truncation for scalar field 
+   ! Low-pass filter or truncation for scalar field 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-   if (convert_opt==25) then  ! -cout trunct
+   
+   if (convert_opt==25) then  ! -cout ttrunc
       if (w_spec) then
          ! -so (spectral output) uses spec_max to specify coefficients to write
          ! -cout trunc uses spec_max as a truncation parameter, so we cant
          ! use both of these together 
          call abortdns("-cout trunct option cant be used with spectral output")
       endif
-
+      
       ! read data, header type =1, or specified in input file
       time2=time
       call input_passive(runname, time2, Q, work1, work2)
-       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
-
+      
       ! compute the FFT
-         write(message,'(a,i4)') 'w_spec fft3d: n=',np1
-         call print_message(message)
-         call fft3d(Q(1,1,1,np1),work1)
-
+      write(message,'(a,i4)') 'w_spec fft3d: n=',np1
+      call print_message(message)
+      call fft3d(Q(1,1,1,np1),work1)
+      
       ! apply Filter
-         ! call the truncation filter subroutine in fftops.F90
-         call fft_filter_trunc(Q(1,1,1,np1)) 
-     
+      ! call the truncation filter subroutine in fftops.F90
+      call fft_filter_trunc(Q(1,1,1,np1)) 
+      
       ! compute iFFT
-         write(message,'(a,i4)') 'w_spec ifft3d: n=',np1
-         call print_message(message)
-         call ifft3d(Q(1,1,1,np1),work1)
-
+      write(message,'(a,i4)') 'w_spec ifft3d: n=',np1
+      call print_message(message)
+      call ifft3d(Q(1,1,1,np1),work1)
+      
       ! give the output file a new name
       write(message, '(i5)') 10000 + spec_max
       write(sdata,'(f10.4)') 10000.0000 + time
       write(ext,'(f8.3)') 1000 + schmidt_in
       write(ext2,'(i3)') 100+type_in
-
-
+      
+      
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-           //'-trunc'//message(2:5)//sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
+           //'trunc'//message(2:5)//"_"//sdata(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
       call singlefile_io3(time,Q(1,1,1,np1),fname,work1,work2,0,io_pe,.false.,1)
-    endif
-
-
-
-
+   endif
+   
+   
+   
+   
    if (tstart>=0) then
       time=time+tinc
       if (time > max(tstop,tstart)) exit

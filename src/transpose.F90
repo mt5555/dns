@@ -94,8 +94,8 @@ if (mpi_maxio<0) then
       mpi_stripe="8"
    else
       ! defaults:  
-      mpi_maxio=64
-      mpi_stripe="64"
+      mpi_maxio=16
+      mpi_stripe="16"
 #ifdef OSF1
       mpi_maxio=32
       mpi_stripe="32"
