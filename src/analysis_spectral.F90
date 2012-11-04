@@ -105,19 +105,19 @@ compute_hfree=.false.		!extracting helicity-free modes
 
 
 project_ch=.false.         !Craya-Herring projection and spectra
-project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h (horizontal
+project_ch_Eh=.true.      !Craya-Herring 2d spectra of E_h (horizontal
 			   !kinetic energy)
 project_minuskh0_Eh=.false. !Craya-Herring 2d spectra of E_h w/out kh0 contribution
-project_ch_Ewt=.false.     !Craya-Herring 2d spectra of E_w and E_t (vertical
+project_ch_Ewt=.true.     !Craya-Herring 2d spectra of E_w and E_t (vertical
 			  !kinetic energy  and potential energy)
 
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
-compute_scalarsbous = .true. !compute .scalars-bous files
+compute_scalarsbous = .false. !compute .scalars-bous files
 
 
-tstart=0.6
-tstop=0.8
+tstart=5.9
+tstop=5.9
 tinc=0.1
 
 icount=0
@@ -129,7 +129,7 @@ nzdecomp=1
 
 
 ! to read times from  file times.dat:
-tstart=-1; tinc=0; tname="times.dat"
+! tstart=-1; tinc=0; tname="times.dat"
 
 
 ! these lines are modifed by some sed scripts for automatic running

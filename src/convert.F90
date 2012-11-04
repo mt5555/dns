@@ -117,13 +117,13 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=0.0
-tstop=0.3
+tstart=5.1
+tstop=5.1
 tinc=0.1
 
 
 ! to read times from  file times.dat:
-  tstart=-1; tinc=0; tname="times.dat"
+!  tstart=-1; tinc=0; tname="times.dat"
 
 ! these lines are modifed by some sed scripts for automatic running
 ! of this code by putting in new values of tstart, tstop, tinc,
@@ -190,7 +190,7 @@ do
          basename=runname(1:len_trim(runname))
       else
          ! dont clobber input file!
-         basename=runname(1:len_trim(runname)) // "-new."
+         basename=runname(1:len_trim(runname)) // "raw."
       endif
 !      call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
       ! output headerless data:
@@ -371,8 +371,7 @@ do
       
       write(message,'(f10.4)') 10000.0000 + time
       fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8) &
-           // '-raw'
+           // 'raw_'// message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
       call print_message(fname)
       call singlefile_io3(time,Q,fname,work1,work2,0,io_pe,.false.,2)
    endif
@@ -808,7 +807,7 @@ do
       
       ! give the output file a new name
       write(message, '(i5)') 10000 + spec_max
-      basename=runname(1:len_trim(runname)) // "-hpass"//message(2:5)//"."
+      basename=runname(1:len_trim(runname)) // "hpass"//message(2:5)//"."
       
       !output headered data:
       !call output_uvw(basename,time2,Q,vor,work1,work2,header_user)  
@@ -821,7 +820,7 @@ do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    ! coarse grain  coarsegrain
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   if (convert_opt==19) then  ! -cout hpass
+   if (convert_opt==19) then  ! -cout coarsegrain
       ! read data, header type =1, or specified in input file
       if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
       time2=time
