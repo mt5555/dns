@@ -24,6 +24,9 @@ for more details.
                  mataylo@sandia.gov
 
 ===================================================================
+README: updated 3/19/2013:  
+added 'pseudospectral.pdf' to svn repo
+
 README: updated 2/20/2009:  
 
 Added support for the SDSC P3DFFT parallel FFT library.  
@@ -81,7 +84,7 @@ scheme.
 The code is documented in 
 [1] Taylor, Kurien and Eyink, Phys. Rev. E 68, 2003. 
 [2] Kurien and Taylor, Los Alamos Science 29, 2005. 
-
+[3] 'pseudospectral.pdf' included with the source code
 
 The code has options to solve the following equations:
 1. Navier-Stokes (primitive variables)  2D and 3D

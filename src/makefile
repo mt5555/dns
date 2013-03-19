@@ -1,5 +1,6 @@
 # Makefile for dns
 #
+#
 # FFT OPTIONS:
 #     USE_FFT99  (default)
 #     USE_FFTW
@@ -109,8 +110,9 @@ ifeq ($(UNAME),Linux)
     ifeq ($(HOST),dosadi)
       VENDOR=GNUMPI
       MPI = -DUSE_MPI -DMPI_HAS_REAL8 -DUSE_MPI_IO
-      FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
-      FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
+      #FFT = -DUSE_FFTWGURU -DUSE_P3DFFT -I/contrib/p3dfft/include
+      #FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
+      FFT = -DUSE_FFT99 
       #FFT = -DUSE_FFT99 -DUSE_P3DFFT -I/contrib/p3dfft/include
       #FFTLIB =  -L/contrib/p3dfft/lib -lp3dfft -lfftw3 
    endif
