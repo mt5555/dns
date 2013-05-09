@@ -186,8 +186,10 @@ else if (index==3) then
    call fft_derivatives(pt,px,numder,n1,n1d,n2,n2d,n3,n3d)
    if (numder==2) then
       call transpose_from_z(px,pxx,n1,n1d,n2,n2d,n3,n3d)
+      pxx=/Lz/Lz
    endif
    call transpose_from_z(pt,px,n1,n1d,n2,n2d,n3,n3d)
+   px=px/Lz
 endif
 
 endif
