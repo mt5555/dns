@@ -2306,7 +2306,8 @@ do j=1,ny_2dz
 enddo
 #ifdef USE_MPI
 ke2 = ke
-call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+!call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 
 
@@ -2436,7 +2437,8 @@ do n=np1,np2
    enddo
 #ifdef USE_MPI
    ke2 = ke
-   call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+!   call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+   call mpi_allreduce(ke2,ke,3,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
    
    if (shell_type==1) then
@@ -2542,7 +2544,8 @@ integer :: im,jm,km,i,j,k,n
    enddo
 #ifdef USE_MPI
    xw = ke
-   call mpi_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+!   call mpi_allreduce(xw,ke,1,MPI_REAL8,MPI_MAX,comm_3d,ierr)
+    call mpi_allreduce(xw,ke,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif
 end subroutine
 
