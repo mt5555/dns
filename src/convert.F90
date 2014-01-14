@@ -72,6 +72,7 @@
 !  -cout pe (23) potential energy field
 !  -cout CH_decomp (24) write wave modes and vortical modes field
 !  -cout ttrunc (25) read scalar, fft, truncate fft back
+!  -cout zerocr (26) compute zero-crossing freqency PDFs for u,v,w in x,yand z
 
 ! To run, set the base name of the file and the times of interest
 ! below.  For example:
@@ -117,8 +118,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=5.1
-tstop=5.1
+tstart=7.0
+tstop=7.0
 tinc=0.1
 
 
@@ -1116,6 +1117,57 @@ do
       call singlefile_io3(time,Q(1,1,1,np1),fname,work1,work2,0,io_pe,.false.,1)
    endif
    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  output PDFs of zero-crossings of velocity components in all cartesian
+!! directions
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   if (convert_opt==26) then  ! -cout zerocr
+      
+      ! tell PDF module what we will be computing: 
+      number_of_cpdf = 0           
+      compute_uvw_pdfs = .false.    ! velocity increment PDFs
+      compute_uvw_jpdfs = .false.    ! velocity increment joint PDFs
+      compute_passive_pdfs = .false.  ! passive scalar PDFs
+      compute_zerocrossing_pdfs = .true. ! zero crossing PDFs      
+      
+      
+      ! read data, header type =2 for headerless data or specified in input file
+      time2=time
+      call input_uvw(time2,Q,vor,work1,work2,2)  
+      if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
+         call print_stats(Q,vor,work1,work2)
+      endif
+      
+      mx = max(1.0d0*g_nx,1.0d0*g_ny)  ! max grid points is the maximum number of crossings
+      mx = max(mx,g_nz*1.0d0)
+      if (my_pe==io_pe) print *, 'max num zero-crosssing',mx
+      zcscale = 2     ! binsize for number of zerocrossings
+      call init_pdf_module()
+      
+      
+      call print_message("computing zero-crossing PDFs")
+      call compute_all_pdfs(Q,vor,work1)
+      
+
+      !
+      ! now output the PDF data
+      !
+      write(sdata,'(f10.4)') 10000.0000 + time
+      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) // sdata(2:10) // ".zcl_pdf"
+      call print_message(fname)
+      if (my_pe==io_pe) then
+         call copen(fname,"w",fid,ierr)
+         if (ierr/=0) then
+            write(message,'(a,i5)') "output_model(): Error opening .zcpdf file errno=",ierr
+            call abortdns(message)
+         endif
+      endif
+      
+      call output_pdf(time,fid,NULL,NULL,NULL,NULL)
+      
+      if (my_pe==io_pe) call cclose(fid,ierr)
+      
+   endif
    
    
    

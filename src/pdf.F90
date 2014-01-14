@@ -31,15 +31,19 @@ implicit none
 ! 
 ! 
 !
-logical ::  compute_uvw_pdfs=.true.
+logical ::  compute_uvw_pdfs=.false.
 logical ::  compute_uvw_jpdfs=.false.
-logical ::  compute_passive_pdfs=.true.
+logical ::  compute_passive_pdfs=.false.
+logical :: compute_zerocrossing_pdfs=.true.
+
+
 
 real*8 :: uscale=.01             ! bin size for vel increment
 real*8 :: epsscale=.01           ! bin size for epsilon increment
 real*8 :: pscale=.0025           ! bin size for scalar increment
                                  ! for t-mix problem, scalar will 
                                  ! range from 0..1
+real*8 :: zcscale=2		 ! bin size for zero-crossings
 
 logical :: compute_cores = .false.
 real*8 :: core_data(g_nx,n_var)      ! used to take x direction cores thru data
@@ -53,7 +57,7 @@ integer :: numx=0,numy=0,numz=0          ! actual number of delta's in each dire
                                          ! allowed by the grid
 
 ! max range:  10 ... 10
-integer,parameter :: pdf_max_bin=4000
+integer,parameter :: pdf_max_bin=400
 integer,parameter :: jpdf_max_bin=200
 
 
@@ -256,6 +260,7 @@ do idel=1,delta_num_max
    endif
 enddo
 
+
 if (compute_uvw_pdfs) then
 do i=1,NUM_SF
    call init_pdf(SF(i,1),100,uscale,numx)
@@ -282,8 +287,6 @@ if (number_of_cpdf > 0) then
    enddo
 endif
 
-
-
 if (compute_uvw_jpdfs) then
 do i=1,NUM_JPDF
    call init_jpdf(jpdf_v(i,1),100,.1d0, min(numx,numy))
@@ -292,12 +295,19 @@ do i=1,NUM_JPDF
 enddo
 endif
 
+! compute: 1 zerocrossing PDF per velocity component per cartesian direction
+if (compute_zerocrossing_pdfs) then
+do j=1,3
+   do i=1,3
+   call init_pdf(SF(i,j),100,zcscale,1)
+   call init_pdf(SF(i,j),100,zcscale,1)
+   call init_pdf(SF(i,j),100,zcscale,1)
+enddo
+enddo
+endif
 
 core_num=0
 end subroutine
-
-
-
 
 
 
@@ -323,11 +333,6 @@ str%pdf_binsize(:)=binsize
 end subroutine
 
 
-
-
-
-
-
 subroutine init_jpdf(str,bin,binsize,ndelta)
 !
 ! call this to initialize a JOINT pdf_structure_function
@@ -345,11 +350,6 @@ str%ncalls=0
 str%delta_num=ndelta
 
 end subroutine
-
-
-
-
-
 
 
 subroutine resize_pdf(str,bin)
@@ -382,8 +382,8 @@ if (bin==n) return;
 
 if (bin>pdf_max_bin) then
    overflow=overflow+1
-   if (overflow<10) print *,"Warning pdf bin overflow on pe=",my_pe
-   if (overflow==10) print *,"disabling bin overflow messages"
+!   if (overflow<10) print *,"Warning pdf bin overflow on pe=",my_pe
+!   if (overflow==10) print *,"disabling bin overflow messages"
    bin=pdf_max_bin
 endif
 
@@ -616,9 +616,6 @@ call reset_pdf
 end subroutine
 
 
-
-
-
 subroutine output_pdf_noreset(time,fid,fidj,fidS,fidC,fidcore)
 use params
 implicit none
@@ -686,6 +683,13 @@ enddo
 enddo
 endif
 
+if (compute_zerocrossing_pdfs) then
+do j=1,3
+do i=1,3
+   call mpisum_pdf(SF(i,j))  
+enddo
+enddo
+endif
 
 
 if (my_pe==io_pe) then
@@ -732,11 +736,22 @@ if (my_pe==io_pe) then
       enddo
       enddo
    endif
+   
+   if (compute_zerocrossing_pdfs) then
+      call cwrite8(fid,time,1)
+      ! number of structure functions
+      x=9 ; call cwrite8(fid,x,1)
+      do j=1,3
+         do i=1,3
+            call normalize_and_write_zcpdf(fid,j,SF(i,j),SF(i,j)%nbin)   
+         enddo
+      enddo
+   endif
 endif
 
 
 
-end subroutine
+end subroutine output_pdf_noreset
 
 
 
@@ -787,6 +802,74 @@ number_of_cpdf_restart=kmax
 end subroutine
 
 
+subroutine normalize_and_write_zcpdf(fid,dir,str,nbin)
+use params
+implicit none
+integer j,i,ierr,nbin,dir
+CPOINTER :: fid
+type(pdf_structure_function) :: str
+real*8 x
+real*8,allocatable :: pdfdata(:,:)
+integer ndelta
+
+
+ndelta=str%delta_num
+allocate(pdfdata(-nbin:nbin,ndelta))
+
+
+! the delta values
+x=ndelta; call cwrite8(fid,x,1)
+do i=1,ndelta
+   x=delta_val(i); call cwrite8(fid,x,1)
+enddo
+
+
+
+! old format: we only had one bin_size for all delta:
+!call cwrite8(fid,str%pdf_bin_size,1)
+
+! new format: write a 0 (so matlab code will know this is new format)
+! then write all the binsizes
+x=0; call cwrite8(fid,x,1)
+call cwrite8(fid,str%pdf_binsize,ndelta)
+
+
+x=str%nbin; call cwrite8(fid,x,1)
+x=str%ncalls; call cwrite8(fid,x,1)
+
+print *, 'writing dir = ', dir
+
+! normalize
+pdfdata=str%pdf
+x=max(str%ncalls,1)
+pdfdata=pdfdata / x;
+! normalize depending on direction 
+if (dir==1) then
+   pdfdata=pdfdata/g_ny/g_nz
+elseif (dir==2) then
+   pdfdata=pdfdata/g_nz/g_nx
+elseif (dir==3) then
+   pdfdata=pdfdata/g_nx/g_ny
+endif
+
+! consistency check:
+x=1
+if (str%ncalls==0) x=0
+do j=1,ndelta
+   if (1e-9<abs(x - sum(pdfdata(:,j)))) then 
+      print *,'ERROR in PDF normalization: '
+      print *,'ndelta = ',j
+      print *,'sum:     ',sum(pdfdata(:,j))
+      print *,'un-norm: ',sum(str%pdf),g_nx*g_ny*real(g_nz)  ! g_n^3 can overflow integers
+      print *,'ncalls:  ',str%ncalls 	
+      print *,'nbin:    ',str%nbin,nbin
+   endif
+enddo
+
+! PDF data
+call cwrite8(fid,pdfdata,(2*nbin+1)*ndelta)
+deallocate(pdfdata)
+end subroutine
 
 
 
@@ -850,12 +933,6 @@ enddo
 call cwrite8(fid,pdfdata,(2*nbin+1)*ndelta)
 deallocate(pdfdata)
 end subroutine
-
-
-
-
-
-
 
 
 subroutine normalize_and_write_jpdf(fid,str,nbin)
@@ -953,14 +1030,6 @@ endif
 #endif
 
 end subroutine
-
-
-
-
-
-
-
-
 
 
 
@@ -1307,9 +1376,111 @@ pdfdata%ncalls=pdfdata%ncalls+1
 end subroutine
 
 
+subroutine compute_zerocross_pdf(u,v,w,n1,n1d,n2,n2d,n3,n3d,str,comp)
+!
+! compute a zero-crossing PDF function along the first dimension of 
+! u,v and w
+!
+! comp=1,2 or 3  we are computing for u,v or w
+!
+! This function computes the element str (local) of SF(:,:) (global) 
+! which is an array of type pdf_structure_function
+! and is the default data array for PDFs
+! 
+
+use params
+implicit none
+integer :: n1,n1d,n2,n2d,n3,n3d,n,m,comp
+real*8 :: u(n1d,n2d,n3d)
+real*8 :: v(n1d,n2d,n3d)
+real*8 :: w(n1d,n2d,n3d)
+type(pdf_structure_function) :: str
+
+! local variables
+
+integer :: bin,i,j,k,i2,nsf,ndelta
+real*8 :: currsign,prevsign,currsum,binval
+
+if (structf_init==0) then
+   call init_pdf_module()
+endif
+
+
+ndelta=str%delta_num
+
+do j=2,NUM_SF
+ASSERT("ndelta must be the same for all U structure functions",ndelta==str(j)%d!elta_num)
+enddo
+
+ str%mn(1)=9e20
+ str%mx(1)=-9e20
+
+ ! accumulate number of zero-crossings in first-index cartesian direction in currsum
+ do k=1,n2
+    do j=1,n3
+       currsum = 0
+       prevsign = 0
+       !currwidth = []
+       do i = 1,n1
+          if (comp==1) then 
+             if (u(i,j,k)==0.0d0) then
+                currsign = 0.0d0
+             else
+                currsign = sign(1.0d0,u(i,j,k))
+             endif
+          elseif (comp==2) then
+             if (v(i,j,k)==0.0d0) then
+                currsign = 0.0d0
+             else
+                currsign = sign(1.0d0,v(i,j,k))
+             endif
+          else 
+             if (w(i,j,k)==0.0d0) then
+                currsign = 0.0d0
+             else
+                currsign = sign(1.0d0,w(i,j,k))
+             endif
+          endif
+          if (currsign*prevsign == -1) then
+             currsum = currsum + 1
+          endif
+          if (currsign .ne. 0.0d0)then
+             prevsign = currsign
+          endif
+       enddo
+
+
+! number of layers is number of zerocrossings + 1
+	 
+       str%mn(1) = min(str%mn(1),currsum+1)
+       str%mx(1) = max(str%mx(1),currsum+1)
+       
+         !compute bin value for (currsum + 1)
+         binval = (currsum+1)/str%pdf_binsize(1)
+         !convert bin value to integer
+         bin = nint(binval)
+
+! check if bin is less than 1
+   if (bin < 1.0d0) then
+      print *, 'comp,j,k, currsum, bin = ',comp,j,k,currsum,bin
+   endif
+            
+            ! increase the size of our PDF function
+         if (abs(bin)>str%nbin) call resize_pdf(str,abs(bin)+10) 
+         if (bin>pdf_max_bin) bin=pdf_max_bin
+         if (bin<-pdf_max_bin) bin=-pdf_max_bin
+         str%pdf(bin,1)=str%pdf(bin,1)+1
+      enddo
+   enddo
 
 
 
+
+   
+   str%ncalls=str%ncalls+1
+         
+   
+ end subroutine compute_zerocross_pdf
 
 
 
@@ -1318,7 +1489,7 @@ subroutine compute_all_pdfs(Q,gradu,work)
 !  Compute the velocity increment PDFs 
 !  compute the epsilon PDF
 !  compute the passive scalar PDFs
-!
+!  compute the zero-crossing PDFs, 1 for each velocity component in each cartesi! an direction
 use params
 use fft_interface
 use transpose
@@ -1337,93 +1508,123 @@ real*8 :: tmx1,tmx2,mx(delta_num_max),mn(delta_num_max)
 
 call wallclock(tmx1)
 
+if (compute_zerocrossing_pdfs) then
+
+   call print_message("computing x direction zero-crossing pdfs...")
+   do n=1,3
+      call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   do n=1,3
+      call compute_zerocross_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(n,1),n)
+   enddo
+
+   call print_message("computing y direction zero-crossing pdfs...")
+   do n=1,3
+      call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   do n=1,3
+      call compute_zerocross_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(n,2),n)
+   enddo
+
+   call print_message("computing z direction zero-crossing pdfs...")
+   do n=1,3
+      call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   do n=1,3
+      call compute_zerocross_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(n,3),n)
+   enddo
+
+   call print_message("done with zero-crossing pdfs.")
+endif
+
+
 if (compute_uvw_pdfs) then
 
-call print_message("computing x direction increment pdfs...")
-do n=1,3
-   call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-   call extract_core(gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d,core_data(1,n),n)
-enddo
-call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
-if (compute_uvw_jpdfs) then
-   call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
-endif
+   call print_message("computing x direction increment pdfs...")
+   do n=1,3
+      call transpose_to_x(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+      call extract_core(gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d,core_data(1,n),n)
+   enddo
+   call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,1),1)
+   if (compute_uvw_jpdfs) then
+      call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,1),1)
+   endif
 
 
-call print_message("computing y direction increment pdfs...")
-do n=1,3
-   call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
-if (compute_uvw_jpdfs) then
-   call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
-endif
+   call print_message("computing y direction increment pdfs...")
+   do n=1,3
+      call transpose_to_y(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,2),2)
+   if (compute_uvw_jpdfs) then
+      call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,2),2)
+   endif
 
 
-call print_message("computing z direction increment pdfs...")
-do n=1,3
-   call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
-enddo
-call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
-if (compute_uvw_jpdfs) then
-   call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
-endif
+   call print_message("computing z direction increment pdfs...")
+   do n=1,3
+      call transpose_to_z(Q(1,1,1,n),gradu(1,1,1,n),n1,n1d,n2,n2d,n3,n3d)
+   enddo
+   call compute_pdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,SF(1,3),3)
+   if (compute_uvw_jpdfs) then
+      call compute_jpdf(gradu(1,1,1,1),gradu(1,1,1,2),gradu(1,1,1,3),n1,n1d,n2,n2d,n3,n3d,jpdf_v(1,3),3)
+   endif
+   
+   call print_message("computing eps pdfs...")
 
-call print_message("computing eps pdfs...")
 
-
-if (compute_cores) then
+   if (compute_cores) then
 !
 !  comptue PDF of regular dissipation field
 !
-   gradu=0
-   do n=1,3
-      ! u_x, u_y, u_z
-      call der(Q(1,1,1,1),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
-      gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
-      
-      call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
-      call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,1),1)
-      
-      
-      ! v_x, v_y, v_z
-      call der(Q(1,1,1,2),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
-      gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
-      
-      call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
-      call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,2),2)
+      gradu=0
+      do n=1,3
+         ! u_x, u_y, u_z
+         call der(Q(1,1,1,1),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+         gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+         
+         call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+         call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,1),1)
       
       
-      ! w_x, w_y, w_z
-      call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
-      gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+         ! v_x, v_y, v_z
+         call der(Q(1,1,1,2),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+         gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+         
+         call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+         call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,2),2)
+         
+         
+         ! w_x, w_y, w_z
+         call der(Q(1,1,1,3),gradu(1,1,1,3),dummy,gradu(1,1,1,2),DX_ONLY,n)
+         gradu(:,:,:,1)=gradu(:,:,:,1)+gradu(:,:,:,3)**2	
+         
+         call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
+         call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,3),3)
+         
+      enddo
+      gradu(:,:,:,1)=mu*gradu(:,:,:,1); 
+      gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
       
-      call transpose_to_x(gradu(1,1,1,3),gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d)
-      call extract_core(gradu(1,1,1,2),n1,n1d,n2,n2d,n3,n3d,core_ddata(1,n,3),3)
-      
-   enddo
-   gradu(:,:,:,1)=mu*gradu(:,:,:,1); 
-   gradu(:,:,:,1)=gradu(:,:,:,1)**one_third
-   
-   call compute_pdf_scalar(gradu,epsilon)
-else
-!
+      call compute_pdf_scalar(gradu,epsilon)
+   else
+      !
 !  comptue PDF of hyper viscosity field
 !
-   gradu=0
-   call hyperder(Q(:,:,:,1),gradu(:,:,:,1),work)
-   gradu(:,:,:,1)=Q(:,:,:,1)*gradu(:,:,:,1) 
+      gradu=0
+      call hyperder(Q(:,:,:,1),gradu(:,:,:,1),work)
+      gradu(:,:,:,1)=Q(:,:,:,1)*gradu(:,:,:,1) 
 
-do n=2,3
-   call hyperder(Q(:,:,:,n),gradu(:,:,:,n),work)
-   gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,n)*gradu(:,:,:,n) 
-enddo
-
-   call compute_pdf_scalar(gradu,epsilon)
-endif
-
-
-call print_message("done with increment pdfs.")
+      do n=2,3
+         call hyperder(Q(:,:,:,n),gradu(:,:,:,n),work)
+         gradu(:,:,:,1)=gradu(:,:,:,1)+Q(:,:,:,n)*gradu(:,:,:,n) 
+      enddo
+      
+      call compute_pdf_scalar(gradu,epsilon)
+   endif
+   
+   
+   call print_message("done with increment pdfs.")
 endif
 
 

@@ -1253,7 +1253,12 @@ if (passive_type(np1)==2 .and. npassive==1) then
    enddo
 endif
 
-if (passive_type(np1)==4 .and. npassive==1) then
+!uncomment line below and comment the first 'if-then' below that if you want to
+! compute and output pv at each output time
+!if (passive_type(np1)==4 .and. npassive==1) then
+
+!the line below is a way to bypass pv output (we do not have > 4 scalar types) at each time step  
+if (passive_type(np1) .ge. 9 .and. npassive==1) then  
    ! compute PV in q1(:,:,:,1)
    call vorticity(q1,Q,work1,work2)  ! q1 = vorticity
 

@@ -575,6 +575,8 @@ if (my_pe==io_pe) then
 	    convert_opt=24
 	 else if (carg(1:6)=="ttrunc") then
             convert_opt=25	          
+	 else if (carg(1:6)=="zerocr") then
+            convert_opt=26	          
          else
             print *,'cout option: ',carg(1:len_trim(carg))
             call abortdns("-cout unrecognized option")
