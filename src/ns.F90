@@ -365,7 +365,6 @@ do ns=np1,np2
    enddo
    do n=2,ndim
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,n)  ! s_y and s_z
-   if (n==3) work=work/Lz
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
