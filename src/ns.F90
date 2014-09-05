@@ -36,6 +36,7 @@ real*8 :: work2(nx,ny,nz)
 real*8 :: Q_tmp(nx,ny,nz,n_var)
 real*8 :: Q_old(nx,ny,nz,n_var)
 real*8 :: rhs(nx,ny,nz,n_var)
+real*8 :: rhsg(nx,ny,nz,n_var)
 real*8, allocatable, save :: q2(:,:,:,:)
 logical,save :: firstcall=.true.
 integer :: n
@@ -78,7 +79,8 @@ if (firstcall) then
    call z_fft3d_nvar(Q_grid,Q,work1,work2) 
 endif
 
-call rk4reshape(time,Q_grid,Q,rhs,rhs,Q_tmp,Q_old,work1,work2,q2)
+call rk4reshape(time,Q_grid,Q,rhs,rhsg,Q_tmp,Q_old,work1,work2,q2)
+
 end
 
 
@@ -134,8 +136,6 @@ do n=1,n_var
 enddo
 
 
-
-
 ! stage 2
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,q2)
 do n=1,n_var
@@ -157,7 +157,6 @@ if (hyper_type==1  .or. hyper_type==3) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-
 
 
 ! stage 3
@@ -184,7 +183,6 @@ do n=1,n_var
 enddo
 
 
-
 ! stage 4
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,q2)
 
@@ -206,6 +204,7 @@ if (hyper_type==1  .or. hyper_type==3) call hyper_filter(Q,delt)
 do n=1,n_var
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
+
 
 time = time + delt
 ! compute max U  
@@ -353,21 +352,31 @@ call wallclock(tmx1)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do ns=np1,np2
+!   if (my_pe==io_pe) then
+!      print *, 'ns.F90: Setting y-z advecting velocities to zero' 
+!   endif
    ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,ns)
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,1)  ! s_x
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
+!      rhsg(i,j,k,ns) = 0.0*work(i,j,k)
+!      rhsg(i,j,k,ns)=-1.0*work(i,j,k)      	      
       rhsg(i,j,k,ns)=-Q(i,j,k,1)*work(i,j,k)
       if (passive_type(ns)==2) rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,1)**2
    enddo
    enddo
    enddo
+!   if (my_pe==io_pe) then
+!      print *, 'ns.F90: y and z derivative terms of scalar advection NOT CALCULATED'
+!   endif
    do n=2,ndim
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,n)  ! s_y and s_z
+!   if (n==3) work=work/Lz
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
+!      rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-0.0*work(i,j,k)
       rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,n)*work(i,j,k)
       if (passive_type(ns)==2) rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,n)**2
    enddo
@@ -380,6 +389,9 @@ enddo
 
 ! check of first scaler is the density and we are running boussinisque
 if (passive_type(np1)==4) then
+!   if (my_pe==io_pe) then
+!      print *, 'Scalar advection off in ns.F90' 
+!   endif
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
@@ -388,9 +400,6 @@ if (passive_type(np1)==4) then
    enddo
    enddo
 endif
-
-
-
 
 
 
@@ -539,7 +548,6 @@ enddo
 #endif
 
 
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! phase shifting:  now compute u x vor with a phase shift,
 ! and add to RHS:
@@ -616,7 +624,10 @@ if (mu_hyper_value>0 .and. mu_hyper>0 .and. hyper_type==0) then
    !   mu_scale k^my_hyper  =  mu_hyper_value (hyper_scale*k^2)^my_hyper
    mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
    if (np1>=4)then
-      mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+! this option computes independently of schmidt, based on potential energy in the largest shell
+!      mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+! this option computes mu_scale_theta based on mu_theta and schmidt
+       mu_scale_theta = mu_scale/schmidt(np1)
    endif
 endif
 if (hyper_type==4) then
@@ -626,6 +637,7 @@ if (hyper_type==4) then
       mu_scale_theta = mu_scale/schmidt(np1)
    endif
 endif
+
 
 ke=0
 ux2ave=0
@@ -675,6 +687,8 @@ do j=1,ny_2dz
             endif
             if(km==0) xw_viss=xw_viss+rylgh
 #endif
+            
+     
 
 
             if (compute_ints==1) then
@@ -729,6 +743,7 @@ do j=1,ny_2dz
                   ens_diss6=ens_diss6 + 2*xfac*(mu*xw*(xw)**2)*  &
                        ((wy-vz)**2 + (uz-wx)**2 + (vx-uy)**2)      
              endif           
+	     
 
       enddo
    enddo
@@ -785,11 +800,14 @@ if (forcing_type>0) then
          call stochastic_highwaveno(Q,Qhat,f_diss,fxx_diss,1)  
       endif
    endif
+
    
    call sforce(rhs,Qhat,f_diss,fxx_diss)
    ! average over all 4 stages
    f_diss_ave=((rkstage-1)*f_diss_ave+f_diss)/rkstage 
 endif
+
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
