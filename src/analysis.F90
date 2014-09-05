@@ -93,7 +93,7 @@ call init_mpi_comm3d()
 call init_model
 
 ! byte swap the input data:
-call set_byteswap_input(1);
+!call set_byteswap_input(1);
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
