@@ -97,28 +97,33 @@ call init_model
 !
 
 !cd
-header_type=1; scale=1;           ! DNS standard data
+!header_type=1; scale=1;           ! DNS standard data
 !header_type=4; scale=1/(2*pi)    ! for Takeshi's data
-compute_hspec=.false.
-read_uvw=.false.
+
+header_type=2; scale=1/(2*pi)	  !for headerless, no periodic extension data (GHOST)
+
+compute_hspec=.false.		  !computes energy and helicity spectra
+read_uvw=.false.		  !reads data and outputs headerless data	    
 compute_hfree=.false.		!extracting helicity-free modes
 
 
-project_ch=.false.         !Craya-Herring projection and spectra
-project_ch_Eh=.true.      !Craya-Herring 2d spectra of E_h (horizontal
+project_ch=.true.         !Craya-Herring projection and spectra
+project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h (horizontal
 			   !kinetic energy)
 project_minuskh0_Eh=.false. !Craya-Herring 2d spectra of E_h w/out kh0 contribution
-project_ch_Ewt=.true.     !Craya-Herring 2d spectra of E_w and E_t (vertical
+project_ch_Ewt=.false.     !Craya-Herring 2d spectra of E_w and E_t (vertical
 			  !kinetic energy  and potential energy)
 
 compute_pv2spec = .false.  !potential enstrophy spectra .pv2spec,.normpvspec
+
 compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
+	      		   !NOT CODED
+
 compute_scalarsbous = .false. !compute .scalars-bous files
 
-
-tstart=5.9
-tstop=5.9
-tinc=0.1
+tstart=4.3
+tstop=4.3
+tinc=1
 
 icount=0
 
@@ -143,7 +148,9 @@ nzdecomp=1
 
 
 if (scale/=1) then
-   print *,'NOTE: scaling data by: ',scale
+   if (my_pe == io_pe) then
+      print *,'NOTE: scaling data by: ',scale
+   endif
 endif
 
 
@@ -211,7 +218,7 @@ do
       ! and it will erase
 
       ! first read in the passive scalars too:
-      call input_passive(runname,time,Q,work1,work2)
+      call input_passive(runname,time,Q,work1,work2,header_type)
 
       call compute_spec(time,Q,q1,work1,work2)
       call output_spec(time,time)
@@ -293,7 +300,7 @@ do
 if (project_ch_Ewt) then
       if (.not. read_uvw) then	
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
+         call input_passive(runname,time,Q,work1,work2,header_type)
          Q=Q*scale;
          read_uvw=.true.	
       endif
@@ -310,7 +317,7 @@ if (project_ch_Ewt) then
    if (project_minuskh0_Eh) then
       if (.not. read_uvw) then	
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
+         call input_passive(runname,time,Q,work1,work2,header_type)
          Q=Q*scale;
          read_uvw=.true.	
       endif
@@ -328,7 +335,7 @@ if (project_ch_Ewt) then
    if (project_ch_Eh) then
       if (.not. read_uvw) then	
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
+         call input_passive(runname,time,Q,work1,work2,header_type)
          Q=Q*scale;
          read_uvw=.true.	
       endif
@@ -347,8 +354,19 @@ if (project_ch_Ewt) then
    
    if (project_ch) then
       if (.not. read_uvw) then	
+      	 if (my_pe==io_pe) then
+	    print *,'header type = ',header_type
+	 endif
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
+	 if (my_pe==io_pe) then
+	    print *,'header type = ',header_type
+            print *,'time = ',time
+	 endif
+         call input_passive(runname,time,Q,work1,work2,header_type)
+	 if (my_pe==io_pe) then
+	    print *,'header type = ',header_type
+            print *,'time = ',time
+	 endif
          Q=Q*scale;
          read_uvw=.true.	
       endif
@@ -357,14 +375,23 @@ if (project_ch_Ewt) then
       endif
 
       call compute_project_ch(Q,q1,q2,work1,work2)
+      if (my_pe==io_pe) then
+      	 print *,'header type = ',header_type
+         print *,'time = ',time
+      endif
+
       call output_project_ch(time,time)
+      if (my_pe==io_pe) then
+      	 print *,'header type = ',header_type
+         print *,'time = ',time
+      endif
    endif
 
    
    if (compute_pv2spec) then
       if (.not. read_uvw) then	
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
+         call input_passive(runname,time,Q,work1,work2,header_type)
          Q=Q*scale;
          read_uvw=.true.	
       endif
@@ -380,7 +407,7 @@ if (project_ch_Ewt) then
    if (compute_pv2HA) then
       if (.not. read_uvw) then	
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
+         call input_passive(runname,time,Q,work1,work2,header_type)
          Q=Q*scale;
          read_uvw=.true.	
       endif
@@ -394,7 +421,7 @@ if (project_ch_Ewt) then
    if (compute_scalarsbous) then
       if (.not. read_uvw) then 
          call input_uvw(time,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
-         call input_passive(runname,time,Q,work1,work2)
+         call input_passive(runname,time,Q,work1,work2,header_type)
          Q=Q*scale;
          read_uvw=.true.
       endif
