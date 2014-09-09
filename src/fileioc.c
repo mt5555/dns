@@ -143,6 +143,13 @@ void byteswap4(char *buf,int len) {
     }
 }
 
+void FORTRAN(fbyteswap8) (char *buf,int *len) {
+    byteswap8(buf,*len);
+}
+
+void FORTRAN(fbyteswap4) (char *buf,int *len) {
+    byteswap4(buf,*len);
+}
 
 /*
   Read 8 byte numbers 
