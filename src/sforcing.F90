@@ -1380,10 +1380,10 @@ if (new_f==1) then
       enddo
    enddo
 
-
-   ! compute forcing function fhat:
-   if (force_theta .and. npassive>0) then
+   ! compute forcing function fhat for scalar:
    ener_pe=0
+   if (force_theta .and. npassive>0) then
+!   ener_pe=0   
    call gaussian(rhs,g_nz2*nx_2dz*ny_2dz)
    n=np1
    do j=1,ny_2dz
@@ -1421,7 +1421,7 @@ if (new_f==1) then
 #ifdef USE_MPI
       ener2=ener
       call mpi_allreduce(ener2,ener,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-      ener2=ener_pe
+      ener2=ener_pe            
       call mpi_allreduce(ener2,ener_pe,numb,MPI_REAL8,MPI_SUM,comm_3d,ierr)
 #endif      
       ener_test=ener_test+ener/ntest
@@ -1431,8 +1431,9 @@ if (new_f==1) then
 
    if (ntest>1) then
    if (io_pe==my_pe) then
-      print *,'forcing:  ',sum(ener_test(numb1:numb))
-      print *,'k,ener_target,ener_ke,ener_pe'
+      print *,'forcing_ke:  ',sum(ener_test(numb1:numb))
+      print *,'forcing_pe:  ',sum(ener_test_pe(numb1:numb))
+      print *,'k,#modes,ener_target,ener_ke,ener_pe'
       do n=numb1,numb
          print *,n,numk(n),ener_target(n),ener_test(n),ener_test_pe(n)
       enddo
@@ -1474,44 +1475,44 @@ enddo
 
 f_diss_pe=0
 if (force_theta .and. npassive>0) then
-n=np1
-do j=1,ny_2dz
-   jm=z_jmcord(j)
-   do i=1,nx_2dz
-      im=z_imcord(i)
-      do k=1,g_nz
-         km=z_kmcord(k)
-
-         rhs(k,i,j,n)=rhs(k,i,j,n) + fhat(k,i,j,n)
-         
-         xfac=8
-         if (km==0) xfac=xfac/2
-         if (jm==0) xfac=xfac/2
-         if (im==0) xfac=xfac/2
-         fsum= Qhat(k,i,j,n)*fhat(k,i,j,n)
-         
-         f_diss_pe = f_diss_pe + xfac*fsum
-         xw=-(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
-         fxx_diss = fxx_diss + xfac*xw*fsum
+   n=np1
+   do j=1,ny_2dz
+      jm=z_jmcord(j)
+      do i=1,nx_2dz
+         im=z_imcord(i)
+         do k=1,g_nz
+            km=z_kmcord(k)
+            
+            rhs(k,i,j,n)=rhs(k,i,j,n) + fhat(k,i,j,n)
+            
+            xfac=8
+            if (km==0) xfac=xfac/2
+            if (jm==0) xfac=xfac/2
+            if (im==0) xfac=xfac/2
+            fsum= Qhat(k,i,j,n)*fhat(k,i,j,n)
+            
+            f_diss_pe = f_diss_pe + xfac*fsum
+            xw=-(im*im + jm*jm + km*km/Lz/Lz)*pi2_squared
+            fxx_diss = fxx_diss + xfac*xw*fsum
+         enddo
       enddo
    enddo
-enddo
 endif
 
 
-#if 0
-call mpi_allreduce(f_diss,xfac,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-if (io_pe==my_pe) then
-   print *,'f_diss: ',xfac,maxval(fhat)
-endif
+#if 0 
+   call mpi_allreduce(f_diss,xfac,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   if (io_pe==my_pe) then
+      print *,'f_diss: ',xfac,maxval(fhat)
+   endif
 #endif
 
-#if 0
-call mpi_allreduce(f_diss,f_diss_ke_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-call mpi_allreduce(f_diss_pe,f_diss_pe_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
-if (io_pe==my_pe) then
-   print *,'eps_f  ke,pe:  ',f_diss_ke_global,f_diss_pe_global
-endif
+#if 0 
+   call mpi_allreduce(f_diss,f_diss_ke_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   call mpi_allreduce(f_diss_pe,f_diss_pe_global,1,MPI_REAL8,MPI_SUM,comm_3d,ierr)
+   if (io_pe==my_pe) then
+      print *,'eps_f  ke,pe:  ',f_diss_ke_global,f_diss_pe_global
+   endif
 #endif
 
 f_diss = f_diss + f_diss_pe
@@ -1519,10 +1520,6 @@ f_diss = f_diss + f_diss_pe
 end subroutine 
    
    
-
-
-
-
 
 subroutine random12(rmodes)
 use params
