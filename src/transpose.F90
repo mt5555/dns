@@ -94,8 +94,10 @@ if (mpi_maxio<0) then
       mpi_stripe="4"
    else
       ! defaults:  
-      mpi_maxio=8
-      mpi_stripe="8"
+      !mpi_maxio=8
+      !mpi_stripe="8"
+      mpi_maxio=32
+      mpi_stripe="32"
 #ifdef OSF1
       mpi_maxio=32
       mpi_stripe="32"
@@ -2259,8 +2261,10 @@ if (do_mpi_io) then
 #ifdef USE_MPI_IO
    if (input_size==4) then	
       call mpi_file_read(fid,buf4,len,MPI_REAL4,statuses,ierr)
+      if (byteswap_input) call fbyteswap4(buf4,len)
    else
       call mpi_file_read(fid,buf,len,MPI_REAL8,statuses,ierr)
+      if (byteswap_input) call fbyteswap8(buf,len)
    endif
    if (ierr==0) ierr=len  ! return length read, if OK
 #else
