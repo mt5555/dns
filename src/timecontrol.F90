@@ -270,7 +270,7 @@ if (doit_screen) then
    call print_message(message)	
 
    if (npassive>0) then
-   write(message,'(a,2f21.14)') 'min/max first passive scalar: ',-maxs(11),maxs(10)
+   write(message,'(a,4e11.4)') 'min/max/var/diss np1: ',-maxs(11),maxs(10),ints(15),ints(16)
    call print_message(message)	
    endif
 
