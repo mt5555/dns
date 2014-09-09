@@ -1,4 +1,4 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !Copyright 2007.  Los Alamos National Security, LLC. This material was
 !produced under U.S. Government contract DE-AC52-06NA25396 for Los
 !Alamos National Laboratory (LANL), which is operated by Los Alamos
@@ -21,7 +21,15 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #include "macros.h"
 
-
+!Need to fix: singlefile_io() calls singlefile_io3() which 
+!is called with fixed header type == 1 (default DNS data with header info).
+!Need to change this so that either everything calls singlefile_io3 directly 
+!with variable header_type as argument (no need to go through singlefile_io());
+!OR, singlefile_io3() be called from singlefile_io() using header_type 
+!as variable argument. And additional argument for singlefile_io().
+!In the first option, singlefile_io() becomes defunct.
+!Output_passive also does not know about header_type, it needs this argument added.
+!
 
 subroutine multfile_io(time,Q,iflag)
 !
@@ -123,21 +131,7 @@ call cclose(fid,ierr)
 endif
 
 
-
-
-
-
-
 end subroutine
-
-
-
-
-
-
-
-
-
 
 
 
@@ -193,11 +187,6 @@ if (my_pe==io_pe) then
 endif
 
 end subroutine
-
-
-
-
-
 
 subroutine singlefile_io(time,p,fname,work,work2,io_read,fpe)
 !
@@ -557,29 +546,6 @@ if (io_nodes(my_z)==my_pe) then
 endif
 #endif
 end subroutine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1289,7 +1255,7 @@ end subroutine
 
 
 
-subroutine input_passive(basename,time,Q,work1,work2)
+subroutine input_passive(basename,time,Q,work1,work2,header_type)
 use params
 use tracers
 use mpi
@@ -1305,7 +1271,7 @@ character(len=*) :: basename
 character(len=80) message
 character(len=80) fname
 character(len=80) base,ext,ext2
-integer :: n
+integer :: n,header_type
 real*8 :: time,mn,mx
 
 if (npassive==0) return
@@ -1319,9 +1285,9 @@ do n=np1,np2
    write(ext2,'(i3)') 100+passive_type(n)
    fname = rundir(1:len_trim(rundir)) // basename(1:len_trim(basename)) &
         // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
-   call print_message(trim(fname))	
-   call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
+   call print_message(trim(fname))
 
+   call singlefile_io3(time,Q(1,1,1,n),fname,work1,work2,1,io_pe,.false.,header_type)
 
    call global_min(Q(1,1,1,n),mn)
    call global_max(Q(1,1,1,n),mx)
@@ -1331,18 +1297,6 @@ do n=np1,np2
 enddo
 
 end subroutine
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 subroutine header1_io(io_read,output_spec,fid,time,xnx,xny,xnz)
@@ -1385,9 +1339,9 @@ if (io_read==1) then
    else
       print *,'grid input data'
       write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
-      if (int(xnx)/=o_nx) call abortdns("Error: data file nx <> nx set in params.h");
-      if (int(xny)/=o_ny) call abortdns("Error: data file ny <> ny set in params.h");
-      if (int(xnz)/=o_nz) call abortdns("Error: data file nz <> nz set in params.h");
+      if (int(xnx)/=o_nx) call abortdns("Error: data file nx <> nx set in params.h, header1_io");
+      if (int(xny)/=o_ny) call abortdns("Error: data file ny <> ny set in params.h, header1_io");
+      if (int(xnz)/=o_nz) call abortdns("Error: data file nz <> nz set in params.h, header1_io");
       call mread8(fid,g_xcord(1),o_nx)
       call mread8(fid,g_ycord(1),o_ny)
       call mread8(fid,g_zcord(1),o_nz)
@@ -1466,7 +1420,7 @@ if (io_read==1) then
    else
       print *,'grid input data'
       write(*,'(a,3f7.0)') 'number of grid points: ',xnx,xny,xnz
-      if (int(xnx)/=o_nx) call abortdns("Error: data file nx <> nx set in params.h");
+      if (int(xnx)/=o_nx) call abortdns("Error: data file nx <> nx set in params.h, header5");
       if (int(xny)/=o_ny) call abortdns("Error: data file ny <> ny set in params.h");
       if (int(xnz)/=o_nz) call abortdns("Error: data file nz <> nz set in params.h");
       call mread8(fid,g_xcord(1),o_nx)
@@ -1578,11 +1532,6 @@ else
    call abortdns("ERROR: header_type==4 output not supported")
 endif
 end subroutine header4_io
-
-
-
-
-
 
 
 subroutine header2_io(io_read,fid,time,xnx,xny,xnz)
