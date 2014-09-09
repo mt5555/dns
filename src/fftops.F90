@@ -2594,7 +2594,10 @@ if (hyper_type == 1 ) then
    !   mu_scale (k^2)^mu_hyper  =  mu_hyper_value(hyper_scale^(1/mu_hyper)) (k^2)^(mu_hyper)
    mu_scale = mu_hyper_value*(sum(hyper_scale(1:3,1))/3)**mu_hyper
    if (np1>=4) then
-      mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+!  this option finds mu_scale_theta independently of Sc, based on potential energy in largest shell
+!      mu_scale_theta = mu_hyper_value*hyper_scale(1,np1)**mu_hyper
+!  this option scales mu_scale_theta according to schmidt
+       mu_scale_theta = mu_scale/schmidt(np1)
    endif
 else
    hyper_scale=1  ! dont scale hyper viscosity, use value in input file
