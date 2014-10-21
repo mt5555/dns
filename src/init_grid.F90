@@ -111,6 +111,9 @@ do n=np1,np2
    i=i+1
    schmidt(n)=input_schmidt(i)
    passive_type(n)=input_passive_type(i)
+   if (mu_hyper_value>0 .and. schmidt(n)/=1) then
+      call abortdns("Chasnov scheme requires Schmidt number=1 in input file (input_schmidt(*) = 1)")
+   endif	  
 enddo
 if (input_npassive>0) then
 deallocate(input_passive_type)
@@ -880,7 +883,10 @@ endif
 if (Lz/=1) then
    write(message,'(a,e10.4)') 'aspect ratio Lz = ',Lz
    call print_message(message)
+   ! wavenumber shell thickness
+   shell_thickness_scale = min(Lz,1.0d0)
 endif
+
 
 
 if (bous/=0) then
@@ -895,17 +901,9 @@ if (cfl_adv<0) then
 endif
 
 
+
+
 end subroutine
-
-
-
-
-
-
-
-
-
-
 
 
 
