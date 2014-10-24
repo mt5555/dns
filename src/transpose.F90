@@ -2003,6 +2003,14 @@ integer (KIND=MPI_OFFSET_KIND) ::  zpos,ypos
 integer i,j,k,l,extra_k,kuse,dest_pe3(3)
 integer n1,n1d,n2,n2d,n3,n3d
 integer :: ny_2dx_actual 
+logical :: byteswap_input_original
+
+! temporarily disable byteswapping:
+byteswap_input_original = byteswap_input
+byteswap_input = .false.
+call set_byteswap_input(0);
+
+
 ny_2dx_actual = ny_2dx
 first_seek=.true.
 
@@ -2126,6 +2134,14 @@ enddo
 enddo
 enddo
 
+
+! restore byteswapping:
+byteswap_input = byteswap_input_original 
+if (byteswap_input) call set_byteswap_input(1);
+
+
+! byteswap the input data as one large array:
+if (byteswap_input)  call fbyteswap8(pt,g_nx2*nslabz*ny_2dx)
 
 n1=g_nx
 n1d=g_nx2
