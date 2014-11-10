@@ -25,24 +25,6 @@ use params
 !use sforcing
 implicit none
 
-#if 0
-
-module to compute spherical and other 1D spectrums and
-transfer function spectrums
-
-Spectrum routines know about Lz for setting aspect ration.
-Spherical shells are stored in integer wave number k,
-and are of thickness of thickness 2*pi/Lz
-
-Max wave number:   2*pi*(g_nz/2)
-Number of shells:  .5*g_nz*Lz
-However, we only allocate space for .5*g_nz shells, so this code will
-print an error message if Lz>1
-
-
-
-#endif
-
 logical :: compute_transfer=.false.
 
 real*8,private ::  spec_x(0:g_nx/2,n_var)
@@ -1528,7 +1510,7 @@ integer i,j,k,iw
 iwave_max=max(g_nx,g_ny,g_nz)
 
 ! max wave number computed below:
-rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
+rwave=shell_thickness_scale*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 if (nint(rwave)>iwave_max) then
    call abortdns("compute_spectrum: called with insufficient storage for spectrum()")
 endif
@@ -1546,7 +1528,7 @@ do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
     rwave = imcord(i)**2 + jmcord(j)**2 + (kmcord(k)/Lz)**2
-    iw = nint(Lz*sqrt(rwave))
+    iw = nint(shell_thickness_scale*sqrt(rwave))
 
     xfac = 8
     if (kmcord(k)==0) xfac=xfac/2
@@ -1602,7 +1584,7 @@ call mpi_reduce(spectrum_in,spec_d,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,i
 if (g_nz == 1)  then
    iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(shell_thickness_scale*min(g_nx/2d0,g_ny/2d0,g_nz/2d0/Lz))
 endif
 
 ! for all waves outside sphere, sum into one wave number:
@@ -1735,7 +1717,7 @@ real*8 :: energy
 integer i,j,k,jm,km,im,iwave_max,iw
 
 
-rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
+rwave=shell_thickness_scale*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 iwave_max=nint(rwave)
 if (iwave_max>max(g_nx,g_ny,g_nz)) then
    call abortdns("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
@@ -1751,7 +1733,7 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iw = nint(Lz*sqrt(rwave))
+         iw = nint(shell_thickness_scale*sqrt(rwave))
          
          energy = 8
          if (km==0) energy=energy/2
@@ -1781,7 +1763,7 @@ call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 if (g_nz == 1)  then
    iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(shell_thickness_scale*min(g_nx/2d0,g_ny/2d0,g_nz/2d0/Lz))
 endif
 
 
@@ -1817,7 +1799,7 @@ real*8 :: energy,xfac,uy,vx,uz,wx,vz,wy
 integer i,j,k,jm,km,im,iwave_max,iw
 
 
-rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
+rwave=shell_thickness_scale*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 iwave_max=nint(rwave)
 if (iwave_max>max(g_nx,g_ny,g_nz)) then
    call abortdns("compute_spectrum_z_fft: called with insufficient storege for spectrum()")
@@ -1833,7 +1815,7 @@ do j=1,ny_2dz
          km=z_kmcord(k)
 
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iw = nint(Lz*sqrt(rwave))
+         iw = nint(shell_thickness_scale*sqrt(rwave))
          
          xfac = 8
          if (km==0) xfac=xfac/2
@@ -1878,7 +1860,7 @@ call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 if (g_nz == 1)  then
    iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(shell_thickness_scale*min(g_nx/2d0,g_ny/2d0,g_nz/2d0/Lz))
 endif
 
 
@@ -1927,7 +1909,7 @@ do j=ny1,ny2
          km=kmcord(k)
 
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iw = nint(Lz*sqrt(rwave))
+         iw = nint(shell_thickness_scale*sqrt(rwave))
          
          energy = 8
          if (km==0) energy=energy/2
@@ -1951,7 +1933,7 @@ call mpi_reduce(spec_r_in,spec,1+iwave_max,MPI_REAL8,MPI_SUM,io_pe,comm_3d,ierr)
 if (g_nz == 1)  then
    iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(shell_thickness_scale*min(g_nx/2d0,g_ny/2d0,g_nz/2d0/Lz))
 endif
 
 
@@ -2003,7 +1985,7 @@ do n=1,3
 enddo
 endif
 
-rwave=Lz*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
+rwave=shell_thickness_scale*sqrt(  (g_nx/2.0)**2 + (g_ny/2.0)**2 + (g_nz/(2.0*Lz))**2 )
 iwave_max=nint(rwave)
 if (iwave_max > max(g_nx,g_ny,g_nz)) then
    call abortdns("compute_helicity_spec(): called with insufficient storege for spectrum()")
@@ -2030,7 +2012,7 @@ do j=ny1,ny2
          km=kmcord(k)
 
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iw = nint(Lz*sqrt(rwave))
+         iw = nint(shell_thickness_scale*sqrt(rwave))
          
          !ux = - pi2*im*p1(i+imsign(i),j,k,1)
          vx = - pi2*im*p1(i+imsign(i),j,k,2)
@@ -2129,7 +2111,7 @@ endif
 if (g_nz == 1)  then
    iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(shell_thickness_scale*min(g_nx/2d0,g_ny/2d0,g_nz/2d0/Lz))
 endif
 
 
@@ -2360,7 +2342,7 @@ do j=ny1,ny2
          km=kmcord_exp(k)
          
          rwave = im**2 + jm**2 + (km/Lz)**2
-         iw = nint(Lz*sqrt(rwave))
+         iw = nint(shell_thickness_scale*sqrt(rwave))
 
          !     compute angle between Re and Im parts of u(k)
          RR = cmodes_r(i,j,k,:)
@@ -2636,7 +2618,7 @@ endif
 if (g_nz == 1)  then
    iwave_3d = min(g_nx/2,g_ny/2)
 else
-   iwave_3d = floor(min(Lz*g_nx/2d0,Lz*g_ny/2d0,g_nz/2d0))
+   iwave_3d = floor(shell_thickness_scale*min(g_nx/2d0,g_ny/2d0,g_nz/2d0/Lz))
 endif
 
 ! for all waves outside sphere, sum into one wave number, iwave_3d+1:
@@ -3040,7 +3022,7 @@ do k=nz1,nz2
          b02 = b0R**2 + b0I**2
 	 
 !	calculate the total energy from the QR, QI directly as a check
-         iw=nint(Lz*sqrt(im**2 + jm**2 + (km/Lz)**2))
+         iw=nint(shell_thickness_scale*sqrt(im**2 + jm**2 + (km/Lz)**2))
          iwave_3d=max(iw,iwave_3d)
 
 	 etot_Q = 0.5*sum(RR**2 + II**2)

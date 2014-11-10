@@ -148,6 +148,9 @@ real*8 :: zscale=1
 ! (all d/dz derivatives become d/dz (1/Lz) See rotation.tex
 real*8 :: Lz=1
 
+! shell_thickness_scale is used to scale the wavenumber shell thickness 
+! used in the forcing and spectrum routines based on min(Lz,1)
+real*8 :: shell_thickness_scale=1
 
 ! local boundary conditions
 ! usually these will be INTERNAL, meaning the boundary is just

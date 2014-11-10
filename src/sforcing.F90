@@ -1192,6 +1192,7 @@ integer,save :: fwidth, nf_comp
 integer :: count 
 integer,save :: kzmod
 
+
 if (0==init_sforcing) then
    init_sforcing=1
 
@@ -1260,7 +1261,8 @@ if (0==init_sforcing) then
          ener_target(wn)=ffval*exp((-2*pi*pi/(kzmod*kzmod))*(wn-forcing_peak_waveno)**2)
       endif
    enddo
-   
+
+
    ! compute number of coefficients in each band
    numk=0
    do j=1,ny_2dz
@@ -1270,8 +1272,8 @@ if (0==init_sforcing) then
          do k=1,g_nz
             km=z_kmcord(k)
 
-            ! use "fat shells":
-            wn=Lz*sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
+            ! use "fat shells for Lz < 1 (shell_thickness_scale=Lz) and Lz > 1 (shell_thickness_scale=1);
+            wn=shell_thickness_scale*sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
             ! use "thin shells":
             ! wn=sqrt(real(im*im+jm*jm+km*km/Lz/Lz))
             if (wn<=numb .and. wn>=numb1 .and. mod(abs(km),kzmod)==0) then 
@@ -1324,7 +1326,7 @@ if (new_f==1) then
          do k=1,g_nz
             km=z_kmcord(k)
             wn2=(im*im+jm*jm+km*km/Lz/Lz)
-            wn = Lz*sqrt(real(wn2))
+            wn = shell_thickness_scale*sqrt(real(wn2))
             wnx = sqrt(real(wn2))
             ! we uses FAT SHELLS for the test, but the true wave number wnx
             ! for normalizations below
@@ -1393,7 +1395,7 @@ if (new_f==1) then
          do k=1,g_nz
             km=z_kmcord(k)
             wn2=(im*im+jm*jm+km*km/Lz/Lz)
-            wn = Lz*sqrt(real(wn2))
+            wn = shell_thickness_scale*sqrt(real(wn2))
             wnx = sqrt(real(wn2))
             ! we uses FAT SHELLS for the test, but the true wave number wnx
             ! for normalizations below

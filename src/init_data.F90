@@ -66,7 +66,7 @@ if (restart==1) then
       call output_passive(runname,time_initial,Q,q1,work1,work2)	
    else
       call init_passive_scalars(0,Q,Qhat,work1,work2)
-      call input_passive(runname,time_initial,Q,work1,work2)
+      call input_passive(runname,time_initial,Q,work1,work2,header_user)
    endif
    endif
 
