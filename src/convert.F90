@@ -118,8 +118,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=7.0
-tstop=7.0
+tstart=0.0277
+tstop=0.0277
 tinc=0.1
 
 
@@ -363,8 +363,10 @@ do
            // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
       call print_message(rundir)
       call print_message(runname)
-      call print_message(fname)	
-      call singlefile_io3(time,Q,fname,work1,work2,1,io_pe,.false.,1)
+      call print_message(fname)
+      ! time2 gets replaced by value -1 for headerless data and so we don't want to use time
+      time2=time	
+      call singlefile_io3(time2,Q,fname,work1,work2,1,io_pe,.false.,header_user)
       call global_min(Q,mn)
       call global_max(Q,mx)
       write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx

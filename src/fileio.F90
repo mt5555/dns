@@ -21,15 +21,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #include "macros.h"
 
-!Need to fix: singlefile_io() calls singlefile_io3() which 
-!is called with fixed header type == 1 (default DNS data with header info).
-!Need to change this so that either everything calls singlefile_io3 directly 
-!with variable header_type as argument (no need to go through singlefile_io());
-!OR, singlefile_io3() be called from singlefile_io() using header_type 
-!as variable argument. And additional argument for singlefile_io().
-!In the first option, singlefile_io() becomes defunct.
-!Output_passive also does not know about header_type, it needs this argument added.
-!
+
 
 subroutine multfile_io(time,Q,iflag)
 !
@@ -302,11 +294,17 @@ if (header_type==2 .or. header_type==3 .or. header_type==4) then
 endif
 
 if (do_mpi_io .and. .not. output_spec ) then
+!   if (my_pe==io_pe) then
+!      print *,'mpi:singlefile_io3: header_type = ',header_type
+!   endif
    call singlefile_mpi_io(time,p,fname,work,work2,io_read,header_type)
    o_nx=o_nx_save; o_ny=o_ny_save; o_nz=o_nz_save;
    return
 endif
 
+!if (my_pe==io_pe) then
+!      print *,'no mpi:singlefile_io3: header_type = ',header_type
+!endif
 
 ! disable MPI_IO for the calls below:
 do_mpi_io_save=do_mpi_io
@@ -378,6 +376,10 @@ if (io_read==1) then
       call input1_spec(p,work,work2,fid,fpe,im_max,jm_max,km_max)
    else
       call input1(p,work,work2,fid,fpe,.false.,-1)
+      if (my_pe==io_pe) then
+         print *,'done calling input1...'
+      endif
+
    endif
 else
    if (output_spec) then
@@ -1287,6 +1289,13 @@ do n=np1,np2
         // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
    call print_message(trim(fname))
 
+!   call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
+
+
+! TODO
+! Should change to a call to singlefile_io3 which has header information
+! sample from input_uvw:  call singlefile_io3(time,p,fname,work,work2,io_read,fpe,.false.,2)
+! should third to last argument be fpe or io_pe?
    call singlefile_io3(time,Q(1,1,1,n),fname,work1,work2,1,io_pe,.false.,header_type)
 
    call global_min(Q(1,1,1,n),mn)
