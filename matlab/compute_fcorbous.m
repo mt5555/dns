@@ -10,12 +10,12 @@ k_w = k_f*2*pi/Lz_short;
 U = (epsf/k_w)^(1/3);
 
 if Lz <= 1
-  H = 2*pi/k_w; %used to be 1/k_w for the older flows
+  H = 1/k_w; %should be 2*pi/k_w to get H = Lz/4 but retaining this definition for consistency with definitions in scalars.m and previous simulations
   L = H/Lz;
 end
 
 if Lz > 1
-  L = 2*pi/k_w
+  L = 1/k_w %should be 2*pi/k_w to get L = 1/4 but retaining this definition for consistency with definitions in scalars.m and previous simulations
   H = L*Lz 
 end
 
