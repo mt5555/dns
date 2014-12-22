@@ -105,7 +105,7 @@ real*8,save  :: work2(nx,ny,nz)
 character(len=80) message,sdata,tname,sdata2
 character(len=280) basename,fname
 integer ierr,i,j,k,n,km,im,jm,icount
-real*8 :: tstart,tstop,tinc,time,time2
+real*8 :: tstart,tstop,tinc,time,time2,time_tmp
 real*8 :: u,v,w,x,y
 real*8 :: kr,ke,ck,xfac,dummy,xtmp
 real*8 :: schmidt_in,mn,mx,a0,a1
@@ -172,8 +172,8 @@ do
 
    if (convert_opt==0) then  ! -cout uvw  
       ! read data, header type =1, or specified in input file
-      time2=time
-      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
@@ -200,7 +200,8 @@ do
     endif
 
     if (convert_opt==1) then  ! -cout vor
-       call input_uvw(time,Q,vor,work1,work2,header_user)
+       time_tmp=time
+       call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
        ! outputing vorticity
        if (ndim==3) then
           basename=runname(1:len_trim(runname)) // "-vor."
@@ -245,7 +246,8 @@ do
     endif
     
     if (convert_opt==2) then  ! -cout vorm
-       call input_uvw(time,Q,vor,work1,work2,header_user)
+       time_tmp=time
+       call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
        call print_message("computing vorticity magnitude...")
        call vorticity(vor,Q,work1,work2)
        do k=nz1,nz2
@@ -269,7 +271,8 @@ do
 
     if (convert_opt==3) then  ! -cout norm2
        ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-       call input_uvw(time,Q,vor,work1,work2,header_user)
+       time_tmp=time
+       call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
        do i=1,ndim
           call print_max(Q(1,1,1,i),i)
        enddo
@@ -364,9 +367,9 @@ do
       call print_message(rundir)
       call print_message(runname)
       call print_message(fname)
-      ! time2 gets replaced by value -1 for headerless data and so we don't want to use time
-      time2=time	
-      call singlefile_io3(time2,Q,fname,work1,work2,1,io_pe,.false.,header_user)
+      ! time_tmp gets replaced by value -1 for headerless data and so we don't want to use time
+      time_tmp=time	
+      call singlefile_io3(time_tmp,Q,fname,work1,work2,1,io_pe,.false.,header_user)
       call global_min(Q,mn)
       call global_max(Q,mx)
       write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
@@ -484,8 +487,8 @@ do
    
    
    if (convert_opt==12) then ! -cout uwbar  
-      time2=time
-      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)  
       call print_stats(Q,vor,work1,work2)
       ! compute the vorticity, store in vor(:,:,:,1)
       call vorticity2d(vor,Q,work1,work2)
@@ -517,8 +520,8 @@ do
       endif
       
       ! read data, header type =1, or specified in input file
-      time2=time
-      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
@@ -636,8 +639,8 @@ do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    if (convert_opt==16) then  ! -cout dfilter
       ! read data, header type =1, or specified in input file
-      time2=time
-      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
@@ -683,8 +686,8 @@ do
       compute_passive_pdfs = .false.  ! passive scalar PDFs
       
       ! read data, header type =1, or specified in input file
-      time2=time
-      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
@@ -778,11 +781,11 @@ do
       endif
       
       ! read data, header type =1, or specified in input file
-      time2=time
+      time_tmp=time
       !     DNS-headered data input
       !     call input_uvw(time2,Q,vor,work1,work2,header_user)  
       !     headerless data input
-      call input_uvw(time2,Q,vor,work1,work2,2)  
+      call input_uvw(time_tmp,Q,vor,work1,work2,2)  
       
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
@@ -826,8 +829,8 @@ do
    if (convert_opt==19) then  ! -cout coarsegrain
       ! read data, header type =1, or specified in input file
       if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
-      time2=time
-      call input_uvw(time2,Q,vor,work1,work2,header_user)  
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
@@ -924,7 +927,8 @@ do
    
    if (convert_opt==21) then  ! -cout ehor
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2,header_user)
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
       do i=1,ndim
          call print_max(Q(1,1,1,i),i)
       enddo
@@ -977,8 +981,9 @@ do
    
    if (convert_opt==23) then  ! -cout pe
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
-      call input_uvw(time,Q,vor,work1,work2,header_user)
-      call input_passive(runname, time, Q, work1, work2)
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
+      call input_passive(runname, time_tmp, Q, work1, work2)
       !      do i=1,ndim
       !         call print_max(Q(1,1,1,i),i)
       !      enddo
@@ -1004,8 +1009,9 @@ do
    if (convert_opt==24) then  ! -cout CH_decomp
       schmidt_in=1.0
       type_in=4
-      call input_uvw(time,Q,vor,work1,work2,header_user)
-      call input_passive(runname, time, Q, work1, work2)
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
+      call input_passive(runname, time_tmp, Q, work1, work2)
       if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
       
       !      do i=1,ndim
@@ -1134,8 +1140,8 @@ do
       
       
       ! read data, header type =2 for headerless data or specified in input file
-      time2=time
-      call input_uvw(time2,Q,vor,work1,work2,2)  
+      time_tmp=time
+      call input_uvw(time_tmp,Q,vor,work1,work2,2)  
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif

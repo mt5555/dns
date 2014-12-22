@@ -87,11 +87,15 @@ endif
 
 if (mpi_maxio<0) then
    if (g_nx <= 512) then
+      !mpi_maxio=4
+      !mpi_stripe="4"
       mpi_maxio=32
       mpi_stripe="32"
    else if (g_nx <= 1024) then
-      mpi_maxio=4
-      mpi_stripe="4"
+      !mpi_maxio=4
+      !mpi_stripe="4"
+      mpi_maxio=32
+      mpi_stripe="32"
    else
       ! defaults:  
       !mpi_maxio=8
