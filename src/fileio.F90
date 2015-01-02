@@ -474,6 +474,7 @@ if (io_nodes(my_z)==my_pe) then
       call mpi_info_set(infoin, "striping_unit", mpi_stride ,ierr)
 #endif
       call mpi_info_set(infoin, "striping_factor", mpi_stripe,ierr) 	
+      call mpi_info_set(infoin, "ibm_largeblock_io","true",ierr)
       call mpi_file_open(comm_io,fname, &
            MPI_MODE_WRONLY + MPI_MODE_CREATE ,&
            infoin, fid,ierr)
