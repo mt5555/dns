@@ -118,8 +118,8 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=0.0277
-tstop=0.0277
+tstart=0.9
+tstop=0.9
 tinc=0.1
 
 
@@ -270,7 +270,7 @@ do
     endif
 
     if (convert_opt==3) then  ! -cout norm2
-       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
+       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus       
        time_tmp=time
        call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
        do i=1,ndim
@@ -983,7 +983,8 @@ do
       ! 2048^3 needs 192GB * 1.66.  needs 256 cpus
       time_tmp=time
       call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
-      call input_passive(runname, time_tmp, Q, work1, work2)
+      time_tmp=time
+      call input_passive(runname, time_tmp, Q, work1, work2,header_user)
       !      do i=1,ndim
       !         call print_max(Q(1,1,1,i),i)
       !      enddo
@@ -1011,9 +1012,35 @@ do
       type_in=4
       time_tmp=time
       call input_uvw(time_tmp,Q,vor,work1,work2,header_user)
-      call input_passive(runname, time_tmp, Q, work1, work2)
+
+      time_tmp=time 
+      call input_passive(runname,time_tmp,Q,work1,work2,header_user)
+
+!      write(message,'(f10.4)') 10000.0000 + time
+!      write(ext,'(f8.3)') 1000 + schmidt_in
+!      write(ext2,'(i3)') 100+type_in
+!      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
+!           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
+!      call print_message(rundir)
+!      call print_message(runname)
+!      call print_message(fname)
+
+!      do n=np1,np2	
+!      ! time_tmp gets replaced by value -1 for headerless data and so we don't want to use time
+!      time_tmp=time
+!      call singlefile_io3(time_tmp,Q(1,1,1,n),fname,work1,work2,1,io_pe,.false.,header_user)
+!      call global_min(Q(1,1,1,n),mn)
+!      call global_max(Q(1,1,1,n),mx)
+!      write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
+!      call print_message(message)	
+!      enddo
+
       if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
-      
+
+      if (my_pe==io_pe) then
+      	 print *,'done Q2 allocation'
+      endif      
+
       !      do i=1,ndim
       !         call print_max(Q(1,1,1,i),i)
       !      enddo
@@ -1094,7 +1121,7 @@ do
       
       ! read data, header type =1, or specified in input file
       time2=time
-      call input_passive(runname, time2, Q, work1, work2)
+      call input_passive(runname, time2, Q, work1, work2,header_user)
       if (.not. r_spec) then  ! r_spec reader will print stats, so we can skip this:
          call print_stats(Q,vor,work1,work2)
       endif
