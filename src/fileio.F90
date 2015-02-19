@@ -1290,13 +1290,6 @@ do n=np1,np2
         // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
    call print_message(trim(fname))
 
-!   call singlefile_io(time,Q(1,1,1,n),fname,work1,work2,1,io_pe)
-
-
-! TODO
-! Should change to a call to singlefile_io3 which has header information
-! sample from input_uvw:  call singlefile_io3(time,p,fname,work,work2,io_read,fpe,.false.,2)
-! should third to last argument be fpe or io_pe?
    call singlefile_io3(time,Q(1,1,1,n),fname,work1,work2,1,io_pe,.false.,header_type)
 
    call global_min(Q(1,1,1,n),mn)
