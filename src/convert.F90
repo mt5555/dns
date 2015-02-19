@@ -118,13 +118,13 @@ integer :: Mval(4) = (/4,16,32,64/)   ! values used for coarse graining
 
 
 ! input file
-tstart=0.9
-tstop=0.9
-tinc=0.1
+tstart=0.0387
+tstop=0.0387
+tinc=0.0001
 
 
 ! to read times from  file times.dat:
-tstart=-1; tinc=0; tname="times.dat"
+!tstart=-1; tinc=0; tname="times.dat"
 
 ! these lines are modifed by some sed scripts for automatic running
 ! of this code by putting in new values of tstart, tstop, tinc,
@@ -1016,30 +1016,8 @@ do
       time_tmp=time 
       call input_passive(runname,time_tmp,Q,work1,work2,header_user)
 
-!      write(message,'(f10.4)') 10000.0000 + time
-!      write(ext,'(f8.3)') 1000 + schmidt_in
-!      write(ext2,'(i3)') 100+type_in
-!      fname = rundir(1:len_trim(rundir)) // runname(1:len_trim(runname)) &
-!           // message(2:10) // '.t' // ext2(2:3) // '.s' // ext(2:8)
-!      call print_message(rundir)
-!      call print_message(runname)
-!      call print_message(fname)
-
-!      do n=np1,np2	
-!      ! time_tmp gets replaced by value -1 for headerless data and so we don't want to use time
-!      time_tmp=time
-!      call singlefile_io3(time_tmp,Q(1,1,1,n),fname,work1,work2,1,io_pe,.false.,header_user)
-!      call global_min(Q(1,1,1,n),mn)
-!      call global_max(Q(1,1,1,n),mx)
-!      write(message,'(a,2f17.5)') 'passive scalar min/max: ',mn,mx
-!      call print_message(message)	
-!      enddo
-
       if (.not.allocated(Q2)) allocate(Q2(nx,ny,nz,n_var))
 
-      if (my_pe==io_pe) then
-      	 print *,'done Q2 allocation'
-      endif      
 
       !      do i=1,ndim
       !         call print_max(Q(1,1,1,i),i)
