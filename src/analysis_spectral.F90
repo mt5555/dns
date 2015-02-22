@@ -97,17 +97,16 @@ call init_model
 !
 
 !cd
-!header_type=1; scale=1;           ! DNS standard data
+header_type=1; scale=1;           ! DNS standard data
 !header_type=4; scale=1/(2*pi)    ! for Takeshi's data
 
-header_type=2; scale=1/(2*pi)	  !for headerless, no periodic extension data (GHOST)
+!header_type=2; scale=1/(2*pi)	  !for headerless, no periodic extension data (GHOST)
 
 compute_hspec=.false.		  !computes energy and helicity spectra
 read_uvw=.false.		  !reads data and outputs headerless data	    
 compute_hfree=.false.		!extracting helicity-free modes
 
-
-project_ch=.true.         !Craya-Herring projection and spectra
+project_ch=.false.         !Craya-Herring projection and spectra
 project_ch_Eh=.false.      !Craya-Herring 2d spectra of E_h (horizontal
 			   !kinetic energy)
 project_minuskh0_Eh=.false. !Craya-Herring 2d spectra of E_h w/out kh0 contribution
@@ -121,9 +120,9 @@ compute_pv2HA = .false.    !compute Hussein Aluie's potential enstrophy spectra
 
 compute_scalarsbous = .true. !compute .scalars-bous files
 
-tstart=0.0277
-tstop=0.0277
-tinc=1
+tstart=2.0
+tstop=3.0
+tinc=0.1
 
 icount=0
 
@@ -174,7 +173,9 @@ if (compute_pv2spec) then
 endif
 if (compute_scalarsbous) then
    if (.not. allocated(Qhat))  allocate(Qhat(g_nz2,nx_2dz,ny_2dz,n_var))
+   print *,'allocation for Qhat scalars-bous complete'
    if (.not. allocated(q3))  allocate(q3(nx,ny,nz,n_var))
+   print *,'allocation q3 for scalars-bous complete'
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -216,10 +217,11 @@ do
 
       ! enable this block of code to recompute spectra.
       ! NOTE: this will output .spec, .pspec, .kspec, .hspec, .cospec, .spec2d
-      ! and it will erase
+      ! and it will erase existing ones
 
       ! first read in the passive scalars too:
-      call input_passive(runname,time,Q,work1,work2,header_type)
+      time_tmp=time
+      call input_passive(runname,time_tmp,Q,work1,work2,header_type)
 
       call compute_spec(time,Q,q1,work1,work2)
       call output_spec(time,time)
@@ -407,6 +409,9 @@ if (project_ch_Ewt) then
    endif
       
    if (compute_scalarsbous) then
+      if (my_pe==io_pe) then
+      	 print *,'Computing Scalars-bous'
+      endif 
       if (.not. read_uvw) then
       	 time_tmp=time 
          call input_uvw(time_tmp,Q,q1,q2(1,1,1,1),q2(1,1,1,2),header_type)
