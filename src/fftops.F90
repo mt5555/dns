@@ -648,7 +648,7 @@ call der(u(1,1,1,n),work1,dummy,work2,DX_ONLY,n)
 do k=nz1,nz2
 do j=ny1,ny2
 do i=nx1,nx2
-   div(i,j,k) = div(i,j,k)+work1(i,j,k)/Lz
+   div(i,j,k) = div(i,j,k)+work1(i,j,k)
 enddo
 enddo
 enddo
