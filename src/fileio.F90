@@ -575,7 +575,7 @@ character(len=280) base
 integer :: n,header_type,im,jm,km,i,j,k,ierr
 real*8 :: time
 real*8 :: time_in,mx(3),mx2,ke,ens,ux,uy,uz,vx,vy,vz,wx,wy,wz,u2,xfac,divmx
-real*8 :: tmx1,tmx2
+real*8 :: tmx1,tmx2,mnval,mxval
 
 call wallclock(tmx1)
 
@@ -757,6 +757,14 @@ endif
 call wallclock(tmx2)
 write(message,'(a,f6.3)') 'input_uvw: time(min)=',(tmx2-tmx1)/60.
 call print_message(message)
+
+do n=1,n_var
+   call global_min(Q(1,1,1,n),mnval)
+   call global_max(Q(1,1,1,n),mxval)
+   write(message,'(a,i3,a,2f17.5)') 'UVW component n=',n,' min/max: ',mnval,mxval
+   call print_message(message)	
+enddo
+
 
 end subroutine
 
