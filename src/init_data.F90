@@ -29,6 +29,7 @@ real*8 :: Qhat(nx,ny,nz,n_var)
 real*8 :: q1(nx,ny,nz,n_var)
 real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
+real*8 :: divx,divi
 character(len=280) :: fname
 
 if (restart==1) then
@@ -98,6 +99,13 @@ else
       call print_message('Dealiasing initial data...')
    endif
 endif
+
+call compute_div(Q,q1,work1,work2,divx,divi)
+write(message,'(3(a,e12.5))') 'inputdata:  max(div)=',divx
+call print_message(message)	
+
+
+
 end subroutine
 
 
