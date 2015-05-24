@@ -31,6 +31,7 @@ real*8 :: work1(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: divx,divi
 character(len=280) :: fname
+character(len=80) message
 
 if (restart==1) then
 
