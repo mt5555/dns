@@ -97,6 +97,8 @@ real*8 :: Q_old(g_nz2,nx_2dz,ny_2dz,n_var)
 real*8 :: work(nx,ny,nz)
 real*8 :: work2(nx,ny,nz)
 real*8 :: q2(nx,ny,nz,ndim)  ! only allocated if phase shifting turned on
+real*8 :: mnval,mxval
+character(len=80) message
 
 ! overlapped in memory:  dont use both in the same n loop
 real*8 :: rhs(g_nz2,nx_2dz,ny_2dz,n_var)
@@ -130,14 +132,18 @@ do n=1,n_var
    enddo
    enddo
 enddo
+
 if (hyper_type==1 .or. hyper_type==3) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
 
 
+
+
 ! stage 2
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2.0,0,work,work2,2,q2)
+
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
@@ -153,6 +159,7 @@ do n=1,n_var
    enddo
    enddo
 enddo
+
 if (hyper_type==1  .or. hyper_type==3) call hyper_filter(Q_tmp,delt/2)
 do n=1,n_var
    call z_ifft3d(Q_tmp(1,1,1,n),Q_grid(1,1,1,n),work)
@@ -161,6 +168,7 @@ enddo
 
 ! stage 3
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt/2,0,work,work2,3,q2)
+
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
@@ -186,7 +194,6 @@ enddo
 ! stage 4
 call ns3D(rhs,rhsg,Q_tmp,Q_grid,time+delt,0,work,work2,4,q2)
 
-
 do n=1,n_var
    do j=1,ny_2dz
    do i=1,nx_2dz
@@ -204,7 +211,6 @@ if (hyper_type==1  .or. hyper_type==3) call hyper_filter(Q,delt)
 do n=1,n_var
    call z_ifft3d(Q(1,1,1,n),Q_grid(1,1,1,n),work)
 enddo
-
 
 time = time + delt
 ! compute max U  
@@ -352,31 +358,23 @@ call wallclock(tmx1)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do ns=np1,np2
-!   if (my_pe==io_pe) then
-!      print *, 'ns.F90: Setting y-z advecting velocities to zero' 
-!   endif
    ! compute u dot grad(s), store (temporally) in rhsg(:,:,:,ns)
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,1)  ! s_x
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-!      rhsg(i,j,k,ns) = 0.0*work(i,j,k)
-!      rhsg(i,j,k,ns)=-1.0*work(i,j,k)      	      
       rhsg(i,j,k,ns)=-Q(i,j,k,1)*work(i,j,k)
       if (passive_type(ns)==2) rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,1)**2
    enddo
    enddo
    enddo
-!   if (my_pe==io_pe) then
-!      print *, 'ns.F90: y and z derivative terms of scalar advection NOT CALCULATED'
-!   endif
+
    do n=2,ndim
    call der(Q(1,1,1,ns),work,dummy,p,DX_ONLY,n)  ! s_y and s_z
 !   if (n==3) work=work/Lz
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
-!      rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-0.0*work(i,j,k)
       rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,n)*work(i,j,k)
       if (passive_type(ns)==2) rhsg(i,j,k,ns)=rhsg(i,j,k,ns)-Q(i,j,k,n)**2
    enddo
@@ -389,9 +387,6 @@ enddo
 
 ! check of first scaler is the density and we are running boussinisque
 if (passive_type(np1)==4) then
-!   if (my_pe==io_pe) then
-!      print *, 'Scalar advection off in ns.F90' 
-!   endif
    do k=nz1,nz2
    do j=ny1,ny2
    do i=nx1,nx2
