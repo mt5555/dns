@@ -869,6 +869,8 @@ real*8 work(g_nz2,nx_2dz,ny_2dz) ! work array
 !local
 integer n1,n1d,n2,n2d,n3,n3d
 integer i,j,k
+character*80 message
+real*8 mnval,mxval
 
 n1=g_nz
 n1d=g_nz2   	
@@ -878,13 +880,14 @@ n3=ny_2dz
 n3d=ny_2dz
 
 work=fin
+
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
+
 call transpose_from_z(work,f,n1,n1d,n2,n2d,n3,n3d)
 
 call transpose_to_y(f,work,n1,n1d,n2,n2d,n3,n3d)
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
 call transpose_from_y(work,f,n1,n1d,n2,n2d,n3,n3d)
-
 
 call transpose_to_x(f,work,n1,n1d,n2,n2d,n3,n3d)
 call ifft1(work,n1,n1d,n2,n2d,n3,n3d)
@@ -1948,7 +1951,7 @@ do k=nz1,nz2
       jm=abs(jmcord(j))                                                      
       do i=nx1,nx2                                                           
          im=abs(imcord(i))                                                   
-         if ((im**2 + jm**2 + (km/Lz)**2 ) < spec_max**2) then                    
+         if (shell_thickness_scale*sqrt(im**2 + jm**2 + (km/Lz)**2 ) < spec_max) then
             p(i,j,k)=0                                                       
          endif
       enddo
